@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import SupervisorPanel from '../components/SupervisorPanel.vue';
@@ -10,11 +10,13 @@ import { useServiceDesk } from '../composables/useServiceDesk';
 import { metricQuery } from '../helpers/screenExperience';
 import { serviceDeskRouteName } from '../routeDefinitions';
 import { useSupervisionReport } from '../composables/useSupervisionReport.js';
+import { routeQuery } from '../helpers/query';
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const session = useServiceDesk();
-const filters = ref({ ...route.query });
+const filters = computed(() => route.query);
+const apply = query => router.replace({ query: routeQuery(query) });
 const { result, status, load } = useSupervisionReport(
   session,
   () => filters.value
@@ -32,7 +34,7 @@ const slaData = computed(() => result.value?.supervision || null);
         </p>
       </div>
     </header>
-    <TicketFilters :query="filters" @apply="filters = $event" />
+    <TicketFilters :query="filters" @apply="apply" />
     <LiveKpis
       :query="filters"
       @metric-filter="

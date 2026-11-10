@@ -1,14 +1,16 @@
 class JrcRelationship::HealthChange
   def self.call(previous:, current:)
     return nil unless previous && current && previous[:score] && current[:score]
-    old = Array(previous[:factors]).to_h { |factor| [factor['factor'] || factor[:factor], factor.transform_keys(&:to_sym)] }
-    now = Array(current[:factors]).to_h { |factor| [factor['factor'] || factor[:factor], factor.transform_keys(&:to_sym)] }
+
+    old = Array(previous[:factors]).to_h { |factor| [factor['factor'] || factor[:factor], factor.deep_symbolize_keys] }
+    now = Array(current[:factors]).to_h { |factor| [factor['factor'] || factor[:factor], factor.deep_symbolize_keys] }
     factors = (old.keys | now.keys).filter_map do |name|
       row = now[name]
       before = old[name]
       next if before == row
-      { factor: name, before: before&.slice(:raw, :normalized, :weight, :contribution, :evidence),
-        after: row&.slice(:raw, :normalized, :weight, :contribution, :evidence),
+
+      { factor: name, before: before&.slice(:raw, :normalized, :weight, :contribution, :evidence, :measurement),
+        after: row&.slice(:raw, :normalized, :weight, :contribution, :evidence, :measurement),
         delta: before&.dig(:contribution) && row&.dig(:contribution) ? (row[:contribution] - before[:contribution]).round(4) : nil }
     end
     { previous: previous[:score].to_f, current: current[:score].to_f,

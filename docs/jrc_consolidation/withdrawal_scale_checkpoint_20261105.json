@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "3ac28a99d0524bf0726f495ac214b77183c7a5ea",
+  "status": "One representative local synthetic scale case passed; not production performance qualification or G closure.",
+  "test": "spec/requests/api/v1/accounts/relationship/withdrawal_readiness_scale_spec.rb",
+  "evidence": {
+    "label": "withdrawal-readiness-scale",
+    "examples": 1,
+    "failures": 0,
+    "actual_persisted_allocations": 1000,
+    "setup_seconds": 13.702,
+    "request_seconds": 1.426,
+    "response_bytes": 391,
+    "ownership_memberships_unchanged": true,
+    "identity_lists_not_returned": true
+  },
+  "resource": {
+    "start": 7421165568,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/requests/api/v1/accounts/relationship/withdrawal_readiness_scale_spec.rb": "b6b52fa69257b0f883dc2a9d398cbf3e9d0913b4426460247262cc12a9c182cd"
+    },
+    "minimum": 7412776960,
+    "exit_code": 0,
+    "end": 7421030400
+  },
+  "limitations": [
+    "Single request, one operator and local isolated test transaction; not concurrent production load.",
+    "No build or Chrome acceptance; no global membership withdrawal performed."
+  ],
+  "next": "Continue F1 exclusive native plan activity responsibilities; preserve shared/foreign-origin blockers."
+}

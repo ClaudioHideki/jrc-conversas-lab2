@@ -8,8 +8,8 @@ require 'digest'
 # is supported; no filename is interpolated into a shell and no remote URL is
 # accepted. An unavailable/malformed scanner never releases a download.
 class JrcServiceDesk::AttachmentScanner
-  def scan(blob)
-    path = ENV.fetch('JRC_SD_CLAMAV_SOCKET', nil)
+  def scan(blob, socket_path: ENV.fetch('JRC_SD_CLAMAV_SOCKET', nil))
+    path = socket_path
     return { 'service_desk_scan_state' => 'unavailable' } if path.blank?
     raise ArgumentError unless path.start_with?('/run/', '/var/run/') && !path.include?("\0")
 

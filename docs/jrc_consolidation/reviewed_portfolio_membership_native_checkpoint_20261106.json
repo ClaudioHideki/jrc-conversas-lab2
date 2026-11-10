@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "82f91d2ab3e5f878fd765d1396cecedb87f69169",
+  "reference": "Relationship P0124/P0128/P0181/P0184/P0185: native reviewed finite membership batches, per-item outcome, restart and recovery.",
+  "status": "Native/API vertical slice validated; source UI integration already started, not yet validated and not C-G closure.",
+  "implementation": [
+    "Add portfolio_membership operation to EXISTING BatchReviewPlan/ReviewedPortfolioBatch/BatchItem/job. No parallel queue, table, customer registry, role grant or owner transfer.",
+    "Pin current native group revision/metadata fingerprint, configured rule version/digest, selected membership state, scoped customer digests and native actor access signature. Enforce configured review lifetime before each effect; reject competing changed proposals instead of silently rebasing.",
+    "Use EXISTING PortfolioGroups#set_customers! for each finite effect in the same native transaction as its immutable item receipt. Exact group revision chain distinguishes linked/unlinked and no-op receipts. Live native capacity, coordinator eligibility/source permissions and unit/tenant rules remain authoritative.",
+    "Preview reuses native membership model validation without writes and fails early on known unit incompatibility/governed unlink. Capacity remains live per-item execution validation; this slice does NOT claim a whole-final-audience capacity simulation.",
+    "Restart same running review through existing read/advance/job. After terminal attention/canceled, re-review only unresolved selected items in a NEW actor/account/group-linked review, with fresh group revision/reason/request UUID. Do not mutate terminal snapshots/receipts or repeat applied items.",
+    "HTTP body keeps original JSON shapes instead of Rails silently removing null audience entries. Reuse strict native positive unique ID parser for all reviewed operations while preserving valid numeric strings/current v1 snapshots. Root arrays/identity overrides denied; empty JSON-body advance remains supported.",
+    "Filter justification text alongside reason in source logging config; tested in isolated app boot. Original5379 server not restarted or claimed to have hot-loaded this initializer."
+  ],
+  "evidence": {
+    "baseline": "reviewed-membership-baseline01:6/6failed as unsupported operation before implementation.",
+    "first": "reviewed-membership-native02:6/0.",
+    "expanded": "reviewed-membership-native03:26/0; final07:30/0, with overlap and14existing engine regressions.",
+    "fixture_failure": "final11:32cases,1failed solely because new BusinessUnit fixture omitted mandatory code; validation retained and native fixture corrected.",
+    "final": {
+      "label": "reviewed-membership-native-final12",
+      "examples": 32,
+      "failures": 0,
+      "breakdown": "12new service +6new HTTP/log-filter cases +14existing reviewed transfer/playbook/native resource/immutable DB receipt regressions."
+    },
+    "coverage": "Idempotent preview, per-item restart, revision/config changes, queued authority revocation, terminal linked re-review, no-op receipts, governed unlink preflight, actual capacity rollback, competing approved reviews, TTL, unit preflight, HTTP confirmation/advance/readback, tenant/identity boundaries, raw null shapes, v1 numeric-string input, free-text filters and empty-body advance.",
+    "static": "New files ruby06/ruby10:0offenses; shared affected services/controller ruby09 and final plan ruby10:0offenses after isolating new authorization/plan logic. Baseline shared files were0; no new debt retained. Filter initializer baseline/current0. git diff check clean.",
+    "database": "jrc_rel_v2_candidate_test",
+    "frontend": "Untracked membership receipt validator started for next block; not tested or included in this native checkpoint. No sourceUI/Chrome success claimed."
+  },
+  "environment": {
+    "disk_initial_bytes": 6922518528,
+    "disk_minimum_observed_bytes": 6877044736,
+    "disk_final_test_bytes": 6896177152,
+    "no_build_cleanup_5379change_migration_external_operation": true
+  },
+  "remaining": [
+    "Connect the new native operation to existing customer-review dialog and horizontally tabbed group screen, reusing ReviewedPortfolioBatchPanel.",
+    "Implement group-scoped session resume, receipt/context validation, explicit fresh reason/review of unresolved items and source UI tests; existing atomic link workflow must remain.",
+    "Whole-audience projected group capacity, broader saved operation listing, local group roles/master allocation batches/full Word and current-source Chrome remain open.",
+    "TRR undefined, deferred portfolio-less documents and external pilots unchanged."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/reviewed_portfolio_membership_native_checkpoint_20261106.json"
+}

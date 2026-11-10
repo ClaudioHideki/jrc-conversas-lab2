@@ -5,7 +5,7 @@ class JrcApprovals::Decisions
     @authorization = JrcApprovals::Authorization.new(account: account, user: user)
   end
 
-  def call(request_id:, step_code:, decision:, reason:, expected_version:, idempotency_key:, delegation_id: nil)
+  def call(request_id:, step_code:, decision:, reason:, expected_version:, idempotency_key:, delegation_id: nil, own_delegation_id: nil)
     JrcApprovals::Ledger.key!(idempotency_key)
     raise JrcApprovals::Error, 'REASON_REQUIRED' unless reason.is_a?(String) && reason.strip.present? && reason.bytesize <= 4096
     raise JrcApprovals::Error, 'INVALID_DECISION' unless JrcApprovals::Definition::ACTIONS.include?(decision)
@@ -17,6 +17,13 @@ class JrcApprovals::Decisions
       actor = @authorization.authorize!('decide', company_id: request.issuer_company_id, unit_id: request.business_unit_id)
       payload = { request_id: request.id, step_code: step_code, decision: decision, reason: reason.strip,
                   expected_version: expected_version, delegation_id: delegation_id }
+      if own_delegation_id
+        raise JrcApprovals::Error, 'INVALID_DELEGATION' if delegation_id
+
+        payload[:own_delegation_id] = own_delegation_id
+        delegation_id = JrcApprovals::OwnDelegationBindings.new(account: @account, user: @user, record: request)
+          .materialize!(id: own_delegation_id, step_code: step_code, decision: decision).id
+      end
       digest = JrcApprovals::Ledger.digest(payload)
       existing = JrcApprovals::Decision.find_by(account_id: @account.id, actor_id: actor.id, idempotency_key: idempotency_key)
       if existing
@@ -24,11 +31,11 @@ class JrcApprovals::Decisions
         raise JrcApprovals::Error, 'VERSION_CONFLICT' unless existing.cycle == request.cycle
 
         principal!(request, step_code, actor, delegation_id, decision)
-        current!(request, replay: true)
+        current!(request, decision: decision, replay: true)
         next existing
       end
       JrcApprovals::Ledger.expected!(request, expected_version)
-      current!(request)
+      current!(request, decision: decision)
       step = request.policy_version.definition.fetch('steps').find { |item| item['code'] == step_code }
       raise JrcApprovals::Error, 'INVALID_STEP_ACTION' unless step && step['actions'].include?(decision)
       unless request.policy_version.definition['execution'] == 'parallel' || pending_steps(request).first == step_code
@@ -55,14 +62,21 @@ class JrcApprovals::Decisions
 
   private
 
-  def current!(request, replay: false)
+  def current!(request, decision:, replay: false)
     raise JrcApprovals::Error, 'REQUEST_EXPIRED' if request.expires_at <= Time.current
     raise JrcApprovals::Error, 'REQUEST_NOT_PENDING' unless request.state == 'pending' ||
       (replay && %w[approved rejected returned escalated].include?(request.state))
 
+    JrcRelationship::DistributionVoteAuthority.authorize!(account: @account, user: @user, record: request)
     snapshot = JrcApprovals::Catalog.snapshot(account: @account, user: @user,
       key: "#{request.module_key}.#{request.event_key}", resource_id: request.resource_id)
     raise JrcApprovals::Error, 'CONTEXT_STALE' unless snapshot == request.snapshot
+
+    if decision == 'approved'
+      JrcApprovals::Catalog.verify!(account: @account, user: @user,
+        key: "#{request.module_key}.#{request.event_key}", resource_id: request.resource_id)
+    end
+    raise JrcApprovals::Error, 'REQUEST_EXPIRED' if request.expires_at <= Time.current
   end
 
   def principal!(request, step_code, actor, delegation_id, decision)
@@ -92,6 +106,8 @@ class JrcApprovals::Decisions
     end
 
     validate_gratuity_delegation!(request, delegation)
+    step = definition.fetch('steps').find { |row| row['code'] == step_code }
+    JrcApprovals::OwnDelegationBindings.new(account: @account, user: actor.user, record: request).verify_scoped!(delegation, step, decision)
     delegation
   end
 

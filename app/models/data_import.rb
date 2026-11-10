@@ -36,6 +36,7 @@ class DataImport < ApplicationRecord
   INTERCOM_STALLED_AFTER = 15.minutes
   LEGACY_DATA_TYPES = ['contacts'].freeze
   INTEGRATION_DATA_TYPES = ['intercom'].freeze
+  CUSTOMER_MASTER_DATA_TYPES = ['customer_master'].freeze
   IMPORT_TYPES = %w[contacts conversations].freeze
 
   belongs_to :account
@@ -47,8 +48,13 @@ class DataImport < ApplicationRecord
   has_many :mappings, class_name: 'DataImportMapping', dependent: :destroy_async
   has_many :import_errors, class_name: 'DataImportError', dependent: :destroy_async
 
-  validates :data_type, inclusion: { in: LEGACY_DATA_TYPES + INTEGRATION_DATA_TYPES, message: I18n.t('errors.data_import.data_type.invalid') }
+  validates :data_type, inclusion: {
+    in: LEGACY_DATA_TYPES + INTEGRATION_DATA_TYPES + CUSTOMER_MASTER_DATA_TYPES,
+    message: I18n.t('errors.data_import.data_type.invalid')
+  }
   validates :access_token, presence: true, on: :create, if: :intercom_import?
+  validates :source_provider, inclusion: { in: ['customer_master_csv'] }, if: -> { data_type == 'customer_master' }
+  validates :initiated_by, presence: true, if: :customer_master_import?
   validate :validate_import_types
 
   enum status: { pending: 0, processing: 1, completed: 2, failed: 3, completed_with_errors: 6, abandoned: 7 }
@@ -66,6 +72,10 @@ class DataImport < ApplicationRecord
 
   def intercom_import?
     data_type == 'intercom' && source_provider == 'intercom'
+  end
+
+  def customer_master_import?
+    data_type == 'customer_master' && source_provider == 'customer_master_csv'
   end
 
   def restartable?
@@ -114,7 +124,8 @@ class DataImport < ApplicationRecord
   def validate_import_types
     return if import_types.blank?
 
-    invalid_types = import_types - IMPORT_TYPES
+    allowed = customer_master_import? ? %w[companies contacts] : IMPORT_TYPES
+    invalid_types = import_types - allowed
     return if invalid_types.blank?
 
     errors.add(:import_types, "contains unsupported values: #{invalid_types.join(', ')}")

@@ -1,0 +1,101 @@
+{
+  "date": "2026-11-07",
+  "status": "source_store_authority_boundary_validated_not_chrome_or_complete_crm_view_acceptance",
+  "previous_checkpoint": "4c88ccc0f00fa9d9ff57009e952213514c26ae1e",
+  "branch": "codex/relacionamento-v2-20261101",
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/crm/components/kanban/KanbanFilters.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/deals/DealsIndex.vue",
+    "app/javascript/dashboard/store/crm/modules/activities.js",
+    "app/javascript/dashboard/store/crm/modules/deals.js",
+    "app/javascript/dashboard/store/crm/modules/leads.js",
+    "app/javascript/dashboard/store/crm/modules/pipelines.js",
+    "app/javascript/dashboard/store/crm/modules/proposals.js",
+    "app/javascript/dashboard/store/crm/specs/funnel.spec.js",
+    "app/javascript/dashboard/store/crm/authorityScope.js",
+    "app/javascript/dashboard/store/crm/specs/authorityScopes.spec.js"
+  ],
+  "implementation": [
+    "Native list/detail getters bind cached leads,activities,deals,pipelines and reused proposal scope helper to current account,actor,role and native account grants. Pending responses/errors may commit only within the same captured scope and latest request.",
+    "Deal list and funnel share request ordering;empty native stages,filters and full native monetary payloads retained. Separate detail scope prevents a newly authorized detail from relabeling an older list. Closing detail invalidates pending request.",
+    "Live DealsIndex uses scoped fetchDeal action rather than bypassing it with raw commit;detail identity includes current authority. KanbanFilters consumes scoped pipeline getter.",
+    "Lead post-write refresh cannot run under a different authority. Existing committed native commands are not rolled back or retried.",
+    "Removed full deal payload console dump and bounded touched error logs to event/status. No backend permission,route,financial calculator or API contract changed."
+  ],
+  "validation": {
+    "baseline": "10 original source store assertions failed before the correction; preserved artifact.",
+    "source02": "39/0:18authority,9funnel,4segment lists,8existing creation/draft regressions.",
+    "source_final05": "50/0:18authority,9funnel,4segment lists,8rendered funnel,11proposal authority. API transport mocked; actual Vuex modules and rendered Vue components. Not database/Chrome evidence.",
+    "lint": "Nine helper/module/spec/filter files:0errors,0warnings. DealsIndex retains150errors/30warnings,compared with152errors/30warnings in untouched HEAD via read-only stdin lint. Remaining rule counts:141prettier,4no-use-before-define,2self-closing,2maxattributes,1plusplus. No rule suppression/global refactor. Lint gate truthfully remains failed for this existing shared file.",
+    "resources": {
+      "crm-authority-baseline01": {
+        "status": "failed",
+        "free_start": 6569852928,
+        "minimum_free": 6547243008,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 23104,
+        "exit_code": 1,
+        "free_end": 6568656896
+      },
+      "crm-authority-source02": {
+        "status": "passed",
+        "free_start": 6572892160,
+        "minimum_free": 6525374464,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 24628,
+        "exit_code": 0,
+        "free_end": 6570631168
+      },
+      "crm-authority-source-final05": {
+        "status": "passed",
+        "free_start": 6560587776,
+        "minimum_free": 6512013312,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 14296,
+        "exit_code": 0,
+        "free_end": 6557544448
+      },
+      "crm-authority-lint-final06": {
+        "status": "failed",
+        "free_start": 6541209600,
+        "minimum_free": 6535847936,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 16816,
+        "exit_code": 1,
+        "free_end": 6535847936
+      }
+    },
+    "old_warnings": "Existing missing source map,Browserslist and transient proposalId prop warning retained,not silenced.",
+    "new_native_backend_tests": false,
+    "chrome": false
+  },
+  "preservation": {
+    "build": false,
+    "server5379_changed": false,
+    "four_container_started_at_unchanged": true,
+    "cleanup": false,
+    "push": false,
+    "external_operations": false,
+    "migrations": false,
+    "all_prior_checkpoints": true
+  },
+  "disk": {
+    "initial_bytes": 6574305280,
+    "minimum_measured_bytes": 6512013312,
+    "final_bytes": 6560604160
+  },
+  "remaining": [
+    "Rendered funnel initialization,lost-reason popup and drag/drop receipts must also be bound to current authority;next independent source task.",
+    "Other CRM forms retain local request/draft caches requiring separate incremental review;this report does not claim full view isolation.",
+    "Unused legacy DealDetailView has no import/route reference in app,enterprise or config found by rg;not used as evidence and not rewritten.",
+    "Current-source Chrome/visual acceptance blocked by no-build/no5379-change;C-G remains open;TRR and local portfolio capability business definitions remain pending."
+  ]
+}

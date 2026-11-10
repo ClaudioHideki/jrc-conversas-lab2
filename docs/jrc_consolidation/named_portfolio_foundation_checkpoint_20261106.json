@@ -1,0 +1,99 @@
+{
+  "date": "2026-11-06",
+  "preserved_previous_checkpoint": "d88804cd51f5172dfafc2fb2dcbc1c1cbf50fffc",
+  "branch": "codex/relacionamento-v2-20261101",
+  "decision": "The same existing customer may belong to multiple active operational portfolios.",
+  "status": "Native vertical slice and source UI validated locally; named-portfolio Word scope and C-G remain open.",
+  "implemented": [
+    "Additive named group plus tenant-bound many-to-many links to existing unique Assignment records; no parallel customer/contact or artificial native team.",
+    "Profile, explicit bounded goals, coordinator, existing team, native unit/segment, visibility, archival and soft link deactivation with optimistic revision and native audit.",
+    "Fresh native CS/account/operator/unit authority, per-record write permissions, destination source visibility and active eligibility; PostgreSQL composite account/group/customer/owner constraints.",
+    "Hidden customer counts remain unavailable; customer rows always intersect native assignment/source permissions. Shared group metadata grants no native customer access.",
+    "Active group coordination blocks CS-only withdrawal readiness; original non-CS work and account membership stay unchanged.",
+    "Integrated horizontal portfolio workspace, tabbed editor/review, native customer picker, cross-page bounded selection, conflict-preserving drafts, pagination, filtered lists and confirmed mutation receipts.",
+    "Late read/write responses are discarded on identity, role, workspace change or unmount; private coordination handoff may confirm a saved receipt while the fresh read denies former visibility."
+  ],
+  "files": [
+    "app/controllers/api/v1/accounts/relationship/portfolio_groups_controller.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupCustomersDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupEditor.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupsPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/namedPortfolioApi.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/namedPortfolios.spec.js",
+    "app/models/jrc_relationship/portfolio_group.rb",
+    "app/models/jrc_relationship/portfolio_group_assignment.rb",
+    "app/services/jrc_relationship/portfolio_group_reader.rb",
+    "app/services/jrc_relationship/portfolio_group_scope.rb",
+    "app/services/jrc_relationship/portfolio_groups.rb",
+    "db/migrate/20261106113000_add_named_relationship_portfolio_groups.rb",
+    "spec/models/jrc_relationship/portfolio_group_spec.rb",
+    "spec/requests/api/v1/accounts/relationship/portfolio_groups_spec.rb",
+    "app/javascript/dashboard/api/jrcRelationship.js",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioWorkspace.vue",
+    "app/services/jrc_relationship/withdrawal_readiness.rb",
+    "config/routes.rb",
+    "db/schema.rb"
+  ],
+  "gates": {
+    "native_postgresql_http_models": {
+      "label": "named-portfolio-native-final08",
+      "examples": 28,
+      "failures": 0,
+      "database": "jrc_rel_v2_candidate_test"
+    },
+    "source_vue_and_api": {
+      "label": "named-portfolio-source-ui-final03",
+      "tests": 20,
+      "failures": 0,
+      "real_chrome": false,
+      "mocks_used": true
+    },
+    "new_ruby_files": "foundation02/final04/final05/final06: all remaining offenses corrected; latest per-file gates zero.",
+    "shared_ruby_delta": "withdrawal_readiness 0->0; routes 0->0.",
+    "source_eslint": "New components/specs and API zero errors/warnings. Workspace zero errors; one existing dynamic-i18n-key warning retained.",
+    "schema": {
+      "original_sha256": "4aea5ccca7e9f7acae8329bf71e598132344d971bb6ca807d43d964d528b9fed",
+      "updated_sha256": "a2f68ecff9222cc8d7c00cca55a85690370dbe508523cec1121e401853ae90a6",
+      "unchanged_original_create_table_blocks": 336,
+      "added_tables": [
+        "jrc_relationship_portfolio_groups",
+        "jrc_relationship_portfolio_group_assignments"
+      ],
+      "added_foreign_keys": 8,
+      "all_other_original_content_preserved": true,
+      "candidate_only_migration": "20261106113000",
+      "no_server_or_production_operation": true
+    }
+  },
+  "corrections_observed": [
+    "Initial membership touch! raised NoMethodError and rolled back; final revision uses native validation-preserving dirty lock_version/save!, tested with a frozen clock.",
+    "Role snapshot timestamp fixture normalized through database reload, retaining all field assertions.",
+    "Expanded source UI gate first had 19 pass/1 failed numeric ID expectation; corrected to actual numeric server ID, final20/0. No failed checks represented as passing."
+  ],
+  "disk": {
+    "block_start_bytes": 8983056384,
+    "backend": {
+      "start": 9274658816,
+      "minimum": 9245093888,
+      "end": 9277009920
+    },
+    "frontend": {
+      "free_start": 9261047808,
+      "minimum_free": 9230266368,
+      "free_end": 9267412992
+    },
+    "current_free_bytes": 9265541120,
+    "no_cleanup_performed": true
+  },
+  "pending": [
+    "Native group filters and capacity/rule integration with existing reviewed/versioned distribution engine.",
+    "Record-aware group history/export and remaining distinct native capabilities; no hidden historical customer/source leakage.",
+    "Representative group scale and integrated regressions for subsequent shared changes.",
+    "Current-source build and Chrome desktop/mobile/light/dark; explicitly not authorized. Frozen5379 assets are not new-version evidence.",
+    "Other literal/visual Word fragments remain under incremental audit; no C-G closure.",
+    "TRR undefined; company documents without portfolio explicitly deferred; real provider/channel/pilot acceptance outstanding."
+  ],
+  "restrictions_preserved": "No appbuild, cleanup, push, GHCR, deploy, external real operations, production changes,5379 modification or original container interruption. Additive migration only in owned synthetic candidateDB.",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_foundation_checkpoint_20261106.json"
+}

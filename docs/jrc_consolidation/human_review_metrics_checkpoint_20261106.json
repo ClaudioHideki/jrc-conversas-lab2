@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "77130b4ab57552668d10cb156f9d4e075dd4b3a1",
+  "status": "F2 descriptive human-review measure implemented and locally validated; no stage closure",
+  "word_reference": "Relationship P0151, observability/false-alert assessment. This is not a model-precision benchmark or inference confidence.",
+  "implementation": [
+    "Existing AlertReview.summary counts, native action/portfolio/source authorization, selected created-at period/default90days and current cause/factors/priority checks reused. No new SQL query, scope grant or duplicate registry.",
+    "Adds reviewed=confirmed+false_positive and human_confirmation_percent=100*confirmed/reviewed rounded to one decimal. Null when reviewed=0; actual0 remains0. Pending/stale labels are excluded from the denominator.",
+    "Operational workspace displays explicit confirmed/reviewed fraction and locale-formatted percentage, plus a clear descriptive-cohort notice. No claim of model precision, automated validation or a production pilot. Old count-only payloads remain renderable as unavailable, not inferred zero.",
+    "Only source en catalog edited per repository instructions; existing layouts and behavior retained. No automation rule, closing decision, historic receipt, model training or provider operation changes."
+  ],
+  "tests": {
+    "native": "10 examples,0 failures =4 new real API/DB/cohort cases plus6 existing alert-review authorization/history cases. Monitoring actions and human assessments created through native Processor/Workflow.",
+    "vue": "19/0 =5 new percentage-rendering cases plus14 existing analyst workflow cases; retained RouterLink/incomplete confirmation fixture warnings, no unhandled failure.",
+    "ruby_new": "0 offenses; shared AlertReview0 unchanged; existing spec assertion alignment corrected separately.",
+    "eslint": "New component/spec0 errors/0 warnings. AnalystWorkspace0errors/24 existing warnings.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "start": 7118843904,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/requests/api/v1/accounts/relationship/human_review_metrics_spec.rb": "e7974d328b6b82795c80144e26c51606445741377c02e90913a60ce7ecadc6aa",
+      "spec/requests/api/v1/accounts/relationship/alert_review_spec.rb": "44c8cfea073a4e8e3b2cf5211aa9b288964ff87802ad46d1f70b6bb5338ef542"
+    },
+    "minimum": 7118508032,
+    "exit_code": 0,
+    "end": 7118508032
+  },
+  "frontend_resources": {
+    "status": "passed",
+    "free_start": 7118151680,
+    "minimum_free": 7095549952,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 22892,
+    "exit_code": 0,
+    "free_end": 7116857344
+  },
+  "pending": [
+    "Fresh Chrome/current assets require future build authorization; frozen5379 assets are not new-version evidence.",
+    "Statistical/model precision, real inference latency and production pilot remain unvalidated and are not inferred from human-reviewed selection.",
+    "Final identity removal, TRR and external demo remain separate dependencies."
+  ],
+  "next": "Filter manual owner choices for an existing record through native current record visibility, not only assignment scope; retain final transactional check.",
+  "restrictions": "No app build, cleanup, server5379 change, container restart, push, GHCR, deploy, production or real external operation."
+}

@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "a52b4c77d4dd7be2a7f5212226ef653a04dcb024",
+  "reference": "Relationship F1 safe CS-only withdrawal, reviewed responsibilities and current account/unit/source boundaries.",
+  "implementation": [
+    "Native withdrawal readiness now inventories the subject analyst previewed/running reviewed intentions through its existing signed count/digest mechanism. A pending intention blocks withdrawal even when root ownership and every other responsibility count are zero.",
+    "New count purpose returns no private review payload. It intersects all selected native allocations with current Context.assignments and named-portfolio metadata with existing PortfolioGroupScope. Incomplete visibility raises denial rather than reporting zero or revealing hidden identities.",
+    "No manager access to another actor frozen review and no manager cancellation grant. The subject can stop their OWN intention through the actor-scoped operational endpoint, then a fresh readiness digest is required. Applied work/snapshots, other-account intentions and unrelated module access remain unchanged.",
+    "Existing horizontal/popup withdrawal UI labels the new counter and explains the actor-owned treatment without adding a manager action to impersonate/cancel another user."
+  ],
+  "evidence": {
+    "baseline": "withdrawal-reviewed-baseline01:5/5failed, reproducing absent counter and missing scope refusal for this previously untracked intention type.",
+    "directed": "withdrawal-reviewed-native02:5/0.",
+    "native_final": "withdrawal-reviewed-native-final05:20/0 (5new reviewed-intent cases +5existing readiness +9existing analyst withdrawal +1representative1000allocation case).",
+    "scale": {
+      "persisted_synthetic_allocations": 1000,
+      "setup_seconds": 12.927,
+      "request_seconds": 0.489,
+      "response_bytes": 615,
+      "qualification": "One local scoped readiness request with1000allocations, not1000active batch operations or a production throughput/capacity pilot."
+    },
+    "source": "withdrawal-reviewed-source01:11/0 (1new pending-review guidance/control case +10existing popup identity/permission/withdrawal/restore regressions). Source mocks are not Chrome/database UI acceptance.",
+    "static": "New collector/spec and shared readiness ruby04:0offenses. Source spec0ESLint errors/warnings; existing dialog0errors/2existing warnings. Diff check clean.",
+    "database": "jrc_rel_v2_candidate_test"
+  },
+  "environment": {
+    "disk_initial_bytes": 6863417344,
+    "disk_minimum_observed_bytes": 6836658176,
+    "disk_final_test_bytes": 6857465856,
+    "no_build_cleanup_5379change_migration_external_operation": true
+  },
+  "remaining": [
+    "Complete own-operation inventory source controls, exact-ID current-state reload for conflict/unknown stop outcomes, pagination and explicit reason confirmation.",
+    "No authority added to stop another actor private intentions; exceptional inactive actors with inaccessible pending intentions remain subject to native permissions and administrative/business handling, not silent eligibility removal.",
+    "Detailed batch failure classification, local portfolio role matrix/master allocation batches/other Word gaps and current-source Chrome/live worker gates remain open.",
+    "TRR undefined, portfolio-less documents deferred and external pilots unchanged; no C-G closure."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/withdrawal_reviewed_operations_checkpoint_20261106.json"
+}

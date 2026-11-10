@@ -1,13 +1,25 @@
 <script setup>
 import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { moduleTabClasses } from 'dashboard/components-next/navigation/moduleTabClasses';
 import { useBackofficeWorkspace } from './useBackofficeWorkspace';
 import { stages, useBackofficePresentation } from './useBackofficePresentation';
 import { stageTones, stageIcons, money } from './backofficeVisuals';
 import BackofficeDashboardPanels from './BackofficeDashboardPanels.vue';
 const props = defineProps({ report: { type: Boolean, default: false } });
-const { text, label, destination, date, deadline, late } =
-  useBackofficePresentation();
+const route = useRoute();
+const {
+  text,
+  label,
+  destination: requestDestination,
+  date,
+  deadline,
+  late,
+} = useBackofficePresentation();
+const destination = id => ({
+  ...requestDestination(id),
+  query: { customer_segment_id: route.query.customer_segment_id },
+});
 const { result, loading, error, load } = useBackofficeWorkspace(
   props.report ? 'reports' : 'overview',
   { status: '', per_page: 5 }
@@ -121,7 +133,7 @@ const queueRows = computed(() =>
 const target = (section, query = {}) => ({
   name: 'crm_backoffice',
   params: { section },
-  query,
+  query: { customer_segment_id: route.query.customer_segment_id, ...query },
 });
 const stageTarget = stage =>
   stage === 'analysis'

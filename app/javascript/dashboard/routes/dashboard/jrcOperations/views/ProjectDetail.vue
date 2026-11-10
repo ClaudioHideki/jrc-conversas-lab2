@@ -272,7 +272,10 @@ async function exportTasks() {
     <div class="flex items-center gap-2 text-xs">
       <RouterLink
         class="flex items-center gap-1 text-n-blue-11 hover:underline"
-        :to="routeTo('jrc_projects_list', accountId)"
+        :to="{
+          ...routeTo('jrc_projects_list', accountId),
+          query: { customer_segment_id: route.query.customer_segment_id },
+        }"
       >
         <span class="i-lucide-chevron-left size-3.5" />{{
           projectText('PROJECTS', 'Projetos')

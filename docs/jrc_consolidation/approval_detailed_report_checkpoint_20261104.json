@@ -1,0 +1,51 @@
+{
+  "stage": "E2",
+  "status": "Native detailed report implemented; operational and visual Word acceptance still partial",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_checkpoint": "6e4f5f37b6fe91293f0f640cc7b5de949a6a122b",
+  "implementation": [
+    "Read-only download in the existing Central request detail; explicit native view_audit authorization and RequestVisibility are required",
+    "Captured immutable policy definition/version/digest/publication, actual captured principal roster/quorums and relevant captured technical values; no re-evaluation against today's rule or source adapter",
+    "Actual immutable votes/cycles/actors/principals and delegated binding at the vote, original grant terms and current revocation facts; revocation does not erase or reinterpret the historical vote",
+    "Original and revised requests connected only through native request_adjusted/request_revised ledger entries, with current per-request authorization",
+    "Native adjustment before/after financial fields, invalidations, reasons, event timestamps, source/origin references and audit; no second approval engine",
+    "Whitelisted audit fields, no raw origin snapshot, transport/idempotency keys, storage locators or unknown private audit payloads",
+    "Account/request FOR SHARE lock and post-projection current account/user/unit/audit reauthorization; digest of actual output bytes recorded in the native append-only ledger",
+    "Bounded 1000-row collections with explicit REPORT_TOO_LARGE instead of truncation; no external operations, origin mutation or new dependency/migration",
+    "ISO timestamps use Rails serialization in both JSON report and documentary manifest, preserving native timezone/millisecond precision",
+    "Documentary HTTP downloads now distinguish integrity conflict and missing stored bytes without producing empty substitutes or successful access audits"
+  ],
+  "evidence_files": [
+    "app/services/jrc_approvals/request_report.rb",
+    "app/controllers/api/v1/accounts/approvals/requests_controller.rb",
+    "config/routes/jrc_approvals.rb",
+    "app/javascript/dashboard/routes/dashboard/approvals/ApprovalRequestReport.vue",
+    "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+    "spec/requests/api/v1/accounts/jrc_approvals/request_report_spec.rb"
+  ],
+  "validation": {
+    "backend_integrated": { "artifact": ".codex/d9-notifications-20261104/e2report03-resource.json", "examples": 34, "failures": 0, "scope": "Central report, tier API, atomic adjustments, actual documentary archive" },
+    "latest_native_report_and_history": { "artifact": ".codex/d9-notifications-20261104/e2f2final01-resource.json", "examples": 29, "failures": 0, "report_examples": 11, "scope": "Report including retired-adapter independence and own-grant revocation, product history and existing hysteresis" },
+    "frontend": { "artifact": ".codex/d-approvals-20261104/e2reportui01-resource.json", "tests": 15, "failures": 0, "scope": "Report interaction plus origin-navigation regressions; simulated API, not browser homologation" },
+    "final_frontend_combined": { "artifact": ".codex/d-approvals-20261104/e2f2ui-final-resource.json", "tests": 36, "failures": 0 },
+    "final_reports_backend": { "artifact": ".codex/d9-notifications-20261104/e1e2reportfinal01-resource.json", "examples": 23, "failures": 0, "scope": "12 documentary cases including controlled unavailable/integrity HTTP failures and 11 detailed Central cases" },
+    "ruby_lint": { "artifact": ".codex/d9-notifications-20261104/e2reportlintfinal.json", "offenses": 0 },
+    "frontend_lint": { "artifact": ".codex/d-approvals-20261104/e2f2-eslint02.json", "report_component_errors": 0, "report_component_warnings": 0 },
+    "failed_rounds_preserved": [
+      "e2report01: 8 examples, 2 fixture failures. Policies.publish! returns a Policy; corrected fixture to its actual current_version, without changing production publication.",
+      "e2report02: 23 examples, 1 failure exposed non-ISO loss of timestamp precision in JSON.pretty_generate(Time). Corrected production exports to Rails as_json before encoding; e2report03 passed.",
+      "f2producthistory01: overall 29 examples, 3 F2 fixture/status failures; all 11 report scenarios passed. Subsequent e2f2final01 passed all 29."
+    ],
+    "test_database": "jrc_rel_v2_candidate_test; native pending-migration guard retained; no schema replacement"
+  },
+  "word_comparison": {
+    "references": "Original Central and Backoffice DOCX; Backoffice section approval flow and image6.png inspected",
+    "implemented": "Detailed native export now exists and preserves captured rule and history rather than inventing an approval table or replaying current policy",
+    "divergences": "JSON export, not a rendered PDF or the full approval mirror pictured in the Word; existing horizontal navigation retained per explicit user instruction",
+    "pending": ["complete Backoffice approval mirror and conclusion integration", "fresh-build desktop/mobile light/dark Chrome acceptance", "operational worker/reminder/escalation and external signature acceptance remain separate existing gaps"],
+    "all_C_to_G_stages_complete": false
+  },
+  "resources": { "start_bytes_e2_final": 12648075264, "minimum_bytes_e2_final": 4553723904, "end_bytes_e2_final": 4599025664, "observation": "Large free-space decrease observed during final run; origin not attributed, no cleanup/process interruption performed.", "disk_guard": "2 GB conservative / 750 MB mandatory; never triggered" },
+  "preservation": "No push, GHCR, deployment, build, cleanup, production change, external call, permission grant, migration or server5379/container interruption.",
+  "next": "Finish and checkpoint read-only product history; then close the native per-product hysteresis, source freshness/trend/cooldown and approved distribution gaps incrementally. E1 sealed signed dossier and E3 governed conclusion/CS handoff remain open."
+}

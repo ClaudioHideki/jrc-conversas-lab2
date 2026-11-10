@@ -1,0 +1,121 @@
+{
+  "date": "2026-11-03",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_checkpoint": "f747a01b8e616316cc124d6aaad7f535d0adf6a3",
+  "stage": "C7 — consumo de Segmentos no Service Desk",
+  "status": "PARCIAL: implementação com gates automatizados aprovados; compilação/Chrome pendentes. Não conclui Etapa C.",
+  "implemented": [
+    "Whitelist nativa QueryParameters aceita customer_segment_id canônico, sem aceitar user_id/account_id para concessão de acesso.",
+    "TicketQuery mantém TicketPolicy/OperationalContext e unidades/operadoras/supervisão nativas, exige customers_view, intersecta resolve_for(customers_view), depois aplica ModuleSegmentFilter com requester_id/company_id.",
+    "Listas e KPIs/reportes que reutilizam TicketQuery recebem o mesmo filtro, antes da paginação. Sem filtro preserva o caminho nativo, sem exigir diretório adicional.",
+    "Formulário TicketFilters reaproveita SegmentFilterPicker com module_key service_desk, mantém filtros pessoais salvos, busca, paginação e validação canônica.",
+    "Seleção aparece apenas com acesso ao diretório e aos dados do cliente. Pode ser removida mesmo após perder acesso. Se a sessão nativa bloquear após resposta negada, remover o filtro na tela solicita nova validação do contexto, sem desbloquear dados por decisão do frontend.",
+    "Navegação preserva o segmento entre visão geral, chamados, minha fila, SLA e relatórios; catálogos/gestão não recebem um filtro de tickets que não suportam. SLA mantém os filtros no endereço.",
+    "Destinos iniciais ServiceDesk/Projetos foram adicionados para os respectivos papéis personalizados, com as permissões reais já existentes. Não muda precedência de atendimento/contatos nem as autorizações do servidor.",
+    "Texto do picker compartilhado deixa de mandar usar Buscar em telas que aplicam seleção automaticamente; somente locale en alterado."
+  ],
+  "tests": {
+    "backend_initial": {
+      "report": ".codex/customer-segment-servicedesk-backend.json",
+      "examples": 28,
+      "failures": 0,
+      "scope": "9 novos +19 regressões de queries/KPIs/filtros/unidades/paginação nativos"
+    },
+    "backend_final_focus": {
+      "report": ".codex/customer-segment-servicedesk-checked-backend.json",
+      "examples": 9,
+      "failures": 0,
+      "reason": "Helper alinhado e spec adequado à classe/caminho; 19regressões não repetidas. Core Ruby do snapshot final confere com os arquivos atuais.",
+      "source": "/consolidation-customer-segment-servicedesk-checked",
+      "final_spec": "spec/services/jrc_service_desk/ticket_query_customer_segments_spec.rb",
+      "executed_spec_copy": "/tmp/ticket_query_customer_segments_final_spec.rb"
+    },
+    "frontend": {
+      "initial_report": ".codex/customer-segment-servicedesk-frontend.json",
+      "initial_passed": 13,
+      "initial_failed": 0,
+      "focused_recovery_report": ".codex/customer-segment-servicedesk-recovery-frontend.json",
+      "focused_passed": 4,
+      "focused_failed": 0,
+      "note": "3 casos do controle repetidos ao validar a recuperação nova; 14casos distintos por composição. Mocks não substituem Chrome."
+    },
+    "native_module_landing": {
+      "report": ".codex/customer-segment-native-module-landing-frontend.json",
+      "passed": 26,
+      "failed": 0
+    },
+    "eslint": {
+      "report": ".codex/customer-segment-servicedesk-final-eslint.json",
+      "files": 9,
+      "errors": 0,
+      "warnings": 8
+    },
+    "ruby_style": {
+      "new_spec_report": ".codex/customer-segment-servicedesk-final-spec-style.json",
+      "new_spec_offenses": 0,
+      "native_comparison": ".codex/customer-segment-servicedesk-final-style.json",
+      "native_files": [
+        {
+          "file": "app/services/jrc_service_desk/query_parameters.rb",
+          "baseline_offenses": 14,
+          "current_offenses": 14,
+          "additional_rules": [],
+          "changed_existing_metrics": [
+            "Assignment Branch Condition size for initialize is too high. [<12, 58, 37> 69.84/26]",
+            "Cyclomatic complexity for `initialize` is too high. [32/7]",
+            "Method has too many lines. [31/19]",
+            "Perceived complexity for `initialize` is too high. [32/8]"
+          ]
+        },
+        {
+          "file": "app/services/jrc_service_desk/ticket_query.rb",
+          "baseline_offenses": 12,
+          "current_offenses": 12,
+          "additional_rules": [],
+          "changed_existing_metrics": [
+            "Assignment Branch Condition size for apply_filters! is too high. [<28, 121, 24> 126.5/26]",
+            "Cyclomatic complexity for `apply_filters!` is too high. [21/7]",
+            "Method has too many lines. [51/19]",
+            "Perceived complexity for `apply_filters!` is too high. [21/8]"
+          ]
+        }
+      ],
+      "global_clean": false,
+      "note": "Arquivos nativos mantêm14/12diagnósticos preexistentes. Métricas numéricas alteradas pela chamada do filtro estão explícitas; nenhum cop desabilitado."
+    },
+    "build": "Pendente para este incremento; assets anteriores Backoffice não são evidência ServiceDesk.",
+    "Chrome": "Pendente para este incremento."
+  },
+  "security_boundaries": [
+    "Segmento exige conta, publicação ativa neste módulo, DirectoryPolicy e customers_view nativo.",
+    "Contato excluído manualmente não volta por correspondência de empresa.",
+    "Critério financeiro exige permissão/escopo CRM do ator; sem isso nega, não considera valor oculto como zero.",
+    "Qualquer remoção de filtro passa novamente pelo contexto/autorização nativos; não preserva dados negados.",
+    "Não mudou show, update, transições, assinatura, integrações ou concessões de unidade."
+  ],
+  "preservation": {
+    "snapshots": ".codex/customer-segment-servicedesk-checked-source-preservation.json",
+    "original_C6_source_reverified": true,
+    "original_files_deleted": false,
+    "UI_backoffice_5373": "preserved; validated28aa8023",
+    "current_database_for_automated_tests": "jrc_rel_v2_candidate_test",
+    "UI_database_reseeded": false,
+    "migrations": false,
+    "dependencies_installed": false,
+    "push_deploy_GHCR_or_production": false
+  },
+  "disk": {
+    "free_bytes": 2882031616,
+    "new_build_minimum": 1500000000,
+    "guard": 750000000,
+    "cleanup": false
+  },
+  "remaining": [
+    "Compilar e homologar ServiceDesk com banco real e Chrome desktop/mobile, incluindo seleção, KPIs, navegação, paginação, negação/recuperação, isolamento e unidades/supervisão.",
+    "Implementar e validar consumidores Projetos, Relacionamento e Campanhas; manter created_by/escopo/autorização/revisão no processamento de audiência.",
+    "Auditoria final C contra Word; TRR sem definição. D/E/F/G permanecem parciais."
+  ],
+  "failed_attempts_preserved": [
+    "RuboCop inicial apontou alinhamento e convenção de classe/caminho do spec; corrigidos sem suprimir regras. Relatórios originais preservados."
+  ]
+}

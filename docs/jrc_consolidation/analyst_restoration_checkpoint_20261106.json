@@ -1,0 +1,130 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "b5dfc9f4006f33900f1faf3dab7c8e7da2755136",
+  "status": "Controlled new eligibility reversal locally validated; C-G remain open",
+  "word_fragments": [
+    "relacionamento:P0106",
+    "relacionamento:P0107"
+  ],
+  "implementation": [
+    "Restoration is a new explicitly confirmed, bounded-reason, native configure/team/manage decision with fresh actor authorization and target membership row lock; self-action and inactive targets denied. No account-wide grant or deletion.",
+    "Additive nonnegative bigint eligibility revision protects successive withdrawal/restoration cycles, including frozen same-second timestamps. Current withdrawal retries bind the original audit digest and episode revision; old episode retries reject409. Prior version-zero receipts remain usable and unchanged.",
+    "Readiness pins membership identity/role/withdrawal state/revision. Restoration reruns native scoped visibility; it does not require work to be transferred back or mutate assignments, tasks, cadences, policies or historical events.",
+    "The restored member still requires current native roles. Existing reviewed snapshots are never rewritten; a changed eligibility epoch invalidates old execution authority and requires a new preview/approval. Epoch0 retains the original Context digest inputs/algorithm exactly for untouched members.",
+    "UI reuses the same dialog, requires a fresh authorized integer revision and explicit restoration scope acknowledgement, preserves drafts on409 and avoids automatic withdrawal/restart after successful reversal."
+  ],
+  "tests_non_additive": {
+    "baseline01": "1/1 failed: restoration route absent.",
+    "native02": "20/0 (5 new restoration +9 withdrawal +6 eligibility).",
+    "legacy03": "1/0 preserves pre-counter receipt and explicitly restores revision0.",
+    "proposals04": "21/0 (7 restoration +14 existing portfolio transfer restriction cases), including actual new BatchExecutionJob after fresh approval and rejected old authority.",
+    "final05": "1/0 named native reviewed execution after final digest helper formatting, not21 repeated.",
+    "vue01": "10/0 final source dialog (8 prior +2 new restoration), transport mocked, not Chrome.",
+    "new_ruby": "0offenses migration and new request spec.",
+    "shared_ruby": "Context14->14 existing debt;Withdrawal0->0;Readiness0->0;Dashboard3->3;existing spec0;Routes0. No added diagnostics.",
+    "eslint": [
+      {
+        "path": "app/javascript/dashboard/api/jrcRelationship.js",
+        "baseline": 0,
+        "current": 0,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/WithdrawalReadinessDialog.vue",
+        "baseline": 2,
+        "current": 2,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/withdrawalReadiness.spec.js",
+        "baseline": 0,
+        "current": 0,
+        "added": {}
+      }
+    ],
+    "diff_check": "passed"
+  },
+  "migration": {
+    "version": 20261106101000,
+    "database": "jrc_rel_v2_candidate_test",
+    "host": "jrc-rel-v2-pg-20261101",
+    "applied": true,
+    "guards": "test +exact database/host +only expected pending migration",
+    "no_production_or_5379_database_change": true
+  },
+  "resources": {
+    "analyst-restoration-native02": {
+      "start": 9602224128,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/analyst_restoration_spec.rb": "19cd844f9abd38e27e31a963a6c1dabfc3fcca0eff8210b69aa2ea55851b6242",
+        "spec/requests/api/v1/accounts/relationship/analyst_withdrawal_spec.rb": "ff9a7b96d01789065a47185df0bc4b036fa984ca20ce9e52084f21de3b55f8c7",
+        "spec/services/jrc_relationship/analyst_eligibility_spec.rb": "4d5d85f706c07fc0115bbc4bedbe0b4bf10c763d00c69404d791c64e34600f74"
+      },
+      "minimum": 9582825472,
+      "exit_code": 0,
+      "end": 9601699840
+    },
+    "analyst-restoration-legacy03": {
+      "start": 9598369792,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/analyst_restoration_spec.rb": "40e0aa791b719a9dbb339a4c1810908f4a735025f380e4258cbc73e40d27566f"
+      },
+      "minimum": 9594597376,
+      "exit_code": 0,
+      "end": 9597657088
+    },
+    "analyst-restoration-proposals04": {
+      "start": 9599074304,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/analyst_restoration_spec.rb": "6e329d84cc9b64bee2c5572389ec3d7cadda7d018086beab8a7bee1755269efd",
+        "spec/requests/api/v1/accounts/relationship/portfolio_transfer_lock_spec.rb": "2a6e0039da635289d64edb11da275f63fc62f8e51bd9c3df53cba942922399e6"
+      },
+      "minimum": 9578532864,
+      "exit_code": 0,
+      "end": 9598095360
+    },
+    "analyst-restoration-final05": {
+      "start": 9598537728,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/analyst_restoration_spec.rb": "7dfb4b3910536ae0e6d3d94083f6418c861825739a8cbd762b14477be084996c"
+      },
+      "minimum": 9598464000,
+      "exit_code": 0,
+      "end": 9598464000
+    }
+  },
+  "vue_resources": {
+    "status": "passed",
+    "free_start": 9592475648,
+    "minimum_free": 9546567680,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 24040,
+    "exit_code": 0,
+    "free_end": 9592147968
+  },
+  "disk_final_bytes": 9596407808,
+  "remaining": [
+    "Fresh compiled desktop/mobile/light/dark Chrome acceptance is still unauthorized; no old assets reused as proof.",
+    "Native source schema was inspected in enforced READ ONLY transaction: tracked schema predates three additive dossier tables and eligibility fields; reconcile incrementally next without losing guards or other modules.",
+    "F1 affinity/conflict sources and full Word/visual acceptance are not declared complete. TRR and portfolio-less documents retain recorded business status."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,external operation,production,container restart or server5379 modification."
+}

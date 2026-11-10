@@ -7,7 +7,11 @@ import API from 'dashboard/api/jrcRelationship';
 import { buttonClass, inputClass, message } from './definitions';
 import { playbookFlowLabels } from './playbookFlowLabels';
 
-const props = defineProps({ book: { type: Object, required: true } });
+const props = defineProps({
+  book: { type: Object, required: true },
+  simulationOnly: Boolean,
+  readOnlyDefinition: Boolean,
+});
 const emit = defineEmits(['updateStep', 'executed']);
 const route = useRoute();
 const store = useStore();
@@ -45,6 +49,7 @@ const approvalSteps = computed(() =>
 );
 const canRun = computed(
   () =>
+    !props.simulationOnly &&
     props.book.id &&
     props.book.active === true &&
     preview.value?.matched === true &&
@@ -74,8 +79,10 @@ const load = async () => {
     if (version === generation) error.value = message(err);
   }
 };
-const update = (index, attrs) =>
+const update = (index, attrs) => {
+  if (props.readOnlyDefinition) return;
   emit('updateStep', index, { ...props.book.steps[index], ...attrs });
+};
 const chooseFlow = (index, id) => {
   const flow = options.value.flows.find(row => String(row.id) === id);
   update(index, {
@@ -92,6 +99,7 @@ const chooseContact = (index, id) =>
     message_id: undefined,
   });
 const chooseMessage = (index, text) => {
+  if (props.readOnlyDefinition) return;
   const step = { ...props.book.steps[index] };
   delete step.message_id;
   if (text !== '') {
@@ -252,6 +260,7 @@ onBeforeUnmount(() => {
     <fieldset
       v-for="{ step, index } in flows"
       :key="step.step_key || index"
+      :disabled="readOnlyDefinition"
       class="space-y-2 rounded border border-n-weak p-3"
     >
       <legend>{{ step.title }}</legend>

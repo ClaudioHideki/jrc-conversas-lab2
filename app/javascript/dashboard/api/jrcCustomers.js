@@ -5,30 +5,182 @@ class CustomerAPI extends ApiClient {
     super('customers', { accountScoped: true });
   }
 
-  metadata() {
-    return axios.get(`${this.url}/metadata`);
+  metadata(options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/metadata`, requestOptions);
+  }
+
+  operationalContacts(params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/operational_contacts`, {
+      ...requestOptions,
+      params,
+    });
   }
 
   identity(params) {
     return axios.get(`${this.url}/identity`, { params });
   }
 
-  taxonomies(params = {}) {
-    return axios.get(`${this.url}/taxonomies`, { params });
+  economicGroupUrl(options = {}) {
+    const url =
+      options.accountId === undefined
+        ? this.url
+        : this.urlForAccount(options.accountId);
+    return `${url}/economic_groups`;
   }
 
-  saveTaxonomy(taxonomy, id = null) {
+  economicGroups(params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(this.economicGroupUrl({ accountId }), {
+      ...requestOptions,
+      params,
+    });
+  }
+
+  economicGroup(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(
+      `${this.economicGroupUrl({ accountId })}/${id}`,
+      requestOptions
+    );
+  }
+
+  saveEconomicGroup(economicGroup, id = null, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url = this.economicGroupUrl({ accountId });
     return id
-      ? axios.patch(`${this.url}/taxonomies/${id}`, { taxonomy })
-      : axios.post(`${this.url}/taxonomies`, { taxonomy });
+      ? axios.patch(
+          `${url}/${id}`,
+          { economic_group: economicGroup },
+          requestOptions
+        )
+      : axios.post(url, { economic_group: economicGroup }, requestOptions);
   }
 
-  companies(params = {}) {
-    return axios.get(`${this.url}/companies`, { params });
+  economicGroupRecords(id, view, params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(`${this.economicGroupUrl({ accountId })}/${id}/${view}`, {
+      ...requestOptions,
+      params,
+    });
   }
 
-  company(id) {
-    return axios.get(`${this.url}/companies/${id}`);
+  assignEconomicGroup(id, values, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.post(
+      `${this.economicGroupUrl({ accountId })}/${id}/assign`,
+      values,
+      requestOptions
+    );
+  }
+
+  deleteEconomicGroup(id, revision, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.delete(`${this.economicGroupUrl({ accountId })}/${id}`, {
+      ...requestOptions,
+      data: { confirm: true, revision },
+    });
+  }
+
+  taxonomyUrl(options = {}) {
+    return `${options.accountId === undefined ? this.url : this.urlForAccount(options.accountId)}/taxonomies`;
+  }
+
+  taxonomies(params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(this.taxonomyUrl({ accountId }), {
+      ...requestOptions,
+      params,
+    });
+  }
+
+  taxonomy(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(
+      `${this.taxonomyUrl({ accountId })}/${id}`,
+      requestOptions
+    );
+  }
+
+  saveTaxonomy(taxonomy, id = null, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url = this.taxonomyUrl({ accountId });
+    return id
+      ? axios.patch(`${url}/${id}`, { taxonomy }, requestOptions)
+      : axios.post(url, { taxonomy }, requestOptions);
+  }
+
+  segmentPreview(taxonomy, params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.post(
+      `${this.taxonomyUrl({ accountId })}/preview`,
+      { taxonomy, ...params },
+      requestOptions
+    );
+  }
+
+  segmentRecords(id, view, params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(`${this.taxonomyUrl({ accountId })}/${id}/${view}`, {
+      ...requestOptions,
+      params,
+    });
+  }
+
+  segmentOverride(id, choice, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.post(
+      `${this.taxonomyUrl({ accountId })}/${id}/set_override`,
+      choice,
+      requestOptions
+    );
+  }
+
+  removeSegmentOverride(id, choiceId, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.delete(
+      `${this.taxonomyUrl({ accountId })}/${id}/overrides/${choiceId}`,
+      requestOptions
+    );
+  }
+
+  deleteTaxonomy(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.delete(`${this.taxonomyUrl({ accountId })}/${id}`, {
+      ...requestOptions,
+      data: { confirm: true },
+    });
+  }
+
+  attendance(subject, id, params = {}, options = {}) {
+    if (!['companies', 'contacts'].includes(subject))
+      throw new TypeError('Invalid customer subject');
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/${subject}/${id}/attendance`, {
+      ...requestOptions,
+      params,
+    });
+  }
+
+  companies(params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/companies`, { ...requestOptions, params });
+  }
+
+  company(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/companies/${id}`, requestOptions);
   }
 
   saveCompany(company, id = null) {
@@ -37,62 +189,154 @@ class CustomerAPI extends ApiClient {
       : axios.post(`${this.url}/companies`, { company });
   }
 
-  overview(id) {
-    return axios.get(`${this.url}/companies/${id}/overview`);
+  overview(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/companies/${id}/overview`, requestOptions);
+  }
+
+  backoffice(id, params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/companies/${id}/backoffice`, {
+      ...requestOptions,
+      params,
+    });
   }
 
   relationships(id) {
     return axios.get(`${this.url}/companies/${id}/relationships`);
   }
 
-  records(id, params) {
-    return axios.get(`${this.url}/companies/${id}/records`, { params });
-  }
-
-  timeline(id, params = {}, type = 'companies') {
-    return axios.get(`${this.url}/${type}/${id}/timeline`, { params });
-  }
-
-  contacts(params = {}) {
-    return axios.get(`${this.url}/contacts`, { params });
-  }
-
-  contact(id) {
-    return axios.get(`${this.url}/contacts/${id}`);
-  }
-
-  contactOverview(id) {
-    return axios.get(`${this.url}/contacts/${id}/overview`);
-  }
-
-  saveContact(contact, id = null, options = {}) {
-    const body = { contact, ...options };
-    return id
-      ? axios.patch(`${this.url}/contacts/${id}`, body)
-      : axios.post(`${this.url}/contacts`, body);
-  }
-
-  duplicates(id) {
-    return axios.get(`${this.url}/contacts/${id}/duplicates`);
-  }
-
-  merge(id, sourceContactId) {
-    return axios.post(`${this.url}/contacts/${id}/merge`, {
-      source_contact_id: sourceContactId,
-      confirm: true,
+  records(id, params, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/companies/${id}/records`, {
+      ...requestOptions,
+      params,
     });
   }
 
-  savePoint(contactId, contactPoint, id = null) {
-    const url = `${this.url}/contacts/${contactId}/contact_points`;
-    return id
-      ? axios.patch(`${url}/${id}`, { contact_point: contactPoint })
-      : axios.post(url, { contact_point: contactPoint });
+  contactRecords(id, params, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts/${id}/records`, {
+      ...requestOptions,
+      params,
+    });
   }
 
-  removePoint(contactId, id) {
+  contactCompanyHistory(id, params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts/${id}/company_history`, {
+      ...requestOptions,
+      params,
+    });
+  }
+
+  timeline(id, params = {}, type = 'companies', options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/${type}/${id}/timeline`, {
+      ...requestOptions,
+      params,
+    });
+  }
+
+  contacts(params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts`, { ...requestOptions, params });
+  }
+
+  contact(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts/${id}`, requestOptions);
+  }
+
+  signingIdentity(accountId, contactId, options = {}) {
+    return axios.get(
+      `${this.urlForAccount(accountId)}/contacts/${contactId}/signing_identity`,
+      options
+    );
+  }
+
+  saveSigningIdentity(accountId, contactId, body) {
+    return axios.patch(
+      `${this.urlForAccount(accountId)}/contacts/${contactId}/signing_identity`,
+      body
+    );
+  }
+
+  contactOverview(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts/${id}/overview`, requestOptions);
+  }
+
+  saveContact(contact, id = null, options = {}, request = {}) {
+    const body = { contact, ...options };
+    const { accountId, ...requestOptions } = request;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return id
+      ? axios.patch(`${url}/contacts/${id}`, body, requestOptions)
+      : axios.post(`${url}/contacts`, body, requestOptions);
+  }
+
+  duplicates(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts/${id}/duplicates`, requestOptions);
+  }
+
+  merge(id, sourceContactId, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.post(
+      `${url}/contacts/${id}/merge`,
+      {
+        source_contact_id: sourceContactId,
+        confirm: true,
+      },
+      requestOptions
+    );
+  }
+
+  savePoint(contactId, contactPoint, id = null, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const base =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    const url = `${base}/contacts/${contactId}/contact_points`;
+    return id
+      ? axios.patch(
+          `${url}/${id}`,
+          { contact_point: contactPoint },
+          requestOptions
+        )
+      : axios.post(url, { contact_point: contactPoint }, requestOptions);
+  }
+
+  removePoint(contactId, id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
     return axios.delete(
-      `${this.url}/contacts/${contactId}/contact_points/${id}`
+      `${url}/contacts/${contactId}/contact_points/${id}`,
+      requestOptions
     );
   }
 
@@ -115,6 +359,81 @@ class CustomerAPI extends ApiClient {
       `${this.url}/imports/${token ? 'apply' : 'preview'}`,
       body
     );
+  }
+
+  importUrl(options = {}) {
+    const url =
+      options.accountId === undefined
+        ? this.url
+        : this.urlForAccount(options.accountId);
+    return `${url}/import_runs`;
+  }
+
+  importMetadata(options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(`${this.importUrl({ accountId })}/metadata`, request);
+  }
+
+  importTemplate(kind, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(`${this.importUrl({ accountId })}/template`, {
+      ...request,
+      params: { kind },
+      responseType: 'blob',
+    });
+  }
+
+  importRuns(params = {}, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(this.importUrl({ accountId }), { ...request, params });
+  }
+
+  importRun(id, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(`${this.importUrl({ accountId })}/${id}`, request);
+  }
+
+  uploadImport(file, kind, delimiter, options = {}) {
+    const { accountId, ...request } = options;
+    const body = new FormData();
+    body.append('file', file);
+    body.append('kind', kind);
+    if (delimiter) body.append('delimiter', delimiter);
+    return axios.post(this.importUrl({ accountId }), body, request);
+  }
+
+  previewImport(id, values, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.post(
+      `${this.importUrl({ accountId })}/${id}/preview`,
+      values,
+      request
+    );
+  }
+
+  applyImport(id, token, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.post(
+      `${this.importUrl({ accountId })}/${id}/apply`,
+      { token, confirm: true },
+      request
+    );
+  }
+
+  importRecords(id, view, params = {}, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(`${this.importUrl({ accountId })}/${id}/${view}`, {
+      ...request,
+      params,
+    });
+  }
+
+  importErrorsFile(id, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(`${this.importUrl({ accountId })}/${id}/errors.csv`, {
+      ...request,
+      responseType: 'blob',
+    });
   }
 }
 export default new CustomerAPI();

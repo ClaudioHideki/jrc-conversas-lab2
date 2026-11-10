@@ -1,15 +1,17 @@
 class JrcRelationship::BatchReviewAuthority
   LOCK = 'FOR SHARE NOWAIT'.freeze
 
-  def initialize(account_id:, actor_id:)
+  def initialize(account_id:, actor_id:, write: true)
     @account_id = account_id
     @actor_id = actor_id
+    @write = write
   end
 
   def call
     ActiveRecord::Base.uncached do
+      JrcRelationship::DistributionApproval.lock_configuration!(@account_id)
       context = JrcRelationship::Context.new(lock_member)
-      raise Pundit::NotAuthorizedError unless context.policy.manage?
+      raise Pundit::NotAuthorizedError unless @write ? context.policy.manage? : context.policy.access?
 
       yield context
     end
@@ -29,6 +31,8 @@ class JrcRelationship::BatchReviewAuthority
   end
 
   def lock_grants(member)
+    JrcRelationship::Configuration.where(account_id: @account_id).where("jsonb_exists(rules, ?)", JrcRelationship::LocalAccess::KEY)
+                                 .order(:id).lock(LOCK).load
     TeamMember.where(user_id: @actor_id, team_id: Team.where(account_id: @account_id).select(:id)).order(:id).lock(LOCK).load
     JrcCrm::UserBusinessUnit.where(account_id: @account_id, user_id: @actor_id).order(:id).lock(LOCK).load
     InboxMember.where(user_id: @actor_id, inbox_id: Inbox.where(account_id: @account_id).select(:id)).order(:id).lock(LOCK).load

@@ -1,0 +1,116 @@
+{
+  "date": "2026-11-07",
+  "previous_head": "99676758f176380e4efb0c15c92b93dbd03716a9",
+  "status": "Real isolated native Master allocation queue gate passed;not full C-G acceptance",
+  "native_result": {
+    "status": "passed",
+    "phase": "tenant_and_network",
+    "checks": [
+      "test environment and exact owned names",
+      "exact PostgreSQL URL/database",
+      "no pending migrations",
+      "fresh empty business database",
+      "committed cross-process fixtures",
+      "exact isolated Redis",
+      "Redis ownership claim",
+      "owned artifact directory",
+      "explicit fresh master mode",
+      "native master preview preserves create or reuse decision",
+      "native master preview preserves create or reuse decision",
+      "no allocation before queue consumption",
+      "worker registered only the owned business and native health queues",
+      "real Redis provider job ID",
+      "six native master roots and active links",
+      "one explicit synthetic hour per native root",
+      "native master preview preserves create or reuse decision",
+      "real Redis provider job ID",
+      "same six roots preserved across two active portfolios",
+      "real Redis provider job ID",
+      "duplicate master delivery has no repeated effect",
+      "real Redis provider job ID",
+      "revoked master creates no roots or links",
+      "revoked master history stays pinned",
+      "foreign account allocation unchanged",
+      "owned queue drained",
+      "no HTTP requests attempted",
+      "worker made no HTTP requests",
+      "worker requested no email or push"
+    ],
+    "database": "jrc_g_worker_20261106_734a12f07963",
+    "queue": "jrc_g_worker_734a12f07963",
+    "delivery_acknowledgments": 6,
+    "fresh_worker": true,
+    "mode": "master",
+    "application_build": false,
+    "production": false,
+    "retained_approval_acknowledgments": 0,
+    "qualification": "Synthetic-only PostgreSQL; real Redis and Sidekiq. Queue routing overridden only for isolation. No default queue/cron/deployment/Chrome claim."
+  },
+  "resources": {
+    "nonce": "734a12f07963",
+    "database": "jrc_g_worker_20261106_734a12f07963",
+    "redis_index": 12,
+    "queue": "jrc_g_worker_734a12f07963",
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "phase": "real_master_worker",
+    "start": 6407696384,
+    "minimum": 6406975488,
+    "build": false,
+    "cleanup": false,
+    "business_data_copied": false,
+    "old_redis15_reused": false,
+    "passed": true,
+    "source_sha256": {
+      "spec/integration/jrc_relationship/owned_worker_boot.rb": "66a36f5cb59ce12d54d15524c2304c59f3205bcc76503bba402a1d60c3ca2857",
+      "spec/integration/jrc_relationship/owned_worker_gate.rb": "3fa792758ab00a6b017fc165c4f7269ab1632200584026d1ee2a5a88303102dc",
+      "spec/integration/jrc_relationship/owned_master_worker_gate.rb": "e743a38e6203a71162416a6c2c981f8544281f5df3fd99e10882071e3cfc8e6f"
+    },
+    "empty_preflight_recovery": true,
+    "head": "99676758f176380e4efb0c15c92b93dbd03716a9",
+    "exit_code": 0,
+    "duration_seconds": 45.05,
+    "end": 6427324416
+  },
+  "source_sha256": {
+    "spec/integration/jrc_relationship/owned_worker_boot.rb": "66a36f5cb59ce12d54d15524c2304c59f3205bcc76503bba402a1d60c3ca2857",
+    "spec/integration/jrc_relationship/owned_worker_gate.rb": "3fa792758ab00a6b017fc165c4f7269ab1632200584026d1ee2a5a88303102dc",
+    "spec/integration/jrc_relationship/owned_master_worker_gate.rb": "e743a38e6203a71162416a6c2c981f8544281f5df3fd99e10882071e3cfc8e6f"
+  },
+  "evidence_sha256": {
+    ".codex\\master-worker-20261107\\734a12f07963\\attempt_ca614ecc\\result.json": "55b0b710bf19fda1fc076b1e6620f57e3544d231f62ecf85456e6273c25c6046",
+    ".codex\\master-worker-20261107\\734a12f07963\\attempt_ca614ecc\\resource.json": "a8abceb4fbcda0d0877e8e7974160b6d551675a65b93bce1d52d6c3dd3b7c70c",
+    ".codex\\master-worker-20261107\\734a12f07963\\attempt_ca614ecc\\runtime.log": "c4bb40898e45219b336854622f7affce33395e00146955e65c406741ca0bcd04",
+    ".codex\\master-worker-20261107\\734a12f07963\\attempt_ca614ecc\\worker-network.json": "771b2ec7e947e19e5342b5c54e87fbf30b9273f50ac246e0915c10e2e9489e2c",
+    ".codex\\master-worker-20261107\\734a12f07963\\attempt_ca614ecc\\worker.log": "b50339bc98dd515e084a2a8b099b00f01784b186e814bb589f181bee02730ee2",
+    ".codex\\master-worker-20261107\\734a12f07963\\guard-regressions.json": "a9820ca8f15f059d28c6dc5a490d700c0bb51b6039c1ea112879681710fc422d",
+    ".codex\\master-worker-20261107\\734a12f07963\\resource.json": "0245e082a0f09408cc6c184072fb7a220d37b2bc41799a2d0666901888b2e8ac",
+    ".codex\\master-worker-20261107\\734a12f07963\\runtime.log": "07c4d6ff061593fc5af5c521a6ed0d960e6dd2084d207fd3f3b3ee3de220c2d9",
+    ".codex\\master-worker-20261107\\734a12f07963\\failure_diagnosis.json": "a1e76986c170bddc9f9fe9ef116bde93782fe36c8b10268655e3750bb2f40f79"
+  },
+  "synthetic_only": [
+    "Fresh database created from native candidate schema-only DDL plus actual schema_migrations/ar_internal_metadata;no business records copied,no sourceDB writes or existing schema replaced. Exact database/environment/no-pending-migration and fresh-zero-business-record checks precede fixtures.",
+    "Redis12 reserved atomically only when entirely empty;20min NX claim. Redis15 had94keys and expired claim and was read-only/preserved. New mode does not relax original modes:4negative startup tests reject crossed Redis or unknown mode before Rails.",
+    "Only native BatchExecutionJob routed to unique owned queue. Native Sidekiq health payload retained. Membership,allocation,capacity,permissions and transaction services unchanged.",
+    "6ACK:2create-six,2reuse-six into second active portfolio,1duplicate no-op,1revoked actor no-op. Frozen review/history,unchanged native roots and foreign-account witness verified.",
+    "Direct-child worker shutdown only;zero attempted HTTP and no email/push requested. Existing containers,5379,other Codex and default environment untouched."
+  ],
+  "preserved_failure": {
+    "first_attempt": ".codex\\master-worker-20261107\\734a12f07963",
+    "cause": "Ruby executable rejected --require;correct flag is -r. Failure before Rails/worker/business fixture creation.",
+    "recovery": "Same fresh owned DB reused only after zero business records,Redis containing solely exact unexpired claim with>600s left and unchanged source hashes;new attempt artifacts. No delete,flush,lease takeover or historical state reset.",
+    "note": "Original helper result absence surfaced FileNotFound;runtime log retains actual CLI cause. Additional failure_diagnosis records this explicitly."
+  },
+  "lint": "First lint7offenses resolved by fixture organization,meaningful native roots checks and actual Queue#size count variable;all3final Ruby files0offenses. No suppression or unsupported Queue#empty? introduced.",
+  "host_helper": {
+    "path": ".codex/master-worker-20261107/run.py",
+    "sha256": "4248197c6a587747fb4f9394c655373c5cf3a8d2ab489895749f4569f937e6f0",
+    "qualification": "Preserved local isolated harness,ignored setup like earlier worker helpers;tracked explicit Ruby entrypoints contain native gate assertions."
+  },
+  "free_at_report": 6404100096,
+  "remaining": [
+    "No default deployment/cron/production throughput acceptance;maximum50+50native scale evidence remains a separate earlier gate.",
+    "No current-source Chrome/real WebSocket client or visual Word closure;old assets not evidence.",
+    "Named local role/capability business matrix,TRR and external provider/scanner/channel dependencies remain open;company docs without portfolio explicitly deferred.",
+    "Literal Word audit of portfolio history full values/reasons and generic audit immutability remains separate;do not infer sealed audit from operational history."
+  ]
+}

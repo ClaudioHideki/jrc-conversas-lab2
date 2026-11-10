@@ -12,7 +12,7 @@ const emit = defineEmits(['update:filters', 'change']);
 const store = useStore();
 
 const pipelines = computed(
-  () => store.state.jrcCrm?.pipelines?.pipelines || []
+  () => store.getters['jrcCrm/pipelines/allPipelines'] || []
 );
 const agents = computed(() => store.state.agents?.records || []);
 

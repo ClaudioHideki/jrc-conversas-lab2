@@ -1,0 +1,539 @@
+{
+  "date": "2026-11-02",
+  "statuses": [
+    "implementado e testado",
+    "parcial",
+    "pendente",
+    "dependência externa"
+  ],
+  "documents": [
+    {
+      "document": "central-aprovacoes",
+      "source": "C:\\Users\\DEV03\\Downloads\\Especificacao_Central_Aprovacoes_JRC_Conversas_DEV.docx",
+      "sha256": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917",
+      "text_read_in_full": true,
+      "figures_inspected": 12
+    },
+    {
+      "document": "cadastro-mestre",
+      "source": "C:\\Users\\DEV03\\Downloads\\JRC-CONVERSAS-CADASTRO-MESTRE-CLIENTES-ESPECIFICACAO-DEV-20261101 (1).docx",
+      "sha256": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
+      "text_read_in_full": true,
+      "figures_inspected": 28
+    },
+    {
+      "document": "backoffice",
+      "source": "C:\\Users\\DEV03\\Downloads\\JRC_Conversas_Backoffice_Projeto_DEV_20261101.docx",
+      "sha256": "ebd5cd1db7fa53cc7bf7e2fa6a801e498735eaef9d67040002a5a9ade4878284",
+      "text_read_in_full": true,
+      "figures_inspected": 10
+    },
+    {
+      "document": "backoffice-evolucao",
+      "source": "C:\\Users\\DEV03\\Downloads\\Projeto_Evolucao_Backoffice_JRC_Conversas_20261101.docx",
+      "sha256": "daae925b14eb1b0943f12e9a7cccae362ff143916a8d6e6bbd4fee2a3ebcb4ce",
+      "text_read_in_full": true,
+      "figures_inspected": 0
+    }
+  ],
+  "relationship_v2": {
+    "reference_sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+    "text_read_in_full": true,
+    "figures_inspected": 22,
+    "status": "parcial",
+    "evidence": [
+      "Nove áreas principais, mantendo as rotas e operações legadas",
+      "Meu Painel e Minhas Ações com escopo por usuário/conta e respostas tardias descartadas",
+      "Caso contextual, conversa nativa autorizada, resultado, próximo passo, retorno, histórico e confirmação separada",
+      "Documentos versionados com permissão explícita, quarentena, auditoria e bloqueio das rotas genéricas de blob",
+      "Cobertura observada de saúde sem apresentar dado ausente como saudável e sem eco da própria agenda",
+      "Histórico real de processamento e cobertura pelo gestor para clientes sem responsável",
+      "Reutilização idempotente do recibo real de mensagem do playbook, mantendo guard, autoridade e ledger",
+      "Tokens nativos violetas locais ao Relacionamento e temas claro/escuro revistos"
+    ],
+    "remaining": [
+      "Completar Carteiras como agrupamento, equipe/capacidade, propostas de distribuição e integração autorizada à Central sem execução na aprovação",
+      "Histerese, frescor e demais evoluções de saúde/automação do Word",
+      "Finalizar filtros e solicitação de documentos conforme Word"
+    ]
+  },
+  "backoffice": [
+    {
+      "requirement": "Módulo independente, abas horizontais, fluxo v2 com aprovações antes de contrato",
+      "status": "parcial",
+      "existing": "Base 50f7f07d preservada; regressões selecionadas passaram. Aceite integral das evoluções do Word continua parcial."
+    },
+    {
+      "requirement": "Busca de toda a base autorizada e seleção Cliente→Pedido→Solicitação",
+      "status": "implementado e testado",
+      "finding": "Busca paginada no servidor com debounce e invalidação de respostas por conta/usuário. Pedidos filtrados pela empresa canônica do contato, autorização de CRM e cobertura de operadora/unidade. Cliente sem pedido permanece selecionável. Criação de Alteração, recarga e abertura preservam cliente/pedido.",
+      "validation": "11 casos de intake no backend e 5 no frontend; demonstração no navegador com dados sintéticos e nenhuma mensagem ou contrato enviado."
+    },
+    {
+      "requirement": "Contrato dentro da solicitação, versões e snapshots de assinantes do Cadastro Mestre",
+      "status": "parcial",
+      "finding": "Versões/PDF/hash e edição contextual, assinantes canônicos, proposta de poderes pela Central, admissão/despacho duráveis, histórico e callbacks implementados em incrementos testados. Agente autorizado gera/reabre nova versão após cancelamento e preserva PDFs. Ações completas pela tela e evidências finais continuam pendentes."
+    },
+    {
+      "requirement": "Envio, lembrete, cancelamento, eventos autenticados e documento final DocuSign",
+      "status": "parcial",
+      "finding": "Conector único isolado; intenção e despacho preservam conexão/versão. Consumidor e reconciliação registram fatos autenticados sem marcar signed. Status persistido e revisão após cancelamento validados no navegador. Consulta externa e ações de reenvio/lembrete/cancelamento pela tela, evidências finais e demo permanecem pendentes."
+    },
+    {
+      "requirement": "Bloqueios de aprovação, assinatura e proteção financeira",
+      "status": "parcial",
+      "existing": "CommercialGate e ContractRelease preservados. SignatureRelease acrescenta bloqueio v2 por evidência interna no avanço, pedido/projeto e ativação via API, sem estados DocuSign; assinatura manual do cliente permanece separada. Validação da versão e evidência reais ainda pendente."
+    },
+    {
+      "requirement": "Requisitos tipados e snapshots por operação/produto/cliente",
+      "status": "pendente",
+      "existing": "Checklist nativo reutilizável; ainda não equivale ao cadastro de todos os tipos de requisito solicitado."
+    },
+    {
+      "requirement": "Documentação com versões, decisão humana, OCR e histórico",
+      "status": "parcial",
+      "existing": "DocumentVersion/Documents/Preanalysis/TextExtraction existentes; OCR não comprova autenticidade ou poderes."
+    },
+    {
+      "requirement": "Pendências por causa, implantação/provisionamento/financeiro, relatórios",
+      "status": "parcial",
+      "existing": "Fluxos nativos e Issues existem; completar conforme matriz e validar causas/atores/escopo."
+    },
+    {
+      "requirement": "Configuração DocuSign, autenticação e recebimento Connect",
+      "status": "parcial",
+      "implemented": [
+        "Configuração restrita a administrador ativo e cobertura de grupo",
+        "Segredos criptografados por conta e revisão, sem retorno na API",
+        "OAuth JWT com verificação de identidade e conta",
+        "HMAC dos bytes originais, limite de corpo e deduplicação durável",
+        "Conexão técnica preservada por revisão; mudança do padrão não troca ambiente/conta dos eventos ou operações ligados à conexão anterior",
+        "Notificações autenticadas são consumidas por conexão/envio exatos; estado de negócio projetado com locks, sem inferir assinatura válida."
+      ],
+      "pending": [
+        "Ações operacionais completas pela tela",
+        "Obtenção e validação das evidências finais e liberação segura",
+        "Homologação externa demo"
+      ],
+      "reference": "docs/jrc_backoffice/docusign_integration.md"
+    },
+    {
+      "requirement": "Separar domínio contratual do fornecedor e preservar a conexão de cada envio",
+      "status": "parcial",
+      "implemented": "Fronteira de operações, erros/estados comuns e conexão imutável testadas com único adaptador DocuSign.",
+      "pending": "Concluir ações operacionais, evidências finais, verificador interno e homologação externa. Ledger com versão/assinantes/conexão e consumidor já implementados; não equivalem a assinatura válida.",
+      "reference": "docs/jrc_backoffice/signature_provider_boundary.md"
+    },
+    {
+      "requirement": "Ambiente DocuSign demo e homologação externa",
+      "status": "dependência externa",
+      "finding": "Responsável confirmou necessidade de preparar demo. Roteiro disponível; conta, consentimento e HTTPS não criados nesta tarefa."
+    }
+  ],
+  "customer_master": [
+    {
+      "requirement": "Fonte única Company/Contact e operações nativas com escopo",
+      "status": "parcial",
+      "existing": "DirectoryQuery, CompanyWriter, ContactsController com IdentityResolver/Audit, Customer360 e CorporateCoverage; preservar os vínculos."
+    },
+    {
+      "requirement": "Detalhes em modal e abas dos módulos sem submenus duplicados",
+      "status": "parcial",
+      "existing": "Popups canônicos de empresas e contatos com abas/contexto e fontes autorizadas. Compositor nativo utilizável sobre o contato, edição/criação/paginação/origem fora da primeira página e temas/celular validados. Segmentos e demais critérios integrais ainda parciais.",
+      "report": "docs/jrc_customers/contact_composer_checkpoint_20261103.json"
+    },
+    {
+      "requirement": "Visão contextual Backoffice: solicitações, documentação, aprovações, contratos, pendências, histórico",
+      "status": "parcial",
+      "constraint": "Somente registros do cliente, com autorização do módulo de origem.",
+      "existing": "Visões de solicitações nativas por empresa, etapas e histórico seguro com links de origem. Backend/API/temas/celular validados; não equivale à Central documental integral.",
+      "report": "docs/jrc_customers/company_context_checkpoint_20261102.json"
+    },
+    {
+      "requirement": "Pessoa/empresa, deduplicação e vínculo do assinante",
+      "status": "parcial",
+      "existing": "Contato canônico ganhou CPF protegido, CAS, deduplicação/merge, escopo e auditoria mascarada; 8 casos do diálogo e regressões backend passaram. Nenhuma prova de poderes ou estrutura paralela de pessoas foi criada."
+    },
+    {
+      "requirement": "Segmentos/critérios/prévia, grupos econômicos separados de etiquetas, importações e contatos ativos",
+      "status": "parcial",
+      "constraint": "Não conceder acesso por segmento; preservar regras e engines existentes.",
+      "existing": "C4a/b/c e C5 preservados. C6 Contatos ativos validou consulta nativa, janela/filtros/paginação, popups, persistência e origens CRM/ServiceDesk no Chrome desktop/celular claro/escuro; presença online preservada. Critérios financeiros/TRR, filtros dos demais módulos e demais requisitos integrais continuam parciais.",
+      "report": "docs/jrc_customers/operational_contacts_checkpoint_20261103.json"
+    }
+  ],
+  "approval_central": {
+    "status": "parcial",
+    "existing": [
+      "Authorization/CorporateCoverage",
+      "Catalog e snapshots",
+      "Requests/Decisions com locks, idempotência, quorum e versões",
+      "Policies/Selection/Simulation",
+      "Delegations e auditoria",
+      "CommercialGate integrado ao CRM/Backoffice"
+    ],
+    "pending": [
+      "Cinco abas, inbox e resumo contextual, confirmações",
+      "Ajuste autorizado: salvar pendente ou salvar+aprovar atômico, sem remover trava financeira",
+      "Wizard de quatro etapas e alçadas sem campos técnicos",
+      "Integração de distribuição do Relacionamento separando decisão da execução",
+      "Notificações internas e homologação visual/contextual"
+    ],
+    "acceptance": [
+      {
+        "id": "CA-01",
+        "criterion": "Usuário com alçada visualiza apenas aprovações dentro de seu escopo ou delegadas a ele.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-02",
+        "criterion": "Aprovador consegue abrir o pedido/registro de origem antes de decidir.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-03",
+        "criterion": "Aprovação é concluída com confirmação e fica registrada no histórico.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-04",
+        "criterion": "Rejeição exige motivo e devolve resultado ao solicitante/módulo de origem.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-05",
+        "criterion": "Ajuste preserva valor original, registra novo valor e exige observação.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-06",
+        "criterion": "Salvar e aprovar executa ajuste + decisão de forma atômica.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-07",
+        "criterion": "Administrador cria regra em quatro passos sem código/evento técnico visível.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-08",
+        "criterion": "Alçadas não podem ter sobreposição inválida.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-09",
+        "criterion": "Simulador usa regras reais mas não cria solicitação nem altera registro.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-10",
+        "criterion": "Delegação simples transfere aprovações do titular ao delegado durante período definido.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-11",
+        "criterion": "Auditoria registra ator, data/hora, ação, regra/versão e alterações.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-12",
+        "criterion": "Duas decisões simultâneas não podem finalizar a mesma solicitação duas vezes.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-13",
+        "criterion": "Pausa/edição de regra não altera solicitações já abertas.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-14",
+        "criterion": "Permissões e isolamento multiempresa são validados no backend.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-15",
+        "criterion": "Interface funciona em desktop com os padrões visuais atuais do JRC Conversas.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      }
+    ],
+    "validation_note_p1": "Regressões comerciais selecionadas passaram no gate P1; isso não conclui o aceite CA01–CA15 nem a UX pendente."
+  },
+  "execution_order": [
+    "Checkpoint Relacionamento",
+    "Busca Cliente→Pedido→Solicitação",
+    "Backoffice P1 contrato/assinante/DocuSign e gates",
+    "Backoffice P2 requisitos/documentação/aprovações",
+    "Backoffice P3 e demais evoluções dos quatro documentos"
+  ],
+  "reference_caveats": [
+    "Imagens ilustrativas não são dados reais nem regras executáveis.",
+    "Exigência atual de navegação horizontal prevalece sobre submenus laterais das imagens.",
+    "Referências antigas de etapas não reordenam registros legados; manter workflow versionado.",
+    "Preservar quorum/paralelismo já existentes mesmo quando o Word trata como evolução futura."
+  ],
+  "validation_checkpoint_20261102": {
+    "frontend": {
+      "files": 129,
+      "tests": 1435,
+      "failures": 0,
+      "artifact": ".codex/continuation-frontend-regression.json"
+    },
+    "backend_new_and_native_regression": {
+      "artifact": ".codex/continuation-backend-verified.json",
+      "sha256": "d7c8afbaf5fa9df591882e879b544105c17c983b9d1a1f0628ed70973bc3768a",
+      "summary": {
+        "duration": 40.868609038,
+        "example_count": 107,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      }
+    },
+    "signature_migration_roundtrip": {
+      "examples": 1,
+      "failures": 0,
+      "included_in_backend_final": true,
+      "test": "spec/services/jrc_backoffice/signature_integration_upgrade_spec.rb"
+    },
+    "relationship_main": {
+      "examples": 427,
+      "failures": 0,
+      "source_commit": "bdf0d56915bcbdf5873cf525623f68b649d9f49e"
+    },
+    "relationship_reviewed": {
+      "examples": 5,
+      "failures": 0,
+      "note": "Rollback em ordem de dependência, mantendo a FK entre conta e documentos."
+    },
+    "relationship_concurrency": {
+      "examples": 33,
+      "failures": 0,
+      "artifact": ".codex/current-full-sd-fixed.json",
+      "coverage": "465 exemplos únicos no plano completo por partições",
+      "provenance": "427 casos centrais executados no snapshot imutável bdf0d569; 5 reviewed e 33 concorrentes no código atual. Os gates específicos de ownership também foram repetidos no backend final. Esta composição não é uma execução única de todo o repositório."
+    },
+    "build": "Frontend de produção compilado localmente com heap de 4096 MiB em 2m57s; sem imagem Docker/publicação.",
+    "browser": [
+      "Cliente→Pedido→Alteração: criação, recarga e reabertura com IDs corretos",
+      "Configuração DocuSign sintética desabilitada salva, segredos limpos, verificações permanecem pendentes, claro/escuro"
+    ],
+    "remaining": "Word integral permanece parcial. Contratos versionados/assinantes/evidências, requisitos tipados, Cadastro Mestre contextual, UX da Central e demais itens da matriz não foram declarados concluídos.",
+    "new_ruby_lint": {
+      "files": 20,
+      "offenses": 0,
+      "artifact": ".codex/continuation-ruby-lint-final.json"
+    },
+    "backend_total_distinct_selected": 572,
+    "scope_note": "572 exemplos distintos somam 465 do plano Relacionamento e 107 do gate Backoffice/DocuSign e regressões selecionadas. Não representam toda a suíte do repositório nem homologação externa.",
+    "rails_eager_load": "Zeitwerk: All is good!; log .codex/continuation-zeitwerk.log.",
+    "provenance": "Histórico anterior desta etapa, checkpoint pai e64e46c9; não representa reexecução no código P1 atual."
+  },
+  "p1_checkpoint_20261102": {
+    "report": "docs/jrc_backoffice/p1_signing_identity_provider_checkpoint_20261102.json",
+    "backend_examples": 408,
+    "frontend_tests": 164,
+    "failures": 0,
+    "external_homologation": false,
+    "scope": "Regressões selecionadas. Evidência detalhada e pendências no relatório; não somar aos gates anteriores como se fossem casos únicos reexecutados."
+  },
+  "contract_version_checkpoint_20261102": {
+    "report": "docs/jrc_backoffice/contract_versions_checkpoint_20261102.json",
+    "status": "parcial",
+    "new_image": false,
+    "push": false,
+    "deploy": false
+  },
+  "document_security_checkpoint_20261102": {
+    "report": "docs/jrc_backoffice/document_security_checkpoint_20261102.json",
+    "status": "parcial",
+    "backend": 534,
+    "frontend": 182,
+    "real_postgresql_concurrency": 3,
+    "legacy_lint_offenses": 44,
+    "real_antivirus_homologation": false,
+    "signature_flow_complete": false,
+    "push": false,
+    "new_image": false,
+    "deploy": false
+  },
+  "canonical_signers_checkpoint_20261102": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/canonical_signers_checkpoint_20261102.json",
+    "implemented": "Seleção canônica, CPF protegido, assinatura conjunta, roster imutável, PDF privado vinculado e interface validada.",
+    "pending": "Poderes/Central e envio durável/eventos/evidências; C/D/E/F/G permanecem abertas."
+  },
+  "contextual_template_checkpoint_20261102": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/contextual_contract_templates_checkpoint_20261102.json",
+    "implemented": "Modelo ativo/elegível pelo pedido/emitente, busca/paginação, edição/CAS nativos, PDF exato com roster, temas e mobile validados.",
+    "pending": "Poderes e B3; demais frentes continuam parciais."
+  },
+  "signing_authority_increment": {
+    "status": "implementado e testado no ambiente sintético",
+    "report": "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json",
+    "scope": "Proposta imutável, documentos/validade por pessoa, decisão e origem pela Central única, assinatura conjunta e bloqueio sem assinatura.",
+    "not_completed": "Envio durável, consumidor, assinatura/evidências externas e conclusão global."
+  },
+  "signature_admission_increment": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/signature_admission_checkpoint_20261102.json",
+    "implemented": "Serviço interno durável, isolamento/imutabilidade e travas validados.",
+    "pending": "Operação de envio, consumidor, evidências finais, UI e homologação externa."
+  },
+  "signature_dispatch_increment": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/signature_dispatch_notifications_checkpoint_20261102.json",
+    "implemented": "Dispatch interno sem POST duplicado, recuperação técnica de leitura e consumo autenticado com jobs.",
+    "pending": "Reconciliação operacional, ações, assinatura validada/evidências finais, UI de envio e homologação externa."
+  },
+  "signature_history_increment": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/signature_history_ui_checkpoint_20261102.json",
+    "implemented": "API/UI de consulta do histórico com permissões, paginação,217 testes frontend,4API e navegador real.",
+    "pending": "Ações operacionais, reconciliação e evidência final de assinatura; demais frentes."
+  },
+  "signature_reconciliation_increment": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/signature_reconciliation_checkpoint_20261102.json",
+    "implemented": "Recuperação durável somente de leitura de resultado incerto, reserva/intervalo/janela, jobs e regressões selecionadas.",
+    "pending": "Demais ações, evidências/verificador/liberação e demais frentes."
+  },
+  "signature_projection_increment": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/signature_projection_checkpoint_20261102.json",
+    "base_commit": "ca44ef6d34eae5ab4d38864e539c920288f6c88f",
+    "backend_selected": {
+      "examples": 52,
+      "failures": 0
+    },
+    "frontend_selected": {
+      "tests": 219,
+      "failures": 0
+    },
+    "browser": "Agente, permissão negada/permitida, callback sintético, revisão2, reabertura, dois downloads/hash, conta estrangeira e celular validados; nenhuma assinatura real.",
+    "next": "Concluir B3 — ações operacionais/evidências/verificador; depois C/D/E/F/G. Quatro frentes permanecem parciais."
+  },
+  "customer_company_scope_increment": {
+    "status": "correção específica implementada e validada; Cadastro Mestre completo permanece parcial",
+    "commit": "8a893582e7967f3674f0756d3c4374a0640f40a7",
+    "isolated_commit": "df1b6e2f38412a4e366c740da548323d6c31ca6b",
+    "report": "docs/jrc_customers/company_corporate_scope_checkpoint_20261102.json",
+    "implemented": "CSV e CompanyWriter aplicam a cobertura nativa à empresa persistida e aos vínculos propostos. Administrador sem grupo não alcança outra operadora interna. Permissões do módulo permanecem nos chamadores.",
+    "validation": {
+      "new_tests": 15,
+      "new_tests_passed": 15,
+      "selected_backend": 91,
+      "passed": 90,
+      "failed": 1,
+      "browser": "Recusa da operadora oculta e importação de cliente externo validadas em claro/escuro; 11 registros originais e agente preservados.",
+      "source": "11250 arquivos iguais ao snapshot combinado após cherry-pick"
+    },
+    "full_gate_green": false,
+    "remaining_failures": [
+      "Nexora falha identicamente na base sem a correção: assinatura interna v2 ainda não verificada; teste original preservado.",
+      "Lint completo mantém 16 ocorrências preexistentes; nenhum novo tipo/local ou regra desabilitada."
+    ],
+    "next": "Concluir cadeia de evidências/verificador B3 e demais funcionalidades de importação/mapeamento/histórico do Cadastro Mestre."
+  },
+  "signature_submission_increment": {
+    "status": "incremento local validado; Etapa B e quatro frentes parciais",
+    "report": "docs/jrc_backoffice/signature_submission_checkpoint_20261102.json",
+    "implemented": "Prévia, confirmação de intenção, job/recovery e cancelamento apenas antes do despacho dentro da solicitação. Serviços Admissions/Dispatch/ContractAccess/AuthorityStatus/ContractRelease existentes preservados.",
+    "backend": {
+      "status": "passed selected checks",
+      "unique_examples": 35,
+      "latest_result_per_example_failures": 0,
+      "single_green_suite": false,
+      "batches": [
+        {
+          "artifact": ".codex/signature-submission-validated-backend.json",
+          "examples": 35,
+          "failures": 1
+        },
+        {
+          "artifact": ".codex/signature-submission-http-commit-tests.json",
+          "examples": 2,
+          "failures": 0
+        }
+      ],
+      "source_delta": {
+        "changed_files": [
+          "spec/requests/api/v1/accounts/crm/backoffice_signature_submission_commit_spec.rb"
+        ],
+        "production_code_unchanged": true,
+        "all_frontend_files_unchanged": true,
+        "previous_source": "/consolidation-signature-submission-validated",
+        "current_source": "/consolidation-signature-submission-http",
+        "reason": "Correct public HTTP500 expectation under native show_exceptions=true; preserve committed-row/retry/no-external-request assertions."
+      },
+      "reason": "Native show_exceptions=true renders HTTP500. Corrected request spec asserts500 and preserves exact committed row, one intent/event, actor/account/connection and retry/no-provider assertions. No production behavior or original regression expectation was weakened."
+    },
+    "frontend": {
+      "files": 37,
+      "tests": 233,
+      "failures": 0
+    },
+    "browser": "Agente sem GROUP, prévia claro/escuro, confirmação 202, reabertura, cancelamento 200, versão reutilizada bloqueada, conta estrangeira 401, celular, PDF/conexão e 17 registros anteriores preservados; nenhuma assinatura externa.",
+    "remaining": "PDF final/certificado/verificador, consulta direta/reenvio/lembrete/cancelamento após despacho e demo pendentes; SignatureEvidence.verifier nil. C/D/E/F/G completos continuam a executar.",
+    "publication": false
+  },
+  "company_context_increment": {
+    "status": "incremento C1 local validado; C e B→G parciais",
+    "report": "docs/jrc_customers/company_context_checkpoint_20261102.json",
+    "backend": {
+      "examples": 63,
+      "failures": 0
+    },
+    "frontend": {
+      "tests": 36,
+      "failures": 0
+    },
+    "original_rows_preserved": 27,
+    "publication": false
+  },
+  "contact_context_checkpoint_20261103": {
+    "status": "parcial",
+    "report": "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+    "blocking": [],
+    "no_global_completion": true,
+    "popup_increment_validated": true
+  },
+  "company_contact_context_checkpoint_20261103": {
+    "status": "parcial",
+    "report": "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+    "blocking": [],
+    "no_global_completion": true,
+    "temporary_link_increment_validated": true
+  },
+  "customer_segment_definition_checkpoint_20261103": {
+    "status": "parcial",
+    "report": "docs/jrc_customers/segment_definition_checkpoint_20261103.json",
+    "execution_order_preserved": "C →D →E →F →G; sem publicação"
+  },
+  "customer_segment_filter_checkpoint_20261103": {
+    "status": "parcial",
+    "report": "docs/jrc_customers/segment_filter_checkpoint_20261103.json"
+  },
+  "economic_groups_checkpoint_20261103": {
+    "status": "incremento validado; escopo integral parcial",
+    "report": "docs/jrc_customers/economic_groups_checkpoint_20261103.json",
+    "backend": "199/0; fonte não frontend idêntica no ajuste",
+    "frontend": "145/0 final",
+    "chrome": "10 verificações com grupo127 preservado/128 excluído;5 capturas estáveis"
+  }
+}

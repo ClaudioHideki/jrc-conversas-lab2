@@ -33,7 +33,11 @@ export function useBackofficeWorkspace(view, initial = {}) {
     loading.value = true;
     error.value = false;
     try {
-      const { data } = await backofficeAPI.workspace({ ...filters, view });
+      const { data } = await backofficeAPI.workspace({
+        ...filters,
+        view,
+        customer_segment_id: route.query.customer_segment_id || undefined,
+      });
       if (request !== sequence) return;
       result.value = data;
       options.value = data.options;
@@ -48,7 +52,7 @@ export function useBackofficeWorkspace(view, initial = {}) {
     }
   };
   watch(
-    () => route.params.accountId,
+    () => [route.params.accountId, route.query.customer_segment_id],
     () => {
       options.value = { queues: [], owners: [], business_units: [] };
       load(1);

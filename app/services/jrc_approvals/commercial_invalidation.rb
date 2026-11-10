@@ -1,5 +1,5 @@
 class JrcApprovals::CommercialInvalidation
-  EVENTS = JrcApprovals::CommercialCatalog::EVENTS.merge(JrcApprovals::GratuityCatalog::EVENTS).freeze
+  EVENTS = JrcApprovals::CommercialCatalog::EVENTS.merge(JrcApprovals::GratuityCatalog::EVENTS).merge(JrcApprovals::FinancialCatalog::EVENTS).freeze
   def self.reference_changed!(product:, user:)
     account = product.account
     return unless account.feature_enabled?('jrc_approvals')

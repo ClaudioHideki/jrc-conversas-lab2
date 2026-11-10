@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "2c5810f9b7d9a117633385b9bda8f0dcb41aec3b",
+  "reference": "Relationship P0125/P0128/P0181/P0184/P0185",
+  "status": "Own saved-operation source UI and exact native reread validated; current-source Chrome and C-G closure remain open.",
+  "implementation": [
+    "Lazy themed own-operation inventory, status filters, bounded pagination, account formatting and native full-detail recovery. Enabled in existing global portfolio and group workspaces under their current manage gates. Generic old callers retain defaults.",
+    "Exact review_id filter narrows the existing hard account/actor/group native query. It grants no source visibility, execution access or other-actor authority.",
+    "Explicit current-revision pending-stop popup with bounded reason preserves committed receipts. Conflict, network failure or inconsistent200requires exact metadata reread and another explicit confirmation; no automatic write retry. Closing and reopening cannot bypass an uncertain outcome.",
+    "Native current state determines the result, including raced completion. Minimal receipts must match identity, operation, revisions and counters; false HTTP200success is rejected. Identity changes abort/clear old views; observed denial removes controls.",
+    "Saved group details remain exactly group-bound and use original source permissions, independent of an older draft UUID. Global inventory can stop own group intent but directs full group details to the group context. Selected detail ID persists through a failed read instead of reopening another cached review. No new customer/engine/schema."
+  ],
+  "evidence": {
+    "native": "reviewed-inventory-exact-native01:8/0including exact-ID scope and all7existing inventory contracts.",
+    "source_initial": "source01:43passed/1failed; failure was an overbroad test assertion matching the canceled status filter option, corrected to inspect the actual result row.",
+    "source_final": "source-final02:31/0;source-final03:32/0including17legacy panel regressions;source-final04:14/0 targeted final popup/unknown-outcome checks. Overlap, not summed.",
+    "source_group": "source-final02includes17membership cases, including saved differentUUID recovery and wrong-group rejection.",
+    "static": "ruby01:0offenses;new Inventory/metadata/API/specs ESLint0errors/0warnings. Shared panel retains8existing warnings;ModulePage103existing warnings, only2prop lines changed. No unrelated formatting rewrite.",
+    "qualification": "Native real synthetic PostgreSQL requests and source Vue mocks; neither application build nor current-source Chrome/real Sidekiq homologation."
+  },
+  "environment": {
+    "initial_free_bytes": 6820855808,
+    "minimum_observed_bytes": 6787670016,
+    "final_free_bytes": 6829060096,
+    "native_database": "jrc_rel_v2_candidate_test",
+    "original_four_containers": "Read-only inspect confirms unchanged original2026-11-04StartedAt timestamps.",
+    "migrations": false,
+    "build": false,
+    "server5379_changed": false,
+    "cleanup": false,
+    "push": false,
+    "external_operations": false
+  },
+  "remaining": [
+    "Bounded meaningful per-item failure codes instead of only a generic native operation failure.",
+    "Current-source Chrome desktop/mobile and Word visual/literal acceptance;no-build/no5379-change restrictions preserved.",
+    "Whole-final-audience group capacity preview, group-local capability matrix and other documented C-G gaps;not declared complete.",
+    "TRR undefined;portfolio-less company documents explicitly deferred;external provider/scanner/channel demo unvalidated."
+  ],
+  "next": "Implement typed safe per-item diagnostics and preserve generic fallback, immutable receipts and native denial semantics, then continue safe C-G work."
+}

@@ -1,0 +1,71 @@
+{
+  "date": "2026-11-07",
+  "scope": "G native CRM deal creation, selected detail/product mutations and draft preservation; incremental source/native acceptance only",
+  "previous_head": "a72d013d29e5cebebd3b7919e3f223dd9b0f4c5e",
+  "implemented": [
+    "Pin option reads, creation, detail editing and native product receipts to current account/actor/access, selection epoch and component lifetime. Reject obsolete follow-up reads/toasts, never retry/undo an already submitted native write.",
+    "Open/restore native global creation draft before asynchronous pipeline/stage metadata can autosave defaults; preserve selected restored pipeline and latest stages.",
+    "Keep native product/discount/value/next-activity payloads and server authorizations. Serialize own pending product writes; reread persisted native detail on rejected inline edits.",
+    "Make metadata denial visible/retryable and prevent incomplete provisional creation; keep one canonical CompanyPicker in details."
+  ],
+  "files_sha256": {
+    "app/javascript/dashboard/routes/dashboard/crm/views/deals/DealsIndex.vue": "324b4d2ef497560583b670b594f874e596f6ce65d340cf19b958cfaa3d2f9196",
+    "app/javascript/dashboard/routes/dashboard/crm/views/deals/spec/DealsAuthority.spec.js": "cf4f7f8211d454ef5e846f13cf0b8b87c37286866eb75f4b842e2d14b633f816",
+    "app/javascript/dashboard/i18n/locale/en/crm.json": "7da5fca056b473868c9032938eed928dac59c5498e6212fb400a068592bf9d99",
+    "spec/requests/api/v1/accounts/crm/deal_product_roundtrip_spec.rb": "07a4cb7772d0b26e06512505ad426f3beb6378408e970211d712a65f3a8edc24"
+  },
+  "evidence": {
+    "baseline01": "9 failed plus18 fixture errors; not accepted product proof. Fixture reset responses and absolute useProjects mock corrected.",
+    "baseline02": "9 genuine source failures, no unhandled fixture errors.",
+    "global_draft_baseline03": "1 genuine slow-stage draft overwrite failure;9notselected.",
+    "source04": "42passed/1failed of43, selected-pipeline test retained stale Teleport DOM wrapper.",
+    "stage_selected05": "1passed/9notselected after current-form requery, no production weakening.",
+    "source07": "13/0 final Deals source cases, including valid native payload/duplicate prevention, saved-item reread and denied-option retry. Actual store modules, mocked transports; not browser/database proof.",
+    "native11": "12/0 native Rails HTTP/PostgreSQL:6 product roundtrip/access/validation +6 existing deal creation atomicity, tenant and origin cases. External HTTP disabled, ActiveJob test adapter.",
+    "lint08": "1 RSpec multiple-expectations offense; positive removal split into independent meaningful example.",
+    "lint10": "Native spec0 Ruby offenses.",
+    "lint12": "New Vue spec0 errors/warnings. Shared DealsIndex128errors(all formatting),42style warnings. HEAD comparison13:150errors including5semantic,30warnings. Shared lint not green; no suppressions or wholesale rewrite. Introduced multiline style warnings explicitly retained, not a functional success claim."
+  },
+  "resources": {
+    "deals-authority-source07": {
+      "status": "passed",
+      "free_start": 6505848832,
+      "minimum_free": 6481190912,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 26740,
+      "exit_code": 0,
+      "free_end": 6503948288
+    },
+    "deals-products-native11": {
+      "start": 6484520960,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/crm/deal_product_roundtrip_spec.rb": "07a4cb7772d0b26e06512505ad426f3beb6378408e970211d712a65f3a8edc24",
+        "spec/requests/api/v1/accounts/crm/deal_creation_homologation_spec.rb": "2916ff47d83ddc5de4406dc3401e399d3fdd71d10e67a4f92e2c36e28df9dd74"
+      },
+      "minimum": 6464401408,
+      "exit_code": 0,
+      "end": 6484451328
+    }
+  },
+  "preserved": {
+    "build": false,
+    "server5379_modified": false,
+    "migrations": false,
+    "original_containers_restarted": false,
+    "push_deploy_external_provider": false,
+    "native_financial_API_changed": false,
+    "prior_business_rules_preserved": true
+  },
+  "remaining": [
+    "Current-source Chrome desktop/mobile requires separately authorized assets; frozen old assets not acceptance.",
+    "Shared legacy DealsIndex style debt remains.",
+    "No full C/D/E/F/G closure;TRR, deferred company docs,local-role capability matrix,real provider/scanner/channel acceptance remain separate."
+  ],
+  "free_bytes_at_report": 6472564736
+}

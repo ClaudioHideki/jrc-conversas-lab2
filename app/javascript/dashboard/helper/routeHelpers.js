@@ -28,6 +28,9 @@ export const defaultRedirectPage = (to, permissions) => {
     { permissions: [CONTACT_PERMISSIONS], path: 'contacts' },
     { permissions: [REPORTS_PERMISSIONS], path: 'reports/overview' },
     { permissions: [PORTAL_PERMISSIONS], path: 'portals' },
+    { permissions: ['jrc_crm'], path: 'crm/dashboard' },
+    { permissions: ['jrc_service_desk_module_view'], path: 'service-desk' },
+    { permissions: ['jrc_projects_project_view'], path: 'projetos' },
     {
       permissions: ['jrc_approvals_policy_manage'],
       path: 'approvals/policies',
@@ -37,6 +40,10 @@ export const defaultRedirectPage = (to, permissions) => {
       path: 'approvals/inbox',
     },
     { permissions: ['jrc_approvals_view_audit'], path: 'approvals/history' },
+    {
+      permissions: ['jrc_approvals_delegate'],
+      path: 'approvals/own-delegations',
+    },
   ];
 
   const route = permissionRoutes.find(({ permissions: routePermissions }) =>

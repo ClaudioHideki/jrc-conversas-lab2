@@ -1,28 +1,34 @@
 class JrcRelationship::Configuration < ApplicationRecord
+  SCOPE_PATTERN = /\A(account|(?:segment|product|company|unit|team):\d+|portfolio:[1-9]\d*)\z/
   self.table_name = 'jrc_relationship_configurations'
   belongs_to :account
   has_many :versions, class_name: 'JrcRelationship::ConfigurationVersion', dependent: :restrict_with_error
 
   def capture_version!(values, actor: nil)
-    versions.create_or_find_by!(account_id: account_id, version: values.fetch('version')) do |row|
+    versions.find_or_create_by!(account_id: account_id, version: values.fetch('version')) do |row|
       row.weights = values.fetch('weights')
       row.rules = values.fetch('rules')
       row.actor = actor
     end
   end
-  validates :scope_key, uniqueness: { scope: :account_id }, format: { with: /\A(account|segment:\d+|product:\d+|company:\d+|unit:\d+)\z/ }
+  validates :scope_key, uniqueness: { scope: :account_id }, format: { with: SCOPE_PATTERN }
   validates :version, numericality: { only_integer: true, greater_than: 0 }
   validate :valid_config
+  before_save { JrcRelationship::DistributionApproval.lock_configuration!(account_id) }
   DEFAULT_WEIGHTS = { 'adoption' => 25, 'relationship' => 15, 'service_desk' => 15, 'finance' => 15,
                       'satisfaction' => 10, 'contract' => 10, 'projects' => 5, 'engagement' => 5, 'sentiment' => 0 }.freeze
   DEFAULT_RULES = { 'no_contact_days' => 30, 'renewal_days' => 120, 'risk_threshold' => 60, 'critical_threshold' => 40,
                     'survey_frequency_days' => 90, 'sla_hours' => 24, 'detractor_sla_hours' => 4, 'healthy_threshold' => 80, 'priority_health' => 0.4,
-                    'priority_mrr' => 0.2, 'priority_renewal' => 0.2, 'priority_inactivity' => 0.2,
+                    'priority_mrr' => 0.2, 'priority_renewal' => 0.2, 'priority_inactivity' => 0.2, 'priority_trend' => 0, 'priority_sla' => 0,
                     'mrr_priority_ceiling_cents' => 1_000_000, 'critical_priority_codes' => %w[P1 critical urgent],
                     'ticket_penalty' => 30, 'sla_penalty' => 20, 'overdue_finance_score' => 20,
                     'project_penalty' => 30, 'task_penalty' => 10, 'csat_threshold' => 3,
                     'critical_action_priority' => 90, 'ticket_action_priority' => 85, 'detractor_action_priority' => 80,
-                    'health_drop_points' => 20, 'health_drop_action_priority' => 70,
+                    'health_hysteresis_points' => 0, 'health_drop_points' => 20, 'health_drop_action_priority' => 70,
+                    'portfolio_transfer_approval_required' => false, 'portfolio_review_validity_minutes' => 15,
+                    'portfolio_capacity_limits' => [], 'satisfaction_window_days' => 90, 'health_trend_window_days' => 30,
+                    'sentiment_window_days' => 90,
+                    'automatic_action_cooldown_hours' => 0, 'automatic_action_daily_limit' => 0,
                     'auto_handoff' => true, 'missing_factor_policy' => 'renormalize', 'survey_automation_enabled' => false,
                     'renewal_window_days' => [15, 30, 60, 90, 120],
                     'eligibility_mode' => 'legacy_order', 'handoff_acceptance_required' => false, 'playbook_flow_effects_enabled' => false,
@@ -31,13 +37,16 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'adoption_metric' => 'adoption', 'recurring_ticket_count' => 3, 'growth_threshold_percent' => 20, 'ces_threshold' => 6,
                     'survey_question_nps' => 'De 0 a 10, quanto você recomendaria nossa empresa?',
                     'survey_question_ces' => 'De 0 a 10, quanto foi fácil alcançar seu objetivo?',
+                    'retention_policy' => nil, 'portfolio_local_access' => nil, 'required_documents' => [],
                     'risk_reasons' => ['Baixa adoção', 'Insatisfação', 'Suporte recorrente', 'Financeiro', 'Renovação',
                                        'Cancelamento solicitado'] }.freeze
 
   BOOLEAN_VALUES = [true, false].freeze
   NON_NUMERIC_RULES = %w[auto_handoff survey_automation_enabled missing_factor_policy critical_priority_codes qbr_agenda_template adoption_metric
                          risk_reasons survey_question_nps survey_question_ces renewal_window_days eligibility_mode handoff_acceptance_required
-                         playbook_flow_effects_enabled playbook_flow_policy].freeze
+                         playbook_flow_effects_enabled playbook_flow_policy required_documents health_hysteresis_points
+                         portfolio_transfer_approval_required portfolio_capacity_limits automatic_action_cooldown_hours
+                         automatic_action_daily_limit priority_trend priority_sla priority_bands retention_policy portfolio_local_access].freeze
 
   def effective_weights
     DEFAULT_WEIGHTS.merge(weights)
@@ -46,6 +55,8 @@ class JrcRelationship::Configuration < ApplicationRecord
   def effective_rules
     values = DEFAULT_RULES.merge(rules)
     values['playbook_flow_policy'] = values['playbook_flow_policy'].deep_dup
+    values['required_documents'] = values['required_documents'].deep_dup
+    values['portfolio_capacity_limits'] = values['portfolio_capacity_limits'].deep_dup
     values
   end
 
@@ -53,17 +64,67 @@ class JrcRelationship::Configuration < ApplicationRecord
 
   def valid_config
     validate_weights
-    unless rules.is_a?(Hash) && (rules.keys - DEFAULT_RULES.keys).empty?
+    unless rules.is_a?(Hash) && (rules.keys - DEFAULT_RULES.keys - ['priority_bands']).empty?
       errors.add(:rules, 'unknown rules')
       return
     end
+    JrcRelationship::PortfolioGroupConfiguration.validate!(self)
     validate_numeric_rules
     validate_risk_bands
+    validate_health_hysteresis
     validate_rule_choices
     validate_flow_policy
     validate_renewal_windows
     validate_rule_lists
+    validate_document_requirements
+    validate_capacity_limits
+    validate_temporal_policy
+    validate_retention_policy
+    validate_local_roles
+    validate_automatic_action_budget
+    validate_priority_signals
     validate_scope
+  end
+
+  def validate_local_roles
+    JrcRelationship::LocalAccess.validate_references!(self)
+  rescue ArgumentError => error
+    errors.add(:rules, error.message)
+  end
+
+  def validate_retention_policy
+    value = effective_rules['retention_policy']
+    return if value.nil?
+    raise ArgumentError, 'TRR policy is configured at account scope' unless scope_key == 'account'
+    JrcRelationship::RetentionPolicy.normalize!(value)
+  rescue ArgumentError => error
+    errors.add(:rules, error.message)
+  end
+
+  def validate_priority_signals
+    JrcRelationship::PrioritySignals.validation_errors(effective_rules).each { |message| errors.add(:rules, message) }
+  end
+
+  def validate_automatic_action_budget
+    limit = effective_rules['automatic_action_daily_limit']
+    valid = limit.is_a?(Integer) && limit.between?(0, 9_007_199_254_740_991) && (scope_key == 'account' || limit.zero?)
+    errors.add(:rules, 'automatic action daily limit must be a nonnegative whole number configured only at account scope; 0 disables it') unless valid
+  end
+
+  def validate_capacity_limits
+    JrcRelationship::DistributionCapacityPolicy.validate!(account, effective_rules['portfolio_capacity_limits'])
+  rescue ArgumentError => e
+    errors.add(:rules, e.message)
+  end
+
+  def validate_temporal_policy
+    JrcRelationship::HealthTemporalPolicy.validation_errors(effective_rules).each { |message| errors.add(:rules, message) }
+  end
+
+  def validate_document_requirements
+    JrcRelationship::DocumentRequirements.validate!(effective_rules['required_documents'])
+  rescue ArgumentError => e
+    errors.add(:rules, e.message)
   end
 
   def validate_weights
@@ -102,8 +163,16 @@ class JrcRelationship::Configuration < ApplicationRecord
     errors.add(:rules, 'risk bands must be ordered') unless critical < risk && risk < healthy && healthy <= 100
   end
 
+  def validate_health_hysteresis
+    value = effective_rules['health_hysteresis_points']
+    ceiling = 100 - effective_rules['healthy_threshold'].to_f
+    valid = value.is_a?(Numeric) && value.finite? && value.between?(0, ceiling)
+    errors.add(:rules, 'health hysteresis must be nonnegative and allow recovery at score 100') unless valid
+  end
+
   def validate_rule_choices
-    %w[auto_handoff survey_automation_enabled handoff_acceptance_required playbook_flow_effects_enabled].each do |key|
+    %w[auto_handoff survey_automation_enabled handoff_acceptance_required playbook_flow_effects_enabled
+       portfolio_transfer_approval_required].each do |key|
       errors.add(:rules, "#{key} must be boolean") unless BOOLEAN_VALUES.include?(effective_rules[key])
     end
     errors.add(:rules, 'invalid eligibility mode') unless %w[legacy_order active_contract_product].include?(effective_rules['eligibility_mode'])
@@ -143,11 +212,6 @@ class JrcRelationship::Configuration < ApplicationRecord
   end
 
   def validate_scope
-    kind, id = scope_key.to_s.split(':')
-    target = { 'segment' => JrcCustomers::Taxonomy, 'product' => JrcCrm::Product, 'company' => JrcCustomers::Company,
-               'unit' => JrcCrm::BusinessUnit }[kind]
-    scope = target&.where(account_id: account_id, id: id)
-    scope = scope.where(kind: 'segment') if kind == 'segment' && scope
-    errors.add(:scope_key, 'scope must belong to this account and kind') if scope && !scope.exists?
+    JrcRelationship::ConfigurationScope.validate(self)
   end
 end

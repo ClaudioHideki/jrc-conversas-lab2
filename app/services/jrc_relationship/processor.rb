@@ -11,8 +11,15 @@ class JrcRelationship::Processor
       data = JrcRelationship::CustomerSignals.new(assignment: @assignment, context: @context).call
       reconcile_commercial! if @context.policy.manage?
       configuration = @context.configuration(@assignment)
+      record_health_trend!(data, configuration)
+      # Keep lineage in stored evidence without treating each refresh as a new observation.
+      fingerprint_data = data.deep_dup
+      fingerprint_data.except!(:health_trend)
+      [fingerprint_data[:health], *fingerprint_data.fetch(:product_health, {}).values].each do |health|
+        health&.dig(:hysteresis)&.except!(:previous_snapshot_id, :previous_band)
+      end
       fingerprint = Digest::SHA256.hexdigest([Date.current, configuration.scope_key, configuration.version, configuration.effective_weights,
-                                              configuration.effective_rules, @context.access_signature, data.to_json].join(':'))
+                                              configuration.effective_rules, @context.access_signature, fingerprint_data.to_json].join(':'))
       previous = JrcRelationship::HealthSnapshot.where(assignment: @assignment, viewer: @context.user,
                                                        config_scope_key: configuration.scope_key, config_version: configuration.version,
                                                        access_signature: @context.access_signature)
@@ -34,34 +41,64 @@ class JrcRelationship::Processor
   end
 
   def action!(kind, reason, data, rules, key: kind)
-    active = @assignment.actions.where(kind: kind, status: JrcRelationship::Action::ACTIVE_STATUSES)
+    health_family = %w[health health_drop].include?(kind)
+    active = @assignment.actions.where(kind: health_family ? %w[health health_drop] : kind, status: JrcRelationship::Action::ACTIVE_STATUSES)
+    key = 'health' if health_family
     keyed = %w[renewal post_ticket expansion].include?(kind)
     active = active.where(source_key: key) if keyed
     current = active.first
     manual = current&.metadata&.dig('manual_priority') == true ? current.priority : nil
-    priority = JrcRelationship::Priority.call(data: data, rules: rules, kind: kind, today: Date.current, manual_priority: manual)
+    related = health_family ? (Array(current&.metadata&.dig('related_signals')) + [kind]).uniq : []
+    priority_kind = related.include?('health_drop') ? 'health_drop' : kind
+    priority = JrcRelationship::Priority.call(data: data, rules: rules, kind: priority_kind, today: Date.current, manual_priority: manual)
+    cause_digest = JrcRelationship::AutomaticActionCooldown.digest(kind: kind, key: key, data: data)
     if current
-      if current.priority != priority[:score] || current.factors != priority[:factors].deep_stringify_keys
+      if current.priority != priority[:score] || current.factors != priority[:factors].deep_stringify_keys ||
+         (health_family && current.metadata['related_signals'] != related) ||
+         (current.metadata['automatic'] && current.metadata['automatic_cause_digest'] != cause_digest)
         before = current.attributes.slice('priority', 'factors')
-        current.update!(priority: priority[:score], factors: priority[:factors], metadata: current.metadata.merge('_source_ids' => data[:_source_ids]))
+        metadata = current.metadata.merge('_source_ids' => data[:_source_ids])
+        metadata['related_signals'] = related if health_family
+        metadata['automatic_cause_digest'] = cause_digest if current.metadata['automatic']
+        current.update!(priority: priority[:score], factors: priority[:factors], metadata: metadata)
         @context.audit!(current, before: before, after: current.attributes.slice('priority', 'factors'), action: 'priority_updated')
       end
       return current
     end
+    cooldown = JrcRelationship::AutomaticActionCooldown.new(context: @context, assignment: @assignment, digest: cause_digest,
+      hours: rules.fetch('automatic_action_cooldown_hours', 0))
+    return unless cooldown.allow?
+
     key = "#{key}:#{Date.current}" unless keyed
     record = JrcRelationship::Action.find_or_initialize_by(assignment: @assignment, source_key: key)
     return record if record.persisted?
     record.assign_attributes(account: @context.account, owner: @assignment.owner, kind: kind, reason: reason,
                              priority: priority[:score], factors: priority[:factors],
-                             due_at: Time.current + rules['sla_hours'].hours, metadata: { _source_ids: data[:_source_ids] })
+                             due_at: Time.current + rules['sla_hours'].hours,
+                             metadata: { _source_ids: data[:_source_ids], automatic: true, automatic_cause_digest: cause_digest }
+                               .merge(health_family ? { related_signals: related } : {}))
     JrcRelationship::OperationalRouting.new(@context).prepare!(record, signals: data)
-    record.save!
-    JrcRelationship::Workflow.new(@context).project_action!(record)
-    @context.audit!(record, after: record.attributes.slice('kind', 'priority', 'due_at'), action: 'action_created')
-    record
+    persist_automatic_action!(record)
   end
 
   private
+
+  def persist_automatic_action!(record)
+    JrcRelationship::AutomaticActionBudget.new(context: @context, assignment: @assignment).call do
+      record.save!
+      JrcRelationship::Workflow.new(@context).project_action!(record)
+      @context.audit!(record, after: record.attributes.slice('kind', 'priority', 'due_at'), action: 'action_created')
+      record
+    end
+  end
+
+  def record_health_trend!(data, configuration)
+    result = JrcRelationship::HealthTrend.new(context: @context, assignment: @assignment, configuration: configuration).call(data.fetch(:health))
+    data[:health_trend] = result.fetch(:trend)
+    result.fetch(:source_ids).each do |key, ids|
+      data[:_source_ids][key.to_sym] = (Array(data[:_source_ids][key.to_sym]) + ids).uniq
+    end
+  end
 
   def record_health_change!(data, previous)
     return unless previous&.score && data.dig(:health, :score)
@@ -87,34 +124,39 @@ class JrcRelationship::Processor
     score = data.dig(:health, :score)
     if data.dig(:health_change, :drop).to_f >= rules['health_drop_points']
       action = action!('health_drop', 'Queda do Health Score acima do limite configurado', data, rules)
-      JrcRelationship::Playbooks.new(@context).run!(@assignment, 'health', source_key: action.id)
+      JrcRelationship::AutomaticPlaybooks.new(@context).run!(@assignment, 'health', source_key: action.id) if action
     end
-    if score && score < rules['risk_threshold']
-      action = action!('health', 'Health Score abaixo do limite configurado', data, rules)
-      risk!('health', 'Health Score abaixo do limite configurado', score < rules['critical_threshold'] ? 'critical' : 'high', data)
-      JrcRelationship::Playbooks.new(@context).run!(@assignment, 'health', source_key: action.id)
+    if score && data.dig(:health, :band).in?(%w[risk critical])
+      reason = if data.dig(:health, :hysteresis, :retained)
+                 'Faixa de risco mantida até confirmar a margem de recuperação'
+               else
+                 'Health Score abaixo do limite configurado'
+               end
+      action = action!('health', reason, data, rules)
+      risk!('health', reason, data.dig(:health, :band) == 'critical' ? 'critical' : 'high', data)
+      JrcRelationship::AutomaticPlaybooks.new(@context).run!(@assignment, 'health', source_key: action.id) if action
     end
     if data[:days_without_contact] >= rules['no_contact_days']
       action = action!('no_contact', 'Cliente sem contato na cadência configurada', data, rules)
-      JrcRelationship::Playbooks.new(@context).run!(@assignment, 'no_contact', source_key: action.id)
+      JrcRelationship::AutomaticPlaybooks.new(@context).run!(@assignment, 'no_contact', source_key: action.id) if action
     end
     if data[:unmanaged_satisfaction]
       action = action!('satisfaction', 'Detrator NPS / CSAT / CES baixo', data, rules)
       risk!('satisfaction', 'Recuperar experiência do cliente', 'high', data)
-      JrcRelationship::Playbooks.new(@context).run!(@assignment, 'satisfaction', source_key: action.id)
+      JrcRelationship::AutomaticPlaybooks.new(@context).run!(@assignment, 'satisfaction', source_key: action.id) if action
     end
     if data[:critical_tickets].positive? || data[:sla_breached].to_i.positive?
       action = action!('ticket', 'Chamados críticos ou SLA vencido', data, rules)
-      JrcRelationship::Playbooks.new(@context).run!(@assignment, 'ticket', source_key: action.id)
+      JrcRelationship::AutomaticPlaybooks.new(@context).run!(@assignment, 'ticket', source_key: action.id) if action
     end
     action!('finance', 'Saldo financeiro vencido', data, rules) if data[:overdue_cents].to_i.positive?
     action!('recurring_ticket', 'Reincidência de chamados no período', data, rules) if data[:recurring_tickets].to_i >= rules['recurring_ticket_count']
     Array(data[:recent_resolved_critical_ticket_ids]).each do |ticket_id|
       action = action!('post_ticket', 'Follow-up de satisfação após chamado crítico resolvido', data, rules, key: "post-ticket:#{ticket_id}")
-      JrcRelationship::Playbooks.new(@context).run!(@assignment, 'ticket', source_key: action.id)
+      JrcRelationship::AutomaticPlaybooks.new(@context).run!(@assignment, 'ticket', source_key: action.id) if action
     end
     expansion = expansion!(data, rules)
-    JrcRelationship::Playbooks.new(@context).run!(@assignment, 'expansion', source_key: expansion.id) if expansion
+    JrcRelationship::AutomaticPlaybooks.new(@context).run!(@assignment, 'expansion', source_key: expansion.id) if expansion
     action!('onboarding', 'Projeto ou tarefa em atraso', data, rules) if data[:delayed_projects].positive?
     action!('activity', 'Atividade vencida', data, rules) if data[:overdue_activities].positive?
     @assignment.customer_context(@context.member).contracts.where(id: data[:active_contract_ids])
@@ -125,15 +167,17 @@ class JrcRelationship::Processor
         renewal.save!
         @context.audit!(renewal, action: 'renewal_opened')
       end
-      action!('renewal', "Renovação #{contract.contract_number}", data, rules, key: "renewal:#{contract.id}:#{contract.ends_on}")
-      JrcRelationship::Playbooks.new(@context).run!(@assignment, 'renewal', source_key: renewal.id)
+      action = action!('renewal', "Renovação #{contract.contract_number}", data, rules, key: "renewal:#{contract.id}:#{contract.ends_on}")
+      JrcRelationship::AutomaticPlaybooks.new(@context).run!(@assignment, 'renewal', source_key: renewal.id) if action
     end
   end
 
   def risk!(kind, reason, severity, data)
     active = JrcRelationship::RiskCase.where(assignment: @assignment, kind: kind, status: %w[detected analyzing planned negotiating]).first
     if active
-      if active.severity != severity
+      # A weaker automatic observation cannot dismiss an already critical case.
+      # An authorized operator can still reclassify it through the native editor.
+      if active.severity != severity && active.severity != 'critical'
         before = { severity: active.severity }
         active.update!(severity: severity, metadata: active.metadata.merge('_source_ids' => data[:_source_ids]))
         @context.audit!(active, before: before, after: { severity: severity }, action: 'risk_reclassified')

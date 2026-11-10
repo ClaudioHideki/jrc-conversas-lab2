@@ -1,165 +1,305 @@
 <script setup>
-import { ref } from 'vue';
-import API from 'dashboard/api/jrcCustomers';
-import { useCustomerMaster } from './useCustomerMaster';
-import { T, buttonClass, primaryClass, errorMessage } from './copy';
-const { accountScopedRoute } = useCustomerMaster();
-const file = ref(null);
-const preview = ref(null);
-const error = ref('');
-const notice = ref('');
-const busy = ref(false);
-const select = event => {
-  file.value = event.target.files?.[0] || null;
-  preview.value = null;
-  error.value = '';
-  notice.value = '';
-};
-const inspect = async () => {
-  if (!file.value) return;
-  busy.value = true;
-  error.value = '';
-  preview.value = null;
-  try {
-    preview.value = (await API.importCompanies(file.value)).data;
-  } catch (err) {
-    error.value = errorMessage(err);
-  } finally {
-    busy.value = false;
+import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
+import ImportMapping from './components/ImportMapping.vue';
+import ImportPreview from './components/ImportPreview.vue';
+import ImportHistory from './components/ImportHistory.vue';
+import ImportResult from './components/ImportResult.vue';
+import CompanyDetailsDialog from './components/CompanyDetailsDialog.vue';
+import ContactDetailsDialog from './components/ContactDetailsDialog.vue';
+import { useCustomerImports } from './useCustomerImports';
+import { inputClass, buttonClass, primaryClass } from './copy';
+const { t, tm } = useI18n();
+const copy = computed(() => tm('CRM.CUSTOMER_IMPORTS'));
+const {
+  metadata,
+  run,
+  source,
+  file,
+  kind,
+  delimiter,
+  mapping,
+  options,
+  preview,
+  tab,
+  busy,
+  error,
+  history,
+  filters,
+  records,
+  resultView,
+  canImport,
+  date,
+  identity,
+  upload,
+  inspect,
+  apply,
+  template,
+  exportErrors,
+  loadHistory,
+  openRun,
+  startNew,
+  pageRecords,
+  showResult,
+} = useCustomerImports();
+const confirmDialog = ref(null);
+const selection = ref(null);
+const mappingKey = ref(0);
+const tabs = [
+  { key: 'file', tone: 'border-n-blue-7 bg-n-blue-3 text-n-blue-12' },
+  { key: 'mapping', tone: 'border-n-amber-7 bg-n-amber-3 text-n-amber-12' },
+  { key: 'preview', tone: 'border-n-violet-7 bg-n-violet-3 text-n-violet-12' },
+  { key: 'result', tone: 'border-n-teal-7 bg-n-teal-3 text-n-teal-12' },
+  { key: 'history', tone: 'border-n-blue-7 bg-n-blue-3 text-n-blue-12' },
+];
+watch(identity, () => {
+  selection.value = null;
+  confirmDialog.value?.close();
+});
+watch(
+  () => run.value?.id,
+  () => {
+    mappingKey.value += 1;
   }
+);
+const switchTab = key => {
+  if (key === 'file') startNew();
+  else if (key === 'history') loadHistory();
+  else tab.value = key;
 };
-const apply = async () => {
-  if (!preview.value?.token || !window.confirm(T.review)) return;
-  busy.value = true;
-  error.value = '';
-  try {
-    const { data } = await API.importCompanies(file.value, preview.value.token);
-    notice.value = `${T.importApplied} ${data.applied}`;
-    preview.value = null;
-  } catch (err) {
-    error.value = errorMessage(err);
-    preview.value = null;
-  } finally {
-    busy.value = false;
-  }
+const disabledTab = key =>
+  busy.value ||
+  !canImport.value ||
+  (key === 'mapping' && !source.value) ||
+  (key === 'preview' && !preview.value) ||
+  (key === 'result' && run.value?.status !== 'completed');
+const updateOptions = values => {
+  Object.assign(options, values);
 };
-const template = () => {
-  const blob = new Blob(
-    ['name,person_kind,tax_id,trade_name,segment,relationship_type\n'],
-    { type: 'text/csv;charset=utf-8' }
-  );
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'empresas-modelo.csv';
-  link.click();
-  URL.revokeObjectURL(url);
+const applyConfirmed = async () => {
+  await apply();
+  confirmDialog.value?.close();
 };
 </script>
 
 <template>
-  <main class="h-full w-full overflow-auto bg-n-solid-1 p-6 text-n-slate-12">
-    <p class="text-sm text-n-brand">{{ T.customers }}</p>
-    <h1 class="my-3 text-2xl font-bold">{{ T.imports }}</h1>
-    <section class="my-5 rounded-xl border border-n-weak bg-n-solid-2 p-5">
-      <h2 class="text-lg font-semibold">{{ T.companyImport }}</h2>
-      <p class="my-3 text-sm text-n-slate-10">{{ T.importHelp }}</p>
-      <button
-        type="button"
-        :class="buttonClass"
-        @click="template"
-      >
-        {{ T.template }}</button
-      ><input
-        type="file"
-        accept=".csv,text/csv"
-        :aria-label="T.companyImport"
-        class="my-4 block"
-        :disabled="busy"
-        @change="select"
-      />
-      <div class="flex gap-3">
+  <main
+    class="h-full min-w-0 w-full overflow-auto bg-n-solid-1 p-4 text-n-slate-12 sm:p-6"
+    data-testid="customer-imports"
+  >
+    <header class="mb-5 rounded-xl border border-n-blue-6 bg-n-blue-3 p-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-bold text-n-blue-12">
+            {{ t('CRM.CUSTOMER_IMPORTS.TITLE') }}
+          </h1>
+          <p class="mt-1 text-sm text-n-blue-11">
+            {{ t('CRM.CUSTOMER_IMPORTS.HELP') }}
+          </p>
+        </div>
         <button
           type="button"
           :class="primaryClass"
-          :disabled="busy || !file"
-          @click="inspect"
+          :disabled="busy || !canImport"
+          @click="startNew"
         >
-          {{ busy ? T.loading : T.preview }}</button
-        ><button
-          v-if="preview?.token"
-          type="button"
-          :class="buttonClass"
-          :disabled="busy"
-          @click="apply"
-        >
-          {{ T.apply }}
+          {{ t('CRM.CUSTOMER_IMPORTS.NEW') }}
         </button>
       </div>
-      <p
-        v-if="error"
-        class="mt-4 text-n-ruby-11"
-        role="alert"
+    </header>
+    <nav
+      class="mb-5 flex flex-wrap gap-2"
+      :aria-label="t('CRM.CUSTOMER_IMPORTS.STEPS')"
+    >
+      <button
+        v-for="item in tabs"
+        :key="item.key"
+        type="button"
+        class="rounded-lg border px-4 py-2 text-sm font-semibold disabled:opacity-40"
+        :class="[item.tone, tab === item.key ? 'ring-2 ring-n-brand' : '']"
+        :aria-pressed="tab === item.key"
+        :disabled="disabledTab(item.key)"
+        @click="switchTab(item.key)"
       >
-        {{ error }}
-      </p>
-      <p
-        v-if="notice"
-        class="mt-4"
-        role="status"
+        {{ copy.TABS[item.key] }}
+      </button>
+    </nav>
+    <p
+      v-if="error"
+      role="alert"
+      class="mb-4 rounded-lg border border-n-ruby-7 bg-n-ruby-3 p-3 text-sm text-n-ruby-12"
+    >
+      {{ error }}
+    </p>
+    <p
+      v-if="busy"
+      role="status"
+      class="mb-3 text-sm text-n-slate-11"
+    >
+      {{ t('CRM.CUSTOMER_IMPORTS.LOADING') }}
+    </p>
+    <p
+      v-if="metadata && !canImport"
+      class="rounded-xl border border-n-amber-7 bg-n-amber-3 p-4 text-n-amber-12"
+    >
+      {{ t('CRM.CUSTOMER_IMPORTS.NO_PERMISSION') }}
+    </p>
+    <section
+      v-else-if="metadata"
+      class="rounded-xl border border-n-weak bg-n-solid-2 p-4 sm:p-5"
+      :aria-busy="busy"
+    >
+      <form
+        v-if="tab === 'file'"
+        class="space-y-5"
+        @submit.prevent="upload"
       >
-        {{ notice }}
-      </p>
-      <div
-        v-if="preview"
-        class="mt-4"
-      >
-        <p class="mb-3 text-sm">{{ T.review }}</p>
-        <p
-          v-for="item in preview.errors"
-          :key="item.line"
-          class="text-sm text-n-ruby-11"
-        >
-          {{ T.line }} {{ item.line }}: {{ item.error }}
-        </p>
-        <div class="max-h-96 overflow-auto">
-          <table class="w-full text-left text-sm">
-            <thead>
-              <tr>
-                <th class="p-2">{{ T.line }}</th>
-                <th class="p-2">{{ T.action }}</th>
-                <th class="p-2">{{ T.companies }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="item in preview.rows"
-                :key="item.line"
-                class="border-t border-n-weak"
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="text-sm font-semibold">
+            {{ t('CRM.CUSTOMER_IMPORTS.KIND') }}
+            <select
+              v-model="kind"
+              :class="inputClass"
+              :disabled="busy"
+            >
+              <option
+                v-for="key in metadata.available_kinds"
+                :key="key"
+                :value="key"
               >
-                <td class="p-2">{{ item.line }}</td>
-                <td class="p-2">
-                  {{ item.action === 'create' ? T.create : T.update }} #{{
-                    item.company_id || ''
-                  }}
-                </td>
-                <td class="p-2">
-                  {{ item.attributes.name }} {{ item.attributes.tax_id }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                {{ copy.KINDS[key] }}
+              </option>
+            </select>
+          </label>
+          <label class="text-sm font-semibold">
+            {{ t('CRM.CUSTOMER_IMPORTS.SEPARATOR') }}
+            <select
+              v-model="delimiter"
+              :class="inputClass"
+              :disabled="busy"
+            >
+              <option value="">{{ t('CRM.CUSTOMER_IMPORTS.AUTO') }}</option>
+              <option value=",">{{ t('CRM.CUSTOMER_IMPORTS.COMMA') }}</option>
+              <option value=";">
+                {{ t('CRM.CUSTOMER_IMPORTS.SEMICOLON') }}
+              </option>
+              <option :value="String.fromCharCode(9)">
+                {{ t('CRM.CUSTOMER_IMPORTS.TAB_SEPARATOR') }}
+              </option>
+            </select>
+          </label>
         </div>
-      </div>
+        <p class="text-sm text-n-slate-11">
+          {{ t('CRM.CUSTOMER_IMPORTS.FILE_HELP', { rows: metadata.max_rows }) }}
+        </p>
+        <label
+          class="block rounded-lg border border-dashed border-n-blue-7 bg-n-blue-2 p-5 text-sm font-semibold"
+        >
+          {{ t('CRM.CUSTOMER_IMPORTS.SELECT_FILE') }}
+          <input
+            :key="`${identity}:${run?.id || 'new'}`"
+            type="file"
+            accept=".csv,text/csv"
+            :disabled="busy"
+            class="mt-3 block w-full text-sm"
+            @change="file = $event.target.files?.[0] || null"
+        /></label>
+        <div class="flex flex-wrap gap-3">
+          <button
+            type="button"
+            :class="buttonClass"
+            :disabled="busy"
+            @click="template"
+          >
+            {{ t('CRM.CUSTOMER_IMPORTS.TEMPLATE') }}
+          </button>
+          <button
+            type="submit"
+            :class="primaryClass"
+            :disabled="busy || !file"
+          >
+            {{ t('CRM.CUSTOMER_IMPORTS.UPLOAD') }}
+          </button>
+        </div>
+      </form>
+      <template v-else>
+        <p
+          v-if="run && tab !== 'history'"
+          class="mb-4 break-words text-sm font-semibold"
+        >
+          {{
+            t('CRM.CUSTOMER_IMPORTS.FILE_CONTEXT', {
+              filename: run.filename,
+              kind: copy.KINDS[run.kind],
+            })
+          }}
+        </p>
+        <ImportMapping
+          v-if="tab === 'mapping' && source"
+          :key="mappingKey"
+          :source="source"
+          :mapping="mapping"
+          :options="options"
+          :disabled="busy"
+          @mapping="mapping = $event"
+          @options="updateOptions"
+          @preview="inspect"
+        />
+        <ImportPreview
+          v-if="tab === 'preview' && preview"
+          :preview="preview"
+          :disabled="busy"
+          @confirm="confirmDialog.open()"
+          @errors="exportErrors"
+          @back="tab = 'mapping'"
+        />
+        <ImportResult
+          v-if="tab === 'result' && run"
+          :run="run"
+          :records="records"
+          :view="resultView"
+          :disabled="busy"
+          @view="showResult"
+          @page="pageRecords"
+          @open="selection = $event"
+          @errors="exportErrors"
+        />
+        <ImportHistory
+          v-if="tab === 'history'"
+          :history="history"
+          :filters="filters"
+          :kinds="metadata.available_kinds"
+          :date="date"
+          :disabled="busy"
+          @filters="Object.assign(filters, $event)"
+          @search="loadHistory()"
+          @page="loadHistory"
+          @open="openRun"
+        />
+      </template>
     </section>
-    <section class="rounded-xl border border-n-weak bg-n-solid-2 p-5">
-      <h2 class="text-lg font-semibold">{{ T.contactImport }}</h2>
-      <p class="my-3 text-sm text-n-slate-10">{{ T.contactImportHelp }}</p>
-      <RouterLink
-        :to="accountScopedRoute('contacts_dashboard_index')"
-        class="text-n-brand"
-        >{{ T.nativeContacts }}</RouterLink
-      >
-    </section>
+    <Dialog
+      ref="confirmDialog"
+      :title="t('CRM.CUSTOMER_IMPORTS.APPLY')"
+      :description="t('CRM.CUSTOMER_IMPORTS.CONFIRM_HELP')"
+      :confirm-button-label="t('CRM.CUSTOMER_IMPORTS.CONFIRM')"
+      :is-loading="busy"
+      :dismissible="!busy"
+      contained
+      @confirm="applyConfirmed"
+    />
+    <CompanyDetailsDialog
+      v-if="selection?.entity === 'company'"
+      :company-id="selection.record_id"
+      @close="selection = null"
+      @updated="pageRecords(records.meta.page)"
+    />
+    <ContactDetailsDialog
+      v-if="selection?.entity === 'contact'"
+      :contact-id="selection.record_id"
+      @close="selection = null"
+      @updated="pageRecords(records.meta.page)"
+    />
   </main>
 </template>

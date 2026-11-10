@@ -20,6 +20,8 @@ import BulkActionsAPI from 'dashboard/api/bulkActions';
 import ContactLeadAction from '../components/ContactLeadAction.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import { useCustomerMaster } from '../../jrcCustomers/useCustomerMaster';
+import ContactDetailsDialog from '../../jrcCustomers/components/ContactDetailsDialog.vue';
+import CompanyDetailsDialog from '../../jrcCustomers/components/CompanyDetailsDialog.vue';
 
 const DEFAULT_SORT_FIELD = 'last_activity_at';
 const DEBOUNCE_DELAY = 300;
@@ -28,7 +30,14 @@ const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const { canAccess: canUseCustomerMaster } = useCustomerMaster();
+const { canAccess: canUseCustomerMaster, identity: masterIdentity } =
+  useCustomerMaster();
+const contactDialogId = ref(null);
+const companyDialogId = ref(null);
+watch([masterIdentity, canUseCustomerMaster], () => {
+  contactDialogId.value = null;
+  companyDialogId.value = null;
+});
 
 const { updateUISettings, uiSettings } = useUISettings();
 
@@ -165,10 +174,15 @@ const contactInitials = contact => {
 
 const selectRelationshipContact = contact => {
   crmSelectedContact.value = contact;
+  if (canUseCustomerMaster.value) contactDialogId.value = contact.id;
 };
 
 const openSelectedContact = async contact => {
   if (!contact?.id) return;
+  if (canUseCustomerMaster.value) {
+    contactDialogId.value = contact.id;
+    return;
+  }
   await router.push({
     name: 'contacts_edit',
     params: { accountId: route.params.accountId, contactId: contact.id },
@@ -720,7 +734,27 @@ onMounted(async () => {
             <tbody class="divide-y divide-n-weak">
               <tr v-for="contact in contacts" :key="contact.id" class="cursor-pointer transition hover:bg-blue-500/5" :class="selectedRelationshipContact?.id === contact.id ? 'bg-blue-500/5' : ''" @click="selectRelationshipContact(contact)">
                 <td class="px-4 py-3"><div class="flex items-center gap-3"><span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-n-teal-3 font-semibold text-n-teal-11">{{ contactInitials(contact) }}</span><div><p class="font-semibold text-n-slate-12">{{ contact.name || 'Sem nome' }}</p><p class="text-xs text-n-slate-11">{{ contactPhone(contact) }}</p></div></div></td>
-                <td class="px-3 py-3 text-n-slate-11">{{ contactCompany(contact) }}</td>
+                <td class="px-3 py-3 text-n-slate-11">
+                  <button
+                    v-if="
+                      canUseCustomerMaster &&
+                      (contact.companyId ||
+                        contact.company_id ||
+                        contact.company?.id)
+                    "
+                    type="button"
+                    class="text-left text-n-blue-11 underline"
+                    @click.stop="
+                      companyDialogId =
+                        contact.companyId ||
+                        contact.company_id ||
+                        contact.company.id
+                    "
+                  >
+                    {{ contactCompany(contact) }}
+                  </button>
+                  <span v-else>{{ contactCompany(contact) }}</span>
+                </td>
                 <td class="px-3 py-3"><div class="flex gap-1"><span class="flex size-8 items-center justify-center rounded-lg bg-n-teal-3 text-n-teal-11"><span class="i-ri-whatsapp-fill size-4" /></span><span class="flex size-8 items-center justify-center rounded-lg bg-n-blue-3 text-n-blue-11"><span class="i-lucide-phone size-4" /></span><span class="flex size-8 items-center justify-center rounded-lg bg-n-amber-3 text-n-amber-11"><span class="i-lucide-mail size-4" /></span></div></td>
                 <td class="px-3 py-3 text-n-slate-11">—</td>
                 <td class="px-3 py-3 text-n-slate-11">{{ contactLastActivity(contact) }}</td>
@@ -793,5 +827,19 @@ onMounted(async () => {
         <div v-else class="flex h-full min-h-64 items-center justify-center text-center text-sm text-n-slate-11">Selecione um contato para ver os detalhes.</div>
       </aside>
     </div>
+    <ContactDetailsDialog
+      v-if="contactDialogId && canUseCustomerMaster"
+      :key="masterIdentity"
+      :contact-id="contactDialogId"
+      @close="contactDialogId = null"
+      @updated="fetchContactsBasedOnContext(pageNumber)"
+    />
+    <CompanyDetailsDialog
+      v-if="companyDialogId && canUseCustomerMaster"
+      :key="masterIdentity"
+      :company-id="companyDialogId"
+      @close="companyDialogId = null"
+      @updated="fetchContactsBasedOnContext(pageNumber)"
+    />
   </div>
 </template>

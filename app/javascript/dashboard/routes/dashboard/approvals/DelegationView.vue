@@ -106,7 +106,20 @@ const step = computed(() =>
     row => row.code === form.value.step_code
   )
 );
-const create = () =>
+watch(
+  () => form.value.principal_id,
+  value => {
+    if (String(value) === String(form.value.delegate_id))
+      form.value.delegate_id = '';
+  }
+);
+const create = () => {
+  if (
+    props.busy ||
+    !policy.value ||
+    String(form.value.principal_id) === String(form.value.delegate_id)
+  )
+    return;
   emit('create', {
     ...form.value,
     principal_id: Number(form.value.principal_id),
@@ -115,6 +128,7 @@ const create = () =>
     starts_at: new Date(form.value.starts_at).toISOString(),
     ends_at: new Date(form.value.ends_at).toISOString(),
   });
+};
 </script>
 
 <template>
@@ -188,10 +202,11 @@ const create = () =>
           >
             <option value="">{{ t('JRC_APPROVALS.select') }}</option>
             <option
-              v-for="row in policy?.published_definition.steps || []"
+              v-for="(row, index) in policy?.published_definition.steps || []"
               :key="row.code"
+              :value="row.code"
             >
-              {{ row.code }}
+              {{ t('JRC_APPROVALS.stepNumber', { number: index + 1 }) }}
             </option>
           </select></label
         ><label
@@ -209,6 +224,10 @@ const create = () =>
               v-for="row in options.account_users"
               :key="row.id"
               :value="row.id"
+              :disabled="
+                field === 'delegate_id' &&
+                String(row.id) === String(form.principal_id)
+              "
             >
               {{ row.name }}
             </option>
@@ -236,7 +255,7 @@ const create = () =>
             type="checkbox"
             :value="action"
           />
-          {{ action }}</label
+          {{ t(`JRC_APPROVALS.decisionLabels.${action}`) }}</label
         >
       </fieldset>
       <label class="block text-sm"

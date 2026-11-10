@@ -27,7 +27,7 @@ class Api::V1::Accounts::Approvals::PoliciesController < Api::V1::Accounts::Appr
   def create
     values = params.require(:policy).permit(:code, :name, :module_key, :event_key, :issuer_company_id, :business_unit_id,
                                             definition: {}).to_h.symbolize_keys
-    render json: payload(service(JrcApprovals::Policies).create!(**values)), status: :created
+    render json: payload(service(JrcApprovals::Policies).create!(**values.reverse_merge(code: nil))), status: :created
   end
 
   def update

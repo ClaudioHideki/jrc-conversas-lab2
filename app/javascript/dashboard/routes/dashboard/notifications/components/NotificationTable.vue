@@ -108,7 +108,7 @@ export default {
           </td>
           <td class="thumbnail--column">
             <Avatar
-              v-if="notificationItem.primary_actor.meta.assignee"
+              v-if="notificationItem.primary_actor?.meta?.assignee"
               :src="notificationItem.primary_actor.meta.assignee.thumbnail"
               :size="28"
               :name="notificationItem.primary_actor.meta.assignee.name"

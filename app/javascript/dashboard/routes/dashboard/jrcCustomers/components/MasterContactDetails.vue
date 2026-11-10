@@ -1,7 +1,13 @@
 <script setup>
-import { reactive, ref, watch, onBeforeUnmount } from 'vue';
+import { reactive, ref, computed, watch, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcCustomers';
 import CompanyPicker from './CompanyPicker.vue';
+import SigningIdentityDialog from './SigningIdentityDialog.vue';
+import {
+  COMPANY_CONTACT_ROLES,
+  companyContactRoleLabels,
+} from './companyContactRoles';
 import { useCustomerMaster } from '../useCustomerMaster';
 import {
   T,
@@ -14,15 +20,25 @@ import {
 } from '../copy';
 const props = defineProps({
   contactId: { type: [Number, String], default: null },
+  expandedByDefault: { type: Boolean, default: false },
 });
-const emit = defineEmits(['updated']);
-const { accountId, enabled, canAdmin, accountScopedRoute } =
-  useCustomerMaster();
+const emit = defineEmits(['updated', 'denied']);
+const {
+  accountId,
+  identity,
+  enabled,
+  canAdmin,
+  canAccess,
+  accountScopedRoute,
+} = useCustomerMaster();
+const { t } = useI18n();
+const roleLabels = computed(() => companyContactRoleLabels(t));
+const showSigningIdentity = ref(false);
 const contact = ref(null);
 const points = ref([]);
 const duplicateItems = ref([]);
 const checked = ref(false);
-const expanded = ref(false);
+const expanded = ref(props.expandedByDefault);
 const error = ref('');
 const notice = ref('');
 const busy = ref(false);
@@ -31,105 +47,197 @@ const form = reactive({
   job_title: '',
   department: '',
   registration_status: 'provisional',
+  company_role: '',
+  company_primary: false,
+  company_contact_status: 'active',
 });
+const companyChanged = computed(
+  () =>
+    contact.value &&
+    String(form.company_id || '') !== String(contact.value.company_id || '')
+);
+watch(
+  () => form.company_id,
+  () => {
+    if (!contact.value?.company_id) return;
+    const context = companyChanged.value ? {} : contact.value;
+    form.job_title = context.job_title || '';
+    form.department = context.department || '';
+    form.company_role = context.company_role || '';
+    form.company_primary = context.company_primary || false;
+    form.company_contact_status = context.company_contact_status || 'active';
+  }
+);
+watch(
+  () => form.company_contact_status,
+  status => {
+    if (status === 'inactive') form.company_primary = false;
+  }
+);
 const point = reactive({ kind: 'phone', value: '', label: '' });
 let generation = 0;
+let controller;
+let active = true;
+const subjectKey = () => `${identity.value}:${props.contactId}`;
+const current = context => active && context === subjectKey();
+const fail = (failure, context) => {
+  if (!current(context)) return;
+  if ([401, 403, 404].includes(failure.response?.status)) {
+    contact.value = null;
+    points.value = [];
+    duplicateItems.value = [];
+    showSigningIdentity.value = false;
+    notice.value = '';
+    emit('denied');
+  }
+  error.value = errorMessage(failure);
+};
 const load = async () => {
   generation += 1;
   const version = generation;
+  const context = subjectKey();
+  controller?.abort();
+  controller = new AbortController();
+  points.value = [];
+  notice.value = '';
+  showSigningIdentity.value = false;
   contact.value = null;
   error.value = '';
   checked.value = false;
   duplicateItems.value = [];
-  if (!enabled.value || !props.contactId) return;
+  if (!enabled.value || !canAccess.value || !props.contactId) return false;
   try {
-    const { data } = await API.contact(props.contactId);
-    if (version !== generation) return;
+    const { data } = await API.contact(props.contactId, {
+      accountId: accountId.value,
+      signal: controller.signal,
+    });
+    if (version !== generation) return false;
     contact.value = data.payload;
     points.value = data.contact_points;
     Object.keys(form).forEach(key => {
       form[key] = data.payload[key];
     });
+    return true;
   } catch (err) {
-    if (version === generation) error.value = errorMessage(err);
+    if (version === generation) fail(err, context);
+    return false;
   }
 };
 const save = async () => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   const changingCompany =
     contact.value.company_id &&
     String(contact.value.company_id) !== String(form.company_id);
   if (changingCompany && !window.confirm(T.confirmReassignment)) return;
+  const primaryChange = form.company_primary && !contact.value.company_primary;
+  if (
+    primaryChange &&
+    !window.confirm(t('CRM.COMPANY_CONTACT_CONTEXT.CONFIRM_PRIMARY'))
+  )
+    return;
   busy.value = true;
   error.value = '';
   notice.value = '';
   try {
-    await API.saveContact({ ...form }, props.contactId, {
-      confirm_reassignment: Boolean(changingCompany),
-    });
-    await load();
+    await API.saveContact(
+      { ...form },
+      props.contactId,
+      {
+        confirm_reassignment: Boolean(changingCompany),
+        confirm_primary_change: Boolean(primaryChange),
+      },
+      options
+    );
+    if (!current(context)) return;
+    if (!(await load()) || !current(context)) return;
     emit('updated');
     notice.value = T.saved;
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
 const addPoint = async () => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   busy.value = true;
   error.value = '';
   try {
-    await API.savePoint(props.contactId, { ...point });
+    await API.savePoint(props.contactId, { ...point }, null, options);
+    if (!current(context)) return;
     point.value = '';
     point.label = '';
     await load();
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
 const removePoint = async item => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   if (!window.confirm(T.confirmRemove)) return;
   busy.value = true;
   try {
-    await API.removePoint(props.contactId, item.id);
+    await API.removePoint(props.contactId, item.id, options);
+    if (!current(context)) return;
     await load();
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
 const duplicates = async () => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   busy.value = true;
   error.value = '';
   try {
-    const { data } = await API.duplicates(props.contactId);
+    const { data } = await API.duplicates(props.contactId, options);
+    if (!current(context)) return;
     duplicateItems.value = data.payload;
     checked.value = true;
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
 const merge = async item => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   if (!window.confirm(T.confirmMerge)) return;
   busy.value = true;
   error.value = '';
   try {
-    await API.merge(props.contactId, item.id);
-    await load();
+    await API.merge(props.contactId, item.id, options);
+    if (!current(context)) return;
+    if (!(await load()) || !current(context)) return;
     emit('updated');
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
-watch([accountId, enabled, () => props.contactId], load, { immediate: true });
+watch(
+  [identity, enabled, canAccess, () => props.contactId],
+  () => {
+    busy.value = false;
+    load();
+  },
+  { immediate: true }
+);
 onBeforeUnmount(() => {
+  active = false;
+  controller?.abort();
+  points.value = [];
+  duplicateItems.value = [];
+  contact.value = null;
   generation += 1;
 });
 </script>
@@ -148,6 +256,14 @@ onBeforeUnmount(() => {
       <span>{{ T.master }}</span
       ><span>{{ expanded ? '\u2212' : '+' }}</span>
     </button>
+    <button
+      v-if="contact && canAccess"
+      type="button"
+      class="mt-3 rounded-lg border border-n-teal-6 bg-n-teal-3 px-3 py-2 text-sm font-semibold text-n-teal-12"
+      @click="showSigningIdentity = true"
+    >
+      {{ t('CRM.CUSTOMER_SIGNING_IDENTITY.TITLE') }}
+    </button>
     <p
       v-if="error"
       class="mt-3 text-sm text-n-ruby-11"
@@ -162,8 +278,8 @@ onBeforeUnmount(() => {
     >
       {{ notice }}
     </p>
-    <template v-if="contact"
-      ><p class="mt-2 text-xs text-n-slate-10">
+    <template v-if="contact">
+      <p class="mt-2 text-xs text-n-slate-10">
         {{
           contact.registration_status === 'registered'
             ? T.registered
@@ -178,9 +294,10 @@ onBeforeUnmount(() => {
           })
         "
         class="mt-2 block text-sm font-medium text-n-brand"
-        >{{ contact.company_name || `#${contact.company_id}` }} /
-        {{ T.openCompany }}</RouterLink
       >
+        {{ contact.company_name || `#${contact.company_id}` }} /
+        {{ T.openCompany }}
+      </RouterLink>
       <p
         v-else
         class="mt-2 text-sm"
@@ -206,8 +323,9 @@ onBeforeUnmount(() => {
                 )
               "
               class="block text-xs text-n-brand"
-              >{{ T.newCompany }}</RouterLink
             >
+              {{ T.newCompany }}
+            </RouterLink>
             <label
               v-for="field in ['job_title', 'department']"
               :key="field"
@@ -215,9 +333,76 @@ onBeforeUnmount(() => {
               >{{ FIELD_LABELS[field]
               }}<input
                 v-model.trim="form[field]"
+                :disabled="companyChanged"
                 maxlength="255"
                 :class="inputClass"
             /></label>
+            <p
+              v-if="companyChanged"
+              class="text-sm text-n-amber-11"
+              role="status"
+            >
+              {{
+                contact.company_id
+                  ? t('CRM.COMPANY_CONTACT_CONTEXT.TRANSFER_HELP')
+                  : t('CRM.COMPANY_CONTACT_CONTEXT.FIRST_LINK_HELP')
+              }}
+            </p>
+            <label
+              v-if="form.company_id"
+              class="block text-sm"
+            >
+              {{ t('CRM.COMPANY_CONTACT_CONTEXT.ROLE') }}
+              <select
+                v-model="form.company_role"
+                :disabled="!form.company_id || companyChanged"
+                :class="inputClass"
+              >
+                <option value="">
+                  {{ t('CRM.COMPANY_CONTACT_CONTEXT.NO_ROLE') }}
+                </option>
+                <option
+                  v-for="role in COMPANY_CONTACT_ROLES"
+                  :key="role"
+                  :value="role"
+                >
+                  {{ roleLabels[role] }}
+                </option>
+              </select>
+            </label>
+            <label
+              v-if="form.company_id"
+              class="block text-sm"
+            >
+              {{ t('CRM.COMPANY_CONTACT_CONTEXT.STATUS') }}
+              <select
+                v-model="form.company_contact_status"
+                :disabled="!form.company_id || companyChanged"
+                :class="inputClass"
+              >
+                <option value="active">
+                  {{ t('CRM.COMPANY_CONTACT_CONTEXT.ACTIVE') }}
+                </option>
+                <option value="inactive">
+                  {{ t('CRM.COMPANY_CONTACT_CONTEXT.INACTIVE') }}
+                </option>
+              </select>
+            </label>
+            <label
+              v-if="form.company_id"
+              class="flex items-center gap-2 text-sm"
+            >
+              <input
+                v-model="form.company_primary"
+                type="checkbox"
+                :disabled="
+                  !form.company_id ||
+                  companyChanged ||
+                  form.company_contact_status !== 'active'
+                "
+              />
+              {{ t('CRM.COMPANY_CONTACT_CONTEXT.PRIMARY') }}
+            </label>
             <label class="block text-sm"
               >{{ T.kind
               }}<select
@@ -317,8 +502,9 @@ onBeforeUnmount(() => {
           <RouterLink
             :to="accountScopedRoute('contacts_edit', { contactId: item.id })"
             class="font-semibold text-n-brand"
-            >{{ item.name }} #{{ item.id }}</RouterLink
           >
+            {{ item.name }} #{{ item.id }}
+          </RouterLink>
           <p>
             {{ item.company_name }} {{ item.phone_number }} {{ item.email }}
           </p>
@@ -334,5 +520,10 @@ onBeforeUnmount(() => {
         </article>
       </div>
     </template>
+    <SigningIdentityDialog
+      v-if="showSigningIdentity && enabled && canAccess"
+      :contact-id="contactId"
+      @close="showSigningIdentity = false"
+    />
   </section>
 </template>

@@ -1,10 +1,11 @@
-# No provider is installed in production. A name or client-uploaded PDF is not company-signature evidence.
+# Native version-bound provider receipts must pass current security/source
+# checks. A name, manual upload or provider status alone is not evidence.
 class JrcApprovals::SignatureEvidence
   class << self
     attr_accessor :verifier
 
     def call(contract)
-      return { 'state' => 'pending_provider', 'evidence_digest' => nil } unless verifier
+      return JrcBackoffice::Signatures::EvidenceState.for_contract(contract) unless verifier
 
       result = verifier.call(contract)
       if result.is_a?(Hash)

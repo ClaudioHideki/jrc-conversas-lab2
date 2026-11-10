@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_head": "cb1bed8142b40989f1b5adcdc40edc31d7b49bd7",
+  "classification": "Implemented and locally tested monitoring-action ceiling; F2 remains partial",
+  "native_changes": {
+    "configuration": "automatic_action_daily_limit: nonnegative whole number at account scope only; zero preserves the previous unlimited behavior. No illustrative business limit was adopted.",
+    "enforcement": "Processor-created automatic CS actions share an account-wide PostgreSQL transaction advisory lock. Count and native action/activity/audit persistence occur in the same transaction.",
+    "window": "Current account reporting time zone, local midnight to next local midnight; completed actions still consume their creation-day allocation.",
+    "scope": "Account policy remains mandatory even when company/product/unit monitoring rules resolve separately. No foreign-account records or human-created actions consume the quota.",
+    "authorization": "Current native membership, authentication and writable assignment are revalidated. The settings editor retains native allowed/configuration scope checks.",
+    "anti_noise": "Active actions are updated before the new-creation admission gate. Critical risk creation remains independent of the gate. Repeated suppression is audited once per assignment/configuration version/day without exposing global counts or customer identities.",
+    "ui": "Existing settings form supports integer limits and explicitly labels zero/account day; global setting hidden in non-account scopes. No separate settings registry.",
+    "storage": "Existing versioned configuration JSON, Action metadata and native audit; no migration or dependency added. No worker/container change."
+  },
+  "tests_not_additive": [
+    { "label": "f2budget02", "backend": 22, "failures": 0, "groups": { "budget": 5, "two_connection_concurrency": 1, "cooldown": 10, "monitoring": 6 } },
+    { "label": "f2budget-g-final", "backend": 38, "failures": 0, "groups": { "budget": 5, "two_connection_concurrency": 1, "completion_package": 12, "completion_handoff": 10, "signature_delivery_guard": 6, "project_handoff_acceptance": 4 }, "overlap": "The six budget/concurrency examples overlap the preceding run." },
+    { "label": "f2budget-final-directed", "backend": 6, "failures": 0, "purpose": "Final persistence-boundary extraction and one added real customer-configuration precedence scenario; five examples overlap earlier runs." },
+    { "label": "f2budget01", "vue": 4, "failures": 0, "purpose": "Native settings form: existing customer capacity/team settings, cooldown and new account-only daily limit." }
+  ],
+  "static_checks": {
+    "eslint": { "label": "f2budget-eslint", "exit_code": 0 },
+    "rubocop_new_service_and_tests": "Zero offenses; f2budget-lint03 and f2budget-final-readonly-lint",
+    "rubocop_configuration": "Zero offenses in final readonly report",
+    "rubocop_processor": "22 inherited complexity/style findings remain in the shared Processor; no global clean-lint claim or disabled cops. Only the new persistence boundary was added.",
+    "git_diff_check": "Passed"
+  },
+  "corrected_failure": "The account-midnight test initially omitted assignment_id required by native Workflow.save; fixture preparation corrected, native validation preserved.",
+  "limitations": [
+    "This quota covers Processor monitoring-created CS Action records. It does not claim a universal task/activity ceiling across independent manual workflows, all playbook native steps, Service Desk or Projects.",
+    "No prioritization/queue of deferred causes is introduced: current evidence is reevaluated by the existing engine, and critical risks remain visible.",
+    "Additional health-dimension freshness, broader priority/aggregation and representative scale acceptance remain pending.",
+    "No production or external provider acceptance; current-source browser QA requires a separately authorized fresh build."
+  ],
+  "preservation": { "no_build": true, "no_5379_modification": true, "no_container_restart": true, "no_cleanup": true, "no_push_ghcr_deploy": true, "no_external_operations": true }
+}

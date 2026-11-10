@@ -1,9 +1,10 @@
 <script setup>
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FIELDS, STATES, buttonClass, inputClass } from './definitions';
 import SlaSummary from './SlaSummary.vue';
 import WorkContextPanel from './WorkContextPanel.vue';
+import { isWaitingStatus, validWaitingReview } from './waitingReview';
 const props = defineProps({
   kind: { type: String, required: true },
   record: { type: Object, default: () => ({}) },
@@ -14,11 +15,13 @@ const props = defineProps({
 });
 const emit = defineEmits(['save', 'close']);
 const { t } = useI18n();
+const editorTab = ref('record');
 const form = reactive({
   assignment_id: props.record.assignment_id || '',
   request_id: crypto.randomUUID(),
   ...props.record,
   notes: props.record.metadata?.notes || '',
+  waiting_reason: props.record.metadata?.waiting_reason || '',
   expansion_kind:
     props.record.metadata?.expansion_kind ||
     props.record.metadata?.kind ||
@@ -26,6 +29,43 @@ const form = reactive({
   renewed_contract_id: props.record.metadata?.renewed_contract_id || '',
 });
 const workContext = ref(null);
+const workHint = computed(() =>
+  props.record.id && ['actions', 'risks', 'plans', 'qbrs'].includes(props.kind)
+    ? { work_kind: props.kind, work_record_id: props.record.id }
+    : null
+);
+const ownerOptions = computed(() => {
+  const options = (workContext.value?.work_owners || []).map(([id, name]) => ({
+    id,
+    name,
+    disabled: false,
+  }));
+  const previous = props.record.owner_id;
+  if (previous && !options.some(row => String(row.id) === String(previous))) {
+    options.unshift({
+      id: previous,
+      name:
+        props.record.owner_name ||
+        props.metadata.owners?.find(
+          row => String(row[0]) === String(previous)
+        )?.[1] ||
+        String(previous),
+      disabled: true,
+    });
+  }
+  return options;
+});
+watch(
+  () => form.assignment_id,
+  () => {
+    workContext.value = null;
+    if (!props.record.id) delete form.owner_id;
+  }
+);
+const waitingError = ref(false);
+const waiting = computed(
+  () => props.kind === 'actions' && isWaitingStatus(form.status)
+);
 const loadContext = data => {
   workContext.value = data;
   if (props.kind === 'qbrs' && !form.agenda && data)
@@ -35,9 +75,23 @@ const loadContext = data => {
     form.period_to = data.period.to;
   }
 };
-const references = key =>
+const referenceOwners = item => {
+  const options = (workContext.value?.work_owners || []).map(row => [
+    ...row,
+    false,
+  ]);
+  const id = item?.owner_id;
+  if (id && !options.some(row => String(row[0]) === String(id))) {
+    const label = props.metadata.owners?.find(
+      row => String(row[0]) === String(id)
+    )?.[1];
+    options.unshift([id, label || String(id), true]);
+  }
+  return options;
+};
+const references = (key, item) =>
   ({
-    owner_id: props.metadata.owners,
+    owner_id: referenceOwners(item),
     user_id: props.metadata.owners,
     product_id: props.metadata.products,
     source_product_id: props.metadata.products,
@@ -104,6 +158,8 @@ const options = key => {
             value === props.record.status
         )
       : STATES[props.kind];
+  if (key === 'customer_confirmation')
+    return ['pending', 'confirmed', 'unresolved', 'not_applicable'];
   if (key === 'severity') return ['low', 'medium', 'high', 'critical'];
   if (key === 'kind' && props.kind === 'surveys') return ['nps', 'ces'];
   if (key === 'expansion_kind')
@@ -121,7 +177,7 @@ const fieldType = key => {
   if (key.endsWith('_url')) return 'url';
   return 'text';
 };
-['due_at', 'scheduled_at'].forEach(key => {
+['due_at', 'scheduled_at', 'return_at'].forEach(key => {
   if (form[key]) {
     const d = new Date(form[key]);
     form[key] = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
@@ -175,8 +231,14 @@ const add = key => {
 };
 const submit = () => {
   if (props.readOnly || props.busy) return;
+  if (waiting.value && !validWaitingReview(form)) {
+    waitingError.value = true;
+    editorTab.value = 'record';
+    return;
+  }
+  waitingError.value = false;
   const payload = { ...form };
-  ['due_at', 'scheduled_at'].forEach(key => {
+  ['due_at', 'scheduled_at', 'return_at'].forEach(key => {
     if (payload[key]) payload[key] = new Date(payload[key]).toISOString();
   });
   [
@@ -211,7 +273,19 @@ const submit = () => {
   <form
     class="rounded-xl border border-n-weak bg-n-solid-2 p-5"
     @submit.prevent="submit"
+    @invalid.capture="
+      editorTab =
+        $event.target.closest('[data-editor-tab]')?.dataset.editorTab ||
+        editorTab
+    "
   >
+    <p
+      v-if="waitingError"
+      role="alert"
+      class="mb-3 text-sm text-n-ruby-11"
+    >
+      {{ t('RELATIONSHIP.V2.WAITING_REVIEW_REQUIRED') }}
+    </p>
     <div class="mb-4 flex items-center justify-between">
       <h3 class="font-semibold">
         {{ t(record.id ? 'RELATIONSHIP.EDIT' : 'RELATIONSHIP.NEW') }}
@@ -224,6 +298,30 @@ const submit = () => {
         {{ t('RELATIONSHIP.CLOSE') }}
       </button>
     </div>
+    <nav
+      class="mb-4 flex flex-wrap gap-2"
+      :aria-label="t('RELATIONSHIP.EDIT')"
+    >
+      <button
+        v-for="key in [
+          'record',
+          ...(['actions', 'plans', 'qbrs', 'expansion'].includes(kind)
+            ? ['context']
+            : []),
+          ...(['plans', 'qbrs', 'risks'].includes(kind) ? ['work'] : []),
+        ]"
+        :key="key"
+        type="button"
+        :class="[
+          buttonClass,
+          editorTab === key && 'border-n-violet-8 text-n-violet-11 ',
+        ]"
+        :aria-pressed="editorTab === key"
+        @click="editorTab = key"
+      >
+        {{ t(`RELATIONSHIP.V2.EDITOR.${key}`) }}
+      </button>
+    </nav>
     <fieldset :disabled="readOnly">
       <label class="mb-4 block text-sm"
         >{{ t('RELATIONSHIP.FIELDS.customer')
@@ -245,16 +343,23 @@ const submit = () => {
       >
       <SlaSummary
         v-if="kind === 'actions'"
+        v-show="editorTab === 'context'"
         :sla="record.sla"
         :metadata="metadata"
       />
       <WorkContextPanel
-        v-if="['qbrs', 'plans', 'expansion'].includes(kind)"
+        v-if="['actions', 'risks', 'qbrs', 'plans', 'expansion'].includes(kind)"
+        v-show="editorTab === 'context'"
         :assignment-id="form.assignment_id"
         :initial-period="record.metadata || {}"
+        :work-hint="workHint"
         @loaded="loadContext"
       />
-      <div class="grid gap-4 md:grid-cols-2">
+      <div
+        v-show="editorTab === 'record'"
+        data-editor-tab="record"
+        class="grid gap-4 md:grid-cols-2"
+      >
         <label
           v-if="kind === 'renewals' && form.status === 'won'"
           class="text-sm"
@@ -286,15 +391,17 @@ const submit = () => {
             v-if="key === 'owner_id'"
             v-model="form[key]"
             :class="inputClass"
-            :disabled="!metadata.can_team"
+            :disabled="!metadata.can_team || !workContext"
+            data-testid="work-owner"
           >
             <option value="">{{ t('RELATIONSHIP.UNASSIGNED') }}</option>
             <option
-              v-for="owner in metadata.owners || []"
-              :key="owner[0]"
-              :value="owner[0]"
+              v-for="owner in ownerOptions"
+              :key="owner.id"
+              :value="owner.id"
+              :disabled="owner.disabled"
             >
-              {{ owner[1] }}
+              {{ owner.name }}
             </option>
           </select>
           <select
@@ -333,7 +440,13 @@ const submit = () => {
               :key="value"
               :value="value"
             >
-              {{ t(`RELATIONSHIP.STATES.${value}`) }}
+              {{
+                t(
+                  key === 'customer_confirmation'
+                    ? `RELATIONSHIP.V2.CONFIRMATION.${value}`
+                    : `RELATIONSHIP.STATES.${value}`
+                )
+              }}
             </option>
           </select>
           <template v-else-if="key === 'reason' && kind === 'risks'">
@@ -356,6 +469,9 @@ const submit = () => {
             v-else-if="
               [
                 'reason',
+                'waiting_reason',
+                'next_step',
+                'customer_feedback',
                 'result',
                 'outcome',
                 'agenda',
@@ -366,8 +482,11 @@ const submit = () => {
             v-model="form[key]"
             :class="inputClass"
             rows="3"
+            :data-testid="`relationship-field-${key}`"
+            :maxlength="key === 'waiting_reason' ? 4000 : undefined"
             :required="
               ['reason'].includes(key) ||
+              (waiting && ['waiting_reason', 'next_step'].includes(key)) ||
               (key === 'result' && form.status === 'completed') ||
               (key === 'summary' && form.status === 'completed') ||
               (key === 'outcome' &&
@@ -379,13 +498,18 @@ const submit = () => {
             v-model="form[key]"
             :class="inputClass"
             :type="fieldType(key)"
+            :data-testid="`relationship-field-${key}`"
             :min="fieldType(key) === 'number' ? 0 : undefined"
-            :required="['title', 'scheduled_at'].includes(key)"
+            :required="
+              ['title', 'scheduled_at'].includes(key) ||
+              (waiting && key === 'return_at')
+            "
           />
         </label>
       </div>
       <label
         v-if="kind === 'plans'"
+        v-show="editorTab === 'record'"
         class="mt-3 block text-sm"
         >{{ t('RELATIONSHIP.FIELDS.notes')
         }}<textarea
@@ -395,6 +519,8 @@ const submit = () => {
       </label>
       <div
         v-if="kind === 'risks'"
+        v-show="editorTab === 'work'"
+        data-editor-tab="work"
         class="mt-4 grid gap-3 md:grid-cols-2"
       >
         <label
@@ -417,7 +543,9 @@ const submit = () => {
       </div>
       <section
         v-for="collection in collections"
+        v-show="editorTab === 'work'"
         :key="collection"
+        data-editor-tab="work"
         class="mt-4"
       >
         <h4 class="mb-2 font-semibold">
@@ -448,15 +576,18 @@ const submit = () => {
                 {{ t(`RELATIONSHIP.PARTICIPANTS.${type}`) }}
               </option></select
             ><select
-              v-else-if="references(key)"
+              v-else-if="references(key, item)"
               v-model="item[key]"
               :class="inputClass"
+              :disabled="key === 'owner_id' && !workContext"
+              :data-testid="key === 'owner_id' ? 'commitment-owner' : undefined"
             >
               <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
               <option
-                v-for="reference in references(key)"
+                v-for="reference in references(key, item)"
                 :key="reference[0]"
                 :value="reference[0]"
+                :disabled="reference[2] === true"
               >
                 {{ reference[1] }}
               </option></select
@@ -498,6 +629,8 @@ const submit = () => {
       </p>
       <label
         v-if="kind === 'risks' && form.plan.concessions"
+        v-show="editorTab === 'work'"
+        data-editor-tab="work"
         class="mt-3 block text-sm"
       >
         {{ t('RELATIONSHIP.CONCESSION_APPROVAL') }}

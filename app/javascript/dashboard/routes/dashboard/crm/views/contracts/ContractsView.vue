@@ -1,15 +1,30 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 /* eslint-disable vue/no-bare-strings-in-template */
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { format } from 'date-fns';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { contractsAPI } from 'dashboard/api/crm/commercialCycle';
 import { useAlert } from 'dashboard/composables';
+import SignatureDeliveryNotice from './SignatureDeliveryNotice.vue';
 import { crmControlClasses } from '../../crmControlClasses';
 
 const router = useRouter();
 const route = useRoute();
+const store = useStore();
+const identity = computed(() =>
+  JSON.stringify([
+    route.params.accountId,
+    store.getters.getCurrentUserID,
+    store.getters.getCurrentRole,
+    store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
+  ])
+);
+let disposed = false;
+const currentIdentity = value => !disposed && value === identity.value;
 
 const rows = ref([]);
 const loading = ref(false);
@@ -25,8 +40,6 @@ const signatureContract = ref(null);
 const signedByName = ref('');
 const signedAt = ref(format(new Date(), "yyyy-MM-dd'T'HH:mm"));
 const signedFile = ref(null);
-const signatureProvider = ref('');
-const signatureExternalId = ref('');
 const manageContract = ref(null);
 const manageTab = ref('summary');
 const contractHistory = ref([]);
@@ -151,32 +164,48 @@ const pagedContracts = computed(() => {
   return filtered.value.slice(start, start + perPage.value);
 });
 
-const load = async () => {
-  loading.value = true;
-
-  try {
-    const response = await contractsAPI.list();
-    rows.value = response.data || [];
-  } finally {
-    loading.value = false;
-  }
+let detailGeneration = 0;
+const clearManagedContract = () => {
+  detailGeneration += 1;
+  manageContract.value = null;
+  contractFiles.value = [];
+  contractHistory.value = [];
+  detailLoading.value = false;
 };
-
-const refreshManagedContract = async id => {
+const refreshManagedContract = async (id, stillCurrent = null) => {
+  const authority = identity.value;
+  const generation = detailGeneration;
+  const accountId = route.params.accountId;
   const [{ data: detail }, { data: history }] = await Promise.all([
     contractsAPI.show(id),
     contractsAPI.history(id),
   ]);
+  if (
+    !currentIdentity(authority) ||
+    generation !== detailGeneration ||
+    route.params.accountId !== accountId ||
+    (stillCurrent && !stillCurrent())
+  )
+    return false;
   manageContract.value = detail;
   contractFiles.value = detail.documents || [];
   contractHistory.value = history || [];
+  return true;
 };
 
 const openManage = async contract => {
+  clearManagedContract();
+  const token = detailGeneration;
   detailLoading.value = true;
   manageTab.value = 'summary';
   try {
-    await refreshManagedContract(contract.id);
+    if (
+      !(await refreshManagedContract(
+        contract.id,
+        () => token === detailGeneration
+      ))
+    )
+      return;
     const baseDate = manageContract.value?.ends_on
       ? new Date(`${manageContract.value.ends_on}T12:00:00`)
       : new Date();
@@ -189,21 +218,95 @@ const openManage = async contract => {
           12
       ) || 12;
   } catch (error) {
+    if (token !== detailGeneration) return;
+    clearManagedContract();
     useAlert(
       error.response?.data?.message ||
         'Não foi possível carregar os detalhes do contrato.'
     );
   } finally {
-    detailLoading.value = false;
+    if (token === detailGeneration) detailLoading.value = false;
   }
 };
 
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+let listGeneration = 0;
+const load = async () => {
+  const authority = identity.value;
+  listGeneration += 1;
+  const token = listGeneration;
+  rows.value = [];
+  loading.value = true;
+
+  try {
+    const response = await contractsAPI.list(segmentParams());
+    if (token !== listGeneration || !currentIdentity(authority)) return;
+    rows.value = response.data || [];
+  } catch {
+    if (token === listGeneration)
+      useAlert('Não foi possível carregar os contratos.');
+  } finally {
+    if (token === listGeneration) loading.value = false;
+  }
+};
+watchSegment(() => {
+  page.value = 1;
+  return load();
+});
+
+const openRequestedContract = async () => {
+  const value = route.query.contractId;
+  if (
+    typeof value === 'string' &&
+    /^[1-9]\d*$/.test(value) &&
+    Number.isSafeInteger(Number(value))
+  )
+    await openManage({ id: value });
+};
 onMounted(async () => {
+  const authority = identity.value;
   await load();
-  const requested = rows.value.find(
-    contract => String(contract.id) === String(route.query.contractId)
-  );
-  if (requested) await openManage(requested);
+  if (currentIdentity(authority)) await openRequestedContract();
+});
+watch(
+  () => route.query.contractId,
+  () => {
+    clearManagedContract();
+    return openRequestedContract();
+  }
+);
+const clearFilters = () => {
+  q.value = '';
+  status.value = 'all';
+  owner.value = 'all';
+  validity.value = 'all';
+  dealFilter.value = 'all';
+  page.value = 1;
+};
+
+watch(
+  identity,
+  async () => {
+    const authority = identity.value;
+    clearManagedContract();
+    signatureContract.value = null;
+    signedByName.value = '';
+    signedFile.value = null;
+    contractUploadFiles.value = [];
+    renewStartsOn.value = '';
+    addendumTitle.value = '';
+    addendumNotes.value = '';
+    saving.value = false;
+    clearFilters();
+    await load();
+    if (currentIdentity(authority)) await openRequestedContract();
+  },
+  { flush: 'sync' }
+);
+onBeforeUnmount(() => {
+  disposed = true;
+  listGeneration += 1;
+  clearManagedContract();
 });
 
 const badge = value =>
@@ -236,15 +339,6 @@ const statusIcon = value =>
     renewed: 'i-lucide-refresh-cw',
   })[value] || 'i-lucide-circle';
 
-const clearFilters = () => {
-  q.value = '';
-  status.value = 'all';
-  owner.value = 'all';
-  validity.value = 'all';
-  dealFilter.value = 'all';
-  page.value = 1;
-};
-
 const filterByStatus = value => {
   status.value = status.value === value ? 'all' : value;
 };
@@ -256,8 +350,10 @@ const newContract = () => {
 };
 
 const downloadPdf = async contract => {
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.pdf(contract.id);
+    if (!currentIdentity(authority)) return;
     const url = URL.createObjectURL(data);
     const a = document.createElement('a');
     a.href = url;
@@ -265,41 +361,44 @@ const downloadPdf = async contract => {
     a.click();
     URL.revokeObjectURL(url);
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert('Não foi possível gerar o PDF do contrato.');
   }
 };
-
 const openSignature = contract => {
   signatureContract.value = contract;
   signedByName.value = '';
   signedAt.value = format(new Date(), "yyyy-MM-dd'T'HH:mm");
   signedFile.value = null;
-  signatureProvider.value = contract.signature_provider || '';
-  signatureExternalId.value = contract.signature_external_id || '';
 };
 const prepareSignature = async mode => {
   if (!signatureContract.value) return;
   saving.value = true;
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.prepareSignature(
       signatureContract.value.id,
-      { mode, provider: mode === 'provider' ? signatureProvider.value : null }
+      { mode }
     );
+    if (!currentIdentity(authority)) return;
     signatureContract.value = data;
     await load();
+    if (!currentIdentity(authority)) return;
     if (manageContract.value?.id === data.id)
       await refreshManagedContract(data.id);
+    if (!currentIdentity(authority)) return;
     useAlert(
       mode === 'manual'
         ? 'Assinatura manual preparada.'
         : 'Fluxo de provedor preparado; nenhum envio externo foi simulado.'
     );
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.message || 'Não foi possível preparar a assinatura.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
 const registerManualSignature = async () => {
@@ -308,6 +407,7 @@ const registerManualSignature = async () => {
     return;
   }
   saving.value = true;
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.registerManualSignature(
       signatureContract.value.id,
@@ -317,12 +417,16 @@ const registerManualSignature = async () => {
         signed_file: signedFile.value,
       }
     );
+    if (!currentIdentity(authority)) return;
     signatureContract.value = data;
     await load();
+    if (!currentIdentity(authority)) return;
     if (manageContract.value?.id === data.id)
       await refreshManagedContract(data.id);
+    if (!currentIdentity(authority)) return;
     useAlert('Assinatura manual registrada.');
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       [
         error.response?.data?.message ||
@@ -334,66 +438,46 @@ const registerManualSignature = async () => {
         .join(' · ')
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
-const registerProviderResult = async () => {
-  if (!signatureContract.value || !signatureExternalId.value.trim()) {
-    useAlert('Informe o ID retornado pelo provedor após envio real.');
-    return;
-  }
-  saving.value = true;
-  try {
-    const { data } = await contractsAPI.sendForSignature(
-      signatureContract.value.id,
-      { external_id: signatureExternalId.value }
-    );
-    signatureContract.value = data;
-    await load();
-    if (manageContract.value?.id === data.id)
-      await refreshManagedContract(data.id);
-    useAlert('Envio externo registrado; assinatura ainda não foi concluída.');
-  } catch (error) {
-    useAlert(
-      error.response?.data?.message ||
-        'Não foi possível registrar o envio externo.'
-    );
-  } finally {
-    saving.value = false;
-  }
-};
-
 const uploadContractDocuments = async () => {
   if (!manageContract.value || !contractUploadFiles.value.length) {
     useAlert('Selecione ao menos um documento.');
     return;
   }
   saving.value = true;
+  const authority = identity.value;
   try {
     await contractsAPI.uploadDocuments(
       manageContract.value.id,
       contractUploadFiles.value
     );
+    if (!currentIdentity(authority)) return;
     contractUploadFiles.value = [];
     await refreshManagedContract(manageContract.value.id);
+    if (!currentIdentity(authority)) return;
     await load();
+    if (!currentIdentity(authority)) return;
     useAlert('Documento anexado e persistido.');
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.message || 'Não foi possível enviar os documentos.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
-
 const downloadContractDocument = async documentRow => {
   if (!manageContract.value) return;
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.downloadDocument(
       manageContract.value.id,
       documentRow.id
     );
+    if (!currentIdentity(authority)) return;
     const url = URL.createObjectURL(data);
     const link = document.createElement('a');
     link.href = url;
@@ -401,19 +485,21 @@ const downloadContractDocument = async documentRow => {
     link.click();
     URL.revokeObjectURL(url);
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert('Não foi possível baixar o documento.');
   }
 };
-
 const downloadSignedDocument = async () => {
   if (!manageContract.value?.signed_document) {
     useAlert('Este contrato não possui documento assinado anexado.');
     return;
   }
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.downloadSignedDocument(
       manageContract.value.id
     );
+    if (!currentIdentity(authority)) return;
     const url = URL.createObjectURL(data);
     const link = document.createElement('a');
     link.href = url;
@@ -423,36 +509,40 @@ const downloadSignedDocument = async () => {
     link.click();
     URL.revokeObjectURL(url);
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.message ||
         'Não foi possível baixar o documento assinado.'
     );
   }
 };
-
 const renewContract = async () => {
   if (!manageContract.value) return;
   saving.value = true;
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.renew(manageContract.value.id, {
       starts_on: renewStartsOn.value || null,
       term_months: Number(renewTermMonths.value || 12),
     });
+    if (!currentIdentity(authority)) return;
     await load();
+    if (!currentIdentity(authority)) return;
     await openManage(data);
+    if (!currentIdentity(authority)) return;
     manageTab.value = 'summary';
     useAlert('Renovação criada como novo contrato em rascunho.');
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.message ||
         error.response?.data?.errors?.join(', ') ||
         'Não foi possível criar a renovação.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
-
 const createAddendum = async () => {
   if (!manageContract.value) return;
   if (!addendumTitle.value.trim()) {
@@ -460,25 +550,29 @@ const createAddendum = async () => {
     return;
   }
   saving.value = true;
+  const authority = identity.value;
   try {
     await contractsAPI.addendum(manageContract.value.id, {
       title: addendumTitle.value.trim(),
       notes: addendumNotes.value.trim(),
     });
+    if (!currentIdentity(authority)) return;
     addendumTitle.value = '';
     addendumNotes.value = '';
     await refreshManagedContract(manageContract.value.id);
+    if (!currentIdentity(authority)) return;
     await load();
+    if (!currentIdentity(authority)) return;
     useAlert('Aditivo registrado no histórico do contrato.');
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.message || 'Não foi possível registrar o aditivo.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
-
 const openManageSignature = () => {
   if (!manageContract.value) return;
   openSignature(manageContract.value);
@@ -486,19 +580,23 @@ const openManageSignature = () => {
 
 const updateStatus = async (contract, nextStatus) => {
   saving.value = true;
+  const authority = identity.value;
   try {
     await contractsAPI.update(contract.id, {
       contract: { status: nextStatus },
     });
+    if (!currentIdentity(authority)) return;
     await load();
+    if (!currentIdentity(authority)) return;
     useAlert('Contrato atualizado.');
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.errors?.join(', ') ||
         'Não foi possível atualizar o contrato.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
 </script>
@@ -1110,10 +1208,10 @@ const updateStatus = async (contract, nextStatus) => {
 
     <Teleport to="body">
       <div
-        :class="crmControlClasses"
         v-if="manageContract"
+        :class="crmControlClasses"
         class="fixed inset-0 z-[95] flex justify-end bg-black/40"
-        @click.self="manageContract = null"
+        @click.self="clearManagedContract"
       >
         <section
           class="h-full w-full max-w-4xl overflow-y-auto bg-n-slate-2 shadow-2xl"
@@ -1141,7 +1239,7 @@ const updateStatus = async (contract, nextStatus) => {
               </div>
               <button
                 class="grid size-9 place-content-center rounded-lg border text-xl"
-                @click="manageContract = null"
+                @click="clearManagedContract"
               >
                 ×
               </button>
@@ -1497,8 +1595,8 @@ const updateStatus = async (contract, nextStatus) => {
 
     <Teleport to="body">
       <div
-        :class="crmControlClasses"
         v-if="signatureContract"
+        :class="crmControlClasses"
         class="fixed inset-0 z-[100] grid place-items-center bg-black/45 p-4"
         @click.self="signatureContract = null"
       >
@@ -1513,10 +1611,6 @@ const updateStatus = async (contract, nextStatus) => {
               <h3 class="text-xl font-bold">
                 {{ signatureContract.contract_number }}
               </h3>
-              <p class="text-sm text-n-slate-11">
-                Status real:
-                {{ signatureContract.signature_status || 'not_started' }}
-              </p>
             </div>
             <button class="text-2xl" @click="signatureContract = null">
               ×
@@ -1560,43 +1654,11 @@ const updateStatus = async (contract, nextStatus) => {
                 Registrar assinatura real
               </button>
             </div>
-            <div
-              class="rounded-xl border border-indigo-200 bg-indigo-50/40 dark:bg-n-iris-3 p-4"
-            >
-              <h4 class="font-bold">Provedor externo</h4>
-              <p class="mt-1 text-xs text-n-slate-11">
-                Não há simulação: o ID abaixo deve vir do provedor após envio
-                real.
-              </p>
-              <label class="mt-3 block text-sm"
-                >Provedor<select
-                  v-model="signatureProvider"
-                  class="mt-1 w-full rounded-lg border p-2"
-                >
-                  <option value="">Selecione</option>
-                  <option value="clicksign">Clicksign</option>
-                  <option value="docusign">DocuSign</option>
-                  <option value="zoho_sign">Zoho Sign</option>
-                  <option value="other">Outro</option>
-                </select></label
-              ><button
-                class="mt-3 w-full rounded-lg border border-indigo-300 px-3 py-2 font-semibold text-indigo-700"
-                :disabled="!signatureProvider || saving"
-                @click="prepareSignature('provider')"
-              >
-                Preparar provedor</button
-              ><label class="mt-3 block text-sm"
-                >ID externo<input
-                  v-model="signatureExternalId"
-                  class="mt-1 w-full rounded-lg border p-2" /></label
-              ><button
-                class="mt-3 w-full rounded-lg bg-indigo-600 px-3 py-2 font-semibold text-white"
-                :disabled="!signatureExternalId || saving"
-                @click="registerProviderResult"
-              >
-                Registrar envio externo
-              </button>
-            </div>
+            <SignatureDeliveryNotice
+              :provider="signatureContract.signature_provider"
+              :external-id="signatureContract.signature_external_id"
+              :signature-status="signatureContract.signature_status"
+            />
           </div>
         </section>
       </div>

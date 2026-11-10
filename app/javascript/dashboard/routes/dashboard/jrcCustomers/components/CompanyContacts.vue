@@ -1,7 +1,16 @@
 <script setup>
-import { reactive, ref, watch, onBeforeUnmount } from 'vue';
+import {
+  defineAsyncComponent,
+  computed,
+  reactive,
+  ref,
+  watch,
+  onBeforeUnmount,
+} from 'vue';
+import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcCustomers';
 import MasterContactPanel from './MasterContactPanel.vue';
+import { companyContactRoleLabels } from './companyContactRoles';
 import { useCustomerMaster } from '../useCustomerMaster';
 import {
   T,
@@ -14,8 +23,14 @@ import {
 const props = defineProps({
   companyId: { type: [Number, String], required: true },
 });
-const emit = defineEmits(['changed']);
-const { accountId, accountScopedRoute } = useCustomerMaster();
+const emit = defineEmits(['changed', 'denied']);
+const { t } = useI18n();
+const roleLabels = computed(() => companyContactRoleLabels(t));
+const ContactDetailsDialog = defineAsyncComponent(
+  () => import('./ContactDetailsDialog.vue')
+);
+const selection = ref(null);
+const { accountId, identity } = useCustomerMaster();
 const contacts = ref([]);
 const candidates = ref([]);
 const query = ref('');
@@ -26,6 +41,23 @@ const detailId = ref(null);
 const error = ref('');
 const busy = ref(false);
 let generation = 0;
+let searchGeneration = 0;
+let controller;
+let searchController;
+let active = true;
+const subjectKey = () => `${identity.value}:${props.companyId}`;
+const current = context => active && context === subjectKey();
+const fail = (failure, context) => {
+  if (!current(context)) return;
+  if ([401, 403, 404].includes(failure.response?.status)) {
+    contacts.value = [];
+    candidates.value = [];
+    selection.value = null;
+    mode.value = '';
+    emit('denied');
+  }
+  error.value = errorMessage(failure);
+};
 const form = reactive({
   name: '',
   email: '',
@@ -36,104 +68,179 @@ const form = reactive({
 const load = async () => {
   generation += 1;
   const version = generation;
+  const context = subjectKey();
+  controller?.abort();
+  controller = new AbortController();
   busy.value = true;
   error.value = '';
   contacts.value = [];
+  meta.value = { total: 0 };
   try {
-    const { data } = await API.contacts({
-      company_id: props.companyId,
-      page: page.value,
-    });
+    const { data } = await API.contacts(
+      { company_id: props.companyId, page: page.value },
+      { accountId: accountId.value, signal: controller.signal }
+    );
     if (version === generation) {
       contacts.value = data.payload;
       meta.value = data.meta;
+      return true;
     }
+    return false;
   } catch (err) {
-    if (version === generation) error.value = errorMessage(err);
+    if (version === generation) fail(err, context);
+    return false;
   } finally {
     if (version === generation) busy.value = false;
   }
 };
 const changed = async () => {
-  await load();
-  emit('changed');
+  const context = subjectKey();
+  if ((await load()) && current(context)) emit('changed');
 };
 const search = async () => {
+  const context = subjectKey();
+  searchGeneration += 1;
+  const version = searchGeneration;
+  searchController?.abort();
+  searchController = new AbortController();
   error.value = '';
+  candidates.value = [];
   try {
-    candidates.value = (await API.contacts({ q: query.value })).data.payload;
+    const { data } = await API.contacts(
+      { q: query.value },
+      { accountId: accountId.value, signal: searchController.signal }
+    );
+    if (version === searchGeneration && current(context))
+      candidates.value = data.payload;
   } catch (err) {
-    error.value = errorMessage(err);
+    if (version === searchGeneration) fail(err, context);
   }
 };
 const link = async item => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   const reassign =
     item.company_id && String(item.company_id) !== String(props.companyId);
   if (reassign && !window.confirm(T.confirmReassignment)) return;
   busy.value = true;
   error.value = '';
   try {
-    await API.saveContact({ company_id: Number(props.companyId) }, item.id, {
-      confirm_reassignment: Boolean(reassign),
-    });
+    await API.saveContact(
+      { company_id: Number(props.companyId) },
+      item.id,
+      {
+        confirm_reassignment: Boolean(reassign),
+      },
+      options
+    );
+    if (!current(context)) return;
     mode.value = '';
     candidates.value = [];
     await changed();
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
 const create = async () => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   busy.value = true;
   error.value = '';
   try {
-    const { data } = await API.saveContact({
-      ...form,
-      company_id: Number(props.companyId),
-    });
-    detailId.value = data.payload.id;
+    const { data } = await API.saveContact(
+      {
+        ...form,
+        company_id: Number(props.companyId),
+      },
+      null,
+      {},
+      options
+    );
+    if (!current(context)) return;
+    selection.value = data.payload.id;
+    detailId.value = null;
     mode.value = '';
     Object.keys(form).forEach(key => {
       form[key] = '';
     });
     await changed();
   } catch (err) {
-    error.value = errorMessage(err);
-    if (err.response?.data?.candidates)
+    fail(err, context);
+    if (current(context) && err.response?.data?.candidates)
       candidates.value = err.response.data.candidates;
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
 const detach = async item => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   if (!window.confirm(T.confirmReassignment)) return;
   busy.value = true;
   try {
-    await API.saveContact({ company_id: null }, item.id, {
-      confirm_reassignment: true,
-    });
+    await API.saveContact(
+      { company_id: null },
+      item.id,
+      {
+        confirm_reassignment: true,
+      },
+      options
+    );
+    if (!current(context)) return;
     await changed();
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
+  }
+};
+const makePrimary = async item => {
+  if (!window.confirm(t('CRM.COMPANY_CONTACT_CONTEXT.CONFIRM_PRIMARY'))) return;
+  const context = subjectKey();
+  busy.value = true;
+  error.value = '';
+  try {
+    await API.saveContact(
+      { company_id: Number(props.companyId), company_primary: true },
+      item.id,
+      { confirm_primary_change: true },
+      { accountId: accountId.value }
+    );
+    if (current(context)) await changed();
+  } catch (err) {
+    fail(err, context);
+  } finally {
+    if (current(context)) busy.value = false;
   }
 };
 watch(
-  [accountId, () => props.companyId],
+  [identity, () => props.companyId],
   () => {
-    page.value = 1;
+    generation += 1;
+    searchGeneration += 1;
+    controller?.abort();
+    searchController?.abort();
+    query.value = '';
+    Object.keys(form).forEach(key => {
+      form[key] = '';
+    });
     candidates.value = [];
     mode.value = '';
     detailId.value = null;
-    load();
+    selection.value = null;
+    if (page.value === 1) load();
+    else page.value = 1;
   },
   { immediate: true }
 );
 watch(page, load);
 onBeforeUnmount(() => {
+  active = false;
+  controller?.abort();
+  searchController?.abort();
+  searchGeneration += 1;
   generation += 1;
 });
 </script>
@@ -259,7 +366,7 @@ onBeforeUnmount(() => {
       {{ T.loading }}
     </p>
     <p
-      v-if="!busy && !contacts.length"
+      v-if="!busy && !error && !contacts.length"
       class="py-6 text-n-slate-10"
     >
       {{ T.noResults }}
@@ -272,17 +379,48 @@ onBeforeUnmount(() => {
       >
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <RouterLink
-              :to="accountScopedRoute('contacts_edit', { contactId: item.id })"
+            <button
+              type="button"
               class="font-semibold text-n-brand"
-              >{{ item.name }}</RouterLink
+              @click="selection = item.id"
             >
+              {{ item.name }}
+            </button>
             <p class="text-sm text-n-slate-10">
               {{ item.job_title }} / {{ item.department }}
             </p>
             <p class="text-sm">{{ item.email }} {{ item.phone_number }}</p>
+            <p class="mt-1 flex flex-wrap gap-2 text-xs">
+              <span
+                v-if="item.company_role"
+                class="rounded bg-n-blue-3 px-2 py-1 text-n-blue-12"
+              >
+                {{ roleLabels[item.company_role] }}
+              </span>
+              <span
+                v-if="item.company_primary"
+                class="rounded bg-n-teal-3 px-2 py-1 font-semibold text-n-teal-12"
+              >
+                {{ t('CRM.COMPANY_CONTACT_CONTEXT.PRIMARY') }}
+              </span>
+              <span
+                v-if="item.company_contact_status === 'inactive'"
+                class="rounded bg-n-amber-3 px-2 py-1 text-n-amber-12"
+              >
+                {{ t('CRM.COMPANY_CONTACT_CONTEXT.INACTIVE') }}
+              </span>
+            </p>
           </div>
           <div class="flex gap-2">
+            <button
+              v-if="!item.company_primary"
+              type="button"
+              :class="buttonClass"
+              :disabled="busy || item.company_contact_status === 'inactive'"
+              @click="makePrimary(item)"
+            >
+              {{ t('CRM.COMPANY_CONTACT_CONTEXT.MAKE_PRIMARY') }}
+            </button>
             <button
               type="button"
               :class="buttonClass"
@@ -324,5 +462,12 @@ onBeforeUnmount(() => {
         {{ T.next }}
       </button>
     </div>
+    <ContactDetailsDialog
+      v-if="selection"
+      :key="identity"
+      :contact-id="selection"
+      @close="selection = null"
+      @updated="changed"
+    />
   </section>
 </template>

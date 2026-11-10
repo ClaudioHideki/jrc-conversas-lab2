@@ -1,0 +1,174 @@
+{
+  "date": "2026-11-07",
+  "status": "native_presence_rule_reused_and_source_permission_regressions_validated_not_chrome",
+  "branch": "codex/relacionamento-v2-20261101",
+  "previous_checkpoint": "4bdc87cdd34e59cf17a447c0e7610efc17761696",
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/crm/views/contracts/ContractsView.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/leads/spec/LeadCreateAuthority.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/orders/SalesOrdersView.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/proposals/ProposalRecipientDelivery.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/proposals/ProposalsIndex.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/proposals/spec/ProposalAuthority.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/proposals/spec/ProposalRecipientDelivery.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/ApprovalOriginDetails.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.js",
+    "app/javascript/dashboard/store/crm/authorityScope.js",
+    "app/javascript/dashboard/store/crm/specs/authorityScopes.spec.js",
+    "app/javascript/dashboard/helper/accountMembershipAccess.js"
+  ],
+  "confirmed_issue": "Broad accounts JSON in newer CRM context checks treated native availability refreshes as permission changes. Actual source baselines closed unsaved lead/proposal drafts,emptied cached lists,discarded a simulated delivery receipt and reread loaded orders/contracts. This was corrected before an application build.",
+  "implementation": [
+    "Extracted the already existing Cadastro Mestre presence exclusion into a tiny pure helper. Existing useCustomerMaster identity semantics and account/feature/policy checks unchanged.",
+    "Only active_at,availability,availability_status,auto_offline are excluded from membership access identity. Account,actor,role,custom role,permissions,membership status and unknown/future scope fields retained. No membership object mutated or server grant inferred.",
+    "The CRM store authority scope and local Proposal/recipient/Order/Contract authority signatures reuse this exact rule. Other current CRM screens already consume that shared scope and receive the same compatibility fix.",
+    "No API payload,financial/version snapshot,draft namespace,role assignment,online presence list,active-contact criterion,provider conector or backend authorization modified."
+  ],
+  "validation": {
+    "baseline01": "8expected source failures,46notselected:5native store caches,lead draft,proposal draft and simulated delivery.",
+    "commercial_baseline02": "2expected source failures,22notselected:presence-only order/contract reread.",
+    "source03": "Implementation script stopped before writing because the initial helper directory did not exist. Shell then ran the source test command against unchanged production code:10failed/74passed. Artifact retained as additional baseline,never accepted as correction. Corrected to native dashboard/helper and added explicit dependent-command failure checks.",
+    "source04": "84passed,0failures:25actual-store authority cases,7shared lead/draft,12proposal,10recipient(simulated only),24order/contract origin/scope,6native Cadastro Mestre feature/role/tenant/presence/future-scope regressions.",
+    "lint05": [
+      {
+        "file": "app\\javascript\\dashboard\\helper\\accountMembershipAccess.js",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "app\\javascript\\dashboard\\routes\\dashboard\\crm\\views\\contracts\\ContractsView.vue",
+        "errors": 0,
+        "warnings": 137
+      },
+      {
+        "file": "app\\javascript\\dashboard\\routes\\dashboard\\crm\\views\\leads\\spec\\LeadCreateAuthority.spec.js",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "app\\javascript\\dashboard\\routes\\dashboard\\crm\\views\\orders\\SalesOrdersView.vue",
+        "errors": 0,
+        "warnings": 194
+      },
+      {
+        "file": "app\\javascript\\dashboard\\routes\\dashboard\\crm\\views\\proposals\\ProposalRecipientDelivery.vue",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "app\\javascript\\dashboard\\routes\\dashboard\\crm\\views\\proposals\\ProposalsIndex.vue",
+        "errors": 0,
+        "warnings": 41
+      },
+      {
+        "file": "app\\javascript\\dashboard\\routes\\dashboard\\crm\\views\\proposals\\spec\\ProposalAuthority.spec.js",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "app\\javascript\\dashboard\\routes\\dashboard\\crm\\views\\proposals\\spec\\ProposalRecipientDelivery.spec.js",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "app\\javascript\\dashboard\\routes\\dashboard\\crm\\views\\spec\\ApprovalOriginDetails.spec.js",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "app\\javascript\\dashboard\\routes\\dashboard\\jrcCustomers\\useCustomerMaster.js",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "app\\javascript\\dashboard\\store\\crm\\authorityScope.js",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "app\\javascript\\dashboard\\store\\crm\\specs\\authorityScopes.spec.js",
+        "errors": 0,
+        "warnings": 0
+      }
+    ],
+    "resources": {
+      "crm-presence-baseline01": {
+        "status": "failed",
+        "free_start": 6539124736,
+        "minimum_free": 6489436160,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 18424,
+        "exit_code": 1,
+        "free_end": 6535667712
+      },
+      "commercial-presence-baseline02": {
+        "status": "failed",
+        "free_start": 6514556928,
+        "minimum_free": 6508228608,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 21828,
+        "exit_code": 1,
+        "free_end": 6542839808
+      },
+      "crm-presence-source03": {
+        "status": "failed",
+        "free_start": 6541381632,
+        "minimum_free": 6499528704,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 24360,
+        "exit_code": 1,
+        "free_end": 6540537856
+      },
+      "crm-presence-source04": {
+        "status": "passed",
+        "free_start": 6519631872,
+        "minimum_free": 6510964736,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 14296,
+        "exit_code": 0,
+        "free_end": 6537867264
+      },
+      "crm-presence-lint05": {
+        "status": "passed",
+        "free_start": 6510964736,
+        "minimum_free": 6510964736,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 14564,
+        "exit_code": 0,
+        "free_end": 6517903360
+      }
+    },
+    "existing_warnings": "Transient proposalId string/number prop warning and existing source map/Browserslist warnings retained. No suppression.",
+    "new_native_backend_tests": false,
+    "chrome": false
+  },
+  "disk": {
+    "initial_bytes": 6539124736,
+    "minimum_measured_bytes": 6489436160,
+    "final_bytes": 6496665600
+  },
+  "preservation": {
+    "build": false,
+    "server5379_changed": false,
+    "containers_restarted": false,
+    "cleanup": false,
+    "push": false,
+    "migrations": false,
+    "real_provider_operations": false
+  },
+  "remaining": [
+    "Resume already identified DealsIndex local options,product/form caches and post-mutation lifecycle boundary.",
+    "Client identity reacts to known client access changes;native server policies remain authoritative on every request. No claim of instantaneous knowledge of unrefreshed server permission changes.",
+    "No current-source Chrome/full Word visual acceptance or C-G closure. Explicit business/external dependencies remain."
+  ]
+}

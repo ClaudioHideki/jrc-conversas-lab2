@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import HealthStabilityNote from './HealthStabilityNote.vue';
 import { buttonClass, date as formatDate } from './definitions';
 const props = defineProps({
   metrics: { type: Object, default: () => ({}) },
@@ -226,6 +227,7 @@ const date = value => formatDate(value, props.metadata.formatting);
                   `RELATIONSHIP.BANDS.${row.signals.health?.band || 'unavailable'}`
                 )
               }}
+              <HealthStabilityNote :health="row.signals.health" />
             </td>
             <td class="p-3">{{ date(row.calculated_at) }}</td>
             <td class="p-3">

@@ -6,6 +6,26 @@ class JrcApprovals::Definition
 
   def self.validate!(definition, entry)
     data = JrcServiceDesk::CanonicalJson.normalize(definition)
+    adjustment = data.is_a?(Hash) && data['adjustments']
+    JrcApprovals::AdjustmentPolicy.validate!(adjustment, entry.key) if adjustment
+    directions = data.is_a?(Hash) && data['review_directions']
+    JrcApprovals::ReviewDirectivePolicy.validate!(directions) if directions
+    base = data.is_a?(Hash) ? data.except('adjustments', 'review_directions') : data
+    invalid! if data.is_a?(Hash) && ((data.key?('adjustments') && !adjustment) || (data.key?('review_directions') && !directions))
+    if base.is_a?(Hash) && base['schema_version'] == 2
+      JrcServiceDesk::CanonicalJson.dump(data)
+      validate_base!(base.except('tiers').merge('schema_version' => 1), entry)
+      JrcApprovals::TierRanges.new(base, entry).validate!
+      data
+    else
+      validate_base!(base, entry)
+      data
+    end
+  rescue ArgumentError, NoMethodError, KeyError, TypeError
+    invalid!
+  end
+
+  def self.validate_base!(data, entry)
     JrcServiceDesk::CanonicalJson.dump(data)
     invalid! unless data.is_a?(Hash) && data.keys.sort == KEYS.sort && data['schema_version'] == 1
     invalid! unless %w[sequential parallel].include?(data['execution']) && data['completion'] == 'all_steps'
@@ -40,6 +60,8 @@ class JrcApprovals::Definition
   rescue ArgumentError, NoMethodError, KeyError, TypeError
     invalid!
   end
+
+  private_class_method :validate_base!
 
   def self.invalid!
     raise JrcApprovals::Error, 'INVALID_DEFINITION'

@@ -3,11 +3,18 @@ module Api::V1::Accounts::Crm
     before_action :set_contract, only: %i[show update pdf history upload_documents download_document download_signed_document prepare_signature send_for_signature register_manual_signature renew addendum]
 
     around_action :lock_backoffice_release, only: %i[prepare_signature send_for_signature register_manual_signature]
+    rescue_from JrcBackoffice::DocumentSafety::NotClean do
+      render json: { code: 'SIGNATURE_ARTIFACT_SECURITY_PENDING' }, status: :conflict
+    end
+    rescue_from ActiveStorage::IntegrityError do
+      render json: { code: 'SIGNATURE_ARTIFACT_INTEGRITY_INVALID' }, status: :conflict
+    end
 
     def index
       rows = visible_to_current_user(crm_scope.jrc_crm_contracts)
              .includes(:contact, :owner, :sales_order, :deal, :contract_template, documents_attachments: :blob)
              .order(created_at: :desc)
+      rows = customer_segment_scope(rows)
       render json: rows.map { |contract| serialize(contract) }
     end
 
@@ -39,25 +46,7 @@ module Api::V1::Accounts::Crm
     end
 
     def update
-      @contract.sales_order.with_lock do
-        @contract.lock!
-        before = audit_snapshot(@contract)
-        attributes = normalized_contract_params
-        if attributes.key?('lifecycle_metadata')
-          attributes['lifecycle_metadata'] = (@contract.lifecycle_metadata || {}).deep_merge(attributes['lifecycle_metadata'])
-        end
-        if attributes['status'] == 'awaiting_signature' || attributes['signature_status'].in?(%w[prepared sent signed])
-          JrcBackoffice::ContractRelease.check!(order: @contract.sales_order, actor: Current.user)
-        end
-        @contract.update!(attributes)
-        JrcApprovals::CommercialInvalidation.call(resource: @contract.reload, user: Current.user)
-        if %w[active expiring renewed].include?(@contract.status)
-          JrcApprovals::CommercialGate.check!(resource: @contract, user: Current.user, key: 'contracts.company_signature')
-        end
-        sync_signature_status_from_contract_status!(@contract)
-        sync_order_after_signature!(@contract)
-        audit!(@contract, 'contract_updated', before, audit_snapshot(@contract))
-      end
+      update_contract!
       render json: serialize(@contract.reload)
     end
 
@@ -99,7 +88,9 @@ module Api::V1::Accounts::Crm
       end
 
       attachment = @contract.signed_document
-      send_data attachment.blob.download, filename: attachment.filename.to_s,
+      response.headers['Cache-Control'] = 'no-store'
+      response.headers['X-Content-Type-Options'] = 'nosniff'
+      send_data signed_document_bytes(attachment), filename: attachment.filename.to_s,
                 type: attachment.content_type, disposition: 'attachment'
     end
 
@@ -132,21 +123,14 @@ module Api::V1::Accounts::Crm
         return render json: { message: 'Este contrato não está configurado para assinatura por provedor.' }, status: :unprocessable_entity
       end
 
-      external_id = params[:external_id].to_s.presence
-      unless external_id
-        return render json: {
-          message: 'Integração externa não configurada/executada. Informe o identificador retornado pelo provedor somente após envio real.'
-        }, status: :unprocessable_entity
-      end
-
-      @contract.with_lock do
-        if @contract.signature_status == 'signed' || @contract.signature_mode != 'provider'
-          return render json: { message: 'O estado da assinatura foi alterado. Atualize a tela.' }, status: :unprocessable_entity
-        end
-        @contract.update!(signature_external_id: external_id, signature_status: 'sent', status: 'awaiting_signature')
-        audit!(@contract, 'contract_signature_sent', {}, { provider: @contract.signature_provider, external_id: external_id })
-      end
-      render json: serialize(@contract.reload)
+      # A manually typed ID is neither a provider acknowledgement nor proof
+      # of the PDF/version/recipients that were sent. Keep historical IDs,
+      # but do not manufacture a new delivery fact through this legacy route.
+      render json: {
+        code: 'VERSIONED_DELIVERY_REQUIRED',
+        message: 'O envio exige versão do contrato, assinantes e conexão vinculados. ' \
+                 'O fluxo integrado ainda não está disponível; nenhum envio foi confirmado.'
+      }, status: :unprocessable_entity
     end
 
     def register_manual_signature
@@ -164,12 +148,14 @@ module Api::V1::Accounts::Crm
                           .evaluate(key: 'contracts.company_signature', resource_id: @contract.id, lock: true)
                       end
         company_pending = gate_result && gate_result[:status] != 'ready'
+        operational_pending = JrcBackoffice::SignatureRelease.operational_v2?(@contract) && !JrcBackoffice::SignatureRelease.verified?(@contract)
         file = params[:signed_file]
         blob = ActiveStorage::Blob.create_and_upload!(io: file.tempfile, filename: file.original_filename,
           content_type: 'application/pdf', identify: false)
         @contract.signed_document.attach(blob)
         @contract.update!(signature_mode: 'manual', signature_provider: nil, signature_status: 'signed',
-          signed_by_name: signed_name, signed_at: signed_time, status: company_pending ? 'awaiting_signature' : 'active')
+          signed_by_name: signed_name, signed_at: signed_time,
+          status: company_pending || operational_pending ? 'awaiting_signature' : 'active')
         sync_order_after_signature!(@contract)
         audit!(@contract, 'contract_manual_signature_registered', {}, {
           signed_by_name: signed_name, signed_at: signed_time, recorded_at: Time.current,
@@ -225,6 +211,46 @@ module Api::V1::Accounts::Crm
     end
 
     private
+
+    def signed_document_bytes(attachment)
+      return attachment.blob.open(&:read) unless JrcBackoffice::PrivateBlob.protected?(attachment.blob.id)
+
+      receipt = JrcBackoffice::SignatureAcceptance.find_by!(account_id: Current.account.id, contract_id: @contract.id,
+                                                            signed_blob_id: attachment.blob.id)
+      raise ActiveStorage::IntegrityError unless receipt.integrity?
+
+      bundle = receipt.bundle
+      reader = JrcBackoffice::Signatures::EvidenceOperations.new(account: Current.account, actor: Current.user,
+                                                                 request_id: bundle.delivery.backoffice_request_id)
+      reader.download(delivery_id: bundle.delivery_id, kind: 'signed_document').last
+    end
+
+    def update_contract!
+      @contract.sales_order.with_lock do
+        @contract.lock!
+        JrcBackoffice::Signatures::DeliveryGuard.check_editable!(@contract)
+        before = audit_snapshot(@contract)
+        attributes = normalized_contract_params
+        if attributes.key?('lifecycle_metadata')
+          attributes['lifecycle_metadata'] = (@contract.lifecycle_metadata || {}).deep_merge(attributes['lifecycle_metadata'])
+        end
+        if attributes['status'] == 'awaiting_signature' || attributes['signature_status'].in?(%w[prepared sent signed])
+          JrcBackoffice::ContractRelease.check!(order: @contract.sales_order, actor: Current.user)
+        end
+        if attributes['status'].in?(%w[active expiring renewed]) && JrcBackoffice::SignatureRelease.operational_v2?(@contract) &&
+           !JrcBackoffice::SignatureRelease.verified?(@contract)
+          raise JrcApprovals::Error, 'SIGNATURE_EVIDENCE_REQUIRED'
+        end
+        @contract.update!(attributes)
+        JrcApprovals::CommercialInvalidation.call(resource: @contract.reload, user: Current.user)
+        if %w[active expiring renewed].include?(@contract.status)
+          JrcApprovals::CommercialGate.check!(resource: @contract, user: Current.user, key: 'contracts.company_signature')
+        end
+        sync_signature_status_from_contract_status!(@contract)
+        sync_order_after_signature!(@contract)
+        audit!(@contract, 'contract_updated', before, audit_snapshot(@contract))
+      end
+    end
 
     def lock_backoffice_release
       @contract.sales_order.with_lock do

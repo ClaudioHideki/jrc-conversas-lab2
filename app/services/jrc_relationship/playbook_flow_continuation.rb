@@ -76,6 +76,16 @@ class JrcRelationship::PlaybookFlowContinuation
     raise ArgumentError, 'playbook_flow_effect_not_approved' unless JrcRelationship::PlaybookFlow::INTERNAL_NODES.include?(type)
   end
 
+  # A replay returns the already sealed native message, never a new provider effect.
+  # The caller must additionally reconcile it with the current ownership ledger.
+  def self.replayed_message(run, type, data)
+    return unless managed?(run) && %w[message media].include?(type)
+
+    context = JrcRelationship::PlaybookFlowRunContext.new(run).authorize!
+    authorize_effect!(context.reference, run, type, data)
+    JrcRelationship::PlaybookFlowJournal.new(run).existing_message
+  end
+
   def self.delivery_allowed?(run)
     return true unless managed?(run)
 

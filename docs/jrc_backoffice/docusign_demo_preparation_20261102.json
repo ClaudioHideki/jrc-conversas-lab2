@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-02",
+  "status": "roteiro preparado; ambiente externo não configurado nem homologado",
+  "scope": "DocuSign é o primeiro e único conector. Fluxo interno e histórico continuam independentes do fornecedor.",
+  "required_before_external_test": [
+    "Concluir e validar B3: intenção durável, dispatch pós-commit, recuperação de resultado incerto, consumidor autenticado e conferência de evidências. O serviço de admissão isolado não habilita envio.",
+    "Criar ou disponibilizar conta DocuSign Developer/demo controlada pela JRC, sem dados reais de clientes.",
+    "Definir usuário técnico e pessoas de teste que consentiram participar; não reutilizar e-mails/CPF reais como fixtures.",
+    "Disponibilizar homologação isolada com HTTPS público, armazenamento privado persistente, Rails e worker na mesma revisão e fila monitorada. Isso ainda exige autorização de implantação.",
+    "Configurar antivírus real e validar a cadeia documental. Resposta simulada de scanner não serve como homologação do controle."
+  ],
+  "configuration_steps": [
+    {
+      "step": 1,
+      "action": "No ambiente demo, criar Integration Key para eSignature e chave RSA de integração; registrar IDs do aplicativo, usuário técnico e API Account.",
+      "security": "Guardar a chave privada no armazenamento seguro autorizado. Não colar chaves, tokens, HMAC ou payloads completos em chats, commits, screenshots ou logs.",
+      "reference": "https://www.docusign.com/blog/developers/the-trenches-authenticate-without-user-interaction-system-user"
+    },
+    {
+      "step": 2,
+      "action": "Cadastrar uma redirect URI exata para o consentimento e conceder ao usuário técnico os escopos signature e impersonation. O conector existente usa JWT RS256.",
+      "note": "A aprovação da Central do JRC não substitui consentimento OAuth da DocuSign.",
+      "reference": "https://www.docusign.com/blog/developers/oauth-jwt-granting-consent"
+    },
+    {
+      "step": 3,
+      "action": "No painel de configuração existente do Backoffice, um administrador com cobertura autorizada informa environment=demo, integration_key, impersonated_user_id, external_account_id, private_key e connect_hmac_keys. Salvar cria revisão imutável da conexão.",
+      "existing_code": [
+        "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignatureSettings.vue",
+        "app/controllers/api/v1/accounts/crm/signature_integrations_controller.rb",
+        "app/services/jrc_backoffice/signature_configuration.rb"
+      ]
+    },
+    {
+      "step": 4,
+      "action": "Executar a verificação de autorização existente. Conferir no servidor o usuário e a conta retornados por userinfo; o host de API é derivado dessa resposta validada, sem aceitar URL arbitrária.",
+      "existing_code": "app/services/jrc_backoffice/docusign/oauth_session.rb",
+      "expected": "Verificação de autenticação aprovada não representa envio ou assinatura."
+    },
+    {
+      "step": 5,
+      "action": "Configurar DocuSign Connect JSON com HMAC-SHA256 para a URL HTTPS exibida pelo painel da revisão atual. Não acrescentar /mcp, redirecionar um webhook existente ou inventar uma URL de callback.",
+      "events_supported_by_current_inbox": [
+        "envelope-sent", "envelope-delivered", "envelope-completed", "envelope-declined", "envelope-voided",
+        "recipient-sent", "recipient-delivered", "recipient-completed", "recipient-declined"
+      ],
+      "settings": "Habilitar reconhecimento e logs no provedor, manter PDFs/certificados fora dos eventos e obter os arquivos pela API. Validar conteúdo exato do corpo, incluindo quebras de linha.",
+      "reference": "https://www.docusign.com/blog/developers/event-notifications-using-json-sim-and-hmac"
+    },
+    {
+      "step": 6,
+      "action": "Gerar evento real de teste no provedor e comprovar recepção, HMAC, conta externa, vínculo à conexão e deduplicação. connect_checked_at isoladamente não é evidência de homologação externa.",
+      "existing_code": "app/services/jrc_backoffice/docusign/connect_inbox.rb",
+      "pending": "Consumidor e reconciliação B3 ainda precisam ser concluídos antes de habilitar a operação."
+    }
+  ],
+  "external_acceptance_after_b3": [
+    "Na mesma solicitação sintética, conferir pedido/cliente, versão/PDF SHA-256, todos os assinantes e poderes aprovados pela única Central.",
+    "Enviar pela operação interna; comprovar que intenção/transaction_id/conexão já estavam commitados antes do POST e que a resposta contém envelope confirmado da conta correta.",
+    "Simular perda da resposta e recuperar pelo mesmo transactionId sem criar outro envelope. A documentação limita a recuperação por transactionId a sete dias; ausência na consulta não autoriza repetir o POST automaticamente.",
+    "Alterar o padrão apenas para novos envios e comprovar que consulta, lembrete, cancelamento, eventos e evidências do envio anterior usam a conexão original.",
+    "Executar assinatura conjunta real no demo e conferir posições, destinatários, datas, PDF final e certificado. completed sozinho nunca libera implantação.",
+    "Conferir o documento final contra a versão enviada e manter hashes/arquivos privados e trilha de validação. Não afirmar verificação criptográfica ou validade jurídica que o verificador não tenha executado.",
+    "Testar duplicidade/reordenação de eventos, conta incorreta, assinatura ausente, mudança de versão, revogação de acesso e negação de download por outro tenant.",
+    "Comprovar separadamente aprovação da empresa, checklist, implantação, financeiro e conclusão. Nenhuma dessas conclusões confirma satisfação do cliente."
+  ],
+  "limits_and_sources": [
+    {
+      "fact": "Recuperação de envelope por transactionId: janela de sete dias; usar a conta original.",
+      "source": "https://www.docusign.com/blog/developers/common-api-tasks-use-transactionid-to-find-the-envelope-you-created"
+    },
+    {
+      "fact": "Connect é a via preferida para eventos. Consultas periódicas devem respeitar os limites de polling do provedor; não usar atualização a cada clique como polling sem controle.",
+      "source": "https://developers.docusign.com/platform/webhooks/connect/"
+    },
+    {
+      "fact": "O certificado de conclusão registra contexto e eventos do envelope. Sua obtenção não substitui a conferência interna de todos os signatários e da versão exata.",
+      "source": "https://support.docusign.com/s/document-item?bundleId=oeq1643226594604&language=en_US&topicId=gpa1578456339545.html"
+    },
+    {
+      "fact": "As páginas de referência REST oficiais foram consultadas, mas não devolveram texto legível nesta sessão; detalhes foram confrontados com os materiais oficiais do fornecedor e seu SDK público.",
+      "sources": [
+        "https://developers.docusign.com/docs/esign-rest-api/reference/envelopes/envelopes/liststatuschanges/",
+        "https://developers.docusign.com/docs/esign-rest-api/reference/envelopes/envelopedocuments/get/",
+        "https://docusign.github.io/docusign-esign-node-client/module-api_EnvelopesApi.html"
+      ]
+    }
+  ],
+  "executed_externally": false,
+  "credentials_received": false,
+  "production_or_deploy_changes": false
+}

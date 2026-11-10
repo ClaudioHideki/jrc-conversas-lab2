@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "d623600dc6ae5b8d9f60d7f81a44d079f47f7360",
+  "status": "Native automatic routing now respects configured effective availability; not final analyst withdrawal or F1/C-G closure.",
+  "files": [
+    "app/services/jrc_relationship/routing_availability.rb",
+    "spec/requests/api/v1/accounts/relationship/routing_contention_spec.rb",
+    "spec/services/jrc_relationship/operational_routing_availability_spec.rb",
+    "spec/services/jrc_relationship/operational_routing_concurrency_spec.rb",
+    "app/controllers/api/v1/accounts/relationship/base_controller.rb",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ActionCasePanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystWorkspace.spec.js",
+    "app/services/jrc_approvals/ledger.rb",
+    "app/services/jrc_relationship/distribution_approval.rb",
+    "app/services/jrc_relationship/operational_routing.rb"
+  ],
+  "implementation": [
+    "Account and matching unit/company/team/segment/product capacity constraints accumulate; zero effective capacity or absent roster entry cannot become automatic availability.",
+    "Candidate must remain an active current account member with native CS manage and actual customer/unit visibility; no permissions or memberships are added.",
+    "Configured authorized substitutes are selected by the existing queue strategy. Without one, the real action remains queued without owner, preserving critical priority, evidence and SLA.",
+    "Explicit native manual owner choices remain unchanged. The action panel explains pending routing and displays named trend/SLA priority factors.",
+    "The existing deterministic configuration lock gains a nonblocking variant. Routing refuses contention before queue changes, preventing an inverted wait while an assignment is locked. Native API returns409 and permits a normal retry."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "routing-availability01",
+      "examples": 20,
+      "failures": 2,
+      "note": "Thirteen existing operational regressions and independent-connection contention passed. Two new fixtures needed eager actor creation and the source operator own native unit grant; no authorization was relaxed."
+    },
+    {
+      "label": "routing-availability-final",
+      "examples": 6,
+      "failures": 0
+    },
+    {
+      "label": "routing-native-http",
+      "examples": 1,
+      "failures": 0,
+      "note": "Two actual HTTP requests:409 with zero partial writes, then201 with persisted native action and CRM activity."
+    },
+    {
+      "label": "routing-ui01",
+      "tests": 6,
+      "failures": 0,
+      "note": "One new routing/factor display case plus five existing analyst workflow cases; not Chrome."
+    }
+  ],
+  "static_gates": [
+    "New RoutingAvailability and3 new specs:0 RuboCop offenses.",
+    "Four shared Ruby paths:0 added cop counts against HEAD; existing unrelated debt remains visible.",
+    "ESLint0 errors;18 existing ActionCasePanel warnings, new/updated test0 warnings.",
+    "git diff --check passed."
+  ],
+  "runtime_preservation": {
+    "containers": "All four original StartedAt timestamps unchanged; running.",
+    "server5379": "No changes or requests performed. Listener verification requested read-only.",
+    "initial_read_check": "Sandbox denied Docker pipe and TCP inventory; read-only elevated check succeeded for Docker. No automatic approval rejection."
+  },
+  "remaining": [
+    "Full native project-owner transfer/cadence successor receipts and final governed analyst withdrawal.",
+    "Fresh-build Chrome desktop/mobile/light-dark acceptance remains unauthorized."
+  ],
+  "disk_final_bytes": 7401496576,
+  "next": "D: prevent monetary adjustment from being ignored by an existing percentage-based proposal valuation, using native mutation and immutable revision paths.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 change,container restart or external operation."
+}

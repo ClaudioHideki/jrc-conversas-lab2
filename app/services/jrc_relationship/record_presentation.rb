@@ -5,6 +5,14 @@ class JrcRelationship::RecordPresentation
     (100.0 * (record.proposed_mrr_cents - contract.monthly_cents) / contract.monthly_cents).round(2)
   end
 
+  def self.history_values(value, fields, model:)
+    attributes = value.slice(*fields)
+    return attributes unless model == JrcRelationship::Action
+
+    attributes.merge('alert_review' => JrcRelationship::AlertReview.projection(value['metadata'], factors: value['factors'],
+                                                                                                  priority: value['priority']))
+  end
+
   def initialize(context, snapshot:, risk_actions:, risks: {})
     @context = context
     @snapshot = snapshot
@@ -14,6 +22,7 @@ class JrcRelationship::RecordPresentation
 
   def augment!(attrs, record)
     case record
+    when JrcRelationship::Action then action!(attrs, record)
     when JrcRelationship::RiskCase then risk!(attrs, record)
     when JrcRelationship::ExpansionSignal then expansion!(attrs, record)
     when JrcRelationship::Survey then survey!(attrs, record)
@@ -34,6 +43,11 @@ class JrcRelationship::RecordPresentation
   end
 
   private
+
+  def action!(attrs, record)
+    attrs['metadata'] = attrs['metadata'].except('alert_review')
+    attrs['alert_review'] = JrcRelationship::AlertReview.projection(record.metadata, factors: record.factors, priority: record.priority)
+  end
 
   def renewal!(attrs, record)
     customer = record.assignment.customer_context(@context.member)

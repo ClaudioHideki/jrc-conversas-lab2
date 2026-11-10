@@ -1,0 +1,138 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "12cab9ff304cc540d65117adaa33f8b70c7a481a",
+  "status": "F2 workspace card source workflow fixed and locally tested; C-G remain open",
+  "word_reference": {
+    "document": "RelationshipV2 Word",
+    "paragraphs": [
+      73,
+      154
+    ],
+    "source_review": "Actual dashboard-to-generic-list mismatch; not a cosmetic card redesign"
+  },
+  "finding": [
+    "Dashboard mode=mine scopes portfolio ownership; the old generic action-list shortcut mine=true scopes action ownership. Delegated work on a current portfolio can contribute to a counter but disappear from its linked list.",
+    "The old actions_today card supplied no due-day predicate and at_risk supplied no risk predicate. Opening those lists did not reproduce the counters.",
+    "Native MetricDrilldown already applied the same scoped portfolio/source predicates but had no overdue_returns case; native Action rows linked to generic customer health instead of their exact action."
+  ],
+  "implemented": [
+    "Existing five summary cards retain placement/colors and now open a reusable Dialog containing the installed native MetricDrilldownPanel. Dashboard and popup share the exact existing portfolio/segment parameters. Original portfolio, health and action pages/editors remain present. No changed portfolio-versus-action ownership rules.",
+    "Actual0 counters are inspectable; unavailable measurements are disabled and remain distinct from0. Existing native table/paging/source links reused, with wrapping/min-width fixes for dialog content. No new business data store.",
+    "Missing overdue_returns native source uses active authorized actions and actual expired return_at, matching the counter even while SLA is paused. It displays that actual reassessment timestamp rather than an unrelated future deadline.",
+    "Every native Action metric row now opens its exact action_id in the current account. mine=false prevents an unrelated personal owner filter from hiding delegated work; current native record access remains authoritative.",
+    "Popup aborts/clears on identity/filter changes and denial, reloads the enclosing scope on403/404, handles unavailable data and bounded disappearing-page recovery. Workspace also observes role/grant changes before retaining source popups. No source write or new API endpoint."
+  ],
+  "tests_non_additive": [
+    {
+      "gate": "workspace-card-native01",
+      "examples": 17,
+      "failures": 1,
+      "explanation": "All13 existing operations regressions and3of4new scenarios passed. Remaining fixture compared database microseconds to native JSON milliseconds; changed only the synthetic instant to whole seconds."
+    },
+    {
+      "gate": "workspace-card-native-final",
+      "examples": 4,
+      "failures": 0,
+      "coverage": [
+        "real counter-source equality, delegated ownership and paused SLA",
+        "account-local day differs from UTC day",
+        "exact action navigation/show and actual overdue return date",
+        "authorized risk observation/portfolio scope",
+        "real26-row pagination, foreign tenant denial and revoked module"
+      ]
+    },
+    {
+      "gate": "workspace-card-ui01",
+      "examples": 13,
+      "failures": 0,
+      "kind": "Vue/API simulations, not real Chrome homologation",
+      "coverage": [
+        "existing workspace/filter/case regressions",
+        "card-to-popup exact scope without misleading generic navigation",
+        "zero versus unavailable",
+        "role/scope invalidation",
+        "reused source panel/navigation/paging",
+        "denial and late-response clearing",
+        "bounded page recovery"
+      ]
+    }
+  ],
+  "static": {
+    "new_ruby_spec_offenses": 0,
+    "shared_native_delta": [
+      {
+        "path": "app/services/jrc_relationship/metric_drilldown.rb",
+        "baseline_count": 39,
+        "current_count": 39,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "eslint_errors": 0,
+    "eslint_warnings": {
+      "AnalystWorkspace.vue": 23,
+      "MetricDrilldownDialog.vue": 1,
+      "MetricDrilldownPanel.vue": 10
+    },
+    "git_diff_check": 0,
+    "translation": "Added missing METRICS.overdue_returns heading in en source only."
+  },
+  "resources": {
+    "initial_free_bytes": 7267414016,
+    "native_initial": {
+      "start": 7256154112,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/workspace_card_sources_spec.rb": "d76a7dd4d8da6e216141009cccb1c9e6dee0a1db76d14b6cdc712808badff6ee",
+        "spec/services/jrc_relationship/operations_spec.rb": "bda925e5af1cb60ef021ab97a7b0ae9fa6b19c5616f7aae9f3e3f11f7181d43f"
+      },
+      "minimum": 7239024640,
+      "exit_code": 1,
+      "end": 7259873280
+    },
+    "native_final": {
+      "start": 7252660224,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/workspace_card_sources_spec.rb": "798c0e7f75a551aa8928374c2f74e97715884dfcc70475ad52a1a4bced0e523d"
+      },
+      "minimum": 7252205568,
+      "exit_code": 0,
+      "end": 7252205568
+    },
+    "vue": {
+      "status": "passed",
+      "free_start": 7263207424,
+      "minimum_free": 7239024640,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 17648,
+      "exit_code": 0,
+      "free_end": 7260864512
+    },
+    "current_free_bytes": 7252766720
+  },
+  "files_sha256": {
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "51b05fa0b805e63c2e42de4801af75fc56b737df8a4a8888a48edef1fa71dd2e",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystWorkspace.vue": "d6bbdb88a06a0c24250de0c579d48adfc274e8e7a555741aad132d0ccbda4715",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/MetricDrilldownPanel.vue": "e084dd475dab8c04674781024b82b15dd16e4f9343c4be2d018914d168fbbd7e",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystWorkspace.spec.js": "d5e1c2bc5803a5ae56366ab1ad37215787497eceb3306d1f874dfb77d400739b",
+    "app/services/jrc_relationship/metric_drilldown.rb": "580fd26d67118ef84a472cb0b6e234d76408a66608545c1bd4725f4d495064c0",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/MetricDrilldownDialog.vue": "035d0c37dad441b0526c65ad3bcad41a4fb886d0a3535029cf017d205653f511",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/metricDrilldownDialog.spec.js": "4bcf1ec18b86c71e8569c4300083cd1e84c8eedeeed4e36e08a14813bc9ca98e",
+    "spec/requests/api/v1/accounts/relationship/workspace_card_sources_spec.rb": "798c0e7f75a551aa8928374c2f74e97715884dfcc70475ad52a1a4bced0e523d"
+  },
+  "limitations": [
+    "Native metrics are current read projections; values may change between requests. No immutable cross-record read snapshot is claimed.",
+    "No fresh build or desktop/mobile Chrome acceptance. No runtime/server5379/container/source permission changes, migration, cleanup, push, deployment or external operation.",
+    "Word stage closure remains open. Final analyst removal scope/TRR/external demo and user-deferred documents retain their constraints."
+  ],
+  "next_active_work": "F1 remaining CRM commitment origins: make linked pending Agenda ownership actionable through existing authorized CRM editors, preserving transfer/withdrawal guards."
+}

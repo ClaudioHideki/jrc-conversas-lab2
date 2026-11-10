@@ -1,0 +1,221 @@
+{
+  "date": "2026-11-02",
+  "state": "Incremento local de intenção de envio e cancelamento antes do despacho validado. Etapa B e quatro frentes permanecem parciais; não é release.",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "010426708b40ab3811536bb6c89c1cc2fee87821",
+  "implemented": [
+    "Prévia autorizada da versão imutável, poderes aprovados e conexão pronta; nenhuma chamada ao fornecedor nessa leitura.",
+    "Enviar para assinatura na solicitação registra Admissions nativa e publica somente o ID interno para o job; repetição usa a mesma chave.",
+    "Worker reutiliza Dispatch nativo com reserva antes de I/O, revalidação do remetente e conexão originalmente admitida. Resultado incerto não provoca novo POST.",
+    "Recuperação de intenções preparadas em lotes de 100 cobre parada entre commit e fila; intenções já consumidas, incertas ou terminais são excluídas.",
+    "Cancelamento local idempotente apenas antes do despacho; um despacho já reivindicado é recusado. Não cancela envelope externo.",
+    "Confirmação vinculada à versão e conexão exatas; falha de rede preserva a chave. Mudança de contexto/revogação fecha os dados e exige nova prévia.",
+    "Versão já vinculada a uma intenção exige nova versão antes de outro envio; não apresenta prévia impossível como pronta."
+  ],
+  "files": [
+    "app/controllers/api/v1/accounts/crm/backoffice_signature_deliveries_controller.rb",
+    "app/javascript/dashboard/api/crm/backofficeSignatures.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractSignatures.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignatureIntentDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/useSignatureHistory.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/useSignatureIntent.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractSignatures.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/SignatureIntentDialog.spec.js",
+    "app/jobs/jrc_backoffice/signature_dispatch_job.rb",
+    "app/jobs/jrc_backoffice/signature_dispatch_recovery_job.rb",
+    "app/services/jrc_backoffice/signatures/preparation.rb",
+    "config/routes.rb",
+    "config/schedule.yml",
+    "spec/jobs/jrc_backoffice/signature_dispatch_job_spec.rb",
+    "spec/requests/api/v1/accounts/crm/backoffice_signature_submission_commit_spec.rb",
+    "spec/requests/api/v1/accounts/crm/backoffice_signature_submission_spec.rb"
+  ],
+  "validation": {
+    "backend": {
+      "status": "passed selected checks",
+      "unique_examples": 35,
+      "latest_result_per_example_failures": 0,
+      "single_green_suite": false,
+      "batches": [
+        {
+          "artifact": ".codex/signature-submission-validated-backend.json",
+          "examples": 35,
+          "failures": 1
+        },
+        {
+          "artifact": ".codex/signature-submission-http-commit-tests.json",
+          "examples": 2,
+          "failures": 0
+        }
+      ],
+      "source_delta": {
+        "changed_files": [
+          "spec/requests/api/v1/accounts/crm/backoffice_signature_submission_commit_spec.rb"
+        ],
+        "production_code_unchanged": true,
+        "all_frontend_files_unchanged": true,
+        "previous_source": "/consolidation-signature-submission-validated",
+        "current_source": "/consolidation-signature-submission-http",
+        "reason": "Correct public HTTP500 expectation under native show_exceptions=true; preserve committed-row/retry/no-external-request assertions."
+      },
+      "reason": "Native show_exceptions=true renders HTTP500. Corrected request spec asserts500 and preserves exact committed row, one intent/event, actor/account/connection and retry/no-provider assertions. No production behavior or original regression expectation was weakened."
+    },
+    "frontend": {
+      "files": 37,
+      "tests": 233,
+      "passed": 233,
+      "failed": 0
+    },
+    "lint": {
+      "ruby_files": 8,
+      "ruby_offenses": 0,
+      "frontend_files": 14,
+      "frontend_errors": 0,
+      "frontend_warnings": 0,
+      "branch_wide_clean": false,
+      "branch_debt": "16 ocorrências legadas do incremento Cadastro Mestre continuam abertas; não representam lint limpo da branch."
+    },
+    "source": {
+      "files": 11259,
+      "mismatches": 0,
+      "snapshot": "/consolidation-signature-submission-validated",
+      "three_raw_sql_pins_preserved": true,
+      "final_test_snapshot": "/consolidation-signature-submission-http",
+      "final_delta": "somente um teste corrigido para o HTTP500 nativo; nenhum arquivo de produção alterado"
+    },
+    "rails_load": "zeitwerk:check passou",
+    "frontend_build": "Vite assets de produção passou em 4min7s; nenhuma imagem Docker construída",
+    "browser": {
+      "status": "passed",
+      "synthetic_only": true,
+      "actor": "agent, BUSINESS_UNIT; sem escopo GROUP",
+      "initial_confirmation": 202,
+      "local_cancellation": 200,
+      "foreign_account_denied": 401,
+      "reopened_state": "canceled",
+      "release_blocked": true,
+      "private_pdf_preserved": true,
+      "original_rows_unchanged": 17,
+      "runtime_errors": 0,
+      "themes": [
+        "claro",
+        "escuro"
+      ],
+      "mobile": "390x844, sem overflow horizontal; captura95 posiciona o estado Cancelado visível;93 mostra o contexto inicial",
+      "queue": "TestAdapter: o job do fornecedor não foi executado pela navegação"
+    },
+    "simulations": "Scanner e prontidão da conexão usados apenas na preparação sintética. HTTP do fornecedor é simulado nos testes de job/serviço, nunca homologação externa."
+  },
+  "initial_attempts": {
+    "backend": "6 casos/1 falha em snapshot substituído; interrompido com INT após conferir PID/cwd/contêiner. Fixture de revisão manual invalidou prontidão; configuração corrigida pelo serviço nativo. Relatórios preservados.",
+    "frontend_sandbox": "Primeira tentativa não iniciou esbuild por spawn EPERM; repetição autorizada e concluída233/0.",
+    "integrity": "Primeiro runner usou tmp/storage padrão e não encontrou o PDF; repetição configurou o mesmo storage privado do servidor e passou. Nenhum arquivo foi movido."
+  },
+  "remaining": [
+    "PDF final/certificado, conferência de todos os destinatários e verificador interno de evidências ainda pendentes; SignatureEvidence.verifier permanece nil.",
+    "Consulta operacional direta, reenvio/lembrete e cancelamento após despacho ainda pendentes. Histórico local não é consulta ao fornecedor.",
+    "Conta DocuSign Developer/demo e consentimento/Connect reais ainda precisam de preparação e homologação externa.",
+    "Nexora continua com falha preexistente ao tentar liberar fluxo v2 usando PDF manual sem evidência verificada; não foi enfraquecido nem removido.",
+    "C/D/E/F/G e matriz integral ainda não concluídas; continuar todas as frentes conforme o complemento aprovado."
+  ],
+  "migrations_added": [],
+  "dependencies_added": [],
+  "operational_requirements": {
+    "rails_and_worker_code": "mesmo commit quando houver publicação autorizada; nenhum ambiente foi alterado agora",
+    "scheduler": "SignatureDispatchRecoveryJob adicionado ao schedule.yml a cada 5min, sem iniciar scheduler/Sidekiq permanente nesta etapa",
+    "production_migrations_executed": false
+  },
+  "publication": {
+    "push": false,
+    "image_build": false,
+    "image_publish": false,
+    "deployment": false,
+    "compose_changed": false,
+    "production_changed": false
+  },
+  "artifacts": [
+    {
+      "path": ".codex/signature-submission-backend-initial.json",
+      "sha256": "846e122921d78ad6a08bdb48732fba0f84643c1e39d2ad0757969961f90e3eb4"
+    },
+    {
+      "path": ".codex/signature-submission-initial-interrupted.json",
+      "sha256": "0558584609278f351ef80eaa389e8e634a5eacfe7de2a6a6199eabf9ec834f1e"
+    },
+    {
+      "path": ".codex/signature-submission-validated-source-verified.json",
+      "sha256": "f91d1a3a56e59b659b578ae6e363a36f430ced6f73548bca58b915b3d44b3057"
+    },
+    {
+      "path": ".codex/signature-submission-validated-ruby-final.json",
+      "sha256": "0fa166eba05ee85b812a924513631db65b90338627e034148425c4fa0ce78adc"
+    },
+    {
+      "path": ".codex/signature-submission-validated-frontend-regression.json",
+      "sha256": "c633eb881895642ca6d34952b15e6d2aa30c0bc40f780959eb62d97a9a28e4b1"
+    },
+    {
+      "path": ".codex/signature-submission-validated-frontend-lint-final.json",
+      "sha256": "cc3eb6e2cc9da403f8ce3f6a4c80c545fa2e2eaec49b1927e92a784d8466b9da"
+    },
+    {
+      "path": ".codex/signature-submission-production-assets.log",
+      "sha256": "d5af6f504a1229219c42221e248d63b0c5bd79a7b329f1a4d3429cdf97286bb9"
+    },
+    {
+      "path": ".codex/signature-submission-validated-zeitwerk.log",
+      "sha256": "0b5652ecc42dad18342ff1ea1b9dd80dd33b41a2d7424ecd469b0ba22aacdc72"
+    },
+    {
+      "path": ".codex/signature-intent-ui-fixture.json",
+      "sha256": "bb5136f8cbe82059261124b61a7be84f5a840a9b95b8cf082d2d9277baad9cd1"
+    },
+    {
+      "path": ".codex/signature-intent-ui-server-mode.json",
+      "sha256": "e7e39d40c33cb49108afec01f2cb20de8c015299e941e820c463ca8557f5b243"
+    },
+    {
+      "path": ".codex/signature-intent-ui-integrity.json",
+      "sha256": "fbf3822d4454723736eabf1b229e496ac0e5bda54e023a21e46e843d6997e0e6"
+    },
+    {
+      "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/assinatura-intencao-resultado.json",
+      "sha256": "56573cb8a0cf12dadfaefddb52190d4529846197335158b1e73720a586b89d75"
+    },
+    {
+      "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/assinatura-intencao-celular-revalidado-resultado.json",
+      "sha256": "f335d5b51105cb66d1c80cae2c834ef273740b6a22e1bfbc6331155fad3ec786"
+    },
+    {
+      "path": ".codex/signature-submission-validated-backend.json",
+      "sha256": "d3b777a57528f0cb135bcbfa6715fe99e9819d8da59abf8549595eb3686a4a3f"
+    },
+    {
+      "path": ".codex/signature-submission-http-commit-tests.json",
+      "sha256": "80c6e39d2cc68ecd5384c75ebaa9670a2f6543b09012237ee9159c43222ff836"
+    },
+    {
+      "path": ".codex/signature-submission-http-delta.json",
+      "sha256": "66f06c4c5734c207ae78329558bf026c463cec5292d3444598e5b3f312c8c7ce"
+    },
+    {
+      "path": ".codex/signature-submission-http-source-verified.json",
+      "sha256": "ae0ba314d56baab67373810e4eb64ff3f6905c442ab8e4c143c4b3370d75a605"
+    },
+    {
+      "path": ".codex/signature-submission-http-ruby.json",
+      "sha256": "c9d4eff00543c7681f3df50430418a49e350dd1e89bbbe9100aca21e33e78631"
+    },
+    {
+      "path": ".codex/signature-submission-verified-composition.json",
+      "sha256": "da7534baa47555df188f487a9cbd28862f801a69571281ffcdb849c9bb750a6b"
+    },
+    {
+      "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/REVISAO-ASSINATURA-INTENCAO.html",
+      "sha256": "8903013fe9a49901e480e6159d2aefd1d14659df3eec613d3f5cd2f3f4179b0c"
+    }
+  ],
+  "next": "Continuar integralmente Cadastro Mestre, Central de Aprovações, Backoffice restante e Relacionamento, depois integração G, conforme complemento aprovado. Preservar os itens B ainda parciais e a homologação externa pendente; nenhuma liberação por flag manual/completed.",
+  "review_gallery": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/REVISAO-ASSINATURA-INTENCAO.html"
+}

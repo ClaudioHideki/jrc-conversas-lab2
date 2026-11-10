@@ -27,6 +27,8 @@ class JrcCampaigns::ReviewConfiguration
       'steps' => campaign.steps.order(:position, :id).map { |step| step.as_json.except('created_at', 'updated_at') },
       'inboxes' => campaign.campaign_inboxes.order(:position, :id).map { |link| link.as_json.except('created_at', 'updated_at') }
     )
+    segment = JrcCustomers::CampaignSegment.new(campaign)
+    result['customer_segment'] = segment.review_evidence if segment.selected?
     result.merge(connector_configuration)
   end
 

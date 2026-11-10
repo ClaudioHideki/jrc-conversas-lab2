@@ -6,6 +6,7 @@ module Api::V1::Accounts::Crm
       orders = visible_to_current_user(crm_scope.jrc_crm_sales_orders)
                .includes(:contact, :owner, :deal, :proposal, :order_items, :business_unit)
                .order(created_at: :desc)
+      orders = customer_segment_scope(orders)
       if params[:company_id].present?
         company = corporate_records(:master_companies).where(id: params[:company_id])
         orders = orders.where(contact_id: crm_scope.contacts.where(company_id: company.select(:id)).select(:id))

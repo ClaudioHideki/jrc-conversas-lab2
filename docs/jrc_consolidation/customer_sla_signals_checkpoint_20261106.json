@@ -1,0 +1,136 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "27d62d217110171d7128e4e324fccfc1b235e9b4",
+  "scope": "F2/C calendar-aware customer360 SLA facts and native evidence authorization",
+  "files": {
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.spec.js": "725049dcae66c3d84e6f99a8ff4bf5855f07eb8e9688b5e7e541bf21dc05d09e",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue": "47c76bbd350a7e1b86ffa759383cf3e23818edd43e36b5f0cb9f5698915adf1b",
+    "app/services/jrc_customers/attendance_metrics.rb": "a311b906599abd14bcd2997daaabf06859fddbc27482116f8a0fab9f36603fff",
+    "app/services/jrc_customers/customer360.rb": "bd858abeea43e040e022f029f5165518d6a289eb41a51028f9908f49d2c7e124",
+    "app/services/jrc_customers/visibility.rb": "57d415da92f198a36b27db11a76e560c0fbc902f7949fc54d5ffdb59dfc51a28",
+    "app/services/jrc_relationship/customer_signals.rb": "6d3db43ada476178d71accc6a6f334aea688daf5d269fdfaad089c53a3679046",
+    "app/services/jrc_relationship/snapshot_access.rb": "dfe159386d5022ba623f6c3f70821a913fb301072364dc4be7b42058eacbbdc2",
+    "app/services/jrc_service_desk/clock_breach_query.rb": "f7b78f69ddb0ec24d103a438f9f6329e76c3339b443d411c68dd181d9603cb6f",
+    "spec/requests/api/v1/accounts/customers/native_sla_signals_spec.rb": "281a97c7cb557ecbdcfb8e5f83408e6a1b7709828037546af43cef3f739f9cb8"
+  },
+  "implemented": [
+    "Reuse native customer/SLA TicketPolicy intersection through Visibility.sla_clocks; native account/operator/unit/department/withdrawal constraints remain in both source scopes.",
+    "Customer360 counts distinct affected tickets through native ClockProjection. Weekend boundary alone is not a breach; paused time is not consumed, but a pause does not erase an already consumed breach.",
+    "Add explicit service_desk_sla capability. Denied SLA facts return null; the health dimension remains unavailable and follows existing configured missing-factor policy rather than fabricating zero.",
+    "Capture exact authorized SLA clock IDs in the existing health/source manifest; no new registry, storage or schema.",
+    "Reauthorize new SLA capability, captured zero and legacy numeric SLA evidence when reading snapshots. Legacy numeric priority SLA facts also require current native SLA access after the optional-manifest branch. Unrelated manual records remain visible.",
+    "Restoring the native grant makes the same preserved historical snapshots readable again; no score/version/evidence rewrite.",
+    "Company360 displays existing localized Metric unavailable text instead of a blank/zero when SLA access is absent."
+  ],
+  "tests": {
+    "initial_native": "12/0:8 new plus4 native snapshot capability cases",
+    "final_native": "35/0:8 new inclactualProcessor/no false ticket alert,9 attendance,4 snapshot,6 monitoring,8 restricted supervision",
+    "history_restore": "1/0 overlap; explicit named case includes grant restoration and unchanged historical attributes",
+    "selector_note": "First line92 selection ran preceding unavailable-source case1/0; not counted as restore evidence. Named selection corrected it.",
+    "vue": "10/0 Company360 inclnew unavailable-source card; no raw translation key",
+    "ruby_new": 0,
+    "ruby_shared_delta": [
+      {
+        "path": "app/services/jrc_customers/visibility.rb",
+        "baseline_count": 1,
+        "current_count": 1,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_customers/attendance_metrics.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_customers/customer360.rb",
+        "baseline_count": 18,
+        "current_count": 18,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/customer_signals.rb",
+        "baseline_count": 26,
+        "current_count": 25,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/snapshot_access.rb",
+        "baseline_count": 12,
+        "current_count": 12,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_service_desk/clock_breach_query.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "eslint_errors": 0,
+    "eslint_warnings": 0,
+    "environment_warning": "Existing missing prosemirror source map in shared node_modules and Browserslist/Rails deprecations were retained; no package or other-worktree changes."
+  },
+  "resources": {
+    "native": {
+      "start": 7218581504,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/customers/native_sla_signals_spec.rb": "96487613b55dfda2c2b7c1df7cf26229c92d109f6af86b663a6d7936162a5e3e",
+        "spec/requests/api/v1/accounts/customers/attendance_spec.rb": "128c974e5497de743c2b6f3bc01a06ad5571a8892ef1d873b92bfa9823a4f2d8",
+        "spec/services/jrc_relationship/snapshot_access_capabilities_spec.rb": "fe8c99cb98ab8bf2a58bd0a67a512cd731d69f019b230b652f6eecd14453959d",
+        "spec/services/jrc_relationship/monitoring_runs_spec.rb": "3c7152fbaff056037c2879f5f49df277ca98a5106a8aacdaf1ae2a04aef44082",
+        "spec/requests/api/v1/accounts/jrc_service_desk/restricted_supervision_spec.rb": "7eb0d1a263593082f3a56576b2bae1356a0d0757dc186a6b4f7273bd56979d8a"
+      },
+      "minimum": 7197790208,
+      "exit_code": 0,
+      "end": 7218171904
+    },
+    "history": {
+      "start": 7214567424,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/customers/native_sla_signals_spec.rb": "281a97c7cb557ecbdcfb8e5f83408e6a1b7709828037546af43cef3f739f9cb8"
+      },
+      "minimum": 7194447872,
+      "exit_code": 0,
+      "end": 7214436352
+    },
+    "frontend": {
+      "status": "passed",
+      "free_start": 7220867072,
+      "minimum_free": 7192825856,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 19056,
+      "exit_code": 0,
+      "free_end": 7219740672
+    }
+  },
+  "native_receipt": "First-response receipt in the pause fixture is synthetic persisted delivered-message evidence; no real provider/channel delivery or external homologation claimed.",
+  "no_build": true,
+  "no_server5379_change": true,
+  "no_original_data_deletion": true,
+  "no_schema_change": true,
+  "no_external_operations": true,
+  "free_final_bytes": 7216934912,
+  "limitations": [
+    "Not full C/F2/G closure; current-source Chrome/visual acceptance remains blocked by no-build restriction.",
+    "No invented financial/TRR/aggregation/business defaults; final analyst withdrawal scope still awaits business answer.",
+    "Native invalid-calendar dependency errors are not converted into fabricated successful/zero measurements."
+  ],
+  "next_work": "F2/G period filter integrity: an end date without a start date is silently ignored by report_period and RecordFilters. Reject incomplete input consistently, preserve legacy start-only one-day behavior and native account timezone/bounds; add functional UI feedback and directed tests."
+}

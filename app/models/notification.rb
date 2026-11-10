@@ -45,7 +45,8 @@ class Notification < ApplicationRecord
     sla_missed_next_response: 7,
     sla_missed_resolution: 8,
     relationship_action: 9,
-    service_desk_clock: 10
+    service_desk_clock: 10,
+    approval_event: 11
   }.freeze
 
   enum notification_type: NOTIFICATION_TYPES
@@ -55,7 +56,8 @@ class Notification < ApplicationRecord
   after_destroy_commit :dispatch_destroy_event
   after_update_commit :dispatch_update_event
 
-  PRIMARY_ACTORS = ['Conversation', 'JrcRelationship::Action', 'JrcServiceDesk::Ticket'].freeze
+  PRIMARY_ACTORS = ['Conversation', 'JrcRelationship::Action', 'JrcServiceDesk::Ticket',
+                    'JrcApprovals::Request', 'JrcApprovals::AuditEvent'].freeze
 
   def visible_to_user?
     return true unless primary_actor_type == 'Conversation'
@@ -64,6 +66,8 @@ class Notification < ApplicationRecord
   end
 
   def push_event_data
+    return JrcApprovals::Notifications.payload(self) if approval_event?
+
     # Secondary actor could be nil for cases like system assigning conversation
     payload = {
       id: id,
@@ -95,6 +99,7 @@ class Notification < ApplicationRecord
 
   # rubocop:disable Metrics/MethodLength
   def push_message_title
+    return JrcApprovals::Notifications.visible?(self) ? I18n.t('notifications.notification_title.approval_event') : '' if approval_event?
     return I18n.t('notifications.notification_title.service_desk_clock') if service_desk_clock?
     return I18n.t('notifications.notification_title.relationship_action') if relationship_action?
 
@@ -124,6 +129,7 @@ class Notification < ApplicationRecord
   # rubocop:enable Metrics/MethodLength
 
   def push_message_body
+    return JrcApprovals::Notifications.visible?(self) ? I18n.t('notifications.approval_event_body') : '' if approval_event?
     return "OLA ##{primary_actor_id}: #{meta['percent']}%" if service_desk_clock?
     return primary_actor.reason if relationship_action?
 
@@ -168,6 +174,7 @@ class Notification < ApplicationRecord
 
   def process_notification_delivery
     return unless visible_to_user?
+    return if approval_event? # In-app only; the durable audit projection owns retry and native feed delivery.
     return if service_desk_clock? # The durable clock execution owns its explicit channels.
     # CS alerts use the existing in-app feed; no conversation-specific delivery job.
     return if relationship_action?

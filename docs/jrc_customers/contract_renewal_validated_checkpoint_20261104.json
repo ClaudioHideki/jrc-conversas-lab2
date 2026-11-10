@@ -1,0 +1,80 @@
+{
+  "date": "2026-11-04",
+  "block": "B4",
+  "base": "07a9e400fa8394ddc49645e8c782c59bc3a2433d",
+  "status": "Implementado, aguardando build/Chrome",
+  "delivered": [
+    "Renovação derivada exclusivamente dos contratos ativos/a vencer já autorizados em Customer360",
+    "Vigência e janela de aviso calculadas no fuso da conta, com data de calendário na interface",
+    "Próximo término, contagens de vencidos e sem data; abertura do contrato na rota nativa do CRM",
+    "Sem renovação automática, envio de assinatura ou alteração de aprovações"
+  ],
+  "tests": {
+    "backend": {
+      "duration": 12.943507648,
+      "example_count": 23,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "vue": {
+      "numPassedTests": 15,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "new_ruby_service_and_spec_offenses": 0,
+    "customer360_existing_offenses": 18,
+    "eslint_errors": 0,
+    "eslint_warnings": 1,
+    "real_chrome": "Não executado nesta versão"
+  },
+  "scope_cases": [
+    "Administrador também respeita operadora/unidade",
+    "Proprietário/agent sem direito a outro proprietário",
+    "Conta estrangeira excluída",
+    "Rascunho/sem assinatura não se torna ativo",
+    "Vencidos/sem término contabilizados sem inventar data",
+    "Nenhuma SignatureDelivery criada, atributos contratuais preservados"
+  ],
+  "failures_retained": [
+    "Conta estrangeira do teste não tinha feature CRM; preparação corrigida, sem mudar autorização de produção",
+    "Asserção Vue esperava vencido em vez de vigência vencida; corrigida",
+    "Harness verificava método extraído; validação de source_location atualizada para overview, sem ignorar SHA"
+  ],
+  "source_testing": "Cópias mínimas com SHA verificado carregadas somente no processo RSpec; snapshots e servidores anteriores não alterados. Dados sintéticos no banco jrc_rel_v2_candidate_test. Assinatura manual é fixture de teste, não homologação DocuSign.",
+  "disk": {
+    "initial": 1704804352,
+    "minimum_observed_during_tests": 1677836288,
+    "current": 1732575232,
+    "required_stop": 750000000,
+    "preventive_stop": 900000000
+  },
+  "modified_files": [
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContractRenewalCard.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContractRenewalCard.vue",
+    "app/services/jrc_customers/customer360.rb",
+    "spec/services/jrc_customers/contract_renewal_context_spec.rb",
+    "app/services/jrc_customers/contract_renewal_context.rb"
+  ],
+  "evidence": {
+    "b4-backend-verified.json": {
+      "path": ".codex/stage-c-resume-20261104/b4-backend-verified.json",
+      "sha256": "1e19f776e67969b4685e31cc7451e15900ec6a2eac2584aaefed45863beb2853"
+    },
+    "b4-vue-final.json": {
+      "path": ".codex/stage-c-resume-20261104/b4-vue-final.json",
+      "sha256": "ae1fbd705cfdcfd26d6f14833ff7e93eab463c2ff44f02a09e70e9a26da7e7a9"
+    },
+    "b4-ruby-reviewed.json": {
+      "path": ".codex/stage-c-resume-20261104/b4-ruby-reviewed.json",
+      "sha256": "bbec9e943c3437d57b3e62bea635acb86f3741b0c082909ea3d0a801ca31ed55"
+    }
+  },
+  "cleanup": false,
+  "build": false,
+  "push": false,
+  "deploy": false,
+  "production": false
+}

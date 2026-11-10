@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-06",
+  "status": "Actual native HTTP safety verified; no fresh Chrome or stage closure",
+  "parent_checkpoint": "93bf2c0c7e656af63d94f49ce1f25c2e714bc7c9",
+  "baseline": "health-recommendations-http01:5cases/1failure;4native denials passed and missing-data/no-business-write assertions passed. Header was max-age=0,private,must-revalidate, not no-store. This was not a cross-account disclosure.",
+  "change": "Set Cache-Control:no-store on live recommendations, matching existing native product-health history behavior.",
+  "files": [
+    "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+    "spec/requests/api/v1/accounts/relationship/health_recommendations_spec.rb"
+  ],
+  "gates": {
+    "http02": "5examples,0failures; actual route/CustomerSignals/database, no signal mocks.",
+    "native_scopes": "Foreign allocation+forged query account/user denied;foreign viewer denied;revoked custom-role grants denied;unit query cannot expand current native issuer/unit coverage. No evidence/customer payload on denial.",
+    "no_business_writes": "Snapshot,action,risk,configuration-version,audit counts and enqueued-job count unchanged by authorized GET.",
+    "static": "Requestspec0offenses;controller baseline/current report in health-recommendations-http-static.json.",
+    "chrome": "Not performed; frozen assets not used as current-source evidence.",
+    "static_controller": {
+      "path": "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+      "baseline": 8,
+      "current": 8,
+      "added": {}
+    }
+  },
+  "resources": {
+    "health-recommendations-http01": {
+      "start": 5145575424,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/health_recommendations_spec.rb": "5be06cec673bf588ec01d74f269e8d4769fc1b698fd035a72030eb4beba1c2e5"
+      },
+      "minimum": 5125636096,
+      "exit_code": 1,
+      "end": 5144903680
+    },
+    "health-recommendations-http02": {
+      "start": 5144559616,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/health_recommendations_spec.rb": "9aa7ab1a1483a7b1cfd3150676ea9f4fb3d94564ddb8ed9b555efed673536631"
+      },
+      "minimum": 5124739072,
+      "exit_code": 0,
+      "end": 5144457216
+    }
+  },
+  "disk_final_bytes": 5122531328,
+  "next": "Refresh C audit using actual newer scale/native SLA/document checkpoints; resolve portfolio-group membership business cardinality before introducing grouping semantics.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,real external operation,production or runtime/server change."
+}

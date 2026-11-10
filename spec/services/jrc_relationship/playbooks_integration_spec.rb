@@ -15,10 +15,10 @@ RSpec.describe JrcRelationship::Playbooks do
     service.run!(assignment, 'health', playbook_id: book.id, source_key: 'first-reviewed-source')
     first = JrcRelationship::PlaybookExecution.find_by!(playbook: book)
     expect(first.snapshot['results'].first).to include('state' => 'blocked', 'reason' => 'playbook_flow_effects_disabled')
-    expect(JrcFlowRun).not_to exist
+    expect(JrcFlowRun.where(account: sd_account)).not_to exist
     configuration.update!(rules: configuration.rules.merge('playbook_flow_effects_enabled' => true))
     service.run!(assignment, 'health', playbook_id: book.id, source_key: 'first-reviewed-source')
-    expect(JrcFlowRun).not_to exist
+    expect(JrcFlowRun.where(account: sd_account)).not_to exist
     expect(first.reload.snapshot['results'].first['state']).to eq('blocked')
   end
 
@@ -47,7 +47,7 @@ RSpec.describe JrcRelationship::Playbooks do
       candidate = JrcRelationship::Playbook.new(account: sd_account, name: 'Invalid flow book', trigger_kind: 'health', steps: [invalid])
       expect(candidate).not_to be_valid
     end
-    expect(JrcFlowRun).not_to exist
-    expect(JrcRelationship::PlaybookExecution).not_to exist
+    expect(JrcFlowRun.where(account: sd_account)).not_to exist
+    expect(JrcRelationship::PlaybookExecution.where(account: sd_account)).not_to exist
   end
 end

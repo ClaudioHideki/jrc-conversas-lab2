@@ -1,0 +1,32 @@
+{
+  "status": "implemented_and_targeted_tests_passed",
+  "previous_checkpoint": "32577a4998832d586a3c2662db95e0ef9bfa2ab3",
+  "implementation": [
+    "Native Orders list/detail now binds account,user,role and current memberships;identity changes clear selections,filters and item drafts and re-read with current authority.",
+    "Former-identity status/item mutation receipts and PDFs do not reopen/download/report success or automatically retry.",
+    "Existing server financial locks,authorization,exact URL links,segment handling and source business commands retained."
+  ],
+  "tests": {
+    "order-identity-baseline01": "4 new failures reproduced;15 existing cases filtered out.",
+    "order-identity-regression03": "30 passed,0failed =22origin/details including7newOrders plus8commercial.",
+    "order-identity-native04": "3 real HTTP/DB gates passed:financial edit denied,foreign account denied,existingdirectorders/contractsCustomer360.",
+    "order-identity-downloads-final05": "2 downloads passed after test-only helper deduplication;20 intentionally filtered.",
+    "eslint": "Orders0errors/194existing template warnings;changed spec0errors/0warnings."
+  },
+  "resources": {
+    "status": "passed",
+    "free_start": 6704648192,
+    "minimum_free": 6674247680,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 25328,
+    "exit_code": 0,
+    "free_end": 6724001792
+  },
+  "limitations": [
+    "SourceVue mocks are not Chrome acceptance.",
+    "No build,external operation,production change or C-Gclosure."
+  ],
+  "next": "Real isolated native approval outbox/notification worker gate;preserve prior source and runtime evidence."
+}

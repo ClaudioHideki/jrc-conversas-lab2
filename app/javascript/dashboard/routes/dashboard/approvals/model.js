@@ -101,6 +101,12 @@ export const decisionChoices = dto =>
         step_code: step.step_code,
         decision: action,
         delegation_id: choice.delegation_id,
+        ...(choice.own_delegation_id
+          ? { own_delegation_id: choice.own_delegation_id }
+          : {}),
+        ...(choice.principal_name
+          ? { principal_name: choice.principal_name }
+          : {}),
       }))
     )
   );
@@ -122,6 +128,15 @@ export const auditPresentation = event => ({
   state: event.data?.state,
   version: event.data?.expected_version,
   cycle: event.data?.cycle,
+  ...(event.event_type === 'request_adjusted'
+    ? {
+        adjustment: {
+          before: event.data?.before?.discount_cents,
+          after: event.data?.after?.discount_cents,
+          currency: event.data?.currency,
+        },
+      }
+    : {}),
 });
 
 export const describeCondition = node => {

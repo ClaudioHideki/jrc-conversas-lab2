@@ -1,0 +1,138 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "d78c925b519bd163792d28e1b3a27c8b280fb99b",
+  "status": "Incremental schema reconciliation validated in new empty owned database; not full G acceptance",
+  "confirmed_gap": "Tracked schema20261104170000 lacked three documentary tables, related foreign keys, four new guards and eligibility fields already implemented through migrations20261106101000.",
+  "implementation": {
+    "native_source": ".codex/d9-notifications-20261104/native-schema-read-20261106-3f5da784ff.rb",
+    "native_sha256": "3a1913bddeaa949897c49073993eed7a4707d53d3a056ffad30186a20deb86c7",
+    "added_tables": [
+      "jrc_backoffice_completion_dossiers",
+      "jrc_backoffice_signature_acceptances",
+      "jrc_backoffice_signature_artifact_bundles"
+    ],
+    "added_foreign_keys": 15,
+    "added_sql_keys": [
+      "account_users:ADD:account_users_relationship_eligibility_nonnegative",
+      "account_users:DROP:account_users_relationship_eligibility_nonnegative",
+      "function:public.jrc_bo_dossier_attachment_guard:",
+      "function:public.jrc_bo_dossier_blob_pin:",
+      "function:public.jrc_bo_dossier_pin:",
+      "function:public.jrc_bo_signature_acceptance_pin:",
+      "trigger:active_storage_attachments:jrc_bo_dossier_attachment_guard",
+      "trigger:active_storage_blobs:jrc_bo_dossier_blob_pin",
+      "trigger:jrc_backoffice_completion_dossiers:jrc_bo_dossier_pin",
+      "trigger:jrc_backoffice_signature_acceptances:jrc_bo_signature_acceptance_pin"
+    ],
+    "updated_function": "function:public.jrc_bo_private_attachment:",
+    "unchanged_original_tables": 332,
+    "preserved_all_original_foreign_keys": true,
+    "preserved_all_other_sql_blocks": true,
+    "candidate_delete_action_drift": [
+      "jrc_customer_segment_overrides:four FK delete actions differ from migration20261103100000; tracked CASCADE preserved. Candidate unchanged."
+    ],
+    "first_merge_guard": "Contacts already contains primary-link check in table DSL; unnecessary addition rejected before any write.",
+    "tracked_sha256": "4aea5ccca7e9f7acae8329bf71e598132344d971bb6ca807d43d964d528b9fed",
+    "sql_statement_order": "Native dump order retained: DROP before ADD check; functions before new triggers."
+  },
+  "tests": {
+    "native_read": "Actual candidate schema extracted only inside enforced READ ONLY transaction; no schema/data mutation.",
+    "preservation": "332 original table blocks unchanged byte-for-byte; all original foreign-key declarations preserved;523 original SQL blocks unchanged, except separately verified private-attachment function update from migration20261105122000.",
+    "schema_load": {
+      "schema_proof": "passed",
+      "database": "jrc_schema_additive_20261106_c98d37472cde",
+      "tables": 338,
+      "trigger_count": 38,
+      "additive_guards": [
+        "jrc_bo_signature_acceptance_pin",
+        "jrc_bo_dossier_pin",
+        "jrc_bo_dossier_blob_pin",
+        "jrc_bo_dossier_attachment_guard"
+      ],
+      "original_segment_cascades_preserved": true,
+      "version": 20261106101000,
+      "retained": true
+    },
+    "initial_runner": "Schema DDL/introspection passed; first combined command then failed before examples because manual Ruby runner lacked spec load path. No schema reload, drop or fictitious test pass.",
+    "native_followup": {
+      "database": "jrc_schema_additive_20261106_c98d37472cde",
+      "same_retained_proof_database": true,
+      "schema_reloaded": false,
+      "sequence_base": 67062,
+      "candidate_data_or_sequences_changed": false,
+      "start_free": 9472823296,
+      "retained_no_cleanup": true,
+      "minimum_free": 9461751808,
+      "exit_code": 0,
+      "end_free": 9474400256,
+      "summary": {
+        "duration": 40.309860664,
+        "example_count": 12,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "failures": []
+    },
+    "result": "12examples,0failures,0pending,0outside-errors in the same retained new proof DB:7 restoration and5 revision cases. New DB sequence IDs reserved above candidate maximum to avoid candidate test-cache key collisions; candidate sequences unchanged.",
+    "dossier_scope": "New tables, foreign keys, functions, exact attachment function and immutable SQL triggers verified after real schema load. Existing dossier functional suites retain their candidate-only fence and were not run against this new DB or falsely counted.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "schema": {
+      "database": "jrc_schema_additive_20261106_c98d37472cde",
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "fresh_empty_database_only": true,
+      "start_free": 9494261760,
+      "retained_no_cleanup": true,
+      "no_server_change": true,
+      "minimum_free": 9462661120,
+      "exit_code": 1,
+      "end_free": 9478979584,
+      "schema_proof": {
+        "schema_proof": "passed",
+        "database": "jrc_schema_additive_20261106_c98d37472cde",
+        "tables": 338,
+        "trigger_count": 38,
+        "additive_guards": [
+          "jrc_bo_signature_acceptance_pin",
+          "jrc_bo_dossier_pin",
+          "jrc_bo_dossier_blob_pin",
+          "jrc_bo_dossier_attachment_guard"
+        ],
+        "original_segment_cascades_preserved": true,
+        "version": 20261106101000,
+        "retained": true
+      }
+    },
+    "followup": {
+      "database": "jrc_schema_additive_20261106_c98d37472cde",
+      "same_retained_proof_database": true,
+      "schema_reloaded": false,
+      "sequence_base": 67062,
+      "candidate_data_or_sequences_changed": false,
+      "start_free": 9472823296,
+      "retained_no_cleanup": true,
+      "minimum_free": 9461751808,
+      "exit_code": 0,
+      "end_free": 9474400256,
+      "summary": {
+        "duration": 40.309860664,
+        "example_count": 12,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "failures": []
+    },
+    "final_free_bytes": 9434628096
+  },
+  "retained_database": "jrc_schema_additive_20261106_c98d37472cde",
+  "candidate_drift": "Four existing candidate segment-override FK delete actions differ from authoritative migration20261103100000. Expected tracked CASCADE definitions preserved and proved in fresh DB. Candidate/other existing databases not repaired or reloaded; this is not a claim about production drift.",
+  "remaining": [
+    "Full C-G functional and fresh built Chrome desktop/mobile/light/dark acceptance remain open.",
+    "Review remaining native destination qualification and Word gaps incrementally.",
+    "No real provider/scanner/channel/external acceptance inferred from local schema tests."
+  ],
+  "restrictions": "No existing database replacement,drop,cleanup,build,push,GHCR,deploy,production,external operation,5379 change or original-container restart."
+}

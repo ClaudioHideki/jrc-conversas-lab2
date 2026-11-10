@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "6d568a7e7826874b090fefcb780ae53761009d90",
+  "status": "Scoped operational history and summary export implemented and locally tested. Full audit/history requirement and C-G remain open.",
+  "implementation": [
+    "Reuse JrcCrm::AuditEvent via the existing native audit writer; no parallel registry or customer record.",
+    "Fresh native account/member/module/team/group authority on every call; complete current native customer scope required. Shared access check extracted from the existing configuration guard without broadening it.",
+    "25-event pages, action filter and native account-timezone period. Archived group history remains readable to current authorized managers.",
+    "Safe projection: event ID/time/kind, current scoped operator label, changed field names and reason-presence boolean. Never expose raw before/after/metadata, historical customer IDs, private prior values or free-text reasons through current sharing.",
+    "Configuration event visibility additionally requires native configure; export additionally requires the existing native administrator capability. Export bounded to10000 events and fenced by highest existing event ID; records a real native export audit.",
+    "Horizontal history tab, source filters/pagination, explicit summary export, cancellation and current identity checks. HTTP200 alone cannot confirm a different group/projection. Late exports after account/role changes cannot download or report success.",
+    "Download feedback reports preparation, not an asserted filesystem save. No source-module write or provider request."
+  ],
+  "native_tests": {
+    "initial": { "label": "named-portfolio-history-native23", "examples": 6, "failures": 0 },
+    "final": { "label": "named-portfolio-history-native28", "examples": 11, "failures": 0, "breakdown": "8history cases +3existing group-configuration authority regressions; initial6 overlap, do not add counts." },
+    "database": "jrc_rel_v2_candidate_test",
+    "coverage": "Real writer persistence, page2/26events, filters, cross-account audit rows, denied read/partial customer visibility, configure/export separation, archived history, hidden actor and old customer ID omission, audited export."
+  },
+  "source_interface_tests": {
+    "label": "named-portfolio-history-source02",
+    "tests": 10,
+    "failures": 0,
+    "breakdown": "7history interface +3API contract tests; mocks are not Chrome homologation.",
+    "corrected_fixture_failure": "First run9passed/1failed because parent test used a nonexistent English button label; corrected to the existing catalog title, no functionality removed.",
+    "warnings": "Existing test setup emits duplicate i18n registration warnings; retained, not hidden."
+  },
+  "static_validation": "Ruby27:0offenses; ESLint03:0errors/0warnings in5changedJS/Vue/spec files; git diff --check clean.",
+  "audit_qualification": "Generic JrcCrm::AuditEvent is not proven append-only. This increment does not introduce a sealed audit. App-readonly configuration versions and DB-pinned batch snapshots remain distinct protections. Full historical values/reasons require historical scope proof and remain pending.",
+  "environment": {
+    "disk_start_bytes": 6620852224,
+    "disk_minimum_observed_bytes": 6613663744,
+    "disk_final_native_bytes": 6633844736,
+    "no_build": true,
+    "no_server_or_original_container_change": true,
+    "no_migration": true
+  },
+  "pending": [
+    "Master-directory selection into existing allocation and reviewed group link flow; local-role/capability matrix and resumable grouping operations.",
+    "Full audit immutability and permission-safe historical values/reasons; this operational summary is a partial delivery, not scope reduction.",
+    "Fresh current-source Chrome desktop/mobile/light/dark blocked by explicit no-build/no5379-change instructions.",
+    "TRR, deferred company documents without portfolio, external provider/scanner/channel pilot remain separately open."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,external real operations,production,5379change or original container restart.",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_history_checkpoint_20261106.json"
+}

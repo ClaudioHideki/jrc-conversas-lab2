@@ -10,6 +10,11 @@ class JrcCustomers::MergePreserver
     return true unless [base.account_id, source.account_id].all? { |id| id == account.id }
     return true if [base.company_id, source.company_id].compact.uniq.size > 1
     return true if [base.identifier, source.identifier].compact_blank.uniq.size > 1
+    identifiers = JrcCustomers::SigningIdentity.where(account_id: account.id, contact_id: [base.id, source.id]).pluck(:lookup_digest)
+    return true if identifiers.compact.uniq.size > 1
+    base_choices = JrcCustomers::SegmentOverride.where(account_id: account.id, contact_id: base.id).pluck(:taxonomy_id, :mode).to_h
+    source_choices = JrcCustomers::SegmentOverride.where(account_id: account.id, contact_id: source.id).pluck(:taxonomy_id, :mode).to_h
+    return true if source_choices.any? { |id, mode| base_choices.key?(id) && base_choices[id] != mode }
 
     JrcNico::ErpBinding.where(account_id: account.id, contact_id: [base.id, source.id]).count > 1
   end
@@ -20,7 +25,7 @@ class JrcCustomers::MergePreserver
 
   def call
     if self.class.conflict?(account: @account, base: @base, source: @source)
-      raise Conflict, 'Conflicting company, external identifier or ERP bindings. Reconcile explicitly before merging.'
+      raise Conflict, 'Conflicting company, identifier, ERP binding or segment choice. Reconcile explicitly before merging.'
     end
     assert_reference_tenants!
     snapshot = @source.attributes.except('updated_at').merge('labels' => @source.label_list,
@@ -33,18 +38,16 @@ class JrcCustomers::MergePreserver
     move_deal_contacts
     move_recipients
     move_contact_points
+    move_signing_identity
+    move_segment_choices
     preserve_identity_points
     preserve_avatars
     preserve_labels
+    preserve_company_context
     # Keep the old source ID in each existing audit's metadata before re-parenting its timeline.
     JrcCrm::AuditEvent.where(account_id: @account.id, resource_type: 'Contact', resource_id: @source.id).find_each do |event|
       event.update_columns(resource_id: @base.id, metadata: (event.metadata || {}).merge('original_contact_id' => @source.id))
     end
-    @base.assign_attributes(company_id: @base.company_id || @source.company_id,
-                            job_title: @base.job_title.presence || @source.job_title,
-                            department: @base.department.presence || @source.department,
-                            registration_status: [@base.registration_status, @source.registration_status].include?('registered') ? 'registered' : 'provisional')
-    @base.save! if @base.changed?
   end
 
   # Native merge methods use update (not update!). Refuse source deletion if a
@@ -59,7 +62,68 @@ class JrcCustomers::MergePreserver
 
   private
 
+  def move_segment_choices
+    JrcCustomers::SegmentOverride.where(account_id: @account.id, contact_id: @source.id).find_each do |choice|
+      if JrcCustomers::SegmentOverride.exists?(account_id: @account.id, taxonomy_id: choice.taxonomy_id, contact_id: @base.id)
+        choice.destroy!
+      else
+        choice.update!(contact_id: @base.id)
+      end
+      JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: choice.taxonomy,
+                                  event_type: 'customer_segment_override_changed', metadata: { source_contact_id: @source.id })
+    end
+  end
+
+  def preserve_company_context
+    serializer = JrcCustomers::Serializer.new(account: @account)
+    before = serializer.contact(@base)
+    values = merged_company_context
+    clear_source_primary(serializer) if @source.company_primary?
+    # Save the link first: normal transfers clear the previous company's context.
+    # This merge then adopts the already-confirmed same-company source context.
+    @base.update!(company_id: @source.company_id) if @base.company_id.blank? && @source.company_id.present?
+    @base.assign_attributes(values)
+    @base.save! if @base.changed?
+    return unless before['company_primary'] != @base.company_primary?
+
+    JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: @base, event_type: 'customer_contact_primary_changed',
+                                from_value: before, to_value: serializer.contact(@base))
+  end
+
+  def merged_company_context
+    primary = @base.company_primary? || @source.company_primary?
+    status = @base.company_id ? @base.company_contact_status : @source.company_contact_status
+    { job_title: @base.job_title.presence || @source.job_title, department: @base.department.presence || @source.department,
+      company_role: @base.company_role.presence || @source.company_role, company_primary: primary,
+      company_contact_status: primary ? 'active' : status,
+      registration_status: [@base.registration_status, @source.registration_status].include?('registered') ? 'registered' : 'provisional' }
+  end
+
+  def clear_source_primary(serializer)
+    before = serializer.contact(@source)
+    @source.update!(company_primary: false)
+    JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: @source, event_type: 'customer_contact_primary_changed',
+                                from_value: before, to_value: serializer.contact(@source))
+  end
+
+  def move_signing_identity
+    source = JrcCustomers::SigningIdentity.find_by(account_id: @account.id, contact_id: @source.id)
+    return unless source
+
+    existing = JrcCustomers::SigningIdentity.find_by(account_id: @account.id, contact_id: @base.id)
+    if existing
+      source.destroy!
+    else
+      source.update!(contact_id: @base.id, revision: source.revision + 1)
+    end
+    JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: @base, event_type: 'customer_contact_merged',
+                                metadata: { source_contact_id: @source.id, signing_identity_preserved: true })
+  end
+
   def assert_reference_tenants!
+    if JrcCustomers::SegmentOverride.where(contact_id: @source.id).where.not(account_id: @account.id).exists?
+      raise Conflict, 'Existing cross-account segment choice; repair before merge'
+    end
     connection = ActiveRecord::Base.connection
     ACCOUNT_TABLES.each do |table|
       invalid = connection.select_value("SELECT 1 FROM #{table} WHERE contact_id = #{@source.id.to_i} AND account_id <> #{@account.id.to_i} LIMIT 1")

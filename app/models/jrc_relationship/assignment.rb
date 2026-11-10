@@ -9,6 +9,12 @@ class JrcRelationship::Assignment < ApplicationRecord
   has_many :actions, class_name: 'JrcRelationship::Action', dependent: :restrict_with_error
   validates :status, inclusion: { in: %w[onboarding active at_risk churned inactive] }
   validate :identity_and_tenant
+  validate { JrcRelationship::DistributionCapacityGuard.new(self).call }
+  validate do
+    JrcRelationship::CapacityWorkload.validate!(settings)
+  rescue JrcRelationship::CapacityWorkload::Unavailable => e
+    errors.add(:settings, e.message)
+  end
 
   def customer_context(member)
     JrcCustomers::Customer360.new(account: account, user: member.user, account_user: member, company: company, contact: contact)

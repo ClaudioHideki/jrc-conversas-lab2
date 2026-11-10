@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-07",
+  "previous_head": "0a3457fe3116bdbb2f05e0c86fb862aacff3558c",
+  "scope": "G native linked appointment/follow-up private-content authority",
+  "implemented": [
+    "Immediately clear per-link private content on account,actor,effective membership or native source/type change; reread only through existing Activity/FollowUp API, never a parallel record.",
+    "Pin asynchronous reads and mutation receipts to current access/selection/lifetime; ignore obsolete content and outward events.",
+    "Serialize duplicate pending completion even during same-source refresh; acknowledged completion invalidates older in-flight reads so a stale scheduled snapshot cannot overwrite it.",
+    "Keep native presence-only updates harmless; shared normalization preserves all non-presence membership fields. Preserve native edit and follow-up endpoint distinction."
+  ],
+  "evidence": {
+    "agenda-record-baseline01": "3genuine failures,4passes:role-private-content,obsolete actor read and same-tick old edit.",
+    "agenda-record-source02": "12/0 =9new authority/read-order cases and3existing Activity/FollowUp/refresh tests. Actual component/store; mocked transports,not Chrome/database proof.",
+    "agenda-record-lint03": "All3files0errors0warnings."
+  },
+  "files_sha256": {
+    "app/javascript/dashboard/routes/dashboard/crm/components/shared/AgendaRecord.vue": "5d2f9ff56969f14253c9ad5e2dc7d279cbcbd28eaea00ec313fe1c2187f358b8",
+    "app/javascript/dashboard/routes/dashboard/crm/components/shared/spec/AgendaRecord.spec.js": "2a9178e5554e16061b7f5efdaca99ce174463e3d0fd071b5b74f940aec4105ba",
+    "app/javascript/dashboard/routes/dashboard/crm/components/shared/spec/AgendaRecordAuthority.spec.js": "9ca999d08784880e85f8b1d1c9c025f91b4f8e4e0ceb2a157291b1d0b2fe206b"
+  },
+  "resources": {
+    "status": "passed",
+    "free_start": 6444244992,
+    "minimum_free": 6424432640,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 8832,
+    "exit_code": 0,
+    "free_end": 6463037440
+  },
+  "free_at_report": 6463561728,
+  "runtime_readonly_verification": {
+    "runner_started": "2026-11-04T11:34:25.650429595Z",
+    "postgres_started": "2026-11-04T11:34:28.691130017Z",
+    "redis_started": "2026-11-04T11:34:29.041643269Z",
+    "proxy_name": "jrc-customer-b1-b4-proxy-4d4a6de3",
+    "proxy_started": "2026-11-04T12:04:25.285490323Z",
+    "checkpoint_53d0b022_and_4c88ccc0_ancestry": true,
+    "note": "Initial inspect guessed a nonexistent proxy name;docker ps located actual name and subsequent readonly inspect confirmed it. No runtime changes."
+  },
+  "preserved": {
+    "build_server_restart_cleanup": false,
+    "native_backend_api_or_schema_changed": false,
+    "push_deploy_external_operations": false
+  },
+  "remaining": [
+    "No current-source Chrome acceptance or C-G closure.",
+    "Next confirmed local source gap:ApprovalsPage reacts only to route and account,retaining old server context/records after same-account actor/access changes;useApprovals only pins account/request generation. Preserve native decisions,v1 snapshots and version/idempotency contracts.",
+    "Business and external dependencies remain explicit."
+  ]
+}

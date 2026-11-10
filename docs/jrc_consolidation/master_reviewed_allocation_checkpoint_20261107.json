@@ -1,0 +1,220 @@
+{
+  "date": "2026-11-07",
+  "status": "native_master_reviewed_operation_and_source_ui_implemented_with_automated_evidence_not_Chrome_acceptance",
+  "previous_checkpoint": "56aea2f6bff17583ea19f36d1184853339010b30",
+  "branch": "codex/relacionamento-v2-20261101",
+  "requirements": [
+    "Relationship Word P0124/P0125/P0128: reviewed initial allocations from native master customers, bounded progress/reasons/receipts and horizontal group navigation.",
+    "Approved business rule: the same native customer allocation may belong to multiple active operational portfolios."
+  ],
+  "implemented": [
+    "New master_allocation operation reuses the existing BatchReview/BatchItem engine, UUID idempotency, immutable snapshots/receipts, finite5-item worker delivery, own inventory, cancellation, explicit re-review and source policies. Company IDs never serve as allocation IDs.",
+    "Preview persists the reviewed intention only. Native AssignmentCreation.preview validates actual policies on a PostgreSQL typed proposed relation without INSERT, sequence use or creation audit. No customer registry, fake allocation IDs or owner transfer is introduced.",
+    "Each confirmed item atomically creates a missing native allocation or reuses its unchanged existing allocation, then calls PortfolioGroups.set_customers!. A rejected link rolls back new root and creation audit; previously applied items remain historical.",
+    "Whole-selection native customers/points/hours projection: new roots consume global capacity once, and new memberships consume the destination group capacity. Unknown private workload and missing inputs are blockers. Configuration, recipient authority, company/native row, group revision, limits and lifetime are rechecked; only own immutable receipts permit continuation.",
+    "Native configured-portfolio metadata gates apply both before capture and on later historical capacity reads. Own minimal inventory remains available without a frozen audience after source access loss. Withdrawal counts nullable pending company subjects without reporting a false zero.",
+    "Distinct staged UI reuses the native CompanyPicker, allocation and workload forms, existing reviewed panel and inventory. At most50 deduplicated companies,10 visible rows/page, explicit confirmation, read-only captured workloads, typed company/native receipts and frozen transition checks. Original individual creation and allocation-only reviewed membership remain available.",
+    "Formal owner-transfer approval requests reject this initial-allocation operation before interpreting any subject IDs. Operational confirmation does not represent a Central vote."
+  ],
+  "files": [
+    "app/controllers/api/v1/accounts/relationship/reviewed_batches_controller.rb",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupMasterDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupsPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioMembershipBatchPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedOperationInventory.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedPortfolioBatchPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/masterAllocationReview.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/masterAllocationReviewReceipt.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupMasterFlow.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedOperationMetadata.js",
+    "app/services/jrc_relationship/assignment_creation.rb",
+    "app/services/jrc_relationship/assignment_proposal_access.rb",
+    "app/services/jrc_relationship/batch_review_identity.rb",
+    "app/services/jrc_relationship/batch_review_plan.rb",
+    "app/services/jrc_relationship/distribution_approval.rb",
+    "app/services/jrc_relationship/master_allocation_capacity.rb",
+    "app/services/jrc_relationship/master_allocation_input.rb",
+    "app/services/jrc_relationship/master_allocation_progress.rb",
+    "app/services/jrc_relationship/master_allocation_projection.rb",
+    "app/services/jrc_relationship/master_allocation_review.rb",
+    "app/services/jrc_relationship/master_allocation_sources.rb",
+    "app/services/jrc_relationship/portfolio_membership_review.rb",
+    "app/services/jrc_relationship/reviewed_portfolio_batch.rb",
+    "app/services/jrc_relationship/withdrawal_reviewed_operations.rb",
+    "spec/requests/api/v1/accounts/relationship/reviewed_master_allocation_spec.rb",
+    "spec/services/jrc_relationship/assignment_creation_spec.rb",
+    "spec/services/jrc_relationship/reviewed_portfolio_batch_master_spec.rb",
+    "spec/services/jrc_relationship/withdrawal_readiness_reviewed_operations_spec.rb"
+  ],
+  "validation": {
+    "native01": "27 cases:26passed;one test incorrectly equated role downgrade with native write revocation. Fixture corrected to explicit denied role; unsuccessful artifact retained.",
+    "native02": "43 cases:41passed;two fixture/assertion corrections:factory creation occurred inside SQL capture and native denied source raised Pundit rather than RecordNotFound. No production gate weakened.",
+    "native03": "43/0:17master+11creator(including2new readonly/scope cases)+15existingengine.",
+    "http04": "Aborted before RSpec because a requested existing filename was wrong;source sync only. Correct filename discovered before next run.",
+    "http05": "34/0:17master+4newHTTP+6existingHTTPmembership+7withdrawal.",
+    "native_final06": "45/0 on final Ruby logic:18master+15existingengine+5newHTTP+7withdrawal. Includes private configured-group projection and formal-transfer separation.",
+    "source01": "49passed,1failed:mock expectation used a wrapped digest while the existing API client accepts a digest string. Corrected expectation only.",
+    "source02": "50/0 across master collection, typed master review and existing durable membership.",
+    "source03": "11/0 targeted master Vue scenarios after readonly workload/duplicate-ID validation.",
+    "source_final04": "18executed/0failed;15notselected by explicit test-name filter, previously covered in source02. Includes all13master receipt/UI cases and5selected collection/identity cases.",
+    "unique_source_cases_confirmed_in_passed_gates": 54,
+    "ruby_lint": "All changed Ruby files0offenses, verified across final per-file lint03/04/05 and HTTP final-lint06; early offenses retained and corrected.",
+    "js_lint": "0errors;new files and master/group wrappers0warnings. Shared ReviewedPortfolioBatchPanel retains8existing template/i18n warnings;no global warning suppression added.",
+    "actual_queue": "Native job executed inline from the HTTP synthetic gate. Earlier real Sidekiq gates remain valid for earlier operations;no new real-queue delivery is claimed for master_allocation.",
+    "Chrome": "Not run for current source. Explicit no-build/no5379-change restriction remains;old assets are not evidence."
+  },
+  "resources": {
+    "free_start": 6667857920,
+    "minimum_observed": 6626369536,
+    "free_end": 6660481024,
+    "gates": [
+      {
+        "gate": "master-reviewed-native01",
+        "start": 6681534464,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/services/jrc_relationship/reviewed_master_allocation_spec.rb": "bd323ed7980845cd36b8ec461931e3526a0c6f5dd9afe29d32966487f4caa122",
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_membership_spec.rb": "35b1270b1d411de36f5bf792275ab9753d869a52ae61e36d5c878b24cbd0ca4d"
+        },
+        "minimum": 6680408064,
+        "exit_code": 1,
+        "end": 6680473600
+      },
+      {
+        "gate": "master-reviewed-native02",
+        "start": 6678568960,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/services/jrc_relationship/reviewed_master_allocation_spec.rb": "33f3503d91fef7ff82f93455819737f6ca7a48352de4467ceb093ff5f4459f81",
+          "spec/services/jrc_relationship/assignment_creation_spec.rb": "fb96a22296aec83441ab5253cc75885d2823ec890db7e75dea8521c356c1abaf",
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ffaaa5d831977870ccff8bd5dc33964802832ce23e9460d02ce6b85e389ec64a"
+        },
+        "minimum": 6677819392,
+        "exit_code": 1,
+        "end": 6677815296
+      },
+      {
+        "gate": "master-reviewed-native03",
+        "start": 6674980864,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/services/jrc_relationship/reviewed_master_allocation_spec.rb": "1d49512554f08134ae758fc83190deca238eb8ffab23632ddaf5dea08884445e",
+          "spec/services/jrc_relationship/assignment_creation_spec.rb": "9006a5423d220989fdc07fe265ec0b0ea997ee6a7a47a0db34ead719830fdcca",
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ffaaa5d831977870ccff8bd5dc33964802832ce23e9460d02ce6b85e389ec64a"
+        },
+        "minimum": 6654861312,
+        "exit_code": 0,
+        "end": 6675537920
+      },
+      {
+        "gate": "master-reviewed-http05",
+        "start": 6670979072,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/relationship/reviewed_master_allocation_spec.rb": "ca7f35bed9d44e39fb5fa9db1d8374aba316e54cc3d00b501fe88b4591146cfe",
+          "spec/requests/api/v1/accounts/relationship/reviewed_membership_spec.rb": "0913b156f85cd51418b8cd872613b3274674a8e74384cb5331982b5a3fbbf604",
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_master_spec.rb": "cd72ccae285c853a33c19db564743e5128156ad054451212966631635f2681aa",
+          "spec/services/jrc_relationship/withdrawal_readiness_reviewed_operations_spec.rb": "673c2dbacbf4a87cdb78a2b3ff820b47caf00775abfc8e2127447e03e418246a"
+        },
+        "minimum": 6644740096,
+        "exit_code": 0,
+        "end": 6644805632
+      },
+      {
+        "gate": "master-reviewed-native-final06",
+        "start": 6656086016,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_master_spec.rb": "b5f5294fe579bc629645c5f82beec337cb22ef578e589d5ce121564c186ea408",
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ffaaa5d831977870ccff8bd5dc33964802832ce23e9460d02ce6b85e389ec64a",
+          "spec/requests/api/v1/accounts/relationship/reviewed_master_allocation_spec.rb": "f9641b64f6c74f5cf3a4499b068c4f5e7e82ec77e0e99cafbea90df3cbf7a537",
+          "spec/services/jrc_relationship/withdrawal_readiness_reviewed_operations_spec.rb": "673c2dbacbf4a87cdb78a2b3ff820b47caf00775abfc8e2127447e03e418246a"
+        },
+        "minimum": 6655885312,
+        "exit_code": 0,
+        "end": 6657900544
+      },
+      {
+        "gate": "master-reviewed-source01",
+        "status": "failed",
+        "free_start": 6673747968,
+        "minimum_free": 6643666944,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 12632,
+        "exit_code": 1,
+        "free_end": 6673076224
+      },
+      {
+        "gate": "master-reviewed-source02",
+        "status": "passed",
+        "free_start": 6670815232,
+        "minimum_free": 6628335616,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 1596,
+        "exit_code": 0,
+        "free_end": 6668627968
+      },
+      {
+        "gate": "master-reviewed-source03",
+        "status": "passed",
+        "free_start": 6659706880,
+        "minimum_free": 6626369536,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 18676,
+        "exit_code": 0,
+        "free_end": 6657855488
+      },
+      {
+        "gate": "master-reviewed-source-final04",
+        "status": "passed",
+        "free_start": 6654758912,
+        "minimum_free": 6632591360,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 23660,
+        "exit_code": 0,
+        "free_end": 6661775360
+      }
+    ]
+  },
+  "preservation": {
+    "original_container_start_times_unchanged": true,
+    "server5379_changed": false,
+    "build": false,
+    "cleanup": false,
+    "push": false,
+    "external_operations": false,
+    "production": false,
+    "candidate_only_additive_migration": "20261107010000 already recorded in the prior schema checkpoint;no further migration in this block"
+  },
+  "remaining": [
+    "Current-source Chrome desktop/mobile/light/dark and full literal/visual Word reconciliation remain open. No stage C-G closure.",
+    "Named local role/capability matrix still awaits business choice;no grant inferred from local role names.",
+    "TRR undefined;company documents without portfolio explicitly deferred;external DocuSign/scanner/channel acceptance still pending.",
+    "Actual master-operation queue runtime and representative maximum-scale acceptance remain separate from inline/source tests."
+  ],
+  "next": "Continue independent CRM source/authority UI gaps: ProposalsIndex currently retains async detail/list/form responses across account/actor/role changes;preserve native draft, financial, approval and source workflows."
+}

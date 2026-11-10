@@ -64,8 +64,7 @@ class JrcRelationship::ReportMetrics
 
   def action_metrics
     actions = records(JrcRelationship::Action).where(first_action_at: @period)
-    { first_action_minutes: actions.where("metadata ? 'first_action_elapsed_seconds'")
-                                   .average("(metadata ->> 'first_action_elapsed_seconds')::numeric / 60")&.to_f }
+    { first_action_minutes: JrcRelationship::FirstActionDuration.average_minutes(actions) }
   end
 
   def health_metrics

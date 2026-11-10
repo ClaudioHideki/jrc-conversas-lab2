@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-04",
+  "status": "Code and native boundaries reviewed; no additional access implemented",
+  "existing": [
+    "app/models/jrc_customers/signing_identity.rb",
+    "app/services/jrc_customers/signing_identity_writer.rb",
+    "app/services/jrc_customers/contact_directory.rb",
+    "app/controllers/api/v1/accounts/customers/contact_signing_identities_controller.rb",
+    "app/services/jrc_backoffice/signer_contacts.rb",
+    "app/services/jrc_backoffice/signer_roster_source.rb",
+    "app/services/jrc_backoffice/authority_access.rb",
+    "app/services/jrc_backoffice/authority_overview.rb"
+  ],
+  "facts": [
+    "SigningIdentity extends the native Contact, encrypts its identifier and masks generic serialization; identifier registration explicitly does not verify powers",
+    "SigningIdentityWriter locks the native directory contact and audits signing_authority_verified=false",
+    "ContactDirectory rechecks active account/member/user and native DirectoryPolicy, including corporate company coverage",
+    "SignerContacts derives customer/issuer from the authorized Backoffice request/contract; caller company/user/unit IDs cannot choose source scope",
+    "SignerRosterSource selects only native directory contacts and seals their source snapshot",
+    "AuthorityAccess binds authoring to exact contract version and signer roster, editable delivery state, Central request_create, issuer and unit coverage",
+    "AuthorityOverview separately checks historical sealed issuer/unit access before counting and presenting cases",
+    "New document/history/catalog endpoints never call authority services or infer powers from file availability"
+  ],
+  "preserved_decision": "No documentary access for companies without an authorized portfolio",
+  "existing_tests": [
+    "spec/requests/api/v1/accounts/customers/signing_identity_spec.rb",
+    "spec/services/jrc_backoffice/signer_rosters_spec.rb",
+    "spec/services/jrc_backoffice/authority_proposals_spec.rb"
+  ],
+  "validation_limits": "This is a code review and existing-test inventory, not a fresh pass of all listed tests or external DocuSign homologation",
+  "remaining": [
+    "Visual audit of native signing identity/roster/authority routes and explicit denials",
+    "E: verified evidence, exact contract-version release and external demo credentials remain separately gated"
+  ]
+}

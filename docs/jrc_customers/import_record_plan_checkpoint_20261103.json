@@ -1,0 +1,42 @@
+{
+  "stage": "C5d — scoped read-only record plan",
+  "status": "Internal plan validated. The Central API, explicit execution and interface remain pending; C→G are not complete.",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "7307f2b9e71b1912843054e4204af6d5c7ae08e6",
+  "snapshot": "/consolidation-customer-import-plan-checked",
+  "source": { "files": 11339, "mismatches": 0, "raw_sql_preserved": true },
+  "implemented": [
+    "Explicit mapping feeds the existing CompanyImport validator; identity remains internal ID or normalized fiscal identifier, never name-only merge.",
+    "Combined rows may reference the same identified company with identical attributes; conflicting or unidentified repeats fail explicitly.",
+    "Contacts reuse IdentityResolver, ContactDirectory, corporate coverage, native validations and protected signing identity validation. Ambiguous or repeated identities are not merged.",
+    "Native ContactMaster validates a real unsaved company association in memory, without fake IDs or preview database writes; tenant ownership remains mandatory.",
+    "Existing records support explicit update/skip; company transfer and primary replacement require separate boolean confirmations. Preview reflects the native context reset.",
+    "Import authorization is refreshed on every planning call and uses the parsed file type, including Enterprise contact_manage; caller options cannot select a weaker type.",
+    "Configured native labels are validated without creating tags. Personal fiscal identifiers are excluded or masked in public rows, including updates omitting person_kind.",
+    "Review fingerprint uses the existing canonical JSON normalizer without imposing its unrelated 128KiB ledger limit on the existing 1MiB/500-row CSV limits."
+  ],
+  "validation": {
+    "backend": { "examples": 119, "failures": 0, "pending": 0, "single_green_run": true, "report": ".codex/customer-import-plan-checked-backend.json" },
+    "coverage": ["New record plan and large CSV", "Native Contact model", "Company/contact context APIs and writer", "Parser, bulk permissions and private run storage", "Existing company imports and corporate coverage"],
+    "style": { "files": 9, "new_offenses": 0, "baseline_shared_offenses": 3, "remaining_preexisting_shared_offenses": 2,
+      "cops_disabled": false, "report": ".codex/customer-import-plan-style-review.json" },
+    "additional_domain_regression": "In progress:84 cases on owned candidate DB, fresh verified source, report customer-import-domain-recovered.json. No pass claimed before completion.",
+    "chrome": "No new interface in this component. Prior company/contact/group popup Chrome evidence remains preserved."
+  },
+  "interruption_and_preservation": {
+    "windows_disk_full": "A test run and a preparation were interrupted. Their partial output is not a successful gate.",
+    "generated_artifacts": "22 old generated archives/builds compressed losslessly, every original content SHA verified;1564595745 bytes freed. Sources, checkpoints, reports, private storage and databases preserved.",
+    "runtime": "Normal launch of stopped per-user Docker Desktop and start of only the3existing task containers. No WSL shutdown/reset, image build or volume removal.",
+    "candidate_schema": "Only additive20261103110000 on owned candidate test DB;331existing table hashes unchanged,0pending. Never a production migration.",
+    "post_outage_integrity": "Passed18protected old rows,26contacts/company contexts, group127/principal75, native labels and exact audit counts; verifier nil and0external operations.",
+    "failed_snapshot": "/consolidation-customer-import-plan is inadmissible after interruption; source mismatch report preserved. Fresh snapshots stream git archive HEAD plus local files and raw SQL, without rewriting source files."
+  },
+  "next": [
+    "Complete the additional domain regression and report its actual outcome.",
+    "Private reviewed configuration/token, locks, stale/replay checks and atomic application through native writers.",
+    "Configured custom attributes and native import extras; company error fields enriched without replacing its existing validator.",
+    "Authenticated Central API, complete horizontal wizard/history/template/error report and real Chrome persistence flows.",
+    "Remaining C requirements and D→E→F→G; TRR definition and external DocuSign demo remain unvalidated."
+  ],
+  "external": "No push, Docker image build/publication, deployment, production change or external signature."
+}

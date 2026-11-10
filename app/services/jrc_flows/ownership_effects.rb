@@ -83,6 +83,25 @@ class JrcFlows::OwnershipEffects
     refresh_message!(message_id) if committed && message_id
   end
 
+  def self.replay_message!(reference:, message:)
+    JrcFlows::OwnershipGuard.checkpoint!
+    context = Thread.current[:jrc_flow_ownership]
+    raise JrcFlows::OwnershipGuard::Closed unless context
+
+    row = JrcFlows::OwnershipLedger.connection_pool.with_connection do |db|
+      db.select_one(JrcFlows::OwnershipLedger.sql(
+        'SELECT kind,state,message_id FROM jrc_flow_ownership_effects WHERE scope_key=? AND generation=? AND effect_reference=?',
+        context.fetch(:scope_key), context.fetch(:generation), reference.to_s
+      ))
+    end
+    unless row && row['kind'] == 'MESSAGE' && %w[OBSERVED QUEUED CONFIRMED].include?(row['state']) && row['message_id'].to_i == message.id
+      raise Duplicate, 'FLOW_EFFECT_RECONCILIATION_REQUIRED'
+    end
+
+    JrcFlows::OwnershipGuard.checkpoint!
+    message
+  end
+
   def self.finish_pending!(committed)
     context=Thread.current[:jrc_flow_ownership]
     return unless context

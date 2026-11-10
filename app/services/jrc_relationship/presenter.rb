@@ -6,8 +6,11 @@ class JrcRelationship::Presenter
   def assignment(record, signals: nil)
     snapshot = snapshots[record.id]
     signals ||= snapshot&.signals&.deep_symbolize_keys || { health: { score: nil, band: 'unavailable', factors: [] } }
+    signals = JrcRelationship::SatisfactionEvidenceProjection.annotate(signals: signals, configuration: @context.configuration(record))
+    signals = JrcRelationship::SentimentEvidenceProjection.annotate(signals: signals, configuration: @context.configuration(record))
     next_action = next_actions[record.id]
     { id: record.id, name: record.label, company_id: record.company_id, contact_id: record.contact_id,
+      assignment_version: record.updated_at.utc.iso8601(6), transfer_locked: JrcRelationship::PortfolioTransferLock.locked?(record.settings),
       business_unit_id: record.business_unit_id, business_unit: record.business_unit&.name,
       owner: record.owner && { id: record.owner.id, name: record.owner.name }, team_id: record.team_id,
       status: record.status, settings: record.settings, signals: signals.except(:_source_ids),
@@ -68,8 +71,9 @@ class JrcRelationship::Presenter
       arr_cents: visibility.crm? ? contracts.sum(:monthly_cents) * 12 : nil,
       health_average: health.average(:score)&.to_f, bands: health.group(:band).count,
       health_coverage: { calculated: health.count, portfolio: scope.count },
-      at_risk: health.exists? ? risk_health.count : nil, churned: period ? closed_risks.where(status: 'churn').count : scope.where(status: 'churned').count,
-      mrr_at_risk_cents: visibility.crm? && health.exists? ? risk_health.sum("COALESCE((signals ->> 'mrr_cents')::bigint, 0)") : nil,
+      at_risk: health.where.not(score: nil).exists? ? risk_health.count : nil,
+      churned: period ? closed_risks.where(status: 'churn').count : scope.where(status: 'churned').count,
+      mrr_at_risk_cents: visibility.crm? && health.where.not(score: nil).exists? ? risk_health.sum("COALESCE((signals ->> 'mrr_cents')::bigint, 0)") : nil,
       retained: closed_risks.where(status: 'retained').count,
       retention_rate: closed_risks.where(status: %w[retained churn]).exists? ? 100.0 * closed_risks.where(status: 'retained').count / closed_risks.where(status: %w[retained churn]).count : nil,
       without_contact: health.exists? ? health.where("(signals ->> 'days_without_contact')::integer >= ?", @context.configuration.effective_rules['no_contact_days']).count : nil,
@@ -80,6 +84,14 @@ class JrcRelationship::Presenter
       actions_today: actions.where(sla_paused_at: nil, due_at: Time.current.all_day).count,
       overdue_actions: actions.where(sla_paused_at: nil).where('due_at < ?', Time.current).count,
       waiting_customer_actions: actions.where(status: 'waiting_customer').count,
+      overdue_returns: actions.where('return_at < ?', Time.current).count,
+      monitoring: { observed_customers: health.count, customers: scope.count, last_processed_at: health.maximum(:calculated_at),
+                    scored_customers: health.where.not(score: nil).count,
+                    stale_customers: health.where('calculated_at < ?', 15.minutes.ago).count,
+                    latest_attempt: JrcRelationship::ProcessingRun.latest_for(@context, scope)&.summary(scope) },
+      automatic_alert_review: JrcRelationship::AlertReview.summary(
+        @context.records(JrcRelationship::Action).where(assignment_id: ids, created_at: period || (90.days.ago..Time.current))
+      ),
       waiting_finance_actions: actions.where(status: 'waiting_finance').count,
       priority_actions: priority_actions(actions),
       expansion_potential_cents: visibility.crm? ? JrcRelationship::ExpansionPipeline.open(expansion, deals).sum(:potential_cents) : nil,
@@ -107,8 +119,9 @@ class JrcRelationship::Presenter
 
   def priority_actions(actions)
     actions.includes(assignment: [:company, :contact]).order(priority: :desc, due_at: :asc, id: :asc).limit(10).map do |action|
-      { assignment_id: action.assignment_id, customer: action.assignment.label, reason: action.reason,
-        priority: action.priority, due_at: action.due_at, status: action.status, factors: action.factors }
+      { id: action.id, assignment_id: action.assignment_id, customer: action.assignment.label, reason: action.reason,
+        priority: action.priority, due_at: action.due_at, status: action.status, factors: action.factors,
+        next_step: action.next_step, return_at: action.return_at, customer_confirmation: action.customer_confirmation }
     end
   end
   private :shared_csat, :renewal_counts, :priority_actions
@@ -182,10 +195,8 @@ class JrcRelationship::Presenter
   public
 
   def recommendations(record)
-    signals = JrcRelationship::CustomerSignals.new(assignment: record, context: @context).call
-    reasons = signals[:health][:factors].select { |f| f[:available] && f[:normalized] < 60 }
-    { customer: record.label, health: signals[:health], evidence: reasons,
-      recommended_action: reasons.empty? ? 'Manter cadência de relacionamento' : 'Revisar fatores e preparar plano com o responsável',
-      external_actions_require_confirmation: true }
+    source = JrcRelationship::CustomerSignals.new(assignment: record, context: @context)
+    signals = source.call
+    JrcRelationship::HealthRecommendation.call(health: signals.fetch(:health), rules: source.rules).merge(customer: record.label)
   end
 end

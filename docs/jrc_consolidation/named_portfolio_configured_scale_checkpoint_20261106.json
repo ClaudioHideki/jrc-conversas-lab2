@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-06",
+  "preserved_previous_checkpoint": "18d2be80ee80fc582df63b7eb331358f8cbd1849",
+  "branch": "codex/relacionamento-v2-20261101",
+  "status": "Configured-group representative HTTP preview scale validated; C-G not closed.",
+  "evidence": {
+    "label": "named-portfolio-governance-scale22",
+    "examples": 1,
+    "failures": 0,
+    "real_postgresql": true,
+    "fixture_preparation": "1000 Contacts,1000 native Assignments,1000 group links through create! and validations; explicit native customer limits.",
+    "request": "POST native reviewed_batches,50allocations; policies derived from stored group memberships rather than client-selected policy scopes.",
+    "metrics": {
+      "customers": 1000,
+      "selected": 50,
+      "total_queries": 378,
+      "portfolio_queries": 18,
+      "elapsed_seconds": 1.0943,
+      "real_database": true
+    },
+    "integrity": "1000 original owners and active links unchanged;50 pending review items,immutable snapshot format version1. Preview persisted its normal native review/audit; no transfer/execution/provider operation.",
+    "lint": "0offenses; formatting only after native pass."
+  },
+  "audit_semantics_verified": {
+    "native_group_audit_store": "JrcCustomers::Audit writes JrcCrm::AuditEvent; no model readonly? or DB append-only trigger was found for this generic store. Planned immutable audit must not be represented as established.",
+    "configuration_versions": "Existing ConfigurationVersion#readonly? protects persisted versions at the application layer. No new DB immutability trigger is claimed.",
+    "review_snapshots": "Existing rel_batch_review_immutable DB trigger protects immutable fields; unchanged.",
+    "next_step": "Implement permission-scoped operational history projections/exports without exposing raw historic customer IDs, free text or prior private values; record remaining full-audit requirements explicitly."
+  },
+  "environment": {
+    "original_containers_started_at_unchanged": true,
+    "server5379": "Read-only HEAD /app/login returned200 and the preserved4d4a6de3asset paths; not new-version Chrome validation. No listener PID reconfirmation claimed.",
+    "disk_start_bytes": 9210286080,
+    "disk_minimum_during_test_bytes": 9190305792,
+    "disk_end_test_bytes": 9209733120,
+    "disk_last_observed_bytes": 6644473856,
+    "note": "Free space later dropped outside the test monitoring interval; cause not attributed. No cleanup or process interruption performed."
+  },
+  "pending": [
+    "Scoped group history/export, native master-to-group allocation flow, local-role matrix and resumable grouping operations.",
+    "Current-source build/Chrome desktop/mobile/light/dark prohibited; Word visual acceptance pending.",
+    "TRR definition, deferred company docs without portfolio and external providers/channel/pilot remain open."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,production,external real operation,5379change or original container restart.",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_configured_scale_checkpoint_20261106.json"
+}

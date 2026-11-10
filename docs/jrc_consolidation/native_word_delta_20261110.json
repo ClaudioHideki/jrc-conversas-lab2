@@ -1,0 +1,151 @@
+{
+  "four_word_sources": [
+    {
+      "module": "Cadastro Mestre",
+      "name": "JRC-CONVERSAS-CADASTRO-MESTRE-CLIENTES-ESPECIFICACAO-DEV-20261101 (1).docx",
+      "sha256": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
+      "embedded_images_not_revalidated": 28,
+      "source": "C:\\Users\\DEV03\\Downloads\\JRC-CONVERSAS-CADASTRO-MESTRE-CLIENTES-ESPECIFICACAO-DEV-20261101 (1).docx",
+      "paragraphs_extracted_for_reconciliation": 421
+    },
+    {
+      "module": "Central de Aprovacoes",
+      "name": "Especificacao_Central_Aprovacoes_JRC_Conversas_DEV.docx",
+      "sha256": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917",
+      "embedded_images_not_revalidated": 12,
+      "source": "C:\\Users\\DEV03\\Downloads\\Especificacao_Central_Aprovacoes_JRC_Conversas_DEV.docx",
+      "paragraphs_extracted_for_reconciliation": 465
+    },
+    {
+      "module": "Backoffice",
+      "name": "JRC_Conversas_Backoffice_Projeto_DEV_20261101.docx",
+      "sha256": "ebd5cd1db7fa53cc7bf7e2fa6a801e498735eaef9d67040002a5a9ade4878284",
+      "embedded_images_not_revalidated": 10,
+      "source": "C:\\Users\\DEV03\\Downloads\\JRC_Conversas_Backoffice_Projeto_DEV_20261101.docx",
+      "paragraphs_extracted_for_reconciliation": 497
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "name": "JRC_Conversas_Relacionamento_V2_Projeto_Completo_Dev_Com_Imagens_20261101.docx",
+      "sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+      "embedded_images_not_revalidated": 22,
+      "source": "C:\\Users\\DEV03\\Downloads\\JRC_Conversas_Relacionamento_V2_Projeto_Completo_Dev_Com_Imagens_20261101.docx",
+      "paragraphs_extracted_for_reconciliation": 326
+    }
+  ],
+  "approved_addendum": {
+    "sha256": "eed04fe648e110c57fbd981a556775973f0e8eea43b3e8ca859c70737246146d",
+    "TRR_formula_approved": true,
+    "four_profiles_approved": true,
+    "real_operational_parameters_not_assumed": true
+  },
+  "migrations": [
+    {
+      "path": "db/migrate/20261109190000_create_backoffice_requirement_catalog.rb",
+      "version_unique": true,
+      "class_unique": true,
+      "source_sha256": "b8dbde50bedc666c966bb07e8c88372ec7d0f62e059610ea6c9866cbf72fd77a",
+      "database_executed": false,
+      "fresh_install_proved": false,
+      "upgrade_proved": false
+    },
+    {
+      "path": "db/migrate/20261109191000_create_portfolio_history_receipts.rb",
+      "version_unique": true,
+      "class_unique": true,
+      "source_sha256": "af209a8689c30e4662260563cc1bb66a18e86d38ad8e36cd192cb4387499e123",
+      "database_executed": false,
+      "fresh_install_proved": false,
+      "upgrade_proved": false
+    },
+    {
+      "path": "db/migrate/20261109200000_add_backoffice_document_validity.rb",
+      "version_unique": true,
+      "class_unique": true,
+      "source_sha256": "fbbf0128b6a7ee786a8b0283956968576ed0a02bd64cc316d1a23dba51cc8763",
+      "database_executed": false,
+      "fresh_install_proved": false,
+      "upgrade_proved": false
+    },
+    {
+      "path": "db/migrate/20261109210000_create_relationship_retention_history.rb",
+      "version_unique": true,
+      "class_unique": true,
+      "source_sha256": "c503069a4acadc04157e6fcd7ef73aeeacf97732d971742f333553885f5e1463",
+      "database_executed": false,
+      "fresh_install_proved": false,
+      "upgrade_proved": false
+    },
+    {
+      "path": "db/migrate/20261109211000_add_relationship_document_confidentiality.rb",
+      "version_unique": true,
+      "class_unique": true,
+      "source_sha256": "badfb20d9a751d384012b0c29c2b55db3d3f6766e4d2fc3b526c67d1a6711ced",
+      "database_executed": false,
+      "fresh_install_proved": false,
+      "upgrade_proved": false
+    },
+    {
+      "path": "db/migrate/20261109212000_create_relationship_management_requests.rb",
+      "version_unique": true,
+      "class_unique": true,
+      "source_sha256": "36a84512ff7d7713fee1b0a9487a3d381269b2754bad946a1b5af33a8dcee4b6",
+      "database_executed": false,
+      "fresh_install_proved": false,
+      "upgrade_proved": false
+    }
+  ],
+  "schema_regenerated": false,
+  "native_registry": {
+    "path": "enterprise/app/models/custom_role.rb",
+    "model_not_duplicated": true,
+    "ModulePolicy_permissions_concat_present": true,
+    "runtime_verified": false
+  },
+  "module_status": [
+    {
+      "stage": "C",
+      "implementation": "Existing Master Directory retained; financial segments/integrations preserved",
+      "native_validation": "Prior evidence retained, not rerun as a whole",
+      "remaining": "Consolidated real database and browser regression"
+    },
+    {
+      "stage": "D",
+      "implementation": "Cumulative financial adjustments/draft review directives integrated",
+      "native_validation": "Vue SFC compilation and Node state tests; Rails not executed",
+      "remaining": "Real SQL concurrency, policy and originating-record integration"
+    },
+    {
+      "stage": "E",
+      "implementation": "Typed/human requirements, document validity, locks and history integrated",
+      "native_validation": "12 native Vue document-version tests plus Node state tests",
+      "remaining": "Six SQL migrations and complete v1/v2 workflow, dossier, scanner and signature acceptance"
+    },
+    {
+      "stage": "F",
+      "implementation": "Approved TRR/history/local roles/management requests integrated; stale TRR UI fixed",
+      "native_validation": "7 Vue TRR scenarios; comparison in Ruby not executed here",
+      "remaining": "Runtime registry/grants, isolated SQL retention cohorts, Sofia workflow"
+    },
+    {
+      "stage": "G",
+      "implementation": "No stage closure inferred from application of package or test counts",
+      "native_validation": "Frontend only, distinct from Rails/bank/browser",
+      "remaining": "Sofia + Backoffice end to end desktop/mobile light/dark; authorized provider demo"
+    }
+  ],
+  "stage_closure": {
+    "A": false,
+    "B": false,
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  },
+  "no_real_grants_or_parameters_applied": true,
+  "no_database_contacted": true,
+  "backend_runtime_blocked": "Windows Ruby/Bundler/PostgreSQL absent; Docker HTTP503, user chose to continue without Docker",
+  "build_blocked": "Resources below the authorized 5 GiB available RAM threshold. No consolidated build attempted; old d8d7c960 assets cannot prove this version.",
+  "visual_acceptance": "No Chrome evidence for consolidated candidate; source reference images not declared matched"
+}

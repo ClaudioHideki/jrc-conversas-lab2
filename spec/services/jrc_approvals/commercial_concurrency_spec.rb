@@ -115,4 +115,48 @@ RSpec.describe 'Commercial gates with independent PostgreSQL connections', type:
     expect(request.decisions.count).to eq(1)
     expect(JrcApprovals::AuditEvent.where(request_id: request.id, event_type: 'request_invalidate').count).to eq(1)
   end
+
+  it 'replays simultaneous adjustments with one immutable revision and one adjustment audit' do
+    scope, author, approver, proposal = concurrent_fixture
+    approver.custom_role.update!(permissions: approver.custom_role.permissions + ['jrc_approvals_adjust'])
+    proposal.update!(owner: approver.user)
+    commercial_policy(scope, author, [approver])
+    request = commercial_request(scope, author, proposal).first
+    results = simultaneous do
+      JrcApprovals::Adjustments.new(account: scope[:account], user: approver.user).call(request_id: request.id,
+                                                                                        changes: { 'discount_cents' => 50 }, mode: 'save',
+                                                                                        reason: 'Synthetic concurrent adjustment',
+                                                                                        expected_version: 0, idempotency_key: 'adjust-concurrent').id
+    end
+    expect(results.map(&:first)).to eq(%i[ok ok]), results.inspect
+    expect(results.map(&:last).uniq.size).to eq(1)
+    expect(JrcApprovals::Request.where(account: scope[:account]).count).to eq(2)
+    expect(JrcApprovals::AuditEvent.where(account: scope[:account], event_type: 'request_adjusted').count).to eq(1)
+  end
+
+  it 'serializes an original vote against adjustment without approving a changed original snapshot' do
+    scope, author, approver, proposal = concurrent_fixture
+    approver.custom_role.update!(permissions: approver.custom_role.permissions + ['jrc_approvals_adjust'])
+    proposal.update!(owner: approver.user)
+    commercial_policy(scope, author, [approver])
+    request = commercial_request(scope, author, proposal).first
+    results = simultaneous do |index|
+      if index.zero?
+        JrcApprovals::Adjustments.new(account: scope[:account], user: approver.user).call(request_id: request.id,
+                                                                                          changes: { 'discount_cents' => 50 }, mode: 'approve',
+                                                                                          reason: 'Synthetic atomic concurrent adjustment',
+                                                                                          expected_version: 0, idempotency_key: 'adjust-vote-race',
+                                                                                          step_code: 'review').id
+      else
+        approval_vote(scope, approver, JrcApprovals::Request.find(request.id), expected_version: 0).id
+      end
+    end
+    expect(results.count { |row| row.first == :ok }).to eq(1), results.inspect
+    expect(results.find { |row| row.first == :error }).to include('VERSION_CONFLICT')
+    approved = JrcApprovals::Request.where(account: scope[:account], state: 'approved').to_a
+    expect(approved.size).to eq(1)
+    current = JrcApprovals::Catalog.snapshot(account: scope[:account], user: author.user,
+                                             key: 'crm.proposal_send', resource_id: proposal.id)
+    expect(approved.first.snapshot).to eq(current)
+  end
 end

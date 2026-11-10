@@ -13,6 +13,7 @@ class JrcRelationship::SurveyRule < ApplicationRecord
   REFERENCES = { 'company_id' => 'JrcCustomers::Company', 'unit_id' => 'JrcServiceDesk::Unit', 'team_id' => 'Team',
                  'inbox_id' => 'Inbox', 'product_id' => 'JrcCrm::Product', 'contract_id' => 'JrcCrm::Contract' }.freeze
   validate :valid_policy
+  validate :eligible_execution_member
 
   def effective_settings
     DEFAULTS.merge(settings)
@@ -29,6 +30,15 @@ class JrcRelationship::SurveyRule < ApplicationRecord
   end
 
   private
+
+  def eligible_execution_member
+    return unless active && execution_member && (new_record? || will_save_change_to_execution_member_id? || will_save_change_to_active?)
+
+    JrcRelationship::DistributionApproval.lock_configuration!(account_id)
+    return if JrcRelationship::AnalystEligibility.available?(account_id, execution_member.user_id)
+
+    errors.add(:execution_member, 'must remain eligible for Relationship execution')
+  end
 
   def valid_policy
     validate_references

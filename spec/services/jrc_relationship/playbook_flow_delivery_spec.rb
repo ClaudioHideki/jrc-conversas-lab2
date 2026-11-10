@@ -97,7 +97,35 @@ RSpec.describe JrcRelationship::PlaybookFlow do
     message
     run.update!(status: 'running', node_id: 'node1', finished_at: nil)
     expect { JrcFlows::Runner.new(run).perform }.not_to(change { flow_messages(run).length })
-    expect(run.reload.status).to eq('completed')
+    expect(run.reload.status).to eq('completed'), run.error
+  end
+
+  it 'does not replay a message whose ownership outcome is unknown' do
+    original = message
+    JrcFlows::OwnershipLedger.connection.execute(JrcFlows::OwnershipLedger.sql(
+      "UPDATE jrc_flow_ownership_effects SET state='UNKNOWN' WHERE message_id=? AND kind='MESSAGE'", original.id
+    ))
+    run.update!(status: 'running', node_id: 'node1', finished_at: nil)
+    expect { JrcFlows::Runner.new(run).perform }.not_to(change(Message, :count))
+    expect(run.reload.status).to eq('failed')
+  end
+
+  it 'does not replay a signed journal when its native message differs from the ownership ledger' do
+    original = message
+    JrcFlows::OwnershipLedger.connection.execute(JrcFlows::OwnershipLedger.sql(
+      "UPDATE jrc_flow_ownership_effects SET message_id=? WHERE message_id=? AND kind='MESSAGE'", original.id + 1_000_000, original.id
+    ))
+    run.update!(status: 'running', node_id: 'node1', finished_at: nil)
+    expect { JrcFlows::Runner.new(run).perform }.not_to(change(Message, :count))
+    expect(run.reload.status).to eq('failed')
+  end
+
+  it 'rechecks the original actor before replaying an already sealed message' do
+    message
+    sd_account_user.update!(role: :agent)
+    run.update!(status: 'running', node_id: 'node1', finished_at: nil)
+    expect { JrcFlows::Runner.new(run).perform }.not_to(change(Message, :count))
+    expect(run.reload.status).to eq('paused')
   end
 
   it 'blocks continuation after an unknown effect outcome without generating another message' do

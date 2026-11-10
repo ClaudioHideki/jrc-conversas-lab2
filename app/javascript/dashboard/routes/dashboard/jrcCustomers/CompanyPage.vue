@@ -3,10 +3,15 @@ import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import API from 'dashboard/api/jrcCustomers';
 import RelationshipPanel from '../jrcRelationship/Customer360Relationship.vue';
+import DocumentsPanel from '../jrcRelationship/DocumentsPanel.vue';
 import { useI18n } from 'vue-i18n';
-import CompanyEditor from './components/CompanyEditor.vue';
+import CompanyEditorDialog from './components/CompanyEditorDialog.vue';
+import BackofficeContextPanel from './components/BackofficeContextPanel.vue';
 import CompanyAddresses from './components/CompanyAddresses.vue';
 import CompanyContacts from './components/CompanyContacts.vue';
+import ContractRenewalCard from './components/ContractRenewalCard.vue';
+import AttendancePanel from './components/AttendancePanel.vue';
+import MasterTicketAction from './components/MasterTicketAction.vue';
 import TimelinePanel from './components/TimelinePanel.vue';
 import RecordsPanel from './components/RecordsPanel.vue';
 import RelationshipMapPanel from './components/RelationshipMapPanel.vue';
@@ -21,10 +26,15 @@ import {
   errorMessage,
 } from './copy';
 
+const props = defineProps({
+  subjectId: { type: [Number, String], default: null },
+  embedded: { type: Boolean, default: false },
+});
+const emit = defineEmits(['updated', 'denied', 'navigateCompany']);
 const route = useRoute();
 const { t } = useI18n();
-const { accountId, accountScopedRoute, date } = useCustomerMaster();
-const companyId = computed(() => route.params.companyId);
+const { accountId, identity, accountScopedRoute, date } = useCustomerMaster();
+const companyId = computed(() => props.subjectId ?? route.params.companyId);
 const company = ref(null);
 const addresses = ref([]);
 const branches = ref([]);
@@ -36,16 +46,20 @@ const editing = ref(false);
 const error = ref('');
 const busy = ref(false);
 let generation = 0;
+let controller;
+let overviewController;
 
 const availableTabs = computed(() => {
   const base = [
     'overview',
+    'map',
     'general',
     'addresses',
     'contacts',
     'timeline',
     'conversations',
   ];
+  if (overview.value?.document_context) base.push('documents');
   if (overview.value?.capabilities?.crm)
     base.push('leads', 'deals', 'proposals', 'activities');
   if (overview.value?.capabilities?.service_desk) base.push('tickets');
@@ -56,13 +70,24 @@ const availableTabs = computed(() => {
   if (overview.value?.capabilities?.calls) base.push('calls');
   if (overview.value?.capabilities?.campaigns) base.push('campaigns');
   if (overview.value?.capabilities?.relationship) base.push('relationship');
+  if (overview.value?.capabilities?.backoffice) base.push('backoffice');
   return base;
 });
 
+const groupTones = {
+  overview: 'border-n-blue-7 bg-n-blue-3 text-n-blue-11',
+  registration: 'border-n-teal-7 bg-n-teal-3 text-n-teal-11',
+  relationshipArea: 'border-n-violet-7 bg-n-violet-3 text-n-violet-11',
+  commercial: 'border-n-amber-7 bg-n-amber-3 text-n-amber-11',
+  operation: 'border-n-blue-7 bg-n-blue-3 text-n-blue-11',
+  service: 'border-n-ruby-7 bg-n-ruby-3 text-n-ruby-11',
+  backoffice: 'border-n-teal-7 bg-n-teal-3 text-n-teal-11',
+};
+
 const navigationGroups = computed(() => {
   const definitions = [
-    ['overview', ['overview']],
-    ['registration', ['general', 'addresses', 'contacts']],
+    ['overview', ['overview', 'map']],
+    ['registration', ['general', 'addresses', 'contacts', 'documents']],
     [
       'relationshipArea',
       ['relationship', 'timeline', 'conversations', 'calls', 'campaigns'],
@@ -70,6 +95,7 @@ const navigationGroups = computed(() => {
     ['commercial', ['leads', 'deals', 'proposals', 'orders', 'contracts']],
     ['operation', ['activities', 'projects', 'project_tasks']],
     ['service', ['tickets', 'follow_ups']],
+    ['backoffice', ['backoffice']],
   ];
   return definitions
     .map(([key, items]) => ({
@@ -110,7 +136,12 @@ const cards = computed(() => {
   if (overview.value.capabilities.service_desk)
     result.push(
       { label: T.openTickets, value: overview.value.tickets_open },
-      { label: T.slaBreached, value: overview.value.sla_breached }
+      {
+        label: T.slaBreached,
+        value:
+          overview.value.sla_breached ??
+          t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE'),
+      }
     );
   if (overview.value.capabilities.projects)
     result.push({
@@ -156,12 +187,20 @@ const selectRelationKind = kind => {
 const load = async () => {
   generation += 1;
   const version = generation;
+  controller?.abort();
+  controller = new AbortController();
   busy.value = true;
   error.value = '';
+  company.value = null;
+  overview.value = null;
+  addresses.value = [];
+  branches.value = [];
+  branchesTotal.value = 0;
+  const options = { accountId: accountId.value, signal: controller.signal };
   try {
     const [record, summary] = await Promise.all([
-      API.company(companyId.value),
-      API.overview(companyId.value),
+      API.company(companyId.value, options),
+      API.overview(companyId.value, options),
     ]);
     if (version === generation) {
       company.value = record.data.payload;
@@ -169,21 +208,61 @@ const load = async () => {
       branches.value = record.data.branches;
       branchesTotal.value = record.data.branches_total;
       overview.value = summary.data;
+      return true;
     }
+    return false;
   } catch (err) {
-    if (version === generation) error.value = errorMessage(err);
+    if (version !== generation) return false;
+    error.value = errorMessage(err);
+    if ([401, 403, 404].includes(err.response?.status)) emit('denied');
+    return false;
   } finally {
     if (version === generation) busy.value = false;
   }
 };
 
-const saved = () => {
+const saved = async record => {
   editing.value = false;
-  load();
+  const context = identity.value;
+  if ((await load()) && context === identity.value) emit('updated', record);
+};
+
+const directoryDenied = () => {
+  generation += 1;
+  controller?.abort();
+  overviewController?.abort();
+  company.value = null;
+  overview.value = null;
+  busy.value = false;
+  error.value = t('CRM.CUSTOMER_MASTER_360.DIRECTORY_DENIED');
+  emit('denied');
+};
+
+const refreshOverview = async () => {
+  const version = generation;
+  const context = identity.value;
+  overviewController?.abort();
+  overviewController = new AbortController();
+  try {
+    const { data } = await API.overview(companyId.value, {
+      accountId: accountId.value,
+      signal: overviewController.signal,
+    });
+    if (version === generation && context === identity.value)
+      overview.value = data;
+  } catch (failure) {
+    if (version !== generation || context !== identity.value) return;
+    error.value = errorMessage(failure);
+    if ([401, 403, 404].includes(failure.response?.status)) {
+      company.value = null;
+      overview.value = null;
+      emit('denied');
+    }
+  }
 };
 
 watch(
-  [accountId, companyId],
+  [identity, companyId],
   () => {
     company.value = null;
     overview.value = null;
@@ -195,20 +274,33 @@ watch(
   { immediate: true }
 );
 
+watch([availableTabs, busy], () => {
+  if (busy.value || !overview.value || availableTabs.value.includes(tab.value))
+    return;
+  section.value = 'overview';
+  tab.value = 'overview';
+});
 onBeforeUnmount(() => {
   generation += 1;
+  controller?.abort();
+  overviewController?.abort();
+  company.value = null;
+  overview.value = null;
 });
 </script>
 
 <template>
-  <main
-    class="h-full w-full overflow-auto bg-n-solid-1 p-5 text-n-slate-12 md:p-8"
+  <component
+    :is="embedded ? 'section' : 'main'"
+    class="w-full bg-n-solid-1 text-n-slate-12"
+    :class="embedded ? 'p-1' : 'h-full overflow-auto p-5 md:p-8'"
   >
     <RouterLink
+      v-if="!embedded"
       :to="accountScopedRoute('jrc_customer_companies')"
       class="text-sm text-n-brand"
     >
-      {{ T.customers }} / {{ T.companies }}
+      {{ `${T.customers} / ${T.companies}` }}
     </RouterLink>
 
     <p
@@ -232,12 +324,13 @@ onBeforeUnmount(() => {
       >
         <div class="min-w-0">
           <p class="text-xs font-semibold uppercase tracking-wide text-n-brand">
-            {{ T.master }} / {{ company.customer_code || `#${company.id}` }}
+            {{ `${T.master} / ${company.customer_code || `#${company.id}`}` }}
           </p>
           <h1 class="mt-2 text-2xl font-bold">{{ company.name }}</h1>
           <p class="mt-2 text-sm text-n-slate-10">
-            {{ company.tax_id || '—' }} / {{ company.segment || '—' }} /
-            {{ company.owner_name || T.noOwner }} / {{ company.city || '—' }}
+            {{
+              `${company.tax_id || '—'} / ${company.segment || '—'} / ${company.owner_name || T.noOwner} / ${company.city || '—'}`
+            }}
           </p>
           <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
             <span
@@ -285,12 +378,12 @@ onBeforeUnmount(() => {
         </button>
       </header>
 
-      <CompanyEditor
+      <CompanyEditorDialog
         v-if="editing"
+        :key="identity"
         :company="company"
-        class="mb-6"
         @saved="saved"
-        @cancel="editing = false"
+        @close="editing = false"
       />
 
       <RouterLink
@@ -304,7 +397,7 @@ onBeforeUnmount(() => {
           )
         "
       >
-        {{ T.agenda }} / {{ company.name }}
+        {{ `${T.agenda} / ${company.name}` }}
       </RouterLink>
 
       <nav
@@ -315,15 +408,20 @@ onBeforeUnmount(() => {
           v-for="group in navigationGroups"
           :key="group.key"
           type="button"
-          class="rounded-lg px-3 py-2 text-sm font-medium"
-          :class="
+          class="rounded-lg border px-3 py-2 text-sm font-medium"
+          :class="[
+            groupTones[group.key],
             section === group.key
-              ? 'bg-n-brand text-white'
-              : 'bg-n-alpha-2 text-n-slate-11'
-          "
+              ? 'ring-2 ring-n-brand ring-offset-2 ring-offset-n-solid-1'
+              : 'opacity-80',
+          ]"
           @click="chooseSection(group)"
         >
-          {{ T[group.key] }}
+          {{
+            group.key === 'backoffice'
+              ? t('CRM.CUSTOMER_MASTER_360.BACKOFFICE_TITLE')
+              : T[group.key]
+          }}
         </button>
       </nav>
 
@@ -345,10 +443,23 @@ onBeforeUnmount(() => {
           :aria-current="tab === key ? 'page' : undefined"
           @click="tab = key"
         >
-          {{ key === 'relationship' ? t('RELATIONSHIP.TITLE') : T[key] }}
+          {{
+            key === 'map'
+              ? t('CRM.CUSTOMER_MASTER_360.RELATIONSHIP_MAP')
+              : key === 'documents'
+                ? t('CRM.CUSTOMER_MASTER_360.COMPANY_DOCUMENTS')
+                : key === 'relationship'
+                  ? t('RELATIONSHIP.TITLE')
+                  : T[key]
+          }}
         </button>
       </nav>
 
+      <MasterTicketAction
+        v-if="overview.capabilities.service_desk"
+        :company-id="company.id"
+        class="mb-4"
+      />
       <section class="rounded-xl border border-n-weak bg-n-solid-2 p-5">
         <template v-if="tab === 'overview'">
           <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -389,17 +500,19 @@ onBeforeUnmount(() => {
             </article>
           </div>
 
+          <ContractRenewalCard
+            v-if="overview.capabilities.contracts"
+            :value="overview.contract_renewal"
+          />
           <p class="mt-5 text-sm text-n-slate-10">{{ T.permissionsHelp }}</p>
-          <RelationshipMapPanel
-            :company-id="company.id"
-            :company-name="company.name"
-            @select-kind="selectRelationKind"
-          />
-          <TimelinePanel
-            class="mt-6"
-            :resource-id="company.id"
-          />
         </template>
+
+        <RelationshipMapPanel
+          v-else-if="tab === 'map'"
+          :company-id="company.id"
+          :company-name="company.name"
+          @select-kind="selectRelationKind"
+        />
 
         <template v-else-if="tab === 'general'">
           <dl class="grid gap-5 md:grid-cols-3">
@@ -422,8 +535,17 @@ onBeforeUnmount(() => {
             v-if="company.parent_company_id"
             class="mt-5"
           >
-            <span>{{ T.parent }}: </span>
+            <span>{{ `${T.parent}: ` }}</span>
+            <button
+              v-if="embedded"
+              type="button"
+              class="text-n-brand"
+              @click="emit('navigateCompany', company.parent_company_id)"
+            >
+              {{ `#${company.parent_company_id}` }}
+            </button>
             <RouterLink
+              v-else
               :to="
                 accountScopedRoute('jrc_customer_company', {
                   companyId: company.parent_company_id,
@@ -431,7 +553,7 @@ onBeforeUnmount(() => {
               "
               class="text-n-brand"
             >
-              #{{ company.parent_company_id }}
+              {{ `#${company.parent_company_id}` }}
             </RouterLink>
           </div>
 
@@ -440,18 +562,30 @@ onBeforeUnmount(() => {
             class="mt-5"
           >
             <h3 class="font-semibold">{{ T.branches }}</h3>
-            <RouterLink
+            <template
               v-for="branch in branches"
               :key="branch.id"
-              :to="
-                accountScopedRoute('jrc_customer_company', {
-                  companyId: branch.id,
-                })
-              "
-              class="mt-2 block text-n-brand"
             >
-              {{ branch.name }}
-            </RouterLink>
+              <button
+                v-if="embedded"
+                type="button"
+                class="mt-2 block text-n-brand"
+                @click="emit('navigateCompany', branch.id)"
+              >
+                {{ branch.name }}
+              </button>
+              <RouterLink
+                v-else
+                :to="
+                  accountScopedRoute('jrc_customer_company', {
+                    companyId: branch.id,
+                  })
+                "
+                class="mt-2 block text-n-brand"
+              >
+                {{ branch.name }}
+              </RouterLink>
+            </template>
             <RouterLink
               v-if="branchesTotal > branches.length"
               :to="
@@ -463,11 +597,21 @@ onBeforeUnmount(() => {
               "
               class="mt-3 block text-n-brand"
             >
-              {{ T.branches }}: {{ branchesTotal }} / {{ T.more }}
+              {{ `${T.branches}: ${branchesTotal} / ${T.more}` }}
             </RouterLink>
           </div>
         </template>
 
+        <DocumentsPanel
+          v-else-if="tab === 'documents' && overview.document_context"
+          :key="`${accountId}:${company.id}:${overview.document_context.assignment_id}`"
+          :assignment-id="overview.document_context.assignment_id"
+          :metadata="overview.document_context"
+        />
+        <BackofficeContextPanel
+          v-else-if="tab === 'backoffice'"
+          :company-id="company.id"
+        />
         <RelationshipPanel
           v-else-if="tab === 'relationship'"
           :assignment-id="overview.relationship.id"
@@ -481,12 +625,24 @@ onBeforeUnmount(() => {
         <CompanyContacts
           v-else-if="tab === 'contacts'"
           :company-id="company.id"
-          @changed="load"
+          @changed="refreshOverview"
+          @denied="directoryDenied"
         />
         <TimelinePanel
           v-else-if="tab === 'timeline'"
           :resource-id="company.id"
         />
+        <section v-else-if="tab === 'conversations'">
+          <AttendancePanel
+            :key="`${identity}:${company.id}:attendance`"
+            :company-id="company.id"
+          />
+          <RecordsPanel
+            :key="`${accountId}:${company.id}:${tab}`"
+            :company-id="company.id"
+            :kind="tab"
+          />
+        </section>
         <RecordsPanel
           v-else
           :key="`${accountId}:${company.id}:${tab}`"
@@ -495,5 +651,5 @@ onBeforeUnmount(() => {
         />
       </section>
     </template>
-  </main>
+  </component>
 </template>

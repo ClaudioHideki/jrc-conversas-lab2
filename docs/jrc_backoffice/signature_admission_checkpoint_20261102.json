@@ -1,0 +1,185 @@
+{
+  "date": "2026-11-02",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "701dad483ee61283b94375050f2952f5ffe2d7df",
+  "phase": "B3 — admissão durável validada neste incremento; envio completo ainda parcial",
+  "global_state": "parcial; C/D/E/F/G e demais requisitos dos quatro documentos continuam abertos",
+  "implemented": [
+    "Intenção cifrada/imutável e eventos append-only persistidos atomicamente antes de qualquer I/O externo.",
+    "Conta, solicitação, contrato/versão/PDF/roster, proposta de poderes, políticas/ciclo/votos, validade/timezone, conexão/revisão/provedor/ambiente/conta externa selados no servidor.",
+    "Aprovação positiva pela Central única e nova verificação dos bytes de todas as evidências exigidas antes da admissão.",
+    "Chave idempotente por conta/ator com conteúdo/contexto protegidos por HMAC; replays revalidam acesso. Reutilização em outra solicitação é recusada.",
+    "Padrão resolvido apenas para nova admissão; mudança do padrão não reescreve a conexão do histórico.",
+    "Uma submissão por versão exata, claim de dispatch único e vínculo externo único no PostgreSQL. Nenhum claim é tratado como envio confirmado.",
+    "Trava da fonte jurídica em serviços e trigger PostgreSQL, preservando atualizações operacionais. Histórico de poderes permanece consultável, sem permitir nova proposta durante a intenção ativa.",
+    "Cancelamento idempotente apenas da intenção não despachada; um envio incerto permanece reservado e não pode ser cancelado como se nunca tivesse saído.",
+    "Admissão e cancelamento auditados sem credenciais, CPF ou corpo completo em logs/DTO. Nada marca o contrato como sent/signed nem libera implantação.",
+    "Somente casos jurídicos exigidos pela proposta são selados; uma solicitação genérica paralela não muda a autorização aprovada.",
+    "Referências externas são opacas no ledger interno; o formato UUID exclusivo da DocuSign é validado dentro do conector.",
+    "Roteiro DocuSign demo baseado em fontes oficiais, sem configuração ou envio externo executado."
+  ],
+  "native_reused": [
+    "JrcBackoffice::ContractAccess/ContractVersions/SignerRoster/AuthorityStatus/DocumentSafety/ContractRelease",
+    "JrcApprovals::Requests/Decisions/RequestVerification/Authorization",
+    "JrcBackoffice::Signatures::ConnectionSelection/Gateway",
+    "JrcCrm::AuditEvent/OrganizationalVisibility"
+  ],
+  "migrations": {
+    "new": [
+      "20261102090000"
+    ],
+    "schema": "20261102090000",
+    "candidate_only": true,
+    "production_applied": false,
+    "rollback": "Extensão vazia pode reverter; registros de intenção tornam a reversão destrutiva recusada, preservando histórico."
+  },
+  "validation": {
+    "backend_selected": {
+      "duration": 2298.025019699,
+      "example_count": 621,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "files": 64,
+      "artifact": {
+        "path": ".codex/signature-admission-backend-validated.json",
+        "sha256": "e556da8f8f66afa9a5957d8a16114fb7acdbe4c4a98d88a2cb6b27c920d35c7b"
+      },
+      "scope": "Admissão, versões/migrations e regressões selecionadas de Backoffice/CRM/Central/Cadastro Mestre/Projetos; não é toda a suíte do repositório."
+    },
+    "ruby_new_files": {
+      "offense_count": 0,
+      "target_file_count": 8,
+      "inspected_file_count": 8,
+      "artifact": {
+        "path": ".codex/signature-admission-ruby-validated.json",
+        "sha256": "ae092459499c5435f03fe244e1aeb3c5894c3e559127a75eafcc656d58665e17"
+      },
+      "scope": "Oito arquivos novos sem infrações; não é afirmação de lint global limpo em arquivos nativos."
+    },
+    "schema": {
+      "schema": "20261102090000",
+      "database": "jrc_four_domains_schema_admission_test",
+      "tables": 332,
+      "public_functions": 211,
+      "delivery_foreign_keys": 10,
+      "event_foreign_keys": 3,
+      "guards": [
+        "jrc_contract_delivery_source_fence",
+        "jrc_signature_deliveries_pin",
+        "jrc_signature_delivery_events_pin"
+      ],
+      "status": "passed",
+      "production": false,
+      "artifact": {
+        "path": ".codex/signature-admission-schema-load.json",
+        "sha256": "d6bb614b2a4aa37f0124df179eb6a2726060c5a9496b7338f277f16d117cc7f2"
+      }
+    },
+    "eager_load": {
+      "status": "passed",
+      "artifact": {
+        "path": ".codex/signature-admission-zeitwerk.log",
+        "sha256": "431fe7834786db76188fdd61e7569ff42ec6b0770aa67bd0863dff5846783963"
+      },
+      "scope": "Carregamento das classes novas na fonte anterior aos dois refinamentos lógicos finais, também exercitados pela regressão Rails atual."
+    },
+    "source": {
+      "files": 11218,
+      "baseline": "701dad483ee61283b94375050f2952f5ffe2d7df",
+      "mismatches": [],
+      "snapshot": "/consolidation-signature-admission-validated",
+      "sql_raw_hashes": true,
+      "manifest": {
+        "path": ".codex/signature-admission-validated-source-manifest.json",
+        "sha256": "33917b32b7dba6ec5ce50f50fd2253612ef9f779d993cfad2c70d5875ca00d26"
+      },
+      "scope": "Fonte701 com apenas os24 arquivos da admissão, incluindo casos jurídicos exatos e referências opacas; recuperação/dispatch/consumidor/jobs ficam fora. Textos normalizam CRLF; três SQL críticos são byte a byte."
+    },
+    "frontend": {
+      "changed": false,
+      "rerun_in_this_increment": false,
+      "previous_selected_tests": 207,
+      "note": "207 testes/build/browser pertencem ao checkpoint anterior de poderes; não comprovam uma interface de envio, ainda ausente."
+    }
+  },
+  "failures_and_refinements": [
+    "Primeiro13/1: corrupção foi negada pelo código nativo AUTHORITY_EVIDENCE_UNAVAILABLE, enquanto o teste esperava outra classe. Expectativa corrigida para o código exato, sem relaxar o bloqueio.",
+    "Primeira regressão619/3: um alias de fixture remanescente e dois testes de rollback040 não removiam antes as dependências090. Corrigidos sem remover FKs ou usar CASCADE; rechecagem18/0 preservada.",
+    "Dois casos finais adicionais passaram na fonte validada: isolamento dos casos jurídicos exigidos e referência opaca interna. A regressão atual cobre os16 casos de admissão.",
+    "Falta de espaço interrompeu o motor Docker. Builds antigos regeneráveis removidos; sete arquivos históricos comprimidos com SHA de ida/volta. Recuperação global WSL foi realizada somente após autorização explícita. Bancos de teste recuperaram automaticamente; nenhum prune/reset/formatação/reparo foi executado pelo agente.",
+    "Migration090 ainda sem envios foi refinada e revertida/reaplicada somente no banco candidato após conferir ambos os ledgers vazios. Registros nativos preservados.",
+    "Refatoração de estilo preservou todos os asserts; privacidade virou cenário separado e dois casos foram acrescentados para chaves em outra solicitação e dispatch incerto.",
+    "Verificações SQL explícitas exercitam bypass de validação do model para comprovar isolamento, imutabilidade, unicidade e bloqueio no banco."
+  ],
+  "limitations": [
+    "Não há endpoint/interface de admissão/dispatch neste incremento; o serviço interno está validado, mas o fluxo de assinatura não está habilitado.",
+    "Dispatch pós-commit, recuperação integrada, ações, consumidor Connect, todos os signatários/datas/PDF final/certificado e verificador interno ainda precisam ser concluídos.",
+    "Dados e verificação de conexão são fixtures sintéticas; antivírus simulado, Poppler real. DocuSign demo/AV real e homologação externa continuam pendentes.",
+    "Nova tentativa após cancelamento exige nova versão; reenvio/lembrete do mesmo envelope e cancelamento externo são operações distintas, a integrar.",
+    "Aprovação de poderes, assinatura do cliente, aprovação da empresa, conclusão operacional e satisfação permanecem fatos distintos."
+  ],
+  "files": [
+    ".gitattributes",
+    "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
+    "app/controllers/api/v1/accounts/crm/backoffice_contracts_controller.rb",
+    "app/controllers/api/v1/accounts/crm/base_controller.rb",
+    "app/controllers/api/v1/accounts/crm/contracts_controller.rb",
+    "app/models/jrc_backoffice/signature_delivery.rb",
+    "app/models/jrc_backoffice/signature_delivery_event.rb",
+    "app/models/jrc_crm/audit_event.rb",
+    "app/services/jrc_backoffice/authority_access.rb",
+    "app/services/jrc_backoffice/authority_overview.rb",
+    "app/services/jrc_backoffice/contract_versions.rb",
+    "app/services/jrc_backoffice/signatures/admissions.rb",
+    "app/services/jrc_backoffice/signatures/delivery_error.rb",
+    "app/services/jrc_backoffice/signatures/delivery_guard.rb",
+    "app/services/jrc_backoffice/signatures/delivery_snapshot.rb",
+    "app/services/jrc_backoffice/signer_rosters.rb",
+    "db/functions/20261102090000_backoffice_signature_delivery_guards.sql",
+    "db/migrate/20261102090000_create_backoffice_signature_deliveries.rb",
+    "db/schema.rb",
+    "docs/jrc_backoffice/docusign_demo_preparation_20261102.json",
+    "spec/services/jrc_backoffice/contract_version_upgrade_spec.rb",
+    "spec/services/jrc_backoffice/signature_connection_upgrade_spec.rb",
+    "spec/services/jrc_backoffice/signature_integration_upgrade_spec.rb",
+    "spec/services/jrc_backoffice/signatures/admissions_spec.rb"
+  ],
+  "files_sha256": {
+    ".gitattributes": "b79bfc6ccc364c434f10988b41ab80cbd41d45dfa86a9ba9e60e29e872c48828",
+    "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb": "6b653581a7159c07f1c2dde20d253122d75dbdcf98b754ac7d53402d3d2c779c",
+    "app/controllers/api/v1/accounts/crm/backoffice_contracts_controller.rb": "d202d5a082c9dba2902d1056f1545269cfaef290c45404d206e030388ad4321a",
+    "app/controllers/api/v1/accounts/crm/base_controller.rb": "1288e35a6df33a3e7d30af8a76da7dd66f8e5cb05e324363701d9f672f321c10",
+    "app/controllers/api/v1/accounts/crm/contracts_controller.rb": "a7924c0b406d36d2f2090100095269b5704fc918f66965bb930e8cc398a31bcf",
+    "app/models/jrc_backoffice/signature_delivery.rb": "7c9051b88988a669aa8682d0633f2d641d9a85a534e7de12bf3e11e1080b2d0a",
+    "app/models/jrc_backoffice/signature_delivery_event.rb": "d1f11845d5f7fd2367efeaf8678d403a361911928c3cfc6b06e177b2ffde1d82",
+    "app/models/jrc_crm/audit_event.rb": "d85bba6838efb0d37ae6a49ca9698d4025303a1f781ff689a0f4e41d09088391",
+    "app/services/jrc_backoffice/authority_access.rb": "4ffac9215fcee7afca1a1e6dc14d86c25ee29965378fe28a5cf15ea9f23d750e",
+    "app/services/jrc_backoffice/authority_overview.rb": "128196486558d82cb24ce98908d652f95a42492cc4d5c0d819c4a3a44c597830",
+    "app/services/jrc_backoffice/contract_versions.rb": "dd425dc18dd92c619281650b0c03b3a7468fccd222e166c83222fc44516b35e8",
+    "app/services/jrc_backoffice/signatures/admissions.rb": "d34f2eda648a2f2fbd92a61f6630e1256bb40c177ce403eb67ba3ddd1ea25787",
+    "app/services/jrc_backoffice/signatures/delivery_error.rb": "a40d489de65c29eefde46cc555eb7863b3237ad6a90202147b98a89a767747ff",
+    "app/services/jrc_backoffice/signatures/delivery_guard.rb": "e910e453da84be7c0de153bce6b679d7f21c925773d86700f4e4c6b0ca9587eb",
+    "app/services/jrc_backoffice/signatures/delivery_snapshot.rb": "9fa17fc4e198e6f16080a4a78de0394b9ec75e1478a2537f1bad1c94b2e67ad9",
+    "app/services/jrc_backoffice/signer_rosters.rb": "358e3363c8d710f83a665447f6155f2ddb388fdee4054be9b6997d94aa4c4dfa",
+    "db/functions/20261102090000_backoffice_signature_delivery_guards.sql": "fd12ceedfbea4a8079d301191c9ee9cccf8076e51899725a59f569f1c0dbfb5b",
+    "db/migrate/20261102090000_create_backoffice_signature_deliveries.rb": "4dddd2b0a744929f962df04f1eb36795ad32f1564b03547fdd1d67846f5d3f5f",
+    "db/schema.rb": "0c0e4b3f179f38686113e9c9a14be84a44b9ee04f1e1b4e9cf63c6e039c61448",
+    "docs/jrc_backoffice/docusign_demo_preparation_20261102.json": "2298bf53254fa3598eab7aadc25454b2c6a12edd7bf072bb69b046e8df390acb",
+    "spec/services/jrc_backoffice/contract_version_upgrade_spec.rb": "5f9e22e8e6a49cfaedc8c6385b07da3edaa662424fecb7cab36b05c0df09cbb0",
+    "spec/services/jrc_backoffice/signature_connection_upgrade_spec.rb": "df1c47cabb3e77d145dca7ccda93fa6c7c9cc44cee3e67f5f7964bf22f189b04",
+    "spec/services/jrc_backoffice/signature_integration_upgrade_spec.rb": "9de8394e42936f7dbd317b534f53ba2ba311655cd525d61978fbe3691f4e96bb",
+    "spec/services/jrc_backoffice/signatures/admissions_spec.rb": "9292c71c44ff0eea50ad4f6eb63829ad36b1e41969b6e91a2125bd41cbf30c52"
+  },
+  "demo_runbook": "docs/jrc_backoffice/docusign_demo_preparation_20261102.json",
+  "next": "Concluir dispatch durável pós-commit, recuperação sem POST duplicado, ações/Connect, evidências e UI; depois continuar C/D/E/F/G.",
+  "publication": {
+    "push": false,
+    "image_build_or_publish": false,
+    "deploy": false,
+    "compose_changed": false,
+    "production_migrations": false,
+    "protected_publication_head": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+    "protected_worktree_clean": true
+  }
+}

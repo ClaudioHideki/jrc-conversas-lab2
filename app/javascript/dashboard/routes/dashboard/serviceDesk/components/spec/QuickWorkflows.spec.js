@@ -694,3 +694,45 @@ describe('quick intake without discarding advanced mode', () => {
     ).toThrow();
   });
 });
+
+it('applies a verified master context without losing native unit or manual fields, and clears it on denial', async () => {
+  await renderQuick();
+  await wrapper.setProps({ customerContextSource: true });
+  await wrapper
+    .findAllComponents(Input)
+    .find(row => row.props('label') === messages.JRC_SERVICE_DESK.FIELDS.title)
+    .find('input')
+    .setValue('Preserved title');
+  const context = {
+    account_id: '1',
+    user_id: '7',
+    unit_id: '10',
+    company_id: '80',
+    requester: { id: '33', name: 'Verified' },
+  };
+  await wrapper.setProps({ customerContext: context });
+  expect(
+    wrapper.findComponent({ name: 'CompanyPicker' }).props('modelValue')
+  ).toBe('80');
+  expect(
+    wrapper.findComponent({ name: 'RequesterSelect' }).props('modelValue')
+  ).toBe('33');
+  expect(
+    wrapper.findComponent({ name: 'RequesterSelect' }).props('unitId')
+  ).toBe('10');
+  await wrapper.setProps({ customerContext: null });
+  expect(
+    wrapper.findComponent({ name: 'CompanyPicker' }).props('modelValue')
+  ).toBeNull();
+  expect(
+    wrapper.findComponent({ name: 'RequesterSelect' }).props('modelValue')
+  ).toBe('');
+  expect(
+    wrapper
+      .findAllComponents(Input)
+      .find(
+        row => row.props('label') === messages.JRC_SERVICE_DESK.FIELDS.title
+      )
+      .props('modelValue')
+  ).toBe('Preserved title');
+});

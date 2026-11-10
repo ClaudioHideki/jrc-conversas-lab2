@@ -1,0 +1,85 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "439e55ebcb76913b4ef5be43c369023e7d3a1d3b",
+  "status": "Native destination authorization reused for direct portfolio writes; stages remain open",
+  "baseline_evidence": [
+    "baseline01:5examples/4failures:3 actual bugs (inactive direct owner, missing CS access, create without manage) and1 BusinessUnit fixture association error; reviewed preview already denied inactive user.",
+    "baseline02:3examples/2failures proves unit rejection was absent and initial allocation accepted inactive target; ordinary native agent future ownership already valid. Fixture corrected to existing company_id, no model relaxation."
+  ],
+  "implementation": [
+    "Forward changed destination owner_id into existing DistributionApproval.direct_allowed! and its DistributionPolicyBinding. Existing authentication, account/team, current module and native CorporateCoverage/OrganizationalVisibility are reused, not a new authorization engine.",
+    "Initial allocation validates the same native destination binding after transactional save and before audit/response; invalid target rolls the new row back. Creation now requires existing manage as well as team, matching update semantics.",
+    "Legacy unreviewed batch also forwards only an actually changed owner. No-op historical links retain prior semantics and do not steal individually delegated work. Reviewed approvals, immutable snapshots and capacity gates remain unchanged.",
+    "CustomerPanel hides assignment controls unless both native manage/team metadata permissions are present. Global historic owner/filter lists remain intact.",
+    "Existing access-only root admission stays access-only; no new manage grant to recipient. Actual pending-work destination permissions remain a separate next block."
+  ],
+  "tests_non_additive": {
+    "native03": "17/0 =7 new destination cases +5 no-op +5 optimistic revision.",
+    "governance04": "47/0 =9 destination +22 native Central distribution +16 native capacity; no pending/fake pass.",
+    "vue01": "10/0 source interface cases including new team-view-only restriction; real Chrome still blocked by no-build instruction. Existing RouterLink fixture warnings retained.",
+    "new_ruby": "0offenses new spec; DistributionApproval0after guard spacing correction.",
+    "shared_ruby": "PortfolioController8->8;PortfolioBatch0->0;no added offenses.",
+    "shared_eslint": [
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue",
+        "baseline": 32,
+        "current": 32,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/interface.spec.js",
+        "baseline": 0,
+        "current": 0,
+        "added": {}
+      }
+    ],
+    "diff_check": "passed"
+  },
+  "resources": {
+    "portfolio-destination-native03": {
+      "start": 9428254720,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/portfolio_destination_access_spec.rb": "2f617b1b07f746caa8990340f389b10fea044b3e6c0147279768ab8949f09c6c",
+        "spec/requests/api/v1/accounts/relationship/portfolio_owner_noop_spec.rb": "128b4a43fbfa53684e2465675c4b36e3537584c721189fabdbebab47e12272a6",
+        "spec/requests/api/v1/accounts/relationship/portfolio_revision_spec.rb": "3ce3bfb78392d9441b942263952065e26632cce2b838422eb432c94602f76770"
+      },
+      "minimum": 9427034112,
+      "exit_code": 0,
+      "end": 9426968576
+    },
+    "portfolio-destination-governance04": {
+      "start": 9429454848,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/portfolio_destination_access_spec.rb": "779b351785b176a87525f32e3d9daa5331f5c256d35310eb6df793ed34ab47b2",
+        "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "d4a5a737c4a27ffd7f6e46f7bbb62befd3000060972c3684e9fe76ce9427e597",
+        "spec/services/jrc_relationship/distribution_capacity_spec.rb": "72803f4fbc25d54ad1e4fe8281b4591bace6788cfea69f70338b8f26c427e7b7"
+      },
+      "minimum": 9406382080,
+      "exit_code": 0,
+      "end": 9428099072
+    }
+  },
+  "vue_resource": {
+    "status": "passed",
+    "free_start": 9425973248,
+    "minimum_free": 9407987712,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 26260,
+    "exit_code": 0,
+    "free_end": 9432506368
+  },
+  "diagnostic": "Longer governance suite was active on CPU and native queries with pg_blocking_pids empty; no process interrupted or container restarted. It completed normally in3m14.9s.",
+  "disk_final_bytes": 9398681600,
+  "next": "Verify legacy propagation of active CS work and linked Agenda through native source/destination record permissions, preserving no-op and complete reviewed transfer behavior.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,external operation,production,5379 modification or container restart."
+}

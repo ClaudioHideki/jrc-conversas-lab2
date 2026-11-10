@@ -31,6 +31,7 @@ const { filters, result, options, loading, error, load } =
 const openRequest = id => ({
   ...destination(id),
   query: {
+    customer_segment_id: route.query.customer_segment_id,
     tab:
       {
         docs: 'documents',

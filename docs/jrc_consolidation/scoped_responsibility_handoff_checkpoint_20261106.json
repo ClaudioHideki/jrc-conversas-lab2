@@ -1,0 +1,102 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "20652ddcae92c8ccbc2495a75e4be3566aa4ee15",
+  "status": "Scoped reviewed handoff and source-free receipt validated locally; not stage closure",
+  "implementation": [
+    "Transfer already-authorized supported pending children before root ownership, then verify real destination access in the same transaction. Preserve immutable review/version and audit.",
+    "Count the authorized loaded batch rows, not a fresh ownership-filtered count after handoff. Produce the root receipt from the native authorized and locked instance, with explicit account/item identity and effective owner verification.",
+    "Continue capacity and native Central verification only for this review original actor and immutable applied receipts, unchanged source authority and currently captured destination grants. Other hidden destination customers remain denied; no Context scope or role is broadened.",
+    "When ownership legitimately removes source access, return only minimal execution identity/state/receipts; omit customer names, customer source data, comparisons and private justification. Cancellation preserves applied items. Source/destination permission revocation and foreign actor/account access remain denied.",
+    "Display a limited-receipt notice, replace the former customer preview and preserve explicit continuation/cancel/recovery controls."
+  ],
+  "tests_non_additive": {
+    "baseline": "Actual scoped failure reproduced: root was moved before children; then native count became zero after valid handoff. Diagnostic03 reproduced Native item result mismatch. Native04 reached completed but its Agenda fixture lacked explicit CRM permission; fixture fixed, without granting production access.",
+    "native05": "6/0 initial scoped cases, real PostgreSQL and actual Agenda.",
+    "governance06": "70examples:69passed,1failed in new Central fixture because reviewer lacked source visibility. Includes7scoped,23Central,16capacity,10complete transfer,14reviewed batch.",
+    "central07": "1failure in attempted administrator fixture: native Central correctly requires explicit decide. No native rule loosened.",
+    "central08": "1/0 corrected native reviewer-only team fixture, with explicit decide, original actor scoped by ownership and partial transfer continuing through real Central. Other69passing examples were not repeated.",
+    "vue01": "17/0 source tests, not Chrome acceptance.",
+    "static": "New scope/receipt/spec zero RuboCop offenses. Shared core zero; Central spec retains1existing offense. Initial modifier warning fixed and final reviewed service zero. Vue errors0, panel warnings11->8, spec0.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "scoped-handoff-native05": {
+      "start": 10735214592,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/scoped_responsibility_handoff_spec.rb": "a8a49be6816653075cbfbe6e71588d75d43ccda5c8975227276b64fd2942bb75"
+      },
+      "minimum": 10708865024,
+      "exit_code": 0,
+      "end": 10731614208
+    },
+    "scoped-handoff-governance06": {
+      "start": 10506604544,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/responsibility_transfer_scoped_spec.rb": "6d2a447fb516d2b4022f52bf6c3b687dbd4e03fc8b564a08a166e39114f108af",
+        "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "b8b8beac3fdde723689e028920e2f685826b728ce3ed4ce82469b6ef72346399",
+        "spec/services/jrc_relationship/distribution_capacity_spec.rb": "72803f4fbc25d54ad1e4fe8281b4591bace6788cfea69f70338b8f26c427e7b7",
+        "spec/services/jrc_relationship/responsibility_transfer_spec.rb": "a7b48889e92d20eca912e2812cb8eb062527acb26d6d955dd18b9e0b4f2f221a",
+        "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ea899c17aacc8afd1f1c8f9511c389b2269ba21a903ffb0fced7e8a5ed86cc40"
+      },
+      "minimum": 10484826112,
+      "exit_code": 1,
+      "end": 11080400896
+    },
+    "scoped-handoff-central07": {
+      "start": 11079577600,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "56690e46c2120f766e32dce9e47e02cde02c45f58e9d6692121830aef96f7140"
+      },
+      "minimum": 10796425216,
+      "exit_code": 1,
+      "end": 10816069632
+    },
+    "scoped-handoff-central08": {
+      "start": 10311946240,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "8566257725bd92893f25cf641af896c5ff4bda1cdaf5aacd524b241af0fa3e13"
+      },
+      "minimum": 10094682112,
+      "exit_code": 0,
+      "end": 10113052672
+    }
+  },
+  "frontend_resources": {
+    "status": "passed",
+    "free_start": 10733400064,
+    "minimum_free": 10696925184,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 27388,
+    "exit_code": 0,
+    "free_end": 10731614208
+  },
+  "disk_final_bytes": 10091888640,
+  "runtime_preservation": {
+    "four_containers": "Same original StartedAt values verified; no restart/reconfiguration.",
+    "5379": "127.0.0.1 listener PID6464 unchanged; frozen old assets are not current visual evidence."
+  },
+  "remaining": [
+    "Current compiled Chrome desktop/mobile/light/dark remains blocked by no-build/no5379-change.",
+    "Unrelated native responsibilities must remain in their origin modules, per new user answer; scope readiness/inventory increment follows.",
+    "TRR undefined, portfolio-less company documents deferred, external provider/scanner/channel acceptance not performed."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,external operation,production or runtime modification."
+}

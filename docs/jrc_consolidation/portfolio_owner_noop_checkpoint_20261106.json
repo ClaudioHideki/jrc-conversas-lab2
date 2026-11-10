@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "21ba2ee507dc361506be8712dd0eef11088c8fb2",
+  "status": "F1/G unchanged-owner side effect fixed and locally validated; stages remain open",
+  "confirmed_gap": "Baseline5/4 failures:3 real direct-API cases replaced/cleared specifically delegated action ownership despite unchanged portfolio owner, including null owner. The batch example first referenced nonexistent result instead of native receipt and was corrected; its baseline does not count as independent proof of the propagation bug.",
+  "implementation": [
+    "Direct portfolio update propagates action/Agenda ownership only when native saved_change_to_owner_id? confirms an actual owner change, including normalization of HTML string IDs. Unrelated changes still persist.",
+    "Legacy reviewed/batch assign path applies the same condition and retains its existing native audit and receipt. Explicit reviewed complete ResponsibilityTransfer branch is untouched.",
+    "Genuine owner change preserves established propagation. No new scope, field, API route, migration, privilege or responsibility history rewrite."
+  ],
+  "tests": {
+    "native02": "29/0 =5 new no-op/actual-change cases plus existing complete-responsibility transfer and14 transfer-lock cases. Native BatchExecutionJob, receipt, actual Agenda, lock_version and ownership were verified.",
+    "final03": "5/0 after extracting the small conditional propagation helper to preserve shared complexity.",
+    "new_ruby_offenses": 0,
+    "shared_static": [
+      {
+        "path": "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+        "baseline_count": 8,
+        "current_count": 8,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/portfolio_batch.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "frontend": "No frontend or DTO change; existing interface behavior and fresh Chrome restriction retained. No redundant Vue suite.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "portfolio-owner-noop-native02": {
+      "start": 7085228032,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/portfolio_owner_noop_spec.rb": "900aa050587788f238a1e395edac09c45484e7d605b9216db4957420c694f041",
+        "spec/services/jrc_relationship/responsibility_transfer_spec.rb": "a7b48889e92d20eca912e2812cb8eb062527acb26d6d955dd18b9e0b4f2f221a",
+        "spec/requests/api/v1/accounts/relationship/portfolio_transfer_lock_spec.rb": "2a6e0039da635289d64edb11da275f63fc62f8e51bd9c3df53cba942922399e6"
+      },
+      "minimum": 7084965888,
+      "exit_code": 0,
+      "end": 7084965888
+    },
+    "portfolio-owner-noop-final03": {
+      "start": 7083896832,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/portfolio_owner_noop_spec.rb": "128b4a43fbfa53684e2465675c4b36e3537584c721189fabdbebab47e12272a6"
+      },
+      "minimum": 7083577344,
+      "exit_code": 0,
+      "end": 7083642880
+    }
+  },
+  "limitations": [
+    "Legacy receipt updated count retains its existing processed-item meaning; do not claim physical ownership changed in a no-op. Native expected owner and historical audit remain truthful.",
+    "No current-source browser or external operations claimed."
+  ],
+  "next": "Continue native stale-update prevention in the existing portfolio editor without breaking legacy callers or current permission/approval transactions.",
+  "restrictions": "No build, cleanup, push, GHCR, deploy, production/external real operation, original container or5379 modification."
+}

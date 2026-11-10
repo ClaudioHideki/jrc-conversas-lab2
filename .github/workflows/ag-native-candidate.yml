@@ -1,0 +1,118 @@
+name: A-G consolidated native candidate (no publication)
+
+on:
+  push:
+    branches: [codex/lab2-ag-consolidada-20261110]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  identities:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - run: git merge-base --is-ancestor d8a83b824b11cc68ddbbce7c79681f368051fb70 HEAD
+      - run: node --test script/validate_ag_migration_identity.test.mjs
+      # Known identity collisions must be resolved with a tested history-adoption plan.
+      # Never mark the current combined tree as database-ready while this gate fails.
+      - run: node script/validate_ag_migration_identity.mjs
+
+  rails:
+    needs: identities
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        installation: [fresh, upgrade]
+        database: [jrc_rel_v2_candidate_test, jrc_four_domains_schema_admission_test, jrc_rel_sd_candidate_test, jrc_jornada_candidate_test]
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: jrc-rel-v2-pg-20261101
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: ${{ matrix.database }}
+      REDIS_URL: redis://127.0.0.1:6379/15
+      SECRET_KEY_BASE: synthetic-ag-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/ag-schema.rb
+      JRC_AG_FIXTURE_RECEIPT: /tmp/ag-fixture-receipt.json
+      JRC_AG_POSTGRES_SERVICE_ID: ${{ job.services.postgres.id }}
+      JRC_SD_CONCURRENCY: '1'
+      JRC_REVIEWED_CONCURRENCY: '1'
+      DB_POOL_SIZE: '10'
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Prove disposable service; legacy spec alias exists only on this ephemeral runner
+        shell: bash
+        run: |
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{.Id}} {{.Config.Image}}'
+          test "$(docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{json .HostConfig.Binds}}')" = null
+          echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Plan every native example source, respecting existing database guards
+        run: python3 script/jrc_ag_native_plan.py > /tmp/ag-test-plan.json
+      - name: Create exclusive empty test database
+        run: bundle exec rails db:create
+      - name: Reproduce pinned main and its actual migration ledger
+        if: matrix.installation == 'upgrade'
+        run: bundle exec rails runner script/jrc_ag_ci_fixture.rb load_main
+      - name: Native migrations and idempotent reexecution
+        run: |
+          bundle exec rails db:migrate
+          bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
+          bundle exec rails db:migrate
+          bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
+          bundle exec rails zeitwerk:check
+      - name: Authenticated APIs, policies, immutable history, signatures and real transactions
+        shell: bash
+        run: |
+          mapfile -t specs < <(python3 script/jrc_ag_native_plan.py --database "$POSTGRES_DATABASE" --paths)
+          test "${#specs[@]}" -gt 0
+          bundle exec rspec "${specs[@]}" --seed 20261110 --format progress --format json --out /tmp/ag-rspec.json
+          ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero?' /tmp/ag-rspec.json
+      - name: Preserve synthetic evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ag-native-${{ github.sha }}-${{ matrix.installation }}-${{ matrix.database }}
+          path: |
+            /tmp/ag-test-plan.json
+            /tmp/ag-rspec.json
+            /tmp/ag-schema.rb
+            /tmp/ag-fixture-receipt.json
+          if-no-files-found: warn
+      - name: Source remains unchanged
+        run: git diff --exit-code

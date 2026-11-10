@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_head": "1d91ad1d22b516ebd7282767d7ea19dd19d598f1",
+  "status": "Native read-only withdrawal readiness validated; not final analyst removal and not F1/C-G completion.",
+  "source_files": [
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/WithdrawalReadinessDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/withdrawalReadiness.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/withdrawalTeamEntry.spec.js",
+    "app/services/jrc_relationship/withdrawal_readiness.rb",
+    "spec/requests/api/v1/accounts/relationship/withdrawal_readiness_spec.rb",
+    "app/controllers/api/v1/accounts/relationship/dashboard_controller.rb",
+    "app/javascript/dashboard/api/jrcRelationship.js",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/TeamPanel.vue",
+    "app/services/jrc_relationship/native_responsibilities.rb",
+    "config/routes.rb"
+  ],
+  "implementation": [
+    "Current pending ownership is inventoried independently of root allocation ownership, including plan-referenced CRM commitments.",
+    "Account/team/native module and unit scopes are enforced before counts; hidden work denies access instead of becoming zero.",
+    "Immutable HMAC readiness digest; no membership, permission, ownership or historical executor change.",
+    "Team interface exposes a read-only dialog even when the allocation table is empty; refreshed metadata on account/role changes."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "withdrawal-readiness02",
+      "examples": 4,
+      "failures": 0
+    },
+    {
+      "label": "withdrawal-plan-commitment-final",
+      "examples": 1,
+      "failures": 0
+    },
+    {
+      "label": "withdrawal-ui01",
+      "tests": 5,
+      "failures": 2,
+      "note": "Three dialog cases passed; parent tests initially selected a different existing filter form."
+    },
+    {
+      "label": "withdrawal-ui-parent-final",
+      "tests": 2,
+      "failures": 0,
+      "note": "Stable dedicated selectors; no loose fallback assertions."
+    }
+  ],
+  "corrected_fixture_failures": [
+    "Missing Action source_key",
+    "CRMActivity requires activity_type plus native lead/deal or explicitly authorized context; final fixture creates a native lead and actual plan goal reference."
+  ],
+  "static_gates": [
+    "Directed new Ruby lint:0 offenses",
+    "Directed new Vue/tests ESLint:0 errors",
+    "Existing TeamPanel baseline comparison:new_messages0; historical unrelated debt preserved",
+    "git diff --check passed"
+  ],
+  "pending": [
+    "Final reviewed withdrawal with immutable destination receipts, active cadence handover and native project owner transitions.",
+    "Global teams/AccountUser roles must not be removed as if they were CS-only memberships.",
+    "Fresh Chrome validation pending explicit no-build restriction; simulated Vue tests are not browser homologation."
+  ],
+  "disk": {
+    "final_bytes": 7422066688
+  },
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 change,container restart or external operation."
+}

@@ -1,0 +1,267 @@
+{
+  "date": "2026-11-02",
+  "phase": "B1 validado — versões contratuais; B2/B3 e quatro frentes ainda parciais",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base": "0fcdb9ec489560d76d1faa10630ff665ad52de84",
+  "publication_worktree_preserved": {
+    "path": "../crm-backoffice-servicedesk-visual-20261101",
+    "head": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+    "push": false,
+    "deploy": false,
+    "new_container_image": false
+  },
+  "implemented": [
+    "Versão imutável em PostgreSQL com PDF privado, checksum SHA-256, fonte contratual cifrada, motivo e autor.",
+    "Histórico paginado, visualização/download autorizados e diferenças reais entre revisões autorizadas.",
+    "Edição contextual da minuta com CAS da fonte e reaproveitamento integral do fluxo nativo de atualização de contratos.",
+    "Revalidação de conta/membro/CRM/ownership/operadora/unidade, inclusive após leitura do armazenamento.",
+    "Bloqueio de URLs bearer/disk/proxy/representations e de relink do PDF privado por ActiveStorage::Attachment.",
+    "Compensação do PDF novo em falha/savepoint/rollback externo sem apagar documentos persistidos.",
+    "PDF versionado usa empresa canônica como contratante; documentos legados/propostas/pedidos preservam o renderer anterior.",
+    "Correção comprovada da codificação UTF-8 na extração limitada Poppler/Tesseract.",
+    "Painel na aba horizontal Contrato, edição e comparação em pop-ups nativos, temas claro/escuro.",
+    "NO KEY UPDATE protege a escrita dos novos serviços e permite FKs documentais sem o deadlock encontrado no teste real."
+  ],
+  "migration": {
+    "version": "20261102050000",
+    "type": "aditiva",
+    "applied_only_to": [
+      "jrc_rel_v2_candidate_test",
+      "jrc_rel_v2_ui_test"
+    ],
+    "fresh_schema_database": "jrc_four_domains_schema_test",
+    "rollback": "Down permitido somente sem versões; com dados, recusa apagar o histórico. Preservar tabela/PDFs e executar plano de arquivamento explícito.",
+    "production_migrations": false
+  },
+  "tests": {
+    "backend": {
+      "path": ".codex/consolidation-backend-b1.json",
+      "sha256": "62d79fd702471e413754f4a6edf71ddfa06cfe7deb4e89bddadf6211ae6e0cbf",
+      "summary": {
+        "duration": 272.837803448,
+        "example_count": 492,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "scope": "Regressões selecionadas de CRM/Backoffice/Clientes/Central/Projetos/Service Desk/ownership; não é toda a suíte."
+    },
+    "concurrency": {
+      "path": ".codex/consolidation-contract-concurrency-verified.json",
+      "sha256": "c1bde445059c47de51ae670bce771a0edaa1e97a3a01b4d277052144d11abf8b",
+      "summary": {
+        "duration": 4.41824762,
+        "example_count": 2,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "database": "jrc_four_domains_schema_test",
+      "redis_index": 12,
+      "independent_postgresql_connections": true
+    },
+    "frontend": {
+      "path": ".codex/consolidation-frontend-b1.json",
+      "sha256": "aed29a4a32efb25d4148b8e5c52c3e1e4fe676777868e02d4a83eac9aab14f9a",
+      "files": 31,
+      "tests": 178,
+      "failures": 0
+    },
+    "ruby_lint": {
+      "new_files": 14,
+      "offenses": 0,
+      "evidence": [
+        {
+          "path": ".codex/consolidation-ruby-b1.json",
+          "sha256": "324c775dac0ed72458e9eff8bfb7de4a401feceb37355738f93daf34adbad5ce"
+        },
+        {
+          "path": ".codex/consolidation-concurrency-clean.json",
+          "sha256": "39bb2d7ecbfb6679209d0cae54988a0b004f7433636392873983c270f7de7f16"
+        }
+      ],
+      "note": "O primeiro relatório contém cinco ofensas no teste novo de concorrência. Foram corrigidas e esse arquivo foi verificado novamente com zero. Os outros 13 já estavam limpos. Não é lint integral do Ruby legado."
+    },
+    "frontend_lint": {
+      "path": ".codex/consolidation-frontend-lint-b1.json",
+      "sha256": "5b5df0b8fc5c90ab49087dd041c1b448f8adeb66c714dc4427327c1ec9d6b8d7",
+      "files": 8,
+      "errors": 0,
+      "warnings": 0
+    },
+    "schema": {
+      "path": ".codex/consolidation-schema-load.json",
+      "sha256": "f52d5dcabcb2b3431bd37ec3aaa035e0b40ec2bebac44b0105ee3a14a2f9a5c4",
+      "result": {
+        "database": "jrc_four_domains_schema_test",
+        "tables": 327,
+        "version_foreign_keys": 7,
+        "immutable_triggers": [
+          "jrc_contract_version_pin"
+        ],
+        "public_functions": 208,
+        "schema_load": "passed",
+        "production": false
+      }
+    },
+    "eager_load": {
+      "path": ".codex/consolidation-zeitwerk-b1.log",
+      "sha256": "7b0a7f8ee3edf5da0c8fd790ae06496d40e495711e2c85a326125e6a2ff36f66",
+      "result": "All is good!"
+    },
+    "build": {
+      "path": ".codex/consolidation-production-build.log",
+      "sha256": "fefe15c0cb55c2b5b3c4d105454a31c9925cc2f1494fd0f063f8d6c914a66311",
+      "result": "passed",
+      "duration": "2m35s",
+      "modules": 5625,
+      "artifact": ".codex/consolidation-production-build",
+      "note": "Somente assets; ViteRuby escreveu public/consolidation-vite e a pasta nova foi movida para .codex após conferência dos caminhos. Sem Docker build/publicação.",
+      "warnings": [
+        "Chunks grandes",
+        "Browserslist desatualizado",
+        "/brand-assets/jrc-background.jpeg resolvido em runtime",
+        "Webphone import estático e dinâmico"
+      ]
+    },
+    "browser": {
+      "result": {
+        "status": "passed",
+        "synthetic_only": true,
+        "request_id": 7,
+        "versions": [
+          7,
+          8
+        ],
+        "numbers": [
+          7,
+          8
+        ],
+        "reload_verified": true,
+        "actual_diff_verified": true,
+        "downloaded_pdf_sha256": "0121344a1c92d715566b24c71dbe3a5f7af3ba032318131f49b50cc60232847c",
+        "both_themes": true,
+        "responsive_capture": true,
+        "asset_prefix": "/consolidation-vite/",
+        "backend_snapshot": "/consolidation-b1-final",
+        "contracts_sent": 0,
+        "external_homologation": false,
+        "page_errors": []
+      },
+      "theme_mobile": {
+        "status": "passed",
+        "synthetic_only": true,
+        "asset_prefix": "/consolidation-vite/",
+        "dark_theme": true,
+        "mobile_viewport": 390,
+        "contract_panel_within_viewport": true,
+        "page_errors": [],
+        "writes": 0
+      },
+      "evidence": [
+        {
+          "path": ".codex/consolidation-contract-browser-production-settled.log",
+          "sha256": "646aca531c2bec503b019d9075cd85cea704d6afabf66490a2a9e574e77828ca"
+        },
+        {
+          "path": ".codex/consolidation-contract-theme-mobile.log",
+          "sha256": "b1bc7bf942f13a9dbf46009b865e7873b82001e2be23ac0e4645e8ab90b02384"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\contrato-versoes-resultado.json",
+          "sha256": "7aa9ea13e0d3eb278d029e77c23a6cc635cf84a8fe22d5dc10f06a3341bf242a"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\contrato-tema-mobile-resultado.json",
+          "sha256": "78075e368602999c8b7b4fe879489540a31c5047b798e56ad23b618915ce61ec"
+        }
+      ],
+      "screenshots": [
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\30-contrato-versoes-claro.png",
+          "sha256": "2be45924c9865f801e37a157eb87a19c2c3cfd212d85e9e7a8dd76cadb327752"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\31-contrato-diferencas-claro.png",
+          "sha256": "10d7db44fc08e8c890fe674d370fbe74474a5954bcb9a3224e3031c7f8073715"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\32-contrato-pdf-claro.png",
+          "sha256": "f4165bae55947e181e5764d81bd2625c4d2374de3966510f8e8cb2d436e3aa09"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\33-contrato-versoes-escuro.png",
+          "sha256": "6d4035205ea637b1a97435a694dfbca597ae73a7ace7f7c7e9328b188bca8a66"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\34-contrato-diferencas-escuro.png",
+          "sha256": "71a59b837288057c3b2a665c96142a992b2855216fb8c93630bfad28becd21cb"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\35-contrato-versoes-mobile.png",
+          "sha256": "1f518e2f0e01a894811b7eb2e3586d8ddf07058c1595e3d49ec4b42e126a3c1e"
+        }
+      ],
+      "inspection": "PDF efetivamente renderizado no Chrome, diferenças antes/depois, cores legíveis e painel móvel sem corte após animação nativa.",
+      "external_homologation": false
+    },
+    "source": {
+      "path": ".codex/consolidation-source-manifest.json",
+      "sha256": "17c7e4a884e38f68f7bc66f7500c9ec47ec4d69067d631ab2a5fb4b1ce466f35",
+      "result": {
+        "files": 11151,
+        "baseline": "0fcdb9ec489560d76d1faa10630ff665ad52de84",
+        "mismatches": [],
+        "snapshot": "/consolidation-b1-final"
+      },
+      "normalization": "Somente CRLF de texto; aplicação, configurações, migrations, lib, specs, EE e arquivos de raiz rastreados. Assets compilados/documentação não são código desta prova."
+    }
+  },
+  "failures_preserved": [
+    {
+      "artifact": ".codex/consolidation-contract-concurrency.json",
+      "result": "2 exemplos, 1 falha: deadlock real com upload nativo; corrigido nos novos bloqueios; repetição independente passou."
+    },
+    {
+      "artifact": ".codex/consolidation-contract-browser-first.log",
+      "result": "Falha antes do login: modo vite-test incompatível com servidor vite-dev; ambiente local corrigido."
+    },
+    {
+      "artifact": ".codex/consolidation-contract-browser-second.log",
+      "result": "Servidor reiniciando; prontidão passou a ser verificada antes da navegação."
+    },
+    {
+      "artifact": ".codex/consolidation-contract-browser-third.log",
+      "result": "Primeiro fluxo funcional aprovado, antes da correção final dos bloqueios; captura móvel pegou estado de carregamento e foi repetida."
+    },
+    {
+      "artifact": ".codex/consolidation-contract-browser-final.log",
+      "result": "Timeout ao carregar a página; não aprovado."
+    },
+    {
+      "artifact": ".codex/consolidation-contract-browser-verified.log",
+      "result": "Login/painel/primeira versão passaram, reload falhou com 500 de Vite. Log Rails provou ECONNREFUSED ao host Windows; não é prova aceita."
+    },
+    {
+      "artifact": ".codex/consolidation-contract-browser-accepted.log",
+      "result": "Apesar do nome, falhou com proxy Rails–Vite recusado. O cache exclusivo não resolveu a conexão intermitente. Prova aprovada usa assets compilados, sem proxy."
+    },
+    {
+      "artifact": ".codex/consolidation-contract-browser-production-assets.log",
+      "result": "Fluxo passou; capturas iniciais pegaram animação móvel e inicialização do leitor PDF. Repetição production-settled aguardou renderização real; tema/mobile conferidos separadamente."
+    }
+  ],
+  "not_implemented_by_this_checkpoint": [
+    "Cadastro/seleção conjunta de assinantes e evidências de poderes autorizadas pela Central.",
+    "PDF com snapshot de assinantes, ledger/intenção durável, envio, consumer/reconciliação e evidência final de assinatura.",
+    "Demais requisitos de Cadastro Mestre, Central, Backoffice e Relacionamento descritos na matriz ainda parcial.",
+    "Homologação DocuSign Developer/demo; nenhum envio ou assinatura externa foi realizado."
+  ],
+  "next": [
+    "B2: assinantes canônicos, poderes e regras individuais/conjuntas com evidência protegida e a Central única; documentos/OCR/CPF não concedem poderes.",
+    "B3: vínculo durável provedor/conexão/ambiente/versão, worker e consumer; bloqueado envio até conclusão dessas dependências.",
+    "Depois C/D/E/F/G conforme solicitação integral, sem abandonar requisitos não concluídos."
+  ],
+  "matrix": "docs/jrc_consolidation/word_requirement_inventory_20261102.json",
+  "matrix_state": "Inventário literal com 1546 fragmentos dos quatro Words; classificação detalhada ainda em andamento, não é matriz final de conclusão."
+}

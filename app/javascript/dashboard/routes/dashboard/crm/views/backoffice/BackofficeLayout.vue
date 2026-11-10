@@ -1,14 +1,54 @@
 <script setup>
-import { computed, watch } from 'vue';
+import { computed, watch, ref, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
+import { backofficeRequirementsAPI } from 'dashboard/api/crm/backofficeRequirements';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useRoute, useRouter } from 'vue-router';
 import ModuleTabs from 'dashboard/components-next/navigation/ModuleTabs.vue';
+import ModuleSegmentFilter from 'dashboard/routes/dashboard/jrcCustomers/components/ModuleSegmentFilter.vue';
 import { crmControlClasses } from '../../crmControlClasses';
 import BackofficeOverview from './BackofficeOverview.vue';
 import BackofficeWorklist from './BackofficeWorklist.vue';
 import BackofficeRequest360 from './BackofficeRequest360.vue';
 import BackofficeNewRequest from './BackofficeNewRequest.vue';
+import SignatureSettings from './SignatureSettings.vue';
+import BackofficeRequirementSettings from './BackofficeRequirementSettings.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
+const store = useStore();
+const canManageRequirements = ref(false);
+let capabilityGeneration = 0;
+let capabilityAbort;
+watch(
+  () => authorityScope(store.getters),
+  async identity => {
+    capabilityGeneration += 1;
+    const generation = capabilityGeneration;
+    capabilityAbort?.abort();
+    capabilityAbort = new AbortController();
+    canManageRequirements.value = false;
+    const account = store.getters.getCurrentAccountId;
+    if (!account) return;
+    try {
+      const { data } = await backofficeRequirementsAPI.capabilities(account, {
+        signal: capabilityAbort.signal,
+      });
+      if (
+        generation === capabilityGeneration &&
+        identity === authorityScope(store.getters)
+      )
+        canManageRequirements.value = data?.can_manage === true;
+    } catch {
+      if (generation === capabilityGeneration)
+        canManageRequirements.value = false;
+    }
+  },
+  { immediate: true }
+);
+onBeforeUnmount(() => {
+  capabilityGeneration += 1;
+  capabilityAbort?.abort();
+});
 const route = useRoute();
 const router = useRouter();
 const { text } = useBackofficePresentation();
@@ -31,7 +71,7 @@ const groups = [
     key: 'CONTROL',
     tone: 'violet',
     icon: 'i-lucide-settings',
-    sections: ['mine', 'issues', 'changes', 'sla'],
+    sections: ['mine', 'issues', 'changes', 'sla', 'signature', 'requirements'],
   },
 ];
 const sections = [...primaryKeys, ...groups.flatMap(group => group.sections)];
@@ -50,6 +90,8 @@ const tones = {
   implement: 'teal',
   provision: 'violet',
   finance: 'amber',
+  signature: 'violet',
+  requirements: 'amber',
 };
 const icons = {
   overview: 'i-lucide-layout-dashboard',
@@ -66,20 +108,28 @@ const icons = {
   implement: 'i-lucide-list-checks',
   provision: 'i-lucide-server',
   finance: 'i-lucide-wallet',
+  signature: 'i-lucide-file-signature',
+  requirements: 'i-lucide-list-checks',
 };
 const entry = key => ({
   key,
   label: text(`NAV.${key}`),
   tone: tones[key],
   icon: icons[key],
-  to: { name: 'crm_backoffice', params: { section: key } },
+  to: {
+    name: 'crm_backoffice',
+    params: { section: key },
+    query: { customer_segment_id: route.query.customer_segment_id },
+  },
 });
 const primary = computed(() => primaryKeys.map(entry));
 const navigationGroups = computed(() =>
   groups.map(group => ({
     ...group,
     label: text(group.key),
-    entries: group.sections.map(entry),
+    entries: group.sections
+      .filter(key => key !== 'requirements' || canManageRequirements.value)
+      .map(entry),
   }))
 );
 const section = computed(() => {
@@ -156,8 +206,26 @@ watch(
       :key="route.fullPath"
       class="min-h-0 flex-1 overflow-auto p-4"
     >
+      <ModuleSegmentFilter
+        v-if="
+          !route.params.requestId &&
+          route.name !== 'crm_backoffice_new' &&
+          !['signature', 'requirements'].includes(section)
+        "
+        module-key="backoffice"
+      />
       <BackofficeRequest360 v-if="route.params.requestId" />
       <BackofficeNewRequest v-else-if="route.name === 'crm_backoffice_new'" />
+      <SignatureSettings v-else-if="section === 'signature'" />
+      <template v-else-if="section === 'requirements'">
+        <BackofficeRequirementSettings v-if="canManageRequirements" />
+        <p
+          v-else
+          role="status"
+        >
+          {{ text('REQUIREMENTS.ACCESS_REQUIRED') }}
+        </p>
+      </template>
       <BackofficeOverview
         v-else-if="['overview', 'reports'].includes(section)"
         :report="section === 'reports'"

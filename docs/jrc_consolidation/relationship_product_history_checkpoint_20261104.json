@@ -1,0 +1,43 @@
+{
+  "stage": "F2",
+  "status": "Read-only native product history implemented and tested; F2 and F remain open",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_checkpoint": "776de86ee41b677ea10645d9f7f806cda994274c",
+  "implemented": [
+    "Product observations read from existing immutable HealthSnapshot.signals.product_health; no parallel registry or recalculation during preview",
+    "Explicit product selector, native customer/portfolio scope, current viewer/access signature and SnapshotAccess reauthorization for every referenced source",
+    "Real PostgreSQL pagination, bounded 1-50 rows and page 1-10000, one additional authorized observation for a correct comparison across page boundaries",
+    "Product score, actual product configuration scope/version, factors/evidence, original observation time and native HealthChange comparison; customer score never substitutes for product score",
+    "Missing scores stay unavailable and model/version changes are flagged; foreign/private evidence and another viewer's history never contribute to counts or values",
+    "Fresh Context and complete source/assignment checks after projection; revoked ownership, role or native unit grants prevent returning cached evidence",
+    "On-demand history integrated into existing native CustomerPanel product section with pagination, factor details, empty/denied/loading states and account/user/product/request-switch stale-response suppression"
+  ],
+  "files": [
+    "app/services/jrc_relationship/product_health_history.rb",
+    "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+    "config/routes.rb",
+    "app/javascript/dashboard/api/jrcRelationship.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ProductHealthHistory.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue",
+    "spec/requests/api/v1/accounts/relationship/product_health_history_spec.rb"
+  ],
+  "validation": {
+    "backend": { "artifact": ".codex/d9-notifications-20261104/e2f2final01-resource.json", "examples": 29, "failures": 0, "scope": "10 product-history scenarios, 8 existing native health-hysteresis scenarios, 11 Central report scenarios" },
+    "frontend": { "artifact": ".codex/d-approvals-20261104/e2f2ui-final-resource.json", "tests": 36, "failures": 0, "scope": "9 history tests plus API, stability note, report and native CRM-origin navigation regressions; simulated HTTP, not Chrome acceptance" },
+    "ruby_lint": { "artifact": ".codex/d9-notifications-20261104/e2f2lint02.json", "new_product_service_and_spec_offenses": 0 },
+    "frontend_lint": { "artifact": ".codex/d-approvals-20261104/e2f2-eslint02.json", "errors": 0, "warnings": "Two dynamic translation-key warnings for existing native factor/band vocabularies; no disabled rule" },
+    "failed_first_round": "f2producthistory01: 29 examples, 3 failures. Two synthetic distinct observations incorrectly shared the unique fingerprint; corrected their fixture identities, retained rel_health_idempotency unchanged. Foreign tenant denial uses native Relationship HTTP403, not HTTP401; assertion corrected to the native contract. Subsequent full 29-example run passed.",
+    "data": "Synthetic fixtures persisted through real Rails/PostgreSQL APIs/models in jrc_rel_v2_candidate_test; existing bank schema guard retained. No duplicate snapshots created by preview/pagination."
+  },
+  "word_comparison": {
+    "reference": "Original Relationship V2 DOCX, Health Score/Customer360 history requirements and image5.png inspected; figures contain illustrative numbers, never used as data",
+    "implemented": "Per-product chronological observations, explainability, model/version comparison and authorized native evidence now available in the current product section",
+    "divergences": "Uses the existing CustomerPanel with an on-demand paginated list; not a complete replacement of the pictured Customer360 health dashboard",
+    "pending": ["actual desktop/mobile light/dark acceptance of current assets after an authorized build", "per-product configured hysteresis", "source freshness and configured trend windows", "cooldown and anti-repeat across closed cases", "representative scale acceptance and full BI/latency measurements"],
+    "TRR": "Undefined business dependency; no formula invented",
+    "all_C_to_G_stages_complete": false
+  },
+  "disk": { "backend_start_bytes": 12654321664, "backend_minimum_bytes": 12633837568, "backend_end_bytes": 12654546944, "frontend_minimum_bytes": 12609167360, "later_observation": "Free space subsequently oscillated near 4.3 GiB and back near 10.25 GiB; no attribution, cleanup or process interruption" },
+  "preserved": "Native customer/product records, customer-wide health behavior, immutable snapshots, permissions, source scopes, CRM/Service Desk/Projects integrations, existing 5379/four containers; no build, migration, push, external operation or deployment.",
+  "next": "Use this checkpoint before any shared scoring change. Implement native opt-in product hysteresis with exact configuration/version matching and snapshot dedup regression; retain E3 and Central distribution gaps as open."
+}

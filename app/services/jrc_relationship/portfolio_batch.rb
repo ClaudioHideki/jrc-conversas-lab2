@@ -1,7 +1,8 @@
 class JrcRelationship::PortfolioBatch
-  def initialize(context, params)
+  def initialize(context, params, review: nil)
     @context = context
     @params = params
+    @review = review
   end
 
   def call
@@ -12,17 +13,46 @@ class JrcRelationship::PortfolioBatch
     raise ArgumentError, 'Unsupported portfolio operation' unless %w[assign activity playbook].include?(operation)
     raise Pundit::NotAuthorizedError if operation == 'assign' && !@context.policy.team?
 
-    options = operation_options(operation, rows.count)
     JrcRelationship::Assignment.transaction do
+      authorize_transfer!(rows) if operation == 'assign'
+      options = operation_options(operation, rows.count)
       rows.each do |record|
         @context.assignment(record.id, write: true)
         record.with_lock { apply!(record, operation, options) }
       end
     end
-    rows.count
+    # The loaded, authorized rows were processed atomically. A handoff can
+    # legitimately remove them from the original actor's ownership scope.
+    rows.size
   end
 
   private
+
+  def authorize_transfer!(rows)
+    rows.each { |row| JrcRelationship::LocalAccess.authorize_assignment!(@context, row, 'execute_transfer') }
+    @owner_id = JrcRelationship::PortfolioOwnerInput.parse(@params[:owner_id])
+    JrcRelationship::DistributionApproval.lock_configuration!(@context.account.id)
+    raise ArgumentError, 'Complete responsibility transfer requires a reviewed proposal' if @params[:transfer_responsibilities] && !@review
+
+    if @review
+      assert_review_identity!(rows)
+      JrcRelationship::DistributionApproval.new(@context).check!(@review)
+    else
+      JrcRelationship::DistributionApproval.direct_allowed!(@context, rows, owner_id: changed_owner_id(rows))
+    end
+  end
+
+  def changed_owner_id(rows)
+    @owner_id if rows.any? { |row| row.owner_id != @owner_id }
+  end
+
+  def assert_review_identity!(rows)
+    expected = { 'account_id' => @context.account.id, 'actor_id' => @context.user.id, 'state' => 'running' }
+    inputs = { 'operation' => 'assign', 'owner_id' => @owner_id }
+    valid = @review.attributes.slice(*expected.keys) == expected && @review.inputs.slice(*inputs.keys) == inputs &&
+            (rows.pluck(:id) - @review.inputs.fetch('ids')).empty?
+    raise ArgumentError, 'Reviewed transfer identity mismatch' unless valid
+  end
 
   def selected_assignments
     ids = @params.require(:ids)
@@ -38,7 +68,7 @@ class JrcRelationship::PortfolioBatch
     request_id = @params.require(:request_id)
     case operation
     when 'assign'
-      owner = @context.assignable_users.find(@params[:owner_id]) if @params[:owner_id].present?
+      owner = @context.assignable_users.find(@owner_id) if @owner_id
       { owner: owner }
     when 'playbook'
       book = JrcRelationship::Playbook.where(account: @context.account, active: true).find(@params.require(:playbook_id))
@@ -59,12 +89,15 @@ class JrcRelationship::PortfolioBatch
   end
 
   def assign!(record, owner)
-    before = { owner_id: record.owner_id }
-    record.update!(owner: owner)
-    record.actions.where(status: JrcRelationship::Action::ACTIVE_STATUSES).find_each do |action|
-      action.update!(owner: owner)
-      action.activity.update!(user: owner) if owner && action.activity
+    if @review&.inputs&.fetch('transfer_responsibilities', false)
+      return JrcRelationship::ResponsibilityTransfer.new(@context, @review).call(record, owner)
     end
+
+    before = { owner_id: record.owner_id }
+    record.assign_attributes(owner: owner)
+    work = JrcRelationship::PortfolioActionTransfer.prepare(@context, record)
+    record.save!
+    work&.apply!(owner)
     @context.audit!(record, before: before, after: { owner_id: owner&.id }, action: 'assignment_updated')
   end
 

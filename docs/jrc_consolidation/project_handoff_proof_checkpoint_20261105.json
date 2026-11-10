@@ -1,0 +1,87 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "4f4531739f696deb1b34c77dd19fa4a24efc0bf9",
+  "status": "Incremental F1 implementation and local automated validation; no stage closure",
+  "implemented": [
+    "Native linked-project proofs distinguish already-destination, historical, source transfer needed, different customer and unreviewed pending native tasks. Project owner/member changes must happen in the native Projects module before a new CS review.",
+    "CS execution revalidates frozen project attributes, customer context and native source/destination scopes. Historical project ownership and native audit/memberships are preserved; tasks explicitly referenced in plans still use native assignment services.",
+    "Existing v1 non-project responsibility snapshot shape is unchanged. Old frozen records are never rewritten. New project-linked reviews require a fresh simulation when native source facts change.",
+    "Comparison displays real captured project state and native scoped route with pagination10, responsive utility classes and account/role redaction. No project transfer button or fabricated success receipt."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "project-handoff01",
+      "examples": 6,
+      "failures": 1,
+      "note": "Five passed; reused test request_id returned the immutable earlier simulation after plan edit. Test corrected to new request_id."
+    },
+    {
+      "label": "project-handoff-final",
+      "examples": 24,
+      "failures": 0,
+      "note": "Six new project cases plus existing responsibility and native task/ticket suites."
+    },
+    {
+      "label": "project-handoff-source-final",
+      "examples": 8,
+      "failures": 1,
+      "note": "Seven passed after helper extraction, including foreign source redaction. Revocation test incorrectly expected exception instead of existing native attention/failed receipt."
+    },
+    {
+      "label": "project-handoff-destination-final",
+      "examples": 1,
+      "failures": 0,
+      "note": "Confirms native scope denied, attention/failed item and no CS allocation/plan writes; no policy changes."
+    },
+    {
+      "label": "project-handoff-ui-source-final",
+      "tests": 10,
+      "failures": 0,
+      "note": "Three new proof/pagination/route/redaction cases and seven existing comparison tests. Earlier UI failure was translated-text assertion; corrected to actual strings."
+    }
+  ],
+  "static_gates": [
+    "Four changed Ruby files0 offenses. Directed ESLint0 errors; new component2 standard warnings and existing comparison10 formatting warnings retained.",
+    "git diff --check clean. No Enterprise override found for changed services."
+  ],
+  "files": [
+    "app/services/jrc_relationship/project_handoff_proof.rb",
+    "app/services/jrc_relationship/portfolio_responsibilities.rb",
+    "app/services/jrc_relationship/responsibility_blockers.rb",
+    "spec/services/jrc_relationship/responsibility_transfer_project_handoff_spec.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ProjectHandoffProofs.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ResponsibilityComparison.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/projectHandoffProofs.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/responsibilityComparison.spec.js",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json"
+  ],
+  "limits": [
+    "This does not automatically transfer a project or remove an analyst/membership. Global withdrawal and active cadence authority transitions remain open.",
+    "Fresh-source Chrome desktop/mobile acceptance pending explicit build authorization; no old assets used as evidence."
+  ],
+  "disk": {
+    "project-handoff01": {
+      "start": 7382355968,
+      "minimum": 7362633728,
+      "end": 7381479424
+    },
+    "project-handoff-final": {
+      "start": 7388839936,
+      "minimum": 7348838400,
+      "end": 7387058176
+    },
+    "project-handoff-source-final": {
+      "start": 7388405760,
+      "minimum": 7387934720,
+      "end": 7387934720
+    },
+    "project-handoff-destination-final": {
+      "start": 7385509888,
+      "minimum": 7385300992,
+      "end": 7386341376
+    },
+    "final_bytes": 7383494656
+  },
+  "next": "Run native financial segment representative-scale test, update Word delta evidence and continue F2/C/D/G work.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 changes,container restart or real external operations."
+}

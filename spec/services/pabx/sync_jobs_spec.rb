@@ -10,7 +10,7 @@ RSpec.describe 'PABX existing job controls', :pabx do
     original = integration.attributes
     expect(Pabx::Client).not_to receive(:new)
     expect { Pabx::SyncJob.perform_now(integration.account_id, integration.id) }.not_to have_enqueued_job(Pabx::SyncJob)
-    expect(Pabx::ScheduleJob.new.enqueue(integration)).to be(false)
+    expect(Pabx::ScheduleJob.new.enqueue_integration(integration)).to be(false)
     expect(integration.reload.attributes).to eq(original)
   end
 

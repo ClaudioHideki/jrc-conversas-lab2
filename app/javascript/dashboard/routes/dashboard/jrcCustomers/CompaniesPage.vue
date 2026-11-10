@@ -1,9 +1,9 @@
 <script setup>
-import { reactive, ref, watch, onBeforeUnmount } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import API from 'dashboard/api/jrcCustomers';
-import CompanyEditor from './components/CompanyEditor.vue';
-import { useCustomerMaster } from './useCustomerMaster';
+import { useI18n } from 'vue-i18n';
+import CompanyEditorDialog from './components/CompanyEditorDialog.vue';
+import CompanyDetailsDialog from './components/CompanyDetailsDialog.vue';
+import SegmentFilterPicker from './components/SegmentFilterPicker.vue';
+import { useCompanyDirectory } from './useCompanyDirectory';
 import {
   T,
   FIELD_LABELS,
@@ -11,94 +11,36 @@ import {
   inputClass,
   buttonClass,
   primaryClass,
-  errorMessage,
 } from './copy';
-const route = useRoute();
-const router = useRouter();
-const { accountId, accountScopedRoute } = useCustomerMaster();
-const rows = ref([]);
-const metadata = ref({ owners: [] });
-const meta = ref({ total: 0 });
-const page = ref(1);
-const error = ref('');
-const busy = ref(false);
-const creating = ref(false);
-const filters = reactive({
-  q: '',
-  relationship_type: '',
-  segment: '',
-  owner_id: '',
-  city: '',
-  active: '',
-  economic_group: '',
-  parent_company_id: '',
-});
-let generation = 0;
-const load = async () => {
-  generation += 1;
-  const version = generation;
-  busy.value = true;
-  error.value = '';
-  rows.value = [];
-  try {
-    const { data } = await API.companies({ ...filters, page: page.value });
-    if (version === generation) {
-      rows.value = data.payload;
-      meta.value = data.meta;
-    }
-  } catch (err) {
-    if (version === generation) error.value = errorMessage(err);
-  } finally {
-    if (version === generation) busy.value = false;
-  }
-};
-const search = () => {
-  if (page.value === 1) load();
-  else page.value = 1;
-};
-const saved = company =>
-  router.push(
-    accountScopedRoute('jrc_customer_company', { companyId: company.id })
-  );
-watch(
-  [
-    accountId,
-    () => route.query.segment,
-    () => route.query.economic_group,
-    () => route.query.create,
-    () => route.query.parent_company_id,
-  ],
-  async () => {
-    generation += 1;
-    rows.value = [];
-    creating.value = route.query.create === '1';
-    filters.segment = String(route.query.segment || '');
-    filters.economic_group = String(route.query.economic_group || '');
-    filters.parent_company_id = String(route.query.parent_company_id || '');
-    page.value = 1;
-    load();
-    try {
-      metadata.value = (await API.metadata()).data;
-    } catch (err) {
-      error.value = errorMessage(err);
-    }
-  },
-  { immediate: true }
-);
-watch(page, load);
-onBeforeUnmount(() => {
-  generation += 1;
-});
+const { t } = useI18n();
+
+const {
+  identity,
+  rows,
+  metadata,
+  meta,
+  page,
+  error,
+  busy,
+  creating,
+  selection,
+  filters,
+  search,
+  changePage,
+  closeEditor,
+  saved,
+  load,
+} = useCompanyDirectory();
 </script>
 
 <template>
   <main
-    class="flex h-full w-full flex-col overflow-auto bg-n-solid-1 p-5 text-n-slate-12 md:p-8"
+    class="h-full w-full overflow-auto bg-n-solid-1 p-5 text-n-slate-12 md:p-8"
   >
     <header class="mb-6 flex flex-wrap items-center justify-between gap-4">
       <div>
         <p class="text-sm font-medium text-n-brand">
-          {{ T.customers }} / {{ T.master }}
+          {{ `${T.customers} / ${T.master}` }}
         </p>
         <h1 class="mt-1 text-2xl font-bold">{{ T.companies }}</h1>
         <p class="mt-2 text-sm text-n-slate-10">{{ T.directoryHelp }}</p>
@@ -106,31 +48,32 @@ onBeforeUnmount(() => {
       <button
         type="button"
         :class="primaryClass"
-        @click="creating = !creating"
+        @click="creating = true"
       >
-        {{ creating ? T.close : T.newCompany }}
+        {{ T.newCompany }}
       </button>
     </header>
-    <CompanyEditor
+    <CompanyEditorDialog
       v-if="creating"
-      class="mb-6"
+      :key="identity"
       @saved="saved"
-      @cancel="creating = false"
+      @close="closeEditor"
     />
     <form
       class="mb-6 grid items-end gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-4 md:grid-cols-3 xl:grid-cols-4"
       @submit.prevent="search"
     >
-      <label class="text-xs md:col-span-2"
-        >{{ T.search
-        }}<input
+      <label class="text-xs md:col-span-2">
+        {{ T.search }}
+        <input
           v-model.trim="filters.q"
           :placeholder="T.searchCompany"
           :class="inputClass"
-      /></label>
-      <label class="text-xs"
-        >{{ T.relationship
-        }}<select
+        />
+      </label>
+      <label class="text-xs">
+        {{ T.relationship }}
+        <select
           v-model="filters.relationship_type"
           :class="inputClass"
         >
@@ -142,11 +85,11 @@ onBeforeUnmount(() => {
           >
             {{ label }}
           </option>
-        </select></label
-      >
-      <label class="text-xs"
-        >{{ T.owner
-        }}<select
+        </select>
+      </label>
+      <label class="text-xs">
+        {{ T.owner }}
+        <select
           v-model="filters.owner_id"
           :class="inputClass"
         >
@@ -158,17 +101,27 @@ onBeforeUnmount(() => {
           >
             {{ owner.name }}
           </option>
-        </select></label
-      >
+        </select>
+      </label>
       <label
         v-for="field in ['segment', 'city', 'economic_group']"
         :key="field"
         class="text-xs"
-        >{{ FIELD_LABELS[field]
-        }}<input
+      >
+        {{
+          field === 'segment'
+            ? t('CRM.CORPORATE_SEGMENTS.COMPANY_CLASSIFICATION')
+            : FIELD_LABELS[field]
+        }}
+        <input
           v-model.trim="filters[field]"
           :class="inputClass"
-      /></label>
+        />
+      </label>
+      <div class="min-w-0 text-xs">
+        <p>{{ t('CRM.CORPORATE_SEGMENTS.FILTER_LABEL') }}</p>
+        <SegmentFilterPicker v-model="filters.taxonomy_id" />
+      </div>
       <div class="flex items-end gap-2">
         <select
           v-model="filters.active"
@@ -177,8 +130,10 @@ onBeforeUnmount(() => {
         >
           <option value="">{{ T.all }}</option>
           <option value="true">{{ T.active }}</option>
-          <option value="false">{{ T.inactive }}</option></select
-        ><button
+          <option value="false">{{ T.inactive }}</option>
+        </select>
+        <button
+          type="submit"
           :class="primaryClass"
           :disabled="busy"
         >
@@ -199,7 +154,10 @@ onBeforeUnmount(() => {
     >
       {{ T.loading }}
     </p>
-    <div class="overflow-x-auto rounded-xl border border-n-weak bg-n-solid-2">
+    <div
+      v-if="!error"
+      class="overflow-x-auto rounded-xl border border-n-weak bg-n-solid-2"
+    >
       <table class="w-full text-left text-sm">
         <thead class="bg-n-alpha-2">
           <tr>
@@ -219,17 +177,15 @@ onBeforeUnmount(() => {
             class="border-t border-n-weak"
           >
             <td class="p-4">
-              <RouterLink
-                :to="
-                  accountScopedRoute('jrc_customer_company', {
-                    companyId: company.id,
-                  })
-                "
-                class="font-semibold text-n-brand"
-                >{{ company.name }}</RouterLink
+              <button
+                type="button"
+                class="text-left font-semibold text-n-brand"
+                @click="selection = company.id"
               >
+                {{ company.name }}
+              </button>
               <p class="text-xs text-n-slate-10">
-                {{ company.trade_name }} #{{ company.id }}
+                {{ `${company.trade_name || ''} #${company.id}` }}
               </p>
             </td>
             <td class="p-4">{{ company.tax_id }}</td>
@@ -256,25 +212,37 @@ onBeforeUnmount(() => {
         {{ T.noResults }}
       </p>
     </div>
-    <footer class="mt-5 flex items-center gap-4">
+    <footer
+      v-if="!busy && !error"
+      class="mt-5 flex flex-wrap items-center gap-4"
+    >
       <button
         type="button"
         :class="buttonClass"
-        :disabled="busy || page <= 1"
-        @click="page--"
+        :disabled="page <= 1"
+        @click="changePage(page - 1)"
       >
-        {{ T.previous }}</button
-      ><span>{{ page }} / {{ Math.max(1, Math.ceil(meta.total / 25)) }}</span
-      ><button
+        {{ T.previous }}
+      </button>
+      <span>{{ `${page} / ${Math.max(1, Math.ceil(meta.total / 25))}` }}</span>
+      <button
         type="button"
         :class="buttonClass"
-        :disabled="busy || page * 25 >= meta.total"
-        @click="page++"
+        :disabled="page * 25 >= meta.total"
+        @click="changePage(page + 1)"
       >
-        {{ T.next }}</button
-      ><span class="text-sm text-n-slate-10"
-        >{{ meta.total }} {{ T.companies }}</span
-      >
+        {{ T.next }}
+      </button>
+      <span class="text-sm text-n-slate-10">{{
+        `${meta.total} ${T.companies}`
+      }}</span>
     </footer>
+    <CompanyDetailsDialog
+      v-if="selection"
+      :key="identity"
+      :company-id="selection"
+      @close="selection = null"
+      @updated="load"
+    />
   </main>
 </template>

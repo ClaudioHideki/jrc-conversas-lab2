@@ -40,6 +40,7 @@ class JrcServiceDesk::TicketQuery
       units = units.where(id: parameters['unit_id'])
     end
     @relation = relation.where(unit_id: units.select(:id))
+    apply_customer_segment!
     if parameters['team_id']
       team = Team.where(account_id: context.account.id).find(parameters['team_id'])
       Pundit.authorize(context.to_h, team, :show?)
@@ -81,5 +82,16 @@ class JrcServiceDesk::TicketQuery
     number = JrcServiceDesk::TicketSearch.identifier(q)
     match = match.or(relation.where(id: number)) if number
     @relation = match
+  end
+
+  def apply_customer_segment!
+    return unless parameters['customer_segment_id']
+    raise Pundit::NotAuthorizedError unless context.capability?(:customers_view)
+
+    customers = JrcServiceDesk::TicketPolicy::Scope.new(context.to_h, JrcServiceDesk::Ticket).resolve_for('customers_view')
+    visible = relation.where(id: customers.select(:id))
+    filter = JrcCustomers::ModuleSegmentFilter.new(account: context.account, actor: context.user, module_key: 'service_desk',
+                                                   segment_id: parameters['customer_segment_id'])
+    @relation = filter.call(visible, company_column: :company_id, contact_column: :requester_id)
   end
 end

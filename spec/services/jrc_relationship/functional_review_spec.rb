@@ -76,7 +76,8 @@ RSpec.describe 'Relationship functional review' do
     JrcRelationship::Processor.new(context: context, assignment: assignment).call
     action = assignment.actions.find_by!(kind: 'health_drop')
     workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id, lock_version: action.lock_version,
-      status: 'waiting_customer' })
+      status: 'waiting_customer', waiting_reason: 'Awaiting customer evidence',
+                                                                next_step: 'Review customer response', return_at: 4.hours.from_now })
     travel_to 1.day.from_now do
       JrcRelationship::Processor.new(context: context, assignment: assignment).call
       expect(assignment.actions.where(kind: 'health_drop').count).to eq(1)

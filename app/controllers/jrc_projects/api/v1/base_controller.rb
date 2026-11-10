@@ -13,6 +13,13 @@ module JrcProjects
         def scoped_project
           JrcOperations::Access.projects(Current.account_user).find(params[:project_id] || params[:id])
         end
+
+        def customer_segment_projects(scope)
+          filter = JrcCustomers::ModuleSegmentFilter.new(account: Current.account, actor: Current.user, module_key: 'projects',
+                                                         segment_id: params[:customer_segment_id])
+          filter.call(scope, company_column: :company_id, contact_column: :contact_id)
+        end
+
         def scoped_tasks(project)
           project.tasks.where(account_id: Current.account.id, project_id: project.id)
         end

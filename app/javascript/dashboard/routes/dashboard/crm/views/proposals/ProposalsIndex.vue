@@ -1,7 +1,16 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
-import { computed, onMounted, reactive, ref } from 'vue';
+import {
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  watch,
+} from 'vue';
 import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
 import ContactPicker from 'dashboard/routes/dashboard/jrcCustomers/components/ContactPicker.vue';
 import ContactCreateModal from 'dashboard/routes/dashboard/jrcCustomers/components/ContactCreateModal.vue';
@@ -24,16 +33,42 @@ import { moneyCents, centsInput } from '../../utils/moneyCents';
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
+const identity = computed(() =>
+  JSON.stringify([
+    route.params.accountId,
+    store.getters.getCurrentUserID,
+    store.getters.getCurrentRole,
+    store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
+  ])
+);
+let viewGeneration = 0;
+let listGeneration = 0;
+let disposed = false;
+const captureContext = () => ({
+  identity: identity.value,
+  generation: viewGeneration,
+});
+const currentContext = context =>
+  !disposed &&
+  context.identity === identity.value &&
+  context.generation === viewGeneration;
+const listIdentity = ref(null);
 const { t } = useI18n();
 const { canAccess: hasCustomerMaster } = useCustomerMaster();
 const pdfLoading = ref(false);
 const savedForm = ref('');
 const itemUpdateFailed = ref(false);
-const proposals = computed(
-  () => store.getters['jrcCrm/proposals/allProposals'] || []
+const proposals = computed(() =>
+  listIdentity.value === identity.value
+    ? store.getters['jrcCrm/proposals/allProposals'] || []
+    : []
 );
 const loading = computed(() => store.getters['jrcCrm/proposals/isLoading']);
-const error = computed(() => store.getters['jrcCrm/proposals/error']);
+const error = computed(() =>
+  listIdentity.value === identity.value
+    ? store.getters['jrcCrm/proposals/error']
+    : null
+);
 const isAdmin = computed(
   () => store.getters.getCurrentRole === 'administrator'
 );
@@ -120,6 +155,9 @@ const creationDraft = useFormDraft('crm:new_proposal', {
     Object.assign(itemForm, draft.pending_item || {});
   },
   reset: () => {
+    // The creation draft shares these fields with the detail editor. Preserve
+    // the active detail until its own native draft key watcher has saved it.
+    if (selectedProposal.value) return;
     origin.value = 'deal';
     dealId.value = '';
     companyId.value = null;
@@ -223,7 +261,18 @@ const proposalProgress = computed(() => {
   ];
 });
 
-const refresh = () => store.dispatch('jrcCrm/proposals/fetchProposals');
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+const refresh = async () => {
+  const authority = identity.value;
+  listGeneration += 1;
+  const generation = listGeneration;
+  listIdentity.value = null;
+  await store.dispatch('jrcCrm/proposals/fetchProposals', segmentParams());
+  if (disposed || authority !== identity.value || generation !== listGeneration)
+    return;
+  listIdentity.value = authority;
+};
+watchSegment(refresh);
 const billingLabel = value =>
   ({
     one_time: 'Cobrança única',
@@ -234,23 +283,84 @@ const billingLabel = value =>
   value ||
   'Cobrança única';
 
+const detailActive = ref(false);
+const detailDraftId = ref(null);
+const detailDraft = useFormDraft(
+  () => 'crm:proposal_edit:' + detailDraftId.value,
+  {
+    active: detailActive,
+    snapshot: () => ({
+      proposal_id: selectedProposal.value?.id,
+      commercial: { ...proposalForm },
+      discount: proposalDiscount.value,
+      pending_item: { ...itemForm },
+    }),
+    reset: () => {},
+    restore: draft => {
+      if (String(draft.proposal_id) === String(selectedProposal.value?.id)) {
+        Object.assign(proposalForm, draft.commercial || {});
+        proposalDiscount.value = draft.discount || '';
+        Object.assign(itemForm, draft.pending_item || {});
+      }
+    },
+  }
+);
+function resetWorking() {
+  saving.value = false;
+  loadingDetails.value = false;
+  itemSaving.value = false;
+  pdfLoading.value = false;
+  actionWorking.value = '';
+  sendingChannel.value = '';
+}
+function resetEditing() {
+  Object.keys(proposalForm).forEach(key => delete proposalForm[key]);
+  Object.assign(proposalForm, initialProposalForm);
+  Object.assign(itemForm, {
+    product_id: '',
+    quantity: 1,
+    unit_price: '',
+    discount: '',
+    commercial_gratuity: {},
+  });
+  savedForm.value = '';
+  proposalDiscount.value = '';
+  itemUpdateFailed.value = false;
+}
+
+function closeProposal() {
+  if (selectedProposal.value && hasUnsavedChanges.value) detailDraft.flush();
+  detailActive.value = false;
+  viewGeneration += 1;
+  resetWorking();
+  selectedProposal.value = null;
+  resetEditing();
+}
+
 const loadProducts = async () => {
+  const context = captureContext();
   if (products.value.length) return;
   const { data } = await productsAPI.list({ active: true });
+  if (!currentContext(context)) return;
   products.value = data;
 };
 
 const openForm = async () => {
   if (selectedProposal.value) closeProposal();
+  viewGeneration += 1;
+  const context = captureContext();
   try {
     const { data } = await dealsAPI.list({ status: 'open' });
-    const contactId = route.query.contactId;
+    if (!currentContext(context)) return;
+    const selectedContactId = route.query.contactId;
     deals.value =
-      typeof contactId === 'string' && /^\d+$/.test(contactId)
+      typeof selectedContactId === 'string' && /^\d+$/.test(selectedContactId)
         ? data.filter(
             deal =>
-              String(deal.contact_id) === contactId ||
-              deal.contacts?.some(contact => String(contact.id) === contactId)
+              String(deal.contact_id) === selectedContactId ||
+              deal.contacts?.some(
+                contact => String(contact.id) === selectedContactId
+              )
           )
         : data;
     const restored = creationDraft.open();
@@ -259,14 +369,17 @@ const openForm = async () => {
     else useAlert(t('CRM.CREATION.RECOVERED'));
     if (proposalsAPI.creationOptions) {
       const options = await proposalsAPI.creationOptions();
+      if (!currentContext(context)) return;
       operatingUnits.value = options.data.business_units || [];
       if (!businessUnitId.value && operatingUnits.value.length === 1)
         businessUnitId.value = operatingUnits.value[0].id;
     }
     await loadProducts();
+    if (!currentContext(context)) return;
     showForm.value = true;
   } catch {
-    useAlert('Não foi possível carregar os negócios.');
+    if (currentContext(context))
+      useAlert('Não foi possível carregar os negócios.');
   }
 };
 
@@ -305,31 +418,13 @@ const hydrateProposalForm = data => {
   savedForm.value = formSnapshot();
 };
 
-const detailActive = ref(false);
-const detailDraftId = ref(null);
-const detailDraft = useFormDraft(
-  () => 'crm:proposal_edit:' + detailDraftId.value,
-  {
-    active: detailActive,
-    snapshot: () => ({
-      proposal_id: selectedProposal.value?.id,
-      commercial: { ...proposalForm },
-      discount: proposalDiscount.value,
-      pending_item: { ...itemForm },
-    }),
-    reset: () => {},
-    restore: draft => {
-      if (String(draft.proposal_id) === String(selectedProposal.value?.id)) {
-        Object.assign(proposalForm, draft.commercial || {});
-        proposalDiscount.value = draft.discount || '';
-        Object.assign(itemForm, draft.pending_item || {});
-      }
-    },
-  }
-);
 const openProposal = async proposal => {
   detailDraft.flush();
   detailActive.value = false;
+  viewGeneration += 1;
+  resetWorking();
+  resetEditing();
+  const context = captureContext();
   detailDraftId.value = proposal.id;
   itemUpdateFailed.value = false;
   loadingDetails.value = true;
@@ -339,30 +434,28 @@ const openProposal = async proposal => {
       proposalsAPI.show(proposal.id),
       loadProducts(),
     ]);
+    if (!currentContext(context)) return false;
+    if (String(data.id) !== String(proposal.id))
+      throw new Error('Proposal detail identity mismatch');
     selectedProposal.value = data;
     hydrateProposalForm(data);
     if (!data.locked) {
       detailDraft.open();
       detailActive.value = true;
     }
+    return true;
   } catch {
+    if (!currentContext(context)) return false;
     selectedProposal.value = null;
     useAlert('Não foi possível abrir a proposta.');
+    return false;
   } finally {
-    loadingDetails.value = false;
+    if (currentContext(context)) loadingDetails.value = false;
   }
 };
 
-const closeProposal = () => {
-  if (selectedProposal.value && hasUnsavedChanges.value) detailDraft.flush();
-  detailActive.value = false;
-  selectedProposal.value = null;
-  itemForm.product_id = '';
-  itemForm.quantity = 1;
-  itemForm.unit_price = '';
-};
-
 const createProposal = async () => {
+  const context = captureContext();
   const savingDraftKey = creationDraft.key.value;
   if (saving.value) return;
   saving.value = true;
@@ -411,23 +504,26 @@ const createProposal = async () => {
             items: creationItems.value,
           };
     const { data } = await proposalsAPI.create(payload);
-    if (!creationDraft.complete(savingDraftKey)) return;
+    if (!currentContext(context) || !creationDraft.complete(savingDraftKey))
+      return;
     showForm.value = false;
     dealId.value = '';
     await refresh();
-    await openProposal(data);
+    if (!currentContext(context)) return;
+    if (!(await openProposal(data))) return;
     useAlert(
       origin.value === 'deal'
         ? 'Proposta criada com os dados do negócio.'
         : 'Proposta criada para o cliente do Cadastro Mestre.'
     );
   } catch (requestError) {
+    if (!currentContext(context)) return;
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
         'Não foi possível criar a proposta.'
     );
   } finally {
-    saving.value = false;
+    if (currentContext(context)) saving.value = false;
   }
 };
 
@@ -449,13 +545,16 @@ const addCreationItem = () => {
   });
 };
 const deleteProposal = async proposal => {
+  const context = captureContext();
   if (!window.confirm(t('CRM.CREATION.DELETE_CONFIRM'))) return;
   try {
     await proposalsAPI.delete(proposal.id);
+    if (!currentContext(context)) return;
     if (selectedProposal.value?.id === proposal.id) closeProposal();
     await refresh();
     useAlert(t('CRM.CREATION.DELETED'));
   } catch (requestError) {
+    if (!currentContext(context)) return;
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
         t('CRM.CREATION.DELETE_ERROR')
@@ -463,15 +562,28 @@ const deleteProposal = async proposal => {
   }
 };
 
-const applyProposalResponse = async (data, preserveDraft = true) => {
+const applyProposalResponse = async (data, preserveDraft, context) => {
+  if (
+    !currentContext(context) ||
+    String(data.id) !== String(selectedProposal.value?.id)
+  )
+    return false;
   const dirty = preserveDraft && hasUnsavedChanges.value;
   selectedProposal.value = data;
   if (!dirty) hydrateProposalForm(data);
   await refresh();
+  return currentContext(context);
 };
 
 const persistCommercialData = async (showSuccess = true) => {
-  if (!selectedProposal.value || selectedProposal.value.locked) return false;
+  const context = captureContext();
+  if (
+    !selectedProposal.value ||
+    selectedProposal.value.locked ||
+    loadingDetails.value ||
+    saving.value
+  )
+    return false;
   saving.value = true;
   try {
     const { data } = await proposalsAPI.update(selectedProposal.value.id, {
@@ -513,18 +625,19 @@ const persistCommercialData = async (showSuccess = true) => {
         follow_up_days: Number(proposalForm.follow_up_days || 0),
       },
     });
-    await applyProposalResponse(data, false);
+    if (!(await applyProposalResponse(data, false, context))) return false;
     detailDraft.complete();
     if (showSuccess) useAlert('Dados comerciais da proposta atualizados.');
     return true;
   } catch (requestError) {
+    if (!currentContext(context)) return false;
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
         'Não foi possível salvar a proposta.'
     );
     return false;
   } finally {
-    saving.value = false;
+    if (currentContext(context)) saving.value = false;
   }
 };
 
@@ -538,7 +651,9 @@ const selectProduct = () => {
 };
 
 const addItem = async () => {
-  if (!selectedProposal.value || itemSaving.value) return;
+  const context = captureContext();
+  if (!selectedProposal.value || loadingDetails.value || itemSaving.value)
+    return;
   itemSaving.value = true;
   try {
     const { data } = await proposalsAPI.createItem(selectedProposal.value.id, {
@@ -549,23 +664,30 @@ const addItem = async () => {
         commercial_gratuity: itemForm.commercial_gratuity,
       },
     });
-    await applyProposalResponse(data);
+    if (!(await applyProposalResponse(data, true, context))) return;
     itemForm.product_id = '';
     itemForm.quantity = 1;
     itemForm.unit_price = '';
     itemForm.commercial_gratuity = {};
   } catch (requestError) {
+    if (!currentContext(context)) return;
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
         'Não foi possível adicionar o produto.'
     );
   } finally {
-    itemSaving.value = false;
+    if (currentContext(context)) itemSaving.value = false;
   }
 };
 
 const updateItem = async item => {
-  if (!selectedProposal.value || itemSaving.value) return;
+  const context = captureContext();
+  if (
+    !selectedProposal.value?.items?.some(row => row.id === item.id) ||
+    loadingDetails.value ||
+    itemSaving.value
+  )
+    return;
   itemSaving.value = true;
   try {
     const { data } = await proposalsAPI.updateItem(
@@ -580,12 +702,13 @@ const updateItem = async item => {
         },
       }
     );
-    await applyProposalResponse(data);
+    await applyProposalResponse(data, true, context);
   } catch {
+    if (!currentContext(context)) return;
     itemUpdateFailed.value = true;
     useAlert('Não foi possível atualizar o item.');
   } finally {
-    itemSaving.value = false;
+    if (currentContext(context)) itemSaving.value = false;
   }
 };
 
@@ -600,18 +723,25 @@ const updateItemDiscount = (item, value) => {
 };
 
 const removeItem = async item => {
-  if (!selectedProposal.value || itemSaving.value) return;
+  const context = captureContext();
+  if (
+    !selectedProposal.value?.items?.some(row => row.id === item.id) ||
+    loadingDetails.value ||
+    itemSaving.value
+  )
+    return;
   itemSaving.value = true;
   try {
     const { data } = await proposalsAPI.deleteItem(
       selectedProposal.value.id,
       item.id
     );
-    await applyProposalResponse(data);
+    await applyProposalResponse(data, true, context);
   } catch {
+    if (!currentContext(context)) return;
     useAlert('Não foi possível remover o item.');
   } finally {
-    itemSaving.value = false;
+    if (currentContext(context)) itemSaving.value = false;
   }
 };
 
@@ -622,6 +752,7 @@ const publicProposalUrl = proposal =>
     : '');
 
 const previewProposal = () => {
+  if (loadingDetails.value) return;
   const url = publicProposalUrl(selectedProposal.value);
   if (url)
     window.open(
@@ -632,6 +763,7 @@ const previewProposal = () => {
 };
 
 const downloadPdf = async (proposal = selectedProposal.value) => {
+  const context = captureContext();
   if (
     !proposal ||
     pdfLoading.value ||
@@ -650,6 +782,7 @@ const downloadPdf = async (proposal = selectedProposal.value) => {
   pdfLoading.value = true;
   try {
     const { data } = await proposalsAPI.pdf(proposal.id);
+    if (!currentContext(context)) return;
     const url = URL.createObjectURL(data);
     const link = document.createElement('a');
     link.href = url;
@@ -663,13 +796,16 @@ const downloadPdf = async (proposal = selectedProposal.value) => {
       setTimeout(() => URL.revokeObjectURL(url), 60000);
     }
   } catch {
+    if (!currentContext(context)) return;
     useAlert(t('CRM.PROPOSAL_PDF.ERROR'));
   } finally {
-    pdfLoading.value = false;
+    if (currentContext(context)) pdfLoading.value = false;
   }
 };
 
 const copyPublicLink = async () => {
+  const context = captureContext();
+  if (loadingDetails.value) return;
   const url = publicProposalUrl(selectedProposal.value);
   if (!url) {
     useAlert('Não foi possível gerar o link público da proposta.');
@@ -678,8 +814,10 @@ const copyPublicLink = async () => {
 
   try {
     await navigator.clipboard.writeText(url);
+    if (!currentContext(context)) return;
     useAlert('Link público copiado.');
   } catch {
+    if (!currentContext(context)) return;
     const input = document.createElement('textarea');
     input.value = url;
     document.body.appendChild(input);
@@ -691,48 +829,76 @@ const copyPublicLink = async () => {
 };
 
 const duplicateProposal = async () => {
-  if (!selectedProposal.value || actionWorking.value) return;
+  const context = captureContext();
+  if (
+    !selectedProposal.value ||
+    loadingDetails.value ||
+    saving.value ||
+    itemSaving.value ||
+    actionWorking.value
+  )
+    return;
   actionWorking.value = 'duplicate';
   try {
     const { data } = await proposalsAPI.duplicate(selectedProposal.value.id);
+    if (!currentContext(context)) return;
     await refresh();
-    await openProposal(data);
+    if (!currentContext(context)) return;
+    if (!(await openProposal(data))) return;
     useAlert('Nova versão criada como rascunho.');
   } catch (requestError) {
+    if (!currentContext(context)) return;
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
         'Não foi possível duplicar a proposta.'
     );
   } finally {
-    actionWorking.value = '';
+    if (currentContext(context)) actionWorking.value = '';
   }
 };
 
 const requestApproval = async () => {
-  if (!selectedProposal.value || actionWorking.value) return;
+  const context = captureContext();
+  if (
+    !selectedProposal.value ||
+    loadingDetails.value ||
+    saving.value ||
+    itemSaving.value ||
+    actionWorking.value
+  )
+    return;
   actionWorking.value = 'approval';
   try {
     const saved = selectedProposal.value.locked
       ? true
       : await persistCommercialData(false);
-    if (!saved) return;
+    if (!saved || !currentContext(context)) return;
     const { data } = await proposalsAPI.requestApproval(
       selectedProposal.value.id
     );
-    await applyProposalResponse(data);
+    if (!(await applyProposalResponse(data, true, context))) return;
     useAlert('Proposta encaminhada para aprovação interna.');
   } catch (requestError) {
+    if (!currentContext(context)) return;
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
         'Não foi possível solicitar aprovação.'
     );
   } finally {
-    actionWorking.value = '';
+    if (currentContext(context)) actionWorking.value = '';
   }
 };
 
 const updateApproval = async (approvalType, decision = 'approved') => {
-  if (!selectedProposal.value || actionWorking.value) return;
+  const context = captureContext();
+  if (
+    !selectedProposal.value ||
+    loadingDetails.value ||
+    saving.value ||
+    itemSaving.value ||
+    actionWorking.value
+  )
+    return;
   actionWorking.value = approvalType;
   try {
     const { data } = await proposalsAPI.approve(
@@ -740,53 +906,71 @@ const updateApproval = async (approvalType, decision = 'approved') => {
       approvalType,
       decision
     );
-    await applyProposalResponse(data);
+    if (!(await applyProposalResponse(data, true, context))) return;
     useAlert(
       decision === 'approved'
         ? 'Aprovação registrada.'
         : 'Reprovação registrada.'
     );
   } catch (requestError) {
+    if (!currentContext(context)) return;
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
         'Não foi possível atualizar a aprovação.'
     );
   } finally {
-    actionWorking.value = '';
+    if (currentContext(context)) actionWorking.value = '';
   }
 };
 
 const sendProposal = async channel => {
-  if (!selectedProposal.value || sendingChannel.value) return;
+  const context = captureContext();
+  if (
+    !selectedProposal.value ||
+    loadingDetails.value ||
+    itemSaving.value ||
+    sendingChannel.value
+  )
+    return;
   sendingChannel.value = channel;
   try {
     const saved = await persistCommercialData(false);
-    if (!saved) return;
+    if (!saved || !currentContext(context)) return;
     const { data } = await proposalsAPI.sendProposal(
       selectedProposal.value.id,
       channel
     );
-    await applyProposalResponse(data.proposal);
+    if (!(await applyProposalResponse(data.proposal, true, context))) return;
     useAlert(
       `Proposta enviada por ${channel === 'email' ? 'e-mail' : 'WhatsApp'} e registrada na conversa.`
     );
   } catch (requestError) {
+    if (!currentContext(context)) return;
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
         'Não foi possível enviar a proposta pela conversa existente.'
     );
   } finally {
-    sendingChannel.value = '';
+    if (currentContext(context)) sendingChannel.value = '';
   }
 };
 
 const recipientDeliverySubmitted = async data => {
+  const context = captureContext();
   if (data.proposal?.id !== selectedProposal.value?.id) return;
-  await applyProposalResponse(data.proposal);
+  await applyProposalResponse(data.proposal, true, context);
 };
 
 const convertProposalToOrder = async () => {
-  if (!selectedProposal.value || actionWorking.value) return;
+  const context = captureContext();
+  if (
+    !selectedProposal.value ||
+    loadingDetails.value ||
+    saving.value ||
+    itemSaving.value ||
+    actionWorking.value
+  )
+    return;
   if (selectedProposal.value.status !== 'accepted') {
     useAlert('Somente propostas aceitas podem ser convertidas em pedido.');
     return;
@@ -796,6 +980,7 @@ const convertProposalToOrder = async () => {
     const { data } = await proposalsAPI.convertToOrder(
       selectedProposal.value.id
     );
+    if (!currentContext(context)) return;
     useAlert(`Pedido ${data.order_number || data.id} criado com sucesso.`);
     router.push({
       name: 'crm_orders',
@@ -803,28 +988,67 @@ const convertProposalToOrder = async () => {
       query: { orderId: data.id },
     });
   } catch (requestError) {
+    if (!currentContext(context)) return;
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
         'Não foi possível converter a proposta em pedido.'
     );
   } finally {
-    actionWorking.value = null;
+    if (currentContext(context)) actionWorking.value = null;
   }
 };
 
 const sendFromRow = async (proposal, channel) => {
-  await openProposal(proposal);
-  await sendProposal(channel);
+  if (await openProposal(proposal)) await sendProposal(channel);
+};
+const previewFromRow = async proposal => {
+  if (await openProposal(proposal)) previewProposal();
+};
+const closeCreationForm = () => {
+  viewGeneration += 1;
+  showForm.value = false;
+  resetWorking();
 };
 
 onMounted(async () => {
+  const context = captureContext();
   await Promise.all([refresh(), store.dispatch('agents/get')]);
+  if (!currentContext(context)) return;
   const { proposalId } = route.query;
   if (typeof proposalId === 'string' && /^\d+$/.test(proposalId)) {
     await openProposal({ id: proposalId });
   } else if (route.query.new === '1') {
     await openForm();
   }
+});
+const clearAuthorityView = () => {
+  closeProposal();
+  showForm.value = false;
+  showContactForm.value = false;
+  detailDraftId.value = null;
+  creationItems.value = [];
+  deals.value = [];
+  products.value = [];
+  operatingUnits.value = [];
+  origin.value = 'deal';
+  dealId.value = '';
+  companyId.value = null;
+  contactId.value = null;
+  businessUnitId.value = null;
+  listIdentity.value = null;
+};
+watch(
+  identity,
+  () => {
+    clearAuthorityView();
+    return refresh();
+  },
+  { flush: 'sync' }
+);
+onBeforeUnmount(() => {
+  disposed = true;
+  listGeneration += 1;
+  clearAuthorityView();
 });
 </script>
 
@@ -965,7 +1189,7 @@ onMounted(async () => {
                   type="button"
                   class="rounded-lg border border-n-weak p-2"
                   title="Visualizar proposta"
-                  @click="openProposal(proposal).then(() => previewProposal())"
+                  @click="previewFromRow(proposal)"
                 >
                   <i class="i-lucide-eye size-4" />
                 </button>
@@ -1004,8 +1228,8 @@ onMounted(async () => {
     <div
       v-if="showForm"
       class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
-      @click.self="showForm = false"
-      @keydown.esc="showForm = false"
+      @click.self="closeCreationForm"
+      @keydown.esc="closeCreationForm"
     >
       <form
         class="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-xl bg-n-solid-2 p-6 shadow-xl"
@@ -1018,7 +1242,7 @@ onMounted(async () => {
             class="rounded-lg p-2"
             :aria-label="t('CRM.CREATION.CLOSE')"
             :disabled="saving"
-            @click="showForm = false"
+            @click="closeCreationForm"
           >
             <i class="i-lucide-x size-5" />
           </button>
@@ -1237,7 +1461,7 @@ onMounted(async () => {
           <button
             type="button"
             class="rounded-lg border border-n-weak px-4 py-2"
-            @click="showForm = false"
+            @click="closeCreationForm"
           >
             Cancelar</button
           ><button
@@ -1325,7 +1549,12 @@ onMounted(async () => {
                 "
                 type="button"
                 class="rounded-xl bg-n-amber-9 px-3 py-2 text-sm font-semibold text-n-on-amber shadow-sm disabled:opacity-100"
-                :disabled="Boolean(actionWorking)"
+                :disabled="
+                  Boolean(actionWorking) ||
+                  loadingDetails ||
+                  saving ||
+                  itemSaving
+                "
                 @click="requestApproval"
               >
                 <i class="i-lucide-shield-check mr-1" /> Solicitar aprovação
@@ -1333,7 +1562,12 @@ onMounted(async () => {
               <button
                 type="button"
                 class="rounded-xl border border-n-weak bg-n-solid-2 px-3 py-2 text-sm font-semibold shadow-sm disabled:opacity-50"
-                :disabled="Boolean(actionWorking)"
+                :disabled="
+                  Boolean(actionWorking) ||
+                  loadingDetails ||
+                  saving ||
+                  itemSaving
+                "
                 @click="duplicateProposal"
               >
                 <i class="i-lucide-copy-plus mr-1" /> Duplicar
@@ -1343,6 +1577,7 @@ onMounted(async () => {
                 class="rounded-xl bg-[#16a765] px-3 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-50"
                 :disabled="
                   Boolean(sendingChannel) ||
+                  loadingDetails ||
                   selectedProposal.status === 'accepted' ||
                   selectedProposal.status === 'canceled'
                 "
@@ -1356,11 +1591,12 @@ onMounted(async () => {
                 }}
               </button>
               <ProposalRecipientDelivery
-                :key="`${route.params.accountId}:${store.getters.getCurrentUserID}:${selectedProposal.id}`"
+                :key="`${identity}:${selectedProposal.id}`"
                 :proposal-id="selectedProposal.id"
                 :public-url="publicProposalUrl(selectedProposal)"
                 :disabled="
                   Boolean(sendingChannel) ||
+                  loadingDetails ||
                   Boolean(actionWorking) ||
                   saving ||
                   itemSaving ||
@@ -1379,6 +1615,7 @@ onMounted(async () => {
                 class="rounded-xl bg-n-brand px-3 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-50"
                 :disabled="
                   Boolean(sendingChannel) ||
+                  loadingDetails ||
                   selectedProposal.status === 'accepted' ||
                   selectedProposal.status === 'canceled'
                 "
@@ -1391,7 +1628,12 @@ onMounted(async () => {
                 v-if="selectedProposal.status === 'accepted'"
                 type="button"
                 class="rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-50"
-                :disabled="Boolean(actionWorking)"
+                :disabled="
+                  Boolean(actionWorking) ||
+                  loadingDetails ||
+                  saving ||
+                  itemSaving
+                "
                 @click="convertProposalToOrder"
               >
                 <i class="i-lucide-shopping-cart mr-1" /> Converter em pedido
@@ -1565,7 +1807,7 @@ onMounted(async () => {
                 </p>
               </div>
               <button
-                :disabled="saving || selectedProposal.locked"
+                :disabled="saving || loadingDetails || selectedProposal.locked"
                 class="rounded-lg bg-n-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
               >
                 <i class="i-lucide-save mr-1" /> Salvar alterações
@@ -2317,7 +2559,12 @@ onMounted(async () => {
                   <button
                     type="button"
                     class="flex-1 rounded-lg bg-n-teal-9 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
-                    :disabled="Boolean(actionWorking)"
+                    :disabled="
+                      Boolean(actionWorking) ||
+                      loadingDetails ||
+                      saving ||
+                      itemSaving
+                    "
                     @click="updateApproval(approvalItem.key, 'approved')"
                   >
                     Aprovar
@@ -2325,7 +2572,12 @@ onMounted(async () => {
                   <button
                     type="button"
                     class="flex-1 rounded-lg border border-n-ruby-7 px-3 py-2 text-xs font-semibold text-n-ruby-11 disabled:opacity-50"
-                    :disabled="Boolean(actionWorking)"
+                    :disabled="
+                      Boolean(actionWorking) ||
+                      loadingDetails ||
+                      saving ||
+                      itemSaving
+                    "
                     @click="updateApproval(approvalItem.key, 'rejected')"
                   >
                     Reprovar

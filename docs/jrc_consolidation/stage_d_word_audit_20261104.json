@@ -1,0 +1,156 @@
+{
+  "date": "2026-11-04",
+  "source": "C:/Users/DEV03/Downloads/Especificacao_Central_Aprovacoes_JRC_Conversas_DEV.docx",
+  "sha256": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917",
+  "read_fully": {
+    "paragraphs": 465,
+    "nonempty": 426
+  },
+  "stage_D_complete": false,
+  "items": [
+    {
+      "criterion": "CA-01",
+      "status": "Existing native scope/eligibility; bounded API regression passed",
+      "evidence": [
+        "app/services/jrc_approvals/authorization.rb",
+        "app/services/jrc_approvals/decision_options.rb"
+      ]
+    },
+    {
+      "criterion": "CA-02",
+      "status": "Installed commercial origin routes and sealed legal view implemented; consolidated 98 Vue scenarios exit zero and no unhandled errors; fresh compilation and real browser pending",
+      "evidence": [
+        "app/serializers/jrc_approvals/request_serializer.rb",
+        "app/javascript/dashboard/routes/dashboard/approvals/AuthorityOrigin.vue",
+        "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+        "app/javascript/dashboard/routes/dashboard/approvals/originRoute.js",
+        "app/javascript/dashboard/routes/dashboard/approvals/ApprovalOriginLink.vue",
+        "docs/jrc_consolidation/approval_origin_checkpoint_20261104.json"
+      ]
+    },
+    {
+      "criterion": "CA-03",
+      "status": "Confirmation implemented and tested; backend persists native decision/history; no build/Chrome yet",
+      "evidence": [
+        "app/javascript/dashboard/routes/dashboard/approvals/ApprovalDecisionDialog.vue",
+        "app/services/jrc_approvals/decisions.rb"
+      ]
+    },
+    {
+      "criterion": "CA-04",
+      "status": "Native reason and source/current-version validation preserved; rejection-specific end-to-end UI still pending",
+      "evidence": [
+        "app/services/jrc_approvals/decisions.rb"
+      ]
+    },
+    {
+      "criterion": "CA-05",
+      "status": "Native proposal general discount adjustment, immutable revision and atomic decision implemented;54 backend and116 Vue passed. Other fields/types, notification delivery and fresh UI acceptance remain pending.",
+      "evidence": [
+        "app/controllers/api/v1/accounts/approvals/requests_controller.rb",
+        "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+        "docs/jrc_consolidation/approval_adjustment_checkpoint_20261104.json"
+      ]
+    },
+    {
+      "criterion": "CA-06",
+      "status": "Native proposal general discount adjustment, immutable revision and atomic decision implemented;54 backend and116 Vue passed. Other fields/types, notification delivery and fresh UI acceptance remain pending.",
+      "evidence": [
+        "app/services/jrc_approvals/decisions.rb",
+        "docs/jrc_consolidation/approval_adjustment_checkpoint_20261104.json"
+      ]
+    },
+    {
+      "criterion": "CA-07",
+      "status": "D6 versioned numeric tiers, shared native planner and wizard implemented/tested; fresh build and actual visual acceptance remain pending",
+      "evidence": [
+        "app/javascript/dashboard/routes/dashboard/approvals/PolicyEditor.vue",
+        "docs/jrc_consolidation/approval_wizard_checkpoint_20261104.json",
+        "app/javascript/dashboard/routes/dashboard/approvals/conditionSummary.js",
+        "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json"
+      ]
+    },
+    {
+      "criterion": "CA-08",
+      "status": "D6 versioned numeric tiers, shared native planner and wizard implemented/tested; fresh build and actual visual acceptance remain pending",
+      "evidence": [
+        "app/services/jrc_approvals/selection.rb",
+        "app/services/jrc_approvals/definition.rb",
+        "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json"
+      ]
+    },
+    {
+      "criterion": "CA-09",
+      "status": "D6 versioned numeric tiers, shared native planner and wizard implemented/tested; fresh build and actual visual acceptance remain pending",
+      "evidence": [
+        "app/services/jrc_approvals/simulation.rb",
+        "app/javascript/dashboard/routes/dashboard/approvals/SimulatorView.vue",
+        "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json"
+      ]
+    },
+    {
+      "criterion": "CA-10",
+      "status": "D8 own global grant lifecycle and native resolver implemented;110 backend plus final21 service/API cases and121 Vue plus final5 component cases passed. Formal gratuity absence preserved; fresh build/real visual acceptance and D9 delivery remain pending.",
+      "evidence": [
+        "app/services/jrc_approvals/delegations.rb",
+        "app/javascript/dashboard/routes/dashboard/approvals/DelegationView.vue",
+        "app/services/jrc_approvals/delegation_topology.rb",
+        "docs/jrc_consolidation/approval_delegation_checkpoint_20261104.json",
+        "docs/jrc_consolidation/approval_own_delegation_checkpoint_20261104.json"
+      ]
+    },
+    {
+      "criterion": "CA-11",
+      "status": "Existing native ledger/versioning; delegated principal name now shown only from eligible current grants and recorded votes",
+      "evidence": [
+        "app/services/jrc_approvals/ledger.rb",
+        "app/controllers/api/v1/accounts/approvals/requests_controller.rb"
+      ]
+    },
+    {
+      "criterion": "CA-12",
+      "status": "Native locks/version/idempotency remain unchanged; no new concurrency exemption introduced",
+      "evidence": [
+        "app/services/jrc_approvals/decisions.rb"
+      ]
+    },
+    {
+      "criterion": "CA-13",
+      "status": "Published policy versions and original request binding remain unchanged; no history overwrite",
+      "evidence": [
+        "app/models/jrc_approvals/request.rb",
+        "app/services/jrc_approvals/policies.rb"
+      ]
+    },
+    {
+      "criterion": "CA-14",
+      "status": "Native account/issuer/unit/explicit decide checks preserved; API regression passed",
+      "evidence": [
+        "app/services/jrc_approvals/authorization.rb",
+        "spec/requests/api/v1/accounts/jrc_approvals/visual_api_spec.rb"
+      ]
+    },
+    {
+      "criterion": "CA-15",
+      "status": "Pending new compilation and real desktop/mobile light/dark homologation; Chrome policy block not bypassed",
+      "evidence": [
+        "app/javascript/dashboard/routes/dashboard/approvals/ApprovalsPage.vue"
+      ]
+    }
+  ],
+  "divergences_preserved": [
+    "Word says optional approval observation; native service/model require bounded reason for all decisions. This stronger existing constraint was preserved and remains an explicit divergence.",
+    "Current advanced parallel/quorum/condition capabilities are preserved even where Word marks them future.",
+    "D9 is internal feed only, with bounded generic text; no email/browser-push delivery or live worker acceptance claimed."
+  ],
+  "next": "Complete E/F native gaps and G scope regression; D remains open for full Word/actual UI acceptance.",
+  "tables_revisited_in_full": 20,
+  "rule_list_increment": {
+    "status": "Native saved-rule duplication implemented and tested, no original mutation; visual acceptance pending",
+    "evidence": "approval_duplication_checkpoint_20261104.json"
+  },
+  "internal_notifications_increment": {
+    "status": "Implemented with 91,119,44 backend regression runs and 71/12 frontend runs; overlaps not summed; new build/real UI pending",
+    "evidence": "approval_notifications_checkpoint_20261104.json"
+  }
+}

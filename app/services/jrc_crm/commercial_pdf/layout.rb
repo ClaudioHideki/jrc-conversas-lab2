@@ -82,6 +82,21 @@ module JrcCrm
         end
       end
 
+      def contract_signers(signers)
+        section('Assinantes obrigatórios')
+        paragraph('Proposta de assinatura vinculada à versão. Este PDF não comprova poderes ou assinatura externa.', size: 9, color: MUTED)
+        signers.each do |person|
+          ensure_space(170)
+          party = person.fetch('party') == 'customer' ? 'Cliente' : 'Emitente'
+          key_values([['Parte / assinante', "#{party} — #{person.fetch('name')}"],
+                      ['CPF', person.fetch('personal_tax_identifier')], ['E-mail', person.fetch('email')]])
+          @y -= 32
+          @page.text(LEFT + 4, @y + 3, person.fetch('anchor'), size: 2, color: WHITE)
+          @page.line(LEFT, @y, LEFT + 240, @y, color: MUTED)
+          @y -= 26
+        end
+      end
+
       def render
         @document.pages.each_with_index do |page, index|
           page.line(LEFT, 57, LEFT + WIDTH, 57, color: BORDER)

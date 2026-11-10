@@ -1,0 +1,226 @@
+{
+  "date": "2026-11-04",
+  "status": "Updated incremental source/local automated evidence: D6-D9, E completion report and F health hysteresis implemented; no full C/D/E/F/G closure or fresh-build visual acceptance claimed.",
+  "source_checkpoint": "e8b3e4d54a2939990fcaa1da0083a04794cf9442",
+  "do_not_restart": [
+    "C5/C6/C7 and current company document catalog/responsibility/history",
+    "D1 confirmation, D2 origins, D3 four-step editor, D4 scoped delegation guard, D5 saved-rule duplication",
+    "Existing Backoffice, signatures boundary and relationship reviewed batches/Flow"
+  ],
+  "D6_numeric_tiers": {
+    "files": [
+      "app/services/jrc_approvals/definition.rb",
+      "app/services/jrc_approvals/requests.rb",
+      "app/services/jrc_approvals/selection.rb",
+      "app/services/jrc_approvals/eligibility.rb",
+      "app/services/jrc_approvals/gratuity_authorities.rb"
+    ],
+    "next": "Build/actual UI acceptance pending explicit build authorization; implementation and automated evidence supersede earlier design plan",
+    "required_tests": [
+      "v1 unchanged; old immutable requests/versions usable",
+      "Intervals at exact open/closed boundaries; decimal precision/currency; overlap/gap policy; unbounded/empty/duplicate malformed ranges",
+      "Simulator and request creation select the same native tier/roster; unmatched range cannot default to approval",
+      "Publishing/version changes and concurrent decisions preserve request binding; revoked eligibility/foreign scope denied"
+    ],
+    "implemented_checkpoint": "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json",
+    "finding_at_source_checkpoint": "Requests.plan! requires all step.authority conditions to match. Mutually exclusive tier conditions in v1 cannot represent alternative approvers; a UI-only tier table would be false functionality. Definition validates exact v1 keys; snapshots/versions are immutable.",
+    "current_status": "Native v2 tiers implemented/tested; v1 preserved"
+  },
+  "D7_adjustment": {
+    "next": "Reuse allowlisted native domain mutations with an explicit adjustment capability, original snapshot and immutable revision/audit link. Atomic adjust+approve must use one domain transaction, preserve actual adjustor and original requester provenance, re-evaluate native pricing/gates and never impersonate another actor or overwrite old snapshots.",
+    "forbidden": [
+      "Arbitrary model.update from approval payload",
+      "Treat decide as unrestricted CRM edit",
+      "Silently copy requester identity into Current.user",
+      "Overwrite immutable snapshot/decision history or bypass financial/authority verification"
+    ],
+    "partial_implementation": "docs/jrc_consolidation/approval_adjustment_checkpoint_20261104.json",
+    "finding_at_source_checkpoint": "Catalog adapters are authorized read/capture/verify only. Native requests pin readonly snapshot/stage_plan; source changes make contexts stale. There is no installed generic write adapter/adjust permission.",
+    "current_status": "Native proposal discount adjustment implemented; other source mutations remain partial"
+  },
+  "D8_global_delegation": {
+    "next": "Add explicit native own-delegation authorization/storage semantics and resolve an intersection with each request current account/company/unit/eligible principals/actions/window. Retain local history and gratuity formal absence. No blanket role grant or policy-version rewrite.",
+    "required_tests": [
+      "self/cycles/windows including concurrent grants",
+      "own revocation/expiry, inactive user, foreign unit/tenant",
+      "future policy version and old in-flight request semantics",
+      "no two effective principal votes, no actor/requester self-approval bypass"
+    ],
+    "implementation_checkpoint": "docs/jrc_consolidation/approval_own_delegation_checkpoint_20261104.json",
+    "finding_at_source_checkpoint": "Existing grants require policy_manage and bind exact policy-version/step; new D4 prevents future scoped cycles. A global own grant is not represented by this model.",
+    "current_status": "Own temporary global grants implemented/tested; exact current native intersection required"
+  },
+  "D9_internal_notifications": {
+    "reuse": [
+      "app/models/notification.rb",
+      "app/finders/notification_finder.rb",
+      "app/listeners/action_cable_listener.rb",
+      "app/services/jrc_relationship/notifications.rb"
+    ],
+    "next": "Operational worker and real fresh-build Chrome acceptance pending; local implementation and automated evidence in linked checkpoint.",
+    "shared_impact": [
+      "Existing conversation/relationship/SLA notifications, unread counts, list pagination, serialization, ActionCable, jobs and frontend route handling require regression before changes"
+    ],
+    "implementation_checkpoint": "docs/jrc_consolidation/approval_notifications_checkpoint_20261104.json",
+    "finding_at_source_checkpoint": "Ledger/AuditEvent persist audit only; Request and AuditEvent have no notification producer hooks, and reviewed native notification/feed paths have no JrcApprovals handling. Audits are not user notification delivery.",
+    "current_status": "Durable native internal feed implemented/tested; operational workers and real browser acceptance pending"
+  },
+  "E_F_followup": "Use ef_g_native_review_checkpoint_20261104.json; preserve existing implementations, implement actual gaps incrementally rather than restarting modules. External DocuSign demo and Chrome visual QA remain distinct prerequisites.",
+  "business_dependencies": {
+    "TRR": "Still undefined; do not invent a formula. Approved financial segmentation remains invoiced orders in a period.",
+    "documents_without_portfolio": "Expansion explicitly deferred; keep blocked."
+  },
+  "preserved_runtime": {
+    "login_http": 200,
+    "entry_http": 200,
+    "entry_url_path": "/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js",
+    "entry_sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+    "served_source_commit": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+    "new_changes_served": false,
+    "new_build_or_instance": false,
+    "browser_automation": false,
+    "functional_browser_qa": false,
+    "containers": [
+      {
+        "name": "jrc-rel-v2-run-20261101",
+        "running": true
+      },
+      {
+        "name": "jrc-rel-v2-pg-20261101",
+        "running": true
+      },
+      {
+        "name": "jrc-rel-v2-redis-20261101",
+        "running": true
+      },
+      {
+        "name": "jrc-customer-b1-b4-proxy-4d4a6de3",
+        "running": true
+      }
+    ],
+    "free_bytes": 16588136448,
+    "earlier_probe": "Treating the URL asset path as a Rails filesystem path returned ENOENT; corrected to the observed HTTP asset URL. No runtime files changed."
+  },
+  "restrictions": [
+    "No cleanup/delete",
+    "No builds or new UI instances under current instruction",
+    "No push/GHCR/deploy/production changes",
+    "No external real operations or interruption of other agents"
+  ],
+  "latest_incremental_report": "docs/jrc_consolidation/implementation_progress_20261104.json",
+  "continuation_20261105": {
+    "date": "2026-11-05",
+    "source_head": "8576c78678d5a7310099db701cf5134b55159fa2",
+    "checkpoints": [
+      {
+        "commit": "7c9edef70edd9d4f3f8c1b18bc138d5fa10c83f4",
+        "stage": "E3",
+        "evidence": "backoffice_cs_handoff_checkpoint_20261105.json",
+        "result": "Exact scoped native completion-to-CS link, explicit prepare/accept,10 native backend and23 initial Vue cases passed;16 changed-component Vue cases rechecked."
+      },
+      {
+        "commit": "82c796618781c135b5bba4f611ace09e72ad1f2d",
+        "stage": "E2",
+        "evidence": "backoffice_approval_mirror_checkpoint_20261105.json",
+        "result": "Native Central history mirror, actual pagination and read-only reused detail;4 backend and17 Vue cases passed."
+      },
+      {
+        "commit": "8576c78678d5a7310099db701cf5134b55159fa2",
+        "stage": "F/G",
+        "evidence": "handoff_project_revalidation_checkpoint_20261105.json",
+        "result": "Reopened native project cannot be accepted; source account lock and current source-scope revalidation.13 of14 first combined cases passed; last fixture corrected and passed alone.10 order cases were repeated only because the common decision path changed."
+      }
+    ],
+    "all_stages_remain_open": true,
+    "authoritative_restrictions": [
+      "No build, push, GHCR, deploy, cleanup, external real operations, production change or server5379 modification",
+      "Old .codex/resume-current-jrc.json build/next-step suggestions are historical and do not override the latest user instruction"
+    ],
+    "next_safe_work": [
+      "F1: native Central-approved portfolio distribution/capacity and safe analyst removal; preserve existing reviewed batch semantics/history and reuse source/version/capability checks. Manual reviewed-batch confirmation is still not Central approval.",
+      "F2: configurable freshness/trend/cooldown with native evidence and old behavior preserved; do not imply current hysteresis/history implement all these requirements.",
+      "E1/E3: version-bound signed artifacts/certificate, immutable final dossier and complete provisioning/CS closure acceptance. Current package truthfully marks unavailable signed artifacts.",
+      "G: current compiled desktop/mobile light/dark acceptance remains blocked by the explicit no-build/no-server-change instruction; frozen5379 assets cannot be evidence for new components."
+    ],
+    "business_dependencies": [
+      "TRR has no approved formula",
+      "Company documents without portfolio remain explicitly blocked",
+      "DocuSign demo and real external provider/channel acceptance require separately authorized environment and operations"
+    ]
+  },
+  "F1b_F2a_actual_update_20261105": {
+    "capacity_checkpoint": "3db1094b28d38ff0753d6bb029c0ddb4a214097d",
+    "capacity_report": "portfolio_capacity_checkpoint_20261105.json",
+    "health_report": "health_windows_checkpoint_20261105.json",
+    "classification": "Implemented and locally automated tested; current-build browser acceptance pending; F2 and C-G remain open",
+    "remaining": [
+      "F1 weighted/hour modes, complete safe analyst removal/all responsibility destinations and approved scope transfer.",
+      "E version-bound provider signed artifacts/certificate and sealed immutable dossier; current export remains truthful about absence.",
+      "Remaining C/D gaps and G real current-build browser acceptance.",
+      "TRR undefined; company documents without portfolio deferred; DocuSign demo/external acceptance not performed."
+    ]
+  },
+  "F2b_round_update_20261105": {
+    "date": "2026-11-05",
+    "cooldown_report": "docs/jrc_consolidation/automatic_action_cooldown_checkpoint_20261105.json",
+    "classification": [
+      {
+        "requirement": "F1 native Central approval and customer-count capacity",
+        "state": "Concluído e testado",
+        "visual": "implementado mas não homologado visualmente",
+        "reports": [
+          "portfolio_distribution_central_checkpoint_20261105.json",
+          "portfolio_capacity_checkpoint_20261105.json"
+        ]
+      },
+      {
+        "requirement": "F1 complete distribution/removal and weighted/hour capacity",
+        "state": "parcial",
+        "remaining": "Complete responsibility destination validation/transfer, safe analyst removal, approved scope transfer and alternative capacity modes."
+      },
+      {
+        "requirement": "F2 satisfaction source windows, customer trend and local NICO read freshness",
+        "state": "Concluído e testado",
+        "visual": "implementado mas não homologado visualmente",
+        "report": "health_windows_checkpoint_20261105.json"
+      },
+      {
+        "requirement": "F2 monitoring-alert cooldown",
+        "state": "Concluído e testado",
+        "visual": "implementado mas não homologado visualmente",
+        "report": "automatic_action_cooldown_checkpoint_20261105.json"
+      },
+      {
+        "requirement": "F2 complete freshness/priority/anti-noise policy",
+        "state": "parcial",
+        "remaining": "Other dimensions, broader trend/priority rules, aggregation, global task ceilings and representative scale."
+      },
+      {
+        "requirement": "E1/E3 provider signed artifacts bound to exact contract version and sealed final dossier",
+        "state": "pendente",
+        "remaining": "Current package remains a truthful current export, not a signed-artifact/sealed-dossier completion."
+      },
+      {
+        "requirement": "C/D functional/documentary closure",
+        "state": "parcial",
+        "remaining": "Existing per-Word audit gaps preserved; no closure claimed."
+      },
+      {
+        "requirement": "G current-source browser/visual acceptance",
+        "state": "bloqueado",
+        "reason": "Explicit no-build/no-frontend-recompile/no-server5379-change instruction. Old assets cannot validate new code."
+      },
+      {
+        "requirement": "DocuSign external demo acceptance",
+        "state": "bloqueado",
+        "reason": "Demo preparation and separately authorized real provider operations are still required."
+      },
+      {
+        "requirement": "TRR and company documents without portfolio",
+        "state": "bloqueado",
+        "reason": "TRR has no approved formula; portfolio-free documents were explicitly deferred by the user."
+      }
+    ],
+    "next_recommended": "Finish F1 responsibility destinations/safe removal and remaining capacity modes; then E exact version-bound signed artifacts/certificate and sealed dossier, without provider operations or environment changes."
+  }
+}

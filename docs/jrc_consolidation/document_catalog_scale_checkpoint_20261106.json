@@ -1,0 +1,225 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "24b4512d1f1068aded14c01c4536b66b709d0438",
+  "status": "C B2 catalog source scale locally validated; C and G remain open",
+  "implementation": [
+    "Confirmed N+1 latest-version/uploader/attachment/blob queries on native document index. Page5/25/50 performed5/25/50 version queries and5/25/50 blob queries.",
+    "CustomerDocuments now selects only currently authorized requested document IDs, then DISTINCT ON highest native version number with eager uploader/private attachment/blob. No account/user/unit parameter grants access. Empty pages still require document permission.",
+    "Index uses bounded page selection; show/create/update/version retain native version pagination. Required-document catalog reuses the same authorized selector. No file versions/history/checksums/scan flags changed.",
+    "Private generic blob routes/quarantine/hash/current permissions preserved; company without portfolio remains blocked."
+  ],
+  "tests": {
+    "baseline": "1/1 intentional regression failure demonstrating existing N+1, all functional data/access checks passed",
+    "first_corrected_run": "19/20; one existing test assumed zero documents globally although2000 synthetic documents were intentionally retained. No application authorization failure.",
+    "fixture_correction": "Replace global empty-table assertion with not_to change(CustomerDocument,:count) around denied POST; verifies no insert anywhere, preserves all existing data.",
+    "final_native": "20/0 =1 actual1000-document scale +2 new cross-account/private selector cases +11 required-catalog +6 protected-document cases",
+    "ruby_new_offenses": 0,
+    "ruby_shared_delta": [
+      {
+        "path": "app/services/jrc_relationship/customer_documents.rb",
+        "baseline": 0,
+        "current": 0,
+        "added": {}
+      },
+      {
+        "path": "app/services/jrc_relationship/document_requirements.rb",
+        "baseline": 0,
+        "current": 0,
+        "added": {}
+      },
+      {
+        "path": "app/controllers/api/v1/accounts/relationship/documents_controller.rb",
+        "baseline": 0,
+        "current": 0,
+        "added": {}
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/relationship/customer_documents_spec.rb",
+        "baseline": 15,
+        "current": 15,
+        "added": {}
+      }
+    ],
+    "frontend": "No frontend contract/layout/source changed; no unnecessary mocked-component repeat or false fresh Chrome claim",
+    "diff_check": "passed"
+  },
+  "measured_cohorts": {
+    "baseline": {
+      "account_id": 18526,
+      "assignment_id": 5329,
+      "documents": 1000,
+      "versions": 1002,
+      "fixture_seconds": 31.75,
+      "observations": [
+        {
+          "page": 1,
+          "per_page": 5,
+          "seconds": 0.5144,
+          "query_count": 45,
+          "version_queries": 5,
+          "blob_queries": 5
+        },
+        {
+          "page": 1,
+          "per_page": 25,
+          "seconds": 0.1733,
+          "query_count": 121,
+          "version_queries": 25,
+          "blob_queries": 25
+        },
+        {
+          "page": 20,
+          "per_page": 50,
+          "seconds": 0.2434,
+          "query_count": 221,
+          "version_queries": 50,
+          "blob_queries": 50
+        },
+        {
+          "page": 40,
+          "per_page": 25,
+          "seconds": 0.2029,
+          "query_count": 121,
+          "version_queries": 25,
+          "blob_queries": 25
+        }
+      ],
+      "source": "native validated synthetic models, one reused private blob plus two native version uploads",
+      "no_external_scanner_or_upload_load_claim": true
+    },
+    "intermediate_nested_scope": {
+      "account_id": 18528,
+      "assignment_id": 5330,
+      "documents": 1000,
+      "versions": 1002,
+      "fixture_seconds": 31.802,
+      "observations": [
+        {
+          "page": 1,
+          "per_page": 5,
+          "seconds": 0.7079,
+          "query_count": 31,
+          "version_queries": 1,
+          "blob_queries": 1
+        },
+        {
+          "page": 1,
+          "per_page": 25,
+          "seconds": 0.3482,
+          "query_count": 27,
+          "version_queries": 1,
+          "blob_queries": 1
+        },
+        {
+          "page": 20,
+          "per_page": 50,
+          "seconds": 0.4307,
+          "query_count": 27,
+          "version_queries": 1,
+          "blob_queries": 1
+        },
+        {
+          "page": 40,
+          "per_page": 25,
+          "seconds": 0.3537,
+          "query_count": 27,
+          "version_queries": 1,
+          "blob_queries": 1
+        }
+      ],
+      "source": "native validated synthetic models, one reused private blob plus two native version uploads",
+      "no_external_scanner_or_upload_load_claim": true
+    },
+    "settled_bounded_authorized_ids": {
+      "account_id": 18552,
+      "assignment_id": 5350,
+      "documents": 1000,
+      "versions": 1002,
+      "fixture_seconds": 36.763,
+      "observations": [
+        {
+          "page": 1,
+          "per_page": 5,
+          "seconds": 0.556,
+          "query_count": 32,
+          "version_queries": 1,
+          "blob_queries": 1
+        },
+        {
+          "page": 1,
+          "per_page": 25,
+          "seconds": 0.1385,
+          "query_count": 28,
+          "version_queries": 1,
+          "blob_queries": 1
+        },
+        {
+          "page": 20,
+          "per_page": 50,
+          "seconds": 0.1399,
+          "query_count": 28,
+          "version_queries": 1,
+          "blob_queries": 1
+        },
+        {
+          "page": 40,
+          "per_page": 25,
+          "seconds": 0.1168,
+          "query_count": 28,
+          "version_queries": 1,
+          "blob_queries": 1
+        }
+      ],
+      "source": "native validated synthetic models, one reused private blob plus two native version uploads",
+      "no_external_scanner_or_upload_load_claim": true
+    }
+  },
+  "interpretation": "Final each page1 version query/1 blob query. Warm query count28 independent of5/25/50 rows; first request32. Timings from one local synthetic run only, not SLO/p95/pilot/capacity assurance. Selector emits no storage locator.",
+  "fixture_limits": "Three committed owned synthetic cohorts retained:1000 documents/1002 immutable versions each. One reused private blob plus2 native version uploads per cohort; not1000 upload/scanner/signature operations. External HTTP blocked, jobs TestAdapter. No cleanup.",
+  "resources": {
+    "baseline": {
+      "start": 7190880256,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/document_catalog_scale_spec.rb": "824b590159f7455ac2e19bddee2eeb0180a058e99e11eecb9523882a8a4ca9a4"
+      },
+      "minimum": 7190503424,
+      "exit_code": 1,
+      "end": 7190564864
+    },
+    "final": {
+      "start": 7187501056,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/document_catalog_scale_spec.rb": "824b590159f7455ac2e19bddee2eeb0180a058e99e11eecb9523882a8a4ca9a4",
+        "spec/services/jrc_relationship/customer_documents_latest_versions_spec.rb": "7055bffc1b2b04b530cc953147c82f6ba77d77f82c6d5eafa61e28618681a43e",
+        "spec/requests/api/v1/accounts/relationship/document_requirements_spec.rb": "e3f33e38e825b8f0fb555944b439fa4e37012238f4db6783285687e4a9b68551",
+        "spec/requests/api/v1/accounts/relationship/customer_documents_spec.rb": "d4416059e5422c2ef7c31d5a50cfc8acdae4069de7dbbb8525e655372c3d1ed5"
+      },
+      "minimum": 7167946752,
+      "exit_code": 0,
+      "end": 7187763200
+    },
+    "free_final": 7166681088
+  },
+  "source_sha256": {
+    "app/controllers/api/v1/accounts/relationship/documents_controller.rb": "8e915ea0c3b4c6fa654262cbcadb084fc83d2cdb93ebd1d31ec51558ec0e5531",
+    "app/services/jrc_relationship/customer_documents.rb": "cbce2190386a8823c52cd7c71fcf89e8c34ce7903b0cc032540e96f43e093212",
+    "app/services/jrc_relationship/document_requirements.rb": "052d6cb757238329ab4931f1c8e4db0e5c79bcbaaef40dd16d84ec53dca7ced5",
+    "spec/requests/api/v1/accounts/relationship/customer_documents_spec.rb": "d4416059e5422c2ef7c31d5a50cfc8acdae4069de7dbbb8525e655372c3d1ed5",
+    "spec/requests/api/v1/accounts/relationship/document_catalog_scale_spec.rb": "824b590159f7455ac2e19bddee2eeb0180a058e99e11eecb9523882a8a4ca9a4",
+    "spec/services/jrc_relationship/customer_documents_latest_versions_spec.rb": "7055bffc1b2b04b530cc953147c82f6ba77d77f82c6d5eafa61e28618681a43e"
+  },
+  "restrictions": "No new schema, appbuild, runtime/5379 change, container restart, cleanup, push/deploy/GHCR or external operation.",
+  "remaining": [
+    "Fresh current-source Chrome/visual/mobile acceptance still pending under no-build rule.",
+    "Real scanner/DocuSign/channel acceptance separate; no C closure."
+  ],
+  "next": "F/G native NICO resource provenance: WorkContext now returns SlaClock source references, but DomainAccess/ProtectedResourceReader do not yet recognize that type for current saved-result checks."
+}

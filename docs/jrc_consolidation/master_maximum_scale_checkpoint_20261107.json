@@ -1,0 +1,79 @@
+{
+  "date": "2026-11-07",
+  "status": "bounded_maximum_native_master_audience_validated_not_browser_or_real_queue_acceptance",
+  "previous_checkpoint": "501fa070f494632a09ba298f71be543d75dee203",
+  "branch": "codex/relacionamento-v2-20261101",
+  "files": [
+    "spec/services/jrc_relationship/reviewed_portfolio_batch_master_scale_spec.rb"
+  ],
+  "validation": {
+    "native": "master-maximum-scale01:1example,0failures,50created roots then50reused roots across2active portfolios;20finite advances of5items. No mocked domain writers.",
+    "confirmed": [
+      "Fifty-first subject rejected by existing bounded input parser.",
+      "Whole-selection configured hours projected at75 with no blocker;explicit synthetic1.5hours per customer,no production defaults.",
+      "Each advance applied exactly5receipts and5group links. Initial allocation honored native onboarding admission.",
+      "Two final active portfolios have50links each while the account retains50native allocations and75global equivalent hours;no second customer registry.",
+      "Duplicate completed advance repeated no operation,review pins and native root attributes remained unchanged at checked boundaries,and a foreign-account allocation remained unchanged."
+    ],
+    "elapsed_observation": {
+      "database": "jrc_rel_v2_candidate_test",
+      "phases": [
+        {
+          "phase": 0,
+          "created": 50,
+          "reused": 0,
+          "items": 50,
+          "finite_advances": 10,
+          "seconds": 191.9157420769916
+        },
+        {
+          "phase": 1,
+          "created": 0,
+          "reused": 50,
+          "items": 50,
+          "finite_advances": 10,
+          "seconds": 94.88282596398494
+        }
+      ],
+      "seconds": 287.97479802402086,
+      "real_queue": false,
+      "external_operations": false,
+      "application_build": false
+    },
+    "scope": "Candidate PostgreSQL synthetic transaction. These are local elapsed observations,not a production SLA or throughput promise.",
+    "artifact": "/tmp/jrc-master-scale-20261107-62386-76c5cace77d3.json",
+    "local_evidence": ".codex/d9-notifications-20261104/master-maximum-scale-native-evidence.json",
+    "resource": {
+      "start": 6594637824,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/reviewed_portfolio_batch_master_scale_spec.rb": "6d650ed549fdce422cdde406a3c7a23631c5bc66b1e867851e22f22fdebb0308"
+      },
+      "minimum": 6576181248,
+      "exit_code": 0,
+      "end": 6595215360
+    },
+    "lint": "0offenses after moving the same configuration/foreign fixture setup into before/let. Functional gate was not repeated for fixture organization/formatting;the executed source SHA remains in the resource artifact.",
+    "read_only_monitoring": "During the run pg_stat_activity showed ClientRead with recent queries,no lock wait. No process or container was interrupted."
+  },
+  "preservation": {
+    "application_build": false,
+    "new_server": false,
+    "real_queue": false,
+    "external_operation": false,
+    "cleanup": false,
+    "push": false,
+    "production": false,
+    "server5379_changed": false
+  },
+  "free_end": 6551252992,
+  "remaining": [
+    "Current-source Chrome desktop/mobile/visual acceptance remains blocked by explicit no-build/no5379-change.",
+    "Actual master Sidekiq delivery separate from this inline domain gate;older real worker artifacts/Redis15 preserved and not overwritten.",
+    "TRR,explicit local portfolio capability matrix,external provider/scanner/channel setup and deferred company documents without portfolio remain documented. No C-Gclosure."
+  ],
+  "next": "Extend the already validated proposal list authority binding to native CRM lead/activity/deal caches where read-only inspection confirmed the same stale-account/role pattern;first add failing native store regression cases,preserve filters and source APIs."
+}

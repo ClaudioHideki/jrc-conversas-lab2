@@ -4,6 +4,7 @@ class ActionCableListener < BaseListener
   def notification_created(event)
     item = event.data[:notification]
     return unless item.visible_to_user?
+    return if item.approval_event? && !JrcApprovals::Notifications.visible?(item)
     return if item.relationship_action? && !JrcRelationship::Notifications.visible?(item)
 
     notification, account, unread_count, count = extract_notification_and_account(event)
@@ -14,6 +15,7 @@ class ActionCableListener < BaseListener
   def notification_updated(event)
     item = event.data[:notification]
     return unless item.visible_to_user?
+    return if item.approval_event? && !JrcApprovals::Notifications.visible?(item)
     return if item.relationship_action? && !JrcRelationship::Notifications.visible?(item)
 
     notification, account, unread_count, count = extract_notification_and_account(event)

@@ -2,6 +2,10 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
   def index
     model = JrcRelationship::Workflow::MODELS.fetch(params[:kind])
     scope = relationship_context.records(model).where(assignment_id: filtered_assignments.select(:id))
+    scope = scope.where(owner_id: Current.user.id) if model == JrcRelationship::Action && params[:mine].to_s == 'true'
+    if model == JrcRelationship::Action && params[:returns_overdue].to_s == 'true'
+      scope = scope.where(status: JrcRelationship::Action::ACTIVE_STATUSES).where('return_at < ?', Time.current)
+    end
     scope = survey_scope(model, scope)
     filters = JrcRelationship::RecordFilters.new(model, params, renewal_rules: model == JrcRelationship::Renewal ? renewal_rules : nil)
     scope = filters.identity_scope(scope)
@@ -24,6 +28,21 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
   end
 
   private :render_records
+
+  def show
+    model = JrcRelationship::Workflow::MODELS.fetch(params[:kind])
+    record = relationship_context.records(model).find(params[:id])
+    fields = JrcRelationship::Workflow::FIELDS.fetch(params[:kind])
+    fields += ['factors'] if params[:kind] == 'actions'
+    events = JrcCrm::AuditEvent.where(account_id: Current.account.id, resource_type: model.name, resource_id: record.id)
+                              .order(created_at: :desc, id: :desc).limit(50)
+    history = events.map do |event|
+      { id: event.id, at: event.created_at, event: event.event_type, actor_id: event.actor_id,
+        before: JrcRelationship::RecordPresentation.history_values(event.from_value, fields, model: model),
+        after: JrcRelationship::RecordPresentation.history_values(event.to_value, fields, model: model) }
+    end
+    render json: presenter.record(record).merge(history: history)
+  end
 
   def create
     save_record
@@ -59,7 +78,13 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
   end
 
   def export_surveys
+    response.headers['Cache-Control'] = 'no-store'
+    raise Pundit::NotAuthorizedError unless relationship_context.policy.export?
+    signature = relationship_context.access_signature
     csv = JrcRelationship::SurveyReport.new(relationship_context, survey_filters).csv
+    fresh = JrcRelationship::Context.new(relationship_context.member)
+    raise Pundit::NotAuthorizedError unless fresh.policy.export? && fresh.access_signature == signature
+    fresh.audit!(Current.account, action: 'survey_report_exported', after: { scope: 'authorized_survey_responses', filters: survey_filters, format: 'csv' })
     send_data csv, type: 'text/csv; charset=utf-8', disposition: 'attachment', filename: "survey-responses-#{Date.current.iso8601}.csv"
   end
 
@@ -97,7 +122,7 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
     ids = params.require(:ids)
     raise ArgumentError, 'Select between 1 and 50 actions' unless ids.is_a?(Array) && ids.size.between?(1, 50)
 
-    attrs = params.require(:record).permit(:status, :due_at, :priority, :result, :owner_id).to_h
+    attrs = params.require(:record).permit(:status, :due_at, :priority, :result, :owner_id, :waiting_reason, :next_step, :return_at).to_h
     raise Pundit::NotAuthorizedError unless relationship_context.policy.manage?
 
     rows = relationship_context.records(JrcRelationship::Action).where(id: ids).order(:id)
@@ -172,9 +197,7 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
       attrs[:plan] =
         params.require(:record).permit(plan: [:cause, :hypothesis, :strategy, :actions, :concessions, :approval_status])[:plan]
     end
-    attrs.merge!(params.require(:record).permit(:period_from, :period_to, :notes,
-                                                milestones: [:title, :due_at, :status, :owner_id, :evidence, :notes, :activity_id, :task_id,
-                                                             :ticket_id, :qbr_id]))
+    attrs.merge!(params.require(:record).permit(:period_from, :period_to, :notes))
     assign_structured_collections!(attrs)
     result = JrcRelationship::Workflow.new(relationship_context).save(kind: params[:kind], attributes: attrs, id: params[:id])
     render json: presenter.record(result[:record]).merge(survey_token: result[:survey_token]), status: params[:id] ? :ok : :created
@@ -184,6 +207,8 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
     params.require(:record).permit(
       :assignment_id, :request_id, :lock_version, :owner_id, :reason, :status, :priority, :due_at,
       :result, :kind, :severity, :outcome, :title, :target_on, :project_id, :scheduled_at, :agenda, :summary,
+      :next_step, :return_at, :customer_confirmation, :customer_feedback, :waiting_reason,
+      :alert_review_status, :alert_review_note,
       :proposed_mrr_cents, :renewed_contract_id, :product_id, :contract_id, :source_contract_id, :source_product_id,
       :potential_cents, :evidence, :expansion_kind, :meeting_url, :recording_url, :provider, :contact_id,
       plan: [:cause, :hypothesis, :strategy, :actions, :concessions], goals: [], participants: [], decisions: []
@@ -192,18 +217,22 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
 
   def assign_structured_collections!(attrs)
     # Structured collections are limited to finite work items, never domain identity copies.
-    %w[goals participants decisions].each do |key|
+    %w[goals participants decisions milestones].each do |key|
       value = params.dig(:record, key)
       next if value.nil?
 
       validate_structured_collection!(value)
 
-      attrs[key] = value.map do |row|
-        row.permit(:metric, :baseline, :target, :current, :due_at, :status, :title, :name, :email,
-                   :owner_id, :evidence, :notes, :activity_id, :task_id, :ticket_id, :qbr_id, :product_id, :user_id, :participant_type,
-                   :decision_key).to_h
-      end
+      fields = structured_collection_fields(key)
+      attrs[key] = value.map { |row| row.permit(*fields).to_h }
     end
+  end
+
+  def structured_collection_fields(key)
+    return %i[title due_at status owner_id evidence notes activity_id task_id ticket_id qbr_id] if key == 'milestones'
+
+    %i[metric baseline target current due_at status title name email owner_id evidence notes activity_id task_id ticket_id qbr_id product_id
+       user_id participant_type decision_key]
   end
 
   def validate_structured_collection!(value)

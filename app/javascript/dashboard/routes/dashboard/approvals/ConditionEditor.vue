@@ -126,11 +126,11 @@ const setValue = (index, value) => {
           >
             <option value="">{{ t('JRC_APPROVALS.select') }}</option>
             <option
-              v-for="(fieldType, name) in fields"
+              v-for="name in Object.keys(fields)"
               :key="name"
               :value="name"
             >
-              {{ name }} ({{ fieldType }})
+              {{ t(`JRC_APPROVALS.catalogFields.${name}`) }}
             </option>
           </select></label
         ><label class="text-sm"
@@ -143,8 +143,9 @@ const setValue = (index, value) => {
             <option
               v-for="op in OPERATORS[type]"
               :key="op"
+              :value="op"
             >
-              {{ op }}
+              {{ t(`JRC_APPROVALS.operators.${op}`) }}
             </option>
           </select></label
         >

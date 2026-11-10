@@ -168,7 +168,8 @@
       "sla_missed_first_response": "SLA Missed",
       "sla_missed_next_response": "SLA Missed",
       "sla_missed_resolution": "SLA Missed",
-      "relationship_action": "Relacionamento / CS"
+      "relationship_action": "Relacionamento / CS",
+      "approval_event": "Approvals"
     }
   },
   "NETWORK": {

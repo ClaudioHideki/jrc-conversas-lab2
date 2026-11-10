@@ -1,0 +1,83 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "7090802b504e10ac02b31ba7a009d72807f9e577",
+  "status": "F1/F2 QBR responsibility boundary locally validated; no stage closure",
+  "confirmed_gap": "Baseline4 examples/2 failures: completed QBR accepted an inactive target; scheduled commitment accepted a current account user outside native portfolio scope. Both returned201.",
+  "implementation": [
+    "WorkflowReferences checks changed/new QBR decision owners using WorkOwnership; comparison uses native decision_key or existing positional legacy identity. Unchanged inactive historical owners retain original IDs. Participants continue to use their independent account/team visibility rule.",
+    "Workflow.activity! checks explicit new commitment targets before creating native action or Agenda; previously persisted idempotent commitments remain unchanged.",
+    "WorkOwnership options also respect the native own-user assignable scope for non-team analysts; no team permission grant. Generic editor main-owner selector still requires team permission.",
+    "Nested owner choices reuse assignment-specific options, disable stale historical selections, preserve their labels and keep participant choices separate. No automatic-routing capacity rule added to manual work."
+  ],
+  "tests": {
+    "native02": "14 examples,0 failures =4 new QBR request cases plus10 existing functional Workflow cases, including native Agenda idempotence and commitments.",
+    "final03": "4 examples,0 failures after extracting small validators to keep shared Ruby complexity at baseline.",
+    "vue": "21/0 =5 ownership form tests plus16 existing functional review tests. Test mocks are not current-source Chrome acceptance.",
+    "ruby_new": 0,
+    "shared_static": [
+      {
+        "path": "app/services/jrc_relationship/workflow.rb",
+        "baseline_count": 28,
+        "current_count": 28,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/workflow_references.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "eslint": "New test0errors/0warnings; RecordEditor0errors/13 pre-existing warnings unchanged.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "qbr-owner-native02": {
+      "start": 7124025344,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/qbr_commitment_ownership_spec.rb": "ea02bdc64b2907919fd86a04ba3541c917678d045d38ae7e6f1996d8fc837707",
+        "spec/services/jrc_relationship/functional_review_spec.rb": "cc7542ae1e89f6329bb28f728486571b903d940fff40d9564483b147214140b9"
+      },
+      "minimum": 7096287232,
+      "exit_code": 0,
+      "end": 7123562496
+    },
+    "qbr-owner-final03": {
+      "start": 7124910080,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/qbr_commitment_ownership_spec.rb": "0c7552efd7d17df4ad693bf81c90d52ecfcd08d04ca43928834d5c9be9770714"
+      },
+      "minimum": 7124770816,
+      "exit_code": 0,
+      "end": 7124770816
+    }
+  },
+  "frontend_resources": {
+    "status": "passed",
+    "free_start": 7126261760,
+    "minimum_free": 7096246272,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 20064,
+    "exit_code": 0,
+    "free_end": 7124795392
+  },
+  "remaining": [
+    "Success-plan goal/milestone owner validation still uses the former account/team lookup and is next.",
+    "No identity removal or global deactivation.",
+    "Current-source desktop/mobile visual gates remain blocked by no-build restriction, not marked passed.",
+    "No real provider/channel invocation or external operation."
+  ],
+  "restrictions": "No build, cleanup, server5379 change, original container restart, push, image publication, deploy or production mutation."
+}

@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "3694f71e8d1876bce90e8c73e4526a7a352bac34",
+  "status": "Final native actor authentication rechecked before disclosing withdrawal readiness",
+  "baseline": "1/1 actual failure: actor confirmed_at changed to nil immediately before final verification; original reader still returned a result because it checked role/signature without active_for_authentication.",
+  "implementation": "Fresh final Context must also pass the unchanged native User.active_for_authentication? rule. Existing team permission and original signature checks remain mandatory. No global user activation, role or account-membership operation added.",
+  "tests": {
+    "native02": "17/0:12native-link cases including actual mid-query authentication revocation and5existing readiness gates.",
+    "rubocop": "Shared readiness and source spec0offenses.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "start": 6380728320,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/services/jrc_relationship/withdrawal_native_links_spec.rb": "d7b5acb120a2955403982b56717c871fc6f3419b869cf8d0ac514342ccfcab4c",
+      "spec/requests/api/v1/accounts/relationship/withdrawal_readiness_spec.rb": "75dffdbaa32c5a2bb63217b8db1f27b3515e97b92b464e7dc915fae84ccf8032"
+    },
+    "minimum": 6370275328,
+    "exit_code": 0,
+    "end": 6370471936
+  },
+  "disk_final_bytes": 6370279424,
+  "next": "Extract only the native subject project/order selectors used by the measured withdrawal view; preserve full Customer360 behavior and native module policies.",
+  "remaining": "Full C-G and fresh compiled visual acceptance remain open.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,external operation,production or runtime change."
+}

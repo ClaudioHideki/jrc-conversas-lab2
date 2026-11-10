@@ -1,0 +1,85 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_head": "53d0b022556a5bfb31210631c2e3a16acb26b7d7",
+  "status": "Sealed dossier source and directed local tests validated; continuing F1, not C-G closure.",
+  "implementation": [
+    "Frozen encrypted HMAC-bound manifest and source/corporate references, actual private archive blob, SHA-256 and immutable numbered revisions.",
+    "Explicit POST pins the reviewed manifest and original scopes; concurrent matching requests commit one seal and archive. New completion revisions preserve old seals.",
+    "Native completion/stage/document/signature gates remain mandatory. The accepted signed PDF/certificate and exact legal version enter the final real archive.",
+    "Current native ownership, account, customer, original unit and authority access are rechecked; current scan quarantine, file corruption or revocation prevents download. Generic blob locators and relinking cannot expose archives.",
+    "Independent read/list/pagination/confirmation/download panel integrated with existing export; themes/responsive utilities, stale identity and conflict handling covered in Vue.",
+    "No operational activation, CS acceptance or provider action is performed by sealing. A server integrity seal is not an independent legal PDF-signature validation."
+  ],
+  "source_files": [
+    "app/controllers/api/v1/accounts/crm/backoffice_completion_dossiers_controller.rb",
+    "app/javascript/dashboard/api/crm/backofficeDossiers.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeCompletionDossier.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeCompletionDossier.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeCompletionPackage.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeCompletionPackage.vue",
+    "app/models/jrc_backoffice/completion_dossier.rb",
+    "app/models/jrc_crm/audit_event.rb",
+    "app/services/jrc_backoffice/completion_dossiers.rb",
+    "app/services/jrc_backoffice/completion_package.rb",
+    "app/services/jrc_backoffice/dossier_access.rb",
+    "app/services/jrc_backoffice/private_blob.rb",
+    "config/routes.rb",
+    "db/functions/20261105130000_backoffice_dossier_guards.sql",
+    "db/migrate/20261105130000_create_backoffice_completion_dossiers.rb",
+    "spec/requests/api/v1/accounts/crm/backoffice_completion_dossiers_spec.rb",
+    "spec/services/jrc_backoffice/completion_dossier_concurrency_spec.rb",
+    "spec/services/jrc_backoffice/signatures/evidence_acceptance_spec.rb"
+  ],
+  "tests_non_additive": [
+    {
+      "label": "dossier-native01",
+      "examples": 26,
+      "failures": 2,
+      "explanation": "21existing package/private-document regressions passed; new lifecycle preparation needed native reopen; native revocation returns401, not403."
+    },
+    {
+      "label": "dossier-native02",
+      "examples": 6,
+      "failures": 0,
+      "purpose": "Five real dossier API lifecycles and final signed-PDF/certificate native completion (synthetic provider/AV only)."
+    },
+    {
+      "label": "dossier-native-final",
+      "examples": 6,
+      "failures": 0,
+      "purpose": "Final refactored lifecycle/security checks, corrupted archive rejection and committed two-connection concurrency."
+    },
+    {
+      "label": "dossier-ui01",
+      "examples": 12,
+      "failures": 0,
+      "purpose": "Five new panel cases plus seven existing export cases; JSDOM, not Chrome."
+    }
+  ],
+  "static_gates": {
+    "dossier-lint02": "0offenses in adjusted new Ruby files; other new files clean in dossier-lint01",
+    "eslint": "dossier-eslint-final exit0",
+    "diff_check": "passed"
+  },
+  "migration": {
+    "version": 20261105130000,
+    "database": "jrc_rel_v2_candidate_test",
+    "exact_test_host_and_pending_guard": true,
+    "host_schema_dump": false,
+    "application_or_production_migration": false
+  },
+  "limits": [
+    "Fresh-build desktop/mobile Chrome acceptance remains blocked by no-build restriction; no old assets used as evidence.",
+    "No external DocuSign/scanner homologation claimed.",
+    "C-G remain open: F1 withdrawal/project/cadence responsibilities, configurable points/hours, F2 and C/D/G audit/scale/regression work.",
+    "TRR undefined; company documents without portfolio deferred."
+  ],
+  "disk": {
+    "initial_bytes": 6349037568,
+    "minimum_test_bytes": 6322503680,
+    "final_bytes": 6687875072
+  },
+  "restrictions_preserved": "No build,cleanup,push,GHCR,deploy,5379change,container restart or external provider operation."
+}

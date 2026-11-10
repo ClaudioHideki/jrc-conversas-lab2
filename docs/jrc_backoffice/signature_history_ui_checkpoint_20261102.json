@@ -1,0 +1,300 @@
+{
+  "date": "2026-11-02",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "abfebf8d085787888a4e4ee1a46a969be7f51715",
+  "phase": "B3 — consulta de assinatura e histórico no contrato; operação completa de assinatura ainda parcial",
+  "global_state": "quatro frentes parciais; matriz literal e C/D/E/F/G continuam pendentes de conclusão",
+  "implemented": [
+    "Nova subaba horizontal Status da assinatura no contrato da solicitação, com cores/tokens nativos, temas claro/escuro e responsividade.",
+    "Lista e popup do histórico leem fatos persistidos. Atualizar consulta o registro interno; não finge consulta ao provedor nem envio.",
+    "Conta, usuário, propriedade da solicitação e cobertura organizacional são validados nos serviços nativos. Unidade/emitente selados em cada envio são verificados antes de contagem e paginação.",
+    "Paginação no servidor:10 envios por página e20 eventos por página; contexto da página/filtros preservado ao abrir/fechar popup e remontar o painel.",
+    "Respostas atrasadas são descartadas e dados/popup são limpos em troca de conta, usuário, papel, solicitação ou negação do servidor.",
+    "DTOs excluem conteúdo contratual, snapshots cifrados, CPF, destinatários, credenciais e fatos privados dos eventos. Respostas usam no-store/nosniff.",
+    "Provedor, ambiente, revisão da conexão, versão exata, identificação externa e última atualização registrada aparecem em contexto.",
+    "Conclusão informada não vira assinatura validada. Exigência satisfeita e evidência verificada são fatos separados; fluxo legado e as demais aprovações operacionais são preservados."
+  ],
+  "reused": [
+    "JrcBackoffice::ContractAccess",
+    "JrcBackoffice::AuthorityAccess",
+    "JrcBackoffice::Signatures::Admissions.scope",
+    "JrcBackoffice::SignatureRelease",
+    "Dialog nativo",
+    "Tailwind/tokens de tema",
+    "router/contexto existentes",
+    "fonte de locale en"
+  ],
+  "validation": {
+    "backend": {
+      "duration": 113.30828619,
+      "example_count": 4,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "artifact": {
+        "path": ".codex/signature-history-api-first.json",
+        "sha256": "17ce4466293a162f3a9c967d80f8c1ba8bd82163d9d0e7b910114e5c95b3d40f"
+      },
+      "scope": "Quatro cenários com agente responsável, privacidade,23 eventos paginados, outra conta, não proprietário, unidade revogada e origem realocada com histórico fora da cobertura."
+    },
+    "frontend": {
+      "files": 36,
+      "tests": 217,
+      "passed": 217,
+      "failed": 0,
+      "artifact": {
+        "path": ".codex/signature-history-frontend-regression.json",
+        "sha256": "c4cba7ec83a646e909abaa8ba914c429c6a3bb14cf067c276006ba6486ea36b6"
+      },
+      "scope": "Regressão selecionada com nova consulta e componentes de CRM, Backoffice, Clientes, Service Desk e Central afetados; não é a suíte inteira do repositório."
+    },
+    "eslint": {
+      "files": 8,
+      "errors": 0,
+      "warnings": 0,
+      "artifact": {
+        "path": ".codex/signature-history-frontend-lint-final.json",
+        "sha256": "2a2047b588a4eeae440bae51e071d8c9ce25ef64d97c01bf718341e4aac32788"
+      }
+    },
+    "ruby": {
+      "offense_count": 0,
+      "target_file_count": 3,
+      "inspected_file_count": 3,
+      "artifact": {
+        "path": ".codex/signature-history-ruby-validated.json",
+        "sha256": "5ab94268be63303410a5d99ea73a45857718539db63e0c05d6f9e9cda8999acf"
+      }
+    },
+    "source": {
+      "files": 11240,
+      "baseline": "701dad483ee61283b94375050f2952f5ffe2d7df",
+      "mismatches": [],
+      "snapshot": "/consolidation-signature-history",
+      "sql_raw_hashes": true,
+      "manifest": {
+        "path": ".codex/signature-history-source-manifest.json",
+        "sha256": "4633531c350654fe2c00e0bbcdd841124407ebb518209ecd77ac5b14e27a99de"
+      }
+    },
+    "rails_load": {
+      "passed": true,
+      "artifact": {
+        "path": ".codex/signature-history-zeitwerk.log",
+        "sha256": "27d84def5c2ee799b32d1b4062ff85486e8a46ac3e50d02aeb1f64d98feedf5c"
+      }
+    },
+    "production_asset_build": {
+      "passed": true,
+      "artifact": {
+        "path": ".codex/signature-history-production-assets.log",
+        "sha256": "0ae0fdf17e4e97c5cfdf56777603d96938f16bddea721d38b955a3be03e1f3d7"
+      },
+      "manifest": {
+        "path": ".codex/consolidation-signature-history-build/.vite/manifest.json",
+        "sha256": "4e6ada689e4f9b61e78699641d11c93b5fdcc6a352b83db49edfe7cc788f7824"
+      },
+      "docker_image": false
+    },
+    "browser": {
+      "synthetic_only": true,
+      "external_signature_homologation": false,
+      "frontend_only_build": true,
+      "actor_role": "agent",
+      "signature_required": true,
+      "persisted_delivery_reopened": 1,
+      "mobile_no_document_overflow": true,
+      "foreign_account_denied": 401,
+      "runtime_errors": [],
+      "blocked_nonlocal_hosts": [],
+      "screenshots": [
+        "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/64-status-assinatura-claro.png",
+        "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/65-historico-assinatura-claro.png",
+        "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/66-status-assinatura-escuro.png",
+        "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/67-historico-assinatura-escuro.png",
+        "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/68-status-assinatura-celular.png"
+      ],
+      "status": "passed",
+      "mobile_panel_scrolled_into_view": true,
+      "mobile_heading_bounds": {
+        "x": 50,
+        "y": 275,
+        "width": 290,
+        "height": 24
+      },
+      "mobile_initial_capture_preserved": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/68-status-assinatura-celular-primeira-tentativa.png",
+      "artifact": {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-historico-resultado.json",
+        "sha256": "b56cd765ec640eac71a412f8e51179a261478feb663776e46463d5057298950f"
+      },
+      "screenshots_proof": [
+        {
+          "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/64-status-assinatura-claro.png",
+          "sha256": "73c932759ae7f2fb711b7caea95de76cd7c667856f472b2ae4399bdd40f0db6a"
+        },
+        {
+          "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/65-historico-assinatura-claro.png",
+          "sha256": "b505f958c22ed532bcc0c2a5283fe8d283b285d239011fbd4cf73a8d6db6b473"
+        },
+        {
+          "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/66-status-assinatura-escuro.png",
+          "sha256": "132ba6622d39c5995868d04a8a15d64ef2c7c6f1937bc42164cf9934936cc34c"
+        },
+        {
+          "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/67-historico-assinatura-escuro.png",
+          "sha256": "7519b69c2a59fdee4f0e7efb08dc2f05041b73fc0306006413b2c1e0cf3ee77d"
+        },
+        {
+          "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/68-status-assinatura-celular.png",
+          "sha256": "fac6e973bda83129d449e552633a9d84d31fa7b0678f49a64d60f6df2ccee9c8"
+        }
+      ],
+      "scope": "Chrome real em localhost, agente restrito, leitura do serviço nativo após commit, reabertura, popup, claro/escuro,390x844 sem transbordamento horizontal e outra conta401. Não houve gravação/envio por botão de assinatura, ainda ausente."
+    },
+    "fixture": {
+      "account_id": 2,
+      "request_id": 11,
+      "contract_id": 5,
+      "contract_version_id": 13,
+      "version_number": 1,
+      "delivery_id": 1,
+      "authority_proposal_id": 2,
+      "connection_id": 3,
+      "required_signers": 2,
+      "pdf_sha256": "1b3ffbf001abf340d03274d9ecb10b8921d15c872ea849dcda3944bb9881020b",
+      "state": "prepared",
+      "actor_id": 5,
+      "actor_email": "gestor.signature.history@example.test",
+      "actor_role": "agent",
+      "original_account_preserved": 1,
+      "synthetic_only": true,
+      "scanner_reply": "simulated; not real antivirus homologation",
+      "connection_verification_flags": "fixtures; NOT external OAuth/Connect",
+      "external_requests": 0,
+      "external_contracts_sent": 0,
+      "signature_verified": false,
+      "production_changed": false,
+      "artifact": {
+        "path": ".codex/signature-history-ui.json",
+        "sha256": "10391de474d9cb11f5aca62cbdd1abde7d9104b4c6c5b378d5daa8457b9f59ce"
+      },
+      "scope": "Nova conta sintética2 para preservar a configuração antiga desativada da conta1. AV e verificação OAuth/Connect são fixtures; HMAC, bancos, fontes canônicas e hashes são reais."
+    },
+    "ui_migration": {
+      "schema": "20261102090000",
+      "database": "jrc_rel_v2_ui_test",
+      "preserved_counts": {
+        "accounts": 1,
+        "users": 4,
+        "contacts": 24,
+        "jrc_crm_contracts": 4,
+        "jrc_backoffice_contract_versions": 12,
+        "jrc_backoffice_authority_proposals": 1
+      },
+      "production": false,
+      "status": "passed",
+      "artifact": {
+        "path": ".codex/signature-history-ui-migrate.json",
+        "sha256": "9915487a672ef3da34b3eafacff6829d226b74d5aae96c9943674b87a413b3a8"
+      },
+      "scope": "090 já validada aplicada somente à UI sintética; seis contagens comparadas. Não se declara checksum completo do banco nem aplicação em produção."
+    }
+  },
+  "attempts_retained": [
+    {
+      "artifact": {
+        "path": ".codex/signature-history-frontend-first.json",
+        "sha256": "82e0db821a7297b81893ac15a8da7984353507a053ab29f3429badd475355ce2"
+      },
+      "result": "13/0; dois erros de shorthand booleano no lint inicial corrigidos antes da regressão217/0."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-history-ui-seed.log",
+        "sha256": "82a505cc0e353a3bba0bc75379a378cae51b48e8d3923a120d6324c9787fc237"
+      },
+      "result": "Primeira preparação recusou corretamente sobrescrever a configuração antiga. Usada nova conta sintética; original preservada."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-history-ui-fixture-result.json",
+        "sha256": "7ef4d9d3bcbdfeaa1db12ce5259fb293049f94ac5622a9d5ecfd2e6d31bcf04c"
+      },
+      "result": "Primeiro bootstrap da nova fixture inicializava Rails duas vezes; zero exemplos e um erro externo. Corrigido require do environment; fixture validada1/0 em artifact separado."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-history-ui-fixture-result-validated.json",
+        "sha256": "3c428c810bbcb7c29315a3160db911d37309614223599478e6d19fd040358463"
+      },
+      "result": "Fixture1/0 com operações nativas, preservação da conta1 e nenhuma chamada DocuSign."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-history-browser.log",
+        "sha256": "2758f757fe56faba77f600e81bdc86de9d713e7a0e5495e9f08e170579e908d8"
+      },
+      "result": "Primeiro seletor do navegador encontrou dois avisos idênticos legítimos, global e contextual. Selecionado o aviso do painel; nenhuma regra foi relaxada."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-history-browser-validated.log",
+        "sha256": "e6d7cbfbddb8ae3d373cff08904c9098ae90e034e678f8f9c8fa5054a969b7d5"
+      },
+      "result": "Navegador passou; captura móvel foi depois refeita com rolagem real para mostrar o painel, mantendo a imagem original."
+    }
+  ],
+  "remaining": [
+    "Operação de envio contextual, job de saída, reconciliação integrada do envio incerto, consulta/remetimento/lembrete/cancelamento e tratamento das demais projeções ainda pendentes.",
+    "PDF final/certificado, evidências de todos os signatários, verificador interno e liberação real dependem da conclusão dos controles e homologação externa; completed não libera nada.",
+    "Histórico exibe somente fatos já persistidos; não há polling remoto neste botão Atualizar.",
+    "DocuSign Developer/demo, credenciais/consentimento/Connect real e antivírus real continuam sem homologação.",
+    "Outros requisitos dos quatro Words e a matriz literal completa ainda abertos; nenhum resultado financeiro, provisionamento, satisfação ou assinatura real foi inferido."
+  ],
+  "nonblocking_warnings": [
+    "Browserslist desatualizado e sourcemap ausente em dependência compartilhada;217 testes passaram.",
+    "Build mantém avisos de tamanho de chunks e referência de branding para resolução em runtime; navegador real renderizou a marca e os temas."
+  ],
+  "files": [
+    "app/services/jrc_backoffice/signatures/history.rb",
+    "app/controllers/api/v1/accounts/crm/backoffice_signature_deliveries_controller.rb",
+    "config/routes.rb",
+    "app/javascript/dashboard/api/crm/backofficeSignatures.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/signaturePresentation.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignatureDeliveryDetails.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/useSignatureHistory.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractSignatures.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractPanel.vue",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractSignatures.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractPanel.spec.js",
+    "spec/requests/api/v1/accounts/crm/backoffice_signature_history_spec.rb"
+  ],
+  "files_sha256": {
+    "app/services/jrc_backoffice/signatures/history.rb": "af76a9189ad9139126e9926d9be7e0b8befcaf78ac8529521f23990adffb5fb7",
+    "app/controllers/api/v1/accounts/crm/backoffice_signature_deliveries_controller.rb": "cf6b31f7b27968926b2ded4e24510f991df44a7ad1c9cf0ef2c81eea4b9ad8e4",
+    "config/routes.rb": "184d82a06c0c87edebad62000c3baf1d99c2dbd8311ccca720a85420daddb2a4",
+    "app/javascript/dashboard/api/crm/backofficeSignatures.js": "58338f89598c95a1373f3aa22cba62e21132798b16f9a2cc724a22ce528e1a30",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/signaturePresentation.js": "16dc8fc2122c9f666b6de67c8fce47f9111d75fb99d487bcf55becb4949cf064",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignatureDeliveryDetails.vue": "d4eed6be9405032427080aeab517dd7adf20d0e8ac3ed3bfc945f7bc46f324f5",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/useSignatureHistory.js": "ae271ba5260e708991e72b614f3815cb25847168efd0c7d036bc267c92448ad7",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractSignatures.vue": "37faf2d3550052a5d71a67e1833b65c50c6a61d070e24518f15b9c7edda695c2",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractPanel.vue": "0a8ed5a37fa1b0cc33ab6fef0a588bea39caed839ac29ef42b9fb1314574c191",
+    "app/javascript/dashboard/i18n/locale/en/crm.json": "16ecd6b781fdac72a793c90b7da9680e95b562243be020ed5d3930d47fe77518",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractSignatures.spec.js": "ca97cc91b4132915548affae3305cb0bea54026d12ddcd7566be105d01f3a4ad",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractPanel.spec.js": "920155ab87457f537fb436e9aa5f404ca1f8f8ca92fdf1744ff56f15da3afd8f",
+    "spec/requests/api/v1/accounts/crm/backoffice_signature_history_spec.rb": "5ea1f7aa117f31ca2961655ade61e3d2c109c4c108f1776d1867db07cfb120cb"
+  },
+  "new_migrations": [],
+  "publication": {
+    "push": false,
+    "docker_image_build": false,
+    "image_publish": false,
+    "deploy": false,
+    "compose_changed": false,
+    "production_migrations": false,
+    "protected_publication_head": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+    "protected_worktree_clean": true
+  },
+  "next": "Continuar B3 com reconciliação, ações e evidências/fluxo de envio; depois C/D/E/F/G, mantendo as dependências externas explícitas."
+}

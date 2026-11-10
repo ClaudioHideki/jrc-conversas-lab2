@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-06",
+  "status": "F2 native recommendation defects fixed and locally tested; no C-G closure",
+  "parent_checkpoint": "7117d9f28f1bd72b698ee755c85724addc43939e",
+  "confirmed_baseline": "health-recommendations-baseline01:5examples,4failures,1passed; actual CustomerSignals/configuration, no signal mocks. Fixed60 threshold omitted observed65 under configured70; zero-weight35 caused corrective advice; missing/blocked health lacked unavailable state.",
+  "implementation": [
+    "Use the exact rules captured by the CustomerSignals calculation rather than refetching a possibly newer configuration.",
+    "Observed positive-weight factors below the configured risk threshold form evidence; exact boundary retained.",
+    "Missing/blocked aggregate score yields unavailable recommendation; observed factors remain available for review, no invented healthy state or model confidence.",
+    "Existing recommended_action/customer/health/evidence/external confirmation fields preserved; add recommendation_state and evidence_threshold.",
+    "Existing Portuguese maintain/review messages retained through source en.yml; explicit unavailable message added. No new automatic writes, source queries or external actions."
+  ],
+  "files": [
+    "app/services/jrc_relationship/health_recommendation.rb",
+    "app/services/jrc_relationship/presenter.rb",
+    "config/locales/en.yml",
+    "spec/services/jrc_relationship/presenter_recommendations_spec.rb"
+  ],
+  "validation": {
+    "health-recommendations-native02": "10examples,0failures:5actual recommendation scenarios plus5native configuration-preview regressions.",
+    "test_path_note": "After passing, new untracked test renamed from health_recommendations_spec.rb to presenter_recommendations_spec.rb and Presenter replaced with described_class solely for static conventions; no assertion/fixture changed.",
+    "ruby": "health-recommendations-final-ruby03:0 offenses; Presenter26->26 pre-existing offenses, no new cop.",
+    "yaml": "Native Ruby Psych parsed final hostYAML and verified all3messages. Only message localization values changed after native02; old valid messages preserved.",
+    "chrome": "Not performed; source Vue gates are separate and fresh assets remain forbidden."
+  },
+  "resources": {
+    "health-recommendations-baseline01": {
+      "start": 5858385920,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/health_recommendations_spec.rb": "134021e572f3b086a34fac7ed1bec1a7d9fe6f8ed67e6c3f6f7af49eeff5c92e"
+      },
+      "minimum": 5395079168,
+      "exit_code": 1,
+      "end": 5414727680
+    },
+    "health-recommendations-native02": {
+      "start": 5246992384,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/health_recommendations_spec.rb": "134021e572f3b086a34fac7ed1bec1a7d9fe6f8ed67e6c3f6f7af49eeff5c92e",
+        "spec/requests/api/v1/accounts/relationship/health_configuration_preview_spec.rb": "309f212d71d18c31351b08a9ead5b15d054e5e962d42a68c2b9c4d09660284be"
+      },
+      "minimum": 5193662464,
+      "exit_code": 0,
+      "end": 5211967488
+    }
+  },
+  "disk_final_bytes": 5122781184,
+  "remaining": [
+    "Customer popup retains an earlier explanation after same-customer reload/denied refresh; reproducing source Vue tests next.",
+    "F1 assisted affinity/rebalance, broader Word/visual acceptance and external prerequisites remain partial."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,real external operation,production or runtime change."
+}

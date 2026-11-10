@@ -16,6 +16,7 @@ import { SERVICE_DESK_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/servic
 import { RELATIONSHIP_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/relationshipPermissions';
 import { CONTACT_CENTER_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/contactCenterPermissions';
 import { PROJECT_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/projectPermissions';
+import { APPROVAL_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/approvalPermissions';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import Button from 'dashboard/components-next/button/Button.vue';
 
@@ -63,14 +64,26 @@ const showContactCenterPermissions = computed(
       FEATURE_FLAGS.JRC_CONTACT_CENTER
     ) === true
 );
+const showApprovalPermissions = computed(
+  () =>
+    store.getters['accounts/isFeatureEnabledonAccount']?.(
+      store.getters.getCurrentAccountId,
+      'jrc_approvals'
+    ) === true
+);
 const visiblePermissions = computed(() => [
   ...AVAILABLE_CUSTOM_ROLE_PERMISSIONS,
-  ...(showRelationshipPermissions.value ? RELATIONSHIP_CUSTOM_ROLE_PERMISSIONS : []),
+  ...(showRelationshipPermissions.value
+    ? RELATIONSHIP_CUSTOM_ROLE_PERMISSIONS
+    : []),
   ...(showContactCenterPermissions.value
     ? CONTACT_CENTER_CUSTOM_ROLE_PERMISSIONS
     : []),
-  ...(showServiceDeskPermissions.value ? SERVICE_DESK_CUSTOM_ROLE_PERMISSIONS : []),
+  ...(showServiceDeskPermissions.value
+    ? SERVICE_DESK_CUSTOM_ROLE_PERMISSIONS
+    : []),
   ...(showProjectPermissions.value ? PROJECT_CUSTOM_ROLE_PERMISSIONS : []),
+  ...(showApprovalPermissions.value ? APPROVAL_CUSTOM_ROLE_PERMISSIONS : []),
 ]);
 // Existing selections are preserved when the feature is off. No automatic dependency grants.
 
@@ -232,7 +245,12 @@ const isSubmitDisabled = computed(
         <label :class="{ 'text-n-ruby-9': v$.selectedPermissions.$error }">
           {{ $t('CUSTOM_ROLE.FORM.PERMISSIONS.LABEL') }}
         </label>
-        <p v-if="showServiceDeskPermissions" class="text-xs text-n-slate-11 mt-2">{{ t('JRC_SERVICE_DESK.NATIVE.role_help') }}</p>
+        <p
+          v-if="showServiceDeskPermissions"
+          class="text-xs text-n-slate-11 mt-2"
+        >
+          {{ t('JRC_SERVICE_DESK.NATIVE.role_help') }}
+        </p>
         <div class="flex flex-col gap-2.5 mb-4 mt-2">
           <div
             v-for="permission in visiblePermissions"

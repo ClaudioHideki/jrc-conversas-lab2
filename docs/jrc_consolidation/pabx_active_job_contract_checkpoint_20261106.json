@@ -1,0 +1,18 @@
+{
+  "status": "implemented_and_targeted_tests_passed",
+  "previous_checkpoint": "83306e757918edbcdc584f7e83658d1a82b07a47",
+  "problem": "Integration-specific ScheduleJob#enqueue overrode ActiveJob#enqueue; real cron supplies an options Hash.",
+  "change": "Renamed business helper enqueue_integration and all known callers; inherited ActiveJob enqueue restored. Native locks, interval, Current.account and SuperAdmin checks preserved.",
+  "evidence": {
+    "pabx-scheduler-baseline01": "3 examples,3 reproduced failures",
+    "pabx-scheduler-fixed01": "65 examples;63 passed,2 concurrency tests refused incompatible database before execution",
+    "pabx-manual-fixed02": "2 examples,0 failures: manual native enqueue, repeat pending, admin/agent denied",
+    "lint": "3 pre-existing offenses (2 transaction-return,1 controller complexity);new-spec performance offense fixed"
+  },
+  "limitations": [
+    "Concurrency spec requires corporate_gratuity_disposable and cleans its synthetic accounts;guard was not relaxed or rerun against preserved database.",
+    "Provider requests in tests are simulated/blocked;no external PABX homologation.",
+    "No build,server change,production operation or stage closure."
+  ],
+  "next": "Resume isolated real Sidekiq gate with exact native SidekiqAlive health routing and preserved synthetic fixture ownership."
+}

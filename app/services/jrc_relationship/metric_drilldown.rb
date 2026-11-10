@@ -78,6 +78,7 @@ class JrcRelationship::MetricDrilldown
     when 'open_retention_cases' then [records(JrcRelationship::RiskCase).where(status: %w[detected analyzing planned negotiating]), 'count']
     when 'actions_today' then [actions.where(sla_paused_at: nil, due_at: Time.current.all_day), 'count']
     when 'overdue_actions' then [actions.where(sla_paused_at: nil).where('due_at < ?', Time.current), 'count']
+    when 'overdue_returns' then [actions.where('return_at < ?', Time.current), 'count']
     when 'waiting_customer_actions' then [actions.where(status: 'waiting_customer'), 'count']
     when 'waiting_finance_actions' then [actions.where(status: 'waiting_finance'), 'count']
     when 'overdue_activities' then [native_sources[:activities], 'count']
@@ -173,6 +174,9 @@ class JrcRelationship::MetricDrilldown
       end
     when JrcRelationship::Action
       row[:elapsed_minutes] = record.metadata['first_action_elapsed_seconds']&.to_f&./(60)
+      row[:date] = record.return_at if metric == 'overdue_returns'
+      row[:route] = { name: 'jrc_relationship_actions', params: { accountId: @context.account.id },
+                      query: { action_id: record.id, mine: 'false' } }
     end
     row
   end

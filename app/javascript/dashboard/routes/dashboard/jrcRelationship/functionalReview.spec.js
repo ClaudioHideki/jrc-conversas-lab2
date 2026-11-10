@@ -51,6 +51,7 @@ const customer = {
 };
 const stubLinks = {
   RouterLink: { template: '<a><slot /></a>', props: ['to'] },
+  Dialog: { template: '<div><slot /></div>', methods: { open: vi.fn() } },
 };
 beforeEach(() => {
   mocks.route = reactive({ params: { accountId: '1' }, query: {} });
@@ -88,6 +89,120 @@ beforeEach(() => {
 });
 
 describe('Relationship functional review', () => {
+  it('does not display unfiltered action data for an end-only period and recovers when the start is supplied', async () => {
+    vi.clearAllMocks();
+    mocks.route.query.to = '2026-10-02';
+    const wrapper = shallowMount(ModulePage, {
+      props: { screen: 'actions' },
+      global: { stubs: stubLinks },
+    });
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      'Select a start date'
+    );
+    expect(mocks.api.metadata).not.toHaveBeenCalled();
+    expect(mocks.api.dashboard).not.toHaveBeenCalled();
+    await wrapper.findAll('input[type="date"]')[0].setValue('2026-10-01');
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(mocks.api.dashboard).toHaveBeenCalledWith(
+      '1',
+      expect.objectContaining({ from: '2026-10-01', to: '2026-10-02' }),
+      expect.any(Object)
+    );
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('clears an invalid deep-linked period through recovery and preserves the segment filter', async () => {
+    vi.clearAllMocks();
+    mocks.route.query = { to: '2026-10-02', customer_segment_id: '9' };
+    mocks.replace.mockImplementationOnce(({ query }) => {
+      mocks.route.query = query;
+      return Promise.resolve();
+    });
+    const wrapper = shallowMount(ModulePage, {
+      props: { screen: 'portfolio' },
+      global: { stubs: stubLinks },
+    });
+    await flushPromises();
+    expect(
+      wrapper.find('[data-testid="operational-period-recovery"]').exists()
+    ).toBe(true);
+    await wrapper
+      .get('[data-testid="clear-operational-period"]')
+      .trigger('click');
+    await flushPromises();
+    expect(mocks.replace).toHaveBeenCalledWith({
+      query: { customer_segment_id: '9' },
+    });
+    expect(mocks.api.dashboard).toHaveBeenCalledTimes(1);
+    const filters = mocks.api.dashboard.mock.calls[0][1];
+    expect(filters).toMatchObject({ customer_segment_id: '9' });
+    expect(filters).not.toHaveProperty('from');
+    expect(filters).not.toHaveProperty('to');
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('keeps native fixed survey reports on their own scoped query and date validation path', async () => {
+    vi.clearAllMocks();
+    mocks.route.query = { from: '2026-10-01', to: '2026-10-02' };
+    const wrapper = shallowMount(ModulePage, {
+      props: {
+        screen: 'surveys',
+        fixedSurveyScope: { source_type: 'JrcServiceDesk::Ticket', unit_id: 7 },
+      },
+      global: { stubs: stubLinks },
+    });
+    await flushPromises();
+    expect(mocks.api.dashboard).not.toHaveBeenCalled();
+    expect(mocks.api.records).toHaveBeenCalledWith(
+      '1',
+      'surveys',
+      expect.objectContaining({
+        source_type: 'JrcServiceDesk::Ticket',
+        unit_id: '7',
+      }),
+      expect.any(Object)
+    );
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('retains invalid server-rejected date inputs in a repairable form without displaying old records', async () => {
+    vi.clearAllMocks();
+    mocks.route.query = { from: '2026-10-02', to: '2026-10-01' };
+    mocks.api.dashboard.mockRejectedValueOnce({
+      response: {
+        status: 422,
+        data: {
+          code: 'INVALID_OPERATIONAL_PERIOD',
+          errors: ['Invalid period'],
+        },
+      },
+    });
+    const wrapper = shallowMount(ModulePage, {
+      props: { screen: 'actions' },
+      global: { stubs: stubLinks },
+    });
+    await flushPromises();
+    const recovery = wrapper.get('[data-testid="operational-period-recovery"]');
+    expect(
+      recovery.findAll('input[type="date"]').map(input => input.element.value)
+    ).toEqual(['2026-10-02', '2026-10-01']);
+    await recovery.findAll('input[type="date"]')[1].setValue('2026-10-03');
+    await recovery.trigger('submit');
+    await flushPromises();
+    expect(mocks.api.dashboard).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({ from: '2026-10-02', to: '2026-10-03' }),
+      expect.any(Object)
+    );
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
   it('REL-03 presents dedicated portfolio cards and only 30/60/90 renewal windows', async () => {
     const w = mount(MetricsPanel, {
       props: {

@@ -1,0 +1,124 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "74a12a809469633ea5b32a59ae50dda6601c41e5",
+  "status": "F1 explicit portfolio transfer lock implemented and locally validated; no stage closure",
+  "word_reference": "relacionamento:P0095 strategic locked customer hard constraint; P0101-P0107 reviewed immutable transfer/controlled reversal. No strategic classification or conflict-of-interest inference invented.",
+  "implementation": [
+    "Explicit opt-in transfer_lock receipt lives in existing Assignment.settings, with server actor/time, bounded reason and monotonically increasing revision. Current native configure+team+manage and scoped portfolio access are rechecked through BatchReviewAuthority inside the native account-configuration/assignment lock order.",
+    "The new PATCH portfolio/:id/transfer_lock ignores account/actor/version forgery fields; typed boolean, reason and exact assignment timestamp revision required. Unchanged requests with current revision do not fabricate a new audit. No new role, model registry, table or migration.",
+    "DistributionCapacityGuard invokes the narrow owner check after its existing account lock. A fresh tenant-bound persisted setting read prevents stale ORM bypass; a single mutation cannot release an existing hold and transfer. Clearing owner is also blocked. Unrelated work/status changes remain valid.",
+    "DistributionPreview refuses a locked owner change before persisting an executable proposal. Existing v1 row snapshots already include full settings/updated_at: lock/release invalidates stale reviews without changing their captured bytes/digest. Native worker reports failed item/attention rather than false completion. Fresh review after authorized release works.",
+    "Existing customer UI displays the persisted reason, disables owner controls, provides a native Dialog with deliberate justification, busy/error preservation and current revision. Facts are refreshed on opening; account/user switches discard late responses. The existing explicit account-bound API and real persisted-read reload are reused.",
+    "Native account/company/operator/unit scope, Central approvals, capacity and membership remain unchanged. No actual analyst removal or new global account deactivation. No HTTP send/provider action performed."
+  ],
+  "tests": {
+    "native01": "11 examples/2 fixture failures: AuditEvent has native for_resource scope, not a resource association. Corrected only test queries;9 cases already passed.",
+    "native02": "11/0 after fixture correction.",
+    "regression03": "52/0 including14 restriction cases and existing distribution-capacity and native Central portfolio approval regressions. Includes foreign account, operating unit, inactive actor, stale revision, direct owner/null owner, stale ORM, release+transfer bypass, old/fresh snapshots and actual BatchExecutionJob failure/attention/success.",
+    "vue": "12/0 =4 new popup cases +8 interface/context/channel/telephony cases. Final popup4/0 repeated only after separating current recorded reason from new mandatory input.",
+    "new_ruby_offenses": 0,
+    "shared_ruby": [
+      {
+        "path": "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+        "baseline_count": 8,
+        "current_count": 8,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/distribution_capacity_guard.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/distribution_preview.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/presenter.rb",
+        "baseline_count": 26,
+        "current_count": 26,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "new_eslint": "0errors/0warnings",
+    "shared_eslint": [
+      {
+        "path": "app/javascript/dashboard/api/jrcRelationship.js",
+        "baseline": 0,
+        "current": 0,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue",
+        "baseline": 32,
+        "current": 32,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/interface.spec.js",
+        "baseline": 0,
+        "current": 0,
+        "added": {}
+      }
+    ],
+    "diff_check": "passed"
+  },
+  "resources": {
+    "start": 7099195392,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/requests/api/v1/accounts/relationship/portfolio_transfer_lock_spec.rb": "2a6e0039da635289d64edb11da275f63fc62f8e51bd9c3df53cba942922399e6",
+      "spec/services/jrc_relationship/distribution_capacity_spec.rb": "72803f4fbc25d54ad1e4fe8281b4591bace6788cfea69f70338b8f26c427e7b7",
+      "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "d4a5a737c4a27ffd7f6e46f7bbb62befd3000060972c3684e9fe76ce9427e597"
+    },
+    "minimum": 7078047744,
+    "exit_code": 0,
+    "end": 7097438208
+  },
+  "frontend_resources": {
+    "portfoliotransferlockui01": {
+      "status": "passed",
+      "free_start": 7096754176,
+      "minimum_free": 7070760960,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 14904,
+      "exit_code": 0,
+      "free_end": 7094763520
+    },
+    "transferlockdialogfinal02": {
+      "status": "passed",
+      "free_start": 7090016256,
+      "minimum_free": 7067308032,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 21008,
+      "exit_code": 0,
+      "free_end": 7088766976
+    }
+  },
+  "preserved_runtime": {
+    "containers": "Four original containers running, StartedAt unchanged: run2026-11-04T11:34:25.650429595Z,pg11:34:28.691130017Z,redis11:34:29.041643269Z,proxy12:04:25.285490323Z",
+    "listener": "127.0.0.1:5379 PID6464 unchanged; read-only verification"
+  },
+  "remaining": [
+    "Conflict-of-interest/affinity source semantics and complete automatic distribution policy still require exact native/Word reconciliation; this hold is not an inferred personnel conflict or a complete F1 closure.",
+    "Final analyst identity-removal scope still awaits its business answer.",
+    "Fresh current-source Chrome desktop/mobile light/dark remains blocked by no-build/no5379-change instruction.",
+    "TRR, company documents without portfolio and external DocuSign/scanner/channel acceptance keep prior pending/deferred states."
+  ],
+  "next": "Continue F1 hard-constraint/source reconciliation and remaining safe native C/D/F/G tasks immediately after this checkpoint.",
+  "restrictions": "No build, cleanup, push, GHCR, deploy, real external/production operations, server5379 change or original container restart."
+}

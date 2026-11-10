@@ -1,0 +1,202 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "3051ba390138dc33c78916d019648b53f535aa0d",
+  "status": "Optional P0-P3 numeric bands implemented and locally tested; F2/C-G remain open",
+  "word_reference": {
+    "paragraphs": [
+      67,
+      68,
+      69,
+      70,
+      71
+    ],
+    "production_thresholds_invented": false
+  },
+  "implemented": [
+    "Optional explicit descending integer minima P0-P3, full0-100 coverage/P3at0. No new DEFAULT_RULES key; absent/empty policy preserves exact legacy factors/results. Native configuration authorization, immutable versions and stale-write guards reused.",
+    "Native priority engine and manual action/activity/playbook constructors capture code, actual score and exact policy JSON. Manual override/urgency evidence preserved. System score updates use captured policy. Unrelated edits retain historical classification; explicit recalculation uses current scoped policy. Workflow audit/read-only action history includes factor snapshots; public writes cannot supply factors.",
+    "Native filtered/paginated action queue validates bands and matches captured/current score after native account/assignment/mine scopes. No access granted through IDs supplied in parameters.",
+    "Existing configuration form provides explicit opt-in with blank operator cuts and native submit guard. Existing queue/case display light/dark badges only for matching captured score; no parallel module/navigation."
+  ],
+  "tests_non_additive": [
+    {
+      "gate": "priority-bands-native01",
+      "examples": 10,
+      "failures": 3,
+      "correction": "Fixtures: native create201, Workflow envelope and playbook trigger allowlist."
+    },
+    {
+      "gate": "priority-bands-native02",
+      "examples": 15,
+      "failures": 1,
+      "correction": "Fresh request Context after configuration changes, matching HTTP lifecycle."
+    },
+    {
+      "gate": "priority-bands-native-final",
+      "examples": 18,
+      "failures": 0,
+      "coverage": [
+        "manual/exact boundaries",
+        "native configuration versioning/stale/invalid rules",
+        "real processor/activity/playbook persistence",
+        "captured-policy system escalation",
+        "real26-row queue/pagination/filter removal",
+        "account isolation/scoped analyst denial",
+        "v1 priority and critical risk preservation"
+      ]
+    },
+    {
+      "gate": "priority-bands-ui01",
+      "examples": 16,
+      "failures": 0,
+      "kind": "Vue simulated API/component, not Chrome"
+    },
+    {
+      "gate": "priority-bands-ui-final",
+      "examples": 4,
+      "failures": 0,
+      "kind": "Exact-schema parity, overlaps UI01"
+    }
+  ],
+  "static": {
+    "new_ruby_offenses": 0,
+    "shared_delta": [
+      {
+        "path": "app/models/jrc_relationship/configuration.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/priority.rb",
+        "baseline_count": 11,
+        "current_count": 11,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/priority_signals.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/workflow.rb",
+        "baseline_count": 28,
+        "current_count": 28,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/playbooks.rb",
+        "baseline_count": 3,
+        "current_count": 3,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/models/jrc_relationship/action.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/record_filters.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/controllers/api/v1/accounts/relationship/records_controller.rb",
+        "baseline_count": 13,
+        "current_count": 13,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "eslint_errors": 0,
+    "eslint_warnings": {
+      "ActionCasePanel.vue": 18,
+      "AnalystWorkspace.vue": 23,
+      "ConfigurationPanel.vue": 35,
+      "PriorityBandBadge.vue": 3,
+      "PriorityBandsForm.vue": 2
+    }
+  },
+  "resources": {
+    "backend": {
+      "start": 7310372864,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/priority_bands_spec.rb": "9b75682b45edaca847cf3ef54fe66413efd503346cde543d07821d2f33945e06",
+        "spec/requests/api/v1/accounts/relationship/priority_bands_spec.rb": "364dac657a8ae0b720ab3976333c5ac04f07eed9c38c71e3ceffc405e63b3175",
+        "spec/services/jrc_relationship/priority_signals_spec.rb": "4bde3e07a124dc558b6ff86dcc44156cabc18ec6486755f8ec69f860749d2793",
+        "spec/services/jrc_relationship/processor_critical_preservation_spec.rb": "dc65e8900b04ed2149e8b5749d0453d7b10d19e907586dd386b99ec0fbda297e"
+      },
+      "minimum": 7310372864,
+      "exit_code": 0,
+      "end": 7310921728
+    },
+    "frontend": [
+      {
+        "status": "passed",
+        "free_start": 7315185664,
+        "minimum_free": 7275593728,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 1728,
+        "exit_code": 0,
+        "free_end": 7313068032
+      },
+      {
+        "status": "passed",
+        "free_start": 7310155776,
+        "minimum_free": 7273160704,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 8744,
+        "exit_code": 0,
+        "free_end": 7308636160
+      }
+    ],
+    "current_free_bytes": 7307808768
+  },
+  "files_sha256": {
+    "app/controllers/api/v1/accounts/relationship/records_controller.rb": "2c8ee1907aaaaef60aa4f717f1878f4aa168d8a3178509516df0bea245c21100",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "881fbcc70d20c69f0199abb728c5ff51f62d83bf5896e08f4c8909d47d7483c5",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ActionCasePanel.vue": "8f4d956822b3393ed3ffa252057412bb0a6b56404452c06e4cc04948703b6612",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystWorkspace.vue": "f0bd6d36929b973c83a298bdc3901c8735bcf5c0b2bdd4bc56720431873a38c3",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue": "c47fcd45fb93847c0b334bae1a5061c426a5808bd423222e3210d232b181da6b",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystWorkspace.spec.js": "2652160719ed7adb424b7bf492d4634dcb09a99e3438a3a75910e47b731fd1da",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/distributionConfiguration.spec.js": "86c7a73417c7402d0abf8192fb7f4e125732f22a26db2a35dbe1237eecf8acb7",
+    "app/models/jrc_relationship/action.rb": "1267140d005f10ca81373ebcfae97dbb3774d3bf2acc43b6ddb983447553de2c",
+    "app/models/jrc_relationship/configuration.rb": "2c8d86eeacbdd0d8b5e83802901f368119f223dc806d2c3ba4ca2fe6404524a1",
+    "app/services/jrc_relationship/playbooks.rb": "a16f9963953ef2ae3890108d0a1f2542cdba57ec77f89dfa428de878bd88aa54",
+    "app/services/jrc_relationship/priority.rb": "defcf52e5517a0bf3416e36168e10bdf754bfb58f4ef6c97de10193e0efb1642",
+    "app/services/jrc_relationship/priority_signals.rb": "0793ce42bf8f37038d7ac9dbba6915db5b114edfd8f90fb7c35318f6a55a79b1",
+    "app/services/jrc_relationship/record_filters.rb": "29df133586b2470ad53280203069741719d0da5b663b0f4d38087cd13ac6149a",
+    "app/services/jrc_relationship/workflow.rb": "323573b429acaf986bd5b6ee41b9fbd8576415e397445a5823193cae91654330",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PriorityBandBadge.vue": "741a1c078da65a3ce23058faaf4c710ba6eb9cfae8925988d9206ecf87599bbd",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PriorityBandsForm.vue": "c0f008c48a922012b6616b14d64d1a2053517b67cd553bc6d52ae4708eeb9234",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/priorityBands.js": "acbf4bc52ace5a97992e631414d5ef10c20c331e6c3d5bac4e8e19c20779e4a0",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/priorityBands.spec.js": "cc38df3f7f008d3bfea1a2051f31de1ab5695ae1ecfba1b4133deead49eeb9a8",
+    "app/services/jrc_relationship/priority_bands.rb": "be2b973609663165724ab3189c716358a703306b1ff082a9b516e21bf22fbdef",
+    "spec/requests/api/v1/accounts/relationship/priority_bands_spec.rb": "364dac657a8ae0b720ab3976333c5ac04f07eed9c38c71e3ceffc405e63b3175",
+    "spec/services/jrc_relationship/priority_bands_spec.rb": "9b75682b45edaca847cf3ef54fe66413efd503346cde543d07821d2f33945e06"
+  },
+  "limitations": [
+    "No production configuration activated. Existing numeric notification thresholds retained; this is optional numeric band mapping, not full qualitative priority policy or all F2 closure.",
+    "No migration/build/Chrome/push/deploy/external operation. Fresh-source visual homologation remains blocked by no-build instruction. Server5379 and preserved runtimes untouched.",
+    "Final analyst withdrawal semantics await explicit business answer; TRR undefined; documents without portfolio user-deferred."
+  ],
+  "next_active_work": "Native automatic playbook task budget: preserve deferred work and source critical risks, without false immutable completion receipts."
+}

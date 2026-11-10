@@ -1,8 +1,17 @@
 <script setup>
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 import { useFormDraft } from '../../helpers/useFormDraft';
 import { useQuickActionTarget } from 'dashboard/components-next/layout/useQuickActionTarget';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
-import { computed, onMounted, reactive, ref } from 'vue';
+import {
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  watch,
+} from 'vue';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { activitiesAPI, dealsAPI } from 'dashboard/api/crm';
@@ -13,6 +22,7 @@ import CrmStatCard from '../../components/shared/CrmStatCard.vue';
 import { useI18n } from 'vue-i18n';
 import { filterActivities } from '../../utils/activityFilters';
 import AgendaRecord from '../../components/shared/AgendaRecord.vue';
+import ActivityEditDialog from '../../components/shared/ActivityEditDialog.vue';
 
 const { t } = useI18n();
 const filters = reactive({ search: '', type: '', owner: '', status: '' });
@@ -21,10 +31,25 @@ const clearFilters = () =>
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
-const showForm = ref(false);
-useQuickActionTarget('crm_activities', () => {
-  activityDraft.open(); showForm.value = true;
+let disposed = false;
+let generation = 0;
+const identity = computed(
+  () => `${route.params.accountId}:${authorityScope(store.getters)}`
+);
+const captureContext = () => ({ identity: identity.value, generation });
+const isCurrent = context =>
+  !disposed &&
+  context.identity === identity.value &&
+  context.generation === generation;
+onBeforeUnmount(() => {
+  disposed = true;
+  generation += 1;
 });
+const completingIds = reactive(new Set());
+const optionsError = ref('');
+const showForm = ref(false);
+const editingActivityId = ref(null);
+const agendaRefresh = ref(0);
 const saving = ref(false);
 const deals = ref([]);
 const form = reactive({
@@ -35,10 +60,20 @@ const form = reactive({
 });
 const initialForm = { ...form };
 const activityDraft = useFormDraft('crm:new_activity', {
-  active: showForm, snapshot: () => ({ ...form }), restore: value => Object.assign(form, value),
+  active: showForm,
+  snapshot: () => ({ ...form }),
+  restore: value => Object.assign(form, value),
   reset: () => Object.assign(form, initialForm),
 });
-const openForm = () => { activityDraft.open(); showForm.value = true; };
+const openForm = () => {
+  if (saving.value || disposed) return;
+  activityDraft.open();
+  showForm.value = true;
+};
+const closeForm = () => {
+  if (!saving.value) showForm.value = false;
+};
+useQuickActionTarget('crm_activities', openForm);
 const activities = computed(
   () => store.getters['jrcCrm/activities/allActivities'] || []
 );
@@ -80,13 +115,63 @@ const owners = computed(() => [
 ]);
 const loading = computed(() => store.getters['jrcCrm/activities/isLoading']);
 const error = computed(() => store.getters['jrcCrm/activities/error']);
-const openActivities = computed(() => activities.value.filter(activity => !activity.completed_at));
-const nextActivity = computed(() => [...openActivities.value].sort((a,b) => new Date(a.due_at) - new Date(b.due_at))[0] || null);
-const completionRate = computed(() => activities.value.length ? Math.round((activities.value.filter(activity => activity.completed_at).length / activities.value.length) * 100) : 0);
-const displayStatus = activity => activity.overdue ? 'Atrasada' : activity.completed_at ? 'Concluída' : ['scheduled','pending','open'].includes(activity.status) ? 'Agendada' : (activity.status || 'Agendada');
-const activityTypeLabel = type => ({ call: 'Ligação', meeting: 'Reunião', whatsapp: 'WhatsApp', follow_up: 'Acompanhamento', email: 'E-mail', demonstration: 'Demonstração', task: 'Tarefa' }[type] || 'Atividade');
-const activityTypeClass = type => ({ call: 'bg-blue-50 text-blue-700', meeting: 'bg-violet-50 text-violet-700', whatsapp: 'bg-emerald-50 text-emerald-700', follow_up: 'bg-cyan-50 text-cyan-700', email: 'bg-orange-50 text-orange-700' }[type] || 'bg-n-slate-2 text-n-slate-12');
-const activityTypeIcon = type => ({ call: 'i-lucide-phone', meeting: 'i-lucide-users-round', whatsapp: 'i-ri-whatsapp-fill', follow_up: 'i-lucide-refresh-cw', email: 'i-lucide-mail', demonstration: 'i-lucide-presentation', task: 'i-lucide-list-checks' }[type] || 'i-lucide-circle-dot');
+const openActivities = computed(() =>
+  activities.value.filter(
+    activity =>
+      !activity.completed_at &&
+      !['completed', 'cancelled'].includes(activity.status)
+  )
+);
+const nextActivity = computed(
+  () =>
+    [...openActivities.value].sort(
+      (a, b) => new Date(a.due_at) - new Date(b.due_at)
+    )[0] || null
+);
+const completionRate = computed(() =>
+  activities.value.length
+    ? Math.round(
+        (activities.value.filter(activity => activity.completed_at).length /
+          activities.value.length) *
+          100
+      )
+    : 0
+);
+const displayStatus = activity => {
+  if (activity.overdue) return 'Atrasada';
+  if (activity.completed_at) return 'Concluída';
+  if (['scheduled', 'pending', 'open'].includes(activity.status))
+    return 'Agendada';
+  return activity.status || 'Agendada';
+};
+const activityTypeLabel = type =>
+  ({
+    call: 'Ligação',
+    meeting: 'Reunião',
+    whatsapp: 'WhatsApp',
+    follow_up: 'Acompanhamento',
+    email: 'E-mail',
+    demonstration: 'Demonstração',
+    task: 'Tarefa',
+  })[type] || 'Atividade';
+const activityTypeClass = type =>
+  ({
+    call: 'bg-blue-50 text-blue-700',
+    meeting: 'bg-violet-50 text-violet-700',
+    whatsapp: 'bg-emerald-50 text-emerald-700',
+    follow_up: 'bg-cyan-50 text-cyan-700',
+    email: 'bg-orange-50 text-orange-700',
+  })[type] || 'bg-n-slate-2 text-n-slate-12';
+const activityTypeIcon = type =>
+  ({
+    call: 'i-lucide-phone',
+    meeting: 'i-lucide-users-round',
+    whatsapp: 'i-ri-whatsapp-fill',
+    follow_up: 'i-lucide-refresh-cw',
+    email: 'i-lucide-mail',
+    demonstration: 'i-lucide-presentation',
+    task: 'i-lucide-list-checks',
+  })[type] || 'i-lucide-circle-dot';
 const activityStats = computed(() => [
   {
     label: 'Atividades',
@@ -97,7 +182,7 @@ const activityStats = computed(() => [
   },
   {
     label: 'Em aberto',
-    value: activities.value.filter(activity => !activity.completed_at).length,
+    value: openActivities.value.length,
     detail: 'Aguardando conclusão',
     icon: 'i-lucide-calendar-clock',
     tone: 'amber',
@@ -125,41 +210,85 @@ const activityStats = computed(() => [
   },
 ]);
 
-const load = () => store.dispatch('jrcCrm/activities/fetchActivities');
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+const load = () =>
+  store.dispatch('jrcCrm/activities/fetchActivities', segmentParams());
+const activitySaved = () => {
+  agendaRefresh.value += 1;
+  load();
+};
+watchSegment(load);
 
 const complete = async id => {
+  if (
+    completingIds.has(id) ||
+    !activities.value.some(activity => activity.id === id)
+  )
+    return;
+  const context = captureContext();
+  completingIds.add(id);
   try {
     await activitiesAPI.complete(id);
-    await load();
+    if (isCurrent(context)) await load();
   } catch {
-    useAlert('Não foi possível concluir a atividade.');
+    if (isCurrent(context)) useAlert('Não foi possível concluir a atividade.');
+  } finally {
+    if (isCurrent(context)) completingIds.delete(id);
   }
 };
 
 const save = async () => {
+  if (saving.value || disposed) return;
+  const context = captureContext();
   const savingDraftKey = activityDraft.key.value;
+  const date = form.due_at;
   saving.value = true;
   try {
     await activitiesAPI.create({ activity: { ...form } });
-    if (!activityDraft.complete(savingDraftKey)) return;
+    if (!isCurrent(context) || !activityDraft.complete(savingDraftKey)) return;
     showForm.value = false;
     await Promise.all([load(), store.dispatch('jrcCrm/deals/fetchDeals')]);
+    if (!isCurrent(context)) return;
     useAlert('Atividade criada com sucesso.');
-    await router.push({ name: 'crm_calendar', query: { date: form.due_at } });
+    await router.push({ name: 'crm_calendar', query: { date } });
   } catch (requestError) {
+    if (!isCurrent(context)) return;
     useAlert(
       requestError.response?.data?.errors ||
         'Não foi possível criar a atividade.'
     );
   } finally {
-    saving.value = false;
+    if (isCurrent(context)) saving.value = false;
   }
 };
 
+const initialize = async () => {
+  const context = captureContext();
+  optionsError.value = '';
+  try {
+    const [{ data }] = await Promise.all([dealsAPI.list(), load()]);
+    if (isCurrent(context)) deals.value = data;
+  } catch {
+    if (isCurrent(context))
+      optionsError.value = t('CRM.ACTIVITY_CREATION.LOAD_ERROR');
+  }
+};
+watch(identity, () => {
+  generation += 1;
+  activityDraft.flush();
+  showForm.value = false;
+  editingActivityId.value = null;
+  deals.value = [];
+  saving.value = false;
+  completingIds.clear();
+  Object.assign(form, { ...initialForm, deal_id: '' });
+  initialize();
+});
 onMounted(async () => {
-  const [{ data }] = await Promise.all([dealsAPI.list(), load()]);
-  deals.value = data;
-  if (route.query.dealId || route.query.new === '1') openForm();
+  const context = captureContext();
+  await initialize();
+  if (isCurrent(context) && (route.query.dealId || route.query.new === '1'))
+    openForm();
 });
 </script>
 
@@ -168,7 +297,27 @@ onMounted(async () => {
     <div
       class="mx-auto flex min-h-full w-full max-w-[1680px] flex-col gap-5 p-4 sm:p-6"
     >
-      <AgendaRecord @changed="load" />
+      <AgendaRecord
+        :refresh-key="agendaRefresh"
+        @changed="load"
+        @edit="editingActivityId = $event"
+      />
+      <ActivityEditDialog
+        v-if="editingActivityId"
+        :activity-id="editingActivityId"
+        @close="editingActivityId = null"
+        @saved="activitySaved"
+      />
+      <div
+        v-if="optionsError"
+        role="alert"
+        class="rounded-xl border border-n-ruby-6 bg-n-ruby-3 p-3 text-sm text-n-ruby-11"
+      >
+        {{ optionsError }}
+        <button type="button" class="ml-2 underline" @click="initialize">
+          {{ t('CRM.ACTIVITY_CREATION.RETRY') }}
+        </button>
+      </div>
       <CrmPageHeader
         eyebrow="Organização comercial"
         title="Atividades"
@@ -287,59 +436,124 @@ onMounted(async () => {
         {{ t('CRM.ACTIVITY_FILTERS.CLEAR') }}
       </button>
 
-      <div class="grid min-h-[380px] flex-1 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
       <div
-        class="overflow-auto rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm"
+        class="grid min-h-[380px] flex-1 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]"
       >
-        <table class="min-w-full divide-y divide-n-weak text-sm">
-          <thead class="sticky top-0 z-10 bg-n-alpha-2">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-n-slate-11">Status</th><th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-n-slate-11">Tipo</th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-n-slate-11 uppercase tracking-wider"
+        <div
+          class="overflow-auto rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm"
+        >
+          <table class="min-w-full divide-y divide-n-weak text-sm">
+            <thead class="sticky top-0 z-10 bg-n-alpha-2">
+              <tr>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-n-slate-11"
+                >
+                  Status
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-n-slate-11"
+                >
+                  Tipo
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-n-slate-11 uppercase tracking-wider"
+                >
+                  Título
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-n-slate-11 uppercase tracking-wider"
+                >
+                  Relacionado a
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-n-slate-11 uppercase tracking-wider"
+                >
+                  Data/Hora
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-n-slate-11"
+                >
+                  Prioridade
+                </th>
+                <th
+                  class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-n-slate-11"
+                >
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-n-solid-2 divide-y divide-n-weak">
+              <tr v-if="loading">
+                <td colspan="7" class="px-6 py-12 text-center text-n-slate-11">
+                  Carregando atividades…
+                </td>
+              </tr>
+              <tr v-else-if="error">
+                <td colspan="7" class="px-6 py-12 text-center text-n-ruby-11">
+                  {{ error }}
+                </td>
+              </tr>
+              <tr v-else-if="!filteredActivities.length">
+                <td colspan="7" class="px-6 py-12 text-center text-n-slate-11">
+                  Nenhuma atividade encontrada
+                </td>
+              </tr>
+              <tr
+                v-for="activity in filteredActivities"
+                :key="activity.id"
+                class="transition hover:bg-n-alpha-2"
               >
-                Título
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-n-slate-11 uppercase tracking-wider"
-              >
-                Relacionado a
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-n-slate-11 uppercase tracking-wider"
-              >
-                Data/Hora
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-n-slate-11">Prioridade</th><th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-n-slate-11">Ações</th>
-            </tr>
-          </thead>
-          <tbody class="bg-n-solid-2 divide-y divide-n-weak">
-            <tr v-if="loading">
-              <td colspan="7" class="px-6 py-12 text-center text-n-slate-11">
-                Carregando atividades…
-              </td>
-            </tr>
-            <tr v-else-if="error">
-              <td colspan="7" class="px-6 py-12 text-center text-n-ruby-11">
-                {{ error }}
-              </td>
-            </tr>
-            <tr v-else-if="!filteredActivities.length">
-              <td colspan="7" class="px-6 py-12 text-center text-n-slate-11">
-                Nenhuma atividade encontrada
-              </td>
-            </tr>
-            <tr
-              v-for="activity in filteredActivities"
-              :key="activity.id"
-              class="transition hover:bg-n-alpha-2"
-            >
-              <td class="px-4 py-4"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" :class="activity.overdue ? 'bg-red-50 text-red-700' : activity.completed_at ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'">{{ displayStatus(activity) }}</span></td>
-              <td class="px-4 py-4"><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold" :class="activityTypeClass(activity.activity_type)"><i class="size-3.5" :class="activityTypeIcon(activity.activity_type)" />{{ activityTypeLabel(activity.activity_type) }}</span></td>
-              <td class="px-4 py-4 font-medium text-n-slate-12">{{ activity.title }}</td>
-              <td class="px-4 py-4 text-n-slate-11">{{ activity.related_label || activity.deal?.title || activity.lead?.name || 'Sem vínculo' }}</td>
-              <td class="px-4 py-4 text-n-slate-11">{{ activity.due_at_display || formatCrmDateTime(activity.due_at) }}</td>
-              <td class="px-4 py-4"><span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="activity.overdue ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'">{{ activity.overdue ? 'Alta' : 'Média' }}</span></td>
+                <td class="px-4 py-4">
+                  <span
+                    class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                    :class="
+                      activity.overdue
+                        ? 'bg-red-50 text-red-700'
+                        : activity.completed_at
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-blue-50 text-blue-700'
+                    "
+                    >{{ displayStatus(activity) }}</span
+                  >
+                </td>
+                <td class="px-4 py-4">
+                  <span
+                    class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold"
+                    :class="activityTypeClass(activity.activity_type)"
+                    ><i
+                      class="size-3.5"
+                      :class="activityTypeIcon(activity.activity_type)"
+                    />{{ activityTypeLabel(activity.activity_type) }}</span
+                  >
+                </td>
+                <td class="px-4 py-4 font-medium text-n-slate-12">
+                  {{ activity.title }}
+                </td>
+                <td class="px-4 py-4 text-n-slate-11">
+                  {{
+                    activity.related_label ||
+                    activity.deal?.title ||
+                    activity.lead?.name ||
+                    'Sem vínculo'
+                  }}
+                </td>
+                <td class="px-4 py-4 text-n-slate-11">
+                  {{
+                    activity.due_at_display ||
+                    formatCrmDateTime(activity.due_at)
+                  }}
+                </td>
+                <td class="px-4 py-4">
+                  <span
+                    class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                    :class="
+                      activity.overdue
+                        ? 'bg-red-50 text-red-700'
+                        : 'bg-amber-50 text-amber-700'
+                    "
+                    >{{ activity.overdue ? 'Alta' : 'Média' }}</span
+                  >
+                </td>
                 <td class="px-4 py-4 text-right">
                   <div class="inline-flex gap-1">
                     <button
@@ -354,18 +568,24 @@ onMounted(async () => {
                     </button>
                     <button
                       type="button"
-                      disabled
+                      :disabled="
+                        Boolean(activity.completed_at) ||
+                        activity.status === 'cancelled'
+                      "
                       :aria-label="t('CRM.HOMOLOGATION.RESCHEDULE')"
-                      aria-describedby="crm-activity-edit-note"
-                      :title="t('CRM.HOMOLOGATION.EDIT_ACTIVITY_UNAVAILABLE')"
-                      class="grid size-8 cursor-not-allowed place-content-center rounded-lg bg-n-slate-3 text-n-slate-11"
+                      :title="t('CRM.ACTIVITY_EDIT.TITLE')"
+                      class="grid size-8 place-content-center rounded-lg bg-n-amber-3 text-n-amber-11 disabled:cursor-not-allowed disabled:opacity-50"
+                      @click="editingActivityId = activity.id"
                     >
                       <i class="i-lucide-calendar-days size-3.5" />
                     </button>
                     <button
                       type="button"
                       class="grid size-8 place-content-center rounded-lg bg-[#0f9f95] text-white disabled:cursor-not-allowed disabled:bg-n-slate-3 disabled:text-n-slate-11"
-                      :disabled="Boolean(activity.completed_at)"
+                      :disabled="
+                        Boolean(activity.completed_at) ||
+                        completingIds.has(activity.id)
+                      "
                       title="Concluir"
                       @click="complete(activity.id)"
                     >
@@ -373,21 +593,24 @@ onMounted(async () => {
                     </button>
                     <button
                       type="button"
-                      disabled
+                      :disabled="
+                        Boolean(activity.completed_at) ||
+                        activity.status === 'cancelled'
+                      "
                       :aria-label="t('CRM.HOMOLOGATION.EDIT_ACTIVITY')"
-                      aria-describedby="crm-activity-edit-note"
-                      :title="t('CRM.HOMOLOGATION.EDIT_ACTIVITY_UNAVAILABLE')"
-                      class="grid size-8 cursor-not-allowed place-content-center rounded-lg bg-n-slate-3 text-n-slate-11"
+                      :title="t('CRM.ACTIVITY_EDIT.TITLE')"
+                      class="grid size-8 place-content-center rounded-lg bg-n-blue-3 text-n-blue-11 disabled:cursor-not-allowed disabled:opacity-50"
+                      @click="editingActivityId = activity.id"
                     >
                       <i class="i-lucide-pencil size-3.5" />
                     </button>
                   </div>
                 </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <aside class="space-y-4">
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <aside class="space-y-4">
           <section
             class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
           >
@@ -412,14 +635,14 @@ onMounted(async () => {
                 </button>
                 <button
                   type="button"
-                  disabled
-                  aria-describedby="crm-activity-edit-note"
-                  class="cursor-not-allowed rounded-xl bg-n-slate-3 px-3 py-2.5 text-sm font-semibold text-n-slate-11"
+                  class="rounded-xl bg-n-amber-3 px-3 py-2.5 text-sm font-semibold text-n-amber-11"
+                  @click="editingActivityId = nextActivity.id"
                 >
                   {{ t('CRM.HOMOLOGATION.RESCHEDULE') }}
                 </button>
                 <button
                   class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-700"
+                  :disabled="completingIds.has(nextActivity.id)"
                   @click="complete(nextActivity.id)"
                 >
                   Concluir
@@ -435,28 +658,88 @@ onMounted(async () => {
             >
               {{ t('CRM.HOMOLOGATION.START_ACTION_UNAVAILABLE') }}
             </p>
-            <p id="crm-activity-edit-note" class="mt-2 text-xs text-n-slate-11">
-              {{ t('CRM.HOMOLOGATION.EDIT_ACTIVITY_UNAVAILABLE') }}
-            </p>
           </section>
-        <section class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"><h3 class="font-semibold text-n-slate-12">Resumo do dia</h3><div class="mt-4 flex items-center gap-4"><div class="grid size-20 place-content-center rounded-full" :style="{background: `conic-gradient(#16a76b ${completionRate * 3.6}deg,#eef2f6 0)`}"><div class="grid size-14 place-content-center rounded-full bg-n-solid-2 text-lg font-bold text-n-slate-12">{{ completionRate }}%</div></div><div class="text-xs text-n-slate-11"><p><b class="text-emerald-600">{{ activities.filter(a => a.completed_at).length }}</b> concluídas</p><p class="mt-2"><b class="text-blue-600">{{ openActivities.length }}</b> agendadas</p><p class="mt-2"><b class="text-red-600">{{ activities.filter(a => a.overdue).length }}</b> atrasadas</p></div></div></section>
-        <section v-if="activities.some(a => a.overdue)" class="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm"><div class="flex gap-2"><i class="i-lucide-triangle-alert size-5 text-red-600" /><div><h3 class="font-semibold text-red-800">Sugestões de prioridade</h3><p class="mt-1 text-xs leading-5 text-red-700">Existem atividades atrasadas que exigem atenção para evitar impacto nos negócios.</p></div></div></section>
-      </aside>
+          <section
+            class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
+          >
+            <h3 class="font-semibold text-n-slate-12">Resumo do dia</h3>
+            <div class="mt-4 flex items-center gap-4">
+              <div
+                class="grid size-20 place-content-center rounded-full"
+                :style="{
+                  background: `conic-gradient(#16a76b ${completionRate * 3.6}deg,#eef2f6 0)`,
+                }"
+              >
+                <div
+                  class="grid size-14 place-content-center rounded-full bg-n-solid-2 text-lg font-bold text-n-slate-12"
+                >
+                  {{ completionRate }}%
+                </div>
+              </div>
+              <div class="text-xs text-n-slate-11">
+                <p>
+                  <b class="text-emerald-600">{{
+                    activities.filter(a => a.completed_at).length
+                  }}</b>
+                  concluídas
+                </p>
+                <p class="mt-2">
+                  <b class="text-blue-600">{{ openActivities.length }}</b>
+                  agendadas
+                </p>
+                <p class="mt-2">
+                  <b class="text-red-600">{{
+                    activities.filter(a => a.overdue).length
+                  }}</b>
+                  atrasadas
+                </p>
+              </div>
+            </div>
+          </section>
+          <section
+            v-if="activities.some(a => a.overdue)"
+            class="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm"
+          >
+            <div class="flex gap-2">
+              <i class="i-lucide-triangle-alert size-5 text-red-600" />
+              <div>
+                <h3 class="font-semibold text-red-800">
+                  Sugestões de prioridade
+                </h3>
+                <p class="mt-1 text-xs leading-5 text-red-700">
+                  Existem atividades atrasadas que exigem atenção para evitar
+                  impacto nos negócios.
+                </p>
+              </div>
+            </div>
+          </section>
+        </aside>
       </div>
     </div>
     <Teleport to="body">
       <div
         v-if="showForm"
         class="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
-        @click.self="showForm = false" @keydown.esc="showForm = false"
+        @click.self="closeForm"
+        @keydown.esc="closeForm"
       >
         <form
           class="w-full max-w-md space-y-3 rounded-xl bg-n-solid-2 p-6 shadow-2xl"
           @submit.prevent="save"
         >
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-n-slate-12">Nova atividade</h3>
-            <button type="button" class="rounded-lg p-2" :aria-label="t('CRM.CREATION.CLOSE')" @click="showForm = false"><i class="i-lucide-x size-5" /></button>
+            <h3 class="text-lg font-semibold text-n-slate-12">
+              Nova atividade
+            </h3>
+            <button
+              type="button"
+              class="rounded-lg p-2"
+              :aria-label="t('CRM.CREATION.CLOSE')"
+              :disabled="saving"
+              @click="closeForm"
+            >
+              <i class="i-lucide-x size-5" />
+            </button>
           </div>
           <select
             v-model="form.deal_id"
@@ -491,11 +774,20 @@ onMounted(async () => {
             type="datetime-local"
             class="w-full rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2"
           />
-          <div class="flex justify-end gap-2"><button type="button" :disabled="saving" class="mr-auto rounded-lg border border-n-weak px-3 py-2" @click="activityDraft.discard">{{ t('CRM.CREATION.DISCARD') }}</button>
+          <div class="flex justify-end gap-2">
+            <button
+              type="button"
+              :disabled="saving"
+              class="mr-auto rounded-lg border border-n-weak px-3 py-2"
+              @click="activityDraft.discard"
+            >
+              {{ t('CRM.CREATION.DISCARD') }}
+            </button>
             <button
               type="button"
               class="px-4 py-2 text-sm"
-              @click="showForm = false"
+              :disabled="saving"
+              @click="closeForm"
             >
               Cancelar
             </button>

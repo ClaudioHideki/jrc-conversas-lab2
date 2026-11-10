@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "4fd0651c56145df282fdbaef320bfffe0afd5717",
+  "status": "Readiness gap fixed before governed Relationship-only withdrawal; stages remain open",
+  "confirmed_gap": "3/3 baseline failures: nested owners omitted from pending inventory and its digest.",
+  "implementation": [
+    "Plans active/paused with goal or milestone owner are collected independently of root/plan ownership; scheduled QBR decision owners are included. Counts represent containing plans/QBRs, not individual JSON entries.",
+    "Existing account/native record visibility, MAX_ROWS bounds and HMAC digest are reused. Hidden work denies readiness rather than yielding zero. Completed/canceled historical records and authors remain unchanged.",
+    "Source catalog labels identify nested container counts. No application build or browser acceptance claim."
+  ],
+  "tests": {
+    "native02": "8examples,0failures (3new +5 existing readiness)",
+    "hidden03": "1example,0failures for actual hidden team allocation and nested plan",
+    "ruby": "0offenses both changed service and new spec after correcting fixture formatting",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "withdrawal-nested-native02": {
+      "start": 7044231168,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/withdrawal_nested_commitments_spec.rb": "5e454a39484db864546783b109002d487f8426a2342a92d4448e4ac88b5155d5",
+        "spec/requests/api/v1/accounts/relationship/withdrawal_readiness_spec.rb": "75dffdbaa32c5a2bb63217b8db1f27b3515e97b92b464e7dc915fae84ccf8032"
+      },
+      "minimum": 7029604352,
+      "exit_code": 0,
+      "end": 7042252800
+    },
+    "withdrawal-nested-hidden03": {
+      "start": 6859735040,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/withdrawal_nested_commitments_spec.rb": "71caf618de7e4a9af41a83c2e7c2161fd7df456a6549d12fc583e113283d1718"
+      },
+      "minimum": 6755909632,
+      "exit_code": 0,
+      "end": 6738550784
+    }
+  },
+  "disk_final_bytes": 6654234624,
+  "next": "Implement explicit Relationship-only withdrawal after fresh zero-workload review and native authorization; never delete AccountUser or affect other module access.",
+  "restrictions": "No build/5379 modification/restart/cleanup/push/GHCR/deploy/external operations."
+}

@@ -1,0 +1,42 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>JRC — roteiro manual B1–B4</title><body><h1>JRC Conversas — homologação manual B1–B4</h1>
+<p>Ambiente exclusivamente local: <a href="http://127.0.0.1:5379/app/login">http://127.0.0.1:5379/app/login</a>. Código de produto <code>4d4a6de3</code>; build validado de 586 arquivos / 372 entradas. A tela de login carregada não comprova aprovação destes fluxos.</p>
+<p>Selecione a conta sintética 1400 e use os usuários de homologação já configurados. Não use credenciais de produção, não revogue sessões e não altere papéis para facilitar testes. A senha não está neste documento. Gestor: mobile.c7.95f1137f@example.test; leitor documental: reader.documents.c8@example.test.</p>
+<p>Executar cada bloco em desktop (1520 px) e celular (390 px), nos temas claro e escuro. Usar a emulação responsiva normal do Chrome. Conferir botões, modais, rolagem, ausência de transbordamento, navegação e persistência após recarregar. Preserve outras abas/navegadores.</p>
+<p>Para cada caso marque: aprovado, falhou, bloqueado ou pendente. Registre ator/conta/unidade, viewport/tema, número do registro sintético, resultado, erro e captura real. Nenhum item vem pré-aprovado.</p>
+<h2>B1 — Novo chamado contextual</h2><ol>
+<li>Entrar com usuário de homologação que tenha Cadastro Mestre e criação de chamado no Service Desk.</li>
+<li>Abrir a empresa de teste 925 e usar Novo chamado. Se houver mais de uma unidade, selecionar uma unidade existente autorizada.</li>
+<li>Conferir empresa e solicitante; a empresa sem pessoa escolhida não deve selecionar um contato automaticamente.</li>
+<li>Repetir pela pessoa 887 no popup Cliente 360º; conferir empresa e pessoa corretas.</li>
+<li>Preencher os campos obrigatórios nativos. Criar somente um chamado sintético com título único, anotar o número e reabrir seu detalhe.</li>
+<li>Trocar unidade/empresa e verificar nova validação e limpeza de contexto incompatível. Não criar unidades nem vínculos para facilitar o teste.</li>
+<li>Repetir com papel sem criação e com URL de outra conta: ação ausente/negada, nenhum dado de outra conta e nenhum chamado indevido.</li>
+</ol><p><strong>Critério:</strong> Formulário e persistência nativos, sem aceitar IDs da URL como autorização.</p><p>Resultado: □ aprovado □ falhou □ bloqueado □ pendente. Evidência/observação: __________________</p>
+<h2>B2 — Documentos da Empresa</h2><ol>
+<li>Abrir a empresa 953, Cadastro → Documentos. O documento 6 já possui versões 1 e 2: não enviar essas versões novamente.</li>
+<li>Conferir autor em cada versão, situação ativa/arquivada, validade e motivo/data no histórico.</li>
+<li>Conferir Responsável pela carteira como informação separada do autor.</li>
+<li>Confirmar que arquivos com verificação pendente/quarentena não permitem download. Não marcar antivírus como limpo manualmente.</li>
+<li>Entrar com leitor reader.documents.c8@example.test e conferir que pode ler o que foi autorizado, mas não enviar/gerir documentos.</li>
+<li>Abrir a empresa 954: ela continua sem carteira e sem acesso documental. Não criar carteira/vínculo para liberar.</li>
+<li>Depois de revogar permissão por fluxo nativo autorizado, repetir leitura/download e verificar bloqueio. Se não houver autorização para mudar permissões, registrar caso como pendente em vez de modificar papéis.</li>
+</ol><p><strong>Critério:</strong> Versões preservadas; permissões e quarentena nativas. Responsável documental próprio e catálogo são incremento posterior ao build 4d4a6de3, não estão homologados nesta tela.</p><p>Resultado: □ aprovado □ falhou □ bloqueado □ pendente. Evidência/observação: __________________</p>
+<h2>B3 — Indicadores de Atendimento</h2><ol>
+<li>Na empresa 925 ou pessoa 887, abrir Atendimento/Conversas e expandir Indicadores de atendimento.</li>
+<li>Aplicar datas inicial/final e conferir o fuso informado. Contagens de conversas usam criação; mensagens usam data da mensagem pública.</li>
+<li>Selecionar um canal existente; confirmar alteração das conversas/mensagens e limpar os filtros.</li>
+<li>Tentar período invertido/incompleto ou superior a366 dias: exibir erro sem manter indicador antigo como resultado atual.</li>
+<li>Conferir CSAT: respostas reais somente; sem respostas não deve aparecer satisfação de 100%. Sem permissão deve indicar indisponibilidade.</li>
+<li>Conferir SLA de conversas separadamente do SLA de chamados. O filtro de canal de conversa não deve alterar a medição separada dos relógios de chamados.</li>
+<li>Abrir a lista nativa de conversas, navegar, paginar e voltar. Notas privadas e presença online não contam como mensagem pública.</li>
+<li>Repetir com usuário restrito e outra conta; não deve aparecer canal, medição ou registro oculto.</li>
+</ol><p><strong>Critério:</strong> Ausência de dados/medição ou de autorização não comprova cumprimento de SLA. Anotar falta de fixture positiva como bloqueio, não como aprovação.</p><p>Resultado: □ aprovado □ falhou □ bloqueado □ pendente. Evidência/observação: __________________</p>
+<h2>B4 — Renovação contratual</h2><ol>
+<li>Na visão geral de uma empresa/pessoa com contrato sintético ativo autorizado, conferir Próxima renovação contratual.</li>
+<li>Comparar a vigência final com o contrato no CRM e a data de aviso com ends_on menos renewal_notice_days.</li>
+<li>Conferir contagens de ativos vencidos e ativos sem término. Rascunhos/encerrados não podem aparecer como próximo contrato ativo.</li>
+<li>Usar Ver contrato e ações no CRM; abrir o contrato exato, voltar e conferir a informação persistida.</li>
+<li>Repetir com usuário que não seja proprietário e com administrador limitado a outra operadora/unidade; os dados não podem vazar.</li>
+<li>Não ativar contrato sem a assinatura exigida e não renovar, aprovar ou enviar assinatura automaticamente. Se não houver fixture ativa, registrar a ausência e manter o caso positivo pendente.</li>
+</ol><p><strong>Critério:</strong> Datas de calendário não mudam entre desktop/celular. Não executar assinatura externa para testar este cartão.</p><p>Resultado: □ aprovado □ falhou □ bloqueado □ pendente. Evidência/observação: __________________</p>
+<h2>Preservação e encerramento</h2><p>Não recriar segmento 98, rascunho de Campanha 1, empresa 953/carteira 36/documento 6/versões 1 e 2. Não enviar campanha, SMS, WhatsApp, ligação ou assinatura DocuSign real. Não limpar dados, volumes, arquivos privados ou checkpoints. Não acessar produção.</p><p>A Etapa C continua aberta até tratar requisitos obrigatórios, divergências documentais, escala representativa e registrar decisões. TRR permanece sem fórmula aprovada. Homologação manual, testes automatizados, build e servidor ativo são estados distintos.</p></body></html>

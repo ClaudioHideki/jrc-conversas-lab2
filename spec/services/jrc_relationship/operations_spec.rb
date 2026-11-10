@@ -27,10 +27,14 @@ RSpec.describe 'Relationship operational regression' do
       original = action.sla_due_at
       original_due = action.due_at
       started = Time.current
+      reassessment_at = started + 5.hours
       zone = Time.find_zone(sd_account.reporting_timezone) || Time.find_zone!('America/Sao_Paulo')
-      agenda_day = original_due.in_time_zone(zone).to_date.iso8601
+      agenda_day = reassessment_at.in_time_zone(zone).to_date.iso8601
       travel_to(started + 1.hour) do
-        workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id, lock_version: action.reload.lock_version, status: 'waiting_customer' })
+        workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id, lock_version: action.reload.lock_version,
+                                                                    status: 'waiting_customer',
+                                                                    waiting_reason: 'Awaiting customer evidence',
+                                                                    next_step: 'Review customer response', return_at: reassessment_at })
         expect(action.reload.activity.metadata['relationship_sla_paused_at']).to be_present
         expect(action.activity.overdue?).to be(false)
       end
@@ -53,7 +57,10 @@ RSpec.describe 'Relationship operational regression' do
     assignment.update!(created_at: 40.days.ago)
     JrcRelationship::Processor.new(context: context, assignment: assignment).call
     action = assignment.actions.find_by!(kind: 'no_contact')
-    workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id, lock_version: action.lock_version, status: 'waiting_customer' })
+    workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id, lock_version: action.lock_version,
+                                                                status: 'waiting_customer',
+                                                                waiting_reason: 'Awaiting customer evidence',
+                                                                next_step: 'Review customer response', return_at: 4.hours.from_now })
     travel_to(2.days.from_now) do
       JrcRelationship::Processor.new(context: context, assignment: assignment).call
       expect(assignment.actions.where(kind: 'no_contact').pluck(:id)).to eq([action.id])
@@ -152,7 +159,8 @@ RSpec.describe 'Relationship operational regression' do
     audits = JrcCrm::AuditEvent.where(account: sd_account, resource_type: action.class.name, resource_id: action.id)
     expect(audits.where(event_type: 'operations_sla_threshold').count).to eq(1)
     expect(audits.where(event_type: 'operations_sla_violated').count).to eq(0)
-    action.update!(status: 'waiting_customer')
+    action.update!(status: 'waiting_customer', waiting_reason: 'Awaiting customer confirmation',
+                   next_step: 'Review customer evidence', return_at: 4.hours.from_now)
     action.update_columns(sla_started_at: 200.minutes.ago)
     JrcRelationship::SlaMonitorJob.perform_now(sd_account.id)
     expect(audits.where(event_type: 'operations_sla_threshold').count).to eq(1)
@@ -167,7 +175,8 @@ RSpec.describe 'Relationship operational regression' do
     original_due = action.due_at
     travel_to(started + 1.hour) do
       workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id,
-        lock_version: action.reload.lock_version, status: 'waiting_finance' })
+        lock_version: action.reload.lock_version, status: 'waiting_finance', waiting_reason: 'Awaiting finance evidence',
+                                                                  next_step: 'Review finance response', return_at: 4.hours.from_now })
       expect(action.reload.activity.metadata['relationship_sla_paused_at']).to be_present
       expect(action.activity.status).to eq('scheduled')
     end
@@ -180,13 +189,14 @@ RSpec.describe 'Relationship operational regression' do
       expect(data[:total]).to eq(1)
       paused = action.reload.sla_paused_at
       workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id,
-        lock_version: action.lock_version, status: 'waiting_customer' })
+        lock_version: action.lock_version, status: 'waiting_customer', waiting_reason: 'Awaiting customer evidence',
+                                                                  next_step: 'Review customer response', return_at: 4.hours.from_now })
       expect(action.reload.sla_paused_at).to eq(paused)
       workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id,
         lock_version: action.lock_version, status: 'in_progress' })
       expect(action.reload.sla_due_at).to be_within(1.second).of(original + 47.hours)
       expect(action.due_at).to be_within(1.second).of(original_due + 47.hours)
-      expect(action.activity.reload.due_at).to eq(action.due_at)
+      expect(action.activity.reload.due_at).to eq(action.return_at)
       expect(action.activity.metadata).not_to have_key('relationship_sla_paused_at')
     end
   end
@@ -208,7 +218,9 @@ RSpec.describe 'Relationship operational regression' do
 
   it 'projects a newly created finance-waiting action to the same Agenda with its pause marker' do
     action = workflow.save(kind: 'actions', attributes: { assignment_id: assignment.id, request_id: 'initial-finance-pause',
-      reason: 'Finance confirmation', status: 'waiting_finance', due_at: 2.hours.from_now })[:record]
+      reason: 'Finance confirmation', status: 'waiting_finance', due_at: 2.hours.from_now,
+                                                          waiting_reason: 'Awaiting finance confirmation',
+                                                          next_step: 'Review finance response', return_at: 4.hours.from_now })[:record]
     expect(action.sla_paused_at).to be_present
     expect(action.activity.metadata['relationship_sla_paused_at']).to eq(action.sla_paused_at.iso8601)
     expect(action.activity.status).to eq('scheduled')

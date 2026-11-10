@@ -338,7 +338,27 @@ describe('Relationship center pagination', () => {
     expect(store.dispatch).toHaveBeenCalledWith('contacts/clearContactFilters');
   });
 
+  it('opens the reviewed import central in the current account when Customer Master is enabled', async () => {
+    route.params.accountId = '2';
+    wrapper = page({ ContactListHeaderWrapper: false });
+    await flushPromises();
+    wrapper
+      .findComponent(ContactListHeaderWrapper)
+      .findComponent(ContactHeader)
+      .vm.$emit('import');
+    await flushPromises();
+    expect(useRouter().push).toHaveBeenCalledWith({
+      name: 'jrc_customer_imports',
+      params: { accountId: 2 },
+      query: { kind: 'contacts' },
+    });
+    expect(
+      store.dispatch.mock.calls.some(([action]) => action === 'contacts/import')
+    ).toBe(false);
+  });
+
   it('opens native create/import dialogs and dispatches their payloads through the existing store', async () => {
+    store.getters['accounts/isFeatureEnabledonAccount'] = () => false;
     const openCreate = vi.fn();
     const openImport = vi.fn();
     const createSuccess = vi.fn();
@@ -452,5 +472,56 @@ describe('Relationship center pagination', () => {
     expect(wrapper.findComponent({ name: 'ContactLeadAction' }).exists()).toBe(
       true
     );
+  });
+
+  it('opens company and contact dialogs without changing the list route, filters or page', async () => {
+    route.query = { page: '2', directory_view: 'people', search: 'Cliente' };
+    store.getters['contacts/getContactsList'] = [
+      { id: 42, name: 'Cliente', companyId: 77, companyName: 'MOCK — Empresa' },
+    ];
+    wrapper = page();
+    await flushPromises();
+    await button('MOCK — Empresa').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'CompanyDetailsDialog' }).props('companyId')
+    ).toBe(77);
+    expect(
+      wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()
+    ).toBe(false);
+    wrapper.getComponent({ name: 'CompanyDetailsDialog' }).vm.$emit('close');
+    await flushPromises();
+    await wrapper.get('tbody tr').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'ContactDetailsDialog' }).props('contactId')
+    ).toBe(42);
+    wrapper.getComponent({ name: 'ContactDetailsDialog' }).vm.$emit('close');
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()
+    ).toBe(false);
+    expect(route.query).toEqual({
+      page: '2',
+      directory_view: 'people',
+      search: 'Cliente',
+    });
+    expect(useRouter().push).not.toHaveBeenCalled();
+  });
+
+  it('preserves the legacy full profile route when Customer Master is unavailable', async () => {
+    store.getters['accounts/isFeatureEnabledonAccount'] = (
+      _accountId,
+      feature
+    ) => feature !== 'jrc_customer_master';
+    wrapper = page();
+    await flushPromises();
+    await button('Ver perfil completo').trigger('click');
+    expect(
+      wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()
+    ).toBe(false);
+    expect(useRouter().push).toHaveBeenCalledWith({
+      name: 'contacts_edit',
+      params: { accountId: '1', contactId: 42 },
+      query: route.query,
+    });
   });
 });

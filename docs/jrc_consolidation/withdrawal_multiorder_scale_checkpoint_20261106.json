@@ -1,0 +1,98 @@
+{
+  "date": "2026-11-06",
+  "status": "Directed G and native multi-order scale locally validated; not stage closure",
+  "parent_checkpoint": "83bb988efb223f0e4be63ac360e7b9a43bd636f2",
+  "business_scope": "Unrelated native projects, tickets and tasks stay with analyst in their original modules. Only actual pending CS origins constrain CS-only withdrawal.",
+  "implementation": "Reuse the same authorized native subject relations per assignment within one restrict call only. Clear cache at the next call. Keep canonical Handoff.origin_order per project and fresh final viewer validation; no authorization grants or provider operations.",
+  "files": [
+    "app/services/jrc_relationship/withdrawal_handoff_projects.rb",
+    "spec/requests/api/v1/accounts/relationship/withdrawal_order_projects_scale_spec.rb"
+  ],
+  "native_results": {
+    "crossmodule-subject-regression01": "20 examples,0 failures; native Backoffice completion handoff and ticket/project responsibility transactions, revoked unit permissions, foreign references, no project viewer promotion.",
+    "withdrawal-order-projects-scale01": "1 example,0 failures; before within-call relation reuse.",
+    "withdrawal-order-projects-scale02": "8 examples,0 failures; multi-order scale plus 7 canonical-origin, conflict, wrong-customer, rejected/history native cases.",
+    "ruby": "withdrawal-order-projects-final-ruby03:0 offenses in both changed files."
+  },
+  "cohort": {
+    "real_synthetic_order_origins": 25,
+    "linked_tasks": 1000,
+    "unrelated_projects": 1,
+    "unrelated_tasks": 1,
+    "requests": 3,
+    "pages": "projects page3 of25; tasks page100 of1000; exact last-page IDs",
+    "sources": "13 Backoffice fulfillment metadata links and12 native implementation keys; same native source resolution; no external request",
+    "unchanged": "Immutable handoff case attributes and native project owners; unrelated task assignee unchanged",
+    "seeding": "Native project/task create services plus model-validated task fixture generation; not1000 UI creation flows"
+  },
+  "metrics": {
+    "withdrawal-order-projects-scale01": {
+      "native_order_origins": 25,
+      "linked_tasks": 1000,
+      "unrelated_projects": 1,
+      "requests": 3,
+      "sql_queries": 3323,
+      "elapsed_seconds": 16.379,
+      "response_bytes": 2367
+    },
+    "withdrawal-order-projects-scale02": {
+      "native_order_origins": 25,
+      "linked_tasks": 1000,
+      "unrelated_projects": 1,
+      "requests": 3,
+      "sql_queries": 1309,
+      "elapsed_seconds": 21.741,
+      "response_bytes": 2370
+    }
+  },
+  "resources": {
+    "crossmodule-subject-regression01": {
+      "start": 6204456960,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/crm/backoffice_completion_handoff_spec.rb": "d4528ffa0dd83fbd2317a8a19a06073578b21b449b8ae403a6064e6f9e4a2337",
+        "spec/services/jrc_relationship/native_responsibilities_spec.rb": "a81d387e18e5ed9ba1cd47fcf68f07d2028d1f2f91366e289a5183df45673dbf"
+      },
+      "minimum": 6183796736,
+      "exit_code": 0,
+      "end": 6204383232
+    },
+    "withdrawal-order-projects-scale01": {
+      "start": 6204940288,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/withdrawal_order_projects_scale_spec.rb": "92dc54824ed704fd208f6262c0ce2a91b2230aea44aa2fa788aafe9ffad686bc"
+      },
+      "minimum": 6185062400,
+      "exit_code": 0,
+      "end": 6203564032
+    },
+    "withdrawal-order-projects-scale02": {
+      "start": 6202564608,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/withdrawal_order_projects_scale_spec.rb": "92dc54824ed704fd208f6262c0ce2a91b2230aea44aa2fa788aafe9ffad686bc",
+        "spec/services/jrc_relationship/withdrawal_handoff_projects_spec.rb": "52fa8fb58bef99fd293ebb0418091e5c0204205b529368f0ef8e28c32ef472b1"
+      },
+      "minimum": 6182223872,
+      "exit_code": 0,
+      "end": 6223388672
+    }
+  },
+  "remaining": [
+    "Query count improved; elapsed time did not improve in this observed run. This is not a production performance/SLA or Chrome pilot claim.",
+    "Independent-customer cohorts, source/module grant changes and full current-source visual/scale acceptance remain separate.",
+    "Fresh build/Chrome, external provider/scanner/channel validation, undefined TRR and deferred portfolio-less documents remain open."
+  ],
+  "disk_final_bytes": 6007971840,
+  "restrictions": "No build,cleanup,push,GHCR,deploy,production,real external operation or runtime/server change."
+}

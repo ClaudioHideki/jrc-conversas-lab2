@@ -1,0 +1,238 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "initial_head": "7c1a9204041d7fa0ac090b3f9552f05ab5155505",
+  "final_code_head": "21ef4b0bce1e8411193a20cf5ced5a44805628fc",
+  "report_checkpoint": "The commit containing this report follows final_code_head; resolve its full SHA using git log -- this report cannot contain its own commit hash.",
+  "git_before_report": "Clean; all implementation changes committed. All requested prior checkpoints remain ancestors; git fsck --connectivity-only exited 0. Dangling local objects retained, not removed.",
+  "functional_checkpoints": [
+    {
+      "sha": "cb1bed8142b40989f1b5adcdc40edc31d7b49bd7",
+      "report": "responsibilities_transfer_checkpoint_20261105.json"
+    },
+    {
+      "sha": "95a004541f5c2bb8ad0acf13bd6599b3af6d00be",
+      "report": "automatic_action_budget_checkpoint_20261105.json"
+    },
+    {
+      "sha": "21ef4b0bce1e8411193a20cf5ced5a44805628fc",
+      "report": "responsibility_comparison_context_checkpoint_20261105.json"
+    }
+  ],
+  "deliveries": [
+    "Additive reviewed full transfer of supported pending CS responsibilities and linked agenda activities, frozen destinations, native Central decisions, separate execution, source/destination revalidation, transactional rollback and audit",
+    "Account-wide configurable daily ceiling for monitoring-created actions, PostgreSQL concurrency protection, account-local day, current permission checks, no foreign-account count disclosure, active-action updates and independent critical risks preserved",
+    "Paginated native responsibility comparison identifies the reviewed customer, current responsible and destination, with source redaction and explicit blocked/stale/failed/canceled states"
+  ],
+  "tests_by_block_not_additive": [
+    {
+      "block": "F1 reviewed responsibilities/native Central/legacy batch",
+      "backend": 48,
+      "vue": 22,
+      "failures": 0,
+      "labels": [
+        "f1responsibilities04",
+        "f1responsibilities01"
+      ]
+    },
+    {
+      "block": "F2 budget/cooldown/monitoring",
+      "backend": 22,
+      "vue": 4,
+      "failures": 0,
+      "labels": [
+        "f2budget02",
+        "f2budget01"
+      ]
+    },
+    {
+      "block": "G documentary package/signature barriers/handoff plus budget",
+      "backend": 38,
+      "failures": 0,
+      "label": "f2budget-g-final",
+      "groups": {
+        "budget": 5,
+        "budget_two_connection_concurrency": 1,
+        "completion_package": 12,
+        "completion_handoff": 10,
+        "signature_delivery_guard": 6,
+        "project_handoff_acceptance": 4
+      },
+      "overlap": "Six budget examples overlap F2; these are not all newly distinct tests."
+    },
+    {
+      "block": "Final budget boundary and mandatory account policy over company override",
+      "backend": 6,
+      "failures": 0,
+      "label": "f2budget-final-directed",
+      "overlap": "Five prior scenarios, one additional account policy precedence scenario."
+    },
+    {
+      "block": "F1.4 frozen customer label and scope redaction",
+      "backend": 10,
+      "vue": 6,
+      "failures": 0,
+      "label": "f1responsibilities-labels",
+      "overlap": "Transfer suite and comparison suite rerun with additional label coverage; not additive to F1."
+    }
+  ],
+  "test_limits": [
+    "Real native PostgreSQL domain/request tests with synthetic fixtures in owned candidate database; not mocked database acceptance.",
+    "Vue component tests use native test harness and API mocks; not Chrome/desktop/mobile acceptance.",
+    "Document clean observations and signature fixtures are explicitly synthetic; no antivirus/provider/demo acceptance claimed.",
+    "Actual two-connection PostgreSQL budget race tested; representative production-volume acceptance remains pending.",
+    "Existing Ruby 3.4/Rails deprecations, Browserslist staleness and RouterLink test stub warnings remain. No dependency upgrades performed.",
+    "New services and tests have zero final RuboCop offenses; final Configuration and BatchReviewPlan checks clean. Existing Workflow and Processor style/complexity debt remains; no full repository lint claim.",
+    "ESLint directed checks exited zero and git diff --check passed. Local hooks unavailable in this worktree; explicit directed gates used with command-local core.hooksPath, no global Git setting changed."
+  ],
+  "corrected_failures": [
+    "Native Project fixture feature had to be enabled before creating the synthetic project.",
+    "Shared success-plan goal fixture needed the required metric.",
+    "Native completion fixture needed assignment_id when calling Workflow.save."
+  ],
+  "word_delta_audit": [
+    {
+      "requirement": "F1.1 destination per pending responsibility, immutable proposal, native approval and separate execution",
+      "state": "Parcial",
+      "validated": "Supported pending CS objects and exclusive native CRM agenda; native Central/read-only reviewer and rollback tests passed.",
+      "remaining": "Native handling of active cadences, Project/tasks, Service Desk and shared/ambiguous responsibilities. These cases are blocked, not silently reassigned."
+    },
+    {
+      "requirement": "F1.2 safe analyst withdrawal, Word section 5.3 and embedded image16",
+      "state": "Pendente",
+      "remaining": "Withdrawal/clearance workflow and its modal, all source responsibilities and approved effective destinations. No team membership, account user or historical object was removed. This is remaining development, not a claim of completion or an external-only blocker."
+    },
+    {
+      "requirement": "F1.3 weighted points and equivalent hours",
+      "state": "Parcial",
+      "validated": "Customer-count capacity, cumulative native scope limits, availability/dedication and existing concurrency checks preserved.",
+      "remaining": "Implement alternative modes with explicit configured base/factor/effort units; validate allocation mappings and hour conversion. Word paragraph91 supplies a configurable expression, but illustrative numeric factors are not approved fixed values. Business parameters and local implementation are still required."
+    },
+    {
+      "requirement": "F1.4 interface permissions and responsibility context",
+      "state": "Implementado, mas sem homologação visual",
+      "validated": "Native source-scoped comparison, current/destination owners, frozen customer label, pagination, alert states, execution/request blocking and read-only reviewer permissions.",
+      "remaining": "Full removal/simulation visual stages and current-build mobile/desktop light/dark acceptance; no arbitrary administrative grant."
+    },
+    {
+      "requirement": "F2 daily account monitoring ceiling",
+      "state": "Concluído e testado",
+      "visual": "Implementado, mas sem homologação visual",
+      "remaining": "This bounds Processor monitoring-created CS Action records only, not every independent playbook/native task/activity engine."
+    },
+    {
+      "requirement": "F2 full freshness, priority, risk aggregation and global task governance",
+      "state": "Parcial",
+      "validated": "Earlier source windows/trend/NICO freshness/cooldown checkpoints retained; active-action updates and critical risks continue under the new monitoring ceiling.",
+      "remaining": "Other dimension freshness, broader trend/priority/aggregation rules, universal automatic-task governance and representative scale."
+    },
+    {
+      "requirement": "E1 exact-version signed files/certificate and sealed final dossier",
+      "state": "Pendente",
+      "confirmed": "Delivery admissions pin provider/connection/environment/version; completion_reported remains an observation; native package explicitly reports missing version-bound signed artifact. No production SignatureEvidence verifier is configured in app/config.",
+      "remaining": "Local artifact ingestion/integrity/security/version-bound evidence persistence and immutable final-dossier implementation remain necessary. Separately, actual DocuSign demo/consent/Connect/certificate acceptance requires external setup and authorization; no completion is inferred from that dependency."
+    },
+    {
+      "requirement": "E3 native completion to CS",
+      "state": "Parcial",
+      "validated": "Ten completion handoff and four Project acceptance regressions passed, preserving native origin, explicit acceptance, scope and old decisions.",
+      "remaining": "Complete exact contractual-version/documentary closure depends on E1; full visual acceptance remains pending. No parallel handoff created."
+    },
+    {
+      "requirement": "C Cadastro Mestre remaining document/customer flow audit",
+      "state": "Parcial",
+      "confirmed": "Earlier C5/C6/C7/B1-B4 and native module integrations preserved; no new blanket closure inferred from current tests.",
+      "remaining": "Consolidated current-source browser acceptance, representative scale and remaining per-Word audit requirements. Portfolio-free company documents remain deferred by explicit user decision."
+    },
+    {
+      "requirement": "C financial segmentation and TRR",
+      "state": "Dependente de decisão funcional",
+      "confirmed": "Approved financial base remains invoiced orders in a period; TRR has no approved definition or formula and was not invented."
+    },
+    {
+      "requirement": "D Central approval audit",
+      "state": "Parcial",
+      "confirmed": "Existing value bands/global own delegation/internal notification/native proposal adjustment retained. Current native transfer vote regressions passed with source scope and read-only reviewers.",
+      "remaining": "Adjust-and-approve for other source modules, documentary/visual closure and broader integration requirements remain per existing audit; proposal-only support is not presented as universal adjustment."
+    },
+    {
+      "requirement": "G current-source Chrome desktop/mobile and light/dark",
+      "state": "Bloqueado por restrição de ambiente",
+      "reason": "Current user forbids builds/recompilation/new runtime changes; frozen5379 assets cannot validate this code. No policy workaround attempted."
+    }
+  ],
+  "visual_acceptance_checklist_for_future_authorized_environment": [
+    "Use a separately authorized fresh build with actual local database; verify entry hash and served commit before acceptance.",
+    "In desktop and390px mobile, both themes: review all responsibility pages, customer/current/destination names, creation of proposal, invalidation on source change, request native approval, reviewer denial/approval and separate executor confirmation.",
+    "Ensure foreign account/unit/team/private sources show no labels/counts; revoke a destination native contract permission before execution and confirm rollback without false success.",
+    "Inspect applied/failed/canceled results individually; reload and retry without duplicate mutations; historical closed work remains unchanged.",
+    "At account settings edit daily limit, save and reload; non-account/unauthorized settings cannot override it. Under limit exhaustion, existing actions update and critical risks remain visible.",
+    "Retest B1-B4 company documents with allowed portfolio, contextual Service Desk ticket creation, real attendance indicators and native contract renewal actions.",
+    "Compare Word original images for customer popup, Central origin, Backoffice completion and Relationship transfer/removal. Do not approve the missing removal workflow or sealed dossier as complete. No campaign sends or real provider calls."
+  ],
+  "preserved_runtime": {
+    "probe": ".codex/d9-notifications-20261104/controlled-cg-runtime-preservation.json",
+    "containers_unchanged": true,
+    "container_names": [
+      "jrc-rel-v2-run-20261101",
+      "jrc-rel-v2-pg-20261101",
+      "jrc-rel-v2-redis-20261101",
+      "jrc-customer-b1-b4-proxy-4d4a6de3"
+    ],
+    "old5379_login_http": 200,
+    "old5379_asset_sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+    "current_source_visually_accepted": false,
+    "no_application_build_or_container_restart_reconfiguration": true,
+    "no_push_ghcr_deploy_production_or_client_environment_change": true,
+    "no_cleanup_or_existing_data_deletion": true,
+    "no_real_external_or_docusign_operation": true,
+    "no_real_environment_migration": true,
+    "untouched_integrations": "CRM/Service Desk/Projects native regressions as listed, no changes to PABX/WhatsApp/SMS providers or runtime. Untouched integrations were not all functionally rehomologated."
+  },
+  "disk_bytes": {
+    "initial": 9946632192,
+    "minimum_observed": 9847021568,
+    "last_preservation_probe": 9877262336,
+    "mandatory_stop": 750000000,
+    "last_before_report_commit": 9870913536
+  },
+  "next_sequence": [
+    "Finish native pending responsibility destinations and scoped safe analyst withdrawal before removing any participation; approval/execution must remain separate and fully audited.",
+    "Complete approved alternative capacity inputs/modes without adopting illustrative factors or inventing hour conversion.",
+    "Implement E1 artifact evidence and sealed dossier locally, retain provider boundary and exact immutable delivery/version; then revalidate E3.",
+    "Finish F2 remaining governance and original Word C/D gaps; run only impacted native regressions.",
+    "Fresh-build Chrome acceptance remains pending explicit environment authorization. C-G remain open."
+  ],
+  "files_changed_in_functional_checkpoints": [
+    "app/controllers/api/v1/accounts/relationship/distribution_approval_origins_controller.rb",
+    "app/controllers/api/v1/accounts/relationship/reviewed_batches_controller.rb",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/approvals/DistributionApprovalOrigin.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ResponsibilityComparison.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedPortfolioBatchPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/distributionConfiguration.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/responsibilityComparison.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedPortfolioBatch.spec.js",
+    "app/models/jrc_relationship/configuration.rb",
+    "app/services/jrc_relationship/automatic_action_budget.rb",
+    "app/services/jrc_relationship/batch_review_plan.rb",
+    "app/services/jrc_relationship/distribution_approval_catalog.rb",
+    "app/services/jrc_relationship/portfolio_batch.rb",
+    "app/services/jrc_relationship/portfolio_responsibilities.rb",
+    "app/services/jrc_relationship/processor.rb",
+    "app/services/jrc_relationship/responsibility_blockers.rb",
+    "app/services/jrc_relationship/responsibility_review.rb",
+    "app/services/jrc_relationship/responsibility_transfer.rb",
+    "app/services/jrc_relationship/reviewed_portfolio_batch.rb",
+    "app/services/jrc_relationship/workflow.rb",
+    "docs/jrc_consolidation/automatic_action_budget_checkpoint_20261105.json",
+    "docs/jrc_consolidation/responsibilities_transfer_checkpoint_20261105.json",
+    "docs/jrc_consolidation/responsibility_comparison_context_checkpoint_20261105.json",
+    "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb",
+    "spec/services/jrc_relationship/automatic_action_budget_concurrency_spec.rb",
+    "spec/services/jrc_relationship/automatic_action_budget_spec.rb",
+    "spec/services/jrc_relationship/responsibility_transfer_spec.rb"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "75ee96842ca6d65d060e9d8b3291e51b5fa193e2",
+  "reference": "Relationship P0124/P0125/P0128: master selection, deduplication and durable reviewed grouping",
+  "status": "Multi-customer master collection integrated and tested;true mass creation,Chrome and C-Gclosure remain open.",
+  "implementation": [
+    "Existing native CompanyPicker and per-company allocation lookup/explicit creation now support a collected audience for one native reviewed membership batch. Existing individual review and every allocation field are retained. No parallel customer/allocation table or new endpoint.",
+    "Collection deduplicates native allocation/company IDs, bounds at50and displays10rows/page. Removal affects selection only. A new explicit bounded reason, original group version and one submission lead to the existing native portfolio_membership operation;no immediate link/owner mutation.",
+    "Current unresolved choice must be added or cleared before submitting the audience;ambiguous allocation creation remains in the existing reread flow. Account/role/membership/group changes clear private selection data;parent loading disables controls without clearing the draft.",
+    "Parent now captures the master dialog context explicitly and routes collected IDs to the durable panel. Original creation and reused allocations keep their native owner, unit, capacity and source checks.",
+    "Created allocations persist independently of a canceled selection;this is stated in the interface. The local collection is not falsely labeled a server-saved draft:durable recovery begins only after the existing server preview succeeds."
+  ],
+  "evidence": {
+    "native": "master-selection-native01:5/0 (4existing master/native/permission/foreign-account/atomic-link contracts +1new real HTTP reuse/create/preview/approve/advance flow for2companies). Existing allocation remains in another active group;only2native allocations,all attributes preserved,actual completed per-item receipts checked.",
+    "source": "master-selection-source01:54/0 (16master including6new collection/dedup/50boundary/paging/role/integration cases +21existing reviewed membership +17existing group workflows).",
+    "static": "Rubynew/changed request spec0offenses;ESLintchanged2sourcecomponents/spec0errors/0warnings. Focused no-await-in-loop directive documents genuinely sequential50picker test interactions;no tests skipped or assertions suppressed.",
+    "qualification": "Real native HTTP/PostgreSQL and source Vue mocks;no fresh-source build/Chrome/real Sidekiq claim."
+  },
+  "environment": {
+    "initial_free_bytes": 6807355392,
+    "minimum_observed_bytes": 6783238144,
+    "final_free_bytes": 6811054080,
+    "database": "jrc_rel_v2_candidate_test",
+    "migrations": false,
+    "build": false,
+    "server5379_changed": false,
+    "external_operations": false,
+    "push": false
+  },
+  "remaining": [
+    "This collects master companies through the reused picker and explicit individual allocation step. A one-operation reviewed mass creation of missing allocations remains a distinct schema/engine requirement,not claimed complete.",
+    "Full local portfolio role/capability matrix,Current-sourceChrome/Word visual/literal audit and remaining C-G requirements remain open.",
+    "TRR undefined,portfolio-less documents deferred and external provider/scanner/channel homologation unchanged."
+  ],
+  "next": "Inspect native queue/runtime isolation and implement a guarded real local-worker integration gate if an unused isolated Redis/database can be guaranteed;otherwise continue another safe native gap. No original process/container/server changes or builds."
+}

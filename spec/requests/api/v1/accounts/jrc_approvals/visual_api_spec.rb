@@ -108,6 +108,29 @@ RSpec.describe 'E4 bounded visual administration', :approval_core, :commercial_a
     expect(response.parsed_body).to eq([])
   end
 
+  it 'projects the authorized delegation principal and records both names without exposing personal data' do
+    published = approval_publish(scope, author, approval_definition([approver]).merge('delegation_allowed' => true))
+    record = approval_request(scope, author)
+    delegate = approval_actor(scope, permissions: %w[jrc_approvals_decide])
+    grant = JrcApprovals::Delegations.new(account: scope[:account], user: author.user).create!(
+      policy_version_id: published.current_version_id, step_code: 'review', principal_id: approver.id, delegate_id: delegate.id,
+      actions: ['approved'], reason: 'SYNTHETIC delegated review', starts_at: 1.minute.ago, ends_at: 1.hour.from_now
+    )
+    get "#{url}/requests/#{record.id}", headers: delegate.user.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['allowed_decisions'].first['choices'].first).to include(
+      'delegation_id' => grant.id, 'principal_name' => approver.user.name, 'actions' => ['approved']
+    )
+    expect(response.body).not_to include(approver.user.email)
+    decision = { step_code: 'review', decision: 'approved', reason: 'SYNTHETIC confirmed delegated decision',
+                 expected_version: record.lock_version, delegation_id: grant.id, idempotency_key: SecureRandom.uuid }
+    post "#{url}/requests/#{record.id}/decide", headers: delegate.user.create_new_auth_token, as: :json, params: { decision: decision }
+    expect(response).to have_http_status(:ok)
+    expect(record.reload.state).to eq('approved')
+    get "#{url}/requests/#{record.id}", headers: headers
+    expect(response.parsed_body['decisions'].first).to include('actor_name' => delegate.user.name, 'delegated_from_name' => approver.user.name)
+  end
+
   it 'returns validated eligible counts and immutable published version authors' do
     proposal
     values = { code: 'visual', name: 'Synthetic UI policy', module_key: 'crm', event_key: 'proposal_send',
@@ -122,6 +145,39 @@ RSpec.describe 'E4 bounded visual administration', :approval_core, :commercial_a
     expect(response.parsed_body['current_version']).to eq(1)
     get "#{url}/policies/#{policy['id']}/versions", headers: headers
     expect(response.parsed_body.first['publisher_name']).to eq(author.user.name)
+  end
+
+  it 'generates distinct internal policy codes when the guided editor omits them, without publishing or changing explicit codes' do
+    values = { name: 'SYNTHETIC guided policy', module_key: 'crm', event_key: 'proposal_send',
+               issuer_company_id: scope[:company].id, business_unit_id: scope[:unit].id, definition: approval_definition([approver]) }
+    codes = Array.new(2) do
+      post "#{url}/policies", params: { policy: values }, headers: headers, as: :json
+      expect(response).to have_http_status(:created)
+      body = response.parsed_body
+      expect(body).to include('state' => 'draft', 'enabled' => false, 'current_version_id' => nil)
+      expect(body['code']).to match(/\Apolicy_[a-f0-9]{24}\z/)
+      expect(JrcApprovals::Policy.find(body['id']).account_id).to eq(scope[:account].id)
+      body['code']
+    end
+    expect(codes.uniq.size).to eq(2)
+    post "#{url}/policies", params: { policy: values.merge(code: 'existing_api_code') }, headers: headers, as: :json
+    expect(response).to have_http_status(:created)
+    expect(response.parsed_body['code']).to eq('existing_api_code')
+  end
+
+  it 'does not turn automatic policy identity into a manage grant or accept a foreign organizational scope' do
+    values = { name: 'SYNTHETIC denied', module_key: 'crm', event_key: 'proposal_send',
+               issuer_company_id: scope[:company].id, business_unit_id: scope[:unit].id, definition: approval_definition([approver]) }
+    expect do
+      post "#{url}/policies", params: { policy: values }, headers: approver.user.create_new_auth_token, as: :json
+    end.not_to change(JrcApprovals::Policy, :count)
+    expect(response).to have_http_status(:unauthorized)
+    other = approval_scope
+    expect do
+      post "#{url}/policies", params: { policy: values.merge(issuer_company_id: other[:company].id, business_unit_id: other[:unit].id) },
+                              headers: headers, as: :json
+    end.not_to change(JrcApprovals::Policy, :count)
+    expect(response).to have_http_status(:not_found)
   end
 
   it 'enriches simulator presentation without executing any effect' do

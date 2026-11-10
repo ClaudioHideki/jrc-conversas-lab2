@@ -28,6 +28,7 @@ RSpec.describe JrcRelationship::ReviewedPortfolioBatch do
       if method.receiver.klass == JrcRelationship::BatchReview && (calls += 1) == 1
         raise ActiveRecord::RecordNotUnique, 'unrelated immutable constraint'
       end
+
       method.call(*args)
     end
     expect { service.preview(input) }.to raise_error(ActiveRecord::RecordNotUnique)
@@ -42,19 +43,31 @@ RSpec.describe JrcRelationship::ReviewedPortfolioBatch do
 
   it 'does not claim that a playbook was applied when native conditions filtered out every effect' do
     book = JrcRelationship::Playbook.create!(account: account, name: 'Never eligible', active: true, trigger_kind: 'health',
-                                            conditions: [{ 'field' => 'health_score', 'operator' => 'gt', 'value' => 1000 }],
-                                            steps: [{ 'kind' => 'activity', 'title' => 'Not eligible', 'after_days' => 0 }])
+                                             conditions: [{ 'field' => 'health_score', 'operator' => 'gt', 'value' => 1000 }],
+                                             steps: [{ 'kind' => 'activity', 'title' => 'Not eligible', 'after_days' => 0 }])
     preview = service.preview(input.merge('operation' => 'playbook', 'playbook_id' => book.id, 'ids' => [first.id]))
     service.approve(preview.fetch('id'), digest: preview.fetch('digest'))
     result = service.advance(preview.fetch('id'))
     expect(result.fetch('state')).to eq('attention')
     expect(result.fetch('items').first).to include('state' => 'failed', 'receipt' => nil)
+    expect(result.fetch('items').first.fetch('error_code')).to eq('BATCH_NATIVE_OPERATION_FAILED')
     expect(JrcCrm::Activity.where(account: account)).to be_empty
+  end
+
+  it 'persists a bounded stale-customer diagnostic after queued work changes without exposing the changed data' do
+    preview = service.preview(input)
+    service.approve(preview.fetch('id'), digest: preview.fetch('digest'))
+    first.update!(settings: { 'synthetic_private_fact' => 'Never return this private fact as a failure' })
+    result = service.advance(preview.fetch('id'))
+    expect(result.fetch('state')).to eq('attention')
+    expect(result.fetch('items').first).to include('state' => 'failed', 'error_code' => 'BATCH_REVIEW_STALE', 'receipt' => nil)
+    expect(result.to_json).not_to include('Never return this private fact')
+    expect([first.reload.owner_id, second.reload.owner_id]).to eq([admin.id, admin.id])
   end
 
   it 'uses the native activity workflow once and rejects a changed playbook version' do
     book = JrcRelationship::Playbook.create!(account: account, name: 'Native book', active: true, trigger_kind: 'health',
-                                            steps: [{ 'kind' => 'activity', 'title' => 'Native follow-up', 'after_days' => 0 }])
+                                             steps: [{ 'kind' => 'activity', 'title' => 'Native follow-up', 'after_days' => 0 }])
     preview = service.preview(input.merge('operation' => 'playbook', 'playbook_id' => book.id))
     book.update!(version: 2)
     expect { service.approve(preview.fetch('id'), digest: preview.fetch('digest')) }.to raise_error(ArgumentError, /playbook changed/i)
@@ -67,7 +80,7 @@ RSpec.describe JrcRelationship::ReviewedPortfolioBatch do
 
   it 'records the real native resources for each successfully applied playbook step without repeating them' do
     book = JrcRelationship::Playbook.create!(account: account, name: 'Verified native book', active: true, trigger_kind: 'health',
-                                            steps: [{ 'kind' => 'activity', 'title' => 'Verified follow-up', 'after_days' => 0 }])
+                                             steps: [{ 'kind' => 'activity', 'title' => 'Verified follow-up', 'after_days' => 0 }])
     preview = service.preview(input.merge('operation' => 'playbook', 'playbook_id' => book.id, 'ids' => [first.id]))
     service.approve(preview.fetch('id'), digest: preview.fetch('digest'))
     result = service.advance(preview.fetch('id'))

@@ -4,6 +4,7 @@ class JrcRelationship::WorkflowReferences
 
   def initialize(context)
     @context = context
+    @changed_work_owner_ids = []
   end
 
   def validate!(record)
@@ -12,6 +13,13 @@ class JrcRelationship::WorkflowReferences
     validate_qbr!(record) if record.is_a?(JrcRelationship::Qbr)
     validate_expansion!(record) if record.is_a?(JrcRelationship::ExpansionSignal)
     record.assignment.customer_context(@context.member).contracts.find(record.contract_id) if record.is_a?(JrcRelationship::Renewal)
+  end
+
+  def authorize_work_owners!(record)
+    return if @changed_work_owner_ids.empty?
+
+    ownership = JrcRelationship::WorkOwnership.new(@context, record.assignment)
+    @changed_work_owner_ids.uniq.each { |id| ownership.authorize_record!(record, user_id: id) }
   end
 
   private
@@ -36,7 +44,8 @@ class JrcRelationship::WorkflowReferences
   end
 
   def validate_plan!(record)
-    (Array(record.goals) + Array(record.metadata['milestones'])).each { |goal| validate_goal!(record, goal) }
+    validate_goals!(record, record.goals, record.attribute_in_database('goals'))
+    validate_goals!(record, record.metadata['milestones'], record.attribute_in_database('metadata').to_h['milestones'])
     return unless record.project_id
 
     project = JrcOperations::Access.projects(@context.member).find(record.project_id)
@@ -45,8 +54,13 @@ class JrcRelationship::WorkflowReferences
     raise ArgumentError, 'Project must belong to this customer'
   end
 
-  def validate_goal!(record, goal)
-    @context.assignable_users.find(goal['owner_id']) if goal['owner_id'].present?
+  def validate_goals!(record, goals, previous)
+    previous = Array(previous)
+    Array(goals).each_with_index { |goal, index| validate_goal!(record, goal, previous[index]) }
+  end
+
+  def validate_goal!(record, goal, original)
+    validate_work_owner!(record, goal, original)
     customer = record.assignment.customer_context(@context.member)
     GOAL_SOURCES.each { |key, method| customer.public_send(method).find(goal[key]) if goal[key].present? }
     @context.records(JrcRelationship::Qbr).where(assignment: record.assignment).find(goal['qbr_id']) if goal['qbr_id'].present?
@@ -63,8 +77,28 @@ class JrcRelationship::WorkflowReferences
 
   def validate_qbr!(record)
     record.assignment.customer_context(@context.member).contacts.find(record.contact_id) if record.contact_id
-    Array(record.decisions).each { |decision| @context.assignable_users.find(decision['owner_id']) if decision['owner_id'].present? }
+    validate_decision_owners!(record)
     Array(record.participants).each { |participant| @context.assignable_users.find(participant['user_id']) if participant['user_id'].present? }
+  end
+
+  def validate_decision_owners!(record)
+    previous = Array(record.attribute_in_database('decisions')).each_with_index.to_h do |decision, index|
+      [decision.fetch('decision_key', index.to_s).to_s, decision]
+    end
+    Array(record.decisions).each_with_index do |decision, index|
+      original = previous[decision.fetch('decision_key', index.to_s).to_s]
+      validate_work_owner!(record, decision, original)
+    end
+  end
+
+  def validate_work_owner!(record, decision, original)
+    return if decision['owner_id'].blank?
+
+    @context.assignable_users.find(decision['owner_id'])
+    return if original && original['owner_id'].to_s == decision['owner_id'].to_s
+
+    candidate = JrcRelationship::WorkOwnership.new(@context, record.assignment).authorize!(decision['owner_id'])
+    @changed_work_owner_ids << candidate.user.id
   end
 
   def validate_expansion!(record)

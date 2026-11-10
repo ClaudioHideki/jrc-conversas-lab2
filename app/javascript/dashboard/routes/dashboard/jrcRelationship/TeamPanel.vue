@@ -1,9 +1,14 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { ref, watch, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import WithdrawalReadinessDialog from './WithdrawalReadinessDialog.vue';
+import AnalystCapacityDialog from './AnalystCapacityDialog.vue';
+import AnalystCadencesDialog from './AnalystCadencesDialog.vue';
+import AnalystNativeResponsibilitiesDialog from './AnalystNativeResponsibilitiesDialog.vue';
 import MetricsPanel from './MetricsPanel.vue';
 import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
 import {
@@ -29,6 +34,19 @@ const error = ref('');
 const busy = ref(false);
 const metadata = ref(null);
 const localRefresh = ref(0);
+const withdrawalUser = ref('');
+const withdrawalAnalyst = ref(null);
+const capacityAnalyst = ref(null);
+const cadenceAnalyst = ref(null);
+const nativeAnalyst = ref(null);
+const cadenceRefresh = ref(false);
+const closeCadences = () => {
+  cadenceAnalyst.value = null;
+  if (cadenceRefresh.value) {
+    cadenceRefresh.value = false;
+    localRefresh.value += 1;
+  }
+};
 const filters = reactive({
   segment_id: '',
   product_id: '',
@@ -37,6 +55,7 @@ const filters = reactive({
 });
 let activeController;
 const query = () => ({
+  customer_segment_id: route.query.customer_segment_id || undefined,
   ...Object.fromEntries(
     Object.entries(filters).filter(([, value]) => value !== '')
   ),
@@ -95,17 +114,29 @@ watch(
   [
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
+    () =>
+      JSON.stringify([
+        store.getters.getCurrentRole,
+        store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
+      ]),
     () => props.refresh,
     () => localRefresh.value,
     () => props.startDate,
     () => props.endDate,
     () => props.search,
+    () => route.query.customer_segment_id,
   ],
   async (_, __, cleanup) => {
     const controller = new AbortController();
     activeController = controller;
     cleanup(() => controller.abort());
     rows.value = [];
+    withdrawalAnalyst.value = null;
+    capacityAnalyst.value = null;
+    cadenceAnalyst.value = null;
+    nativeAnalyst.value = null;
+    cadenceRefresh.value = false;
+    withdrawalUser.value = '';
     metadata.value = null;
     metrics.value = null;
     drilldown.value = null;
@@ -213,6 +244,64 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         inspectMetric({ metric: drilldown.metric, day: drilldown.day }, $event)
       "
     />
+    <form
+      data-testid="withdrawal-entry"
+      class="mb-3 flex flex-wrap gap-2"
+      @submit.prevent="withdrawalAnalyst = Number(withdrawalUser)"
+    >
+      <label class="min-w-0 text-sm">
+        {{ t('RELATIONSHIP.WITHDRAWAL.ANALYST') }}
+        <select
+          v-model="withdrawalUser"
+          data-testid="withdrawal-analyst"
+          required
+          :class="inputClass"
+        >
+          <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
+          <option
+            v-for="owner in metadata?.owners || []"
+            :key="owner[0]"
+            :value="owner[0]"
+          >
+            {{ owner[1] }}
+          </option>
+        </select>
+      </label>
+      <button
+        type="submit"
+        :class="buttonClass"
+        :disabled="!withdrawalUser || busy"
+      >
+        {{ t('RELATIONSHIP.WITHDRAWAL.REVIEW') }}
+      </button>
+      <button
+        type="button"
+        data-testid="analyst-capacity-open"
+        :class="buttonClass"
+        :disabled="!withdrawalUser || busy"
+        @click="capacityAnalyst = Number(withdrawalUser)"
+      >
+        {{ t('RELATIONSHIP.CAPACITY.CURRENT_OPEN') }}
+      </button>
+      <button
+        type="button"
+        data-testid="analyst-cadences-open"
+        :class="buttonClass"
+        :disabled="!withdrawalUser || busy"
+        @click="cadenceAnalyst = Number(withdrawalUser)"
+      >
+        {{ t('RELATIONSHIP.CADENCE_TEAM.OPEN') }}
+      </button>
+      <button
+        type="button"
+        data-testid="analyst-native-open"
+        :class="buttonClass"
+        :disabled="!withdrawalUser || busy"
+        @click="nativeAnalyst = Number(withdrawalUser)"
+      >
+        {{ t('RELATIONSHIP.NATIVE_RESPONSIBILITIES.OPEN') }}
+      </button>
+    </form>
     <div
       v-if="rows.length"
       class="overflow-x-auto rounded-xl border border-n-weak"
@@ -235,7 +324,16 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             v-for="row in rows"
             :key="row.user.id"
           >
-            <td class="p-3 font-semibold">{{ row.user.name }}</td>
+            <td class="p-3 font-semibold">
+              {{ row.user.name }}
+              <button
+                type="button"
+                :class="buttonClass"
+                @click="capacityAnalyst = row.user.id"
+              >
+                {{ t('RELATIONSHIP.CAPACITY.CURRENT_OPEN') }}
+              </button>
+            </td>
             <td
               v-for="key in keys"
               :key="key"
@@ -258,4 +356,27 @@ const money = value => formatMoney(value, metadata.value?.formatting);
       {{ t('RELATIONSHIP.EMPTY') }}
     </p>
   </section>
+  <WithdrawalReadinessDialog
+    v-if="withdrawalAnalyst"
+    :analyst-id="withdrawalAnalyst"
+    @close="withdrawalAnalyst = null"
+  />
+  <AnalystCapacityDialog
+    v-if="capacityAnalyst"
+    :analyst-id="capacityAnalyst"
+    @close="capacityAnalyst = null"
+  />
+  <AnalystCadencesDialog
+    v-if="cadenceAnalyst"
+    :analyst-id="cadenceAnalyst"
+    :formatting="metadata?.formatting || {}"
+    @close="closeCadences"
+    @changed="cadenceRefresh = true"
+  />
+  <AnalystNativeResponsibilitiesDialog
+    v-if="nativeAnalyst"
+    :analyst-id="nativeAnalyst"
+    :formatting="metadata?.formatting || {}"
+    @close="nativeAnalyst = null"
+  />
 </template>

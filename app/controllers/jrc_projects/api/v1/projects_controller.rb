@@ -4,6 +4,7 @@ module JrcProjects
       class ProjectsController < BaseController
         def index
           scope = JrcOperations::Access.projects(Current.account_user).includes(:owner, :contact).order(updated_at: :desc, id: :desc)
+          scope = customer_segment_projects(scope)
           scope = scope.where(status: params[:status]) if params[:status].present?
           scope = scope.where(owner_id: params[:owner_id]) if params[:owner_id].present?
           scope = scope.where(contact_id: params[:contact_id]) if params[:contact_id].present?

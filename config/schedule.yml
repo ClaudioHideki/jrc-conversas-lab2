@@ -98,6 +98,26 @@ jrc_relationship_signals_job:
   class: 'JrcRelationship::SchedulerJob'
   queue: low
 
+jrc_backoffice_signature_notification_recovery_job:
+  cron: '* * * * *'
+  class: 'JrcBackoffice::SignatureNotificationRecoveryJob'
+  queue: scheduled_jobs
+
+jrc_approval_notification_recovery_job:
+  cron: '* * * * *'
+  class: 'JrcApprovals::NotificationRecoveryJob'
+  queue: scheduled_jobs
+
+jrc_backoffice_signature_reconciliation_recovery_job:
+  cron: '*/5 * * * *'
+  class: 'JrcBackoffice::SignatureReconciliationRecoveryJob'
+  queue: scheduled_jobs
+
+jrc_backoffice_signature_dispatch_recovery_job:
+  cron: '*/5 * * * *'
+  class: 'JrcBackoffice::SignatureDispatchRecoveryJob'
+  queue: scheduled_jobs
+
 jrc_operations_sla_monitor_job:
   cron: '*/5 * * * *'
   class: 'JrcOperations::SlaMonitorJob'

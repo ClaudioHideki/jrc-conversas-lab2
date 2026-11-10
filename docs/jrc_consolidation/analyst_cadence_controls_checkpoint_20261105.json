@@ -1,0 +1,135 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "ded8fe028309f2d8094627dda359e04dbb3ff153",
+  "status": "Incremental F1 supervised cadence dependency control implemented and locally validated; final withdrawal and C-G remain open",
+  "word_reference": {
+    "document": "RelationshipV2 Word",
+    "paragraphs": [
+      101,
+      102,
+      104,
+      105,
+      106,
+      107
+    ],
+    "scope": "Native dependency diagnosis and explicit operational stop; not automatic reassignment or removal."
+  },
+  "implemented": [
+    "Supervisor listing covers both original execution authority and active portfolio ownership. The same native query feeds withdrawal readiness; OR membership avoids double counting. Hidden native portfolios deny before counts.",
+    "Listing is paginated10, returns current authorized customer/revision/pending count/date/dependency kind, and omits original playbook contents, conversation evidence and applied receipts. Full native cadence detail remains restricted to the original actor.",
+    "An explicit supervisor decision requires current native manage+team, account-bound analyst, write-scoped assignment, locked enrollment/assignment, exact reviewed revision and bounded reason. Dependencies are revalidated after locks.",
+    "Only pending steps stop through the original native stop transition. Original actor, immutable source/review snapshots, applied receipts and v1 execution paths are preserved. Audit records current supervisor and canonical reviewed analyst. No impersonation or future execution authority is fabricated.",
+    "Existing team panel opens a native popup even when the analyst has no current allocation rows. It supports pagination/customer navigation/read-only roles, explicit stop review, retained conflict drafts, last-page recovery, identity/revocation clearing and no stale change emission during refresh. Team counters reload on popup close so successive reviews remain available."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "analyst-cadences01",
+      "examples": 5,
+      "failures": 2,
+      "note": "Three core authorization/immutable-stop cases passed; two fixtures assumed revision0 instead of the actual native default1."
+    },
+    {
+      "label": "analyst-cadences-native02",
+      "examples": 7,
+      "failures": 0,
+      "note": "Adds real11-enrollment pagination and hidden-scope rejection before disclosure."
+    },
+    {
+      "label": "analyst-cadences-native-final",
+      "examples": 16,
+      "failures": 0,
+      "note": "Seven new route cases plus nine native v1 cadence regression cases."
+    },
+    {
+      "label": "analyst-cadences-reader-final",
+      "examples": 1,
+      "failures": 0,
+      "note": "Current scoped team readers cannot execute a stop without manage permission."
+    },
+    {
+      "label": "analyst-cadences-dependency-final",
+      "examples": 15,
+      "failures": 0,
+      "note": "Nine final route cases, five existing readiness cases and one1000-allocation native scale case; includes differing execution/portfolio owners."
+    },
+    {
+      "label": "analyst-cadences-ui01",
+      "tests": 13,
+      "failures": 0,
+      "note": "Six popup cases, four team-entry and three existing readiness cases."
+    },
+    {
+      "label": "analyst-cadences-ui-final",
+      "tests": 13,
+      "failures": 0,
+      "note": "Eight popup and five team-entry cases; overlaps earlier evidence, adds empty final page and identity change during post-stop refresh."
+    },
+    {
+      "label": "analyst-cadences-ui-dependency-final",
+      "tests": 8,
+      "failures": 0,
+      "note": "Final popup state/dependency label verification; not additional distinct tests."
+    }
+  ],
+  "representative_scale": {
+    "synthetic_allocations": 1000,
+    "setup_seconds": 9.517,
+    "request_seconds": 0.316,
+    "response_bytes": 391,
+    "claim": "One real native synthetic request, not a universal production capacity SLA."
+  },
+  "static": [
+    "New service/controller/spec and changed native cadence/readiness services0 RuboCop offenses.",
+    "Directed ESLint0 errors; new popup1 standard warning and existing team panel9 warnings retained.",
+    "git diff --check clean. New endpoints exercised through actual Rails request routing; no related Enterprise override found."
+  ],
+  "files": [
+    "app/javascript/dashboard/api/jrcRelationship.js",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/TeamPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/withdrawalTeamEntry.spec.js",
+    "app/services/jrc_relationship/reviewed_cadence.rb",
+    "app/services/jrc_relationship/withdrawal_readiness.rb",
+    "config/routes.rb",
+    "app/controllers/api/v1/accounts/relationship/analyst_cadences_controller.rb",
+    "app/services/jrc_relationship/analyst_cadences.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystCadencesDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystCadences.spec.js",
+    "spec/requests/api/v1/accounts/relationship/analyst_cadences_spec.rb"
+  ],
+  "disk": {
+    "analyst-cadences01": {
+      "start": 7318491136,
+      "minimum": 7318360064,
+      "end": 7318351872
+    },
+    "analyst-cadences-native02": {
+      "start": 7317340160,
+      "minimum": 7297523712,
+      "end": 7317184512
+    },
+    "analyst-cadences-native-final": {
+      "start": 7313264640,
+      "minimum": 7312367616,
+      "end": 7312367616
+    },
+    "analyst-cadences-reader-final": {
+      "start": 7302443008,
+      "minimum": 7290970112,
+      "end": 7290187776
+    },
+    "analyst-cadences-dependency-final": {
+      "start": 7308230656,
+      "minimum": 7287955456,
+      "end": 7307612160
+    },
+    "final_bytes": 7314264064
+  },
+  "remaining": [
+    "Safe continuation under a successor authority remains separate; explicit stop is not presented as responsibility transfer.",
+    "Final analyst withdrawal awaits a business scope distinction between CS eligibility and global account/user removal. Native AgentsController currently destroys AccountUser and queues DeleteObjectJob when no memberships remain; no global identity behavior changed. A concise asynchronous question is pending; independent work continues.",
+    "Current-source Chrome desktop/mobile and full Word visual conformity remain pending explicit build authorization. TRR undefined; company documents without portfolio explicitly deferred."
+  ],
+  "next": "F2 explicit numeric P0-P3 policy through native versioned configuration/priority calculation and queue UI, preserving legacy behavior when absent.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 changes,container restart,global membership changes or external real operation."
+}

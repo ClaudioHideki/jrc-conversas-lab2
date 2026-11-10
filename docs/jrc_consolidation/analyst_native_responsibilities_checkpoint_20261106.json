@@ -1,0 +1,152 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "8622af58c6bc7b2ce06b606aa312bfae06a91d1e",
+  "status": "F1 native responsibility origin inventory implemented/tested; final withdrawal and C-G remain open",
+  "word_reference": {
+    "document": "RelationshipV2 Word",
+    "paragraphs": [
+      102,
+      105,
+      106
+    ],
+    "scope": "Safe source inventory and native editor access; no final removal/succession decision"
+  },
+  "implemented": [
+    "NativeResponsibilities now exposes the identical account-bound pending ownership query already used by WithdrawalReadiness. Readiness reuses it without changing conditions/digest/count semantics. Existing native task/ticket transfers unchanged.",
+    "New read-only team endpoint selects canonical account analyst and allowlisted category project_tasks/service_tickets/projects. Native pending phases/ownership, project visibility, task capability, Service Desk unit/operator/withdrawal/supervision scopes reused. Any hidden owned row rejects before totals; no partial count represented as complete. Supplied unit/operator/user IDs cannot grant access.",
+    "Fixed10-row SQL pagination, safe empty out-of-range pages without overflowing SQL offsets, minimal id/title/state/update/source-route projection. Descriptions, attachments, membership details, immutable source payloads and credentials omitted. Successful responses are no-store.",
+    "Fresh caller/account/source membership/module/Team/native visibility is rechecked before disclosure, including a deterministic real DB grant revocation during the query. This is not a final withdrawal token or execution approval.",
+    "Existing Team selector opens the dialog even with no allocated customers. Horizontal colored categories, paging, native source/task navigation, bounded last-page recovery, denied-access clearing, explicit retry, request abort and user/account/role identity clearing. No source editor, ownership or membership mutation introduced."
+  ],
+  "tests_non_additive": [
+    {
+      "gate": "analyst-native-responsibilities01",
+      "examples": 12,
+      "failures": 1,
+      "correction": "Historical ticket fixture now creates the mandatory native initial status before moving to closed; no production validation bypass."
+    },
+    {
+      "gate": "analyst-native-final",
+      "examples": 22,
+      "failures": 0,
+      "coverage": [
+        "actual11-task pagination and completed exclusion",
+        "pending ticket membership/closed history/minimal fields",
+        "owned projects and final status exclusion",
+        "private projects/foreign accounts and analysts/module capability denial",
+        "native operator and unit grants; hidden owned ticket rejects totals even with supplied unit/operator parameters",
+        "real DB capability revocation injected during source query then rechecked before disclosure",
+        "invalid category/page and huge page without SQL offset overflow",
+        "existing readiness5 and native scoped transfer8 regressions"
+      ]
+    },
+    {
+      "gate": "analyst-native-ui01",
+      "examples": 11,
+      "failures": 0,
+      "kind": "Vue/API simulations, not Chrome desktop/mobile acceptance",
+      "coverage": [
+        "native source navigation/paging/category reset",
+        "denial/retry/no stale links",
+        "identity abort/late response suppression",
+        "bounded disappearing-page recovery",
+        "zero-allocation Team entry and account switch",
+        "existing readiness/capacity/cadence entry regressions"
+      ]
+    }
+  ],
+  "static": {
+    "new_ruby_offenses": 0,
+    "shared_delta": [
+      {
+        "path": "app/services/jrc_relationship/native_responsibilities.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/withdrawal_readiness.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "config/routes.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "eslint_errors": 0,
+    "eslint_warnings": {
+      "AnalystNativeResponsibilitiesDialog.vue": 3,
+      "TeamPanel.vue": 9
+    },
+    "git_diff_check": 0
+  },
+  "resources": {
+    "initial_free_bytes": 7298306048,
+    "native": {
+      "start": 7266451456,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/analyst_native_responsibilities_spec.rb": "6fd4fbadfaab6555f34778ae3ba7935102ae5535e5cd56f5c99ff62fddf42457",
+        "spec/requests/api/v1/accounts/relationship/withdrawal_readiness_spec.rb": "75dffdbaa32c5a2bb63217b8db1f27b3515e97b92b464e7dc915fae84ccf8032",
+        "spec/services/jrc_relationship/native_responsibilities_spec.rb": "a81d387e18e5ed9ba1cd47fcf68f07d2028d1f2f91366e289a5183df45673dbf"
+      },
+      "minimum": 7264731136,
+      "exit_code": 0,
+      "end": 7264731136
+    },
+    "vue": {
+      "status": "passed",
+      "free_start": 7269965824,
+      "minimum_free": 7246843904,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 19192,
+      "exit_code": 0,
+      "free_end": 7268798464
+    },
+    "current_free_bytes": 7263965184
+  },
+  "preserved_checkpoints_ancestors": {
+    "53d0b022": true,
+    "3b31577e": true,
+    "a1fef624": true,
+    "9bb8d2ec": true,
+    "07a9e400": true,
+    "0f768a98": true,
+    "e1c6261c": true,
+    "9340184a": true,
+    "8622af58": true
+  },
+  "files_sha256": {
+    "app/javascript/dashboard/api/jrcRelationship.js": "701c4348e4d03b1e795a001c770f7250026d1139bd91f69d42f6be09fe790e82",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "0cee25dbd0c69b242e3286f3c81d6c17d62622126420946c2d84e046a36669c1",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/TeamPanel.vue": "9aa9043247cbc5d5a66f5c77c362ec9f62aeaf69e251486a5806a6a194c4ca09",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/withdrawalTeamEntry.spec.js": "6e31defc7eeef1ee73418eb9c2d689007fc8c281e22a8d1e2285b88848313b32",
+    "app/services/jrc_relationship/native_responsibilities.rb": "d85389477186397670e2d92c2212247c6d935ae6bdccf6cc197e4167ae1b80e3",
+    "app/services/jrc_relationship/withdrawal_readiness.rb": "e11383d3021b45b57f3b0bb7d7ced96a22024097f213bb38022d87027b58c49b",
+    "config/routes.rb": "c174e3cbc8959da27652113c1bf31bc725b07342e93634470efb2310fec01556",
+    "app/controllers/api/v1/accounts/relationship/analyst_native_responsibilities_controller.rb": "d7b9f697002a5deaabce3687cb4ea1f482f2484b9c9917f835e8c46ea5bf1aba",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystNativeResponsibilitiesDialog.vue": "7863607d3d5ffcdd8b516b52bb7a7dee2649fb90265934842f7889d906fad187",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystNativeResponsibilities.spec.js": "4bfa4487746afa1f4e36ca8ce122cd20a7c143f91171a5d9f45848eaff9f28ff",
+    "app/services/jrc_relationship/analyst_native_responsibilities.rb": "dccfeed97e138cb2b49d85ab7f0716ebe60bf52b66bc9647d67e0111f6cd0f75",
+    "spec/requests/api/v1/accounts/relationship/analyst_native_responsibilities_spec.rb": "6fd4fbadfaab6555f34778ae3ba7935102ae5535e5cd56f5c99ff62fddf42457"
+  },
+  "limitations": [
+    "Read-only native ownership inventory. No source transfer, roster suspension, global user removal or new project/unit grants. Final withdrawal business scope still awaits the pending answer.",
+    "Native source editor permissions remain authoritative after navigation; visible rows do not imply transfer capability or a reviewed destination.",
+    "Fresh build/current-source Chrome, full Word visual acceptance and external DocuSign/scanner/channel homologation remain open. No build, migration, cleanup, push, deployment, external operation or runtime change performed.",
+    "TRR undefined and documents without portfolio remain user-deferred."
+  ],
+  "next_active_work": "Consolidated Word/source/evidence delta audit to select the next executable C/D/F2 gap, then continue implementation; no stage closure."
+}

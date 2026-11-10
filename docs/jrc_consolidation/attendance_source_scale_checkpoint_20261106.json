@@ -1,0 +1,251 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "b1851b76d74b9f135ed17ab876c2680e703ccc2b",
+  "scope": "C B3 native source scale and query corrections; limited subset of C representative scale, not full stage acceptance",
+  "files": {
+    "app/services/jrc_customers/attendance_metrics.rb": "c207615e6a7fa458284360498ebaeb483cc686d3557d941709940b6cc6b8c483",
+    "app/services/jrc_service_desk/clock_breach_query.rb": "7cbbb7065d45b21a231c2bf0111c7dd90386d0fa84a9bc3d68a19f6af2465280",
+    "spec/requests/api/v1/accounts/customers/attendance_scale_spec.rb": "4bcf1f37e17b2726864c5eb287b8c4014c7590a65aee4df5f89450709289c060"
+  },
+  "changes": [
+    "Preserve both native customer-view and SLA-view ticket scopes via explicit SQL INTERSECT; no account/unit/department/grant predicate removed.",
+    "Preload the immutable lifecycle policy version together with SLA cycles/snapshots; no clock calculation or state changed.",
+    "Test committed synthetic conversation cohort; preserve it and analyze only messages/conversations/contacts in exact guarded candidate DB. No removal or production statistics change."
+  ],
+  "evidence": {
+    "first_gate": "2 examples/1 failure: conversation correctness passed; nested native clock query canceled at unchanged14s timeout. No SQL blocker was present.",
+    "diagnostic_gate": "1/1 reproduced QueryCanceled, then secondary InFailedSqlTransaction. SQL diagnostics record classes/tables/times only.",
+    "after_intersection": "1/1 solely bounded-query assertion: all response/calendar/read-only assertions passed;100 policy reads detected.",
+    "native_regression": "24/0 after preload: scale clock case,9 attendance cases,8 restricted-supervision cases,6 agent-load cases.",
+    "committed_final_gate": "2/0 before declarative fixture/report rearrangement.",
+    "source_settled_gate": "2/1: all domain assertions passed; final manifest GROUP BY hit Message default order. Fixed only report query with reorder(nil). Calendar case1/0.",
+    "final_manifest_gate": "1/0 after reorder correction; complete own-cohort API assertions passed.",
+    "statistics_note": "Earlier uncommitted1000-row setup was planned using estimates of4 messages/conversations. Observed8-11s was not accepted as steady-state evidence. No application timeout or native message query changed to hide this fixture effect.",
+    "ruby_source_offenses": 0,
+    "new_frontend_code": false
+  },
+  "conversation_cohort": {
+    "dataset": "synthetic_company_attendance",
+    "account_id": 18403,
+    "company_id": 12845,
+    "contact_id": 18772,
+    "committed_cohort_preserved": true,
+    "statistics_updated_only_in_guarded_candidate_db": true,
+    "table_estimates": [
+      [
+        "conversations",
+        3004
+      ],
+      [
+        "messages",
+        6454
+      ],
+      [
+        "contacts",
+        112
+      ]
+    ],
+    "conversations": 1000,
+    "fixture_messages": 1150,
+    "private_messages": 100,
+    "all_messages_by_type": {
+      "incoming": 1000,
+      "outgoing": 150,
+      "template": 1000
+    },
+    "setup_seconds": 92.184,
+    "observations": [
+      {
+        "channel": "all",
+        "seconds": 0.8285,
+        "uncached_queries": 22,
+        "response_bytes": 522,
+        "slowest_queries": [
+          {
+            "milliseconds": 3.34,
+            "cached": false,
+            "tables": [
+              "messages",
+              "conversations",
+              "contacts"
+            ],
+            "error": null,
+            "cause": null
+          },
+          {
+            "milliseconds": 2.97,
+            "cached": false,
+            "tables": [
+              "conversations",
+              "inboxes",
+              "contacts"
+            ],
+            "error": null,
+            "cause": null
+          },
+          {
+            "milliseconds": 2.88,
+            "cached": false,
+            "tables": [
+              "messages",
+              "conversations",
+              "contacts"
+            ],
+            "error": null,
+            "cause": null
+          }
+        ],
+        "service_desk_available": false
+      },
+      {
+        "channel": "Channel::Api",
+        "seconds": 0.1229,
+        "uncached_queries": 22,
+        "response_bytes": 489,
+        "slowest_queries": [
+          {
+            "milliseconds": 2.86,
+            "cached": false,
+            "tables": [
+              "messages",
+              "conversations",
+              "inboxes",
+              "contacts"
+            ],
+            "error": null,
+            "cause": null
+          },
+          {
+            "milliseconds": 2.82,
+            "cached": false,
+            "tables": [
+              "messages",
+              "conversations",
+              "inboxes",
+              "contacts"
+            ],
+            "error": null,
+            "cause": null
+          },
+          {
+            "milliseconds": 1.92,
+            "cached": false,
+            "tables": [
+              "conversations",
+              "inboxes",
+              "contacts"
+            ],
+            "error": null,
+            "cause": null
+          }
+        ],
+        "service_desk_available": false
+      },
+      {
+        "channel": "all",
+        "seconds": 0.1134,
+        "uncached_queries": 22,
+        "response_bytes": 522,
+        "slowest_queries": [
+          {
+            "milliseconds": 3.19,
+            "cached": false,
+            "tables": [
+              "messages",
+              "conversations",
+              "contacts"
+            ],
+            "error": null,
+            "cause": null
+          },
+          {
+            "milliseconds": 2.86,
+            "cached": false,
+            "tables": [
+              "messages",
+              "conversations",
+              "contacts"
+            ],
+            "error": null,
+            "cause": null
+          },
+          {
+            "milliseconds": 1.89,
+            "cached": false,
+            "tables": [
+              "conversations",
+              "inboxes",
+              "contacts"
+            ],
+            "error": null,
+            "cause": null
+          }
+        ],
+        "service_desk_available": false
+      }
+    ]
+  },
+  "calendar_cohort": {
+    "dataset": "synthetic_attendance_calendar_clocks",
+    "tickets": 100,
+    "clocks": 200,
+    "policy_queries": 1,
+    "setup_seconds": 40.454,
+    "request_seconds": 0.3459
+  },
+  "resources": {
+    "final_conversations": {
+      "start": 7225389056,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {},
+      "minimum": 7204646912,
+      "exit_code": 0,
+      "end": 7224262656
+    },
+    "calendar_settled": {
+      "start": 7228346368,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/customers/attendance_scale_spec.rb": "74afa4045e0796024a86e59de66856b6e3a369f877df78ca47e40ad784ec52e0"
+      },
+      "minimum": 7206879232,
+      "exit_code": 1,
+      "end": 7226408960
+    },
+    "native_regression": {
+      "start": 7230812160,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/customers/attendance_spec.rb": "128c974e5497de743c2b6f3bc01a06ad5571a8892ef1d873b92bfa9823a4f2d8",
+        "spec/requests/api/v1/accounts/jrc_service_desk/restricted_supervision_spec.rb": "7eb0d1a263593082f3a56576b2bae1356a0d0757dc186a6b4f7273bd56979d8a",
+        "spec/services/jrc_service_desk/supervision_agent_loads_spec.rb": "a64ad43e5c55e4964824c191c869533975746c664a8f7892579c69757e6556a0"
+      },
+      "minimum": 7210553344,
+      "exit_code": 0,
+      "end": 7230328832
+    }
+  },
+  "preserved_cohorts": "All committed synthetic cohorts retained; no automatic cleanup. Earlier failed diagnostic cohorts also remain. IDs available through marker company name and account manifest.",
+  "no_build": true,
+  "no5379_change": true,
+  "no_container_restart": true,
+  "no_external_delivery": true,
+  "no_schema_change": true,
+  "no_push_deploy": true,
+  "free_final_bytes": 7223656448,
+  "limitations": [
+    "One company/contact, two native channels and1000 conversations;100 tickets in one native unit. This does not qualify all document/list/popup datasets or production capacity.",
+    "Only bounded local request observations; no throughput/concurrent production pilot, p95 claim or invented SLO.",
+    "Fresh Chrome desktop/mobile/light-dark acceptance remains blocked by no-build instruction. C-G remain open."
+  ],
+  "next_work": "F2 customer360/health SLA signal must reuse native calendar projections and SLA-view permissions; review in customer_sla_native_gap_review_20261106.json."
+}

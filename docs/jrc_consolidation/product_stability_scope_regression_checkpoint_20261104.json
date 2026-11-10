@@ -1,0 +1,63 @@
+{
+  "stage": "F2 and targeted G",
+  "status": "Product stability and snapshot revocation fixes implemented/tested; C,D,E,F,G remain open",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_checkpoint": "4627f9f9c9dd10520e8b68aef9d69334fc2f6085",
+  "implemented": [
+    "Opt-in per-product recovery hysteresis reuses HealthHysteresis.band, the current effective native configuration, and exact product configuration scope/version",
+    "Previous observations must belong to the same account, viewer, native portfolio scope and current access signature; SnapshotAccess reauthorizes every historical source",
+    "Measured score/raw band, stabilized band and actual prior snapshot ID remain separate explainable stored evidence; missing product scores never borrow the customer score or become zero",
+    "Real CustomerSignals/Processor flow now preserves per-product stability and the union of authorized historical evidence; default zero-margin behavior is retained",
+    "Fingerprint excludes previous_snapshot_id and previous_band lineage only, for both customer and product health. Scores, effective bands, factors, configuration, date and access evidence remain fingerprinted; unchanged recovered observations no longer create duplicate snapshots",
+    "Existing HealthStabilityNote reused on current product measurements and immutable product history, without a second scoring or document registry",
+    "Confirmed/fixed snapshot authorization defect: formerly enabled CRM/Service Desk/Projects observations could survive module revocation when their source arrays were empty. Native current capability checks now cover those stored claims, including the optional legacy-manifest branch",
+    "No permission grants, historical snapshot rewrites, default policy activation, external operation, migration or background worker added"
+  ],
+  "shared_impact_review": {
+    "affected": ["CustomerSignals", "Processor", "SnapshotAccess", "native portfolio/history/metrics", "Customer360 snapshot evidence", "NICO snapshot access"],
+    "enterprise": "Corresponding class/extension searches found no overlay for the modified relationship services; native enterprise/custom-role source policies remain reused",
+    "preserved": ["existing module access and corporate/unit/portfolio visibility", "private project scopes", "legacy authorized history", "immutable snapshot attributes", "native reviewed portfolio transactions and receipts", "CRM/contract lineage", "NICO native tool authorization"]
+  },
+  "validation": {
+    "native_full_selected_regression": { "artifact": ".codex/d9-notifications-20261104/gf2nativefinal01-resource.json", "examples": 109, "failures": 0, "scope": "Product/customer hysteresis and dedup, public product-history endpoint, snapshot capabilities, reviewed portfolios, monitoring, health coverage, native CRM lineage, revenue and NICO domain actions" },
+    "final_named_capability_spec": { "artifact": ".codex/d9-notifications-20261104/gsnapshot-caps-final-resource.json", "examples": 4, "failures": 0 },
+    "frontend": { "artifact": ".codex/d-approvals-20261104/f2productstabilityui01-resource.json", "tests": 22, "failures": 0, "scope": "10 product-history interactions including real stability-note component, 4 existing stability-note cases and 8 API regressions; HTTP simulated, not Chrome acceptance" },
+    "new_ruby_lint": { "artifacts": [".codex/d9-notifications-20261104/f2g-new-ruby-final.json", ".codex/d9-notifications-20261104/snapshot-access-capabilities-lint-final.json"], "offenses": "Zero in the final new service/spec files. Capability spec renamed to match SnapshotAccess; no lint rule disabled." },
+    "frontend_lint": { "parents": ".codex/d-approvals-20261104/ef-parent-eslint02.json", "components": ".codex/d-approvals-20261104/f2g-stability-eslint-final.json", "errors": 0, "warnings": "Existing/dynamic native translation-vocabulary warnings retained, not suppressed" },
+    "native_pending_migration_check": "Retained and passed; no test schema replacement or special bank guard bypass",
+    "before_fix_reproduction": { "artifact": ".codex/d9-notifications-20261104/gsnapshotrevocation-before01-resource.json", "examples": 1, "failures": 1, "finding": "After project module revocation, an observation declaring projects available still returned total=1 because _source_ids was empty" },
+    "after_fix_endpoint": { "artifact": ".codex/d9-notifications-20261104/gsnapshotrevocation-after01-resource.json", "examples": 13, "failures": 0 },
+    "earlier_regression_failure": "gproductstability01: 64 examples, 1 fixture failure. A supposed authorized own-project control lacked the native jrc_projects_enabled flag. Explicitly enabled it on the synthetic actor only, kept the positive own-project control and private foreign-owner rejection. Subsequent 109-example regression passed.",
+    "rename": { "proof": ".codex/d9-notifications-20261104/snapshot-spec-rename-proof.json", "final_path": "spec/services/jrc_relationship/snapshot_access_capabilities_spec.rb", "same_host_and_owned_copy_sha256": "fe8c99cb98ab8bf2a58bd0a67a512cd731d69f019b230b652f6eecd14453959d", "note": "First PowerShell parameter-set attempt moved nothing. Corrected stop-on-error rename preserved bytes in host and independent owned test copy; no duplicate test or user-content deletion." }
+  },
+  "bounded_scale_sample": {
+    "observations": 200,
+    "source": "Synthetic daily native PostgreSQL snapshots referencing a real authorized native contract, one portfolio/product",
+    "page": 13,
+    "returned": 10,
+    "total": 200,
+    "seconds": 0.526,
+    "sql_queries": 160,
+    "interpretation": "Measured local pagination/privacy sample, not a production SLO or full enterprise-scale acceptance; preview did not create/update snapshots"
+  },
+  "word_comparison": {
+    "implemented_and_tested": ["configured per-product hysteresis", "explainable raw/stable score and preserved observations", "source revocation", "immutable histories and repeated-calculation idempotency"],
+    "visual_partial": "Reference Relationship image5 inspected. Existing CustomerPanel/product list reused; real desktop/mobile/light/dark acceptance and full dashboard visual comparison remain pending authorized assets.",
+    "pending": ["configured source freshness and trend windows", "cooldown/anti-repeat across closed cases", "full product-specific operational trigger/filter/report matrix", "native Central-approved distribution with actual capacity and safe analyst removal", "E1 sealed signed dossier and E3 full conclusion/CS handoff", "D operational and complete visual acceptance", "full cross-module and representative enterprise-scale G acceptance"],
+    "business_dependencies": ["TRR remains undefined; no invented formula", "company documents without portfolio remain deferred by user"],
+    "all_stages_complete": false
+  },
+  "runtime_and_disk": {
+    "initial_bytes_this_continuation": 12870594560,
+    "minimum_observed_bytes_this_continuation": 4553723904,
+    "native_regression_start": 12095107072,
+    "native_regression_minimum": 11976216576,
+    "native_regression_end": 12039385088,
+    "last_preservation_probe_bytes": 13069103104,
+    "guard": "Conservative 2 GB / mandatory 750 MB; never triggered. Free-space oscillations recorded without attributing their cause or cleaning/interfering with other work.",
+    "containers": "All four running with unchanged start timestamps",
+    "preserved_5379": { "login_http": 200, "entry_http": 200, "entry_sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52", "source_commit": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def", "new_source_served": false, "browser_qa": false, "artifact": ".codex/d9-notifications-20261104/followup-runtime-preservation.json" },
+    "build_push_ghcr_deploy_external_real_operations_cleanup": false
+  },
+  "next": "Continue native E3 conclusion/CS context and F1 Central distribution gaps, retaining all checkpoint evidence and current build/external-operation restrictions."
+}

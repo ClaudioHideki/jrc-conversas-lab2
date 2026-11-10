@@ -57,6 +57,27 @@ export function createServiceDeskClient(http) {
         throw new TypeError('Unit selection required');
       return get(`${baseUrl(accountId)}/${resource}`, normalized, signal);
     },
+    requesterContext: (accountId, { unitId, companyId, contactId }, signal) => {
+      const unit = canonicalId(unitId);
+      const company = companyId ? canonicalId(companyId) : null;
+      const contact = contactId ? canonicalId(contactId) : null;
+      if (
+        !unit ||
+        (companyId && !company) ||
+        (contactId && !contact) ||
+        (!company && !contact)
+      )
+        throw new TypeError('Invalid requester context');
+      return get(
+        `${baseUrl(accountId)}/requester_people${contact ? `/${contact}` : ''}`,
+        {
+          unit_id: unit,
+          ...(company ? { company_id: company } : {}),
+          ...(contact ? {} : { per_page: 1 }),
+        },
+        signal
+      );
+    },
     ticket: (accountId, ticketId, signal) => {
       const id = canonicalId(ticketId);
       if (!id) throw new TypeError('Invalid ticket');

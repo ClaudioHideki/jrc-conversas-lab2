@@ -5,6 +5,7 @@ class JrcRelationship::Record < ApplicationRecord
   validates :assignment, presence: true, unless: -> { is_a?(JrcRelationship::Survey) && source_type.present? }
   belongs_to :owner, class_name: 'User', optional: true
   validate :tenant_references
+  validate { JrcRelationship::AnalystEligibility.validate!(self) }
 
   private
 

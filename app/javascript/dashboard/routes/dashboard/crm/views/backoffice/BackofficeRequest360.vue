@@ -9,7 +9,13 @@ import BackofficeRequestSummary from './BackofficeRequestSummary.vue';
 import BackofficeAssignment from './BackofficeAssignment.vue';
 import BackofficeActions from './BackofficeActions.vue';
 import BackofficeDocumentVersions from './BackofficeDocumentVersions.vue';
+import BackofficeContractPanel from './BackofficeContractPanel.vue';
 import BackofficeFinance from './BackofficeFinance.vue';
+import BackofficeCompletionReport from './BackofficeCompletionReport.vue';
+import BackofficeCompletionPackage from './BackofficeCompletionPackage.vue';
+import BackofficeCompletionHandoff from './BackofficeCompletionHandoff.vue';
+import BackofficeApprovalMirror from './BackofficeApprovalMirror.vue';
+import BackofficeRequirementsPanel from './BackofficeRequirementsPanel.vue';
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
@@ -25,9 +31,13 @@ const tabs = [
   'operations',
   'context',
   'documents',
+  'requirements',
+  'approvals',
+  'contracts',
   'checklist',
   'issues',
   'finance',
+  'completion',
   'history',
 ];
 const tab = ref(
@@ -39,9 +49,13 @@ const tabTones = {
   operations: 'blue',
   context: 'cyan',
   documents: 'amber',
+  requirements: 'amber',
+  approvals: 'violet',
+  contracts: 'blue',
   checklist: 'teal',
   issues: 'rose',
   finance: 'violet',
+  completion: 'teal',
   history: 'blue',
 };
 let sequence = 0;
@@ -54,35 +68,79 @@ const orderApproval = computed(
     record.value?.request_kind === 'approval'
 );
 const admin = computed(() => store.getters.getCurrentRole === 'administrator');
+const requestContext = computed(() =>
+  JSON.stringify([
+    route.params.accountId,
+    route.params.requestId,
+    store.getters.getCurrentUser?.id,
+    store.getters.getCurrentRole,
+    store.getters.getCurrentUser?.accounts,
+  ])
+);
 const load = async () => {
   sequence += 1;
   const request = sequence;
   loading.value = true;
+  saving.value = false;
   error.value = '';
   record.value = null;
   try {
     const { data } = await backofficeAPI.show(route.params.requestId);
-    if (sequence === request) record.value = data;
+    if (sequence === request) {
+      record.value = data;
+      return true;
+    }
   } catch {
     if (sequence === request) error.value = text('DETAIL_ERROR');
   } finally {
     if (sequence === request) loading.value = false;
   }
+  return false;
+};
+const clearDeniedContext = () => {
+  // Invalidate concurrent refreshes so an older success cannot restore private data.
+  sequence += 1;
+  record.value = null;
+  message.value = '';
+  historyPage.value = 1;
+  startIssue.value = false;
+  loading.value = false;
 };
 const refreshDocuments = async () => {
-  const { data } = await backofficeAPI.show(route.params.requestId);
-  record.value = data;
+  const current = sequence;
+  const context = requestContext.value;
+  try {
+    const { data } = await backofficeAPI.show(route.params.requestId);
+    if (current === sequence && context === requestContext.value) {
+      record.value = data;
+      error.value = '';
+    }
+  } catch (failure) {
+    if (current !== sequence || context !== requestContext.value) return;
+    error.value = text('DETAIL_ERROR');
+    if ([401, 403, 404].includes(failure.response?.status))
+      clearDeniedContext();
+  }
 };
 const action = async command => {
   if (saving.value) return;
+  const context = requestContext.value;
   saving.value = true;
   error.value = '';
   message.value = '';
   try {
     await command();
-    await load();
-    message.value = text('ACTION_SUCCESS');
+    if (context !== requestContext.value) return;
+    const loaded = await load();
+    if (context !== requestContext.value) return;
+    if (loaded) message.value = text('ACTION_SUCCESS');
   } catch (failure) {
+    if (context !== requestContext.value) return;
+    if ([401, 403, 404].includes(failure.response?.status)) {
+      clearDeniedContext();
+      error.value = text('DETAIL_ERROR');
+      return;
+    }
     error.value =
       failure.response?.data?.errors?.join(', ') ||
       failure.response?.data?.message ||
@@ -90,10 +148,10 @@ const action = async command => {
         failure.response?.status === 409 ? 'APPROVAL_ERROR' : 'ACTION_ERROR'
       );
   } finally {
-    saving.value = false;
+    if (context === requestContext.value) saving.value = false;
   }
 };
-watch(() => [route.params.accountId, route.params.requestId], load, {
+watch(requestContext, load, {
   immediate: true,
 });
 onBeforeUnmount(() => {
@@ -108,7 +166,11 @@ onBeforeUnmount(() => {
   >
     <div class="flex items-center justify-between gap-3">
       <RouterLink
-        :to="{ name: 'crm_backoffice', params: { section: 'requests' } }"
+        :to="{
+          name: 'crm_backoffice',
+          params: { section: 'requests' },
+          query: { customer_segment_id: route.query.customer_segment_id },
+        }"
         class="text-sm font-semibold text-emerald-700"
       >
         {{ text('BACK_TO_QUEUE') }}
@@ -171,6 +233,7 @@ onBeforeUnmount(() => {
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
+            <BackofficeCompletionReport :record="record" />
             <span
               class="rounded-lg border px-3 py-2 text-sm font-semibold"
               :class="moduleTabClasses(stageTones[record.stage])"
@@ -409,6 +472,20 @@ onBeforeUnmount(() => {
                 />
               </details>
             </div>
+            <BackofficeRequirementsPanel
+              v-else-if="tab === 'requirements'"
+              :record="record"
+              @changed="refreshDocuments"
+            />
+            <BackofficeApprovalMirror
+              v-else-if="tab === 'approvals'"
+              :record="record"
+            />
+            <BackofficeContractPanel
+              v-else-if="tab === 'contracts'"
+              :record="record"
+              @updated="load"
+            />
             <BackofficeActions
               v-else-if="['checklist', 'issues'].includes(tab)"
               :key="tab"
@@ -424,6 +501,22 @@ onBeforeUnmount(() => {
               :saving="saving"
               @command="action"
             />
+            <div
+              v-else-if="tab === 'completion'"
+              class="min-w-0 space-y-3"
+            >
+              <BackofficeCompletionPackage :record="record" />
+              <BackofficeCompletionHandoff
+                v-if="record.status === 'completed'"
+                :record="record"
+              />
+              <p
+                v-if="record.status !== 'completed'"
+                class="text-sm text-n-slate-11"
+              >
+                {{ text('COMPLETION_PACKAGE_NOT_COMPLETED') }}
+              </p>
+            </div>
             <div
               v-else
               class="space-y-3"

@@ -428,14 +428,45 @@ Rails.application.routes.draw do
           namespace :customers do
             get :metadata, to: 'directory#metadata'
             get :identity, to: 'directory#identity'
-            resources :taxonomies, only: [:index, :create, :update]
+            resources :operational_contacts, only: [:index]
+            resources :economic_groups, only: [:index, :show, :create, :update, :destroy] do
+              member do
+                get :members
+                get :history
+                post :assign
+              end
+            end
+            resources :taxonomies, only: [:index, :show, :create, :update, :destroy] do
+              post :preview, on: :collection
+              member do
+                get :members
+                get :overrides
+                get :history
+                post :set_override
+                delete 'overrides/:override_id', action: :remove_override
+              end
+            end
             post 'imports/preview', to: 'imports#preview'
             post 'imports/apply', to: 'imports#apply'
+            resources :import_runs, only: [:index, :show, :create] do
+              collection do
+                get :metadata
+                get :template
+              end
+              member do
+                post :preview
+                post :apply
+                get :rows
+                get :errors
+              end
+            end
             resources :companies, only: [:index, :show, :create, :update] do
               get :duplicates, on: :collection
               member do
                 get :overview
+                get :attendance
                 get :relationships
+                get :backoffice
                 get :timeline
                 get :records
               end
@@ -444,11 +475,15 @@ Rails.application.routes.draw do
             resources :contacts, only: [:index, :show, :create, :update] do
               member do
                 get :overview
+                get :attendance
+                get :records
+                get :company_history
                 get :duplicates
                 get :timeline
                 post :merge
               end
               resources :contact_points, only: [:create, :update, :destroy]
+              resource :signing_identity, only: [:show, :update], controller: 'contact_signing_identities'
             end
           end
 
@@ -587,6 +622,25 @@ Rails.application.routes.draw do
             end
           end
           namespace :relationship do
+            get :retention, to: 'retention#show'
+            get :local_role_options, to: 'local_role_options#index'
+            resources :management_requests, only: [:index, :create] do
+              post :route, on: :member
+              get :resolution_options, on: :member
+            end
+            get 'retention/status', to: 'retention#status'
+            post 'retention/start', to: 'retention#start'
+            resources :portfolio_groups, only: [:index, :show, :create, :update] do
+              post :customer_review, on: :member
+              get :history, on: :member
+              get :history_detail, on: :member
+              get :export_history, on: :member
+              get :workload, on: :member
+              member do
+                get :customers
+                patch :customers, action: :update_customers, as: :update_customers
+              end
+            end
             resources :survey_models, only: [:index, :show, :create, :update] do
               collection { get :options }
               member do
@@ -602,6 +656,21 @@ Rails.application.routes.draw do
             get :dashboard, to: 'dashboard#show'
             get :drilldown, to: 'dashboard#drilldown'
             get :team, to: 'dashboard#team'
+            get 'team/:analyst_id/withdrawal_readiness', to: 'dashboard#withdrawal_readiness'
+            post 'team/:analyst_id/withdraw', to: 'dashboard#withdraw'
+            post 'team/:analyst_id/restore', to: 'dashboard#restore'
+            get 'team/:analyst_id/capacity', to: 'analyst_capacities#show'
+            get 'team/:analyst_id/cadences', to: 'analyst_cadences#index'
+            get 'team/:analyst_id/native_responsibilities', to: 'analyst_native_responsibilities#index'
+            post 'team/:analyst_id/cadences/:id/cancel', to: 'analyst_cadences#cancel'
+            resources :documents, only: [:index, :show, :create, :update] do
+              member do
+                get :responsibles
+                get :history
+                post :version
+                get 'versions/:version_id/download', action: :download, as: :download
+              end
+            end
             resources :portfolio, only: [:index, :show, :create, :update] do
               member do
                 post :recalculate
@@ -609,22 +678,28 @@ Rails.application.routes.draw do
                 get :recommendations
                 get :channels
                 get :work_context
+                patch :transfer_lock
+                get :product_health_history
                 post :native_csat
                 post :manual_attendance
               end
             end
             get 'records/:kind', to: 'records#index'
+            get 'records/:kind/:id', to: 'records#show'
             post 'records/:kind', to: 'records#create'
             patch 'records/:kind/:id', to: 'records#update'
             post 'records/:kind/:id/opportunity', to: 'records#opportunity'
             post 'portfolio/batch', to: 'portfolio#batch'
-            resources :reviewed_batches, only: [:create, :show] do
+            resources :reviewed_batches, only: [:index, :create, :show] do
               member do
+                post :cancel_pending
                 post :approve
+                post :request_approval
                 post :advance
                 post :cancel
               end
             end
+            resources :distribution_approval_origins, only: [:show]
             resources :cadences, only: [:show] do
               member do
                 post :advance
@@ -657,12 +732,16 @@ Rails.application.routes.draw do
             get :export, to: 'dashboard#export'
             get :export_history, to: 'dashboard#export_history'
             resource :configuration, only: [:show, :update], controller: :configuration
+            post 'configuration/restore', to: 'configuration#restore'
+            post 'configuration/health_preview', to: 'health_configuration_previews#create'
             get :playbooks, to: 'configuration#playbooks'
+            get 'playbooks/:id/history', to: 'configuration#playbook_history'
             get :playbook_options, to: 'configuration#playbook_options'
             post :playbook_preview, to: 'configuration#playbook_preview'
             get :playbook_executions, to: 'configuration#playbook_executions'
             post :playbooks, to: 'configuration#save_playbook'
             patch 'playbooks/:id', to: 'configuration#save_playbook'
+            post 'playbooks/:id/restore', to: 'configuration#restore_playbook'
           end
           namespace :crm do
             resource :dashboard, only: :show, controller: :dashboards
@@ -757,13 +836,54 @@ Rails.application.routes.draw do
             resources :commission_programs, only: [:index, :show, :create, :update] do
               post :simulate, on: :collection
             end
+            resources :backoffice_requirement_rules, only: [:index, :create, :update] do
+              get :capabilities, on: :collection
+              get :options, on: :collection
+            end
             resources :backoffice_requests, only: [:index, :show, :create, :update] do
+              get 'requirements', to: 'backoffice_requirements#index'
+              get 'requirements/history', to: 'backoffice_requirements#history'
+              post 'requirements/adopt', to: 'backoffice_requirements#adopt'
+              post 'requirements/answer', to: 'backoffice_requirements#answer'
+              get 'completion_report', to: 'backoffice_completion_reports#show'
+              get 'completion_handoff', to: 'backoffice_completion_handoffs#show'
+              get 'completion_package', to: 'backoffice_completion_packages#show'
+              get 'completion_package/download', to: 'backoffice_completion_packages#download'
+              get 'completion_dossiers', to: 'backoffice_completion_dossiers#show'
+              post 'completion_dossiers', to: 'backoffice_completion_dossiers#create'
+              get 'completion_dossiers/:dossier_id/download', to: 'backoffice_completion_dossiers#download'
+              get 'contract', to: 'backoffice_contracts#show'
+              get 'contract/templates', to: 'backoffice_contracts#templates'
+              patch 'contract', to: 'backoffice_contracts#update'
+              get 'contract_versions', to: 'backoffice_contract_versions#index'
+              get 'contract_signers', to: 'backoffice_signers#index'
+              post 'contract_signers', to: 'backoffice_signers#create'
+              get 'contract_signers/contacts', to: 'backoffice_signers#contacts'
+              get 'contract_authorities', to: 'backoffice_authorities#index'
+              post 'contract_authorities', to: 'backoffice_authorities#create'
+              get 'contract_authorities/:proposal_id', to: 'backoffice_authorities#show'
+              get 'contract_authorities/:proposal_id/pdf', to: 'backoffice_authorities#contract_pdf'
+              get 'contract_authorities/:proposal_id/documents/:document_version_id', to: 'backoffice_authorities#document'
+              get 'contract_signatures', to: 'backoffice_signature_deliveries#index'
+              get 'contract_signatures/preparation', to: 'backoffice_signature_deliveries#preparation'
+              post 'contract_signatures', to: 'backoffice_signature_deliveries#create'
+              post 'contract_signatures/:delivery_id/cancel_prepared', to: 'backoffice_signature_deliveries#cancel_prepared'
+              get 'contract_signatures/:delivery_id/evidence', to: 'backoffice_signature_deliveries#evidence'
+              post 'contract_signatures/:delivery_id/capture_evidence', to: 'backoffice_signature_deliveries#capture_evidence'
+              post 'contract_signatures/:delivery_id/accept_evidence', to: 'backoffice_signature_deliveries#accept_evidence'
+              get 'contract_signatures/:delivery_id/evidence/:kind/download', to: 'backoffice_signature_deliveries#evidence_document'
+              get 'contract_signatures/:delivery_id', to: 'backoffice_signature_deliveries#show'
+              post 'contract_versions', to: 'backoffice_contract_versions#create'
+              get 'contract_versions/:version_id/pdf', to: 'backoffice_contract_versions#download'
+              get 'contract_versions/:version_id/differences', to: 'backoffice_contract_versions#differences'
               get :summary, on: :collection
+              get :order_options, on: :collection
               get :workspace, on: :collection
               get 'document_versions', to: 'backoffice_documents#index'
               post 'document_versions', to: 'backoffice_documents#create'
               get 'document_versions/:version_id', to: 'backoffice_documents#download'
               post 'document_versions/:version_id/decision', to: 'backoffice_documents#decide'
+              post 'document_versions/:version_id/recheck', to: 'backoffice_documents#recheck'
               member do
                 post :decide_order
                 post :advance
@@ -775,6 +895,9 @@ Rails.application.routes.draw do
                 post :confirm_provisioning
                 post :reopen
               end
+            end
+            resource :signature_integration, only: [:show, :update] do
+              post :check
             end
             resources :operations_queues, only: [:index, :create, :update]
             resources :operations_sla_policies, only: [:index, :create, :update]
@@ -1317,6 +1440,7 @@ Rails.application.routes.draw do
   post 'webhooks/instagram', to: 'webhooks/instagram#events'
   post 'webhooks/tiktok', to: 'webhooks/tiktok#events'
   post 'webhooks/shopify', to: 'webhooks/shopify#events'
+  post 'webhooks/docusign/:integration_id', to: 'webhooks/docusign#events'
 
   namespace :twitter do
     resource :callback, only: [:show]

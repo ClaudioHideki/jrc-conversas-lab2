@@ -39,12 +39,8 @@ it('explains unsupported calendar controls while preserving the weekly view and 
   const unavailableButtons = wrapper.findAll('button[aria-describedby]');
   expect(unavailableButtons.map(button => button.text())).toEqual([
     'Sincronizar calendário',
-    'Mês',
-    'Dia',
-    'Lista',
     'Iniciar ligação',
     'WhatsApp',
-    'Reagendar',
   ]);
   await Promise.all(
     unavailableButtons.map(async button => {
@@ -57,15 +53,16 @@ it('explains unsupported calendar controls while preserving the weekly view and 
       await button.trigger('click');
     })
   );
-  const filters = wrapper.findAll('input[type="checkbox"]');
-  expect(filters).toHaveLength(6);
-  expect(filters.every(input => input.element.disabled)).toBe(true);
-  expect(filters.every(input => !input.element.checked)).toBe(true);
-  expect(wrapper.get('#crm-calendar-filter-note').text()).toContain(
-    'não estão disponíveis'
-  );
+  const filters = wrapper.findAll('[data-testid^="calendar-filter-"]');
+  expect(filters).toHaveLength(4);
+  expect(filters.every(input => !input.element.disabled)).toBe(true);
   expect(wrapper.get('[aria-current="true"]').text()).toBe('Semana');
   expect(wrapper.get('article').text()).toContain('Reunião de teste');
+  expect(
+    wrapper
+      .findAll('button')
+      .find(button => button.text().includes('Reagendar')).element.disabled
+  ).toBe(false);
   expect(store.dispatch).toHaveBeenCalledTimes(1);
   expect(activitiesAPI.complete).not.toHaveBeenCalled();
 

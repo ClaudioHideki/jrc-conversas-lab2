@@ -14,6 +14,7 @@ module Api
 
           def index
             proposals = visible_to_current_user(crm_scope.jrc_crm_proposals)
+            proposals = segmented_proposals(proposals)
             proposals = proposals.where(deal_id: params[:deal_id]) if params[:deal_id].present?
             proposals = proposals.where(status: params[:status]) if params[:status].present?
             proposals = proposals.where(owner_id: params[:owner_id]) if params[:owner_id].present?
@@ -53,16 +54,10 @@ module Api
             attributes[:financial_version] = 3 if @proposal.draft? && @proposal.sent_at.nil?
             attributes.except!(:implementation_cents, :monthly_cents, :subtotal_cents, :total_cents) if @proposal.proposal_items.exists?
 
-            if @proposal.update(attributes)
-              commercial_changes = @proposal.saved_changes.keys - %w[updated_at]
-              @proposal.reset_approvals! if commercial_changes.any?
-              @proposal.recalculate_totals!
-              JrcApprovals::CommercialInvalidation.call(resource: @proposal.reload, user: Current.user)
-              audit_event!('updated', 'Proposta atualizada no CRM')
-              render json: serialize(@proposal.reload)
-            else
-              render json: { errors: @proposal.errors.full_messages }, status: :unprocessable_entity
-            end
+            JrcCrm::ProposalMutation.call!(proposal: @proposal, actor: Current.user, attributes: attributes)
+            render json: serialize(@proposal)
+          rescue ActiveRecord::RecordInvalid => e
+            render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
           end
 
           def destroy
@@ -312,6 +307,17 @@ module Api
           end
 
           private
+
+          def segmented_proposals(proposals)
+            selected = customer_segment_scope(proposals)
+            return selected if params[:customer_segment_id].blank?
+
+            # Legacy proposals can inherit the canonical customer from their
+            # deal. That fallback must also pass the native deal access scope.
+            deals = customer_segment_scope(visible_to_current_user(crm_scope.jrc_crm_deals))
+            inherited = proposals.where(company_id: nil, contact_id: nil, deal_id: deals.select(:id))
+            selected.or(inherited)
+          end
 
           def lock_proposal_mutation
             @proposal.with_lock do

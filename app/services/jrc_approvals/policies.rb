@@ -7,6 +7,7 @@ class JrcApprovals::Policies
 
   def create!(code:, name:, module_key:, event_key:, definition:, issuer_company_id: nil, business_unit_id: nil)
     actor = @authorization.authorize!('policy_manage', company_id: issuer_company_id, unit_id: business_unit_id)
+    code ||= "policy_#{SecureRandom.hex(12)}"
     JrcApprovals::Policy.transaction do
       policy = JrcApprovals::Policy.create!(account: @account, author: actor, code: code, name: name, module_key: module_key,
                                             event_key: event_key, issuer_company_id: issuer_company_id,

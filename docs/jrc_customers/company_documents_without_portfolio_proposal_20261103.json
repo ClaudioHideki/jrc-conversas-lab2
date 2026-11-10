@@ -1,0 +1,22 @@
+{
+  "status": "deferred_not_authorized",
+  "current": "Documents are scoped by native authorized assignments. A company without one has no document context. No portfolio is auto-created.",
+  "recommended_extension": {
+    "subject": "Existing canonical Company, optional native assignment; same CustomerDocument/DocumentVersion/storage/scanner/audit.",
+    "authorization": "Separate explicit company-document view/manage grants, plus DirectoryPolicy and CorporateCoverage for the authenticated account and current operator/business unit. Existing portfolio/document grants do not silently grant the new access.",
+    "rollout": "Disabled by default; explicit administrator configuration and grants. Preserve existing assignment-linked access without widening it.",
+    "migration": "Add explicit canonical company subject to native documents, backfill from verified existing company assignments; preserve document/version IDs and bytes; no synthetic assignments.",
+    "tests": [
+      "Foreign account/company denial",
+      "Operator/unit and grant revocation on list/show/upload/download",
+      "No write privilege from read-only grant",
+      "Original version/quarantine checks",
+      "No portfolio auto-creation",
+      "Existing native document regression"
+    ]
+  },
+  "implemented": false,
+  "approval_needed": "New company-subject permissions and schema/access extension, not metadata display.",
+  "current_increment": "Uploader name/id, document status, portfolio owner identified separately, version history validity. A dedicated documentary responsible and configurable required-document catalog remain pending.",
+  "decision": "User: keep blocked, evaluate later"
+}

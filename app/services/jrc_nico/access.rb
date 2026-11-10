@@ -9,10 +9,8 @@ class JrcNico::Access
   end
 
   def authorize!
-    account.reload
-    @membership = account.account_users.find_by(user_id: user&.id)
-    allowed = user.is_a?(User) && membership && account.active? && account.custom_attributes['nico_enabled'] == true
-    allowed &&= conversation.account_id == account.id
+    @membership = JrcNico::OperationalAccess.new(account: account, user: user).authorize!.membership
+    allowed = conversation.account_id == account.id
     allowed &&= JrcMigrations::Visibility.scope(account.contacts, account: account, domain: 'contacts').exists?(id: conversation.contact_id)
     allowed &&= ConversationPolicy.new({ account: account, user: user, account_user: membership }, conversation).show?
     raise Pundit::NotAuthorizedError unless allowed

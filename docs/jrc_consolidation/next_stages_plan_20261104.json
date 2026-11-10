@@ -1,0 +1,130 @@
+{
+  "date": "2026-11-04",
+  "product_checkpoint": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+  "mode": "Planejamento baseado em código e Word; nenhuma implementação D/E/F nesta rodada",
+  "gate_before_progression": "Etapa C permanece aberta; build/Chrome B1–B4, lacunas documentais e escala precisam de aceite verificável. TRR permanece dependência de negócio; não substituir fórmula.",
+  "preservation": "Reutilizar o que já existe, executar regressões proporcionais apenas quando houver alteração ou lacuna real, preservar checkpoints e integrações. Cada implementação futura exige confronto de requisito/código/evidência, não reconstrução do módulo.",
+  "stages": [
+    {
+      "stage": "D — Central de Aprovações",
+      "status": "Planejamento; não declarar concluída",
+      "word": [
+        "central-aprovacoes:P0043",
+        "central-aprovacoes:P0065",
+        "central-aprovacoes:P0118",
+        "central-aprovacoes:P0126",
+        "central-aprovacoes:P0018"
+      ],
+      "existing_files": [
+        "app/javascript/dashboard/routes/dashboard/approvals/routes.js",
+        "app/services/jrc_approvals/requests.rb",
+        "app/services/jrc_approvals/decisions.rb",
+        "app/services/jrc_approvals/policies.rb",
+        "app/services/jrc_approvals/delegations.rb",
+        "app/services/jrc_approvals/simulation.rb",
+        "app/services/jrc_approvals/authorization.rb",
+        "app/services/jrc_approvals/request_visibility.rb",
+        "app/services/jrc_approvals/ledger.rb"
+      ],
+      "confirmed": "Existem rotas de regras/fila/simulador/delegações/histórico, versões de políticas, decisões transacionais com versão/idempotência, validação de snapshot atual, motivos, elegibilidade e cobertura corporativa. Existência não equivale a aceite integral do Word.",
+      "sequence": [
+        "Mapear os tipos reais do Catalog e adaptadores existentes para os registros de origem; confrontar lacunas com cada requisito antes de editar",
+        "Homologar fluxo simples pela interface: regra/revisão/ativação → origem → solicitação → aprovador → decisão → origem/histórico",
+        "Verificar ajustes de campos explicitamente permitidos e atomicidade ajuste+aprovação, devolução, rejeição e nova revisão, sem editor irrestrito",
+        "Verificar delegação temporária, expiração/revogação, aprovação sequencial/paralela e invalidação de contexto; completar somente lacunas demonstradas"
+      ],
+      "tests": [
+        "Negação por conta, operadora/unidade e ausência de decide inclusive administrador",
+        "Idempotência/replay, concorrência, versão/snapshot vencidos e delegação expirada",
+        "Mesmo estado na origem e na central após navegar/recarregar; clareza de botões/motivo/erros em 390px e desktop, claro/escuro"
+      ]
+    },
+    {
+      "stage": "E — Backoffice",
+      "status": "Planejamento; ampliar somente lacunas verificadas",
+      "word": [
+        "backoffice:P0006",
+        "backoffice:P0008",
+        "backoffice:P0013",
+        "backoffice:P0026",
+        "backoffice:P0029",
+        "backoffice:P0035",
+        "backoffice:P0038"
+      ],
+      "existing_files": [
+        "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeLayout.vue",
+        "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+        "app/services/jrc_crm/backoffice_document_checklist.rb",
+        "app/services/jrc_backoffice/documents.rb",
+        "app/services/jrc_backoffice/authority_overview.rb",
+        "app/services/jrc_backoffice/contract_versions.rb",
+        "app/services/jrc_backoffice/signature_release.rb",
+        "app/services/jrc_backoffice/signatures/gateway.rb",
+        "app/services/jrc_backoffice/signatures/delivery_snapshot.rb",
+        "app/services/jrc_backoffice/docusign/adapter.rb"
+      ],
+      "confirmed": "Esteira/360, documentos/versionamento, prova de autoridade, versões contratuais, liberação e boundary do conector existem. Gateway instala somente DocuSign; liberação usa evidência interna verificada, não estado bruto do fornecedor.",
+      "sequence": [
+        "Reconciliar navegação independente e Detalhe360 com o Word e o layout aprovado; preservar componentes e filtros existentes",
+        "Homologar pedido aprovado → análise/documentos → pendência/aprovação quando necessária → versão de contrato/assinantes → assinatura → liberação/implantação/provisionamento/financeiro, apenas local sintético",
+        "Fechar a lacuna documental do Cadastro Mestre com projeção de requisitos configurados e responsável explícito. Não tratar proprietário da carteira ou uploader como responsável documental. Não chamar BackofficeDocumentChecklist#sync! em consultas, pois grava e audita",
+        "Preservar modelos/versões históricas, vínculos de companhia/operadora/unidade e provas de signatários. Empresas sem carteira continuam bloqueadas; não implementar a expansão adiada",
+        "Preparar futuramente demo DocuSign e checklist de homologação externa separado; testar conector com stubs não prova envio/Connect reais. Sem outro fornecedor, sem operação externa nesta etapa autorizada"
+      ],
+      "tests": [
+        "Assinatura/aprovação/documento pendente bloqueiam liberação; nenhuma condição é relaxada",
+        "Rascunho/revisão/assinantes/versionamento/gravação/reabertura; anexos privados e quarentena",
+        "Mesmo envio preserva fornecedor, conta/conexão, ambiente, ID externo e versão exata; alterar padrão afeta apenas novos envios",
+        "Eventos repetidos/fora de ordem, conta errada, falta de autorização e falha de rede não ativam contrato ou implantação",
+        "Botões e retornos nativos para CRM/Cliente360/Projetos com papéis distintos, desktop/mobile e temas"
+      ]
+    },
+    {
+      "stage": "F — Relacionamento V2/NICO",
+      "status": "Planejamento; separar assistente de execução automática",
+      "word": [
+        "relacionamento:P0009",
+        "relacionamento:P0011",
+        "relacionamento:P0041",
+        "relacionamento:P0043"
+      ],
+      "existing_files": [
+        "app/services/jrc_relationship/context.rb",
+        "app/services/jrc_relationship/record_visibility.rb",
+        "app/services/jrc_relationship/snapshot_access.rb",
+        "app/services/jrc_relationship/reviewed_portfolio_batch.rb",
+        "app/services/jrc_relationship/health_score.rb",
+        "app/services/jrc_relationship/playbooks.rb",
+        "app/services/jrc_relationship/playbook_flow.rb",
+        "app/services/jrc_relationship/playbook_flow_policy.rb",
+        "app/services/jrc_relationship/playbook_flow_approval.rb",
+        "app/services/jrc_relationship/playbook_flow_mutation_guard.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/NicoSummaryPanel.vue"
+      ],
+      "confirmed": "Context/visibilidade por origem, snapshots, operações revisadas de carteira, health score, playbooks/Flow com política e aprovação vinculada ao payload existem. NicoSummaryPanel abre prompts no copilot; isso não demonstra monitoramento/execução automática integral.",
+      "sequence": [
+        "Confrontar regras de carteira/capacidade/rebalanceamento com a configuração e os serviços atuais; evitar nova carteira ou limite fixo inventado",
+        "Homologar fila por exceção, saúde/risco e plano/QBR/pesquisa/renovação/expansão com fontes nativas e permissões, sem métricas fabricadas",
+        "Exercitar prévia → aprovação humana exigida → execução local sintética → histórico, respeitando consentimento, bloqueio, versão e vínculo de origem; manter integração de segmentos já homologada",
+        "Distinguir resumo/copilot, simulação, execução local e automação externa. Cobertura da base significa cobertura autorizada por conta e ator, nunca acesso global irrestrito",
+        "Verificar alterações/revogação de política, grants, operadora/unidade ou registro privado durante a execução e invalidar snapshots/autorizações quando necessário"
+      ],
+      "tests": [
+        "Simulação sem efeitos; aprovação de outro payload ou expirada rejeitada",
+        "Consentimento ausente/bloqueio/usuário inelegível/registro privado não produzem envio nem escrita",
+        "Reabertura/paginação/filtros e retorno às origens preservam o contexto e a persistência",
+        "Nenhum WhatsApp/SMS/PABX/campanha/assinatura/provedor NICO externo real neste ensaio; testes locais identificados como locais"
+      ]
+    }
+  ],
+  "G_follow_up": "Integração geral, papéis/contas/unidades, desktop/mobile, persistência e navegação entre origens; relatório distingue automatizado, Chrome e homologação externa.",
+  "forbidden": [
+    "limpeza automática",
+    "push",
+    "deploy",
+    "GHCR",
+    "produção",
+    "operações externas reais",
+    "ampliação documental sem carteira sem autorização específica"
+  ]
+}

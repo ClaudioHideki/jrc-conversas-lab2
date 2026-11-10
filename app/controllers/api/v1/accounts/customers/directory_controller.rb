@@ -1,7 +1,8 @@
 class Api::V1::Accounts::Customers::DirectoryController < Api::V1::Accounts::Customers::BaseController
   def metadata
     users = Current.account.users.order(:name).limit(500).pluck(:id, :name).map { |id, name| { id: id, name: name } }
-    configured_segments = JrcCustomers::Taxonomy.where(account_id: Current.account.id, kind: 'segment', active: true).ordered.limit(200).pluck(:name)
+    configured_segments = JrcCustomers::Taxonomy.classifications.active.where(account_id: Current.account.id, kind: 'segment')
+                                               .ordered.limit(200).pluck(:name)
 
     render json: {
       relationships: JrcCustomers::CompanyRules::RELATIONSHIPS,
@@ -14,13 +15,14 @@ class Api::V1::Accounts::Customers::DirectoryController < Api::V1::Accounts::Cus
       can_administer: Current.account_user.administrator?,
       external_tax_lookup: { configured: JrcCustomers::TaxLookup.configured?, required: false },
       segments: configured_segments,
-      economic_groups: Current.account.master_companies.where.not(economic_group: [nil, '']).distinct.order(:economic_group).limit(200).pluck(:economic_group)
+      economic_groups: corporate_companies.where.not(economic_group: [nil, '']).distinct.order(:economic_group).limit(200).pluck(:economic_group)
     }
   end
 
   def identity
     matches = JrcCustomers::IdentityResolver.new(account: Current.account).call(email: params[:email], phone: params[:phone],
-                                                                                 extension: params[:extension], country: params[:country]).to_a
+                                                                                 extension: params[:extension], country: params[:country])
+                                          .merge(JrcCustomers::ContactDirectory.new(account: Current.account, actor: Current.user).scope).to_a
     render json: { payload: serializer.contacts(matches.first(50)), match: matches.one? ? 'unique' : (matches.empty? ? 'none' : 'ambiguous'),
                    truncated: matches.size > 50, creates_customer: false }
   end

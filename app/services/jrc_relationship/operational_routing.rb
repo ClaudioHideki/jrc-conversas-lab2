@@ -4,6 +4,18 @@ class JrcRelationship::OperationalRouting
   end
 
   def prepare!(action, signals: {}, preserve_owner: false)
+    JrcRelationship::Action.transaction do
+      unless JrcRelationship::DistributionApproval.try_lock_configuration!(@context.account.id)
+        raise ActiveRecord::LockWaitTimeout, 'Routing configuration is being reviewed; retry without changing the source'
+      end
+
+      @context = JrcRelationship::Context.new(@context.member)
+      @context.assignment(action.assignment_id, write: true)
+      route_action!(action, signals: signals, preserve_owner: preserve_owner)
+    end
+  end
+
+  def route_action!(action, signals:, preserve_owner:)
     signals ||= {}
     assignment = action.assignment
     queues = JrcOperations::Queue.active.where(account: @context.account)
@@ -22,11 +34,15 @@ class JrcRelationship::OperationalRouting
       action.operations_queue = queue
       action.operations_sla_policy = policy
       action.owner = resolve_owner(queue, assignment) unless preserve_owner
+      if !preserve_owner && !action.owner
+        action.metadata = action.metadata.to_h.merge('routing_waiting_reason' => 'no_authorized_available_analyst')
+      end
       Time.use_zone(Time.find_zone(@context.account.reporting_timezone) || Time.zone) { JrcOperations::SlaClock.new(action).start! }
       action.due_at ||= action.sla_due_at || action.first_action_due_at || action.stage_due_at
     end
     action
   end
+  private :route_action!
 
   private
 
@@ -66,14 +82,14 @@ class JrcRelationship::OperationalRouting
   end
 
   def resolve_owner(queue, assignment)
-    return assignment.owner if queue.assignment_strategy == 'manual' && assignment.owner
-    allowed_ids = @context.assignable_users.pluck(:id)
-    candidates = queue.candidate_users.where(id: allowed_ids).order(:id).select do |user|
-      member = @context.account.account_users.find_by!(user_id: user.id)
-      candidate = JrcRelationship::Context.new(member) if JrcRelationship::ModulePolicy.new({ account: @context.account, user: user, account_user: member }, @context.account).manage?
-      candidate && candidate.assignments.exists?(id: assignment.id)
+    available = JrcRelationship::RoutingAvailability.new(@context, assignment)
+    if queue.assignment_strategy == 'manual' && assignment.owner
+      return available.call(assignment.owner) ? assignment.owner : nil
     end
-    return assignment.owner if candidates.empty?
+
+    candidates = queue.candidate_users.order(:id).select { |user| available.call(user) }
+    return available.call(assignment.owner) ? assignment.owner : nil if candidates.empty?
+
     ids = candidates.map(&:id)
     scope = JrcRelationship::Action.where(account: @context.account, operations_queue: queue, owner_id: ids)
     case queue.assignment_strategy

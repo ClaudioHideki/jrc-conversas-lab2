@@ -1,0 +1,292 @@
+{
+  "date": "2026-11-02",
+  "phase": "B2 — seleção canônica de signatários e vínculo ao PDF; poderes e B3 ainda pendentes",
+  "global_state": "parcial; não é conclusão das quatro frentes, publicação ou homologação externa",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "97a82d92e40b7a0ea169497b7508ccd59945df8c",
+  "implemented": [
+    "Proposta imutável e cifrada de signatários, sem novo cadastro de pessoas; somente Contact e Company nativos.",
+    "Busca/paginação servidor10 por parte derivada do contrato e unidade; sem aceitar account/user/company/unit do cliente para conceder acesso.",
+    "Nome, e-mail, bloqueio e CPF protegido válido conferidos pelo servidor; usuário interno não substitui contato canônico.",
+    "Assinatura individual por uma pessoa ou conjunta por duas a dez em cada parte; todos os selecionados obrigatórios.",
+    "CAS da origem/revisão e idempotência; revisor concorrente não sobrescreve o anterior, histórico e PDFs antigos preservados.",
+    "Versão formato2 prende origem/roster exatos, snapshot cifrado e PDF/checksum; dados canônicos modificados exigem revisão antes de nova geração.",
+    "CPF integral somente no snapshot cifrado e PDF jurídico privado autorizado; DTOs/diffs mascarados e fingerprints sensíveis com HMAC.",
+    "PDF nativo inclui cada signatário e uma âncora genérica única; parser Poppler real conferiu as ocorrências, sem alegar posicionamento homologado na DocuSign.",
+    "Aba Contrato possui subabas horizontais, popup por parte e reutiliza o popup nativo de CPF; filtros/contexto preservados na URL ao remonte responsivo.",
+    "Acesso negado limpa identidades, respostas tardias são descartadas e timeout mantém a intenção para repetição segura. Nenhum envio ou poder é concedido."
+  ],
+  "migration": {
+    "id": "20261102070000",
+    "additive": true,
+    "fresh_schema": {
+      "database": "jrc_four_domains_schema_signers_test",
+      "schema": "20261102070000",
+      "tables": 329,
+      "roster_foreign_keys": 6,
+      "version_foreign_keys": 9,
+      "immutable_triggers": [
+        "jrc_bo_document_scan_pin",
+        "jrc_bo_document_version_pin",
+        "jrc_bo_private_attachment",
+        "jrc_signer_roster_pin"
+      ],
+      "public_functions": 210,
+      "schema_load": "passed",
+      "production": false
+    },
+    "fences": "Seis FKs do roster e nove da versão, incluindo vínculo composto conta/contrato/solicitação/roster; snapshots imutáveis também no PostgreSQL.",
+    "compatibility": "Versões anteriores mantidas sem roster; conteúdo histórico não reescrito. Down vazio testado na pilha real070→060→050; down com roster/versão recusa perda de dados.",
+    "production_applied": false
+  },
+  "validation": {
+    "backend_selected": {
+      "duration": 431.324899856,
+      "example_count": 558,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "files": 59,
+      "artifact": {
+        "path": ".codex\\consolidation-signers-backend-full.json",
+        "sha256": "1c39b9c096ec728334d32e92a8e3a3c56abcb2cd54437ef37c2aa16d647267c5",
+        "bytes": 255068
+      },
+      "not_entire_repository": true
+    },
+    "latest_backend_recheck": {
+      "duration": 109.036205363,
+      "example_count": 24,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-signers-responsive-backend.json",
+        "sha256": "b0cd165d5e54f056f076dd9509e87c03404dbb461f6ab64bb3c4ee57b2f8736c",
+        "bytes": 11194
+      },
+      "note": "Após a última alteração Ruby de estilo no catálogo de auditoria; refinamento responsivo posterior ao gate amplo alterou somente Vue/testes de frontend."
+    },
+    "independent_postgresql_connections": {
+      "duration": 26.00132153,
+      "example_count": 5,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-signers-concurrency-first.json",
+        "sha256": "5012f86d2a3f931af5eced7d9b2e86636d911320cde614d5eec355a945a6117e",
+        "bytes": 2692
+      },
+      "cases": [
+        "mesma intenção contratual produz um PDF",
+        "FK/auditoria sem deadlock",
+        "revogação confirmada durante upload recusa e compensa arquivo",
+        "mesma intenção dos signatários produz uma proposta",
+        "intenções concorrentes com mesma revisão resultam em uma gravação e um conflito"
+      ]
+    },
+    "frontend": {
+      "tests": 192,
+      "files": 33,
+      "failures": 0,
+      "pending": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-signers-frontend-responsive.json",
+        "sha256": "71c2f1342d3e2859c781c8fc43130f3ba0430e9e0b7e6e2c0e926a8ea79a39b3",
+        "bytes": 75186
+      }
+    },
+    "ruby_lint": {
+      "overall_passed": false,
+      "clean_files": 15,
+      "inspected_files": 20,
+      "legacy_offenses": 87,
+      "legacy_files": [
+        {
+          "file": "app/models/jrc_crm/audit_event.rb",
+          "offenses": 11
+        },
+        {
+          "file": "app/services/jrc_crm/commercial_document_service.rb",
+          "offenses": 57
+        },
+        {
+          "file": "app/services/jrc_crm/commercial_pdf/layout.rb",
+          "offenses": 16
+        },
+        {
+          "file": "app/services/jrc_crm/contract_pdf_service.rb",
+          "offenses": 2
+        },
+        {
+          "file": "config/routes.rb",
+          "offenses": 1
+        }
+      ],
+      "note": "Mesmas contagens e categorias em cinco arquivos nativos antes/depois. Não é lint global limpo; nova ocorrência concat corrigida.",
+      "artifact": {
+        "path": ".codex\\consolidation-signers-ruby-responsive.json",
+        "sha256": "4fe5d1544729a798e30a56e1012438b09f75725d98f452497e267298d10f5879",
+        "bytes": 26842
+      },
+      "baseline": {
+        "path": ".codex\\consolidation-signers-ruby-baseline.json",
+        "sha256": "ab00096950f3843c71a66311d93f6aedbcef78f7fd4c9265e1622b889cba095e",
+        "bytes": 25633
+      }
+    },
+    "frontend_lint": {
+      "files": 7,
+      "errors": 0,
+      "warnings": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-signers-frontend-lint-responsive.json",
+        "sha256": "402d4db4aefb1b71fb5e5e7a135f8cf6d85007e9268a2359fa1ea4f271132367",
+        "bytes": 10100
+      }
+    },
+    "frontend_build": {
+      "status": "passed",
+      "duration": "3m52s",
+      "artifact": {
+        "path": ".codex\\consolidation-signers-responsive-production-build.log",
+        "sha256": "ef162b6626282ebebb0b28e9f317f9ea0cbfbcfdd6a53b0c3a422cb701a4aaa7",
+        "bytes": 57004
+      },
+      "warnings": [
+        "chunks grandes",
+        "Browserslist antigo",
+        "brand JPEG resolvido em runtime",
+        "Webphone importado estaticamente e dinamicamente"
+      ],
+      "docker_image_built": false
+    },
+    "eager_load": {
+      "status": "passed",
+      "artifact": {
+        "path": ".codex\\consolidation-signers-zeitwerk.log",
+        "sha256": "ae0c1c7e0e6072ee80034cdd6df01716c6c66aaa795d98eed0ace2d8126aabf0",
+        "bytes": 949
+      }
+    },
+    "source": {
+      "files": 11178,
+      "baseline": "97a82d92e40b7a0ea169497b7508ccd59945df8c",
+      "mismatches": [],
+      "snapshot": "/consolidation-signers-responsive-validated",
+      "sql_raw_hashes": true,
+      "manifest": {
+        "path": ".codex\\consolidation-signers-responsive-source-manifest.json",
+        "sha256": "1bcdccf01afc4d3bb6e003d6a2fc13f2e35d965ebc973d34735e7346119411d8",
+        "bytes": 1829650
+      }
+    },
+    "browser": {
+      "status": "passed",
+      "synthetic_only": true,
+      "snapshot": "/consolidation-signers-responsive-validated",
+      "roster_id": 2,
+      "revision": 2,
+      "contract_version_id": 10,
+      "pdf_sha256": "779e52d82c7da35fdc202c95a2868916055f82b7fbc12409c6dcf7e550345e9a",
+      "pdf_download": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/contrato-assinantes-b2-v2-sintetico.pdf",
+      "required_signers": 3,
+      "customer_mode": "joint",
+      "second_page": true,
+      "canonical_company_scope": true,
+      "saved_reopened": true,
+      "full_identity_in_structured_dto": false,
+      "both_themes": true,
+      "mobile_width": 390,
+      "page_errors": [],
+      "ended_old_synthetic_session_via_native_picker": true,
+      "signing_authority_verified": false,
+      "external_contracts_sent": 0,
+      "external_homologation": false,
+      "artifact": {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinantes-b2-resultado.json",
+        "sha256": "b80661ac1839c7cef864f53d4fc5fbc12345501d2bc7a0542e4fd309361cf8a7",
+        "bytes": 796
+      }
+    },
+    "images_inspected": [
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\52-assinantes-conjuntos-claro.png",
+        "sha256": "0e77e0359dba5dc22701f2148a405607733eb3b83761df8b17b21a14ff377023",
+        "bytes": 356236
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\53-assinantes-conjuntos-escuro.png",
+        "sha256": "5e0de02cc19db6417c506e130f35c924422b07b3ae67466be156e39db2a977f5",
+        "bytes": 352108
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\54-assinantes-mobile.png",
+        "sha256": "e0ff39b778234813c597661c5bfcf833b10d625a099d10b5ea0dba32fed7c891",
+        "bytes": 81195
+      }
+    ]
+  },
+  "failures_found_and_corrected": [
+    "Fixtures iniciais não tinham cobertura corporativa/e-mail válidos; corrigidas com dados canônicos e escopo explícito, sem relaxar a regra de produção.",
+    "Catálogo nativo de auditoria não reconhecia o novo evento; registrado explicitamente.",
+    "Navegador revelou perda da subaba no remonte responsivo; preservada com query validada e dois testes de regressão.",
+    "Primeira navegação imediata ocorreu antes do Puma ficar pronto; readiness local com prefixo real de assets, sem contornar autenticação.",
+    "Todas as tentativas/falhas de gates foram preservadas em .codex; os resultados apresentados são das últimas execuções indicadas."
+  ],
+  "not_claimed_complete": [
+    "Poderes/representação, evidências jurídicas e aprovação formal pela Central ainda não implementados neste incremento.",
+    "Intenção durável de envio, consumidor Connect, reconciliação de todos os destinatários e PDF final/certificado continuam B3.",
+    "Âncoras foram verificadas no PDF local, sem homologação de posicionamento/assinatura na DocuSign.",
+    "Ainda falta seleção contextual do modelo contratual na UI e revisão autorizada de contratos enviados/assinados.",
+    "Seleção atual cobre Cliente/Emitente com todos obrigatórios; papéis adicionais/testemunhas, se exigidos por regra, não foram implementados silenciosamente.",
+    "Sem DocuSign demo/credenciais ou ClamAV real; testes HTTP do conector continuam simulados e arquivo real fica em quarentena quando AV indisponível.",
+    "Cadastros, Central, restante do Backoffice e Relacionamento continuam parciais conforme as matrizes; inventário literal ainda não é a matriz final classificada."
+  ],
+  "next": "Poderes vinculados à versão, roster, evidências limpas/analisadas e validade, usando exclusivamente a Central; depois B3 e continuidade C/D/E/F/G.",
+  "publication": {
+    "push": false,
+    "docker_build_or_publish": false,
+    "deploy": false,
+    "compose_changed": false,
+    "production_migrations": false,
+    "previous_candidate_untouched": true,
+    "publication_worktree_head": "50f7f07d802829dd44a67547fabad3aa77f3d196"
+  },
+  "files": [
+    "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
+    "app/controllers/api/v1/accounts/crm/backoffice_signers_controller.rb",
+    "app/javascript/dashboard/api/crm/backofficeSigners.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractSigners.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/ContractSignerEditor.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignerContactPicker.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractPanel.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractSigners.spec.js",
+    "app/models/jrc_backoffice/contract_version.rb",
+    "app/models/jrc_backoffice/signer_roster.rb",
+    "app/models/jrc_crm/audit_event.rb",
+    "app/services/jrc_backoffice/contract_snapshot.rb",
+    "app/services/jrc_backoffice/contract_versions.rb",
+    "app/services/jrc_backoffice/signer_contacts.rb",
+    "app/services/jrc_backoffice/signer_roster_source.rb",
+    "app/services/jrc_backoffice/signer_rosters.rb",
+    "app/services/jrc_backoffice/signer_selection.rb",
+    "app/services/jrc_crm/commercial_document_service.rb",
+    "app/services/jrc_crm/commercial_pdf/layout.rb",
+    "app/services/jrc_crm/contract_pdf_service.rb",
+    "config/routes.rb",
+    "db/migrate/20261102070000_create_backoffice_signer_rosters.rb",
+    "db/schema.rb",
+    "docs/jrc_backoffice/canonical_signers_checkpoint_20261102.json",
+    "docs/jrc_consolidation/word_requirement_inventory_20261102.json",
+    "docs/jrc_relationship/continuation_matrix_20261102.json",
+    "spec/requests/api/v1/accounts/crm/backoffice_signers_spec.rb",
+    "spec/services/jrc_backoffice/contract_version_upgrade_spec.rb",
+    "spec/services/jrc_backoffice/signer_rosters_concurrency_spec.rb",
+    "spec/services/jrc_backoffice/signer_rosters_spec.rb"
+  ]
+}

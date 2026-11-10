@@ -14,6 +14,7 @@ import {
   ticketTypePreferenceKey,
 } from '../helpers/quickIntake';
 import { canonicalId } from '../helpers/access';
+import { applyMasterCustomer } from '../helpers/masterCustomer';
 import LookupSelect from './LookupSelect.vue';
 import RequesterSelect from './RequesterSelect.vue';
 import EstablishmentPicker from './EstablishmentPicker.vue';
@@ -22,8 +23,13 @@ import CatalogueAnswers from './CatalogueAnswers.vue';
 import TicketCreationReceipt from './TicketCreationReceipt.vue';
 import WriteFeedback from './WriteFeedback.vue';
 
-const props = defineProps({ initialDraft: { type: Object, default: null } });
-const emit = defineEmits(['advanced', 'cancel', 'open']);
+const props = defineProps({
+  initialDraft: { type: Object, default: null },
+  customerContext: { type: Object, default: null },
+  customerContextSource: { type: Boolean, default: false },
+  contextLoading: { type: Boolean, default: false },
+});
+const emit = defineEmits(['advanced', 'cancel', 'open', 'unitChange']);
 const { t } = useI18n();
 const session = useServiceDesk();
 const { canAccess } = useCustomerMaster();
@@ -70,6 +76,7 @@ const busy = computed(() => mutation.value.status === 'saving');
 const locked = computed(
   () =>
     busy.value ||
+    props.contextLoading ||
     ['readback_pending', 'error', 'invalid_contract'].includes(
       mutation.value.status
     )
@@ -130,6 +137,26 @@ watch(
   () => {
     if (!locked.value) reset(true);
   }
+);
+watch(
+  () => draft.unit_id,
+  id => {
+    if (props.customerContextSource) emit('unitChange', id);
+  },
+  { immediate: true }
+);
+watch(
+  () => props.customerContext,
+  (value, previous) => {
+    const result = applyMasterCustomer(draft, previous, value, {
+      accountId: session.accountId.value,
+      userId: session.userId.value,
+      allowed: master.value && unit.value?.permissions.create_ticket === true,
+    });
+    if (result.applied) selectedRequester.value = value.requester;
+    else if (result.clearRequester) selectedRequester.value = null;
+  },
+  { immediate: true }
 );
 const changeUnit = id => {
   if (!locked.value && id !== draft.unit_id) {

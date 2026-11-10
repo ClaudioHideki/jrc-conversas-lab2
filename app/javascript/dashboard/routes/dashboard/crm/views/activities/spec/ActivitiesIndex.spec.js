@@ -71,7 +71,7 @@ it('preserves semantic colors/count badges, highlights selection and applies/cle
   wrapper.unmount();
 });
 
-it('explains unavailable execution, editing and rescheduling while preserving completion', async () => {
+it('opens native editing and rescheduling while explaining unavailable channel execution and preserving completion', async () => {
   useRoute.mockReturnValue({ params: { accountId: '1' }, query: {} });
   useRouter.mockReturnValue({ push: vi.fn() });
   dealsAPI.list.mockResolvedValue({ data: [] });
@@ -96,7 +96,7 @@ it('explains unavailable execution, editing and rescheduling while preserving co
   await flushPromises();
 
   const unavailableButtons = wrapper.findAll('button[aria-describedby]');
-  expect(unavailableButtons).toHaveLength(5);
+  expect(unavailableButtons).toHaveLength(2);
   await Promise.all(
     unavailableButtons.map(async button => {
       expect(button.element.disabled).toBe(true);
@@ -111,9 +111,24 @@ it('explains unavailable execution, editing and rescheduling while preserving co
   expect(activitiesAPI.complete).not.toHaveBeenCalled();
   expect(store.dispatch).toHaveBeenCalledTimes(1);
 
+  const editButton = wrapper
+    .findAll('tbody button')
+    .find(button => button.find('.i-lucide-pencil').exists());
+  expect(editButton.element.disabled).toBe(false);
+  await editButton.trigger('click');
+  const editor = wrapper.findComponent({ name: 'ActivityEditDialog' });
+  expect(editor.props('activityId')).toBe(1);
+  editor.vm.$emit('saved');
+  editor.vm.$emit('close');
+  await flushPromises();
+  expect(store.dispatch).toHaveBeenCalledTimes(2);
+  expect(wrapper.findComponent({ name: 'ActivityEditDialog' }).exists()).toBe(
+    false
+  );
+
   await wrapper.get('tbody button[title="Concluir"]').trigger('click');
   await flushPromises();
   expect(activitiesAPI.complete).toHaveBeenCalledWith(1);
-  expect(store.dispatch).toHaveBeenCalledTimes(2);
+  expect(store.dispatch).toHaveBeenCalledTimes(3);
   wrapper.unmount();
 });

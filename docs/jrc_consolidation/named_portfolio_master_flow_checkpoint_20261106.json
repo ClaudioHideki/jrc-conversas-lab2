@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "41ed9b5b6498a348cb86b910cb363fb2d26f0502",
+  "status": "Master-directory individual selection into native allocation and explicit group-link review implemented/tested. C-G and full Word acceptance remain open.",
+  "implementation": [
+    "Existing CompanyPicker searches the native master directory with its current permissions; no new directory/model/route.",
+    "Existing native portfolio list filtered by company_id finds the current accessible unique allocation. Reuse does not mutate owner, responsibilities, capacity inputs or source records.",
+    "If no accessible allocation exists, explicitly create the native Relationship allocation via the unchanged PortfolioController. The original full allocation form was extracted into PortfolioAssignmentForm and reused by ModulePage and the group dialog.",
+    "Preserve owner/team/unit/segment/product/complexity, explicit points/hours and eligibility-exception controls. No invented weights, no automatic company creation. New allocation defaults remain visible/editable before its explicit save.",
+    "Native allocation save and group link are intentionally two explicit persisted steps. UI warns that allocation survives later cancellation or rejected group linking; no fictitious all-or-nothing promise.",
+    "Chosen allocation enters the existing customer-link reason/revision review. No link is written until the existing explicit confirmation; existing deduplication, capacity and destination scope remain enforced.",
+    "Late account/role/group-revision responses are discarded and workflow closes. Unknown mutation result requires a fresh native lookup before retry, preventing blind duplicate creation."
+  ],
+  "native_tests": {
+    "label": "named-portfolio-master-native29",
+    "examples": 4,
+    "failures": 0,
+    "database": "jrc_rel_v2_candidate_test",
+    "proof": "Real HTTP list/create/list/link/list, one native company/allocation in2activegroups, preserved ownership/tasks on409/422, foreign tenant refusal, native manage denial and no group grant from supplied IDs.",
+    "qualification": "After native pass, only spec formatting and two equivalent assertions were combined for lint. No native runtime implementation changed in this increment."
+  },
+  "source_interface_tests": {
+    "label": "named-portfolio-master-source02",
+    "tests": 34,
+    "failures": 0,
+    "breakdown": "10new master/allocation/review tests +17existing group-editor/customer-dialog tests +7existing group/native-list integration tests.",
+    "corrected_real_failure": "Initial source gate7passed/1failed exposed immediate multi-source watch closing the dialog at mount. Fixed empty previous-values handling and added a direct no-premature-close regression.",
+    "coverage": "Existing allocation no writes, all native fields, blocked invalid success receipt, network-unknown retry, role change, archived group, disabled submit, original ModulePage API wiring, explicit group revision/reason and active link semantics.",
+    "warnings": "Existing duplicate-i18n/RouterLink test-harness warnings retained; source tests are not Chrome homologation."
+  },
+  "static_validation": "Ruby31:0offenses; ESLint03:0errors, all5new/otherchangedfiles0warnings. Shared ModulePage existing warnings114to103 because the form moved and its11warnings were corrected in the new reusable component. git diff --check clean.",
+  "environment": {
+    "disk_initial_recorded_native_gate_bytes": 6630260736,
+    "disk_minimum_observed_bytes": 6587625472,
+    "disk_final_observed_bytes": 6629543936,
+    "no_build": true,
+    "no_migration_or_server_change": true,
+    "no_external_operation": true
+  },
+  "remaining_word_requirements": [
+    "P0124 individual master selection now integrated; cross-page reviewed grouping of existing allocations remains preserved. A true multi-select master-directory allocation batch is still partial, not claimed complete by this individual flow.",
+    "P0126/P0127 full local role/capability matrix and P0128 durable grouping-item retry/results remain pending; current native global permissions are preserved.",
+    "Private historical audit values/reasons and generic append-only audit enforcement remain pending, distinct from the delivered operational summary.",
+    "Fresh source build and Chrome desktop/mobile/light/dark acceptance remain prohibited; no old-asset acceptance claimed.",
+    "TRR definition, explicitly deferred documents without portfolio and external provider/scanner/channel pilot remain open."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_master_flow_checkpoint_20261106.json"
+}

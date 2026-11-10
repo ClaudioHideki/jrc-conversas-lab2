@@ -33,7 +33,7 @@ class JrcRelationship::Eligibility
   end
 
   def signature_pending?
-    JrcCrm::OrderContractService.new(order: @order).required? && !@order.contracts.exists?(signature_status: 'signed')
+    !JrcBackoffice::SignatureRelease.order_satisfied?(@order)
   end
   private :signature_pending?
 

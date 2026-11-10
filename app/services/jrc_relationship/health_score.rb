@@ -15,11 +15,12 @@ class JrcRelationship::HealthScore
 
     missing = observations.any? { |key, value| value[:normalized].nil? && weights.fetch(key).positive? }
     blocked = policy == 'block' && missing
+    observed_weight = available_weight(observations, weights)
     observations = apply_missing_policy(observations, policy)
     denominator = available_weight(observations, weights)
     factors = observations.map { |key, value| factor(key, value, weights.fetch(key).to_f, denominator) }
-    score = score_for(factors, denominator, blocked)
-    { score: score, band: band(score, rules: rules), factors: factors, coverage_weight: denominator,
+    score = score_for(factors, denominator, blocked) if observed_weight.positive?
+    { score: score, band: band(score, rules: rules), factors: factors, coverage_weight: observed_weight, calculation_weight: denominator,
       missing_factor_policy: policy, blocked: blocked }
   end
 
@@ -37,7 +38,7 @@ class JrcRelationship::HealthScore
     contribution = value[:normalized].clamp(0, 100) * weight / denominator if denominator.positive? && !value[:normalized].nil?
     { factor: key, raw: value[:raw], normalized: value[:normalized], weight: weight,
       contribution: contribution&.round(4), evidence: value[:evidence], available: !value[:normalized].nil? && !value[:imputed],
-      imputed: value[:imputed] == true }
+      imputed: value[:imputed] == true }.merge(value.slice(:measurement))
   end
 
   def self.score_for(factors, denominator, blocked)

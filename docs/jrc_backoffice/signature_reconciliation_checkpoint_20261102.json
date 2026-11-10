@@ -1,0 +1,298 @@
+{
+  "date": "2026-11-02",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "6b384c32ad8af752b516a4cf363691cee43fa951",
+  "phase": "B3 — recuperação durável de envio incerto; fluxo contratual completo ainda parcial",
+  "global_state": "quatro frentes e matriz literal ainda parciais; nenhuma assinatura real ou liberação operacional inferida",
+  "implemented": [
+    "Recuperação somente por leitura da transação persistida, usando conta externa, ambiente e conexão originais. Trocar o padrão não redireciona a consulta.",
+    "Reserva de cada tentativa confirmada em transação antes do HTTP; observações criptografadas e imutáveis não alteram o estado do envio.",
+    "Intervalo de16min contado também após o término da consulta. Janela de descoberta limitada aos7dias contados da tentativa original; resultado vazio, timeout ou janela vencida não permitem outro POST nem liberam o contrato.",
+    "Revalidação nativa de conta, usuário, proprietário e cobertura da empresa/unidade seladas antes da consulta. Leitura histórica pode continuar na solicitação encerrada, preservadas as permissões; novo envio permanece sujeito à autorização de escrita.",
+    "Envelope recuperado é vinculado à intenção original e pode receber o callback autenticado que chegou antes da confirmação. Conclusão informada continua diferente de assinatura verificada.",
+    "Jobs locais para consulta e recuperação de até100 candidatos por lote; todos revalidam o contexto. Agendamento definido no código, sem iniciar scheduler/Sidekiq permanente ou alterar ambiente existente.",
+    "Seis negativas do webhook agora verificam que o conjunto global de IDs permanece idêntico à situação anterior, preservando recibos legítimos já commitados. Não há limpeza de fixtures nem redução da exigência de rejeição.",
+    "Novas observações têm rótulos na interface de histórico existente, sem expor payloads privados."
+  ],
+  "validation": {
+    "backend": {
+      "distinct_examples": 105,
+      "status": "selected partitions passed; not a single105-case process",
+      "batches": [
+        {
+          "duration": 933.084927362,
+          "example_count": 89,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0,
+          "database": "jrc_four_domains_schema_admission_test",
+          "files": 11,
+          "artifact": {
+            "path": ".codex/signature-reconciliation-core-validated.json",
+            "sha256": "6b7fd14011cfc02169c1f9b7f4d36f8727b24cfd2b66982e246d7f0f9aba43ae"
+          }
+        },
+        {
+          "duration": 434.676251255,
+          "example_count": 16,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0,
+          "database": "jrc_rel_v2_candidate_test",
+          "files": 1,
+          "artifact": {
+            "path": ".codex/signature-admissions-candidate-validated.json",
+            "sha256": "88514a2d79e9be2f2b6d7f3cc8f9725027d57cc4a75f9650fd1c5144ab9bf3a6"
+          }
+        }
+      ],
+      "files": 12,
+      "scope": "Admissão, despacho, recuperação, gateway/conector, HMAC/webhook, consumidor/jobs, API de histórico e schedule. Regressão selecionada; não é a suíte completa do repositório."
+    },
+    "preliminary": {
+      "artifact": {
+        "path": ".codex/signature-reconciliation-first.json",
+        "sha256": "858a946d4e12f1404c42db5747c2f1cab851eb1a0fbabf2153c8b739a743177b"
+      },
+      "scope": "Lote preliminar de28 casos preservado; fonte final acrescenta verificação do intervalo após uma resposta demorada."
+    },
+    "frontend": {
+      "tests": 217,
+      "passed": 217,
+      "files": 36,
+      "artifact": {
+        "path": ".codex/signature-reconciliation-frontend-regression.json",
+        "sha256": "2b8e32faf64fd46ae44613726cb0dd38e364a488e083b9ffa9fcb89d31f5da19"
+      },
+      "eslint": {
+        "path": ".codex/signature-reconciliation-frontend-lint-final.json",
+        "sha256": "2a2047b588a4eeae440bae51e071d8c9ce25ef64d97c01bf718341e4aac32788"
+      }
+    },
+    "ruby": {
+      "offense_count": 0,
+      "target_file_count": 10,
+      "inspected_file_count": 10,
+      "artifact": {
+        "path": ".codex/signature-reconciliation-ruby-validated.json",
+        "sha256": "b52e1349cb03c7c4a890b94b8d57c383b88067860730d8543180a9f08b1b3dd9"
+      }
+    },
+    "source": {
+      "files": 11245,
+      "baseline": "701dad483ee61283b94375050f2952f5ffe2d7df",
+      "mismatches": [],
+      "snapshot": "/consolidation-signature-reconciliation-validated",
+      "sql_raw_hashes": true,
+      "manifest": {
+        "path": ".codex/signature-reconciliation-validated-source-manifest.json",
+        "sha256": "3b98eea0771bb25a3ab53e8321903037e25d02330d290f1373fb42afd7b3bdcc"
+      }
+    },
+    "existing_data": {
+      "schema": "20261102100000",
+      "database": "jrc_four_domains_schema_admission_test",
+      "preserved_table_digests": {
+        "accounts": "632df1c09587152df7bc28a23495adb1",
+        "users": "dd1709657fa5c15738a37277bb2cb7be",
+        "contacts": "74815eaa4cd54117a30b3d41c748c183",
+        "companies": "d610b742ea0fc95a17159a7e82f7fdc0",
+        "jrc_crm_contracts": "5dd1335d020e099b4a4c0a5031b0f3d1",
+        "jrc_backoffice_contract_versions": "6bcddbe9651a8a97c47f384fdc1545c5",
+        "jrc_backoffice_authority_proposals": "2df636b8ea7ced08cef995bade194bfb",
+        "jrc_backoffice_signature_deliveries": "e101eee70a9805d0e8baf871e50bf8d2",
+        "jrc_backoffice_signature_delivery_events": "d597de66e6bc924578b5036fef9187ad",
+        "jrc_backoffice_signature_notifications": "d85e0ca07943d8d9558c2cd8a9897df5"
+      },
+      "production": false,
+      "status": "passed",
+      "artifact": {
+        "path": ".codex/signature-reconciliation-migrate.json",
+        "sha256": "80cf9a8bb4161dc81a7df3ff540823740be6001debc723def3d939751ad29fdd"
+      },
+      "scope": "Apenas migration100 no banco sintético; conteúdo das dez tabelas comparado antes/depois, antes das novas fixtures dos testes."
+    },
+    "candidate_existing_data": {
+      "schema": "20261102100000",
+      "database": "jrc_rel_v2_candidate_test",
+      "preserved_table_digests": {
+        "accounts": "0f1cbf602de4a0548b090cfdd35f1daa",
+        "users": "10ab545ec0d345206113b7c8a4013345",
+        "contacts": "36a7ce509ac93d0ea6a1eec3e2ab6de1",
+        "companies": "d41d8cd98f00b204e9800998ecf8427e",
+        "jrc_crm_contracts": "d41d8cd98f00b204e9800998ecf8427e",
+        "jrc_backoffice_contract_versions": "d41d8cd98f00b204e9800998ecf8427e",
+        "jrc_backoffice_authority_proposals": "d41d8cd98f00b204e9800998ecf8427e",
+        "jrc_backoffice_signature_deliveries": "d41d8cd98f00b204e9800998ecf8427e",
+        "jrc_backoffice_signature_delivery_events": "d41d8cd98f00b204e9800998ecf8427e",
+        "jrc_backoffice_signature_notifications": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "production": false,
+      "status": "passed",
+      "artifact": {
+        "path": ".codex/signature-reconciliation-candidate-migrate.json",
+        "sha256": "29c4b50ec6840e8637088373b8a3960d318578f336f6c444b3aa4186942b2c69"
+      },
+      "scope": "Migration100 também aplicada somente ao banco sintético candidato exigido pela admissão; dez tabelas comparadas antes/depois; UI e produção preservadas."
+    },
+    "fresh_schema": {
+      "schema": "20261102100000",
+      "database": "jrc_four_domains_schema_reconciliation_recheck_test",
+      "tables": 332,
+      "public_functions": 211,
+      "delivery_foreign_keys": 10,
+      "event_foreign_keys": 3,
+      "guards": [
+        "jrc_contract_delivery_source_fence",
+        "jrc_signature_deliveries_pin",
+        "jrc_signature_delivery_events_pin"
+      ],
+      "empty_rollback_round_trip": true,
+      "constraint_truth_table": {
+        "prepared": true,
+        "dispatch_started": true,
+        "send_confirmed": true,
+        "send_uncertain": true,
+        "send_rejected": true,
+        "sender_blocked": true,
+        "canceled_before_send": true,
+        "completion_reported": true,
+        "envelope_canceled": true,
+        "envelope_declined": true,
+        "reconciliation_started": true,
+        "reconciliation_finished": true,
+        "forged": false,
+        "": false
+      },
+      "identical_display_expression": false,
+      "status": "passed",
+      "production": false,
+      "artifact": {
+        "path": ".codex/signature-reconciliation-schema-recheck.json",
+        "sha256": "cc6e862fd67691c30e86859a7ae5873d853954db4f634f5431e49252771a3943"
+      }
+    },
+    "rails_load": {
+      "passed": true,
+      "artifact": {
+        "path": ".codex/signature-reconciliation-zeitwerk.log",
+        "sha256": "8ce63b75f11d2625dcb8429a345b05376b4e9d095a702d78bfd81bc4d569adc8"
+      }
+    },
+    "visual_baseline": {
+      "report": "docs/jrc_backoffice/signature_history_ui_checkpoint_20261102.json",
+      "scope": "Capturas reais claro/escuro/mobile e build pertencem ao checkpoint6b384c32. Este incremento altera dois rótulos e regras de backend; não declara uma nova inspeção visual nem um novo asset build."
+    },
+    "external_homologation": false,
+    "provider_http_and_scanner": "simulados; locks/commits/HMAC/cifra/hashes e políticas usam o banco real de teste"
+  },
+  "attempts_retained": [
+    {
+      "artifact": {
+        "path": ".codex/signature-reconciliation-backend-validated.json",
+        "sha256": "f4ec918ed424eb4a163167bf275f93b1b2fb3eaeab50a104e1ae35636d21290b"
+      },
+      "result": "Primeiro plano misturou especificações que exigem bancos diferentes. Interrompido graciosamente após63casos/16falhas; todas as16falhas eram Owned candidate database required. Arquivos e proteções mantidos; todos12arquivos reexecutados nos dois bancos exigidos, sem omitir casos."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-admission-integrated-failure-repro.json",
+        "sha256": "2756e0c1dd1d609deb111c25fbf85ccc55fa03c7af66ef0c7f6930fe11e7ae74"
+      },
+      "result": "Reprodução1caso/1falha confirmou a proteção de banco; não era defeito ocultado com mudança de expectativa."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-reconciliation-style.json",
+        "sha256": "fde8e8c80742b8565e7b37300a9d6b692e3720177c34d6bef854ef679bf073e9"
+      },
+      "result": "Lint inicial com correções de estilo e expectativas agrupadas, mantendo as mesmas verificações."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-reconciliation-refined-style.json",
+        "sha256": "23766f7e603d95d8d5e5fef32417c934dbdfe42a0ed50e4e3ffc6816cd595e11"
+      },
+      "result": "Uma execução incluiu indevidamente schema gerado e realizou extensa formatação. Tentativa integral preservada, nunca aplicada ao banco."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-reconciliation-schema-proof.json",
+        "sha256": "43c5d58411ef2f70411777f8bf85ddf63b3a8bc0228837b71eecae0445072bd7"
+      },
+      "result": "Restauração inicial rejeitada pelo auto-review por possível perda de mudanças; concluída alternativa mais segura após prova da AST/literais equivalentes, cópia integral e comparação SHA antes da substituição. Schema final conserva somente5linhas alteradas de cada lado correspondentes à migration100."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-reconciliation-schema-load.log",
+        "sha256": "42b5a8ca50d1ad1d263cb6c624213ae489268837bd3843d8be9a4e5d17b01ed8"
+      },
+      "result": "Primeiro schema carregou, mas falhou comparação textual antes/depois do rollback por casts normalizados pelo PostgreSQL. Prova seguinte em outro banco vazio confirmou os mesmos estados permitidos e negados e preservou o primeiro resultado."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-reconciliation-ruby-final.json",
+        "sha256": "5b35f3c802e0060ea0381c3ae65525014c9846f912b3864c0f4f46bbe99e9e82"
+      },
+      "result": "Preferência de aspas identificada e corrigida; execução final10arquivos zero infrações."
+    }
+  ],
+  "operational_limits": [
+    "Recuperação automática cobre somente envio dispatching/uncertain ainda sem envelope vinculado; consulta remota de envelope conhecido, lembrete, reenvio e cancelamento operacional continuam pendentes.",
+    "Fim dos7dias mantém a reserva e exige análise, nunca novo POST automático. A interface ainda não apresenta ações de resolução manual dessa situação.",
+    "Rails e workers devem ser atualizados em conjunto; versões anteriores à migration100 não conhecem as novas observações. Rollback destrutivo após observações é recusado; preservar histórico e corrigir por avanço.",
+    "Projeção das demais transições no contrato, tratamento operacional de conflitos, PDF final/certificado, verificador interno, API/job de saída e ação contextual de envio continuam pendentes.",
+    "DocuSign Developer/demo, consentimento e Connect real, assinaturas reais e antivírus real ainda sem homologação.",
+    "Matriz literal completa e frentes C/D/E/F/G continuam abertas. Não se infere satisfação, provisionamento, faturamento ou pagamento."
+  ],
+  "official_references": [
+    "https://developers.docusign.com/platform/webhooks/connect/",
+    "https://docusign.github.io/docusign-esign-node-client/module-model_EnvelopeTransactionStatus.html"
+  ],
+  "files": [
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/signaturePresentation.js",
+    "app/models/jrc_backoffice/signature_delivery.rb",
+    "app/models/jrc_backoffice/signature_delivery_event.rb",
+    "app/services/jrc_backoffice/signatures/dispatch_context.rb",
+    "app/services/jrc_backoffice/signatures/notifications.rb",
+    "config/schedule.yml",
+    "db/schema.rb",
+    "spec/requests/webhooks/docusign_spec.rb",
+    "app/jobs/jrc_backoffice/signature_reconciliation_job.rb",
+    "app/jobs/jrc_backoffice/signature_reconciliation_recovery_job.rb",
+    "app/services/jrc_backoffice/signatures/reconciliation.rb",
+    "db/migrate/20261102100000_allow_signature_reconciliation_observations.rb",
+    "spec/services/jrc_backoffice/signatures/reconciliation_spec.rb"
+  ],
+  "files_sha256": {
+    "app/javascript/dashboard/i18n/locale/en/crm.json": "9f9e1e52e6f8737d057d18b835bc61ebc12adc14fc566b942f4d094d2382ae2b",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/signaturePresentation.js": "7f8746d404af06a326b3d6aca756b447e3b4f2e65c2b77843b9e64d8551162c7",
+    "app/models/jrc_backoffice/signature_delivery.rb": "3828267fd6c5d892d59aa7b5d3520bb14c2d3131cca64c0279fc2f3c133004af",
+    "app/models/jrc_backoffice/signature_delivery_event.rb": "6c3130021ef55d63241b64aa65cb3921aae27c2b7f301e06e556e7515baf3b31",
+    "app/services/jrc_backoffice/signatures/dispatch_context.rb": "5c4db07e70636ad0899189c895f363da20c59ae6f9d7b3f7e9a52c97bc8dac5d",
+    "app/services/jrc_backoffice/signatures/notifications.rb": "4bcbcac3cc5510ef4ed15520bf04ee819552a98a85e2e9d40649925f7b7f2dfd",
+    "config/schedule.yml": "ba56ed0a9931d3b528e269dda13b315f887d7bc28442cdcbdf055ca6fa0841f6",
+    "db/schema.rb": "d9362e343863017b7fc0d8fb734c561a640ddced55dbfa52645e8c93d9b9cea1",
+    "spec/requests/webhooks/docusign_spec.rb": "6597b8ccfe5b1d33be15675a3fd0a617ee2d0e37a65873395e2994ce8a47744a",
+    "app/jobs/jrc_backoffice/signature_reconciliation_job.rb": "c70a756ae20be03e9ba192cb5da209d8ae79f839a71a92cc00e6b9e158e1596c",
+    "app/jobs/jrc_backoffice/signature_reconciliation_recovery_job.rb": "260dcaf86cb3cbf96dbd495d750953c2b48fa337268f24cb80a8dbe6660ada8c",
+    "app/services/jrc_backoffice/signatures/reconciliation.rb": "1fc1115853289d1b167fdfe96d5555ee80074850b37cf5cc2773e1ad88daa286",
+    "db/migrate/20261102100000_allow_signature_reconciliation_observations.rb": "9b0d5245ba42e50a4608811e79b6b21d9172b822ddc6e790d465893c364ff8f9",
+    "spec/services/jrc_backoffice/signatures/reconciliation_spec.rb": "8972ad15ea7d6e3b8f0910304937f8d7eed17e8c43beaeb2be5bf84172744b22"
+  },
+  "new_migrations": [
+    "20261102100000"
+  ],
+  "publication": {
+    "push": false,
+    "docker_image_build": false,
+    "image_publish": false,
+    "deploy": false,
+    "compose_changed": false,
+    "production_migrations": false,
+    "protected_publication_head": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+    "protected_worktree_clean": true
+  },
+  "next": "Continuar B3: ações operacionais e evidências finais/verificador, mantendo envio bloqueado onde faltarem controles; depois C/D/E/F/G."
+}

@@ -1,0 +1,89 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "8db8a17bd1207be71a86d974aad84b27debf0119",
+  "status": "F2 native coverage presentation locally validated; no stage closure",
+  "word_reference": "relacionamento:P0082/P0083: observed-weight coverage and missing-evidence policy. Not model confidence from P0148.",
+  "confirmed_gap": "Native HealthScore already returned coverage_weight, calculation_weight and missing_factor_policy; none of the note/detail/history/preview UI consumers presented these fields. Existing calculated-customer coverage is a separate metric. No score engine was recreated.",
+  "implementation": [
+    "One read-only HealthCoverageNote presents captured observed configured weights separately from the effective calculation denominator and captured missing-evidence policy. No score or inferred statistical confidence percentage is manufactured.",
+    "Real0 observed coverage stays0; missing legacy weights/policy remain unavailable with no default policy substituted. Neutral-imputation100 calculation weight never masquerades as100 observed coverage.",
+    "Native customer/detail, work context, current product health, product history and both draft/current health preview surfaces reuse the component. Account formatting flows through existing metadata to preview; active UI locale is a fallback. No fictitious response formatting field added.",
+    "Existing native HealthScore weights, version/hysteresis, source permissions, immutable histories, routes, native communication buttons and API DTOs remain unchanged. Only source en catalog changed per repository rules."
+  ],
+  "tests": {
+    "first_vue": "23/0 =5 new coverage presentation cases +4 preview +10 product history +4 work-context identity/cancellation regressions.",
+    "final_consumer_vue": "14/0 =5 coverage +4 preview +5 interface/channel/telephony/context invalidation cases, including customer API health forwarded directly to the coverage note. Runs overlap; not summed.",
+    "eslint_new": "0 errors/0 warnings",
+    "eslint_shared": [
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue",
+        "baseline": 32,
+        "current": 32,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/WorkContextPanel.vue",
+        "baseline": 13,
+        "current": 13,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/HealthConfigurationPreview.vue",
+        "baseline": 5,
+        "current": 5,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ProductHealthHistory.vue",
+        "baseline": 2,
+        "current": 2,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue",
+        "baseline": 35,
+        "current": 35,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/interface.spec.js",
+        "baseline": 0,
+        "current": 0,
+        "added": {}
+      }
+    ],
+    "backend": "No backend implementation changed; native HealthScore fields and Presenter/WorkContext/HealthConfigurationPreview projection were inspected and reused. Existing native coverage tests were read, not re-reported as newly executed.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "healthcoveragenoteui01": {
+      "status": "passed",
+      "free_start": 7108411392,
+      "minimum_free": 7066599424,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 7844,
+      "exit_code": 0,
+      "free_end": 7106498560
+    },
+    "healthcoverageconsumerui02": {
+      "status": "passed",
+      "free_start": 7106797568,
+      "minimum_free": 7079931904,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 25084,
+      "exit_code": 0,
+      "free_end": 7104368640
+    }
+  },
+  "limitations": [
+    "Vue data fixtures/consumer integration are not real current-build Chrome desktop/mobile acceptance.",
+    "No pixel/theme/responsive screenshot acceptance asserted under the no-build restriction.",
+    "Calibrated NICO suggestion confidence/model precision and external pilot remain separate requirements; data coverage does not substitute for them."
+  ],
+  "next": "Review F1 hard distribution restrictions from P0095 and reuse current native model/approval/batch guards before implementing any missing opt-in restriction.",
+  "restrictions": "No build, cleanup, server5379 change, container restart, push, GHCR, deploy, production or real external operation."
+}

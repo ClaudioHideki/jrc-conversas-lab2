@@ -1,30 +1,40 @@
 <script setup>
-import { ref, watch, onBeforeUnmount } from 'vue';
+import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import API from 'dashboard/api/jrcCustomers';
 import { useCustomerMaster } from '../useCustomerMaster';
 import { T, buttonClass, errorMessage } from '../copy';
 const props = defineProps({
-  companyId: { type: [Number, String], required: true },
+  companyId: { type: [Number, String], default: null },
+  contactId: { type: [Number, String], default: null },
   kind: { type: String, required: true },
 });
-const { accountId, accountScopedRoute, date } = useCustomerMaster();
+const { accountId, identity, accountScopedRoute, date } = useCustomerMaster();
+const subjectId = computed(() => props.contactId ?? props.companyId);
+const subjectType = computed(() =>
+  props.contactId === null ? 'companies' : 'contacts'
+);
 const rows = ref([]);
 const meta = ref({ total: 0 });
 const page = ref(1);
 const busy = ref(false);
 const error = ref('');
 let generation = 0;
+let controller;
 const load = async () => {
   generation += 1;
   const version = generation;
+  controller?.abort();
+  controller = new AbortController();
   busy.value = true;
   error.value = '';
   rows.value = [];
+  meta.value = { total: 0 };
   try {
-    const { data } = await API.records(props.companyId, {
-      kind: props.kind,
-      page: page.value,
-    });
+    const params = { kind: props.kind, page: page.value };
+    const options = { accountId: accountId.value, signal: controller.signal };
+    const { data } = await (subjectType.value === 'contacts'
+      ? API.contactRecords(subjectId.value, params, options)
+      : API.records(subjectId.value, params, options));
     if (version === generation) {
       rows.value = data.payload;
       meta.value = data.meta;
@@ -61,19 +71,37 @@ const routeFor = row => {
     campaigns: 'jrc_campaigns_index',
     calls: 'calls_dashboard_index',
   };
-  return accountScopedRoute(routes[props.kind]);
+  const queryKeys = {
+    leads: 'leadId',
+    deals: 'dealId',
+    proposals: 'proposalId',
+    orders: 'orderId',
+    contracts: 'contractId',
+  };
+  const queryKey = queryKeys[props.kind];
+  return accountScopedRoute(
+    routes[props.kind],
+    {},
+    queryKey ? { [queryKey]: row.id } : {}
+  );
 };
 watch(
-  [accountId, () => props.companyId, () => props.kind],
+  [identity, subjectId, subjectType, () => props.kind],
   () => {
-    page.value = 1;
-    load();
+    generation += 1;
+    controller?.abort();
+    rows.value = [];
+    meta.value = { total: 0 };
+    if (page.value === 1) load();
+    else page.value = 1;
   },
   { immediate: true }
 );
 watch(page, load);
 onBeforeUnmount(() => {
   generation += 1;
+  controller?.abort();
+  rows.value = [];
 });
 </script>
 
@@ -93,7 +121,7 @@ onBeforeUnmount(() => {
       {{ error }}
     </p>
     <p
-      v-if="!busy && !rows.length"
+      v-if="!busy && !error && !rows.length"
       class="py-6 text-n-slate-10"
     >
       {{ T.noData }}
@@ -108,16 +136,17 @@ onBeforeUnmount(() => {
           <RouterLink
             :to="routeFor(row)"
             class="font-semibold text-n-brand"
-            >{{
+          >
+            {{
               row.title ||
               row.name ||
               row.contract_number ||
               row.order_number ||
               `#${row.display_id || row.id}`
-            }}</RouterLink
-          >
+            }}
+          </RouterLink>
           <p class="text-sm text-n-slate-10">
-            {{ row.status }} / {{ date(row.created_at) }}
+            {{ `${row.status || ''} / ${date(row.created_at)}` }}
           </p>
           <p
             v-if="row.due_at"
@@ -129,8 +158,9 @@ onBeforeUnmount(() => {
         <span
           v-if="row.duration_seconds != null"
           class="text-sm"
-          >{{ row.duration_seconds }} {{ T.secondsShort }}</span
         >
+          {{ `${row.duration_seconds} ${T.secondsShort}` }}
+        </span>
       </article>
     </div>
     <div class="mt-4 flex items-center gap-3">
@@ -140,9 +170,10 @@ onBeforeUnmount(() => {
         :disabled="busy || page <= 1"
         @click="page--"
       >
-        {{ T.previous }}</button
-      ><span>{{ page }} / {{ Math.max(1, Math.ceil(meta.total / 25)) }}</span
-      ><button
+        {{ T.previous }}
+      </button>
+      <span>{{ `${page} / ${Math.max(1, Math.ceil(meta.total / 25))}` }}</span>
+      <button
         type="button"
         :class="buttonClass"
         :disabled="busy || page * 25 >= meta.total"

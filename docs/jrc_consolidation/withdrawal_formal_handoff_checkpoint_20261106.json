@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "f4a9b89eff7e24afa744bdc7a70ba3147f585398",
+  "status": "Formal CS handoff responsibility links and representative task read scale validated locally; fixed query cost remains actionable",
+  "implementation": [
+    "Include pending/accepted native HandoffCases whose portfolio is currently active, while rejected/inactive historical cases do not force ownership transfer. Reopened implementation and its task responsibilities remain linked to CS.",
+    "Reuse canonical Handoff.origin_order for Backoffice fulfillment metadata and native crm-order-implementation identity; a conflicting canonical origin requires native review, not a fabricated zero. Wrong-customer source is denied. Native assignment, project and order scopes all remain mandatory.",
+    "Authorize direct project handoffs in groups through the unchanged native customer project scope; no per-project authority is granted by candidate IDs. Force native rows to the actual context account.",
+    "No handoff decisions, original owners, histories or other module memberships are mutated by this read selection. Actual prepare/accept API flow and immutable accepted case were exercised."
+  ],
+  "tests_non_additive": {
+    "native01": "18/0:7initial formal handoff cases and11CS native link cases.",
+    "scale02": "First1example failed an unsupported absolute query-count assumption; functional1000/1000 counts/pagination were correct. Bulk seeding also triggered a static validation warning; replaced with model-validated seeding, not a gate suppression.",
+    "final03": "8/0:7formal cases including actual prepare/accept API, preserved accepted attributes and1scale scenario. Final identical-method/fixture extraction was style-only and linted afterward.",
+    "scale_details": {
+      "linked_tasks": 1000,
+      "unrelated_tasks": 1000,
+      "projects": 2,
+      "requests_per_phase": 3,
+      "small_sql_queries": 3155,
+      "large_sql_queries": 3156,
+      "measurement_note": "One extra large-phase SQL is the assertion-side total query; native API count did not grow per candidate. Model-validated source seeding measures read scale, not2000UI creation flows.",
+      "large_phase_seconds": 21.962,
+      "last_page_response_bytes": 2296,
+      "pagination": "Actual API first page and page100 returned correct10native task IDs and total1000, excluding1000unrelated tasks."
+    },
+    "static": "Final4new/changed files0RuboCop offenses; no disabled cops.",
+    "diff_check": "passed",
+    "chrome": "No new compiled/browser acceptance: explicit no-build/no5379-change retained."
+  },
+  "resources": {
+    "start": 7687618560,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/services/jrc_relationship/withdrawal_handoff_projects_spec.rb": "52fa8fb58bef99fd293ebb0418091e5c0204205b529368f0ef8e28c32ef472b1",
+      "spec/requests/api/v1/accounts/relationship/withdrawal_native_links_scale_spec.rb": "9419c2a985b1740d3612db966cb6dd7dff8f162bde34a9eba3ab5518123ac091"
+    },
+    "minimum": 6447243264,
+    "exit_code": 0,
+    "end": 6466129920
+  },
+  "runtime_preservation": {
+    "four_containers": "All original StartedAt values unchanged in final check.",
+    "5379": "127.0.0.1 PID6464 unchanged."
+  },
+  "disk_final_bytes": 6426238976,
+  "remaining": [
+    "Fixed source authorization query overhead is high despite no task-count N+1. Next: small measured local reuse of native read scopes, retaining fresh final actor/source checks and negative revocation tests.",
+    "Large cohorts of many distinct order-bound implementation projects were not measured; canonical resolution remains per candidate. No production latency/capacity promise.",
+    "Fresh current-source Chrome and full C-G literal/visual acceptance, TRR definition, deferred portfolio-less documents and real provider/scanner/channel acceptance remain separate."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,production,external real action,5379 change or container restart."
+}

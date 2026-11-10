@@ -30,6 +30,11 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
+  jrc_relationship:
+    recommendations:
+      unavailable: 'Revisar os dados disponíveis antes de recomendar uma ação.'
+      maintain_cadence: 'Manter cadência de relacionamento'
+      review_factors: 'Revisar fatores e preparar plano com o responsável'
   hello: 'Hello world'
   inbox:
     reauthorization:
@@ -132,6 +137,9 @@ en:
       search:
         query_missing: Specify search string with parameter q
     messages:
+      portfolio_capacity_exceeded: exceeds the configured portfolio capacity
+      portfolio_capacity_unconfigured: requires a configured capacity for this portfolio
+      portfolio_capacity_unavailable: is not available for this portfolio
       search:
         time_range_limit_exceeded: 'Search is limited to the last %{days} days'
     categories:
@@ -293,6 +301,8 @@ en:
       sla_missed_resolution: 'SLA target resolution missed for conversation (#%{display_id})'
       relationship_action: 'Relationship action requires attention'
       service_desk_clock: 'Internal Service Desk OLA alert'
+      approval_event: 'Approval Center update'
+    approval_event_body: 'Open the Approval Center to review this update.'
     attachment: 'Attachment'
     no_content: 'No content'
   conversations:

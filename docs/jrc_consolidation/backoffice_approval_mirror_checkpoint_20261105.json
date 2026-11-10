@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-05",
+  "base_checkpoint": "7c9edef70edd9d4f3f8c1b18bc138d5fa10c83f4",
+  "status": "Incremental E2 native approval mirror implemented with automated evidence; no full stage or Chrome acceptance",
+  "implementation": [
+    "Horizontal Approvals tab in existing Backoffice360; request, origin order and linked contract use fixed native resource filters.",
+    "Existing native Central request index, context, pagination and show endpoints reused without new permission grants, models, migrations or parallel approval motor.",
+    "Native RequestDetail reused in explicit read-only mode; its default interactive behavior retained. No decision/adjustment popup in mirror, including pending dialog on mode switch.",
+    "Actual historical stages, versions, outcomes, votes and reasons are rendered; full captured rule/tier/audit JSON remains the existing independently authorized report.",
+    "Source/account/user/membership changes and denied refresh clear prior detail; late responses and mismatching origin are rejected. Central route opens exact request."
+  ],
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeApprovalMirror.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeApprovalMirror.vue",
+    "spec/requests/api/v1/accounts/jrc_approvals/backoffice_mirror_spec.rb",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/decisionConfirmation.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue"
+  ],
+  "automated": {
+    "backend": "e2mirror02:4 examples0 failures, jrc_rel_v2_candidate_test real PostgreSQL; actual native origin filters/count/page/detail/immutable history and current issuer/unit/foreign-account denial. No approval gate relaxed.",
+    "Vue": "e2mirrorui01:17 passed;9 mirror interactions and8 decision-confirmation cases including2 new read-only tests. Test fixture style only changed afterward for no-nested-ternary; production component unchanged.",
+    "lint": "e2mirrorlint01 RuboCop0; e2mirroreslint02 five files0 errors",
+    "first_failures": "e2mirror01 had2 incorrect expectations: published helper returns Policy not PolicyVersion, and native denied direct GET is401. Expectations corrected; no authorization implementation changed.",
+    "resources": {
+      ".codex/d9-notifications-20261104/e2mirror02-resource.json": {
+        "start": 12704858112,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/jrc_approvals/backoffice_mirror_spec.rb": "364f8104c70422408e9e4e4f7a41d5ea46ad90453da3e6e5f0943b8445125f26"
+        },
+        "minimum": 12704768000,
+        "exit_code": 0,
+        "end": 12704768000
+      },
+      ".codex/d-approvals-20261104/e2mirrorui01-resource.json": {
+        "status": "passed",
+        "free_start": 12707336192,
+        "minimum_free": 12665061376,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 21644,
+        "exit_code": 0,
+        "free_end": 12704440320
+      }
+    }
+  },
+  "limitations": [
+    "No compiled desktop/mobile light/dark Chrome acceptance: user prohibits builds and server5379 changes. Horizontal layout uses current module tab/navigation components and native color tokens, not screenshot proof.",
+    "Full Word E approval dossier still partial: this UI is native Central history/report access, not a new operational approval or digital/legal signature.",
+    "Native Central index currently filters visible rows in memory before pagination. Existing scale constraint remains; no production scale or SLO claim.",
+    "Version-bound signed artifacts and sealed final conclusion dossier remain pending; previous E3 transfer is explicit native handoff, not a sealed immutable acceptance dossier."
+  ],
+  "disk_end": 12702695424,
+  "preservation": {
+    "no_build_push_GHCR_deploy_cleanup_production_external_operations": true,
+    "server5379_unchanged": true,
+    "previous109_not_repeated": true
+  },
+  "stages_C_D_E_F_G_complete": false
+}

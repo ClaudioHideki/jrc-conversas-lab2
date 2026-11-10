@@ -17,11 +17,11 @@ const money = value => formatMoney(value, props.metadata.formatting);
 
 <template>
   <section
-    class="space-y-3 rounded-xl border border-n-weak p-4"
+    class="min-w-0 space-y-3 rounded-xl border border-n-weak p-4"
     data-testid="metric-drilldown"
   >
-    <div class="flex justify-between">
-      <h3 class="font-semibold">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <h3 class="break-words font-semibold">
         {{ t(`RELATIONSHIP.METRICS.${data.metric}`) }} ·
         {{ data.metric.endsWith('_cents') ? money(data.value) : data.value }}
       </h3>
@@ -82,8 +82,9 @@ const money = value => formatMoney(value, props.metadata.formatting);
                 :to="row.route"
                 class="text-n-brand"
               >
-                {{ row.label }} #{{ row.id }} </RouterLink
-              ><span v-else>{{ row.label }} #{{ row.id }}</span>
+                {{ row.label }} #{{ row.id }}
+              </RouterLink>
+              <span v-else>{{ row.label }} #{{ row.id }}</span>
               <p class="text-xs text-n-slate-11">
                 {{ t(`RELATIONSHIP.SOURCES.${row.source_kind}`) }}
               </p>
@@ -124,8 +125,9 @@ const money = value => formatMoney(value, props.metadata.formatting);
         :disabled="data.page <= 1"
         @click="emit('page', data.page - 1)"
       >
-        {{ t('RELATIONSHIP.PREVIOUS') }}</button
-      ><button
+        {{ t('RELATIONSHIP.PREVIOUS') }}
+      </button>
+      <button
         :class="buttonClass"
         :disabled="data.page * data.per_page >= data.total"
         @click="emit('page', data.page + 1)"

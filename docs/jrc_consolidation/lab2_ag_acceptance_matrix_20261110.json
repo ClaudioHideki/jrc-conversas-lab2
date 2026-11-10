@@ -1,0 +1,2650 @@
+{
+  "date": "2026-11-10",
+  "main_sha": "d8a83b824b11cc68ddbbce7c79681f368051fb70",
+  "ag_sha": "647fda5177a653b4a08b5b80679e61fa399f1919",
+  "criteria_count": 75,
+  "all_acceptance_completed": false,
+  "classification_not_a_completion_percentage": true,
+  "counts": {
+    "parcialmente_implementado": 72,
+    "dependente_de_homologacao_externa": 3
+  },
+  "qualifications": [
+    "75 observable clauses are not the entire Word/addendum inventory; original 1546-fragment inventory remains preserved.",
+    "72 embedded reference images have not been visually re-homologated against this combined candidate.",
+    "TRR and four local profiles remain approved; real operational parameters and grants are not invented.",
+    "Company documents without a portfolio remain blocked by the explicit user decision."
+  ],
+  "additional_approved_rules": {
+    "TRR": "Opening eligible cohort retained at close / opening eligible cohort, entrants excluded; null when no confirmed opening data/base. Native historical/authorization tests still required.",
+    "profiles": "Consulta, Analista, Supervisor, Gestor restrict native permissions; no automatic grants.",
+    "synthetic_only": true
+  },
+  "criteria": [
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.1 Empresas / 1",
+      "observable_requirement": "Lista premium com filtros e busca funcional.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "line": 1,
+          "sha256": "30252b41bab11af31482841f2597ca7281293fe38fd0cd4af9b76428ab6f0440"
+        },
+        {
+          "path": "app/services/jrc_customers/visibility.rb",
+          "line": 3,
+          "sha256": "fc6e8a006eb3e4c69109ac970401fa8efa7d62763645f6d6ed44ebab22720cd3"
+        },
+        {
+          "path": "app/services/jrc_customers/company_writer.rb",
+          "line": 1,
+          "sha256": "673b7e37d350813343625c98a739674aa2d268ba83b023cd93436f2c28583884"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.1 Empresas / 2",
+      "observable_requirement": "Clique abre popup 360º.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "line": 1,
+          "sha256": "30252b41bab11af31482841f2597ca7281293fe38fd0cd4af9b76428ab6f0440"
+        },
+        {
+          "path": "app/services/jrc_customers/visibility.rb",
+          "line": 3,
+          "sha256": "fc6e8a006eb3e4c69109ac970401fa8efa7d62763645f6d6ed44ebab22720cd3"
+        },
+        {
+          "path": "app/services/jrc_customers/company_writer.rb",
+          "line": 1,
+          "sha256": "673b7e37d350813343625c98a739674aa2d268ba83b023cd93436f2c28583884"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.1 Empresas / 3",
+      "observable_requirement": "Pessoas podem ser cadastradas, vinculadas, marcadas como principal e desvinculadas sem duplicar pessoa.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "line": 1,
+          "sha256": "30252b41bab11af31482841f2597ca7281293fe38fd0cd4af9b76428ab6f0440"
+        },
+        {
+          "path": "app/services/jrc_customers/visibility.rb",
+          "line": 3,
+          "sha256": "fc6e8a006eb3e4c69109ac970401fa8efa7d62763645f6d6ed44ebab22720cd3"
+        },
+        {
+          "path": "app/services/jrc_customers/company_writer.rb",
+          "line": 1,
+          "sha256": "673b7e37d350813343625c98a739674aa2d268ba83b023cd93436f2c28583884"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.1 Empresas / 4",
+      "observable_requirement": "Abas consultam módulos existentes e respeitam permissões.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "line": 1,
+          "sha256": "30252b41bab11af31482841f2597ca7281293fe38fd0cd4af9b76428ab6f0440"
+        },
+        {
+          "path": "app/services/jrc_customers/visibility.rb",
+          "line": 3,
+          "sha256": "fc6e8a006eb3e4c69109ac970401fa8efa7d62763645f6d6ed44ebab22720cd3"
+        },
+        {
+          "path": "app/services/jrc_customers/company_writer.rb",
+          "line": 1,
+          "sha256": "673b7e37d350813343625c98a739674aa2d268ba83b023cd93436f2c28583884"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.2 Contatos / 1",
+      "observable_requirement": "Lista mestre com indicadores e estados de sem empresa/sem responsável/duplicado.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "line": 1,
+          "sha256": "30252b41bab11af31482841f2597ca7281293fe38fd0cd4af9b76428ab6f0440"
+        },
+        {
+          "path": "app/services/jrc_customers/visibility.rb",
+          "line": 3,
+          "sha256": "fc6e8a006eb3e4c69109ac970401fa8efa7d62763645f6d6ed44ebab22720cd3"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.2 Contatos / 2",
+      "observable_requirement": "Clique abre popup com 6 abas aprovadas.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "line": 1,
+          "sha256": "30252b41bab11af31482841f2597ca7281293fe38fd0cd4af9b76428ab6f0440"
+        },
+        {
+          "path": "app/services/jrc_customers/visibility.rb",
+          "line": 3,
+          "sha256": "fc6e8a006eb3e4c69109ac970401fa8efa7d62763645f6d6ed44ebab22720cd3"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.2 Contatos / 3",
+      "observable_requirement": "Vincular empresa funciona sem criar empresa/contato paralelo.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "line": 1,
+          "sha256": "30252b41bab11af31482841f2597ca7281293fe38fd0cd4af9b76428ab6f0440"
+        },
+        {
+          "path": "app/services/jrc_customers/visibility.rb",
+          "line": 3,
+          "sha256": "fc6e8a006eb3e4c69109ac970401fa8efa7d62763645f6d6ed44ebab22720cd3"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.2 Contatos / 4",
+      "observable_requirement": "Ações rápidas usam canais reais.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "line": 1,
+          "sha256": "30252b41bab11af31482841f2597ca7281293fe38fd0cd4af9b76428ab6f0440"
+        },
+        {
+          "path": "app/services/jrc_customers/visibility.rb",
+          "line": 3,
+          "sha256": "fc6e8a006eb3e4c69109ac970401fa8efa7d62763645f6d6ed44ebab22720cd3"
+        }
+      ],
+      "status": "dependente_de_homologacao_externa",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Code present; real channel/provider acceptance remains unproved, in addition to native combined-candidate acceptance.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.3 Segmentos / 1",
+      "observable_requirement": "CRUD em popup.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/segment_criteria.rb",
+          "line": 3,
+          "sha256": "fc21dd31bf14e567d58a8b3b520da4d8392718670a9704a0a24449cc175fd37c"
+        },
+        {
+          "path": "app/services/jrc_customers/segment_members.rb",
+          "line": 3,
+          "sha256": "0dd7f4c6510fdd2efae29ac2ccd2f7716fb7546356de34189c578461f3e01120"
+        },
+        {
+          "path": "app/services/jrc_customers/module_segment_filter.rb",
+          "line": 3,
+          "sha256": "b44f2e239b36fbbd4358bcc5cdd3cde3b84e9fd22f5425c776b04cb69fbe9b01"
+        },
+        {
+          "path": "app/services/jrc_customers/financial_segment_criteria.rb",
+          "line": 3,
+          "sha256": "2764a1fa45386b0524cf2bb44cae8cdd1204bf6deea99a3f1321c80785eb16f1"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.3 Segmentos / 2",
+      "observable_requirement": "Critérios E/OU e prévia funcionam.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/segment_criteria.rb",
+          "line": 3,
+          "sha256": "fc21dd31bf14e567d58a8b3b520da4d8392718670a9704a0a24449cc175fd37c"
+        },
+        {
+          "path": "app/services/jrc_customers/segment_members.rb",
+          "line": 3,
+          "sha256": "0dd7f4c6510fdd2efae29ac2ccd2f7716fb7546356de34189c578461f3e01120"
+        },
+        {
+          "path": "app/services/jrc_customers/module_segment_filter.rb",
+          "line": 3,
+          "sha256": "b44f2e239b36fbbd4358bcc5cdd3cde3b84e9fd22f5425c776b04cb69fbe9b01"
+        },
+        {
+          "path": "app/services/jrc_customers/financial_segment_criteria.rb",
+          "line": 3,
+          "sha256": "2764a1fa45386b0524cf2bb44cae8cdd1204bf6deea99a3f1321c80785eb16f1"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.3 Segmentos / 3",
+      "observable_requirement": "Listas de empresas/contatos vinculados são paginadas e filtráveis.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/segment_criteria.rb",
+          "line": 3,
+          "sha256": "fc21dd31bf14e567d58a8b3b520da4d8392718670a9704a0a24449cc175fd37c"
+        },
+        {
+          "path": "app/services/jrc_customers/segment_members.rb",
+          "line": 3,
+          "sha256": "0dd7f4c6510fdd2efae29ac2ccd2f7716fb7546356de34189c578461f3e01120"
+        },
+        {
+          "path": "app/services/jrc_customers/module_segment_filter.rb",
+          "line": 3,
+          "sha256": "b44f2e239b36fbbd4358bcc5cdd3cde3b84e9fd22f5425c776b04cb69fbe9b01"
+        },
+        {
+          "path": "app/services/jrc_customers/financial_segment_criteria.rb",
+          "line": 3,
+          "sha256": "2764a1fa45386b0524cf2bb44cae8cdd1204bf6deea99a3f1321c80785eb16f1"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.3 Segmentos / 4",
+      "observable_requirement": "Uso por módulo não altera permissão do usuário.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/segment_criteria.rb",
+          "line": 3,
+          "sha256": "fc21dd31bf14e567d58a8b3b520da4d8392718670a9704a0a24449cc175fd37c"
+        },
+        {
+          "path": "app/services/jrc_customers/segment_members.rb",
+          "line": 3,
+          "sha256": "0dd7f4c6510fdd2efae29ac2ccd2f7716fb7546356de34189c578461f3e01120"
+        },
+        {
+          "path": "app/services/jrc_customers/module_segment_filter.rb",
+          "line": 3,
+          "sha256": "b44f2e239b36fbbd4358bcc5cdd3cde3b84e9fd22f5425c776b04cb69fbe9b01"
+        },
+        {
+          "path": "app/services/jrc_customers/financial_segment_criteria.rb",
+          "line": 3,
+          "sha256": "2764a1fa45386b0524cf2bb44cae8cdd1204bf6deea99a3f1321c80785eb16f1"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.4 Grupos / 1",
+      "observable_requirement": "Grupo econômico separado de etiqueta/grupo de contato.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/economic_group_writer.rb",
+          "line": 1,
+          "sha256": "b607920cc636bde883c8dac5f6e02da3d787aa5a10d0adbc1d253f20d022c35b"
+        },
+        {
+          "path": "app/services/jrc_customers/economic_group_directory.rb",
+          "line": 1,
+          "sha256": "5be5f3d234d62d422b7285a7b9be3ba91db7862817a1161efffe1f228d3d0b94"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.4 Grupos / 2",
+      "observable_requirement": "Vínculo de empresa com grupo econômico auditável.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/economic_group_writer.rb",
+          "line": 1,
+          "sha256": "b607920cc636bde883c8dac5f6e02da3d787aa5a10d0adbc1d253f20d022c35b"
+        },
+        {
+          "path": "app/services/jrc_customers/economic_group_directory.rb",
+          "line": 1,
+          "sha256": "5be5f3d234d62d422b7285a7b9be3ba91db7862817a1161efffe1f228d3d0b94"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.5 Contatos ativos / 1",
+      "observable_requirement": "Critério operacional claro e diferente da lista geral.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/operational_contacts.rb",
+          "line": 1,
+          "sha256": "401ee55984b74b24ed243c80af54627d64fd57eaee2cef7299a235c5e2f7c86c"
+        },
+        {
+          "path": "app/services/jrc_customers/operational_sources.rb",
+          "line": 3,
+          "sha256": "f602aa98ae82deeb60012d687318c89ec1d22b971dde03809a41a7283fddbf46"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.5 Contatos ativos / 2",
+      "observable_requirement": "Ações abrem conversa/módulo correspondente.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/operational_contacts.rb",
+          "line": 1,
+          "sha256": "401ee55984b74b24ed243c80af54627d64fd57eaee2cef7299a235c5e2f7c86c"
+        },
+        {
+          "path": "app/services/jrc_customers/operational_sources.rb",
+          "line": 3,
+          "sha256": "f602aa98ae82deeb60012d687318c89ec1d22b971dde03809a41a7283fddbf46"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.6 Importações / 1",
+      "observable_requirement": "CSV UTF-8, modelo para download, mapeamento, prévia e histórico.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/import_runs.rb",
+          "line": 1,
+          "sha256": "4fa542712a0913ac42edcc8a6aa0f87ab0b025260ac1e41af23f8fa4b88d2d8e"
+        },
+        {
+          "path": "app/services/jrc_customers/import_plan.rb",
+          "line": 1,
+          "sha256": "1f1caf3ea2fd6ef8c2c27fb69f41dc823d68cc6f51c4eb4caa515b0227e945c4"
+        },
+        {
+          "path": "app/services/jrc_customers/import_results.rb",
+          "line": 3,
+          "sha256": "d6dff926fa52ab393a8830e448f1abf9af809b4ca70334929d8c9e0ce3ec39f4"
+        },
+        {
+          "path": "app/services/jrc_customers/company_import.rb",
+          "line": 6,
+          "sha256": "92135a51b56f82f15eb3f3b3811fd309c67b54046015b73ac812b9f7aa490250"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.6 Importações / 2",
+      "observable_requirement": "Sem mescla automática por nome.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/import_runs.rb",
+          "line": 1,
+          "sha256": "4fa542712a0913ac42edcc8a6aa0f87ab0b025260ac1e41af23f8fa4b88d2d8e"
+        },
+        {
+          "path": "app/services/jrc_customers/import_plan.rb",
+          "line": 1,
+          "sha256": "1f1caf3ea2fd6ef8c2c27fb69f41dc823d68cc6f51c4eb4caa515b0227e945c4"
+        },
+        {
+          "path": "app/services/jrc_customers/import_results.rb",
+          "line": 3,
+          "sha256": "d6dff926fa52ab393a8830e448f1abf9af809b4ca70334929d8c9e0ce3ec39f4"
+        },
+        {
+          "path": "app/services/jrc_customers/company_import.rb",
+          "line": 6,
+          "sha256": "92135a51b56f82f15eb3f3b3811fd309c67b54046015b73ac812b9f7aa490250"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.6 Importações / 3",
+      "observable_requirement": "Relatório de erros disponível.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/import_runs.rb",
+          "line": 1,
+          "sha256": "4fa542712a0913ac42edcc8a6aa0f87ab0b025260ac1e41af23f8fa4b88d2d8e"
+        },
+        {
+          "path": "app/services/jrc_customers/import_plan.rb",
+          "line": 1,
+          "sha256": "1f1caf3ea2fd6ef8c2c27fb69f41dc823d68cc6f51c4eb4caa515b0227e945c4"
+        },
+        {
+          "path": "app/services/jrc_customers/import_results.rb",
+          "line": 3,
+          "sha256": "d6dff926fa52ab393a8830e448f1abf9af809b4ca70334929d8c9e0ce3ec39f4"
+        },
+        {
+          "path": "app/services/jrc_customers/company_import.rb",
+          "line": 6,
+          "sha256": "92135a51b56f82f15eb3f3b3811fd309c67b54046015b73ac812b9f7aa490250"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.6 Importações / 4",
+      "observable_requirement": "Nenhuma exclusão implícita.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/import_runs.rb",
+          "line": 1,
+          "sha256": "4fa542712a0913ac42edcc8a6aa0f87ab0b025260ac1e41af23f8fa4b88d2d8e"
+        },
+        {
+          "path": "app/services/jrc_customers/import_plan.rb",
+          "line": 1,
+          "sha256": "1f1caf3ea2fd6ef8c2c27fb69f41dc823d68cc6f51c4eb4caa515b0227e945c4"
+        },
+        {
+          "path": "app/services/jrc_customers/import_results.rb",
+          "line": 3,
+          "sha256": "d6dff926fa52ab393a8830e448f1abf9af809b4ca70334929d8c9e0ce3ec39f4"
+        },
+        {
+          "path": "app/services/jrc_customers/company_import.rb",
+          "line": 6,
+          "sha256": "92135a51b56f82f15eb3f3b3811fd309c67b54046015b73ac812b9f7aa490250"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-01",
+      "observable_requirement": "Usuário com alçada visualiza apenas aprovações dentro de seu escopo ou delegadas a ele.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/authorization.rb",
+          "line": 1,
+          "sha256": "f7aca176732faaad8d8c7818a11c78c303b9cb5c62a7c106dffc3038ba63035f"
+        },
+        {
+          "path": "app/services/jrc_approvals/requests.rb",
+          "line": 1,
+          "sha256": "051a8054dd8f6e0bc35ff4e888bfa997825e606df044abac204e591e8220ca82"
+        },
+        {
+          "path": "app/services/jrc_approvals/decisions.rb",
+          "line": 1,
+          "sha256": "08564ce8a52cbf24962917f381e8cd73b35be449aec7736bec889b3ae7bf9fa5"
+        },
+        {
+          "path": "app/services/jrc_approvals/request_visibility.rb",
+          "line": 1,
+          "sha256": "994a1007730cebb49cd6ef9abfdd2549268a618bff81c899bb25753426198434"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-02",
+      "observable_requirement": "Aprovador consegue abrir o pedido/registro de origem antes de decidir.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/authorization.rb",
+          "line": 1,
+          "sha256": "f7aca176732faaad8d8c7818a11c78c303b9cb5c62a7c106dffc3038ba63035f"
+        },
+        {
+          "path": "app/services/jrc_approvals/requests.rb",
+          "line": 1,
+          "sha256": "051a8054dd8f6e0bc35ff4e888bfa997825e606df044abac204e591e8220ca82"
+        },
+        {
+          "path": "app/services/jrc_approvals/decisions.rb",
+          "line": 1,
+          "sha256": "08564ce8a52cbf24962917f381e8cd73b35be449aec7736bec889b3ae7bf9fa5"
+        },
+        {
+          "path": "app/services/jrc_approvals/request_visibility.rb",
+          "line": 1,
+          "sha256": "994a1007730cebb49cd6ef9abfdd2549268a618bff81c899bb25753426198434"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-03",
+      "observable_requirement": "Aprovação é concluída com confirmação e fica registrada no histórico.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/authorization.rb",
+          "line": 1,
+          "sha256": "f7aca176732faaad8d8c7818a11c78c303b9cb5c62a7c106dffc3038ba63035f"
+        },
+        {
+          "path": "app/services/jrc_approvals/requests.rb",
+          "line": 1,
+          "sha256": "051a8054dd8f6e0bc35ff4e888bfa997825e606df044abac204e591e8220ca82"
+        },
+        {
+          "path": "app/services/jrc_approvals/decisions.rb",
+          "line": 1,
+          "sha256": "08564ce8a52cbf24962917f381e8cd73b35be449aec7736bec889b3ae7bf9fa5"
+        },
+        {
+          "path": "app/services/jrc_approvals/request_visibility.rb",
+          "line": 1,
+          "sha256": "994a1007730cebb49cd6ef9abfdd2549268a618bff81c899bb25753426198434"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-04",
+      "observable_requirement": "Rejeição exige motivo e devolve resultado ao solicitante/módulo de origem.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/authorization.rb",
+          "line": 1,
+          "sha256": "f7aca176732faaad8d8c7818a11c78c303b9cb5c62a7c106dffc3038ba63035f"
+        },
+        {
+          "path": "app/services/jrc_approvals/requests.rb",
+          "line": 1,
+          "sha256": "051a8054dd8f6e0bc35ff4e888bfa997825e606df044abac204e591e8220ca82"
+        },
+        {
+          "path": "app/services/jrc_approvals/decisions.rb",
+          "line": 1,
+          "sha256": "08564ce8a52cbf24962917f381e8cd73b35be449aec7736bec889b3ae7bf9fa5"
+        },
+        {
+          "path": "app/services/jrc_approvals/request_visibility.rb",
+          "line": 1,
+          "sha256": "994a1007730cebb49cd6ef9abfdd2549268a618bff81c899bb25753426198434"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-05",
+      "observable_requirement": "Ajuste preserva valor original, registra novo valor e exige observação.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/adjustments.rb",
+          "line": 2,
+          "sha256": "8cc8cbb5de69968830d6c800bb5060c6a4b62c75dffcd65627bdc1cc7f20fd6d"
+        },
+        {
+          "path": "app/services/jrc_approvals/adjustment_policy.rb",
+          "line": 2,
+          "sha256": "d867d7aca91596113b754331e738e971723832e7918a67b7dd9e31a9d532204b"
+        },
+        {
+          "path": "app/services/jrc_approvals/adjustment_sources.rb",
+          "line": 3,
+          "sha256": "062f59097bf850c9f573b60dda80eb194818422330bce2c224f94db9582fa5bc"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-06",
+      "observable_requirement": "Salvar e aprovar executa ajuste + decisão de forma atômica.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/adjustments.rb",
+          "line": 2,
+          "sha256": "8cc8cbb5de69968830d6c800bb5060c6a4b62c75dffcd65627bdc1cc7f20fd6d"
+        },
+        {
+          "path": "app/services/jrc_approvals/adjustment_policy.rb",
+          "line": 2,
+          "sha256": "d867d7aca91596113b754331e738e971723832e7918a67b7dd9e31a9d532204b"
+        },
+        {
+          "path": "app/services/jrc_approvals/adjustment_sources.rb",
+          "line": 3,
+          "sha256": "062f59097bf850c9f573b60dda80eb194818422330bce2c224f94db9582fa5bc"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-07",
+      "observable_requirement": "Administrador cria regra em quatro passos sem código/evento técnico visível.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/policies.rb",
+          "line": 1,
+          "sha256": "454ca60c837acc443de0ab48a7e136e1f5e6717430cbb7cc9ff77f1fe301c683"
+        },
+        {
+          "path": "app/services/jrc_approvals/tier_ranges.rb",
+          "line": 2,
+          "sha256": "e5f8ed492b645ab0ce6212db6df316920fad9eb4a6424a734be4bbe0324aa822"
+        },
+        {
+          "path": "app/services/jrc_approvals/simulation.rb",
+          "line": 1,
+          "sha256": "031c1bc29854e95ed632276527c484daceca07a3caac6ad544fad044b5f8376f"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-08",
+      "observable_requirement": "Alçadas não podem ter sobreposição inválida.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/policies.rb",
+          "line": 1,
+          "sha256": "454ca60c837acc443de0ab48a7e136e1f5e6717430cbb7cc9ff77f1fe301c683"
+        },
+        {
+          "path": "app/services/jrc_approvals/tier_ranges.rb",
+          "line": 2,
+          "sha256": "e5f8ed492b645ab0ce6212db6df316920fad9eb4a6424a734be4bbe0324aa822"
+        },
+        {
+          "path": "app/services/jrc_approvals/simulation.rb",
+          "line": 1,
+          "sha256": "031c1bc29854e95ed632276527c484daceca07a3caac6ad544fad044b5f8376f"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-09",
+      "observable_requirement": "Simulador usa regras reais mas não cria solicitação nem altera registro.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/policies.rb",
+          "line": 1,
+          "sha256": "454ca60c837acc443de0ab48a7e136e1f5e6717430cbb7cc9ff77f1fe301c683"
+        },
+        {
+          "path": "app/services/jrc_approvals/tier_ranges.rb",
+          "line": 2,
+          "sha256": "e5f8ed492b645ab0ce6212db6df316920fad9eb4a6424a734be4bbe0324aa822"
+        },
+        {
+          "path": "app/services/jrc_approvals/simulation.rb",
+          "line": 1,
+          "sha256": "031c1bc29854e95ed632276527c484daceca07a3caac6ad544fad044b5f8376f"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-10",
+      "observable_requirement": "Delegação simples transfere aprovações do titular ao delegado durante período definido.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/delegations.rb",
+          "line": 1,
+          "sha256": "baf17c4091274fcd9970c90743c551e9be98c94c262024ac535f9d96721f857f"
+        },
+        {
+          "path": "app/services/jrc_approvals/own_delegations.rb",
+          "line": 1,
+          "sha256": "3cded20b5f5aa79d75a4fca4ec27c304ec95909d7e632e9131a78ddbe58bb1a6"
+        },
+        {
+          "path": "app/services/jrc_approvals/delegation_topology.rb",
+          "line": 2,
+          "sha256": "c846908fe99bb9e570670e73df5327acfc5e6c551dc4de5244d99a7eca5ca17b"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-11",
+      "observable_requirement": "Auditoria registra ator, data/hora, ação, regra/versão e alterações.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/ledger.rb",
+          "line": 3,
+          "sha256": "1ec8eb3c217a10ee852aae98ebedfcd413eb1d138423f9d6953e7acf80df1fa0"
+        },
+        {
+          "path": "app/services/jrc_approvals/decisions.rb",
+          "line": 1,
+          "sha256": "08564ce8a52cbf24962917f381e8cd73b35be449aec7736bec889b3ae7bf9fa5"
+        },
+        {
+          "path": "app/services/jrc_approvals/request_revision.rb",
+          "line": 2,
+          "sha256": "3e55c2da2e768a0215393364d1546faacbcfc126549c574afeaed6152c1f14f0"
+        },
+        {
+          "path": "app/services/jrc_approvals/authorization.rb",
+          "line": 1,
+          "sha256": "f7aca176732faaad8d8c7818a11c78c303b9cb5c62a7c106dffc3038ba63035f"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-12",
+      "observable_requirement": "Duas decisões simultâneas não podem finalizar a mesma solicitação duas vezes.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/ledger.rb",
+          "line": 3,
+          "sha256": "1ec8eb3c217a10ee852aae98ebedfcd413eb1d138423f9d6953e7acf80df1fa0"
+        },
+        {
+          "path": "app/services/jrc_approvals/decisions.rb",
+          "line": 1,
+          "sha256": "08564ce8a52cbf24962917f381e8cd73b35be449aec7736bec889b3ae7bf9fa5"
+        },
+        {
+          "path": "app/services/jrc_approvals/request_revision.rb",
+          "line": 2,
+          "sha256": "3e55c2da2e768a0215393364d1546faacbcfc126549c574afeaed6152c1f14f0"
+        },
+        {
+          "path": "app/services/jrc_approvals/authorization.rb",
+          "line": 1,
+          "sha256": "f7aca176732faaad8d8c7818a11c78c303b9cb5c62a7c106dffc3038ba63035f"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-13",
+      "observable_requirement": "Pausa/edição de regra não altera solicitações já abertas.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/ledger.rb",
+          "line": 3,
+          "sha256": "1ec8eb3c217a10ee852aae98ebedfcd413eb1d138423f9d6953e7acf80df1fa0"
+        },
+        {
+          "path": "app/services/jrc_approvals/decisions.rb",
+          "line": 1,
+          "sha256": "08564ce8a52cbf24962917f381e8cd73b35be449aec7736bec889b3ae7bf9fa5"
+        },
+        {
+          "path": "app/services/jrc_approvals/request_revision.rb",
+          "line": 2,
+          "sha256": "3e55c2da2e768a0215393364d1546faacbcfc126549c574afeaed6152c1f14f0"
+        },
+        {
+          "path": "app/services/jrc_approvals/authorization.rb",
+          "line": 1,
+          "sha256": "f7aca176732faaad8d8c7818a11c78c303b9cb5c62a7c106dffc3038ba63035f"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-14",
+      "observable_requirement": "Permissões e isolamento multiempresa são validados no backend.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/ledger.rb",
+          "line": 3,
+          "sha256": "1ec8eb3c217a10ee852aae98ebedfcd413eb1d138423f9d6953e7acf80df1fa0"
+        },
+        {
+          "path": "app/services/jrc_approvals/decisions.rb",
+          "line": 1,
+          "sha256": "08564ce8a52cbf24962917f381e8cd73b35be449aec7736bec889b3ae7bf9fa5"
+        },
+        {
+          "path": "app/services/jrc_approvals/request_revision.rb",
+          "line": 2,
+          "sha256": "3e55c2da2e768a0215393364d1546faacbcfc126549c574afeaed6152c1f14f0"
+        },
+        {
+          "path": "app/services/jrc_approvals/authorization.rb",
+          "line": 1,
+          "sha256": "f7aca176732faaad8d8c7818a11c78c303b9cb5c62a7c106dffc3038ba63035f"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-15",
+      "observable_requirement": "Interface funciona em desktop com os padrões visuais atuais do JRC Conversas.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_approvals/ledger.rb",
+          "line": 3,
+          "sha256": "1ec8eb3c217a10ee852aae98ebedfcd413eb1d138423f9d6953e7acf80df1fa0"
+        },
+        {
+          "path": "app/services/jrc_approvals/decisions.rb",
+          "line": 1,
+          "sha256": "08564ce8a52cbf24962917f381e8cd73b35be449aec7736bec889b3ae7bf9fa5"
+        },
+        {
+          "path": "app/services/jrc_approvals/request_revision.rb",
+          "line": 2,
+          "sha256": "3e55c2da2e768a0215393364d1546faacbcfc126549c574afeaed6152c1f14f0"
+        },
+        {
+          "path": "app/services/jrc_approvals/authorization.rb",
+          "line": 1,
+          "sha256": "f7aca176732faaad8d8c7818a11c78c303b9cb5c62a7c106dffc3038ba63035f"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-01",
+      "observable_requirement": "Backoffice aparece como módulo principal no menu lateral e não como aba interna do CRM.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/components-next/sidebar/Sidebar.vue",
+          "line": 49,
+          "sha256": "70fc67dcaae536e7878005abc52ad88bf697ffb9db2106036a2d2ec26409d81c"
+        },
+        {
+          "path": "config/routes.rb",
+          "line": 1,
+          "sha256": "811bc3911bbe7d6ff0ec6f2d9dfdc6651f7d5d4cff12f537df0370c7476aa8a2"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-02",
+      "observable_requirement": "Rota antiga do CRM redireciona sem quebrar links existentes.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/components-next/sidebar/Sidebar.vue",
+          "line": 49,
+          "sha256": "70fc67dcaae536e7878005abc52ad88bf697ffb9db2106036a2d2ec26409d81c"
+        },
+        {
+          "path": "config/routes.rb",
+          "line": 1,
+          "sha256": "811bc3911bbe7d6ff0ec6f2d9dfdc6651f7d5d4cff12f537df0370c7476aa8a2"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-03",
+      "observable_requirement": "Pedido aprovado no CRM pode originar/abrir uma única solicitação operacional de fulfillment, respeitando idempotência.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/completion_report.rb",
+          "line": 2,
+          "sha256": "6b68175c7bca2503c21fe809e2d9102089563c8176d5e71c52baaab266f43493"
+        },
+        {
+          "path": "app/services/jrc_backoffice/native_requirements.rb",
+          "line": 2,
+          "sha256": "da06d2434753f09d1cb7aeaf362a938b35fecb8f7fec07aef40fabf98f3e1789"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-04",
+      "observable_requirement": "Tela 360 mostra venda, pedido, cliente, contrato, documentos, aprovações, pendências, SLA e histórico.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/completion_report.rb",
+          "line": 2,
+          "sha256": "6b68175c7bca2503c21fe809e2d9102089563c8176d5e71c52baaab266f43493"
+        },
+        {
+          "path": "app/services/jrc_backoffice/native_requirements.rb",
+          "line": 2,
+          "sha256": "da06d2434753f09d1cb7aeaf362a938b35fecb8f7fec07aef40fabf98f3e1789"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-05",
+      "observable_requirement": "Documentos obrigatórios são derivados de regras configuradas por produto/operação e impedem avanço quando bloqueantes.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/requirement_catalog.rb",
+          "line": 3,
+          "sha256": "ea7c3493450de23e4b7e07a73f97fce4882672ce11334a159ac9251acb9d9521"
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_gate.rb",
+          "line": 4,
+          "sha256": "79377372ef71b17845cdabb1c317085a1a3e13b7bcdbc35baaae947d37aa190e"
+        },
+        {
+          "path": "app/services/jrc_backoffice/documents.rb",
+          "line": 3,
+          "sha256": "5318494276b4748bf6717e27db1003f5662cb3e978541a28e721d6b1ab5da10b"
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_preanalysis.rb",
+          "line": 1,
+          "sha256": "5d689c5891125efc0959708f6d6f427c44dc5610e1903bbd0dd2999e4252a9a9"
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_validity.rb",
+          "line": 6,
+          "sha256": "0d9747ff2212578752683b69e2e7291b0f2d9e4cac0986270318d7a65e6c7947"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-06",
+      "observable_requirement": "Upload substituído gera nova versão e preserva histórico.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/requirement_catalog.rb",
+          "line": 3,
+          "sha256": "ea7c3493450de23e4b7e07a73f97fce4882672ce11334a159ac9251acb9d9521"
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_gate.rb",
+          "line": 4,
+          "sha256": "79377372ef71b17845cdabb1c317085a1a3e13b7bcdbc35baaae947d37aa190e"
+        },
+        {
+          "path": "app/services/jrc_backoffice/documents.rb",
+          "line": 3,
+          "sha256": "5318494276b4748bf6717e27db1003f5662cb3e978541a28e721d6b1ab5da10b"
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_preanalysis.rb",
+          "line": 1,
+          "sha256": "5d689c5891125efc0959708f6d6f427c44dc5610e1903bbd0dd2999e4252a9a9"
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_validity.rb",
+          "line": 6,
+          "sha256": "0d9747ff2212578752683b69e2e7291b0f2d9e4cac0986270318d7a65e6c7947"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-07",
+      "observable_requirement": "Pré-análise documental persiste resultado e evidências; divergências ficam visíveis ao analista.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/requirement_catalog.rb",
+          "line": 3,
+          "sha256": "ea7c3493450de23e4b7e07a73f97fce4882672ce11334a159ac9251acb9d9521"
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_gate.rb",
+          "line": 4,
+          "sha256": "79377372ef71b17845cdabb1c317085a1a3e13b7bcdbc35baaae947d37aa190e"
+        },
+        {
+          "path": "app/services/jrc_backoffice/documents.rb",
+          "line": 3,
+          "sha256": "5318494276b4748bf6717e27db1003f5662cb3e978541a28e721d6b1ab5da10b"
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_preanalysis.rb",
+          "line": 1,
+          "sha256": "5d689c5891125efc0959708f6d6f427c44dc5610e1903bbd0dd2999e4252a9a9"
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_validity.rb",
+          "line": 6,
+          "sha256": "0d9747ff2212578752683b69e2e7291b0f2d9e4cac0986270318d7a65e6c7947"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-08",
+      "observable_requirement": "Aprovação obrigatória pendente bloqueia contrato; decisão da Central de Aprovações é refletida no Backoffice.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/requirements.rb",
+          "line": 1,
+          "sha256": "381972ec8ca902dd278e444dcffb742d0f3dd697eaa76c1d65b022b1751a959a"
+        },
+        {
+          "path": "app/services/jrc_backoffice/contract_release.rb",
+          "line": 2,
+          "sha256": "2a63af47a53b2c8897422efd5b87e117a3b5fab59fa2bd09665b4efeca5e8e0b"
+        },
+        {
+          "path": "app/services/jrc_backoffice/signature_release.rb",
+          "line": 2,
+          "sha256": "dfc22f80f2ee21b4fb7bb7bfee34db28028e4ed8527b198ce5652fd9f3e80bd3"
+        },
+        {
+          "path": "app/services/jrc_backoffice/completion_signature.rb",
+          "line": 3,
+          "sha256": "ce958b63f08eb24033ddc9a1d30de0af6f6849b41ef59fe54b430d1d23b4b0d5"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-09",
+      "observable_requirement": "Contrato obrigatório não assinado bloqueia implantação/provisionamento.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/requirements.rb",
+          "line": 1,
+          "sha256": "381972ec8ca902dd278e444dcffb742d0f3dd697eaa76c1d65b022b1751a959a"
+        },
+        {
+          "path": "app/services/jrc_backoffice/contract_release.rb",
+          "line": 2,
+          "sha256": "2a63af47a53b2c8897422efd5b87e117a3b5fab59fa2bd09665b4efeca5e8e0b"
+        },
+        {
+          "path": "app/services/jrc_backoffice/signature_release.rb",
+          "line": 2,
+          "sha256": "dfc22f80f2ee21b4fb7bb7bfee34db28028e4ed8527b198ce5652fd9f3e80bd3"
+        },
+        {
+          "path": "app/services/jrc_backoffice/completion_signature.rb",
+          "line": 3,
+          "sha256": "ce958b63f08eb24033ddc9a1d30de0af6f6849b41ef59fe54b430d1d23b4b0d5"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-10",
+      "observable_requirement": "Pendências têm tipo, responsável, prazo, bloqueio, status e evidências.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/issues.rb",
+          "line": 1,
+          "sha256": "b9651131813bbc6af32ad1872375dc3252db2a00d599830ce078bb51924f4950"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-11",
+      "observable_requirement": "SLA pausa/retoma conforme política e exibe tempo restante por etapa.",
+      "native_source_references": [
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "line": 49,
+          "sha256": "a045acf5afa09e441108901315f1382a826fdcbc7c365eba3999201026420aef"
+        },
+        {
+          "path": "app/services/jrc_backoffice/completion_report.rb",
+          "line": 2,
+          "sha256": "6b68175c7bca2503c21fe809e2d9102089563c8176d5e71c52baaab266f43493"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-12",
+      "observable_requirement": "Toda ação relevante gera auditoria com ator e timestamp.",
+      "native_source_references": [
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "line": 49,
+          "sha256": "a045acf5afa09e441108901315f1382a826fdcbc7c365eba3999201026420aef"
+        },
+        {
+          "path": "app/services/jrc_backoffice/completion_report.rb",
+          "line": 2,
+          "sha256": "6b68175c7bca2503c21fe809e2d9102089563c8176d5e71c52baaab266f43493"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-13",
+      "observable_requirement": "Relatórios respeitam permissões e filtros de escopo.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/completion_report.rb",
+          "line": 2,
+          "sha256": "6b68175c7bca2503c21fe809e2d9102089563c8176d5e71c52baaab266f43493"
+        },
+        {
+          "path": "app/services/jrc_backoffice/completion_handoff.rb",
+          "line": 3,
+          "sha256": "6661f4ce731b04c2819a63a9306a4f13b7795d2a236956edbc1297ce94d4a669"
+        },
+        {
+          "path": "app/services/jrc_backoffice/contract_access.rb",
+          "line": 3,
+          "sha256": "47f7ca8def338186724053b7ec0b77dd778702f43678e9eeb52937479f5fa673"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-14",
+      "observable_requirement": "Fluxos de Relacionamento/Retenção permanecem fora do Backoffice.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/completion_report.rb",
+          "line": 2,
+          "sha256": "6b68175c7bca2503c21fe809e2d9102089563c8176d5e71c52baaab266f43493"
+        },
+        {
+          "path": "app/services/jrc_backoffice/completion_handoff.rb",
+          "line": 3,
+          "sha256": "6661f4ce731b04c2819a63a9306a4f13b7795d2a236956edbc1297ce94d4a669"
+        },
+        {
+          "path": "app/services/jrc_backoffice/contract_access.rb",
+          "line": 3,
+          "sha256": "47f7ca8def338186724053b7ec0b77dd778702f43678e9eeb52937479f5fa673"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-15",
+      "observable_requirement": "Testes automatizados cobrem transições, bloqueios e regressão das APIs atuais.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/completion_report.rb",
+          "line": 2,
+          "sha256": "6b68175c7bca2503c21fe809e2d9102089563c8176d5e71c52baaab266f43493"
+        },
+        {
+          "path": "app/services/jrc_backoffice/completion_handoff.rb",
+          "line": 3,
+          "sha256": "6661f4ce731b04c2819a63a9306a4f13b7795d2a236956edbc1297ce94d4a669"
+        },
+        {
+          "path": "app/services/jrc_backoffice/contract_access.rb",
+          "line": 3,
+          "sha256": "47f7ca8def338186724053b7ec0b77dd778702f43678e9eeb52937479f5fa673"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Cliente saudável",
+      "observable_requirement": "Não gera tarefa repetitiva; monitoramento e score atualizados; contato apenas por cadência autorizada.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/automatic_playbooks.rb",
+          "line": 3,
+          "sha256": "c462c5ee5fdd6a02388264c7c8a5f2257c8e7ec8d2d8fadf595db69966e9b4be"
+        },
+        {
+          "path": "app/services/jrc_relationship/automatic_action_cooldown.rb",
+          "line": 5,
+          "sha256": "b65ec131c1a5aaa00affb6b858ea2872b3d80c4f231b73a11b3ebda1013ebee8"
+        },
+        {
+          "path": "app/services/jrc_relationship/alert_review.rb",
+          "line": 2,
+          "sha256": "49e59dbfc32c8a8601f2be149b3403b49ce1cb32a1fcafb95aa1d9f4c1d4bd47"
+        },
+        {
+          "path": "app/services/jrc_relationship/action_sources.rb",
+          "line": 2,
+          "sha256": "72bd2368f9ea3efe0f1f64b67e3d5449baf38aade4d1177c7a7291aeb335a3e7"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Queda de saúde",
+      "observable_requirement": "Sinal explicável; caso priorizado; analista recebe causa e ação; histórico preservado.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/automatic_playbooks.rb",
+          "line": 3,
+          "sha256": "c462c5ee5fdd6a02388264c7c8a5f2257c8e7ec8d2d8fadf595db69966e9b4be"
+        },
+        {
+          "path": "app/services/jrc_relationship/automatic_action_cooldown.rb",
+          "line": 5,
+          "sha256": "b65ec131c1a5aaa00affb6b858ea2872b3d80c4f231b73a11b3ebda1013ebee8"
+        },
+        {
+          "path": "app/services/jrc_relationship/alert_review.rb",
+          "line": 2,
+          "sha256": "49e59dbfc32c8a8601f2be149b3403b49ce1cb32a1fcafb95aa1d9f4c1d4bd47"
+        },
+        {
+          "path": "app/services/jrc_relationship/action_sources.rb",
+          "line": 2,
+          "sha256": "72bd2368f9ea3efe0f1f64b67e3d5449baf38aade4d1177c7a7291aeb335a3e7"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "NPS detrator",
+      "observable_requirement": "Vincula resposta da pesquisa existente; sugere follow-up; sem duplicar pesquisa ou atendimento.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/automatic_playbooks.rb",
+          "line": 3,
+          "sha256": "c462c5ee5fdd6a02388264c7c8a5f2257c8e7ec8d2d8fadf595db69966e9b4be"
+        },
+        {
+          "path": "app/services/jrc_relationship/automatic_action_cooldown.rb",
+          "line": 5,
+          "sha256": "b65ec131c1a5aaa00affb6b858ea2872b3d80c4f231b73a11b3ebda1013ebee8"
+        },
+        {
+          "path": "app/services/jrc_relationship/alert_review.rb",
+          "line": 2,
+          "sha256": "49e59dbfc32c8a8601f2be149b3403b49ce1cb32a1fcafb95aa1d9f4c1d4bd47"
+        },
+        {
+          "path": "app/services/jrc_relationship/action_sources.rb",
+          "line": 2,
+          "sha256": "72bd2368f9ea3efe0f1f64b67e3d5449baf38aade4d1177c7a7291aeb335a3e7"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Analista ausente",
+      "observable_requirement": "Fila redistribuída temporariamente conforme regras; críticos não ficam órfãos.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/analyst_withdrawal.rb",
+          "line": 3,
+          "sha256": "27148de735830e3308843aeddc0cde50077846453abea7425a7824e71146d052"
+        },
+        {
+          "path": "app/services/jrc_relationship/analyst_eligibility.rb",
+          "line": 3,
+          "sha256": "0c8e1e4c0b4cf61cea07daaae2dbbe846496b286c96905db4673f6677c52e6b0"
+        },
+        {
+          "path": "app/services/jrc_relationship/analyst_capacity.rb",
+          "line": 1,
+          "sha256": "b9636abe2452906af2d8d46ecc4932435dcf5d93f9daa72c91ce43eb699a722a"
+        },
+        {
+          "path": "app/services/jrc_relationship/analyst_native_responsibilities.rb",
+          "line": 3,
+          "sha256": "f5e0c40612b133c3a9a30f7f31dca2faee6e450056a4e75c734b264deb8a8584"
+        },
+        {
+          "path": "app/services/jrc_relationship/distribution_preview.rb",
+          "line": 2,
+          "sha256": "82a9357cdd86de0f3bce5c2a3595af3facbe5d29c8f489207e50615116c6bde0"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Novo analista",
+      "observable_requirement": "Capacidade cadastrada sem transferências; simulação mostra antes/depois e impactos.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/analyst_withdrawal.rb",
+          "line": 3,
+          "sha256": "27148de735830e3308843aeddc0cde50077846453abea7425a7824e71146d052"
+        },
+        {
+          "path": "app/services/jrc_relationship/analyst_eligibility.rb",
+          "line": 3,
+          "sha256": "0c8e1e4c0b4cf61cea07daaae2dbbe846496b286c96905db4673f6677c52e6b0"
+        },
+        {
+          "path": "app/services/jrc_relationship/analyst_capacity.rb",
+          "line": 1,
+          "sha256": "b9636abe2452906af2d8d46ecc4932435dcf5d93f9daa72c91ce43eb699a722a"
+        },
+        {
+          "path": "app/services/jrc_relationship/analyst_native_responsibilities.rb",
+          "line": 3,
+          "sha256": "f5e0c40612b133c3a9a30f7f31dca2faee6e450056a4e75c734b264deb8a8584"
+        },
+        {
+          "path": "app/services/jrc_relationship/distribution_preview.rb",
+          "line": 2,
+          "sha256": "82a9357cdd86de0f3bce5c2a3595af3facbe5d29c8f489207e50615116c6bde0"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Remover analista",
+      "observable_requirement": "Bloqueia remoção se houver qualquer vínculo ou compromisso não realocado.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/analyst_withdrawal.rb",
+          "line": 3,
+          "sha256": "27148de735830e3308843aeddc0cde50077846453abea7425a7824e71146d052"
+        },
+        {
+          "path": "app/services/jrc_relationship/analyst_eligibility.rb",
+          "line": 3,
+          "sha256": "0c8e1e4c0b4cf61cea07daaae2dbbe846496b286c96905db4673f6677c52e6b0"
+        },
+        {
+          "path": "app/services/jrc_relationship/analyst_capacity.rb",
+          "line": 1,
+          "sha256": "b9636abe2452906af2d8d46ecc4932435dcf5d93f9daa72c91ce43eb699a722a"
+        },
+        {
+          "path": "app/services/jrc_relationship/analyst_native_responsibilities.rb",
+          "line": 3,
+          "sha256": "f5e0c40612b133c3a9a30f7f31dca2faee6e450056a4e75c734b264deb8a8584"
+        },
+        {
+          "path": "app/services/jrc_relationship/distribution_preview.rb",
+          "line": 2,
+          "sha256": "82a9357cdd86de0f3bce5c2a3595af3facbe5d29c8f489207e50615116c6bde0"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": "Withdrawal applies only to Relationship; unrelated responsibilities and other module accesses remain intact."
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Aprovação pendente",
+      "observable_requirement": "Nenhum cliente muda de responsável até autorização e execução válida.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/distribution_scope_guard.rb",
+          "line": 1,
+          "sha256": "608c8add3b6416633b8874e8cd697e790f6b844da77c14a2ce020d1715308c6f"
+        },
+        {
+          "path": "app/services/jrc_relationship/distribution_capacity_guard.rb",
+          "line": 3,
+          "sha256": "362feb82bcbda90b270b015001fcb7991521b38643117b025b1e3780dd86cc9b"
+        },
+        {
+          "path": "app/services/jrc_relationship/batch_review_identity.rb",
+          "line": 3,
+          "sha256": "82f2f34169fb535651d6eaadf2fde6b57da3c1959d104ac22e756cfc2b83ba14"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Execução parcial",
+      "observable_requirement": "Mostra sucesso/erro/pendente por item; retry só nos falhos; conclusão global bloqueada.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/distribution_scope_guard.rb",
+          "line": 1,
+          "sha256": "608c8add3b6416633b8874e8cd697e790f6b844da77c14a2ce020d1715308c6f"
+        },
+        {
+          "path": "app/services/jrc_relationship/distribution_capacity_guard.rb",
+          "line": 3,
+          "sha256": "362feb82bcbda90b270b015001fcb7991521b38643117b025b1e3780dd86cc9b"
+        },
+        {
+          "path": "app/services/jrc_relationship/batch_review_identity.rb",
+          "line": 3,
+          "sha256": "82f2f34169fb535651d6eaadf2fde6b57da3c1959d104ac22e756cfc2b83ba14"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Conflito após aprovação",
+      "observable_requirement": "Detecta mudança de vínculo ou capacidade; bloqueia item e exige revisão quando pertinente.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/distribution_scope_guard.rb",
+          "line": 1,
+          "sha256": "608c8add3b6416633b8874e8cd697e790f6b844da77c14a2ce020d1715308c6f"
+        },
+        {
+          "path": "app/services/jrc_relationship/distribution_capacity_guard.rb",
+          "line": 3,
+          "sha256": "362feb82bcbda90b270b015001fcb7991521b38643117b025b1e3780dd86cc9b"
+        },
+        {
+          "path": "app/services/jrc_relationship/batch_review_identity.rb",
+          "line": 3,
+          "sha256": "82f2f34169fb535651d6eaadf2fde6b57da3c1959d104ac22e756cfc2b83ba14"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Documentos",
+      "observable_requirement": "Nova versão mantém antiga e histórico; usuário sem acesso não visualiza ou baixa.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/document_access.rb",
+          "line": 3,
+          "sha256": "ab0d633e37a3aff0db03f03f7e2f1d5aedc84945bd7ec7d97fa9dd1e4e61eae3"
+        },
+        {
+          "path": "app/services/jrc_relationship/context.rb",
+          "line": 1,
+          "sha256": "a43d24afa232051fbe429ffef4dcb2667218a55634e374091e46f30f5f6983fe"
+        },
+        {
+          "path": "app/services/jrc_relationship/automatic_action_budget.rb",
+          "line": 3,
+          "sha256": "329bde8958c5e528b5c797184e1a9926a4a7a4c0cc8e84dd149997f49a018890"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Multiempresa",
+      "observable_requirement": "Não vaza dados por tela, API, exportação, jobs, documentos ou pesquisa.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/document_access.rb",
+          "line": 3,
+          "sha256": "ab0d633e37a3aff0db03f03f7e2f1d5aedc84945bd7ec7d97fa9dd1e4e61eae3"
+        },
+        {
+          "path": "app/services/jrc_relationship/context.rb",
+          "line": 1,
+          "sha256": "a43d24afa232051fbe429ffef4dcb2667218a55634e374091e46f30f5f6983fe"
+        },
+        {
+          "path": "app/services/jrc_relationship/automatic_action_budget.rb",
+          "line": 3,
+          "sha256": "329bde8958c5e528b5c797184e1a9926a4a7a4c0cc8e84dd149997f49a018890"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Escala",
+      "observable_requirement": "Paginação e jobs suportam bases crescentes; não criar uma tarefa para cada cliente sem sinal.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_relationship/document_access.rb",
+          "line": 3,
+          "sha256": "ab0d633e37a3aff0db03f03f7e2f1d5aedc84945bd7ec7d97fa9dd1e4e61eae3"
+        },
+        {
+          "path": "app/services/jrc_relationship/context.rb",
+          "line": 1,
+          "sha256": "a43d24afa232051fbe429ffef4dcb2667218a55634e374091e46f30f5f6983fe"
+        },
+        {
+          "path": "app/services/jrc_relationship/automatic_action_budget.rb",
+          "line": 3,
+          "sha256": "329bde8958c5e528b5c797184e1a9926a4a7a4c0cc8e84dd149997f49a018890"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-01",
+      "observable_requirement": "Backoffice como modulo independente — Menu/rotas proprios e redirecionamento legado",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/components-next/sidebar/Sidebar.vue",
+          "line": 49,
+          "sha256": "70fc67dcaae536e7878005abc52ad88bf697ffb9db2106036a2d2ec26409d81c"
+        },
+        {
+          "path": "config/routes.rb",
+          "line": 1,
+          "sha256": "811bc3911bbe7d6ff0ec6f2d9dfdc6651f7d5d4cff12f537df0370c7476aa8a2"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-02",
+      "observable_requirement": "Visao contextual dentro do cliente — Somente solicitacoes/documentos/aprovacoes/contratos/pendencias/historico do cliente autorizado",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/backoffice_context.rb",
+          "line": 3,
+          "sha256": "7ebbb061e1de0bb183723b73f7cc2852e1cfcb2ebee771491e46f3e9ef99a060"
+        },
+        {
+          "path": "app/services/jrc_customers/visibility.rb",
+          "line": 3,
+          "sha256": "fc6e8a006eb3e4c69109ac970401fa8efa7d62763645f6d6ed44ebab22720cd3"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-03",
+      "observable_requirement": "Cadastro de requisitos — Documento, informacao, validacao, aprovacao, assinatura, campo cadastral e condicional; por operacao/produto/tipo de cliente",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/requirement_catalog.rb",
+          "line": 3,
+          "sha256": "ea7c3493450de23e4b7e07a73f97fce4882672ce11334a159ac9251acb9d9521"
+        },
+        {
+          "path": "app/services/jrc_backoffice/requirement_definition.rb",
+          "line": 5,
+          "sha256": "a72d6fb2b8866b888e8b7a88909110b8c80c55e5d8fa2838bcbe149c0d0c476a"
+        },
+        {
+          "path": "app/services/jrc_backoffice/requirement_evaluation.rb",
+          "line": 3,
+          "sha256": "99e4331867387d7b4b589d6a901fd6dd1b3372615a72059d7fb63445cb0cf525"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-04",
+      "observable_requirement": "Assinantes e poderes — Contato reutilizavel, multiplos assinantes e comprovacao de poderes",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/signer_rosters.rb",
+          "line": 1,
+          "sha256": "0af05b1b59b579988806d9bf5710034294dca4eca95e6f194c18698a57fdbc85"
+        },
+        {
+          "path": "app/services/jrc_backoffice/signer_contacts.rb",
+          "line": 3,
+          "sha256": "2bb9e17c467515170b6b9bf59243044c9b871aed9d5511eec064a4ee9a57230d"
+        },
+        {
+          "path": "app/services/jrc_backoffice/authority_proposals.rb",
+          "line": 3,
+          "sha256": "70d8465d9b486da0d32b2ee1127410da92b407d2a432c19d888f125e539728f0"
+        },
+        {
+          "path": "app/services/jrc_backoffice/authority_proofs.rb",
+          "line": 3,
+          "sha256": "7936323f89e9097e59763bbd1d0cdbf59e5708b49c6c6d3ae6159af04879986b"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-05",
+      "observable_requirement": "Validacao documental — Versoes, historico, motivo, validade, analista e preanalise assistida",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/document_validity.rb",
+          "line": 6,
+          "sha256": "0d9747ff2212578752683b69e2e7291b0f2d9e4cac0986270318d7a65e6c7947"
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_preanalysis.rb",
+          "line": 1,
+          "sha256": "5d689c5891125efc0959708f6d6f427c44dc5610e1903bbd0dd2999e4252a9a9"
+        },
+        {
+          "path": "app/services/jrc_backoffice/documents.rb",
+          "line": 3,
+          "sha256": "5318494276b4748bf6717e27db1003f5662cb3e978541a28e721d6b1ab5da10b"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-06",
+      "observable_requirement": "Aprovacoes explicitas — Motivo/politica/cliente/valor/aprovador visiveis; usar Central existente",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/requirements.rb",
+          "line": 1,
+          "sha256": "381972ec8ca902dd278e444dcffb742d0f3dd697eaa76c1d65b022b1751a959a"
+        },
+        {
+          "path": "app/services/jrc_backoffice/contract_release.rb",
+          "line": 2,
+          "sha256": "2a63af47a53b2c8897422efd5b87e117a3b5fab59fa2bd09665b4efeca5e8e0b"
+        },
+        {
+          "path": "app/services/jrc_backoffice/native_requirements.rb",
+          "line": 2,
+          "sha256": "da06d2434753f09d1cb7aeaf362a938b35fecb8f7fec07aef40fabf98f3e1789"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-07",
+      "observable_requirement": "Ordem obrigatoria — Documentacao e aprovacoes antes do contrato quando exigidas",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/requirements.rb",
+          "line": 1,
+          "sha256": "381972ec8ca902dd278e444dcffb742d0f3dd697eaa76c1d65b022b1751a959a"
+        },
+        {
+          "path": "app/services/jrc_backoffice/contract_release.rb",
+          "line": 2,
+          "sha256": "2a63af47a53b2c8897422efd5b87e117a3b5fab59fa2bd09665b4efeca5e8e0b"
+        },
+        {
+          "path": "app/services/jrc_backoffice/native_requirements.rb",
+          "line": 2,
+          "sha256": "da06d2434753f09d1cb7aeaf362a938b35fecb8f7fec07aef40fabf98f3e1789"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-08",
+      "observable_requirement": "Painel Contrato — Gerar, versionar, editar quando permitido, enviar, reenviar, lembrar, cancelar e consultar evidencia na solicitacao",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/contract_versions.rb",
+          "line": 4,
+          "sha256": "6a55afe79eb35cae5a11c0105a5c17b391d450b08e1bb37ffd8605deb056eaef"
+        },
+        {
+          "path": "app/services/jrc_backoffice/signatures/dispatch.rb",
+          "line": 3,
+          "sha256": "e97f6774195033371094a0df9a13c34e52d255f40871dddf9ec73288d47c4373"
+        },
+        {
+          "path": "app/services/jrc_backoffice/signatures/connection_selection.rb",
+          "line": 3,
+          "sha256": "0fe55a1a24b4a2206db0a45e8f321ba0cf56d1064885d0272606533a5ecba710"
+        },
+        {
+          "path": "app/services/jrc_backoffice/signatures/evidence_acceptance.rb",
+          "line": 3,
+          "sha256": "44de28b23fac3a85dc29dd5882f18747bbe69802547234b5cf7eb6e34038b9ae"
+        }
+      ],
+      "status": "dependente_de_homologacao_externa",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Code present; real channel/provider acceptance remains unproved, in addition to native combined-candidate acceptance.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-09",
+      "observable_requirement": "Estados e evidencia de assinatura — Envio, usuario, assinantes, conexao, versao, arquivos finais e estado confiavel",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/contract_versions.rb",
+          "line": 4,
+          "sha256": "6a55afe79eb35cae5a11c0105a5c17b391d450b08e1bb37ffd8605deb056eaef"
+        },
+        {
+          "path": "app/services/jrc_backoffice/signatures/dispatch.rb",
+          "line": 3,
+          "sha256": "e97f6774195033371094a0df9a13c34e52d255f40871dddf9ec73288d47c4373"
+        },
+        {
+          "path": "app/services/jrc_backoffice/signatures/connection_selection.rb",
+          "line": 3,
+          "sha256": "0fe55a1a24b4a2206db0a45e8f321ba0cf56d1064885d0272606533a5ecba710"
+        },
+        {
+          "path": "app/services/jrc_backoffice/signatures/evidence_acceptance.rb",
+          "line": 3,
+          "sha256": "44de28b23fac3a85dc29dd5882f18747bbe69802547234b5cf7eb6e34038b9ae"
+        }
+      ],
+      "status": "dependente_de_homologacao_externa",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Code present; real channel/provider acceptance remains unproved, in addition to native combined-candidate acceptance.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-10",
+      "observable_requirement": "Bloqueio de implantacao — Contrato obrigatorio sem evidencia valida deve bloquear implantacao",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/signature_release.rb",
+          "line": 2,
+          "sha256": "dfc22f80f2ee21b4fb7bb7bfee34db28028e4ed8527b198ce5652fd9f3e80bd3"
+        },
+        {
+          "path": "app/services/jrc_backoffice/completion_signature.rb",
+          "line": 3,
+          "sha256": "ce958b63f08eb24033ddc9a1d30de0af6f6849b41ef59fe54b430d1d23b4b0d5"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-11",
+      "observable_requirement": "Central da solicitacao — Protocolo, pedido, cliente, valor, prioridade, dono, etapa, SLA, bloqueios e assinatura",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/completion_report.rb",
+          "line": 2,
+          "sha256": "6b68175c7bca2503c21fe809e2d9102089563c8176d5e71c52baaab266f43493"
+        },
+        {
+          "path": "app/services/jrc_backoffice/authority_overview.rb",
+          "line": 1,
+          "sha256": "3ae25785c681874c9f2449ae4e6470f742cac0a17ea9186725902afa5ccfd714"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-12",
+      "observable_requirement": "Pendencias estruturadas — Tipo, descricao, responsavel, prazo, status, bloqueio, origem e historico",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/issues.rb",
+          "line": 1,
+          "sha256": "b9651131813bbc6af32ad1872375dc3252db2a00d599830ce078bb51924f4950"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-13",
+      "observable_requirement": "Auditoria e dossie — Antes/depois, ator, instante, versao, envio, aceite e liberacao",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/completion_dossiers.rb",
+          "line": 4,
+          "sha256": "3db6986480f101cf6bcce4ae29c7f3d6245a0aa2c59d39b5482077be60d2cfe5"
+        },
+        {
+          "path": "app/services/jrc_backoffice/dossier_access.rb",
+          "line": 3,
+          "sha256": "be1067c67f0d290c696666eccacf7425c96ada866c30cfe6d0404b67b1ca22e1"
+        },
+        {
+          "path": "app/services/jrc_backoffice/completion_handoff.rb",
+          "line": 3,
+          "sha256": "6661f4ce731b04c2819a63a9306a4f13b7795d2a236956edbc1297ce94d4a669"
+        }
+      ],
+      "status": "parcialmente_implementado",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true,
+      "classification_reason": "Native entry points present; combined-tree database and Chrome acceptance remain unproved. Source presence and previous-line tests do not close this observable criterion.",
+      "blockers": [
+        "migration_version_collisions",
+        "native_runtime_or_CI_authorization",
+        "real_UI_homologation"
+      ],
+      "approved_interpretation": null
+    }
+  ]
+}

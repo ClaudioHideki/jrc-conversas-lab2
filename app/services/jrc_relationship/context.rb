@@ -28,6 +28,7 @@ class JrcRelationship::Context
   def assignment(id, write: false)
     record = assignments.find(id)
     raise Pundit::NotAuthorizedError if write && !policy.manage?
+    JrcRelationship::LocalAccess.authorize_assignment!(self, record, 'work') if write
 
     record
   end
@@ -77,14 +78,16 @@ class JrcRelationship::Context
                     else
                       record.try(:assignment_id) || record.try(:metadata)&.dig('relationship_assignment_id')
                     end
-    JrcCustomers::Audit.record!(account: account, actor: user, resource: record, event_type: 'relationship_updated',
-                                from_value: before, to_value: after,
-                                metadata: { action: action, assignment_id: assignment_id })
+    event = JrcCustomers::Audit.record!(account: account, actor: user, resource: record, event_type: 'relationship_updated',
+                                        from_value: before, to_value: after,
+                                        metadata: { action: action, assignment_id: assignment_id })
+    JrcRelationship::PortfolioHistoryDetails.capture!(event, resource: record)
+    event
   end
 
   def access_signature
     require 'digest'
-    @access_signature ||= Digest::SHA256.hexdigest(
+    @access_signature ||= eligibility_digest(
       [member.role, member.custom_role_id, member.custom_role&.updated_at,
        member.permissions.sort, account[:feature_flags], account[:feature_flags_ext_1],
        account.custom_attributes[JrcCrm::OrganizationalStructureService::SETTINGS_KEY],
@@ -108,10 +111,23 @@ class JrcRelationship::Context
     return product_config if product_config
 
     segment = assignment&.settings&.dig('segment_id')
-    key = segment ? "segment:#{segment}" : 'account'
-    choices = [configurations[key], customer_configuration(assignment, configurations), configurations['account']]
+    segment_config = configurations["segment:#{segment}"] if segment
+    choices = [segment_config, customer_configuration(assignment, configurations), configurations['account']]
     choices.compact.first ||
       JrcRelationship::Configuration.new(account: account, scope_key: 'account')
+  end
+
+  # Overlay only an authorized unsaved configuration. Native precedence and
+  # every permission/source scope remain those of a fresh real Context.
+  def for_health_configuration_preview(draft)
+    authorize_configuration_scope!(draft.scope_key)
+    raise ArgumentError, 'Preview requires an unsaved valid configuration from this account' unless
+      (draft.new_record? || draft.changed?) && draft.account_id == account.id && draft.valid?
+
+    preview = self.class.new(member)
+    configurations = JrcRelationship::Configuration.where(account_id: account.id).index_by(&:scope_key)
+    preview.instance_variable_set(:@configurations, configurations.merge(draft.scope_key => draft))
+    preview
   end
 
   def customer_configuration(assignment, configurations)
@@ -125,14 +141,27 @@ class JrcRelationship::Context
     raise Pundit::NotAuthorizedError unless policy.configure?
 
     kind, id = scope_key.to_s.split(':')
+    JrcRelationship::ConfigurationScope.authorize_corporate!(self, kind, id)
+    return JrcRelationship::PortfolioGroupConfiguration.authorize!(self, scope_key) if kind == 'portfolio'
     return if policy.admin?
 
     case kind
     when 'company' then assignments.find_by!(company_id: id)
     when 'unit' then assignments.find_by!(business_unit_id: id)
+    when 'team' then account.teams.joins(:team_members).where(team_members: { user_id: user.id }).find(id)
     when 'segment', 'product'
       raise Pundit::NotAuthorizedError unless assignments.exists?(['settings ->> ? = ?', "#{kind}_id", id])
     else raise Pundit::NotAuthorizedError
     end
+  end
+
+  private
+
+  def eligibility_digest(value)
+    local_rules = JrcRelationship::LocalAccess.signature(member)
+    value = "#{value}:local_role_policies:#{local_rules.to_json}" if local_rules.any?
+    version = member.jrc_relationship_eligibility_version
+    value = "#{value}:relationship_eligibility:#{version}" if version.positive?
+    Digest::SHA256.hexdigest(value)
   end
 end

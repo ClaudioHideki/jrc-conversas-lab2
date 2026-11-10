@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-03",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "3390725ef6974d969abacc694da06248bc8c98ab",
+  "status": "Correção mínima de navegação aprovada em testes automatizados; novo build/Chrome ainda pendentes",
+  "problem": "Papel custom_role com jrc_crm sem permissão de conversas não tem destino inicial autorizado no fallback; Chrome entrou em redirecionamento ao dashboard de atendimento e o cenário de permissões não concluiu.",
+  "change": "Adicionar crm/dashboard ao fallback por jrc_crm depois dos destinos nativos existentes. Não altera grants, membership, APIs nem precedência de conversas/contatos/relatórios/portais. O beforeEnter do CRM continua validando feature e permissão da conta.",
+  "tests": {
+    "report": ".codex/backoffice-crm-role-landing-frontend.json",
+    "passed": 33,
+    "failed": 0,
+    "eslint_report": ".codex/backoffice-crm-role-landing-final-eslint.json",
+    "eslint_errors": 0,
+    "eslint_warnings": 0,
+    "initial_style_note": "Primeiro relatório tinha162diagnósticos de EOL CRLF no helper. Normalizado por Prettier, sem supressões; diffGit mantém apenas1linha funcional."
+  },
+  "Backoffice_3390725e_validated": {
+    "build": "passed;587assets372manifestentries; guardmin4286001152bytes",
+    "Chrome_creation": "segmentos-backoffice-c7-criacao-3390725e-20261103.json passed2; newsegment95, no existing segment edits",
+    "Chrome_flows": "segmentos-backoffice-c7-fluxos-3390725e-20261103.json passed5; native picker/list/indicators/pagination/detail return/mobile/native dark",
+    "Chrome_permissions": "segmentos-backoffice-c7-permissoes-3390725e-20261103.json partial: agent ownership/financial positive control passed; restricted-role UI blocked by landing bug; later cases not executed",
+    "prior_rows_preserved": 281,
+    "UI": "http://127.0.0.1:5372",
+    "source": "/consolidation-customer-segment-backoffice-browser-3390725e",
+    "fixture": ".codex/backoffice-segment-ui-3390725e.json",
+    "never_reseed": true,
+    "old_native_request20": "Preserved. First fixture attempt stopped before transaction because it already existed; checked additive fixture preserved all original rows.",
+    "new_controlled_data": "25 requests +12publishedBackofficecatalogs+newrestrictedUser/role; 1segment95 created via Chrome; no billing/signature external actions"
+  },
+  "process_event": {
+    "auto_review_initial_stop": "Rejected by earlier no-process-stop instruction; no workaround used",
+    "user_subsequent_authorization": "Autorizar somente o Chrome desse teste",
+    "stopped_Chrome_pid": 8860,
+    "verified_parent_test_Node_pid": 3752,
+    "other_Codex_or_user_browsers_stopped": false
+  },
+  "remaining": [
+    "Rebuild final commit with newprefix and750MBguard; do not reuse3390725eassets as proof of fix",
+    "Finish native permissions/mobile clear-filter Chrome; preserve segment95/no reseed",
+    "Final hash-preservation and checkpoint; then ServiceDesk/Projects/Relationship/Campaigns consumers",
+    "Final audit C still pending; TRRundefined; D/E/F/Gpartial"
+  ],
+  "publication": {
+    "push": false,
+    "deploy": false,
+    "GHCR": false,
+    "production_changed": false
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "b187d282cf6744b560aae0d03ffd213f573badd1",
+  "status": "F2 bounded waiting transition implemented and locally validated; not full C-G closure",
+  "word_requirement": "Relationship paragraph73: waiting/pause requires a reason and a reassessment deadline.",
+  "implemented": [
+    "New waiting_customer/waiting_finance entries and meaningful review edits require nonempty textual waiting_reason, next_step and a future return_at. Native validations also apply to direct writes; no full metadata input is accepted.",
+    "Reason uses a native metadata store accessor without migrations or changes to frozen v1 snapshots. Unrelated legacy waiting updates and historical records remain usable; no historical reason/date is fabricated.",
+    "Popup, generic editor and existing batch form collect the required data and prevent incomplete save emissions. The actual invalid-field tab becomes visible/focusable; native optimistic locking, scope and transactions stay intact.",
+    "Real record and batch endpoints whitelist only the explicit additional fields; native source SLA pause/Agenda synchronization/audit remain authoritative. Invalid review/date/type leaves status, audit and SLA unchanged."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "waiting-review01",
+      "examples": 34,
+      "failures": 2,
+      "note": "All five new HTTP cases and32 total cases passed; two old Agenda expectations still assumed no scheduled return, after fixtures supplied a required return."
+    },
+    {
+      "label": "waiting-review-agenda-final",
+      "examples": 3,
+      "failures": 0,
+      "note": "Both midnight/account-zone pause/resume cases plus finance waiting. Native SLA duration assertions retained; Agenda checked against actual return_at."
+    },
+    {
+      "label": "waiting-review-guard-final",
+      "examples": 5,
+      "failures": 0,
+      "note": "Overlapping native revalidation after narrow dirty-state helper extraction."
+    },
+    {
+      "label": "waiting-review-reason-final",
+      "examples": 5,
+      "failures": 0,
+      "note": "Includes additional numeric-reason rejection and all valid/legacy/batch cases."
+    },
+    {
+      "label": "waiting-review-ui01",
+      "tests": 25,
+      "failures": 1,
+      "note": "Twenty-four passed, including all four new popup/editor and new batch cases. An existing finance editor fixture needed to provide now-required waiting review fields."
+    },
+    {
+      "label": "waiting-review-ui-final",
+      "tests": 15,
+      "failures": 0,
+      "note": "Overlapping complementary suite with updated legitimate wait fixture; existing metrics/routes assertions retained."
+    },
+    {
+      "label": "waiting-popup-source-final",
+      "tests": 4,
+      "failures": 0,
+      "note": "Final directed popup/editor check after type-safe shared UI validation."
+    }
+  ],
+  "static": [
+    "New HTTP spec0 reported offenses with one explicitly documented synthetic pre-rule fixture SQL exception; production validation is not bypassed.",
+    "Final directed Action model/spec lint0 reported offenses; shared delta had0 new cop counts. Workflow28,RecordsController13,operations specs28 andfunctional specs34 inherited offenses remain.",
+    "Directed ESLint0 errors after fixing new markup/return lint; existing module114,case18,dialog14,editor13 warnings retained.",
+    "git diff --check clean; no build, migration or Enterprise override change."
+  ],
+  "files": [
+    "app/controllers/api/v1/accounts/relationship/records_controller.rb",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ActionCasePanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ActionFollowUpDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/RecordEditor.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/complementaryReview.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/definitions.js",
+    "app/models/jrc_relationship/action.rb",
+    "app/services/jrc_relationship/workflow.rb",
+    "spec/services/jrc_relationship/functional_review_spec.rb",
+    "spec/services/jrc_relationship/operations_spec.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/waitingReview.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/actionWaitingReview.spec.js",
+    "spec/requests/api/v1/accounts/relationship/action_waiting_review_spec.rb"
+  ],
+  "disk": {
+    "waiting-review01": {
+      "start": 7364767744,
+      "minimum": 7337783296,
+      "end": 7365074944
+    },
+    "waiting-review-agenda-final": {
+      "start": 7365038080,
+      "minimum": 7364902912,
+      "end": 7364902912
+    },
+    "waiting-review-guard-final": {
+      "start": 7345070080,
+      "minimum": 7332204544,
+      "end": 7360319488
+    },
+    "waiting-review-reason-final": {
+      "start": 7359008768,
+      "minimum": 7354433536,
+      "end": 7353425920
+    },
+    "final_bytes": 7345324032
+  },
+  "limits": [
+    "A review date does not automatically resume SLA, resolve a case or authorize external contact. Native status/clock policies remain in force.",
+    "Due-review internal notification is the next increment. Current-source Chrome desktop/mobile remains pending no-build authorization."
+  ],
+  "next": "Implement native internal due-review notice through the existing scheduled SLA job and scoped relationship notification feed, with durable deduplication and transactional retries.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 changes,container restart or external real operation."
+}

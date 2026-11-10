@@ -1,0 +1,128 @@
+{
+  "date": "2026-11-05",
+  "stage": "F2a evidence windows/trend; native NICO read integration and G regression",
+  "parent_checkpoint": "3db1094b28d38ff0753d6bb029c0ddb4a214097d",
+  "classification": "Implemented and locally automated tested; current-build browser acceptance pending; F2 and C-G remain open",
+  "implemented": [
+    "Versioned whole-day satisfaction and customer trend windows, defaults90/30 retained, range1..3650 technical query bound; native configuration API/history/stale writes reused.",
+    "Native authorized NPS/CES and unified shared/native CSAT retain immutable survey direction/scale and deduplication; future and foreign responses excluded.",
+    "Current/stale/missing evidence uses the actual response timestamp, never the refresh time. Out-of-window responses are not observed zero values; existing missing-factor policy is preserved.",
+    "Per-product scoring uses its exact window without changing the customer window; all contributing and stale-explanation source rows remain in the native reauthorization manifest.",
+    "Read-time Presenter/NICO annotation identifies stale cached evidence and changed windows without recalculating or overwriting the historical score/date. The interface explicitly requests recalculation.",
+    "Actual authorized baseline within the configured customer window; excludes different viewers, model versions, access signatures, future/old/foreign evidence.",
+    "Trend source lineage is included before fingerprinting; derived comparison metadata is excluded from identity to preserve refresh idempotency.",
+    "HealthChange normalizes serialized nested keys, avoiding false changes due only to JSON key shape; real measurement change remains explainable.",
+    "Native-token responsive evidence/trend component and current-membership change clearing; no production assets built."
+  ],
+  "files": [
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/HealthEvidenceSummary.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/healthEvidence.spec.js",
+    "app/models/jrc_relationship/configuration.rb",
+    "app/services/jrc_nico/domain_actions.rb",
+    "app/services/jrc_relationship/customer_signals.rb",
+    "app/services/jrc_relationship/health_change.rb",
+    "app/services/jrc_relationship/health_score.rb",
+    "app/services/jrc_relationship/health_trend.rb",
+    "app/services/jrc_relationship/presenter.rb",
+    "app/services/jrc_relationship/processor.rb",
+    "app/services/jrc_relationship/satisfaction_evidence.rb",
+    "app/services/jrc_relationship/satisfaction_evidence_projection.rb",
+    "app/services/jrc_relationship/satisfaction_signals.rb",
+    "spec/requests/api/v1/accounts/relationship/health_stability_spec.rb",
+    "spec/services/jrc_relationship/health_change_spec.rb",
+    "spec/services/jrc_relationship/health_trend_spec.rb",
+    "spec/services/jrc_relationship/satisfaction_evidence_projection_spec.rb",
+    "spec/services/jrc_relationship/satisfaction_evidence_spec.rb"
+  ],
+  "sha256": {
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "d9d17626861cc841192e5a9cf8b2841128fc63816045b6485a3985d0dd0a7aa4",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue": "f8c1a610702259bb358fd5dc8af4ac2c14faa2b42182d562a5d0cd45ba4aecca",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue": "f380d09c593d2327ba83ee4a3399f948da745e15bcfabc9e5828e3d987caa896",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/HealthEvidenceSummary.vue": "797a5bcfe9e736f247d0b6cf206afd4f144c83d84c16666989ab07917266975a",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/healthEvidence.spec.js": "733b1aa307abaf3f553de49b7f2c02a95559b037a198ac2817705dedd324828c",
+    "app/models/jrc_relationship/configuration.rb": "2a0d8667ec99d22e53bee8815fadbcb27c24dc770eeec43e6f5361f3d3fe5032",
+    "app/services/jrc_nico/domain_actions.rb": "ec0b9856025e11da7fe64a1aadca9949d38e55b910422c43ba8badc619e4b36a",
+    "app/services/jrc_relationship/customer_signals.rb": "307c7c48dcae648238e838fc342108c4360a9d621221f7d205ed6bf2fc5c3f35",
+    "app/services/jrc_relationship/health_change.rb": "13f5154099f39119a3a2bfecd0dccf9a869131da444082eb94c6522ee0242443",
+    "app/services/jrc_relationship/health_score.rb": "0c4b1ea23ea87d1d14958ec930420cb75068ba57ace232f024a3d99f47ba1954",
+    "app/services/jrc_relationship/health_trend.rb": "c8c9be7f2e3f535f000b0191a3290077a1468827d0b6b1e0b64c48773032ac8e",
+    "app/services/jrc_relationship/presenter.rb": "8c44e8e8df33cf3a2c967971cae7ef7f5d8612b6d28b8d0e7aefe09b5f745e1e",
+    "app/services/jrc_relationship/processor.rb": "f78753c619624cdb2d6b5391607417b8cd2eb8947f306f822844951f9be2436b",
+    "app/services/jrc_relationship/satisfaction_evidence.rb": "19871bd18a5639f06a9220822de0b8e26f787d50ec67bde9a86ed562557644fe",
+    "app/services/jrc_relationship/satisfaction_evidence_projection.rb": "d50156166aade1655b65e45f9759a6e879bf4a9699a61fe149536f2c895df45c",
+    "app/services/jrc_relationship/satisfaction_signals.rb": "44cbb4b308da20083c14370eeca1f0d21103eae82f84f70ca53f7269f233b08a",
+    "spec/requests/api/v1/accounts/relationship/health_stability_spec.rb": "249d9d4afd8abe43ac3597ede0e9167be7d3850d368d73ab8f885eb6b9769b45",
+    "spec/services/jrc_relationship/health_change_spec.rb": "a954e9d5d419a2c3b079941ee1cb2db5618067347ab183117a9450cf1385645c",
+    "spec/services/jrc_relationship/health_trend_spec.rb": "4f154dd4bf1ddb9d86b56bae6867e75c33297a3af33d4c4343e64dc6d95fae3d",
+    "spec/services/jrc_relationship/satisfaction_evidence_projection_spec.rb": "ea9858a701e532307798eecd26ca3ba9233d2f008a5daf3ec4ca29fda850bac0",
+    "spec/services/jrc_relationship/satisfaction_evidence_spec.rb": "3077cdfeb2f2fc0cd906b6410ac1ab289fb352b945c2d0d699dabdf75eb627df"
+  },
+  "validation": {
+    "backend": {
+      "run": "f2final05",
+      "examples": 46,
+      "failures": 0,
+      "database": "jrc_rel_v2_candidate_test",
+      "includes": "Native NICO tool execution with real local DB; no external model/provider operation. Source windows, per-product window, actual cache ageing, configuration API, lineage/tenant/viewer/model denial and prior hysteresis/CSAT regressions."
+    },
+    "vue": [
+      {
+        "run": "f2windowsui01",
+        "tests": 15,
+        "failures": 0,
+        "note": "Includes3 initial evidence tests, 2 configuration tests and10 preserved product-history tests."
+      },
+      {
+        "run": "f2cachedvis02",
+        "tests": 4,
+        "failures": 0,
+        "note": "Final evidence component including read-time cached-score warning; repeats the initial3.16 distinct Vue cases, not19."
+      }
+    ],
+    "rubocop_new_services_and_specs": {
+      "run": "f2windowslint05",
+      "files": 9,
+      "offenses": 0
+    },
+    "eslint": {
+      "run": "f2windowseslint02",
+      "files": 4,
+      "errors": 0,
+      "warnings": 70
+    },
+    "shared_static_debt": "HealthChange and large native CustomerSignals/Presenter/Processor/NICO methods have inherited complexity; no repository-wide clean-lint claim. New services/tests pass the targeted gate.",
+    "initial_runs": "f2windows01=35, f2windows02=40, f2cached03=3, f2governed04=10 all passed; final46 consolidates them without falsely summing repeated cases.",
+    "simulated_vs_external": "Survey/legacy PDF fixtures are synthetic local test data. Native DB, authorization, snapshots and NICO ToolExecutor are real local paths. No DocuSign, NICO model or channel external homologation claimed."
+  },
+  "disk_bytes": {
+    "block_start": 9830174720,
+    "observed_test_minimum": 9805455360,
+    "final": 9931661312,
+    "mandatory_stop": 750000000
+  },
+  "preservation": {
+    "no_build": true,
+    "no_server5379_change": true,
+    "no_container_configuration_or_restart": true,
+    "no_dependency_or_schema_change": true,
+    "no_push_cleanup_external_action_or_production_change": true
+  },
+  "word_classification": {
+    "implemented_validated": "F2 source window for satisfaction, customer trend window, native historical/source reauthorization, per-product window and governed local NICO read.",
+    "implemented_not_visually_accepted": "Evidence/trend display and settings need a fresh authorized build/desktop-mobile light-dark Chrome test; frozen5379 assets cannot validate this code.",
+    "partial": [
+      "Source freshness for other dimensions, complete configurable trend/priority policy, cooldown/aggregation/global task ceilings and representative operational-scale evidence remain open.",
+      "Dashboard user-selected period and existing product history retain their native semantics; this does not claim all trend screens now use the new customer window."
+    ]
+  },
+  "pending": [
+    "F1 weighted/hour modes, complete safe analyst removal/all responsibility destinations and approved scope transfer.",
+    "E version-bound provider signed artifacts/certificate and sealed immutable dossier; current export remains truthful about absence.",
+    "Remaining C/D gaps and G real current-build browser acceptance.",
+    "TRR undefined; company documents without portfolio deferred; DocuSign demo/external acceptance not performed."
+  ],
+  "next": "Conservative source-bound automatic-action cooldown, preserving active-action updates, risk visibility, source changes and native playbook semantics."
+}

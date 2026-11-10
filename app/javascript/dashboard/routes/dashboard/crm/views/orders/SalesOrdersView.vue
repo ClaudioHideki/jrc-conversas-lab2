@@ -1,14 +1,28 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 /* eslint-disable vue/no-bare-strings-in-template */
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { salesOrdersAPI } from 'dashboard/api/crm/commercialCycle';
 import { useAlert } from 'dashboard/composables';
 import { crmControlClasses } from '../../crmControlClasses';
 
 const route = useRoute();
 const router = useRouter();
+const store = useStore();
+const identity = computed(() =>
+  JSON.stringify([
+    route.params.accountId,
+    store.getters.getCurrentUserID,
+    store.getters.getCurrentRole,
+    store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
+  ])
+);
+let disposed = false;
+const currentIdentity = value => !disposed && value === identity.value;
 const rows = ref([]);
 const loading = ref(false);
 const selected = ref(null);
@@ -285,36 +299,72 @@ const upcoming = computed(() =>
 );
 
 const detailLoading = ref(false);
+let detailGeneration = 0;
+let requestedOrderId = null;
+const clearOrderDetail = () => {
+  detailGeneration += 1;
+  requestedOrderId = null;
+  selected.value = null;
+  detailLoading.value = false;
+};
 const open = async row => {
-  editingItems.value = false;
-  selected.value = row;
+  const authority = identity.value;
+  clearOrderDetail();
+  const token = detailGeneration;
+  const accountId = route.params.accountId;
+  requestedOrderId = String(row.id);
   detailLoading.value = true;
   router.replace({ query: { ...route.query, orderId: row.id } });
   try {
     const { data } = await salesOrdersAPI.show(row.id);
-    if (String(selected.value?.id) === String(row.id)) selected.value = data;
+    if (
+      token === detailGeneration &&
+      route.params.accountId === accountId &&
+      currentIdentity(authority)
+    )
+      selected.value = data;
   } catch (e) {
-    useAlert('Não foi possível carregar o detalhe do pedido.');
-  } finally {
-    detailLoading.value = false;
-  }
-};
-const load = async () => {
-  loading.value = true;
-  try {
-    const response = await salesOrdersAPI.list();
-    rows.value = response.data || [];
-    const q = route.query.orderId;
-    if (q) {
-      const row = rows.value.find(x => String(x.id) === String(q));
-      if (row) await open(row);
+    if (token === detailGeneration) {
+      clearOrderDetail();
+      useAlert('Não foi possível carregar o detalhe do pedido.');
     }
   } finally {
-    loading.value = false;
+    if (token === detailGeneration) detailLoading.value = false;
   }
 };
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+let listGeneration = 0;
+const load = async () => {
+  const authority = identity.value;
+  listGeneration += 1;
+  const token = listGeneration;
+  rows.value = [];
+  loading.value = true;
+  try {
+    const response = await salesOrdersAPI.list(segmentParams());
+    if (token !== listGeneration || !currentIdentity(authority)) return;
+    rows.value = response.data || [];
+    const q = route.query.orderId;
+    if (
+      typeof q === 'string' &&
+      /^[1-9]\d*$/.test(q) &&
+      Number.isSafeInteger(Number(q))
+    )
+      await open({ id: q });
+  } catch {
+    if (token === listGeneration)
+      useAlert('Não foi possível carregar os pedidos.');
+  } finally {
+    if (token === listGeneration) loading.value = false;
+  }
+};
+watchSegment(() => {
+  page.value = 1;
+  selectedIds.value = [];
+  return load();
+});
 const close = () => {
-  selected.value = null;
+  clearOrderDetail();
   const q = { ...route.query };
   delete q.orderId;
   router.replace({ query: q });
@@ -322,20 +372,24 @@ const close = () => {
 const changeStatus = async status => {
   if (!selected.value) return;
   saving.value = true;
+  const authority = identity.value;
   try {
     const { data } = await salesOrdersAPI.update(selected.value.id, {
       sales_order: { status },
     });
+    if (!currentIdentity(authority)) return;
     selected.value = data;
     await load();
+    if (!currentIdentity(authority)) return;
     useAlert('Status do pedido atualizado.');
   } catch (e) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       e.response?.data?.errors?.join(', ') ||
         'Não foi possível atualizar o pedido.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
 const startItemEdit = () => {
@@ -352,21 +406,25 @@ const recalculateItem = item => {
 const saveItems = async () => {
   if (!selected.value) return;
   saving.value = true;
+  const authority = identity.value;
   try {
     const { data } = await salesOrdersAPI.update(selected.value.id, {
       sales_order: { items: draftItems.value },
     });
+    if (!currentIdentity(authority)) return;
     selected.value = data;
     editingItems.value = false;
     await load();
+    if (!currentIdentity(authority)) return;
     useAlert('Itens e indicadores recalculados.');
   } catch (e) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       e.response?.data?.errors?.join(', ') ||
         'Não foi possível atualizar os itens.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
 const newContract = () =>
@@ -377,8 +435,10 @@ const newContract = () =>
   });
 const downloadPdf = async (row, event) => {
   event?.stopPropagation();
+  const authority = identity.value;
   try {
     const { data } = await salesOrdersAPI.pdf(row.id);
+    if (!currentIdentity(authority)) return;
     const url = URL.createObjectURL(data);
     const a = document.createElement('a');
     a.href = url;
@@ -386,6 +446,7 @@ const downloadPdf = async (row, event) => {
     a.click();
     URL.revokeObjectURL(url);
   } catch (e) {
+    if (!currentIdentity(authority)) return;
     useAlert('Não foi possível gerar o PDF do pedido.');
   }
 };
@@ -454,6 +515,37 @@ const togglePage = () => {
     ];
 };
 onMounted(load);
+watch(
+  () => route.query.orderId,
+  value => {
+    if (String(value) === requestedOrderId) return;
+    if (
+      typeof value === 'string' &&
+      /^[1-9]\d*$/.test(value) &&
+      Number.isSafeInteger(Number(value))
+    )
+      open({ id: value });
+    else clearOrderDetail();
+  }
+);
+watch(
+  identity,
+  () => {
+    clearOrderDetail();
+    selectedIds.value = [];
+    draftItems.value = [];
+    editingItems.value = false;
+    saving.value = false;
+    clearFilters();
+    return load();
+  },
+  { flush: 'sync' }
+);
+onBeforeUnmount(() => {
+  disposed = true;
+  listGeneration += 1;
+  clearOrderDetail();
+});
 </script>
 
 <template>

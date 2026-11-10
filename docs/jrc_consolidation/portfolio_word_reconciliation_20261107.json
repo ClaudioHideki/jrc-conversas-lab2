@@ -1,0 +1,127 @@
+{
+  "date": "2026-11-07",
+  "head": "6bb8c3b88dcaa9180ac7af80c96dae8a6151e89c",
+  "document_sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+  "scope": "Incremental exact P0123-P0128 reconciliation;not complete1530fragment or visual acceptance",
+  "business_decision": "Multiple active operational portfolios per customer;already preserved in code and real tests.",
+  "matrix": [
+    {
+      "word_fragment": "relacionamento:P0123",
+      "literal_requirement": "Criar carteira com nome, empresa/unidade, objetivo, segmento, responsável, equipe, visibilidade, capacidade, metas e regras.",
+      "classification": "Implemented native metadata/goals/governed capacity,visual acceptance pending",
+      "source_files": [
+        "app/models/jrc_relationship/portfolio_group.rb",
+        "app/services/jrc_relationship/portfolio_groups.rb",
+        "app/services/jrc_relationship/portfolio_group_configuration.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupEditor.vue"
+      ],
+      "verified_reports": [
+        "docs/jrc_consolidation/named_portfolio_foundation_checkpoint_20261106.json",
+        "docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json"
+      ],
+      "qualification": "Company/operator restriction follows native organizational/unit scope;no new standalone company grant. Goals are explicit entered metrics,not invented financial automation."
+    },
+    {
+      "word_fragment": "relacionamento:P0124",
+      "literal_requirement": "Adicionar clientes existentes por busca no Cadastro Mestre, seleção individual ou lote revisado; deduplicar vínculos.",
+      "classification": "Implemented and source/native tested;actual Master worker now validated",
+      "source_files": [
+        "app/services/jrc_relationship/reviewed_portfolio_batch.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupMasterDialog.vue",
+        "app/jobs/jrc_relationship/batch_execution_job.rb"
+      ],
+      "verified_reports": [
+        "docs/jrc_consolidation/named_portfolio_master_flow_checkpoint_20261106.json",
+        "docs/jrc_consolidation/master_reviewed_allocation_checkpoint_20261107.json",
+        "docs/jrc_consolidation/master_maximum_scale_checkpoint_20261107.json",
+        "docs/jrc_consolidation/master_owned_worker_checkpoint_20261107.json"
+      ],
+      "qualification": "Individual and true reviewed mass Master operations reuse native company/allocation. User-approved multiple active portfolios preserve unique allocation/capacity;no current-sourceChrome acceptance."
+    },
+    {
+      "word_fragment": "relacionamento:P0125",
+      "literal_requirement": "Editar por abas de dados gerais, regras e metas, equipe e permissões; etapa única de revisão/resultado.",
+      "classification": "Implemented with functional/layout divergences,not fully accepted",
+      "source_files": [
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupEditor.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupRulesPanel.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupCustomersDialog.vue"
+      ],
+      "verified_reports": [
+        "docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json",
+        "docs/jrc_consolidation/named_portfolio_link_results_checkpoint_20261106.json"
+      ],
+      "qualification": "Horizontal general/goals/permissions/review editor plus native separately versioned rule panel;not an assertion of exact Word team/rules tab equivalence. Fresh visual desktop/mobile comparison remains blocked."
+    },
+    {
+      "word_fragment": "relacionamento:P0126",
+      "literal_requirement": "Atribuir papéis como gestor, supervisor, analista e consulta; respeitar permissões globais e restrições de empresa.",
+      "classification": "Dependent on explicit business capability matrix",
+      "source_files": [
+        "app/policies/jrc_relationship/module_policy.rb",
+        "app/services/jrc_relationship/portfolio_group_scope.rb"
+      ],
+      "verified_reports": [
+        "docs/jrc_consolidation/named_portfolio_foundation_checkpoint_20261106.json"
+      ],
+      "qualification": "Current native global roles/team/unit restrictions preserved. No local manager/supervisor/analyst/viewer grant inferred from label. Previous business question remains pending."
+    },
+    {
+      "word_fragment": "relacionamento:P0127",
+      "literal_requirement": "Separar ver, editar, atribuir, transferir, aprovar, executar, exportar e gerenciar documentos.",
+      "classification": "Partial;native separate checks retained,local role matrix pending",
+      "source_files": [
+        "app/services/jrc_relationship/portfolio_group_access.rb",
+        "app/services/jrc_relationship/portfolio_group_configuration.rb",
+        "app/services/jrc_relationship/distribution_approval.rb",
+        "app/services/jrc_relationship/portfolio_group_history.rb"
+      ],
+      "verified_reports": [
+        "docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json",
+        "docs/jrc_consolidation/named_portfolio_history_checkpoint_20261106.json",
+        "docs/jrc_consolidation/master_reviewed_allocation_checkpoint_20261107.json"
+      ],
+      "qualification": "View/manage/configure/export,Central approval/execution and document access reuse distinct current native policies. Do not claim a completed local eight-capability matrix."
+    },
+    {
+      "word_fragment": "relacionamento:P0128",
+      "literal_requirement": "Ação em lote retorna resultado por item, erros, motivo, retomada e auditoria.",
+      "classification": "Native per-item reviewed operation/results/retry implemented;historical full-audit requirement partial",
+      "source_files": [
+        "app/services/jrc_relationship/reviewed_portfolio_batch.rb",
+        "app/services/jrc_relationship/portfolio_group_membership_results.rb",
+        "app/services/jrc_relationship/portfolio_group_history.rb"
+      ],
+      "verified_reports": [
+        "docs/jrc_consolidation/reviewed_item_diagnostics_checkpoint_20261106.json",
+        "docs/jrc_consolidation/reviewed_portfolio_membership_native_checkpoint_20261106.json",
+        "docs/jrc_consolidation/master_owned_worker_checkpoint_20261107.json",
+        "docs/jrc_consolidation/named_portfolio_history_checkpoint_20261106.json"
+      ],
+      "qualification": "Frozen batch input/digest and current-authority per-item receipts are not a sealed generic CRM audit. Historic free text/prior customer IDs remain withheld until historical scope proof exists."
+    }
+  ],
+  "shared_audit_impact_confirmed": {
+    "native_history": "PortfolioGroupHistory.present_event exposes only kind,actor under current roster,field names and reason_recorded. It does not return historic values/reasons/customer IDs.",
+    "current_authorization": "Complete_management verifies current group/current assignments only;it does not independently prove all historical sharing scopes.",
+    "model": "app/models/jrc_crm/audit_event.rb has no append-only concern. Generic audit is not asserted sealed.",
+    "existing_update_path": "app/services/jrc_crm/sales_import_service.rb:99-113 find_or_initialize_by legacy ID then assign_attributes/save!,so blanket readonly/UPDATE rejection would break native idempotent import.",
+    "existing_delete_path": "app/models/account.rb:137 has_many jrc_crm_audit_events dependent:destroy_async;blanket DELETE rejection changes native account lifecycle.",
+    "next_required_design": "Add exact immutable historical-scope/version evidence for relevant Relationship history and explicitly accommodate existing import/account lifecycle before exposing old values or enforcing shared-store immutability. No blanket shared audit alteration in this block."
+  },
+  "retained_dependencies": [
+    "Local-role matrix business decision",
+    "TRR undefined",
+    "Companies without portfolio document expansion explicitly deferred",
+    "Current-sourceChrome blocked by no-build/no5379-change",
+    "External DocuSign/scanner/channel pilot authorization and environment"
+  ],
+  "stage_closure": {
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  },
+  "next_independent_task": "Native Calendar month/day/list controls remain explicitly disabled. Implement local views/navigation over the existing authorized activity list,without external sync/channel calls or a new appointment store."
+}

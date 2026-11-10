@@ -36,10 +36,12 @@ RSpec.describe Api::V1::Accounts::Relationship::PortfolioController, type: :requ
 
   it 'rejects a different full source key before any run is created' do
     preview = request_preview
+    before = [JrcFlowRun.count, JrcRelationship::PlaybookExecution.count]
     post "/api/v1/accounts/#{sd_account.id}/relationship/portfolio/batch", params: run_payload(preview).merge(source_key: 'altered-origin'),
                                                                            headers: sd_user.create_new_auth_token, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
-    expect(JrcFlowRun).not_to exist
-    expect(JrcRelationship::PlaybookExecution).not_to exist
+    expect([JrcFlowRun.count, JrcRelationship::PlaybookExecution.count]).to eq(before)
+    expect(JrcFlowRun.where(account: sd_account)).not_to exist
+    expect(JrcRelationship::PlaybookExecution.where(account: sd_account)).not_to exist
   end
 end
