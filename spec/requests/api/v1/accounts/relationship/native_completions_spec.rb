@@ -22,14 +22,22 @@ RSpec.describe 'Relationship reviewed preview and manual attendance endpoints', 
   end
 
   it 'previews the complete draft without saving it or creating planned work' do
-    post "#{url}/playbook_preview", params: { assignment_id: assignment.id, source_key: 'preview-request', playbook: book }, headers: headers,
-                                    as: :json
+    foreign = create(:account)
+    foreign_assignment = JrcRelationship::Assignment.create!(account: foreign, contact: create(:contact, account: foreign))
+    existing = foreign_assignment.actions.create!(account: foreign, kind: 'manual', reason: 'SYNTHETIC existing foreign work',
+                                                   source_key: SecureRandom.uuid)
+    original = existing.reload.attributes
+    expect do
+      post "#{url}/playbook_preview", params: { assignment_id: assignment.id, source_key: 'preview-request', playbook: book }, headers: headers,
+                                      as: :json
+    end.not_to change { [JrcRelationship::Playbook.count, JrcRelationship::PlaybookExecution.count, JrcRelationship::Action.count] }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body).to include('state' => 'preview', 'matched' => true, 'active' => false)
     expect(response.parsed_body['steps'].first).to include('kind' => 'action', 'state' => 'planned')
-    expect(JrcRelationship::Playbook).not_to exist
-    expect(JrcRelationship::PlaybookExecution).not_to exist
-    expect(JrcRelationship::Action).not_to exist
+    expect(JrcRelationship::Playbook.where(account: sd_account)).not_to exist
+    expect(JrcRelationship::PlaybookExecution.where(account: sd_account)).not_to exist
+    expect(JrcRelationship::Action.where(account: sd_account)).not_to exist
+    expect(existing.reload.attributes).to eq(original)
   end
 
   it 'revalidates portfolio access before exposing options or previewing a foreign customer' do

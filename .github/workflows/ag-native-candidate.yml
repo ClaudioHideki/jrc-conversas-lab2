@@ -132,6 +132,10 @@ jobs:
     needs: [identities, migration-admission]
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        installation: [fresh, upgrade]
     services:
       postgres:
         image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
@@ -185,8 +189,13 @@ jobs:
           bundler: 2.5.16
           bundler-cache: true
       - name: Admit only an empty disposable native database
+        run: bundle exec rails db:create
+      - name: Reproduce pinned main before the focused upgrade scenarios
+        if: matrix.installation == 'upgrade'
+        run: bundle exec rails runner script/jrc_ag_ci_fixture.rb load_main
+      - name: Verify native migrations and the retained synthetic account
         run: |
-          bundle exec rails db:create db:migrate
+          bundle exec rails db:migrate
           bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
           bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
       - name: Reproduce corrected native failures before the full regression matrix
@@ -195,6 +204,7 @@ jobs:
           bundle exec rspec \
             spec/services/jrc_crm/nexora_end_to_end_spec.rb \
             spec/requests/api/v1/accounts/relationship/sofia_operational_journey_spec.rb \
+            spec/requests/api/v1/accounts/relationship/native_completions_spec.rb \
             spec/requests/api/v1/accounts/crm/commercial_flow_spec.rb \
             spec/requests/api/v1/accounts/relationship/survey_models_integrated_spec.rb \
             spec/services/jrc_relationship/survey_models_delivery_spec.rb \
@@ -204,7 +214,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ag-native-focused-${{ github.sha }}
+          name: ag-native-focused-${{ github.sha }}-${{ matrix.installation }}
           path: /tmp/ag-focused-rspec.json
           if-no-files-found: warn
 

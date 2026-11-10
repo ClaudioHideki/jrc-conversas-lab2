@@ -1,0 +1,39 @@
+{
+  "utc": "2026-11-10T18:58:52.213302+00:00",
+  "validated_source_sha": "feacf688b84834403302699933b962fd91272413",
+  "workflow_run": 42876066038,
+  "native_journeys": {
+    "artifact": 13792686881,
+    "file_sha256": "e616856e1fdd13dad522b785ab831ca5b0c88f406f7cefe251c79ec8bf17d433",
+    "examples": 40,
+    "failures": 0,
+    "pending": 0,
+    "Sofia": "Authenticated native panel, own portfolio, Customer360, completed CRM attendance and idempotent reread, result, Agenda return and management denial.",
+    "Backoffice": "Same customer/sale, native v2 document and powers decisions, exact version/provider connection, synthetic provider/AV boundary, accepted bundle, real sealed dossier bytes/replay/hash, native project task completion and acceptance, CS dependency gate and authenticated handoff acceptance/duplicate denial.",
+    "CSS_or_external_provider_accepted": false
+  },
+  "broader_regression_failure": {
+    "artifact": 13791874913,
+    "examples": 391,
+    "failures": 1,
+    "pending": 0,
+    "file": "spec/requests/api/v1/accounts/relationship/native_completions_spec.rb:24",
+    "cause": "The preview test asserted no Action existed anywhere. The committed complete Backoffice journey now correctly preserves an onboarding Action for a different synthetic account.",
+    "fix": "A separate foreign Action is explicitly seeded. Global model counts must remain unchanged, current-account planned work remains absent, and the existing foreign attributes must remain identical. No data cleanup, fixture deletion or permission weakening."
+  },
+  "next_focused_gate": {
+    "installation_modes": [
+      "fresh",
+      "upgrade"
+    ],
+    "additional_scenario": "native_completions_spec.rb",
+    "same_full_36_lane_inventory": true,
+    "native_validation_of_this_fix": "pending"
+  },
+  "build": {
+    "executed": false,
+    "manual_input_default": false,
+    "separate_consolidated_authorization_still_required": true
+  },
+  "production_ready": false
+}
