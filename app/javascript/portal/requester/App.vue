@@ -11,6 +11,11 @@ const session = ref(null);
 const error = ref('');
 const loading = ref(true);
 const generation = ref(0);
+const brandAssets = {
+  logo: '/brand-assets/logo-jrc-thumbnail.png',
+  sidebar: '/brand-assets/portal-sidebar.svg',
+  background: '/brand-assets/portal-waves.svg',
+};
 const isLogin = computed(() => route.path === '/login');
 provide(
   'portalContext',
@@ -79,7 +84,7 @@ const logout = async () => {
           class="flex shrink-0 items-center gap-4 text-white"
         >
           <img
-            src="/brand-assets/logo-jrc-thumbnail.png"
+            :src="brandAssets.logo"
             :alt="t('PORTAL.BRAND_SHORT')"
             class="h-14 w-16 rounded-xl object-cover"
           />
@@ -134,7 +139,7 @@ const logout = async () => {
     >
       <aside class="relative overflow-hidden bg-[#04234c] text-white">
         <img
-          src="/brand-assets/portal-sidebar.svg"
+          :src="brandAssets.sidebar"
           alt=""
           aria-hidden="true"
           class="pointer-events-none absolute inset-0 h-full w-full object-cover"
@@ -167,7 +172,7 @@ const logout = async () => {
       </aside>
       <main class="relative isolate min-w-0 overflow-hidden p-5 sm:p-7 xl:p-8">
         <img
-          src="/brand-assets/portal-waves.svg"
+          :src="brandAssets.background"
           alt=""
           aria-hidden="true"
           class="pointer-events-none absolute inset-x-0 top-0 -z-10 w-full"
