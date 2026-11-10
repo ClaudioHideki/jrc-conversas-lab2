@@ -1,0 +1,113 @@
+{
+  "utc": "2026-11-10T17:51:21.645815+00:00",
+  "source_sha": "a2f0a782993b68bf8c75f13225c647fd751bb9db",
+  "branch": "codex/lab2-ag-consolidada-20261110",
+  "verified_main_sha": "d8a83b824b11cc68ddbbce7c79681f368051fb70",
+  "workflow_run": 42867053958,
+  "native_focused": {
+    "artifact": 13788671123,
+    "file_sha256": "6556e99b0c94509da3ae41ce0ab011f6519f834733dae92708a7528cbe489566",
+    "examples": 219,
+    "failures": 0,
+    "pending": 0,
+    "scope": "Native authenticated APIs and Rails services against disposable PostgreSQL, with only declared provider/AV boundary simulations. Does not prove external DocuSign/scanner/channel acceptance."
+  },
+  "frontend": {
+    "artifact": 13788007903,
+    "file_sha256": "938df8cf0fed80787fa201f0e039c4bd213341f9f6999336424a71ae7d176988",
+    "examples": 2452,
+    "failures": 0,
+    "pending": 0,
+    "scope": "Vue component/state regressions; mocked API transport is not real CSS/browser acceptance."
+  },
+  "schema_admission": {
+    "status": "passed",
+    "scope": "Fresh migrations, pinned main upgrade, account preservation, real constraint validation and generated schema reload into a third synthetic database."
+  },
+  "full_native_matrix": {
+    "lanes": 36,
+    "status": "in_progress",
+    "completed": false,
+    "fresh_general": {
+      "examples": 2557,
+      "failures": 3,
+      "pending": 0,
+      "artifacts": [
+        13789920470,
+        13787789958,
+        13790420843,
+        13788593128,
+        13789883443,
+        13789996475
+      ]
+    },
+    "fresh_special_passed": {
+      "retention": 12,
+      "relationship_service_desk_concurrency": 33,
+      "jornada": 4,
+      "authority_concurrency": 3,
+      "roster_concurrency": 5,
+      "signing_identity_upgrade": 1,
+      "document_scan_upgrade": 3,
+      "signature_submission_admission": 59,
+      "contract_version_upgrade": 2,
+      "signature_integration_upgrade": 1,
+      "signature_connection_upgrade": 1,
+      "reviewed_operations_upgrade": 1
+    }
+  },
+  "additional_unexecuted_tests": [
+    "Sofia HTTP operational journey with explicit approved analyst binding; real customer/panel/action/Agenda persistence and denied team/configuration/export; no browser claim.",
+    "Same Nexora lifecycle now extended to seal/replay/download exact-version dossier.",
+    "Survey model export fixture explicitly includes source module/unit view capabilities without granting report roles."
+  ],
+  "acceptance_gaps": [
+    "Full native regression matrix still running; no claim of zero failures before artifacts.",
+    "Consolidated candidate has no new authorized build or CSS/browser acceptance yet. Old d8d7c960 build authorization remains separate.",
+    "72 reference images and full four-Word/addendum functional/visual closure remain unproved.",
+    "External demo/scanner/channels and real operational parameters remain separate; company documents without portfolio remain explicitly blocked."
+  ],
+  "production_ready": false,
+  "production_or_main_changed": false,
+  "prepared_native_journeys": {
+    "Sofia": "Explicit approved analyst binding; authenticated panel, own portfolio, Customer360, native completed meeting and idempotent readback, result, Agenda return, forbidden management/export and revoked access. Not executed yet.",
+    "Backoffice": "Same sale and version-bound signature now extended to sealed archive replay/hash, native project task completion and acceptance, CS dependency denial, explicit native handoff acceptance and duplicate rejection. Not executed yet."
+  },
+  "static_check": {
+    "native_plan_guard_tests": 6,
+    "result": "passed",
+    "does_not_substitute_for_Rails": true
+  },
+  "runtime_permission_registry": "Native enterprise/app/models/custom_role.rb concatenates JrcRelationship::ModulePolicy::PERMISSIONS and JrcApprovals::Authorization::PERMISSIONS and validates inclusion. The passing focused tests create actual CustomRoles; this is runtime validation on CI, not merely file presence.",
+  "fresh_matrix_complete": {
+    "run": 42867053958,
+    "lanes": 18,
+    "examples": 2682,
+    "failures": 3,
+    "pending": 0,
+    "overlapping_focused_and_core0_reruns_not_added": true,
+    "exclusive_upgrade_lanes_all_passed": true,
+    "remaining_failures": "Three native fixture/expectation failures preserved in artifacts. Source-specific corrections prepared, not yet rerun."
+  },
+  "next_run": {
+    "remote_max_parallel": 8,
+    "reason": "Independent disposable GitHub VMs only. Same test inventory, no shared local resources and no reduction of assertions or resource limits.",
+    "old_upgrade_jobs": "Will be superseded with the corrected test source; canceled jobs are never counted as passed."
+  },
+  "guarded_build_preparation": {
+    "executed": false,
+    "approval_for_consolidated_sha_received": false,
+    "ordinary_push_cannot_trigger": true,
+    "manual_dispatch_default": false,
+    "exact_authorized_sha_required": true,
+    "needs_all_native_and_frontend_gates": true,
+    "start_ram_bytes": 5368709120,
+    "start_disk_bytes": 3221225472,
+    "stop_ram_bytes": 786432000,
+    "stop_disk_bytes": 750000000,
+    "isolated_GitHub_hosted_first_attempt_only": true,
+    "guard_pure_tests_passed": 4,
+    "pure_tests_do_not_prove_a_real_build": true,
+    "old_d8d7c960_authorization_untouched": true
+  }
+}

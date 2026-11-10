@@ -23,6 +23,12 @@ RSpec.describe 'V3 survey native delivery with a simulated provider' do
     JrcRelationship::SurveyEngine.evaluate_event(source: ticket, event: 'closure', cycle_key: "delivery:#{ticket.id}").survey
   end
 
+  around do |example|
+    with_modified_env FRONTEND_URL: 'https://surveys.disposable-mail.invalid' do
+      example.run
+    end
+  end
+
   before do
     stub_request(:post, 'https://waba.360dialog.io/v1/configs/webhook').to_return(status: 200, body: '{}', headers: { 'Content-Type' => 'application/json' })
     stub_request(:get, 'https://waba.360dialog.io/v1/configs/templates').to_return(status: 200, body: { waba_templates: [] }.to_json, headers: { 'Content-Type' => 'application/json' })

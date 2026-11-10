@@ -249,9 +249,15 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
     attachment_id = response.parsed_body.fetch('documents').first.fetch('id')
     post "#{path}/document_status", params: { document_key: 'identity', attachment_id: attachment_id, status: 'approved' },
       headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    # Preserve legacy status recording, while proving it cannot satisfy the v2
+    # release gate or substitute for a version, technical scan and human decision.
+    expect(request.reload.metadata.dig('document_statuses', 'identity')).to eq('approved')
+    expect(JrcBackoffice::DocumentGate.statuses(request).fetch('identity')).to eq('pending')
+    post "#{path}/advance", headers: headers, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
-    # Legacy attachments do not satisfy the v2 document gate. Preserve the
-    # financial-lock assertions using a real version, technical scan and human decision.
+    expect(request.reload.stage).to eq('documentation')
+    expect(order.contracts).to be_empty
     post "#{path}/document_versions", params: { document_key: 'identity', file: file, idempotency_key: SecureRandom.uuid }, headers: headers
     expect(response).to have_http_status(:created), response.body
     version = JrcBackoffice::DocumentVersion.find(response.parsed_body.fetch('id'))

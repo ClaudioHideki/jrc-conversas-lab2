@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle', :approval_core, :authority_core, :signature_delivery_core do
+RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle', :approval_core, :authority_core, :signature_delivery_core, type: :request do
   self.use_transactional_tests = false
   let(:account) { create(:account) }
   let(:seller) { create(:user, account: account, role: :administrator, name: 'Thiago Ribeiro') }
@@ -272,6 +272,57 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle', :approval_core,
     JrcCrm::OrderWorkflowSyncService.new(order: order.reload, actor: seller, event: 'payment_received').call
     expect(backoffice.reload).to be_completed
 
+    # Seal the same real native contract version and accepted artifact bundle,
+    # not an empty dossier or a separately constructed successful operation.
+    dossiers = JrcBackoffice::CompletionDossiers.new(account: account, actor: seller, request_id: backoffice.id)
+    candidate = dossiers.show
+    expect(candidate.fetch(:can_seal)).to be(true)
+    seal = dossiers.seal!(expected_manifest_digest: candidate.fetch(:candidate_digest))
+    expect(seal.integrity?).to be(true)
+    expect(dossiers.seal!(expected_manifest_digest: candidate.fetch(:candidate_digest)).id).to eq(seal.id)
+    expect(seal.snapshot.fetch('manifest').fetch('signature')).to include(
+      'artifact_available' => true, 'contract_version_id' => legal[:version].id, 'bundle_id' => bundle.id
+    )
+    archived, bytes = dossiers.download(seal.id)
+    expect(archived.id).to eq(seal.id)
+    expect(Digest::SHA256.hexdigest(bytes)).to eq(seal.archive_sha256)
+
+    # The completed operation does not silently complete its implementation.
+    # Exercise native task/project commands before allowing the same sale into CS.
+    account.enable_features!('jrc_relationship')
+    JrcRelationship::Configuration.create!(account: account, rules: { 'handoff_acceptance_required' => true })
+    expect(JrcRelationship::Handoff.call(backoffice, actor: seller)).to be_nil
+    expect(JrcRelationship::Assignment.where(account: account, company: company)).not_to exist
+    project.tasks.order(:id).each do |task|
+      destination = project.board_columns.find_by!(board_id: task.board_column.board_id, status_key: 'completed')
+      JrcProjects::Tasks::Move.call(task: task, actor: seller, column: destination,
+                                    lock_version: task.reload.lock_version, correlation_id: SecureRandom.uuid)
+    end
+    project = JrcProjects::Projects::Update.call(
+      account: account, actor: seller, project: project.reload, correlation_id: SecureRandom.uuid,
+      attributes: { status: 'completed', lock_version: project.lock_version, acceptance_notes: 'SYNTHETIC implementation accepted' }
+    )
+    expect(project).to have_attributes(status: 'completed', accepted_by_id: seller.id)
+    assignment = JrcRelationship::Handoff.call(backoffice, actor: seller)
+    expect(assignment).to have_attributes(company_id: company.id, owner_id: seller.id, status: 'onboarding')
+    expect(assignment.actions.where(source_key: 'handoff')).not_to exist
+    headers = seller.create_new_auth_token
+    get "/api/v1/accounts/#{account.id}/crm/backoffice_requests/#{backoffice.id}/completion_handoff", headers: headers
+    expect(response).to have_http_status(:ok), response.body
+    expect(response.parsed_body).to include('available' => true, 'assignment_id' => assignment.id,
+                                            'source_type' => order.class.name, 'source_id' => order.id, 'handoff_status' => 'pending')
+    handoff_id = response.parsed_body.fetch('handoff_id')
+    acceptance = { status: 'accepted', reason: 'SYNTHETIC same-sale handoff accepted',
+                   checklist: %w[contract products contacts objectives promises pending_items].index_with(true) }
+    post "/api/v1/accounts/#{account.id}/relationship/handoffs/#{handoff_id}/decide", headers: headers, as: :json, params: acceptance
+    expect(response).to have_http_status(:ok), response.body
+    expect(assignment.reload.status).to eq('active')
+    expect(assignment.actions.where(source_key: 'handoff').count).to eq(1)
+    post "/api/v1/accounts/#{account.id}/relationship/handoffs/#{handoff_id}/decide", headers: headers, as: :json, params: acceptance
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(JrcRelationship::Assignment.where(account: account, company: company).count).to eq(1)
+    expect(assignment.actions.where(source_key: 'handoff').count).to eq(1)
+
     # The Customer 360 must still point to the same master company/contact and
     # expose the complete commercial/operational history of the sale.
     account_user = account.account_users.find_by!(user_id: seller.id)
@@ -289,6 +340,6 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle', :approval_core,
     expect(sources['activities']).to include(demonstration)
     expect(overview[:contracts_active]).to eq(1)
     expect(overview[:contracts_mrr_cents]).to eq(order.monthly_cents)
-    expect(overview[:projects_active]).to eq(1)
+    expect(overview[:projects_active]).to eq(0)
   end
 end

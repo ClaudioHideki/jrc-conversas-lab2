@@ -244,7 +244,8 @@ RSpec.describe 'Survey models native persistence, security and ticket events', t
     JrcRelationship::SurveyResponse.new(survey).call(answers: { score: 9 })
     create(:team_member, team: team, user: sd_user)
     exporter = create(:custom_role, account: sd_account,
-                       permissions: %w[contact_manage jrc_relationship_view jrc_relationship_export])
+                       permissions: %w[contact_manage jrc_relationship_view jrc_relationship_export
+                                       jrc_service_desk_module_view jrc_service_desk_tickets_view jrc_service_desk_customers_view])
     sd_account_user.update!(role: :agent, custom_role: exporter)
     get "/api/v1/accounts/#{sd_account.id}/relationship/records/surveys", headers: survey_headers,
       params: { source_type: 'JrcServiceDesk::Ticket', unit_id: sd_unit.id }

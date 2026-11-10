@@ -4,6 +4,15 @@ on:
   push:
     branches: [codex/lab2-ag-consolidada-20261110]
   workflow_dispatch:
+    inputs:
+      build_candidate:
+        description: 'Execute one guarded consolidated build only after explicit user authorization'
+        type: boolean
+        default: false
+      expected_build_sha:
+        description: 'Full SHA explicitly authorized for the consolidated build; separate from d8d7c960'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -27,6 +36,7 @@ jobs:
       - run: node --test script/validate_ag_migration_identity.test.mjs
       - run: python3 script/jrc_ag_native_plan_test.py
       - run: python3 script/jrc_ag_catalog_compare_test.py
+      - run: python3 script/jrc_ag_guarded_frontend_build_test.py
       # Known identity collisions must be resolved with a tested history-adoption plan.
       # Never mark the current combined tree as database-ready while this gate fails.
       - run: node script/validate_ag_migration_identity.mjs
@@ -183,28 +193,11 @@ jobs:
         shell: bash
         run: |
           bundle exec rspec \
-            spec/services/jrc_relationship/approved_local_roles_spec.rb \
-            spec/jobs/jrc_backoffice/document_preanalysis_job_spec.rb \
-            spec/requests/api/v1/accounts/relationship/configuration_restore_spec.rb \
-            spec/requests/api/v1/accounts/relationship/portfolio_group_governance_spec.rb \
-            spec/requests/api/v1/accounts/relationship/portfolio_history_details_spec.rb \
-            spec/requests/api/v1/accounts/jrc_approvals/adjustments_spec.rb \
-            spec/services/jrc_backoffice/document_safety_spec.rb \
-            spec/requests/api/v1/accounts/crm/approved_human_requirements_spec.rb \
-            spec/requests/api/v1/accounts/jrc_approvals/approved_financial_adjustments_spec.rb \
-            spec/services/jrc_customers/company_import_corporate_scope_spec.rb \
-            spec/services/jrc_backoffice/consolidated_migration_identity_spec.rb \
             spec/services/jrc_crm/nexora_end_to_end_spec.rb \
-            spec/services/jrc_relationship/playbook_flow_spec.rb \
-            spec/services/jrc_relationship/survey_message_execution_provider_boundary_spec.rb \
-            spec/services/jrc_relationship/operations_spec.rb \
-            spec/requests/api/v1/accounts/relationship/survey_reports_spec.rb \
-            spec/services/jrc_relationship/customer_documents_latest_versions_spec.rb \
-            spec/requests/api/v1/accounts/relationship/document_catalog_scale_spec.rb \
-            spec/services/jrc_backoffice/signatures/admissions_spec.rb \
-            spec/requests/api/v1/accounts/relationship/analyst_restoration_spec.rb \
-            spec/requests/api/v1/accounts/jrc_approvals/commercial_api_spec.rb \
-            spec/requests/api/v1/accounts/relationship/customer_documents_spec.rb \
+            spec/requests/api/v1/accounts/relationship/sofia_operational_journey_spec.rb \
+            spec/requests/api/v1/accounts/crm/commercial_flow_spec.rb \
+            spec/requests/api/v1/accounts/relationship/survey_models_integrated_spec.rb \
+            spec/services/jrc_relationship/survey_models_delivery_spec.rb \
             --seed 20261110 --require ./script/jrc_ag_ci_formatter.rb --format JrcAgCiFormatter --format json --out /tmp/ag-focused-rspec.json
           ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero?' /tmp/ag-focused-rspec.json
       - name: Preserve focused native failures and evidence
@@ -221,7 +214,7 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 8
       matrix:
         installation: [fresh, upgrade]
         target:
@@ -411,3 +404,34 @@ jobs:
           path: /tmp/ag-vue-results.json
           if-no-files-found: warn
       - run: git diff --exit-code
+
+  guarded-candidate-build:
+    # This is NOT authorized by a push or ordinary CI testing. The agent must
+    # obtain separate explicit authorization before dispatching with this input.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_candidate }}
+    needs: [identities, migration-admission, native-focused, rails, frontend]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - run: pnpm install --frozen-lockfile
+      - name: Guard one exact-source build; no server, database, image or publication
+        env:
+          JRC_AG_AUTHORIZED_BUILD_SHA: ${{ inputs.expected_build_sha }}
+        run: python3 script/jrc_ag_guarded_frontend_build.py --execute --expected-sha "$JRC_AG_AUTHORIZED_BUILD_SHA"
+      - name: Preserve build evidence and new assets for isolated acceptance only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ag-guarded-build-${{ github.sha }}
+          path: ${{ runner.temp }}/jrc-ag-build-${{ github.sha }}/
+          if-no-files-found: warn
