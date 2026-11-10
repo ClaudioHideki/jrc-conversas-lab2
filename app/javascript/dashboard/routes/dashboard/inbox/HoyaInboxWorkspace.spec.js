@@ -8,6 +8,14 @@ import HoyaInboxWorkspace from './HoyaInboxWorkspace.vue';
 import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 import { CONVERSATION_TOOLS } from './conversationTools';
 import { GLOBAL_VOICE_SHELL } from '../webphone/voiceShell';
+const pagination = vi.hoisted(() => ({ observe: null }));
+vi.mock('@vueuse/core', async importOriginal => ({
+  ...(await importOriginal()),
+  useIntersectionObserver: vi.fn((target, callback) => {
+    pagination.observe = callback;
+    return { stop: vi.fn() };
+  }),
+}));
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: key => key, locale: ref('pt_BR') }),
 }));
@@ -101,6 +109,48 @@ const global = {
   },
 };
 describe('inbox native SIP action guards', () => {
+  it('offers voice configuration inside Attendance only to a backend-authorized configurator', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    await flushPromises();
+    expect(wrapper.find('[data-voice-settings]').exists()).toBe(false);
+    await wrapper.setProps({
+      context: {
+        ...props.context,
+        capabilities: { operate: true, configure: true },
+      },
+    });
+    expect(wrapper.find('[data-voice-settings]').exists()).toBe(true);
+    await wrapper.setProps({
+      context: {
+        ...props.context,
+        capabilities: { operate: true, configure: false },
+      },
+    });
+    expect(wrapper.find('[data-voice-settings]').exists()).toBe(false);
+  });
+  it('loads the next page at the end of the existing mixed channel list without changing the selected interaction', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props: { ...props, canLoadMore: true },
+      global,
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-conversation-scroll]').exists()).toBe(true);
+    pagination.observe([{ isIntersecting: true }]);
+    await flushPromises();
+    expect(wrapper.emitted('loadMore')).toEqual([[]]);
+    expect(wrapper.emitted('selectCall')).toBeUndefined();
+    expect(wrapper.emitted('channelChange')).toBeUndefined();
+    await wrapper.setProps({ loading: true });
+    pagination.observe([{ isIntersecting: false }]);
+    pagination.observe([{ isIntersecting: true }]);
+    await flushPromises();
+    expect(wrapper.emitted('loadMore')).toHaveLength(1);
+    await wrapper.setProps({ loading: false, conversationError: true });
+    expect(wrapper.emitted('loadMore')).toHaveLength(1);
+    await wrapper.setProps({ conversationError: false, canLoadMore: false });
+    expect(wrapper.emitted('loadMore')).toHaveLength(1);
+  });
+
   it('composes the five Voice V4 tabs and keeps script and notes in the call without duplicate SIP controls', async () => {
     const wrapper = mount(HoyaInboxWorkspace, {
       props: {

@@ -2,7 +2,7 @@ name: Voz V4 - contratos e regressao isolados
 
 on:
   push:
-    branches: ['codex/voz-v4-*', 'codex/consolidacao-*']
+    branches: ['codex/voz-v4-*', 'codex/consolidacao-*', 'codex/atendimento-voz-*']
   workflow_dispatch:
 
 permissions:
@@ -76,10 +76,16 @@ jobs:
             spec/requests/api/v1/accounts/jrc_contact_center \
             spec/jobs/jrc_contact_center \
             --format progress --format json --out /tmp/voice-v4-rspec.json
+      - name: Politica de voz isolada sem Rails
+        run: bundle exec ruby spec/standalone/voice_acw_policy_test.rb
       - name: RuboCop do incremento
         run: >-
           bundle exec rubocop
           app/services/jrc_contact_center/customer_context.rb
+          app/services/jrc_contact_center/acw_policy.rb
+          app/services/jrc_contact_center/qualification_manager.rb
+          app/services/jrc_contact_center/call_journey.rb
+          app/controllers/api/v1/accounts/jrc_contact_center/acw_policies_controller.rb
           app/services/jrc_contact_center/agent_state_manager.rb
           app/services/jrc_contact_center/call_observation_writer.rb
           app/models/jrc_contact_center/call_observation.rb

@@ -66,7 +66,7 @@ describe('outbound confirmation without changing selected attendance', () => {
     expect(dialog.props('dismissible')).toBe(true);
     wrapper.unmount();
   });
-  it('does not dial on opening or while a required reason is missing', async () => {
+  it('opens a dialer without originating a call and allows the agent to annotate it afterwards', async () => {
     const wrapper = mount(OutboundVoiceDialog, {
       ...options,
       props: { ...options.props, initialPhone: '12345678' },
@@ -75,10 +75,26 @@ describe('outbound confirmation without changing selected attendance', () => {
     expect(state.sip.call).not.toHaveBeenCalled();
     expect(
       wrapper.get('[data-outbound-call]').attributes('disabled')
-    ).toBeDefined();
+    ).toBeUndefined();
     expect(
       wrapper.get('[data-outbound-source]').attributes('readonly')
     ).toBeDefined();
+    wrapper.unmount();
+  });
+  it('supports keypad entry and correction before the explicit call action', async () => {
+    const wrapper = mount(OutboundVoiceDialog, options);
+    await wrapper.get('[data-outbound-tone="1"]').trigger('click');
+    await wrapper.get('[data-outbound-tone="4"]').trigger('click');
+    await wrapper.get('[data-outbound-tone="1"]').trigger('click');
+    await wrapper.get('[data-outbound-tone="0"]').trigger('click');
+    expect(wrapper.get('[data-outbound-phone]').element.value).toBe('1410');
+    await wrapper.get('[data-outbound-backspace]').trigger('click');
+    expect(wrapper.get('[data-outbound-phone]').element.value).toBe('141');
+    expect(state.sip.call).not.toHaveBeenCalled();
+    await wrapper.get('[data-outbound-call]').trigger('click');
+    await flushPromises();
+    expect(state.sip.destination.value).toBe('141');
+    expect(wrapper.emitted('started')[0][0].reason).toBe('');
     wrapper.unmount();
   });
   it('starts only the reviewed number from the already authorized extension', async () => {
@@ -106,6 +122,9 @@ describe('outbound confirmation without changing selected attendance', () => {
     expect(
       wrapper.get('[data-outbound-call]').attributes('disabled')
     ).toBeDefined();
+    expect(wrapper.get('[data-outbound-blocked]').text()).toContain(
+      'VOICE_V4.CALL_ALREADY_ACTIVE'
+    );
     state.sip.hasCall.value = false;
     state.sip.accountId.value = 8;
     await flushPromises();

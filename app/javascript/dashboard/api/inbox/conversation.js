@@ -19,6 +19,7 @@ class ConversationApi extends ApiClient {
     includeParticipating,
   }) {
     return axios.get(this.url, {
+      timeout: 30000,
       params: {
         inbox_id: inboxId,
         team_id: teamId,

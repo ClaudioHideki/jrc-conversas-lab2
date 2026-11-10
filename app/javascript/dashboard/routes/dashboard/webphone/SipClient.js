@@ -34,7 +34,8 @@ export class SipClient {
     this.muted = false;
     this.held = false;
     this.wasEstablished = false;
-    this.terminationExpected = false;
+    this.sessionOutcomes = new WeakMap();
+    this.sessionEpoch = 0;
     this.callLockRelease = null;
     this.callStarting = false;
     this.transportConnected = false;
@@ -220,7 +221,14 @@ export class SipClient {
     this.muted = false;
     this.held = false;
     this.wasEstablished = false;
-    this.terminationExpected = false;
+    this.sessionEpoch += 1;
+    const outcome = {
+      expected: false,
+      rejected: false,
+      established: false,
+      epoch: this.sessionEpoch,
+    };
+    this.sessionOutcomes.set(session, outcome);
     this.remoteStream = new MediaStream();
 
     session.delegate = {
@@ -241,6 +249,7 @@ export class SipClient {
       this.log('CHAMADA', `Estado SIP: ${String(state)}`);
       this.emitSessionState(session, state);
       if (state === SessionState.Established) {
+        outcome.established = true;
         this.wasEstablished = true;
         this.setStatus('Em chamada', 'success');
         this.attachPeerConnection(
@@ -249,13 +258,23 @@ export class SipClient {
         this.emit('onEstablished');
       }
       if (state === SessionState.Terminated) {
-        if (!this.wasEstablished && !this.terminationExpected) {
-          const message =
-            'A sessão SIP foi encerrada antes de a chamada ser atendida.';
-          this.emit('onError', message);
-          this.setStatus('Chamada encerrada pelo PABX', 'error');
-          this.log('CHAMADA', message);
-        }
+        // sip.js emits Terminated synchronously before its rejection delegate.
+        // Preserve the per-session outcome through finishCall and let that
+        // delegate report the authoritative code before a generic fallback.
+        if (!outcome.established && !outcome.expected)
+          queueMicrotask(() => {
+            if (
+              this.sessionEpoch !== outcome.epoch ||
+              outcome.rejected ||
+              outcome.expected
+            )
+              return;
+            const message =
+              'A sessão SIP foi encerrada antes de a chamada ser atendida.';
+            this.emit('onError', message);
+            this.setStatus('Chamada encerrada pelo PABX', 'error');
+            this.log('CHAMADA', message);
+          });
         this.finishCall(!this.wasEstablished);
       }
     });
@@ -353,6 +372,14 @@ export class SipClient {
             this.log('CHAMADA', `Chamada atendida (${statusCode})`);
           },
           onReject: response => {
+            const outcome = this.sessionOutcomes.get(inviter);
+            if (
+              !outcome ||
+              outcome.expected ||
+              outcome.epoch !== this.sessionEpoch
+            )
+              return;
+            outcome.rejected = true;
             const statusCode = response?.message?.statusCode;
             const details = Number(statusCode) || 'sem código';
             const message = `O PABX recusou a chamada (${details}).`;
@@ -364,7 +391,7 @@ export class SipClient {
       });
     } catch (error) {
       this.callStarting = false;
-      this.terminationExpected = true;
+      this.markIntentionalTermination(inviter);
       if (this.session === inviter) this.finishCall(true);
       else this.releaseCallLock();
       throw error;
@@ -393,7 +420,7 @@ export class SipClient {
     if (!(this.session instanceof Invitation)) {
       throw new Error('Não existe chamada recebida para recusar');
     }
-    this.terminationExpected = true;
+    this.markIntentionalTermination(this.session);
     await this.session.reject({ statusCode: 486, reasonPhrase: 'Busy Here' });
     this.setStatus('Chamada recusada', 'neutral');
     this.log('CHAMADA', 'Chamada recusada');
@@ -404,7 +431,7 @@ export class SipClient {
     if (!session || session.state === SessionState.Terminated) return;
     if (session.state === SessionState.Terminating) return;
 
-    this.terminationExpected = true;
+    this.markIntentionalTermination(session);
     this.setStatus('Encerrando chamada', 'warning');
     if (session.state === SessionState.Established) {
       await session.bye();
@@ -413,6 +440,11 @@ export class SipClient {
     } else if (session instanceof Inviter) {
       await session.cancel();
     }
+  }
+
+  markIntentionalTermination(session) {
+    const outcome = session && this.sessionOutcomes.get(session);
+    if (outcome) outcome.expected = true;
   }
 
   setMuted(muted) {
@@ -584,12 +616,12 @@ export class SipClient {
     this.muted = false;
     this.held = false;
     this.wasEstablished = false;
-    this.terminationExpected = false;
     this.callStarting = false;
     this.releaseCallLock();
   }
 
   async disconnect() {
+    this.sessionEpoch += 1;
     const userAgent = this.userAgent;
     const registerer = this.registerer;
     this.cancelRegistration?.();

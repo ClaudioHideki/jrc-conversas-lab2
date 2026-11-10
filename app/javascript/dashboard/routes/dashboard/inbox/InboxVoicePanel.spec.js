@@ -100,6 +100,28 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 describe('central shared voice panel', () => {
+  it('opens the global DTMF keypad as a labeled overlay and closes it with Escape without ending the call', async () => {
+    state.sip.hasCall.value = true;
+    state.sip.established.value = true;
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...props, controlsOnly: true },
+    });
+    expect(wrapper.find('[data-call-keypad]').exists()).toBe(false);
+    await button(wrapper, 'KEYPAD').trigger('click');
+    const keypad = wrapper.get('[data-call-keypad]');
+    expect(keypad.attributes('role')).toBe('group');
+    expect(keypad.attributes('aria-label')).toBe('SOFTPHONE.CENTRAL.KEYPAD');
+    expect(keypad.classes()).toContain('absolute');
+    await keypad.findAll('button')[0].trigger('click');
+    expect(state.sip.pressKey).toHaveBeenCalledWith('1');
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+    );
+    await flushPromises();
+    expect(wrapper.find('[data-call-keypad]').exists()).toBe(false);
+    expect(state.sip.hangup).not.toHaveBeenCalled();
+  });
+
   it('can hang up once while a hold request is still awaiting a response', async () => {
     state.sip.hasCall.value = true;
     state.sip.established.value = true;

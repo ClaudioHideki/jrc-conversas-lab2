@@ -93,6 +93,14 @@ describe('conversation list request lifecycle with a real Vuex store', () => {
     }
   );
 
+  it('ends loading after a request timeout without marking the conversation list as exhausted', async () => {
+    axios.get.mockRejectedValueOnce({ code: 'ECONNABORTED' });
+    await store.dispatch('fetchAllConversations');
+    expect(store.state.listLoadingStatus).toBe(false);
+    expect(store.getters.getChatListErrorStatus).toBe(true);
+    expect(store.state.conversationPage.hasEndReached.all).toBe(false);
+  });
+
   it('allows an explicit retry to recover from a failed request', async () => {
     axios.get.mockRejectedValueOnce(new Error('network unavailable'));
     await store.dispatch('fetchAllConversations');

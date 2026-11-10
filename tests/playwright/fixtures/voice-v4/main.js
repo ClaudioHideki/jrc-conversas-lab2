@@ -6,7 +6,7 @@ import { createI18n } from 'vue-i18n';
 import GlobalVoiceBar from 'dashboard/components-next/layout/GlobalVoiceBar.vue';
 import HoyaInboxWorkspace from 'dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue';
 import { GLOBAL_VOICE_SHELL } from 'dashboard/routes/dashboard/webphone/voiceShell';
-import { record, sip, scenario } from './state';
+import { record, scenario } from './state';
 import { context } from './api';
 import ptBR from 'dashboard/i18n/locale/pt_BR';
 import destinations from './destinations.json';
@@ -21,6 +21,7 @@ window.axios = Object.fromEntries(
   ])
 );
 const currentCall = ref(scenario !== 'idle' ? record.id : null);
+const workspaceVisible = ref(true);
 const currentConversation = ref(scenario !== 'idle' ? null : 9201);
 const conversations = [
   {
@@ -44,13 +45,16 @@ const router = createRouter({
     },
   ],
 });
-for (const name of destinations)
+destinations.forEach(name =>
   router.addRoute({
     path: `/app/accounts/:accountId/fixture/${name}/:customerId?`,
     name,
     component: { template: '<article>Rota sintética</article>' },
-  });
-await router.push('/app/accounts/9001/inbox-view/call/9009');
+  })
+);
+const initialNavigation = router.push(
+  '/app/accounts/9001/inbox-view/call/9009'
+);
 const store = createStore({
   getters: {
     getCurrentUserID: () => 901,
@@ -59,10 +63,12 @@ const store = createStore({
   },
 });
 const selectVoice = () => {
+  workspaceVisible.value = true;
   currentCall.value = record.id;
   currentConversation.value = null;
 };
 const selectWhatsApp = () => {
+  workspaceVisible.value = true;
   currentCall.value = null;
   currentConversation.value = 9201;
 };
@@ -87,36 +93,54 @@ const app = createApp({
             { 'data-fixture-whatsapp': '', onClick: selectWhatsApp },
             'Abrir WhatsApp'
           ),
+          h(
+            'button',
+            {
+              'data-fixture-other-module': '',
+              onClick: () => {
+                workspaceVisible.value = false;
+              },
+            },
+            'Abrir outro módulo'
+          ),
         ]
       ),
       h(GlobalVoiceBar),
-      h(HoyaInboxWorkspace, {
-        accountId: 9001,
-        context,
-        softphoneAccess: true,
-        currentCallId: currentCall.value,
-        currentConversationId: currentConversation.value,
-        calls: scenario === 'idle' ? [] : [record],
-        conversations,
-        channels: [
-          { key: 'voice', label: 'Voz' },
-          { key: 'whatsapp', label: 'WhatsApp' },
-        ],
-        inboxFor: () => ({
-          id: 31,
-          name: 'WhatsApp — laboratório',
-          channel_type: 'Channel::Whatsapp',
-        }),
-        onSelectCall: selectVoice,
-        onSelectConversation: selectWhatsApp,
-      }),
+      workspaceVisible.value
+        ? h(HoyaInboxWorkspace, {
+            accountId: 9001,
+            context,
+            softphoneAccess: true,
+            currentCallId: currentCall.value,
+            currentConversationId: currentConversation.value,
+            calls: scenario === 'idle' ? [] : [record],
+            conversations,
+            channels: [
+              { key: 'voice', label: 'Voz' },
+              { key: 'whatsapp', label: 'WhatsApp' },
+            ],
+            inboxFor: () => ({
+              id: 31,
+              name: 'WhatsApp — laboratório',
+              channel_type: 'Channel::Whatsapp',
+            }),
+            onSelectCall: selectVoice,
+            onSelectConversation: selectWhatsApp,
+          })
+        : h(
+            'article',
+            { 'data-fixture-module': '', class: 'p-5' },
+            'Outro módulo — laboratório sintético'
+          ),
     ]),
 });
-app
-  .provide(GLOBAL_VOICE_SHELL, true)
-  .use(store)
-  .use(router)
-  .use(
-    createI18n({ legacy: false, locale: 'pt_BR', messages: { pt_BR: ptBR } })
-  )
-  .mount('#app');
+initialNavigation.then(() => {
+  app
+    .provide(GLOBAL_VOICE_SHELL, true)
+    .use(store)
+    .use(router)
+    .use(
+      createI18n({ legacy: false, locale: 'pt_BR', messages: { pt_BR: ptBR } })
+    )
+    .mount('#app');
+});

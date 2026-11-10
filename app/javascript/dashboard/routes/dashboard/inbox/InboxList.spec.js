@@ -10,7 +10,19 @@ import InboxList from './InboxList.vue';
 import { routes as webphoneRoutes } from '../webphone/routes';
 import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 
-const mocks = vi.hoisted(() => ({ route: null, router: null, sip: null }));
+const mocks = vi.hoisted(() => ({
+  route: null,
+  router: null,
+  sip: null,
+  observe: null,
+}));
+vi.mock('@vueuse/core', async importOriginal => ({
+  ...(await importOriginal()),
+  useIntersectionObserver: vi.fn((_target, callback) => {
+    mocks.observe = callback;
+    return { stop: vi.fn() };
+  }),
+}));
 vi.mock('dashboard/routes/dashboard/webphone/useSipWebphone', () => ({
   useSipWebphone: () => mocks.sip,
 }));
@@ -78,6 +90,36 @@ const mountInbox = () =>
   });
 
 describe('omnichannel inbox', () => {
+  it('continues loading a short page while the sentinel remains visible after the action finishes before its parent', async () => {
+    store.state.feature = false;
+    let requests = 0;
+    let resolveSecond;
+    const dispatch = store.dispatch.bind(store);
+    vi.spyOn(store, 'dispatch').mockImplementation((type, ...args) => {
+      if (type !== 'fetchAllConversations') return dispatch(type, ...args);
+      requests += 1;
+      if (requests === 2) {
+        store.state.loading = true;
+        return new Promise(resolve => {
+          resolveSecond = () => {
+            store.state.loading = false;
+            resolve({ meta: {} });
+          };
+        });
+      }
+      if (requests === 3) store.state.ended = true;
+      return dispatch(type, ...args);
+    });
+    const wrapper = mountInbox();
+    await flushPromises();
+    mocks.observe([{ isIntersecting: true }]);
+    await flushPromises();
+    expect(requests).toBe(2);
+    resolveSecond();
+    await flushPromises();
+    expect(requests).toBe(3);
+    expect(wrapper.findAll('[data-channel="voice"]')).toHaveLength(1);
+  });
   it('loads authorized pending conversations from a status deep link', async () => {
     mocks.route.query.status = 'pending';
     store.state.conversationPayload = [
@@ -289,6 +331,113 @@ describe('omnichannel inbox', () => {
     expect(wrapper.text()).not.toContain(
       'JRC_CONTACT_CENTER.INBOX.ASSIGNEE.MINE_OR_SHARED'
     );
+  });
+
+  it('keeps already authorized conversations visible while refreshing an unchanged sharing scope', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    try {
+      ConversationAPI.sharedContext.mockResolvedValueOnce({
+        data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+      });
+      store.state.sharedScopeResult = { enabled: true, inbox_ids: [11] };
+      store.state.conversationPayload = [
+        {
+          id: 999,
+          inbox_id: 11,
+          meta: { assignee: { id: 99 }, assignee_type: 'User' },
+        },
+      ];
+      const wrapper = mountInbox();
+      await flushPromises();
+      let resolveScope;
+      ConversationAPI.sharedContext.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            resolveScope = resolve;
+          })
+      );
+      await vi.advanceTimersByTimeAsync(15000);
+      await flushPromises();
+      expect(
+        wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+      ).toContain('999');
+      resolveScope({
+        data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+      });
+      await flushPromises();
+      expect(
+        wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+      ).toContain('999');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('requires fresh sharing proof after an existing conversation changes assignment', async () => {
+    ConversationAPI.sharedContext.mockResolvedValueOnce({
+      data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+    });
+    store.state.sharedScopeResult = { enabled: true, inbox_ids: [11] };
+    store.state.conversationPayload = [
+      {
+        id: 999,
+        inbox_id: 11,
+        meta: { assignee: { id: 99 }, assignee_type: 'User' },
+      },
+    ];
+    const wrapper = mountInbox();
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).toContain('999');
+    let resolveScope;
+    ConversationAPI.sharedContext.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveScope = resolve;
+        })
+    );
+    store.state.conversations[0].meta.assignee.id = 98;
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).not.toContain('999');
+    resolveScope({
+      data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+    });
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).toContain('999');
+  });
+
+  it('fails closed after a periodic sharing lookup fails', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    try {
+      ConversationAPI.sharedContext.mockResolvedValueOnce({
+        data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+      });
+      store.state.sharedScopeResult = { enabled: true, inbox_ids: [11] };
+      store.state.conversationPayload = [
+        {
+          id: 999,
+          inbox_id: 11,
+          meta: { assignee: { id: 99 }, assignee_type: 'User' },
+        },
+      ];
+      const wrapper = mountInbox();
+      await flushPromises();
+      ConversationAPI.sharedContext.mockRejectedValueOnce(
+        new Error('unavailable')
+      );
+      await vi.advanceTimersByTimeAsync(15000);
+      await flushPromises();
+      expect(
+        wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+      ).not.toContain('999');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('revalidates sharing before showing an incoming realtime conversation from a previous sharing proof', async () => {
@@ -508,6 +657,7 @@ describe('omnichannel inbox', () => {
         ],
         conversations: [],
         conversationError: false,
+        loading: false,
         ended: false,
         conversationPayload: [],
         filters: {},
@@ -536,7 +686,7 @@ describe('omnichannel inbox', () => {
               filters.status === 'all' ||
               filters.status === conversation.status
           ),
-        getChatListLoadingStatus: () => false,
+        getChatListLoadingStatus: state => state.loading,
         getChatListErrorStatus: state => state.conversationError,
       },
       actions: {

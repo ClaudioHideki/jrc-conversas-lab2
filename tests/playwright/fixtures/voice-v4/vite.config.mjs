@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { aliases, vueOptions } from '../../../../vite.shared';
 const fixture = name => fileURLToPath(new URL(name, import.meta.url));
 export default defineConfig({
+  publicDir: false,
   plugins: [vue(vueOptions), yaml()],
   resolve: {
     alias: [
@@ -46,5 +47,18 @@ export default defineConfig({
       })),
     ],
   },
-  server: { host: '127.0.0.1', port: 5226, strictPort: true },
+  server: {
+    host: '127.0.0.1',
+    port: Number(process.env.JRC_VOICE_FIXTURE_PORT || 5226),
+    strictPort: true,
+  },
+  preview: {
+    host: '127.0.0.1',
+    port: Number(process.env.JRC_VOICE_FIXTURE_PORT || 5226),
+    strictPort: true,
+  },
+  build: {
+    outDir: '.codex/atendimento-voz-20261110-static',
+    rollupOptions: { input: fixture('./index.html') },
+  },
 });

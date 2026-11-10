@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 const fixture = '/tests/playwright/fixtures/voice-v4/index.html';
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, baseURL }) => {
   let errors = 0;
   page.on('pageerror', error => {
     if (errors++ < 3)
@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }) => {
       console.log(`Fixture console: ${message.text().slice(0, 600)}`);
   });
   await page.route('**/*', route =>
-    route.request().url().startsWith('http://127.0.0.1:5226/')
+    route.request().url().startsWith(`${baseURL}/`)
       ? route.continue()
       : route.abort()
   );
@@ -35,8 +35,10 @@ test('mantem chamada A e controles ao abrir WhatsApp B sem overflow da pagina', 
     path: testInfo.outputPath('ligacao-conectada.png'),
     fullPage: true,
   });
+  const barHeight = (await bar.boundingBox())?.height;
   await bar.locator('[data-voice-action=KEYPAD]').click();
   await expect(bar.locator('[data-call-keypad] button')).toHaveCount(12);
+  expect((await bar.boundingBox())?.height).toBe(barHeight);
   await page.screenshot({
     path: testInfo.outputPath('teclado-dtmf.png'),
     fullPage: true,
@@ -73,7 +75,7 @@ test('mantem chamada A e controles ao abrir WhatsApp B sem overflow da pagina', 
     fullPage: true,
   });
 });
-test('popup de saida preserva contexto e exige motivo antes de chamar', async ({
+test('discador preserva contexto e permite anotar depois da chamada', async ({
   page,
 }, testInfo) => {
   await page.goto(`${fixture}?state=idle`);
@@ -90,9 +92,10 @@ test('popup de saida preserva contexto e exige motivo antes de chamar', async ({
   await expect(page.locator('[data-whatsapp-fixture]')).toBeVisible();
   await expect(page.locator('[data-outbound-call]')).toBeDisabled();
   await page.locator('[data-outbound-phone]').fill('2002');
-  await page
-    .locator('[data-outbound-reason]')
-    .fill('Retorno solicitado no cenário sintético');
+  await expect(page.locator('[data-outbound-phone]')).toHaveCSS(
+    'color',
+    'rgb(255, 255, 255)'
+  );
   await expect(page.locator('[data-outbound-call]')).toBeEnabled();
   await page.screenshot({
     path: testInfo.outputPath('nova-ligacao.png'),
@@ -105,6 +108,32 @@ test('popup de saida preserva contexto e exige motivo antes de chamar', async ({
     path: testInfo.outputPath('chamando.png'),
     fullPage: true,
   });
+});
+test('mantem a chamada ao sair do Atendimento para outro modulo e voltar', async ({
+  page,
+}) => {
+  await page.goto(fixture);
+  const bar = page.locator('[data-global-voice-bar]');
+  await expect(bar).toContainText('Em ligação');
+  await page.locator('[data-fixture-other-module]').click();
+  await expect(page.locator('[data-fixture-module]')).toBeVisible();
+  await expect(page.locator('[data-testid=hoya-inbox-workspace]')).toHaveCount(
+    0
+  );
+  await expect(bar).toContainText('Cliente sintético A');
+  await bar.locator('[data-voice-action=MUTE]').click();
+  await expect(bar.locator('[data-voice-action=MUTE]')).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
+  await page.locator('[data-fixture-voice]').click();
+  await expect(
+    page.locator('[data-testid=hoya-inbox-workspace]')
+  ).toBeVisible();
+  await expect(bar.locator('[data-voice-action=MUTE]')).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
 });
 test('recebendo sem cronometro e pos-atendimento sem telefonia ativa', async ({
   page,

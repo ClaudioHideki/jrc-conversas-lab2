@@ -37,6 +37,29 @@ RSpec.describe JrcContactCenter::CallJourney do
     )
   end
 
+  it 'ends an answered call without ACW or invented availability when voice tabulation is optional' do
+    account.enable_features!('jrc_contact_center')
+    account.update!(settings: account.settings.merge('jrc_contact_center_acw' => { 'voice_required' => false }))
+    steps = [
+      ['call.created', 0, {}], ['call.offered', 1, { leg_id: 'optional-leg', account_user_id: member.id }],
+      ['call.answered', 2, { leg_id: 'optional-leg' }], ['call.ended', 10, {}]
+    ]
+    steps.each_with_index do |(type, seconds, body), index|
+      event = JrcContactCenter::EventIngestor.new(account: account).call(
+        { schema_version: '1.0', event_id: "optional-#{index}", event_type: type, occurred_at: (started_at + seconds.seconds).iso8601,
+          provider: 'jrc_pabx', correlation_id: 'optional-call', payload: body }, signature_verified: true
+      ).record
+      JrcContactCenter::EventReconciler.new(event_record: event).call
+      expect(event.reload.status).to eq('processed'), event.last_error
+    end
+
+    session = JrcContactCenter::CallSession.find_by!(account: account)
+    expect(session.status).to eq('ended')
+    expect(JrcContactCenter::Qualification.where(call_session: session)).to be_empty
+    expect(JrcContactCenter::AgentStateSnapshot.new(account_user: member).call)
+      .to include(state: 'unavailable', provider_confirmed: false, eligible: false)
+  end
+
   it 'rolls back a journey referencing a queue from another account' do
     session = JrcContactCenter::CallSession.create!(account: account, correlation_id: 'call-1', direction: 'inbound', started_at: started_at)
     foreign = create(:account)

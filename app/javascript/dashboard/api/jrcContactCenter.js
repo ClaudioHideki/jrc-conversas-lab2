@@ -10,8 +10,8 @@ const base = accountId => {
 
 export default {
   acwPolicy: accountId => axios.get(`${base(accountId)}/acw_policy`),
-  updateAcwPolicy: (accountId, limits) =>
-    axios.patch(`${base(accountId)}/acw_policy`, { limits }),
+  updateAcwPolicy: (accountId, limits, options = {}) =>
+    axios.patch(`${base(accountId)}/acw_policy`, { ...options, limits }),
   qualifications: (accountId, params) =>
     axios.get(`${base(accountId)}/qualifications`, { params }),
   startQualification: (accountId, params) =>
@@ -32,7 +32,8 @@ export default {
   events: accountId => axios.get(`${base(accountId)}/events`),
   reprocessEvent: (accountId, id) =>
     axios.post(`${base(accountId)}/events/${Number(id)}/reprocess`),
-  context: accountId => axios.get(`${base(accountId)}/context`),
+  context: accountId =>
+    axios.get(`${base(accountId)}/context`, { timeout: 30000 }),
   customerContext: (accountId, phone) =>
     axios.get(`${base(accountId)}/customer_context`, { params: { phone } }),
   units: accountId => axios.get(`${base(accountId)}/units`),
@@ -56,7 +57,7 @@ export default {
       ? axios.patch(`${base(accountId)}/queues/${Number(id)}`, { queue })
       : axios.post(`${base(accountId)}/queues`, { queue }),
   calls: (accountId, params = {}) =>
-    axios.get(`${base(accountId)}/call_sessions`, { params }),
+    axios.get(`${base(accountId)}/call_sessions`, { params, timeout: 30000 }),
   call: (accountId, id) =>
     axios.get(`${base(accountId)}/call_sessions/${Number(id)}`),
   saveCallObservations: (accountId, id, observations) =>

@@ -40,6 +40,24 @@ RSpec.describe JrcContactCenter::QualificationManager do
                                                                                          eligibility_reason: 'tabulation_pending', provider_confirmed: false)
   end
 
+  it 'does not create an automatic obligation for voice when that company makes tabulation optional' do
+    account.update!(settings: account.settings.merge('jrc_contact_center_acw' => { 'voice_required' => false }))
+    session.update!(status: 'ended', ended_at: Time.current)
+    described_class.ensure_voice!(session.reload)
+    expect(JrcContactCenter::Qualification.where(call_session: session)).to be_empty
+    record = manager.start!(call_session: session)
+    expect(record).to have_attributes(channel: 'voice', completed_at: nil)
+  end
+
+  it 'preserves a pending obligation and its notes when the company makes future voice tabulation optional' do
+    session.update!(status: 'ended', ended_at: Time.current)
+    record = JrcContactCenter::Qualification.find_by!(call_session: session)
+    account.update!(settings: account.settings.merge('jrc_contact_center_acw' => { 'voice_required' => false }))
+    described_class.ensure_voice!(session.reload)
+    expect(record.reload.completed_at).to be_nil
+    expect(manager.start!(call_session: session).id).to eq(record.id)
+  end
+
   it 'creates required tabulation for a confirmed terminal agent leg even when the transferred call continues' do
     leg.update!(status: 'transferred', ended_at: Time.current)
     expect(JrcContactCenter::Qualification.pending.find_by!(call_session: session).account_user_id).to eq(member.id)

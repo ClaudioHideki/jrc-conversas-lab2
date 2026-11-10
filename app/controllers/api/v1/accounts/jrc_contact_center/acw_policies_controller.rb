@@ -9,6 +9,7 @@ class Api::V1::Accounts::JrcContactCenter::AcwPoliciesController < Api::V1::Acco
   def update
     authorize_contact_center!(:configure?)
     policy = JrcContactCenter::AcwPolicy.new(account: Current.account)
-    render json: base_payload.merge(item: policy.update!(params.require(:limits).permit(:voice, :whatsapp)))
+    mode = params.key?(:voice_required) ? params[:voice_required] : :unchanged
+    render json: base_payload.merge(item: policy.update!(params.require(:limits).permit(:voice, :whatsapp), voice_required: mode))
   end
 end
