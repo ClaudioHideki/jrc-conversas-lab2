@@ -41,6 +41,7 @@ vi.mock('dashboard/routes/dashboard/webphone/useSipWebphone', () => ({
     hasCall: ref(false),
     accountId: state.identity,
     registered: ref(true),
+    errorMessage: ref(''),
     callId: ref(''),
     credential: ref({ extension: 'synthetic-extension' }),
   }),
