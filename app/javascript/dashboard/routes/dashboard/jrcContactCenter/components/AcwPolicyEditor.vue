@@ -11,6 +11,7 @@ const channelLabels = computed(() => ({
   whatsapp: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.whatsapp'),
 }));
 const limits = ref(null);
+const voiceRequired = ref(null);
 const saving = ref(false);
 const failed = ref(false);
 const saved = ref(false);
@@ -21,11 +22,18 @@ watch(
     generation += 1;
     const version = generation;
     limits.value = null;
+    voiceRequired.value = null;
     failed.value = false;
     saved.value = false;
     try {
       const response = await ContactCenterAPI.acwPolicy(props.accountId);
-      if (version === generation) limits.value = response.data.item.limits;
+      if (version === generation) {
+        limits.value = response.data.item.limits;
+        voiceRequired.value =
+          typeof response.data.item.voice_required === 'boolean'
+            ? response.data.item.voice_required
+            : null;
+      }
     } catch {
       if (version === generation) failed.value = true;
     }
@@ -38,12 +46,22 @@ const save = async () => {
   failed.value = false;
   saved.value = false;
   try {
-    const response = await ContactCenterAPI.updateAcwPolicy(props.accountId, {
-      voice: Number(limits.value.voice),
-      whatsapp: Number(limits.value.whatsapp),
-    });
+    const response = await ContactCenterAPI.updateAcwPolicy(
+      props.accountId,
+      {
+        voice: Number(limits.value.voice),
+        whatsapp: Number(limits.value.whatsapp),
+      },
+      typeof voiceRequired.value === 'boolean'
+        ? { voice_required: voiceRequired.value }
+        : {}
+    );
     if (version === generation) {
       limits.value = response.data.item.limits;
+      voiceRequired.value =
+        typeof response.data.item.voice_required === 'boolean'
+          ? response.data.item.voice_required
+          : null;
       saved.value = true;
     }
   } catch {
@@ -63,13 +81,31 @@ onBeforeUnmount(() => {
       {{ t('JRC_CONTACT_CENTER.ACW_OPERATION.POLICY_TITLE') }}
     </h2>
     <p class="mt-2 text-sm text-n-slate-11">
-      {{ t('JRC_CONTACT_CENTER.ACW_OPERATION.POLICY_REQUIRED') }}
+      {{ t('VOICE_V4.TABULATION_POLICY_HINT') }}
     </p>
     <form
       v-if="limits"
       class="mt-4 grid gap-4 sm:grid-cols-2"
       @submit.prevent="save"
     >
+      <label
+        v-if="typeof voiceRequired === 'boolean'"
+        class="flex items-start gap-3 rounded-lg bg-n-alpha-2 p-3 text-sm sm:col-span-2"
+      >
+        <input
+          v-model="voiceRequired"
+          data-voice-tabulation-required
+          type="checkbox"
+          :disabled="saving"
+          class="mt-1"
+        />
+        <span
+          >{{ t('VOICE_V4.TABULATION_REQUIRED')
+          }}<span class="mt-1 block text-xs text-n-slate-11">{{
+            t('VOICE_V4.TABULATION_OPTIONAL_HINT')
+          }}</span></span
+        >
+      </label>
       <label
         v-for="channel in ['voice', 'whatsapp']"
         :key="channel"

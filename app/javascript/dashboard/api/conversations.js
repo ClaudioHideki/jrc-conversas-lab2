@@ -22,6 +22,7 @@ class ConversationApi extends ApiClient {
     return axios.get(
       `${this.apiVersion}/accounts/${accountId}/conversations/meta`,
       {
+        timeout: 30000,
         params: {
           assignee_type: 'mine_or_shared',
           include_participating: true,

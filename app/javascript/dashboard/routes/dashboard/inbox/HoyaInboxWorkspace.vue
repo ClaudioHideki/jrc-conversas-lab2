@@ -1,5 +1,6 @@
 <script setup>
 import { computed, inject, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { useIntersectionObserver } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import {
   inbox360Labels,
@@ -46,6 +47,7 @@ import { useInboxListResize } from './useInboxListResize';
 import { GLOBAL_VOICE_SHELL } from '../webphone/voiceShell';
 import { activeVoiceAttendance } from './useActiveVoiceContext';
 import VoiceCallSummary from './VoiceCallSummary.vue';
+import AcwPolicyEditor from '../jrcContactCenter/components/AcwPolicyEditor.vue';
 
 const props = defineProps({
   accountId: { type: Number, required: true },
@@ -89,11 +91,34 @@ const featureEnabled = useMapGetter('accounts/isFeatureEnabledonAccount');
 const sip = useSipWebphone();
 const globalVoiceShell = inject(GLOBAL_VOICE_SHELL, false);
 const moreOpen = ref(false);
+const voicePolicyDialog = ref(null);
 const tab = ref('CONVERSATION');
 const voiceSection = ref('journey');
 const listOpen = ref(false);
 const layoutElement = ref(null);
 const listElement = ref(null);
+const conversationScroll = ref(null);
+const conversationEnd = ref(null);
+const endVisible = ref(false);
+useIntersectionObserver(
+  conversationEnd,
+  ([entry]) => {
+    endVisible.value = entry?.isIntersecting === true;
+  },
+  { root: conversationScroll, rootMargin: '0px 0px 120px 0px' }
+);
+watch(
+  [
+    endVisible,
+    () => props.canLoadMore,
+    () => props.loading,
+    () => props.conversationError,
+    () => props.ready,
+  ],
+  ([visible, more, loading, error, ready]) => {
+    if (visible && more && !loading && !error && ready) emit('loadMore');
+  }
+);
 const customerElement = ref(null);
 const workspaceTabsElement = ref(null);
 const listResize = useInboxListResize(
@@ -881,6 +906,19 @@ onBeforeUnmount(() => {
               }}
             </h1>
             <button
+              v-if="
+                softphoneAccess && context?.capabilities?.configure === true
+              "
+              type="button"
+              data-voice-settings
+              :aria-label="t('VOICE_V4.VOICE_SETTINGS')"
+              :title="t('VOICE_V4.VOICE_SETTINGS')"
+              class="grid size-9 shrink-0 place-items-center rounded-lg text-n-brand hover:bg-n-blue-3 focus-visible:ring-2 focus-visible:ring-n-brand"
+              @click="voicePolicyDialog.open()"
+            >
+              <span class="i-lucide-settings-2 size-4" aria-hidden="true" />
+            </button>
+            <button
               v-if="listOpen"
               type="button"
               class="grid size-6 shrink-0 place-items-center text-n-slate-10 xl:hidden"
@@ -947,7 +985,11 @@ onBeforeUnmount(() => {
             </option>
           </select>
         </header>
-        <div class="min-h-0 flex-1 overflow-y-auto bg-n-slate-2 p-2.5">
+        <div
+          ref="conversationScroll"
+          data-conversation-scroll
+          class="min-h-0 flex-1 overflow-y-auto bg-n-slate-2 p-2.5"
+        >
           <InboxChannelGroups
             :calls="listCalls"
             :conversations="conversations"
@@ -993,6 +1035,7 @@ onBeforeUnmount(() => {
           >
             {{ t('JRC_CONTACT_CENTER.INBOX.LOAD_MORE') }}
           </button>
+          <div ref="conversationEnd" class="h-px" aria-hidden="true" />
         </div>
       </aside>
       <div
@@ -1583,6 +1626,18 @@ onBeforeUnmount(() => {
         />
       </aside>
     </div>
+    <Dialog
+      ref="voicePolicyDialog"
+      :title="t('VOICE_V4.VOICE_SETTINGS')"
+      :show-confirm-button="false"
+      :show-cancel-button="false"
+      show-close-button
+    >
+      <AcwPolicyEditor
+        v-if="context?.capabilities?.configure === true"
+        :account-id="accountId"
+      />
+    </Dialog>
     <Dialog
       ref="pauseDialog"
       :title="t('JRC_CONTACT_CENTER.INBOX_360.PAUSE')"

@@ -2,7 +2,7 @@ name: Voz V4 - contratos e regressao isolados
 
 on:
   push:
-    branches: ['codex/voz-v4-*', 'codex/consolidacao-*']
+    branches: ['codex/voz-v4-*', 'codex/consolidacao-*', 'codex/atendimento-voz-*']
   workflow_dispatch:
 
 permissions:
@@ -76,10 +76,15 @@ jobs:
             spec/requests/api/v1/accounts/jrc_contact_center \
             spec/jobs/jrc_contact_center \
             --format progress --format json --out /tmp/voice-v4-rspec.json
+      - name: Politica de voz isolada sem Rails
+        run: bundle exec ruby spec/standalone/voice_acw_policy_test.rb
       - name: RuboCop do incremento
         run: >-
           bundle exec rubocop
           app/services/jrc_contact_center/customer_context.rb
+          app/services/jrc_contact_center/acw_policy.rb
+          app/services/jrc_contact_center/call_journey.rb
+          app/controllers/api/v1/accounts/jrc_contact_center/acw_policies_controller.rb
           app/services/jrc_contact_center/agent_state_manager.rb
           app/services/jrc_contact_center/call_observation_writer.rb
           app/models/jrc_contact_center/call_observation.rb
@@ -87,6 +92,27 @@ jobs:
           app/controllers/api/v1/accounts/jrc_contact_center/call_observations_controller.rb
           db/migrate/20261109150000_create_jrc_contact_center_call_observations.rb
           --format progress
+      - name: Impedir novas infracoes no servico legado de tabulacao
+        run: |
+          set -euo pipefail
+          source=app/services/jrc_contact_center/qualification_manager.rb
+          git fetch --no-tags origin d8a83b824b11cc68ddbbce7c79681f368051fb70
+          git show "d8a83b824b11cc68ddbbce7c79681f368051fb70:$source" > /tmp/voice-qualification-baseline.rb
+          bundle exec rubocop --stdin "$source" --format json < /tmp/voice-qualification-baseline.rb > /tmp/voice-lint-baseline.json || test "$?" = 1
+          bundle exec rubocop "$source" --format json > /tmp/voice-lint-candidate.json || test "$?" = 1
+          ruby -rjson - <<'RUBY'
+          counts = lambda do |path|
+            report = JSON.parse(File.read(path))
+            raise 'Expected one analyzed file' unless report.fetch('files').size == 1
+            report.fetch('files').flat_map { |file| file.fetch('offenses') }
+                  .map { |offense| [offense.fetch('cop_name'), offense.fetch('severity'), offense.fetch('message').gsub(/on line \d+/, 'on line <offset>')] }.tally
+          end
+          baseline = counts.call('/tmp/voice-lint-baseline.json')
+          current = counts.call('/tmp/voice-lint-candidate.json')
+          regressions = current.select { |signature, count| count > baseline.fetch(signature, 0) }
+          raise "New legacy RuboCop findings: #{regressions.inspect}" unless regressions.empty?
+          puts JSON.generate(baseline_offenses: baseline.values.sum, candidate_offenses: current.values.sum, new_offenses: 0)
+          RUBY
       - name: Preservar guards existentes de custodia ao carregar o schema
         run: >-
           bundle exec rspec spec/services/jrc_migrations/media_protocol_spec.rb

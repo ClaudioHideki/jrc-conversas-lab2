@@ -65,6 +65,16 @@ beforeEach(() => {
 });
 
 describe('persistent global voice bar', () => {
+  it('keeps a rejected call diagnostic visible after SIP termination and hides it after switching Accounts', async () => {
+    state.sip.errorMessage.value = 'O PABX recusou a chamada (403).';
+    const wrapper = mount(GlobalVoiceBar, options);
+    expect(wrapper.get('[role="alert"]').text()).toContain('(403)');
+    expect(wrapper.find('[data-active-voice-controls]').exists()).toBe(false);
+    state.account.value = 8;
+    await flushPromises();
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
   it('has an idle state without a fake timer or enabled call controls', () => {
     const wrapper = mount(GlobalVoiceBar, options);
     expect(wrapper.text()).toContain('VOICE_V4.NO_ACTIVE_CALL');
