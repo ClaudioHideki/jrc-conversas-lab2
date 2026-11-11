@@ -24,8 +24,10 @@ const {
 
 const { t } = useI18n();
 
-const policyCode = computed(
-  () => props.error.match(/^\s*(131049|131026)(?=\s*:|\s*$)/)?.[1]
+const policyCode = computed(() =>
+  isWhatsappCloud.value
+    ? props.error.match(/^\s*(131049|131026)(?=\s*:|\s*$)/)?.[1]
+    : null
 );
 const retryExplanation = computed(() => {
   if (policyCode.value === '131049')
