@@ -224,7 +224,7 @@ RSpec.describe 'WhatsApp Cloud eligible retry', type: :request do
 
     it 'rechecks a destination change before submission' do
       attempt = WhatsappRetryAttempt.last
-      conversation.contact_inbox.update!(source_id: 'synthetic-other-destination')
+      conversation.contact_inbox.update!(source_id: 'BR.SYNTHETICOTHER')
       WhatsappRetryJob.perform_now(attempt.id)
       expect(attempt.reload.state).to eq('cancelled')
       expect(a_request(:post, post_url)).not_to have_been_made

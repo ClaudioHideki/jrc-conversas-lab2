@@ -61,6 +61,7 @@ class Whatsapp::IncomingMessageBaseService
       errors: status[:errors]
     )
     return unless find_message_by_source_id(status[:id])
+    return if @message.additional_attributes['whatsapp_retry'].present?
 
     update_whatsapp_identifiers_from_status(status)
     update_message_with_status(@message, status)

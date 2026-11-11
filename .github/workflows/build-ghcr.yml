@@ -217,6 +217,7 @@ jobs:
               'db/migrate/20261005200000_extend_relationship_operations.rb',
               'db/migrate/20261005210000_add_relationship_playbook_conditions.rb',
               'db/migrate/20261005220000_extend_commercial_operational_configuration.rb',
+              'db/migrate/20261111150000_create_whatsapp_retry_attempts.rb',
           ]
           files = {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in set(paths + migrations)}
           pathlib.Path(os.environ['RUNNER_TEMP'], 'candidate-files.json').write_text(json.dumps(files))
@@ -234,7 +235,7 @@ jobs:
           require 'grpc'
           require 'pg'
           require 'nokogiri'
-          puts JSON.generate(verified_product_files: expected.size, migrations: 8, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
+          puts JSON.generate(verified_product_files: expected.size, migrations: 9, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
           RUBY
 
       - name: Smoke do artefato exato com app, worker e transporte falso

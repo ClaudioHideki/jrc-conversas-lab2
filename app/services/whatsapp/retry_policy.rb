@@ -22,7 +22,7 @@ class Whatsapp::RetryPolicy
 
     channel = message.inbox.channel
     return 'retry_unavailable' unless channel.is_a?(Channel::Whatsapp) && channel.provider == 'whatsapp_cloud'
-    return 'retry_unavailable' unless message.failed? && message.outgoing? && message.source_id.present? && !message.private?
+    return 'retry_unavailable' unless message.failed? && message.outgoing? && message.content_type == 'text' && message.source_id.present? && !message.private?
     return 'retry_unavailable' unless TRANSIENT_CODES.include?(code) && allowed_actor?(message, actor)
     return 'retry_unavailable' if cooldown && message.updated_at > 60.seconds.ago
     return 'retry_unavailable' unless message.sender_type == 'User' && message.attachments.empty?
@@ -53,6 +53,8 @@ class Whatsapp::RetryPolicy
 
     values = processed.fetch('body', {})
     placeholders = body['text'].scan(/\{\{([^{}]+)\}\}/).flatten.uniq.sort
+    return false unless template['parameter_format'] == 'NAMED' || placeholders.sort_by(&:to_i) == (1..placeholders.size).map(&:to_s)
+
     values.is_a?(Hash) && values.keys.sort == placeholders && values.values.all? { |value| value.is_a?(String) && value.present? }
   end
 

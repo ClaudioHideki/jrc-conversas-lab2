@@ -26,7 +26,8 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     response = HTTParty.post(
       "#{phone_id_path}/messages",
       headers: api_headers,
-      body: request_body.to_json
+      body: request_body.to_json,
+      **(message.additional_attributes['whatsapp_retry'].present? ? { timeout: 20 } : {})
     )
 
     process_response(response, message)
@@ -93,8 +94,6 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     "#{api_base_path}/v13.0/#{media_id}"
   end
 
-  private
-
   # Retry attempts must distinguish a confirmed rejection from an uncertain result.
   # Other messages retain the existing provider contract.
   def process_response(response, message)
@@ -104,6 +103,8 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     if response.success? && parsed.is_a?(Hash) && parsed['error'].blank?
       id = parsed.dig('messages', 0, 'id')
       raise 'Unconfirmed WhatsApp retry response' unless id.is_a?(String) && id.present?
+
+      raise 'WhatsApp retry did not receive a new correlation' if message.inbox.messages.where(source_id: id).where.not(id: message.id).exists?
 
       id
     elsif response.code.to_i.between?(400, 499) && parsed.is_a?(Hash) && parsed.dig('error', 'code').to_s.match?(/\A\d{1,9}\z/)

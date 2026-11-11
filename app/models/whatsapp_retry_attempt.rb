@@ -7,7 +7,7 @@ class WhatsappRetryAttempt < ApplicationRecord
 
   def transition!(state, error_code: nil)
     update!(state: state)
-    metadata = { 'attempt_id' => id, 'original_message_id' => original_message_id, 'state' => state }
+    metadata = { 'attempt_id' => id, 'original_message_id' => original_message_id, 'state' => state, 'next_check_at' => next_attempt_at&.iso8601 }
     attributes = { additional_attributes: message.reload.additional_attributes.merge('whatsapp_retry' => metadata) }
     if %w[accepted delivered read].include?(state)
       attributes.merge!(status: state == 'accepted' ? :sent : state, external_error: nil)

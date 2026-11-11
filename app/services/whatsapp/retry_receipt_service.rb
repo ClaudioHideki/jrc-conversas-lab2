@@ -31,6 +31,23 @@ class Whatsapp::RetryReceiptService
     end
   end
 
+  def self.reconcile!(attempt)
+    attempt.inbox.channel.with_lock do
+      attempt.with_lock do
+        source_id = attempt.message.reload.source_id
+        next if source_id.blank?
+
+        attempt.transition!('accepted') if %w[submitting unknown].include?(attempt.state)
+        WhatsappRetryReceipt.where(inbox_id: attempt.inbox_id, source_id: source_id)
+                            .order(Arel.sql("CASE status WHEN 'sent' THEN 0 WHEN 'failed' THEN 1 WHEN 'delivered' THEN 2 ELSE 3 END")).each do |receipt|
+          receipt.update!(whatsapp_retry_attempt: attempt)
+          apply!(attempt, receipt.status, receipt.error_code)
+        end
+      end
+    end
+  end
+
+
   def self.apply!(attempt, status, error_code)
     return if attempt.state == 'read'
     return if attempt.state == 'delivered' && status != 'read'

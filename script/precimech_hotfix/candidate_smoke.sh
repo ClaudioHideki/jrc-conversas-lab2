@@ -74,6 +74,20 @@ Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback
 raise 'Artifact callback did not update matching message' unless normal.reload.delivered? && original.reload.failed?
 raise 'Artifact callback changed original correlation' unless original.source_id == 'wamid.synthetic-original'
 puts JSON.generate(artifact_callback: 'delivered', original: 'failed')
+retry_message = Message.find(ids.fetch('retry_id'))
+recovered = Message.find(ids.fetch('recovered_id'))
+%w[delivered sent failed].each do |status|
+  callback[:entry][0][:changes][0][:value][:statuses][0] = { id: retry_message.source_id, status: status }.with_indifferent_access
+  Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
+end
+%w[delivered failed].each do |status|
+  callback[:entry][0][:changes][0][:value][:statuses][0] = { id: recovered.source_id, status: status }.with_indifferent_access
+  Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
+end
+raise 'Retry receipt regressed after early read' unless retry_message.reload.read?
+raise 'Recovered retry receipt regressed after delivery' unless recovered.reload.delivered?
+raise 'Original transient failure changed' unless Message.find(ids.fetch('eligible_original_id')).failed? && Message.find(ids.fetch('lost_original_id')).failed?
+puts JSON.generate(artifact_retry_callback: 'read', recovered_callback: 'delivered', original_attempts: 'failed')
 RUBY
 test "$(docker exec "$app" cat /app/.git_sha)" = "$SOURCE_SHA"
 test "$(docker exec "$worker" cat /app/.git_sha)" = "$SOURCE_SHA"
