@@ -29,8 +29,11 @@ const { t } = useI18n();
   <component
     :is="interactive ? 'button' : 'section'"
     :type="interactive ? 'button' : undefined"
-    class="flex flex-col gap-2 rounded-xl border border-n-weak bg-n-solid-1 p-3 text-start focus-visible:ring-2 focus-visible:ring-n-blue-9"
-    :class="interactive ? 'cursor-pointer hover:border-n-blue-8' : ''"
+    class="flex flex-col gap-2 rounded-xl border border-n-weak border-t-4 p-4 text-start focus-visible:ring-2 focus-visible:ring-n-blue-9"
+    :class="[
+      tones[tone].soft,
+      interactive ? 'cursor-pointer hover:border-n-blue-8' : '',
+    ]"
     :title="
       hint ||
       (value === null

@@ -11,6 +11,7 @@ import State from '../components/ServiceDeskState.vue';
 import TicketFilters from '../components/TicketFilters.vue';
 import TicketTable from '../components/TicketTable.vue';
 import SupervisorPanel from '../components/SupervisorPanel.vue';
+import ReportCenter from '../components/ReportCenter.vue';
 import OperationalReportPanel from '../components/OperationalReportPanel.vue';
 import LiveKpis from '../components/LiveKpis.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
@@ -22,15 +23,14 @@ const router = useRouter();
 const session = useServiceDesk();
 const { t } = useI18n();
 const labels = computed(() => v2Labels(t));
-const mode = ref(
-  session.state.context?.capabilities?.operational_reports?.index
-    ? 'operational'
-    : 'supervision'
-);
+const mode = ref('library');
 watch(
   () => session.state.context,
   () => {
-    if (!session.state.context?.capabilities?.operational_reports?.index)
+    if (
+      mode.value === 'operational' &&
+      !session.state.context?.capabilities?.operational_reports?.index
+    )
       mode.value = 'supervision';
   },
   { flush: 'sync' }
@@ -49,7 +49,8 @@ const open = ticketId =>
 
 <template>
   <section class="grid gap-4">
-    <h2 class="text-xl font-semibold">
+    <ReportCenter v-if="mode === 'library'" @select="mode = $event" />
+    <h2 v-else class="text-xl font-semibold">
       {{ labels.screen[props.screen] }}
     </h2>
     <div
@@ -58,20 +59,24 @@ const open = ticketId =>
       :aria-label="t('JRC_SERVICE_DESK.SCREENS.reports')"
     >
       <Button
-        v-for="value in ['operational', 'supervision'].filter(
+        v-for="value in ['library', 'operational', 'supervision'].filter(
           key =>
-            key === 'supervision' ||
+            ['library', 'supervision'].includes(key) ||
             session.state.context?.capabilities?.operational_reports?.index
         )"
         :key="value"
         :variant="mode === value ? 'solid' : 'outline'"
         :aria-pressed="mode === value"
-        :label="t(`JRC_SERVICE_DESK.EXPERIENCE.report_modes.${value}`)"
+        :label="
+          value === 'library'
+            ? t('JRC_SERVICE_DESK.SCREENS.reports')
+            : t(`JRC_SERVICE_DESK.EXPERIENCE.report_modes.${value}`)
+        "
         @click="mode = value"
       />
     </div>
     <OperationalReportPanel v-if="mode === 'operational'" @open="open" />
-    <template v-else>
+    <template v-else-if="mode === 'supervision'">
       <TicketFilters
         :query="route.query"
         @apply="router.push({ query: $event })"
