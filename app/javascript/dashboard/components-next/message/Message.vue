@@ -584,10 +584,10 @@ provideMessageContext({
         <Component :is="componentToRender" />
       </div>
       <MessageError
-        v-if="contentAttributes.externalError"
+        v-if="contentAttributes.externalError || additionalAttributes.whatsappRetry"
         class="[grid-area:meta]"
         :class="flexOrientationClass"
-        :error="contentAttributes.externalError"
+        :error="contentAttributes.externalError || ''"
         @retry="emit('retry')"
       />
     </div>

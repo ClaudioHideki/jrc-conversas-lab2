@@ -20,9 +20,17 @@ const {
   attachments,
   meta,
   isWhatsappCloud,
+  additionalAttributes,
 } = useMessageContext();
 
 const { t } = useI18n();
+const attempt = computed(() => additionalAttributes?.value?.whatsappRetry);
+const attemptLabel = computed(() => {
+  if (!attempt.value) return '';
+  return t(`CHAT_LIST.WHATSAPP_RETRY.STATES.${attempt.value.state.toUpperCase()}`, {
+    id: attempt.value.originalMessageId,
+  });
+});
 
 const policyCode = computed(() =>
   isWhatsappCloud.value
@@ -38,6 +46,7 @@ const retryExplanation = computed(() => {
 });
 
 const canRetry = computed(() => {
+  if (attempt.value) return false;
   if (policyCode.value) return false;
   const hasContent = content.value !== null;
   const hasAttachments = attachments.value && attachments.value.length > 0;
@@ -47,8 +56,9 @@ const canRetry = computed(() => {
 
 <template>
   <div class="text-xs text-n-ruby-11 flex flex-wrap items-center gap-1.5">
-    <span>{{ t('CHAT_LIST.FAILED_TO_SEND') }}</span>
-    <div class="relative group">
+    <span v-if="attempt" role="status" class="select-text">{{ attemptLabel }}</span>
+    <span v-else>{{ t('CHAT_LIST.FAILED_TO_SEND') }}</span>
+    <div v-if="error" class="relative group">
       <div
         class="bg-n-alpha-2 rounded-md size-5 grid place-content-center cursor-pointer"
       >

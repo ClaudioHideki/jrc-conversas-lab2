@@ -9,7 +9,17 @@
     "FAILED_TO_SEND": "Failed to send",
     "WHATSAPP_RETRY": {
       "MARKETING": "Meta restricted delivery of this marketing message (131049). Retry is blocked pending review; delivery is not guaranteed later.",
-      "DESTINATION": "Meta could not deliver this message (131026). Verify the destination before considering a new attempt. Retry is blocked."
+      "DESTINATION": "Meta could not deliver this message (131026). Verify the destination before considering a new attempt. Retry is blocked.",
+      "STATES": {
+        "QUEUED": "Retry of message #{id}: queued; not yet sent.",
+        "SUBMITTING": "Retry of message #{id}: Submitting; awaiting confirmation.",
+        "UNKNOWN": "Retry of message #{id}: result unconfirmed. Reconcile before resending.",
+        "ACCEPTED": "Retry of message #{id}: accepted by Meta; delivery not yet confirmed.",
+        "DELIVERED": "Retry of message #{id}: delivered.",
+        "READ": "Retry of message #{id}: read.",
+        "FAILED": "Retry of message #{id}: rejected. Review the provider error.",
+        "CANCELLED": "Retry of message #{id}: stopped before submission. Review access and template."
+      }
     },
     "TAB_HEADING": "Conversations",
     "MENTION_HEADING": "Mentions",

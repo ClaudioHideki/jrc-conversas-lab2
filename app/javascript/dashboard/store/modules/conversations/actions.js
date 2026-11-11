@@ -306,14 +306,19 @@ const actions = {
       const response = isRetry
         ? await MessageApi.retry(conversationId, id)
         : await MessageApi.create(pendingMessage);
+      const { new_message: newMessage, ...originalMessage } = response.data;
       commit(types.ADD_MESSAGE, {
-        ...response.data,
+        ...originalMessage,
         status: isRetry ? response.data.status : MESSAGE_STATUS.SENT,
       });
       commit(types.ADD_CONVERSATION_ATTACHMENTS, {
-        ...response.data,
+        ...originalMessage,
         status: isRetry ? response.data.status : MESSAGE_STATUS.SENT,
       });
+      if (newMessage) {
+        commit(types.ADD_MESSAGE, newMessage);
+        commit(types.ADD_CONVERSATION_ATTACHMENTS, newMessage);
+      }
     } catch (error) {
       const errorMessage = error.response
         ? error.response.data.error

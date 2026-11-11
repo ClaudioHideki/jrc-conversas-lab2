@@ -1,4 +1,9 @@
 # https://github.com/ondrejbartas/sidekiq-cron
+whatsapp_retry_recovery_job:
+  cron: '* * * * *'
+  class: 'WhatsappRetryRecoveryJob'
+  queue: scheduled_jobs
+
 nico_queue_recovery_job:
   cron: '* * * * *'
   class: 'JrcNico::RecoveryJob'
