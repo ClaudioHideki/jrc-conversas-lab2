@@ -142,7 +142,7 @@ RSpec.describe 'Conversation Messages API', type: :request do
              headers: { api_access_token: agent_bot.access_token.token },
              as: :json
 
-        expect(response).to have_http_status(:success)
+        expect(response).to have_http_status(:success), response.body
         expect(conversation.messages.count).to eq(1)
         expect(conversation.messages.first.content).to eq(params[:content])
       end
@@ -158,7 +158,7 @@ RSpec.describe 'Conversation Messages API', type: :request do
              headers: { api_access_token: agent_bot.access_token.token },
              as: :json
 
-        expect(response).to have_http_status(:success)
+        expect(response).to have_http_status(:success), response.body
         expect(conversation.messages.count).to eq(1)
         expect(conversation.messages.first.content_type).to eq(params[:content_type])
         expect(conversation.messages.first.content).to be_nil
@@ -174,7 +174,7 @@ RSpec.describe 'Conversation Messages API', type: :request do
              headers: { api_access_token: agent_bot.access_token.token },
              as: :json
 
-        expect(response).to have_http_status(:success)
+        expect(response).to have_http_status(:success), response.body
         expect(conversation.messages.count).to eq(1)
         expect(conversation.messages.first.content_type).to eq(params[:content_type])
       end
@@ -228,6 +228,7 @@ RSpec.describe 'Conversation Messages API', type: :request do
 
           expect(response).to have_http_status(:success)
           canonical = response.parsed_body.fetch('payload').find { |item| item['id'] == message.id }
+          expect(canonical).not_to be_nil, response.body
           expect(canonical).to include('additional_attributes' => attributes, 'conversation_id' => conversation.display_id,
                                        'inbox_id' => conversation.inbox_id, 'message_type' => 1, 'private' => false)
           expect(canonical.fetch('sender')).to include('id' => agent.id, 'type' => 'user')
