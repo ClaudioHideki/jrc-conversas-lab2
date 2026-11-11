@@ -162,6 +162,9 @@ jobs:
           --maxWorkers=2 --minWorkers=1 --no-file-parallelism
           --reporter=default --reporter=json --outputFile=/tmp/projects-portal-vitest.json
       - name: Build frontend real
+        # The A-G image workflow performs the one protected production build,
+        # verifies fresh entrypoints/CSS and refuses publication on any failure.
+        if: github.ref_name != 'codex/lab2-ag-consolidada-20261110'
         env:
           NODE_OPTIONS: --max-old-space-size=6144
         run: bundle exec vite build

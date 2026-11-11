@@ -180,7 +180,35 @@
         "unassigned": "Contacts without a company or whose Customer Master company has no assigned owner.",
         "duplicates": "Possible duplicates share an email, phone or extension within this account. Records are never merged automatically."
       },
-      "MASTER_REQUIRED": "Enable Customer Master and grant contact access to use this view."
+      "MASTER_REQUIRED": "Enable Customer Master and grant contact access to use this view.",
+      "UI": {
+        "TOTAL_CONTACTS": "Total contacts",
+        "ALL_RECORDS": "All records",
+        "NEW_THIS_MONTH": "New this month",
+        "NO_INTERACTION": "No interaction",
+        "ACTIVE_CUSTOMERS": "Active customers",
+        "CONTACT": "Contact",
+        "COMPANY": "Company",
+        "CHANNELS": "Channels",
+        "OWNER": "Owner",
+        "LAST_INTERACTION": "Last interaction",
+        "NEXT_ACTION": "Next action",
+        "ACTIONS": "Actions",
+        "WHATSAPP": "WhatsApp",
+        "EMAIL": "Email",
+        "CALENDAR": "Calendar",
+        "OWNER_LABEL": "Owner:",
+        "CRM": "CRM",
+        "COMMERCIAL_RELATIONSHIP": "Commercial relationship",
+        "CRM_HINT": "Use CRM to link a deal, proposal and next activity.",
+        "DEALS": "Deals",
+        "ACTIVITIES": "Activities",
+        "CALL": "Call",
+        "CALL_HINT": "Open WhatsApp Calling to start.",
+        "FULL_PROFILE": "View full profile",
+        "SELECT_CONTACT_HINT": "Select a contact to view details."
+      },
+      "SELECT_CONTACT": "Select contact {name}"
     },
     "ACTIVITY_FILTERS": {
       "OPEN": "Em aberto",

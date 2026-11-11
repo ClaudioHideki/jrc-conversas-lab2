@@ -5,6 +5,11 @@ import { useRoute, useRouter } from 'vue-router';
 import ContactsIndex from '../ContactsIndex.vue';
 import ContactListHeaderWrapper from 'dashboard/components-next/Contacts/ContactsHeader/ContactListHeaderWrapper.vue';
 import ContactHeader from 'dashboard/components-next/Contacts/ContactsHeader/ContactHeader.vue';
+import ContactsBulkActionBar from '../../components/ContactsBulkActionBar.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
+import BulkActionsAPI from 'dashboard/api/bulkActions';
+
+vi.mock('dashboard/api/bulkActions', () => ({ default: { create: vi.fn() } }));
 
 vi.mock('vue-router', () => ({ useRoute: vi.fn(), useRouter: vi.fn() }));
 vi.mock('dashboard/composables', () => ({
@@ -46,6 +51,7 @@ describe('Relationship center pagination', () => {
   const button = label =>
     wrapper.findAll('button').find(item => item.text() === label);
   beforeEach(() => {
+    BulkActionsAPI.create.mockReset().mockResolvedValue({});
     route = reactive({
       name: 'contacts_dashboard_index',
       params: { accountId: '1' },
@@ -80,6 +86,58 @@ describe('Relationship center pagination', () => {
     };
   });
   afterEach(() => wrapper?.unmount());
+
+  it('selects contacts through the premium table and calls native bulk label assignment', async () => {
+    wrapper = page();
+    await flushPromises();
+    await wrapper.get('tbody input[type="checkbox"]').setValue(true);
+    const bar = wrapper.getComponent(ContactsBulkActionBar);
+    expect(bar.props('selectedContactIds')).toEqual([42]);
+    bar.vm.$emit('assignLabels', ['synthetic-label']);
+    await flushPromises();
+    expect(BulkActionsAPI.create).toHaveBeenCalledWith({
+      type: 'Contact',
+      ids: [42],
+      labels: { add: ['synthetic-label'] },
+    });
+    expect(wrapper.findComponent(ContactsBulkActionBar).exists()).toBe(false);
+  });
+
+  it('opens the existing confirmation dialog before native bulk deletion', async () => {
+    const open = vi.fn();
+    wrapper = page({
+      Dialog: {
+        name: 'Dialog',
+        template: '<div />',
+        methods: { open, close: vi.fn() },
+      },
+    });
+    await flushPromises();
+    await wrapper.get('tbody input[type="checkbox"]').setValue(true);
+    wrapper.getComponent(ContactsBulkActionBar).vm.$emit('deleteSelected');
+    await flushPromises();
+    expect(open).toHaveBeenCalledOnce();
+    expect(BulkActionsAPI.create).not.toHaveBeenCalled();
+    wrapper.getComponent(Dialog).vm.$emit('confirm');
+    await flushPromises();
+    expect(BulkActionsAPI.create).toHaveBeenCalledWith({
+      type: 'Contact',
+      ids: [42],
+      action_name: 'delete',
+    });
+  });
+
+  it('connects native select-all and clear-selection controls', async () => {
+    wrapper = page();
+    await flushPromises();
+    await wrapper.get('thead input[type="checkbox"]').setValue(true);
+    expect(
+      wrapper.getComponent(ContactsBulkActionBar).props('selectedContactIds')
+    ).toEqual([42]);
+    wrapper.getComponent(ContactsBulkActionBar).vm.$emit('clearSelection');
+    await flushPromises();
+    expect(wrapper.findComponent(ContactsBulkActionBar).exists()).toBe(false);
+  });
 
   it.each(['people', 'unassigned', 'duplicates'])(
     'selects %s using the native account-wide directory and resets pagination',

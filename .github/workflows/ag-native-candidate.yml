@@ -446,6 +446,7 @@ jobs:
             app/javascript/dashboard/routes/dashboard/approvals \
             app/javascript/dashboard/routes/dashboard/jrcOperations \
             app/javascript/dashboard/routes/dashboard/serviceDesk \
+            app/javascript/dashboard/routes/dashboard/contacts/pages/spec \
             app/javascript/dashboard/components-next/sidebar \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/ag-vue-results.json
