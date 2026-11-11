@@ -117,9 +117,9 @@ RSpec.describe 'Employee-only Service Desk and Portal boundary', type: :request 
     values[JrcServiceDesk::InternalIntake::KEY][sd_unit.id.to_s]['employee_account_user_ids'].delete(sd_account_user.id)
     sd_account.update!(internal_attributes: values)
     get "#{path}/tickets/#{customer_ticket.id}", headers: headers
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:forbidden)
     post "#{path}/tickets", params: opening, headers: headers.merge('Idempotency-Key' => 'employee-removed'), as: :json
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:forbidden)
   end
 
   it 'does not let an external native User without the account membership enter the employee endpoints' do
