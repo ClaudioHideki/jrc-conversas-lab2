@@ -88,6 +88,18 @@ raise 'Retry receipt regressed after early read' unless retry_message.reload.rea
 raise 'Recovered retry receipt regressed after delivery' unless recovered.reload.delivered?
 raise 'Original transient failure changed' unless Message.find(ids.fetch('eligible_original_id')).failed? && Message.find(ids.fetch('lost_original_id')).failed?
 puts JSON.generate(artifact_retry_callback: 'read', recovered_callback: 'delivered', original_attempts: 'failed')
+batch = Message.where(id: ids.fetch('batch_ids')).order(:id).to_a
+raise 'Artifact lost batch messages' unless batch.size == 20
+batch.each_with_index do |message, index|
+  status = { id: message.source_id, status: index < 17 ? 'delivered' : 'failed' }
+  status[:errors] = [{ code: index == 17 ? 131026 : 131049, title: 'Synthetic restriction' }] if index >= 17
+  callback[:entry][0][:changes][0][:value][:statuses][0] = status.with_indifferent_access
+  Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
+end
+scope = Message.where(id: ids.fetch('batch_ids'))
+raise 'Artifact batch outcomes do not account for all 20' unless scope.where(status: :delivered).count == 17 && scope.where(status: :failed).count == 3
+raise 'Artifact lost batch correlations' unless scope.distinct.count(:source_id) == 20
+puts JSON.generate(artifact_batch_submitted: 20, artifact_batch_delivered: 17, artifact_batch_meta_restricted: 3, artifact_batch_unaccounted: 0)
 RUBY
 # Boot the exact previous installed revision as a read-only reader of the additive schema.
 # No old worker is started: it cannot process the new retry job classes.

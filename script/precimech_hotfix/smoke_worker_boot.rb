@@ -24,8 +24,15 @@ module PrecimechSmokeTransport
     raise 'Unexpected parameters' unless body.dig('template', 'components', 0, 'parameters', 0, 'text') == 'Synthetic'
 
     index = Redis.new(url: ENV.fetch('REDIS_URL')).incr('precimech_smoke_posts')
-    raise 'Unexpected duplicate POST' unless (1..3).cover?(index)
-    id = ['wamid.synthetic-image', 'wamid.synthetic-retry', 'wamid.synthetic-recovered'][index - 1]
+    raise 'Unexpected duplicate POST' unless (1..23).cover?(index)
+    id = if index <= 3
+           ['wamid.synthetic-image', 'wamid.synthetic-retry', 'wamid.synthetic-recovered'][index - 1]
+         else
+           count = Redis.new(url: ENV.fetch('REDIS_URL')).hincrby('precimech_smoke_batch_destinations', body.fetch('to'), 1)
+           raise 'Duplicate batch destination' unless count == 1
+
+           "wamid.synthetic-batch-#{index - 3}"
+         end
     if index == 2
       attempt = WhatsappRetryAttempt.find_by!(state: 'submitting')
       callback = { entry: [{ changes: [{ value: { statuses: [{ id: id, status: 'read' }] } }] }] }.with_indifferent_access

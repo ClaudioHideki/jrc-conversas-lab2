@@ -23,6 +23,16 @@ describe Whatsapp::Providers::WhatsappCloudService do
   end
 
   describe '#send_message' do
+    it 'preserves the existing campaign proxy response after a successful text POST' do
+      proxy = JrcCampaigns::ProviderMessageProxy.new(kind: 'text', body: 'Synthetic')
+      request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages')
+                .with(body: hash_including(text: { body: 'Synthetic' }))
+                .to_return(status: 200, body: whatsapp_response.to_json, headers: response_headers)
+
+      expect(service.send_message('+123456789', proxy)).to eq('message_id')
+      expect(request).to have_been_requested.once
+    end
+
     context 'when called' do
       it 'calls message endpoints for normal messages' do
         stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages')
@@ -215,6 +225,34 @@ describe Whatsapp::Providers::WhatsappCloudService do
     end
 
     context 'when called' do
+      it 'preserves the campaign contract when no message object is supplied' do
+        request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages')
+                  .with(body: template_body.to_json)
+                  .to_return(status: 200, body: whatsapp_response.to_json, headers: response_headers)
+
+        expect(service.send_template('+123456789', template_info, nil)).to eq('message_id')
+        expect(request).to have_been_requested.once
+      end
+
+      it 'preserves the existing campaign proxy contract without retry metadata' do
+        proxy = JrcCampaigns::ProviderMessageProxy.new(kind: 'text', body: 'Synthetic')
+        request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages')
+                  .with(body: template_body.to_json)
+                  .to_return(status: 200, body: whatsapp_response.to_json, headers: response_headers)
+
+        expect(service.send_template('+123456789', template_info, proxy)).to eq('message_id')
+        expect(request).to have_been_requested.once
+      end
+
+      it 'returns a campaign rejection without requiring a message object' do
+        request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages')
+                  .to_return(status: 400, body: { error: { code: 131049, message: 'Synthetic restriction' } }.to_json,
+                              headers: response_headers)
+
+        expect(service.send_template('+123456789', template_info, nil)).to be_nil
+        expect(request).to have_been_requested.once
+      end
+
       it 'calls message endpoints with template params for template messages' do
         stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages')
           .with(

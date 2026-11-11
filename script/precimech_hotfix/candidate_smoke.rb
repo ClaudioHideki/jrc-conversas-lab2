@@ -110,8 +110,35 @@ end
 raise 'Expected normal + retry + recovered POSTs only' unless redis.get('precimech_smoke_posts').to_i == 3
 raise 'Retry message leaked to legacy SendReplyJob' unless redis.get('precimech_smoke_SendReplyJob').to_i == 1
 raise 'Real retry redelivery was not exercised' unless redis.get('precimech_smoke_retry_completed').to_i >= 3
+
+# The contact composer creates one conversation with template_params per selected contact.
+contacts = FactoryBot.create_list(:contact, 20, :with_phone_number, account: account)
+headers = agent.reload.create_new_auth_token
+create_uri = URI("http://#{ENV.fetch('SMOKE_APP_HOST')}:3000/api/v1/accounts/#{account.id}/conversations")
+batch_ids = contacts.map do |contact|
+  request = Net::HTTP::Post.new(create_uri, headers.merge('Content-Type' => 'application/json'))
+  request.body = { inbox_id: inbox.id, contact_id: contact.id, assignee_id: agent.id,
+                   message: { content: 'Synthetic batch', template_params: template } }.to_json
+  response = Net::HTTP.start(create_uri.host, create_uri.port, open_timeout: 3, read_timeout: 30) { |http| http.request(request) }
+  raise 'Batch contact request was not accepted' unless response.code == '200'
+
+  created = Conversation.find_by!(account: account, display_id: JSON.parse(response.body).fetch('id'))
+  raise 'Batch conversation belongs to another contact' unless created.contact_id == contact.id
+  created.messages.outgoing.find_by!(content: 'Synthetic batch').id
+end
+60.times do
+  break if Message.where(id: batch_ids).where.not(source_id: nil).count == 20
+  sleep 1
+end
+batch = Message.where(id: batch_ids).to_a
+raise 'Batch lost a correlation' unless batch.size == 20 && batch.map(&:source_id).all?(&:present?) && batch.map(&:source_id).uniq.size == 20
+raise 'Batch did not submit exactly once per destination' unless redis.hvals('precimech_smoke_batch_destinations').sort == Array.new(20, '1')
+raise 'Batch sent to different destinations' unless redis.hkeys('precimech_smoke_batch_destinations').sort == contacts.map { |contact| contact.phone_number.delete('+') }.sort
+raise 'Batch did not submit all 20' unless redis.get('precimech_smoke_posts').to_i == 23
+raise 'Unexpected SendReplyJob count' unless redis.get('precimech_smoke_SendReplyJob').to_i == 21
 File.write(ENV.fetch('SMOKE_IDS_PATH'), JSON.generate(normal_id: normal.id, original_id: failed.id, inbox_id: inbox.id,
                                                    retry_id: attempt.message_id, recovered_id: recovered.message_id,
-                                                   eligible_original_id: eligible.id, lost_original_id: lost.id))
+                                                   eligible_original_id: eligible.id, lost_original_id: lost.id, batch_ids: batch_ids))
 puts JSON.generate(smoke: 'app_and_worker_passed', restricted_retry: 'blocked', concurrent_retry: 'one_attempt_one_post',
-                   early_callback: 'read', lost_enqueue: 'recovered', redelivery: 'no_post', worker_posts: 3, template_language: 'pt_BR')
+                   early_callback: 'read', lost_enqueue: 'recovered', redelivery: 'no_post', worker_posts: 23, batch_submitted: 20,
+                   batch_unique_correlations: 20, template_language: 'pt_BR')

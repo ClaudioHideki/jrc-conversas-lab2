@@ -76,6 +76,23 @@ describe Whatsapp::OneoffCampaignService do
     end
 
     context 'when campaign is valid' do
+      it 'submits all 20 recipients through the actual Cloud provider without a message object' do
+        contacts = create_list(:contact, 20, :with_phone_number, account: account)
+        contacts.each { |contact| contact.update_labels([label1.title]) }
+        destinations = []
+        request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages').to_return do |http|
+          destinations << JSON.parse(http.body).fetch('to')
+          { status: 200, body: { messages: [{ id: "wamid.synthetic-campaign-#{destinations.length}" }] }.to_json,
+            headers: { 'Content-Type' => 'application/json' } }
+        end
+
+        described_class.new(campaign: campaign).perform
+
+        expect(destinations.sort).to eq(contacts.map(&:phone_number).sort)
+        expect(request).to have_been_requested.times(20)
+        expect(campaign.reload).to be_completed
+      end
+
       it 'marks campaign as completed' do
         described_class.new(campaign: campaign).perform
 
