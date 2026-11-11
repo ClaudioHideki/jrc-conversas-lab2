@@ -1,3 +1,8 @@
+whatsapp_retry_recovery_job:
+  cron: '* * * * *'
+  class: 'WhatsappRetryRecoveryJob'
+  queue: scheduled_jobs
+
 # https://github.com/ondrejbartas/sidekiq-cron
 jrc_broker_inbox_sync_job:
   cron: '* * * * *'

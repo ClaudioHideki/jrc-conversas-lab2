@@ -51,12 +51,17 @@ class Whatsapp::IncomingMessageBaseService
 
   def process_statuses
     status = @processed_params[:statuses].first
+    if inbox.channel.is_a?(Channel::Whatsapp) && inbox.channel.provider == 'whatsapp_cloud'
+      return if Whatsapp::RetryReceiptService.new(inbox, status).perform
+    end
+
     JrcCampaigns::StatusTrackerService.call(
       external_id: status[:id],
       status: status[:status],
       errors: status[:errors]
     )
     return unless find_message_by_source_id(status[:id])
+    return if @message.additional_attributes.to_h['whatsapp_retry'].present?
 
     update_whatsapp_identifiers_from_status(status)
     update_message_with_status(@message, status)

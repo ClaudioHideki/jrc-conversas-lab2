@@ -54,3 +54,6 @@ coverage
 __pycache__
 *.pyc
 public/vite*
+
+# Isolated candidate smoke transport must never enter the runtime image.
+script/precimech_hotfix/

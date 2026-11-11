@@ -117,6 +117,7 @@ const props = defineProps({
   call: { type: Object, default: null }, // eslint-disable-line vue/no-unused-properties
   content: { type: String, default: null },
   contentAttributes: { type: Object, default: () => ({}) },
+  meta: { type: Object, default: () => ({}) }, // eslint-disable-line vue/no-unused-properties
   contentType: {
     type: String,
     default: 'text',
@@ -520,6 +521,11 @@ onMounted(setupHighlightTimer);
 
 provideMessageContext({
   ...toRefs(props),
+  isWhatsappCloud: computed(
+    () =>
+      inbox.value.channel_type === 'Channel::Whatsapp' &&
+      inbox.value.provider === 'whatsapp_cloud'
+  ),
   isPrivate: computed(() => props.private),
   variant,
   orientation,
@@ -578,10 +584,12 @@ provideMessageContext({
         <Component :is="componentToRender" />
       </div>
       <MessageError
-        v-if="contentAttributes.externalError"
+        v-if="
+          contentAttributes.externalError || additionalAttributes?.whatsappRetry
+        "
         class="[grid-area:meta]"
         :class="flexOrientationClass"
-        :error="contentAttributes.externalError"
+        :error="contentAttributes.externalError || ''"
         @retry="emit('retry')"
       />
     </div>
