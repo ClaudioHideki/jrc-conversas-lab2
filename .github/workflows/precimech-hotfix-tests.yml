@@ -28,7 +28,7 @@ jobs:
           POSTGRES_PASSWORD: synthetic_test_only
         ports: ['5432:5432']
         options: >-
-          --health-cmd 'pg_isready -U postgres -d precimech_hotfix_test'
+          --health-cmd "pg_isready -U postgres -d precimech_hotfix_test"
           --health-interval 5s --health-timeout 5s --health-retries 20
       redis:
         image: redis:7.4-alpine
