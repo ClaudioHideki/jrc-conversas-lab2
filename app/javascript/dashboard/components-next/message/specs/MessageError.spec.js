@@ -23,16 +23,19 @@ describe('WhatsApp failure explanation', () => {
     ['queued', 'queued'],
     ['submitting', 'Submitting'],
     ['unknown', 'unconfirmed'],
-  ])('shows persisted retry %s after reload without presenting it as sent or permitting another retry', (state, label) => {
-    useMessageContext().additionalAttributes.value = {
-      whatsappRetry: { attemptId: 55, originalMessageId: 101, state },
-    };
-    const wrapper = mount(MessageError, { props: { error: '' } });
-    expect(wrapper.text()).toContain(label);
-    expect(wrapper.text()).toContain('101');
-    expect(wrapper.text()).not.toContain('Failed to send');
-    expect(wrapper.find('button').exists()).toBe(false);
-  });
+  ])(
+    'shows persisted retry %s after reload without presenting it as sent or permitting another retry',
+    (state, label) => {
+      useMessageContext().additionalAttributes.value = {
+        whatsappRetry: { attemptId: 55, originalMessageId: 101, state },
+      };
+      const wrapper = mount(MessageError, { props: { error: '' } });
+      expect(wrapper.text()).toContain(label);
+      expect(wrapper.text()).toContain('101');
+      expect(wrapper.text()).not.toContain('Failed to send');
+      expect(wrapper.find('button').exists()).toBe(false);
+    }
+  );
 
   it.each([
     ['131049: Synthetic restriction', 'marketing'],

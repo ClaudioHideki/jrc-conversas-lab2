@@ -27,9 +27,18 @@ const { t } = useI18n();
 const attempt = computed(() => additionalAttributes?.value?.whatsappRetry);
 const attemptLabel = computed(() => {
   if (!attempt.value) return '';
-  return t(`CHAT_LIST.WHATSAPP_RETRY.STATES.${attempt.value.state.toUpperCase()}`, {
-    id: attempt.value.originalMessageId,
-  });
+  const values = { id: attempt.value.originalMessageId };
+  const labels = {
+    queued: t('CHAT_LIST.WHATSAPP_RETRY.STATES.QUEUED', values),
+    submitting: t('CHAT_LIST.WHATSAPP_RETRY.STATES.SUBMITTING', values),
+    unknown: t('CHAT_LIST.WHATSAPP_RETRY.STATES.UNKNOWN', values),
+    accepted: t('CHAT_LIST.WHATSAPP_RETRY.STATES.ACCEPTED', values),
+    delivered: t('CHAT_LIST.WHATSAPP_RETRY.STATES.DELIVERED', values),
+    read: t('CHAT_LIST.WHATSAPP_RETRY.STATES.READ', values),
+    failed: t('CHAT_LIST.WHATSAPP_RETRY.STATES.FAILED', values),
+    cancelled: t('CHAT_LIST.WHATSAPP_RETRY.STATES.CANCELLED', values),
+  };
+  return labels[attempt.value.state] || '';
 });
 
 const policyCode = computed(() =>
@@ -56,7 +65,9 @@ const canRetry = computed(() => {
 
 <template>
   <div class="text-xs text-n-ruby-11 flex flex-wrap items-center gap-1.5">
-    <span v-if="attempt" role="status" class="select-text">{{ attemptLabel }}</span>
+    <span v-if="attempt" role="status" class="select-text">
+      {{ attemptLabel }}
+    </span>
     <span v-else>{{ t('CHAT_LIST.FAILED_TO_SEND') }}</span>
     <div v-if="error" class="relative group">
       <div

@@ -22,16 +22,30 @@ describe('WhatsApp retry result', () => {
       id: 102,
       content_attributes: {},
       additional_attributes: {
-        whatsapp_retry: { attempt_id: 55, original_message_id: 101, state: 'queued' },
+        whatsapp_retry: {
+          attempt_id: 55,
+          original_message_id: 101,
+          state: 'queued',
+        },
       },
     };
     MessageApi.retry.mockResolvedValue({
-      data: { ...failed, retry: { status: 'queued', attempt_id: 55 }, new_message: child },
+      data: {
+        ...failed,
+        retry: { status: 'queued', attempt_id: 55 },
+        new_message: child,
+      },
     });
     await actions.sendMessageWithData({ commit }, failed);
-    const messages = commit.mock.calls.filter(([type]) => type === types.ADD_MESSAGE).map(([, message]) => message);
+    const messages = commit.mock.calls
+      .filter(([type]) => type === types.ADD_MESSAGE)
+      .map(([, message]) => message);
     expect(messages.find(message => message.id === 102)).toEqual(child);
-    expect(messages.filter(message => message.id === 101).every(message => message.status === 'failed')).toBe(true);
+    expect(
+      messages
+        .filter(message => message.id === 101)
+        .every(message => message.status === 'failed')
+    ).toBe(true);
   });
 
   it('does not replace a truthful failed API response with sent', async () => {
