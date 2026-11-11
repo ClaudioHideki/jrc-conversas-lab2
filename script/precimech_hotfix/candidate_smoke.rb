@@ -7,7 +7,6 @@ require 'factory_bot'
 require 'webmock'
 require 'net/http'
 require 'json'
-FactoryBot.find_definitions
 WebMock.enable!
 WebMock.disable_net_connect!(allow: [ENV.fetch('SMOKE_APP_HOST')])
 
