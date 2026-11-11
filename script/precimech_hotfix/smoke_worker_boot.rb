@@ -19,3 +19,15 @@ module PrecimechSmokeTransport
   end
 end
 HTTParty.singleton_class.prepend(PrecimechSmokeTransport)
+
+class PrecimechSmokeJobCounter
+  def call(_worker, job, _queue)
+    if job.dig('args', 0, 'job_class') == 'SendReplyJob'
+      Redis.new(url: ENV.fetch('REDIS_URL')).incr('precimech_smoke_send_reply_jobs')
+    end
+    yield
+  end
+end
+Sidekiq.configure_server do |config|
+  config.server_middleware { |chain| chain.add(PrecimechSmokeJobCounter) }
+end

@@ -29,6 +29,7 @@ RSpec.describe 'WhatsApp Cloud retry containment', type: :request do
       post retry_path, headers: agent.create_new_auth_token, as: :json
     end
 
+    expect(performed_jobs.count { |job| job[:job] == SendReplyJob }).to eq(0)
     expect(message.reload.attributes).to eq(original)
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.parsed_body).to include('retry' => include('status' => 'blocked', 'reason' => 'marketing_restriction'))
