@@ -224,7 +224,12 @@ jobs:
         if: inputs.component == 'app'
         run: |
           git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$SOURCE_SHA" -- '*.rb' | while IFS= read -r file; do ruby -c "$file"; done
-          node script/validate_changed_source.mjs "$BASE_SHA"
+          if [ "$GITHUB_REF_NAME" = codex/lab2-ag-consolidada-20261110 ]; then
+            node script/validate_changed_source.mjs "$BASE_SHA" \
+              --historical-admission docs/jrc_consolidation/ag_historical_migration_admission_20261111.json
+          else
+            node script/validate_changed_source.mjs "$BASE_SHA"
+          fi
 
       - name: Gates isolados do Cadastro Mestre e modulos preservados
         if: inputs.component == 'app' && github.ref_name != 'codex/lab2-ag-consolidada-20261110'
