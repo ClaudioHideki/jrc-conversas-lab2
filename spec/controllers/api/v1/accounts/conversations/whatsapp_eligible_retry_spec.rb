@@ -172,6 +172,64 @@ RSpec.describe 'WhatsApp Cloud eligible retry', type: :request do
       expect(attempt.reload.state).to eq('accepted')
     end
 
+    it 'preserves a pending obligation through a transient validation outage and sends only after validation recovers' do
+      attempt = WhatsappRetryAttempt.last
+      stub_request(:get, %r{https://graph.facebook.com/v14.0/.*/message_templates}).to_return(status: 503, body: '{}')
+      request = stub_request(:post, post_url).to_return(status: 200, body: { messages: [{ id: 'wamid.synthetic-after-validation' }] }.to_json,
+                                                      headers: { 'Content-Type' => 'application/json' })
+      WhatsappRetryJob.perform_now(attempt.id)
+      expect(attempt.reload.state).to eq('queued')
+      expect(attempt.next_attempt_at).to be > Time.current
+      expect(request).not_to have_been_requested
+      attempt.update!(next_attempt_at: 1.second.ago)
+      stub_request(:get, %r{https://graph.facebook.com/v14.0/.*/message_templates}).to_return(
+        status: 200, body: { data: template_data }.to_json, headers: { 'Content-Type' => 'application/json' }
+      )
+      perform_enqueued_jobs(only: WhatsappRetryJob) { WhatsappRetryRecoveryJob.perform_now }
+      expect(attempt.reload.state).to eq('accepted')
+      expect(request).to have_been_requested.once
+    end
+
+    it 'does not submit if another process marks the attempt unknown during preflight' do
+      attempt = WhatsappRetryAttempt.last
+      stub_request(:get, %r{https://graph.facebook.com/v14.0/.*/message_templates}).to_return do
+        attempt.update!(state: 'unknown')
+        { status: 200, body: { data: template_data }.to_json, headers: { 'Content-Type' => 'application/json' } }
+      end
+      request = stub_request(:post, post_url).to_return(status: 200, body: { messages: [{ id: 'wamid.synthetic-stopped' }] }.to_json,
+                                                      headers: { 'Content-Type' => 'application/json' })
+      WhatsappRetryJob.perform_now(attempt.id)
+      expect(request).not_to have_been_requested
+      expect(attempt.reload.state).to eq('unknown')
+    end
+
+    it 'requires a new correlation instead of accepting the original source_id again' do
+      attempt = WhatsappRetryAttempt.last
+      stub_request(:post, post_url).to_return(status: 200, body: { messages: [{ id: message.source_id }] }.to_json,
+                                            headers: { 'Content-Type' => 'application/json' })
+      WhatsappRetryJob.perform_now(attempt.id)
+      expect(attempt.reload.state).to eq('unknown')
+      expect(attempt.message.reload.source_id).to be_nil
+      expect(message.reload.source_id).to eq('wamid.synthetic-rejected')
+    end
+
+    it 'keeps a server error after POST uncertain without a second submission' do
+      attempt = WhatsappRetryAttempt.last
+      request = stub_request(:post, post_url).to_return(status: 503, body: { error: { code: 131016 } }.to_json,
+                                                      headers: { 'Content-Type' => 'application/json' })
+      2.times { WhatsappRetryJob.perform_now(attempt.id) }
+      expect(attempt.reload.state).to eq('unknown')
+      expect(request).to have_been_requested.once
+    end
+
+    it 'rechecks a destination change before submission' do
+      attempt = WhatsappRetryAttempt.last
+      conversation.contact_inbox.update!(source_id: 'synthetic-other-destination')
+      WhatsappRetryJob.perform_now(attempt.id)
+      expect(attempt.reload.state).to eq('cancelled')
+      expect(a_request(:post, post_url)).not_to have_been_made
+    end
+
     it 'R08 never reclaims a stale submission for another POST' do
       attempt = WhatsappRetryAttempt.last
       attempt.update!(state: 'submitting', updated_at: 20.minutes.ago)
