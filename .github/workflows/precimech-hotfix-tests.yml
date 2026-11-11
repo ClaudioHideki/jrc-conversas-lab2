@@ -1,0 +1,76 @@
+name: Precimech hotfix regression
+on:
+  push:
+    branches: [codex/hotfix-precimech-whatsapp-retry-20261111]
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact source commit to test
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      source_sha:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: precimech_hotfix_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic_test_only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd 'pg_isready -U postgres -d precimech_hotfix_test'
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      SECRET_KEY_BASE: synthetic_test_only_not_production
+      POSTGRES_HOST: localhost
+      POSTGRES_DATABASE: precimech_hotfix_test
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: synthetic_test_only
+      REDIS_URL: redis://localhost:6379/0
+      BUNDLE_FROZEN: 'true'
+      LOG_LEVEL: error
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirm baseline ancestry and source
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git merge-base --is-ancestor 4ce8241d35ce862e9d53e9a5dce4df9a1858432c "$SOURCE_SHA"
+      - run: sudo apt-get update && sudo apt-get install -y libpq-dev libvips libvips-dev
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Prepare disposable test schema
+        run: bundle exec rails db:create db:schema:load
+      - name: Request regression and preserved WhatsApp paths
+        run: >-
+          bundle exec rspec
+          spec/controllers/api/v1/accounts/conversations/whatsapp_retry_spec.rb
+          spec/controllers/api/v1/accounts/conversations/messages_controller_spec.rb
+          spec/services/whatsapp/send_on_whatsapp_service_spec.rb
+          spec/services/whatsapp/incoming_message_whatsapp_cloud_service_spec.rb
+          spec/jobs/send_reply_job_spec.rb
+      - name: Ensure source remains clean
+        run: git diff --exit-code
