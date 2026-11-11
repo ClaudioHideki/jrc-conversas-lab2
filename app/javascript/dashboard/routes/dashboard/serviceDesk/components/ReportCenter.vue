@@ -138,6 +138,7 @@ const allowed = target => {
         operational: 'operational_reports',
         supervision: 'reports',
         overview: 'dashboard',
+        sla: 'reports',
       }[target] || target
     ]?.index === true
   );
