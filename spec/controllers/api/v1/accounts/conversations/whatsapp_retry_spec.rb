@@ -114,6 +114,7 @@ RSpec.describe 'WhatsApp Cloud retry containment', type: :request do
     SendReplyJob.perform_now(legacy.id)
     expect(request).to have_been_requested.once
     expect(legacy.reload.source_id).to eq('wamid.synthetic-legacy')
+    expect(legacy.additional_attributes).to be_nil
   end
 
   it 'R09 keeps ordinary callbacks working with nullable historical metadata' do

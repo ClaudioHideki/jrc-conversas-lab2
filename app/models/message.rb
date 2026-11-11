@@ -74,7 +74,7 @@ class Message < ApplicationRecord
   validates_with ContentAttributeValidator
   validates_with JsonSchemaValidator,
                  schema: TEMPLATE_PARAMS_SCHEMA,
-                 attribute_resolver: ->(record) { record.additional_attributes }
+                 attribute_resolver: ->(record) { record.additional_attributes.nil? ? {} : record.additional_attributes }
 
   validates :content_type, presence: true
   validates :content, length: { maximum: 150_000 }
