@@ -96,7 +96,7 @@ jobs:
           PYTHON
 
       - name: Exigir Projetos e Portal tambem na release consolidada
-        if: (github.ref_name == 'main' || startsWith(github.ref_name, 'codex/consolidacao-')) && inputs.component == 'app'
+        if: (github.ref_name == 'main' || startsWith(github.ref_name, 'codex/consolidacao-') || github.ref_name == 'codex/lab2-ag-consolidada-20261110') && inputs.component == 'app'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATION_RUN_ID: ${{ inputs.projects_validation_run_id }}
