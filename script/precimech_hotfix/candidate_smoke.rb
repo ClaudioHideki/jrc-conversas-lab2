@@ -98,12 +98,12 @@ raise 'Pending obligation not recovered' unless recovered.reload.state == 'accep
 WhatsappRetryJob.perform_later(attempt.id)
 redis = Redis.new(url: ENV.fetch('REDIS_URL'))
 60.times do
-  break if redis.get('precimech_smoke_WhatsappRetryJob').to_i >= 3
+  break if redis.get('precimech_smoke_retry_completed').to_i >= 3
   sleep 1
 end
 raise 'Expected normal + retry + recovered POSTs only' unless redis.get('precimech_smoke_posts').to_i == 3
 raise 'Retry message leaked to legacy SendReplyJob' unless redis.get('precimech_smoke_SendReplyJob').to_i == 1
-raise 'Real retry redelivery was not exercised' unless redis.get('precimech_smoke_WhatsappRetryJob').to_i >= 3
+raise 'Real retry redelivery was not exercised' unless redis.get('precimech_smoke_retry_completed').to_i >= 3
 File.write(ENV.fetch('SMOKE_IDS_PATH'), JSON.generate(normal_id: normal.id, original_id: failed.id, inbox_id: inbox.id,
                                                    retry_id: attempt.message_id, recovered_id: recovered.message_id,
                                                    eligible_original_id: eligible.id, lost_original_id: lost.id))

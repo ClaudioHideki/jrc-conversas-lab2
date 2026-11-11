@@ -5,13 +5,13 @@ class Whatsapp::RetryDeliveryService
 
   def perform
     return unless @attempt.state == 'queued' && due?
-    return finish('cancelled') unless locally_allowed?
+    return cancel_queued unless locally_allowed?
 
     templates = current_templates
     return defer_validation if templates == :unavailable
     unless templates.is_a?(Array) &&
            Whatsapp::RetryPolicy.valid_template?(@attempt.message.additional_attributes['template_params'], templates)
-      return finish('cancelled')
+      return cancel_queued
     end
 
     # Read-only validation can repeat; commit the claim only when ready for POST.
@@ -106,9 +106,13 @@ class Whatsapp::RetryDeliveryService
     end
   end
 
+  def cancel_queued
+    @attempt.with_lock { @attempt.transition!('cancelled') if @attempt.state == 'queued' }
+  end
+
   def finish(state, error_code: nil)
     @attempt.with_lock do
-      @attempt.transition!(state, error_code: error_code) if %w[queued submitting unknown].include?(@attempt.state)
+      @attempt.transition!(state, error_code: error_code) if %w[submitting unknown].include?(@attempt.state)
     end
   end
 end

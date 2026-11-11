@@ -57,6 +57,72 @@ RSpec.describe 'WhatsApp Cloud eligible retry', type: :request do
     expect(enqueued_jobs).to include(hash_including(job: WhatsappRetryJob, args: [attempt.id]))
   end
 
+
+  it 'R12 exposes the persisted attempt state and original link after reloading the message list' do
+    post retry_path, headers: agent.create_new_auth_token, as: :json
+    child_id = response.parsed_body.dig('retry', 'message_id')
+    get retry_path.sub("/#{message.id}/retry", ''), headers: agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:ok)
+    child = response.parsed_body.fetch('payload').find { |item| item['id'] == child_id }
+    expect(child.fetch('status')).to eq('failed')
+    expect(child.dig('additional_attributes', 'whatsapp_retry', 'state')).to eq('queued')
+    expect(child.dig('additional_attributes', 'whatsapp_retry', 'original_message_id')).to eq(message.id)
+  end
+
+  it 'rejects incomplete template parameters before reserving any attempt' do
+    params = message.additional_attributes['template_params'].deep_dup
+    params['processed_params'] = { 'body' => {} }
+    message.update!(additional_attributes: { template_params: params }, updated_at: 2.minutes.ago)
+    post retry_path, headers: agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(WhatsappRetryAttempt.where(original_message: message)).not_to exist
+    expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
+  end
+
+  it 'preserves the exact numeric parameter sequence for twelve reversed input keys' do
+    values = (1..12).to_a.reverse.to_h { |index| [index.to_s, "Synthetic#{index}"] }
+    params = message.additional_attributes['template_params'].deep_dup
+    params['processed_params'] = { 'body' => values }
+    message.update!(additional_attributes: { template_params: params }, updated_at: 2.minutes.ago)
+    data = channel.message_templates.first.deep_dup
+    data['components'] = [{ 'type' => 'BODY', 'text' => (1..12).map { |index| "{{#{index}}}" }.join(' ') }]
+    channel.update!(message_templates: [data])
+    stub_request(:get, %r{https://graph.facebook.com/v14.0/.*/message_templates}).to_return(
+      status: 200, body: { data: [data] }.to_json, headers: { 'Content-Type' => 'application/json' }
+    )
+    request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages').with do |http|
+      JSON.parse(http.body).dig('template', 'components', 0, 'parameters').map { |item| item['text'] } == (1..12).map { |index| "Synthetic#{index}" }
+    end.to_return(status: 200, body: { messages: [{ id: 'wamid.synthetic-twelve' }] }.to_json,
+                  headers: { 'Content-Type' => 'application/json' })
+    original = message.reload.attributes.deep_dup
+    post retry_path, headers: agent.create_new_auth_token, as: :json
+    WhatsappRetryJob.perform_now(WhatsappRetryAttempt.last.id)
+    expect(request).to have_been_requested.once
+    expect(message.reload.attributes).to eq(original)
+  end
+
+  it 'recovers a known provider identifier after a crash before final state persistence without another POST' do
+    post retry_path, headers: agent.create_new_auth_token, as: :json
+    attempt = WhatsappRetryAttempt.last
+    attempt.update!(state: 'submitting', updated_at: 20.minutes.ago)
+    attempt.message.update!(source_id: 'wamid.synthetic-already-accepted')
+    WhatsappRetryRecoveryJob.perform_now
+    expect(attempt.reload.state).to eq('accepted')
+    expect(attempt.message.reload).to be_sent
+    expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
+  end
+
+  it 'backs off a validation timeout while preserving the pending obligation' do
+    post retry_path, headers: agent.create_new_auth_token, as: :json
+    attempt = WhatsappRetryAttempt.last
+    request = stub_request(:get, %r{https://graph.facebook.com/v14.0/.*/message_templates}).to_timeout
+    2.times { WhatsappRetryJob.perform_now(attempt.id) }
+    expect(attempt.reload.state).to eq('queued')
+    expect(attempt.next_attempt_at).to be > Time.current
+    expect(request).to have_been_requested.once
+    expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
+  end
+
   context 'when processing the queued attempt' do
     let(:post_url) { "https://graph.facebook.com/v13.0/#{channel.provider_config['phone_number_id']}/messages" }
     let(:template_data) { channel.reload.message_templates }

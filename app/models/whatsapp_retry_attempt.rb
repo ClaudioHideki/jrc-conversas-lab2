@@ -14,7 +14,7 @@ class WhatsappRetryAttempt < ApplicationRecord
     else
       attributes[:status] = :failed
       attributes[:external_error] = if state == 'failed'
-                                      "#{error_code}: #{I18n.t('errors.whatsapp.retry.provider_rejected')}"
+                                      error_code.present? ? "#{error_code}: #{I18n.t('errors.whatsapp.retry.provider_rejected')}" : I18n.t('errors.whatsapp.retry.provider_rejected')
                                     elsif %w[unknown cancelled].include?(state)
                                       I18n.t("errors.whatsapp.retry.#{state}")
                                     end

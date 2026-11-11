@@ -29,7 +29,16 @@ module PrecimechSmokeTransport
     if index == 2
       attempt = WhatsappRetryAttempt.find_by!(state: 'submitting')
       callback = { entry: [{ changes: [{ value: { statuses: [{ id: id, status: 'read' }] } }] }] }.with_indifferent_access
-      Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: attempt.inbox, params: callback).perform
+      owning_backend = ActiveRecord::Base.connection.raw_connection.backend_pid
+      inbox_id = attempt.inbox_id
+      receipt_thread = Thread.new do
+        ActiveRecord::Base.connection_pool.with_connection do |connection|
+          raise 'Early callback reused submission connection' if connection.raw_connection.backend_pid == owning_backend
+          Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: Inbox.find(inbox_id), params: callback).perform
+        end
+      end
+      raise 'Cross-connection callback blocked on submission' unless receipt_thread.join(15)
+      receipt_thread.value
     end
     response = Struct.new(:parsed_response).new({ 'messages' => [{ 'id' => id }] })
     response.define_singleton_method(:success?) { true }
@@ -46,6 +55,9 @@ class PrecimechSmokeJobCounter
       Redis.new(url: ENV.fetch('REDIS_URL')).incr("precimech_smoke_#{klass}")
     end
     yield
+    if klass == 'WhatsappRetryJob'
+      Redis.new(url: ENV.fetch('REDIS_URL')).incr('precimech_smoke_retry_completed')
+    end
   end
 end
 Sidekiq.configure_server { |config| config.server_middleware { |chain| chain.add(PrecimechSmokeJobCounter) } }

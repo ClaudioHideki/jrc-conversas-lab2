@@ -18,6 +18,21 @@ class Whatsapp::RetryReceiptService
       if attempt
         attempt.with_lock { self.class.apply!(attempt, status, code) }
         true
+      elsif (original_attempt = WhatsappRetryAttempt.joins(:original_message).find_by(
+        inbox_id: @inbox.id, account_id: @inbox.account_id, messages: { source_id: source_id }
+      ))
+        original = original_attempt.original_message
+        original.with_lock do
+          unless original.read? || (original.delivered? && status != 'read') || (original.failed? && status == 'sent')
+            error = @status[:errors]&.first
+            attributes = { status: status }
+            attributes[:external_error] = if status == 'failed'
+                                            error ? "#{error[:code]}: #{error[:title]}" : original.external_error
+                                          end
+            original.update!(attributes)
+          end
+        end
+        true
       elsif @inbox.messages.exists?(source_id: source_id)
         false
       elsif WhatsappRetryAttempt.where(inbox_id: @inbox.id, state: %w[submitting unknown]).exists?
@@ -47,12 +62,11 @@ class Whatsapp::RetryReceiptService
     end
   end
 
-
   def self.apply!(attempt, status, error_code)
     return if attempt.state == 'read'
     return if attempt.state == 'delivered' && status != 'read'
     return if attempt.state == 'failed' && status == 'sent'
 
-    attempt.transition!(status == 'sent' ? 'accepted' : status, error_code: error_code || '000000')
+    attempt.transition!(status == 'sent' ? 'accepted' : status, error_code: error_code)
   end
 end
