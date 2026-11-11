@@ -65,7 +65,9 @@ jobs:
           bundler: 2.5.16
           bundler-cache: true
       - name: Prepare disposable test schema
-        run: bundle exec rails db:create db:schema:load db:migrate
+        run: |
+          bundle exec rails db:create db:schema:load
+          SCHEMA="$RUNNER_TEMP/precimech-test-schema.rb" bundle exec rails db:migrate
       - name: Request regression and preserved WhatsApp paths
         run: >-
           bundle exec rspec
