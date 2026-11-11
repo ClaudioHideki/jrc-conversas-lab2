@@ -45,7 +45,15 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
 vi.mock('dashboard/api/conversations', () => ({
   default: {
     sharedContext: vi.fn().mockResolvedValue({
-      data: { meta: { shared_scope: { enabled: false, inbox_ids: [] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: false,
+            inbox_ids: [],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     }),
   },
 }));
@@ -90,6 +98,87 @@ const mountInbox = () =>
   });
 
 describe('omnichannel inbox', () => {
+  it('keeps an explicit open selection in the URL when the history view is the default', async () => {
+    const wrapper = mountInbox();
+    await flushPromises();
+    await wrapper
+      .get('[data-testid="conversation-status-filter"]')
+      .setValue('open');
+    await flushPromises();
+    expect(mocks.route.query.status).toBe('open');
+    expect(store.state.filters.status).toBe('open');
+  });
+  it.each(['me', 'mine_or_shared'])(
+    'keeps a non-member inbox out of %s after an administrator receives a realtime assignment there',
+    async assignee => {
+      mocks.route.query.assignee = assignee;
+      store.state.currentUser.accounts[0].role = 'administrator';
+      const scope = {
+        enabled: true,
+        inbox_ids: [11],
+        member_inbox_ids: [11],
+      };
+      ConversationAPI.sharedContext.mockResolvedValue({
+        data: { meta: { shared_scope: scope } },
+      });
+      store.state.sharedScopeResult = scope;
+      store.state.conversationPayload = [
+        { id: 901, inbox_id: 11, meta: { assignee: { id: 5 } } },
+      ];
+      const wrapper = mountInbox();
+      await flushPromises();
+      store.state.conversations.push({
+        id: 999,
+        inbox_id: 12,
+        meta: { assignee: { id: 5 } },
+      });
+      await flushPromises();
+      expect(
+        wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+      ).toEqual(['901']);
+    }
+  );
+  it.each(['me', 'mine_or_shared'])(
+    'shows the complete persisted personal inbox for %s with a server sharing proof',
+    async assignee => {
+      mocks.route.query.assignee = assignee;
+      ConversationAPI.sharedContext.mockResolvedValueOnce({
+        data: {
+          meta: {
+            shared_scope: {
+              enabled: true,
+              inbox_ids: [11],
+              member_inbox_ids: [11, 12, 13],
+            },
+          },
+        },
+      });
+      store.state.sharedScopeResult = {
+        enabled: true,
+        inbox_ids: [11],
+        member_inbox_ids: [11, 12, 13],
+      };
+      store.state.conversationPayload = [
+        { id: 901, inbox_id: 11, status: 'pending', meta: {} },
+        {
+          id: 902,
+          inbox_id: 11,
+          status: 'resolved',
+          meta: { assignee: { id: 99 }, assignee_type: 'User' },
+        },
+      ];
+      const wrapper = mountInbox();
+      await flushPromises();
+      expect(store.state.filters).toMatchObject({
+        assigneeType: assignee,
+        inboxScope: 'member',
+        status: 'all',
+      });
+      expect(
+        wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+      ).toEqual(['901', '902']);
+    }
+  );
   it('continues loading a short page while the sentinel remains visible after the action finishes before its parent', async () => {
     store.state.feature = false;
     let requests = 0;
@@ -180,15 +269,15 @@ describe('omnichannel inbox', () => {
   });
 
   it.each([undefined, 'invalid', ['all', 'pending']].map(value => [value]))(
-    'preserves open as the default for an absent or invalid status %j',
+    'includes all persisted statuses by default for an absent or invalid status %j',
     async status => {
       mocks.route.query.status = status;
       const wrapper = mountInbox();
       await flushPromises();
-      expect(store.state.filters.status).toBe('open');
+      expect(store.state.filters.status).toBe('all');
       expect(
         wrapper.get('[data-testid="conversation-status-filter"]').element.value
-      ).toBe('open');
+      ).toBe('all');
     }
   );
 
@@ -206,7 +295,7 @@ describe('omnichannel inbox', () => {
     expect(store.state.filters.status).toBe('all');
     delete mocks.route.query.status;
     await flushPromises();
-    expect(store.state.filters.status).toBe('open');
+    expect(store.state.filters.status).toBe('all');
   });
 
   it('invalidates the old status and exhausted page before awaiting fresh sharing metadata', async () => {
@@ -225,7 +314,15 @@ describe('omnichannel inbox', () => {
     expect(store.state.filters.status).toBe('pending');
     expect(store.state.ended).toBe(false);
     resolveScope({
-      data: { meta: { shared_scope: { enabled: false, inbox_ids: [] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: false,
+            inbox_ids: [],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     });
     await flushPromises();
     expect(
@@ -289,9 +386,21 @@ describe('omnichannel inbox', () => {
   });
   it('defaults an authorized ordinary member to own and shared conversations without changing their assignments', async () => {
     ConversationAPI.sharedContext.mockResolvedValueOnce({
-      data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: true,
+            inbox_ids: [11],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     });
-    store.state.sharedScopeResult = { enabled: true, inbox_ids: [11] };
+    store.state.sharedScopeResult = {
+      enabled: true,
+      inbox_ids: [11],
+      member_inbox_ids: [11, 12, 13],
+    };
     store.state.conversationPayload = [
       {
         id: 1,
@@ -317,7 +426,15 @@ describe('omnichannel inbox', () => {
 
   it('drops a previous sharing proof when the list request cannot return a fresh scope', async () => {
     ConversationAPI.sharedContext.mockResolvedValueOnce({
-      data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: true,
+            inbox_ids: [11],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     });
     const dispatch = store.dispatch;
     vi.spyOn(store, 'dispatch').mockImplementation((type, ...args) =>
@@ -337,9 +454,21 @@ describe('omnichannel inbox', () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
     try {
       ConversationAPI.sharedContext.mockResolvedValueOnce({
-        data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+        data: {
+          meta: {
+            shared_scope: {
+              enabled: true,
+              inbox_ids: [11],
+              member_inbox_ids: [11, 12, 13],
+            },
+          },
+        },
       });
-      store.state.sharedScopeResult = { enabled: true, inbox_ids: [11] };
+      store.state.sharedScopeResult = {
+        enabled: true,
+        inbox_ids: [11],
+        member_inbox_ids: [11, 12, 13],
+      };
       store.state.conversationPayload = [
         {
           id: 999,
@@ -362,7 +491,15 @@ describe('omnichannel inbox', () => {
         wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
       ).toContain('999');
       resolveScope({
-        data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+        data: {
+          meta: {
+            shared_scope: {
+              enabled: true,
+              inbox_ids: [11],
+              member_inbox_ids: [11, 12, 13],
+            },
+          },
+        },
       });
       await flushPromises();
       expect(
@@ -375,9 +512,21 @@ describe('omnichannel inbox', () => {
 
   it('requires fresh sharing proof after an existing conversation changes assignment', async () => {
     ConversationAPI.sharedContext.mockResolvedValueOnce({
-      data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: true,
+            inbox_ids: [11],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     });
-    store.state.sharedScopeResult = { enabled: true, inbox_ids: [11] };
+    store.state.sharedScopeResult = {
+      enabled: true,
+      inbox_ids: [11],
+      member_inbox_ids: [11, 12, 13],
+    };
     store.state.conversationPayload = [
       {
         id: 999,
@@ -403,7 +552,15 @@ describe('omnichannel inbox', () => {
       wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
     ).not.toContain('999');
     resolveScope({
-      data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: true,
+            inbox_ids: [11],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     });
     await flushPromises();
     expect(
@@ -415,9 +572,21 @@ describe('omnichannel inbox', () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
     try {
       ConversationAPI.sharedContext.mockResolvedValueOnce({
-        data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+        data: {
+          meta: {
+            shared_scope: {
+              enabled: true,
+              inbox_ids: [11],
+              member_inbox_ids: [11, 12, 13],
+            },
+          },
+        },
       });
-      store.state.sharedScopeResult = { enabled: true, inbox_ids: [11] };
+      store.state.sharedScopeResult = {
+        enabled: true,
+        inbox_ids: [11],
+        member_inbox_ids: [11, 12, 13],
+      };
       store.state.conversationPayload = [
         {
           id: 999,
@@ -442,9 +611,21 @@ describe('omnichannel inbox', () => {
 
   it('revalidates sharing before showing an incoming realtime conversation from a previous sharing proof', async () => {
     ConversationAPI.sharedContext.mockResolvedValueOnce({
-      data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: true,
+            inbox_ids: [11],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     });
-    store.state.sharedScopeResult = { enabled: true, inbox_ids: [11] };
+    store.state.sharedScopeResult = {
+      enabled: true,
+      inbox_ids: [11],
+      member_inbox_ids: [11, 12, 13],
+    };
     const wrapper = mountInbox();
     await flushPromises();
     let resolveScope;
@@ -465,7 +646,15 @@ describe('omnichannel inbox', () => {
     ).not.toContain('999');
     expect(resolveScope).toBeTypeOf('function');
     resolveScope({
-      data: { meta: { shared_scope: { enabled: true, inbox_ids: [] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: true,
+            inbox_ids: [],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     });
     await flushPromises();
     expect(
@@ -477,9 +666,21 @@ describe('omnichannel inbox', () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
     try {
       ConversationAPI.sharedContext.mockResolvedValueOnce({
-        data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+        data: {
+          meta: {
+            shared_scope: {
+              enabled: true,
+              inbox_ids: [11],
+              member_inbox_ids: [11, 12, 13],
+            },
+          },
+        },
       });
-      store.state.sharedScopeResult = { enabled: true, inbox_ids: [11] };
+      store.state.sharedScopeResult = {
+        enabled: true,
+        inbox_ids: [11],
+        member_inbox_ids: [11, 12, 13],
+      };
       store.state.conversationPayload = [
         {
           id: 999,
@@ -493,7 +694,15 @@ describe('omnichannel inbox', () => {
         wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
       ).toContain('999');
       ConversationAPI.sharedContext.mockResolvedValueOnce({
-        data: { meta: { shared_scope: { enabled: true, inbox_ids: [] } } },
+        data: {
+          meta: {
+            shared_scope: {
+              enabled: true,
+              inbox_ids: [],
+              member_inbox_ids: [11, 12, 13],
+            },
+          },
+        },
       });
       await vi.advanceTimersByTimeAsync(15000);
       await flushPromises();
@@ -508,9 +717,21 @@ describe('omnichannel inbox', () => {
 
   it('excludes a removed inbox immediately even if an in-flight scope response still lists it', async () => {
     ConversationAPI.sharedContext.mockResolvedValueOnce({
-      data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: true,
+            inbox_ids: [11],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     });
-    store.state.sharedScopeResult = { enabled: true, inbox_ids: [11] };
+    store.state.sharedScopeResult = {
+      enabled: true,
+      inbox_ids: [11],
+      member_inbox_ids: [11, 12, 13],
+    };
     store.state.conversationPayload = [
       {
         id: 999,
@@ -533,7 +754,15 @@ describe('omnichannel inbox', () => {
       wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
     ).not.toContain('999');
     resolveScope({
-      data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: true,
+            inbox_ids: [11],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     });
     await flushPromises();
     expect(
@@ -583,7 +812,15 @@ describe('omnichannel inbox', () => {
   });
   beforeEach(() => {
     ConversationAPI.sharedContext.mockReset().mockResolvedValue({
-      data: { meta: { shared_scope: { enabled: false, inbox_ids: [] } } },
+      data: {
+        meta: {
+          shared_scope: {
+            enabled: false,
+            inbox_ids: [],
+            member_inbox_ids: [11, 12, 13],
+          },
+        },
+      },
     });
     mocks.sip = Object.fromEntries(
       Object.entries({
@@ -660,6 +897,11 @@ describe('omnichannel inbox', () => {
         loading: false,
         ended: false,
         conversationPayload: [],
+        sharedScopeResult: {
+          enabled: false,
+          inbox_ids: [],
+          member_inbox_ids: [11, 12, 13],
+        },
         filters: {},
       }),
       getters: {

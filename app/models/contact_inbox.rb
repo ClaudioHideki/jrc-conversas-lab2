@@ -27,6 +27,7 @@ class ContactInbox < ApplicationRecord
   validates :contact_id, presence: true
   validates :source_id, presence: true
   validate :valid_source_id_format?
+  validate :broker_group_stays_in_canonical_inbox
 
   belongs_to :contact
   belongs_to :inbox
@@ -56,6 +57,23 @@ class ContactInbox < ApplicationRecord
   end
 
   private
+
+  def broker_group_stays_in_canonical_inbox
+    return unless contact&.persisted? && inbox
+    return unless JrcBroker::GroupContactAccess.new(account: contact.account, user: nil).group?(contact)
+
+    # Serialize link creation with history bootstrap and other links of this group.
+    contact.lock!
+    errors.add(:inbox, :invalid) if broker_group_inbox_conflict?
+  end
+
+  def broker_group_inbox_conflict?
+    return true if persisted? && inbox_id_in_database != inbox_id
+    return true if contact.account_id != inbox.account_id
+
+    # A second source in the same inbox is also ambiguous during silent import.
+    ContactInbox.where(contact_id: contact_id).where.not(id: id).exists?
+  end
 
   def validate_twilio_source_id
     # https://www.twilio.com/docs/glossary/what-e164#regex-matching-for-e164

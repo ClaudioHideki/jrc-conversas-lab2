@@ -17,6 +17,7 @@ class ConversationApi extends ApiClient {
     sortBy,
     updatedWithin,
     includeParticipating,
+    inboxScope,
   }) {
     return axios.get(this.url, {
       timeout: 30000,
@@ -31,6 +32,7 @@ class ConversationApi extends ApiClient {
         sort_by: sortBy,
         updated_within: updatedWithin,
         include_participating: includeParticipating,
+        inbox_scope: inboxScope,
       },
     });
   }
@@ -108,6 +110,7 @@ class ConversationApi extends ApiClient {
     teamId,
     conversationType,
     includeParticipating,
+    inboxScope,
   }) {
     return axios.get(`${this.url}/meta`, {
       params: {
@@ -118,6 +121,7 @@ class ConversationApi extends ApiClient {
         team_id: teamId,
         conversation_type: conversationType,
         include_participating: includeParticipating,
+        inbox_scope: inboxScope,
       },
     });
   }

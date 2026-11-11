@@ -528,6 +528,10 @@ Rails.application.routes.draw do
             end
           end
           get 'jrc_history_import/inboxes/:inbox_id', to: 'jrc_history_imports#capability'
+          get 'jrc_history_sync/v2/inboxes/:inbox_id', to: 'jrc_history_syncs#capability'
+          post 'jrc_history_sync/v2/inboxes/:inbox_id/bootstrap', to: 'jrc_history_syncs#bootstrap'
+          post 'jrc_history_sync/v2/inboxes/:inbox_id/messages', to: 'jrc_history_syncs#create'
+          get 'jrc_history_sync/v2/inboxes/:inbox_id/receipts/:receipt_id', to: 'jrc_history_syncs#receipt'
           post 'jrc_history_import/inboxes/:inbox_id/bootstrap', to: 'jrc_history_imports#bootstrap'
           post 'conversations/:conversation_id/jrc_history_import', to: 'jrc_history_imports#create'
           get 'jrc_flow_effects/capabilities', to: 'jrc_flow_effects#capabilities'

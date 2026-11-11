@@ -1,6 +1,7 @@
 class JrcCustomers::ContactQuery
   def initialize(account:, scope:, query:, view: nil, include_company: true)
     @account, @scope, @term = account, scope, query.to_s.strip.first(200)
+    @scope = JrcBroker::GroupContactAccess.new(account: account, user: nil).excluding_groups(@scope)
     @include_company = include_company
     @scope = directory_scope(view)
   end
@@ -20,7 +21,7 @@ class JrcCustomers::ContactQuery
     if @term.match?(/\A[+0-9().\s\/-]+\z/) && digits.length >= 4
       matched = matched.or(@scope.where("regexp_replace(COALESCE(contacts.phone_number, ''), '[^0-9]', '', 'g') LIKE :q OR regexp_replace(COALESCE(contacts.identifier, ''), '[^0-9]', '', 'g') LIKE :q", q: "%#{digits}%"))
       numeric_points = JrcCustomers::ContactPoint.where(account_id: @account.id, kind: JrcCustomers::Identity::PHONE_KINDS)
-        .where('normalized_value LIKE ?', "%#{digits}%").select(:contact_id)
+                                                 .where('normalized_value LIKE ?', "%#{digits}%").select(:contact_id)
       matched = matched.or(@scope.where(id: numeric_points))
     end
     matched

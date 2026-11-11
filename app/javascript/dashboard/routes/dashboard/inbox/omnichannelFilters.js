@@ -9,10 +9,14 @@ export const matchesAssigneeFilter = (
   conversation,
   filter,
   currentUserId,
-  sharedInboxIds = []
+  sharedInboxIds = [],
+  personalInboxView = false
 ) => {
   const { assignee, assignee_type: assigneeType } = conversation.meta || {};
-  if (filter === ASSIGNEE_FILTERS.MINE_OR_SHARED) {
+  if (
+    filter === ASSIGNEE_FILTERS.MINE_OR_SHARED ||
+    (filter === ASSIGNEE_FILTERS.ME && personalInboxView)
+  ) {
     return (
       matchesAssigneeFilter(conversation, ASSIGNEE_FILTERS.ME, currentUserId) ||
       (assigneeType !== 'AgentBot' &&

@@ -1386,7 +1386,7 @@
       "CALL_WORKSPACE": "Atendimento de voz",
       "ASSIGNEE": {
         "MINE_OR_SHARED": "Minhas e compartilhadas",
-        "ME": "Minhas",
+        "ME": "Minhas caixas",
         "UNASSIGNED": "Não atribuídas",
         "ALL": "Todas"
       },

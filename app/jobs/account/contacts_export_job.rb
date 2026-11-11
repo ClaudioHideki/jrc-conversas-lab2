@@ -57,14 +57,15 @@ class Account::ContactsExportJob < ApplicationJob
   end
 
   def contacts
-    if @params.present? && @params[:payload].present? && @params[:payload].any?
-      result = ::Contacts::FilterService.new(@account, @account_user, @params).perform
-      result[:contacts]
-    elsif @params[:label].present?
-      @account.contacts.resolved_contacts(use_crm_v2: @account.feature_enabled?('crm_v2')).tagged_with(@params[:label], any: true)
-    else
-      @account.contacts.resolved_contacts(use_crm_v2: @account.feature_enabled?('crm_v2'))
-    end
+    records = if @params.present? && @params[:payload].present? && @params[:payload].any?
+                result = ::Contacts::FilterService.new(@account, @account_user, @params).perform
+                result[:contacts]
+              elsif @params[:label].present?
+                @account.contacts.resolved_contacts(use_crm_v2: @account.feature_enabled?('crm_v2')).tagged_with(@params[:label], any: true)
+              else
+                @account.contacts.resolved_contacts(use_crm_v2: @account.feature_enabled?('crm_v2'))
+              end
+    JrcBroker::GroupContactAccess.new(account: @account, user: @account_user).restrict(records)
   end
 
   def valid_headers(column_names)

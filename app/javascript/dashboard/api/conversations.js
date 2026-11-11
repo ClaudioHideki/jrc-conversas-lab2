@@ -18,7 +18,7 @@ class ConversationApi extends ApiClient {
     return axios.get(`${this.url}/unread_counts`);
   }
 
-  sharedContext(accountId) {
+  sharedContext(accountId, inboxScope) {
     return axios.get(
       `${this.apiVersion}/accounts/${accountId}/conversations/meta`,
       {
@@ -26,6 +26,7 @@ class ConversationApi extends ApiClient {
         params: {
           assignee_type: 'mine_or_shared',
           include_participating: true,
+          inbox_scope: inboxScope,
         },
       }
     );

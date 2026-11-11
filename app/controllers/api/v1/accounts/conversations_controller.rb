@@ -209,7 +209,8 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
   def contact
     return if params[:contact_id].blank?
 
-    @contact = Current.account.contacts.find(params[:contact_id])
+    @contact = JrcBroker::GroupContactAccess.new(account: Current.account, user: Current.user || @resource)
+                                            .restrict(Current.account.contacts).find(params[:contact_id])
   end
 
   def contact_inbox
@@ -220,6 +221,8 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
     # and deprecate the support of passing only source_id as the param
     @contact_inbox ||= ::ContactInbox.find_by!(source_id: params[:source_id])
     authorize @contact_inbox.inbox, :show?
+    JrcBroker::GroupContactAccess.new(account: Current.account, user: Current.user || @resource)
+                                 .restrict(Current.account.contacts).find(@contact_inbox.contact_id)
   rescue ActiveRecord::RecordNotUnique
     render json: { error: 'source_id should be unique' }, status: :unprocessable_entity
   end

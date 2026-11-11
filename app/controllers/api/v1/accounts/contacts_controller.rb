@@ -71,7 +71,7 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
   def filter
     result = ::Contacts::FilterService.new(Current.account, Current.user, params.permit!).perform
     contacts = directory_contacts(result[:contacts])
-    @contacts_count = params[:directory_view].present? ? contacts.count : result[:count]
+    @contacts_count = group_contact_scope(contacts).count
     @contacts = fetch_contacts(contacts)
   rescue CustomExceptions::CustomFilter::InvalidAttribute,
          CustomExceptions::CustomFilter::InvalidOperator,
@@ -137,6 +137,7 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
   end
 
   def directory_contacts(contacts)
+    contacts = group_contact_scope(contacts)
     return contacts if params[:directory_view].blank?
 
     if params[:directory_view] != 'people'
@@ -232,9 +233,13 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
   end
 
   def fetch_contact
-    contact_scope = Current.account.contacts
+    contact_scope = group_contact_scope(Current.account.contacts)
     contact_scope = contact_scope.includes(contact_inboxes: [:inbox]) if @include_contact_inboxes
     @contact = contact_scope.find(params[:id])
+  end
+
+  def group_contact_scope(contacts)
+    JrcBroker::GroupContactAccess.new(account: Current.account, user: Current.user || @resource).restrict(contacts)
   end
 
   def process_avatar_from_url

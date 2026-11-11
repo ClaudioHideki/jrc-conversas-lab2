@@ -43,7 +43,7 @@ class ConversationFinder
 
     mine_count, unassigned_count, all_count = set_count_for_all_conversations
     assigned_count = all_count - unassigned_count
-    shared = @assignee_type == 'mine_or_shared' ? shared_inbox_scope : nil
+    shared = shared_inbox_view? ? shared_inbox_scope : nil
     shared_count = shared&.perform&.count
 
     filter_by_assignee_type
@@ -66,7 +66,7 @@ class ConversationFinder
 
     mine_count, unassigned_count, all_count, = set_count_for_all_conversations
     assigned_count = all_count - unassigned_count
-    shared = @assignee_type == 'mine_or_shared' ? shared_inbox_scope : nil
+    shared = shared_inbox_view? ? shared_inbox_scope : nil
 
     {
       count: {
@@ -113,6 +113,10 @@ class ConversationFinder
 
   def find_conversation_by_inbox
     @conversations = current_account.conversations
+    if params[:inbox_scope] == 'member'
+      memberships = InboxMember.where(user_id: current_user.id, inbox_id: current_account.inboxes.select(:id)).select(:inbox_id)
+      @conversations = @conversations.where(inbox_id: memberships)
+    end
 
     return unless params[:inbox_id]
 
@@ -134,7 +138,7 @@ class ConversationFinder
   def filter_by_assignee_type
     case @assignee_type
     when 'me'
-      @conversations = mine_conversations
+      @conversations = shared_inbox_view? ? shared_inbox_scope.perform : mine_conversations
     when 'mine_or_shared'
       @conversations = shared_inbox_scope.perform
     when 'unassigned'
@@ -151,7 +155,8 @@ class ConversationFinder
       conversation_ids = current_account.mentions.where(user: current_user).pluck(:conversation_id)
       @conversations = @conversations.where(id: conversation_ids)
     when 'participating'
-      @conversations = current_user.participating_conversations.where(account_id: current_account.id)
+      participating = current_user.participating_conversations.where(account_id: current_account.id)
+      @conversations = params[:inbox_scope] == 'member' ? @conversations.where(id: participating.select(:id)) : participating
     when 'unattended'
       @conversations = @conversations.unattended
     end
@@ -210,6 +215,10 @@ class ConversationFinder
     ActiveModel::Type::Boolean.new.cast(params[:include_participating])
   end
 
+  def shared_inbox_view?
+    @assignee_type == 'mine_or_shared' || (@assignee_type == 'me' && params[:inbox_scope] == 'member')
+  end
+
   def mine_conversations
     assigned = @conversations.assigned_to(current_user)
     return assigned unless include_participating?
@@ -220,7 +229,8 @@ class ConversationFinder
 
   def shared_inbox_scope
     @shared_inbox_scope ||= Conversations::SharedInboxScope.new(conversations: @conversations, account: current_account,
-                                                               user: current_user, include_participating: include_participating?)
+                                                                user: current_user, include_participating: include_participating?,
+                                                                member_inboxes_only: params[:inbox_scope] == 'member')
   end
 
   def legacy_count_for_all_conversations

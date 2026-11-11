@@ -59,6 +59,41 @@ RSpec.describe 'Broker historical message import', type: :request do
     end
   end
 
+  it 'advances the historical conversation clock without reopening or changing the responsible agent and without callbacks' do
+    headers = { 'api_access_token' => admin.access_token.token }
+    create(:inbox_member, inbox: inbox, user: agent)
+    conversation.update_columns(last_activity_at: 10.days.ago, assignee_id: agent.id) # rubocop:disable Rails/SkipsModelValidations
+    before_state = conversation.reload.attributes
+    input = payload
+    clear_enqueued_jobs
+
+    2.times do
+      post path, params: input, headers: headers, as: :json
+      expect(response).to have_http_status(:ok)
+    end
+
+    expect(conversation.reload.last_activity_at.to_i).to eq(input.fetch(:occurred_at))
+    expect(conversation.attributes.except('last_activity_at')).to eq(before_state.except('last_activity_at'))
+    expect(conversation.messages.count).to eq(1)
+    expect(enqueued_jobs).to be_empty
+  end
+
+  it 'keeps the latest historical clock when older pages or repeated messages arrive later' do
+    conversation.update_columns(last_activity_at: 10.days.ago) # rubocop:disable Rails/SkipsModelValidations
+    input = payload
+    headers = { 'api_access_token' => admin.access_token.token }
+    clear_enqueued_jobs
+
+    [input, input.merge(broker_message_id: SecureRandom.uuid, occurred_at: 8.days.ago.to_i), input].each do |item|
+      post path, params: item, headers: headers, as: :json
+      expect(response).to have_http_status(:ok)
+    end
+
+    expect(conversation.reload.last_activity_at.to_i).to eq(input.fetch(:occurred_at))
+    expect(conversation.messages.count).to eq(2)
+    expect(enqueued_jobs).to be_empty
+  end
+
   it 'advances historical delivery status monotonically without emitting live update callbacks' do
     input = payload.merge(direction: 'outgoing', status: 'sent')
     headers = { 'api_access_token' => admin.access_token.token }
@@ -99,7 +134,7 @@ RSpec.describe 'Broker historical message import', type: :request do
               broker_conversation_id: SecureRandom.uuid, phone: '15550000001', name: 'Synthetic historical contact', occurred_at: 5.days.ago.to_i }
     headers = { 'api_access_token' => admin.access_token.token }
     clear_enqueued_jobs
-    receipts = 2.times.map do
+    receipts = Array.new(2) do
       post path, params: input, headers: headers, as: :json
       expect(response).to have_http_status(:ok)
       response.parsed_body

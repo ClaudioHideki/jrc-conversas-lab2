@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_11_170000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -9366,5 +9366,40 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   JRC_SCHEMA_SQL_808eaf09795b
 
   add_foreign_key "jrc_service_desk_tickets", "companies", column: ["account_id", "establishment_company_id"], primary_key: ["account_id", "id"], name: "jrc_sd_establishment_account_fk"
+
+  create_table "jrc_broker_history_receipts", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "inbox_id", null: false
+    t.bigint "contact_id", null: false
+    t.bigint "conversation_id", null: false
+    t.bigint "message_id"
+    t.uuid "receipt_id", null: false
+    t.uuid "organization_id", null: false
+    t.uuid "integration_id", null: false
+    t.uuid "history_account_identity", null: false
+    t.uuid "source_id", null: false
+    t.uuid "broker_conversation_id", null: false
+    t.string "record_kind", null: false
+    t.string "request_hash", limit: 64, null: false
+    t.jsonb "recipient", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.index ["account_id"], name: "index_jrc_broker_history_receipts_on_account_id"
+    t.index ["inbox_id"], name: "index_jrc_broker_history_receipts_on_inbox_id"
+    t.index ["contact_id"], name: "index_jrc_broker_history_receipts_on_contact_id"
+    t.index ["conversation_id"], name: "index_jrc_broker_history_receipts_on_conversation_id"
+    t.index ["message_id"], name: "index_jrc_broker_history_receipts_on_message_id"
+    t.index ["receipt_id"], name: "index_jrc_broker_history_receipts_on_receipt_id", unique: true
+    t.index ["account_id", "inbox_id", "integration_id", "history_account_identity", "record_kind", "source_id"],
+            name: "jrc_broker_history_fact_identity", unique: true
+    t.index ["account_id", "message_id"], name: "jrc_broker_history_message_identity", unique: true, where: "(message_id IS NOT NULL)"
+    t.check_constraint "request_hash ~ '^[a-f0-9]{64}$'::text", name: "jrc_broker_history_hash"
+    t.check_constraint "((record_kind = 'CHAT'::text) AND (message_id IS NULL)) OR ((record_kind = 'MESSAGE'::text) AND (message_id IS NOT NULL))",
+                       name: "jrc_broker_history_receipt_kind"
+  end
+  add_foreign_key "jrc_broker_history_receipts", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_broker_history_receipts", "inboxes", on_delete: :cascade
+  add_foreign_key "jrc_broker_history_receipts", "contacts", on_delete: :cascade
+  add_foreign_key "jrc_broker_history_receipts", "conversations", on_delete: :cascade
+  add_foreign_key "jrc_broker_history_receipts", "messages", on_delete: :cascade
 
 end

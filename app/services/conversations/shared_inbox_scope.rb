@@ -1,10 +1,11 @@
 # An additive list scope. The underlying conversation permissions remain authoritative.
 class Conversations::SharedInboxScope
-  def initialize(conversations:, account:, user:, include_participating: false)
+  def initialize(conversations:, account:, user:, include_participating: false, member_inboxes_only: false)
     @conversations = conversations
     @account = account
     @user = user
     @include_participating = include_participating
+    @member_inboxes_only = member_inboxes_only
   end
 
   def metadata
@@ -14,11 +15,7 @@ class Conversations::SharedInboxScope
       shared = enabled ? Conversations::SharedInboxRouting.new(account: @account, user: @user, inbox_ids: ids).perform : []
       # The remote snapshot must not retain access revoked while HTTP was in flight.
       ApplicationRecord.uncached do
-        enabled &&= allowed?
-        result = { enabled: enabled, inbox_ids: enabled ? (shared & member_inbox_ids).sort : [] }
-        supervised = Conversations::InboxVisibility.new(account: @account, user: @user).supervised_inbox_ids
-        result[:supervised_inbox_ids] = supervised if supervised.any?
-        result
+        current_metadata(enabled && allowed?, shared)
       end
     end
   end
@@ -37,6 +34,18 @@ class Conversations::SharedInboxScope
   end
 
   private
+
+  def current_metadata(enabled, shared)
+    result = { enabled: enabled, inbox_ids: enabled ? (shared & member_inbox_ids).sort : [] }
+    result[:member_inbox_ids] = current_member_inbox_ids if @member_inboxes_only
+    supervised = Conversations::InboxVisibility.new(account: @account, user: @user).supervised_inbox_ids
+    result[:supervised_inbox_ids] = supervised if supervised.any?
+    result
+  end
+
+  def current_member_inbox_ids
+    @account.account_users.exists?(user_id: @user.id) ? member_inbox_ids.sort : []
+  end
 
   def allowed?
     member = @account.account_users.find_by(user_id: @user.id)

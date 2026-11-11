@@ -27,6 +27,6 @@ class Api::V1::Accounts::Actions::ContactMergesController < Api::V1::Accounts::B
   end
 
   def contacts
-    @contacts ||= Current.account.contacts
+    @contacts ||= JrcBroker::GroupContactAccess.new(account: Current.account, user: Current.user || @resource).restrict(Current.account.contacts)
   end
 end

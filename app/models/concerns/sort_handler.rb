@@ -3,7 +3,7 @@ module SortHandler
 
   class_methods do
     def sort_on_last_activity_at(sort_direction = :desc)
-      order(last_activity_at: sort_direction)
+      order(last_activity_at: sort_direction, id: :asc)
     end
 
     def sort_on_created_at(sort_direction = :asc)

@@ -170,7 +170,7 @@ class SearchService
   end
 
   def filter_contacts
-    contacts_query = current_account.contacts.where(
+    contacts_query = JrcBroker::GroupContactAccess.new(account: current_account, user: current_user).restrict(current_account.contacts).where(
       "name ILIKE :search OR email ILIKE :search OR phone_number
       ILIKE :search OR identifier ILIKE :search", search: "%#{search_query}%"
     )

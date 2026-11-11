@@ -8,6 +8,30 @@ import {
 } from './omnichannelFilters';
 
 describe('omnichannel inbox assignee filters', () => {
+  it('includes unassigned and other human work in a proved personal inbox only when the personal inbox view is requested', () => {
+    const shared = {
+      inbox_id: 8,
+      meta: { assignee: { id: 99 }, assignee_type: 'User' },
+    };
+    expect(matchesAssigneeFilter(shared, 'me', 42, [8], true)).toBe(true);
+    expect(matchesAssigneeFilter(shared, 'me', 42, [], true)).toBe(false);
+    expect(matchesAssigneeFilter(shared, 'me', 42, [8])).toBe(false);
+    expect(
+      matchesAssigneeFilter({ inbox_id: 8, meta: {} }, 'me', 42, [8], true)
+    ).toBe(true);
+    expect(
+      matchesAssigneeFilter(
+        {
+          ...shared,
+          meta: { assignee: { id: 99 }, assignee_type: 'AgentBot' },
+        },
+        'me',
+        42,
+        [8],
+        true
+      )
+    ).toBe(false);
+  });
   it('treats an AgentBot assignment as lacking a human owner without exposing it as personal or shared work', () => {
     const conversation = {
       inbox_id: 8,

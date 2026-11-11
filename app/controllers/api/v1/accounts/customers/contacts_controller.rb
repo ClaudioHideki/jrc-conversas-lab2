@@ -2,7 +2,7 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
   before_action :set_contact, only: [:show, :update, :duplicates, :overview, :timeline, :merge]
 
   def index
-    scope = Current.account.contacts
+    scope = directory_people
     scope = scope.where(company_id: corporate_companies.find(params[:company_id]).id) if params[:company_id].present?
     scope = scope.where(company_id: nil) if params[:unlinked] == 'true'
     scope = JrcCustomers::ContactQuery.new(account: Current.account, scope: scope, query: params[:q]).call
@@ -72,7 +72,7 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
     authorize_admin!
     raise ActionController::BadRequest, 'Explicit confirmation required' unless params[:confirm] == true
 
-    source = Current.account.contacts.find(params.require(:source_contact_id))
+    source = directory_people.find(params.require(:source_contact_id))
     ContactMergeAction.new(account: Current.account, base_contact: @contact, mergee_contact: source).perform
     render json: { payload: serializer.contact(@contact.reload) }
   end
@@ -85,7 +85,11 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
   private
 
   def set_contact
-    @contact = Current.account.contacts.find(params[:id])
+    @contact = directory_people.find(params[:id])
+  end
+
+  def directory_people
+    JrcBroker::GroupContactAccess.new(account: Current.account, user: Current.user).excluding_groups(Current.account.contacts)
   end
 
   def contact_params

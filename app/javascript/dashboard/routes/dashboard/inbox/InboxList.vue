@@ -30,13 +30,17 @@ const { t } = useI18n();
 
 const page = ref(1);
 const resolveStatus = value =>
-  ['open', 'pending', 'all'].includes(value)
-    ? value
-    : wootConstants.STATUS_TYPE.OPEN;
+  ['open', 'pending', 'all'].includes(value) ? value : 'all';
 const statusFilter = ref(resolveStatus(route.query.status));
 const channelFilter = ref(route.query.channel || 'all');
 const assigneeFilter = ref(ASSIGNEE_FILTERS.ME);
+const personalInboxView = computed(() =>
+  [ASSIGNEE_FILTERS.ME, ASSIGNEE_FILTERS.MINE_OR_SHARED].includes(
+    assigneeFilter.value
+  )
+);
 const sharedScope = ref({ enabled: false, inbox_ids: [] });
+const memberInboxIds = ref([]);
 const admittedSharedConversations = ref(new Set());
 const supervisedInboxIds = ref([]);
 const voiceCalls = ref([]);
@@ -140,6 +144,7 @@ const statusFilterOptions = computed(() => [
 const conversationFilters = computed(() => ({
   assigneeType: assigneeFilter.value,
   includeParticipating: true,
+  inboxScope: personalInboxView.value ? 'member' : undefined,
   status: statusFilter.value,
   sortBy: wootConstants.SORT_BY_TYPE.LAST_ACTIVITY_AT_DESC,
   page: page.value,
@@ -157,6 +162,9 @@ const sharingIdentity = conversation =>
   ]);
 
 const acceptSharedScope = scope => {
+  memberInboxIds.value = Array.isArray(scope?.member_inbox_ids)
+    ? scope.member_inbox_ids.filter(id => Number.isSafeInteger(id) && id > 0)
+    : [];
   supervisedInboxIds.value = Array.isArray(scope?.supervised_inbox_ids)
     ? scope.supervised_inbox_ids.filter(
         id => Number.isSafeInteger(id) && id > 0
@@ -245,6 +253,11 @@ const conversations = computed(() => {
         inbox => Number(inbox.id) === Number(conversation.inbox_id)
       )
     )
+    .filter(
+      conversation =>
+        !personalInboxView.value ||
+        memberInboxIds.value.includes(Number(conversation.inbox_id))
+    )
     .filter(conversation =>
       matchesAssigneeFilter(
         conversation,
@@ -252,7 +265,8 @@ const conversations = computed(() => {
         currentUser.value?.id,
         admittedSharedConversations.value.has(sharingIdentity(conversation))
           ? sharedScope.value.inbox_ids
-          : []
+          : [],
+        personalInboxView.value
       )
     );
 
@@ -295,11 +309,7 @@ const canLoadMore = computed(
 // Keep admitted rows stable while refreshing. New rows remain fenced until the
 // response, and errors/revocations still remove the grant. Coalesce event bursts.
 const refreshSharedScope = async () => {
-  if (
-    isInitializing.value ||
-    assigneeFilter.value !== ASSIGNEE_FILTERS.MINE_OR_SHARED
-  )
-    return;
+  if (isInitializing.value || !personalInboxView.value) return;
   sharingGeneration += 1;
   const request = sharingGeneration;
   const generation = accountGeneration;
@@ -311,7 +321,10 @@ const refreshSharedScope = async () => {
   sharingRequest = true;
   sharingDirty = false;
   try {
-    const response = await ConversationAPI.sharedContext(accountId.value);
+    const response = await ConversationAPI.sharedContext(
+      accountId.value,
+      'member'
+    );
     if (request === sharingGeneration && generation === accountGeneration)
       acceptSharedScope(response.data?.meta?.shared_scope);
   } catch {
@@ -340,8 +353,7 @@ const fetchConversations = async ({ reset = false } = {}) => {
     if (
       generation === accountGeneration &&
       request === listGeneration &&
-      (data?.meta?.shared_scope ||
-        assigneeFilter.value === ASSIGNEE_FILTERS.MINE_OR_SHARED)
+      (data?.meta?.shared_scope || personalInboxView.value)
     ) {
       acceptSharedScope(data?.meta?.shared_scope);
     }
@@ -424,7 +436,7 @@ const setStatusFilter = async key => {
   statusFilter.value = resolved;
   await replaceInboxRoute({
     ...route.query,
-    status: resolved === wootConstants.STATUS_TYPE.OPEN ? undefined : resolved,
+    status: resolved === 'all' ? undefined : resolved,
   });
 };
 
@@ -527,6 +539,7 @@ watch(
     contactCenterContext.value = null;
     voiceError.value = false;
     sharedScope.value = { enabled: false, inbox_ids: [] };
+    memberInboxIds.value = [];
     admittedSharedConversations.value = new Set();
     store.dispatch('clearSelectedState');
     store.dispatch('emptyAllConversations');
@@ -535,7 +548,10 @@ watch(
     if (version !== accountGeneration) return;
 
     try {
-      const response = await ConversationAPI.sharedContext(accountId.value);
+      const response = await ConversationAPI.sharedContext(
+        accountId.value,
+        'member'
+      );
       if (version !== accountGeneration) return;
       acceptSharedScope(response.data?.meta?.shared_scope);
     } catch {

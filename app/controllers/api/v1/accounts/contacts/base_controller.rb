@@ -4,6 +4,7 @@ class Api::V1::Accounts::Contacts::BaseController < Api::V1::Accounts::BaseContr
   private
 
   def ensure_contact
-    @contact = Current.account.contacts.find(params[:contact_id])
+    @contact = JrcBroker::GroupContactAccess.new(account: Current.account, user: Current.user || @resource)
+                                            .restrict(Current.account.contacts).find(params[:contact_id])
   end
 end

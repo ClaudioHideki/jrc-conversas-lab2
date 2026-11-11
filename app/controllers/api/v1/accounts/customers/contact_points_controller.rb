@@ -32,7 +32,8 @@ class Api::V1::Accounts::Customers::ContactPointsController < Api::V1::Accounts:
   private
 
   def set_contact
-    @contact = Current.account.contacts.find(params[:contact_id])
+    @contact = JrcBroker::GroupContactAccess.new(account: Current.account, user: Current.user)
+                                            .excluding_groups(Current.account.contacts).find(params[:contact_id])
   end
 
   def point_params

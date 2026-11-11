@@ -22,6 +22,11 @@ class JrcBroker::HistoryImport
       raise ArgumentError, 'scope' unless conversation.inbox_id == inbox.id
 
       message = persist_message(conversation, input)
+      # The conversation is already locked: older pages/replays cannot move its
+      # clock backwards. Skip callbacks and leave operational state untouched.
+      if message.created_at > conversation.last_activity_at
+        conversation.update_columns(last_activity_at: message.created_at) # rubocop:disable Rails/SkipsModelValidations
+      end
       receipt_scope(inbox, input).merge(conversation_id: conversation.display_id,
                                         broker_message_id: input.fetch('broker_message_id'), id: message.id)
     end
@@ -88,16 +93,7 @@ class JrcBroker::HistoryImport
   end
 
   def scope!(inbox_id, organization_id, integration_id)
-    @authority.authorize!(lock: true)
-    account = @authority.account
-    raise ActiveRecord::RecordNotFound unless JrcBroker::Configuration.enabled? && account.feature_enabled?('jrc_broker')
-    raise ArgumentError, 'identity' unless [organization_id, integration_id].all? { |value| UUID.match?(value.to_s) }
-
-    integration = JrcBrokerIntegration.lock('FOR SHARE').find_by!(account_id: account.id)
-    binding = JrcBrokerInboxBinding.lock('FOR SHARE').find_by!(account_id: account.id, inbox_id: Integer(inbox_id))
-    raise ArgumentError, 'scope' unless integration.organization_id == organization_id && binding.integration_id == integration_id
-
-    account.inboxes.lock('FOR SHARE').where(channel_type: 'Channel::Api').find(binding.inbox_id)
+    JrcBroker::HistoryScope.new(@authority).call(inbox_id, organization_id, integration_id).inbox
   end
 
   def validate!(input)
