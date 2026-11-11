@@ -52,9 +52,9 @@ RSpec.describe 'WhatsApp Cloud eligible retry', type: :request do
     expect(response).to have_http_status(:accepted)
     attempt = WhatsappRetryAttempt.find(response.parsed_body.dig('retry', 'attempt_id'))
     expect(attempt.state).to eq('queued')
-    allow(WhatsappRetryJob).to receive(:perform_later)
+    allow(WhatsappRetryJob).to receive(:perform_later).and_call_original
     WhatsappRetryRecoveryJob.perform_now
-    expect(WhatsappRetryJob).to have_received(:perform_later).with(attempt.id)
+    expect(enqueued_jobs).to include(hash_including(job: WhatsappRetryJob, args: [attempt.id]))
   end
 
   context 'when processing the queued attempt' do
@@ -157,6 +157,19 @@ RSpec.describe 'WhatsApp Cloud eligible retry', type: :request do
       end
       expect(attempt.message.reload).to be_read
       expect(message.reload).to be_failed
+    end
+
+    it 'R07 refuses to update a retry through the callback of another inbox' do
+      attempt = WhatsappRetryAttempt.last
+      stub_request(:post, post_url).to_return(status: 200, body: { messages: [{ id: 'wamid.synthetic-scoped' }] }.to_json,
+                                            headers: { 'Content-Type' => 'application/json' })
+      WhatsappRetryJob.perform_now(attempt.id)
+      other = create(:channel_whatsapp, account: create(:account), provider: 'whatsapp_cloud',
+                                       sync_templates: false, validate_provider_config: false)
+      callback = { entry: [{ changes: [{ value: { statuses: [{ id: 'wamid.synthetic-scoped', status: 'delivered' }] } }] }] }.with_indifferent_access
+      Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: other.inbox, params: callback).perform
+      expect(attempt.message.reload).to be_sent
+      expect(attempt.reload.state).to eq('accepted')
     end
 
     it 'R08 never reclaims a stale submission for another POST' do
