@@ -33,9 +33,8 @@ class Whatsapp::RetryReceiptService
           end
         end
         true
-      elsif @inbox.messages.exists?(source_id: source_id)
-        false
-      elsif WhatsappRetryAttempt.where(inbox_id: @inbox.id, state: %w[submitting unknown]).exists?
+      elsif !@inbox.messages.exists?(source_id: source_id) &&
+            WhatsappRetryAttempt.where(inbox_id: @inbox.id, state: %w[submitting unknown]).exists?
         WhatsappRetryReceipt.create_or_find_by!(inbox_id: @inbox.id, source_id: source_id, status: status) do |receipt|
           receipt.error_code = code
         end
