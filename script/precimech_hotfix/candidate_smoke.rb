@@ -120,7 +120,8 @@ batch_ids = contacts.map do |contact|
   request.body = { inbox_id: inbox.id, contact_id: contact.id, assignee_id: agent.id,
                    message: { content: 'Synthetic batch', template_params: template } }.to_json
   response = Net::HTTP.start(create_uri.host, create_uri.port, open_timeout: 3, read_timeout: 30) { |http| http.request(request) }
-  raise 'Batch contact request was not accepted' unless response.code == '200'
+  raise "Batch contact request was not accepted (HTTP #{response.code})" unless response.code == '200'
+  %w[access-token client uid].each { |key| headers[key] = response[key] if response[key].present? }
 
   created = Conversation.find_by!(account: account, display_id: JSON.parse(response.body).fetch('id'))
   raise 'Batch conversation belongs to another contact' unless created.contact_id == contact.id

@@ -27,7 +27,7 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
       "#{phone_id_path}/messages",
       headers: api_headers,
       body: request_body.to_json,
-      **(message.additional_attributes.to_h['whatsapp_retry'].present? ? { timeout: 20 } : {})
+      **(message.is_a?(Message) && message.additional_attributes.to_h['whatsapp_retry'].present? ? { timeout: 20 } : {})
     )
 
     process_response(response, message)
@@ -97,7 +97,7 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
   # Retry attempts must distinguish a confirmed rejection from an uncertain result.
   # Other messages retain the existing provider contract.
   def process_response(response, message)
-    return super unless message.additional_attributes.to_h['whatsapp_retry'].present?
+    return super unless message.is_a?(Message) && message.additional_attributes.to_h['whatsapp_retry'].present?
 
     parsed = response.parsed_response
     if response.success? && parsed.is_a?(Hash) && parsed['error'].blank?
