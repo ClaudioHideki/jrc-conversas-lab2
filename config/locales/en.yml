@@ -151,6 +151,10 @@ en:
     slack:
       invalid_channel_id: 'Invalid slack channel. Please try again'
     whatsapp:
+      retry:
+        marketing_restriction: 'Meta restricted marketing delivery (131049). Retry is blocked pending review; later delivery is not guaranteed.'
+        destination_verification_required: 'Message undeliverable (131026). Verify the destination before considering another attempt. Retry is blocked.'
+        retry_unavailable: 'WhatsApp retry is temporarily blocked to preserve the original result and prevent duplicate sends. Review this failure before a new attempt.'
       token_exchange_failed: 'Failed to exchange code for access token. Please try again.'
       invalid_token_permissions: 'The access token does not have the required permissions for WhatsApp.'
       phone_info_fetch_failed: 'Failed to fetch phone number information. Please try again.'

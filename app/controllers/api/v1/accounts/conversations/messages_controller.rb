@@ -27,6 +27,8 @@ class Api::V1::Accounts::Conversations::MessagesController < Api::V1::Accounts::
 
   def retry
     return if message.blank?
+    return render_whatsapp_retry_blocked if @conversation.inbox.channel_type == 'Channel::Whatsapp' &&
+                                           @conversation.inbox.channel.provider == 'whatsapp_cloud'
 
     service = Messages::StatusUpdateService.new(message, 'sent')
     service.perform
@@ -58,6 +60,21 @@ class Api::V1::Accounts::Conversations::MessagesController < Api::V1::Accounts::
   end
 
   private
+
+  # Containment only: never reuse an attempt after a possible provider submission.
+  # Absence of source_id is not proof that a timed-out POST was not accepted.
+  def render_whatsapp_retry_blocked
+    error_code = message.external_error.to_s[/\A\s*(\d{6})(?=\s*:|\s*\z)/, 1]
+    reason = case error_code
+             when '131049' then 'marketing_restriction'
+             when '131026' then 'destination_verification_required'
+             else 'retry_unavailable'
+             end
+    render json: {
+      error: I18n.t("errors.whatsapp.retry.#{reason}"),
+      retry: { status: 'blocked', reason: reason, message_id: message.id, error_code: error_code }
+    }, status: :unprocessable_entity
+  end
 
   def message
     @message ||= @conversation.messages.find(permitted_params[:id])

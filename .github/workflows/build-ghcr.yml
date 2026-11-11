@@ -27,7 +27,15 @@ permissions:
   packages: write
 
 jobs:
+  precimech-regression:
+    if: inputs.component == 'app'
+    uses: ./.github/workflows/precimech-hotfix-tests.yml
+    with:
+      source_sha: ${{ inputs.source_sha }}
+
   build-and-push:
+    needs: precimech-regression
+    if: ${{ !cancelled() && (inputs.component != 'app' || needs.precimech-regression.result == 'success') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     concurrency:

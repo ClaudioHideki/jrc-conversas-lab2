@@ -82,4 +82,66 @@ RSpec.describe 'WhatsApp Cloud retry containment', type: :request do
     expect(response).to have_http_status(:unauthorized)
     expect(message.reload).to be_failed
   end
+  it 'R10 denies a revoked application credential' do
+    headers = agent.create_new_auth_token
+    agent.update!(tokens: {})
+    post retry_path, headers: headers, as: :json
+    expect(response).to have_http_status(:unauthorized)
+    expect(message.reload).to be_failed
+  end
+
+  it 'R11 keeps an existing synthetic attachment readable and preserves its IDs' do
+    attachment = message.attachments.create!(account_id: account.id, file_type: :file,
+                                             file: { io: StringIO.new('synthetic attachment'), filename: 'synthetic.txt', content_type: 'text/plain' })
+    original_ids = [message.id, conversation.id, attachment.id, attachment.file.blob.id]
+    original_checksum = attachment.file.blob.checksum
+    post retry_path, headers: agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect([message.reload.id, conversation.reload.id, attachment.reload.id, attachment.file.blob.id]).to eq(original_ids)
+    expect(attachment.file.download).to eq('synthetic attachment')
+    expect(attachment.file.blob.checksum).to eq(original_checksum)
+  end
+
+  it 'R13 sends a normal pt_BR template through a real Redis queue and serialized Sidekiq wrapper, then handles its callback' do
+    require 'sidekiq/api'
+    channel.update!(message_templates: [{ name: 'reativacao_cliente_01', language: 'pt_BR', status: 'APPROVED',
+                                         category: 'MARKETING', components: [{ type: 'BODY', text: 'Synthetic {{1}}' }] }])
+    normal = create(:message, account: account, inbox: inbox, conversation: conversation, message_type: :outgoing,
+                              source_id: nil, content: 'Synthetic control', additional_attributes: message.additional_attributes)
+    request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages')
+              .with do |http|
+      body = JSON.parse(http.body)
+      body['type'] == 'template' && body.dig('template', 'name') == 'reativacao_cliente_01' &&
+        body.dig('template', 'language', 'code') == 'pt_BR' &&
+        body.dig('template', 'components', 0, 'parameters', 0, 'text') == 'Synthetic'
+    end.to_return(status: 200, body: { messages: [{ id: 'wamid.synthetic-control' }] }.to_json,
+                  headers: { 'Content-Type' => 'application/json' })
+
+    original_adapter = SendReplyJob._queue_adapter
+    original_test_adapter = SendReplyJob._test_adapter
+    begin
+      SendReplyJob.disable_test_adapter
+      SendReplyJob.queue_adapter = :sidekiq
+      Sidekiq::Testing.disable! do
+        job = SendReplyJob.perform_later(normal.id)
+        queued = Sidekiq::Queue.new(job.queue_name).find_job(job.provider_job_id)
+        expect(queued).to be_present
+        payload = queued.item['args'].first
+        queued.delete
+        ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper.new.perform(payload)
+      end
+    ensure
+      SendReplyJob.queue_adapter = original_adapter
+      SendReplyJob.enable_test_adapter(original_test_adapter)
+    end
+    expect(request).to have_been_requested.once
+    expect(normal.reload.source_id).to eq('wamid.synthetic-control')
+    expect(message.reload).to be_failed
+    expect(message.source_id).to eq('wamid.synthetic-original')
+
+    callback = { entry: [{ changes: [{ value: { statuses: [{ id: normal.source_id, status: 'delivered' }] } }] }] }.with_indifferent_access
+    Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
+    expect(normal.reload).to be_delivered
+    expect(message.reload).to be_failed
+  end
 end

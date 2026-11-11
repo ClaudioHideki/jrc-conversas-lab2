@@ -57,13 +57,8 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           git merge-base --is-ancestor 4ce8241d35ce862e9d53e9a5dce4df9a1858432c "$SOURCE_SHA"
-      - name: Install test libraries with bounded network timeouts
-        timeout-minutes: 4
-        run: |
-          printf '%s\n' 'https://archive.ubuntu.com/ubuntu' | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
-          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g; s|http://security.ubuntu.com/ubuntu|https://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
-          sudo apt-get -o APT::Update::Error-Mode=any -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 update
-          sudo apt-get -o APT::Update::Error-Mode=any -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 install --no-install-recommends -y libpq-dev libvips
+      - name: Verify runner PostgreSQL build headers
+        run: pg_config --version
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
