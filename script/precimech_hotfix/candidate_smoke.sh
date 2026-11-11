@@ -89,6 +89,27 @@ raise 'Recovered retry receipt regressed after delivery' unless recovered.reload
 raise 'Original transient failure changed' unless Message.find(ids.fetch('eligible_original_id')).failed? && Message.find(ids.fetch('lost_original_id')).failed?
 puts JSON.generate(artifact_retry_callback: 'read', recovered_callback: 'delivered', original_attempts: 'failed')
 RUBY
+# Boot the exact previous installed revision as a read-only reader of the additive schema.
+# No old worker is started: it cannot process the new retry job classes.
+rollback_image=ghcr.io/claudiohideki/jrc-conversas-lab2@sha256:40d8073e0861b156f344c1f4fb882e8472c9560149ef5a353d27a5a4b23fb2d1
+docker pull --platform linux/amd64 "$rollback_image"
+docker run --rm -i --network "$network" "${env_args[@]}" -e SMOKE_IDS="$(cat "$SMOKE_IDS_PATH")" \
+  --entrypoint bundle "$rollback_image" exec rails runner - <<'ROLLBACK_RUBY'
+require 'json'
+raise 'Unexpected rollback revision' unless File.read('/app/.git_sha').strip == '4ce8241d35ce862e9d53e9a5dce4df9a1858432c'
+ids = JSON.parse(ENV.fetch('SMOKE_IDS'))
+ActiveRecord::Base.transaction do
+  ActiveRecord::Base.connection.execute('SET TRANSACTION READ ONLY')
+  %w[original_id eligible_original_id lost_original_id].each { |key| raise 'Original changed on rollback read' unless Message.find(ids.fetch(key)).failed? }
+  raise 'Rollback lost normal message' unless Message.find(ids.fetch('normal_id')).delivered?
+  raise 'Rollback lost retry receipt' unless Message.find(ids.fetch('retry_id')).read?
+  raise 'Rollback lost recovery receipt' unless Message.find(ids.fetch('recovered_id')).delivered?
+  raise 'New job unexpectedly present in old image' if defined?(WhatsappRetryJob)
+end
+puts JSON.generate(rollback_reader_boot: 'passed', additive_schema_read: 'passed', old_worker_new_jobs_supported: false)
+ROLLBACK_RUBY
+
+
 test "$(docker exec "$app" cat /app/.git_sha)" = "$SOURCE_SHA"
 test "$(docker exec "$worker" cat /app/.git_sha)" = "$SOURCE_SHA"
 test "$(docker exec "$app" sha256sum /app/Gemfile.lock)" = "$lock_before"

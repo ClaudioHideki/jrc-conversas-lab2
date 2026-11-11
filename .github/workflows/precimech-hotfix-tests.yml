@@ -101,3 +101,11 @@ jobs:
           app/javascript/dashboard/store/modules/specs/conversations/whatsappRetry.spec.js
           app/javascript/dashboard/components-next/message/specs/MessageError.spec.js
           --maxWorkers=2 --no-file-parallelism
+      - name: Lint dos arquivos frontend do retry
+        run: >-
+          pnpm exec eslint
+          app/javascript/dashboard/components-next/message/Message.vue
+          app/javascript/dashboard/components-next/message/MessageError.vue
+          app/javascript/dashboard/store/modules/conversations/actions.js
+          app/javascript/dashboard/components-next/message/specs/MessageError.spec.js
+          app/javascript/dashboard/store/modules/specs/conversations/whatsappRetry.spec.js

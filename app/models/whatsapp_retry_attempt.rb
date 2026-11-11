@@ -7,17 +7,17 @@ class WhatsappRetryAttempt < ApplicationRecord
 
   def transition!(state, error_code: nil)
     update!(state: state)
-    metadata = { 'attempt_id' => id, 'original_message_id' => original_message_id, 'state' => state, 'next_check_at' => next_attempt_at&.iso8601 }
+    metadata = { 'attempt_id' => id, 'original_message_id' => original_message_id, 'state' => state,
+                 'next_check_at' => next_attempt_at&.iso8601 }
     attributes = { additional_attributes: message.reload.additional_attributes.merge('whatsapp_retry' => metadata) }
     if %w[accepted delivered read].include?(state)
       attributes.merge!(status: state == 'accepted' ? :sent : state, external_error: nil)
+    elsif state == 'failed'
+      explanation = [error_code.presence, I18n.t('errors.whatsapp.retry.provider_rejected')].compact.join(': ')
+      attributes.merge!(status: :failed, external_error: explanation)
     else
-      attributes[:status] = :failed
-      attributes[:external_error] = if state == 'failed'
-                                      error_code.present? ? "#{error_code}: #{I18n.t('errors.whatsapp.retry.provider_rejected')}" : I18n.t('errors.whatsapp.retry.provider_rejected')
-                                    elsif %w[unknown cancelled].include?(state)
-                                      I18n.t("errors.whatsapp.retry.#{state}")
-                                    end
+      explanation = I18n.t("errors.whatsapp.retry.#{state}") if %w[unknown cancelled].include?(state)
+      attributes.merge!(status: :failed, external_error: explanation)
     end
     message.update!(attributes)
   end

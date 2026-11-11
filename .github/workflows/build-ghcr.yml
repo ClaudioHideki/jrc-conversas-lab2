@@ -235,8 +235,17 @@ jobs:
           require 'grpc'
           require 'pg'
           require 'nokogiri'
+          puts JSON.generate(verified_files_sha256: expected)
           puts JSON.generate(verified_product_files: expected.size, migrations: 9, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
           RUBY
+
+      - name: Autenticar GHCR para leitura da imagem anterior no smoke isolado
+        if: inputs.component == 'app'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Smoke do artefato exato com app, worker e transporte falso
         if: inputs.component == 'app'
