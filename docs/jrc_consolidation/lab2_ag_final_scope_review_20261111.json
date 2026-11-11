@@ -68,7 +68,7 @@
       "path": "app/javascript/dashboard/routes/dashboard/contacts/pages/spec/ContactsIndex.spec.js",
       "group": "native_contact_controls_and_localization",
       "captured_working_change": true,
-      "canonical_sha256": "8a2880cdd5ca98fdf081a4716444734c93ebd7956cc098481e8efa4a0daff2bc"
+      "canonical_sha256": "fe3ecb1028a871ce8fdedec427098bd5a96335997f77a85bacdd64ac54036851"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/crm/views/deals/DealsIndex.vue",
@@ -423,7 +423,8 @@
     "examples": 2484,
     "failures": 2,
     "pending": 0,
-    "cause": "Two older selectors still used Portuguese literal captions after native localization. Only selectors now read the authoritative English locale; disabled/title and legacy profile route assertions remain unchanged. The three new bulk-control tests passed."
+    "cause": "Two older selectors still used Portuguese literal captions after native localization. Only selectors now read the authoritative English locale; disabled/title and legacy profile route assertions remain unchanged. The three new bulk-control tests passed.",
+    "locale_labels_constant": "Short authoritative locale reference preserves the existing Prettier line layout and all action assertions."
   },
   "validation_status": "Pending all gates on the new exact SHA; prior partial runs are not final acceptance."
 }

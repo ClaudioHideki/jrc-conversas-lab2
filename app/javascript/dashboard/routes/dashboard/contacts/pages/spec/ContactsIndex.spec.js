@@ -10,6 +10,8 @@ import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import BulkActionsAPI from 'dashboard/api/bulkActions';
 import crmLocale from 'dashboard/i18n/locale/en/crm.json';
 
+const contactLabels = crmLocale.CRM.CONTACT_LEAD.UI;
+
 vi.mock('dashboard/api/bulkActions', () => ({ default: { create: vi.fn() } }));
 
 vi.mock('vue-router', () => ({ useRoute: vi.fn(), useRouter: vi.fn() }));
@@ -509,8 +511,8 @@ describe('Relationship center pagination', () => {
         wrapper.get(`[data-contact-view="${view}"]`).element.disabled
       ).toBe(false);
     });
-    expect(button(crmLocale.CRM.CONTACT_LEAD.UI.CALENDAR).element.disabled).toBe(true);
-    expect(button(crmLocale.CRM.CONTACT_LEAD.UI.CALENDAR).attributes('title')).toBe(
+    expect(button(contactLabels.CALENDAR).element.disabled).toBe(true);
+    expect(button(contactLabels.CALENDAR).attributes('title')).toBe(
       'This action is not available in this view.'
     );
     expect(wrapper.text()).toContain(
@@ -573,7 +575,7 @@ describe('Relationship center pagination', () => {
     ) => feature !== 'jrc_customer_master';
     wrapper = page();
     await flushPromises();
-    await button(crmLocale.CRM.CONTACT_LEAD.UI.FULL_PROFILE).trigger('click');
+    await button(contactLabels.FULL_PROFILE).trigger('click');
     expect(
       wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()
     ).toBe(false);
