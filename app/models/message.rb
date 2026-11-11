@@ -396,7 +396,7 @@ class Message < ApplicationRecord
   end
 
   def send_reply
-    return if additional_attributes['whatsapp_retry'].present?
+    return if additional_attributes.to_h['whatsapp_retry'].present?
 
     # FIXME: Giving it few seconds for the attachment to be uploaded to the service
     # active storage attaches the file only after commit

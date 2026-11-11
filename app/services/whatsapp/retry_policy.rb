@@ -27,8 +27,8 @@ class Whatsapp::RetryPolicy
     return 'retry_unavailable' if cooldown && message.updated_at > 60.seconds.ago
     return 'retry_unavailable' unless message.sender_type == 'User' && message.attachments.empty?
     return 'retry_unavailable' if message.content_attributes.except('external_error', 'in_reply_to', 'in_reply_to_external_id').present?
-    return 'retry_unavailable' if message.additional_attributes.except('template_params').present?
-    return 'retry_unavailable' unless valid_template?(message.additional_attributes['template_params'], channel.message_templates)
+    return 'retry_unavailable' if message.additional_attributes.to_h.except('template_params').present?
+    return 'retry_unavailable' unless valid_template?(message.additional_attributes.to_h['template_params'], channel.message_templates)
 
     nil
   end

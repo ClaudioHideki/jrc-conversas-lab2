@@ -17,7 +17,7 @@ class SendReplyJob < ApplicationJob
 
   def perform(message_id)
     message = Message.find(message_id)
-    return if message.additional_attributes['whatsapp_retry'].present?
+    return if message.additional_attributes.to_h['whatsapp_retry'].present?
 
     if message.content_attributes.to_h['jrc_flow_run_id']
       return JrcFlows::Delivery.new(message).perform { deliver(message) }

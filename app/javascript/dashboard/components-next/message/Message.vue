@@ -585,7 +585,7 @@ provideMessageContext({
       </div>
       <MessageError
         v-if="
-          contentAttributes.externalError || additionalAttributes.whatsappRetry
+          contentAttributes.externalError || additionalAttributes?.whatsappRetry
         "
         class="[grid-area:meta]"
         :class="flexOrientationClass"

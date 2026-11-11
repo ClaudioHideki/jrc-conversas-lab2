@@ -69,6 +69,15 @@ describe('WhatsApp failure explanation', () => {
     expect(wrapper.text()).not.toContain('Verify the destination');
   });
 
+  it('preserves a legacy failure when optional metadata is null', () => {
+    useMessageContext().additionalAttributes.value = null;
+    const wrapper = mount(MessageError, {
+      props: { error: '131026: Synthetic destination' },
+    });
+    expect(wrapper.text()).toContain('131026');
+    expect(wrapper.find('button').exists()).toBe(false);
+  });
+
   it('retains the retry control for an unrelated existing error', () => {
     const wrapper = mount(MessageError, {
       props: { error: 'Synthetic email error' },

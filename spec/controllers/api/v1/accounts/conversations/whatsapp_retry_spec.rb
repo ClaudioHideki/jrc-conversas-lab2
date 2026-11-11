@@ -131,6 +131,17 @@ RSpec.describe 'WhatsApp Cloud retry containment', type: :request do
     expect(message.reload.additional_attributes).to be_nil
   end
 
+  it 'returns a structured denial for legacy metadata without inventing a new attempt' do
+    message.update!(sender: agent, content_attributes: { external_error: '130429: Synthetic limit' }, updated_at: 2.minutes.ago)
+    message.update_column(:additional_attributes, nil)
+    original = message.reload.attributes.deep_dup
+    post retry_path, headers: agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.dig('retry', 'status')).to eq('blocked')
+    expect(message.reload.attributes).to eq(original)
+    expect(WhatsappRetryAttempt.where(original_message: message)).not_to exist
+  end
+
   it 'R13 sends a normal pt_BR template through a real Redis queue and serialized Sidekiq wrapper, then handles its callback' do
     require 'sidekiq/api'
     channel.update!(message_templates: [{ name: 'reativacao_cliente_01', language: 'pt_BR', status: 'APPROVED',
