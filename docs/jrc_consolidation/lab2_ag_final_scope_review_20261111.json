@@ -68,7 +68,7 @@
       "path": "app/javascript/dashboard/routes/dashboard/contacts/pages/spec/ContactsIndex.spec.js",
       "group": "native_contact_controls_and_localization",
       "captured_working_change": true,
-      "canonical_sha256": "f82bc67291709201774e5b077da01993026b517d1ac791154ef697fe549f75b5"
+      "canonical_sha256": "8a2880cdd5ca98fdf081a4716444734c93ebd7956cc098481e8efa4a0daff2bc"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/crm/views/deals/DealsIndex.vue",
@@ -415,5 +415,15 @@
   "production_modified": false,
   "all_Word_acceptance_complete": false,
   "remote_followup_parent": "b8d753edb5a197b7f6091766f3cffb7128d9fb92",
-  "remote_followup": "The candidate image now requires both successful native A-G and Projects/Portal workflow runs on the exact same SHA and branch, as the main release already does. No build or publication is dispatched."
+  "remote_followup": "The candidate image now requires both successful native A-G and Projects/Portal workflow runs on the exact same SHA and branch, as the main release already does. No build or publication is dispatched.",
+  "selector_regression": {
+    "previous_sha": "514ef9f873021d219b23be0e2f8f518c48a0106f",
+    "run": 43014799739,
+    "artifact": 13852083387,
+    "examples": 2484,
+    "failures": 2,
+    "pending": 0,
+    "cause": "Two older selectors still used Portuguese literal captions after native localization. Only selectors now read the authoritative English locale; disabled/title and legacy profile route assertions remain unchanged. The three new bulk-control tests passed."
+  },
+  "validation_status": "Pending all gates on the new exact SHA; prior partial runs are not final acceptance."
 }
