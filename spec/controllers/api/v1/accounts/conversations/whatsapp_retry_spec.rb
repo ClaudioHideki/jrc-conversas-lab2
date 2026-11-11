@@ -103,6 +103,34 @@ RSpec.describe 'WhatsApp Cloud retry containment', type: :request do
     expect(attachment.file.blob.checksum).to eq(original_checksum)
   end
 
+  it 'R09 keeps normal session delivery working with nullable historical metadata' do
+    create(:message, account: account, inbox: inbox, conversation: conversation, message_type: :incoming)
+    legacy = create(:message, account: account, inbox: inbox, conversation: conversation,
+                              message_type: :outgoing, source_id: nil, status: :sent, content: 'Synthetic legacy text')
+    legacy.update_column(:additional_attributes, nil)
+    request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages')
+              .to_return(status: 200, body: { messages: [{ id: 'wamid.synthetic-legacy' }] }.to_json,
+                          headers: { 'Content-Type' => 'application/json' })
+    SendReplyJob.perform_now(legacy.id)
+    expect(request).to have_been_requested.once
+    expect(legacy.reload.source_id).to eq('wamid.synthetic-legacy')
+  end
+
+  it 'R09 keeps ordinary callbacks working with nullable historical metadata' do
+    message.update_column(:additional_attributes, nil)
+    callback = { entry: [{ changes: [{ value: { statuses: [{ id: message.source_id, status: 'delivered' }] } }] }] }.with_indifferent_access
+    Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
+    expect(message.reload).to be_delivered
+  end
+
+  it 'R11 keeps the message list readable with nullable historical metadata' do
+    message.update_column(:additional_attributes, nil)
+    get retry_path.sub("/#{message.id}/retry", ''), headers: agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('payload').map { |item| item['id'] }).to include(message.id)
+    expect(message.reload.additional_attributes).to be_nil
+  end
+
   it 'R13 sends a normal pt_BR template through a real Redis queue and serialized Sidekiq wrapper, then handles its callback' do
     require 'sidekiq/api'
     channel.update!(message_templates: [{ name: 'reativacao_cliente_01', language: 'pt_BR', status: 'APPROVED',
