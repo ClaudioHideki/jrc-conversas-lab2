@@ -1,0 +1,30 @@
+name: One isolated Ubuntu connectivity diagnostic
+on:
+  push:
+    branches: [codex/diag-ubuntu-connectivity-20261111-6195]
+permissions:
+  contents: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: One bounded DNS HTTPS and signed APT proof
+        run: python3 -B .github/scripts/ubuntu_connectivity_probe.py --output "$RUNNER_TEMP/jrc-connectivity-$GITHUB_RUN_ID"
+      - name: Preserve the diagnostic even on connectivity failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu-connectivity-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/jrc-connectivity-${{ github.run_id }}/report.json
+            ${{ runner.temp }}/jrc-connectivity-${{ github.run_id }}/summary.txt
+            ${{ runner.temp }}/jrc-connectivity-${{ github.run_id }}/attempts.jsonl
+            ${{ runner.temp }}/jrc-connectivity-${{ github.run_id }}/attempts.tsv
+            ${{ runner.temp }}/jrc-connectivity-${{ github.run_id }}/metadata/*.InRelease
+            ${{ runner.temp }}/jrc-connectivity-${{ github.run_id }}/apt-*/apt-update.log
+          if-no-files-found: warn
