@@ -43,7 +43,9 @@ describe('WhatsApp failure explanation', () => {
 
   it('preserves the existing retry control for the same error on a non-Cloud provider', () => {
     useMessageContext().isWhatsappCloud.value = false;
-    const wrapper = mount(MessageError, { props: { error: '131026: Synthetic undeliverable' } });
+    const wrapper = mount(MessageError, {
+      props: { error: '131026: Synthetic undeliverable' },
+    });
     expect(wrapper.find('button').exists()).toBe(true);
     expect(wrapper.text()).not.toContain('Verify the destination');
   });

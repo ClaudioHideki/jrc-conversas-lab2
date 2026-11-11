@@ -12,8 +12,15 @@ const props = defineProps({
 
 const emit = defineEmits(['retry']);
 
-const { orientation, status, createdAt, content, attachments, meta } =
-  useMessageContext();
+const {
+  orientation,
+  status,
+  createdAt,
+  content,
+  attachments,
+  meta,
+  isWhatsappCloud,
+} = useMessageContext();
 
 const { t } = useI18n();
 

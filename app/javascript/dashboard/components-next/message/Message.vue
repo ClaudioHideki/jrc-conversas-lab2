@@ -521,6 +521,11 @@ onMounted(setupHighlightTimer);
 
 provideMessageContext({
   ...toRefs(props),
+  isWhatsappCloud: computed(
+    () =>
+      inbox.value.channel_type === 'Channel::Whatsapp' &&
+      inbox.value.provider === 'whatsapp_cloud'
+  ),
   isPrivate: computed(() => props.private),
   variant,
   orientation,
