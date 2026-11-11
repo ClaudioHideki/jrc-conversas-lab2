@@ -88,3 +88,9 @@ test('an equal-to-base unreviewed migration stays blocked', () => {
   input.baseMigrationPaths = [];
   assert.throws(() => validateHistoricalMigrationAdmission(input), /must sort after/);
 });
+
+test('rejects a new migration inside the gap between main and the audited import', () => {
+  const { input } = fixture();
+  input.addedPaths.push('db/migrate/20261109220000_unreviewed_gap.rb');
+  assert.throws(() => validateHistoricalMigrationAdmission(input), /must sort after audited history 20261110190000/);
+});

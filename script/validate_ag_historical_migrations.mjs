@@ -65,6 +65,12 @@ export function validateHistoricalMigrationAdmission({
       throw new Error('Audited SQL dependency changed: ' + item.path);
     }
   }
+  const reviewedBoundary = sorted([strict.baseSchemaVersion, ...entries.map(item => item.version)]).at(-1);
+  for (const name of added.filter(path => !original.includes(path))) {
+    if (migrationPath.exec(name)[1] <= reviewedBoundary) {
+      throw new Error('Unreviewed migration ' + name + ' must sort after audited history ' + reviewedBoundary + '.');
+    }
+  }
   // Every unlisted migration still goes through the unchanged strict timestamp policy.
   const forward = validateNewMigrationTimestamps(baseSchema, added.filter(name => !historical.has(name)));
   return {
