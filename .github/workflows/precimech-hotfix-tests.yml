@@ -56,7 +56,11 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           git merge-base --is-ancestor 4ce8241d35ce862e9d53e9a5dce4df9a1858432c "$SOURCE_SHA"
-      - run: sudo apt-get update && sudo apt-get install -y libpq-dev libvips libvips-dev
+      - name: Install test libraries with bounded network timeouts
+        timeout-minutes: 4
+        run: |
+          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 update
+          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 install -y libpq-dev libvips libvips-dev
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
@@ -74,3 +78,25 @@ jobs:
           spec/jobs/send_reply_job_spec.rb
       - name: Ensure source remains clean
         run: git diff --exit-code
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - run: pnpm install --frozen-lockfile
+      - name: Retry store and component regressions
+        run: >-
+          pnpm exec vitest run
+          app/javascript/dashboard/store/modules/specs/conversations/actions.spec.js
+          app/javascript/dashboard/store/modules/specs/conversations/whatsappRetry.spec.js
+          app/javascript/dashboard/components-next/message/specs/MessageError.spec.js
+          --maxWorkers=2 --no-file-parallelism
