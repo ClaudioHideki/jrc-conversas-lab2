@@ -4,7 +4,7 @@ require 'json'
 # Test transport only, mounted read-only at runtime; never copied into the image.
 module PrecimechSmokeTransport
   def get(url, options = {})
-    raise 'Unexpected smoke GET' unless url == 'https://graph.facebook.com/v14.0/synthetic-business/message_templates'
+    raise 'Unexpected smoke GET' unless url == 'https://graph.facebook.com/v14.0/123456789/message_templates'
     raise 'Unexpected template query' unless options.dig(:query, :name) == 'reativacao_cliente_01'
     response = Struct.new(:parsed_response).new({
       'data' => [{ 'name' => 'reativacao_cliente_01', 'language' => 'pt_BR', 'status' => 'APPROVED',

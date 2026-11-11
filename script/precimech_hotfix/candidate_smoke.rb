@@ -14,8 +14,9 @@ account = FactoryBot.create(:account)
 agent = FactoryBot.create(:user, account: account, role: :agent)
 channel = FactoryBot.create(:channel_whatsapp, account: account, provider: 'whatsapp_cloud',
                                               provider_config: { api_key: 'test_key', phone_number_id: '123456789',
-                                                                 business_account_id: 'synthetic-business' },
+                                                                 business_account_id: '123456789' },
                                               sync_templates: false, validate_provider_config: false)
+raise 'Unexpected effective fixture business ID' unless channel.reload.provider_config['business_account_id'] == '123456789'
 inbox = channel.inbox
 FactoryBot.create(:inbox_member, inbox: inbox, user: agent)
 conversation = FactoryBot.create(:conversation, inbox: inbox, account: account)
@@ -75,6 +76,11 @@ attempt = WhatsappRetryAttempt.find(results.first.fetch('attempt_id'))
   break if attempt.reload.state == 'read'
   sleep 1
 end
+warn JSON.generate(retry_smoke_diagnostic: {
+  state: attempt.state, source_id_present: attempt.message.reload.source_id.present?,
+  validation_failures: attempt.validation_failures, next_check_at: attempt.next_attempt_at,
+  posts: Redis.new(url: ENV.fetch('REDIS_URL')).get('precimech_smoke_posts')
+}) unless attempt.state == 'read'
 raise 'Real worker lost early callback or duplicated correlation' unless attempt.reload.state == 'read' &&
                                                                        attempt.message.source_id == 'wamid.synthetic-retry'
 raise 'Eligible original changed' unless eligible.reload.attributes == eligible_original

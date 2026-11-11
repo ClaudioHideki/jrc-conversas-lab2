@@ -46,7 +46,7 @@ env_args=(-e RAILS_ENV=production -e NODE_ENV=production -e SECRET_KEY_BASE -e A
   -e ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY -e ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT \
   -e DATABASE_URL="postgresql://postgres:synthetic_test_only@$pg:5432/precimech_candidate_test" -e POSTGRES_HOST="$pg" -e POSTGRES_PORT=5432 -e POSTGRES_DATABASE -e POSTGRES_USERNAME -e POSTGRES_PASSWORD \
   -e REDIS_URL="redis://$redis:6379/0" -e ACTIVE_STORAGE_SERVICE=local -e FORCE_SSL=false -e FRONTEND_URL=http://localhost:13000 \
-  -e RAILS_LOG_TO_STDOUT=true -e LOG_LEVEL=error)
+  -e RAILS_LOG_TO_STDOUT=true -e LOG_LEVEL=warn)
 lock_before=$(docker run --rm --network none --entrypoint sha256sum "$image" /app/Gemfile.lock)
 docker run --rm --network none --entrypoint bundle "$image" check
 # Actual image entrypoint and default bundle install. Internal network prevents dependency downloads; checksum detects lockfile drift.
