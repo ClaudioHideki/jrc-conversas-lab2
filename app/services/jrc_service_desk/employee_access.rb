@@ -2,7 +2,7 @@
 
 # Explicit native membership roster, not an email/domain or a company-name match.
 class JrcServiceDesk::EmployeeAccess
-  READ_CAPABILITIES = %i[module_view tickets_view tickets_create notes_view notes_add history_view sla_view lookups_view customers_view].freeze
+  READ_CAPABILITIES = %i[module_view tickets_view tickets_create notes_view notes_add history_view sla_view lookups_view].freeze
 
   def self.isolated_configurations(context)
     return {} unless context.account && context.account_user

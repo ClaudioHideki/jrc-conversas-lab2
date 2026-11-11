@@ -104,6 +104,14 @@ RSpec.describe 'Employee-only Service Desk and Portal boundary', type: :request 
     expect(response).to have_http_status(:forbidden)
   end
 
+  it 'does not expose customer or establishment pickers to an employee through direct native URLs' do
+    get "#{path}/establishments", params: { unit_id: sd_unit.id }, headers: headers
+    expect(response).to have_http_status(:forbidden)
+    get "#{path}/requester_people", params: { unit_id: sd_unit.id, company_id: company.id }, headers: headers
+    expect(response).to have_http_status(:forbidden)
+    expect(response.body).not_to include(company.name)
+  end
+
   it 'fails closed for a new or removed roster member instead of reverting to unrestricted customer access' do
     values = sd_account.reload.internal_attributes.deep_dup
     values[JrcServiceDesk::InternalIntake::KEY][sd_unit.id.to_s]['employee_account_user_ids'].delete(sd_account_user.id)
