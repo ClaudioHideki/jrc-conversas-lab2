@@ -43,6 +43,8 @@ Resposta de persistência: `protocol: "jrc-history-sync/2"`, `state: "PERSISTED"
 
 Pausa: desligar a flag e interromper admissão/projeção V2. Dados ficam preservados. DOWN é irreversível intencionalmente; não remover recibos para voltar ao comportamento anterior. FKs permitem a exclusão explícita normal de entidades; o incremento não executa exclusão de dados.
 
+Pausa do recurso não equivale a downgrade de imagem. Depois que grupos forem importados, uma candidata de rollback deve conservar os filtros de privacidade de grupos nos endpoints de contatos/busca/exportação e o tratamento dos recibos. Uma imagem antiga sem esses filtros não foi homologada como rollback seguro. O procedimento deste incremento é manter o binário compatível e desligar apenas a admissão V2.
+
 ## Evidências locais de 11/11/2026
 
 - RED antes de implementar: 6 falhas de rotas ausentes. Casos de revisão reproduziram adoção conflitante, vazamento de grupo, fonte JSON incompatível, vínculo em outra caixa e segundo vínculo na mesma caixa.
