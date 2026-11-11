@@ -42,6 +42,7 @@ jobs:
       POSTGRES_PASSWORD: synthetic_test_only
       REDIS_URL: redis://localhost:6379/0
       BUNDLE_FROZEN: 'true'
+      BUNDLE_WITHOUT: development
       LOG_LEVEL: error
       TZ: UTC
     steps:
@@ -59,8 +60,9 @@ jobs:
       - name: Install test libraries with bounded network timeouts
         timeout-minutes: 4
         run: |
+          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g; s|http://security.ubuntu.com/ubuntu|https://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
           sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 update
-          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 install -y libpq-dev libvips libvips-dev
+          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 install --no-install-recommends -y libpq-dev libvips
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
