@@ -54,8 +54,8 @@ jobs:
               sudo sed -i -E -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' "$source"
             fi
           done
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+          sudo apt-get -o Acquire::ForceIPv4=true -o Acquire::https::Timeout=30 -o Acquire::Retries=2 update
+          sudo apt-get -o Acquire::ForceIPv4=true -o Acquire::https::Timeout=30 -o Acquire::Retries=2 install -y --no-install-recommends libpq-dev libvips libvips-dev
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
