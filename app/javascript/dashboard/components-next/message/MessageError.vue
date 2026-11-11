@@ -17,12 +17,14 @@ const { orientation, status, createdAt, content, attachments, meta } =
 
 const { t } = useI18n();
 
-const policyCode = computed(() =>
-  props.error.match(/^\s*(131049|131026)(?=\s*:|\s*$)/)?.[1]
+const policyCode = computed(
+  () => props.error.match(/^\s*(131049|131026)(?=\s*:|\s*$)/)?.[1]
 );
 const retryExplanation = computed(() => {
-  if (policyCode.value === '131049') return t('CHAT_LIST.WHATSAPP_RETRY.MARKETING');
-  if (policyCode.value === '131026') return t('CHAT_LIST.WHATSAPP_RETRY.DESTINATION');
+  if (policyCode.value === '131049')
+    return t('CHAT_LIST.WHATSAPP_RETRY.MARKETING');
+  if (policyCode.value === '131026')
+    return t('CHAT_LIST.WHATSAPP_RETRY.DESTINATION');
   return meta.value.error || '';
 });
 
