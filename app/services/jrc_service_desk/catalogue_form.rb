@@ -9,6 +9,10 @@ class JrcServiceDesk::CatalogueForm
     values = JrcServiceDesk::Input.attributes(parameters, %w[unit_id service_id ticket_type_id category_id subcategory_id])
     Pundit.authorize(@context.to_h, :lookup, :index?, policy_class: JrcServiceDesk::LookupPolicy)
     unit = @context.unit_scope.find(JrcServiceDesk::Input.id(values.fetch('unit_id')))
+    JrcServiceDesk::EmployeeAccess.verify_service!(@context, unit.id, values['service_id'].presence)
+    if JrcServiceDesk::EmployeeAccess.restricted?(@context) && values.except('unit_id', 'service_id').values.any?(&:present?)
+      raise Pundit::NotAuthorizedError
+    end
     records = selected_records(values, unit)
     payload = definition_payload(unit, records).merge(restrictions(records.first))
     payload.merge(revision: JrcServiceDesk::CanonicalJson.digest(payload))

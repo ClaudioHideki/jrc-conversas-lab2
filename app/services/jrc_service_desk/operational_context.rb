@@ -4,12 +4,25 @@
 # This is not a login mechanism. Never accept this context from request parameters.
 class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
   def initialize(native_context)
+    @employee_portal = native_context.is_a?(Hash) && native_context[:employee_portal] == true
+    @customer_execution = native_context.is_a?(Hash) && native_context[:customer_execution] == true
     refreshed = refresh_identity(native_context)
     super(refreshed)
   end
 
   def to_h
-    { account: account, user: user, account_user: account_user }
+    value = { account: account, user: user, account_user: account_user }
+    value[:employee_portal] = true if employee_portal?
+    value[:customer_execution] = true if customer_execution?
+    value
+  end
+
+  def employee_portal?
+    @employee_portal
+  end
+
+  def customer_execution?
+    @customer_execution
   end
 
   def native_operator?
@@ -26,6 +39,7 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
     units = JrcServiceDesk::Unit.where(account_id: account.id, active: true).joins(:operator_company)
                                 .where(jrc_service_desk_operator_companies: { account_id: account.id, active: true })
     units = JrcCrm::CorporateCoverage.new(account: account, user: user).service_desk_units(units)
+    units = units.where(id: JrcServiceDesk::EmployeeAccess.unit_ids(self)) if JrcServiceDesk::EmployeeAccess.restricted?(self)
     return units if administrator?
 
     granted = JrcServiceDesk::UnitMembership.operational.where(account_id: account.id, account_user_id: account_user.id,
@@ -84,11 +98,18 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
   end
 
   def capability?(key)
-    available? && capability_set.allowed?(key)
+    return false unless available? && capability_set.allowed?(key)
+    if JrcServiceDesk::EmployeeAccess.restricted?(self) && !(administrator? && !employee_portal?)
+      return JrcServiceDesk::EmployeeAccess::READ_CAPABILITIES.include?(key.to_sym)
+    end
+    true
   end
 
   def effective_capabilities
-    available? ? capability_set.effective : []
+    return [] unless available?
+
+    values = capability_set.effective
+    JrcServiceDesk::EmployeeAccess.restricted?(self) ? values.select { |key| capability?(key) } : values
   end
 
   def supervision_access

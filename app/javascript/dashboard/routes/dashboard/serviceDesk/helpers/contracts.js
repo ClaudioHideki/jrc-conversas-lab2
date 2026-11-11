@@ -62,6 +62,7 @@ export function decodeContext(payload, identity) {
       name: text(unit.name),
       operator_company: named(unit.operator_company),
       permissions: permissions(unit.permissions),
+      ...(unit.employee_only === true ? { employee_only: true } : {}),
       ...(unit.self_assignee
         ? { self_assignee: named(unit.self_assignee) }
         : {}),

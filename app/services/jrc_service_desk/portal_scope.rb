@@ -25,6 +25,8 @@ class JrcServiceDesk::PortalScope
                                      .joins(unit: :operator_company)
                                      .where(jrc_service_desk_units: { active: true }, jrc_service_desk_operator_companies: { active: true })
                                      .joins(:portal_execution_membership).where(jrc_service_desk_unit_memberships: { active: true, administrative_actor: false })
+    internal_ids = @account.internal_attributes.fetch(JrcServiceDesk::InternalIntake::KEY, {}).values.flat_map { |row| Array(row['internal_service_ids']) }
+    records = records.where.not(id: internal_ids)
     allowed = records.select { |service| JrcServiceDesk::PortalCatalogue.new(contact: @contact, service: service).allowed? }
     records.where(id: allowed.map(&:id))
   end

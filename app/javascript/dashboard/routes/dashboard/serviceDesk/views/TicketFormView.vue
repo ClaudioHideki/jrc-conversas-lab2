@@ -47,6 +47,9 @@ import {
 } from '../helpers/ticketNavigation';
 const { t, tm } = useI18n();
 const session = useServiceDesk();
+const employeeOnly = computed(() =>
+  session.state.context?.units.some(row => row.employee_only)
+);
 const hasCustomerMaster = computed(
   () =>
     mayUseMasterDirectory.value &&
@@ -255,7 +258,14 @@ const loadRelationshipCustomer = async () => {
   relationshipCustomer.value = null;
   const assignmentId = canonicalId(route.query.relationship_assignment_id);
   const requesterId = canonicalId(route.query.requester_id);
-  if (edit.value || !hasCustomerMaster.value || !assignmentId || !requesterId)
+  if (
+    employeeOnly.value ||
+    !session.state.context ||
+    edit.value ||
+    !hasCustomerMaster.value ||
+    !assignmentId ||
+    !requesterId
+  )
     return;
   try {
     const { data } = await RelationshipAPI.channels(
@@ -527,11 +537,12 @@ const submit = async () => {
   <InternalTicketForm
     v-if="
       !edit &&
-      !advanced &&
-      !relationshipSeed &&
-      session.state.context?.units.some(
-        row => row.internal_intake && row.permissions.create_ticket
-      )
+      (employeeOnly ||
+        (!advanced &&
+          !relationshipSeed &&
+          session.state.context?.units.some(
+            row => row.internal_intake && row.permissions.create_ticket
+          )))
     "
     ref="quickForm"
     @cancel="cancel"

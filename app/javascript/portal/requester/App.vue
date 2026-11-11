@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { request, errorKey } from './client';
 import PortalIcon from './PortalIcon.vue';
+import EmployeePortal from './EmployeePortal.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -69,6 +70,10 @@ const logout = async () => {
 
 <template>
   <RouterView v-if="isLogin" />
+  <EmployeePortal
+    v-else-if="session?.employee_context"
+    :identity="session.employee_context"
+  />
   <div
     v-else
     class="min-h-screen bg-[#eaf3ff] text-slate-950 [&_*]:border-solid"

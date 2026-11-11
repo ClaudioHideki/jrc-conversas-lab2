@@ -39,7 +39,7 @@ class JrcServiceDesk::PortalCreationService
 
   def execution_context(service)
     member = service.portal_execution_membership.account_user
-    context = JrcServiceDesk::OperationalContext.new(account: service.account, user: member.user, account_user: member)
+    context = JrcServiceDesk::OperationalContext.new(account: service.account, user: member.user, account_user: member, customer_execution: true)
     permitted = context.unit_allowed?(service.unit) && %i[tickets_create conversations_link].all? { |name| context.capability?(name) }
     permitted &&= JrcServiceDesk::NativeExecutionContext.with(context.to_h) { InboxPolicy.new(context.to_h, service.portal_inbox).show? }
     raise Pundit::NotAuthorizedError unless permitted

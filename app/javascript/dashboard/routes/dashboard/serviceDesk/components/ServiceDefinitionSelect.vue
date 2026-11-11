@@ -19,6 +19,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 const session = useServiceDesk();
+const api = session.lifecycleClient || API;
 const page = ref(1);
 const items = ref([]);
 const total = ref(0);
@@ -43,11 +44,12 @@ const load = async () => {
   const context = session.state.context;
   status.value = 'loading';
   try {
-    const response = await API.services(
+    const response = await api.services(
       context.account_id,
       props.unitId,
       page.value,
-      controller.signal
+      controller.signal,
+      ...(props.unrestrictedOnly ? [true] : [])
     );
     if (current !== epoch || context !== session.state.context) return;
     const result = decodeConfigurationList(

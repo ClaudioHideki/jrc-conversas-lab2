@@ -41,7 +41,14 @@ module RequesterPortal::NativeSession
     }
   end
 
+  def employee_portal_context
+    return @employee_portal_context if defined?(@employee_portal_context)
+
+    @employee_portal_context = current_user && JrcServiceDesk::EmployeeAccess.portal_context(current_user)
+  end
+
   def requester_grants
+    return [] if current_user && JrcServiceDesk::EmployeeAccess.portal_identity?(current_user)
     @requester_grants ||= JrcServiceDesk::PortalGrant.available_for(current_user)
   end
 

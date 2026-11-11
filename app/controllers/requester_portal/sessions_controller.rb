@@ -14,6 +14,11 @@ class RequesterPortal::SessionsController < ApplicationController
 
   def create
     JrcServiceDesk::Input.attributes(request.request_parameters, [])
+    if employee_portal_context
+      credentials = RequesterPortal::NativeSession::HEADERS.index_with { |key| request.headers[key] }
+      write_requester_session(credentials)
+      return render json: { employee_context: employee_portal_context }
+    end
     return render json: { code: 'portal_access_denied' }, status: :forbidden if requester_grants.empty?
 
     credentials = RequesterPortal::NativeSession::HEADERS.index_with { |key| request.headers[key] }
@@ -23,6 +28,9 @@ class RequesterPortal::SessionsController < ApplicationController
   end
 
   def show
+    if employee_portal_context
+      return render json: { employee_context: employee_portal_context }
+    end
     return render json: { code: 'portal_access_denied' }, status: :forbidden if requester_grants.empty?
 
     render json: { contexts: requester_grants.map(&:public_context),
