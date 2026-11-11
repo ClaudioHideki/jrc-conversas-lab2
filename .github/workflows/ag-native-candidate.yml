@@ -45,6 +45,8 @@ jobs:
           bash -n .github/scripts/jrc_ci_apt_setup.sh
           if GITHUB_ACTIONS=false bash .github/scripts/jrc_ci_apt_setup.sh; then exit 1; fi
           if GITHUB_REPOSITORY=unrelated/repository bash .github/scripts/jrc_ci_apt_setup.sh; then exit 1; fi
+      - name: Test HTTPS mirror selection with isolated simulated curl and APT
+        run: python3 -B .github/scripts/jrc_ci_apt_setup_test.py
       - run: node --test script/validate_ag_migration_identity.test.mjs
       - run: node --test script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
       - run: python3 script/jrc_ag_native_plan_test.py
