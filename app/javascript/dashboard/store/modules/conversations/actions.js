@@ -297,21 +297,22 @@ const actions = {
 
   sendMessageWithData: async ({ commit }, pendingMessage) => {
     const { conversation_id: conversationId, id } = pendingMessage;
+    const isRetry = hasMessageFailedWithExternalError(pendingMessage);
     try {
       commit(types.ADD_MESSAGE, {
         ...pendingMessage,
-        status: MESSAGE_STATUS.PROGRESS,
+        status: isRetry ? pendingMessage.status : MESSAGE_STATUS.PROGRESS,
       });
-      const response = hasMessageFailedWithExternalError(pendingMessage)
+      const response = isRetry
         ? await MessageApi.retry(conversationId, id)
         : await MessageApi.create(pendingMessage);
       commit(types.ADD_MESSAGE, {
         ...response.data,
-        status: MESSAGE_STATUS.SENT,
+        status: isRetry ? response.data.status : MESSAGE_STATUS.SENT,
       });
       commit(types.ADD_CONVERSATION_ATTACHMENTS, {
         ...response.data,
-        status: MESSAGE_STATUS.SENT,
+        status: isRetry ? response.data.status : MESSAGE_STATUS.SENT,
       });
     } catch (error) {
       const errorMessage = error.response

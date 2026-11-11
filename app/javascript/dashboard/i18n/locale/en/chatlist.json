@@ -7,6 +7,10 @@
       "404": "There are no active conversations in this group."
     },
     "FAILED_TO_SEND": "Failed to send",
+    "WHATSAPP_RETRY": {
+      "MARKETING": "Meta restricted delivery of this marketing message (131049). Retry is blocked pending review; delivery is not guaranteed later.",
+      "DESTINATION": "Meta could not deliver this message (131026). Verify the destination before considering a new attempt. Retry is blocked."
+    },
     "TAB_HEADING": "Conversations",
     "MENTION_HEADING": "Mentions",
     "UNATTENDED_HEADING": "Unattended",

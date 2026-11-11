@@ -117,6 +117,7 @@ const props = defineProps({
   call: { type: Object, default: null }, // eslint-disable-line vue/no-unused-properties
   content: { type: String, default: null },
   contentAttributes: { type: Object, default: () => ({}) },
+  meta: { type: Object, default: () => ({}) }, // eslint-disable-line vue/no-unused-properties
   contentType: {
     type: String,
     default: 'text',

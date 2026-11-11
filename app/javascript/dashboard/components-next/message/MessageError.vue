@@ -6,18 +6,28 @@ import { useMessageContext } from './provider.js';
 import { hasOneDayPassed } from 'shared/helpers/timeHelper';
 import { ORIENTATION, MESSAGE_STATUS } from './constants';
 
-defineProps({
+const props = defineProps({
   error: { type: String, required: true },
 });
 
 const emit = defineEmits(['retry']);
 
-const { orientation, status, createdAt, content, attachments } =
+const { orientation, status, createdAt, content, attachments, meta } =
   useMessageContext();
 
 const { t } = useI18n();
 
+const policyCode = computed(() =>
+  props.error.match(/^\s*(131049|131026)(?=\s*:|\s*$)/)?.[1]
+);
+const retryExplanation = computed(() => {
+  if (policyCode.value === '131049') return t('CHAT_LIST.WHATSAPP_RETRY.MARKETING');
+  if (policyCode.value === '131026') return t('CHAT_LIST.WHATSAPP_RETRY.DESTINATION');
+  return meta.value.error || '';
+});
+
 const canRetry = computed(() => {
+  if (policyCode.value) return false;
   const hasContent = content.value !== null;
   const hasAttachments = attachments.value && attachments.value.length > 0;
   return !hasOneDayPassed(createdAt.value) && (hasContent || hasAttachments);
@@ -25,7 +35,7 @@ const canRetry = computed(() => {
 </script>
 
 <template>
-  <div class="text-xs text-n-ruby-11 flex items-center gap-1.5">
+  <div class="text-xs text-n-ruby-11 flex flex-wrap items-center gap-1.5">
     <span>{{ t('CHAT_LIST.FAILED_TO_SEND') }}</span>
     <div class="relative group">
       <div
@@ -46,6 +56,9 @@ const canRetry = computed(() => {
         {{ error }}
       </div>
     </div>
+    <span v-if="retryExplanation" role="status" class="select-text">
+      {{ retryExplanation }}
+    </span>
     <button
       v-if="canRetry"
       type="button"
