@@ -136,10 +136,14 @@ raise 'Batch lost a correlation' unless batch.size == 20 && batch.map(&:source_i
 raise 'Batch did not submit exactly once per destination' unless redis.hvals('precimech_smoke_batch_destinations').sort == Array.new(20, '1')
 raise 'Batch sent to different destinations' unless redis.hkeys('precimech_smoke_batch_destinations').sort == contacts.map { |contact| contact.phone_number.delete('+') }.sort
 raise 'Batch did not submit all 20' unless redis.get('precimech_smoke_posts').to_i == 23
-raise 'Unexpected SendReplyJob count' unless redis.get('precimech_smoke_SendReplyJob').to_i == 21
+# Conversation assignment also creates activity messages and their harmless SendReplyJobs.
+# Count the selected batch IDs; keep the exact destination/POST assertions above.
+batch_jobs = redis.hmget('precimech_smoke_message_jobs', *batch_ids.map(&:to_s))
+raise 'Batch message did not execute exactly once' unless batch_jobs == Array.new(20, '1')
 File.write(ENV.fetch('SMOKE_IDS_PATH'), JSON.generate(normal_id: normal.id, original_id: failed.id, inbox_id: inbox.id,
                                                    retry_id: attempt.message_id, recovered_id: recovered.message_id,
                                                    eligible_original_id: eligible.id, lost_original_id: lost.id, batch_ids: batch_ids))
 puts JSON.generate(smoke: 'app_and_worker_passed', restricted_retry: 'blocked', concurrent_retry: 'one_attempt_one_post',
                    early_callback: 'read', lost_enqueue: 'recovered', redelivery: 'no_post', worker_posts: 23, batch_submitted: 20,
-                   batch_unique_correlations: 20, template_language: 'pt_BR')
+                   batch_unique_correlations: 20, batch_jobs: 20, legacy_jobs_total: redis.get('precimech_smoke_SendReplyJob').to_i,
+                   template_language: 'pt_BR')
