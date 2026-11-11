@@ -230,6 +230,43 @@ RSpec.describe 'WhatsApp Cloud eligible retry', type: :request do
       expect(a_request(:post, post_url)).not_to have_been_made
     end
 
+    it 'does not let a stale validator cancel a submission owned by another worker' do
+      attempt = WhatsappRetryAttempt.last
+      stub_request(:get, %r{https://graph.facebook.com/v14.0/.*/message_templates}).to_return do
+        attempt.update!(state: 'submitting')
+        attempt.message.update!(source_id: 'wamid.synthetic-other-owner')
+        { status: 401, body: '{}', headers: { 'Content-Type' => 'application/json' } }
+      end
+      WhatsappRetryJob.perform_now(attempt.id)
+      expect(attempt.reload.state).to eq('submitting')
+      Whatsapp::RetryReceiptService.reconcile!(attempt)
+      expect(attempt.reload.state).to eq('accepted')
+      expect(attempt.message.reload).to be_sent
+      expect(a_request(:post, post_url)).not_to have_been_made
+    end
+
+    it 'ignores an old sent callback on the failed original while processing its queued retry' do
+      attempt = WhatsappRetryAttempt.last
+      callback = { entry: [{ changes: [{ value: { statuses: [{ id: message.source_id, status: 'sent' }] } }] }] }.with_indifferent_access
+      Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
+      expect(message.reload).to be_failed
+      request = stub_request(:post, post_url).to_return(status: 200, body: { messages: [{ id: 'wamid.synthetic-after-old-sent' }] }.to_json,
+                                                      headers: { 'Content-Type' => 'application/json' })
+      WhatsappRetryJob.perform_now(attempt.id)
+      expect(attempt.reload.state).to eq('accepted')
+      expect(request).to have_been_requested.once
+    end
+
+    it 'suppresses an unnecessary retry after the original is truly delivered' do
+      attempt = WhatsappRetryAttempt.last
+      callback = { entry: [{ changes: [{ value: { statuses: [{ id: message.source_id, status: 'delivered' }] } }] }] }.with_indifferent_access
+      Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
+      WhatsappRetryJob.perform_now(attempt.id)
+      expect(message.reload).to be_delivered
+      expect(attempt.reload.state).to eq('cancelled')
+      expect(a_request(:post, post_url)).not_to have_been_made
+    end
+
     it 'R08 never reclaims a stale submission for another POST' do
       attempt = WhatsappRetryAttempt.last
       attempt.update!(state: 'submitting', updated_at: 20.minutes.ago)
