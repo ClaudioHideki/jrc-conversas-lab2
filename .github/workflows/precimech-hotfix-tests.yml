@@ -35,6 +35,7 @@ jobs:
         ports: ['6379:6379']
     env:
       RAILS_ENV: test
+      FRONTEND_URL: https://host.example.test
       SECRET_KEY_BASE: synthetic_test_only_not_production
       POSTGRES_HOST: localhost
       POSTGRES_DATABASE: precimech_hotfix_test

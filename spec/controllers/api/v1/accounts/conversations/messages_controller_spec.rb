@@ -223,8 +223,10 @@ RSpec.describe 'Conversation Messages API', type: :request do
                                         file: fixture_file_upload(Rails.root.join('spec/assets/avatar.png'), 'image/png'))
           end
 
+          anchor = create(:message, account: account, inbox: conversation.inbox, conversation: conversation,
+                                    created_at: message.created_at + 1.second)
           get "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}/messages",
-              params: { before: message.id + 1 }, headers: agent.create_new_auth_token, as: :json
+              params: { before: anchor.id }, headers: agent.create_new_auth_token, as: :json
 
           expect(response).to have_http_status(:success)
           canonical = response.parsed_body.fetch('payload').find { |item| item['id'] == message.id }
