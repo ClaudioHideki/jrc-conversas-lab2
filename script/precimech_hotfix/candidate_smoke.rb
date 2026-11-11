@@ -2,14 +2,14 @@
 raise 'Smoke must use its isolated test database' unless Rails.env.test? && ENV['POSTGRES_DATABASE'] == 'precimech_candidate_test'
 connection = ActiveRecord::Base.connection_db_config.configuration_hash
 raise 'Unexpected smoke database connection' unless connection[:database] == 'precimech_candidate_test' &&
-                                                   connection[:host] == '127.0.0.1' && connection[:port].to_i == 15432
+                                                   connection[:host] == ENV.fetch('SMOKE_DB_HOST') && connection[:port].to_i == 5432
 require 'factory_bot'
 require 'webmock'
 require 'net/http'
 require 'json'
 FactoryBot.find_definitions
 WebMock.enable!
-WebMock.disable_net_connect!(allow_localhost: true)
+WebMock.disable_net_connect!(allow: [ENV.fetch('SMOKE_APP_HOST')])
 
 account = FactoryBot.create(:account)
 agent = FactoryBot.create(:user, account: account, role: :agent)
@@ -27,7 +27,7 @@ failed = FactoryBot.create(:message, account: account, inbox: inbox, conversatio
                                     additional_attributes: { template_params: template })
 original = failed.reload.attributes.deep_dup
 headers = agent.create_new_auth_token
-uri = URI("http://127.0.0.1:13000/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}/messages/#{failed.id}/retry")
+uri = URI("http://#{ENV.fetch('SMOKE_APP_HOST')}:3000/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}/messages/#{failed.id}/retry")
 response = nil
 60.times do
   begin

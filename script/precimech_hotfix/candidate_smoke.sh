@@ -19,14 +19,23 @@ done
 if docker network inspect "$network" >/dev/null 2>&1; then echo 'Smoke network already exists' >&2; exit 2; fi
 docker network create --internal "$network" >/dev/null
 trap cleanup EXIT
-docker run -d --name "$pg" --network "$network" --tmpfs /var/lib/postgresql/data -p 127.0.0.1:15432:5432 \
+docker run -d --name "$pg" --network "$network" --tmpfs /var/lib/postgresql/data \
   -e POSTGRES_DB=precimech_candidate_test -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=synthetic_test_only pgvector/pgvector:pg16 >/dev/null
-docker run -d --name "$redis" --network "$network" -p 127.0.0.1:16379:6379 redis:7.4-alpine redis-server --save '' --appendonly no >/dev/null
-for i in $(seq 1 30); do docker exec "$pg" pg_isready -U postgres -d precimech_candidate_test >/dev/null 2>&1 && break; sleep 1; done
-export RAILS_ENV=test POSTGRES_HOST=127.0.0.1 POSTGRES_PORT=15432 POSTGRES_DATABASE=precimech_candidate_test
-export POSTGRES_USERNAME=postgres POSTGRES_PASSWORD=synthetic_test_only REDIS_URL=redis://127.0.0.1:16379/0
+docker run -d --name "$redis" --network "$network" redis:7.4-alpine redis-server --save '' --appendonly no >/dev/null
+ready=0
+for i in $(seq 1 60); do
+  if docker exec "$pg" pg_isready -h 127.0.0.1 -p 5432 -U postgres -d precimech_candidate_test >/dev/null 2>&1; then ready=1; break; fi
+  sleep 1
+done
+if [ "$ready" != 1 ]; then docker logs --tail 80 "$pg"; exit 1; fi
+# Internal networks do not need published ports: the native Linux Docker host can use the bridge IPs.
+pg_ip=$(docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$pg")
+redis_ip=$(docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$redis")
+export SMOKE_DB_HOST="$pg_ip"
+export RAILS_ENV=test POSTGRES_HOST="$pg_ip" POSTGRES_PORT=5432 POSTGRES_DATABASE=precimech_candidate_test
+export POSTGRES_USERNAME=postgres POSTGRES_PASSWORD=synthetic_test_only REDIS_URL="redis://$redis_ip:6379/0"
 # DATABASE_URL takes precedence over POSTGRES_*; always override any caller/.env value.
-export DATABASE_URL=postgresql://postgres:synthetic_test_only@127.0.0.1:15432/precimech_candidate_test
+export DATABASE_URL="postgresql://postgres:synthetic_test_only@$pg_ip:5432/precimech_candidate_test"
 export SECRET_KEY_BASE=synthetic_candidate_smoke_only
 export ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 export ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -41,12 +50,13 @@ env_args=(-e RAILS_ENV=production -e NODE_ENV=production -e SECRET_KEY_BASE -e A
 lock_before=$(docker run --rm --network none --entrypoint sha256sum "$image" /app/Gemfile.lock)
 docker run --rm --network none --entrypoint bundle "$image" check
 # Actual image entrypoint and default bundle install. Internal network prevents dependency downloads; checksum detects lockfile drift.
-docker run -d --name "$app" --network "$network" -p 127.0.0.1:13000:3000 "${env_args[@]}" \
+docker run -d --name "$app" --network "$network" "${env_args[@]}" \
   --entrypoint docker/entrypoints/rails.sh "$image" \
   bundle exec rails s -p 3000 -b 0.0.0.0 >/dev/null
 docker run -d --name "$worker" --network "$network" "${env_args[@]}" \
   --mount "type=bind,source=$PWD/script/precimech_hotfix/smoke_worker_boot.rb,target=/smoke_worker_boot.rb,readonly" \
   --entrypoint bundle "$image" exec sidekiq -r /smoke_worker_boot.rb -q high -c 1 >/dev/null
+export SMOKE_APP_HOST="$(docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$app")"
 export SMOKE_IDS_PATH="${RUNNER_TEMP:-/tmp}/precimech-smoke-ids.json"
 if ! bundle exec rails runner script/precimech_hotfix/candidate_smoke.rb; then
   docker logs --tail 80 "$app"
