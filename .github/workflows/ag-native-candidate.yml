@@ -40,6 +40,11 @@ jobs:
         with:
           node-version-file: .nvmrc
       - run: git merge-base --is-ancestor d8a83b824b11cc68ddbbce7c79681f368051fb70 HEAD
+      - name: Verify disposable APT helper syntax and refusal outside owned CI
+        run: |
+          bash -n .github/scripts/jrc_ci_apt_setup.sh
+          if GITHUB_ACTIONS=false bash .github/scripts/jrc_ci_apt_setup.sh; then exit 1; fi
+          if GITHUB_REPOSITORY=unrelated/repository bash .github/scripts/jrc_ci_apt_setup.sh; then exit 1; fi
       - run: node --test script/validate_ag_migration_identity.test.mjs
       - run: node --test script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
       - run: python3 script/jrc_ag_native_plan_test.py
@@ -135,8 +140,7 @@ jobs:
           echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
           echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
           sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/jrc-ag-ci-av
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
+          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
@@ -250,8 +254,7 @@ jobs:
           echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
           echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
           sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/jrc-ag-ci-av
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
+          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
@@ -363,8 +366,7 @@ jobs:
           echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
           echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
           sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/jrc-ag-ci-av
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
+          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'

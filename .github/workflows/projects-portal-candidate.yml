@@ -57,8 +57,7 @@ jobs:
               sudo sed -i -E -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' "$source"
             fi
           done
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
