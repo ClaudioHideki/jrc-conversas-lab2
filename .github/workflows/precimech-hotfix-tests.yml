@@ -72,6 +72,7 @@ jobs:
         run: >-
           bundle exec rspec
           spec/controllers/api/v1/accounts/conversations/whatsapp_retry_spec.rb
+          spec/controllers/api/v1/accounts/conversations/whatsapp_eligible_retry_spec.rb
           spec/controllers/api/v1/accounts/conversations/messages_controller_spec.rb
           spec/services/whatsapp/send_on_whatsapp_service_spec.rb
           spec/services/whatsapp/incoming_message_whatsapp_cloud_service_spec.rb
