@@ -49,7 +49,5 @@ end
 raise 'Image worker did not correlate the fake provider result' unless normal.reload.source_id == 'wamid.synthetic-image'
 redis = Redis.new(url: ENV.fetch('REDIS_URL'))
 raise 'Expected exactly one fake provider POST' unless redis.get('precimech_smoke_posts').to_i == 1
-callback = { entry: [{ changes: [{ value: { statuses: [{ id: normal.source_id, status: 'delivered' }] } }] }] }.with_indifferent_access
-Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
-raise 'Callback did not update the matching attempt' unless normal.reload.delivered? && failed.reload.failed?
-puts JSON.generate(smoke: 'passed', app_retry: 'blocked', worker_posts: 1, template_language: 'pt_BR', callback: 'delivered')
+File.write(ENV.fetch('SMOKE_IDS_PATH'), JSON.generate(normal_id: normal.id, original_id: failed.id, inbox_id: inbox.id))
+puts JSON.generate(smoke: 'app_and_worker_passed', app_retry: 'blocked', worker_posts: 1, template_language: 'pt_BR')

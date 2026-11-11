@@ -45,11 +45,24 @@ docker run -d --name "$app" --network "$network" -p 127.0.0.1:13000:3000 "${env_
 docker run -d --name "$worker" --network "$network" "${env_args[@]}" \
   --mount "type=bind,source=$PWD/script/precimech_hotfix/smoke_worker_boot.rb,target=/smoke_worker_boot.rb,readonly" \
   --entrypoint bundle "$image" exec sidekiq -r /smoke_worker_boot.rb -q high -c 1 >/dev/null
+export SMOKE_IDS_PATH="${RUNNER_TEMP:-/tmp}/precimech-smoke-ids.json"
 if ! bundle exec rails runner script/precimech_hotfix/candidate_smoke.rb; then
   docker logs --tail 80 "$app"
   docker logs --tail 80 "$worker"
   exit 1
 fi
+docker exec -i -e SMOKE_IDS="$(cat "$SMOKE_IDS_PATH")" "$app" bundle exec rails runner - <<'RUBY'
+require 'json'
+ids = JSON.parse(ENV.fetch('SMOKE_IDS'))
+normal = Message.find(ids.fetch('normal_id'))
+original = Message.find(ids.fetch('original_id'))
+inbox = Inbox.find(ids.fetch('inbox_id'))
+callback = { entry: [{ changes: [{ value: { statuses: [{ id: normal.source_id, status: 'delivered' }] } }] }] }.with_indifferent_access
+Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
+raise 'Artifact callback did not update matching message' unless normal.reload.delivered? && original.reload.failed?
+raise 'Artifact callback changed original correlation' unless original.source_id == 'wamid.synthetic-original'
+puts JSON.generate(artifact_callback: 'delivered', original: 'failed')
+RUBY
 test "$(docker exec "$app" cat /app/.git_sha)" = "$SOURCE_SHA"
 test "$(docker exec "$worker" cat /app/.git_sha)" = "$SOURCE_SHA"
 test "$(docker exec "$app" sha256sum /app/Gemfile.lock)" = "$lock_before"
