@@ -25,6 +25,8 @@ docker run -d --name "$redis" --network "$network" -p 127.0.0.1:16379:6379 redis
 for i in $(seq 1 30); do docker exec "$pg" pg_isready -U postgres -d precimech_candidate_test >/dev/null 2>&1 && break; sleep 1; done
 export RAILS_ENV=test POSTGRES_HOST=127.0.0.1 POSTGRES_PORT=15432 POSTGRES_DATABASE=precimech_candidate_test
 export POSTGRES_USERNAME=postgres POSTGRES_PASSWORD=synthetic_test_only REDIS_URL=redis://127.0.0.1:16379/0
+# DATABASE_URL takes precedence over POSTGRES_*; always override any caller/.env value.
+export DATABASE_URL=postgresql://postgres:synthetic_test_only@127.0.0.1:15432/precimech_candidate_test
 export SECRET_KEY_BASE=synthetic_candidate_smoke_only
 export ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 export ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -33,7 +35,7 @@ bundle exec rails db:create db:schema:load
 SCHEMA="${RUNNER_TEMP:-/tmp}/precimech-image-test-schema.rb" bundle exec rails db:migrate
 env_args=(-e RAILS_ENV=production -e NODE_ENV=production -e SECRET_KEY_BASE -e ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY \
   -e ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY -e ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT \
-  -e POSTGRES_HOST="$pg" -e POSTGRES_PORT=5432 -e POSTGRES_DATABASE -e POSTGRES_USERNAME -e POSTGRES_PASSWORD \
+  -e DATABASE_URL="postgresql://postgres:synthetic_test_only@$pg:5432/precimech_candidate_test" -e POSTGRES_HOST="$pg" -e POSTGRES_PORT=5432 -e POSTGRES_DATABASE -e POSTGRES_USERNAME -e POSTGRES_PASSWORD \
   -e REDIS_URL="redis://$redis:6379/0" -e ACTIVE_STORAGE_SERVICE=local -e FORCE_SSL=false -e FRONTEND_URL=http://localhost:13000 \
   -e RAILS_LOG_TO_STDOUT=true -e LOG_LEVEL=error)
 lock_before=$(docker run --rm --network none --entrypoint sha256sum "$image" /app/Gemfile.lock)

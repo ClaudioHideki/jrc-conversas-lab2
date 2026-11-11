@@ -1,5 +1,8 @@
 # Executed on the CI host with RAILS_ENV=test against disposable PG/Redis only.
 raise 'Smoke must use its isolated test database' unless Rails.env.test? && ENV['POSTGRES_DATABASE'] == 'precimech_candidate_test'
+connection = ActiveRecord::Base.connection_db_config.configuration_hash
+raise 'Unexpected smoke database connection' unless connection[:database] == 'precimech_candidate_test' &&
+                                                   connection[:host] == '127.0.0.1' && connection[:port].to_i == 15432
 require 'factory_bot'
 require 'webmock'
 require 'net/http'
