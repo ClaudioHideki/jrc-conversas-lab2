@@ -8,6 +8,8 @@ import {
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
+import serviceDeskPt from '../../dashboard/i18n/locale/pt_BR/jrcServiceDesk.json';
+import serviceDeskEn from '../../dashboard/i18n/locale/en/jrcServiceDesk.json';
 import InternalTicketForm from '../../dashboard/routes/dashboard/serviceDesk/components/InternalTicketForm.vue';
 import PortalHeading from './PortalHeading.vue';
 import PortalStatus from './PortalStatus.vue';
@@ -28,7 +30,10 @@ import { provideServiceDeskValue } from '../../dashboard/routes/dashboard/servic
 import { decodeTicket } from '../../dashboard/routes/dashboard/serviceDesk/helpers/contracts';
 
 const props = defineProps({ identity: { type: Object, required: true } });
-const { t } = useI18n();
+const { t, mergeLocaleMessage } = useI18n();
+mergeLocaleMessage('pt_BR', serviceDeskPt);
+mergeLocaleMessage('en', serviceDeskEn);
+const assets = { logo: '/brand-assets/logo-jrc-thumbnail.png' };
 const http = employeeTransport(props.identity.account_id);
 const state = reactive(createSessionState());
 const base = createServiceDeskSession(createServiceDeskClient(http), state);
@@ -130,7 +135,14 @@ onBeforeUnmount(() => {
     <header
       class="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-[#02172e] to-[#052b5b] px-6 py-5 text-white"
     >
-      <strong class="text-2xl">{{ t('PORTAL.BRAND') }}</strong>
+      <span class="flex items-center gap-3">
+        <img
+          :src="assets.logo"
+          :alt="t('PORTAL.BRAND_SHORT')"
+          class="h-12 w-14 rounded-xl object-cover"
+        />
+        <strong class="text-2xl">{{ t('PORTAL.BRAND') }}</strong>
+      </span>
       <button
         type="button"
         class="rounded-lg border border-blue-300 px-4 py-2"
@@ -144,7 +156,7 @@ onBeforeUnmount(() => {
     >
       <nav
         :aria-label="t('PORTAL.TITLE')"
-        class="flex gap-2 rounded-2xl bg-[#052b5b] p-3 text-white md:flex-col md:self-start"
+        class="flex flex-wrap gap-2 rounded-2xl bg-[#052b5b] p-3 text-white md:flex-col md:flex-nowrap md:self-start"
       >
         <button
           v-for="item in tabs"
