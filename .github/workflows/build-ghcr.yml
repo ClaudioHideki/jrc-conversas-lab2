@@ -90,9 +90,9 @@ jobs:
         with:
           run_install: false
 
-      - name: Instalar dependencias de sistema dos gates Ruby
+      - name: Verificar headers PostgreSQL do runner para os gates Ruby
         if: inputs.component == 'app'
-        run: sudo apt-get update && sudo apt-get install -y libpq-dev libvips libvips-dev
+        run: pg_config --version
 
       - name: Configurar Ruby e Bundler declarados
         if: inputs.component == 'app'
