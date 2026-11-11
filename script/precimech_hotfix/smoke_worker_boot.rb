@@ -61,6 +61,9 @@ class PrecimechSmokeJobCounter
     if %w[SendReplyJob WhatsappRetryJob].include?(klass)
       Redis.new(url: ENV.fetch('REDIS_URL')).incr("precimech_smoke_#{klass}")
     end
+    if klass == 'SendReplyJob'
+      Redis.new(url: ENV.fetch('REDIS_URL')).hincrby('precimech_smoke_message_jobs', job.dig('args', 0, 'arguments', 0).to_s, 1)
+    end
     yield
     if klass == 'WhatsappRetryJob'
       Redis.new(url: ENV.fetch('REDIS_URL')).incr('precimech_smoke_retry_completed')
