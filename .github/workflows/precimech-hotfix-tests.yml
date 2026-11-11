@@ -60,16 +60,17 @@ jobs:
       - name: Install test libraries with bounded network timeouts
         timeout-minutes: 4
         run: |
+          printf '%s\n' 'https://archive.ubuntu.com/ubuntu' | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
           sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g; s|http://security.ubuntu.com/ubuntu|https://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
-          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 update
-          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 install --no-install-recommends -y libpq-dev libvips
+          sudo apt-get -o APT::Update::Error-Mode=any -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 update
+          sudo apt-get -o APT::Update::Error-Mode=any -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 install --no-install-recommends -y libpq-dev libvips
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
           bundler: 2.5.16
           bundler-cache: true
       - name: Prepare disposable test schema
-        run: bundle exec rails db:create db:schema:load
+        run: bundle exec rails db:create db:schema:load db:migrate
       - name: Request regression and preserved WhatsApp paths
         run: >-
           bundle exec rspec
