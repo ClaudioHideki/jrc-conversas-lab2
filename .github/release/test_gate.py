@@ -196,7 +196,10 @@ class EvidenceGateTest(unittest.TestCase):
     def test_runtime_contract_preserves_dependencies_and_blocks_image_claim(self):
         report = {"passed": True, "base_sha": "cad427d400d824fc1fdc06c1c1079f324e7f3f6c",
                   "ruby": "3.4.12", "patchlevel": 148, "node": "24.22.3", "alpine": "3.24",
-                  "gem_versions_unchanged": True, "pnpm_lock_unchanged": True,
+                  "gem_versions_unchanged": False, "all_other_gem_versions_unchanged": True,
+                  "reviewed_gem_changes": [{"gem": "scout_apm", "from": "5.3.3", "to": "5.7.0",
+                      "upstream_fix": "https://github.com/scoutapp/scout_apm_ruby/pull/552"}],
+                  "pnpm_lock_unchanged": True,
                   "functional_sources_unchanged": False, "all_other_functional_sources_unchanged": True,
                   "migrations_unchanged": True, "separate_nico_image_unchanged": True,
                   "reviewed_functional_fixes": [{
@@ -206,7 +209,9 @@ class EvidenceGateTest(unittest.TestCase):
                       "regression_sha256": "f424461b1008fc5942e421e430a283485e7dd54b8d4551a339ece28abaaa2172"
                   }], "docker_build_executed": False}
         gate.runtime_contract(report)
-        for key, value in [("docker_build_executed", True), ("gem_versions_unchanged", False),
+        for key, value in [("docker_build_executed", True), ("gem_versions_unchanged", True),
+                           ("all_other_gem_versions_unchanged", False), ("reviewed_gem_changes", []),
+                           ("reviewed_gem_changes", [{"gem": "scout_apm", "from": "5.3.3", "to": "5.3.3"}]),
                            ("all_other_functional_sources_unchanged", False), ("ruby", "3.4.4"),
                            ("reviewed_functional_fixes", []), ("functional_sources_unchanged", True)]:
             with self.subTest(key=key):

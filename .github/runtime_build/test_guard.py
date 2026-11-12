@@ -55,6 +55,9 @@ class GuardTest(unittest.TestCase):
         self.assertIsNotNone(limits.resource_reason(3*1024**3,750*1024**2))
         self.assertIsNone(limits.resource_reason(750_000_001,750*1024**2+1))
 
+    def test_image_schema_is_brought_to_current_migrations(self):
+        self.assertEqual(guard.schema_command(), ["bundle", "exec", "rails", "db:schema:load", "db:migrate"])
+
     def test_local_amd64_build_only(self):
         cmd = guard.build_command("owned-builder", Path("/tmp/output"))
         self.assertEqual(cmd[:3],["docker","buildx","build"])
@@ -111,4 +114,4 @@ if __name__ == "__main__":
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     report = {"tests":result.testsRun,"failures":len(result.failures),"errors":len(result.errors),"skipped":len(result.skipped)}
     Path(os.environ["GUARD_TEST_REPORT"]).write_text(json.dumps(report)+"\n")
-    sys.exit(0 if result.wasSuccessful() and result.testsRun==10 and not result.skipped else 1)
+    sys.exit(0 if result.wasSuccessful() and result.testsRun==11 and not result.skipped else 1)

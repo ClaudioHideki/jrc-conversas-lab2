@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
   "repository": "ClaudioHideki/jrc-conversas-lab2",
-  "product_sha": "dce805894696416ed5397c268efb4acecb8ecfc7",
-  "product_branch": "codex/runtime-alpine324-ci-20261112",
-  "infrastructure_branch": "ci/runtime-build-dce80589-20261112",
-  "native_run_id": 43296936629,
+  "product_sha": "d11c879a3d6e27499e1aea45736797a6e913b829",
+  "product_branch": "codex/runtime-alpine324-scout-fix-20261112",
+  "infrastructure_branch": "ci/release-gate-scout-d11c879a-20261112",
+  "native_run_id": 43323289272,
   "native_attempt": 1,
   "native_workflow": ".github/workflows/ag-native-candidate.yml",
   "protected_refs": {
@@ -15,7 +15,10 @@
     "codex/runtime-alpine324-ci-20261112": "dce805894696416ed5397c268efb4acecb8ecfc7",
     "ci/release-gate-cad427d4-20261112": "825de15a19016f9c3b69e80b4157d8e2cb322b40",
     "codex/runtime-alpine324-numbering-20261112": "cabfac0807404295f8405fadbe2255239c0c6719",
-    "ci/release-gate-runtime-20261112": "fdbb12734a0c695d5b123d6d60e5cfff5c52bc39"
+    "ci/release-gate-runtime-20261112": "fdbb12734a0c695d5b123d6d60e5cfff5c52bc39",
+    "codex/runtime-alpine324-scout-fix-20261112": "d11c879a3d6e27499e1aea45736797a6e913b829",
+    "ci/runtime-scout-probe-fix-20261112": "9131d1784a8256fed273b15f6f7b18389223612e",
+    "ci/release-gate-runtime-dce80589-20261112": "716647d67e96b77e8a56125ab0033c173bd68485"
   },
   "matrix": [
     {
@@ -718,8 +721,8 @@
     ".github/workflows/whatsapp-connections-candidate.yml": "be9d679b3f75df40a4fa7afeecffd2a4e4fa3b31b6cd5a152007397fbbb8e131",
     ".nvmrc": "7d47464895fb4585f012a93b04bd3ec88d1fc02b8a9d4e4ae12ade8f07a238a4",
     ".ruby-version": "574407f3c0155bbfe45bd150e22911c3328a000ea76c92f5f8b72708f83de5ef",
-    "Gemfile": "9e8e492019bae8f0ea10f9a87b0fd4ee1e414f0efbb31954bb480180d4d9daec",
-    "Gemfile.lock": "403d58bdbf2acb4c1a3bebb94142840d50cb7d0b96d900af8595d7fb22da8f40",
+    "Gemfile": "ca316cf633bf2e8e3f503696860a10e82cf0d05803d0d23c9a6d49665d69c9f4",
+    "Gemfile.lock": "47a57b5e48dc5287800821e009a1e2fbe938eef3bc9f024f64418a3faf9f180a",
     "app/models/jrc_crm/backoffice_request.rb": "599bc1fce954fe4bcc58aa98117722628001939b24f77522f178bd0bb90331bd",
     "db/migrate/20261111150000_create_whatsapp_retry_attempts.rb": "481b757bc0ddda6169d325d42ee48b79d4a7e4eba2de3ecc1f35d03ed928f48f",
     "db/migrate/20261112000000_create_service_desk_report_exports.rb": "14b7cefc0dab82448fce24eab5e29fee29a82f4fd09eeaf81fe264e6ba421b94",
@@ -731,27 +734,29 @@
     "script/jrc_ag_guarded_frontend_build.py": "18fa3a0e7af674e78e59cda0815805f65c88072dbfb80e6a327c87cf5f84e2c4",
     "script/jrc_ag_guarded_image_build.py": "f8d98a4ecfe255dad5a859c99d3f823bf50e045f021e814a3c1b0f97b5951b16",
     "script/jrc_ag_native_plan.py": "d6541ccbab07c864b0840644b578b5270c69a8db2c349aa7aac39dcd06154fa9",
-    "script/jrc_runtime_contract_test.py": "b74cf5e602e00eedf2c27b6529e3a76303e06603643f0e185842fc3365db03c0",
+    "script/jrc_runtime_contract_test.py": "6b04f17cd0d50895dcf7524ce81e2448065bfc08d356da3dc50333776a85b18d",
     "script/validate_ag_historical_migrations.mjs": "9a9223426da70dfdca3376d8153671b365cde9dca1fabeaec767ed3fc21ff27a",
     "script/validate_ag_migration_identity.mjs": "44cf4712f475845e3d31864b161c9807b48bf7f76d7d13df410d1c6cef048baf",
     "script/validate_migration_timestamps.mjs": "d9d2e69219c19ba23c70ddd0e4bca4f91b37b31a8c09cf0c9ef662afd27b8f36",
     "spec/services/jrc_crm/backoffice_request_number_spec.rb": "f424461b1008fc5942e421e430a283485e7dd54b8d4551a339ece28abaaa2172",
     "test/jrc_runtime/runtime_compatibility_spec.rb": "69f23c23df906a2c2a131b391be8ec410ac5f44a6dde58c6a72975855a1f11cf",
-    "test/jrc_runtime/sidekiq_worker.rb": "07badc8d904daa403a5ec52895d2b1b357e2a132b8dd28d0150a51467ad84485"
+    "test/jrc_runtime/sidekiq_worker.rb": "07badc8d904daa403a5ec52895d2b1b357e2a132b8dd28d0150a51467ad84485",
+    "script/jrc_runtime_contract_test_test.py": "05e6acbea28de5a00fc9ca326c457098d0a63458cd973462040692e04ccc5d5d",
+    "docs/jrc_consolidation/scout_native_fix_20261112.json": "0208361723b74f5c1a97ad0748f9fb481892e0a71b6b595c1ba041a82b133a39"
   },
   "evidence": {
-    "repository": "ClaudioHideki/jrc-conversas-ci-evidencias",
-    "coverage_receipt": {
-      "commit": "0d3c2a6a832912735e474eb16ac59e04af76f790",
-      "manifest_path": "evidence/6195f7d21a0781cd5c5cf4d13bd73a497bb5a452/runtime-candidate/validation-dce805894696416ed5397c268efb4acecb8ecfc7/matrix-complete/manifest.json",
-      "manifest_sha256": "5c428772bba5c64eca64a81a0cfc5ff1135b0bd24837cdbe9c9ff284a9c5198d",
-      "verified_files": 2,
-      "private": true
-    },
-    "coverage_sha256": "9cc68c42229782313fa5221b9fd33351db95dd8d34f1938ef1295e14924c1dd0"
+    "status": "awaiting-complete-new-native-run"
   },
   "expected_matrix_examples": 5554,
   "expected_artifact_count": 46,
   "build_authorized": false,
-  "alpine_image_tested": false
+  "alpine_image_tested": false,
+  "evidence_state": "awaiting-native-run",
+  "probe_hashes": {
+    ".github/runtime_build/probe.rb": "7a09a3010b76bdb9cc4398923171a788e4223cec59025b0f617dd0bf2583f75f",
+    ".github/runtime_build/worker.rb": "eb1cc09fc16dc1dcb581ab4f5b18a9bb41f851bf2e5860c3a5ba8ebbbc895a98",
+    ".github/runtime_build/receipt.rb": "245c2fe0f80676aa0318636301d58a5cb1fe44c74704858b5890f05891706643",
+    ".github/runtime_build/test_receipt.rb": "ed0e4ef29cae544877da6abdb3b74581c8caafafe047b90adc79d4d298cfdc7d",
+    ".github/runtime_build/extra.rb": "fdcfa1dc5faa1d2b45b06dae720d956bc042faa2f2a8054bb4b292a4eee87df4"
+  }
 }

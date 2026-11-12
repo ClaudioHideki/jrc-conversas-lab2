@@ -12,6 +12,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
+import scout_probe
 
 
 class GateError(Exception):
@@ -174,7 +175,12 @@ def runtime_contract(report):
             "Runtime contract not approved")
     require(report["ruby"] == "3.4.12" and report["patchlevel"] == 148
             and report["node"] == "24.22.3" and report["alpine"] == "3.24", "Runtime contract versions mismatch")
-    for key in ("gem_versions_unchanged", "pnpm_lock_unchanged", "all_other_functional_sources_unchanged",
+    require(report["gem_versions_unchanged"] is False and report["all_other_gem_versions_unchanged"] is True,
+            "Scout-only dependency change must be disclosed")
+    require(report["reviewed_gem_changes"] == [{"gem": "scout_apm", "from": "5.3.3", "to": "5.7.0",
+            "upstream_fix": "https://github.com/scoutapp/scout_apm_ruby/pull/552"}],
+            "Unreviewed dependency change")
+    for key in ("pnpm_lock_unchanged", "all_other_functional_sources_unchanged",
                 "migrations_unchanged", "separate_nico_image_unchanged"):
         require(report[key] is True, "Runtime preservation proof missing")
     require(report["functional_sources_unchanged"] is False, "Reviewed fix must be disclosed")
@@ -240,6 +246,7 @@ class GitHub:
 
 
 def execute(lock, infra, product, output):
+    require(lock.get("evidence_state") == "validated-native-run", "Native evidence lock is not finalized")
     require(re.fullmatch(r"[0-9a-f]{40}", infra), "Full infrastructure SHA required")
     require(os.environ["GITHUB_SHA"] == infra, "Infrastructure SHA differs from authorization")
     require(os.environ["GITHUB_REF_NAME"] == lock["infrastructure_branch"], "Wrong infrastructure branch")
@@ -254,9 +261,15 @@ def execute(lock, infra, product, output):
                                         "--untracked-files=all"], text=True).strip(), "Product checkout dirty")
     for path, expected in lock["source_hashes"].items():
         require(sha((product / path).read_bytes()) == expected, "Source file mismatch: " + path)
+    for path, expected in lock["probe_hashes"].items():
+        require(sha((Path(__file__).resolve().parents[2] / path).read_bytes()) == expected,
+                "Approved probe/smoke file changed: " + path)
     gh = GitHub(lock["repository"], os.environ["GH_TOKEN"])
     for ref, expected in lock["protected_refs"].items():
         require(gh.api("/git/ref/heads/" + ref)["object"]["sha"] == expected, "Protected source ref moved")
+    excluded = "a822141b28d553a11555b9786293f3da0a91bd7c"
+    comparison = gh.api("/compare/" + excluded + "..." + lock["product_sha"])
+    require(comparison["merge_base_commit"]["sha"] != excluded, "Excluded WhatsApp commit was incorporated")
     run = gh.api("/actions/runs/" + str(lock["native_run_id"]))
     run_identity(lock, run)
     snap = gh.api("/actions/runs/" + str(lock["native_run_id"]) + "/attempts/1/jobs?per_page=100")
@@ -324,7 +337,8 @@ def execute(lock, infra, product, output):
             == lock["product_sha"], "Product changed during verification")
     require(not subprocess.check_output(["git", "-C", str(product), "status", "--porcelain",
                                         "--untracked-files=all"], text=True).strip(), "Product changed during gate")
-    report = {"passed": True, "product_sha": lock["product_sha"], "infrastructure_sha": infra,
+    focused = scout_probe.verify(gh, require, archive, member, rspec, apt)
+    report = {"scout_probe_evidence": focused, "passed": True, "product_sha": lock["product_sha"], "infrastructure_sha": infra,
               "lock_sha256": sha(json.dumps(lock, sort_keys=True).encode()),
               "native_run_id": lock["native_run_id"], "native_attempt": 1,
               "matrix_identities": 36, "matrix_example_executions": total, "mandatory_jobs": len(lock["mandatory_jobs"]),

@@ -13,9 +13,9 @@ import urllib.request
 import urllib.error
 import uuid
 
-PRODUCT = "dce805894696416ed5397c268efb4acecb8ecfc7"
+PRODUCT = "d11c879a3d6e27499e1aea45736797a6e913b829"
 APPROVED = "716647d67e96b77e8a56125ab0033c173bd68485"
-BRANCH = "ci/runtime-build-dce80589-20261112"
+BRANCH = "ci/runtime-build-scout-d11c879a-20261112"
 REPO = "ClaudioHideki/jrc-conversas-lab2"
 BUILDKIT = "mirror.gcr.io/moby/buildkit:v0.33.1@sha256:98cc6a3fc46220d00f8224ae483f3274fc874e9be8d7dd1e2e2c5481209228b5"
 PG = "pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a"
@@ -60,6 +60,10 @@ def build_command(builder, output):
             "--metadata-file", str(output / "metadata.json"), "--progress=plain", "."]
 
 
+def schema_command():
+    return ["bundle", "exec", "rails", "db:schema:load", "db:migrate"]
+
+
 class Attempt:
     def __init__(self):
         self.name = identity(os.environ)
@@ -71,7 +75,8 @@ class Attempt:
         self.builder_id = None
         self.builder_created = False
         self.builder_stopped = False
-        self.result = {"product_sha": PRODUCT, "approved_gate_sha": APPROVED,
+        self.result = {"authorized_image_attempt": 2, "previous_image_run": 43314230369,
+                       "product_sha": PRODUCT, "approved_gate_sha": APPROVED,
                        "execution_sha": os.environ["GITHUB_SHA"], "run_id": os.environ["GITHUB_RUN_ID"],
                        "build_started": False, "build_passed": False, "smoke_passed": False,
                        "published": False, "phases": [], "initial": None, "disk_min": None, "ram_min": None}
@@ -230,24 +235,26 @@ class Attempt:
                  "type=bind,src=" + str(self.output) + ",dst=/evidence"]
         base = ["docker", "create", "--name", self.name + "-schema", "--label", "jrc.runtime.run=" + self.name,
                 "--network", self.name, "--env-file", str(envfile)]
-        self.command(base + [image, "bundle", "exec", "rails", "db:schema:load"], "create-schema")
+        self.command(base + [image] + schema_command(), "create-schema-and-migrate")
         self.own(self.name + "-schema")
-        self.command(["docker", "start", "-a", self.name + "-schema"], "schema-load", 300)
-        def probe(mode):
+        self.command(["docker", "start", "-a", self.name + "-schema"], "schema-load-and-migrate", 600)
+        def probe(mode, script='probe.rb'):
             name = self.name + "-probe-" + mode
             args = ["docker", "create", "--name", name, "--label", "jrc.runtime.run=" + self.name,
                     "--network", self.name, "--env-file", str(envfile)]
             for m in mount:
                 args += ["--mount", m]
-            self.command(args + [image, "bundle", "exec", "rails", "runner", "/smoke/probe.rb", mode], "create-probe-" + mode)
+            self.command(args + [image, "bundle", "exec", "rails", "runner", "/smoke/" + script, mode], "create-probe-" + mode)
             self.own(name)
             self.command(["docker", "start", "-a", name], "probe-" + mode, 300)
         probe("native")
+        probe("scout", "extra.rb")
         probe("enqueue")
         worker = self.name + "-worker"
         self.run_container(worker, image, ["bundle", "exec", "sidekiq", "-r", "/smoke/worker.rb",
                                            "-q", env["RUNTIME_SMOKE_QUEUE"], "-c", "1"], envfile, mount)
         probe("verify_worker")
+        probe("worker_pid_one", "extra.rb")
         web = self.name + "-web"
         self.run_container(web, image, ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"],
                            envfile, mount, ["127.0.0.1::3000"])
