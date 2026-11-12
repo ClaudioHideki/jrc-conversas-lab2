@@ -1,0 +1,327 @@
+{
+  "date": "2026-11-02",
+  "state": "Incremento local C1 validado; Etapa C e conjunto B→G continuam parciais. Não é release.",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_commit": "1b7b8342e3c976820da770f155cec1497b924ff4",
+  "source_snapshot": "/consolidation-master-company-mobile",
+  "source_proof": {
+    "files": 11270,
+    "baseline": "701dad483ee61283b94375050f2952f5ffe2d7df",
+    "mismatches": [],
+    "snapshot": "/consolidation-master-company-mobile",
+    "sql_raw_hashes": true
+  },
+  "implemented": [
+    "Lista de empresas abre ficha 360º em popup reutilizando CompanyPage; rotas individuais preservadas. Criação/edição reutilizam CompanyEditor e CompanyWriter canônicos.",
+    "Filtros e página ficam na URL e permanecem ao fechar o popup. Conta/identidade mudam e respostas antigas/negadas são descartadas; dados privados anteriores são limpos.",
+    "Formulário existente dividido em quatro abas horizontais com tokens nativos; todos os valores reativos e revision/CAS preservados. Validação nativa abre a seção e foca o campo inválido antes de gravar.",
+    "Mapa e linha do tempo possuem abas próprias; visão geral mantém indicadores e últimos/próximos eventos sem carregar painéis completos duplicados.",
+    "Backoffice contextual reutiliza ContractAccess.requests, ContactDirectory, CorporateCoverage e BackofficeWorkspace. Filtro da empresa limita a relação antes de totais, opções, paginação e filtros do cliente.",
+    "Visões de solicitações por etapa e histórico seguro ligam à solicitação no módulo proprietário. IDs de conta, empresa, usuário e unidade fornecidos pelo cliente não concedem acesso.",
+    "Correção comprovada em Chrome: fluxo normal da página evita comprimir a tabela em celular sob filtros altos; cliques normais voltam a abrir o popup."
+  ],
+  "limits": [
+    "Backoffice contextual mostra solicitações nas visões nativas e link de origem. Não substitui nem duplica o detalhamento de cada documento, aprovação ou contrato; a Central documental integral do cliente continua parcial.",
+    "Popup de contatos, segmentos dinâmicos E/OU, grupos econômicos completos, importações mapeadas/histórico e contatos ativos operacionais ainda exigem desenvolvimento/validação.",
+    "Etapas D/E/F/G e critérios restantes de B não estão concluídos. Nenhuma homologação externa realizada.",
+    "21 ocorrências Ruby preexistentes permanecem nos arquivos existentes. Lint Ruby geral não está aprovado; nenhuma regra foi desativada.",
+    "Nexora original continua com o bloqueio comprovado de contrato sem evidência de assinatura; verificador permanece nil. Não foi ignorado nem enfraquecido."
+  ],
+  "validation": {
+    "backend": {
+      "examples": 63,
+      "failures": 0,
+      "artifact": ".codex/master-company-context-validated-backend.json",
+      "coverage": "Escopo de empresa, conta, proprietário, revogação de CRM/unidade, parâmetros sem ampliação, paginação e histórico com campos seguros; regressões do Cadastro Mestre e cobertura corporativa."
+    },
+    "signature_regression": {
+      "examples": 8,
+      "failures": 0,
+      "artifact": ".codex/master-company-context-signature-regression.json",
+      "note": "Oito regressões executadas no snapshot inicial C1; arquivos de assinatura/ContractAccess idênticos no snapshot final."
+    },
+    "frontend": {
+      "files": 8,
+      "tests": 36,
+      "failures": 0,
+      "artifact": ".codex/master-company-mobile-frontend-tests.json"
+    },
+    "frontend_style": {
+      "files": 13,
+      "errors": 0,
+      "warnings": 0,
+      "artifacts": [
+        ".codex/master-company-review-frontend-style.json",
+        ".codex/master-company-mobile-style.json"
+      ]
+    },
+    "ruby_style": {
+      "baseline_offenses": 25,
+      "current_offenses": 21,
+      "new_types_or_locations": [],
+      "full_lint_green": false,
+      "no_rules_disabled": true,
+      "remaining": [
+        {
+          "file": "app/controllers/api/v1/accounts/customers/companies_controller.rb",
+          "cop": "Layout/ArgumentAlignment",
+          "source": ":segment, :size, :website, :domain, :email, :phone_number, :source, :economic_group,",
+          "message": "Align the arguments of a method call if they span more than one line."
+        },
+        {
+          "file": "app/controllers/api/v1/accounts/customers/companies_controller.rb",
+          "cop": "Layout/ArgumentAlignment",
+          "source": ":parent_company_id, :owner_id, :relationship_type, :active, :description,",
+          "message": "Align the arguments of a method call if they span more than one line."
+        },
+        {
+          "file": "app/controllers/api/v1/accounts/customers/companies_controller.rb",
+          "cop": "Layout/ArgumentAlignment",
+          "source": "relationship_tags: [], tags: [])",
+          "message": "Align the arguments of a method call if they span more than one line."
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Metrics/AbcSize",
+          "source": "def initialize(account:, user:, account_user:, company: nil, contact: nil)",
+          "message": "Assignment Branch Condition size for initialize is too high. [<19, 56, 3> 59.21/26]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Metrics/MethodLength",
+          "source": "def initialize(account:, user:, account_user:, company: nil, contact: nil)",
+          "message": "Method has too many lines. [20/19]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Style/ParallelAssignment",
+          "source": "@account, @user, @company, @contact, @account_user = account, user, company, contact, account_user",
+          "message": "Do not use parallel assignment."
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Metrics/AbcSize",
+          "source": "def overview",
+          "message": "Assignment Branch Condition size for overview is too high. [<11, 100, 11> 101.2/26]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Metrics/CyclomaticComplexity",
+          "source": "def overview",
+          "message": "Cyclomatic complexity for `overview` is too high. [12/7]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Metrics/MethodLength",
+          "source": "def overview",
+          "message": "Method has too many lines. [37/19]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Metrics/PerceivedComplexity",
+          "source": "def overview",
+          "message": "Perceived complexity for `overview` is too high. [12/8]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Metrics/AbcSize",
+          "source": "def sources",
+          "message": "Assignment Branch Condition size for sources is too high. [<9, 26, 5> 27.96/26]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Layout/MultilineMethodCallIndentation",
+          "source": ".where(message_type: [0, 1]), :created_at],",
+          "message": "Align `.where` with `.where` on line 88."
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Layout/LineLength",
+          "source": "@project_events = @project_events.where(action: %w[projects.project.created projects.project.updated projects.task.created projects.task.updated projects.task.moved projects.task.completed])",
+          "message": "Line is too long. [194/150]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Metrics/AbcSize",
+          "source": "def initialize_commercial(contact_ids)",
+          "message": "Assignment Branch Condition size for initialize_commercial is too high. [<7, 30, 0> 30.81/26]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Layout/EmptyLineAfterGuardClause",
+          "source": "return unless @account.feature_enabled?('jrc_relationship')",
+          "message": "Add empty line after guard clause."
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Layout/LineLength",
+          "source": "scope = JrcRelationship::AssignmentPolicy::Scope.new({ account: @account, user: @user, account_user: @account_user }, JrcRelationship::Assignment).resolve",
+          "message": "Line is too long. [158/150]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Metrics/AbcSize",
+          "source": "def initialize_audits",
+          "message": "Assignment Branch Condition size for initialize_audits is too high. [<16, 38, 5> 41.53/26]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Layout/LineLength",
+          "source": "relationship_audits = scope.where(event_type: 'relationship_updated').where(\"metadata ->> 'assignment_id' = ?\", @relationship_assignment.id.to_s)",
+          "message": "Line is too long. [151/150]"
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Layout/ArgumentAlignment",
+          "source": "assignment_id: @relationship_assignment.id, access_signature: ctx.access_signature)",
+          "message": "Align the arguments of a method call if they span more than one line."
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Layout/HashAlignment",
+          "source": "assignment_id: @relationship_assignment.id, access_signature: ctx.access_signature)",
+          "message": "Align the keys of a hash literal if they span more than one line."
+        },
+        {
+          "file": "app/services/jrc_customers/customer360.rb",
+          "cop": "Layout/LineLength",
+          "source": "{ deals => ['JrcCrm::Deal', 'Deal'], leads => ['JrcCrm::Lead', 'Lead'], proposals => ['JrcCrm::Proposal', 'Proposal'], contracts => ['JrcCrm::Contract'], orders => ['JrcCrm::SalesOrder'] }.each do |records, types|",
+          "message": "Line is too long. [217/150]"
+        }
+      ]
+    },
+    "zeitwerk": "passed; .codex/master-company-review-zeitwerk.log; Ruby source identical to final snapshot",
+    "assets": "Vite production assets passed; .codex/master-company-mobile-production-assets.log. No Docker image.",
+    "browser": {
+      "initial": {
+        "synthetic_only": true,
+        "actor_role": "agent",
+        "source": "/consolidation-master-company-review",
+        "external_homologation": false,
+        "real_messages_sent": 0,
+        "screenshots": [
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/96-cadastro-lista-pagina2-claro.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/97-cadastro-popup-claro.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/98-cadastro-popup-escuro.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/99-cadastro-editor-abas-escuro.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/100-cadastro-backoffice-escuro.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/101-cadastro-origem-documentos-escuro.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/102-cadastro-popup-celular-escuro.png"
+        ],
+        "checks": {
+          "edit_persisted": true,
+          "native_scope": true,
+          "native_source_link": true,
+          "list_context_preserved": true,
+          "create_and_native_validation": true,
+          "reopen_persisted": true
+        },
+        "list_url": "http://localhost:5370/app/accounts/4/customers/companies?q=%5BTESTE%20SINT%C3%89TICO%5D%20Cadastro&page=2",
+        "created_company_id": 38,
+        "status": "failed",
+        "error": "locator.evaluate: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').last()\u001b[22m\n\n    at C:\\Users\\DEV03\\Documents\\Jrc\\relacionamento-v2-20261101\\.codex\\verify-master-company-review-browser.cjs:100:58"
+      },
+      "final_readonly": {
+        "synthetic_only": true,
+        "read_only_recheck": true,
+        "source": "/consolidation-master-company-mobile",
+        "initial_attempt": "cadastro-popup-progresso.json",
+        "initial_status": "failed",
+        "previous_mobile_failure": "cadastro-popup-revalidacao-resultado.json",
+        "mobile_fix": "CompaniesPage normal document flow prevents table collapse beneath filters; normal pointer clicks are required.",
+        "initial_note": "Creation/edit/persisted reopen and native source checks passed; viewport change remounted the application and closed its transient popup. The initial attempt then timed out waiting for that dialog. No repeated creation.",
+        "initial_checks": {
+          "edit_persisted": true,
+          "native_scope": true,
+          "native_source_link": true,
+          "list_context_preserved": true,
+          "create_and_native_validation": true,
+          "reopen_persisted": true
+        },
+        "checks": {
+          "mobile_popup_no_overflow": true,
+          "mobile_editor_persisted": true,
+          "foreign_account_denied": 401
+        },
+        "screenshots": [
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/109-cadastro-lista-celular-corrigida.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/104-cadastro-popup-celular-escuro-revalidado.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/105-cadastro-popup-celular-claro-revalidado.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/106-cadastro-editor-celular-escuro.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/107-cadastro-popup-desktop-escuro-revalidado.png",
+          "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/108-cadastro-backoffice-claro.png"
+        ],
+        "real_messages_sent": 0,
+        "external_homologation": false,
+        "page_errors": [],
+        "status": "passed"
+      },
+      "note": "A primeira execução real gravou/validou criação e edição, mas falhou após trocar a largura e fechar o popup transitório. Nova tentativa em celular revelou tabela comprimida. Ambas foram preservadas; após correção, repetição somente leitura em celular/desktop passou. Não houve nova criação."
+    },
+    "integrity": {
+      "status": "passed",
+      "synthetic_only": true,
+      "original_rows_unchanged": 27,
+      "model_sets": [
+        "AccountUser",
+        "JrcCustomers::Company",
+        "JrcCrm::Contract",
+        "JrcBackoffice::ContractVersion",
+        "JrcBackoffice::SignatureDelivery",
+        "JrcBackoffice::SignatureDeliveryEvent",
+        "JrcBackoffice::SignatureNotification"
+      ],
+      "actor_role": "agent",
+      "group_scope": false,
+      "created_company_id": 38,
+      "updated_company_id": 8,
+      "native_audit_present": true,
+      "visible_request_ids": [
+        3
+      ],
+      "signature_deliveries": 0,
+      "verifier": null,
+      "production_changed": false
+    },
+    "failed_attempts": [
+      ".codex/master-company-tabs-frontend-tests.json —35/36; foco incorreto no fieldset corrigido; rechecagem3/0 e final36/0.",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\cadastro-popup-progresso.json",
+      "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\cadastro-popup-revalidacao-resultado.json",
+      ".codex/master-company-ui-integrity.log —runner de leitura usava associação actor inexistente/resource_type incorreto; corrigido para colunas reais, sem mudança no produto."
+    ]
+  },
+  "files": [
+    "app/controllers/api/v1/accounts/customers/companies_controller.rb",
+    "app/javascript/dashboard/api/jrcCustomers.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompaniesPage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/BackofficeContextPanel.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/BackofficeContextPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyDetailsDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditorDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCompanyDirectory.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCompanyDirectory.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.js",
+    "app/services/jrc_backoffice/contract_access.rb",
+    "app/services/jrc_customers/backoffice_context.rb",
+    "app/services/jrc_customers/customer360.rb",
+    "config/routes.rb",
+    "spec/requests/api/v1/accounts/customers/company_backoffice_context_spec.rb",
+    "spec/services/jrc_customers/backoffice_context_spec.rb"
+  ],
+  "migrations_added": [],
+  "dependencies_added": [],
+  "publication": {
+    "push": false,
+    "docker_image_build": false,
+    "image_publish": false,
+    "deploy": false,
+    "production_migrations": false,
+    "protected_publication_head": "50f7f07d802829dd44a67547fabad3aa77f3d196"
+  },
+  "next": "Continuar integralmente os requisitos restantes de C, depois D→E→F→G, com checkpoints e testes. Não encerrar o objetivo no popup/CSV/assinatura."
+}

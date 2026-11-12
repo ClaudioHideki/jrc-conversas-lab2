@@ -1,0 +1,53 @@
+{
+  "stage": "E1",
+  "status": "Increment implemented and automatically tested; E remains open",
+  "parent_checkpoint": "8fe9a7a864de148ed5138ddfc8bf9d63a43d66de",
+  "branch": "codex/relacionamento-v2-20261101",
+  "implemented": [
+    "Authenticated native preview and tar.gz download containing actual immutable safe document versions and generated contract PDFs, with exact version IDs and SHA-256 hashes",
+    "Manifest includes origin/order/contract links, completed date, responsible ID, version authors, document decisions, native bounded request history and authorized signature delivery/event history",
+    "All historical contract PDFs reuse ContractVersions.download!; uploaded document bytes reuse DocumentSafety.bytes!; signature history reuses Signatures::History and AuthorityAccess",
+    "Unscanned/quarantined files stay blocked; missing required documents, unsigned-version artifacts and legacy unversioned attachments are explicitly reported instead of silently exporting them",
+    "Native account, operational owner and corporate/unit scopes are rechecked after file I/O; completion/reference/security changes abort the download",
+    "Native access audit pins output digest and exact included/blocked versions without snapshots, credentials, raw file contents or storage keys",
+    "Dedicated colored horizontal final-documents tab with explicit preview, missing reasons, version hashes, archive download, error handling and stale-response suppression",
+    "Existing operational CSV preserved; no new document registry, dependency, migration, worker or external call"
+  ],
+  "limits": {
+    "available_uncompressed_file_bytes": 104857600,
+    "each_document_contract_history_or_signature_collection": 100,
+    "overflow": "Explicit error; never silently truncates or claims a complete archive",
+    "format": "tar.gz using Ruby standard libraries; numeric generated entry paths and known native document extensions"
+  },
+  "tests": {
+    "backend_final": { "examples": 18, "failures": 0, "resource": ".codex/d9-notifications-20261104/e1package03-resource.json", "output": ".codex/d9-notifications-20261104/e1package03-resource.log" },
+    "frontend_final": { "tests": 12, "failures": 0, "resource": ".codex/d-approvals-20261104/e1packageui02-resource.json" },
+    "new_ruby_files_rubocop": { "offenses": 0, "evidence": ".codex/d9-notifications-20261104/e1packagelint04.json" },
+    "changed_package_frontend_eslint": { "evidence": ".codex/d-approvals-20261104/e1package-eslint.json" },
+    "covered": ["real archive extraction and checksums", "all uploaded versions", "actual generated native contract PDF", "clean-scan simulation explicitly distinguished from scanner acceptance", "missing/blocked files", "legacy signed file preservation without false verification", "unfinished/reopened request denied", "tenant/owner/unit denial", "revocation during private I/O", "tampered bytes", "pre-download byte limit", "late browser responses discarded", "CSV regression"],
+    "initial_failed_round": "e1package02: 18 examples, 1 failure. Contract PDF fixture attempted completion without the native signature prerequisite. Prepared an explicitly synthetic legacy signed fixture; did not weaken the production gate. e1package03 passed.",
+    "candidate_database": "jrc_rel_v2_candidate_test",
+    "migration_check": "Native pending-migration check retained; no schema replacement, new migration or production database operation"
+  },
+  "word_comparison": {
+    "reference": ".codex/referencias-continuacao-20261102/backoffice/texto-completo.txt, section 8.7 and image9.png; cache compared with original DOCX",
+    "functional_partial": "Actual available-version export now exists alongside the CSV. Not a sealed immutable final dossier and never substitutes provider observation for signature proof.",
+    "visual_partial": "Dedicated horizontal tab and final-files preview implemented. Frozen 5379 assets do not include this increment; no actual Chrome/desktop/mobile acceptance claimed.",
+    "still_missing": ["durable sealed final dossier and version-bound verified signed artifacts/certificates", "signed artifact acquisition and legal/evidence binding", "complete final-deliveries/finance/approval/conclusion and governed CS handoff view", "fresh-build and real Chrome validation when authorized"],
+    "C": "Open: consolidated visual/scale acceptance, deferred companies-without-portfolio documents and undefined TRR remain separately recorded",
+    "D": "Open: prior native tiers/adjustment/delegation/notification work preserved; required visual/operational acceptance remains",
+    "E": "Open; documentary export is partial",
+    "F": "Open; native portfolio/distribution, product history/trends and governed automation gaps remain",
+    "G": "Open; targeted automated evidence does not replace full integration and browser acceptance"
+  },
+  "preservation": {
+    "free_initial_bytes": 12870594560,
+    "minimum_observed_bytes": 12683972608,
+    "backend_final_free_bytes": 12707549184,
+    "disk_guard": "Owned local test processes only; conservative stop at 2 GB, mandatory user limit 750 MB; never reached",
+    "existing_containers": "All four running with unchanged start times when checked",
+    "server_5379": "Not modified; existing frozen source/assets preserved, not used as evidence of new changes",
+    "build_push_deploy_external_calls_cleanup": false
+  },
+  "next": "Continue E2 native detailed Central report, then local E3/F gaps. Do not mark E1 or any C-G stage complete."
+}

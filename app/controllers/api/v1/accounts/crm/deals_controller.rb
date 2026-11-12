@@ -7,6 +7,7 @@ module Api
 
           def index
             deals = visible_to_current_user(crm_scope.jrc_crm_deals)
+            deals = customer_segment_scope(deals)
             deals = deals.where.not(status: 'archived') unless params[:status].present?
             deals = deals.where(pipeline_id: params[:pipeline_id]) if params[:pipeline_id].present?
             deals = deals.where(stage_id: params[:stage_id]) if params[:stage_id].present?

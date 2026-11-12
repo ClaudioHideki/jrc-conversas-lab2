@@ -16,6 +16,14 @@ const sourceName = source => {
   if (!source) return empty();
   return te(key) ? t(key) : source;
 };
+const slaTone = ticket =>
+  ({
+    overdue: 'bg-rose-100 text-rose-800 ring-rose-200',
+    on_time: 'bg-emerald-100 text-emerald-800 ring-emerald-200',
+    completed: 'bg-emerald-100 text-emerald-800 ring-emerald-200',
+    near_due: 'bg-amber-100 text-amber-900 ring-amber-200',
+    paused: 'bg-amber-100 text-amber-900 ring-amber-200',
+  })[ticket.sla?.state] || 'bg-slate-100 text-slate-700 ring-slate-200';
 const slaName = ticket =>
   ticket.sla?.state
     ? t(`JRC_SERVICE_DESK.OPS.SLA.${ticket.sla.state}`)
@@ -116,7 +124,11 @@ const assigneeName = ticket =>
             {{ assigneeName(ticket) }}
           </td>
           <td class="break-words py-3 pr-2 text-n-slate-11">
-            {{ slaName(ticket) }}
+            <span
+              class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+              :class="slaTone(ticket)"
+              >{{ slaName(ticket) }}</span
+            >
           </td>
           <td class="py-2">
             <div class="flex flex-col items-start gap-1">
@@ -185,7 +197,13 @@ const assigneeName = ticket =>
             <dt class="text-n-slate-11">
               {{ t('JRC_SERVICE_DESK.FIELDS.sla') }}
             </dt>
-            <dd class="m-0">{{ slaName(ticket) }}</dd>
+            <dd class="m-0">
+              <span
+                class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+                :class="slaTone(ticket)"
+                >{{ slaName(ticket) }}</span
+              >
+            </dd>
           </div>
         </dl>
         <div class="flex flex-wrap items-center gap-2">

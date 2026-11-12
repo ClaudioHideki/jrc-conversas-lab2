@@ -2,7 +2,8 @@
 class JrcNico::ProtectedResourceReader
   SOURCES = { 'JrcRelationship::Survey' => 'surveys', 'JrcCrm::Invoice' => 'invoices', 'CsatSurveyResponse' => 'csat',
               'Conversation' => 'conversations', 'Message' => 'messages', 'Call' => 'calls',
-              'JrcServiceDesk::TicketEvent' => 'ticket_events', 'JrcProjects::AuditEvent' => 'project_events' }.freeze
+              'JrcServiceDesk::TicketEvent' => 'ticket_events', 'JrcServiceDesk::SlaClock' => 'sla_clocks',
+              'JrcProjects::AuditEvent' => 'project_events' }.freeze
   TICKET_MODELS = { 'JrcServiceDesk::TicketNote' => JrcServiceDesk::TicketNote, 'JrcServiceDesk::TicketTask' => JrcServiceDesk::TicketTask,
                     'JrcServiceDesk::TicketApproval' => JrcServiceDesk::TicketApproval }.freeze
 

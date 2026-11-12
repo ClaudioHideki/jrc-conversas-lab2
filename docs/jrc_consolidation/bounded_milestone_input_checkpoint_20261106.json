@@ -1,0 +1,60 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "8af510ed626286e04522c3e3226daa0941f1c977",
+  "status": "F2/G milestone collection boundary locally validated; stages remain open",
+  "confirmed_gap": "Baseline4 examples/3 failures: hash-shaped milestone collection returned500; scalar entries were silently discarded and returned201;51 milestones reached51 native ownership checks before model validation rejected them. Existing goals/participants/decisions already had controller bounds and were not reimplemented.",
+  "implementation": [
+    "Milestones now reuse the existing structured-collection shape and50-item limit before any Workflow ownership/source lookup. Malformed collections return native422 rather than500 or silently accepted data loss.",
+    "Exact previous milestone field allowlist retained separately from the existing union for goals/participants/decisions. No extra identity, product or user fields admitted for milestones.",
+    "Native model validation remains in place; omitted/null semantics retained and explicit empty-array clearing is covered. No new table, UI layout, integration or business limit introduced."
+  ],
+  "tests": {
+    "native02": "22 examples,0 failures =4 collection cases plus9 manual ownership,5 plan ownership and4 QBR ownership regressions after the shared controller change.",
+    "cost_final03": "1 additional named case/0 failures after replacing any_instance instrumentation. Zero target checks for51 items, and a valid one-item positive control proves the spy observes real native authorization.",
+    "new_ruby_offenses": 0,
+    "shared_static": [
+      {
+        "path": "app/controllers/api/v1/accounts/relationship/records_controller.rb",
+        "baseline_count": 13,
+        "current_count": 13,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "frontend": "No frontend source changed; no redundant Vue suite or app build.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "milestone-input-native02": {
+      "start": 7119859712,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/structured_milestones_spec.rb": "d2e1344e977c49aa57614d100c21e6639fd98310a323f32aca7679315773941f",
+        "spec/requests/api/v1/accounts/relationship/manual_work_ownership_spec.rb": "c39da13c6f8956ae93420fbf088bba3c05d36086751847b8cc8e868546a7ed2b",
+        "spec/requests/api/v1/accounts/relationship/plan_commitment_ownership_spec.rb": "bcf5504b4ea335101d6da57023f9129b85bf055ed6d085e3c463babb2e9f0c0f",
+        "spec/requests/api/v1/accounts/relationship/qbr_commitment_ownership_spec.rb": "0c7552efd7d17df4ad693bf81c90d52ecfcd08d04ca43928834d5c9be9770714"
+      },
+      "minimum": 7119851520,
+      "exit_code": 0,
+      "end": 7120617472
+    },
+    "milestone-input-cost-final03": {
+      "start": 7118737408,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/structured_milestones_spec.rb": "675be9c398d894309d1647aa38c45618692e612b463b515db800194786713cab"
+      },
+      "minimum": 7098953728,
+      "exit_code": 0,
+      "end": 7118745600
+    }
+  },
+  "next": "Continue F2/G source and operational observability gaps; do not duplicate existing health-family aggregation or Approval actor-authentication guards found in native source.",
+  "restrictions": "No build, cleanup, server5379 change, original container restart, push, GHCR, deploy, production or external real operation."
+}

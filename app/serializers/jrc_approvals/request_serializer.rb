@@ -11,10 +11,25 @@ class JrcApprovals::RequestSerializer
                                'requester_id' => @record.requester_id, 'requester_name' => @record.requester.user.name,
                                'policy_name' => @record.policy_version.publication['name'], 'policy_version' => @record.policy_version.version,
                                'stages' => stages
-                             )
+                             ).merge(origin)
   end
 
   private
+
+  def origin
+    if @record.resource_type == 'JrcRelationship::BatchReview' &&
+       @record.module_key == 'relationship' && @record.event_key == 'portfolio_distribution'
+      return { 'origin' => { kind: 'portfolio_distribution', review_id: @record.resource_id } }
+    end
+
+    legal_case = @record.resource_type == 'JrcBackoffice::AuthorityProposal' && @record.module_key == 'contracts' &&
+                 @record.event_key == 'signer_authority'
+    return {} unless legal_case
+
+    proposal = JrcBackoffice::AuthorityProposal.where(account_id: @record.account_id).find(@record.resource_id)
+    { 'origin' => { kind: 'contract_authority', backoffice_request_id: proposal.backoffice_request_id,
+                    contract_version_id: proposal.contract_version_id } }
+  end
 
   def stages
     @record.stage_plan.map do |step|

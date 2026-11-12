@@ -1,11 +1,16 @@
 require 'rails_helper'
 
-RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
+RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle', :approval_core, :authority_core, :signature_delivery_core, type: :request do
+  self.use_transactional_tests = false
   let(:account) { create(:account) }
   let(:seller) { create(:user, account: account, role: :administrator, name: 'Thiago Ribeiro') }
 
   before do
-    account.enable_features!('jrc_crm', 'jrc_customer_master', 'jrc_projects')
+    config = ActiveRecord::Base.connection_db_config
+    raise 'Exclusive synthetic integration database required' unless Rails.env.test? && config.database == 'jrc_rel_v2_candidate_test' &&
+                                                                    config.host == 'jrc-rel-v2-pg-20261101'
+
+    account.enable_features!('jrc_crm', 'jrc_customer_master', 'jrc_projects', 'jrc_approvals')
   end
 
   it 'preserves one company/contact from lead through won sale, order, contract, backoffice and implementation project' do
@@ -171,13 +176,57 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
 
     # The operational handoff remains explicit: contract signature and the
     # implementation checklist are real gates and are not auto-completed.
-    File.open(Rails.root.join('spec/assets/sample.pdf')) do |file|
-      contract.signed_document.attach(io: file, filename: 'nexora-assinado.pdf', content_type: 'application/pdf')
-    end
-    contract.update!(
-      status: 'active', signature_status: 'signed', signature_mode: 'manual',
-      signed_by_name: 'Marcelo Andrade', signed_at: Time.current
+    expect { backoffice.advance!(actor: seller) }.to raise_error(ActiveRecord::RecordInvalid)
+    expect(backoffice.reload.stage).to eq('contract')
+    # Preserve the same customer/order. The v2 path requires real native versions,
+    # signer identities, powers approval and accepted evidence; a manual flag is insufficient.
+    # Only provider HTTP and antivirus results are synthetic, not legal decisions.
+    issuer = account.master_companies.create!(name: 'SYNTHETIC Nexora issuer', relationship_type: 'internal', tax_id: '11444777000161')
+    unit = account.jrc_crm_business_units.create!(name: 'SYNTHETIC Nexora unit', code: SecureRandom.hex(6), company_id: issuer.id)
+    company.update!(tax_id: '11222333000181')
+    issuer_person = create(:contact, account: account, company_id: issuer.id, email: 'issuer.nexora@example.test')
+    domain = { account: account, actor: seller, company: issuer, customer: company, unit: unit,
+               customer_person: contact, issuer_person: issuer_person, order: order, contract: contract, operation: backoffice,
+               documents: JrcBackoffice::Documents.new(request: backoffice, actor: seller),
+               versions: JrcBackoffice::ContractVersions.new(account: account, actor: seller, request_id: backoffice.id),
+               file: Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/sample.pdf'), 'application/pdf') }
+    authority_identity_setup(domain)
+    # Explicit synthetic group coverage keeps the pre-existing cross-module manager scope.
+    account.jrc_crm_user_business_units.create!(user: seller, scope: 'GROUP', active: true, structure_managed: true)
+    order.update!(business_unit: unit)
+    contract.update!(business_unit: unit)
+    backoffice.update!(business_unit: unit, metadata: backoffice.metadata.merge('required_documents' => ['representation']))
+    legal = signature_legal_context(domain)
+    connection = synthetic_delivery_connection(account)
+    delivery = JrcBackoffice::Signatures::Admissions.new(account: account, actor: seller, request_id: backoffice.id).create!(
+      version_id: legal[:version].id, authority_proposal_id: legal[:proposal].id, expected_connection_id: connection.id,
+      expected_source_digest: legal[:version].source_digest, idempotency_key: SecureRandom.uuid
     )
+    external_id = SecureRandom.uuid
+    delivery.events.create!(account: account, connection: connection, kind: 'send_confirmed', event_key: SecureRandom.uuid,
+                            external_id: external_id, source_snapshot: '{}')
+    gateway = instance_double(JrcBackoffice::Signatures::Gateway)
+    allow(JrcBackoffice::Signatures::Gateway).to receive(:new).with(connection: connection).and_return(gateway)
+    observation = {
+      external_id: external_id, state: 'completion_reported', document_references: ['1'], observed_at: Time.current.iso8601(6),
+      signers: delivery.snapshot.fetch('recipients').map do |row|
+        { id: row.fetch('position').to_s, name: row.fetch('name'), email: row.fetch('email'), completed: true,
+          signed_at: Time.current.iso8601(6), provider_state: 'completed' }
+      end,
+      signed_document: "%PDF-1.4\nSYNTHETIC NEXORA SIGNED FILE", certificate: "%PDF-1.4\nSYNTHETIC NEXORA CERTIFICATE"
+    }
+    allow(gateway).to receive(:evidence).with(external_id).and_return(observation)
+    bundle = JrcBackoffice::Signatures::Artifacts.new(account: account, actor: seller, request_id: backoffice.id)
+                                               .capture!(delivery_id: delivery.id)
+    [bundle.signed_document, bundle.certificate_document].each do |version|
+      JrcBackoffice::DocumentScan.create!(account: account, document_version: version, source_blob: version.file.blob,
+                                          attempt: 1, state: 'clean', expected_sha256: version.sha256,
+                                          observed_sha256: version.sha256, scanner_adapter: 'clamav-instream-v1')
+    end
+    JrcBackoffice::Signatures::EvidenceAcceptance.new(account: account, actor: seller, request_id: backoffice.id)
+                                               .call(delivery_id: delivery.id, expected_source_digest: bundle.source_digest)
+    expect(JrcBackoffice::SignatureRelease.verified?(contract.reload)).to be(true)
+    contract.update!(status: 'active')
     JrcCrm::BackofficeDocumentChecklist.new(request: backoffice, actor: seller).sync!
     expect(backoffice.reload.stage).to eq('contract')
     backoffice.advance! # contract -> implementation
@@ -223,6 +272,57 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
     JrcCrm::OrderWorkflowSyncService.new(order: order.reload, actor: seller, event: 'payment_received').call
     expect(backoffice.reload).to be_completed
 
+    # Seal the same real native contract version and accepted artifact bundle,
+    # not an empty dossier or a separately constructed successful operation.
+    dossiers = JrcBackoffice::CompletionDossiers.new(account: account, actor: seller, request_id: backoffice.id)
+    candidate = dossiers.show
+    expect(candidate.fetch(:can_seal)).to be(true)
+    seal = dossiers.seal!(expected_manifest_digest: candidate.fetch(:candidate_digest))
+    expect(seal.integrity?).to be(true)
+    expect(dossiers.seal!(expected_manifest_digest: candidate.fetch(:candidate_digest)).id).to eq(seal.id)
+    expect(seal.snapshot.fetch('manifest').fetch('signature')).to include(
+      'artifact_available' => true, 'contract_version_id' => legal[:version].id, 'bundle_id' => bundle.id
+    )
+    archived, bytes = dossiers.download(seal.id)
+    expect(archived.id).to eq(seal.id)
+    expect(Digest::SHA256.hexdigest(bytes)).to eq(seal.archive_sha256)
+
+    # The completed operation does not silently complete its implementation.
+    # Exercise native task/project commands before allowing the same sale into CS.
+    account.enable_features!('jrc_relationship')
+    JrcRelationship::Configuration.create!(account: account, rules: { 'handoff_acceptance_required' => true })
+    expect(JrcRelationship::Handoff.call(backoffice, actor: seller)).to be_nil
+    expect(JrcRelationship::Assignment.where(account: account, company: company)).not_to exist
+    project.tasks.order(:id).each do |task|
+      destination = project.board_columns.find_by!(board_id: task.board_column.board_id, status_key: 'completed')
+      JrcProjects::Tasks::Move.call(task: task, actor: seller, column: destination,
+                                    lock_version: task.reload.lock_version, correlation_id: SecureRandom.uuid)
+    end
+    project = JrcProjects::Projects::Update.call(
+      account: account, actor: seller, project: project.reload, correlation_id: SecureRandom.uuid,
+      attributes: { status: 'completed', lock_version: project.lock_version, acceptance_notes: 'SYNTHETIC implementation accepted' }
+    )
+    expect(project).to have_attributes(status: 'completed', accepted_by_id: seller.id)
+    assignment = JrcRelationship::Handoff.call(backoffice, actor: seller)
+    expect(assignment).to have_attributes(company_id: company.id, owner_id: seller.id, status: 'onboarding')
+    expect(assignment.actions.where(source_key: 'handoff')).not_to exist
+    headers = seller.create_new_auth_token
+    get "/api/v1/accounts/#{account.id}/crm/backoffice_requests/#{backoffice.id}/completion_handoff", headers: headers
+    expect(response).to have_http_status(:ok), response.body
+    expect(response.parsed_body).to include('available' => true, 'assignment_id' => assignment.id,
+                                            'source_type' => order.class.name, 'source_id' => order.id, 'handoff_status' => 'pending')
+    handoff_id = response.parsed_body.fetch('handoff_id')
+    acceptance = { status: 'accepted', reason: 'SYNTHETIC same-sale handoff accepted',
+                   checklist: %w[contract products contacts objectives promises pending_items].index_with(true) }
+    post "/api/v1/accounts/#{account.id}/relationship/handoffs/#{handoff_id}/decide", headers: headers, as: :json, params: acceptance
+    expect(response).to have_http_status(:ok), response.body
+    expect(assignment.reload.status).to eq('active')
+    expect(assignment.actions.where(source_key: 'handoff').count).to eq(1)
+    post "/api/v1/accounts/#{account.id}/relationship/handoffs/#{handoff_id}/decide", headers: headers, as: :json, params: acceptance
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(JrcRelationship::Assignment.where(account: account, company: company).count).to eq(1)
+    expect(assignment.actions.where(source_key: 'handoff').count).to eq(1)
+
     # The Customer 360 must still point to the same master company/contact and
     # expose the complete commercial/operational history of the sale.
     account_user = account.account_users.find_by!(user_id: seller.id)
@@ -240,6 +340,6 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
     expect(sources['activities']).to include(demonstration)
     expect(overview[:contracts_active]).to eq(1)
     expect(overview[:contracts_mrr_cents]).to eq(order.monthly_cents)
-    expect(overview[:projects_active]).to eq(1)
+    expect(overview[:projects_active]).to eq(0)
   end
 end

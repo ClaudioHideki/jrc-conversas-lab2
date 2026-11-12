@@ -11,14 +11,19 @@ module JrcCrm
     SHIPPING = { 'included' => 'Incluso', 'separate' => 'Cobrado separadamente', 'not_applicable' => 'Sem frete' }.freeze
     RENEWALS = { 'automatic' => 'Automática', 'manual' => 'Manual', 'none' => 'Sem renovação' }.freeze
 
-    def initialize(kind:, record:)
+    def initialize(kind:, record:, revision: nil, signers: nil)
       @kind, @record = kind.to_sym, record
+      @revision = revision
+      @signers = signers if @kind == :contract && @revision
       raise ArgumentError, 'Tipo de documento invalido.' unless TITLES.key?(@kind)
       @order = @kind == :contract ? value(record, :sales_order) : (@kind == :order ? record : nil)
       @snapshot = CommercialFinancials.symbolize(value(@order, :snapshot, {}))
       @financials = CommercialFinancials.symbolize(record.financial_summary)
       @contact = @kind == :proposal ? value(record, :customer_contact) : value(record, :contact)
       @contact ||= value(@order, :contact)
+      if @kind == :contract && @revision
+        @contract_customer = record.account.master_companies.find_by(id: @contact&.company_id)
+      end
     end
 
     def call
@@ -26,6 +31,7 @@ module JrcCrm
       @layout = CommercialPdf::Layout.new(title: TITLES.fetch(@kind), number: number, logo: DocumentBranding.logo)
       title = value(@record, :title)
       @layout.heading(title) if present?(title)
+      @layout.key_values([['Versão contratual', @revision.to_s]]) if @kind == :contract && @revision
       identity
       if @kind == :proposal
         @layout.section('Descrição da solução')
@@ -53,7 +59,8 @@ module JrcCrm
     end
 
     def customer_name
-      value(value(@record, :customer_company), :name) || value(@contact, :name) || @snapshot[:customer_name] || value(value(@record, :deal), :title) || 'Cliente'
+      value(@contract_customer, :name) || value(value(@record, :customer_company), :name) ||
+        value(@contact, :name) || @snapshot[:customer_name] || value(value(@record, :deal), :title) || 'Cliente'
     end
 
     def issuer
@@ -66,6 +73,7 @@ module JrcCrm
       rows = [['Cliente / contratante', customer_name], ['Responsável comercial', value(value(@record, :owner), :name, 'Equipe JRC')],
               ['Emissor informado', issuer]]
       rows << ['Contato', [value(@contact, :email), value(@contact, :phone_number)].compact.join(' | ')] if value(@contact, :email) || value(@contact, :phone_number)
+      rows << ['Documento do contratante', @contract_customer.tax_id] if @contract_customer&.tax_id.present?
       if @kind == :proposal
         rows += [['Validade', date(value(@record, :valid_until))], ['Versão', value(@record, :version_number, 1).to_s],
                  ['Vigência', "#{value(@record, :term_months)} meses"]]
@@ -74,7 +82,7 @@ module JrcCrm
       else
         rows << ['Proposta de origem', value(value(@order, :proposal), :proposal_number, 'Pedido direto')]
         rows << ['Pedido de origem', value(@order, :order_number)] if @kind == :contract
-        rows << ['Situação', value(@record, :status, 'A definir')]
+        rows << ['Situação', value(@record, :status, 'A definir')] unless @kind == :contract && @revision
       end
       @layout.key_values(rows)
     end
@@ -97,7 +105,8 @@ module JrcCrm
         snap = CommercialFinancials.symbolize(raw[:snapshot] || {})
         normalized = if @kind == :proposal
                        CommercialFinancials.new(attributes: @financials, items: []).normalize_item(raw)
-                     else raw
+                     else
+                       raw
                      end
         name = raw[:name] || raw[:name_snapshot] || 'Item'
         description = raw[:description_snapshot] || snap[:description]
@@ -198,8 +207,10 @@ module JrcCrm
 
     def contract_terms
       @layout.section('Vigência e renovacao')
-      @layout.key_values([['Vigência', validity], ['Renovação', RENEWALS.fetch(value(@record, :renewal_type), 'A definir')],
-        ['Indice de reajuste', value(@record, :adjustment_index, 'IPCA')], ['Situação da assinatura', value(@record, :signature_status, 'A definir')]])
+      terms = [['Vigência', validity], ['Renovação', RENEWALS.fetch(value(@record, :renewal_type), 'A definir')],
+               ['Indice de reajuste', value(@record, :adjustment_index, 'IPCA')]]
+      terms << ['Situação da assinatura', value(@record, :signature_status, 'A definir')] unless @revision
+      @layout.key_values(terms)
       @layout.section('Condicoes contratuais')
       clauses.each_with_index { |clause, index| @layout.paragraph("#{index + 1}. #{clause}") }
       meta = CommercialFinancials.symbolize(value(@record, :lifecycle_metadata, {}))
@@ -209,7 +220,7 @@ module JrcCrm
         @layout.paragraph(entry[:notes])
         @layout.paragraph("Registrado em #{date(entry[:created_at])}", size: 9)
       end
-      @layout.signature_rows(customer_name, issuer)
+      @signers ? @layout.contract_signers(@signers) : @layout.signature_rows(customer_name, issuer)
     end
 
     def clauses
@@ -223,6 +234,10 @@ module JrcCrm
           'valor_total' => money(@financials[:financial_version].to_i >= 3 ? @financials[:contract_total_cents] : @financials[:total_cents]),
           'valor_inicial' => money(@financials[:total_cents]), 'total_recorrente' => money(@financials[:recurring_total_cents]),
           'quantidade_mensalidades' => @financials[:recurring_months_count].to_s }
+        if @contract_customer
+          context['cliente'].merge!('documento' => @contract_customer.tax_id, 'razao_social' => @contract_customer.name,
+                                   'nome_fantasia' => @contract_customer.trade_name)
+        end
         return paragraphs(Liquid::Template.parse(template.body).render(context))
       end
       ["Este contrato formaliza a contratacao vinculada ao pedido #{value(@order, :order_number)}.",

@@ -1,0 +1,430 @@
+{
+  "local_date": "2026-11-11",
+  "branch": "codex/lab2-ag-consolidada-20261110",
+  "parent_checkpoint": "2b47dc74e7b6f152014c62bf1faab1a4c25a7bfa",
+  "native_green_checkpoint": "2a85e0f87600753e600240209bd96c3f99a1040a",
+  "requested_reference_file_count": 41,
+  "observed_changed_path_count_from_native_checkpoint": 63,
+  "uncommitted_paths_captured": [
+    ".github/workflows/ag-native-candidate.yml",
+    ".github/workflows/projects-portal-candidate.yml",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/contacts/pages/ContactsIndex.vue",
+    "app/javascript/dashboard/routes/dashboard/contacts/pages/spec/ContactsIndex.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/deals/DealsIndex.vue",
+    "app/javascript/dashboard/routes/dashboard/serviceDesk/__tests__/contractCases.js"
+  ],
+  "scope_review": "Every observed path belongs to the approved Portal/internal intake integration, A-G fixes, their tests and build/CI evidence. No independent PlugNMeet, Broker or Branef workspace is imported.",
+  "records": [
+    {
+      "path": ".github/workflows/ag-native-candidate.yml",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": true,
+      "canonical_sha256": "7cf9eca3e6010c8694180ba0621a2ce1a334c04f9e643c11ba6d127ea234ffe8"
+    },
+    {
+      "path": ".github/workflows/build-ghcr.yml",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "ab15c93cf30513d5e20c8e1a105f10fdf38bff7bf5b60ff1b182832d784308ac"
+    },
+    {
+      "path": ".github/workflows/projects-portal-candidate.yml",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": true,
+      "canonical_sha256": "daa756fe84e9afb240c635b8c81ed32f5709191def6e60c8da268a3f90794a74"
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/jrc_service_desk/tickets_controller.rb",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "eff9effebc1062ba84450829d3be03f48caa59dd53aface60f3c3fe917826403"
+    },
+    {
+      "path": "app/controllers/requester_portal/tickets_controller.rb",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "22745b9d147f40463c3f9f4923b48cebf7880bf8be7d7ab705b77872cc8a1494"
+    },
+    {
+      "path": "app/javascript/dashboard/api/serviceDeskOperationsClient.js",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "1d49e7bf7a3ce3c6b355954de57fda3a7f18c7d8a4f19f4a224ef7b18b200981"
+    },
+    {
+      "path": "app/javascript/dashboard/i18n/locale/en/crm.json",
+      "group": "native_contact_controls_and_localization",
+      "captured_working_change": true,
+      "canonical_sha256": "d208a895c97d98398edc8d818643600ee193f51b33a25655aee054233fdf2178"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/contacts/pages/ContactsIndex.vue",
+      "group": "native_contact_controls_and_localization",
+      "captured_working_change": true,
+      "canonical_sha256": "0a87b3f64a40983617cd0e64ae392c9816fdff8c0e6f6185f507cae0f5a79d00"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/contacts/pages/spec/ContactsIndex.spec.js",
+      "group": "native_contact_controls_and_localization",
+      "captured_working_change": true,
+      "canonical_sha256": "fe3ecb1028a871ce8fdedec427098bd5a96335997f77a85bacdd64ac54036851"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/crm/views/deals/DealsIndex.vue",
+      "group": "targeted_lint_and_preserved_flow_unwind",
+      "captured_working_change": true,
+      "canonical_sha256": "3e4b365c6a9af480e03f117999126eb7fad014b07dbc912b07d323f5afc1a5ba"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/__tests__/contractCases.js",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": true,
+      "canonical_sha256": "6751f33e64f314418ddb38aa3be871e595f3b72dd4a3b87fc5222effb760900a"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/__tests__/selfAssignment.spec.js",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "0445d3709607f4091b94ab4d70517d989a2b893477a6fc840dad94bbacf1da4e"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/components/InternalTicketForm.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "b951bdf8cccde17e73a63fab9e1fec34eae8eecaf842af3e794dee5ed1f05feb"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/components/ServiceDefinitionSelect.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "17b7a98495f4d0b6bb0846e032aeef95444a47c7214378f74150ebf27d8f3c95"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/components/TicketOperations.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "c9414d967f3658cf5dd4c53bbbd4f42468633c807e9fcf18eab18192e8273f43"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/contracts.js",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "32da2739f0eb1aa608a8ca9e107833d3fa1ef254688f4afff846de66c5994b87"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/operationalSession.js",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "5087ae1f45f14f3a64a001dd7a3d6f45f8d779bd9b1b7fa3e3ff8e9b9b24804f"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/selfAssignment.js",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "907e1d7b692bb05099b00c43106d3eac3d75320a138921db470c94dd5b2db357"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/views/TicketDetailView.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "7d018f220ee95c821b5f8cbf1c0fe4d83f13241b829907d9a5e6b046fee04cd1"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/views/TicketFormView.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "5810e18a1126a902ea78caabe8dead8cf6f5f08aa88c622e356f13cf413bc5a0"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/views/spec/MasterCustomerForm.spec.js",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "06330e23f18fe1a24fadb75e9ef055c3faa81a72030cdd0c00d38beaac25d40a"
+    },
+    {
+      "path": "app/javascript/portal/requester/App.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "e6b73ed7b109adedd55aa5b11e0f99124ac70a86eec540a9d0dffb2d6e716597"
+    },
+    {
+      "path": "app/javascript/portal/requester/Knowledge.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "a5f4ef345b2772dd3fe2cdd2f0572b479ae2b80465584831da9c884bafae3cfb"
+    },
+    {
+      "path": "app/javascript/portal/requester/NewTicket.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "d33de621a328d7f388f153dfaf270cdfe362993273d6cc0bab213bb53b00fe8c"
+    },
+    {
+      "path": "app/javascript/portal/requester/PortalHeading.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "f21f59ba31edbcd23d27acf835bad3616608a236b7815377d0371769c16748de"
+    },
+    {
+      "path": "app/javascript/portal/requester/PortalIcon.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "144344b029cfaf8c25d04706316efaa417ca785f4134c053d2dd7b7d85af1198"
+    },
+    {
+      "path": "app/javascript/portal/requester/PortalStatus.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "f72b30b984318c36b6ef0ff3c1a0df40844ac9a75f7757c62c106ba0b7de60fa"
+    },
+    {
+      "path": "app/javascript/portal/requester/Profile.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "a5611d084c88df1b1f89a68c093ec9eed01f674a386107c43a7ff6afb6e1b13a"
+    },
+    {
+      "path": "app/javascript/portal/requester/TicketDetail.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "59d8e8fe8a1c28897c9ea676d9eae202272b89a06a97ff62ed66bb0ad36de850"
+    },
+    {
+      "path": "app/javascript/portal/requester/Tickets.vue",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "475ca212302c29704203797464b7f4335505e0eb430dc1391b1cc762a3375316"
+    },
+    {
+      "path": "app/serializers/jrc_crm/activity_serializer.rb",
+      "group": "targeted_lint_and_preserved_flow_unwind",
+      "captured_working_change": false,
+      "canonical_sha256": "b468ca93092aff07c347106189fe9637d63fcf22484f137a4d45aa7ba3fe37a1"
+    },
+    {
+      "path": "app/services/jrc_crm/commercial_document_service.rb",
+      "group": "targeted_lint_and_preserved_flow_unwind",
+      "captured_working_change": false,
+      "canonical_sha256": "ebedc262fb897535d76524bcafecf3479180b597b170545f0b8ba5329399ca92"
+    },
+    {
+      "path": "app/services/jrc_crm/commercial_pdf/layout.rb",
+      "group": "targeted_lint_and_preserved_flow_unwind",
+      "captured_working_change": false,
+      "canonical_sha256": "da8e50fb641d408f53d7dc42aaaaea6db4acf2245333a53f2768e2a9e6b57d57"
+    },
+    {
+      "path": "app/services/jrc_crm/order_implementation_project_service.rb",
+      "group": "targeted_lint_and_preserved_flow_unwind",
+      "captured_working_change": false,
+      "canonical_sha256": "b36008833fe4b0dafec812af8d43006d68be741af0769542ce40e2857b3ea70e"
+    },
+    {
+      "path": "app/services/jrc_flows/ownership_effects.rb",
+      "group": "targeted_lint_and_preserved_flow_unwind",
+      "captured_working_change": false,
+      "canonical_sha256": "d2f14e0581b1dbdf7ec75608b40c579a4813ce0a6aec418f2632b1b37004deeb"
+    },
+    {
+      "path": "app/services/jrc_relationship/customer_signals.rb",
+      "group": "targeted_lint_and_preserved_flow_unwind",
+      "captured_working_change": false,
+      "canonical_sha256": "df85fb95cc18ec021a960e6bad3e2961763564996784ccbf54caa08b25cbb8d9"
+    },
+    {
+      "path": "app/services/jrc_relationship/priority.rb",
+      "group": "targeted_lint_and_preserved_flow_unwind",
+      "captured_working_change": false,
+      "canonical_sha256": "f49243ab4d200e77dd290b768d3359000ffb0e15d1fc4921e5d82a9523b6b21c"
+    },
+    {
+      "path": "app/services/jrc_relationship/retention_report.rb",
+      "group": "targeted_lint_and_preserved_flow_unwind",
+      "captured_working_change": false,
+      "canonical_sha256": "67631d71a9afcc5e3a493baeb50d3a6009411755cbeb12d79850b5517928f205"
+    },
+    {
+      "path": "app/services/jrc_service_desk/create_ticket_service.rb",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "a6865befd0f60784388b553761cb1dbe1ab4a51560b038d3a19fc3902c20733f"
+    },
+    {
+      "path": "app/services/jrc_service_desk/create_ticket_workflow_service.rb",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "5fb3bc52a5c7cbb438604146f1260e9c13bdf972751dbb7d370c42c938bccd37"
+    },
+    {
+      "path": "app/services/jrc_service_desk/internal_intake.rb",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "1bc6c5666d85d945eb366f3f890423330fb1744eb80e490d7ef5d6c0ffab8e01"
+    },
+    {
+      "path": "app/services/jrc_service_desk/ui_context_service.rb",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "89beb8c8f0b6788e4fa539256aa20cd98000216fc4f08bf651597518e946fee2"
+    },
+    {
+      "path": "config/jrc_flow_ownership_guards.json",
+      "group": "preserved_manifest",
+      "captured_working_change": false,
+      "canonical_sha256": "59458f6c0db6dc191f42354b10e233554897363c4bcdc71fffe2606c05058a9a"
+    },
+    {
+      "path": "deploy/jrc/MODULE-COMPOSITION-MANIFEST.json",
+      "group": "preserved_manifest",
+      "captured_working_change": false,
+      "canonical_sha256": "f7c1bca5eba3eb79a5809e6901598ebff5552907921914a4369dc58d6f602575"
+    },
+    {
+      "path": "docs/jrc_consolidation/lab2_ag_image_lint_and_mfa_checkpoint_20261110.json",
+      "group": "acceptance_documentation",
+      "captured_working_change": false,
+      "canonical_sha256": "3189e10c06582c33a6712d70d02eb9fafcb4dda94d4a2b9a83501d9494a23386"
+    },
+    {
+      "path": "docs/jrc_consolidation/lab2_ag_today_consolidation_checkpoint_20261110.json",
+      "group": "acceptance_documentation",
+      "captured_working_change": false,
+      "canonical_sha256": "395985e0a881519088b55ec6fec152789f92320c151994a3db8dc5b0fa92a7c1"
+    },
+    {
+      "path": "public/brand-assets/portal-sidebar.svg",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "8b24c075e592441cecd26220966f71aa74b10d94f42f86b8fc8d4c2f6f839349"
+    },
+    {
+      "path": "public/brand-assets/portal-waves.svg",
+      "group": "approved_portal_and_internal_intake",
+      "captured_working_change": false,
+      "canonical_sha256": "0e814ef5a3a7e22309027f3864fb7b40fc7477840b79aa2112e8fddc6752081f"
+    },
+    {
+      "path": "script/jrc_ag_ci_fixture.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "fcc1b56391a59df024b39ac76f3b95a975369f91b1df52a907925abd9924cd2d"
+    },
+    {
+      "path": "script/jrc_ag_guarded_image_build.py",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "f8d98a4ecfe255dad5a859c99d3f823bf50e045f021e814a3c1b0f97b5951b16"
+    },
+    {
+      "path": "script/jrc_ag_guarded_image_build_test.py",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "f51740a2028f15d4a898c8ecce0ef4e01b2dc0154902b1c09115da301d0a30fe"
+    },
+    {
+      "path": "script/jrc_ag_native_plan.py",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "d6541ccbab07c864b0840644b578b5270c69a8db2c349aa7aac39dcd06154fa9"
+    },
+    {
+      "path": "script/jrc_portfolio_history_capture.test.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "3519f0681b5e74ef68ca3512a22d643069c5504c2f4df9914e60f139f321bbf1"
+    },
+    {
+      "path": "script/smoke_backoffice_candidate.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "02a044c866e36a2d871f2088f22107c3b7141c18613d8c225d31d1f6a837b2f1"
+    },
+    {
+      "path": "script/smoke_backoffice_candidate.sh",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "075e2d849fd9b308e0a522bec2b100467184cc101bbbc8304e9d8fc3fc9f45a3"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/relationship/native_completions_spec.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "7ea284c2e2ed0eca5d10f410a21c2ea05f5f2d0368ca1afe3de77e22f6f639fa"
+    },
+    {
+      "path": "spec/requests/requester_portal/phase_one_spec.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "6efd3d0d02b4b34bafbf9334b530381ad1073a58d6ecb8ccb709eba2d7262a61"
+    },
+    {
+      "path": "spec/services/jrc_flows/ownership_effects_spec.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "f5cbfc21fb18105820609798f80bd6f30e3f7857113bcd6ef812614d5e52fe62"
+    },
+    {
+      "path": "spec/services/jrc_service_desk/create_ticket_service_spec.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "f9fe87890486daba7b39e893c3663414acaabb7a187fae4bd5359e211e079d63"
+    },
+    {
+      "path": "spec/services/jrc_service_desk/internal_intake_integration_spec.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "768ff34e6194a8e305098de11c74a4882c34faa791bbfcbd2666a7e185da21f2"
+    },
+    {
+      "path": "test/jrc_consolidation/candidate_fixture_scanner.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "6868f30bb6934deee4d8dc9342f87277cfcf42fa8732176eb3118c87a60a71fc"
+    },
+    {
+      "path": "test/jrc_consolidation/candidate_fixture_scanner_test.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "645a6befacbc253e43b9080c34d250e72891ddfb598130deb43b657f732b3660"
+    },
+    {
+      "path": "test/jrc_delivery/document_gate_test.rb",
+      "group": "ci_and_test_infrastructure",
+      "captured_working_change": false,
+      "canonical_sha256": "64da617464e609b5ae15a17da96b8f77d51eb6d97d953c996c7675e80bb53b71"
+    }
+  ],
+  "prior_targeted_lint": {
+    "errors": 0,
+    "warnings": 92,
+    "sha256": "7cf103628b553d63b355bbb2e14f9a0a1dade71230da996a88785cc8ed715815",
+    "not_a_current_SHA_CI_approval": true
+  },
+  "contacts": "Native select-all, label actions and delete confirmation reconnected to existing commands; current account/identity changes clear selection. Existing availability route remains.",
+  "gate_repairs": "MFA uses synthetic encryption keys only in disposable CI. The three database-guarded concurrency cases run in their dedicated databases with strict positive/no-failure/no-pending JSON gates. Complete Ruby and JS lint gate is mandatory.",
+  "Windows_preservation": {
+    "local_HEAD_unchanged": "2b47dc74e7b6f152014c62bf1faab1a4c25a7bfa",
+    "working_files_untouched": true,
+    "no_local_write": true,
+    "reason": "C: below the mandatory 750 MB reserve; explicit user authorization to continue exclusively on GitHub."
+  },
+  "publication_authorized": false,
+  "build_executed": false,
+  "main_modified": false,
+  "production_modified": false,
+  "all_Word_acceptance_complete": false,
+  "remote_followup_parent": "b8d753edb5a197b7f6091766f3cffb7128d9fb92",
+  "remote_followup": "The candidate image now requires both successful native A-G and Projects/Portal workflow runs on the exact same SHA and branch, as the main release already does. No build or publication is dispatched.",
+  "selector_regression": {
+    "previous_sha": "514ef9f873021d219b23be0e2f8f518c48a0106f",
+    "run": 43014799739,
+    "artifact": 13852083387,
+    "examples": 2484,
+    "failures": 2,
+    "pending": 0,
+    "cause": "Two older selectors still used Portuguese literal captions after native localization. Only selectors now read the authoritative English locale; disabled/title and legacy profile route assertions remain unchanged. The three new bulk-control tests passed.",
+    "locale_labels_constant": "Short authoritative locale reference preserves the existing Prettier line layout and all action assertions."
+  },
+  "validation_status": "Pending all gates on the new exact SHA; prior partial runs are not final acceptance."
+}

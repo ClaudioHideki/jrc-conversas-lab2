@@ -1,6 +1,7 @@
 class Api::V1::Accounts::Relationship::HandoffsController < Api::V1::Accounts::Relationship::BaseController
   def index
     rows = JrcRelationship::HandoffCase.where(account: Current.account, assignment_id: filtered_assignments.select(:id)).includes(:assignment)
+    rows = rows.where(id: params[:handoff_id]) if params[:handoff_id].present?
     render json: { payload: rows.order(id: :desc).limit(100).map { |row| row.as_json.merge(customer_name: row.assignment.label) } }
   end
 
@@ -71,6 +72,12 @@ class Api::V1::Accounts::Relationship::HandoffsController < Api::V1::Accounts::R
       validate_order_eligibility!(source, assignment)
     elsif source.status != 'completed'
       raise ArgumentError, 'Implementation is not completed'
+    else
+      order = JrcRelationship::Handoff.origin_order(source)
+      return unless order
+
+      current = assignment.customer_context(relationship_context.member).orders.find(order.id)
+      validate_order_eligibility!(current, assignment)
     end
   end
 
@@ -80,9 +87,9 @@ class Api::V1::Accounts::Relationship::HandoffsController < Api::V1::Accounts::R
   end
 
   def validated_decision_checklist(row, status)
-    native_context(row) # Revalidate the original native source before accepting.
-    source = row.source_type.constantize.find(row.source_id)
-    validate_order_eligibility!(source, row.assignment) if status == 'accepted' && source.is_a?(JrcCrm::SalesOrder)
+    source = row.source_type.constantize.where(account_id: Current.account.id).lock('FOR SHARE').find(row.source_id)
+    native_context(row) # Revalidate current native scope after acquiring the source lock.
+    validate_creation_source!(source, row.assignment) if status == 'accepted'
     checklist = params.require(:checklist).permit(:contract, :products, :contacts, :objectives, :promises, :pending_items).to_h
     complete = %w[contract products contacts objectives promises pending_items].all? { |key| checklist[key] == true }
     raise ArgumentError, 'Review every handoff item before accepting' if status == 'accepted' && !complete

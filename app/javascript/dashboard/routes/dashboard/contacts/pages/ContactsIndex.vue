@@ -11,15 +11,15 @@ import { dateFormat } from 'shared/helpers/timeHelper';
 
 import ContactListHeaderWrapper from 'dashboard/components-next/Contacts/ContactsHeader/ContactListHeaderWrapper.vue';
 import ContactsActiveFiltersPreview from 'dashboard/components-next/Contacts/ContactsHeader/components/ContactsActiveFiltersPreview.vue';
-import ContactEmptyState from 'dashboard/components-next/Contacts/EmptyState/ContactEmptyState.vue';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
-import ContactsList from 'dashboard/components-next/Contacts/Pages/ContactsList.vue';
 import ContactsBulkActionBar from '../components/ContactsBulkActionBar.vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import BulkActionsAPI from 'dashboard/api/bulkActions';
 import ContactLeadAction from '../components/ContactLeadAction.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import { useCustomerMaster } from '../../jrcCustomers/useCustomerMaster';
+import ContactDetailsDialog from '../../jrcCustomers/components/ContactDetailsDialog.vue';
+import CompanyDetailsDialog from '../../jrcCustomers/components/CompanyDetailsDialog.vue';
 
 const DEFAULT_SORT_FIELD = 'last_activity_at';
 const DEBOUNCE_DELAY = 300;
@@ -28,7 +28,10 @@ const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const { canAccess: canUseCustomerMaster } = useCustomerMaster();
+const { canAccess: canUseCustomerMaster, identity: masterIdentity } =
+  useCustomerMaster();
+const contactDialogId = ref(null);
+const companyDialogId = ref(null);
 
 const { updateUISettings, uiSettings } = useUISettings();
 
@@ -87,6 +90,12 @@ const selectedContactIds = ref([]);
 const isBulkActionLoading = ref(false);
 const bulkDeleteDialogRef = ref(null);
 const selectedCount = computed(() => selectedContactIds.value.length);
+watch([masterIdentity, canUseCustomerMaster], () => {
+  contactDialogId.value = null;
+  companyDialogId.value = null;
+  selectedContactIds.value = [];
+  bulkDeleteDialogRef.value?.close?.();
+});
 const crmSelectedContact = ref();
 const contactHeaderRef = ref(null);
 const relationshipTabs = [
@@ -165,10 +174,15 @@ const contactInitials = contact => {
 
 const selectRelationshipContact = contact => {
   crmSelectedContact.value = contact;
+  if (canUseCustomerMaster.value) contactDialogId.value = contact.id;
 };
 
 const openSelectedContact = async contact => {
   if (!contact?.id) return;
+  if (canUseCustomerMaster.value) {
+    contactDialogId.value = contact.id;
+    return;
+  }
   await router.push({
     name: 'contacts_edit',
     params: { accountId: route.params.accountId, contactId: contact.id },
@@ -559,10 +573,6 @@ const handleSort = async ({ sort, order }) => {
     : fetchContacts());
 };
 
-const createContact = async contact => {
-  await store.dispatch('contacts/create', contact);
-};
-
 watch(hasSelection, value => {
   if (!value) {
     bulkDeleteDialogRef.value?.close?.();
@@ -628,12 +638,23 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div role="region" :aria-label="t('CRM.CONTACT_LEAD.LIST')" tabindex="0" class="flex h-full min-h-0 flex-col overflow-auto bg-n-surface-1 focus-visible:outline-n-blue-8">
-    <section class="shrink-0 border-b border-n-weak bg-gradient-to-r from-n-blue-2 via-n-background to-n-violet-2 px-6 py-5">
+  <div
+    role="region"
+    :aria-label="t('CRM.CONTACT_LEAD.LIST')"
+    tabindex="0"
+    class="flex h-full min-h-0 flex-col overflow-auto bg-n-surface-1 focus-visible:outline-n-blue-8"
+  >
+    <section
+      class="shrink-0 border-b border-n-weak bg-gradient-to-r from-n-blue-2 via-n-background to-n-violet-2 px-6 py-5"
+    >
       <div class="mx-auto max-w-[1500px]">
         <ContactListHeaderWrapper
           ref="contactHeaderRef"
-          :header-title="t('CRM.CONTACT_LEAD.CENTER_TITLE')"
+          :header-title="
+            isActiveView || activeSegmentId || activeLabel || searchQuery
+              ? headerTitle
+              : t('CRM.CONTACT_LEAD.CENTER_TITLE')
+          "
           :show-search="!activeSegmentId && !isActiveView"
           :search-value="searchValue"
           :active-sort="sortState.activeSort"
@@ -649,32 +670,74 @@ onMounted(async () => {
           @clear-filters="fetchContacts()"
         />
         <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm">
-            <div class="flex items-center justify-between"><span class="text-xs font-medium text-n-slate-11">Total de contatos</span><span class="i-lucide-users size-5 text-teal-500" /></div>
-            <strong class="mt-2 block text-2xl text-n-slate-12">{{ totalContactsMetric }}</strong>
-            <small class="text-n-slate-11">Todos os registros</small>
+          <div
+            class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-n-slate-11">{{
+                t('CRM.CONTACT_LEAD.UI.TOTAL_CONTACTS')
+              }}</span
+              ><span class="i-lucide-users size-5 text-teal-500" />
+            </div>
+            <strong class="mt-2 block text-2xl text-n-slate-12">{{
+              totalContactsMetric
+            }}</strong>
+            <small class="text-n-slate-11">{{
+              t('CRM.CONTACT_LEAD.UI.ALL_RECORDS')
+            }}</small>
           </div>
-          <div class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm">
-            <div class="flex items-center justify-between"><span class="text-xs font-medium text-n-slate-11">Novos neste mês</span><span class="i-lucide-user-round-plus size-5 text-blue-500" /></div>
+          <div
+            class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-n-slate-11">{{
+                t('CRM.CONTACT_LEAD.UI.NEW_THIS_MONTH')
+              }}</span
+              ><span class="i-lucide-user-round-plus size-5 text-blue-500" />
+            </div>
             <strong class="mt-2 block text-2xl text-n-slate-12">—</strong>
-            <small class="text-n-teal-11">{{ t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE') }}</small>
+            <small class="text-n-teal-11">{{
+              t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE')
+            }}</small>
           </div>
-          <div class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm">
-            <div class="flex items-center justify-between"><span class="text-xs font-medium text-n-slate-11">Sem interação</span><span class="i-lucide-clock-3 size-5 text-amber-500" /></div>
+          <div
+            class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-n-slate-11">{{
+                t('CRM.CONTACT_LEAD.UI.NO_INTERACTION')
+              }}</span
+              ><span class="i-lucide-clock-3 size-5 text-amber-500" />
+            </div>
             <strong class="mt-2 block text-2xl text-n-slate-12">—</strong>
-            <small class="text-n-slate-11">{{ t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE') }}</small>
+            <small class="text-n-slate-11">{{
+              t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE')
+            }}</small>
           </div>
-          <div class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm">
-            <div class="flex items-center justify-between"><span class="text-xs font-medium text-n-slate-11">Clientes ativos</span><span class="i-lucide-building-2 size-5 text-violet-500" /></div>
+          <div
+            class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-n-slate-11">{{
+                t('CRM.CONTACT_LEAD.UI.ACTIVE_CUSTOMERS')
+              }}</span
+              ><span class="i-lucide-building-2 size-5 text-violet-500" />
+            </div>
             <strong class="mt-2 block text-2xl text-n-slate-12">—</strong>
-            <small class="text-n-slate-11">{{ t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE') }}</small>
+            <small class="text-n-slate-11">{{
+              t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE')
+            }}</small>
           </div>
         </div>
       </div>
     </section>
 
-    <div class="mx-auto grid w-full max-w-[1500px] shrink-0 items-start gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_330px]">
-      <main class="min-w-0 overflow-hidden rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm">
+    <div
+      class="mx-auto grid w-full max-w-[1500px] shrink-0 items-start gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_330px]"
+    >
+      <main
+        class="min-w-0 overflow-hidden rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm"
+      >
         <div class="border-b border-n-weak px-4 pt-3">
           <div class="flex gap-1 overflow-x-auto">
             <button
@@ -703,30 +766,209 @@ onMounted(async () => {
           <p class="mt-2 text-xs text-n-slate-11">{{ relationshipHint }}</p>
         </div>
 
+        <ContactsBulkActionBar
+          v-if="hasSelection"
+          :visible-contact-ids="visibleContactIds"
+          :selected-contact-ids="selectedContactIds"
+          :is-loading="isBulkActionLoading"
+          @clear-selection="clearSelection"
+          @toggle-all="toggleSelectAll"
+          @assign-labels="assignLabels"
+          @remove-labels="removeLabels"
+          @delete-selected="openBulkDeleteDialog"
+        />
         <ContactsActiveFiltersPreview
-          v-if="(hasAppliedFilters || activeSegmentId) && !activeLabel && !isActiveView"
+          v-if="
+            (hasAppliedFilters || activeSegmentId) &&
+            !activeLabel &&
+            !isActiveView
+          "
           :active-segment="activeSegment"
           class="p-4"
           @clear-filters="fetchContacts()"
           @open-filter="contactHeaderRef?.onToggleFilters()"
         />
-        <div v-if="isFetchingList" class="flex h-60 items-center justify-center"><Spinner /></div>
-        <div v-else-if="!hasContacts" class="p-10 text-center text-n-slate-11">{{ emptyStateMessage }}</div>
+        <div
+          v-if="isFetchingList"
+          class="flex h-60 items-center justify-center"
+        >
+          <Spinner />
+        </div>
+        <div
+          v-else-if="showEmptyStateLayout || showEmptyText"
+          class="p-10 text-center text-n-slate-11"
+        >
+          {{ emptyStateMessage }}
+        </div>
         <div v-else class="overflow-x-auto">
           <table class="w-full min-w-[900px] text-left text-sm">
-            <thead class="bg-n-alpha-2 text-[11px] uppercase tracking-wide text-n-slate-11">
-              <tr><th class="px-4 py-3">Contato</th><th class="px-3 py-3">Empresa</th><th class="px-3 py-3">Canais</th><th class="px-3 py-3">Responsável</th><th class="px-3 py-3">Última interação</th><th class="px-3 py-3">Próxima ação</th><th class="px-3 py-3">{{ t('CRM.CONTACT_LEAD.AVAILABILITY') }}</th><th class="px-3 py-3">Ações</th></tr>
+            <thead
+              class="bg-n-alpha-2 text-[11px] uppercase tracking-wide text-n-slate-11"
+            >
+              <tr>
+                <th class="px-3 py-3">
+                  <input
+                    type="checkbox"
+                    :aria-label="
+                      t('CONTACTS_BULK_ACTIONS.SELECT_ALL', {
+                        count: visibleContactIds.length,
+                      })
+                    "
+                    :checked="
+                      visibleContactIds.length > 0 &&
+                      visibleContactIds.every(id =>
+                        selectedContactIds.includes(id)
+                      )
+                    "
+                    :disabled="isBulkActionLoading"
+                    @change="toggleSelectAll($event.target.checked)"
+                  />
+                </th>
+                <th class="px-4 py-3">
+                  {{ t('CRM.CONTACT_LEAD.UI.CONTACT') }}
+                </th>
+                <th class="px-3 py-3">
+                  {{ t('CRM.CONTACT_LEAD.UI.COMPANY') }}
+                </th>
+                <th class="px-3 py-3">
+                  {{ t('CRM.CONTACT_LEAD.UI.CHANNELS') }}
+                </th>
+                <th class="px-3 py-3">{{ t('CRM.CONTACT_LEAD.UI.OWNER') }}</th>
+                <th class="px-3 py-3">
+                  {{ t('CRM.CONTACT_LEAD.UI.LAST_INTERACTION') }}
+                </th>
+                <th class="px-3 py-3">
+                  {{ t('CRM.CONTACT_LEAD.UI.NEXT_ACTION') }}
+                </th>
+                <th class="px-3 py-3">
+                  {{ t('CRM.CONTACT_LEAD.AVAILABILITY') }}
+                </th>
+                <th class="px-3 py-3">
+                  {{ t('CRM.CONTACT_LEAD.UI.ACTIONS') }}
+                </th>
+              </tr>
             </thead>
             <tbody class="divide-y divide-n-weak">
-              <tr v-for="contact in contacts" :key="contact.id" class="cursor-pointer transition hover:bg-blue-500/5" :class="selectedRelationshipContact?.id === contact.id ? 'bg-blue-500/5' : ''" @click="selectRelationshipContact(contact)">
-                <td class="px-4 py-3"><div class="flex items-center gap-3"><span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-n-teal-3 font-semibold text-n-teal-11">{{ contactInitials(contact) }}</span><div><p class="font-semibold text-n-slate-12">{{ contact.name || 'Sem nome' }}</p><p class="text-xs text-n-slate-11">{{ contactPhone(contact) }}</p></div></div></td>
-                <td class="px-3 py-3 text-n-slate-11">{{ contactCompany(contact) }}</td>
-                <td class="px-3 py-3"><div class="flex gap-1"><span class="flex size-8 items-center justify-center rounded-lg bg-n-teal-3 text-n-teal-11"><span class="i-ri-whatsapp-fill size-4" /></span><span class="flex size-8 items-center justify-center rounded-lg bg-n-blue-3 text-n-blue-11"><span class="i-lucide-phone size-4" /></span><span class="flex size-8 items-center justify-center rounded-lg bg-n-amber-3 text-n-amber-11"><span class="i-lucide-mail size-4" /></span></div></td>
+              <tr
+                v-for="contact in contacts"
+                :key="contact.id"
+                class="cursor-pointer transition hover:bg-blue-500/5"
+                :class="
+                  selectedRelationshipContact?.id === contact.id
+                    ? 'bg-blue-500/5'
+                    : ''
+                "
+                @click="selectRelationshipContact(contact)"
+              >
+                <td class="px-3 py-3" @click.stop>
+                  <input
+                    type="checkbox"
+                    :aria-label="
+                      t('CRM.CONTACT_LEAD.SELECT_CONTACT', {
+                        name: contact.name || contact.id,
+                      })
+                    "
+                    :checked="selectedContactIds.includes(contact.id)"
+                    :disabled="isBulkActionLoading"
+                    @change="
+                      toggleContactSelection({
+                        id: contact.id,
+                        value: $event.target.checked,
+                      })
+                    "
+                  />
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-n-teal-3 font-semibold text-n-teal-11"
+                      >{{ contactInitials(contact) }}</span
+                    >
+                    <div>
+                      <p class="font-semibold text-n-slate-12">
+                        {{ contact.name || 'Sem nome' }}
+                      </p>
+                      <p class="text-xs text-n-slate-11">
+                        {{ contactPhone(contact) }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-3 py-3 text-n-slate-11">
+                  <button
+                    v-if="
+                      canUseCustomerMaster &&
+                      (contact.companyId ||
+                        contact.company_id ||
+                        contact.company?.id)
+                    "
+                    type="button"
+                    class="text-left text-n-blue-11 underline"
+                    @click.stop="
+                      companyDialogId =
+                        contact.companyId ||
+                        contact.company_id ||
+                        contact.company.id
+                    "
+                  >
+                    {{ contactCompany(contact) }}
+                  </button>
+                  <span v-else>{{ contactCompany(contact) }}</span>
+                </td>
+                <td class="px-3 py-3">
+                  <div class="flex gap-1">
+                    <span
+                      class="flex size-8 items-center justify-center rounded-lg bg-n-teal-3 text-n-teal-11"
+                      ><span class="i-ri-whatsapp-fill size-4" /></span
+                    ><span
+                      class="flex size-8 items-center justify-center rounded-lg bg-n-blue-3 text-n-blue-11"
+                      ><span class="i-lucide-phone size-4" /></span
+                    ><span
+                      class="flex size-8 items-center justify-center rounded-lg bg-n-amber-3 text-n-amber-11"
+                      ><span class="i-lucide-mail size-4"
+                    /></span>
+                  </div>
+                </td>
                 <td class="px-3 py-3 text-n-slate-11">—</td>
-                <td class="px-3 py-3 text-n-slate-11">{{ contactLastActivity(contact) }}</td>
+                <td class="px-3 py-3 text-n-slate-11">
+                  {{ contactLastActivity(contact) }}
+                </td>
                 <td class="px-3 py-3 font-medium text-n-blue-11">—</td>
-                <td class="px-3 py-3"><span class="rounded-full bg-n-teal-3 px-2.5 py-1 text-xs font-semibold text-n-teal-11">{{ contactStatus(contact) }}</span></td>
-                <td class="px-3 py-3" @click.stop><div class="flex gap-1"><button type="button" disabled :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')" :aria-label="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')" class="flex size-8 items-center justify-center rounded-lg bg-n-slate-3 text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"><span class="i-ri-whatsapp-fill size-4" /></button><button type="button" class="flex size-8 items-center justify-center rounded-lg bg-n-brand text-white" :title="t('CRM.CONTACT_LEAD.CALLING_CENTER')" :aria-label="t('CRM.CONTACT_LEAD.CALLING_CENTER')" @click="openWhatsappCalling(contact)"><span class="i-lucide-phone size-4" /></button><button type="button" class="flex size-8 items-center justify-center rounded-lg bg-n-violet-9 text-white" :title="t('CRM.CONTACT_LEAD.VIEW_PROFILE')" :aria-label="t('CRM.CONTACT_LEAD.VIEW_PROFILE')" @click="openSelectedContact(contact)"><span class="i-lucide-user-round size-4" /></button></div></td>
+                <td class="px-3 py-3">
+                  <span
+                    class="rounded-full bg-n-teal-3 px-2.5 py-1 text-xs font-semibold text-n-teal-11"
+                    >{{ contactStatus(contact) }}</span
+                  >
+                </td>
+                <td class="px-3 py-3" @click.stop>
+                  <div class="flex gap-1">
+                    <button
+                      type="button"
+                      disabled
+                      :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
+                      :aria-label="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
+                      class="flex size-8 items-center justify-center rounded-lg bg-n-slate-3 text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
+                    >
+                      <span class="i-ri-whatsapp-fill size-4" /></button
+                    ><button
+                      type="button"
+                      class="flex size-8 items-center justify-center rounded-lg bg-n-brand text-white"
+                      :title="t('CRM.CONTACT_LEAD.CALLING_CENTER')"
+                      :aria-label="t('CRM.CONTACT_LEAD.CALLING_CENTER')"
+                      @click="openWhatsappCalling(contact)"
+                    >
+                      <span class="i-lucide-phone size-4" /></button
+                    ><button
+                      type="button"
+                      class="flex size-8 items-center justify-center rounded-lg bg-n-violet-9 text-white"
+                      :title="t('CRM.CONTACT_LEAD.VIEW_PROFILE')"
+                      :aria-label="t('CRM.CONTACT_LEAD.VIEW_PROFILE')"
+                      @click="openSelectedContact(contact)"
+                    >
+                      <span class="i-lucide-user-round size-4" />
+                    </button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -777,21 +1019,195 @@ onMounted(async () => {
         </button>
       </main>
 
-      <aside class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm">
+      <aside
+        class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
+      >
         <template v-if="selectedRelationshipContact">
           <ContactLeadAction
             v-if="canUseCrm"
             :contact="selectedRelationshipContact"
           />
-          <div class="flex items-start justify-between"><div class="flex items-center gap-3"><span class="flex size-12 items-center justify-center rounded-2xl bg-n-teal-3 text-lg font-bold text-n-teal-11">{{ contactInitials(selectedRelationshipContact) }}</span><div><h2 class="font-semibold text-n-slate-12">{{ selectedRelationshipContact.name }}</h2><p class="text-xs text-n-slate-11">{{ contactCompany(selectedRelationshipContact) }}</p><span class="mt-1 inline-flex rounded-full bg-n-teal-3 px-2 py-0.5 text-[11px] font-semibold text-n-teal-11">{{ contactStatus(selectedRelationshipContact) }}</span></div></div><button class="text-n-slate-11" :aria-label="t('CRM.CONTACT_LEAD.CLOSE_DETAILS')" @click="crmSelectedContact = null">×</button></div>
-          <div class="mt-4 grid grid-cols-4 gap-2"><button disabled :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')" class="rounded-lg bg-n-slate-3 px-2 py-2 text-xs font-semibold text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"><span class="i-ri-whatsapp-fill me-1 inline-block size-4 align-text-bottom" />WhatsApp</button><button class="rounded-lg bg-n-brand px-2 py-2 text-xs font-semibold text-white" @click="openWhatsappCalling(selectedRelationshipContact)"><span class="i-lucide-phone me-1 inline-block size-4 align-text-bottom" />{{ t('CRM.CONTACT_LEAD.CALLING_CENTER') }}</button><button disabled :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')" class="rounded-lg bg-n-slate-3 px-2 py-2 text-xs font-semibold text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"><span class="i-lucide-mail me-1 inline-block size-4 align-text-bottom" />E-mail</button><button disabled :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')" class="rounded-lg bg-n-slate-3 px-2 py-2 text-xs font-semibold text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"><span class="i-lucide-calendar-plus me-1 inline-block size-4 align-text-bottom" />Agenda</button></div>
-          <div class="mt-5 space-y-3 text-sm"><p class="flex items-center gap-2 text-n-slate-11"><span class="i-ri-whatsapp-line size-4 text-emerald-500" />{{ contactPhone(selectedRelationshipContact) }}</p><p class="flex items-center gap-2 text-n-slate-11"><span class="i-lucide-mail size-4 text-blue-500" />{{ selectedRelationshipContact.email || 'Sem e-mail' }}</p><p class="flex items-center gap-2 text-n-slate-11"><span class="i-lucide-user-round size-4" />Responsável: {{ t('CRM.CONTACT_LEAD.UNKNOWN') }}</p></div>
-          <div class="mt-5 border-t border-n-weak pt-4"><p class="text-xs font-semibold uppercase tracking-wide text-n-slate-11">CRM</p><div class="mt-2 rounded-xl border border-n-weak bg-n-alpha-2 p-3"><div class="flex items-center justify-between"><strong class="text-n-slate-12">Relacionamento comercial</strong><strong class="text-n-teal-11">CRM</strong></div><p class="mt-1 text-xs text-n-slate-11">Use o CRM para vincular negócio, proposta e próxima atividade.</p></div></div>
-          <div class="mt-5 border-t border-n-weak pt-4"><div class="flex gap-3 border-b border-n-weak text-xs font-semibold"><span class="border-b-2 border-blue-500 px-1 pb-2 text-n-blue-11">{{ t('CRM.CONTACT_LEAD.CONTACT_OPTIONS') }}</span><button disabled :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')" class="px-1 pb-2 text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed">Negócios</button><button disabled :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')" class="px-1 pb-2 text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed">Atividades</button></div><div class="mt-4 space-y-4 text-xs text-n-slate-11"><div class="flex gap-3"><span class="i-ri-whatsapp-fill mt-0.5 size-4 text-emerald-500" /><div><strong class="block text-n-slate-11">{{ contactStatus(selectedRelationshipContact) }}</strong><span>{{ t('CRM.CONTACT_LEAD.AVAILABILITY') }}</span></div></div><div class="flex gap-3"><span class="i-lucide-phone mt-0.5 size-4 text-blue-500" /><div><strong class="block text-n-slate-11">Ligação</strong><span>Abra o WhatsApp Calling para iniciar.</span></div></div></div></div>
-          <button type="button" class="mt-5 w-full rounded-xl border border-blue-500 px-3 py-2.5 text-sm font-semibold text-n-blue-11" @click="openSelectedContact(selectedRelationshipContact)">Ver perfil completo</button>
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <span
+                class="flex size-12 items-center justify-center rounded-2xl bg-n-teal-3 text-lg font-bold text-n-teal-11"
+                >{{ contactInitials(selectedRelationshipContact) }}</span
+              >
+              <div>
+                <h2 class="font-semibold text-n-slate-12">
+                  {{ selectedRelationshipContact.name }}
+                </h2>
+                <p class="text-xs text-n-slate-11">
+                  {{ contactCompany(selectedRelationshipContact) }}
+                </p>
+                <span
+                  class="mt-1 inline-flex rounded-full bg-n-teal-3 px-2 py-0.5 text-[11px] font-semibold text-n-teal-11"
+                  >{{ contactStatus(selectedRelationshipContact) }}</span
+                >
+              </div>
+            </div>
+            <button
+              class="text-n-slate-11"
+              :aria-label="t('CRM.CONTACT_LEAD.CLOSE_DETAILS')"
+              @click="crmSelectedContact = null"
+            >
+              <span class="i-lucide-x size-4" aria-hidden="true" />
+            </button>
+          </div>
+          <div class="mt-4 grid grid-cols-4 gap-2">
+            <button
+              disabled
+              :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
+              class="rounded-lg bg-n-slate-3 px-2 py-2 text-xs font-semibold text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
+            >
+              <span
+                class="i-ri-whatsapp-fill me-1 inline-block size-4 align-text-bottom"
+              />{{ t('CRM.CONTACT_LEAD.UI.WHATSAPP') }}</button
+            ><button
+              class="rounded-lg bg-n-brand px-2 py-2 text-xs font-semibold text-white"
+              @click="openWhatsappCalling(selectedRelationshipContact)"
+            >
+              <span
+                class="i-lucide-phone me-1 inline-block size-4 align-text-bottom"
+              />{{ t('CRM.CONTACT_LEAD.CALLING_CENTER') }}</button
+            ><button
+              disabled
+              :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
+              class="rounded-lg bg-n-slate-3 px-2 py-2 text-xs font-semibold text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
+            >
+              <span
+                class="i-lucide-mail me-1 inline-block size-4 align-text-bottom"
+              />{{ t('CRM.CONTACT_LEAD.UI.EMAIL') }}</button
+            ><button
+              disabled
+              :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
+              class="rounded-lg bg-n-slate-3 px-2 py-2 text-xs font-semibold text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
+            >
+              <span
+                class="i-lucide-calendar-plus me-1 inline-block size-4 align-text-bottom"
+              />{{ t('CRM.CONTACT_LEAD.UI.CALENDAR') }}
+            </button>
+          </div>
+          <div class="mt-5 space-y-3 text-sm">
+            <p class="flex items-center gap-2 text-n-slate-11">
+              <span class="i-ri-whatsapp-line size-4 text-emerald-500" />{{
+                contactPhone(selectedRelationshipContact)
+              }}
+            </p>
+            <p class="flex items-center gap-2 text-n-slate-11">
+              <span class="i-lucide-mail size-4 text-blue-500" />{{
+                selectedRelationshipContact.email || 'Sem e-mail'
+              }}
+            </p>
+            <p class="flex items-center gap-2 text-n-slate-11">
+              <span class="i-lucide-user-round size-4" />{{
+                t('CRM.CONTACT_LEAD.UI.OWNER_LABEL')
+              }}{{ t('CRM.CONTACT_LEAD.UNKNOWN') }}
+            </p>
+          </div>
+          <div class="mt-5 border-t border-n-weak pt-4">
+            <p
+              class="text-xs font-semibold uppercase tracking-wide text-n-slate-11"
+            >
+              {{ t('CRM.CONTACT_LEAD.UI.CRM') }}
+            </p>
+            <div class="mt-2 rounded-xl border border-n-weak bg-n-alpha-2 p-3">
+              <div class="flex items-center justify-between">
+                <strong class="text-n-slate-12">{{
+                  t('CRM.CONTACT_LEAD.UI.COMMERCIAL_RELATIONSHIP')
+                }}</strong
+                ><strong class="text-n-teal-11">{{
+                  t('CRM.CONTACT_LEAD.UI.CRM')
+                }}</strong>
+              </div>
+              <p class="mt-1 text-xs text-n-slate-11">
+                {{ t('CRM.CONTACT_LEAD.UI.CRM_HINT') }}
+              </p>
+            </div>
+          </div>
+          <div class="mt-5 border-t border-n-weak pt-4">
+            <div
+              class="flex gap-3 border-b border-n-weak text-xs font-semibold"
+            >
+              <span
+                class="border-b-2 border-blue-500 px-1 pb-2 text-n-blue-11"
+                >{{ t('CRM.CONTACT_LEAD.CONTACT_OPTIONS') }}</span
+              ><button
+                disabled
+                :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
+                class="px-1 pb-2 text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
+              >
+                {{ t('CRM.CONTACT_LEAD.UI.DEALS') }}</button
+              ><button
+                disabled
+                :title="t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION')"
+                class="px-1 pb-2 text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
+              >
+                {{ t('CRM.CONTACT_LEAD.UI.ACTIVITIES') }}
+              </button>
+            </div>
+            <div class="mt-4 space-y-4 text-xs text-n-slate-11">
+              <div class="flex gap-3">
+                <span
+                  class="i-ri-whatsapp-fill mt-0.5 size-4 text-emerald-500"
+                />
+                <div>
+                  <strong class="block text-n-slate-11">{{
+                    contactStatus(selectedRelationshipContact)
+                  }}</strong
+                  ><span>{{ t('CRM.CONTACT_LEAD.AVAILABILITY') }}</span>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <span class="i-lucide-phone mt-0.5 size-4 text-blue-500" />
+                <div>
+                  <strong class="block text-n-slate-11">{{
+                    t('CRM.CONTACT_LEAD.UI.CALL')
+                  }}</strong
+                  ><span>{{ t('CRM.CONTACT_LEAD.UI.CALL_HINT') }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="mt-5 w-full rounded-xl border border-blue-500 px-3 py-2.5 text-sm font-semibold text-n-blue-11"
+            @click="openSelectedContact(selectedRelationshipContact)"
+          >
+            {{ t('CRM.CONTACT_LEAD.UI.FULL_PROFILE') }}
+          </button>
         </template>
-        <div v-else class="flex h-full min-h-64 items-center justify-center text-center text-sm text-n-slate-11">Selecione um contato para ver os detalhes.</div>
+        <div
+          v-else
+          class="flex h-full min-h-64 items-center justify-center text-center text-sm text-n-slate-11"
+        >
+          {{ t('CRM.CONTACT_LEAD.UI.SELECT_CONTACT_HINT') }}
+        </div>
       </aside>
     </div>
+    <Dialog
+      ref="bulkDeleteDialogRef"
+      type="alert"
+      :title="bulkDeleteDialogTitle"
+      :description="bulkDeleteDialogDescription"
+      :confirm-button-label="bulkDeleteDialogConfirmLabel"
+      :is-loading="isBulkActionLoading"
+      :disable-confirm-button="!hasSelection"
+      @confirm="deleteContacts"
+    />
+    <ContactDetailsDialog
+      v-if="contactDialogId && canUseCustomerMaster"
+      :key="masterIdentity"
+      :contact-id="contactDialogId"
+      @close="contactDialogId = null"
+      @updated="fetchContactsBasedOnContext(pageNumber)"
+    />
+    <CompanyDetailsDialog
+      v-if="companyDialogId && canUseCustomerMaster"
+      :key="masterIdentity"
+      :company-id="companyDialogId"
+      @close="companyDialogId = null"
+      @updated="fetchContactsBasedOnContext(pageNumber)"
+    />
   </div>
 </template>

@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_checkpoint": "95a00454",
+  "requirement": "F1.4 explicit customer/current owner/destination on each pending responsibility",
+  "implementation": [
+    "Each authorized responsibility comparison receives the frozen customer label from the existing reviewed source rows, not from a newly interpreted live name.",
+    "Unavailable source projections stay redacted, including customer name.",
+    "Vue renders customer, current responsible and reviewed destination using existing native translations, responsive Tailwind classes and bounded pagination.",
+    "Stored reviewed inputs, source snapshots, historical labels and owners are not rewritten."
+  ],
+  "word_reference": "Relationship original Word, section 5.3 and embedded image16: customer/responsibility impact of analyst removal. This improves the existing comparison; it does not implement or claim the removal modal/workflow.",
+  "tests_not_additive": {
+    "backend": { "label": "f1responsibilities-labels", "examples": 10, "failures": 0, "overlap": "Nine transfer examples overlap cb1bed81; one new frozen-customer-label example." },
+    "vue": { "label": "f1responsibilities-labels", "examples": 6, "failures": 0, "overlap": "Comparison suite rerun with additional customer assertion; not six newly distinct scenarios." },
+    "rubocop": { "label": "f1responsibilities-labels-lint", "offenses": 0 },
+    "eslint": { "label": "f1responsibilities-labels-eslint", "exit_code": 0 }
+  },
+  "classification": "Implemented and automated tested; current-build desktop/mobile light/dark acceptance pending explicit separate build authorization",
+  "no_build_runtime_or_external_change": true
+}

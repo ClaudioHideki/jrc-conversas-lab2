@@ -1,0 +1,70 @@
+{
+  "status": "Automated increment validated; not compiled or Chrome-homologated",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_checkpoint": "6f061f80",
+  "feature": "B2 explicit documentary responsible and audited metadata",
+  "implementation": [
+    "Optional explicit responsible, distinct from uploader and portfolio owner; no access granted by assignment",
+    "Native documents_manage and assignment scopes, refreshed in locked transaction",
+    "Native assignable-user pagination/search without email or credentials",
+    "Reason required; revision conflict returns 409; explicit removal and archival preserve files and versions",
+    "Existing audit records; metadata audit UI remains pending"
+  ],
+  "database": {
+    "migration": "20261104120000",
+    "applied_only_to": "jrc_rel_v2_candidate_test",
+    "ui_database_unchanged": true,
+    "legacy_responsible_default": null,
+    "schema": "Merged only exact generated document table/FK delta; no unrelated schema drift imported"
+  },
+  "tests": {
+    "backend": {
+      "examples": 17,
+      "failures": 0,
+      "evidence": ".codex/doc-responsibility-20261104/backend-final.json"
+    },
+    "vue": {
+      "examples": 7,
+      "failures": 0,
+      "evidence": ".codex/doc-responsibility-20261104/vue-review.json"
+    },
+    "ruby_lint": "All five changed Ruby files pass after formatting of the new request spec",
+    "eslint": {
+      "errors": 0,
+      "warnings": 44,
+      "note": "Existing Vue formatter/i18n warnings retained; no disabled checks"
+    }
+  },
+  "manual_homologation": "docs/jrc_customers/manual_b1_b4_20261104.html",
+  "current_ui": {
+    "url": "http://127.0.0.1:5379/app/login",
+    "product_sha": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+    "entry_sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+    "new_increment_available": false,
+    "new_server": false,
+    "rebuild": false,
+    "user_confirmed_login_loaded": true,
+    "functional_homologation": "pending manual; automation blocked by browser URL-policy identification"
+  },
+  "disk": {
+    "start": 10293903360,
+    "minimum_tests": 10253996032,
+    "current": 10270912512
+  },
+  "pending": [
+    "Configurable mandatory documentary catalog",
+    "Protected presentation of metadata audit history",
+    "B1-B4 manual UI validation; compile new documentary increments only after authorized batch readiness",
+    "Representative scale",
+    "TRR business definition",
+    "Full stage C audit before D/E/F/G completion"
+  ],
+  "restrictions": {
+    "push": false,
+    "deploy": false,
+    "ghcr": false,
+    "production": false,
+    "cleanup": false,
+    "existing_environments_stopped": false
+  }
+}

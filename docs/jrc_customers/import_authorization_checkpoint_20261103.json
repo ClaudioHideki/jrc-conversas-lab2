@@ -1,0 +1,16 @@
+{
+  "stage": "C5b — permission boundary before persistent import runs",
+  "status": "Internal service validated; the complete Central de Importações remains pending.",
+  "source": "/consolidation-customer-import-access",
+  "backend": { "examples": 35, "failures": 0, "report": ".codex/customer-import-access-backend.json" },
+  "style": { "files": 2, "offenses": 0, "report": ".codex/customer-import-access-style.json" },
+  "preserved": [
+    "Current account, active user, membership and customer-master feature are checked afresh.",
+    "Company and combined imports retain the existing administrator gate.",
+    "Contact imports reuse ContactPolicy.import?, including Enterprise contact_manage.",
+    "Directory access alone does not grant bulk import.",
+    "Existing CSV and Intercom APIs, callbacks, jobs and UI are unchanged."
+  ],
+  "pending": ["Persistent scoped history and private CSV storage", "Record planning and explicit confirmation", "Central API and complete interface", "Chrome end-to-end validation"],
+  "external_operations": "No push, image build/publication, deploy, production migration or provider calls."
+}

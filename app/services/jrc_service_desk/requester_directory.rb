@@ -38,6 +38,9 @@ class JrcServiceDesk::RequesterDirectory
 
   def visible_contacts
     Pundit.authorize(@context.to_h, Contact, :index?)
+    if JrcServiceDesk::EmployeeAccess.restricted?(@context)
+      return @context.account.contacts.where('LOWER(email) = ?', @context.user.email.downcase)
+    end
     companies = JrcCrm::CorporateCoverage.new(account: @context.account, user: @context.user)
       .companies(@context.account.master_companies).select(:id)
     @context.account.contacts.where(company_id: nil).or(@context.account.contacts.where(company_id: companies))

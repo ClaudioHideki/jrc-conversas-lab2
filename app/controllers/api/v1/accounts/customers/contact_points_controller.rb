@@ -2,7 +2,7 @@ class Api::V1::Accounts::Customers::ContactPointsController < Api::V1::Accounts:
   before_action :set_contact
 
   def create
-    @contact.with_lock do
+    with_authorized_contact do
       raise ActionController::BadRequest, 'Maximum of 50 directory channels per contact' if @contact.contact_points.count >= 50
       point = @contact.contact_points.create!(point_params.merge(account_id: Current.account.id))
       audit(point, 'created')
@@ -11,7 +11,7 @@ class Api::V1::Accounts::Customers::ContactPointsController < Api::V1::Accounts:
   end
 
   def update
-    @contact.with_lock do
+    with_authorized_contact do
       point = @contact.contact_points.where(account_id: Current.account.id).find(params[:id])
       before = point.attributes
       point.update!(point_params)
@@ -21,7 +21,7 @@ class Api::V1::Accounts::Customers::ContactPointsController < Api::V1::Accounts:
   end
 
   def destroy
-    @contact.with_lock do
+    with_authorized_contact do
       point = @contact.contact_points.where(account_id: Current.account.id).find(params[:id])
       audit(point, 'removed')
       point.destroy!
@@ -33,7 +33,18 @@ class Api::V1::Accounts::Customers::ContactPointsController < Api::V1::Accounts:
 
   def set_contact
     @contact = JrcBroker::GroupContactAccess.new(account: Current.account, user: Current.user)
-                                            .excluding_groups(Current.account.contacts).find(params[:contact_id])
+                                            .excluding_groups(directory.scope).find(params[:contact_id])
+  end
+
+  def directory
+    JrcCustomers::ContactDirectory.new(account: Current.account, actor: Current.user)
+  end
+
+  def with_authorized_contact
+    directory.with_locked_contact(@contact.id) do |contact|
+      @contact = contact
+      yield
+    end
   end
 
   def point_params

@@ -34,3 +34,15 @@ scope '/api/v1/accounts/:account_id/jrc_service_desk', module: 'api/v1/accounts/
   post '/requester_portal/grants', to: 'requester_portal#create'
   patch '/requester_portal/grants/:id', to: 'requester_portal#change_grant'
 end
+
+# Employee Portal uses the native commands with a server-enforced internal scope.
+scope '/portal/employee/accounts/:account_id', module: 'requester_portal/employee' do
+  get '/ui_context', to: 'context#show'
+  get '/tickets', to: 'tickets#index'
+  post '/tickets', to: 'tickets#create'
+  get '/tickets/:id', to: 'tickets#show'
+  get '/tickets/:id/:kind/:record_id', to: 'tickets#related_item', constraints: { kind: /notes|conversations/ }
+  get '/service_definitions', to: 'services#index'
+  get '/service_definitions/:id', to: 'services#show'
+  get '/catalogue_form', to: 'catalogue#show'
+end

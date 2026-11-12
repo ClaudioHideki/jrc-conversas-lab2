@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_head": "7c1a9204041d7fa0ac090b3f9552f05ab5155505",
+  "status": "F1.1 additive supported responsibility transfer tested; F1 as a whole remains partial",
+  "implementation": [
+    "Explicit transfer_responsibilities=true on the native reviewed assign operation; legacy inputs and snapshots remain unchanged when absent or false",
+    "Immutable per-customer inventory binds current and destination owners, pending record identities and attribute digests",
+    "Supported pending records: actions, success plans, scheduled QBRs, risks, renewals, expansion signals and exclusively linked native CRM agenda activities",
+    "Simulation and native Central approval do not move any ownership; executor confirms separately",
+    "Native authorization, destination capacity, approval bindings and current inventory are revalidated; root and children move in the existing per-customer transaction",
+    "Destination visibility is checked after ownership changes; denial rolls back the entire item",
+    "Every changed owner is audited; closed history and immutable proposal remain unchanged; retry retains native individual receipts",
+    "Source-scoped paginated Vue comparison is integrated into reviewed execution and the native Central origin; blocked/stale/failed/canceled states are not shown as executed"
+  ],
+  "tests": {
+    "backend_final": { "label": "f1responsibilities04", "examples": 48, "failures": 0, "groups": { "responsibility_transfer": 9, "legacy_reviewed_batches": 14, "native_central_distribution": 25 } },
+    "backend_repeated": "f1responsibilities03 also passed 48; not additional distinct coverage",
+    "vue": { "label": "f1responsibilities01", "examples": 22, "failures": 0, "groups": { "reviewed_panel": 16, "responsibility_comparison": 6 }, "limitations": "Component tests; not browser acceptance. Existing RouterLink stub warnings remain." },
+    "new_service_rubocop": { "reports": ["f1responsibilities-lint02", "f1responsibilities-lint03"], "final_new_service_offenses": 0 },
+    "eslint": { "report": "f1responsibilities-eslint", "exit_code": 0 },
+    "corrected_failures": ["Project fixture needed its native feature enabled before creation", "Shared plan fixture needed the native required metric field"],
+    "remaining_static_debt": "Large native Workflow has inherited complexity/style offenses; no global clean-lint claim. New BatchReviewPlan additions were split to avoid added complexity. No disabling of tests or cops.",
+    "environment": "Owned candidate PostgreSQL with synthetic records, WebMock denies external network, test job adapter; no migrations or application build"
+  },
+  "word_reference": {
+    "path": "C:/Users/DEV03/Downloads/JRC_Conversas_Relacionamento_V2_Projeto_Completo_Dev_Com_Imagens_20261101.docx",
+    "sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+    "paragraphs": [101, 102, 103, 104, 105, 106, 107],
+    "visual": "Comparison follows reviewed simulation/execution references; desktop/mobile light/dark acceptance pending a separately authorized fresh build"
+  },
+  "remaining": {
+    "F1_1": "Active cadences, linked native Project/task and Service Desk responsibilities, ambiguous/shared agenda sources remain explicitly blocked for native source handling; no cross-module owner is silently changed. Maximum 1000 pending records per kind/customer fails loudly instead of truncation.",
+    "F1_2": "No analyst/team removal has been implemented or claimed. Existing memberships remain untouched; a complete source-responsibility clearance/withdrawal workflow remains required.",
+    "F1_3": "Customer-count capacity preserved. Points/hour conversion and essential business configuration remain unimplemented; illustrative Word factors are not adopted as fixed rules.",
+    "C_D_E_F_G": "Stages remain open; exact-version provider artifacts/final sealed dossier, further health governance and full visual audit remain pending.",
+    "TRR": "Business definition missing; no invented formula",
+    "company_documents_without_portfolio": "Explicitly deferred"
+  },
+  "safety": {
+    "initial_free_bytes": 9946632192,
+    "backend_final_minimum_free_bytes": 9866993664,
+    "no_build": true,
+    "no_runtime_change": true,
+    "no_push_deploy_ghcr": true,
+    "no_cleanup": true,
+    "no_external_operations": true
+  }
+}

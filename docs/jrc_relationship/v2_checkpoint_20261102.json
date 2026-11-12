@@ -1,0 +1,69 @@
+{
+  "date": "2026-11-02",
+  "kind": "local development checkpoint; not a release",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+  "implemented": [
+    "Nove áreas principais, mantendo as rotas e operações legadas",
+    "Meu Painel e Minhas Ações com escopo por usuário/conta e respostas tardias descartadas",
+    "Caso contextual, conversa nativa autorizada, resultado, próximo passo, retorno, histórico e confirmação separada",
+    "Documentos versionados com permissão explícita, quarentena, auditoria e bloqueio das rotas genéricas de blob",
+    "Cobertura observada de saúde sem apresentar dado ausente como saudável e sem eco da própria agenda",
+    "Histórico real de processamento e cobertura pelo gestor para clientes sem responsável",
+    "Reutilização idempotente do recibo real de mensagem do playbook, mantendo guard, autoridade e ledger",
+    "Tokens nativos violetas locais ao Relacionamento e temas claro/escuro revistos"
+  ],
+  "tests": {
+    "frontend": {
+      "files": 17,
+      "tests": 128,
+      "failures": 0
+    },
+    "backend": {
+      "distinct_examples_verified": 60,
+      "failures_in_latest_execution_per_example": 0,
+      "execution": "53 casos do Relacionamento passaram no gate inicial; seis casos de documentos foram repetidos após simplificação; sete casos de ownership passaram após corrigir LF no snapshot. Não representa execução integral do repositório.",
+      "artifacts": [
+        ".codex/v2-checkpoint.json",
+        ".codex/v2-checkpoint-recheck.json",
+        ".codex/v2-ownership-lf.json"
+      ]
+    },
+    "baseline": {
+      "main_examples": 404,
+      "main_failures": 20,
+      "reviewed_and_sd_partitions": "Ainda não executadas nesta continuação; não omitir da validação ampla."
+    },
+    "production_frontend_build": "Concluiu com Node --max-old-space-size=4096, conforme Dockerfile. Tentativa inicial com heap de 2 GiB falhou por memória; log preservado.",
+    "lint": "ESLint: zero erros e 230 avisos. RuboCop apontou 218 ocorrências na primeira leitura, incluindo estilo/complexidade preexistentes e novos; parte simplificada e revalidada, lint Ruby ainda não está totalmente limpo.",
+    "browser": {
+      "synthetic_only": true,
+      "external_messages_sent": 0,
+      "theme_screenshots": [
+        "08-tema-corrigido-claro.png",
+        "09-tema-corrigido-escuro.png",
+        "10-tema-corrigido-acoes-1100.png"
+      ],
+      "page_errors": [],
+      "notes": "Demonstração inicial de gravação via API passou. Repetições posteriores preservadas com erro de seletor ambíguo e timeout; a revisão final de tema foi somente leitura e passou."
+    }
+  },
+  "migrations": [
+    "20261101210000",
+    "20261101220000",
+    "20261101230000"
+  ],
+  "environment": "Somente bancos descartáveis e app local; sem deploy, push, publicação de imagem, Compose ou migrations de produção.",
+  "external_dependencies": [
+    "ClamAV precisa de configuração real; arquivos continuam em quarentena se indisponível.",
+    "DocuSign confirmada pelo usuário; conector ainda não implementado/configurado/homologado."
+  ],
+  "remaining": [
+    "Completar Carteiras como agrupamento, equipe/capacidade, propostas de distribuição e integração autorizada à Central sem execução na aprovação",
+    "Histerese, frescor e demais evoluções de saúde/automação do Word",
+    "Finalizar filtros e solicitação de documentos conforme Word",
+    "Corrigir Cliente→Pedido→Solicitação e executar Backoffice P1, P2 e P3",
+    "Evoluir Cadastro Mestre e UX da Central, incluindo CA-01 a CA-15",
+    "Executar regressão ampla CRM/Service Desk/Projetos/Central e partições de concorrência; este checkpoint não declara homologação integral"
+  ]
+}

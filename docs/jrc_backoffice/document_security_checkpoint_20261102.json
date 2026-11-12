@@ -1,0 +1,361 @@
+{
+  "date": "2026-11-02",
+  "phase": "B2 — fundação documental validada; assinantes/poderes e B3 ainda pendentes",
+  "global_state": "parcial; não é conclusão das quatro frentes nem candidata publicada",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "461be8e25450ad3d4a794a13cfa0b2d34ca89978",
+  "publication_worktree_preserved": {
+    "path": "..\\crm-backoffice-servicedesk-visual-20261101",
+    "head": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+    "clean": true
+  },
+  "implemented": [
+    "Observações técnicas imutáveis por versão/blob/checksum; resultado do antivírus não concede aprovação humana ou poderes.",
+    "Formato real inicial, tamanho e hash limitados; detector nativo do Service Desk reutilizado com socket próprio do Backoffice.",
+    "Inspeção persistida antes de OCR/retry; indisponibilidade fica em quarentena, infectado/integridade divergente não seguem ao parser.",
+    "Poppler/Tesseract recebem os bytes exatos previamente liberados; aprovação humana e download revalidam bytes, conta e acesso após I/O.",
+    "Links ActiveStorage genéricos/disk/proxy/representations e relink de arquivo documental protegidos; sem URL bearer no DTO.",
+    "Upload idempotente mantém intenção no frontend em resposta incerta; rollback externo/falha parcial/revogação compensam somente o arquivo novo.",
+    "Recheck retorna queued somente após enqueue real; queued/pending/unavailable não habilitam leitura/aprovação.",
+    "Requisitos manuais já aplicados não desaparecem na reconciliação nativa após upload ou pré-análise.",
+    "Interface contextual preserva versões, histórico e paginação; elimina dados após acesso negado e descarta respostas tardias de outro contexto.",
+    "Atualizações técnicas auditadas como System; decisões/acessos humanos auditados com o usuário autorizado."
+  ],
+  "reused": [
+    "ActiveStorage",
+    "JrcBackoffice::DocumentVersion/DocumentAnalysis/DocumentDecision",
+    "JrcBackoffice::ContractAccess",
+    "JrcCrm::BackofficeDocumentChecklist",
+    "JrcServiceDesk::AttachmentScanner",
+    "JrcBackoffice::TextExtraction",
+    "native Account/Contact/Company and organizational policies"
+  ],
+  "migration": {
+    "version": "20261102060000",
+    "type": "aditiva",
+    "dependencies": [
+      "20261102050000 — índices tenant de solicitação"
+    ],
+    "applied_only_to": [
+      "jrc_rel_v2_candidate_test",
+      "jrc_rel_v2_ui_test",
+      "jrc_four_domains_schema_test"
+    ],
+    "fresh_schema_load": {
+      "database": "jrc_four_domains_schema_b2_test",
+      "schema": "20261102060000",
+      "tables": 328,
+      "scan_foreign_keys": 4,
+      "immutable_triggers": [
+        "jrc_bo_document_scan_pin",
+        "jrc_bo_document_version_pin",
+        "jrc_bo_private_attachment"
+      ],
+      "public_functions": 210,
+      "schema_load": "passed",
+      "production": false
+    },
+    "production_migrations": false,
+    "rollback": "Down recusa observações existentes e preserva arquivos nativos no roundtrip sem inspeções. Operacionalmente, manter tabelas/bytes e a proteção de leitura B2; não voltar a uma aplicação anterior que reabra links privados. Planejar retenção/rollback de dados antes de produção."
+  },
+  "validation": {
+    "backend": {
+      "duration": 210.204546939,
+      "example_count": 534,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-b2-backend-final.json",
+        "sha256": "b111d767f5211b81e33356380baa11d70534e6c5aa059c6581bded419fdc972b",
+        "bytes": 244087
+      },
+      "selected": true
+    },
+    "real_postgresql_concurrency": {
+      "duration": 7.99845739,
+      "example_count": 3,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-b2-concurrency-final.json",
+        "sha256": "97261091180014d7038875e579b6585f11b70e12206ff5f36f721ca02abadbc8",
+        "bytes": 1725
+      },
+      "cases": [
+        "mesma intenção produz uma versão/PDF",
+        "FKs/auditoria documental sem deadlock",
+        "revogação confirmada em conexão independente durante upload recusa persistência e compensa arquivo"
+      ]
+    },
+    "frontend": {
+      "files": 31,
+      "tests": 182,
+      "failures": 0,
+      "pending": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-b2-frontend-configured.json",
+        "sha256": "c3a8372164b25f93bf47bc8e38c068709e7702e8245868b24848c96b7408d0b3",
+        "bytes": 70897
+      }
+    },
+    "ruby_lint": {
+      "overall_passed": false,
+      "inspected_files": 26,
+      "clean_files": 22,
+      "legacy_offenses": 44,
+      "legacy_files": [
+        {
+          "file": "app/services/jrc_backoffice/document_preanalysis.rb",
+          "offenses": 9,
+          "categories": [
+            "Layout/ArgumentAlignment",
+            "Layout/HashAlignment",
+            "Metrics/AbcSize",
+            "Metrics/CyclomaticComplexity",
+            "Metrics/MethodLength",
+            "Metrics/PerceivedComplexity",
+            "Style/RegexpLiteral"
+          ]
+        },
+        {
+          "file": "app/services/jrc_crm/backoffice_document_checklist.rb",
+          "offenses": 29,
+          "categories": [
+            "Layout/ArgumentAlignment",
+            "Layout/EmptyLineAfterGuardClause",
+            "Layout/HashAlignment",
+            "Layout/LineLength",
+            "Metrics/AbcSize",
+            "Metrics/CyclomaticComplexity",
+            "Metrics/MethodLength",
+            "Metrics/PerceivedComplexity",
+            "Rails/TransactionExitStatement",
+            "Style/ClassAndModuleChildren",
+            "Style/IfUnlessModifier",
+            "Style/ParallelAssignment"
+          ]
+        },
+        {
+          "file": "app/services/jrc_service_desk/attachment_scanner.rb",
+          "offenses": 5,
+          "categories": [
+            "Metrics/AbcSize",
+            "Metrics/CyclomaticComplexity",
+            "Metrics/MethodLength",
+            "Metrics/PerceivedComplexity",
+            "Rails/NegateInclude"
+          ]
+        },
+        {
+          "file": "config/routes.rb",
+          "offenses": 1,
+          "categories": [
+            "Layout/EndOfLine"
+          ]
+        }
+      ],
+      "baseline_legacy_offenses": 60,
+      "note": "Mesmas categorias já existentes em B1; não se declarou lint global limpo. Métodos do serviço Documents foram organizados e agora estão sem infrações.",
+      "artifact": {
+        "path": ".codex\\consolidation-b2-ruby-all-final.json",
+        "sha256": "1079299613c0196b5e0d245a4222bc43fc72fa3b761bf09e74bce71218f80440",
+        "bytes": 14542
+      }
+    },
+    "frontend_lint": {
+      "files": 3,
+      "errors": 0,
+      "warnings": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-b2-frontend-lint.json",
+        "sha256": "00f66ec3248d2f854e0eb7b74b3de2d6a430635ebd40a3f72a341030d7e79b8e",
+        "bytes": 2612
+      }
+    },
+    "frontend_build": {
+      "status": "passed",
+      "duration": "2m39s",
+      "artifact": {
+        "path": ".codex\\consolidation-b2-production-build.log",
+        "sha256": "ec008cc34f5cc1319d04fa1f4c2065910ee657f1ac9c1a7a1b7091b702e88d8d",
+        "bytes": 50892
+      },
+      "warnings": [
+        "chunks grandes",
+        "Browserslist antigo",
+        "brand JPEG resolvido em runtime",
+        "Webphone importado por caminhos estático/dinâmico"
+      ],
+      "note": "Build de assets frontend; nenhuma imagem Docker construída/publicada. Alterações posteriores atingiram apenas Ruby e testes; frontend permaneceu idêntico."
+    },
+    "rails_eager_load": {
+      "status": "passed",
+      "artifact": {
+        "path": ".codex\\consolidation-b2-zeitwerk-final.log",
+        "sha256": "8cc6ec1adf2b97491781e993cff4046dfbef93f373b7c3958d69e3e5ead33edf",
+        "bytes": 939
+      }
+    },
+    "source": {
+      "files": 11161,
+      "baseline": "461be8e25450ad3d4a794a13cfa0b2d34ca89978",
+      "mismatches": [],
+      "snapshot": "/consolidation-b2-validated",
+      "sql_raw_hashes": true,
+      "manifest": {
+        "path": ".codex\\consolidation-b2-source-manifest.json",
+        "sha256": "7776037ca2525d4076f0702fbcc482b4eaed6ad0fd5de07be293e2481d525eee",
+        "bytes": 1826385
+      }
+    },
+    "actual_browser_flow": {
+      "status": "passed",
+      "snapshot": "/consolidation-b2-validated",
+      "asset_prefix": "/consolidation-b2-vite/",
+      "synthetic_only": true,
+      "request_id": 8,
+      "version_ids": [
+        4,
+        5
+      ],
+      "upload_persisted": true,
+      "original_version_preserved": true,
+      "reload_verified": true,
+      "actual_state": "unavailable",
+      "queued_is_not_clean": true,
+      "direct_download_status": 422,
+      "approve_and_download_disabled": true,
+      "both_themes": true,
+      "responsive_capture": true,
+      "page_errors": [],
+      "real_antivirus_homologation": false,
+      "external_contracts_sent": 0,
+      "external_homologation": false,
+      "artifact": {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\documentos-b2-resultado.json",
+        "sha256": "62977256f3226d717ddb3bbd877aabadb1394fe2de0e3ea80bda6937512e8de2",
+        "bytes": 607
+      }
+    },
+    "settled_visual_review": {
+      "status": "passed",
+      "snapshot": "/consolidation-b2-validated",
+      "synthetic_only": true,
+      "domain_writes": [],
+      "native_profile_or_presence_updates": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/profile"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/profile"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/profile/set_active_account"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/profile"
+        }
+      ],
+      "page_errors": [],
+      "both_themes": true,
+      "mobile_width": 390,
+      "quarantine_visible_within_viewport": true,
+      "previous_synthetic_session_closed_via_native_picker": true,
+      "real_antivirus_homologation": false,
+      "external_homologation": false,
+      "artifact": {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\documentos-b2-capturas-resultado.json",
+        "sha256": "8ab2077a19e090d62e25364f0097746725d4cfa583cff4b17073b918ee3141bc",
+        "bytes": 705
+      },
+      "images_inspected": [
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\46-documentos-quarentena-claro-estavel.png",
+          "sha256": "4ed5d46e088524144d9f7330e55b37b3f6040e00d274113c47628bca28d911a1",
+          "bytes": 312196
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\47-documentos-quarentena-escuro-estavel.png",
+          "sha256": "be8dddb2991c898e776cb5d553743f33e930a4c5731f4bd9ac570b3b73475734",
+          "bytes": 307646
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\48-documentos-quarentena-mobile-estavel.png",
+          "sha256": "c3c4f7bad31743444e3b42bde1bcd85312356a22ae514256874d8e9b3f877616",
+          "bytes": 69232
+        }
+      ]
+    }
+  },
+  "failures_found_and_corrected": [
+    "Trigger inicial recusava o touch updated_at do vínculo ActiveStorage; passou a permitir exclusivamente esse timestamp, preservando dados substantivos.",
+    "Cache-Control no-store em after_action não cobria erros; movido antes da autenticação/rescue nos controllers documentais e contratuais.",
+    "Retry inicialmente revertia a observação técnica e repetia infectado; agora observação commita antes de OCR e apenas indisponibilidade tem retry automático.",
+    "Tentativa frontend sem configuração do worktree não executou testes por fs.allow da dependência compartilhada; configuração isolada existente executou 182/0, sem instalar pacotes.",
+    "Navegador revelou requisito manual retirado após upload: reproduzido por API com 1 falha contra código anterior, corrigido sem enfraquecer a expectativa; gate final 534/0.",
+    "Capturas intermediárias foram descartadas como evidência visual conclusiva; feitas novas capturas estáveis após dados/transições.",
+    "Repetição de login atingiu o limite nativo de sessões HTTP409; captura final encerrou uma sessão sintética antiga pelo seletor nativo, sem alterar autenticação ou tokens por SQL."
+  ],
+  "not_claimed_complete": [
+    "Antivírus real instalado/configurado/homologado: protocolo Unix e respostas simuladas em testes; navegador comprovou estado real indisponível.",
+    "Assinantes canônicos, poderes/assinatura conjunta, intenção durável, envio, consumidor Connect e conferência de PDF final/certificado ainda não implementados neste incremento.",
+    "Portal documental, validade/expiração, retenção, requisitos tipados/snapshot completo de regras e perfis específicos continuam na etapa E.",
+    "Proteções desta etapa cobrem DocumentVersion e ContractVersion; anexos legados não foram apresentados como pipeline documental completo.",
+    "Configuração de bucket privado, execução de worker/ClamAV, observabilidade e plano de retenção/rollback precisam de homologação de infraestrutura.",
+    "A conta DocuSign Developer/demo ainda precisa ser preparada; nenhum contrato foi enviado ou assinado externamente.",
+    "Cadastro Mestre, Central de Aprovações, Relacionamento e integração final ainda exigem as etapas C/D/E/F/G e matriz exaustiva."
+  ],
+  "next": "B2: assinantes de Contacts/Companies canônicos, identificação protegida, regras conjuntas e evidências privadas com validação humana via Central única; depois B3 ledger/envio/reconciliação/evidência sem confundir completed com assinatura válida.",
+  "files": [
+    ".gitattributes",
+    "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
+    "app/controllers/api/v1/accounts/crm/backoffice_contracts_controller.rb",
+    "app/controllers/api/v1/accounts/crm/backoffice_documents_controller.rb",
+    "app/controllers/concerns/jrc_backoffice/protected_contract_blob.rb",
+    "app/javascript/dashboard/api/crm/commercialCycle.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeDocumentVersions.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeDocumentVersions.spec.js",
+    "app/jobs/jrc_backoffice/document_preanalysis_job.rb",
+    "app/models/concerns/jrc_backoffice/protected_contract_attachment.rb",
+    "app/models/jrc_backoffice/contract_version.rb",
+    "app/models/jrc_backoffice/document_scan.rb",
+    "app/models/jrc_backoffice/document_version.rb",
+    "app/services/jrc_backoffice/contract_versions.rb",
+    "app/services/jrc_backoffice/document_preanalysis.rb",
+    "app/services/jrc_backoffice/document_safety.rb",
+    "app/services/jrc_backoffice/document_safety/scanner_unavailable.rb",
+    "app/services/jrc_backoffice/documents.rb",
+    "app/services/jrc_backoffice/private_blob.rb",
+    "app/services/jrc_crm/backoffice_document_checklist.rb",
+    "app/services/jrc_service_desk/attachment_scanner.rb",
+    "config/routes.rb",
+    "db/functions/20261102060000_backoffice_document_guards.sql",
+    "db/migrate/20261102060000_create_backoffice_document_scans.rb",
+    "db/schema.rb",
+    "spec/jobs/jrc_backoffice/document_preanalysis_job_spec.rb",
+    "spec/requests/api/v1/accounts/crm/backoffice_document_security_spec.rb",
+    "spec/services/jrc_backoffice/contract_version_upgrade_spec.rb",
+    "spec/services/jrc_backoffice/contract_versions_concurrency_spec.rb",
+    "spec/services/jrc_backoffice/contract_versions_spec.rb",
+    "spec/services/jrc_backoffice/document_safety_spec.rb",
+    "spec/services/jrc_backoffice/document_scan_upgrade_spec.rb"
+  ],
+  "dependencies_added": [],
+  "push": false,
+  "docker_build": false,
+  "docker_image_published": false,
+  "deploy": false,
+  "compose_changed": false,
+  "local_commit_hook": {
+    "condition": "Husky helper .husky/_/husky.sh ausente neste worktree, já identificado no checkpoint B1",
+    "scope": "core.hooksPath=.codex/git-hooks somente no comando de checkpoint; nenhuma configuração global alterada",
+    "validation": "Gates manuais registrados neste relatório; lint ampliado conserva explicitamente as 44 infrações legadas, sem declaração de aprovação global."
+  }
+}

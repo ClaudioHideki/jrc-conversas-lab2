@@ -1,0 +1,130 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "3b33af4f1fe7a4bd9534d1fb1f73b06d5f274523",
+  "status": "D native-base percentage input implemented and locally tested; C-G remain open",
+  "word_reference": {
+    "sha256": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917",
+    "fragments": [
+      "central-aprovacoes:P0111",
+      "central-aprovacoes:P0112",
+      "central-aprovacoes:P0126",
+      "central-aprovacoes:P0411",
+      "central-aprovacoes:P0413",
+      "central-aprovacoes:P0437"
+    ]
+  },
+  "implemented": [
+    "Existing permitted proposal general discount editor accepts amount or explicit percentage of the native products/discount base already returned by Adjustments.options. No source model field, API endpoint, permission, adapter or dependency added. Backend whitelist remains discount_cents only.",
+    "Positive exact base required for percentage mode; blank independent draft,0-100 range/up-to4 decimals, decimal comma accepted, BigInt arithmetic and exact HALF_UP conversion matching CommercialFinancials. No binary float multiplication. Amount mode remains compatible with legacy/missing bases.",
+    "Preview shows actual monetary before/after; the exact amount is saved/audited. Source base, request ID/version/state remain pinned; base changes require reopening. Mandatory reason, native approval-choice selection, submission guard and error draft retention preserved.",
+    "Shared nine-vector contract tests native Ruby calculation and JS conversion, including half-cent boundaries and maximum safe integer base. Real native adjustment demonstrates25%to20% equivalence with immutable original snapshot and atomic authorized approval. Arbitrary discount_percent source writes remain rejected."
+  ],
+  "tests_non_additive": [
+    {
+      "gate": "approval-percent-native01",
+      "examples": 15,
+      "failures": 0,
+      "coverage": [
+        "shared native9-vectors",
+        "real source adjustment/immutable history",
+        "atomic approval and rollback when new tier needs another principal",
+        "explicit adjust/native CRM permissions",
+        "foreign tenants/stale versions/locked source",
+        "exact applied native amount and cap rejection",
+        "idempotent replay and source-context changes"
+      ]
+    },
+    {
+      "gate": "approval-percent-contract-final",
+      "examples": 1,
+      "failures": 0,
+      "note": "Same contract under canonical jrc_crm spec path; overlaps native01."
+    },
+    {
+      "gate": "approval-percent-ui01",
+      "examples": 23,
+      "failures": 0,
+      "kind": "Vue/API simulations; not Chrome homologation",
+      "coverage": [
+        "9shared conversion vectors plus malformed input guards",
+        "Word25to20 popup/atomic payload",
+        "currency legacy behavior",
+        "separate drafts/server error recovery/base pinning",
+        "existing reason/version/native-choice and denial tests"
+      ]
+    }
+  ],
+  "static": {
+    "ruby_offenses": 0,
+    "eslint_errors": 0,
+    "eslint_warnings": {
+      "AdjustmentDialog.vue": 8,
+      "adjustments.spec.js": 2
+    },
+    "git_diff_check": 0,
+    "test_organization": "New calculator contract placed at canonical spec/services/jrc_crm path after path lint feedback; no existing work removed."
+  },
+  "resources": {
+    "initial_free_bytes": 7263952896,
+    "native": {
+      "start": 7268794368,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_approvals/discount_percentage_contract_spec.rb": "cec9b51d72c3c8ea30b6556c3e4e03f42d5b7021c68ba35d290bf3d6c3afad83",
+        "spec/requests/api/v1/accounts/jrc_approvals/adjustments_spec.rb": "aafacc4903be14e8cab109842dbf3882459a364162e2771f45b4526ae9b51b58"
+      },
+      "minimum": 7268794368,
+      "exit_code": 0,
+      "end": 7269634048
+    },
+    "contract_final": {
+      "start": 7265824768,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_crm/commercial_financials_approval_percentage_spec.rb": "e3e525e3206f934424127e32265802ebf4d2b07b1a56286ae7ce2f6cf4350cd7"
+      },
+      "minimum": 7265759232,
+      "exit_code": 0,
+      "end": 7265759232
+    },
+    "vue": {
+      "status": "passed",
+      "free_start": 7262105600,
+      "minimum_free": 7238086656,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 24452,
+      "exit_code": 0,
+      "free_end": 7269552128
+    },
+    "current_free_bytes": 7267422208
+  },
+  "files_sha256": {
+    "app/javascript/dashboard/i18n/locale/en/jrcApprovals.json": "e62a8d0dcb27fe8a7faaad7f1dc9817529db01b08f2926eab5f3cfa570999d3f",
+    "app/javascript/dashboard/routes/dashboard/approvals/AdjustmentDialog.vue": "fa20bc3bde9958d4b24fa4919d85f875f1d20b4667eeccd6d84f28d62c9afc84",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/adjustments.spec.js": "8ede4791f756dff99448a28aa2fc054862d577e05fb5400d0f350d05dcba7f7f",
+    "spec/requests/api/v1/accounts/jrc_approvals/adjustments_spec.rb": "aafacc4903be14e8cab109842dbf3882459a364162e2771f45b4526ae9b51b58",
+    "app/javascript/dashboard/routes/dashboard/approvals/discountPercentage.js": "02a0c265d3d67bac838fde014924b3879db9425af528d9b21fdd1d096f30f085",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/discountPercentage.spec.js": "b4d47b34b8601dd935e9777ac9f3ffb94fc67efd5907cc0f44dc9d3cbd2869d1",
+    "spec/fixtures/jrc_approvals/discount_percentage_examples.json": "3268c968fe4c6d89dd164b1ac09acf094ab365dbf5cd5ff41d7070a7cb9d26cd",
+    "spec/services/jrc_crm/commercial_financials_approval_percentage_spec.rb": "e3e525e3206f934424127e32265802ebf4d2b07b1a56286ae7ce2f6cf4350cd7"
+  },
+  "limitations": [
+    "Percentage is a frontend input conversion for the installed monetary adjustment, not a new editable source field. Audit and persisted source retain exact cents. Other types/fields remain allowlisted or unsupported; no general source editing.",
+    "No build/current-source Chrome, migration, cleanup, push/deploy, provider call or change to5379/four preserved containers. Existing i18n/Browserslist/Rails warnings remain documented in raw gates.",
+    "Full literal/visual Word audit and stage closure remain open; see word_gap_delta_20261106.json."
+  ],
+  "next_active_work": {
+    "source": "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystWorkspace.vue",
+    "finding": "Summary cards route to generic lists: actions_today supplies no due-day filter and at_risk supplies no risk filter; dashboard uses portfolio mode=mine but action-list mine filters action ownership. A delegated task can therefore disappear from the linked list despite contributing to the card.",
+    "native_reuse": "MetricDrilldown already applies the authorized dashboard portfolio and source predicates. Reuse its existing paginated panel in a popup, add the missing overdue_returns source and exact action navigation.",
+    "scope": "Incremental functional fix; preserve dashboard portfolio semantics, layouts, permissions and all existing editors."
+  }
+}

@@ -69,7 +69,9 @@ beforeEach(() => {
   mocks.api.records.mockResolvedValue({
     data: { payload: [], meta: { page: 1, total: 0, per_page: 25 } },
   });
-  mocks.api.playbooks.mockResolvedValue({ data: { payload: [] } });
+  mocks.api.playbooks.mockResolvedValue({
+    data: { payload: [], meta: { page: 1, per_page: 25, total: 0 } },
+  });
   mocks.api.savePlaybook.mockResolvedValue({ data: {} });
   mocks.api.batch.mockResolvedValue({ data: {} });
 });
@@ -218,6 +220,7 @@ describe('Complementary CS review', () => {
   it('keeps original step identities after removing a previous playbook step', async () => {
     mocks.api.playbooks.mockResolvedValue({
       data: {
+        meta: { page: 1, per_page: 25, total: 1 },
         payload: [
           {
             id: 5,
@@ -271,6 +274,7 @@ describe('Complementary CS review', () => {
     );
     mocks.api.playbooks.mockResolvedValue({
       data: {
+        meta: { page: 1, per_page: 25, total: 1 },
         payload: [
           {
             id: 5,
@@ -431,9 +435,64 @@ describe('Complementary CS review', () => {
     );
     w.unmount();
   });
+  it('requires an explicit bounded wait in the existing batch form and sends its actual review fields', async () => {
+    mocks.api.records.mockResolvedValue({
+      data: {
+        payload: [
+          {
+            id: 31,
+            assignment_id: 19,
+            customer_name: 'Native customer',
+            reason: 'Follow-up',
+            status: 'open',
+          },
+        ],
+        meta: { page: 1, total: 1, per_page: 25 },
+      },
+    });
+    const w = page('actions');
+    await flushPromises();
+    await w.get('tbody input[type="checkbox"]').setValue(true);
+    await w
+      .findAll('button')
+      .find(b => b.text() === labels.RELATIONSHIP.BATCH.replace('{count}', '1'))
+      .trigger('click');
+    const status = w.get('[data-testid="batch-status"]');
+    await status.setValue('waiting_finance');
+    const form = status.element.closest('form');
+    form.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true })
+    );
+    await flushPromises();
+    expect(mocks.api.batch).not.toHaveBeenCalled();
+    await w
+      .get('[data-testid="batch-waiting-reason"]')
+      .setValue('Waiting on invoice evidence');
+    await w
+      .get('[data-testid="batch-next-step"]')
+      .setValue('Review evidence with finance');
+    const future = new Date(Date.now() + 86_400_000).toISOString().slice(0, 16);
+    await w.get('[data-testid="batch-return-at"]').setValue(future);
+    form.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true })
+    );
+    await flushPromises();
+    expect(mocks.api.batch).toHaveBeenCalledWith(
+      '1',
+      [31],
+      expect.objectContaining({
+        status: 'waiting_finance',
+        waiting_reason: 'Waiting on invoice evidence',
+        next_step: 'Review evidence with finance',
+        return_at: new Date(future).toISOString(),
+      })
+    );
+    w.unmount();
+  });
   it('configures product-specific playbooks using native metadata references', async () => {
     mocks.api.playbooks.mockResolvedValue({
       data: {
+        meta: { page: 1, per_page: 25, total: 1 },
         payload: [
           {
             id: 5,
@@ -502,6 +561,15 @@ describe('Complementary CS review', () => {
       .find(field => field.find('option[value="waiting_finance"]').exists());
     expect(state).toBeTruthy();
     await state.setValue('waiting_finance');
+    await editor
+      .get('[data-testid="relationship-field-waiting_reason"]')
+      .setValue('Awaiting finance approval');
+    await editor
+      .get('[data-testid="relationship-field-next_step"]')
+      .setValue('Review finance result');
+    await editor
+      .get('[data-testid="relationship-field-return_at"]')
+      .setValue(new Date(Date.now() + 86_400_000).toISOString().slice(0, 16));
     await editor.get('form').trigger('submit');
     expect(editor.emitted('save')[0][0].status).toBe('waiting_finance');
     editor.unmount();

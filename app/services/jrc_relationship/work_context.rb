@@ -1,9 +1,11 @@
 class JrcRelationship::WorkContext
-  def initialize(context:, assignment:, period: nil)
+  def initialize(context:, assignment:, period: nil, source: nil, work_record: nil)
     @context = context
     @assignment = context.assignment(assignment.id)
     @period = period || (90.days.ago..Time.current)
     @customer = @assignment.customer_context(context.member)
+    @source = source
+    @work_record = work_record
   end
 
   def call
@@ -14,7 +16,9 @@ class JrcRelationship::WorkContext
     qbrs = @context.records(JrcRelationship::Qbr).where(assignment: @assignment)
     signals = JrcRelationship::CustomerSignals.new(assignment: @assignment, context: @context).call
     plans = @context.records(JrcRelationship::SuccessPlan).where(assignment: @assignment)
-    { _source_ids: signals[:_source_ids], formatting: @context.formatting, period: { from: @period.begin, to: @period.end }, health: signals[:health],
+    { _source_ids: signals[:_source_ids], formatting: @context.formatting,
+      work_owners: JrcRelationship::WorkOwnership.new(@context, @assignment).options(record: @work_record),
+      period: { from: @period.begin, to: @period.end }, health: signals[:health],
       mrr_cents: signals[:mrr_cents], finance_overdue_cents: signals[:overdue_cents],
       tickets: tickets.count, completed_activities: activities.completed.count,
       risks: risks.where.not(status: %w[retained churn no_action]).pluck(:id, :reason, :severity),
@@ -58,9 +62,29 @@ class JrcRelationship::WorkContext
     orders = @customer.orders.where(status: 'completed').order(:id).limit(100).select do |order|
       JrcRelationship::Eligibility.new(order, exception: @assignment.settings['eligibility_exception']).reason.nil?
     end
-    orders.map { |order| { type: order.class.name, id: order.id, label: order.order_number } } +
+    sources = orders.map { |order| { type: order.class.name, id: order.id, label: order.order_number } } +
       @customer.projects.where(status: 'completed').order(:id).limit(100).map do |project|
         { type: project.class.name, id: project.id, label: project.name }
       end
+    @source ? (sources + [requested_source]).uniq { |row| [row[:type], row[:id]] } : sources
+  end
+
+  def requested_source
+    id = Integer(@source.fetch(:id).to_s, 10)
+    raise ArgumentError, 'Invalid handoff source' unless id.positive?
+
+    case @source.fetch(:type)
+    when 'JrcCrm::SalesOrder'
+      order = @customer.orders.find(id)
+      reason = JrcRelationship::Eligibility.new(order, exception: @assignment.settings['eligibility_exception']).reason
+      raise ArgumentError, 'Handoff origin is not eligible' if reason
+
+      { type: order.class.name, id: order.id, label: order.order_number }
+    when 'JrcProjects::Project'
+      project = @customer.projects.where(status: 'completed').find(id)
+      { type: project.class.name, id: project.id, label: project.name }
+    else
+      raise ArgumentError, 'Unsupported handoff origin'
+    end
   end
 end

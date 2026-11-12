@@ -10,17 +10,15 @@ class JrcApprovals::Delegations
     ends_at = formal_absence.fetch(:ends_at)
     absence_authorization = formal_absence[:absence_authorization]
     JrcApprovals::Delegation.transaction do
-      version, grantor, company_id, unit_id = delegation_context(policy_version_id)
+      version, grantor = delegation_context(policy_version_id)
+      JrcApprovals::Ledger.lock!(@account.id, 'own-delegation-topology')
       step = version.definition['steps'].find { |item| item['code'] == step_code }
       validate_terms!(version, step, actions, reason, [starts_at, ends_at])
+      JrcApprovals::Ledger.lock!(@account.id, "delegations:#{version.id}:#{step_code}")
 
-      catalog_key = "#{version.policy.module_key}.#{version.policy.event_key}"
-      eligibility = JrcApprovals::Eligibility.new(account: @account, company_id: company_id, unit_id: unit_id, catalog_key: catalog_key)
-      principal = @account.account_users.find(principal_id)
-      delegate = @account.account_users.find(delegate_id)
-      raise Pundit::NotAuthorizedError unless eligibility.candidates(step).include?(principal.id) && eligibility.capable?(delegate)
-
+      principal, delegate = delegation_parties!(version, step, principal_id, delegate_id)
       validate_formal_absence!(version, step_code, principal.id, delegate.id, absence_authorization)
+      check_topology!(version, step, principal, delegate, [starts_at, ends_at])
 
       grant = JrcApprovals::Delegation.create!(account: @account, policy_version: version, grantor: grantor, principal: principal,
                                                delegate: delegate, step_code: step_code, actions: actions,
@@ -38,6 +36,26 @@ class JrcApprovals::Delegations
     [version, grantor, company_id, unit_id]
   end
   private :delegation_context
+
+  def delegation_parties!(version, step, principal_id, delegate_id)
+    company_id, unit_id = version.publication.values_at('issuer_company_id', 'business_unit_id')
+    catalog_key = "#{version.policy.module_key}.#{version.policy.event_key}"
+    eligibility = JrcApprovals::Eligibility.new(account: @account, company_id: company_id, unit_id: unit_id, catalog_key: catalog_key)
+    principal = @account.account_users.find(principal_id)
+    delegate = @account.account_users.find(delegate_id)
+    raise Pundit::NotAuthorizedError unless eligibility.candidates(step).include?(principal.id) && eligibility.capable?(delegate)
+
+    [principal, delegate]
+  end
+
+  def check_topology!(version, step, principal, delegate, period)
+    JrcApprovals::DelegationTopology.check!(
+      relation: JrcApprovals::Delegation.where(account_id: @account.id, policy_version_id: version.id, step_code: step['code'], revoked_at: nil),
+      principal_id: principal.id, delegate_id: delegate.id, period: period
+    )
+    JrcApprovals::OwnDelegations.check_scoped_topology!(@account, principal.id, delegate.id, period)
+  end
+  private :delegation_parties!, :check_topology!
 
   def audit_grant!(grant, actor, absence)
     data = { delegation_id: grant.id, principal_id: grant.principal_id, delegate_id: grant.delegate_id, reason: grant.reason }
@@ -78,6 +96,7 @@ class JrcApprovals::Delegations
       company_id, unit_id = grant.policy_version.publication.values_at('issuer_company_id', 'business_unit_id')
       actor = JrcApprovals::Authorization.new(account: @account, user: @user)
         .authorize!('policy_manage', company_id: company_id, unit_id: unit_id)
+      raise JrcApprovals::Error, 'INVALID_DELEGATION' if JrcApprovals::OwnDelegationBindings.own_id(grant)
       next grant if grant.revoked_at
 
       grant.update!(revoked_at: Time.current)

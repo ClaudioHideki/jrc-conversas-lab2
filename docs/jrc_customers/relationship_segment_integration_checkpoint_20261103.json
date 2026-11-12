@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-03",
+  "baseline": "13e6bfb6",
+  "status": "PARTIAL: code and automated gates passed; fresh build and Chrome pending",
+  "scope": [
+    "Reuses Relationship Context, AssignmentPolicy, record visibility, organizational coverage and snapshots",
+    "Published customer_segment_id is independent of legacy settings.segment_id",
+    "Same cohort for portfolio, dashboard, actions, team, drilldowns, customer options and handoffs",
+    "Tabs and detail/list navigation retain the filter; configuration screens remain separate",
+    "No change to native write/detail authorization"
+  ],
+  "gates": {
+    "backend": {
+      "report": ".codex/customer-segment-consumers-checked-backend.json",
+      "relationship_examples": 9,
+      "failures": 0,
+      "includes_native_operator_and_unit_coverage": true
+    },
+    "native_batch_regression": {
+      "report": ".codex/customer-segment-relationship-checked-backend.json",
+      "native_examples": 4,
+      "failures": 0
+    },
+    "vue": {
+      "report": ".codex/customer-segment-relationship-frontend.json",
+      "examples": 15,
+      "failures": 0,
+      "new_examples": 5,
+      "native_regression_examples": 10,
+      "kind": "mocked component tests; not real Chrome"
+    },
+    "style": {
+      "new_spec_offenses": 0,
+      "report": ".codex/customer-segment-consumers-checked-style.json",
+      "eslint_errors": 0,
+      "native_component_warnings_recorded": true,
+      "global_lint_clean": false
+    },
+    "source": ".codex/customer-segment-consumers-checked-source-verified.json"
+  },
+  "initial_failure": "Action request test used /actions; corrected to existing /records/actions. No route was invented or added.",
+  "pending": [
+    "Fresh guarded Vite build",
+    "Actual installed Chrome desktop/mobile with local database",
+    "Campaign gates and Chrome",
+    "Final C Word audit; TRR undefined"
+  ],
+  "preservation": {
+    "deleted_files": false,
+    "push": false,
+    "deploy": false,
+    "production_changes": false,
+    "external_operations": 0
+  }
+}

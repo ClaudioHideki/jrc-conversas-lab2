@@ -2,11 +2,26 @@ import { computed } from 'vue';
 import { useAccount } from 'dashboard/composables/useAccount';
 import { useMapGetter } from 'dashboard/composables/store';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 export function useCustomerMaster() {
   const { accountId, accountScopedRoute, currentAccount } = useAccount();
   const feature = useMapGetter('accounts/isFeatureEnabledonAccount');
   const role = useMapGetter('getCurrentRole');
   const user = useMapGetter('getCurrentUser');
+  const identity = computed(() => {
+    const membership = user.value?.accounts?.find(
+      item => Number(item.id) === accountId.value
+    );
+    // Activity/presence refreshes must not discard a form. All other membership
+    // fields, including future access scopes, still invalidate its context.
+    const access = accountMembershipAccess(membership);
+    return JSON.stringify([
+      accountId.value,
+      user.value?.id,
+      role.value,
+      access,
+    ]);
+  });
   const enabled = computed(() =>
     Boolean(feature.value(accountId.value, FEATURE_FLAGS.JRC_CUSTOMER_MASTER))
   );
@@ -38,5 +53,13 @@ export function useCustomerMaster() {
       return parsed.toLocaleString('pt-BR');
     }
   };
-  return { accountId, enabled, canAccess, canAdmin, accountScopedRoute, date };
+  return {
+    accountId,
+    identity,
+    enabled,
+    canAccess,
+    canAdmin,
+    accountScopedRoute,
+    date,
+  };
 }

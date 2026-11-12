@@ -9,6 +9,9 @@ module Api
           around_action :use_account_timezone
 
           rescue_from ActiveRecord::StaleObjectError, with: :handle_stale_object_conflict
+          rescue_from JrcBackoffice::Signatures::DeliveryError do |exception|
+            render json: { error: exception.code, code: exception.code }, status: :conflict
+          end
           rescue_from JrcApprovals::Error do |exception|
             render json: { error: exception.code, code: exception.code }, status: :conflict
           end
@@ -18,6 +21,10 @@ module Api
 
           rescue_from JrcCustomers::LegacyCompanyMapper::Conflict, JrcCustomers::LeadContactLinker::Conflict do |exception|
             render json: { error: exception.message, errors: [exception.message], code: 'REVIEW_REQUIRED' }, status: :conflict
+          end
+
+          rescue_from JrcBackoffice::Requirements::Blocked do |exception|
+            render json: { code: 'BACKOFFICE_REQUIREMENTS_PENDING', message: exception.message }, status: :unprocessable_entity
           end
 
           private
@@ -43,6 +50,14 @@ module Api
           def visible_to_current_user(relation, owner_column: :owner_id)
             legacy_visible = crm_admin? ? relation : relation.where(owner_column => Current.user.id)
             JrcCrm::OrganizationalVisibility.new(account: crm_scope, user: Current.user, relation: legacy_visible).call
+          end
+
+          def customer_segment_scope(relation, module_key: 'crm')
+            filter = JrcCustomers::ModuleSegmentFilter.new(account: crm_scope, actor: Current.user,
+                                                           module_key: module_key, segment_id: params[:customer_segment_id])
+            columns = relation.klass.column_names
+            filter.call(relation, company_column: columns.include?('company_id') ? :company_id : nil,
+                                  contact_column: columns.include?('contact_id') ? :contact_id : nil)
           end
 
           def ensure_crm_admin!

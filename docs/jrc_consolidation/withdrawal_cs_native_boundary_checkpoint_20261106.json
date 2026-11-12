@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "5cd0e82d49b6a04c3712fe5668242445057ae0d9",
+  "status": "User-confirmed CS-only responsibility boundary implemented for active plan/action/risk sources; formal handoff origin expansion follows",
+  "business_decision": "User confirmed unrelated projects,tickets,tasks remain with analyst in original modules. Linked pending CS obligations still require effective native treatment.",
+  "implementation": [
+    "Restrict only withdrawal readiness and its existing paginated native-source dialog, not global project/ticket/task scopes or ownership. Preserve other module access, records, memberships and actual owners.",
+    "Recognize active/paused success-plan direct project, goals and milestones; parent projects of linked tasks and tasks of linked projects. Recognize active CS Action/Risk source evidence and native source references, including post-ticket provenance. Completed CS history does not force new native transfers.",
+    "Check both relevant CS-origin visibility and original native source grants; hidden origin/source denies before totals, not a fabricated zero. Only account-bound CS origins participate. Fresh HMAC review rejects a new linked dependency added after an earlier ready review.",
+    "Existing list/readiness payloads and native editors remain unchanged. Explain clearly that unrelated native work stays in original modules. Existing negative permission fixtures now contain real CS links, preserving their denial assertions rather than weakening tests."
+  ],
+  "tests_non_additive": {
+    "native01": "7/0 initial real PostgreSQL cases: actual eligibility withdrawal preserves full unrelated Project/Task/Ticket attributes and native access; CS access denied afterward.",
+    "regression02": "34/0:11link cases,9native origin API,5readiness,9withdrawal. Includes original unit/operator/tenant/private project/revocation, pagination and real source navigation.",
+    "static": "New linker/spec and shared readiness/inventory and updated request fixtures0RuboCop offenses.",
+    "frontend": "Only source en text changed; component behavior unchanged. Existing source UI tests retained; no fresh built Chrome acceptance claimed.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "start": 9532116992,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/services/jrc_relationship/withdrawal_native_links_spec.rb": "9bd94eb02ef9938b30ccadbe50853034e63c5a10374e4cb894caaed30875c3c3",
+      "spec/requests/api/v1/accounts/relationship/analyst_native_responsibilities_spec.rb": "df6932907c1b597c30a8fb02f71d018e3755e2f31f200a5b8d0b215ebe176993",
+      "spec/requests/api/v1/accounts/relationship/withdrawal_readiness_spec.rb": "75dffdbaa32c5a2bb63217b8db1f27b3515e97b92b464e7dc915fae84ccf8032",
+      "spec/requests/api/v1/accounts/relationship/analyst_withdrawal_spec.rb": "ff9a7b96d01789065a47185df0bc4b036fa984ca20ce9e52084f21de3b55f8c7"
+    },
+    "minimum": 8837087232,
+    "exit_code": 0,
+    "end": 8857255936
+  },
+  "disk_final_bytes": 8004919296,
+  "remaining": [
+    "Formal pending/accepted HandoffCase origins, including canonical order-linked implementation projects, are being added next. This checkpoint does not claim every possible CS origin is reconciled.",
+    "Representative scale of the new linked selector and current compiled Chrome desktop/mobile/light/dark are still pending.",
+    "TRR undefined; portfolio-less documents deferred; real external provider/scanner/channel acceptance unavailable under current restrictions."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,production/external operation,5379 change or container restart."
+}

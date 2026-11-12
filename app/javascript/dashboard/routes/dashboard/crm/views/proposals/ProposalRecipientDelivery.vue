@@ -1,5 +1,6 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
+import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -25,8 +26,16 @@ const composer = ref(null);
 const contactDialog = ref(null);
 const working = ref(false);
 let attempt = null;
+let disposed = false;
 const identity = () =>
-  `${route.params.accountId}:${store.getters.getCurrentUserID}:${props.proposalId}`;
+  JSON.stringify([
+    route.params.accountId,
+    store.getters.getCurrentUserID,
+    store.getters.getCurrentRole,
+    store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
+    props.proposalId,
+  ]);
+const current = startedFor => !disposed && startedFor === identity();
 const canCreateContact = computed(() =>
   checkPermissions(['administrator', 'agent', 'contact_manage'])
 );
@@ -77,21 +86,29 @@ const submitDelivery = async ({ payload }) => {
       delivery,
       attempt.key
     );
-    if (startedFor !== identity()) return false;
+    if (!current(startedFor)) return false;
     attempt = null;
     useAlert(t('CRM.PROPOSAL_RECIPIENT.SUCCESS'));
     return data;
   } catch (error) {
-    if (startedFor === identity())
+    if (current(startedFor))
       useAlert(
         error.response?.data?.errors?.join(', ') ||
           t('CRM.PROPOSAL_RECIPIENT.ERROR')
       );
     return false;
   } finally {
-    working.value = false;
+    if (current(startedFor)) working.value = false;
   }
 };
+watch(identity, () => {
+  attempt = null;
+  working.value = false;
+});
+onBeforeUnmount(() => {
+  disposed = true;
+  attempt = null;
+});
 </script>
 
 <template>

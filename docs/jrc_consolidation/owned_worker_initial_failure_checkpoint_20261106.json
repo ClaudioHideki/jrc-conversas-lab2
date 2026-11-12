@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "581d8557f96610d0059bb21d1a16f22980804110",
+  "status": "Real worker gate FAILED at startup verification;no native business delivery passed and no C-G closure. Preserve checkpoint before PABX changes.",
+  "implementation": "Guarded manual integration harness and host preparation script;new schema-only database,exact empty Redis15claim,synthetic-only data,HTTP guard and owned-child graceful shutdown. No app deployment or normal-spec skip/mocks.",
+  "actual_evidence": {
+    "artifact": ".codex/g-worker-20261106/db4184c50703",
+    "database": "jrc_g_worker_20261106_db4184c50703",
+    "schema_bytes": 1293950,
+    "migration_metadata_bytes": 5874,
+    "business_data_copied": false,
+    "result": "failed",
+    "phase": "worker_boot",
+    "completed_business_deliveries": 0,
+    "queued_reviews": "Read-only SQL confirms reviews1/2remain running,0applied items each.",
+    "worker_network": "Shutdown artifact confirms0HTTPattempts;worker exited and connections are absent.",
+    "original_four_containers": "All original2026-11-04StartedAt timestamps unchanged.",
+    "static": "All3Rubyharnessfiles0offenses after fixture extraction;host Python syntax validated. This is not runtime success."
+  },
+  "real_findings": [
+    {
+      "kind": "test_harness",
+      "cause": "SidekiqAlive adds its native health queue after startup. The test incorrectly required exactly one registered queue and its receipt middleware rejected the native health worker. Fix by explicitly allowing only this process native health queue/class without counting it as JRC delivery."
+    },
+    {
+      "kind": "application_bug",
+      "cause": "Pabx::ScheduleJob#enqueue(integration) overrides ActiveJob#enqueue(options). Real sidekiq-cron perform_later supplies an options Hash, producing NoMethodError Hash#with_lock. Existing tests exercise only the custom direct call,not ActiveJob enqueue."
+    }
+  ],
+  "preservation": {
+    "no_cleanup": true,
+    "no_build": true,
+    "no_migrations_on_existing_databases": true,
+    "no_original_server_or_container_change": true,
+    "own_database_and_artifacts_retained": true,
+    "no_push_or_external_operation": true,
+    "initial_free_bytes": 6783201280,
+    "minimum_free_bytes": 6783201280,
+    "final_free_bytes": 6767509504
+  },
+  "next": [
+    "Add failing ActiveJob scheduling regression,rename the PABX integration-specific helper and update its known controller/direct-test callers while retaining HTTP permissions,locks,interval and sync behavior.",
+    "Fix the worker harness native health handling;preserve every original artifact.",
+    "Resume the exact untouched synthetic setup only after verifying0applied items,expected actors/group/record scope and the Redis ownership claim;write a separate attempt directory. Do not drop data or pretend the first gate passed.",
+    "Continue other safe C-G work if a real external/business dependency blocks this gate."
+  ]
+}

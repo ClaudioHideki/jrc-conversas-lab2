@@ -1,0 +1,99 @@
+{
+  "date": "2026-11-05",
+  "stage": "F2b conservative operational-alert cooldown; G native regression",
+  "parent_checkpoint": "b678452f4c294ac89a62cec7e35702d0efe6fee1",
+  "classification": "Concluído e testado for the bounded cooldown engine/configuration; implemented but not visually homologated; full F2 and C-G remain partial",
+  "implemented": [
+    "Opt-in versioned cooldown0..8760 hours, default0 preserves prior admission behavior and native daily/source idempotency.",
+    "Stable source/health cause digest; only exact completed/dismissed causes created by this engine qualify. Historical rows without a cause proof are not rewritten or retroactively suppressed.",
+    "Active actions continue updating their priority/evidence and preserve manual priority. Changed sources or actual measurements are evaluated normally.",
+    "Rechecks current native account membership/module/write/assignment scope and authentication eligibility before suppression/audit; cross-account and cross-customer suppression denied.",
+    "Risk evaluation remains active. Suppressed repeated tasks do not execute their dependent playbook through any of the7 Processor paths or the native critical-ticket SignalJob path.",
+    "Native assignment locks retained in both real callers; deduplicated native audit contains the closed-action reference, policy hours and deadline without raw customer source data.",
+    "Configuration UI accepts typed numeric hours, zero, bounds and native permission/versioned API; team scopes continue showing only supported distribution settings."
+  ],
+  "files": [
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/distributionConfiguration.spec.js",
+    "app/jobs/jrc_relationship/signal_job.rb",
+    "app/models/jrc_relationship/configuration.rb",
+    "app/services/jrc_relationship/automatic_action_cooldown.rb",
+    "app/services/jrc_relationship/health_temporal_policy.rb",
+    "app/services/jrc_relationship/processor.rb",
+    "spec/requests/api/v1/accounts/relationship/health_stability_spec.rb",
+    "spec/services/jrc_relationship/automatic_action_cooldown_spec.rb",
+    "spec/services/jrc_relationship/health_temporal_policy_spec.rb"
+  ],
+  "sha256": {
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "570b2b7572dcc8a850a4dd55da818ea7cc691aee256a7cfc3358b7dd1436d556",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue": "778fa779e13360d12d6ce24bcaf70a16b9fd9316ffff252b891c163d694502b3",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/distributionConfiguration.spec.js": "b7abb945dd4542312f5b483bcb6480a9862cc6910951dc3a664917e79ccf08fb",
+    "app/jobs/jrc_relationship/signal_job.rb": "c3d807471cf6b3e735c3dc02ed62b1a5830006d7d1196487497a2660e6a27762",
+    "app/models/jrc_relationship/configuration.rb": "7d3bd1134c89b91e7d4577f188cd1714de6f83e20f3e944ea8431bec558c08ac",
+    "app/services/jrc_relationship/automatic_action_cooldown.rb": "b7127692aa3beef53e05b502ded508563bb19c6e7e3557e3e5a8929c4d15f662",
+    "app/services/jrc_relationship/health_temporal_policy.rb": "b3d3fc23d77e02ec82eb383d29d567a9fc553bfc90c7fbf84f759cf6d90b3fa2",
+    "app/services/jrc_relationship/processor.rb": "2c370180ce42d1f345e0dca4bc03c6d286836d19e4652d11fa9d170c0f770e55",
+    "spec/requests/api/v1/accounts/relationship/health_stability_spec.rb": "4baf8daa330ffd1d6ca13ba1b66234d4c5c004a18cc7bd312e6447cafb3f2d4e",
+    "spec/services/jrc_relationship/automatic_action_cooldown_spec.rb": "386fbade762911d4a24e64b094811d418ed0a9de4e73790fc20b866d586f6622",
+    "spec/services/jrc_relationship/health_temporal_policy_spec.rb": "3e98f1934701e9705aff8407b7e1333e2fd497d1265fafd6c27be87f477b8e65"
+  },
+  "validation": {
+    "backend": {
+      "run": "f2cooldownfinal05",
+      "examples": 38,
+      "failures": 0,
+      "database": "jrc_rel_v2_candidate_test",
+      "includes": "10 cooldown cases including real native ticket lifecycle publication/resolution and SignalJob;2 temporal policy;5 versioned configuration API;21 pre-existing CS/CRM/Service Desk lifecycle regressions."
+    },
+    "vue": {
+      "run": "f2cooldownui01",
+      "tests": 3,
+      "failures": 0
+    },
+    "rubocop": {
+      "run": "f2cooldownlint04",
+      "new_services_and_specs": 5,
+      "offenses": 0
+    },
+    "eslint": {
+      "run": "f2cooldowneslint01",
+      "files": 2,
+      "errors": 0,
+      "warnings": 35
+    },
+    "failed_attempts_preserved": [
+      "f2cooldown01: expected exact expiry but Rails time travel truncated microseconds; no engine boundary relaxed.",
+      "f2cooldown02: unsupported ActiveSupport microsecond helper in fixture; replaced with exact Rational subtraction and with_usec clock.21 legacy lifecycle cases passed.",
+      "f2cooldown03: native Ticket initial-state validation correctly refused an already-resolved factory; fixture changed to actual lifecycle publication/resolution, no production validation bypass.",
+      "f2cooldown04: all17 directed cases passed; final38 adds current regression coverage."
+    ],
+    "not_claimed": [
+      "No current-build Chrome/desktop/mobile/light-dark acceptance.",
+      "No production CI, full build, external model/provider/channel or DocuSign acceptance.",
+      "No repository-wide clean lint claim; inherited complexity in large Processor and other native classes is not hidden."
+    ]
+  },
+  "disk_bytes": {
+    "initial_test_start": 9954197504,
+    "final_run_start": 9947471872,
+    "final_run_minimum": 9947471872,
+    "final": 9945837568,
+    "mandatory_stop": 750000000
+  },
+  "word_status": {
+    "implemented_validated": "Source-bound cooldown for native health/operational monitoring tasks and their dependent automatic follow-ups.",
+    "partial": [
+      "General aggregation, global task ceilings, priority-policy completeness and all automations remain open.",
+      "Survey delivery/follow-up rules and independently triggered playbooks retain their existing separate policies; no universal cooldown claim.",
+      "Safe analyst removal/all responsibility destinations, weighted/hour capacity and approved scope transfers remain open."
+    ]
+  },
+  "preservation": {
+    "evidence": ".codex/d9-notifications-20261104/round-runtime-preservation-final.json",
+    "frozen5379_entry_unchanged": true,
+    "unchanged_containers": 4,
+    "preserved_checkpoint_ancestors": 10,
+    "no_build_push_cleanup_deploy_external_ops_or_schema_change": true
+  }
+}

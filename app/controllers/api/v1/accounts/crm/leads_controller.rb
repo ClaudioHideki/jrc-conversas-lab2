@@ -7,6 +7,7 @@ module Api
 
           def index
             leads = visible_to_current_user(crm_scope.jrc_crm_leads)
+            leads = customer_segment_scope(leads)
             leads = leads.where(status: normalized_filter_status) if params[:status].present?
             leads = leads.where(owner_id: params[:owner_id]) if params[:owner_id].present?
             leads = leads.where(conversation_id: params[:conversation_id]) if params[:conversation_id].present?

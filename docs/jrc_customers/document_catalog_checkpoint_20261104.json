@@ -1,0 +1,213 @@
+{
+  "status": "Increment validated by targeted automated gates; new compilation/Chrome and complete Stage C still pending",
+  "base_checkpoint": "8ab2ec95",
+  "branch": "codex/relacionamento-v2-20261101",
+  "stage_C_complete": false,
+  "changes": [
+    "Required-document catalog reuses existing scoped Configuration rules, version snapshots and configure permission",
+    "Explicit requirement_key on native CustomerDocument; no inferred legacy links; one active evidence per requirement",
+    "Projection selects only latest versions and uses native scope, expiry and scanner attestation; never legal approval",
+    "Metadata/upload forms preserve document identity and immutable versions; denied reads clear catalog data",
+    "Context configuration fallback corrected to product, segment, company, unit, account; global calls remain account-level",
+    "Published-Flow test fixture supplies reserved HTTPS origin required by unchanged OwnershipGuard; no runtime origin or guard bypass"
+  ],
+  "files": [
+    "app/controllers/api/v1/accounts/relationship/documents_controller.rb",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationCatalog.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentMetadataDialog.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentMetadataDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentRequirementField.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentRequirementsPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentUploadCatalog.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentUploadDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/RequiredDocumentsForm.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/RequiredDocumentsForm.vue",
+    "app/models/jrc_relationship/configuration.rb",
+    "app/models/jrc_relationship/customer_document.rb",
+    "app/services/jrc_relationship/context.rb",
+    "app/services/jrc_relationship/customer_documents.rb",
+    "app/services/jrc_relationship/document_metadata.rb",
+    "app/services/jrc_relationship/document_requirements.rb",
+    "db/migrate/20261104130000_add_relationship_document_requirement.rb",
+    "db/schema.rb",
+    "docs/jrc_customers/document_catalog_checkpoint_20261104.json",
+    "docs/jrc_customers/document_catalog_pre_context_checkpoint_20261104.json",
+    "docs/jrc_customers/manual_b1_b4_20261104.html",
+    "docs/jrc_customers/stage_c_word_audit_20261104.json",
+    "spec/requests/api/v1/accounts/relationship/document_requirements_spec.rb",
+    "spec/services/jrc_relationship/context_configuration_scope_selection_spec.rb",
+    "spec/support/playbook_flow_context.rb"
+  ],
+  "tests": {
+    "catalog_initial_review": {
+      "examples": 36,
+      "failures": 0,
+      "report": ".codex/doc-catalog-20261104/backend-reviewed.json"
+    },
+    "expanded_regression": {
+      "examples": 57,
+      "failures": 1,
+      "report": ".codex/doc-catalog-20261104/catalog-precedence-regression.json",
+      "historical_failure": "Playbooks run stayed running because test container FRONTEND_URL used http and the native guard requires https"
+    },
+    "baseline_check": {
+      "examples": 1,
+      "failures": 1,
+      "report": ".codex/doc-catalog-20261104/playbook-baseline-comparison.json",
+      "purpose": "Reproduced with original Context, before shared configuration correction"
+    },
+    "affected_recheck": {
+      "examples": 3,
+      "failures": 0,
+      "report": ".codex/doc-catalog-20261104/playbook-native-origin.json",
+      "purpose": "Actual native Playbooks/guard with corrected test-only HTTPS prerequisite"
+    },
+    "vue": {
+      "examples": 15,
+      "failures": 0,
+      "report": ".codex/doc-catalog-20261104/vue-final.json",
+      "limitation": "API mocks, not browser homologation"
+    },
+    "lint": {
+      "eslint_errors": 0,
+      "eslint_warnings": 99,
+      "ruby_new_or_changed_catalog_files": "No offenses",
+      "context_baseline_offenses": 13,
+      "context_current_offenses": 13,
+      "context_new_offenses": 0,
+      "no_rules_disabled": true
+    },
+    "additional_continuation": {
+      "examples": 30,
+      "failures": 0,
+      "report": ".codex/doc-catalog-20261104/continuation-origin-regression.json",
+      "duration_seconds": 342.891001382
+    },
+    "complementary_coverage": {
+      "unique_cases": 87,
+      "explanation": "57 distinct expanded cases: 56 passed in expanded run and all three Playbooks cases passed after test-prerequisite correction. Plus 30 distinct continuation cases. This is complementary execution evidence, not a single all-green 87-case run."
+    }
+  },
+  "migrations": {
+    "versions": [
+      "20261104120000",
+      "20261104130000"
+    ],
+    "applied_only_to": "jrc_rel_v2_candidate_test",
+    "ui_database_changed": false,
+    "schema": "Only exact generated table/FK/index deltas imported; unrelated schema drift preserved"
+  },
+  "runtime": {
+    "status": "passed",
+    "verification": "Read-only server/assets integrity; not browser functional QA",
+    "url": "http://127.0.0.1:5379/app/login",
+    "http_status": 200,
+    "entry": "/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js",
+    "entry_status": 200,
+    "sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+    "compiled_product_sha": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+    "new_documentary_increment_served": false,
+    "new_server": false,
+    "new_build": false,
+    "free_bytes": 10157850624
+  },
+  "manual_homologation": "docs/jrc_customers/manual_b1_b4_20261104.html",
+  "remaining": [
+    "Current documentary increment not compiled or browser validated; user instructed no repeat build",
+    "Protected visual history for metadata audit remains pending",
+    "Native representatives/signers and authority integration require further permission-scoped audit; no powers inferred by file status",
+    "Real clean antivirus path not homologated",
+    "B1-B4 manual desktop/mobile light/dark, including positive fixtures where available",
+    "Representative scale not proven by these small fixtures",
+    "TRR remains undefined",
+    "D/E/F/G not declared complete"
+  ],
+  "restrictions": {
+    "push": false,
+    "ghcr": false,
+    "production": false,
+    "deploy": false,
+    "cleanup": false,
+    "new_ui_server": false,
+    "new_build": false
+  },
+  "disk_current": 4207419392,
+  "disk": {
+    "initial_bytes": 10293903360,
+    "minimum_bytes": 4206379008,
+    "final_bytes": 4206354432,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_test_stop_bytes": 900000000,
+    "stopped_by_guard": false,
+    "late_free_space_drop_cause": "Not established; no inference that another process or this test caused it",
+    "cleanup": false,
+    "resources": [
+      {
+        "run": "catalog-initial",
+        "start": 10260492288,
+        "minimum": 10223837184,
+        "end": 10236776448,
+        "status": "failed"
+      },
+      {
+        "run": "catalog-reviewed",
+        "start": 10280550400,
+        "minimum": 10280325120,
+        "end": 10280329216,
+        "status": "passed"
+      },
+      {
+        "run": "catalog-context-final",
+        "start": 10279768064,
+        "minimum": 10219614208,
+        "end": 10268135424,
+        "status": "failed"
+      },
+      {
+        "run": "catalog-precedence-regression",
+        "start": 10162696192,
+        "minimum": 10138255360,
+        "end": 10157563904,
+        "status": "failed"
+      },
+      {
+        "run": "playbook-baseline-comparison",
+        "start": 10139144192,
+        "minimum": 10139144192,
+        "end": 10158891008,
+        "status": "failed"
+      },
+      {
+        "run": "playbook-native-origin",
+        "start": 10156060672,
+        "minimum": 10155986944,
+        "end": 10156433408,
+        "status": "passed"
+      },
+      {
+        "run": "continuation-origin-regression",
+        "start": 10157142016,
+        "minimum": 4206379008,
+        "end": 4226359296,
+        "status": "passed"
+      }
+    ]
+  },
+  "preserved_checkpoints": {
+    "a1fef624": true,
+    "d28eebd8": true,
+    "9bb8d2ec": true,
+    "3390725e": true,
+    "07a9e400fa8394ddc49645e8c782c59bc3a2433d": true,
+    "4d4a6de3": true,
+    "4631b79e": true,
+    "8ab2ec95": true
+  },
+  "native_configuration_impact": "Only assignments without a product/segment configuration change: an explicit company/unit configuration now wins over the account fallback. Health and operational rules may therefore use their already-configured scoped values. No permissions changed and no live environment updated.",
+  "next": "Run manual B1-B4 against the existing build; keep new source unserved until a future permitted compilation. Continue protected metadata history and authority audit incrementally; Stage C remains open.",
+  "git_hooks": "Stock hook entry .husky/_/husky.sh is absent; local commits used only command-scoped core.hooksPath=.codex/git-hooks after explicit checks. No global hooks changed."
+}

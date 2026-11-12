@@ -1,3 +1,4 @@
+/* global axios */
 import CacheEnabledApiClient from './CacheEnabledApiClient';
 
 class LabelsAPI extends CacheEnabledApiClient {
@@ -8,6 +9,10 @@ class LabelsAPI extends CacheEnabledApiClient {
   // eslint-disable-next-line class-methods-use-this
   get cacheModelName() {
     return 'label';
+  }
+
+  getForAccount(accountId, options = {}) {
+    return axios.get(this.urlForAccount(accountId), options);
   }
 }
 

@@ -1,0 +1,31 @@
+{
+  "utc": "2026-11-10T17:03:46.745729+00:00",
+  "status": "Candidate changes awaiting native validation; not accepted",
+  "preservation_checkpoint_before_product_change": "ac7ffa96",
+  "product_fix": {
+    "files": [
+      "app/services/jrc_backoffice/documents.rb",
+      "app/jobs/jrc_backoffice/document_preanalysis_job.rb"
+    ],
+    "confirmed_cause": "System technical job invoked interactive ContractAccess with nil actor",
+    "behavior": "Technical projection rechecks the scoped current version, latest analysis, active tenant/feature, scan and exact bytes; no human decision is created. Terminal requests retain scans without operational rewrite. Interactive commands keep native user authorization.",
+    "new_regressions": "Interactive analysis invocation denied; canceled request bytes may be scanned but no parse/operational mutation occurs"
+  },
+  "native_test_reconciliation": {
+    "approved_rule_source": "REGRAS_APROVADAS_20261109.txt, lines 215 and 268; SHA256 eed04fe648e110c57fbd981a556775973f0e8eea43b3e8ca859c70737246146d",
+    "adjustments": "Retain authorized financial adjustment and route to configured next authority, with no fabricated approval; frozen snapshots, audited route and idempotency asserted",
+    "migrations": "Six historical extension/rollback specs now have exclusive disposable service lanes. The old stack is exercised below empty newer signature dependents only inside a PostgreSQL transaction that is rolled back to the full current schema. No published migration or source ledger is rewritten.",
+    "concurrency": "Shared opt-in concurrency contexts are assigned to jrc_rel_sd_candidate_test instead of being skipped",
+    "scanner": "Owned /run/jrc-ag-ci-av test socket directory; production socket path restriction preserved; simulated daemon is not ClamAV acceptance",
+    "remaining_native_failures": "Latest catalog/restore diagnostics and remaining regression causes still require execution; no success inferred"
+  },
+  "test_plan": "336 native spec source paths remain covered without omissions; isolated migration lanes are explicit in plan output",
+  "frontend_last_confirmed": {
+    "sha": "38f483b556c900de53208988a5b000eb97c336fb",
+    "examples": 2386,
+    "failures": 0,
+    "pending": 0,
+    "browser": false
+  },
+  "no_build_or_publication": true
+}

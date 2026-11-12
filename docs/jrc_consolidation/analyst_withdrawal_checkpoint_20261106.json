@@ -1,0 +1,169 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "195d388d751b7de5cfac48065f08e335a2dfb600",
+  "status": "Governed Relationship-only withdrawal implemented and locally tested; not full F1 or C-G closure",
+  "business_decision": "User explicitly selected Relationship eligibility only; preserve other accesses and AccountUser membership.",
+  "implementation": [
+    "Nullable account-scoped AccountUser.jrc_relationship_withdrawn_at; no global deletion, role/team/inbox/availability change or historical ownership rewrite. Native ModulePolicy rechecks eligibility on each use, including held Context objects.",
+    "Final action uses fresh native BatchReviewAuthority grants, existing account configuration transaction lock, target membership FOR UPDATE NOWAIT, current HMAC readiness, mandatory bounded reason and a new native audit event without changing prior events. Self-withdrawal refused; unchanged successful retry returns the same timestamp without duplicate audit.",
+    "Root allocation admission, active work reactivation and new nested responsibility ownership serialize on the same native lock and refuse withdrawn owners even without configured capacity. Historical unchanged references survive. Shared survey authorship remains independent.",
+    "Readiness covers active survey execution rules under existing legacy admin and SurveyModelAccess source/unit grants. Native versioned policy deactivation/reassignment is required; reactivation cannot bind a withdrawn executor. Old rule versions remain intact.",
+    "UI offers the final action only with explicit current server permission, scope acknowledgement and reason. Busy/late/identity/403 cases protected;409 preserves the draft and requires explicit refresh. No automatic retry or simulated success.",
+    "Readonly preview refuses withdrawn destinations before creating an executable review. Other native authorization/capacity/approval policies remain required."
+  ],
+  "tests_non_additive": {
+    "baseline01": "1/1 failed because route absent; native missing-route output retained locally only.",
+    "native02": "24/0 (6 initial withdrawal,5 readiness,4 nested,9 ownership).",
+    "native03": "22/0 (5 eligibility,7 withdrawal,10 complete transfer).",
+    "final04": "28total/1failed:27passed including13 shared survey regressions; new rule fixture lacked native required:true, fixed without relaxing validation.",
+    "concurrency05": "16total/1failed:15passed including actual separate-connection lock/admission denial; rule test reused memoized old digest and correctly received409.",
+    "directed06": "2/0 actual concurrency plus fresh review after policy deactivation; confirmed executed count2.",
+    "rule07": "1/0 final native invalid-executor regression and governed rule deactivation/withdrawal.",
+    "vue02": "12/0 dialog+team source tests; initial UI01 did not run due sandbox EPERM spawning esbuild, subsequently rerun with execution permission.",
+    "vue03": "8/0 final dialog including duplicate submit, late account response and403 clearing; overlaps prior dialog6, not additive.",
+    "new_ruby": "0offenses after correcting new static diagnostics; one earlier lint safely aborted on concurrent host modification and did not overwrite work.",
+    "shared_ruby": "No added offenses: Dashboard3,Record0,ModulePolicy1,CapacityGuard0,DistributionPreview0,Readiness0,SurveyRule1,Routes0.",
+    "eslint": "API0->0;Dialog2->2 pre-existing dynamic i18n warnings;spec0. No added diagnostics.",
+    "chrome": "Not performed on new source; no-build/no5379-change restriction retained. Vue mocks are not Chrome acceptance."
+  },
+  "migration": {
+    "version": 20261106100000,
+    "database": "jrc_rel_v2_candidate_test",
+    "host": "jrc-rel-v2-pg-20261101",
+    "applied": true,
+    "environment_guard": "test,exact database andhost,only one pending version",
+    "server5379_database_modified": false,
+    "host_schema_dumped": false,
+    "note": "Tracked schema already predates earlier additive dossier migrations; reconcile separately from the verified owned schema, without changing server/database."
+  },
+  "resources": {
+    "analyst-withdrawal-native02": {
+      "start": 10634829824,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/analyst_withdrawal_spec.rb": "2d94ec22ea96dea6f0ee9960ee47191b643c9eaf8031c4ff27f1728a4d5adcd7",
+        "spec/requests/api/v1/accounts/relationship/withdrawal_readiness_spec.rb": "75dffdbaa32c5a2bb63217b8db1f27b3515e97b92b464e7dc915fae84ccf8032",
+        "spec/requests/api/v1/accounts/relationship/withdrawal_nested_commitments_spec.rb": "0b11221a7ca40648cd115743f9caede179462be05d442ac4757e84ae3d0bfb47",
+        "spec/requests/api/v1/accounts/relationship/manual_work_ownership_spec.rb": "c39da13c6f8956ae93420fbf088bba3c05d36086751847b8cc8e868546a7ed2b"
+      },
+      "minimum": 10580590592,
+      "exit_code": 0,
+      "end": 10600472576
+    },
+    "analyst-eligibility-native03": {
+      "start": 9994395648,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/analyst_eligibility_spec.rb": "af65a0356ebc5959473314bdcfc6bd2493b1fbc28f0859d9051ddc7b12f456a4",
+        "spec/requests/api/v1/accounts/relationship/analyst_withdrawal_spec.rb": "5d2332ddd3b27d71d2a979f4b13d3caadaa9f5694daa796dde1384dfe0cafa29",
+        "spec/services/jrc_relationship/responsibility_transfer_spec.rb": "a7b48889e92d20eca912e2812cb8eb062527acb26d6d955dd18b9e0b4f2f221a"
+      },
+      "minimum": 9792724992,
+      "exit_code": 0,
+      "end": 9792720896
+    },
+    "analyst-withdrawal-final04": {
+      "start": 9696600064,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/analyst_eligibility_spec.rb": "674fb6007ccd6afc87d4f5ebca4b16bdece1179de0832722075e7ba5bea68d57",
+        "spec/requests/api/v1/accounts/relationship/analyst_withdrawal_spec.rb": "1305271e793816bbf8e218e86d3a394babfc07a7c770c304ac64766b052bd935",
+        "spec/services/jrc_relationship/survey_engine_shared_surveys_spec.rb": "fb40ca35a1049a10195905a60f08461a6be94d3e788a0c04a29bfb64dee5e4a6"
+      },
+      "minimum": 9676222464,
+      "exit_code": 1,
+      "end": 9696972800
+    },
+    "analyst-withdrawal-concurrency05": {
+      "start": 9316884480,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/analyst_withdrawal_concurrency_spec.rb": "f2f941bd371dfbaa9c2f30576598faf5097b302abf77e76dfe2dc32d756f6da5",
+        "spec/requests/api/v1/accounts/relationship/analyst_withdrawal_spec.rb": "63c379ddd880dc0c14302b399cbdb308726e2dc8f81349b174f6a5fce7f84d7e",
+        "spec/services/jrc_relationship/analyst_eligibility_spec.rb": "4d5d85f706c07fc0115bbc4bedbe0b4bf10c763d00c69404d791c64e34600f74"
+      },
+      "minimum": 9257242624,
+      "exit_code": 1,
+      "end": 9344872448
+    },
+    "analyst-withdrawal-directed06": {
+      "start": 9695256576,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/analyst_withdrawal_concurrency_spec.rb": "8eef16ccd214b95f701eef558d7ff9467ed09be1302cddb5983e323ee7880e08",
+        "spec/requests/api/v1/accounts/relationship/analyst_withdrawal_spec.rb": "4c6e0a2a5036da26e1721db81f638f9af1c20e5e569000630cfe7958aafa0478"
+      },
+      "minimum": 9675120640,
+      "exit_code": 0,
+      "end": 9695432704
+    },
+    "analyst-withdrawal-rule07": {
+      "start": 9694109696,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/analyst_withdrawal_spec.rb": "98e10a415223b15f7ca99bde4c6253f490eb57dc0a525000179fc55fb5eb1bb2"
+      },
+      "minimum": 9694027776,
+      "exit_code": 0,
+      "end": 9660473344
+    }
+  },
+  "vue_resources": {
+    "analystwithdrawalui02": {
+      "status": "passed",
+      "free_start": 10600382464,
+      "minimum_free": 10256023552,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 24528,
+      "exit_code": 0,
+      "free_end": 10296791040
+    },
+    "analystwithdrawalui03": {
+      "status": "passed",
+      "free_start": 9698299904,
+      "minimum_free": 9658888192,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 9320,
+      "exit_code": 0,
+      "free_end": 9695322112
+    }
+  },
+  "retained_synthetic_concurrency_accounts": [
+    "19219",
+    "19237"
+  ],
+  "disk_final_bytes": 9625010176,
+  "runtime_preservation": {
+    "listener": "127.0.0.1:5379 PID6464 unchanged",
+    "containers": "All four running with exact original2026-11-04 StartedAt values; no restart/reconfiguration."
+  },
+  "remaining": [
+    "Fresh desktop/mobile/light/dark acceptance still needs authorized compilation of current source and isolated application refresh.",
+    "Controlled reversal of module eligibility must remain a new audited operation; no restoration of old tasks/cadences/automation or account-wide deletion.",
+    "Native project/cadence successor review remains explicit; no blanket automatic external handoff.",
+    "TRR undefined, portfolio-less documents deferred; external DocuSign/scanner/channel acceptance separate."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,production,external operation,original container restart or server5379 modification."
+}

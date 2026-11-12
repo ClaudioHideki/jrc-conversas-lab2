@@ -86,6 +86,24 @@ RSpec.describe 'Requester portal Phase 1 over the native Service Desk', type: :r
     expect(response.parsed_body['can_reply']).to be(true)
   end
 
+  it 'preserves the external customer Portal when its native execution operator is employee-restricted' do
+    service
+    sd_account.update!(internal_attributes: sd_account.internal_attributes.merge(
+      JrcServiceDesk::InternalIntake::KEY => { sd_unit.id.to_s => {
+        'employee_isolation_enabled' => true, 'employee_account_user_ids' => [sd_account_user.id],
+        'support_account_user_ids' => [], 'internal_service_ids' => []
+      } }))
+    get '/portal/session'
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig('context', 'id')).to eq(grant.id.to_s)
+    expect(response.parsed_body).not_to have_key('employee_context')
+    post '/portal/api/chamados', params: { ticket: creation }, headers: write_headers, as: :json
+    expect(response).to have_http_status(:created)
+    ticket = JrcServiceDesk::Ticket.find(response.parsed_body.dig('ticket', 'id'))
+    expect(ticket.company_id).to eq(company.id)
+    expect(ticket.requester).to eq(sd_contact)
+  end
+
   it 'rejects arbitrary priority, requester, tenant, assignee and service configuration fields' do
     %w[priority_id requester_id account_id company_id unit_id assignee_account_user_id status_id category_id].each do |field|
       post '/portal/api/chamados', params: { ticket: creation.merge(field => '1') }, headers: write_headers, as: :json

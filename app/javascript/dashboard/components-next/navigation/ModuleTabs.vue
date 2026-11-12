@@ -7,6 +7,7 @@ const props = defineProps({
   items: { type: Array, required: true },
   groups: { type: Array, default: () => [] },
   activeKey: { type: String, required: true },
+  tabClasses: { type: Function, default: moduleTabClasses },
 });
 const navigation = ref(null);
 const closeMenus = () => {
@@ -29,7 +30,7 @@ watch(() => props.activeKey, closeMenus);
       :key="item.key"
       :to="item.to"
       class="inline-flex items-center gap-2 whitespace-nowrap rounded-lg border px-3 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-      :class="moduleTabClasses(item.tone, activeKey === item.key)"
+      :class="tabClasses(item.tone, activeKey === item.key)"
       :aria-current="activeKey === item.key ? 'page' : undefined"
     >
       <span
@@ -47,7 +48,7 @@ watch(() => props.activeKey, closeMenus);
       <summary
         class="flex cursor-pointer list-none items-center gap-2 whitespace-nowrap rounded-lg border px-3 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 [&::-webkit-details-marker]:hidden"
         :class="
-          moduleTabClasses(
+          tabClasses(
             group.tone,
             group.entries.some(item => item.key === activeKey)
           )
@@ -72,9 +73,7 @@ watch(() => props.activeKey, closeMenus);
           :key="item.key"
           :to="item.to"
           class="flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-semibold"
-          :class="
-            moduleTabClasses(item.tone || group.tone, activeKey === item.key)
-          "
+          :class="tabClasses(item.tone || group.tone, activeKey === item.key)"
           :aria-current="activeKey === item.key ? 'page' : undefined"
           @click="closeMenus"
         >

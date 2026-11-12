@@ -9,14 +9,18 @@ import State from './ServiceDeskState.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { decodeConfigurationList } from '../helpers/lifecycle';
 const props = defineProps({
+  showRefresh: { type: Boolean, default: true },
   modelValue: { type: String, default: '' },
   unitId: { type: String, default: '' },
   disabled: Boolean,
   cards: Boolean,
+  unrestrictedOnly: Boolean,
+  generalLabel: { type: String, default: '' },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 const session = useServiceDesk();
+const api = session.lifecycleClient || API;
 const page = ref(1);
 const items = ref([]);
 const total = ref(0);
@@ -41,11 +45,12 @@ const load = async () => {
   const context = session.state.context;
   status.value = 'loading';
   try {
-    const response = await API.services(
+    const response = await api.services(
       context.account_id,
       props.unitId,
       page.value,
-      controller.signal
+      controller.signal,
+      ...(props.unrestrictedOnly ? [true] : [])
     );
     if (current !== epoch || context !== session.state.context) return;
     const result = decodeConfigurationList(
@@ -54,7 +59,14 @@ const load = async () => {
       props.unitId,
       'services'
     );
-    items.value = result.items;
+    items.value = props.unrestrictedOnly
+      ? result.items.filter(
+          row =>
+            row.active &&
+            !row.allowed_company_ids.length &&
+            !row.allowed_contract_ids.length
+        )
+      : result.items;
     total.value = result.meta.total;
     status.value = result.items.length ? 'ready' : 'empty';
   } catch {
@@ -122,7 +134,10 @@ onBeforeUnmount(() => {
       v-model="selected"
       :disabled="disabled || !unitId || status === 'loading'"
       :options="[
-        { value: '', label: t('JRC_SERVICE_DESK.LIFECYCLE.unit_policy') },
+        {
+          value: '',
+          label: generalLabel || t('JRC_SERVICE_DESK.LIFECYCLE.unit_policy'),
+        },
         ...items.map(row => ({ value: row.id, label: row.name })),
       ]"
     />
@@ -147,6 +162,7 @@ onBeforeUnmount(() => {
       @update:current-page="page = $event"
     />
     <Button
+      v-if="showRefresh"
       size="xs"
       variant="ghost"
       :disabled="!unitId || disabled"

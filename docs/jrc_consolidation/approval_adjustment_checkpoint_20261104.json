@@ -1,0 +1,76 @@
+{
+  "date": "2026-11-04",
+  "parent": "054b9afe166c9c0b2144e822d3725a77a4198a62",
+  "status": "D7 native proposal discount adjustment implemented and automatically tested; overall CA-05/06 remain partial for other domain fields/types and actual UI acceptance",
+  "implemented": [
+    "Explicit adjust permission; native administrators do not inherit adjust/decide",
+    "Native ProposalPolicy/OrganizationalVisibility/CorporateIssuer and CRM permissions required in addition to a current eligible approval choice",
+    "Shared native ProposalMutation extracted from existing CRM edit path; same recalculation/reset/invalidation/events",
+    "Save pending creates a new immutable request pinned to original requester, exact policy version and deadline; append-only native audit links old/new and original/adjusted discount",
+    "Atomic save+approve uses Decisions in the same PostgreSQL transaction; changed tier/eligibility rejects and rolls back all changes",
+    "Actor-scoped idempotency, source-first locks, stale version handling and audit history projection",
+    "Responsive native dialog, exact monetary input, mandatory reason, real HTTP action, bounded handoff receipt, explicit role configuration"
+  ],
+  "scope": {
+    "installed_types": [
+      "crm.proposal_send",
+      "crm.proposal_convert"
+    ],
+    "installed_fields": [
+      "discount_cents"
+    ],
+    "not_implemented": [
+      "Other domain adjustment adapters/percentage edits",
+      "Internal notification delivery (D9)",
+      "Global own delegation (D8 in progress)",
+      "Fresh build and real Chrome desktop/mobile/light/dark acceptance"
+    ]
+  },
+  "tests": [
+    {
+      "run": "d7-native-final",
+      "backend": 54,
+      "failures": 0,
+      "includes": "10 adjustment, 7 independent-connection commercial/concurrency, native CRM proposal/homologation and core permission API regressions"
+    },
+    {
+      "run": "d7-audit-final",
+      "backend": 10,
+      "failures": 0,
+      "scope": "Final currency/history payload"
+    },
+    {
+      "run": "d7-approval-suite-final",
+      "vue": 116,
+      "failures": 0,
+      "errors_outside_tests": 0
+    }
+  ],
+  "failed_runs_fixed": [
+    "Initial rollback expectation now uses actual native STEP_NOT_CURRENT error; the final test verifies every source/audit/revision/decision count and original attributes unchanged",
+    "Concurrent test setup used expanded member.permissions including the Enterprise custom_role marker; corrected to stored custom_role.permissions. No production validation weakened."
+  ],
+  "lint": "New service files and RequestsController canonical RuboCop zero offenses before final currency data addition (layout only); final artifacts in .codex/d7-adjustments-20261104. ESLint zero errors; existing warning-only Vue styles. Existing concurrency helper offenses preserved, not suppressed.",
+  "visual": {
+    "word_images_inspected": [
+      "word/media/image4.png"
+    ],
+    "following_reference": "Native modal, two responsive panels, original/adjusted value summary, mandatory reason, save pending / atomic approve choices",
+    "differences": "Current native monetary general discount rather than unimplemented item percentage. Uses action selector and native confirmation button rather than two parallel footer actions. Notification switch omitted until real delivery exists; no estimated savings fabricated.",
+    "actual_Chrome": "Pending; no new build authorized or executed"
+  },
+  "storage": "Reuses existing immutable Requests and AuditEvents and native actor FK/unique audit keys; no new migration, model table or dependency",
+  "preserved": [
+    "Server5379 frozen at4d4a6de3",
+    "UI database and original runtime sources untouched",
+    "v1 versions, snapshots, decisions and scoped delegation history",
+    "No cleanup/push/GHCR/deploy/external real operation"
+  ],
+  "disk": {
+    "block_start": 15865892864,
+    "minimum_observed": 7706550272,
+    "end": 14078169088,
+    "note": "Large unexplained fluctuation and recovery, no cleanup by this agent. Guards remained active; threshold not approached."
+  },
+  "next": "Continue D8 global own grants and their native decision/visibility intersection; then D9 internal notifications and real E/F/G gaps"
+}

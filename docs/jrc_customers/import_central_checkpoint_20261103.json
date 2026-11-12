@@ -1,0 +1,198 @@
+{
+  "date": "2026-11-03",
+  "stage": "C5 — Central de Importações",
+  "status": "Incremento validado; Cadastro Mestre e etapas C/D/E/F/G continuam parciais",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "bdbc487f64c062ed8b389a2ec04125a502c03ace",
+  "preserved_backend": [
+    "d53f817fa4db88580c43e714b18135f85349c6cd",
+    "bdbc487f64c062ed8b389a2ec04125a502c03ace"
+  ],
+  "confirmed": [
+    "Central única para empresas, contatos e ambos: CSV UTF-8/modelos, mapeamento explícito, tratamento de existentes, prévia sem escrita, confirmação, resultado e histórico privado por conta e iniciador",
+    "Campos nativos e customizados configurados na conta; atualização preserva IDs, JSON, etiquetas, contexto corporativo e identidade fiscal cifrada; nenhuma mescla por nome ou exclusão por omissão",
+    "Confirmações de transferência e contato principal não concedem acesso; escopo, permissões e catálogo atual reavaliados pelo servidor",
+    "Popups canônicos, navegação, retomada pelo histórico, filtros, paginação e download real de erros; conta/papel invalidam estado assíncrono",
+    "Entrada nativa de importação aponta à central quando a funcionalidade está ativa; importação legada e Intercom preservados nas condições documentadas no checkpoint backend"
+  ],
+  "limits": {
+    "format": "CSV UTF-8",
+    "bytes": 1048576,
+    "logical_records": 500,
+    "history_page": 20,
+    "result_page": 25,
+    "server_max_page": 50
+  },
+  "backend": {
+    "examples": 188,
+    "failures": 0,
+    "pending": 0,
+    "evidence": {
+      "path": ".codex/customer-import-wizard-field-errors-backend.json",
+      "sha256": "1d38368051855920613cc5080704cf42a00e4e0b9fa9524f1ebbb162002afed7"
+    }
+  },
+  "frontend": {
+    "functional_regression": {
+      "passed": 155,
+      "failed": 0,
+      "evidence": {
+        "path": ".codex/customer-import-wizard-final-frontend.json",
+        "sha256": "982a50bc37797486e910b5ece86c37bb6ebe0b67a3b6b00dcc44437587841486"
+      }
+    },
+    "after_presentation_changes": {
+      "passed": 10,
+      "failed": 0,
+      "evidence": {
+        "path": ".codex/customer-import-presentation-checked-vitest.json",
+        "sha256": "eedd7c603cabf16da61e461dcbba83c194011985d2994ba8375160ee1318ab35"
+      }
+    },
+    "unit_services": "APIs e diálogos simulados nos testes unitários; persistência comprovada separadamente no Chrome"
+  },
+  "lint": {
+    "files": 14,
+    "errors": 0,
+    "warnings": 0,
+    "evidence": {
+      "path": ".codex/customer-import-central-final-eslint.json",
+      "sha256": "d30eb8ec847139eac66d005dda2eb091c422beb66cf94eb6ba3f14f587f715b1"
+    }
+  },
+  "ruby_style": "12 arquivos + 2 arquivos finais sem novas infrações; ClassLength nativo anterior preservado, nenhum cop desativado",
+  "build": {
+    "type": "Somente assets Vite locais",
+    "duration": "4m45",
+    "files_verified": 583,
+    "log": {
+      "path": ".codex/customer-import-wizard-final-production-assets.log",
+      "sha256": "681de63955c9abf3c2393085868ece5b3875a526e8f9e892d070987438a38951"
+    },
+    "warnings": "Chunks grandes, Browserslist, background e sourcemap de dependência preexistentes; sem instalação ou supressão"
+  },
+  "chrome": {
+    "browser": "Chrome real channel=chrome, headless, servidor e banco sintéticos reais",
+    "passed_reports": [
+      {
+        "report": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\importacoes-c5-chrome-phase2-checked.json",
+        "sha256": "96cba76f355c917ccdcdd7ad0885efb719a9499232a88e60d4b5ee6a19eb6bd4",
+        "checks": {
+          "current_result_id_edit_persistence_and_mobile_themes": true,
+          "native_existing_id_labels_json_company_and_private_identity_preserved": true,
+          "error_blocks_apply_and_downloads_real_field_report": true,
+          "foreign_company_parameter_never_grants_access": true,
+          "account_isolation": true,
+          "contact_manage_real_native_creation_without_company_grant": true,
+          "ordinary_agent_has_no_bulk_import_grant": true
+        }
+      },
+      {
+        "report": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\importacoes-c5-chrome-qa-resume.json",
+        "sha256": "9c080498c24019692e48aebdb74a9aec23479d83b02c83afb2a6c1d2ad9204d1",
+        "checks": {
+          "reassignment_acknowledgement_and_scope_denial": true,
+          "primary_acknowledgement_no_unconfirmed_business_writes": true,
+          "history_status_kind_filters_and_mobile_next_previous": true
+        }
+      }
+    ],
+    "native_popup_persistence": "importacoes-c5-chrome-phase1-resume-checked.json: edição852/empresa360/reload/histórico aprovados antes da asserção visual incorreta; phase2-checked reconfirma persistência",
+    "desktop_themes": "importacoes-c5-chrome-qa-final.json: temas claro/escuro e popup nativo aprovados antes da falha de configuração do teste de transferência; capturas013–015 inspecionadas",
+    "earlier_failures_preserved": "Seletores nativos incorretos, espera de login curta, contagem de abas desabilitadas e cenário de transferência sem selecionar atualizar foram corrigidos na automação; relatórios anteriores mantidos como falhas, sem repetir criações",
+    "capture_caveat": "Captura016 tem nome escuro mas mostra tema claro. Demonstra paginação; não é evidência de tema escuro. Temas mobile são validados separadamente em phase2-checked/capturas008–009",
+    "synthetic_ids": {
+      "account": 1394,
+      "company": 919,
+      "contacts": [
+        851,
+        852,
+        853,
+        854
+      ],
+      "completed_imports": [
+        444,
+        445,
+        448
+      ],
+      "invalid_or_preview_only": [
+        446,
+        447,
+        449,
+        450
+      ]
+    },
+    "no_replay": "Não repetir criações/importações já persistidas"
+  },
+  "integrity": {
+    "status": "passed",
+    "source": "/consolidation-customer-import-wizard-field-errors",
+    "protected_previous_rows": 102,
+    "native_company_ids": [
+      917,
+      919
+    ],
+    "native_contact_ids": [
+      851,
+      852,
+      853,
+      854
+    ],
+    "original_contact_id_preserved": 851,
+    "private_source_files_verified": 29,
+    "encrypted_fiscal_identity_verified": true,
+    "labels_json_roles_primary_and_counters_preserved": true,
+    "no_signature_authority_granted": true,
+    "verifier": null,
+    "external_operations": 0,
+    "production_changed": false
+  },
+  "preserved_economic_groups": {
+    "status": "passed",
+    "source": "/consolidation-customer-import-wizard-field-errors",
+    "protected_old_rows": 18,
+    "fixture_company_contexts_checked": 26,
+    "group": 127,
+    "principal": 75,
+    "members": [
+      74,
+      75
+    ],
+    "audits": {
+      "customer_economic_group_created": 1,
+      "customer_economic_group_linked": 4,
+      "customer_economic_group_updated": 4
+    },
+    "verifier": null,
+    "external_operations": 0,
+    "production_changed": false,
+    "chrome": "10 checks passed in continuation; stable theme QA reported separately",
+    "unused_group": 128,
+    "unused_deleted": true,
+    "unused_audits": {
+      "customer_economic_group_created": 1,
+      "customer_economic_group_deleted": 1
+    },
+    "native_labels": 2,
+    "canonical_people": 26
+  },
+  "integrity_test_correction": "Comparação inicial de etiquetas manteve ordenação default por título; corrigida com reorder(:id), conferindo IDs e títulos exatos. Primeira falha mantida.",
+  "source": {
+    "path": ".codex/customer-import-wizard-field-errors-source-verified.json",
+    "sha256": "fbb2f683e110903fbb571914e8cd5031b6369c4cff50e2e240f50ff787691353"
+  },
+  "hooks": "Bootstrap .husky/_/husky.sh ausente no worktree. Gates manuais executados; commit local usa core.hooksPath apenas no comando, sem alterar configuração global e sem alegar execução do hook nativo.",
+  "remaining": [
+    "C6 Contatos ativos operacionais",
+    "Filtros de segmento nos demais módulos e critérios financeiros/TRR ainda parciais; TRR sem definição",
+    "Requisitos restantes de C/D/E/F/G",
+    "Homologação externa DocuSign demo; verifier continua nil e bloqueio de implantação assinada inalterado"
+  ],
+  "publication": {
+    "push": false,
+    "docker_image_build_or_publish": false,
+    "deploy": false,
+    "production_migrations": false,
+    "external_provider_calls": false
+  }
+}

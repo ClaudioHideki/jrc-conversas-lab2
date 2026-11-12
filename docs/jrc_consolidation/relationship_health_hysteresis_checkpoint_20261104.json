@@ -1,0 +1,114 @@
+{
+  "date": "2026-11-04",
+  "parent_checkpoint": "abf9064352d6144736e8eb7173986bf8571ec9e2",
+  "status": "Configured global customer health hysteresis implemented and validated automatically; full F and actual fresh-build visual acceptance remain open",
+  "stage_F_complete": false,
+  "word_evidence": {
+    "paragraphs": [
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87
+    ],
+    "text": ".codex/relacionamento-v2-referencia/word-completo.txt",
+    "visuals_inspected": [
+      "image5.png",
+      "image10.png"
+    ],
+    "visual_difference": "Retains the existing native 360, health table and configuration form. Adds an actual persisted margin and honest measured-band explanation; no reproduction of illustrative churn probability, segment average or financial targets from the figures."
+  },
+  "behavior": [
+    "Opt-in nonnegative finite recovery margin; default0 preserves historical behavior and native score calculation",
+    "Deterioration is immediate; improving bands require boundary+margin; score100 must remain able to reach healthy",
+    "Missing evidence stays unavailable, not carried forward from an older score",
+    "Only the same currently authorized portfolio, viewer, model scope/version and access signature can supply history",
+    "Historical source IDs remain in the native evidence manifest and are reauthorized through SnapshotAccess; foreign sources are rejected",
+    "Measured score and factors stay exact; raw_band and hysteresis explanation are separate from the stabilized band",
+    "Native processor uses the stabilized risk band and truthful retained-risk reason; existing case handling, approval/Flow permissions and immutable snapshots are preserved",
+    "Native versioned configuration/API and existing Vue form persist the setting; no migration or replacement customer registry"
+  ],
+  "backend": {
+    "cases": 46,
+    "failures": 0,
+    "evidence": {
+      "start": 13478395904,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/health_hysteresis_spec.rb": "f6e342c49c92f335c36c42494cdc6810624109884ca05f57c0056a0bdcd4e364",
+        "spec/requests/api/v1/accounts/relationship/health_stability_spec.rb": "fa32c441a8a13a9ea943f52a5c22d953a8a38d2b91c261da85f3eb1e9608b0c5",
+        "spec/requests/api/v1/accounts/relationship/document_requirements_spec.rb": "e3f33e38e825b8f0fb555944b439fa4e37012238f4db6783285687e4a9b68551",
+        "spec/services/jrc_relationship/configuration_guards_spec.rb": "c9cf8f1ebbb5c35c094932ffabdd7b91819eb7cbe34fd2138d7ad3be62a97f8f",
+        "spec/services/jrc_relationship/health_coverage_spec.rb": "2e69a283b127f208e9f3675d025143e759757dbc77614a701cba0adf76d1d886",
+        "spec/services/jrc_relationship/monitoring_runs_spec.rb": "3c7152fbaff056037c2879f5f49df277ca98a5106a8aacdaf1ae2a04aef44082",
+        "spec/requests/api/v1/accounts/relationship/access_spec.rb": "3335c853c56fa078678a8e06051e7d7e86486d1b25829f514fd431b25d204689"
+      },
+      "minimum": 13389877248,
+      "exit_code": 0,
+      "end": 13369151488
+    },
+    "covers": [
+      "boundary precision",
+      "deterioration/recovery",
+      "zero margin",
+      "absence",
+      "actual PostgreSQL snapshots",
+      "foreign evidence",
+      "viewer/version/access-signature/assignment boundaries",
+      "ownership revocation",
+      "native Processor persistence and root-cause dedup",
+      "configuration API/history/stale-write guard",
+      "cross-account403",
+      "native documentary and access regressions"
+    ]
+  },
+  "frontend": {
+    "cases": 18,
+    "failures": 0,
+    "evidence": {
+      "status": "passed",
+      "free_start": 13247115264,
+      "minimum_free": 13196976128,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 26352,
+      "exit_code": 0,
+      "free_end": 13239836672
+    },
+    "mocked_API_not_browser_homologation": true,
+    "inherited_test_warning": "Existing functionalReview fixtures omit RouterLink registration; not a production-runtime finding."
+  },
+  "quality": {
+    "new_ruby_files": "3 files, RuboCop0",
+    "JS_Vue": "6 files, ESLint0",
+    "test_correction": "Foreign-account endpoint denies with native403, not the initially expected401; no server authorization code changed."
+  },
+  "remaining": [
+    "New authorized build and actual Chrome desktop/mobile light/dark acceptance",
+    "Per-product historical stabilization is not claimed for the product_health map",
+    "Source freshness policies, configurable trend windows/cooldown and representative-scale acceptance remain partial",
+    "Portfolio capacity and Central distribution integration remain open",
+    "No live NICO or external channel operations"
+  ],
+  "disk": {
+    "start": 13478395904,
+    "minimum_observed": 13196976128,
+    "end": 13264642048
+  },
+  "restrictions": {
+    "no_build": true,
+    "no_push": true,
+    "no_cleanup": true,
+    "server5379_unchanged": true
+  },
+  "deduplication_followup": {
+    "evidence": "implementation_progress_20261104.json",
+    "status": "Lineage excluded from measurement fingerprint; original zero-margin manifest preserved; final native repeat-refresh count assertion passed."
+  }
+}

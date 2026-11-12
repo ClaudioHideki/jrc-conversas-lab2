@@ -1,0 +1,125 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "7cf063a493b3ed78c1217f4554372d655d0b08c2",
+  "status": "Incremental F2 source-window implementation and local native validation; full F2/C-G not closed",
+  "word_reference": {
+    "document": "JRC_Conversas_Relacionamento_V2_Projeto_Completo_Dev_Com_Imagens_20261101.docx",
+    "sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+    "paragraphs": [
+      40,
+      83,
+      85,
+      87
+    ],
+    "scope": "Incremental source evidence/freshness; not a new full visual audit."
+  },
+  "implemented": [
+    "Sentiment uses recognized existing analysis on native-authorized public incoming/outgoing messages only. Ninety days preserves the actual previous default; the native versioned editor now supports a whole-day1..3650 window. No AI inference or external request.",
+    "Current score excludes out-of-window data while bounded older recognized sources identify stale rather than missing. Source dates come from actual contributing messages; no refresh clock is inserted into observations. Source IDs remain in the native internal manifest for access revocation.",
+    "The100-message test exposed inherited Message ascending default order; explicit reorder now truly selects the100 most recent source messages. Private/future/activity/foreign or unavailable-inbox evidence cannot contribute.",
+    "Reusable HealthFactorEvidenceProjection preserves existing satisfaction read behavior. Portfolio and NICO report sentiment freshness separately from immutable historical score/date, including policy-change recalculation and malformed/future dates.",
+    "Native health evidence UI distinguishes missing/stale/current/refresh-required, shows the real source date/captured/current window, and clears evidence when the parent access projection disappears."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "sentiment-window01",
+      "examples": 11,
+      "failures": 1,
+      "note": "Ten passed; immutable source comparison captured pre-reload nanosecond timestamps. Fixture corrected to actual persisted microseconds."
+    },
+    {
+      "label": "sentiment-window-final",
+      "examples": 26,
+      "failures": 1,
+      "note": "Twenty-five passed, including six new read projections, native NICO/portfolio/foreign guards and existing satisfaction/temporal/coverage regressions. The100-message case exposed default ascending order; corrected with reorder."
+    },
+    {
+      "label": "sentiment-window-native-final",
+      "examples": 9,
+      "failures": 0,
+      "note": "Six source cases including100-message bound plus three native versioned HTTP configuration cases."
+    },
+    {
+      "label": "sentiment-inbox-native",
+      "examples": 1,
+      "failures": 0,
+      "note": "Additional real native inbox-denied then explicit-grant scope test; CS ownership never substitutes for inbox permission."
+    },
+    {
+      "label": "sentiment-evidence-ui01",
+      "tests": 14,
+      "failures": 0,
+      "note": "Native editor/view component tests including existing health preview; mocks do not substitute for current-source Chrome acceptance."
+    }
+  ],
+  "static": [
+    "New/changed temporal services and specs0 RuboCop offenses.",
+    "CustomerSignals26,Presenter26,NICO54 inherited offenses retained;0 added cop counts. Configuration0 offenses.",
+    "ESLint0 errors; existing ConfigurationPanel35 and HealthEvidenceSummary4 standard warnings reported.",
+    "git diff --check clean; no related Enterprise override found."
+  ],
+  "files": [
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationCatalog.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/HealthEvidenceSummary.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/healthEvidence.spec.js",
+    "app/models/jrc_relationship/configuration.rb",
+    "app/services/jrc_nico/domain_actions.rb",
+    "app/services/jrc_relationship/customer_signals.rb",
+    "app/services/jrc_relationship/health_temporal_policy.rb",
+    "app/services/jrc_relationship/presenter.rb",
+    "app/services/jrc_relationship/satisfaction_evidence_projection.rb",
+    "app/services/jrc_relationship/sentiment_signals.rb",
+    "app/services/jrc_relationship/health_factor_evidence_projection.rb",
+    "app/services/jrc_relationship/sentiment_evidence_projection.rb",
+    "spec/services/jrc_relationship/sentiment_signals_spec.rb",
+    "spec/services/jrc_relationship/sentiment_evidence_projection_spec.rb",
+    "spec/requests/api/v1/accounts/relationship/sentiment_configuration_spec.rb"
+  ],
+  "disk": {
+    "sentiment-window01": {
+      "start": 7378145280,
+      "minimum": 7378100224,
+      "end": 7378034688
+    },
+    "sentiment-window-final": {
+      "start": 7377928192,
+      "minimum": 7377764352,
+      "end": 7377772544
+    },
+    "sentiment-window-native-final": {
+      "start": 7375601664,
+      "minimum": 7355342848,
+      "end": 7374659584
+    },
+    "sentiment-inbox-native": {
+      "start": 7372681216,
+      "minimum": 7372607488,
+      "end": 7372607488
+    },
+    "final_bytes": 7350190080
+  },
+  "limits": [
+    "Other health-dimension freshness/measurement policies remain partial; this does not invent telemetry dates for undated adoption metrics or expiry for live financial/ServiceDesk state.",
+    "Broader P0-P3 configuration, universal automation budget, safe final analyst withdrawal and remaining C/D/G audit stay open.",
+    "New build/Chrome desktop/mobile and real provider acceptance remain pending current restrictions."
+  ],
+  "environment": {
+    "containers": "Four original containers still running with exactly the same2026-11-04 StartedAt values verified read-only.",
+    "server5379_owner_pid": 6464,
+    "server_changed": false,
+    "migrations": false
+  },
+  "checkpoint_preservation": {
+    "53d0b022": true,
+    "3b31577e": true,
+    "a1fef624": true,
+    "9bb8d2ec": true,
+    "07a9e400": true,
+    "0f768a98": true,
+    "e1c6261c": true
+  },
+  "next": "F2 waiting-state governance: inspect and enforce a reason and review deadline on new pauses without invalidating legacy historical cases or pausing native SLA silently.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,container restart,5379 change or external real operation."
+}

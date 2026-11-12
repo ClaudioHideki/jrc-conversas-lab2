@@ -13,6 +13,37 @@ import { createServiceDeskClient } from 'dashboard/api/serviceDeskClient';
 const context = { units: [{ id: '10', operator_company: { id: '3' } }] };
 
 describe('Service Desk list filters and navigation', () => {
+  it('preserves a published segment through native query, saved filters and pagination without granting catalog access', () => {
+    const value = normalizeQuery(
+      { customer_segment_id: '9223372036854775807', page: '2' },
+      'tickets'
+    );
+    expect(value).toMatchObject({
+      customer_segment_id: '9223372036854775807',
+      page: 2,
+    });
+    expect(() =>
+      normalizeQuery({ customer_segment_id: '01' }, 'tickets')
+    ).toThrow(QueryError);
+    expect(() =>
+      normalizeQuery({ customer_segment_id: '9' }, 'statuses')
+    ).toThrow(QueryError);
+    const records = new Map();
+    const storage = {
+      getItem: key => records.get(key),
+      setItem: (key, data) => records.set(key, data),
+    };
+    writeSavedFilters(storage, '1', '2', [
+      { name: 'Published customers', query: value },
+    ]);
+    expect(readSavedFilters(storage, '1', '2', context)).toEqual([
+      {
+        name: 'Published customers',
+        query: { customer_segment_id: '9223372036854775807' },
+      },
+    ]);
+    expect(readSavedFilters(storage, '3', '2', context)).toEqual([]);
+  });
   it('accepts inclusive ISO date filters and canonical team IDs', () => {
     expect(
       normalizeQuery({

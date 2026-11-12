@@ -1,0 +1,67 @@
+{
+  "date": "2026-11-10",
+  "branch": "codex/lab2-ag-consolidada-20261110",
+  "preserved_native_green": "2a85e0f87600753e600240209bd96c3f99a1040a",
+  "preserved_native_run": 42880854527,
+  "main_checked": "d8a83b824b11cc68ddbbce7c79681f368051fb70",
+  "incoming_checkpoint": "e0f7d42672e649943e8d9231f4395e96add8f2de",
+  "incoming_includes": [
+    "9b727eedad56af01a063d8250d9d0565567e8dbd",
+    "d16de95da61b0ad3eb1e89f1861f1eda41a78b07"
+  ],
+  "scope": [
+    "A–G consolidado validado anteriormente",
+    "Portal azul e resolução de assets em runtime",
+    "roteamento nativo de chamados internos",
+    "entrada de chamados de funcionários",
+    "assumir chamados elegíveis pela atribuição nativa"
+  ],
+  "merge_conflicts": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/serviceDesk/views/TicketFormView.vue",
+      "resolution": "Preservados o status/contexto do Cadastro Mestre e o formulário interno; URLs com origem no Cadastro Mestre continuam no fluxo de cliente, sem serem desviadas ao formulário do funcionário."
+    }
+  ],
+  "validation": {
+    "previous_results_are_not_new_sha_validation": true,
+    "local_light_checks": {
+      "native_test_plan": 6,
+      "image_guard_identity": 1,
+      "workflow_yaml": 2
+    },
+    "native_new_tests": "pending CI",
+    "Vue_new_tests": "pending CI",
+    "new_native_sources": [
+      "CreateTicketService",
+      "InternalIntakeIntegration",
+      "AssignmentEligibility",
+      "ServiceDeskOperations HTTP",
+      "RequesterPortalPhaseOne",
+      "ProtectedAttachmentOwners"
+    ]
+  },
+  "image": {
+    "authorized_candidate_publication": true,
+    "repository": "ghcr.io/claudiohideki/jrc-conversas-lab2",
+    "tag_policy": "sha-FULL_SOURCE_SHA; refuse overwrite; no latest",
+    "build": "Exclusive hosted runner; requires exact source native CI; >=5GiB physical RAM and >=3GiB free disk at start; stop reserve750MiB RAM/750MBdisk; stop only owned process group and its uniquely named BuildKit container.",
+    "runtime": "Rails and Sidekiq must use the identical image ID; existing smoke harness uses disposable PostgreSQL, Redis, network and storage on the runner.",
+    "production_deploy": false
+  },
+  "uncommitted_work_preserved": {
+    "workspace": "C:/Users/DEV03/Documents/Jrc/jrc-plugnmeet-20261110/jrc",
+    "branch": "codex/jrc-plugnmeet-20261110",
+    "head": "599b2f41e30570881432daebc3df2e9b70b0a366",
+    "state": "Uncommitted video changes and new files remain untouched; user decision requested before including in image."
+  },
+  "retained_limits": [
+    "No original workspace edits",
+    "No main push",
+    "No deployment",
+    "No production or 5379 changes",
+    "No automatic cleanup",
+    "No real external provider calls"
+  ],
+  "full_Word_visual_acceptance": false,
+  "production_ready": false
+}

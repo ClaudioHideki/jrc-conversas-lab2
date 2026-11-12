@@ -1,13 +1,22 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import HealthStabilityNote from './HealthStabilityNote.vue';
+import HealthCoverageNote from './HealthCoverageNote.vue';
+import TransferLockDialog from './TransferLockDialog.vue';
+import HealthEvidenceSummary from './HealthEvidenceSummary.vue';
+import AutomaticPlaybookNotice from './AutomaticPlaybookNotice.vue';
+import ProductHealthHistory from './ProductHealthHistory.vue';
 import API from 'dashboard/api/jrcRelationship';
+import CapacityWorkloadForm from './CapacityWorkloadForm.vue';
 import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue';
 import VoiceCallButton from 'dashboard/components-next/Contacts/VoiceCallButton.vue';
 import SurveyDeliveryPanel from './SurveyDeliveryPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
+import ManagementRequestsPanel from './ManagementRequestsPanel.vue';
 import ManualAttendancePanel from './ManualAttendancePanel.vue';
 import {
   buttonClass,
@@ -32,19 +41,33 @@ const contactId = ref('');
 const activityTitle = ref('');
 const dueAt = ref('');
 const recommendation = ref(null);
+const explaining = ref(false);
+let explanationRequest = null;
+const resetExplanation = () => {
+  explanationRequest?.abort();
+  explanationRequest = null;
+  explaining.value = false;
+  recommendation.value = null;
+};
 const ownerId = ref('');
+const capacityWorkload = ref({});
 const sendCsat = ref(false);
+const transferLockOpen = ref(false);
 const contact = computed(() =>
   channels.value?.contacts.find(
     row => String(row.id) === String(contactId.value)
   )
 );
 let generation = 0;
-const load = async () => {
+const load = async ({ closeIfUnavailable = false } = {}) => {
+  resetExplanation();
+  transferLockOpen.value = false;
   generation += 1;
   const version = generation;
   const accountId = route.params.accountId;
   record.value = null;
+  channels.value = null;
+  recommendation.value = null;
   error.value = '';
   busy.value = true;
   try {
@@ -54,16 +77,26 @@ const load = async () => {
     ]);
     if (version !== generation) return;
     record.value = summary.data;
+    capacityWorkload.value = structuredClone(
+      record.value.settings?.capacity_workload || {}
+    );
     channels.value = communication.data;
     ownerId.value = record.value.owner?.id || '';
     contactId.value = channels.value.contacts[0]?.id || '';
   } catch (err) {
-    if (version === generation) error.value = message(err);
+    if (version === generation) {
+      if (closeIfUnavailable && [403, 404].includes(err.response?.status)) {
+        emit('close');
+        return;
+      }
+      error.value = message(err);
+    }
   } finally {
     if (version === generation) busy.value = false;
   }
 };
-const execute = async action => {
+const execute = async (action, { closeIfUnavailable = false } = {}) => {
+  resetExplanation();
   const version = generation;
   busy.value = true;
   error.value = '';
@@ -71,7 +104,7 @@ const execute = async action => {
     await action();
     if (version === generation) {
       emit('changed');
-      await load();
+      await load({ closeIfUnavailable });
     }
   } catch (err) {
     if (version === generation) error.value = message(err);
@@ -81,11 +114,56 @@ const execute = async action => {
 };
 const recalculate = () =>
   execute(() => API.recalculate(route.params.accountId, props.assignmentId));
-const assign = () =>
+const openTransferLock = async () => {
+  if (busy.value) return;
+  const version = generation;
+  const accountId = route.params.accountId;
+  const id = props.assignmentId;
+  busy.value = true;
+  error.value = '';
+  try {
+    const { data } = await API.customer(accountId, id);
+    if (version !== generation) return;
+    record.value = data;
+    transferLockOpen.value = true;
+  } catch (err) {
+    if (version === generation) {
+      error.value = message(err);
+      if ([401, 403, 404].includes(err.response?.status)) record.value = null;
+    }
+  } finally {
+    if (version === generation) busy.value = false;
+  }
+};
+const saveTransferLock = fields =>
+  execute(() =>
+    API.saveTransferLock(route.params.accountId, props.assignmentId, fields)
+  );
+const assignmentFields = fields => ({
+  ...fields,
+  ...(typeof record.value?.assignment_version === 'string'
+    ? { expected_version: record.value.assignment_version }
+    : {}),
+});
+const assign = () => {
+  if (busy.value || record.value?.transfer_locked) return undefined;
+  return execute(
+    () =>
+      API.saveAssignment(
+        route.params.accountId,
+        assignmentFields({ owner_id: ownerId.value || null }),
+        props.assignmentId
+      ),
+    { closeIfUnavailable: true }
+  );
+};
+const saveWorkload = () =>
   execute(() =>
     API.saveAssignment(
       route.params.accountId,
-      { owner_id: ownerId.value || null },
+      assignmentFields({
+        settings: { capacity_workload: capacityWorkload.value },
+      }),
       props.assignmentId
     )
   );
@@ -99,15 +177,42 @@ const activity = () =>
     })
   );
 const explain = async () => {
+  if (busy.value || explaining.value || !record.value) return;
   const version = generation;
+  const request = new AbortController();
+  explanationRequest = request;
+  explaining.value = true;
+  recommendation.value = null;
+  error.value = '';
+  const current = () =>
+    version === generation && explanationRequest === request;
   try {
     const { data } = await API.recommendations(
       route.params.accountId,
-      props.assignmentId
+      props.assignmentId,
+      { signal: request.signal }
     );
-    if (version === generation) recommendation.value = data;
+    if (current()) recommendation.value = data;
   } catch (err) {
-    if (version === generation) error.value = message(err);
+    if (current()) {
+      error.value = message(err);
+      if ([401, 403, 404].includes(err.response?.status)) {
+        generation += 1;
+        record.value = null;
+        channels.value = null;
+        contactId.value = '';
+        ownerId.value = '';
+        activityTitle.value = '';
+        dueAt.value = '';
+        capacityWorkload.value = {};
+        transferLockOpen.value = false;
+      }
+    }
+  } finally {
+    if (explanationRequest === request) {
+      explanationRequest = null;
+      explaining.value = false;
+    }
   }
 };
 watch(
@@ -115,6 +220,11 @@ watch(
     () => route.params.accountId,
     () => props.assignmentId,
     () => store.getters.getCurrentUserID,
+    () =>
+      JSON.stringify([
+        store.getters.getCurrentRole,
+        store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
+      ]),
   ],
   () => {
     activityTitle.value = '';
@@ -128,6 +238,7 @@ watch(
   { immediate: true }
 );
 onBeforeUnmount(() => {
+  resetExplanation();
   generation += 1;
 });
 const date = value => formatDate(value, props.metadata?.formatting);
@@ -179,17 +290,61 @@ const money = value => formatMoney(value, props.metadata?.formatting);
       {{ t('RELATIONSHIP.LOADING') }}
     </p>
     <template v-if="record">
+      <p
+        v-if="record.transfer_locked"
+        class="mb-3 min-w-0 break-words rounded-lg border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
+        data-testid="portfolio-transfer-locked"
+      >
+        {{ t('RELATIONSHIP.TRANSFER_LOCK.ACTIVE') }}
+        {{
+          record.settings?.transfer_lock?.reason ||
+          t('RELATIONSHIP.UNAVAILABLE')
+        }}
+      </p>
+      <button
+        v-if="
+          metadata.can_configure && metadata.can_team && metadata.can_manage
+        "
+        type="button"
+        :class="buttonClass"
+        :disabled="busy"
+        data-testid="open-transfer-lock"
+        @click="openTransferLock"
+      >
+        {{ t('RELATIONSHIP.TRANSFER_LOCK.TITLE') }}
+      </button>
+      <TransferLockDialog
+        v-if="transferLockOpen"
+        :record="record"
+        :busy="busy"
+        :error="error"
+        @close="transferLockOpen = false"
+        @save="saveTransferLock"
+      />
+      <AutomaticPlaybookNotice
+        :attempt="record.automatic_playbook_attempt"
+        :formatting="metadata.formatting"
+      />
       <NicoSummaryPanel
         :assignment-id="assignmentId"
         :enabled="metadata.can_nico"
         :metadata="metadata"
+      />
+      <HealthEvidenceSummary
+        :signals="record.signals"
+        :formatting="metadata.formatting"
+      />
+      <HealthCoverageNote
+        :health="record.signals.health"
+        :formatting="metadata.formatting"
       />
       <div class="flex flex-wrap gap-3">
         <strong class="text-2xl">{{
           record.signals.health.score ?? '—'
         }}</strong
         ><span>{{ t(`RELATIONSHIP.BANDS.${record.signals.health.band}`) }}</span
-        ><span>{{ money(record.signals.mrr_cents) }}</span
+        ><HealthStabilityNote :health="record.signals.health" />
+        <span>{{ money(record.signals.mrr_cents) }}</span
         ><span>{{ date(record.calculated_at) }}</span>
         <button
           v-if="metadata.can_manage"
@@ -202,6 +357,8 @@ const money = value => formatMoney(value, props.metadata?.formatting);
         ><button
           type="button"
           :class="buttonClass"
+          :disabled="busy || explaining"
+          :aria-busy="explaining"
           @click="explain"
         >
           {{ t('RELATIONSHIP.EXPLAIN') }}
@@ -296,6 +453,18 @@ const money = value => formatMoney(value, props.metadata?.formatting);
             {{ factor.normalized ?? t('RELATIONSHIP.UNAVAILABLE') }} ·
             {{ factor.evidence }}
           </p>
+          <HealthStabilityNote
+            :health="record.signals.product_health?.[product.id]"
+          />
+          <HealthCoverageNote
+            :health="record.signals.product_health?.[product.id]"
+            :formatting="metadata.formatting"
+          />
+          <ProductHealthHistory
+            :assignment-id="record.id"
+            :product-id="product.id"
+            :formatting="metadata.formatting"
+          />
         </div>
       </details>
       <details class="my-4">
@@ -354,7 +523,7 @@ const money = value => formatMoney(value, props.metadata?.formatting);
         </ul>
       </details>
       <form
-        v-if="metadata.can_team"
+        v-if="metadata.can_team && metadata.can_manage"
         class="my-4 flex flex-wrap items-end gap-2"
         @submit.prevent="assign"
       >
@@ -363,6 +532,8 @@ const money = value => formatMoney(value, props.metadata?.formatting);
           }}<select
             v-model="ownerId"
             :class="inputClass"
+            :disabled="busy || record.transfer_locked"
+            data-testid="portfolio-owner"
           >
             <option value="">{{ t('RELATIONSHIP.UNASSIGNED') }}</option>
             <option
@@ -376,9 +547,27 @@ const money = value => formatMoney(value, props.metadata?.formatting);
         ><button
           type="submit"
           :class="buttonClass"
-          :disabled="busy"
+          :disabled="busy || record.transfer_locked"
+          data-testid="assign-portfolio-owner"
         >
           {{ t('RELATIONSHIP.ASSIGN') }}
+        </button>
+      </form>
+      <form
+        v-if="metadata.can_team && metadata.can_manage"
+        class="my-4 space-y-3"
+        @submit.prevent="saveWorkload"
+      >
+        <CapacityWorkloadForm
+          v-model="capacityWorkload"
+          :disabled="busy"
+        />
+        <button
+          type="submit"
+          :class="buttonClass"
+          :disabled="busy"
+        >
+          {{ t('RELATIONSHIP.CAPACITY.WORKLOAD.SAVE') }}
         </button>
       </form>
       <div
@@ -466,6 +655,10 @@ const money = value => formatMoney(value, props.metadata?.formatting);
           {{ t('RELATIONSHIP.SAVE') }}
         </button>
       </form>
+      <ManagementRequestsPanel
+        :metadata="metadata"
+        :assignment-id="assignmentId"
+      />
       <ManualAttendancePanel
         v-if="metadata.can_manage && channels?.can_crm"
         :assignment-id="assignmentId"

@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-07",
+  "status": "native_reuse_prerequisite_implemented_and_tested_not_master_batch_completion",
+  "previous_checkpoint": "b76ff87848db4423dec950f1792141aafd117037",
+  "implementation": [
+    "Moved the existing individual allocation operation from PortfolioController into AssignmentCreation for native batch reuse;HTTPstrongparameters/raw owner shape validation,response and direct individual behavior preserved.",
+    "Fresh native BatchReviewAuthority inside transaction;team/manage/account/active actor,source scope,destination membership,organizational coverage,configuredcapacity,commercialeligibility and originalaudit reused.",
+    "Contact/company normalization still reuses existing master directory;no company creation or parallelregistry.",
+    "New internal service rejects authority fields and forged eligibility_exception/settings;HTTPcaller retains its existing allowlist. Existing audited manager exception remains explicit."
+  ],
+  "tests": {
+    "native-allocation-reuse01": "16 existing HTTPcases passed;5 new testsfailed onlyRuby3Hash/keywordcalling mismatch.",
+    "native-allocation-reuse-fixed02": "Existing commercialexceptionHTTP passed;newtestfilehadsyntaxerror and wasnotaccepted.",
+    "native-allocation-reuse-final03": "10 passed,0failed =9newservice cases plus1nativeHTTPeligibilityexception.",
+    "native-allocation-api-final04": "16 passed,0failed after settled internal parameter validation =11destination-shapes+5master nativeflows.",
+    "lint": "Newservice/spec0offenses;sharedcontrollerretains6existingcomplexity/linelengthoffenses.",
+    "enterprise": "No corresponding creation/controller override or helper caller found."
+  },
+  "resources": {
+    "start": 6703759360,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/requests/api/v1/accounts/relationship/portfolio_owner_shapes_spec.rb": "c4467001953a850c6127c7cef8d5b6abf67f20af84934b6e4cfe0d9f78fcb379",
+      "spec/requests/api/v1/accounts/relationship/portfolio_group_master_flow_spec.rb": "e06cd4a5fc0850effeab6a23cc26754251836ed46941e4f8614dd193c52f5de1"
+    },
+    "minimum": 6703628288,
+    "exit_code": 0,
+    "end": 6703693824
+  },
+  "remaining": [
+    "True reviewed one-operation mass creation of missing native assignments stillrequires additive subject/item support in existing review engine;notimplementedby this prerequisite.",
+    "Named local role matrix pending businesschoice;TRRundefined;documentswithoutportfolio explicitlydeferred.",
+    "Current-sourceChrome remainsblockedbyno-build/no5379-change. NoC-Gclosure."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,production,clientinfrastructure,externaloperation orapplicationmigration.",
+  "next": "Add frozen native master-company subjects to existing reviewed batch items while keeping assignment-only v1 guards intact;then native execution/UI and regression."
+}

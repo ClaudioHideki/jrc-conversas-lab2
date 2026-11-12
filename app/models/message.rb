@@ -76,7 +76,7 @@ class Message < ApplicationRecord
   validates_with ContentAttributeValidator
   validates_with JsonSchemaValidator,
                  schema: TEMPLATE_PARAMS_SCHEMA,
-                 attribute_resolver: ->(record) { record.additional_attributes }
+                 attribute_resolver: ->(record) { record.additional_attributes.nil? ? {} : record.additional_attributes }
 
   validates :content_type, presence: true
   validates :content, length: { maximum: 150_000 }
@@ -413,6 +413,8 @@ class Message < ApplicationRecord
   end
 
   def send_reply
+    return if additional_attributes.to_h['whatsapp_retry'].present?
+
     # FIXME: Giving it few seconds for the attachment to be uploaded to the service
     # active storage attaches the file only after commit
     attachments.blank? ? ::SendReplyJob.perform_later(id) : ::SendReplyJob.set(wait: 2.seconds).perform_later(id)

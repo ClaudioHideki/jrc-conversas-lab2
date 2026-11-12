@@ -1,6 +1,7 @@
 <script setup>
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { lostReasonsAPI } from 'dashboard/api/crm';
@@ -17,6 +18,18 @@ const pendingLostMove = ref(null);
 const lostReasonId = ref('');
 const initializing = ref(true);
 const actionError = ref(null);
+let disposed = false;
+let generation = 0;
+let lossRequest = 0;
+const movingDealIds = new Set();
+const captureContext = () => ({
+  generation,
+  scope: authorityScope(store.getters),
+});
+const isCurrent = context =>
+  !disposed &&
+  context.generation === generation &&
+  context.scope === authorityScope(store.getters);
 
 // Filters state
 const filters = ref({
@@ -26,25 +39,47 @@ const filters = ref({
 });
 
 const loadKanbanData = async () => {
+  if (disposed) return;
   await store.dispatch('jrcCrm/deals/fetchKanbanData', filters.value);
 };
 
 // Load initial data
 const initialize = async () => {
+  generation += 1;
+  lostReasons.value = [];
+  pendingLostMove.value = null;
+  lostReasonId.value = '';
+  actionError.value = null;
+  lossRequest += 1;
+  movingDealIds.clear();
+  const context = captureContext();
   initializing.value = true;
   try {
     await store.dispatch('jrcCrm/pipelines/fetchPipelines');
-    if (store.getters['jrcCrm/pipelines/error']) return;
+    if (!isCurrent(context) || store.getters['jrcCrm/pipelines/error']) return;
     filters.value.pipeline_id =
       store.getters['jrcCrm/pipelines/allPipelines'][0]?.id || null;
     await loadKanbanData();
   } finally {
-    initializing.value = false;
+    if (isCurrent(context)) initializing.value = false;
   }
 };
 onMounted(() => {
   store.dispatch('agents/get');
   initialize();
+});
+
+watch(
+  () => authorityScope(store.getters),
+  () => {
+    filters.value = { pipeline_id: null, owner_id: null, search: '' };
+    initialize();
+  }
+);
+onBeforeUnmount(() => {
+  disposed = true;
+  generation += 1;
+  lossRequest += 1;
 });
 
 // Columns = stages from selected pipeline
@@ -77,7 +112,15 @@ const pipelineValue = computed(() =>
   )
 );
 
-const performMove = async ({ dealId, fromStageId, toStageId, reasonId }) => {
+const performMove = async ({
+  dealId,
+  fromStageId,
+  toStageId,
+  reasonId,
+  context = captureContext(),
+}) => {
+  if (!isCurrent(context) || movingDealIds.has(dealId)) return;
+  movingDealIds.add(dealId);
   actionError.value = null;
   store.commit('jrcCrm/deals/UPDATE_DEAL_STAGE', {
     dealId,
@@ -89,18 +132,32 @@ const performMove = async ({ dealId, fromStageId, toStageId, reasonId }) => {
       stageId: toStageId,
       lostReasonId: reasonId,
     });
+    if (!isCurrent(context)) return;
     await loadKanbanData();
   } catch {
+    if (!isCurrent(context)) return;
     actionError.value = t('CRM.FUNNEL.MOVE_ERROR');
     store.commit('jrcCrm/deals/ROLLBACK_DEAL_STAGE', {
       dealId,
       stageId: fromStageId,
     });
+  } finally {
+    if (isCurrent(context)) movingDealIds.delete(dealId);
   }
 };
 
 const confirmLostMove = async () => {
-  await performMove({ ...pendingLostMove.value, reasonId: lostReasonId.value });
+  const move = pendingLostMove.value;
+  if (
+    !move ||
+    !isCurrent(move.context) ||
+    !lostReasons.value.some(
+      reason => String(reason.id) === String(lostReasonId.value)
+    )
+  )
+    return;
+  await performMove({ ...move, reasonId: lostReasonId.value });
+  if (!isCurrent(move.context)) return;
   pendingLostMove.value = null;
   lostReasonId.value = '';
 };
@@ -108,25 +165,39 @@ const confirmLostMove = async () => {
 // Drag and drop
 const { onDragStart, onDragOver, onDrop, onDragEnd } = useDragAndDrop({
   onMove: async ({ dealId, fromStageId, toStageId }) => {
+    const context = captureContext();
+    if (disposed || movingDealIds.has(dealId)) return;
     const targetStage = columns.value.find(
       column => Number(column.stage.id) === Number(toStageId)
     )?.stage;
-    if (targetStage?.is_lost) {
+    if (
+      !targetStage ||
+      !columns.value.some(column =>
+        column.deals.some(deal => Number(deal.id) === Number(dealId))
+      )
+    )
+      return;
+    if (targetStage.is_lost) {
+      lossRequest += 1;
+      const request = lossRequest;
       try {
         const { data } = await lostReasonsAPI.list();
+        if (!isCurrent(context) || request !== lossRequest) return;
         lostReasons.value = data;
       } catch {
+        if (!isCurrent(context) || request !== lossRequest) return;
         actionError.value = t('CRM.FUNNEL.REASONS_ERROR');
         return;
       }
       pendingLostMove.value = {
+        context,
         dealId,
         fromStageId,
         toStageId,
       };
       return;
     }
-    await performMove({ dealId, fromStageId, toStageId });
+    await performMove({ dealId, fromStageId, toStageId, context });
   },
 });
 </script>

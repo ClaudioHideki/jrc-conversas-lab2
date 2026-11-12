@@ -123,3 +123,8 @@ export function useServiceDesk() {
   if (!value) throw new Error('Service Desk provider missing');
   return value;
 }
+
+// Dedicated cookie-authenticated employee Portal reuses the same scoped session.
+export function provideServiceDeskValue(value) {
+  provide(KEY, value);
+}

@@ -23,10 +23,20 @@ class JrcRelationship::RecordFilters
     scope = overdue_scope(scope)
     scope = scope.where(kind: @params[:type]) if @params[:type].present? && @model.column_names.include?('kind')
     scope = priority_scope(scope)
+    scope = priority_band_scope(scope)
     period_scope(scope)
   end
 
   private
+
+  def priority_band_scope(scope)
+    return scope unless @model == JrcRelationship::Action && @params[:priority_band].present?
+
+    band = @params[:priority_band]
+    raise ArgumentError, 'Invalid priority band' unless JrcRelationship::PriorityBands::CODES.include?(band)
+
+    scope.where("factors ->> 'priority_band' = ? AND factors ->> 'priority_band_score' = priority::text", band)
+  end
 
   def priority_scope(scope)
     return scope unless @params[:priority].present? && @model.column_names.include?('priority')
@@ -42,12 +52,11 @@ class JrcRelationship::RecordFilters
   end
 
   def period_scope(scope)
-    return scope unless @params[:from].present? && @model.column_names.include?('due_at')
+    return scope unless @model.column_names.include?('due_at')
 
-    from = Date.iso8601(@params[:from])
-    to = Date.iso8601(@params.fetch(:to, @params[:from]))
-    raise ArgumentError, 'Invalid period' if to < from || (to - from).to_i > 366
+    period = JrcRelationship::OperationalPeriod.call(@params)
+    return scope unless period
 
-    scope.where(due_at: from.beginning_of_day..to.end_of_day)
+    scope.where(due_at: period)
   end
 end

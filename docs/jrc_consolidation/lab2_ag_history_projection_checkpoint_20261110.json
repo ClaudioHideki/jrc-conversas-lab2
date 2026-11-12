@@ -1,0 +1,26 @@
+{
+  "utc": "2026-11-10T17:36:59.928374+00:00",
+  "source_sha": "4ac14ef5f50de4c8fae76176d9bcf697419dbdf0",
+  "native_baseline": {
+    "run": 42863585981,
+    "focused_artifact": 13787207107,
+    "examples": 208,
+    "failed": 8,
+    "pending": 0,
+    "migration_admission": "passed"
+  },
+  "changes": {
+    "history": "Capture the same bounded rule fields accepted by historical disclosure. Keep full immutable event/version and event digest; no local user grant projection. Native and isolated regression cases added.",
+    "fixtures": "Explicit source-view permissions for survey exporters, independent document download permission and denied-first assertion, actual approvals module enabled in Nexora synthetic domain. No production grant/policy changes.",
+    "frontend": "Expected C6 operational route rather than presence; production routes unchanged.",
+    "schema": "Exact Rails-generated schema proven in disposable native fresh/upgrade/reload admission."
+  },
+  "validation": "Awaiting rerun on the authorized disposable CI; no native Ruby locally. Local formatter guard refused to start at RAM below 750 MiB; actual CIM available 216532 KiB.",
+  "scope": {
+    "only_authorized_branch_push": true,
+    "build": false,
+    "production": false,
+    "provider_calls": false
+  },
+  "production_ready": false
+}

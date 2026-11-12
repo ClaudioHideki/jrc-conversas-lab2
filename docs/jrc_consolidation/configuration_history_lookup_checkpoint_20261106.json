@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "81df8195704071737f0d57dd879cd2148eae921a",
+  "reference": "Relationship P0152/P0181/P0185: controlled restoration and native history/source scope.",
+  "implementation": [
+    "Existing scoped configuration GET accepts source_version to select its exact stored history row without changing the recent50default contract. Reuses the same strictly positive persisted-integer validator as native playbook history; account/company/unit/group/configure gates remain before access.",
+    "Existing editor now allows selecting a prior stored version by number. Fresh server current/source values enter the SAME compare/simulate/reason/confirmation dialog and governed restore writer; cancel preserves unsaved draft and missing sources never open confirmation.",
+    "No inferred historic fields, overwritten versions, new tables, bypassed Central gate or external operations."
+  ],
+  "evidence": {
+    "baseline": "configuration-history-lookup-baseline01:3failures; two real unsupported/ignored-source issues, plus a test expectation401 corrected to the existing native403foreign-account denial without changing auth code.",
+    "integrated": "configuration-history-lookup-final03:8/0 (3initial lookup +5playbook catalog shared-validator regressions).",
+    "intermediate": "configuration-history-lookup-final05:3/0 including actual restore v76fromv1→v77.",
+    "final": "configuration-history-lookup-final08:4/0 after splitting separate read/no-mutation and real native restore/preserved76historical rows cases to satisfy spec maintainability limits. Overlaps not counted as unique.",
+    "source": "configuration-history-lookup-source01:17/0 (11existing restore/history cases +6new selector cases including four invalid-number boundaries).",
+    "static": "New Ruby spec ruby07:0offenses; source spec0errors/0warnings; shared Panel34existing warnings. Controller only inherited ClassLength finding, now258/175. No globally clean claim.",
+    "database": "jrc_rel_v2_candidate_test",
+    "chrome": "No current-source Chrome/build evidence; source mocks remain distinct."
+  },
+  "environment": {
+    "disk_initial_bytes": 6924603392,
+    "disk_minimum_observed_bytes": 6902878208,
+    "disk_final_test_bytes": 6922608640,
+    "no_build_cleanup_5379change_migration_external_operation": true
+  },
+  "remaining": [
+    "Configuration history remains a recent50list plus exact-version search; broad page browsing is not claimed complete.",
+    "Group durable membership batches/item recovery, local roles, master multi-allocation and full Word/current-source browser gates remain open.",
+    "TRR undefined/deferred portfolio-less documents/external pilots unchanged."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/configuration_history_lookup_checkpoint_20261106.json"
+}

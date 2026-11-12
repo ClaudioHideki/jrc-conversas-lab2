@@ -26,12 +26,12 @@ class Api::V1::Accounts::NotificationsController < Api::V1::Accounts::BaseContro
 
   def update
     @notification.update(read_at: DateTime.now.utc)
-    render json: @notification
+    render json: notification_payload
   end
 
   def unread
     @notification.update(read_at: nil)
-    render json: @notification
+    render json: notification_payload
   end
 
   def destroy
@@ -56,7 +56,7 @@ class Api::V1::Accounts::NotificationsController < Api::V1::Accounts::BaseContro
   def snooze
     updated_meta = (@notification.meta || {}).merge('last_snoozed_at' => nil)
     @notification.update(snoozed_until: parse_date_time(params[:snoozed_until].to_s), meta: updated_meta) if params[:snoozed_until]
-    render json: @notification
+    render json: notification_payload
   end
 
   private
@@ -65,7 +65,10 @@ class Api::V1::Accounts::NotificationsController < Api::V1::Accounts::BaseContro
     return unless params[:primary_actor_type]
     return unless Notification::PRIMARY_ACTORS.include?(params[:primary_actor_type])
 
-    if params[:primary_actor_type] == 'JrcServiceDesk::Ticket'
+    if JrcApprovals::Notifications::ACTORS.include?(params[:primary_actor_type])
+      @primary_actor = JrcApprovals::Notifications.actor!(account: Current.account, user: Current.user,
+                                                                type: params[:primary_actor_type], id: params[:primary_actor_id])
+    elsif params[:primary_actor_type] == 'JrcServiceDesk::Ticket'
       ctx = JrcServiceDesk::OperationalContext.new(pundit_user)
       raise ActiveRecord::RecordNotFound unless ctx.capability?(:sla_view)
 
@@ -81,6 +84,11 @@ class Api::V1::Accounts::NotificationsController < Api::V1::Accounts::BaseContro
     @notification = current_user.notifications.where(account_id: Current.account.id).find(params[:id])
     raise ActiveRecord::RecordNotFound if @notification.service_desk_clock? && !JrcServiceDesk::ClockAlerts.visible?(@notification)
     raise ActiveRecord::RecordNotFound if @notification.relationship_action? && !JrcRelationship::Notifications.visible?(@notification)
+    raise ActiveRecord::RecordNotFound if @notification.approval_event? && !JrcApprovals::Notifications.visible?(@notification)
+  end
+
+  def notification_payload
+    @notification.approval_event? ? @notification.push_event_data : @notification
   end
 
   def set_current_page

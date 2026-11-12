@@ -40,7 +40,15 @@ permissions:
   packages: write
 
 jobs:
+  precimech-regression:
+    if: inputs.component == 'app'
+    uses: ./.github/workflows/precimech-hotfix-tests.yml
+    with:
+      source_sha: ${{ inputs.source_sha }}
+
   build-and-push:
+    needs: precimech-regression
+    if: ${{ !cancelled() && (inputs.component != 'app' || needs.precimech-regression.result == 'success') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     concurrency:
@@ -96,7 +104,7 @@ jobs:
           PYTHON
 
       - name: Exigir Projetos e Portal tambem na release consolidada
-        if: (github.ref_name == 'main' || startsWith(github.ref_name, 'codex/consolidacao-')) && inputs.component == 'app'
+        if: (github.ref_name == 'main' || startsWith(github.ref_name, 'codex/consolidacao-') || github.ref_name == 'codex/lab2-ag-consolidada-20261110') && inputs.component == 'app'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATION_RUN_ID: ${{ inputs.projects_validation_run_id }}
@@ -124,6 +132,37 @@ jobs:
           ref: ${{ inputs.source_sha }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Exigir a matriz A-G aprovada no SHA consolidado exato
+        if: github.ref_name == 'codex/lab2-ag-consolidada-20261110'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATION_RUN_ID: ${{ inputs.validation_run_id }}
+        run: |
+          test "$COMPONENT" = app
+          test "$BACKOFFICE_CANDIDATE" = true
+          test "$GITHUB_SHA" = "$SOURCE_SHA"
+          python3 - <<'PYTHON'
+          import json, os, urllib.request
+          run_id = os.environ['VALIDATION_RUN_ID']
+          assert run_id.isdecimal(), 'Exact native validation run required'
+          base = f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{run_id}"
+          headers = {'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'}
+          def read(url):
+              with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as response:
+                  return json.load(response)
+          run = read(base)
+          assert run['head_sha'] == os.environ['SOURCE_SHA']
+          assert run['head_branch'] == os.environ['GITHUB_REF_NAME']
+          assert run['path'] == '.github/workflows/ag-native-candidate.yml'
+          assert run['status'] == 'completed' and run['conclusion'] == 'success'
+          jobs = read(base + '/jobs?per_page=100')['jobs']
+          rails = [job for job in jobs if job['name'].startswith('rails (')]
+          assert len(rails) == 36 and all(job['conclusion'] == 'success' for job in rails)
+          for name in ['identities', 'migration-admission', 'frontend', 'native-focused (fresh)', 'native-focused (upgrade)']:
+              assert any(job['name'] == name and job['conclusion'] == 'success' for job in jobs)
+          print('Exact consolidated native matrix confirmed:', run['html_url'])
+          PYTHON
 
       - name: Confirmar identidade e alteracoes do componente
         run: |
@@ -155,24 +194,27 @@ jobs:
         with:
           run_install: false
 
-      - name: Instalar dependencias de sistema dos gates Ruby
+      - name: Verificar headers PostgreSQL do runner para os gates Ruby
         if: inputs.component == 'app'
         timeout-minutes: 8
         run: |
           set -euo pipefail
-          # The hosted Azure mirror stalled this release before any product gate.
-          # Keep APT signature/TLS verification and use the official HTTPS archives.
+          mirror=''
+          for candidate in https://archive.ubuntu.com/ubuntu https://azure.archive.ubuntu.com/ubuntu https://mirrors.edge.kernel.org/ubuntu; do
+            if curl --fail --silent --max-time 10 "$candidate/dists/noble/InRelease" -o /dev/null; then
+              mirror="$candidate"
+              break
+            fi
+          done
+          test -n "$mirror"
           for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources /etc/apt/apt-mirrors*.txt; do
             if [ -f "$source" ]; then
-              sudo sed -i -E \
-                -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' \
-                -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' \
-                "$source"
+              sudo sed -i -E "s#https?://(azure[.]archive|archive|security)[.]ubuntu[.]com/ubuntu/?#$mirror/#g" "$source"
             fi
           done
           apt_options=(-o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20)
           sudo apt-get "${apt_options[@]}" -o APT::Update::Error-Mode=any update
-          sudo apt-get "${apt_options[@]}" install -y --no-install-recommends libpq-dev libvips libvips-dev
+          sudo apt-get "${apt_options[@]}" install -y --no-install-recommends libpq-dev libvips libvips-dev fonts-dejavu-core
           if [ "$BACKOFFICE_CANDIDATE" = true ]; then
             sudo apt-get "${apt_options[@]}" install -y --no-install-recommends imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
           fi
@@ -193,10 +235,15 @@ jobs:
         if: inputs.component == 'app'
         run: |
           git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$SOURCE_SHA" -- '*.rb' | while IFS= read -r file; do ruby -c "$file"; done
-          node script/validate_changed_source.mjs "$BASE_SHA"
+          if [ "$GITHUB_REF_NAME" = codex/lab2-ag-consolidada-20261110 ]; then
+            node script/validate_changed_source.mjs "$BASE_SHA" \
+              --historical-admission docs/jrc_consolidation/ag_historical_migration_admission_20261111.json
+          else
+            node script/validate_changed_source.mjs "$BASE_SHA"
+          fi
 
       - name: Gates isolados do Cadastro Mestre e modulos preservados
-        if: inputs.component == 'app'
+        if: inputs.component == 'app' && github.ref_name != 'codex/lab2-ag-consolidada-20261110'
         run: |
           ruby test/jrc_customers/identity_pure_test.rb
           ruby test/jrc_customers/company_link_decision_test.rb
@@ -204,7 +251,7 @@ jobs:
           node --test test/jrc_customers/*.test.mjs test/jrc_operations/*test.mjs test/jrc_consolidation/commercial_ui.test.mjs
 
       - name: Vitest dos modulos afetados e SIP/WebRTC preservado
-        if: inputs.component == 'app'
+        if: inputs.component == 'app' && github.ref_name != 'codex/lab2-ag-consolidada-20261110'
         run: >-
           pnpm exec vitest run
           app/javascript/dashboard/routes/dashboard/serviceDesk
@@ -225,7 +272,7 @@ jobs:
           --maxWorkers=2 --no-file-parallelism
 
       - name: Lint direcionado do Cadastro Mestre e Pedido
-        if: inputs.component == 'app'
+        if: inputs.component == 'app' && github.ref_name != 'codex/lab2-ag-consolidada-20261110'
         run: >-
           pnpm exec eslint --ext .js,.vue
           app/javascript/dashboard/routes/dashboard/jrcCustomers
@@ -235,7 +282,7 @@ jobs:
           app/javascript/dashboard/routes/dashboard/crm/views/orders
 
       - name: Lint dos fontes alterados de Relacionamento e badges
-        if: inputs.component == 'app'
+        if: inputs.component == 'app' && github.ref_name != 'codex/lab2-ag-consolidada-20261110'
         run: |
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$SOURCE_SHA" -- app/javascript | grep -E '\.(js|vue)$' | grep -E '(/jrcRelationship/|/api/jrcRelationship.js$|/components-next/sidebar/)' | grep -v '/sidebar/Sidebar.vue$')
           if [ "${#files[@]}" -gt 0 ]; then pnpm exec eslint "${files[@]}"; fi
@@ -259,9 +306,11 @@ jobs:
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
+          name: jrc-ag-image-${{ github.run_id }}-${{ github.run_attempt }}
           driver-opts: image=mirror.gcr.io/moby/buildkit:v0.33.1@sha256:98cc6a3fc46220d00f8224ae483f3274fc874e9be8d7dd1e2e2c5481209228b5
 
       - name: Construir somente a imagem selecionada (inclui build frontend)
+        if: github.ref_name != 'codex/lab2-ag-consolidada-20261110'
         uses: docker/build-push-action@v6
         with:
           context: ${{ inputs.component == 'flows-sandbox' && './services/flows-sandbox' || '.' }}
@@ -278,6 +327,21 @@ jobs:
           cache-to: type=gha,scope=${{ inputs.component }},mode=max
           provenance: false
 
+      - name: Construir a candidata A-G com guarda de RAM e disco desde o inicio
+        if: github.ref_name == 'codex/lab2-ag-consolidada-20261110'
+        env:
+          JRC_AG_AUTHORIZED_BUILD_SHA: ${{ inputs.source_sha }}
+          JRC_AG_BUILDER: jrc-ag-image-${{ github.run_id }}-${{ github.run_attempt }}
+        run: python3 script/jrc_ag_guarded_image_build.py --execute
+
+      - name: Preservar a evidencia do build protegido A-G
+        if: always() && github.ref_name == 'codex/lab2-ag-consolidada-20261110'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ag-image-build-${{ inputs.source_sha }}
+          path: ${{ runner.temp }}/ag-image-${{ inputs.source_sha }}
+          if-no-files-found: warn
+
       - name: Verificar SHA interno, label e plataforma antes de publicar
         run: |
           image="ghcr.io/$IMAGE:sha-$SOURCE_SHA"
@@ -292,7 +356,9 @@ jobs:
         run: |
           python3 - <<'PYTHON'
           import hashlib, json, os, pathlib, subprocess
-          paths = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', os.environ['BASE_SHA'], os.environ['SOURCE_SHA']], text=True).splitlines()
+          reviewed_base = ('d8a83b824b11cc68ddbbce7c79681f368051fb70'
+                           if os.environ['GITHUB_REF_NAME'] == 'codex/lab2-ag-consolidada-20261110' else os.environ['BASE_SHA'])
+          paths = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', reviewed_base, os.environ['SOURCE_SHA']], text=True).splitlines()
           paths = [p for p in paths if p.startswith(('app/', 'config/', 'db/', 'lib/', 'enterprise/', 'public/')) and '/spec/' not in p and '/specs/' not in p and not p.endswith(('.spec.js', '.spec.vue'))]
           migrations = [
               'db/migrate/20261004170000_complete_jrc_customer_master_company_profile.rb',
@@ -303,6 +369,7 @@ jobs:
               'db/migrate/20261005200000_extend_relationship_operations.rb',
               'db/migrate/20261005210000_add_relationship_playbook_conditions.rb',
               'db/migrate/20261005220000_extend_commercial_operational_configuration.rb',
+              'db/migrate/20261111150000_create_whatsapp_retry_attempts.rb',
           ]
           if os.environ.get('BACKOFFICE_CANDIDATE') == 'true':
               migrations += ['db/migrate/20261101190000_create_backoffice_document_versions.rb',
@@ -323,6 +390,15 @@ jobs:
           require 'grpc'
           require 'pg'
           require 'nokogiri'
+          manifest_path = %w[public/vite/manifest.json public/vite/.vite/manifest.json].find { |path| File.file?(path) }
+          raise 'New compiled frontend manifest missing' unless manifest_path
+          manifest = JSON.parse(File.read(manifest_path))
+          %w[entrypoints/dashboard.js entrypoints/v3app.js entrypoints/requester_portal.js].each do |key|
+            entry = manifest.fetch(key)
+            path = File.expand_path(entry.fetch('file'), '/app/public/vite')
+            raise 'Compiled entry missing or outside candidate' unless entry['isEntry'] && path.start_with?('/app/public/vite/') && File.file?(path)
+          end
+          raise 'Compiled CSS missing' if Dir.glob('public/vite/**/*.css').empty?
           puts JSON.generate(verified_product_files: expected.size, migrations: expected.keys.count { |path| path.start_with?('db/migrate/') }, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
           RUBY
 
@@ -334,7 +410,7 @@ jobs:
           PUBLISH: ${{ inputs.publish }}
         run: |
           case "$GITHUB_REF_NAME" in
-            main|codex/crm-backoffice-servicedesk-visual-20261101|codex/release-integrada-specs-20261102|codex/lab2-integral-20261102|codex/shared-inbox-history-20261104|codex/ura-padrao-lab2-*|codex/consolidacao-*) ;;
+            main|codex/crm-backoffice-servicedesk-visual-20261101|codex/release-integrada-specs-20261102|codex/lab2-integral-20261102|codex/shared-inbox-history-20261104|codex/ura-padrao-lab2-*|codex/consolidacao-*|codex/lab2-ag-consolidada-20261110) ;;
             *) echo 'Branch candidata nao autorizada para este gate' >&2; exit 1 ;;
           esac
           test "$COMPONENT" = app
@@ -351,7 +427,8 @@ jobs:
               run = json.load(response)
           assert run['head_sha'] == os.environ['SOURCE_SHA'], 'Validation source SHA mismatch'
           assert run['head_branch'] == os.environ['GITHUB_REF_NAME'], 'Validation branch mismatch'
-          assert run['path'] == '.github/workflows/backoffice-flow.yml', 'Unexpected validation workflow'
+          expected = '.github/workflows/ag-native-candidate.yml' if os.environ['GITHUB_REF_NAME'] == 'codex/lab2-ag-consolidada-20261110' else '.github/workflows/backoffice-flow.yml'
+          assert run['path'] == expected, 'Unexpected validation workflow'
           assert run['conclusion'] == 'success', 'Native validation has not passed'
           print('Native validation confirmed for the exact candidate SHA:', run['html_url'])
           PYTHON
@@ -368,6 +445,21 @@ jobs:
           name: backoffice-candidate-runtime-${{ github.run_attempt }}
           path: ${{ runner.temp }}/jrc-bo-candidate-*.log
           if-no-files-found: ignore
+
+      - name: Autenticar GHCR para leitura da imagem anterior no smoke isolado
+        if: inputs.component == 'app'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke do artefato exato com app, worker e transporte falso
+        if: inputs.component == 'app'
+        run: |
+          docker run --rm --network none --entrypoint test "ghcr.io/$IMAGE:sha-$SOURCE_SHA" ! -e /app/script/precimech_hotfix
+          bash script/precimech_hotfix/candidate_smoke.sh "ghcr.io/$IMAGE:sha-$SOURCE_SHA"
+          git diff --exit-code
 
       - name: Autenticar no GHCR somente para publicacao autorizada
         if: inputs.publish
@@ -413,3 +505,11 @@ jobs:
             echo "Criacao: $(docker image inspect --format '{{.Created}}' "ghcr.io/$IMAGE@$digest")"
             echo "Verificacao UTC: $(date -u +%FT%TZ)"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Repetir smoke na imagem publicada por digest
+        if: inputs.publish && inputs.component == 'app'
+        run: |
+          digest=$(docker buildx imagetools inspect "ghcr.io/$IMAGE:sha-$SOURCE_SHA" --format '{{.Manifest.Digest}}')
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          bash script/precimech_hotfix/candidate_smoke.sh "ghcr.io/$IMAGE@$digest"
+          git diff --exit-code

@@ -1,0 +1,41 @@
+{
+  "word": "cadastro-mestre:P0414",
+  "requirement": "Listas e popups respondem com paginação/queries adequadas em base real.",
+  "status": "Prepared; not executed or accepted as representative scale",
+  "no_business_volume_invented": true,
+  "profiles_proposed_not_business_requirements": [
+    100,
+    1000,
+    10000,
+    50000
+  ],
+  "fixtures": "Only separate synthetic tenant fixtures, native validation/import services and explicit dataset manifests; no copy of production data and no new parallel customer registry",
+  "sources": [
+    "app/services/jrc_customers/contact_directory.rb",
+    "app/services/jrc_customers/customer360.rb",
+    "app/services/jrc_customers/module_segment_filter.rb",
+    "app/services/jrc_relationship/document_history.rb",
+    "app/services/jrc_backoffice/authority_overview.rb"
+  ],
+  "measurements": [
+    "Record actual volume, source SHA, schema, disk and process memory",
+    "Authorized and denied accounts/companies/issuer/units, private portfolios and source modules",
+    "First/next/last page, boundary per_page, empty/final page, filters and clearing filters",
+    "Warm/cold request timings and query counts with native serializers",
+    "Read-only EXPLAIN ANALYZE/BUFFERS for native authorized queries, without ignoring policies",
+    "Document history latest versions and account-scoped audit selection; no file bytes during list queries",
+    "Record p50/p95 without inventing an acceptance SLO or extrapolating tiny fixtures to production"
+  ],
+  "safety": {
+    "no_run_now": "Unexplained prior disk drop; preserve headroom and use lightweight development. Do not run a large dataset here without a measured resource budget.",
+    "minimum_preferred_free_bytes": 3221225472,
+    "stop_before_bytes": 2000000000,
+    "mandatory_stop_bytes": 750000000,
+    "single_owned_operation": true,
+    "no_cleanup": true,
+    "no_production": true,
+    "no_external_effects": true
+  },
+  "known_review_point": "AuthorityOverview authorizes historical rows individually before pagination; do not limit before authorization or expose hidden counts to optimize prematurely",
+  "remaining": "Representative scale acceptance and browser popups remain open; this plan is not performance evidence."
+}

@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "5c28470c96a3cd047555455f11697bd338df0632",
+  "status": "Legacy batch rejects malformed owner input before mutation",
+  "baseline": "Actual false owner payload unassigned the source and added an audit event;1/1 baseline failure proves mutation.",
+  "implementation": [
+    "Parse assign destination once before native transfer policy binding; require a scalar positive integer/decimal ID string. Explicit nil/empty input retains legacy unassignment. Reject booleans,arrays,objects,floats,zero and malformed text before domain mutation.",
+    "Reuse the parsed identity in unchanged-owner comparison, reviewed identity verification and native user lookup. No authorization bypass or new destination access. Activity/playbook operations unchanged."
+  ],
+  "tests": {
+    "native02": "19/0:8input cases,5owner no-op and6active-work permission regressions. Valid native string assignment and nil unassignment preserved.",
+    "rubocop": "PortfolioBatch and new request spec0offenses.",
+    "frontend": "No source UI change in this block.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "start": 10105491456,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/requests/api/v1/accounts/relationship/portfolio_batch_owner_input_spec.rb": "2f91222b453bdd3d835171e1cd18b437325c2161b4f8957ab668c39a7157f211",
+      "spec/requests/api/v1/accounts/relationship/portfolio_owner_noop_spec.rb": "128b4a43fbfa53684e2465675c4b36e3537584c721189fabdbebab47e12272a6",
+      "spec/requests/api/v1/accounts/relationship/portfolio_active_work_access_spec.rb": "57f348458372d9ac7566e710e96ccfce2a18ba8c0aca389b3819130fba4ff1df"
+    },
+    "minimum": 10105278464,
+    "exit_code": 0,
+    "end": 10105991168
+  },
+  "disk_final_bytes": 10039324672,
+  "remaining": "Reviewed preview/direct controller input shapes are outside this focused endpoint correction; do not claim universal input normalization. Full current-source Chrome and C-G acceptance still open.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,external operation,production or runtime change."
+}

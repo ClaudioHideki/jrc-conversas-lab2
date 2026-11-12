@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "6d8afce8ecd3fb576bb91a270a15b82f2e2eff78",
+  "status": "Native read-only draft health simulation implemented and locally tested; not a universal automation simulator or F2/C-G closure.",
+  "files": [
+    "app/controllers/api/v1/accounts/relationship/health_configuration_previews_controller.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/HealthConfigurationPreview.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/healthConfigurationPreview.spec.js",
+    "app/services/jrc_relationship/health_configuration_preview.rb",
+    "spec/requests/api/v1/accounts/relationship/health_configuration_preview_spec.rb",
+    "app/javascript/dashboard/api/jrcRelationship.js",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue",
+    "app/services/jrc_relationship/context.rb",
+    "config/routes.rb"
+  ],
+  "implementation": [
+    "A dedicated authorized POST preview uses a fresh real Context, current scoped customer data and CustomerSignals/HealthScore; it never invokes Processor, playbooks, delivery or configuration saves.",
+    "The draft is an unsaved update instance with native identity, expected version and all native validations. Product/segment/company/unit/account precedence is retained through the original Context.configuration method.",
+    "The response explicitly identifies simulation and no business writes, with current/proposed score, coverage/factors/evidence and effective scope/version. A draft that is not effective is visibly identified.",
+    "A separate section below the native editor selects real scoped paginated customers, compares results, aborts old requests and clears evidence when identity, permissions, draft or selected customer changes. No simulated save is emitted."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "health-preview-native01",
+      "examples": 5,
+      "failures": 2,
+      "note": "Draft initially used a new model identity; native scope uniqueness correctly rejected updating an existing scope. Fixed by retaining the original native identity in a separate unsaved instance; uniqueness was not disabled."
+    },
+    {
+      "label": "health-preview-native02",
+      "examples": 5,
+      "failures": 0
+    },
+    {
+      "label": "health-preview-native-final",
+      "examples": 11,
+      "failures": 0,
+      "note": "Five API cases including no configuration/version/snapshot/action/audit/job writes, native malformed-input rejection, account/unit isolation, plus six existing scope-precedence cases."
+    },
+    {
+      "label": "health-preview-ui01",
+      "tests": 7,
+      "failures": 0,
+      "note": "Four new workflow cases plus three native configuration form regressions; Vue mocks, not Chrome."
+    }
+  ],
+  "static_gates": [
+    "New service/spec/controller:0 RuboCop offenses.",
+    "Context:14 inherited offenses,0 added; stable ConfigurationController unchanged and0 offenses.",
+    "Directed ESLint0 errors;5 standard dynamic-key/separator warnings in the new component and35 inherited ConfigurationPanel warnings.",
+    "git diff --check passed."
+  ],
+  "word_reference": {
+    "paragraph": "Relationship V2 paragraph152: simulation before production rules",
+    "partial": "This increment previews health calculation only. General automation effects, delivery, global budgets, approval and rollback authorization remain their own native workflows."
+  },
+  "disk_final_bytes": 7401758720,
+  "next": "F2 native cadence action-budget deferral with persisted truthful pending steps and bounded retry, preserving contact-reply and authority gates.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 change,container restart or external operation."
+}

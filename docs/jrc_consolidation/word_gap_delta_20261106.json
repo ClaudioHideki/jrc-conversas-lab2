@@ -1,0 +1,537 @@
+{
+  "date": "2026-11-06",
+  "source_head": "3b33af4f1fe7a4bd9534d1fb1f73b06d5f274523",
+  "audit_kind": "Incremental verified source/evidence delta; not a completed literal/visual Word acceptance matrix",
+  "original_inventory_preserved": true,
+  "literal_fragment_counts": {
+    "cadastro-mestre": 373,
+    "relacionamento": 298,
+    "backoffice": 449,
+    "central-aprovacoes": 426
+  },
+  "document_sha256": {
+    "cadastro-mestre": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
+    "relacionamento": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+    "backoffice": "ebd5cd1db7fa53cc7bf7e2fa6a801e498735eaef9d67040002a5a9ade4878284",
+    "central-aprovacoes": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917"
+  },
+  "confirmed_deltas": [
+    {
+      "requirement": "E final sealed dossier",
+      "current_state": "Native implementation and automated evidence supersede the older pending note",
+      "report": "sealed_dossier_checkpoint_20261105.json",
+      "remaining": "External signature/scanner acceptance and fresh UI remain separate."
+    },
+    {
+      "requirement": "F1 points/hours/current capacity",
+      "current_state": "Explicit opt-in typed calculation and native/current capacity tested; old pending note partially superseded",
+      "reports": [
+        "weighted_capacity_checkpoint_20261105.json",
+        "analyst_current_capacity_checkpoint_20261105.json"
+      ],
+      "remaining": "No illustrative production defaults or blanket full F1 closure."
+    },
+    {
+      "requirement": "F1 native pending destinations/removal",
+      "current_state": "Native readiness, reviewed handoffs, nested commitments, automation dependencies and final Relationship-only eligibility withdrawal locally tested, including actual PostgreSQL concurrency.",
+      "reports": [
+        "withdrawal_readiness_checkpoint_20261105.json",
+        "project_handoff_proof_checkpoint_20261105.json",
+        "analyst_cadence_controls_checkpoint_20261105.json",
+        "analyst_native_responsibilities_checkpoint_20261106.json",
+        "withdrawal_nested_commitments_checkpoint_20261106.json",
+        "analyst_withdrawal_checkpoint_20261106.json"
+      ],
+      "remaining": "No account/global agent deletion. Fresh visual acceptance and controlled new reversal remain separate; native project/cadence successor decisions are not automated blanket transfers."
+    },
+    {
+      "requirement": "F2 priority/anti-noise",
+      "current_state": "Trend/SLA inputs, optional P0-P3 mapping and monitor/cadence/automatic-playbook budgets tested",
+      "reports": [
+        "priority_critical_checkpoint_20261105.json",
+        "priority_bands_checkpoint_20261105.json",
+        "automatic_playbook_budget_checkpoint_20261106.json"
+      ],
+      "remaining": "Other dimensions/aggregation and full functional/visual audit remain open. Risk follow-up, surveys/plans/manual workflows deliberately retain separate policies."
+    },
+    {
+      "requirement": "D percentage adjustment input",
+      "word_fragments": [
+        "central-aprovacoes:P0111",
+        "central-aprovacoes:P0112",
+        "central-aprovacoes:P0126",
+        "central-aprovacoes:P0411",
+        "central-aprovacoes:P0413",
+        "central-aprovacoes:P0437"
+      ],
+      "current_state": "Implemented native-base percentage-to-cents input; exact shared calculator vectors and atomic source adjustment tested",
+      "remaining": "No new percentage source field or generic write adapter; other unspecified domains not declared complete."
+    },
+    {
+      "requirement": "F1 linked CRM commitments and native edit/reschedule",
+      "reports": [
+        "analyst_crm_commitments_checkpoint_20261106.json",
+        "native_activity_editing_checkpoint_20261106.json"
+      ],
+      "current_state": "Scoped source inventory and native content/date editor implemented and locally tested. No final identity removal or ownership transfer claimed."
+    },
+    {
+      "requirement": "C B3 limited representative attendance source scale",
+      "report": "attendance_source_scale_checkpoint_20261106.json",
+      "current_state": "1000 conversations/1150 fixture messages plus native templates and100 tickets/200 clocks; native query/permission regressions passed.",
+      "remaining": "Other C scale cohorts, real current-source popup/browser acceptance and production pilot remain open."
+    },
+    {
+      "requirement": "F2 explicit human assessment and internal run observability P0148/P0151",
+      "current_state": "Native guarded alert assessment, immutable audit, exact cause/factors/priority freshness, authorized raw-count cohort and persisted internal-batch duration locally tested. Closure/dismissal/customer feedback do not infer false alerts.",
+      "reports": [
+        "automatic_alert_review_checkpoint_20261106.json",
+        "processing_duration_checkpoint_20261106.json",
+        "priority_band_pinning_checkpoint_20261106.json",
+        "operational_period_checkpoint_20261106.json"
+      ],
+      "remaining": "No model precision or external NICO/end-to-end latency acceptance. Fresh UI/current-source visual gates remain open."
+    },
+    {
+      "requirement": "C B2 native document catalog scale/private version queries",
+      "current_state": "Measured1000 versioned documents, real native API pages5/25/50/lastpage; fixed N+1 using shared authorized selector;20 native gates passed. Original cohorts/files preserved.",
+      "report": "document_catalog_scale_checkpoint_20261106.json",
+      "remaining": "Not upload/scanner throughput or full production pilot; fresh UI/visual acceptance still pending."
+    },
+    {
+      "requirement": "F1/F2 manual responsibility and QBR commitment destinations",
+      "current_state": "Implemented and native/Vue tested; historic responsibilities preserved",
+      "evidence": [
+        "docs/jrc_consolidation/manual_work_ownership_checkpoint_20261106.json",
+        "docs/jrc_consolidation/qbr_commitment_ownership_checkpoint_20261106.json"
+      ],
+      "remaining": "Plan goal/milestone guard is next; final identity-removal business scope and fresh visual gates remain open."
+    },
+    {
+      "requirement": "F1/F2 success-plan metric/milestone responsible and source access",
+      "current_state": "Implemented and native/Vue tested; positional historical references preserved",
+      "evidence": "docs/jrc_consolidation/plan_commitment_ownership_checkpoint_20261106.json",
+      "remaining": "Current-source Chrome and final withdrawal/business gates remain open."
+    },
+    {
+      "requirement": "relacionamento:P0082/P0083, observed Health Score coverage presentation",
+      "current_state": "Native engine reused; read-only multi-surface presentation and source/consumer Vue tests passed",
+      "evidence": "docs/jrc_consolidation/health_observed_coverage_checkpoint_20261106.json",
+      "remaining": "Fresh Chrome/visual acceptance and P0148 calibrated inference confidence are separate."
+    },
+    {
+      "requirement": "relacionamento:P0095 strategic owner-transfer hold",
+      "current_state": "Explicit opt-in native guard, reviewed-batch integration and functional dialog locally validated",
+      "evidence": "docs/jrc_consolidation/portfolio_transfer_lock_checkpoint_20261106.json",
+      "remaining": "No inferred strategic status, personnel conflict detection, final roster removal or full F1/visual closure."
+    },
+    {
+      "requirement": "F1 controlled new reversal of Relationship eligibility",
+      "word_fragments": [
+        "relacionamento:P0107"
+      ],
+      "current_state": "Implemented audited native reversal with monotonic revision, pre-counter compatibility and new reviewed execution after restoration. Prior snapshots/events and untouched epoch0 signatures preserved.",
+      "report": "analyst_restoration_checkpoint_20261106.json",
+      "remaining": "Fresh compiled visual acceptance and other F1 distribution dimensions remain separate."
+    },
+    {
+      "requirement": "F1 reviewed partial responsibility transfer with legitimate source scope loss",
+      "word_fragments": [
+        "relacionamento:P0099",
+        "relacionamento:P0104",
+        "relacionamento:P0105",
+        "relacionamento:P0106",
+        "relacionamento:P0128"
+      ],
+      "current_state": "Native supported handoff, source-free receipt, real Central/capacity continuation and current grants tested; no implicit customer access grant.",
+      "report": "scoped_responsibility_handoff_checkpoint_20261106.json",
+      "remaining": "Fresh visual acceptance and new unrelated-native boundary increment remain open."
+    },
+    {
+      "requirement": "F1 CS-only analyst withdrawal: preserve unrelated native responsibilities",
+      "word_fragments": [
+        "relacionamento:P0106",
+        "relacionamento:P0127",
+        "relacionamento:P0128"
+      ],
+      "current_state": "User business scope confirmed;34native gates passed for plan/action/risk source selection and native grants. Other module work/access/records preserved.",
+      "report": "withdrawal_cs_native_boundary_checkpoint_20261106.json",
+      "remaining": "Formal handoff origin expansion and source-selector scale are next; no full F1 or fresh visual closure."
+    },
+    {
+      "requirement": "F1 formal project/order handoff origins and native linked-task scale",
+      "current_state": "Native prepare/accept and immutable case, canonical order resolution, rejection/archived roots and wrong-customer denial tested.1000linked/1000unrelated real tasks, correct native API pages1/100.",
+      "report": "withdrawal_formal_handoff_checkpoint_20261106.json",
+      "remaining": "High fixed native authorization-query cost; many distinct order-linked project cohorts and fresh compiled visual acceptance not completed."
+    },
+    {
+      "requirement": "C/F1/G source selection performance with native authorization",
+      "current_state": "Shared customer predicates extracted without full360eager initialization;55customer regressions,16additional origin/permission cases and1000linked/1000unrelated task read scale passed.",
+      "report": "subject_source_performance_checkpoint_20261106.json",
+      "remaining": "Current compiled Chrome and broader production/many-order-project pilot not validated."
+    },
+    {
+      "requirement": "F1/G native CS-only withdrawal boundary and distinct implementation-order scale",
+      "current_state": "User approved unrelated native responsibilities remaining in source modules; actual CS links and canonical handoffs are enforced. Native20cross-module regressions and25orders/1000linked-task cohort passed.",
+      "reports": [
+        "withdrawal_cs_native_boundary_checkpoint_20261106.json",
+        "withdrawal_formal_handoff_checkpoint_20261106.json",
+        "withdrawal_multiorder_scale_checkpoint_20261106.json",
+        "analyst_restoration_checkpoint_20261106.json"
+      ],
+      "remaining": "Fresh current-source visual acceptance, broader independent-customer cohort and assisted affinity/rebalancing remain partial; controlled restoration is already implemented, superseding older pending notes."
+    },
+    {
+      "requirement": "F2 P0148/P0082 explainable recommendations from configured and observed health",
+      "current_state": "Native CustomerSignals reproduction5cases/4failures corrected;10native regression cases passed. Exact risk threshold and positive weights used; missing/blocked data never imply maintained healthy cadence.",
+      "report": "health_recommendation_checkpoint_20261106.json",
+      "remaining": "Popup stale explanation source tests in progress; no calibrated model confidence, fresh Chrome or external acceptance claim."
+    },
+    {
+      "reference": "Relationship P0123-P0128",
+      "report": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_foundation_checkpoint_20261106.json",
+      "implemented_validated": "Named group/link foundation and sourceUI;28native+20Vue/API passed. Multiple active memberships preserve unique root allocations and global counts.",
+      "partial": "Group-specific capacity/rules, distinct capabilities, scoped history/export and current-source Chrome acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0091-P0107,P0123-P0128",
+      "report": "docs/jrc_consolidation/named_portfolio_native_integration_checkpoint_20261106.json",
+      "implemented_validated": "Native group filters, action cohorts, observed workload and sourceUI; real1000customer proof via full model validations:40SQL,1.0861s local request.",
+      "partial": "Configurable group capacity/rules enforcement, distinct capabilities/history/export and current-source Chrome acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0091-P0107,P0123-P0128",
+      "report": "docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json",
+      "implemented_validated": "Actual group capacity/transfer rules in native immutable configuration and reviewed/direct admission engines;20new governance cases,13native capacity regressions,1concurrency,7sourceUI.",
+      "partial": "Full master-to-group picker flow, local role/capability matrix, grouping per-item resume, scoped history/export and current-source Chrome acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0099-P0104,P0123-P0128",
+      "report": "docs/jrc_consolidation/named_portfolio_configured_scale_checkpoint_20261106.json",
+      "implemented_validated": "Configured native HTTP preview50of1000customers:378SQL/18groupSQL/1.0943s local;owner integrity and v1snapshot checked.",
+      "qualification": "Generic native audit store append-only enforcement is not confirmed; do not equate it with persisted readonly configuration versions or DB-pinned batch snapshots."
+    },
+    {
+      "reference": "Relationship P0123-P0128",
+      "report": "docs/jrc_consolidation/named_portfolio_history_checkpoint_20261106.json",
+      "implemented_validated": "Scoped operational history/summary export:8newnative+3authorityregressions/0,10sourceUI/API/0.",
+      "partial": "Full historical values/reasons,append-only audit,local-role matrix,master flow,per-item resume and current-source Chrome remain pending."
+    },
+    {
+      "reference": "Relationship P0124/P0125",
+      "report": "docs/jrc_consolidation/named_portfolio_master_flow_checkpoint_20261106.json",
+      "implemented_validated": "Individual native master selection, existing allocation reuse or explicit creation and later reason/revision link review;4native/0,34sourceUI/0.",
+      "partial": "True master multi-select allocation batches, local roles, durable per-item resume, full audit and current-source visual acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0128/P0184/P0185",
+      "report": "docs/jrc_consolidation/named_portfolio_link_results_checkpoint_20261106.json",
+      "implemented_validated": "Real per-item atomic receipts and controlled fresh re-review; no false partial/background success.",
+      "partial": "Durable grouping queue/item resumption, full local roles, master allocation batches and current-source Chrome remain open."
+    },
+    {
+      "reference": "Relationship P0152/P0185/P0188",
+      "report": "docs/jrc_consolidation/configuration_restore_checkpoint_20261106.json",
+      "implemented_validated": "Native configuration restoration creates new version; snapshots preserved, scopes/current authority/real Central gate retained.25native/0,source19/0and22/0overlap.",
+      "partial": "Playbook rollback and other full F2 automation/production pilot/visual gates remain separate; protected generic audit is not claimed sealed."
+    },
+    {
+      "reference": "Relationship P0152/P0184/P0185",
+      "report": "docs/jrc_consolidation/playbook_restore_checkpoint_20261106.json",
+      "implemented_validated": "Controlled native playbook restoration, current Flow review and simulation-only UI;6backend/0 and source cohorts19/0,25/0,11/0 with overlaps.",
+      "partial": "Actual current-source Chrome, production governance/pilot, full history pagination and other C-G requirements remain open."
+    },
+    {
+      "reference": "Relationship P0152/P0181/P0185",
+      "report": "docs/jrc_consolidation/playbook_input_checkpoint_20261106.json",
+      "implemented_validated": "Typed JSON/form input gate;16native/0 with overlap qualifications. No silently unconditional condition or shortened step sequence.",
+      "partial": "Catalog/history pagination and remaining F2/current-source visual acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0152/P0181/P0184/P0185",
+      "report": "docs/jrc_consolidation/playbook_catalog_checkpoint_20261106.json",
+      "implemented_validated": "Operational native book/history pagination and fresh selected-history restoration, scoped reads;5native directed/0,11integrated/0overlap;39source/0.",
+      "partial": "Execution-history broad paging, remaining F2 governance/pilot and actual current-source Chrome remain open."
+    },
+    {
+      "reference": "Relationship P0151/P0184/P0185",
+      "report": "docs/jrc_consolidation/playbook_execution_access_checkpoint_20261106.json",
+      "implemented_validated": "Role/membership invalidation of loaded and pending execution histories;4source/0,5native/0 including native Flow HTTP scope/origin regression.",
+      "partial": "Execution-wide pagination and full current-source visual acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0152",
+      "report": "docs/jrc_consolidation/playbook_history_attribution_checkpoint_20261106.json",
+      "implemented_validated": "Recorded actor/date in native playbook history using current authorized metadata, without inventing legacy authors;10source/0 with8overlap.",
+      "partial": "Original legacy creation authors are not retroactively proved; current-source Chrome and full F2 remain open."
+    },
+    {
+      "reference": "Relationship P0152/P0181/P0185",
+      "report": "docs/jrc_consolidation/configuration_history_lookup_checkpoint_20261106.json",
+      "implemented_validated": "Exact older stored configuration selection and same governed restoration;4native directed/0,8integrated/0overlap,17source/0. Original76rows preserved throughv77.",
+      "partial": "Recent history list is still bounded50 with exact lookup, not full broad paging; full Word/Chrome acceptance remains open."
+    },
+    {
+      "reference": "Relationship P0124/P0128/P0181/P0184/P0185",
+      "report": "docs/jrc_consolidation/reviewed_portfolio_membership_native_checkpoint_20261106.json",
+      "implemented_validated": "Native/API durable group membership through existing reviewed engine;32backend/0 including14existing regressions; protected terminal history and linked unresolved-item re-review.",
+      "partial": "UI integration started but not yet tested; whole-audience projected capacity, broad saved-operation listing and current-source visual acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0124/P0125/P0128/P0184/P0185",
+      "report": "docs/jrc_consolidation/reviewed_portfolio_membership_ui_checkpoint_20261106.json",
+      "implemented_validated": "Native group resumable membership review UI using existing engine;32source/0 and33previous atomic/results/master regressions passed, with corrected failed-button gate documented.",
+      "partial": "Current-source Chrome/liveSidekiq, broad own-operation listing and remaining C-G gaps are open."
+    },
+    {
+      "reference": "Relationship P0128/P0181/P0184/P0185",
+      "report": "docs/jrc_consolidation/reviewed_batch_inventory_native_checkpoint_20261106.json",
+      "implemented_validated": "Own source-free reviewed-operation inventory and explicit own pending cancellation;21native/0 including14legacy regressions. No new source access or other-actor cancellation grant.",
+      "partial": "Source interface and safe withdrawal integration remain open, as do current-source Chrome and other C-G requirements."
+    },
+    {
+      "reference": "Relationship F1/P0119/P0120/P0184/P0185",
+      "report": "docs/jrc_consolidation/withdrawal_reviewed_operations_checkpoint_20261106.json",
+      "implemented_validated": "Pending CS-reviewed intentions now block scoped withdrawal;20native/0 with1000allocation request and11source/0. Actor-only cancellation and fresh readiness digest preserve other module/account rights.",
+      "partial": "Own inventory UI/exceptional inactive actor handling/current-source Chrome and remaining F1/F2/C-G requirements remain open."
+    },
+    {
+      "reference": "Relationship P0125/P0128/P0181/P0184/P0185",
+      "report": "docs/jrc_consolidation/reviewed_batch_inventory_ui_checkpoint_20261106.json",
+      "implemented_validated": "Own saved-operation source controls, native exact reread and explicit pending-stop;8native/0;source31/0,32/0,14/0overlap.",
+      "partial": "Current-source Chrome, native audience capacity simulation, local capability matrix and C-G closure remain open."
+    },
+    {
+      "requirement": "Relationship P0128/P0184/P0185: bounded per-item failures and preserved resumable history",
+      "report": "docs/jrc_consolidation/reviewed_item_diagnostics_checkpoint_20261106.json",
+      "current_state": "Typed safe per-item diagnostics native29/0,source22/0;terminal receipts and explicit re-review preserved.",
+      "remaining": "Unclassified legacy failures remain generic;Chrome/Word visual and C-G closure remain open."
+    },
+    {
+      "requirement": "Relationship P0152/P0181/P0184: native history, pagination, original source guards",
+      "report": "docs/jrc_consolidation/playbook_execution_pagination_checkpoint_20261106.json",
+      "current_state": "Execution history native9/0 andsource18/0 with source-visible cursor, bounded scan and old contract preservation.",
+      "remaining": "Broad all-book reads require narrowing at budget;current-source Chrome/visual/completeC-G remain open."
+    },
+    {
+      "requirement": "Relationship P0152/P0184: stored versions, complete history browsing and fresh governed restore",
+      "report": "docs/jrc_consolidation/configuration_history_pagination_checkpoint_20261106.json",
+      "current_state": "Paged configuration history native8/0 andsource21/0;draft preserved and exact governed restoration reused.",
+      "remaining": "Current-source Chrome/visual acceptance,otherC-Grequirements and business/external dependencies remain open."
+    },
+    {
+      "requirement": "Relationship P0091/P0092/P0095/P0123/P0128: complete selected workload and native capacity preservation",
+      "report": "docs/jrc_consolidation/membership_capacity_projection_checkpoint_20261106.json",
+      "current_state": "Native whole-selection historical workload projection40/0+3/0 andsource42/0 with source/privacy checks;original per-item admission remains authoritative.",
+      "remaining": "Not automatic redistribution or all-or-nothing preflight;master mass allocation,local roles,current-source Chrome/visual and remainingC-Gopen."
+    },
+    {
+      "requirement": "Relationship P0124/P0125/P0128: master selection, deduplication and durable reviewed grouping",
+      "report": "docs/jrc_consolidation/master_selection_collection_checkpoint_20261106.json",
+      "current_state": "Collected native master audiences with explicit individual allocation and durable grouping;5native/0 and54source/0.",
+      "remaining": "Not a one-operation mass allocation-creation engine;local roles,Chrome/visual/completeC-Gstillopen."
+    },
+    {
+      "requirement": "G real worker runtime and preserved PABXintegration",
+      "report": "docs/jrc_consolidation/owned_worker_initial_failure_checkpoint_20261106.json",
+      "current_state": "Runtime gate failed atstartup;synthetic database/artifacts and0appliedbusinessitems preserved.",
+      "remaining": "Correct native health verification and actual PABXActiveJob enqueue collision before claiming runtime queue success."
+    },
+    {
+      "requirement": "G real native batch worker delivery",
+      "report": "docs/jrc_consolidation/owned_worker_runtime_checkpoint_20261106.json",
+      "current_state": "32 native checks,5 real ACK;12 business results,duplicate no-op,revocation/account/history preservation;failed attempts retained.",
+      "remaining": "Default runtime/deployment,current-source Chrome and remainingC-Gopen."
+    },
+    {
+      "requirement": "F1/F2customer sourceUI denial/privacy",
+      "report": "docs/jrc_consolidation/customer_denied_read_checkpoint_20261106.json",
+      "current_state": "23sourceVue and5nativeHTTP cases passed;old data removed ondenial and requests canceled byidentity.",
+      "remaining": "Chrome/visual and completeC-Gauditopen."
+    },
+    {
+      "requirement": "C B4 / Econtract UI authority isolation",
+      "report": "docs/jrc_consolidation/contract_identity_checkpoint_20261106.json",
+      "current_state": "24 source and7native tests passed;identity-bound views,downloads and late mutation receipts.",
+      "remaining": "Orders analogous gap and current-source Chrome/fullC-Gopen."
+    },
+    {
+      "requirement": "C-GnativeOrders UI authority isolation",
+      "report": "docs/jrc_consolidation/order_identity_checkpoint_20261106.json",
+      "current_state": "30source and3nativepassed;2download targeted checks passed after test helper cleanup.",
+      "remaining": "Current-source Chrome and remainingC-Gopen."
+    },
+    {
+      "requirement": "D9/G native internal approvalnotification runtime",
+      "report": "docs/jrc_consolidation/approval_worker_runtime_checkpoint_20261106.json",
+      "current_state": "5actualjobACKacross2workers;nativecreated/read cablefacts,duplicate/revocation/foreigndenial and29finalread-onlychecks;2failedverifierattemptspreserved.",
+      "remaining": "Chrome/WebSocketrealclient,defaultdeploymentandcompleteD/Gopen."
+    },
+    {
+      "requirement": "Relationship P0124nativeMaster reviewedmasscreation prerequisite",
+      "report": "docs/jrc_consolidation/native_allocation_creation_checkpoint_20261107.json",
+      "current_state": "9newnative service+1existingHTTPeligibility+16HTTPregressions passed;existing individualcreation nowreusable with freshauthority.",
+      "remaining": "Mass subject/schema/engine/UInotyetimplemented;ChromeandC-Gopen."
+    },
+    {
+      "requirement": "Relationship P0124/P0128 native master subject preservation prerequisite",
+      "report": "docs/jrc_consolidation/master_subject_schema_checkpoint_20261107.json",
+      "current_state": "36 native cases passed; additive candidate-only migration preserved original rows and immutable parent guard.",
+      "remaining": "Master batch engine/UI and current-source Chrome not complete; C-G open."
+    },
+    {
+      "requirement": "Relationship P0124/P0125/P0128: genuine reviewed initial allocation and multi-membership native integration",
+      "report": "docs/jrc_consolidation/master_reviewed_allocation_checkpoint_20261107.json",
+      "current_state": "Native45/0 final,source50/0 plus18 targeted;actual company subjects,atomic native creation/link,readonly preview,source/current authority/capacity gates and usable staged UI.",
+      "remaining": "No current-sourceChrome/fullC-Gclosure;localrole matrix,real master queue/maximum scale and documented business/external dependencies remain."
+    },
+    {
+      "requirement": "G CRM source authority,commercial draft integrity and approval/origin UI",
+      "report": "docs/jrc_consolidation/proposal_authority_checkpoint_20261107.json",
+      "current_state": "Six original failing assertions corrected;40source+13targeted and5native checks passed. Native drafts,financial inputs,source policy and committed command history preserved.",
+      "remaining": "No current-sourceChrome or completeC-Gclosure;documented business/external dependencies remain."
+    },
+    {
+      "requirement": "Relationship P0124/P0128 and G bounded workload/real native integration",
+      "report": "docs/jrc_consolidation/master_maximum_scale_checkpoint_20261107.json",
+      "current_state": "Maximum50native companies created then reused in another active portfolio:100links,50roots,75global hours;20finite advances;native1/0 in287.97s.",
+      "remaining": "Not current-sourceChrome,real master queue or productionthroughput;fullC-G and explicit business/external dependencies remain open."
+    },
+    {
+      "requirement": "C-GnativeCRM cache/read authority and source filter preservation",
+      "report": "docs/jrc_consolidation/crm_cache_authority_checkpoint_20261107.json",
+      "current_state": "10 failing baseline assertions corrected;39/0source then50/0finalsource;scope-bound lists/details/funnel metadata,native API contracts unchanged.",
+      "remaining": "Rendered funnel lifecycle/popups and other local CRM forms,next;no current-source Chrome/fullC-G closure. Existing DealsIndex lint explicitly reported."
+    },
+    {
+      "requirement": "C/GnativeCRM funnel popup,drag/drop and current authority",
+      "report": "docs/jrc_consolidation/funnel_authority_checkpoint_20261107.json",
+      "current_state": "6failing baseline assertions corrected;43sourcepassed then18finalpassed including actual loss confirmation;0lint errors.",
+      "remaining": "Chrome/sourceasset authorization,other nativeCRM forms and completeC-G still open."
+    },
+    {
+      "requirement": "C/Gfunctional native lead deletion,conversion and current-authority sourceUI",
+      "report": "docs/jrc_consolidation/lead_native_actions_checkpoint_20261107.json",
+      "current_state": "Actual store deletion missing despite mocked action test;restored native path with36source then14directedpassed and5native HTTPpassed. No new native deletion permissions.",
+      "remaining": "Shared standalone creation modal authority next;Chrome and completeC-G open."
+    },
+    {
+      "requirement": "C/Gshared lead creation,current authority and native draft preservation",
+      "report": "docs/jrc_consolidation/lead_create_authority_checkpoint_20261107.json",
+      "current_state": "5failing assertions corrected;11sourcepassed plus1stale-submit check;lint0errors. Global action caller reuses the protected modal.",
+      "remaining": "Activities local form boundary,next;Chrome/fullC-G and explicit dependencies remain."
+    },
+    {
+      "requirement": "C/GnativeActivity source form,lifecycle,drafts and completion UI",
+      "report": "docs/jrc_consolidation/activities_authority_checkpoint_20261107.json",
+      "current_state": "7baseline failures corrected;22sourcepassed plus2additional checks and2post-lint existing UI checks;0lint errors.",
+      "remaining": "Native source lookup scope mismatch next;not Chrome/fullC-G acceptance."
+    },
+    {
+      "requirement": "C/GnativeActivity origin/account/owner/corporate scope and real persistence",
+      "report": "docs/jrc_consolidation/activity_origin_scope_checkpoint_20261107.json",
+      "current_state": "Hidden origin writes reproduced in candidate and fixed using existing native read scope;17nativepassed plus1post-stylecase. No new permission or internal service rewrite.",
+      "remaining": "DealsIndex local form/receipt boundary next;broader assignee semantics,Chrome and fullC-G not claimed."
+    },
+    {
+      "requirement": "C/Gpreserve native presence and unsaved commercial UI while enforcing access changes",
+      "report": "docs/jrc_consolidation/crm_presence_authority_checkpoint_20261107.json",
+      "current_state": "10presence regressions reproduced and corrected using existing Cadastro Mestre rule;84sourcepassed and0lint errors. Actual permission/tenant/status/future-scope negative cases remain passing.",
+      "remaining": "DealsIndex local continuation boundary next;not Chrome or completeC-G acceptance."
+    },
+    {
+      "requirement": "C/G functional deal creation, products, authority and native draft persistence",
+      "report": "docs/jrc_consolidation/deals_authority_checkpoint_20261107.json",
+      "current_state": "9 genuine failing source cases and slow-stage global-draft regression corrected;43source then13final source and12native cases passed; shared legacy lint reported honestly.",
+      "remaining": "Current-sourceChrome/Wordvisual acceptance and fullC-G remain open."
+    },
+    {
+      "requirement": "C/G native operational Calendar and exact-version editor reuse",
+      "report": "docs/jrc_consolidation/calendar_native_actions_checkpoint_20261107.json",
+      "current_state": "5original failures corrected;26unique source cases passed across final directed gates. Native editor reused;no backend mutation changes.",
+      "remaining": "Other visibly unavailable controls and current-sourceChrome/completeC-G acceptance remain separate."
+    },
+    {
+      "requirement": "G native per-link private activity/follow-up authority",
+      "report": "docs/jrc_consolidation/agenda_record_authority_checkpoint_20261107.json",
+      "current_state": "3original failures corrected;12source cases and zero lint errors/warnings.",
+      "remaining": "Current-sourceChrome and completeC-G remain open."
+    },
+    {
+      "requirement": "D/G native Central authority,request/decision lifecycle and operational Refresh",
+      "report": "docs/jrc_consolidation/approval_authority_lifecycle_checkpoint_20261107.json",
+      "current_state": "6original failures corrected;100source regression cases passed and4files0lint errors;backend engine/history untouched.",
+      "remaining": "Current-sourceChrome/fullWordacceptance/C-G and explicit business/external dependencies remain open."
+    },
+    {
+      "requirement": "Relationship P0124/P0128 genuine native Master allocation queue delivery",
+      "report": "docs/jrc_consolidation/master_owned_worker_checkpoint_20261107.json",
+      "current_state": "6actualACK realSidekiq/Redis/PostgreSQL;6native roots linked into2activeportfolios,duplicate/revoked/tenant/network safeguards and4negative startup checks.",
+      "remaining": "No current-sourceChrome/defaultdeploy/productionthroughput/fullC-G or local-role matrix closure."
+    },
+    {
+      "requirement": "G functional native Calendar views/navigation;F exact portfolio Word P0123-P0128 delta",
+      "report": "docs/jrc_consolidation/calendar_views_checkpoint_20261107.json",
+      "current_state": "Native source month/day/list/week activated;19unique final source definitions passed across gates;exact6Wordfragment audit retains real divergences.",
+      "remaining": "No current-sourceChrome/fullC-G/local-role/history immutability or external channel closure."
+    },
+    {
+      "requirement": "F/G preserve operational drafts and exact native receipts during chat presence refresh",
+      "report": "docs/jrc_consolidation/relationship_presence_checkpoint_20261107.json",
+      "current_state": "3reproduced losses corrected;145source cases and22files0lint errors;native permission boundaries unchanged.",
+      "remaining": "No current-sourceChrome/fullC-G/business/local-role/audit or external acceptance closure."
+    },
+    {
+      "requirement": "G actual Calendar filters and removal integrated with native views/commands",
+      "report": "docs/jrc_consolidation/calendar_filters_checkpoint_20261107.json",
+      "current_state": "26source cases passed;real current-filter semantics reused,account/private choices cleared,presence preserved;no backend changes.",
+      "remaining": "No current-sourceChrome,backend large-scale Calendar pagination,external sync or fullC-G acceptance."
+    }
+  ],
+  "explicit_dependencies": [
+    {
+      "requirement": "TRR",
+      "state": "Business definition absent; no formula invented."
+    },
+    {
+      "requirement": "Company documents without portfolio",
+      "state": "User explicitly deferred expansion; existing authorized portfolio flow retained."
+    },
+    {
+      "requirement": "Current-source Chrome/visual acceptance",
+      "state": "Blocked by explicit no-build/no-recompile/no5379-change instruction; old assets are not evidence."
+    },
+    {
+      "requirement": "DocuSign/scanner/channel pilot",
+      "state": "External environment/operations require separate authorization; not simulated as passed."
+    }
+  ],
+  "next_confirmed_local_gap": "Prepare consolidated current-source isolated Chrome acceptance for committed candidate;build/new local instance still require explicit authorization and5379must remain frozen.",
+  "stage_closure": {
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  },
+  "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
+  "next_source_review": "Prepare consolidated current-source isolated Chrome acceptance for committed candidate;build/new local instance still require explicit authorization and5379must remain frozen.",
+  "latest_unvalidated_increment": {
+    "date": "2026-11-09",
+    "report": "docs/jrc_consolidation/calendar_list_pagination_checkpoint_20261109.json",
+    "state": "Supersedes prior WIP:35unique Calendar source/pure cases passed;still no build/Chrome/DB acceptance.",
+    "pinned_build_candidate_unchanged": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
+    "stage_closure": {
+      "C": false,
+      "D": false,
+      "E": false,
+      "F": false,
+      "G": false
+    }
+  },
+  "current_history_increment": {
+    "report": "docs/jrc_consolidation/portfolio_history_denial_checkpoint_20261109.json",
+    "state": "4reproduced failures fixed;13source cases and2files0lint;generic historical audit remains partial"
+  },
+  "current_literal_matrix": "docs/jrc_consolidation/cg_word_reconciliation_20261109.json"
+}

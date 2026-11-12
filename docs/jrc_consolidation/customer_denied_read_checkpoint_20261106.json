@@ -1,0 +1,32 @@
+{
+  "status": "implemented_and_native_source_tested",
+  "previous_checkpoint": "306deefb",
+  "implementation": [
+    "CustomerPanel removes loaded customer/channel/editor data on recommendation read401/403/404;server denial is not treated as a successful mutation.",
+    "One in-flight explanation,disabled accessible button;AbortController and identity token discard late requests on reload,mutation,identity change and unmount.",
+    "Transient failures retain explicit retry;existing native server authorization unchanged."
+  ],
+  "tests": {
+    "baseline": "customer-denied-read-baseline01:5 newly added examples reproduced failures;18 filtered existing tests not run in baseline.",
+    "vue": "customer-denied-read-fixed02:23 passed,0 failed;5 new plus18 existing.",
+    "native": "customer-denied-read-native03:5 passed,0 failed;real HTTP/DB reads check account,unit,revoked permission,no writes and no-store.",
+    "eslint": "0errors,CustomerPanel32 inherited warnings;spec0warnings.",
+    "warnings": "Existing RouterLink test stub and Rails deprecations retained."
+  },
+  "resource": {
+    "status": "passed",
+    "free_start": 6731124736,
+    "minimum_free": 6721925120,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 5024,
+    "exit_code": 0,
+    "free_end": 6749704192
+  },
+  "limitations": [
+    "SourceVue API mocks are not real Chrome acceptance.",
+    "No build,5379 change,push,deploy,external operation or stage closure."
+  ],
+  "next": "Continue remaining native functional Word gaps;local portfolio roles awaiting business matrix choice."
+}

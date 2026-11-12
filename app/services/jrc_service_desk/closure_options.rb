@@ -11,6 +11,7 @@ class JrcServiceDesk::ClosureOptions
   def call
     return [] unless @version
     return [] if unavailable_reason
+
     policy = JrcServiceDesk::LifecycleActionPolicy.new(@context, @ticket)
     return [] unless policy.action?('close') && policy.view_notes?
 
@@ -18,10 +19,14 @@ class JrcServiceDesk::ClosureOptions
     return direct if direct.any?
 
     @options.select { |rule| rule[:action] == 'resolve' }.flat_map do |resolve|
-      @version.definition.fetch('transitions').map { |rule| @revision.rule(rule) }.filter_map do |close|
+      @version.definition.fetch('transitions').map do |rule|
+        JrcServiceDesk::OperationalClosure.rule(@revision.rule(rule), @context, @ticket)
+      end.filter_map do |close|
         next unless close['action'] == 'close' && close['from_status_ids'].include?(resolve[:to_status_id].to_i)
         next unless policy.requirements_allowed?(close.fetch('requirements'))
-        target = JrcServiceDesk::TicketStatus.find_by(account_id: @ticket.account_id, unit_id: @ticket.unit_id, id: close['to_status_id'], active: true)
+
+        target = JrcServiceDesk::TicketStatus.find_by(account_id: @ticket.account_id, unit_id: @ticket.unit_id, id: close['to_status_id'],
+                                                      active: true)
         next unless target && target.phase == 'closed' && @version.status_phases[target.id.to_s] == target.phase
 
         plan([resolve, { key: close['key'], action: 'close', to_status_id: target.id.to_s,
@@ -32,6 +37,7 @@ class JrcServiceDesk::ClosureOptions
 
   def unavailable_reason
     return unless @ticket.service&.approval_required?
+
     policy = JrcServiceDesk::LifecycleActionPolicy.new(@context, @ticket)
     return unless policy.action?('close') && policy.view_notes?
 

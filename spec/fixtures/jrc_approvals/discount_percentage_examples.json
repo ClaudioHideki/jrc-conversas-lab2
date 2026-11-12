@@ -1,0 +1,11 @@
+[
+  { "base_cents": 800, "percent": "20", "discount_cents": 160 },
+  { "base_cents": 10000, "percent": "20", "discount_cents": 2000 },
+  { "base_cents": 1, "percent": "50", "discount_cents": 1 },
+  { "base_cents": 1, "percent": "49.9999", "discount_cents": 0 },
+  { "base_cents": 3, "percent": "50", "discount_cents": 2 },
+  { "base_cents": 101, "percent": "0.5", "discount_cents": 1 },
+  { "base_cents": 12345, "percent": "12.3456", "discount_cents": 1524 },
+  { "base_cents": 9007199254740991, "percent": "100", "discount_cents": 9007199254740991 },
+  { "base_cents": 9007199254740991, "percent": "99.9999", "discount_cents": 9007190247541736 }
+]

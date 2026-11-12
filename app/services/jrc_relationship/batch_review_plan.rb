@@ -6,16 +6,17 @@ class JrcRelationship::BatchReviewPlan
 
   def normalize(raw)
     input = raw.to_h.deep_stringify_keys
-    ids = input.fetch('ids')
-    raise ArgumentError, 'Choose 1 to 50 unique customers' unless ids.is_a?(Array) && ids.size.between?(1, 50) && ids.uniq.size == ids.size
+    ids = JrcRelationship::PortfolioGroupCustomerInput.parse(input.fetch('ids'))
     raise ArgumentError, 'Invalid request identity' unless UUID.match?(input.fetch('request_id').to_s)
 
     operation = input.fetch('operation')
     options = operation_options(operation, input)
-    { 'ids' => ids.map { |id| Integer(id) }.sort, 'operation' => operation, 'request_id' => input.fetch('request_id'), **options }
+    { 'ids' => ids, 'operation' => operation, 'request_id' => input.fetch('request_id'), **options }
   end
 
   def snapshot(inputs, lock: false)
+    return JrcRelationship::MasterAllocationReview.new(@context).snapshot(inputs, lock: lock) if inputs['operation'] == 'master_allocation'
+
     rows = @context.assignments.where(id: inputs.fetch('ids')).order(:id)
     rows = rows.lock if lock
     records = rows.to_a
@@ -24,7 +25,9 @@ class JrcRelationship::BatchReviewPlan
     book = book_snapshot(inputs, lock: lock)
     result = { 'version' => 1, 'access_signature' => @context.access_signature, 'book' => book, 'summary' => operation_summary(inputs, book),
                'rows' => records.map { |record| row_snapshot(record) } }
+    add_distribution_snapshot(result, inputs, records, lock)
     add_cadence_snapshot(result, inputs, book, lock) if inputs['operation'] == 'cadence'
+    add_membership_snapshot(result, inputs, lock, records)
     result
   end
 
@@ -37,10 +40,12 @@ class JrcRelationship::BatchReviewPlan
   end
 
   def validate!(review, assignment: nil)
-    raise ArgumentError, 'Reviewed access changed' unless review.snapshot.fetch('access_signature') == @context.access_signature
-    raise ArgumentError, 'Reviewed playbook changed' unless review.snapshot['book'] == book_snapshot(review.inputs, lock: true)
+    return JrcRelationship::MasterAllocationReview.new(@context).validate!(review) if review.inputs['operation'] == 'master_allocation'
 
+    validate_source_pins!(review)
     validate_cadence!(review)
+    JrcRelationship::PortfolioMembershipReview.new(@context).validate!(review) if review.inputs['operation'] == 'portfolio_membership'
+    JrcRelationship::ResponsibilityReview.new(@context).verify!(review, assignment: assignment)
 
     records = assignment ? [assignment] : reviewed_assignments(review)
     records.each { |record| validate_row!(review, record) }
@@ -51,6 +56,29 @@ class JrcRelationship::BatchReviewPlan
   end
 
   private
+
+  def validate_source_pins!(review)
+    unless review.snapshot.fetch('access_signature') == @context.access_signature
+      raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed access changed')
+    end
+    return if review.snapshot['book'] == book_snapshot(review.inputs, lock: true)
+
+    raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed playbook changed')
+  end
+
+  def add_distribution_snapshot(result, inputs, records, lock)
+    return unless inputs['operation'] == 'assign'
+
+    result.merge!(JrcRelationship::DistributionPreview.new(context: @context, inputs: inputs, records: records,
+                                                           summary: result['summary']).call)
+    add_responsibility_snapshot(result, inputs, records, lock)
+  end
+
+  def add_membership_snapshot(result, inputs, lock, records)
+    return unless inputs['operation'] == 'portfolio_membership'
+
+    result.merge!(JrcRelationship::PortfolioMembershipReview.new(@context).snapshot(inputs, lock: lock, records: records))
+  end
 
   def add_cadence_snapshot(result, inputs, book, lock)
     result['cadence'] = JrcRelationship::CadencePlan.new(@context).snapshot(inputs, lock: lock)
@@ -73,6 +101,7 @@ class JrcRelationship::BatchReviewPlan
       id = inputs['owner_id']
       { 'owner_id' => id, 'owner_name' => id ? @context.assignable_users.find(id).name : nil }
     when 'playbook', 'cadence' then { 'book_name' => book.fetch('name'), 'book_version' => book.fetch('version') }
+    when 'portfolio_membership' then {}
     else { 'title' => inputs.fetch('title'), 'due_at' => inputs.fetch('due_at') }
     end
   end
@@ -87,18 +116,19 @@ class JrcRelationship::BatchReviewPlan
 
   def validate_row!(review, record)
     original = review.snapshot.fetch('rows').find { |row| row.fetch('assignment_id') == record.id }
-    raise ArgumentError, 'Reviewed customer changed' unless original && original == row_snapshot(record)
+    return if original && original == row_snapshot(record)
+
+    raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed customer changed')
   end
 
   def operation_options(operation, input)
     case operation
     when 'assign'
       assign_options(input)
+    when 'portfolio_membership' then JrcRelationship::PortfolioMembershipInput.new(@context).call(input)
+    when 'master_allocation' then JrcRelationship::MasterAllocationInput.new(@context).call(input)
     when 'activity'
-      title = input.fetch('title').to_s.strip
-      raise ArgumentError, 'Activity title is required' unless title.length.between?(1, 250)
-
-      { 'title' => title, 'due_at' => Time.iso8601(input.fetch('due_at')).iso8601(6) }
+      activity_options(input)
     when 'playbook' then { 'playbook_id' => selected_book(input) }
     when 'cadence'
       { 'playbook_id' => selected_book(input), 'conversation_id' => Integer(input.fetch('conversation_id')),
@@ -107,10 +137,40 @@ class JrcRelationship::BatchReviewPlan
     end
   end
 
+  def activity_options(input)
+    title = input.fetch('title').to_s.strip
+    raise ArgumentError, 'Activity title is required' unless title.length.between?(1, 250)
+
+    { 'title' => title, 'due_at' => Time.iso8601(input.fetch('due_at')).iso8601(6) }
+  end
+
   def assign_options(input)
     raise Pundit::NotAuthorizedError unless @context.policy.team?
 
-    { 'owner_id' => input['owner_id'].present? ? @context.assignable_users.find(input['owner_id']).id : nil }
+    owner_id = JrcRelationship::PortfolioOwnerInput.parse(input['owner_id'])
+    result = { 'owner_id' => owner_id ? @context.assignable_users.find(owner_id).id : nil }
+    result.merge!(responsibility_options(input))
+    if input.key?('justification')
+      reason = input['justification']
+      raise ArgumentError, 'Invalid distribution justification' unless reason.is_a?(String) && reason.strip.bytesize.between?(1, 4096)
+
+      result['justification'] = reason.strip
+    end
+    result
+  end
+
+  def responsibility_options(input)
+    return {} unless input.key?('transfer_responsibilities')
+
+    raise ArgumentError, 'Invalid responsibility transfer option' unless [true, false].include?(input['transfer_responsibilities'])
+
+    input['transfer_responsibilities'] ? { 'transfer_responsibilities' => true } : {}
+  end
+
+  def add_responsibility_snapshot(result, inputs, records, lock)
+    return unless inputs['transfer_responsibilities']
+
+    result['responsibilities'] = JrcRelationship::ResponsibilityReview.new(@context).snapshot(inputs, records, lock: lock)
   end
 
   def book_snapshot(inputs, lock: false)

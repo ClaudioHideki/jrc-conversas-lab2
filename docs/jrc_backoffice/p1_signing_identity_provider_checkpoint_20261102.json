@@ -1,0 +1,235 @@
+{
+  "date": "2026-11-02",
+  "kind": "checkpoint local de desenvolvimento; não é release nem homologação externa",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_commit": "e64e46c91c51195429a9fcd0b96684f5b0e38aa9",
+  "commit_reference": "Commit que contém este arquivo; obter SHA completo com git log -1 --format=%H -- este caminho.",
+  "scope": "CPF protegido no Contato canônico e separação técnica do único conector DocuSign; P1 contratual ainda parcial.",
+  "preserved": [
+    "Checkpoints locais anteriores e64e46c9, 02516df7 e bdf0d569, inclusive intake Cliente→Pedido→Alteração",
+    "Worktree de publicação Backoffice, imagem GHCR anterior, Compose e ambientes existentes não alterados",
+    "Motor único da Central, autorização nativa, cobertura de operadora/unidade, integrações e fluxo legado v1"
+  ],
+  "implemented_and_tested": [
+    "CPF criptografado na extensão do Contato, com CAS, deduplicação, merge preservado, auditoria mascarada e revalidação real de permissões; não comprova poderes",
+    "Fronteira Signatures::Gateway com somente DocuSign instalado; autenticação, HTTPs, mapeamento dos estados e operações ficam no conector",
+    "Snapshot imutável da conexão por revisão, incluindo provedor, conta externa, ambiente e contexto criptográfico, protegido também por trigger e FKs por conta",
+    "Seleção do padrão somente na admissão; transporte e eventos anteriores permanecem na conexão original quando o padrão muda",
+    "Evento recebido não assina contrato; completed do fornecedor vira completion_reported e estados desconhecidos viram unknown",
+    "ID digitado não confirma envio e não cria auditoria de envio; histórico existente preservado",
+    "Status operacionais active/expiring/renewed, pedido e avanço v2 dependem da evidência interna; assinatura manual do cliente continua um fato separado",
+    "Interface operacional Enviar para assinatura e Status da assinatura, fornecedor nos detalhes, envio bloqueado enquanto o fluxo versionado não existir",
+    "Migrations 20261102030000 e 20261102040000 exercitadas somente em bancos sintéticos, inclusive reversibilidade e preservação de dados nativos"
+  ],
+  "tests": {
+    "backend": {
+      "path": ".codex/p1-backend-final.json",
+      "sha256": "e5a5eb9e8e9d7a04c6722d53ae6753314e21d19ebd3c2a543c4293c51ed8988a",
+      "summary": {
+        "duration": 163.840216215,
+        "example_count": 408,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "examples_per_file": {
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb": 13,
+        "./spec/services/jrc_backoffice/docusign/connect_verifier_spec.rb": 5,
+        "./spec/services/jrc_backoffice/signature_connection_upgrade_spec.rb": 1,
+        "./spec/services/jrc_backoffice/signature_integration_upgrade_spec.rb": 1,
+        "./spec/services/jrc_backoffice/signature_release_spec.rb": 3,
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb": 15,
+        "./spec/requests/webhooks/docusign_spec.rb": 16,
+        "./spec/requests/api/v1/accounts/crm/activities_spec.rb": 2,
+        "./spec/requests/api/v1/accounts/crm/backoffice_intake_spec.rb": 11,
+        "./spec/requests/api/v1/accounts/crm/commercial_flow_spec.rb": 7,
+        "./spec/requests/api/v1/accounts/crm/commercial_operational_reconciliation_spec.rb": 7,
+        "./spec/requests/api/v1/accounts/crm/commercial_reconciliation_spec.rb": 9,
+        "./spec/requests/api/v1/accounts/crm/consolidated_commercial_protection_spec.rb": 11,
+        "./spec/requests/api/v1/accounts/crm/contact_leads_spec.rb": 8,
+        "./spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb": 10,
+        "./spec/requests/api/v1/accounts/crm/deal_creation_homologation_spec.rb": 6,
+        "./spec/requests/api/v1/accounts/crm/deals_spec.rb": 6,
+        "./spec/requests/api/v1/accounts/crm/leads_spec.rb": 5,
+        "./spec/requests/api/v1/accounts/crm/management_spec.rb": 2,
+        "./spec/requests/api/v1/accounts/crm/proposal_homologation_spec.rb": 26,
+        "./spec/requests/api/v1/accounts/crm/proposal_recipient_delivery_spec.rb": 24,
+        "./spec/requests/api/v1/accounts/crm/proposals_spec.rb": 2,
+        "./spec/requests/api/v1/accounts/crm/recurring_proposals_spec.rb": 6,
+        "./spec/requests/api/v1/accounts/crm/sales_order_link_integrity_spec.rb": 8,
+        "./spec/requests/api/v1/accounts/crm/signature_delivery_guard_spec.rb": 6,
+        "./spec/requests/api/v1/accounts/crm/signature_integration_spec.rb": 12,
+        "./spec/requests/api/v1/accounts/crm/wallet_spec.rb": 1,
+        "./spec/requests/api/v1/accounts/jrc_approvals/commercial_api_spec.rb": 11,
+        "./spec/requests/api/v1/accounts/jrc_approvals/core_spec.rb": 9,
+        "./spec/requests/api/v1/accounts/jrc_approvals/visual_api_spec.rb": 9,
+        "./spec/requests/api/v1/accounts/jrc_approvals/visual_performance_spec.rb": 1,
+        "./spec/requests/api/v1/accounts/customers/signing_identity_spec.rb": 26,
+        "./spec/services/jrc_customers/bemtevi_import_spec.rb": 27,
+        "./spec/services/jrc_customers/customer360_relationship_map_spec.rb": 7,
+        "./spec/services/jrc_customers/import_spec.rb": 8,
+        "./spec/services/jrc_customers/master_services_spec.rb": 19,
+        "./spec/services/jrc_customers/merge_spec.rb": 5,
+        "./spec/services/jrc_customers/operations_integration_spec.rb": 22,
+        "./spec/services/jrc_customers/signing_identity_upgrade_spec.rb": 1,
+        "./spec/services/jrc_customers/timeline_spec.rb": 5,
+        "./spec/controllers/api/v1/accounts/customers/master_api_spec.rb": 9,
+        "./spec/controllers/api/v1/accounts/actions/contact_merges_controller_spec.rb": 2,
+        "./spec/actions/contact_merge_action_spec.rb": 8,
+        "./spec/requests/api/v1/accounts/jrc_operations/project_access_spec.rb": 9,
+        "./spec/requests/jrc_flow_native_ownership_spec.rb": 7
+      },
+      "scope": "Regressões selecionadas de Backoffice, CRM, Cadastro Mestre, Central, Projetos e ownership; não é toda a suíte do repositório."
+    },
+    "frontend": {
+      "path": ".codex/p1-frontend-final.json",
+      "sha256": "dab46d342a0783e696f97bfca82eb13c86f20fcd51844c656b3e6377af7da3f4",
+      "files": 29,
+      "tests": 164,
+      "failures": 0,
+      "scope": "Suites CRM e Cadastro Mestre. Os 1435 casos históricos do checkpoint e64 não são declarados como reexecutados nesta etapa."
+    },
+    "ruby_lint": {
+      "path": ".codex/p1-ruby-verified.json",
+      "sha256": "0c876a94b85c54783e3cb4f6aaae61bb75bd490d021a5159191dac403502f92f",
+      "offense_count": 0,
+      "target_file_count": 25,
+      "inspected_file_count": 25,
+      "final_guard_recheck": {
+        "path": ".codex/p1-status-guard-lint.json",
+        "sha256": "ed3c64fb92e48f37d0c522248c7da95b457ddffa4e5242407265a468fb0e5ca4",
+        "offense_count": 0,
+        "target_file_count": 1,
+        "inspected_file_count": 1
+      },
+      "scope": "25 arquivos selecionados; não equivale a lint integral do Ruby legado."
+    },
+    "frontend_lint": {
+      "path": ".codex/p1-frontend-final-lint.json",
+      "sha256": "fc2903a4e02972a1089165212f55c560930c77e2cae19784efb09c7502625a5b",
+      "files": 8,
+      "errors": 0,
+      "warnings": 258
+    },
+    "build": {
+      "path": ".codex/p1-production-build.log",
+      "sha256": "a03ce8a241204a39abfb72212a316c0f4df1263f4630c92a7533ac63faebe7d1",
+      "exit_code": 0,
+      "duration": "2m47s",
+      "node_heap_mib": 4096,
+      "warnings": "Chunks grandes, base Browserslist antiga e asset /brand-assets/jrc-background.jpeg resolvido em runtime; sem alteração de dependências."
+    },
+    "eager_load": {
+      "path": ".codex/p1-zeitwerk.log",
+      "sha256": "1d342089eee68b23e85a0212d184d1b55d9f66bd75eee7e1bf321be22eacd7a0",
+      "result": "All is good!"
+    },
+    "source": {
+      "path": ".codex/p1-code-manifest-final.json",
+      "sha256": "082dbb62fc0da67dd795f53ca594ebcc0ec3b6891bc98cdff0995c8c6f8ff3ea",
+      "files": 11887,
+      "snapshot": "/candidate-p1-final",
+      "mismatches": 0,
+      "method": "SHA-256 dos arquivos de código do worktree/snapshot, normalizando somente CRLF em texto. Documentação excluída deste manifesto final.",
+      "history": "Primeiro gate de 406 casos conferiu 12136 arquivos. Cópia antiga /candidate-p1 foi descartada como prova: continha um model revertido que não correspondia ao worktree. Após reconstrução e conferência de hash, o gate final inclui também os dois estados operacionais adicionais."
+    },
+    "permission_negative_control": {
+      "path": ".codex/p1-role-negative.json",
+      "sha256": "640dda12019d2805c287bf2ba2d02cf3936c1bc82fbb64cbc647a0470fd5de7d",
+      "expected_failures": 1,
+      "note": "Somente em processo isolado, uma substituição removeu a ordem de limpeza do cache antes da leitura de AccountUser; o teste recebeu 200 em vez de 401 e falhou como esperado. Não é gate aprovado, não altera arquivos do produto e não foi carregada no gate final."
+    },
+    "browser": {
+      "results": {
+        "assinante-cadastro-resultado.json": {
+          "status": "passed",
+          "synthetic_only": true,
+          "canonical_contact_id": 7,
+          "saved_and_reopened": true,
+          "authority_verified": false,
+          "browser_storage_contains_identifier": false,
+          "contracts_sent": 0,
+          "external_homologation": false,
+          "page_errors": []
+        },
+        "conexao-revisao-resultado.json": {
+          "status": "passed",
+          "synthetic_only": true,
+          "screenshots": 3,
+          "encrypted_configuration_saved": true,
+          "credentials_returned": false,
+          "private_inputs_cleared": true,
+          "oauth_checked": false,
+          "connect_checked": false,
+          "contracts_sent": 0,
+          "external_homologation": false,
+          "page_errors": []
+        },
+        "envio-assinatura-resultado.json": {
+          "status": "passed",
+          "synthetic_only": true,
+          "contract_id": 1,
+          "operation_label": "Enviar para assinatura",
+          "provider_in_details": "DocuSign",
+          "delivery_blocked_without_version": true,
+          "contracts_sent": 0,
+          "external_homologation": false,
+          "page_errors": []
+        }
+      },
+      "external_contracts_sent": 0,
+      "screenshots": [
+        "20-assinante-cadastro-claro.png",
+        "21-assinante-cadastro-escuro.png",
+        "23-conexao-revisao-claro.png",
+        "24-conexao-verificacoes-claro.png",
+        "25-conexao-revisao-escuro.png",
+        "26-envio-assinatura-claro.png",
+        "27-envio-assinatura-escuro.png"
+      ],
+      "accepted_run": {
+        "path": ".codex/p1-notice-browser-accepted.log",
+        "sha256": "1a33de7ed6ef8ee523913155aea733088e8b7993a7d907e1e3535bd913117c6b"
+      },
+      "diagnostic": "Três tentativas do aviso de envio falharam por timeout de módulos/login enquanto o proxy Rails→Vite estava indisponível. Logs p1-notice-browser-final.log, p1-notice-browser-verified.log e p1-notice-browser-passed.log preservados como falhas, apesar do nome deste último. O plugin Ruby sobrescrevia a escuta; VITE_RUBY_HOST foi corrigida somente no processo local. Proxy respondeu 200 e uma nova execução passou em p1-notice-browser-accepted.log, com capturas revistas dos dois temas."
+    },
+    "provider_http": "Simulado com WebMock; HMAC e chaves RSA sintéticos. Nenhum resultado desta suíte comprova envio ou assinatura reais."
+  },
+  "partial_or_pending": {
+    "backoffice_p1": [
+      "Versão imutável do contrato/PDF e hashes",
+      "Snapshots de vários assinantes e validação de poderes por evidência/política",
+      "Envio/tentativa durável antes do I/O, ligado à versão, conexão, provedor, ambiente e identificação externa",
+      "Consumidor de eventos, reconciliação de incerteza e obtenção/verificação das evidências finais",
+      "Painel e ações contratuais completos dentro da solicitação"
+    ],
+    "backoffice_p2_p3": "Requisitos tipados, snapshots por operação e demais funcionalidades continuam conforme matriz, sem declaração de conclusão.",
+    "customer_master": "CPF está implementado. Representação por empresa, prova de poderes e abas contextuais de Backoffice continuam pendentes/parciais.",
+    "approval_central": "Motor nativo preservado e regressões comerciais selecionadas passaram; UX, wizard, ajustes atômicos e aceite integral CA01–CA15 continuam pendentes.",
+    "relationship_v2": "Entrega anterior preservada; Carteiras/equipe/capacidade/distribuição e demais itens da matriz continuam parciais.",
+    "legacy_records": "ID externo legado sem versão/conexão não é associado por suposição ao padrão atual. Eventos de revisões antigas sem credenciais recuperáveis são preservados, sem inventar uma conexão."
+  },
+  "external_dependency": {
+    "provider": "DocuSign",
+    "demo_available": false,
+    "confirmed_by_user": "Precisamos preparar o ambiente demo",
+    "guide": "docs/jrc_backoffice/docusign_demo_setup.md",
+    "external_homologation": "não executada"
+  },
+  "future_provider_change": {
+    "installed_connectors": [
+      "docusign"
+    ],
+    "new_connector_implemented": false,
+    "boundary_report": "docs/jrc_backoffice/signature_provider_boundary.md",
+    "limit": "Prova atual cobre separação técnica e conexão preservada. Sem ledger/versionamento durável ainda não é uma prova ponta a ponta de todos os envios em andamento."
+  },
+  "next_smallest_scope": "Concluir versão imutável + snapshots de signatários + evidência de poderes, reutilizando a Central; só então criar admissão durável ligada à conexão selecionada e habilitar envio.",
+  "publication": {
+    "push": false,
+    "deploy": false,
+    "docker_image_published": false,
+    "production_migrations": false,
+    "hook": "Husky local referencia .husky/_/husky.sh ausente. Checkpoint usa core.hooksPath apenas no comando; gates manuais registrados, sem alteração persistente da configuração."
+  }
+}

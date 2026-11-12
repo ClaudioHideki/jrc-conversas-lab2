@@ -4,23 +4,34 @@ require 'time'
 
 # Reports use an explicit unit and intersect the native Ticket/Conversation scopes.
 class JrcServiceDesk::OperationalReportQuery
-  FIELDS = %w[unit_id service_id company_id inbox_id channel_type category_id priority_id from to page per_page].freeze
-  attr_reader :context, :unit, :relation, :filters, :from, :to
+  FIELDS = %w[unit_id service_id company_id inbox_id channel_type category_id priority_id status_id queue_id team_id account_user_id from to page
+              per_page].freeze
+  attr_reader :context, :unit, :relation, :filters, :from, :to, :activity_relation
 
   def initialize(user_context:, parameters:, permission: 'reports_view')
     @context = JrcServiceDesk::OperationalContext.new(user_context)
-    unless context.capability?(:dashboard_view) && (context.capability?(:tickets_view_all) || context.supervision_access.any?(permission))
-      raise Pundit::NotAuthorizedError, 'Operational reports require supervisor capabilities'
+    unless context.reporting_allowed?(permission: permission)
+      raise Pundit::NotAuthorizedError, 'Operational reports require an authorized reporting scope'
     end
 
     @filters = JrcServiceDesk::Input.attributes(parameters, FIELDS)
     @unit = context.unit_scope.find(JrcServiceDesk::Input.id(filters.fetch('unit_id')))
+    raise Pundit::NotAuthorizedError unless context.reporting_allowed?(permission: permission, unit: unit)
+
     @relation = JrcServiceDesk::TicketPolicy::Scope.new(context.to_h, JrcServiceDesk::Ticket).resolve_for(permission).where(unit_id: unit.id)
     @from = timestamp(filters['from'])
     @to = timestamp(filters['to'])
     raise ArgumentError, 'Invalid time range' if from && to && from >= to
 
     apply_filters!
+  end
+
+  def activity_transitions
+    return JrcServiceDesk::LifecycleTransition.none unless context.capability?(:history_view)
+
+    tickets = context.supervision_access.scope(activity_relation, permission: 'history_view')
+    transitions = JrcServiceDesk::LifecycleTransition.where(account_id: context.account.id, unit_id: unit.id, ticket_id: tickets.select(:id))
+    during(transitions, 'occurred_at')
   end
 
   def collection
@@ -60,9 +71,8 @@ class JrcServiceDesk::OperationalReportQuery
   private
 
   def apply_filters!
-    @relation = during(relation, 'jrc_service_desk_tickets.opened_at')
     { 'service_id' => JrcServiceDesk::Service, 'category_id' => JrcServiceDesk::Category,
-      'priority_id' => JrcServiceDesk::Priority }.each do |field, model|
+      'priority_id' => JrcServiceDesk::Priority, 'queue_id' => JrcServiceDesk::Queue, 'status_id' => JrcServiceDesk::TicketStatus }.each do |field, model|
       next unless filters[field]
 
       id = JrcServiceDesk::Input.id(filters[field])
@@ -76,7 +86,22 @@ class JrcServiceDesk::OperationalReportQuery
       JrcCustomers::Company.where(account_id: context.account.id).find(id)
       @relation = relation_for('customers_view').where(company_id: id)
     end
+    apply_people_filters!
     apply_channel!
+    @activity_relation = relation
+    @relation = during(relation, 'jrc_service_desk_tickets.opened_at')
+  end
+
+  def apply_people_filters!
+    if filters['team_id']
+      team = Team.where(account_id: context.account.id).find(JrcServiceDesk::Input.id(filters['team_id']))
+      @relation = relation.where(team_id: team.id)
+    end
+    if filters['account_user_id']
+      member = AccountUser.where(account_id: context.account.id).find(JrcServiceDesk::Input.id(filters['account_user_id']))
+      memberships = JrcServiceDesk::UnitMembership.where(account_id: context.account.id, unit_id: unit.id, account_user_id: member.id).select(:id)
+      @relation = relation.where(created_by_membership_id: memberships).or(relation.where(assignee_membership_id: memberships))
+    end
   end
 
   def apply_channel!

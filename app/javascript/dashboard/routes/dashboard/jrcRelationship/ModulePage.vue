@@ -1,13 +1,19 @@
 <script setup>
-import { computed, ref, reactive, watch, onBeforeUnmount } from 'vue';
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
+import { computed, ref, reactive, watch, onBeforeUnmount, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import PortfolioAssignmentForm from './PortfolioAssignmentForm.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import MetricsPanel from './MetricsPanel.vue';
+import ManagementRequestsPanel from './ManagementRequestsPanel.vue';
+import RetentionPanel from './RetentionPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
 import PortfolioTable from './PortfolioTable.vue';
 import RecordEditor from './RecordEditor.vue';
+import { isWaitingStatus, validWaitingReview } from './waitingReview';
 import CustomerPanel from './CustomerPanel.vue';
 import ConfigurationPanel from './ConfigurationPanel.vue';
 import SurveyAdministrationPanel from './SurveyAdministrationPanel.vue';
@@ -21,7 +27,6 @@ import SurveyDeliveryPanel from './SurveyDeliveryPanel.vue';
 import HealthScorePanel from './HealthScorePanel.vue';
 import RenewalPipeline from './RenewalPipeline.vue';
 import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
-import CompanyPicker from '../jrcCustomers/components/CompanyPicker.vue';
 import ReviewedPortfolioBatchPanel from './ReviewedPortfolioBatchPanel.vue';
 import { fixedSurveyScope as normalizeFixedSurveyScope } from './fixedSurveyScope';
 import {
@@ -48,7 +53,15 @@ const pagination = ref({ page: 1, total: 0, per_page: 25 });
 const loading = ref(false);
 const saving = ref(false);
 const error = ref('');
+const periodError = ref(false);
 const editing = ref(null);
+const recordDialog = ref(null);
+watch(editing, async value => {
+  if (value) {
+    await nextTick();
+    recordDialog.value?.open();
+  }
+});
 const selectedCustomer = ref(null);
 const selected = ref([]);
 const portfolioReviewProposal = ref(null);
@@ -99,6 +112,8 @@ const filters = reactive({
 });
 const portfolioOperation = reactive({
   operation: 'activity',
+  justification: '',
+  transfer_responsibilities: false,
   conversation_id: '',
   starts_at: '',
   owner_id: '',
@@ -107,19 +122,15 @@ const portfolioOperation = reactive({
   playbook_id: '',
   request_id: crypto.randomUUID(),
 });
-const assignment = reactive({
-  company_id: null,
-  owner_id: '',
-  team_id: '',
-  business_unit_id: '',
-  settings: { segment_id: '', product_id: '', complexity: '' },
-});
 const batch = reactive({
   status: 'completed',
   result: '',
   due_at: '',
   priority: '',
   owner_id: '',
+  waiting_reason: '',
+  next_step: '',
+  return_at: '',
 });
 const commercial = reactive({ pipeline_id: '', stage_id: '', contact_id: '' });
 const portfolioScreen = computed(() =>
@@ -131,6 +142,14 @@ const configScreen = computed(() =>
 const dedicatedScreen = computed(() =>
   ['survey_admin', 'handoffs'].includes(props.screen)
 );
+const incompletePeriod = computed(
+  () =>
+    !configScreen.value &&
+    !dedicatedScreen.value &&
+    !props.fixedSurveyScope &&
+    Boolean(filters.to) &&
+    !filters.from
+);
 const stageOptions = computed(
   () =>
     metadata.value?.pipelines.find(
@@ -138,6 +157,8 @@ const stageOptions = computed(
     )?.stages || []
 );
 const scope = () => ({
+  customer_segment_id: route.query.customer_segment_id || undefined,
+  portfolio_group_id: route.query.portfolio_group_id || undefined,
   ...Object.fromEntries(
     Object.entries(filters).filter(
       ([, value]) => value !== '' && value !== false
@@ -148,6 +169,14 @@ const scope = () => ({
   page: pagination.value.page,
   ...normalizeFixedSurveyScope(props.fixedSurveyScope, props.screen),
 });
+const customerSegmentQuery = computed(() => ({
+  ...(route.query.customer_segment_id
+    ? { customer_segment_id: route.query.customer_segment_id }
+    : {}),
+  ...(route.query.portfolio_group_id
+    ? { portfolio_group_id: route.query.portfolio_group_id }
+    : {}),
+}));
 let generation = 0;
 let controller;
 const load = async () => {
@@ -158,10 +187,20 @@ const load = async () => {
   const accountId = route.params.accountId;
   const options = { signal: controller.signal };
   error.value = '';
+  periodError.value = false;
   loading.value = true;
   rows.value = [];
   drilldown.value = null;
   selected.value = [];
+  if (incompletePeriod.value) {
+    metadata.value = null;
+    metrics.value = null;
+    customers.value = [];
+    error.value = t('RELATIONSHIP.PERIOD_START_REQUIRED');
+    periodError.value = true;
+    loading.value = false;
+    return;
+  }
   try {
     const fixed = normalizeFixedSurveyScope(
       props.fixedSurveyScope,
@@ -192,7 +231,12 @@ const load = async () => {
         : API.records(accountId, props.screen, scope(), options),
       API.portfolio(
         accountId,
-        { per_page: 50, assignment_id: route.query.assignment_id || undefined },
+        {
+          per_page: 50,
+          assignment_id: route.query.assignment_id || undefined,
+          customer_segment_id: route.query.customer_segment_id || undefined,
+          portfolio_group_id: route.query.portfolio_group_id || undefined,
+        },
         options
       ),
     ]);
@@ -210,6 +254,9 @@ const load = async () => {
       error.value = message(err);
       metadata.value = null;
       metrics.value = null;
+      periodError.value =
+        err.response?.data?.code === 'INVALID_OPERATIONAL_PERIOD';
+      if (periodError.value) customers.value = [];
     }
   } finally {
     if (version === generation) loading.value = false;
@@ -218,6 +265,18 @@ const load = async () => {
 const refresh = () => {
   pagination.value.page = 1;
   load();
+};
+const clearPeriod = () => {
+  filters.from = '';
+  filters.to = '';
+  if (route.query.from !== undefined || route.query.to !== undefined) {
+    const query = { ...route.query };
+    delete query.from;
+    delete query.to;
+    router.replace({ query });
+    return;
+  }
+  refresh();
 };
 const mutate = async operation => {
   const version = generation;
@@ -253,7 +312,7 @@ const save = fields => {
       surveyLink.value = `${window.location.origin}/jrc/relacionamento/pesquisas/${data.survey_token}`;
   });
 };
-const saveAssignment = () =>
+const saveAssignment = assignment =>
   mutate(() =>
     API.saveAssignment(route.params.accountId, {
       ...assignment,
@@ -290,8 +349,13 @@ const chooseOpportunity = async row => {
       error.value = message(err);
   }
 };
-const completeBatch = () =>
-  mutate(() =>
+const completeBatch = () => {
+  const waiting = isWaitingStatus(batch.status);
+  if (waiting && !validWaitingReview(batch)) {
+    error.value = t('RELATIONSHIP.V2.WAITING_REVIEW_REQUIRED');
+    return false;
+  }
+  return mutate(() =>
     API.batch(route.params.accountId, selected.value, {
       ...batch,
       status: batch.status || undefined,
@@ -299,11 +363,25 @@ const completeBatch = () =>
       priority: batch.priority === '' ? undefined : Number(batch.priority),
       owner_id: batch.owner_id === '' ? undefined : Number(batch.owner_id),
       due_at: batch.due_at ? new Date(batch.due_at).toISOString() : undefined,
+      waiting_reason: waiting ? batch.waiting_reason : undefined,
+      next_step: waiting ? batch.next_step : undefined,
+      return_at: waiting ? new Date(batch.return_at).toISOString() : undefined,
     })
   );
+};
 const updatePortfolioBatch = () => {
   portfolioReviewProposal.value = {
     ...portfolioOperation,
+    transfer_responsibilities:
+      portfolioOperation.operation === 'assign' &&
+      portfolioOperation.transfer_responsibilities
+        ? true
+        : undefined,
+    justification:
+      portfolioOperation.operation === 'assign' &&
+      portfolioOperation.justification.trim()
+        ? portfolioOperation.justification.trim()
+        : undefined,
     ids: [...selected.value],
     request_id: crypto.randomUUID(),
     due_at: portfolioOperation.due_at
@@ -325,6 +403,11 @@ watch(
   [
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
+    () => store.getters.getCurrentRole,
+    () =>
+      JSON.stringify(
+        store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess)
+      ),
     () => props.screen,
   ],
   () => {
@@ -369,7 +452,11 @@ const quick = ({ kind, assignmentId }) =>
   router.push({
     name: `jrc_relationship_${kind}`,
     params: { accountId: route.params.accountId },
-    query: { assignment_id: assignmentId, create: '1' },
+    query: {
+      ...customerSegmentQuery.value,
+      assignment_id: assignmentId,
+      create: '1',
+    },
   });
 const metricFilter = key => {
   if (typeof key === 'object' && key.renewal_days) {
@@ -388,13 +475,15 @@ const metricFilter = key => {
     router.push({
       name: 'jrc_relationship_actions',
       params: { accountId: route.params.accountId },
-      query:
-        key === 'overdue_actions'
+      query: {
+        ...customerSegmentQuery.value,
+        ...(key === 'overdue_actions'
           ? { overdue: 'true' }
           : {
               from: new Date().toLocaleDateString('en-CA'),
               to: new Date().toLocaleDateString('en-CA'),
-            },
+            }),
+      },
     });
     return;
   } else if (
@@ -404,6 +493,7 @@ const metricFilter = key => {
       name: 'jrc_relationship_actions',
       params: { accountId: route.params.accountId },
       query: {
+        ...customerSegmentQuery.value,
         status:
           key === 'waiting_finance_actions'
             ? 'waiting_finance'
@@ -506,6 +596,11 @@ watch(
   [
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
+    () => store.getters.getCurrentRole,
+    () =>
+      JSON.stringify(
+        store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess)
+      ),
     () => props.screen,
     () => props.fixedSurveyScope,
     () => props.fixedSurveyScope?.unit_id,
@@ -523,6 +618,8 @@ watch(
     () => route.query.renewal_days,
     () => route.query.mode,
     () => route.query.segment_id,
+    () => route.query.customer_segment_id,
+    () => route.query.portfolio_group_id,
     () => route.query.product_id,
     () => route.query.business_unit_id,
     () => route.query.complexity,
@@ -539,14 +636,6 @@ watch(
     newAssignment.value = false;
     opportunity.value = null;
     batchMode.value = false;
-    Object.assign(assignment, {
-      company_id: null,
-      owner_id: '',
-      team_id: '',
-      business_unit_id: '',
-      exception_reason: '',
-      settings: { segment_id: '', product_id: '', complexity: '' },
-    });
     surveyLink.value = '';
     surveyDelivery.value = null;
     surveyPreparation.value = null;
@@ -576,6 +665,7 @@ watch(
     });
     Object.assign(portfolioOperation, {
       operation: 'assign',
+      transfer_responsibilities: false,
       conversation_id: '',
       starts_at: '',
       owner_id: '',
@@ -618,7 +708,7 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         >
           {{ t('RELATIONSHIP.REFRESH') }}</button
         ><button
-          v-if="metadata?.can_team && portfolioScreen"
+          v-if="metadata?.can_export && portfolioScreen"
           type="button"
           :class="buttonClass"
           @click="exportPortfolio"
@@ -672,6 +762,66 @@ const money = value => formatMoney(value, metadata.value?.formatting);
     >
       {{ error }}
     </p>
+    <div
+      v-if="route.query.portfolio_group_id"
+      class="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-lg border border-n-teal-6 bg-n-teal-2 p-3"
+      data-testid="active-portfolio-group-filter"
+    >
+      <p class="min-w-0 break-words text-sm">
+        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.FILTER_ACTIVE') }}
+      </p>
+      <button
+        type="button"
+        :class="buttonClass"
+        :disabled="loading || saving"
+        @click="
+          router.replace({
+            query: { ...route.query, portfolio_group_id: undefined },
+          })
+        "
+      >
+        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.CLEAR_GROUP_FILTER') }}
+      </button>
+    </div>
+    <form
+      v-if="periodError"
+      data-testid="operational-period-recovery"
+      class="flex flex-wrap items-end gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-3"
+      @submit.prevent="refresh"
+    >
+      <label class="grid min-w-0 gap-1 text-sm">
+        {{ t('RELATIONSHIP.FIELDS.from') }}
+        <input
+          v-model="filters.from"
+          type="date"
+          required
+          :class="inputClass"
+        />
+      </label>
+      <label class="grid min-w-0 gap-1 text-sm">
+        {{ t('RELATIONSHIP.FIELDS.to') }}
+        <input
+          v-model="filters.to"
+          type="date"
+          :class="inputClass"
+        />
+      </label>
+      <button
+        type="submit"
+        :class="buttonClass"
+        :disabled="loading"
+      >
+        {{ t('RELATIONSHIP.FILTER') }}
+      </button>
+      <button
+        type="button"
+        data-testid="clear-operational-period"
+        :class="buttonClass"
+        @click="clearPeriod"
+      >
+        {{ t('RELATIONSHIP.CLEAR_PERIOD') }}
+      </button>
+    </form>
     <p
       v-if="loading"
       role="status"
@@ -971,117 +1121,21 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           {{ t('RELATIONSHIP.FACTORS.' + filters.factor) }} ·
           {{ t('RELATIONSHIP.CLEAR_FACTOR_FILTER') }}
         </button>
-        <form
+        <PortfolioAssignmentForm
           v-if="newAssignment"
-          class="rounded-xl border border-n-weak p-4"
-          @submit.prevent="saveAssignment"
-        >
-          <h3 class="mb-3 font-semibold">
-            {{ t('RELATIONSHIP.ADD_CUSTOMER') }}
-          </h3>
-          <CompanyPicker
-            v-model="assignment.company_id"
-            :disabled="saving"
-          />
-          <div class="mt-3 flex gap-3">
-            <label class="flex-1 text-sm"
-              >{{ t('RELATIONSHIP.FIELDS.owner_id')
-              }}<select
-                v-model="assignment.owner_id"
-                :class="inputClass"
-              >
-                <option value="">{{ t('RELATIONSHIP.UNASSIGNED') }}</option>
-                <option
-                  v-for="owner in metadata.owners"
-                  :key="owner[0]"
-                  :value="owner[0]"
-                >
-                  {{ owner[1] }}
-                </option>
-              </select></label
-            ><label class="flex-1 text-sm"
-              >{{ t('RELATIONSHIP.FIELDS.team_id')
-              }}<select
-                v-model="assignment.team_id"
-                :class="inputClass"
-              >
-                <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
-                <option
-                  v-for="team in metadata.teams"
-                  :key="team[0]"
-                  :value="team[0]"
-                >
-                  {{ team[1] }}
-                </option>
-              </select></label
-            >
-          </div>
-          <div class="mt-3 grid gap-3 md:grid-cols-3">
-            <label class="text-sm"
-              >{{ t('RELATIONSHIP.FIELDS.business_unit_id')
-              }}<select
-                v-model="assignment.business_unit_id"
-                :class="inputClass"
-              >
-                <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
-                <option
-                  v-for="unit in metadata.units"
-                  :key="unit[0]"
-                  :value="unit[0]"
-                >
-                  {{ unit[1] }}
-                </option>
-              </select></label
-            >
-            <label
-              v-for="key in ['segment_id', 'product_id']"
-              :key="key"
-              class="text-sm"
-              >{{ t(`RELATIONSHIP.FIELDS.${key}`)
-              }}<select
-                v-model="assignment.settings[key]"
-                :class="inputClass"
-              >
-                <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
-                <option
-                  v-for="item in metadata[
-                    key === 'segment_id' ? 'segments' : 'products'
-                  ] || []"
-                  :key="item[0]"
-                  :value="item[0]"
-                >
-                  {{ item[1] }}
-                </option>
-              </select></label
-            >
-          </div>
-          <label class="mt-3 block text-sm"
-            >{{ t('RELATIONSHIP.FIELDS.complexity')
-            }}<input
-              v-model="assignment.settings.complexity"
-              :class="inputClass"
-          /></label>
-          <label class="mt-3 block text-sm"
-            >{{ t('RELATIONSHIP.ELIGIBILITY_EXCEPTION_REASON')
-            }}<textarea
-              v-model="assignment.exception_reason"
-              maxlength="2000"
-              :class="inputClass"
-              data-testid="eligibility-exception-reason"
-            />
-            <span class="text-xs text-n-slate-11">{{
-              t('RELATIONSHIP.ELIGIBILITY_EXCEPTION_GUIDANCE')
-            }}</span></label
-          >
-          <button
-            type="submit"
-            :class="buttonClass"
-            class="mt-3"
-            :disabled="saving || !assignment.company_id"
-          >
-            {{ t('RELATIONSHIP.SAVE') }}
-          </button>
-        </form>
+          :metadata="metadata"
+          :disabled="saving"
+          @submit="saveAssignment"
+        />
+        <ManagementRequestsPanel
+          v-if="metadata && screen === 'team'"
+          :metadata="metadata"
+        />
+        <RetentionPanel
+          v-if="metadata && screen === 'reports'"
+          :metadata="metadata"
+          :portfolio-group-id="route.query.portfolio_group_id || null"
+        />
         <MetricsPanel
           v-if="
             metrics &&
@@ -1150,18 +1204,28 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         >
           {{ t('RELATIONSHIP.NATIVE_CSAT_GUIDANCE') }}
         </p>
-        <RecordEditor
+        <Dialog
           v-if="editing"
-          :key="`${screen}:${editing.id || 'new'}`"
-          :kind="screen"
-          :record="editing"
-          :customers="customers"
-          :metadata="metadata"
-          :busy="saving"
-          :read-only="!metadata.can_manage"
-          @save="save"
+          ref="recordDialog"
+          width="5xl"
+          :title="t(editing.id ? 'RELATIONSHIP.EDIT' : 'RELATIONSHIP.NEW')"
+          :show-confirm-button="false"
+          :show-cancel-button="false"
+          :dismissible="!saving"
           @close="editing = null"
-        />
+        >
+          <RecordEditor
+            :key="`${screen}:${editing.id || 'new'}`"
+            :kind="screen"
+            :record="editing"
+            :customers="customers"
+            :metadata="metadata"
+            :busy="saving"
+            :read-only="!metadata.can_manage"
+            @save="save"
+            @close="editing = null"
+          />
+        </Dialog>
         <p
           v-if="surveyLink"
           class="rounded-lg border border-n-weak p-3 text-sm"
@@ -1174,13 +1238,32 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             >{{ t('RELATIONSHIP.SURVEY_LINK') }}</a
           >
         </p>
-        <CustomerPanel
+        <aside
           v-if="selectedCustomer"
-          :assignment-id="selectedCustomer"
-          :metadata="metadata"
-          @changed="load"
-          @close="selectedCustomer = null"
-        />
+          class="fixed inset-y-0 right-0 z-40 w-full max-w-2xl overflow-y-auto border-l border-n-violet-6 bg-n-solid-1 p-4 shadow-xl"
+          :aria-label="t('RELATIONSHIP.V2.OPEN_360')"
+          @keydown.esc="selectedCustomer = null"
+        >
+          <RouterLink
+            :class="buttonClass"
+            :to="{
+              name: 'jrc_relationship_customers',
+              params: route.params,
+              query: {
+                ...customerSegmentQuery,
+                assignment_id: selectedCustomer,
+              },
+            }"
+          >
+            {{ t('RELATIONSHIP.V2.OPEN_360') }}
+          </RouterLink>
+          <CustomerPanel
+            :assignment-id="selectedCustomer"
+            :metadata="metadata"
+            @changed="load"
+            @close="selectedCustomer = null"
+          />
+        </aside>
         <SurveyPreparationPanel
           v-if="surveyPreparation"
           :survey="surveyPreparation"
@@ -1253,6 +1336,25 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                 </option>
               </select></label
             >
+            <label
+              v-if="
+                metadata.can_team && portfolioOperation.operation === 'assign'
+              "
+            >
+              <input
+                v-model="portfolioOperation.transfer_responsibilities"
+                type="checkbox"
+              />
+              {{ t('RELATIONSHIP.RESPONSIBILITIES.INCLUDE') }}
+            </label>
+            <label v-if="portfolioOperation.operation === 'assign'">
+              {{ t('RELATIONSHIP.DISTRIBUTION.JUSTIFICATION') }}
+              <textarea
+                v-model="portfolioOperation.justification"
+                maxlength="4096"
+                :class="inputClass"
+              />
+            </label>
             <template v-if="portfolioOperation.operation === 'activity'">
               <label
                 >{{ t('RELATIONSHIP.FIELDS.title')
@@ -1330,7 +1432,17 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           :key="`${route.params.accountId}:${store.getters.getCurrentUserID}`"
           :account-id="route.params.accountId"
           :actor-id="store.getters.getCurrentUserID"
+          :authorization-key="
+            JSON.stringify([
+              store.getters.getCurrentRole,
+              store.getters.getCurrentUser?.accounts?.map(
+                accountMembershipAccess
+              ),
+            ])
+          "
           :proposal="portfolioReviewProposal"
+          show-inventory
+          :formatting="metadata.formatting"
           @updated="load"
         />
         <template v-if="!portfolioScreen && rows.length">
@@ -1349,6 +1461,49 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             class="mt-3 flex flex-wrap items-end gap-2 rounded-xl border border-n-weak p-4"
             @submit.prevent="completeBatch"
           >
+            <div
+              v-if="isWaitingStatus(batch.status)"
+              class="grid w-full min-w-0 gap-3 md:grid-cols-3"
+            >
+              <label class="text-sm">
+                <span class="block">{{
+                  t('RELATIONSHIP.FIELDS.waiting_reason')
+                }}</span>
+                <textarea
+                  v-model="batch.waiting_reason"
+                  data-testid="batch-waiting-reason"
+                  :class="inputClass"
+                  maxlength="4000"
+                  rows="2"
+                  required
+                />
+              </label>
+              <label class="text-sm">
+                <span class="block">{{
+                  t('RELATIONSHIP.FIELDS.next_step')
+                }}</span>
+                <textarea
+                  v-model="batch.next_step"
+                  data-testid="batch-next-step"
+                  :class="inputClass"
+                  maxlength="4000"
+                  rows="2"
+                  required
+                />
+              </label>
+              <label class="text-sm">
+                <span class="block">{{
+                  t('RELATIONSHIP.FIELDS.return_at')
+                }}</span>
+                <input
+                  v-model="batch.return_at"
+                  data-testid="batch-return-at"
+                  type="datetime-local"
+                  :class="inputClass"
+                  required
+                />
+              </label>
+            </div>
             <label class="text-sm"
               >{{ t('RELATIONSHIP.FIELDS.status')
               }}<select
@@ -1368,8 +1523,8 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             ><label class="flex-1 text-sm"
               >{{ t('RELATIONSHIP.FIELDS.result')
               }}<input
-                data-testid="batch-result"
                 v-model="batch.result"
+                data-testid="batch-result"
                 :class="inputClass"
                 :required="batch.status === 'completed'" /></label
             ><label class="text-sm"

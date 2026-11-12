@@ -1,0 +1,75 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_head": "8acdb7716f8102448d928c8945492d1e205a2ab7",
+  "status": "Explicit weighted/hour capacity source and directed tests validated; continuing F1 readiness, not full C-G closure.",
+  "implementation": [
+    "Legacy integer customer-capacity limits and reviewed snapshots remain supported without conversion. Optional explicit unit selects points or equivalent hours per analyst limit.",
+    "Points use supplied base × complexity × risk × journey + supplied activity effort. No illustrative Word factor becomes a default. Equivalent hours are supplied explicitly; no implicit currency/day/hour conversion exists.",
+    "Native configuration validation, BigDecimal admission, reviewed projection, availability/dedication, approval invalidation, baseline-workload digest and idempotent receipts use the same typed workload.",
+    "Native owner/workload writes and concurrent allocations respect limits; missing or invalid workload is unavailable, not zero.",
+    "Configuration limits and customer/new-allocation forms expose explicit units/factors/hours, preserve other settings under native locks and permissions, and label units in the review."
+  ],
+  "source_files": [
+    "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/CapacityWorkloadForm.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DistributionCapacitySummary.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioCapacityLimitsForm.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/capacityWorkload.spec.js",
+    "app/models/jrc_relationship/assignment.rb",
+    "app/services/jrc_relationship/capacity_workload.rb",
+    "app/services/jrc_relationship/distribution_capacity.rb",
+    "app/services/jrc_relationship/distribution_capacity_guard.rb",
+    "app/services/jrc_relationship/distribution_capacity_policy.rb",
+    "app/services/jrc_relationship/weighted_capacity.rb",
+    "spec/requests/api/v1/accounts/relationship/capacity_workload_spec.rb",
+    "spec/services/jrc_relationship/weighted_capacity_concurrency_spec.rb",
+    "spec/services/jrc_relationship/weighted_capacity_spec.rb"
+  ],
+  "tests_non_additive": [
+    {
+      "label": "weighted-capacity01",
+      "examples": 17,
+      "failures": 0
+    },
+    {
+      "label": "weighted-capacity-api",
+      "examples": 3,
+      "failures": 1,
+      "note": "Native foreign-account denial was403, not401; expectation corrected without changing native authorization."
+    },
+    {
+      "label": "weighted-capacity-final",
+      "examples": 3,
+      "failures": 0,
+      "purpose": "Native API persistence/isolation plus committed two-thread hour-capacity admission."
+    },
+    {
+      "label": "weighted-capacity-regression-final",
+      "examples": 19,
+      "failures": 0,
+      "purpose": "Weighted review/approval/execution,13legacy capacity cases and native HTTP workload editing."
+    },
+    {
+      "label": "weighted-ui01",
+      "examples": 8,
+      "failures": 0,
+      "purpose": "Explicit inputs, typed fractional limits, disabled state and4legacy form/summary cases."
+    }
+  ],
+  "static_gates": "New/changed capacity Ruby final followups0offenses; directed ESLint exit0. No whole-repository lint claim.",
+  "limits": [
+    "Actual fresh-build Chrome acceptance remains pending no-build authorization.",
+    "F1 final analyst withdrawal, project owner authority receipts and immutable active-cadence handover remain open. Do not remove any actual participant.",
+    "F2 and C/D/G remaining functional/Word/scale validation not closed. TRR undefined; company documents without portfolio deferred."
+  ],
+  "disk": {
+    "initial_bytes": 6929879040,
+    "minimum_test_bytes": 6583382016,
+    "final_bytes": 7398367232
+  },
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379change,containerrestart or external operation."
+}

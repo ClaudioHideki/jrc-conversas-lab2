@@ -100,7 +100,8 @@ RSpec.describe 'Quick Service Desk intake and authorized closure plans', type: :
     plan['steps'].each_with_index do |step, index|
       get "#{base}/tickets/#{row.id}/lifecycle", headers: headers
       data = response.parsed_body
-      command = { rule_key: step['key'], solution: 'Synthetic single resolution', expected_lock_version: data['lock_version'], expected_policy_version_id: data.dig('policy', 'id') }
+      command = { rule_key: step['key'], closing_reason: 'Synthetic closure reason', solution: 'Synthetic single resolution',
+        expected_lock_version: data['lock_version'], expected_policy_version_id: data.dig('policy', 'id') }
       2.times do
         post "#{base}/tickets/#{row.id}/lifecycle", headers: headers.merge('Idempotency-Key' => "quick-close:#{index}"), params: command, as: :json
         expect(response).to have_http_status(:ok)
@@ -123,14 +124,18 @@ RSpec.describe 'Quick Service Desk intake and authorized closure plans', type: :
     expect(response.parsed_body.fetch('closure_options')).to be_empty
   end
 
-  it 'keeps contractual diagnosis, evidence and custom requirements mandatory in both the plan and official command' do
+  it 'keeps the pinned contract strict for customer execution while simplifying native closure' do
     definition = lc_definition
     definition['transitions'].find { |r| r['action'] == 'close' }['requirements'].merge!('note' => true, 'evidence' => true,
       'fields' => { 'accepted' => { 'label' => 'Contract acceptance', 'type' => 'boolean', 'required' => true, 'equals' => true } })
     lc_publish(definition: definition)
     row = sd_ticket
     get "#{base}/tickets/#{row.id}/lifecycle", headers: headers
-    expect(response.parsed_body.dig('closure_options', 0, 'steps', 1, 'requirements', 'note')).to be(true)
+    expect(response.parsed_body.dig('closure_options', 0, 'steps', 1, 'requirements', 'note')).to be(false)
+    customer_read = JrcServiceDesk::LifecycleReadService.new(user_context: sd_context.merge(customer_execution: true), ticket: row).call
+    expect(customer_read.dig(:closure_options, 0, :steps, 1, :requirements, 'note')).to be(true)
+    original_rule = JrcServiceDesk::LifecycleSelector.new(row).applicable.definition['transitions'].find { |rule| rule['action'] == 'close' }
+    expect(original_rule.dig('requirements', 'note')).to be(true)
     lc_execute(row, 'resolve', solution: 'Synthetic resolution')
     get "#{base}/tickets/#{row.id}/lifecycle", headers: headers
     data = response.parsed_body

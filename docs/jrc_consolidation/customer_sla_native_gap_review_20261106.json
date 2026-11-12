@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-06",
+  "source_head": "b1851b76d74b9f135ed17ab876c2680e703ccc2b",
+  "scope": "Next independent F2/C native SLA signal gap; review before changing shared customer/health code",
+  "files": {
+    "app/services/jrc_customers/customer360.rb": "c8cf9f20260fce6a1ee06a1b208c4d6e8c1568e7457806324f618867d70d065b",
+    "app/services/jrc_customers/attendance_metrics.rb": "c207615e6a7fa458284360498ebaeb483cc686d3557d941709940b6cc6b8c483",
+    "app/services/jrc_relationship/customer_signals.rb": "c4ba68832d9293d8dc8b12e947b4ebda9d54a8e51a349fc917f4dd1d62bd9fe5",
+    "app/services/jrc_relationship/snapshot_access.rb": "ec677619a8378d812fae453a2b2da8e640785facaf481103c9730ca819380ce8",
+    "app/services/jrc_service_desk/clock_breach_query.rb": "7cbbb7065d45b21a231c2bf0111c7dd90386d0fa84a9bc3d68a19f6af2465280"
+  },
+  "facts": [
+    "Customer360.overview currently counts distinct ticket IDs by running/paused clock due_at alone.",
+    "ClockProjection uses native elapsed business time, the immutable calendar snapshot and budget; a stored deadline crossing a weekend does not by itself prove a breach.",
+    "CustomerSignals consumes Customer360 sla_breached in health, priority and automatic ticket actions.",
+    "AttendanceMetrics separately intersects native customer-view and SLA-view ticket scopes and calls ClockBreachQuery.",
+    "Customer360 currently checks native tickets/customers access for this count but has no distinct SLA-view capability in its summary.",
+    "SnapshotAccess currently reauthorizes source IDs and known module capabilities; distinct SLA capability/clock evidence is not represented in CustomerSignals.SOURCE_MANIFEST."
+  ],
+  "implementation_constraints": [
+    "Reuse native policy scopes and ClockProjection; no deadline-only breach heuristic or invented SLA formula.",
+    "Do not change calendars, current clocks, immutable snapshots, role grants or old versions.",
+    "Unavailable SLA permission must not become a fabricated zero or healthy observation.",
+    "Current customer/health derived numeric SLA facts and their cached sources must remain authorized after revocation.",
+    "Keep critical-ticket visibility and existing native editing/transfers; no blanket analyst removal or role mutation.",
+    "Test distinct affected-ticket counts, paused and weekend boundary cases, module/unit/supervision/tenant denial and historical immutability."
+  ],
+  "status": "Native implementation and directed regressions passed; no stage/visual closure.",
+  "stage_closure": false,
+  "implementation_report": "customer_sla_signals_checkpoint_20261106.json"
+}

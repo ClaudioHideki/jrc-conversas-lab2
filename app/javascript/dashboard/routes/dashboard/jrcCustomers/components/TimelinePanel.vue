@@ -7,15 +7,18 @@ const props = defineProps({
   resourceId: { type: [Number, String], required: true },
   resourceType: { type: String, default: 'companies' },
 });
-const { accountId, date } = useCustomerMaster();
+const { accountId, identity, date } = useCustomerMaster();
 const items = ref([]);
 const cursor = ref(null);
 const error = ref('');
 const busy = ref(false);
 let generation = 0;
+let controller;
 const load = async (more = false) => {
   generation += 1;
   const version = generation;
+  controller?.abort();
+  controller = new AbortController();
   busy.value = true;
   error.value = '';
   if (!more) {
@@ -26,25 +29,33 @@ const load = async (more = false) => {
     const { data } = await API.timeline(
       props.resourceId,
       { cursor: more ? cursor.value : undefined },
-      props.resourceType
+      props.resourceType,
+      { accountId: accountId.value, signal: controller.signal }
     );
     if (version === generation) {
       items.value = more ? [...items.value, ...data.payload] : data.payload;
       cursor.value = data.next_cursor;
     }
   } catch (err) {
-    if (version === generation) error.value = errorMessage(err);
+    if (version === generation) {
+      items.value = [];
+      cursor.value = null;
+      error.value = errorMessage(err);
+    }
   } finally {
     if (version === generation) busy.value = false;
   }
 };
 watch(
-  [accountId, () => props.resourceId, () => props.resourceType],
+  [identity, () => props.resourceId, () => props.resourceType],
   () => load(),
   { immediate: true }
 );
 onBeforeUnmount(() => {
   generation += 1;
+  controller?.abort();
+  items.value = [];
+  cursor.value = null;
 });
 </script>
 
@@ -69,7 +80,7 @@ onBeforeUnmount(() => {
       {{ error }}
     </p>
     <p
-      v-if="!busy && !items.length"
+      v-if="!busy && !error && !items.length"
       class="py-6 text-n-slate-10"
     >
       {{ T.noData }}
@@ -83,11 +94,11 @@ onBeforeUnmount(() => {
         <time class="text-xs text-n-slate-10">{{ date(item.at) }}</time>
         <p class="font-medium">{{ item.title }}</p>
         <p class="text-xs text-n-slate-10">
-          {{ item.source }} #{{ item.id }}
-          <span v-if="item.status">{{ item.status }}</span
-          ><span v-if="item.duration_seconds != null">
-            / {{ item.duration_seconds }} {{ T.secondsShort }}</span
-          >
+          {{ `${item.source} #${item.id}` }}
+          <span v-if="item.status">{{ item.status }}</span>
+          <span v-if="item.duration_seconds != null">
+            {{ `/ ${item.duration_seconds} ${T.secondsShort}` }}
+          </span>
         </p>
       </li>
     </ol>

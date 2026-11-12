@@ -1,6 +1,7 @@
 import { createStore } from 'vuex';
 import deals from '../modules/deals';
 import pipelines from '../modules/pipelines';
+import { authorityScope } from '../authorityScope';
 import { dealsAPI, stagesAPI, pipelinesAPI } from 'dashboard/api/crm';
 
 vi.mock('dashboard/api/crm', () => ({
@@ -19,7 +20,11 @@ beforeEach(() => {
           deals: { ...deals, state: structuredClone(deals.state) },
           pipelines: {
             ...pipelines,
-            state: { pipelines: [{ id: 1 }, { id: 2 }], error: null },
+            state: {
+              ...structuredClone(pipelines.state),
+              authorityScope: authorityScope({}),
+              pipelines: [{ id: 1 }, { id: 2 }],
+            },
           },
         },
       },

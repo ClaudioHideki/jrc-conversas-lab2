@@ -21,6 +21,7 @@ import {
   retainedCatalogueAnswers,
 } from '../helpers/catalogueFields';
 const session = useServiceDesk();
+const api = session.lifecycleClient || API;
 const fields = ref([]);
 const status = ref('idle');
 const hasCatalogue = () =>
@@ -66,7 +67,7 @@ const load = async () => {
     ].forEach(([key, value]) => {
       if (value || props.editing) selection[key] = value || null;
     });
-    const payload = await API.catalogueForm(
+    const payload = await api.catalogueForm(
       context.account_id,
       selection,
       controller.signal

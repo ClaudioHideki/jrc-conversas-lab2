@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-07",
+  "status": "native_activity_origin_read_scope_reused_and_candidate_regressions_validated_not_chrome",
+  "branch": "codex/relacionamento-v2-20261101",
+  "previous_checkpoint": "14262fe161068693af0ceba5e14991dce3bf59b2",
+  "files": [
+    "app/controllers/api/v1/accounts/crm/activities_controller.rb",
+    "spec/requests/api/v1/accounts/crm/activity_origin_visibility_spec.rb",
+    "spec/requests/api/v1/accounts/crm/activity_completion_scope_spec.rb"
+  ],
+  "confirmed_problem": [
+    "Actual native GET of another owners deal/lead was404,but activity create accepted the submitted hidden source ID with201;generic versioned reparenting returned200.",
+    "Administrator with native coverage of only unitA could create through a deal whose unitB was hidden by native read scope. Business unit is stored in Deal.metadata,not a business_unit association."
+  ],
+  "implementation": [
+    "Only two production lookup expressions changed:activity_params resolves submitted deal/lead IDs through existing visible_to_current_user(crm_scope.native_relation). Existing account,legacy ownership,OrganizationalVisibility and CorporateCoverage now govern source writes as they govern reads.",
+    "No new role matrix,ActivityPolicy,endpoint,grant,force flag or migration. Native ActivityDispatchService,transactional audits,internal Backoffice/CS direct services,serializer,assignee semantics and versioned editor retained.",
+    "Unauthorized source lookup happens before native save/update,without persisted row mutation or creation/edit audit. Own-source and native administrator access that the read scope already permits remain valid."
+  ],
+  "validation": {
+    "baseline01": "6failures in test preparation (unbound factory pipeline and wrong unit/serializer assumptions),not accepted as product proof. Failed artifacts retained.",
+    "baseline02": "3real negative assertion failures201/201/200;2positivecasespassed;corporatecase still had an invalid business_unit association and was not evidence.",
+    "corporate_baseline03": "1real negative failure201 after fixture corrected to actual metadata business_unit_id;native GET beforehand404.",
+    "native_final06": "17examples,0failures:6origin/write/readscope cases,3nativecompletion account/owner/source-preservation cases,2existing creation/timezone/source integration cases,6existing versioned editor cases. Actual Rails/PostgreSQL in owned candidate,no mocked domain policies.",
+    "corporate_final08": "1example,0failures after only equivalent fixture iteration style change from2.times.map toArray.new(2). Other16already passed;executed SHA and artifacts retained.",
+    "ruby_lint": "Both new request specs0offenses after final style correction. Read-only comparison of shared controller has exactly same2legacy offenses in HEAD/current:Style/ClassAndModuleChildren andMetrics/AbcSize. No global rewrite/suppression.",
+    "controller_lint_artifact": ".codex/d9-notifications-20261104/activity-origin-controller-lint-readonly05.json",
+    "resources": {
+      "activity-origin-baseline01": {
+        "start": 6545022976,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/crm/activity_origin_visibility_spec.rb": "60e6dba6676cd0e4ff8a4e583e30800ac3c51e1f8a172905d1e45d859679d726"
+        },
+        "minimum": 6544703488,
+        "exit_code": 1,
+        "end": 6544683008
+      },
+      "activity-origin-baseline02": {
+        "start": 6544617472,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/crm/activity_origin_visibility_spec.rb": "5806fd2a3e4b135f043674b758193bd9edeae281918083b4658219ad8108cd16"
+        },
+        "minimum": 6544396288,
+        "exit_code": 1,
+        "end": 6544392192
+      },
+      "activity-origin-corporate-baseline03": {
+        "start": 6544404480,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/crm/activity_origin_visibility_spec.rb": "564df723c2ad5b5c4774ce85f9388edc93c845753add08139cc201066ab3060c"
+        },
+        "minimum": 6544334848,
+        "exit_code": 1,
+        "end": 6544330752
+      },
+      "activity-origin-native-final06": {
+        "start": 6542069760,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/crm/activity_origin_visibility_spec.rb": "a37b63b264bb0e436d28398294723aee4840228e15375e5be776dfe6c01fe07b",
+          "spec/requests/api/v1/accounts/crm/activity_completion_scope_spec.rb": "c0424d022221b18e8e7d07684158b2308cdb1ff35b6721e58fdb6242cab9ebbe",
+          "spec/requests/api/v1/accounts/crm/activities_spec.rb": "e53be8f38b0ca61578fb7add1cca9cd2f502f5ddc940c062ad297d4d478974c5",
+          "spec/requests/api/v1/accounts/crm/activity_editing_spec.rb": "7ed59b2fc2bdaeabc14c55ba0715f02b25363f324bd67ade53155c18070f7f8a"
+        },
+        "minimum": 6542000128,
+        "exit_code": 0,
+        "end": 6541934592
+      },
+      "activity-origin-corporate-final08": {
+        "start": 6541930496,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/crm/activity_origin_visibility_spec.rb": "71d6b97788d43c64aaeedec0aec26cacd910654b3d928f57c2cc8309e74a3a73"
+        },
+        "minimum": 6541684736,
+        "exit_code": 0,
+        "end": 6541619200
+      }
+    },
+    "chrome": false
+  },
+  "disk": {
+    "initial_bytes": 6545022976,
+    "minimum_measured_bytes": 6541684736,
+    "final_bytes": 6541316096
+  },
+  "preservation": {
+    "original_four_container_started_at_confirmed_unchanged": true,
+    "server5379_changed": false,
+    "build": false,
+    "cleanup": false,
+    "migrations": false,
+    "push": false,
+    "external_operations": false,
+    "existing_data_deleted": false
+  },
+  "remaining": [
+    "DealsIndex current detail store is scoped,but its creation options,product/form local caches and post-mutation continuations still require the same incremental authority review.",
+    "Broader existing assignee/reassignment and inherited child-serialization semantics not changed or declared audited here;no business permission invented.",
+    "Current-source Chrome and complete Word visual/literal acceptance,C-G and explicit business/external dependencies remain open."
+  ]
+}

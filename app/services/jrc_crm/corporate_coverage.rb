@@ -50,6 +50,22 @@ class JrcCrm::CorporateCoverage
     relation.where.not(relationship_type: 'internal').or(relation.where(id: company_ids))
   end
 
+  # Callers retain their module permissions. Check both the persisted target
+  # and proposed internal/parent links before a master-company write.
+  def authorize_company_write!(company)
+    raise ActiveRecord::RecordNotFound unless company.account_id == @account.id
+    return company unless configured?
+
+    visible = companies(@account.master_companies)
+    target_allowed = company.new_record? || visible.exists?(id: company.id)
+    unless target_allowed && company_links_allowed?(company, visible)
+      raise ActiveRecord::RecordNotFound,
+            'Company unavailable in the current scope'
+    end
+
+    company
+  end
+
   def configured?
     @account.jrc_crm_business_units.where.not(company_id: nil).exists?
   end
@@ -77,6 +93,12 @@ class JrcCrm::CorporateCoverage
   end
 
   private
+
+  def company_links_allowed?(company, visible)
+    issuer_allowed = company.relationship_type != 'internal' || group? || company_allowed?(company.id)
+    parent_allowed = company.parent_company_id.blank? || visible.exists?(id: company.parent_company_id)
+    issuer_allowed && parent_allowed
+  end
 
   def account_scope(relation)
     return relation if relation.where_values_hash['account_id'] == @account.id

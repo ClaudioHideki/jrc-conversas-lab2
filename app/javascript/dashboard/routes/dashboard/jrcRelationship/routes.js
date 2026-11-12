@@ -16,8 +16,14 @@ export const routes = [
         path: screen,
         name: `jrc_relationship_${screen}`,
         meta,
-        component: () => import('./ModulePage.vue'),
-        props: { screen },
+        component: () => {
+          if (['overview', 'actions'].includes(screen))
+            return import('./AnalystWorkspace.vue');
+          if (screen === 'customers') return import('./CustomerWorkspace.vue');
+          if (screen === 'portfolio') return import('./PortfolioWorkspace.vue');
+          return import('./ModulePage.vue');
+        },
+        props: { screen: screen === 'actions_advanced' ? 'actions' : screen },
       })),
     ],
   },

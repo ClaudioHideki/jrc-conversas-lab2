@@ -1,0 +1,157 @@
+{
+  "date": "2026-11-03",
+  "stage": "C4a — Definições e operação básica de segmentos",
+  "status": "parcial",
+  "base_commit": "b7a0db05a4f799565315016adc6a18dd05559839",
+  "branch": "codex/relacionamento-v2-20261101",
+  "scope_note": "Incremento validado; não conclui Segmentos integralmente, Cadastro Mestre ou C/D/E/F/G. Nenhuma publicação, imagem Docker, deploy ou migration de produção.",
+  "before": "Taxonomy de classificação estática, criação/ativação simples e CustomFilters pessoais de contatos. Os registros e as regras nativas foram preservados.",
+  "implemented": [
+    "Descrição, status, seleção por classificação ou critérios explícitos E/OU; DSL restrita a campos corporativos conhecidos, até 20 regras, sem SQL fornecido pelo usuário.",
+    "Wizard de quatro etapas com revisão e prévia real antes de criar; popup de seis abas, paginação, busca e estados de carregamento, temas e celular.",
+    "Inclusões e exclusões independentes de empresas e contatos, preservadas nas mudanças de critério; criação e escolhas iniciais na mesma transação.",
+    "Consultas calculadas sobre dados atuais, sempre intersectadas com CorporateCoverage e ContactDirectory. Os segmentos não concedem permissões.",
+    "Revisão em updates, auditoria nativa, bloqueio de exclusão com dependências, confirmação/cancelamento/exclusão efetiva quando sem dependências.",
+    "Fusão preserva escolhas de segmentos mesmo com feature posteriormente desligada, colapsa escolhas idênticas e bloqueia conflitos; exclusão nativa de contato continua funcional.",
+    "Filtro taxonomy_id nas consultas canônicas de empresas/contatos; URL do diretório preserva o filtro. CustomFilters pessoais continuam separados e acessíveis apenas ao titular."
+  ],
+  "files": [
+    "app/models/jrc_customers/taxonomy.rb",
+    "app/models/jrc_customers/segment_override.rb",
+    "app/services/jrc_customers/segment_criteria.rb",
+    "app/services/jrc_customers/segment_members.rb",
+    "app/services/jrc_customers/taxonomy_writer.rb",
+    "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+    "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+  ],
+  "validation": {
+    "backend": {
+      "unique_examples": 122,
+      "passed": 122,
+      "failed": 0,
+      "pending": 0,
+      "single_green_run": false,
+      "provenance": "113 passaram no banco novo; 9 recusaram esse ambiente pelos guards originais e passaram no candidato exigido. Os guards não foram alterados. Os primeiros relatórios de falha foram preservados.",
+      "reports": [
+        ".codex/customer-segments-backend-checked.json",
+        ".codex/customer-segments-owned-regression.json",
+        ".codex/customer-segments-latest-backend-evidence.json"
+      ]
+    },
+    "frontend": {
+      "unique_cases": 128,
+      "passed": 128,
+      "failed": 0,
+      "single_green_run": false,
+      "full_run": "125/0",
+      "focused_final": "11/0, incluindo 3 casos adicionais e 8 repetidos",
+      "reports": [
+        ".codex/customer-segments-frontend.json",
+        ".codex/customer-segments-preview-frontend-fixed.json",
+        ".codex/customer-segments-latest-frontend-evidence.json"
+      ]
+    },
+    "style": {
+      "ruby_new_files": 8,
+      "ruby_offenses": 0,
+      "frontend_files": 14,
+      "frontend_errors": 0,
+      "frontend_warnings": 14,
+      "global_clean_claim": false,
+      "reports": [
+        ".codex/customer-segments-ruby-final.json",
+        ".codex/customer-segments-frontend-style-final.json"
+      ]
+    },
+    "assets": {
+      "result": "passed",
+      "duration": "3m1s",
+      "artifact": ".codex/customer-segments-preview-production-assets.log",
+      "kind": "Somente assets Vite; sem build de imagem Docker."
+    },
+    "chrome": {
+      "browser": "Chrome real, canal chrome do Playwright",
+      "base_url": "http://localhost:5370",
+      "account_synthetic": 282,
+      "existing_segment_id": 55,
+      "created_then_deleted_unused_segment_id": 56,
+      "flow_provenance": "Criação/edição persistidas no primeiro fluxo; confirmação corrigida e demais etapas retomadas pelo ID 55. Revisão atual, cancelamento e exclusão positiva executados em outro segmento sem dependências, sem repetir a primeira criação.",
+      "reports": [
+        "segmentos-c4-fluxo-chrome.json (falha preservada após criar/editar; não é um fluxo inteiro verde)",
+        "segmentos-c4-retomada-chrome.json (passed)",
+        "segmentos-c4-exclusao-sem-dependencias.json (passed)",
+        ".codex/customer-segments-final-tabs.json (seis abas e checkbox de CRM habilitados)"
+      ],
+      "javascript_errors_final": 0,
+      "rejected_writes_final": 0,
+      "expected_denials": [
+        "DELETE segmento 55 com dependências:422"
+      ],
+      "screenshots": [
+        "150-segmento-criterio-desktop-escuro.png",
+        "152-segmento-historico-desktop-escuro.png",
+        "165-segmento-agente-somente-leitura.png",
+        "166-segmento-mobile-claro-estavel.png",
+        "171-segmento-revisao-previa-atual.png",
+        "172-segmento-mobile-abas-claro-final.png",
+        "173-segmento-mobile-abas-escuro-final.png",
+        "174-segmento-mobile-claro-abas-habilitadas.png"
+      ],
+      "evidence_caveats": [
+        "151 capturou a prévia durante carregamento, antes da correção; não prova o estado final da revisão.",
+        "164 capturou a transição de tema; usar 166/174 para tema claro estável.",
+        "A captura 159 de falha foi reutilizada na segunda tentativa; usar os JSONs preservados e as capturas com timestamp para o histórico."
+      ]
+    },
+    "integrity": {
+      "status": "passed",
+      "protected_business_rows": 32,
+      "protected_memberships": 2,
+      "native_login_timestamp_changes_allowed_only": [
+        "active_at",
+        "updated_at"
+      ],
+      "existing_segment_id": 55,
+      "deleted_unused_segment_id": 56,
+      "manual_choices": 3,
+      "company_count": 12,
+      "contact_count": 13,
+      "audit_event_count": 7,
+      "schema": "20261103100000",
+      "foreign_keys": 4,
+      "signature_verifier": null,
+      "external_operations": 0,
+      "source": "/consolidation-customer-segments-preview",
+      "production_changed": false
+    },
+    "source": {
+      "snapshot": "/consolidation-customer-segments-preview",
+      "proof": ".codex/customer-segments-preview-source-verified.json",
+      "files_checked": 11304,
+      "mismatches": 0,
+      "native_sql_raw_hashes_preserved": true
+    }
+  },
+  "migration": {
+    "version": "20261103100000",
+    "new_database": "jrc_customer_segments_test",
+    "new_schema_loaded_then_additive_migration_passed": true,
+    "existing_candidate_preserved": true,
+    "rollback_attempt": "Revisão automática rejeitou db:migrate:down no candidato por risco aos dados. A reversão não foi executada; foi criado um banco novo, sem remover/reutilizar bases anteriores.",
+    "used_data_rollback_guard": "A migration recusa down quando há definições ou escolhas em uso.",
+    "production_executed": false
+  },
+  "pending": [
+    "Separar claramente os seletores de classificação estática e os filtros dinâmicos; conferir transições de modo de classificações já atribuídas antes de ampliar uso.",
+    "Tornar o filtro por ID visível na interface dos diretórios e conectá-lo aos demais módulos. A marcação Módulos ainda é indicação declarativa, sem habilitar os filtros de todos os módulos.",
+    "Critérios financeiros/contratos e TRR; a definição de TRR, fórmula/unidade e fonte foi perguntada ao usuário. Não foi inventada.",
+    "Grupos econômicos como entidade corporativa com membros/empresa principal e histórico, separados das etiquetas pessoais; o fluxo existente continua preservado.",
+    "Demais critérios integrais, importação mapeada, contatos ativos operacionais e demais pendências de C, seguidas de D/E/F/G.",
+    "Assinatura externa DocuSign e prova independente continuam pendentes; verifier permanece nil e o bloqueio de implantação continua exigindo contrato assinado."
+  ],
+  "next_action": "Concluir a distinção entre classificação/filtro e o filtro visível; avançar para grupos econômicos reaproveitando o editor e os serviços canônicos, sem refazer módulos estáveis."
+}

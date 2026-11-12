@@ -17,6 +17,8 @@ class SendReplyJob < ApplicationJob
 
   def perform(message_id)
     message = Message.find(message_id)
+    return if message.additional_attributes.to_h['whatsapp_retry'].present?
+
     if message.content_attributes.to_h['service_desk_delivery_id']
       return if message.inbox.channel_type == 'Channel::Api'
 

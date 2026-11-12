@@ -15,8 +15,15 @@ class JrcApprovals::RequestVisibility
     principals = record.stage_plan.flat_map { |step| step['principal_ids'] }
     delegated = JrcApprovals::Delegation.where(account_id: account.id, delegate_id: member.id,
       policy_version_id: record.policy_version_id, principal_id: principals, revoked_at: nil)
-      .where('starts_at <= ? AND ends_at > ?', Time.current, Time.current).exists?
-    raise Pundit::NotAuthorizedError unless principals.include?(member.id) || delegated
+      .where('starts_at <= ? AND ends_at > ?', Time.current, Time.current).any? do |grant|
+        !JrcApprovals::OwnDelegationBindings.own_id(grant)
+      end
+    return member if principals.include?(member.id) || delegated
+    own = record.policy_version.definition.fetch('steps').any? do |step|
+      JrcApprovals::OwnDelegationBindings.choices(account: account, user: user, record: record,
+        step: step, principals: principals).any?
+    end
+    raise Pundit::NotAuthorizedError unless own
 
     member
   end

@@ -56,10 +56,51 @@ const entries = group =>
 const to = key => ({
   name: serviceDeskRouteName(key),
   params: { accountId: accountId.value },
+  query: ['overview', 'tickets', 'mine', 'sla', 'reports'].includes(key)
+    ? { customer_segment_id: route.query.customer_segment_id }
+    : {},
 });
-const tabTones = { overview: 'blue', tickets: 'teal', mine: 'violet', sla: 'amber', assignees: 'cyan', reports: 'rose' };
-const navigationItems = computed(() => primaryEntries.value.map(item => ({ ...item, tone: tabTones[item.key], to: to(item.key) })));
-const navigationGroups = computed(() => groups.map(group => ({ key: group, label: groupLabels.value[group], icon: ({ operation: 'i-lucide-workflow', governance: 'i-lucide-shield-check', management: 'i-lucide-settings' })[group], tone: ({ operation: 'cyan', governance: 'violet', management: 'rose' })[group], entries: entries(group).map(item => ({ ...item, label: screenLabels.value[item.key], to: to(item.key) })) })));
+const clearCustomerSegment = async () => {
+  const query = { ...route.query };
+  delete query.customer_segment_id;
+  delete query.page;
+  await router.replace({ query });
+  await session.retry();
+};
+const tabTones = {
+  overview: 'blue',
+  tickets: 'teal',
+  mine: 'violet',
+  sla: 'amber',
+  assignees: 'cyan',
+  reports: 'rose',
+};
+const navigationItems = computed(() =>
+  primaryEntries.value.map(item => ({
+    ...item,
+    tone: tabTones[item.key],
+    to: to(item.key),
+  }))
+);
+const navigationGroups = computed(() =>
+  groups.map(group => ({
+    key: group,
+    label: groupLabels.value[group],
+    icon: {
+      operation: 'i-lucide-workflow',
+      governance: 'i-lucide-shield-check',
+      management: 'i-lucide-settings',
+    }[group],
+    tone: { operation: 'cyan', governance: 'violet', management: 'rose' }[
+      group
+    ],
+    entries: entries(group).map(item => ({
+      ...item,
+      label: screenLabels.value[item.key],
+      to: to(item.key),
+    })),
+  }))
+);
 const screenAllowed = computed(() =>
   screenAccessible(
     state.context,
@@ -95,15 +136,26 @@ const blocked = computed(() =>
     <template v-if="enabled">
       <main
         :key="`${accountId}:${userId}`"
-        class="flex-1 min-h-0 min-w-0 overflow-auto p-4 xl:p-5"
+        class="flex-1 min-h-0 min-w-0 overflow-auto bg-gradient-to-br from-blue-100/80 via-sky-50/70 to-indigo-100/70 p-4 dark:from-n-solid-1 dark:via-n-solid-2 dark:to-n-solid-1 xl:p-5"
       >
+        <Button
+          v-if="blocked && route.query.customer_segment_id"
+          class="mb-4"
+          :label="t('CRM.CORPORATE_SEGMENTS.CLEAR_FILTER')"
+          variant="outline"
+          color="slate"
+          @click="clearCustomerSegment"
+        />
         <Breadcrumb
           v-if="state.status === 'ready'"
           :items="breadcrumbs"
           @click="item => item.route && router.push(item.route)"
         />
         <ModuleTabs
-          v-if="state.status === 'ready' && !['detail', 'edit', 'new'].includes(activeScreen)"
+          v-if="
+            state.status === 'ready' &&
+            !['detail', 'edit', 'new'].includes(activeScreen)
+          "
           class="mb-4"
           :label="t('JRC_SERVICE_DESK.REDESIGN_LIST.navigation')"
           :items="navigationItems"

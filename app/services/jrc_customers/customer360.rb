@@ -1,15 +1,16 @@
 class JrcCustomers::Customer360
   attr_reader :contacts, :conversations, :deals, :leads, :activities, :proposals, :audits, :calls, :recipients, :tickets, :projects, :project_tasks,
-              :ticket_events, :project_events, :contracts, :orders, :follow_ups
+              :ticket_events, :project_events, :contracts, :orders, :follow_ups, :sla_clocks
 
   def initialize(account:, user:, account_user:, company: nil, contact: nil)
     @account, @user, @company, @contact, @account_user = account, user, company, contact, account_user
-    @visibility = JrcCustomers::Visibility.new(account: account, user: user, account_user: account_user)
-    @visibility.authorize_subject!(company: company, contact: contact)
-    @contacts = contact ? account.contacts.where(id: contact.id) : account.contacts.where(company_id: company.id)
+    @subject_sources = JrcCustomers::SubjectSources.new(account: account, user: user, account_user: account_user,
+                                                        company: company, contact: contact)
+    @visibility = @subject_sources.visibility
+    @contacts = @subject_sources.contacts
     contact_ids = @contacts.select(:id)
     @conversations = @visibility.conversations.where(contact_id: contact_ids)
-    @deals = related(@visibility.crm(account.jrc_crm_deals), contact_ids)
+    @deals = @subject_sources.deals
     @leads = related(@visibility.crm(account.jrc_crm_leads), contact_ids)
     @activities = related(@visibility.crm(account.jrc_crm_activities, owner: :user_id), contact_ids)
     @activities = @activities.or(@visibility.crm(account.jrc_crm_activities, owner: :user_id).where(deal_id: deals.select(:id)))
@@ -29,7 +30,10 @@ class JrcCustomers::Customer360
     values = {
       contacts: contacts.count, conversations_open: conversations.where(status: :open).count,
       capabilities: { conversations: true, crm: @visibility.crm?, calls: !calls.nil?, campaigns: !recipients.nil?,
-                      service_desk: @visibility.service_desk?, projects: @visibility.projects?, contracts: @visibility.crm?, central_sip_cdr: false, relationship: !@relationship_assignment.nil? },
+                      service_desk: @visibility.service_desk?, service_desk_sla: @visibility.service_desk_sla?,
+                      projects: @visibility.projects?, contracts: @visibility.crm?,
+                      backoffice: @visibility.crm?, central_sip_cdr: false, relationship: !@relationship_assignment.nil? },
+      document_context: JrcCustomers::CompanyDocumentsContext.new(member: @account_user, company: @company).call(@relationship_assignment),
       relationship: @relationship_assignment && { id: @relationship_assignment.id, status: @relationship_assignment.status },
       visibility: 'Counts and items are restricted to the signed-in user. Missing modules are not counted as zero.'
     }
@@ -43,16 +47,13 @@ class JrcCustomers::Customer360
         leads: leads.count,
         proposals: proposals.count,
         pending_activities: activities.pending.count,
-        contracts_active: active_contracts.count,
-        contracts_mrr_cents: active_contracts.sum(:monthly_cents),
         next_activity: next_activity && { id: next_activity.id, title: next_activity.title, due_at: next_activity.due_at&.iso8601 }
       )
+      values.merge!(JrcCustomers::ContractRenewalContext.new(contracts: active_contracts, account: @account).summary)
     end
     if @visibility.service_desk?
       values[:tickets_open] = tickets.joins(:status).where(jrc_service_desk_ticket_statuses: { phase: %w[open waiting] }).count
-      values[:sla_breached] = JrcServiceDesk::SlaClock.where(account_id: @account.id, ticket_id: tickets.select(:id))
-                                                      .where(state: %w[running paused]).where('due_at < ?', Time.current)
-                                                      .select(:ticket_id).distinct.count
+      values[:sla_breached] = @visibility.service_desk_sla? ? JrcServiceDesk::ClockBreachQuery.ticket_count(sla_clocks) : nil
     end
     values[:projects_active] = projects.where(status: %w[planned active on_hold]).count if @visibility.projects?
     values[:calls] = calls.count if calls
@@ -61,9 +62,7 @@ class JrcCustomers::Customer360
                                   .where(message_type: [0, 1]).maximum(:created_at)
     interactions = [last_conversation_at, activities.maximum(:completed_at), calls&.maximum(:started_at),
                     ticket_events.maximum(:created_at), project_events.maximum(:created_at)]
-    values[:last_conversation_at] = last_conversation_at&.iso8601
-    values[:last_interaction_at] = interactions.compact.max&.iso8601
-    values
+    values.merge(last_conversation_at: last_conversation_at&.iso8601, last_interaction_at: interactions.compact.max&.iso8601)
   end
 
   def sources
@@ -135,7 +134,8 @@ class JrcCustomers::Customer360
                else
                  ticket_scope.where(company_id: @company.id).or(ticket_scope.where(company_id: nil, requester_id: contact_ids))
                end
-    @projects = related(@visibility.projects, contact_ids)
+    @sla_clocks = @visibility.sla_clocks(@tickets)
+    @projects = @subject_sources.projects
     @project_tasks = @visibility.project_tasks(@projects)
     @ticket_events = @visibility.ticket_events(@tickets).where(event_type: %w[ticket_created ticket_updated lifecycle_transitioned])
     audit = JrcProjects::AuditEvent.where(account_id: @account.id)
@@ -146,8 +146,7 @@ class JrcCustomers::Customer360
   end
 
   def initialize_commercial(contact_ids)
-    orders_scope = @visibility.crm(JrcCrm::SalesOrder.where(account_id: @account.id))
-    @orders = orders_scope.where(contact_id: contact_ids).or(orders_scope.where(deal_id: deals.select(:id)))
+    @orders = @subject_sources.orders
     contracts_scope = @visibility.crm(JrcCrm::Contract.where(account_id: @account.id))
     @contracts = contracts_scope.where(contact_id: contact_ids).or(contracts_scope.where(deal_id: deals.select(:id)))
     @contracts = @contracts.or(contracts_scope.where(sales_order_id: orders.select(:id)))
@@ -156,9 +155,7 @@ class JrcCustomers::Customer360
   end
 
   def related(scope, contact_ids)
-    return scope.where(contact_id: contact_ids) if @contact
-
-    scope.where(company_id: @company.id).or(scope.where(company_id: nil, contact_id: contact_ids))
+    @subject_sources.related(scope, contact_ids)
   end
 
   def initialize_relationship

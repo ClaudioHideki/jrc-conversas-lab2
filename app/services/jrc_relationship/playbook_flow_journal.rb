@@ -41,6 +41,12 @@ class JrcRelationship::PlaybookFlowJournal
     end
   end
 
+  def existing_message
+    verify_outcomes!
+    record = verify_integrity![@run.node_id]
+    native_message!(record) if record
+  end
+
   private
 
   def native_message!(record)

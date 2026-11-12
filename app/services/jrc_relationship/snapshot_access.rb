@@ -10,8 +10,34 @@ class JrcRelationship::SnapshotAccess
       sql = native_scope.reselect(native_scope.klass.arel_table[:id]).reorder(nil).to_sql
       relation = relation.where("NOT EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE(#{evidence} #> '{_source_ids,#{key}}', '[]'::jsonb)) AS source_id(value) WHERE source_id.value::bigint NOT IN (#{sql}))")
     end
-    require_manifest ? relation : relation.or(original.where("NOT (#{evidence} ? '_source_ids')"))
+    relation = relation.or(original.where("NOT (#{evidence} ? '_source_ids')")) unless require_manifest
+    column == 'signals' ? capability_scope(context, relation, evidence) : action_sla_scope(context, relation)
   end
+
+  # Empty source lists do not prove continued module access. A previously
+  # available factor must not survive revocation just because it counted zero.
+  def self.capability_scope(context, relation, evidence)
+    visibility = JrcCustomers::Visibility.new(account: context.account, user: context.user, account_user: context.member)
+    available = { 'crm' => visibility.crm?, 'service_desk' => visibility.service_desk?,
+                  'service_desk_sla' => visibility.service_desk_sla?, 'projects' => visibility.projects? }
+    available.each do |key, allowed|
+      relation = relation.where("#{evidence} #>> ARRAY['capabilities', ?] IS DISTINCT FROM 'true'", key) unless allowed
+    end
+    # Older snapshots may predate the explicit SLA capability bit. A captured
+    # numeric SLA fact still needs its native grant, including captured zero.
+    available['service_desk_sla'] ? relation : relation.where("#{evidence} ->> 'sla_breached' IS NULL")
+  end
+  private_class_method :capability_scope
+
+  def self.action_sla_scope(context, relation)
+    return relation unless relation.klass == JrcRelationship::Action
+
+    visibility = JrcCustomers::Visibility.new(account: context.account, user: context.user, account_user: context.member)
+    return relation if visibility.service_desk_sla?
+
+    relation.where("jrc_relationship_actions.factors #>> '{sla,breached_count}' IS NULL")
+  end
+  private_class_method :action_sla_scope
 
   def self.sources(context)
     visibility = JrcCustomers::Visibility.new(account: context.account, user: context.user, account_user: context.member)
@@ -24,6 +50,7 @@ class JrcRelationship::SnapshotAccess
     sources = {
       'conversations' => visibility.conversations, 'activities' => visibility.crm(context.account.jrc_crm_activities, owner: :user_id),
       'contracts' => contracts, 'orders' => orders, 'invoices' => invoices, 'tickets' => visibility.tickets,
+      'sla_clocks' => visibility.sla_clocks,
       'projects' => projects, 'project_tasks' => visibility.project_tasks(projects),
       'csat' => CsatSurveyResponse.where(account_id: context.account.id, conversation_id: visibility.conversations.select(:id)),
       'messages' => Message.where(account_id: context.account.id, conversation_id: visibility.conversations.select(:id), private: false),

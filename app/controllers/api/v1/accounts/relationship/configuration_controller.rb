@@ -1,9 +1,14 @@
 class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accounts::Relationship::BaseController
+  rescue_from JrcApprovals::Error do |error|
+    render json: { errors: [error.code] }, status: :unprocessable_entity
+  end
+
   before_action do
     raise Pundit::NotAuthorizedError unless relationship_context.policy.configure?
   end
 
   def show
+    response.headers['Cache-Control'] = 'no-store'
     scope_key = params.fetch(:scope_key, 'account')
     relationship_context.authorize_configuration_scope!(scope_key)
     record = JrcRelationship::Configuration.find_or_initialize_by(account: Current.account, scope_key: scope_key)
@@ -13,23 +18,49 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def update
-    record = Current.account.with_lock do
-      @relationship_context = JrcRelationship::Context.new(Current.account_user)
-      raise Pundit::NotAuthorizedError unless relationship_context.policy.configure?
+    record = JrcRelationship::DistributionConfigurationGovernance.synchronize(Current.account.id) do
+      Current.account.with_lock do
+        @relationship_context = JrcRelationship::Context.new(Current.account_user)
+        raise Pundit::NotAuthorizedError unless relationship_context.policy.configure?
 
-      scope = params.fetch(:scope_key, 'account')
-      relationship_context.authorize_configuration_scope!(scope)
-      row = JrcRelationship::Configuration.find_or_initialize_by(account: Current.account, scope_key: scope)
-      update_configuration!(row)
-      row
+        scope = params.fetch(:scope_key, 'account')
+        relationship_context.authorize_configuration_scope!(scope)
+        JrcRelationship::PortfolioGroupConfiguration.verify_revision!(relationship_context, scope, params[:portfolio_revision])
+        row = JrcRelationship::Configuration.find_or_initialize_by(account: Current.account, scope_key: scope)
+        update_configuration!(row)
+        row
+      end
     end
     render json: configuration_payload(record)
   end
 
+  def restore
+    response.headers['Cache-Control'] = 'no-store'
+    render json: JrcRelationship::ConfigurationRestore.new(relationship_context).call(
+      scope_key: params.fetch(:scope_key, 'account'), version: params[:version], source_version: params[:source_version],
+      reason: params[:reason], portfolio_revision: params[:portfolio_revision]
+    )
+  end
+
   def playbooks
-    render json: { payload: JrcRelationship::Playbook.where(account: Current.account).includes(:versions).order(:id).limit(100).map do |row|
-      row.as_json.merge(history: row.versions.order(version: :desc).limit(50).as_json)
-    end }
+    response.headers['Cache-Control'] = 'no-store'
+    rows = JrcRelationship::Playbook.where(account: Current.account).order(:id)
+    if params.key?(:page) || params.key?(:per_page)
+      rows, meta = page(rows)
+      render json: { payload: rows.as_json, meta: meta }
+    else
+      render json: { payload: rows.limit(100).map { |row| row.as_json.merge(history: row.versions.order(version: :desc).limit(50).as_json) } }
+    end
+  end
+
+  def playbook_history
+    response.headers['Cache-Control'] = 'no-store'
+    book = JrcRelationship::Playbook.where(account: Current.account).find(params[:id])
+    versions = book.versions.where(account: Current.account).order(version: :desc, id: :desc)
+    source = history_source_version
+    versions = versions.where(version: source) if source
+    rows, meta = page(versions)
+    render json: { current: book.as_json, payload: rows.as_json, meta: meta }
   end
 
   def save_playbook
@@ -40,6 +71,23 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
       update_playbook!(record, attrs)
     end
     render json: record
+  end
+
+  def restore_playbook
+    response.headers['Cache-Control'] = 'no-store'
+    input = playbook_restoration_input
+    result = JrcRelationship::Playbook.transaction do
+      JrcRelationship::BatchReviewAuthority.new(account_id: Current.account.id, actor_id: Current.user.id, write: false).call do |context|
+        raise Pundit::NotAuthorizedError unless context.policy.configure?
+
+        @relationship_context = context
+        Current.account = context.account
+        Current.user = context.user
+        Current.account_user = context.member
+        restore_playbook_version!(context, input)
+      end
+    end
+    render json: result
   end
 
   def playbook_options
@@ -63,6 +111,11 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def playbook_executions
+    response.headers['Cache-Control'] = 'no-store'
+    if %i[per_page before_id playbook_id].any? { |key| params.key?(key) }
+      render json: paged_execution_payload
+      return
+    end
     rows = JrcRelationship::PlaybookExecution.where(account: Current.account, assignment_id: relationship_context.assignments.select(:id))
     render json: { payload: rows.includes(:assignment).order(id: :desc).limit(100).select { |row| execution_visible?(row) }
                                 .map { |row| execution_payload(row) } }
@@ -70,20 +123,40 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
 
   private
 
+  def paged_execution_payload
+    result = JrcRelationship::PlaybookExecutionHistory.new(relationship_context).call(
+      per_page: params.fetch(:per_page, 25), before_id: params[:before_id], playbook_id: params[:playbook_id]
+    ) { |row| execution_visible?(row) }
+    result.merge(payload: result.fetch(:payload).map { |row| execution_payload(row) })
+  end
+
+  def history_source_version
+    return unless params.key?(:source_version)
+
+    value = params[:source_version].to_s
+    valid = value.match?(/\A[1-9]\d{0,9}\z/) && value.to_i <= 2_147_483_647
+    raise ArgumentError, 'Use a positive whole-number source version' unless valid
+
+    value.to_i
+  end
+
   def execution_payload(row)
     results = JrcRelationship::PlaybookFlow.new(relationship_context).projection(execution: row)
     row.as_json.merge(customer_name: row.assignment.label, snapshot: row.snapshot.merge('results' => results))
   end
 
   def configuration_payload(record)
-    { scope_key: record.scope_key, version: record.version, weights: record.effective_weights, rules: record.effective_rules,
-      history: configuration_history(record) }
+    response.headers['Cache-Control'] = 'no-store' if record.scope_key.start_with?('portfolio:')
+    { scope_key: record.scope_key, version: record.version, weights: record.effective_weights, rules: record.effective_rules }
+      .merge(configuration_history(record), JrcRelationship::PortfolioGroupConfiguration.payload(relationship_context, record.scope_key))
   end
 
   def configuration_history(record)
-    return [] unless record.persisted?
-
-    record.versions.order(version: :desc).limit(50).as_json(only: [:version, :weights, :rules, :actor_id, :created_at])
+    paginate = request.get? && %i[history_page history_per_page].any? { |key| params.key?(key) }
+    JrcRelationship::ConfigurationHistory.new(account: Current.account, configuration: record).call(
+      source_version: history_source_version, paginate: paginate,
+      page: params.fetch(:history_page, 1), per_page: params.fetch(:history_per_page, 25)
+    )
   end
 
   def find_playbook
@@ -92,22 +165,54 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
     JrcRelationship::Playbook.new(account: Current.account)
   end
 
-  def update_playbook!(record, attrs)
-    validate_playbook_version!(record)
+  def update_playbook!(record, attrs, expected_version: params.dig(:playbook, :version), review_definition: false)
+    validate_playbook_version!(record, expected_version)
 
     before = record.attributes.slice('name', 'trigger_kind', 'active', 'steps', 'conditions')
     capture_playbook_version!(record) if record.persisted?
     record.active = false if record.new_record?
     record.assign_attributes(attrs)
-    validate_flow_steps!(record.steps) if record.new_record? || record.will_save_change_to_steps?
+    validate_flow_steps!(record.steps) if review_definition || record.new_record? || record.will_save_change_to_steps?
     record.version += 1 if record.persisted?
     record.save!
     capture_playbook_version!(record)
     audit_playbook!(record, before)
   end
 
-  def validate_playbook_version!(record)
-    raise ActiveRecord::StaleObjectError.new(record, 'update') if record.persisted? && params.dig(:playbook, :version).to_s != record.version.to_s
+  def validate_playbook_version!(record, expected_version)
+    raise ActiveRecord::StaleObjectError.new(record, 'update') if record.persisted? && expected_version.to_s != record.version.to_s
+  end
+
+  def playbook_restoration_input
+    input = params.permit(:version, :source_version, :reason).to_h
+    versions = input.values_at('version', 'source_version')
+    unless versions.all? { |value| value.is_a?(Integer) && value.positive? }
+      raise ArgumentError, 'Use whole-number current and prior playbook versions'
+    end
+    raise ArgumentError, 'Choose a prior playbook version' unless versions.last < versions.first
+
+    reason = input['reason']
+    raise ArgumentError, 'Provide a bounded restoration reason' unless reason.is_a?(String) && reason.strip.length.between?(1, 4000)
+
+    input.merge('reason' => reason.strip)
+  end
+
+  def restore_playbook_version!(context, input)
+    record = JrcRelationship::Playbook.where(account_id: context.account.id).lock('FOR UPDATE NOWAIT').find(params[:id])
+    source = record.versions.lock('FOR SHARE').find_by!(account_id: context.account.id, version: input.fetch('source_version'))
+    update_playbook!(record, playbook_restoration_fields(source), expected_version: input.fetch('version'), review_definition: true)
+    context.audit!(record, action: 'playbook_restored', before: { version: input.fetch('version') },
+                           after: { version: record.version, restored_from_version: source.version, reason: input.fetch('reason') })
+    { id: record.id, version: record.version, restored_from_version: source.version }
+  end
+
+  def playbook_restoration_fields(source)
+    keys = %w[name trigger_kind active steps conditions]
+    payload = source.payload
+    complete = payload.is_a?(Hash) && keys.all? { |key| payload.key?(key) } && [true, false].include?(payload['active'])
+    raise ArgumentError, 'Historical playbook definition is incomplete' unless complete
+
+    payload.slice(*keys).deep_dup
   end
 
   def audit_playbook!(record, before)
@@ -135,17 +240,34 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
     raise ActiveRecord::StaleObjectError.new(record, 'update') unless expected == record.version
 
     previous = configuration_version(record)
-    record.assign_attributes(weights: params.require(:weights).to_unsafe_h, rules: params.require(:rules).to_unsafe_h, version: expected + 1)
+    rules = configuration_rules
+    JrcRelationship::DistributionConfigurationGovernance.authorize!(account: Current.account, user: Current.user,
+                                                                    configuration: record, rules: rules)
+    if rules['portfolio_local_access'] != record.rules[JrcRelationship::LocalAccess::KEY]
+      raise ArgumentError, 'Provide a reason for the local permission change' unless params[:reason].is_a?(String) && params[:reason].strip.length.between?(1, 2000)
+      normalized = rules['portfolio_local_access']
+      if normalized && normalized['enabled'] == true
+        permitted = JrcRelationship::LocalRoleRules.allowed?(normalized, user_id: Current.user.id, action: 'configure', owner_id: :metadata)
+        raise ArgumentError, 'Keep an authorized configuration manager in this scope' unless permitted
+      end
+    end
+    record.assign_attributes(weights: params.require(:weights).to_unsafe_h, rules: rules, version: expected + 1)
     record.save!
-    record.capture_version!(previous, actor: Current.user)
-    current = configuration_version(record)
-    record.capture_version!(current, actor: Current.user)
-    audit_configuration!(record, previous, current)
+    JrcRelationship::DistributionConfigurationGovernance.record_versions!(record, actor: Current.user, previous: previous)
+    relationship_context.audit!(record, action: 'configuration_changed_with_reason',
+      before: { version: expected }, after: { version: record.version, scope_key: record.scope_key, reason: params[:reason] }) if params[:reason].present?
   end
 
-  def audit_configuration!(record, previous, current)
-    JrcCustomers::Audit.record!(account: Current.account, actor: Current.user, resource: record, event_type: 'relationship_updated',
-                                from_value: previous, to_value: current, metadata: { action: 'configuration_versioned', scope_key: record.scope_key })
+  def configuration_rules
+    return params.require(:rules).to_unsafe_h unless request.media_type == 'application/json'
+
+    # Rails deep-munges [null] into []; preserve the submitted collection shapes
+    # so native rules cannot silently turn invalid entries into empty catalogs.
+    body = ActiveSupport::JSON.decode(request.raw_post)
+    rules = body.fetch('rules') if body.is_a?(Hash)
+    raise ArgumentError, 'Configuration rules must be an object' unless rules.is_a?(Hash)
+
+    rules
   end
 
   def configuration_version(record)
@@ -153,9 +275,7 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def playbook_attributes
-    params.require(:playbook).permit(:name, :trigger_kind, :active,
-                                     steps: [:kind, :title, :after_days, :step_key, *JrcRelationship::PlaybookSteps::FLOW_FIELDS],
-                                     conditions: [:field, :operator, :value])
+    JrcRelationship::PlaybookInput.call(request: request, params: params)
   end
 
   def validate_flow_steps!(steps)
@@ -181,7 +301,7 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
     return unless step.key?(:message_id)
 
     JrcRelationship::PlaybookFlowInput.find!(account: Current.account, conversation: conversation,
-                                            contact_id: conversation.contact_id, message_id: step[:message_id])
+                                             contact_id: conversation.contact_id, message_id: step[:message_id])
   end
 
   def validate_flow_pin!(flow, step)

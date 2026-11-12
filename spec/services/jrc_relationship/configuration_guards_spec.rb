@@ -16,6 +16,16 @@ RSpec.describe JrcRelationship::Configuration do
     expect(valid).not_to be_valid
   end
 
+  it 'validates an opt-in finite hysteresis margin and keeps recovery reachable' do
+    [0, 0.5, 20].each do |value|
+      expect(described_class.new(account: sd_account, rules: { health_hysteresis_points: value })).to be_valid
+    end
+    [-1, 20.1, '5', nil].each do |value|
+      expect(described_class.new(account: sd_account, rules: { health_hysteresis_points: value })).not_to be_valid
+    end
+    expect(described_class.new(account: sd_account).effective_rules['health_hysteresis_points']).to eq(0)
+  end
+
   it 'supports explicit renormalize, neutral and block policies without hiding missing evidence' do
     observations = { 'known' => { raw: 80, normalized: 80, evidence: 'Observed' },
                      'missing' => { raw: nil, normalized: nil, evidence: 'Unavailable' } }

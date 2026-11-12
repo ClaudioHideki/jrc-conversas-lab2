@@ -8,6 +8,7 @@ import Pagination from 'dashboard/components-next/pagination/PaginationFooter.vu
 import Lookup from './LookupSelect.vue';
 import Feedback from './WriteFeedback.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
+import { selfAssignment } from '../helpers/selfAssignment';
 const props = defineProps({
   ticket: { type: Object, required: true },
   initialAction: { type: String, default: '' },
@@ -16,6 +17,9 @@ const emit = defineEmits(['updated']);
 const { t } = useI18n();
 const session = useServiceDesk();
 const key = `ticket:actions:${props.ticket.id}`;
+const selfAssignee = computed(() =>
+  selfAssignment(session.state.context, props.ticket)
+);
 const optionsKey = `${key}:statuses`;
 const mode = ref(props.initialAction);
 const optionsPage = ref(1);
@@ -69,7 +73,10 @@ const submit = async () => {
     ticketId: props.ticket.id,
     expected_lock_version: props.ticket.lock_version,
   };
-  if (mode.value === 'priority')
+  if (mode.value === 'assume') {
+    if (!selfAssignee.value) return;
+    payload.assignment = { assignee_account_user_id: selfAssignee.value.id };
+  } else if (mode.value === 'priority')
     payload.ticket = { priority_id: fields.priority_id };
   else if (mode.value === 'work_status') payload.status_id = fields.status_id;
   else {
@@ -80,9 +87,10 @@ const submit = async () => {
     // Blank team delegates to the selected queue rather than forcing an inconsistent null.
     if (fields.team_id) payload.assignment.team_id = fields.team_id;
   }
+  const operation = mode.value === 'priority' ? 'update' : mode.value;
   const result = await session.operations.write(
     key,
-    mode.value === 'priority' ? 'update' : mode.value,
+    mode.value === 'assume' ? 'assign' : operation,
     payload,
     props.ticket
   );
@@ -134,7 +142,16 @@ onBeforeUnmount(() => {
       />
     </div>
     <form v-if="mode" class="grid gap-3" @submit.prevent="submit">
-      <template v-if="['assign', 'transfer'].includes(mode)">
+      <dl
+        v-if="mode === 'assume' && selfAssignee"
+        class="rounded-xl border border-n-weak bg-n-alpha-1 p-4"
+      >
+        <dt class="text-sm text-n-slate-11">
+          {{ t('JRC_SERVICE_DESK.FIELDS.assignee') }}
+        </dt>
+        <dd class="mt-1 text-base font-semibold">{{ selfAssignee.name }}</dd>
+      </dl>
+      <template v-else-if="['assign', 'transfer'].includes(mode)">
         <p class="text-xs text-n-slate-11">
           {{ t('JRC_SERVICE_DESK.OPS.same_unit') }}
         </p>
@@ -182,7 +199,7 @@ onBeforeUnmount(() => {
         :current-name="ticket.priority?.name || ''"
         :disabled="busy"
       />
-      <template v-else>
+      <template v-else-if="mode === 'work_status'">
         <p class="text-xs text-n-slate-11">
           {{ t('JRC_SERVICE_DESK.OPS.work_status_help') }}
         </p>
@@ -210,10 +227,15 @@ onBeforeUnmount(() => {
         type="submit"
         :disabled="
           busy ||
+          (mode === 'assume' && !selfAssignee) ||
           (mode === 'work_status' &&
             !options.some(row => row.id === fields.status_id))
         "
-        :label="t('JRC_SERVICE_DESK.COMMON.save')"
+        :label="
+          mode === 'assume'
+            ? t('CONVERSATION.ASSIGN_TO_ME')
+            : t('JRC_SERVICE_DESK.COMMON.save')
+        "
       />
     </form>
     <Feedback :status="mutation.status" />

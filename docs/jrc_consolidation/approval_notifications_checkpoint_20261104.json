@@ -1,0 +1,164 @@
+{
+  "date": "2026-11-04",
+  "parent_checkpoint": "2eabf83378b2bcbc2dae964507305023ae60b50f",
+  "status": "D9 native in-app notifications implemented with local automated evidence; no build or real browser acceptance",
+  "stage_D_complete": false,
+  "implementation": [
+    "Transactional notification outbox linked by composite account/source-event foreign key; source identity and completion protected by PostgreSQL trigger",
+    "Immutable source audits preserved; no historical backfill; replay/concurrent projection deduplicates per recipient and request or original grant",
+    "Scheduled recovery and own/scoped delegation expiry notifications; no queue enqueue from the domain approval transaction",
+    "Native feed, read/unread/snooze, counts, pagination, ActionCable, native click navigation and account-switch rejection",
+    "Current native membership/request/company/unit authorization at projection, read, count, serialization and broadcast",
+    "Closed payload whitelist; no commercial snapshot, audit reason, private evidence, credentials or recipient token in feed metadata",
+    "In-app only; native email/browser push delivery explicitly skipped for the new kind"
+  ],
+  "migration": {
+    "version": 20261104170000,
+    "applied_only_to_local_test_banks": [
+      "jrc_rel_v2_candidate_test",
+      "jrc_d9_notice_regression_20261104_ab80245c"
+    ],
+    "existing_UI_database_unchanged": true,
+    "new_empty_bank_schema_load_guarded": true,
+    "schema_dump": "35-line additive merge only; existing schema blocks retained"
+  },
+  "backend_runs": [
+    {
+      "name": "d9-api-initial",
+      "evidence": {
+        "start": 14226149376,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/services/jrc_approvals/notifications_spec.rb": "270815006e7af645b82057d4fd1a46d2931629e19ba16959f724d0c2b5c0fbaf",
+          "spec/requests/api/v1/accounts/jrc_approvals/notifications_spec.rb": "1375510bae876de2da1d8a43ea83f1c24242a4f97826360c5ef15f0e770267d7"
+        },
+        "minimum": 14225489920,
+        "exit_code": 0,
+        "end": 14225932288
+      },
+      "examples": 15,
+      "failures": 0
+    },
+    {
+      "name": "d9-native-regression",
+      "evidence": {
+        "start": 13544747008,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_d9_notice_regression_20261104_ab80245c",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/models/notification_spec.rb": "e700ebc4782013824e3267922ab0816c8a3d1709319613b74d62202c9c2f4081",
+          "spec/finders/notification_finder_spec.rb": "2ad3b37500e7213758292b303bab0fd4b5ef431e45cb880191ea9f6ba03bcfdb",
+          "spec/controllers/api/v1/accounts/notifications_controller_spec.rb": "935312087fabdcf54355103b8d804ae32a899383a39097c1181fb3da8db96da3",
+          "spec/listeners/action_cable_listener_spec.rb": "6ef431ccff5f47905c34305954e8ce2ded31e936a31585ca5146d6244b5fbb95",
+          "spec/enterprise/listeners/action_cable_listener_spec.rb": "f641a9a81a60772498c6c3bc178fa1b97dda8dc3089171d3f85512ec1f4ba4be",
+          "spec/services/auto_assignment/safety_contract_spec.rb": "27b0f8ac6b4ff88c47e4ef1eb473aa2f225e4781416be7600940cade4c84c3f7",
+          "spec/services/auto_assignment/legacy_replacement_spec.rb": "899ec7f3502a316fcc3058e7e773bbe0c496a4ea381de62e5cd4777f508a671a"
+        },
+        "minimum": 13516054528,
+        "exit_code": 0,
+        "end": 13535711232
+      },
+      "examples": 91,
+      "failures": 0
+    },
+    {
+      "name": "d9-final-core",
+      "evidence": {
+        "start": 13537009664,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_d9_notice_regression_20261104_ab80245c",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/services/jrc_approvals/notifications_spec.rb": "34fb12aa95401e32c34869a82d908dadeb5e88f16ab8ccd619751a734e6c6bc5",
+          "spec/requests/api/v1/accounts/jrc_approvals/notifications_spec.rb": "524459a9887df3954052dfdf413d05a9344bd3b01e3d4ad1cf5950023bd1af9b",
+          "spec/services/jrc_approvals/core_spec.rb": "c23d6137204c0db7680dd1999a13f1718e3a64b70bca1431cd0bb3a8be4d81d0",
+          "spec/services/jrc_approvals/own_delegations_spec.rb": "506b247dec55e2f2e1b4e3dba4a679fefbf9db539d1fa7e4ebd83c6cb9fb91de",
+          "spec/services/jrc_approvals/commercial_integration_spec.rb": "8d98659b5c5ac085e059c9a65beadd34c8994e4163283c04913b78aa1f08bd28",
+          "spec/services/jrc_approvals/commercial_concurrency_spec.rb": "354e769fb7cad7124ecd325963e6c2ab4c43872ccc017978b5e393b40b5b726c",
+          "spec/services/jrc_service_desk/r3_notification_scopes_spec.rb": "f5111b7c1dcb4f94ab33b0c2dbca5f15ad24c1a191b7b4f8272e7d82ea3e0feb"
+        },
+        "minimum": 13494378496,
+        "exit_code": 0,
+        "end": 13533995008
+      },
+      "examples": 119,
+      "failures": 0
+    },
+    {
+      "name": "d9-final-accepted",
+      "evidence": {
+        "start": 13519249408,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/services/jrc_approvals/notifications_spec.rb": "8a79bbd79184fd461fa9b8a5facf86f8492d277e50b85f146a9b7705f0d79196",
+          "spec/requests/api/v1/accounts/jrc_approvals/notifications_spec.rb": "524459a9887df3954052dfdf413d05a9344bd3b01e3d4ad1cf5950023bd1af9b",
+          "spec/services/jrc_approvals/concurrency_spec.rb": "15d86e13ecbfad23ef03ac689e45b45bf79a1ecfa28bffbe3b507732631ecb90",
+          "spec/services/jrc_relationship/monitoring_runs_spec.rb": "3c7152fbaff056037c2879f5f49df277ca98a5106a8aacdaf1ae2a04aef44082",
+          "spec/services/jrc_backoffice/signature_release_spec.rb": "3af87f5030050305d1ab9f025eaaf017a3582bf3254bf719ac2c4f08714ce432",
+          "spec/requests/api/v1/accounts/crm/backoffice_intake_spec.rb": "9f5a01b4e905323bd21bebdd3af101bd7a6e53823e10a8eb4fbae4a5f4b64726"
+        },
+        "minimum": 13499330560,
+        "exit_code": 0,
+        "end": 13527711744
+      },
+      "examples": 44,
+      "failures": 0
+    }
+  ],
+  "frontend_runs": [
+    {
+      "name": "d9-notification-ui",
+      "cases": 71,
+      "failures": 0,
+      "note": "native stores, API and route helper"
+    },
+    {
+      "name": "d9-view-interaction",
+      "cases": 12,
+      "failures": 0,
+      "note": "actual Vue view click and closed route helper; mocks are not Chrome acceptance"
+    }
+  ],
+  "failures_not_hidden": [
+    "Initial timestamp comparison differed at nanosecond versus persisted PostgreSQL microsecond precision; test now compares the persisted read timestamp",
+    "Native Notification model suite initially 24/1: unchanged auto-assignment callback dereferenced deleted inbox after conversation destroy. Added destroyed? early return and real assignment regression; 91-case rerun passed",
+    "Protected DocuSign receipt suite refused four cases on candidate bank; guard not altered or bypassed. Mixed 34-case run exited1, not counted as passed. Provider receipt homologation not claimed",
+    "First lint stdin invocation did not forward Docker STDIN and reported empty files; invalid result excluded. Corrected -i lint verified actual file contents"
+  ],
+  "quality": {
+    "new_ruby_files": "RuboCop clear after targeted corrections; inherited shared-file metrics recorded, not suppressed",
+    "javascript": "five changed/new Vue/JS files ESLint exit0",
+    "git_diff_check": "passed",
+    "enterprise": "Existing copilot listener overlay preserved; native OSS+Enterprise listener regression passed"
+  },
+  "visual": {
+    "base": "Existing native notification bell/table layout reused; safe optional avatar metadata",
+    "difference": "Generic bounded title/body and details link omit financial context; no new notification-specific visual mock",
+    "actual_Chrome": false,
+    "new_build": false
+  },
+  "remaining": [
+    "New build only with authorization and actual desktop/mobile light/dark QA",
+    "In-app worker/scheduler operational acceptance; no worker was started here",
+    "No email/browser push/external channel scope implemented",
+    "No generalized adjustments beyond installed native proposal discount adapter",
+    "No claim of complete E/F/G acceptance, scale or DocuSign demo"
+  ],
+  "preservation": {
+    "server5379": "untouched frozen source/assets 4d4a6de3",
+    "no_push": true,
+    "no_cleanup": true,
+    "no_external_operations": true,
+    "auto_review": "Whole-file reconstruction of an existing spec rejected; replaced with narrow reviewed formatting-only patch; added test and all original scenarios preserved"
+  },
+  "free_bytes_end": 13512036352
+}

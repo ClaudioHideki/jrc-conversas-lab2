@@ -11,6 +11,7 @@ prefix="jrc-bo-candidate-${GITHUB_RUN_ID:?}-${GITHUB_RUN_ATTEMPT:?}"
 network="$prefix-network"
 setup_network="$prefix-setup-network"
 storage="$prefix-storage"
+scanner_storage="$prefix-scanner"
 postgres="$prefix-pg"
 redis="$prefix-redis"
 rails="$prefix-rails"
@@ -26,6 +27,7 @@ cleanup() {
     fi
   done
   docker volume rm "$storage" >/dev/null 2>&1 || true
+  docker volume rm "$scanner_storage" >/dev/null 2>&1 || true
   docker network rm "$network" >/dev/null 2>&1 || true
   docker network rm "$setup_network" >/dev/null 2>&1 || true
 }
@@ -36,6 +38,7 @@ docker network create --internal --label "$label" "$network"
 # Rails, Sidekiq, Redis and the documentary runner retain the internal-only network.
 docker network create --label "$label" "$setup_network"
 docker volume create --label "$label" "$storage"
+docker volume create --label "$label" "$scanner_storage"
 docker run -d --name "$postgres" --label "$label" --network "$setup_network" -p 127.0.0.1::5432 \
   -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=disposable-candidate-only \
   -e POSTGRES_DB=backoffice_candidate_smoke_test \
@@ -61,18 +64,30 @@ RAILS_ENV=test POSTGRES_HOST=127.0.0.1 POSTGRES_PORT="$port" POSTGRES_USERNAME=p
 
 # The native worker also runs auxiliary capsules and cron; a one-connection pool starves documentary jobs.
 runtime_env=(--network "$network" --label "$label" --mount "type=volume,source=$storage,target=/app/storage"
+  --mount "type=volume,source=$scanner_storage,target=/run/jrc-candidate-av"
   -e RAILS_ENV=production -e POSTGRES_HOST="$postgres" -e POSTGRES_PORT=5432
   -e POSTGRES_USERNAME=postgres -e POSTGRES_PASSWORD=disposable-candidate-only
   -e POSTGRES_DATABASE=backoffice_candidate_smoke_test -e REDIS_URL="redis://$redis:6379/15"
   -e SECRET_KEY_BASE=isolated-candidate-smoke-not-production -e CANDIDATE_SHA="$SOURCE_SHA"
   -e LOG_LEVEL=error -e RAILS_LOG_TO_STDOUT=true -e ACTIVE_STORAGE_SERVICE=local
   -e SIDEKIQ_CONCURRENCY=1 -e DB_POOL_SIZE=10
+  -e GITHUB_ACTIONS=true -e RUNNER_ENVIRONMENT=github-hosted
+  -e JRC_BO_CLAMAV_SOCKET=/run/jrc-candidate-av/clamd.sock
   -e APP_TIME_ZONE=America/Sao_Paulo -e TZ=UTC
   -e URA_HML_TIMEZONE_REDIS_URL="redis://$redis:6379/15")
 docker run -d --name "$rails" "${runtime_env[@]}" --entrypoint bundle \
   "$candidate" exec rails server -b 0.0.0.0 -p 3000
-docker run -d --name "$sidekiq" "${runtime_env[@]}" --entrypoint bundle \
+docker run -d --name "$sidekiq" "${runtime_env[@]}" \
+  --mount "type=bind,source=$PWD/test/jrc_consolidation/candidate_fixture_scanner.rb,target=/candidate-fixture-scanner.rb,readonly" --entrypoint bundle \
   "$candidate" exec sidekiq -C config/sidekiq.yml -r ./script/ura_hml_timezone.rb -q low -q ura_hml_timezone_probe
+docker exec -d "$sidekiq" ruby /candidate-fixture-scanner.rb
+scanner_ready=false
+for attempt in {1..15}; do
+  if docker exec "$sidekiq" ruby -e 'exit(File.socket?("/run/jrc-candidate-av/clamd.sock") ? 0 : 1)'; then scanner_ready=true; break; fi
+  sleep 1
+done
+test "$scanner_ready" = true
+echo 'Synthetic exact-byte scanner boundary only; no external antivirus homologation is claimed.'
 test "$(docker inspect --format '{{.Image}}' "$rails")" = "$(docker inspect --format '{{.Image}}' "$sidekiq")"
 ready=false
 for attempt in {1..45}; do

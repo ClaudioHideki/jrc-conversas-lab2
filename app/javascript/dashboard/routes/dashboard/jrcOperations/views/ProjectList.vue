@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import ModuleSegmentFilter from 'dashboard/routes/dashboard/jrcCustomers/components/ModuleSegmentFilter.vue';
 import { useProjects } from '../../jrcProjects/useProjects';
 import {
   statusTone,
@@ -25,6 +26,14 @@ import DeleteProjectButton from '../../jrcProjects/components/DeleteProjectButto
 
 const { accountId, userId, status, canCreate, projectText } = useProjects();
 const router = useRouter();
+const route = useRoute();
+const segmentQuery = computed(() => ({
+  customer_segment_id: route.query.customer_segment_id || undefined,
+}));
+const projectDestination = projectId => ({
+  ...routeTo('jrc_projects_detail', accountId.value, { projectId }),
+  query: segmentQuery.value,
+});
 const preferenceKey = computed(
   () => 'jrc:projects:portfolio:' + accountId.value + ':' + userId.value
 );
@@ -56,6 +65,7 @@ let generation = 0;
 let summaryGeneration = 0;
 let debounce;
 const queryParams = () => ({
+  ...segmentQuery.value,
   q: filters.q,
   status: filters.status === 'overdue' ? '' : filters.status,
   overdue: filters.status === 'overdue' ? 'true' : undefined,
@@ -69,6 +79,8 @@ async function load() {
   if (!status.value?.projects_enabled) return;
   loading.value = true;
   error.value = '';
+  rows.value = [];
+  meta.value = { total: 0 };
   try {
     const result = await request(accountId.value, 'projects/projects', {
       params: { ...queryParams(), page: page.value, per_page: pageSize },
@@ -93,7 +105,9 @@ async function loadSummary() {
   )
     return;
   try {
-    const result = await request(accountId.value, 'projects/portfolio');
+    const result = await request(accountId.value, 'projects/portfolio', {
+      params: segmentQuery.value,
+    });
     if (current === summaryGeneration) portfolio.value = result.data;
   } catch (err) {
     if (current === summaryGeneration) summaryError.value = errorMessage(err);
@@ -105,6 +119,7 @@ watch(
     userId.value,
     status.value?.projects_enabled,
     status.value?.can_view_project_reports,
+    route.query.customer_segment_id,
   ],
   () => {
     clearTimeout(debounce);
@@ -150,6 +165,12 @@ function clearFilters() {
     owner: '',
     contact: '',
   });
+  if (route.query.customer_segment_id) {
+    const query = { ...route.query };
+    delete query.customer_segment_id;
+    delete query.page;
+    router.replace({ query });
+  }
 }
 function navigatePage(delta) {
   page.value += delta;
@@ -157,9 +178,7 @@ function navigatePage(delta) {
 }
 function created(project) {
   creating.value = false;
-  router.push(
-    routeTo('jrc_projects_detail', accountId.value, { projectId: project.id })
-  );
+  router.push(projectDestination(project.id));
 }
 async function deleted() {
   if (rows.value.length === 1 && page.value > 1) page.value -= 1;
@@ -276,6 +295,7 @@ async function exportProjects() {
         </button>
       </div>
     </header>
+    <ModuleSegmentFilter module-key="projects" />
     <nav
       class="flex gap-5 border-b border-n-weak"
       :aria-label="projectText('PORTFOLIO_NAVIGATION', 'Navegação de projetos')"
@@ -485,11 +505,7 @@ async function exportProjects() {
         <div>
           <RouterLink
             class="block truncate text-base font-semibold text-n-slate-12 hover:text-n-blue-11"
-            :to="
-              routeTo('jrc_projects_detail', accountId, {
-                projectId: project.id,
-              })
-            "
+            :to="projectDestination(project.id)"
           >
             {{ project.name }}
           </RouterLink>
@@ -563,10 +579,8 @@ async function exportProjects() {
               v-if="project.capabilities?.includes('projects.project.update')"
               class="rounded-lg border border-n-weak p-2 text-n-blue-11 hover:bg-n-blue-2"
               :to="{
-                ...routeTo('jrc_projects_detail', accountId, {
-                  projectId: project.id,
-                }),
-                query: { tab: 'settings' },
+                ...projectDestination(project.id),
+                query: { ...segmentQuery, tab: 'settings' },
               }"
               :aria-label="projectText('EDIT_PROJECT', 'Editar projeto')"
               :title="projectText('EDIT_PROJECT', 'Editar projeto')"
@@ -583,11 +597,7 @@ async function exportProjects() {
             />
             <RouterLink
               class="rounded-lg border border-n-blue-5 bg-n-blue-2 px-3 py-1.5 text-xs font-semibold text-n-blue-11 hover:bg-n-blue-3"
-              :to="
-                routeTo('jrc_projects_detail', accountId, {
-                  projectId: project.id,
-                })
-              "
+              :to="projectDestination(project.id)"
             >
               {{ projectText('OPEN_PROJECT', 'Abrir projeto') }}
             </RouterLink>

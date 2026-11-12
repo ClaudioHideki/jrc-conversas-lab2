@@ -1,0 +1,105 @@
+{
+  "date": "2026-11-03",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_commit": "61f0e094b5fc48a46daf4a17c8dbb6a29e44af29",
+  "state": "Checkpoint local C2 parcial antes da alteração compartilhada. Etapas C→G permanecem parciais. Não é release.",
+  "implemented": [
+    "Popup canônico de contatos nas listas de pessoas e empresa, mantendo as rotas e os editores existentes; abas horizontais e contexto da lista/página preservado.",
+    "Fontes paginadas de contatos/empresas reutilizam Customer360 e políticas existentes. IDs fornecidos pelo cliente não concedem escopo.",
+    "Mudança de conta/usuário/registro invalida respostas antigas; negação limpa informações, canais e candidatos a duplicidade.",
+    "Empresa conserva a lista e o popup interno durante atualização dos indicadores. Origem de contrato fora da primeira página abre o registro exato no CRM existente."
+  ],
+  "validation": {
+    "source_proof": {
+      "files": 11278,
+      "baseline": "701dad483ee61283b94375050f2952f5ffe2d7df",
+      "mismatches": [],
+      "snapshot": "/consolidation-master-contact-popup-validated",
+      "sql_raw_hashes": true
+    },
+    "frontend": {
+      "tests": 76,
+      "failures": 0,
+      "files": 13
+    },
+    "backend": {
+      "examples": 68,
+      "failures": 0
+    },
+    "integrity": {
+      "status": "passed",
+      "synthetic_only": true,
+      "original_rows_unchanged": 73,
+      "model_sets": [
+        "Account",
+        "AccountUser",
+        "Contact",
+        "JrcCustomers::Company",
+        "JrcCrm::Contract",
+        "JrcCrm::SalesOrder",
+        "JrcBackoffice::ContractVersion",
+        "JrcBackoffice::SignatureDelivery",
+        "JrcBackoffice::SignatureDeliveryEvent"
+      ],
+      "actor_role": "agent",
+      "group_scope": false,
+      "edited_contact_id": 19,
+      "created_contact_id": 37,
+      "company_id": 40,
+      "native_contact_audit": true,
+      "signature_deliveries": 0,
+      "verifier": null,
+      "production_changed": false
+    },
+    "build": "Assets Vite concluídos em 4m9s; nenhum build/publicação de imagem Docker.",
+    "browser": "Chrome real local: editar/reabrir, criar contato canônico, popups aninhados, contexto da página 2, origem de contrato 4 fora da primeira página, inbox oculto omitido e conta estrangeira negada. Somente dados sintéticos; nenhuma operação externa.",
+    "lint": "Novos arquivos limpos. Débito legado preservado: Ruby 17 ocorrências; ContactsIndex 79 erros/32 avisos versus 80/32; MasterContactDetails 16 avisos; CompanyContacts 14 avisos. Lint geral não está verde.",
+    "failed_attempts_preserved": [
+      "Primeira verificação de auditoria esperava updated para edição; o controlador existente registra linked quando company_id integra o formulário. Assertiva corrigida para o evento exato sem alterar o código ou os dados.",
+      "Um teste usava stub assíncrono sem a prop pública contactId; corrigido o contrato do stub. Suíte final 76/0.",
+      "O resultado mecânico do navegador registrou compositor aberto, mas a imagem116 revelou o compositor atrás do dialog nativo e inutilizável. Não representa sucesso desse fluxo.",
+      "Imagem117 nomeada escuro está clara; não serve como prova do tema escuro no celular."
+    ]
+  },
+  "blocking": [
+    "Compositor nativo usa Popover teleportado ao body e fica atrás do dialog do contato. Corrigir incrementalmente com modo opcional de dialog nativo e validar uso real.",
+    "Refazer captura mobile escura com tema explicitamente aplicado; não repetir criação/edição já persistidas."
+  ],
+  "remaining": [
+    "Requisitos integrais de papéis/contato principal, segmentos E/OU, grupos econômicos, importação mapeada e contatos operacionais ainda parciais.",
+    "Demais frentes D/E/F/G e evidência genuína de assinatura permanecem parciais. Verificador nil, bloqueio de contrato sem assinatura preservado; demo DocuSign não homologada."
+  ],
+  "no_publication": true,
+  "production_changed": false,
+  "file_sha256": {
+    "app/controllers/api/v1/accounts/customers/base_controller.rb": "b27fde02c8409f62b065a9556fe6279ae130480599064f86827be912740d19b5",
+    "app/controllers/api/v1/accounts/customers/companies_controller.rb": "fec62a89ad1c1ceeaf2b09eaf520895ab5c35904b56f7216fff5a47859cbefff",
+    "app/controllers/api/v1/accounts/customers/contacts_controller.rb": "00e1e17905079eb8e8d5905847a88d87a8352377cd5461fca2a4da5eb9c39ff3",
+    "app/javascript/dashboard/api/jrcCustomers.js": "b095d395c70d4b1bf205c0ba488202073c463c46643487956d84beab27080390",
+    "app/javascript/dashboard/i18n/locale/en/crm.json": "9813c296a3227fe59a64b8329a4a259b4f6c43e427defd2a2575ff59493a0071",
+    "app/javascript/dashboard/routes/dashboard/contacts/pages/ContactsIndex.vue": "1771d47d3cd4000a562bf49680cb754c7799461bafaf0ee81e2bdd62eb7c52b5",
+    "app/javascript/dashboard/routes/dashboard/contacts/pages/spec/ContactsIndex.spec.js": "f2b2d5de74fb6ffc745978a8dd5b82797c77420d9a638cd9d9cdfe2ad7469146",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.spec.js": "b4efbdd192e3616e004b5426ac84f0d2abd3a3af36e5dbb969a2bf977453700c",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue": "f8fa5852136550b0f0f90f8c5bc2965f2d9ddeeff15dda5dcb8e6d50d3d51a50",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyContacts.spec.js": "93e2de6c7ec1a9ed89bd6727f5f230cfd0347e20c641d22569ede83f40b37c1a",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyContacts.vue": "b06f07bbbff8d061c7e5af3109e05fa07d7c02272d7fa6a031435fbf6b74e1d9",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.spec.js": "95b1e2f6db915449117f7176716973de3abc30a606ea989f25bebd9770713c2f",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue": "1dc84a18decdf549f7b376360d4b2880156b1a48b8959827ba088ac8175eab96",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContactDetailsDialog.vue": "5c3d0fad94c8cf0450d035b68cec05589f652c888104a8f247cdc49e4eaaa847",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContextRecordPanels.spec.js": "9ec77a0c59c1e5f53a84088842a6f121505240d6603f5444998cf5f31efe9426",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/MasterContactDetails.spec.js": "ea2e0fa60dee91216365fdcca581b6d09996d0e6da8ea2942c21b10ee438b696",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/MasterContactDetails.vue": "8ccee95b3fa330a5bb1b3aa14fb426ecb4ac228f60fae4ff3e778c098c61a1a7",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/MasterContactPanel.vue": "5af396bae5a7d37aa9b69a48790d02a4e2db70aa4d34980ae1e30488f980bcd3",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/RecordsPanel.vue": "f1ecbf3a406c7584ab64715b7eb13f810938c99bf3afc7b3fc172ed42bbe48b5",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/TimelinePanel.vue": "3353fd433d6781f8d0a27bc8077dcdaf6f90957da5663478ae637a9788ce7b3a",
+    "app/services/jrc_customers/record_serializer.rb": "2102715598f7218b9d4e1afbb6b96282a67800d493cefd5f547e51f6bedf709d",
+    "config/routes.rb": "0becfdd89f029ab9aff1ca7bda6ba8ce292bfc785130f03faf7302f16d642267",
+    "spec/requests/api/v1/accounts/customers/contact_records_spec.rb": "7130a625e2fe27b0da423efd71d4c677bc449d325385266fd93e9b3ef30d496a"
+  },
+  "artifact_sha256": {
+    ".codex/master-contact-popup-frontend-tests.json": "b6e4469cbc0b9487f4528ae1740308ed42928e471558b39b7a14a1e3f637f503",
+    ".codex/master-contact-popup-validated-backend.json": "a29a35b869d03bceadae3ba7199c145ea47ec8f000b2fad45fe5f468b242ff33",
+    ".codex/master-contact-popup-ui-integrity.json": "c0225690c5a08598fe4a95fbf0a53791cee52cfe60dccf754f3dbe6ec36614c2",
+    ".codex/master-contact-popup-validated-source-verified.json": "3f526ab9cf9cab240cf613a10f9fa02b4aae4499a192b03b29db01182f41505d"
+  }
+}

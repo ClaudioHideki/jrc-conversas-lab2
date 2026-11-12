@@ -7,6 +7,7 @@ const api = vi.hoisted(() => ({
   approvePortfolioBatch: vi.fn(),
   advancePortfolioBatch: vi.fn(),
   cancelPortfolioBatch: vi.fn(),
+  requestPortfolioBatchApproval: vi.fn(),
 }));
 vi.mock('dashboard/api/jrcRelationship', () => ({ default: api }));
 const proposal = {
@@ -33,9 +34,79 @@ const review = {
   ],
 };
 let wrapper;
+it('replaces the private preview with a limited receipt and continues remaining work explicitly', async () => {
+  const receipt = {
+    ...review,
+    state: 'running',
+    revision: 3,
+    inputs: { ids: [19], operation: 'assign', owner_id: 29 },
+    source_access_limited: true,
+    summary: null,
+    distribution: [],
+    capacity: [],
+    responsibilities: [],
+    approval: null,
+    items: [{ ...review.items[0], label: null, state: 'applied' }],
+  };
+  api.advancePortfolioBatch.mockResolvedValueOnce({ data: receipt });
+  wrapper = mount(ReviewedPortfolioBatchPanel, {
+    props: { accountId: '12', proposal },
+  });
+  await flushPromises();
+  expect(wrapper.text()).toContain('Synthetic customer');
+  await wrapper.get('[data-test="review-approve"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-test="review-advance"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-test="review-limited-receipt"]').exists()).toBe(
+    true
+  );
+  expect(wrapper.text()).not.toContain('Synthetic customer');
+  expect(wrapper.find('[data-test="review-approve"]').exists()).toBe(false);
+  api.advancePortfolioBatch.mockResolvedValueOnce({
+    data: { ...receipt, state: 'completed', revision: 4 },
+  });
+  await wrapper.get('[data-test="review-advance"]').trigger('click');
+  await flushPromises();
+  expect(api.advancePortfolioBatch).toHaveBeenCalledTimes(2);
+  expect(wrapper.find('[data-test="review-advance"]').exists()).toBe(false);
+  expect(wrapper.emitted('updated')).toBeTruthy();
+});
+it.each(['blocked', 'stale', 'unavailable', 'failed'])(
+  'prevents confirmation and approval requests for %s responsibilities',
+  async state => {
+    api.previewPortfolioBatch.mockResolvedValueOnce({
+      data: {
+        ...review,
+        responsibilities: [
+          { assignment_id: 19, entries: [], blockers: [], state },
+        ],
+        approval: { required: true, state: 'required', requests: [] },
+      },
+    });
+    wrapper = mount(ReviewedPortfolioBatchPanel, {
+      props: { accountId: '12', proposal },
+    });
+    await flushPromises();
+    expect(
+      wrapper.get('[data-test="review-request-approval"]').element.disabled
+    ).toBe(true);
+    expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+      true
+    );
+    expect(api.requestPortfolioBatchApproval).not.toHaveBeenCalled();
+    expect(api.approvePortfolioBatch).not.toHaveBeenCalled();
+  }
+);
 beforeEach(() => {
   vi.clearAllMocks();
   sessionStorage.clear();
+  api.requestPortfolioBatchApproval.mockResolvedValue({
+    data: {
+      ...review,
+      approval: { required: true, state: 'required', requests: [] },
+    },
+  });
   api.previewPortfolioBatch.mockResolvedValue({ data: review });
   api.portfolioBatchReview.mockResolvedValue({ data: review });
   api.approvePortfolioBatch.mockResolvedValue({
@@ -57,6 +128,25 @@ beforeEach(() => {
 });
 afterEach(() => {
   wrapper?.unmount();
+});
+it('blocks over-capacity execution and clears captured workload after an authorization change', async () => {
+  api.previewPortfolioBatch.mockResolvedValueOnce({
+    data: {
+      ...review,
+      capacity: [{ scope_key: 'account', blocker: 'capacity_exceeded' }],
+    },
+  });
+  wrapper = mount(ReviewedPortfolioBatchPanel, {
+    props: { accountId: '12', proposal, authorizationKey: 'initial' },
+  });
+  await flushPromises();
+  expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+    true
+  );
+  await wrapper.get('[data-test="review-approve"]').trigger('click');
+  expect(api.approvePortfolioBatch).not.toHaveBeenCalled();
+  await wrapper.setProps({ authorizationKey: 'revoked' });
+  expect(wrapper.find('[data-test="review-approve"]').exists()).toBe(false);
 });
 it('prepares only a preview and requires explicit confirmation bound to its account and digest', async () => {
   wrapper = mount(ReviewedPortfolioBatchPanel, {
@@ -150,4 +240,167 @@ it('recovers only the account and operator saved operation without approving it 
   );
   expect(api.approvePortfolioBatch).not.toHaveBeenCalled();
   expect(wrapper.text()).toContain('Synthetic customer');
+});
+
+it('requires a formal native vote instead of enabling execution after manual preview', async () => {
+  api.previewPortfolioBatch.mockResolvedValue({
+    data: {
+      ...review,
+      approval: { required: true, state: 'required', requests: [] },
+    },
+  });
+  wrapper = mount(ReviewedPortfolioBatchPanel, {
+    props: { accountId: '12', proposal },
+  });
+  await flushPromises();
+  expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+    true
+  );
+  await wrapper.get('[data-test="review-request-approval"]').trigger('click');
+  await flushPromises();
+  expect(api.requestPortfolioBatchApproval).toHaveBeenCalledWith(
+    '12',
+    5,
+    { digest: review.digest, idempotency_key: expect.any(String) },
+    expect.any(Object)
+  );
+  expect(api.approvePortfolioBatch).not.toHaveBeenCalled();
+});
+it('requires a separate execution confirmation after native approval', async () => {
+  api.previewPortfolioBatch.mockResolvedValue({
+    data: {
+      ...review,
+      approval: { required: true, state: 'approved', requests: [] },
+    },
+  });
+  wrapper = mount(ReviewedPortfolioBatchPanel, {
+    props: { accountId: '12', proposal },
+  });
+  await flushPromises();
+  expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+    true
+  );
+  await wrapper
+    .get('[data-test="review-execution-confirmation"]')
+    .setValue(true);
+  await wrapper.get('[data-test="review-approve"]').trigger('click');
+  await flushPromises();
+  expect(api.approvePortfolioBatch).toHaveBeenCalledTimes(1);
+});
+it('retains the same native approval intent after a failed request instead of creating duplicates', async () => {
+  const data = {
+    ...review,
+    approval: { required: true, state: 'required', requests: [] },
+  };
+  api.previewPortfolioBatch.mockResolvedValue({ data });
+  api.portfolioBatchReview.mockResolvedValue({ data });
+  api.requestPortfolioBatchApproval.mockRejectedValueOnce(
+    new Error('local interruption')
+  );
+  wrapper = mount(ReviewedPortfolioBatchPanel, {
+    props: { accountId: '12', proposal },
+  });
+  await flushPromises();
+  await wrapper.get('[data-test="review-request-approval"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-test="review-refresh"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-test="review-request-approval"]').trigger('click');
+  await flushPromises();
+  expect(api.requestPortfolioBatchApproval.mock.calls[0][2]).toEqual(
+    api.requestPortfolioBatchApproval.mock.calls[1][2]
+  );
+  expect(api.approvePortfolioBatch).not.toHaveBeenCalled();
+});
+it('invalidates the execution checkbox when native approval evidence changes on refresh', async () => {
+  api.previewPortfolioBatch.mockResolvedValue({
+    data: {
+      ...review,
+      approval: { required: true, state: 'approved', requests: [] },
+    },
+  });
+  wrapper = mount(ReviewedPortfolioBatchPanel, {
+    props: { accountId: '12', proposal },
+  });
+  await flushPromises();
+  await wrapper
+    .get('[data-test="review-execution-confirmation"]')
+    .setValue(true);
+  api.portfolioBatchReview.mockResolvedValue({
+    data: {
+      ...review,
+      approval: { required: true, state: 'stale', requests: [] },
+    },
+  });
+  await wrapper.get('[data-test="review-refresh"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+    true
+  );
+  expect(api.approvePortfolioBatch).not.toHaveBeenCalled();
+});
+
+it('creates a new intent when a refreshed selected policy version requires a new formal decision', async () => {
+  api.previewPortfolioBatch.mockResolvedValue({
+    data: {
+      ...review,
+      approval: {
+        required: true,
+        state: 'required',
+        requests: [],
+        policy_version_ids: [1],
+      },
+    },
+  });
+  wrapper = mount(ReviewedPortfolioBatchPanel, {
+    props: { accountId: '12', proposal },
+  });
+  await flushPromises();
+  await wrapper.get('[data-test="review-request-approval"]').trigger('click');
+  await flushPromises();
+  api.portfolioBatchReview.mockResolvedValue({
+    data: {
+      ...review,
+      approval: {
+        required: true,
+        state: 'required',
+        requests: [{ id: 8, state: 'approved', policy_version_id: 1 }],
+        policy_version_ids: [2],
+      },
+    },
+  });
+  await wrapper.get('[data-test="review-refresh"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-test="review-request-approval"]').trigger('click');
+  await flushPromises();
+  expect(
+    api.requestPortfolioBatchApproval.mock.calls[0][2].idempotency_key
+  ).not.toBe(
+    api.requestPortfolioBatchApproval.mock.calls[1][2].idempotency_key
+  );
+  expect(api.approvePortfolioBatch).not.toHaveBeenCalled();
+});
+it('opens an existing current pending approval instead of admitting another request', async () => {
+  api.previewPortfolioBatch.mockResolvedValue({
+    data: {
+      ...review,
+      approval: {
+        required: true,
+        state: 'required',
+        requests: [{ id: 8, state: 'pending', policy_version_id: 1 }],
+        policy_version_ids: [1],
+      },
+    },
+  });
+  wrapper = mount(ReviewedPortfolioBatchPanel, {
+    props: { accountId: '12', proposal },
+  });
+  await flushPromises();
+  expect(wrapper.find('[data-test="review-request-approval"]').exists()).toBe(
+    false
+  );
+  expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+    true
+  );
+  expect(api.requestPortfolioBatchApproval).not.toHaveBeenCalled();
 });

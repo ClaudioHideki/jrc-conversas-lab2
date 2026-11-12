@@ -1,0 +1,135 @@
+{
+  "date": "2026-11-07",
+  "status": "rendered_source_funnel_authority_and_loss_confirmation_validated_not_chrome",
+  "previous_checkpoint": "eaedeeb131d6265bbdc368eab76a0d193d981ce1",
+  "branch": "codex/relacionamento-v2-20261101",
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/crm/components/kanban/DealsFunnelKanban.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/components/kanban/specs/DealsFunnelKanban.spec.js"
+  ],
+  "implementation": [
+    "Native pipeline initialization captures authority/generation and ignores late obsolete continuations;fresh authority reinitializes the board and clears old loss popup/reasons/owner/pipeline filters.",
+    "Loss reasons and confirmation retain captured authority and latest popup request. Confirmation requires an actual listed reason;request payload/API remain native.",
+    "Native move cannot be submitted twice for the same deal while pending. Its already committed outcome is not undone/retried on authority change or unmount;obsolete UI refresh/error/rollback is ignored.",
+    "Native stages/cards,price aggregates,filters,clear/retry/navigation and current-view rejection rollback remain intact. No backend permission or native drag/drop composable modified."
+  ],
+  "validation": {
+    "baseline01": "5failed/9passed;one failure and one false-positive involved Teleport outside wrapper,not a product conclusion.",
+    "baseline02": "After correct Teleport inspection,all6new authority/lifecycle assertions failed as expected;8old tests explicitly not selected.",
+    "source03": "43passed:14rendered funnel,18authority cache,9funnel store,2drag/drop.",
+    "source_final05": "17passed/1failed:new confirmation case kept a stale Teleport button wrapper;preserved artifact.",
+    "loss_popup07": "1failed/15notselected:fresh-value assertion localized disabled stale button reference.",
+    "loss_popup08": "1passed/15notselected:actual selected model5,current enabled button and native move receipt verified.",
+    "source_final09": "18passed:16rendered funnel and2drag/drop;includes6originalfailures,validlossconfirmation andduplicatecommand prevention. Real Vue/Vuex,API transport mocked;not browser/database proof.",
+    "lint_final10": "0errors;component1existing closing bracket newline warning,spec0warnings.",
+    "resources": {
+      "funnel-authority-baseline01": {
+        "status": "failed",
+        "free_start": 6539194368,
+        "minimum_free": 6536372224,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 13008,
+        "exit_code": 1,
+        "free_end": 6557995008
+      },
+      "funnel-authority-baseline02": {
+        "status": "failed",
+        "free_start": 6557040640,
+        "minimum_free": 6524669952,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 12824,
+        "exit_code": 1,
+        "free_end": 6554505216
+      },
+      "funnel-authority-source03": {
+        "status": "passed",
+        "free_start": 6563536896,
+        "minimum_free": 6520102912,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 24708,
+        "exit_code": 0,
+        "free_end": 6561005568
+      },
+      "funnel-authority-source-final05": {
+        "status": "failed",
+        "free_start": 6561722368,
+        "minimum_free": 6539165696,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 23744,
+        "exit_code": 1,
+        "free_end": 6560296960
+      },
+      "funnel-loss-popup07": {
+        "status": "failed",
+        "free_start": 6559903744,
+        "minimum_free": 6537269248,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 5464,
+        "exit_code": 1,
+        "free_end": 6558060544
+      },
+      "funnel-loss-popup08": {
+        "status": "passed",
+        "free_start": 6557925376,
+        "minimum_free": 6543609856,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 15696,
+        "exit_code": 0,
+        "free_end": 6564925440
+      },
+      "funnel-authority-source-final09": {
+        "status": "passed",
+        "free_start": 6544740352,
+        "minimum_free": 6540922880,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 27040,
+        "exit_code": 0,
+        "free_end": 6562570240
+      },
+      "funnel-authority-lint-final10": {
+        "status": "passed",
+        "free_start": 6540976128,
+        "minimum_free": 6540976128,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 26308,
+        "exit_code": 0,
+        "free_end": 6540922880
+      }
+    }
+  },
+  "disk": {
+    "initial_bytes": 6539194368,
+    "minimum_bytes": 6520102912,
+    "final_bytes": 6563168256
+  },
+  "preservation": {
+    "build": false,
+    "server5379_changed": false,
+    "cleanup": false,
+    "containers_restarted": false,
+    "external_operations": false,
+    "push": false,
+    "migrations": false
+  },
+  "remaining": [
+    "Actual Chrome/desktop/mobile needs a separately authorized current-source build/environment;frozen assets are not accepted evidence.",
+    "Confirmed next functional gap:LeadsIndex dispatches jrcCrm/leads/deleteLead but the actual module has no action. Existing API.delete and native destroy policy/controller already present. Fix with actual source store integration and native preservation regressions,not another module.",
+    "C-G,other local CRM form authority review,literal/visual Word audit and explicit business/external dependencies remain open."
+  ]
+}

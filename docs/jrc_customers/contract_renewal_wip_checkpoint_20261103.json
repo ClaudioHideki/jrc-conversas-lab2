@@ -1,0 +1,45 @@
+{
+  "block": "B4",
+  "status": "work_in_progress_NOT_TESTED",
+  "base": "b6929f0d",
+  "implemented_source": [
+    "Read-only next active/expiring contract from Customer360#contracts",
+    "ends_on and renewal_notice_days derive account-local notice date",
+    "Overdue and undated contract counts, native CRM contract link",
+    "Company and Contact 360 cards"
+  ],
+  "validation": {
+    "backend": "NOT RUN: approaching mandatory disk threshold",
+    "vue": "NOT RUN: approaching mandatory disk threshold",
+    "lint": "NOT RUN for B4",
+    "build": "NOT RUN",
+    "chrome": "NOT RUN"
+  },
+  "checkpoint_purpose": "Preserve partially implemented source, NOT acceptance or completion. Review and run newly added tests before considering functionality ready.",
+  "tests_prepared": [
+    "spec/services/jrc_customers/contract_renewal_context_spec.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContractRenewalCard.spec.js"
+  ],
+  "unchanged_rules": [
+    "No contract or signature updates by projection",
+    "No approval/activation/signature guards changed",
+    "No automatic renewal",
+    "No data from another account/owner/unit should be included; validation pending"
+  ],
+  "disk": {
+    "block_start": 1106817024,
+    "source_write_before": 922349568,
+    "source_write_after": 922341376,
+    "current": 754130944,
+    "mandatory_stop": 750000000,
+    "conservative_stop": 900000000
+  },
+  "blocker": "Host C free space dropped to near 750 MB while tests were already suspended. Remaining write is a tiny Git preservation checkpoint only.",
+  "pending": [
+    "Review/lint B4",
+    "Execute B4 tests and owner/operator/unit/foreign-account regression",
+    "Fresh combined protected build at >=1.5 GiB, preferably3GiB",
+    "Real Chrome desktop/mobile",
+    "Stage C document audit remains open"
+  ]
+}

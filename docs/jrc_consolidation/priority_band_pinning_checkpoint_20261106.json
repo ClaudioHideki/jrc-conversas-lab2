@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "0b65c32b902bc3e5e0e377cf7be160043fb4914d",
+  "status": "Implemented;11 native backend tests passed; not stage closure",
+  "problem": "Generic action editor sends unchanged priority, causing current priority-band defaults to replace historical captured evidence during an unrelated edit.",
+  "change": "Capture current policy on new action or actual dirty priority change only. Existing model callbacks still use captured policy for system escalations; genuine manual score edits retain current configuration semantics.",
+  "tests": {
+    "native": "11/0 actual candidateDB: config publish, unchanged string score, same metadata/source, genuine score edit, disabled bands, legacy records, stale lock, filters/pagination, foreign/restricted authorization",
+    "new_or_modified_spec_rubocop_offenses": 0,
+    "shared_workflow_delta": {
+      "path": "app/services/jrc_relationship/workflow.rb",
+      "baseline_count": 28,
+      "current_count": 28,
+      "added": {}
+    },
+    "frontend": "No frontend source modified; request regression mirrors native editor resubmission",
+    "diff_check": "passed"
+  },
+  "resource": {
+    "start": 7194599424,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/requests/api/v1/accounts/relationship/priority_bands_spec.rb": "2e6222810356e4adcdca6033af76b877f4e34b19ee4543e3e29ccbed438c7f17",
+      "spec/services/jrc_relationship/priority_bands_spec.rb": "9b75682b45edaca847cf3ef54fe66413efd503346cde543d07821d2f33945e06"
+    },
+    "minimum": 7175127040,
+    "exit_code": 0,
+    "end": 7194587136
+  },
+  "files_sha256": {
+    "app/services/jrc_relationship/workflow.rb": "c4d5b1cf30fc1135560a92930312b64b3106f61e282abd9179ef06748d4df5a2",
+    "spec/requests/api/v1/accounts/relationship/priority_bands_spec.rb": "d695236f0fe0a466b09e1ec42f374e9ec970b525808c8b5cae1e878c30f603ef"
+  },
+  "free_final": 7192113152,
+  "restrictions": "No build/runtime change/newmigration/provider/push/deploy/cleanup. Histories/configversions preserved.",
+  "next": "F2 observability: expose measured duration of native finished processing attempts, with unavailable values honest and filtered counts preserved."
+}

@@ -15,22 +15,27 @@ class JrcServiceDesk::LifecycleReadService
       cycle = @ticket.sla_cycles.order(number: :desc).first
       begin
         JrcServiceDesk::LifecycleClocks.verify_snapshot!(cycle&.sla_snapshot || @ticket.latest_sla_snapshot,
-                                                        clock_kinds: (cycle&.lifecycle_policy_version || version).rules.clock_kinds)
+                                                         clock_kinds: (cycle&.lifecycle_policy_version || version).rules.clock_kinds)
       rescue JrcServiceDesk::LifecycleDependencyError, TZInfo::InvalidTimezoneIdentifier
         dependency = 'calendar_snapshot_required'
       end
     end
     pause = @ticket.lifecycle_pauses.find_by(ended_at: nil)
     options = if version
-                version.definition['transitions'].map { |rule| revision.rule(rule) }.select do |rule|
+                version.definition['transitions'].map do |rule|
+                  JrcServiceDesk::OperationalClosure.rule(revision.rule(rule), @context, @ticket)
+                end.select do |rule|
                   next false if dependency && (cycle || !revision.closure_rules.permits_unconfigured_closure?(rule['action']))
                   next false unless JrcServiceDesk::LifecycleActionPolicy.new(@context, @ticket).action?(rule['action'])
                   next false unless JrcServiceDesk::LifecycleActionPolicy.new(@context, @ticket).requirements_allowed?(rule['requirements'])
                   next false unless rule['from_status_ids'].include?(@ticket.status_id)
-                  target = JrcServiceDesk::TicketStatus.find_by(account_id: @ticket.account_id, unit_id: @ticket.unit_id, id: rule['to_status_id'], active: true)
+
+                  target = JrcServiceDesk::TicketStatus.find_by(account_id: @ticket.account_id, unit_id: @ticket.unit_id, id: rule['to_status_id'],
+                                                                active: true)
                   next false unless target && version.status_phases[target.id.to_s] == target.phase && version.status_phases[@ticket.status_id.to_s] == @ticket.status.phase
                   next false if (rule['action'] == 'pause' && pause) || (rule['action'] == 'resume' && !pause)
                   next false if pause && !%w[resume pause].include?(rule['action']) && !rule['end_pause']
+
                   if rule['action'] == 'reopen'
                     config = version.definition['reopen']
                     anchor = @ticket.lifecycle_transitions.where(action: config['anchor_action']).order(occurred_at: :desc, id: :desc).first
@@ -44,7 +49,9 @@ class JrcServiceDesk::LifecycleReadService
                 end.map do |rule|
                   { key: rule['key'], action: rule['action'], to_status_id: rule['to_status_id'].to_s,
                     to_status_name: JrcServiceDesk::TicketStatus.find(rule['to_status_id']).name,
-                    requirements: rule['requirements'], reasons: rule['action'] == 'pause' ? version.definition['pause_reasons'].select { |r| r['status_ids'].include?(rule['to_status_id']) }.map { |r| r.slice('code', 'name', 'clocks') } : [] }
+                    requirements: rule['requirements'], reasons: rule['action'] == 'pause' ? version.definition['pause_reasons'].select do |r|
+                                                          r['status_ids'].include?(rule['to_status_id'])
+                                                        end.map { |r| r.slice('code', 'name', 'clocks') } : [] }
                 end
               else
                 []
@@ -64,7 +71,7 @@ class JrcServiceDesk::LifecycleReadService
       closure_unavailable_reason: version && options.any? ? closure.unavailable_reason : nil,
       pause: pause && { id: pause.id.to_s, reason_code: pause.reason_code, clocks: pause.clocks, started_at: pause.started_at.iso8601(6) },
       cycle: cycle && { id: cycle.id.to_s, number: cycle.number, snapshot_version: cycle.sla_snapshot.version,
-        timezone: cycle.sla_snapshot.timezone, clocks: cycle.sla_clocks.order(:kind).map { |c| clock(c) } },
+                        timezone: cycle.sla_snapshot.timezone, clocks: cycle.sla_clocks.order(:kind).map { |c| clock(c) } },
       history: history.offset((page - 1) * 20).limit(20).map { |r| transition(r) },
       meta: { page: page, per_page: 20, total: history.count } }
   end
@@ -72,20 +79,26 @@ class JrcServiceDesk::LifecycleReadService
   def transition(record)
     Pundit.authorize(@context, @ticket, :view_history?)
     raise Pundit::NotAuthorizedError unless record.ticket_id == @ticket.id && record.account_id == @ticket.account_id && record.unit_id == @ticket.unit_id
+
     { id: record.id.to_s, ticket_id: record.ticket_id.to_s, account_id: record.account_id.to_s, unit_id: record.unit_id.to_s,
       policy_version_id: record.lifecycle_policy_version_id.to_s, policy_version: record.lifecycle_policy_version.version,
       action: record.action, rule_key: record.rule_key, request_key: record.request_key,
       from_status_id: record.from_status_id.to_s, to_status_id: record.to_status_id.to_s,
       author: { account_user_id: record.actor_membership.account_user_id.to_s, name: record.actor_membership.account_user.user.name },
       occurred_at: record.occurred_at.iso8601(6), payload: JrcServiceDesk::HistoryProjection.lifecycle(record.payload,
-        notes: JrcServiceDesk::TicketPolicy.new(@context, @ticket).view_notes?,
-        sla: JrcServiceDesk::TicketPolicy.new(@context, @ticket).view_sla?) }
+                                                                                                       notes: JrcServiceDesk::TicketPolicy.new(
+                                                                                                         @context, @ticket
+                                                                                                       ).view_notes?,
+                                                                                                       sla: JrcServiceDesk::TicketPolicy.new(
+                                                                                                         @context, @ticket
+                                                                                                       ).view_sla?) }
   end
 
   private
 
   def reopening_summary(version)
     return nil unless version && version.definition['reopen']['allowed']
+
     config = version.definition['reopen']
     anchor = @ticket.lifecycle_transitions.where(action: config['anchor_action']).order(occurred_at: :desc, id: :desc).first
     { window_seconds: config['window_seconds'], expired_behavior: config['expired'], sla_cycle: config['sla_cycle'],

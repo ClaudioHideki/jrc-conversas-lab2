@@ -1,12 +1,14 @@
 require 'digest'
 
 class JrcRelationship::Workflow
+  class AutomaticWorkUnavailable < StandardError; end
+
   MODELS = { 'actions' => JrcRelationship::Action, 'risks' => JrcRelationship::RiskCase,
              'plans' => JrcRelationship::SuccessPlan, 'qbrs' => JrcRelationship::Qbr,
              'renewals' => JrcRelationship::Renewal, 'expansion' => JrcRelationship::ExpansionSignal,
              'surveys' => JrcRelationship::Survey }.freeze
   FIELDS = {
-    'actions' => %w[reason status priority due_at result owner_id],
+    'actions' => %w[reason status priority due_at result owner_id next_step return_at customer_confirmation customer_feedback waiting_reason],
     'risks' => %w[kind severity reason status due_at outcome plan owner_id],
     'plans' => %w[title status target_on goals project_id contract_id product_id owner_id],
     'qbrs' => %w[title scheduled_at status agenda summary participants decisions owner_id meeting_url recording_url provider contact_id contract_id
@@ -18,6 +20,21 @@ class JrcRelationship::Workflow
 
   def initialize(context)
     @context = context
+  end
+
+  # Narrow internal operation for a reviewed portfolio handoff. It does not
+  # widen the public editor fields or replay commercial/status transitions.
+  def transfer_owner!(kind:, id:, assignment:, owner:)
+    raise Pundit::NotAuthorizedError unless @context.policy.manage? && @context.policy.team?
+
+    model = JrcRelationship::PortfolioResponsibilities::TYPES.fetch(kind).first
+    statuses = JrcRelationship::PortfolioResponsibilities::TYPES.fetch(kind).last
+    record = @context.records(model).where(assignment_id: assignment.id, status: statuses).lock.find(id)
+    @context.assignable_users.find(owner.id)
+    before = { owner_id: record.owner_id }
+    record.update!(owner: owner)
+    @context.audit!(record, before: before, after: { owner_id: owner.id }, action: 'responsibility_transferred')
+    record
   end
 
   def save(kind:, attributes:, id: nil)
@@ -34,8 +51,17 @@ class JrcRelationship::Workflow
       audit_fields = audit_fields_for(kind)
       before = record.attributes.slice(*audit_fields)
       record.assign_attributes(attrs.slice(*FIELDS.fetch(kind)))
+      if kind == 'actions' && record.will_save_change_to_customer_confirmation?
+        answered = %w[confirmed unresolved].include?(record.customer_confirmation)
+        record.customer_confirmed_by = answered ? @context.user : nil
+        record.customer_confirmed_at = answered ? Time.current : nil
+      end
       if kind == 'actions' && attrs.key?('priority') && record.will_save_change_to_priority?
         record.metadata = record.metadata.merge('manual_priority' => true)
+      end
+      capture_priority_band!(record) if kind == 'actions' && (record.new_record? || record.will_save_change_to_priority?)
+      if kind == 'actions' && (attrs.key?('alert_review_status') || attrs.key?('alert_review_note'))
+        JrcRelationship::AlertReview.apply!(record, attrs, actor: @context.user)
       end
       record.metadata = record.metadata.merge(attrs.slice('period_from', 'period_to', 'milestones', 'notes')) if %w[plans qbrs].include?(kind)
       record.agenda ||= @context.configuration(assignment).effective_rules['qbr_agenda_template'] if kind == 'qbrs'
@@ -46,12 +72,13 @@ class JrcRelationship::Workflow
       end
       raise ArgumentError, 'Retention plan must be structured data' if kind == 'risks' && !record.plan.is_a?(Hash)
 
-      if attrs.key?('owner_id') && attrs['owner_id'].to_s != before['owner_id'].to_s
+      owner_changed = attrs.key?('owner_id') && attrs['owner_id'].to_s != before['owner_id'].to_s
+      if owner_changed
         raise Pundit::NotAuthorizedError unless @context.policy.team?
 
-        @context.assignable_users.find(record.owner_id) if record.owner_id
+        JrcRelationship::WorkOwnership.new(@context, assignment).authorize!(record.owner_id) if record.owner_id
       end
-      validate_links!(record)
+      references = validate_links!(record)
       confirm_renewal!(record, attrs)
       record.source_key ||= "manual:#{attrs.fetch('request_id')}" if record.respond_to?(:source_key)
       record.kind ||= 'manual' if kind == 'actions'
@@ -89,13 +116,16 @@ class JrcRelationship::Workflow
       end
       capture_financial!(record, kind)
       record.save!
+      JrcRelationship::WorkOwnership.new(@context, assignment).authorize_record!(record) if owner_changed
+      references.authorize_work_owners!(record)
       JrcRelationship::RefreshJob.perform_later(@context.member.id, [assignment.id]) if kind == 'plans'
       if kind == 'actions' && record.saved_change_to_status? && %w[in_progress completed].include?(record.status)
         JrcOperations::SlaClock.new(record).mark_first_action!
       end
       project_action!(record) if kind == 'actions'
-      if kind == 'actions' && record.activity
-        fields = { due_at: record.due_at }
+      if kind == 'actions' && record.activity && JrcOperations::Access.crm?(@context.member) &&
+         assignment.customer_context(@context.member).activities.exists?(id: record.activity_id)
+        fields = { due_at: record.return_at || record.due_at }
         fields[:user_id] = record.owner_id if record.owner_id
         fields.merge!(status: 'completed', completed_at: record.completed_at) if record.status == 'completed'
         fields[:status] = 'cancelled' if record.status == 'dismissed'
@@ -112,7 +142,7 @@ class JrcRelationship::Workflow
     end
   end
 
-  def activity!(assignment:, title:, due_at:, request_id:, kind: 'task', owner_id: nil)
+  def activity!(assignment:, title:, due_at:, request_id:, kind: 'task', owner_id: nil, automatic: false)
     raise Pundit::NotAuthorizedError unless JrcOperations::Access.crm?(@context.member)
     raise ArgumentError, 'Invalid activity type' unless %w[task meeting note follow_up call whatsapp email].include?(kind)
 
@@ -121,18 +151,36 @@ class JrcRelationship::Workflow
     return action.activity if action.persisted?
 
     action.assign_attributes(account: @context.account, owner: assignment.owner, kind: 'manual', reason: title, due_at: due_at)
-    action.owner = @context.assignable_users.find(owner_id) if owner_id
-    JrcRelationship::OperationalRouting.new(@context).prepare!(action, preserve_owner: owner_id.present?)
-    action.owner ||= @context.user
+    capture_priority_band!(action)
+    prepare_activity_owner!(action, owner_id, automatic)
     action.save!
     activity = project_action!(action, kind: kind)
     @context.audit!(activity, after: { title: title, due_at: due_at }, action: 'activity_created')
     activity
   end
 
+  def capture_priority_band!(action)
+    bands = @context.configuration(action.assignment).effective_rules['priority_bands']
+    action.factors = JrcRelationship::PriorityBands.capture(action.factors, action.priority, bands)
+  end
+
+  def prepare_activity_owner!(action, owner_id, automatic)
+    action.metadata = action.metadata.merge('automatic' => true) if automatic
+    if owner_id
+      candidate = JrcRelationship::WorkOwnership.new(@context, action.assignment).authorize!(owner_id)
+      action.owner = candidate.user
+    end
+    JrcRelationship::OperationalRouting.new(@context).prepare!(action, preserve_owner: owner_id.present?)
+    raise AutomaticWorkUnavailable, 'Automatic work requires an available authorized owner' if automatic && !action.owner
+
+    action.owner ||= @context.user
+  end
+  private :prepare_activity_owner!
+
   def project_action!(action, kind: 'task')
     return action.activity if action.activity
-    return unless action.due_at && action.owner && JrcOperations::Access.crm?(@context.member)
+    scheduled_at = action.return_at || action.due_at
+    return unless scheduled_at && action.owner && JrcOperations::Access.crm?(@context.member)
 
     metadata = { relationship_assignment_id: action.assignment_id, relationship_action_id: action.id,
                  relationship_source_key: action.source_key }
@@ -140,7 +188,7 @@ class JrcRelationship::Workflow
     activity = JrcCrm::Activity.create!(account: @context.account, user: action.owner,
                                         company: action.assignment.company, contact: action.assignment.contact,
                                         business_unit: action.assignment.business_unit,
-                                        title: action.reason, activity_type: kind, due_at: action.due_at,
+                                        title: action.reason, activity_type: kind, due_at: scheduled_at,
                                         metadata: metadata)
     action.update!(activity: activity)
     @context.audit!(activity, after: { action_id: action.id, due_at: activity.due_at }, action: 'agenda_projected')
@@ -164,7 +212,7 @@ class JrcRelationship::Workflow
   end
 
   def audit_fields_for(kind)
-    fields = FIELDS.fetch(kind) + (kind == 'actions' ? %w[completed_at completed_by_id] : [])
+    fields = FIELDS.fetch(kind) + (kind == 'actions' ? %w[completed_at completed_by_id customer_confirmed_at customer_confirmed_by_id factors] : [])
     fields += %w[metadata] if %w[actions plans qbrs expansion renewals].include?(kind)
     fields += %w[financial_captured_at] if kind == 'risks'
     fields
@@ -175,7 +223,9 @@ class JrcRelationship::Workflow
   end
 
   def validate_links!(record)
-    JrcRelationship::WorkflowReferences.new(@context).validate!(record)
+    references = JrcRelationship::WorkflowReferences.new(@context)
+    references.validate!(record)
+    references
   end
 
   def prepare_survey(record)
@@ -246,6 +296,7 @@ class JrcRelationship::Workflow
                              due_at: record.due_at || action.due_at, metadata: record.metadata.merge('relationship_risk_id' => record.id))
     if action.new_record?
       action.priority = { 'critical' => 90, 'high' => 80, 'medium' => 50, 'low' => 20 }.fetch(record.severity)
+      capture_priority_band!(action)
       JrcRelationship::OperationalRouting.new(@context).prepare!(action, preserve_owner: record.owner_id.present?)
     end
     if %w[retained churn].include?(record.status)

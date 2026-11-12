@@ -1,0 +1,33 @@
+{
+  "utc": "2026-11-10T16:09:00.130172+00:00",
+  "scope": "Targeted Vue regressions with API mocks, NOT native browser or SQL acceptance",
+  "deduplicated_files": 8,
+  "deduplicated_examples": 139,
+  "failed": 0,
+  "evidence": [
+    "targeted-ui-final.json",
+    "ui-policy-contract-final.json"
+  ],
+  "production_change": "Document metadata save requires explicit classification; no grant is inferred",
+  "native_pending": [
+    "Real update from pinned main after integer locale fixture fix",
+    "Reviewed operations rollback with management requests FK dependency",
+    "Full native regressions after all fixes"
+  ],
+  "lint": {
+    "changed_components_and_8_tests": "0 errors; 42 retained warnings",
+    "shared_service_desk_contract_test": "Inherited formatting/loop lint debt retained; exact narrow assertions changed, not included in clean lint claim"
+  },
+  "fresh_native_confirmed_groups": [
+    "signature admission",
+    "Service Desk relationship concurrency",
+    "authority concurrency",
+    "roster/version concurrency",
+    "approved retention"
+  ],
+  "not_claimed": [
+    "UI end-to-end acceptance",
+    "External provider acceptance",
+    "All A-G criteria complete"
+  ]
+}

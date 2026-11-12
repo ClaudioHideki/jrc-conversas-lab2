@@ -1,0 +1,40 @@
+{
+  "utc": "2026-11-10T16:49:08.879989+00:00",
+  "status": "In progress; NOT native-approved or end-to-end accepted",
+  "observed_sha": "38f483b556c900de53208988a5b000eb97c336fb",
+  "frontend": {
+    "files": 254,
+    "examples": 2386,
+    "failures": 0,
+    "pending": 0,
+    "artifact_id": 13782590950,
+    "kind": "native Vitest runtime; APIs mocked; no CSS browser acceptance"
+  },
+  "core_RSpec": {
+    "examples": 2487,
+    "failures": 96,
+    "pending": 22,
+    "six_distinct_shards": true,
+    "fresh_only": true,
+    "not_a_green_result": true
+  },
+  "pending_changes_not_yet_executed_natively": [
+    "Synthetic FRONTEND_URL for real survey/Flow URL generation",
+    "Explicit document classification and native export/portfolio grants in positive fixtures, with negative coverage retained",
+    "Nexora v2 requires version-bound powers approval and accepted signature evidence, with provider/AV replies explicitly simulated",
+    "Controlled withdrawal settles the pending own review before eligibility reversal; frozen snapshots remain checked",
+    "Native catalog expectation includes the additional installed financial, draft and distribution entries",
+    "Fresh/upgrade/schema-reload catalog comparison admission before expensive native execution",
+    "Shared native notification, NICO, Flow and Projects regressions added without removing the original plan"
+  ],
+  "confirmed_product_defect_pending_fix": "System document preanalysis invokes interactive writable authorization with actor:nil; fix must be scoped to technical analysis only",
+  "still_investigating": [
+    "Migration reversal expectations with committed historical evidence and newer FK dependencies",
+    "Named-portfolio configuration restoration and revision conflicts",
+    "Project capabilities in former coarse permission fixtures",
+    "Unix socket test path permissions on GitHub runner",
+    "Opt-in concurrency guards must execute, not remain skipped",
+    "Atomic adjustment result across a new authority tier against approved requirements"
+  ],
+  "no_completion_claim": true
+}

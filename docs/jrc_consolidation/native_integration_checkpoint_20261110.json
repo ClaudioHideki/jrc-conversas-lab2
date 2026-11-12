@@ -1,0 +1,84 @@
+{
+  "utc": "2026-11-10T13:16:52.778358+00:00",
+  "candidate_branch": "codex/integracao-ag-20261110-094025",
+  "original_head": "96fe31861713b506ed0a2afd84e288c1e9558597",
+  "original_repo_unchanged": true,
+  "package_sha256": "de449b1939da368be6b81f98d52d055f32e69468dad530b473903d4f3dc0643b",
+  "cumulative_paths_applied": 189,
+  "approved_rules_unchanged": true,
+  "implemented_additional_fix": "TRR component includes native authorization metadata in its identity; visible and pending results are cleared after permission metadata changes. Two failing component scenarios before, seven passing after.",
+  "native_frontend": {
+    "vue_component_examples": 27,
+    "vue_suites": 3,
+    "vue_sfc_files": 28,
+    "lint_files": 44,
+    "lint_errors": 0,
+    "lint_warnings": 459,
+    "test_apis_doubled": true,
+    "browser_acceptance": false
+  },
+  "isolated_node": {
+    "passed": 229,
+    "whole_hybrid_group_passed": false,
+    "hybrid_group_attempt": {
+      "observed_tests": 262,
+      "passed": 261,
+      "failed": 1,
+      "failed_reason": "Ruby process unavailable; role parity test cannot execute. Original failure retained."
+    }
+  },
+  "native_backend": {
+    "ruby_3_4_4_available": false,
+    "postgresql_available": false,
+    "migrations_executed": 0,
+    "prepared_migrations": 6,
+    "schema_regenerated": false,
+    "Rails_examples_executed": 0
+  },
+  "resources_build_gate": "No build: available physical RAM below 5 GiB; d8d7c960 assets do not demonstrate this consolidated candidate.",
+  "Docker": "Read-only attempt returned HTTP503; user explicitly selected continue without Docker. No restarts or further Docker operations.",
+  "checkpoints_prior_preserved": true,
+  "publication": false,
+  "production_changed": false,
+  "real_grants_applied": false,
+  "external_operations": false,
+  "stage_closure": {
+    "A": false,
+    "B": false,
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  },
+  "evidence": {
+    "cumulative-check.stdout.json": {
+      "sha256": "01e4de4fd4b83dde1afdbc7e407eb4d0de6aac2f83d39de82a612f9b9e66ae16",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\cumulative-check.stdout.json"
+    },
+    "cumulative-apply.stdout.json": {
+      "sha256": "ca3156742f5c63f258d499fae4f33fae266e162554821864b67dfc43f9055224",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\cumulative-apply.stdout.json"
+    },
+    "vitest-components-corrected.json": {
+      "sha256": "d0e4f31ba5583cebdfe86aedb7b600f50a6caa8f39760321f2ea795a7665a0ab",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\vitest-components-corrected.json"
+    },
+    "node-only-regressions.json": {
+      "sha256": "a7c754a241df6687b0a8b63caa75e8c9c1a51ce0889b7c49dd82703344483321",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\node-only-regressions.json"
+    },
+    "sfc-initial.json": {
+      "sha256": "c08868a2f232e5bbfe5880667e90dc95c8993fa93c4645063a526569f38a4d01",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\sfc-initial.json"
+    },
+    "lint-checkpoint.json": {
+      "sha256": "7ee02948caf02e2a6530803067635add2b5acad5965f9b762da428606692b8bd",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\lint-checkpoint.json"
+    },
+    "native-preflight-after-integration.json": {
+      "sha256": "abcf9edbdf4426e3515a2d106acc949c05ac65630732ad913f7d635011c14350",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\native-preflight-after-integration.json"
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "date": "2026-11-07",
+  "status": "activities_source_creation_completion_and_draft_boundary_validated_not_chrome",
+  "branch": "codex/relacionamento-v2-20261101",
+  "previous_checkpoint": "9adb5064f99aed8a1e5608d0ec3e5af203c0af29",
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/crm/views/activities/ActivitiesIndex.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/activities/spec/ActivitiesAuthority.spec.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json"
+  ],
+  "implementation": [
+    "Native ActivitiesIndex captures current account/actor/role/grants plus lifetime for local deal options and post-create/post-complete UI. Old receipts do not refresh or navigate under replacement authority or after unmount.",
+    "Changed authority flushes existing owner draft when applicable,closes old form/editor,clears local options and reloads with original segment scope. Native draft helper and native edit component unchanged.",
+    "Creation and completion cannot be submitted twice while their native receipt is pending. Close/cancel/Escape cannot replace a pending creation draft;authority changes and navigation still preserve it safely.",
+    "Successful creation retains exact native payload,selected local date,explicit segment refresh and calendar destination. Native command already committed is not retried/rolled back after a context change.",
+    "Retryable translated option-read error added;only en source messages. Same semantic status labels via equivalent early returns removed two existing nested-ternary lint errors. Existing colors,editor,filters and unavailable-channel controls retained."
+  ],
+  "validation": {
+    "baseline01": "7failed/1passed before correction;original current-success path remained passing.",
+    "source02": "22passed:8new source authority cases,8existing edit dialog,2existing activity UI,4segment store regressions. API transport mocked;Vue/Vuex/draft helper real.",
+    "final03": "2passed/8notselected:additional native-completion duplicate and option403 retry cases. Earlier8already passed;no repeated full suite.",
+    "native_ui_final06": "2existing UI cases passed after equivalent status-helper lint correction;other native payload/lifecycle code unchanged.",
+    "lint_final05": [
+      {
+        "file": "ActivitiesIndex.vue",
+        "errors": 0,
+        "warnings": 3
+      },
+      {
+        "file": "ActivitiesAuthority.spec.js",
+        "errors": 0,
+        "warnings": 0
+      }
+    ],
+    "resources": {
+      "activities-authority-baseline01": {
+        "status": "failed",
+        "free_start": 6533312512,
+        "minimum_free": 6530342912,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 26920,
+        "exit_code": 1,
+        "free_end": 6551625728
+      },
+      "activities-authority-source02": {
+        "status": "passed",
+        "free_start": 6549344256,
+        "minimum_free": 6506635264,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 26684,
+        "exit_code": 0,
+        "free_end": 6548017152
+      },
+      "activities-authority-final03": {
+        "status": "passed",
+        "free_start": 6528290816,
+        "minimum_free": 6511689728,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 16856,
+        "exit_code": 0,
+        "free_end": 6546350080
+      },
+      "activities-authority-lint04": {
+        "status": "failed",
+        "free_start": 6532202496,
+        "minimum_free": 6529392640,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 26532,
+        "exit_code": 1,
+        "free_end": 6527709184
+      },
+      "activities-authority-lint-final05": {
+        "status": "passed",
+        "free_start": 6528651264,
+        "minimum_free": 6528585728,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 23212,
+        "exit_code": 0,
+        "free_end": 6547591168
+      },
+      "activities-native-ui-final06": {
+        "status": "passed",
+        "free_start": 6548508672,
+        "minimum_free": 6511783936,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 5580,
+        "exit_code": 0,
+        "free_end": 6545596416
+      }
+    },
+    "native_backend_this_increment": false,
+    "chrome": false
+  },
+  "disk": {
+    "initial_bytes": 6533312512,
+    "minimum_measured_bytes": 6506635264,
+    "final_bytes": 6546239488
+  },
+  "preservation": {
+    "new_backend_api_or_permission": false,
+    "draft_helper_changed": false,
+    "activity_editor_changed": false,
+    "build": false,
+    "server5379_changed": false,
+    "containers_restarted": false,
+    "cleanup": false,
+    "push": false,
+    "external_operations": false
+  },
+  "remaining": [
+    "Read-only native inspection found activity source lookups in activity_params use raw account relations,while lists use visible_to_current_user. ActivityDispatchService saves/audits but does not apply that read scope. Next:prove whether hidden deal/lead writes leak or persist,then reuse existing scope rather than invent permission.",
+    "No claim about an ActivityPolicy:the guessed file does not exist;native controller scopes and model validations are the confirmed controls.",
+    "User_id reassignment and any broader role policy need separate native semantic review;this sourceUI report does not grant or redefine them.",
+    "Chrome/sourceasset permission,Word literal/visual audit and allC-G/business/external dependencies remain open."
+  ]
+}

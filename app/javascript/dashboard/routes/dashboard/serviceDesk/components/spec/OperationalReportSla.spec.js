@@ -99,6 +99,8 @@ describe('report SLA coverage and completed-clock denominator', () => {
           stubs: {
             Panel: { template: '<section><slot /></section>' },
             ScopeBar: true,
+            SavedReportQueries: true,
+            ReportExportMenu: true,
             LookupSelect: true,
             ServiceSelect: true,
             CompanyPicker: true,
@@ -120,10 +122,30 @@ describe('report SLA coverage and completed-clock denominator', () => {
         .map(tr => tr.findAll('td').map(td => td.text()));
       const unavailable = messages.JRC_SERVICE_DESK.COMPLETION.not_available;
       expect(rows[0].slice(1)).toEqual(
-        completed ? ['1', '1', '12', '0'] : ['0', '0', unavailable, unavailable]
+        completed
+          ? ['1', '1', '12', '100.0%', '0']
+          : [
+              '0',
+              '0',
+              unavailable,
+              messages.JRC_SERVICE_DESK.COMMON.no_value,
+              unavailable,
+            ]
       );
-      expect(rows[1].slice(1)).toEqual(['0', '0', unavailable, unavailable]);
-      expect(rows[2].slice(1)).toEqual(['2', '0', unavailable, unavailable]);
+      expect(rows[1].slice(1)).toEqual([
+        '0',
+        '0',
+        unavailable,
+        messages.JRC_SERVICE_DESK.COMMON.no_value,
+        unavailable,
+      ]);
+      expect(rows[2].slice(1)).toEqual([
+        '2',
+        '0',
+        unavailable,
+        messages.JRC_SERVICE_DESK.COMMON.no_value,
+        unavailable,
+      ]);
       expect(wrapper.find('caption').text()).toContain(
         'apenas relógios concluídos'
       );

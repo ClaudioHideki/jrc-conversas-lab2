@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-07",
+  "status": "additive_master_subject_prerequisite_validated_not_batch_feature_complete",
+  "previous_checkpoint": "b0c1ae37b01554f6faa0c9525b3e10377a082484",
+  "implementation": [
+    "Existing reviewed batch items gain an optional native master-company subject; no parallel customer registry.",
+    "Legacy assignment-only item guard retained. New master subjects pin account/company/review and bind a same-company native assignment only once with their applied receipt. Parent snapshot guard unchanged.",
+    "Composite tenant foreign key and per-review company uniqueness; terminal receipt immutable. No claim of a new delete guard.",
+    "Rollback is explicitly irreversible: retain additive schema and histories rather than removing recorded subjects."
+  ],
+  "migration": {
+    "version": "20261107010000",
+    "database": "jrc_rel_v2_candidate_test",
+    "host": "jrc-rel-v2-pg-20261101",
+    "gate_status": "passed",
+    "before": {
+      "companies": {
+        "count": 219,
+        "digest": "304ffbba12f6982ba896bf624c7008ea"
+      },
+      "jrc_relationship_assignments": {
+        "count": 36,
+        "digest": "074b6ec71784998faa9bb24279e3b75d"
+      },
+      "jrc_relationship_batch_reviews": {
+        "count": 6,
+        "digest": "e1ebccd21ec5c29090e61579706b6f24"
+      },
+      "jrc_relationship_batch_items": {
+        "count": 6,
+        "digest": "24bfe46f6a576dad77bae9c679ae8505"
+      }
+    },
+    "parent_guard_sha256": "d9371cb3bd39d3f34c1d64a9fa73a44f8d688a74b812e5ab9822ca8eb9e14b63",
+    "evidence": ".codex/master-subject-schema-20261107/f7d64f406c51/native-result.json",
+    "application_or_production_migration": false
+  },
+  "tests": {
+    "master-subject-schema-native01": "Stopped before RSpec: incorrect requested filename. No false success.",
+    "master-subject-schema-native02": "36 examples,0 failures:9 new native schema cases,15 existing reviewed-engine cases,12 existing membership cases.",
+    "lint": "Four changed Ruby files:0 offenses after test-only naming/comments and deliberate database-bypass documentation.",
+    "python": "AST compilation passed without generating cache."
+  },
+  "resources": {
+    "start": 6700302336,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/models/jrc_relationship/master_batch_subject_spec.rb": "87fec525ce20e08d6a8d1f7a59550f9f42044d2dc3984bacb2e100d0eef38951",
+      "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ffaaa5d831977870ccff8bd5dc33964802832ce23e9460d02ce6b85e389ec64a",
+      "spec/services/jrc_relationship/reviewed_portfolio_batch_membership_spec.rb": "35b1270b1d411de36f5bf792275ab9753d869a52ae61e36d5c878b24cbd0ca4d"
+    },
+    "minimum": 6700183552,
+    "exit_code": 0,
+    "end": 6700249088
+  },
+  "remaining": [
+    "Implement master-allocation input, frozen plan, native creation plus membership transaction, progress/projection and usable UI.",
+    "Explicit local portfolio permission matrix pending business answer. TRR undefined; documents without portfolio deferred.",
+    "Current-source Chrome blocked by no-build/no5379-change restriction. C-G remain open."
+  ],
+  "restrictions": "No build,cleanup,push,deploy,external operation,production or application-server changes.",
+  "next": "Continue master-allocation operation in existing reviewed engine; preserve legacy IDs, native source policies and exact own receipts."
+}

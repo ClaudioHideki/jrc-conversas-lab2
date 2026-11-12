@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "ea780d5bf89646d56b9ba7f7247e436373ffaae5",
+  "status": "Native processing observability increment validated; F2/G remain open",
+  "implementation": [
+    "Derive duration_ms only for finished non-running attempts with chronological persisted timestamps. Missing/running/backward timing remains null; real zero preserved. No schema or execution-record writes.",
+    "Workspace labels the entire internal batch timing, explicitly excluding queue wait and external delivery; filtered requested/processed/failed counts retain native meaning. No customer IDs/outcomes added to projection.",
+    "Native latest_for retains account/viewer/access-signature and assignment intersection; account switches clear old values."
+  ],
+  "tests": {
+    "backend": "10/0:4 new duration/projection/access cases +6 existing native monitor cases",
+    "vue": "12/0:3 new duration/unavailable/revoked-account cases +9 existing workflow cases",
+    "ruby_offenses": 0,
+    "eslint_errors": 0,
+    "eslint_warnings": 0,
+    "initial_ui_failure": "EPERM starting Vitest esbuild subprocess in sandbox before tests. Retried authorized test command outside sandbox;12/0. No application build.",
+    "retained_warnings": "Existing shallow RouterLink and synthetic confirmation fixture warnings; no new duration translation key failures.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "native": {
+      "start": 7195779072,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/processing_run_duration_spec.rb": "c7391a95aab461e461112373603fce3939538377875bb4476f99d63c55983d53",
+        "spec/services/jrc_relationship/monitoring_runs_spec.rb": "3c7152fbaff056037c2879f5f49df277ca98a5106a8aacdaf1ae2a04aef44082"
+      },
+      "minimum": 7195660288,
+      "exit_code": 0,
+      "end": 7195660288
+    },
+    "vue": {
+      "status": "passed",
+      "free_start": 7195668480,
+      "minimum_free": 7158697984,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 14580,
+      "exit_code": 0,
+      "free_end": 7194374144
+    },
+    "final_free": 7194300416
+  },
+  "source_sha256": {
+    "app/models/jrc_relationship/processing_run.rb": "d9fdcdf80aa48ad4cb505eb4e4383e6b5900f153c949df9d00fcd9d1dc9d3655",
+    "spec/services/jrc_relationship/processing_run_duration_spec.rb": "c7391a95aab461e461112373603fce3939538377875bb4476f99d63c55983d53",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystWorkspace.vue": "ab3cc039bfcd54510b3bc660dd24bf538381c6bd7577edb0320ed454a4f8cf81",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystWorkspace.spec.js": "c5bf0c04c005b45c0bc2423ca93a43686ca0249f5745908b57834c3b3394faaa",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "3bcf108022722f71d18e7a626797fed2bb4d15111bf0545e3d281314fcec171f"
+  },
+  "limitations": [
+    "Not end-to-end NICO latency or statistical/model precision.",
+    "Fresh current-source Chrome blocked by no-build restriction; no claims from oldassets.",
+    "No external run, push/deploy/cleanup/runtime change."
+  ],
+  "next": "F2 explicit human review of engine alerts, separate from customer confirmation and operational closure; no inferred false positives from dismissal."
+}

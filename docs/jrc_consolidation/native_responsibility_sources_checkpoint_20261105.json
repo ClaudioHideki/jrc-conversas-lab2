@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
+  "execution_status": "Ongoing autonomous continuation, not final C-G report",
+  "changes": [
+    "Explicit pending task/ticket references from active success plans enter the immutable responsibility inventory and comparison.",
+    "Service Desk reassignment uses AssignTicketService, native unit/team/domain eligibility and TicketEvent history.",
+    "New narrow JrcProjects::Tasks::Assign uses existing native Authorization, project membership, optimistic version and AuditEvent; no project owner, member role or historical author is changed.",
+    "Destination task permissions are checked after reassignment; a viewer is never promoted and the entire customer transaction rolls back on denial.",
+    "Shared sources and sources for another customer are blocked; foreign-account references are denied before exposing details.",
+    "Parent-first Project/Task and Unit/Ticket locking follows native writers; NOWAIT avoids waiting cycles while native authority grants are held.",
+    "Source eligibility belongs to the original executor, not the origin reader/approver. Authorized readers do not receive operational memberships."
+  ],
+  "tests_not_additive": [
+    { "label": "continuous-native-final", "backend": 57, "failures": 0, "groups": { "native_sources": 7, "competing_proposals_concurrency": 1, "responsibility_transfer": 10, "legacy_reviewed_batches": 14, "native_central_distribution": 25 } },
+    { "label": "continuous-native-locks", "backend": 9, "failures": 0, "purpose": "Eight overlapping cases plus native editor parent-lock contention; no partial proposal persisted." },
+    { "label": "continuous-native-reader", "backend": 10, "failures": 0, "purpose": "Native sources, two concurrency cases and original-executor eligibility under another authorized reader; overlapping earlier coverage." },
+    { "label": "continuous-native01", "vue": 23, "failures": 0, "groups": { "reviewed_panel": 16, "comparison": 7 } }
+  ],
+  "failures_corrected": [
+    "Native eligibility revocation is reported by the existing reviewed engine as attention; test expectation corrected without changing the engine. A separate missing-destination-membership case verifies rollback after native rejection.",
+    "Project AuditEvent stores explicit auditable_type/auditable_id columns rather than a polymorphic association; assertion corrected."
+  ],
+  "static_gates": "Directed ESLint exit0; new Ruby files/direct modifications clean across continuous-native-lint04/05/06/07 final followups. No cop disabled; no global clean-lint claim.",
+  "remaining_F1": "Project owner handoff changes native member roles and access signatures and needs reviewed receipt handling; active cadences and safe final team withdrawal remain open. No real participation was removed. Weighted/hour modes and their explicit business inputs remain open.",
+  "next_independent_work": "E1 provider evidence observation, safe version-bound persistence and final dossier; then return to remaining native F1/E/F/C/D/G tasks. Do not end after this checkpoint.",
+  "environment": "Synthetic owned PostgreSQL candidate only; no migrations, no frontend build, no5379 modification, no container restart/reconfiguration, no cleanup/push/GHCR/deploy/provider operation."
+}

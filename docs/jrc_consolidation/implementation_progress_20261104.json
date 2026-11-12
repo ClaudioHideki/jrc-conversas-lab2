@@ -1,0 +1,253 @@
+{
+  "date": "2026-11-04",
+  "branch": "codex/relacionamento-v2-20261101",
+  "checkpoints": {
+    "start": "0f768a98aef6078c84b7196c520c40b5985844f7",
+    "D6": "054b9afe166c9c0b2144e822d3725a77a4198a62",
+    "D7": "b5dbb7e346523887cda5ca282ca0a290668eae9c",
+    "D8": "2eabf83378b2bcbc2dae964507305023ae60b50f",
+    "D9": "abf9064352d6144736e8eb7173986bf8571ec9e2",
+    "F_health": "ab2a9412f39a96951256d41112cd9c84bf35e606",
+    "E_report": "a5bd8e31737bcf9abf8047ed5e534382818bf877"
+  },
+  "preserved_ancestors": [
+    "a1fef624",
+    "9bb8d2ec",
+    "3390725e",
+    "07a9e400",
+    "0f768a98"
+  ],
+  "status": "Incremental implementation and selected native G regression completed; C,D,E,F,G all remain open for remaining functional and real visual acceptance",
+  "implemented_this_continuation": [
+    "D6 real numeric authority tiers using versioned native planner, not a UI-only table; v1 and old snapshots retained",
+    "D7 transactional native proposal discount adjustment plus approval, with explicit grant and immutable revision/audit",
+    "D8 own temporary delegations intersected with account/company/unit, captured steps/actions, current eligibility, real formal-absence rules and immutable grant/revoke history",
+    "D9 durable native internal notification feed/projection, strict current authorization, recovery/expiry, no external delivery",
+    "F configured health recovery margin using authorized same-viewer/config/access history; raw score/factors unchanged; native versioned settings and actual processor integration",
+    "E scoped completed-request operational CSV with dates, SLA, source/version metadata, native audit and real frontend download action"
+  ],
+  "final_correctness_increment": {
+    "files": [
+      "app/services/jrc_relationship/customer_signals.rb",
+      "app/services/jrc_relationship/processor.rb",
+      "spec/services/jrc_relationship/health_hysteresis_spec.rb",
+      "app/javascript/dashboard/routes/dashboard/notifications/components/NotificationTable.spec.js"
+    ],
+    "fix": "Historical snapshot ID is lineage, not a changed measurement: exclude only that volatile field from calculation fingerprint while retaining it in stored evidence. Repeated identical refreshes no longer produce unbounded new snapshots. Zero-margin/empty-history path retains the original source manifest unchanged.",
+    "proof": "Actual PostgreSQL Processor test repeats unchanged refreshes and checks snapshot count plus original immutable attributes; final17-case run passed. Native table renders both new actor kinds without conversation metadata."
+  },
+  "G_backend": {
+    "cases": 74,
+    "failures": 0,
+    "run": {
+      "start": 13253402624,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_customers/financial_segment_criteria_spec.rb": "ffd66978a7519419af5a44c60ab0a514ee802a84c4ced4015af8ee6d32419fa4",
+        "spec/requests/api/v1/accounts/customers/segment_definitions_spec.rb": "0b5fd1a36b4d3e7c6382c59b6e477aff098590d73a72ef0ac42f7ca32ea43103",
+        "spec/requests/api/v1/accounts/customers/module_segment_filter_spec.rb": "b8b2bcde2f1f65e6937a5e3c7c854c00214b6f52ed2546f2754251b1832b2fd4",
+        "spec/requests/api/v1/accounts/customers/backoffice_segment_filter_spec.rb": "e0451d9873981e05517b371f462f50257d256513c850d9a790c0f725c86e6698",
+        "spec/requests/api/v1/accounts/customers/relationship_segment_filter_spec.rb": "c83c1041ddba52696a7f5b4851dd69e94c61e62b41836630a32e9110fcb92d71",
+        "spec/requests/api/v1/accounts/customers/project_segment_filter_spec.rb": "4260bb3eac19cf295e85c348ff2b19f2ea476682538d2366eb618a39fd89a7c4",
+        "spec/requests/api/v1/accounts/customers/campaign_segment_filter_spec.rb": "3bfd6d35ab21f250fef70a10d818fd6b9b77dcf8354dd8b875cb2bc59c253a38",
+        "spec/requests/api/v1/accounts/customers/campaign_segment_review_edit_spec.rb": "8f7610f27c3ec54b85a19a3007f103601e9821ce479cb3a1b60f100ba319ee60",
+        "spec/services/jrc_service_desk/ticket_query_customer_segments_spec.rb": "bfebb037b0b8ce23548c7619582477bc2b183359f43044b1ac60a5c22d36d3f7",
+        "spec/services/jrc_nico/bounded_workflow_knowledge_spec.rb": "e6474f6c449e7b38f0b0f88656cfca00c6255c8ab0e92b1c83e190961eb7a2e0"
+      },
+      "minimum": 13232242688,
+      "exit_code": 0,
+      "end": 13251891200
+    },
+    "coverage": [
+      "Invoiced-order financial period criteria and native segment publication",
+      "CRM module filters and Backoffice integration",
+      "Service Desk TicketQuery scope",
+      "Private native Projects filtering",
+      "Relationship native portfolio context",
+      "Campaign draft/preview and approval invalidation after audience edits",
+      "Bounded NICO workflow knowledge"
+    ],
+    "limitations": "Selected real Rails/PostgreSQL regressions with synthetic local fixtures; not full end-to-end or external-channel acceptance."
+  },
+  "G_frontend": {
+    "cases": 37,
+    "failures": 0,
+    "run": {
+      "status": "passed",
+      "free_start": 13251878912,
+      "minimum_free": 13221756928,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 944,
+      "exit_code": 0,
+      "free_end": 13250883584
+    },
+    "coverage": [
+      "Actual notification table/view click wiring and closed current-account navigation",
+      "Completion report click/error/hidden-active/late-account/unmount responses",
+      "Persisted-setting form wiring, measured-band explanation and existing relationship functional components"
+    ],
+    "limitations": "Vue API fixtures use mocks. No actual Chrome or new product assets generated. Existing RouterLink fixture warnings remain recorded."
+  },
+  "latest_native_combined": {
+    "cases": 38,
+    "failures": 0,
+    "run": {
+      "start": 13213634560,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/crm/backoffice_completion_report_spec.rb": "cfe2517e1da5dba9c433124854f9e5141e3ef528097394e1c3728705f6f3fb8c",
+        "spec/services/jrc_relationship/health_hysteresis_spec.rb": "624c666965f3588368ad1c6ffe7833ff01ba9ee06acaa28b4d83cc1a673d5e20",
+        "spec/services/jrc_relationship/monitoring_runs_spec.rb": "3c7152fbaff056037c2879f5f49df277ca98a5106a8aacdaf1ae2a04aef44082",
+        "spec/services/jrc_approvals/notifications_spec.rb": "8a79bbd79184fd461fa9b8a5facf86f8492d277e50b85f146a9b7705f0d79196",
+        "spec/requests/api/v1/accounts/jrc_approvals/notifications_spec.rb": "524459a9887df3954052dfdf413d05a9344bd3b01e3d4ad1cf5950023bd1af9b"
+      },
+      "minimum": 13194268672,
+      "exit_code": 0,
+      "end": 13213859840
+    }
+  },
+  "sealed_legacy_and_health": {
+    "cases": 17,
+    "failures": 0,
+    "run": {
+      "start": 13212315648,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/crm/backoffice_completion_report_spec.rb": "264ec6400f579e2211b497fecca844fb1b8f007e5999e1f8453cf1128106ffb3",
+        "spec/services/jrc_relationship/health_hysteresis_spec.rb": "624c666965f3588368ad1c6ffe7833ff01ba9ee06acaa28b4d83cc1a673d5e20",
+        "spec/services/jrc_relationship/health_coverage_spec.rb": "2e69a283b127f208e9f3675d025143e759757dbc77614a701cba0adf76d1d886"
+      },
+      "minimum": 13212098560,
+      "exit_code": 0,
+      "end": 13212090368
+    }
+  },
+  "quality": {
+    "new_ruby": "Targeted new service/controller/spec lint0; existing shared metrics are not represented as globally clean",
+    "related_frontend": "Final5-file ESLint0 and previous6-file health ESLint0",
+    "diff_check": "passed",
+    "remote_CI": "Not executed; no push"
+  },
+  "failed_runs_preserved": [
+    "d9-native-model24/1 before destroyed-conversation callback fix;91-case native rerun passed",
+    "d9-post-lint34/4 because protected DocuSign receipt spec requires its own exact bank; restriction not bypassed; no external homologation claimed",
+    "f1-health-api32/1 expected401 versus native403; corrected assertion without changing server authorization;46-case rerun passed",
+    "e1-completion-report19/3 and diagnostic5/2: missing native audit event registration plus exact native401 contract; corrected implementation/assertion;30-case then17-case runs passed"
+  ],
+  "runtime_preservation": {
+    "login_http": 200,
+    "entry_http": 200,
+    "entry_url": "/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js",
+    "entry_sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+    "same_preserved_asset": true,
+    "served_commit": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+    "new_code_served": false,
+    "not_browser_homologation": true,
+    "no_new_server_or_build": true,
+    "free_bytes": 13213630464
+  },
+  "disk": {
+    "turn_start_bytes": 16596615168,
+    "lowest_recorded_test_run": {
+      "file": ".codex/d-approvals-20261104/d8-own-initial-backend-resource.json",
+      "minimum_observed": 3856183296
+    },
+    "current_bytes": 12941705216,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_test_guard_bytes": 2000000000,
+    "guard_triggered": false,
+    "cleanup": false,
+    "cause_of_external_fluctuation": "Not established; no cleanup or unrelated process interruption performed"
+  },
+  "Word_remaining": {
+    "C": [
+      "Fresh build and actual consolidated desktop/mobile light/dark acceptance",
+      "Representative-scale full acceptance",
+      "TRR business definition; no formula invented",
+      "Documents for companies without authorized portfolios remain explicitly deferred"
+    ],
+    "D": [
+      "Real fresh-build UI acceptance and worker/scheduler operational acceptance",
+      "Adjustments outside the explicitly installed native proposal discount adapter remain partial",
+      "No blanket bridge or authority grant to independent legacy approval engines"
+    ],
+    "E": [
+      "Actual final signed-document package export and independent detailed Central approval report",
+      "Full go-live, external provisioning, final immutable dossier and relationship handoff acceptance",
+      "Real DocuSign Developer/demo, consent, Connect and scanner/OCR homologation"
+    ],
+    "F": [
+      "Central-approved portfolio grouping/capacity/distribution integration and analyst removal workflow",
+      "Per-product historical stabilization, configurable trend/freshness/cooldown and governed automation gaps",
+      "Full NICO/Flow/channel acceptance with actual authorized external pilots"
+    ],
+    "G": [
+      "New compiled code/assets and real Chrome desktop/mobile light/dark acceptance only after explicit build authorization",
+      "Representative-scale measured acceptance and full cross-module role/origin matrix",
+      "Actual provider/telephony/WhatsApp/SMS integrations not retested through live operations"
+    ]
+  },
+  "next_independent_implementation": "Continue the native final-document package and governed portfolio/approval integration using the existing services. Keep real external acceptance and build authorization separate. Do not restart completed modules or treat metadata CSV as the final archive.",
+  "restrictions": {
+    "no_push": true,
+    "no_GHCR": true,
+    "no_deploy": true,
+    "no_production_changes": true,
+    "no_external_real_operations": true,
+    "no_build": true,
+    "no_cleanup": true,
+    "no_other_process_interruption": true
+  },
+  "stages_closed": [],
+  "continuation_20261105": {
+    "date": "2026-11-05",
+    "source_head": "8576c78678d5a7310099db701cf5134b55159fa2",
+    "checkpoints": [
+      {
+        "commit": "7c9edef70edd9d4f3f8c1b18bc138d5fa10c83f4",
+        "stage": "E3",
+        "evidence": "backoffice_cs_handoff_checkpoint_20261105.json",
+        "result": "Exact scoped native completion-to-CS link, explicit prepare/accept,10 native backend and23 initial Vue cases passed;16 changed-component Vue cases rechecked."
+      },
+      {
+        "commit": "82c796618781c135b5bba4f611ace09e72ad1f2d",
+        "stage": "E2",
+        "evidence": "backoffice_approval_mirror_checkpoint_20261105.json",
+        "result": "Native Central history mirror, actual pagination and read-only reused detail;4 backend and17 Vue cases passed."
+      },
+      {
+        "commit": "8576c78678d5a7310099db701cf5134b55159fa2",
+        "stage": "F/G",
+        "evidence": "handoff_project_revalidation_checkpoint_20261105.json",
+        "result": "Reopened native project cannot be accepted; source account lock and current source-scope revalidation.13 of14 first combined cases passed; last fixture corrected and passed alone.10 order cases were repeated only because the common decision path changed."
+      }
+    ],
+    "all_stages_remain_open": true,
+    "authoritative_restrictions": [
+      "No build, push, GHCR, deploy, cleanup, external real operations, production change or server5379 modification",
+      "Old .codex/resume-current-jrc.json build/next-step suggestions are historical and do not override the latest user instruction"
+    ],
+    "next_safe_work": [
+      "F1: native Central-approved portfolio distribution/capacity and safe analyst removal; preserve existing reviewed batch semantics/history and reuse source/version/capability checks. Manual reviewed-batch confirmation is still not Central approval.",
+      "F2: configurable freshness/trend/cooldown with native evidence and old behavior preserved; do not imply current hysteresis/history implement all these requirements.",
+      "E1/E3: version-bound signed artifacts/certificate, immutable final dossier and complete provisioning/CS closure acceptance. Current package truthfully marks unavailable signed artifacts.",
+      "G: current compiled desktop/mobile light/dark acceptance remains blocked by the explicit no-build/no-server-change instruction; frozen5379 assets cannot be evidence for new components."
+    ],
+    "business_dependencies": [
+      "TRR has no approved formula",
+      "Company documents without portfolio remain explicitly blocked",
+      "DocuSign demo and real external provider/channel acceptance require separately authorized environment and operations"
+    ]
+  }
+}

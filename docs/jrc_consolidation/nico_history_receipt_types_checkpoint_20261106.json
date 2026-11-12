@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "91cacc62c645afc38ee18a9789005d7879cac7d7",
+  "status": "G saved-history receipt hardening locally validated; no C-G closure",
+  "confirmed_gap": "Unknown resource types were silently skipped by OperatorSession current-source checks. The prior SLA regression demonstrated the impact; a new unsupported-type case reproduces retained cached messages.",
+  "implementation": [
+    "Unknown receipt type now follows native denied-history path; no constantization/unscoped model fallback. Native cache is cleared/pending confirmations cancelled, while succeeded commands/audit remain unchanged.",
+    "Preserve existing direct branches for Contact,CRM leads/deals/proposals/activities,AutomationRule,Campaign and approved knowledge; known DomainAccess types retain native readers. Plain legacy operator history without native source receipts retains existing semantics.",
+    "Inbox receipt is explicitly registered and checked against current Account plus native InboxPolicy via OperationalAccess.inbox_visible?; Current context restored. Campaign-specific WhatsApp/source gates remain unchanged in Helpdesk::GroupNativeActions.",
+    "Contract test checks every current SnapshotAccess source class belongs to finite native receipt authorizers, preventing another silently unsupported new source."
+  ],
+  "producer_review": [
+    "app/services/jrc_nico/domain_actions.rb",
+    "app/services/jrc_nico/tool_result_projection.rb",
+    "app/services/jrc_nico/commercial_actions.rb",
+    "app/services/jrc_nico/helpdesk/group_native_actions.rb",
+    "app/services/jrc_nico/helpdesk/group_draft_actions.rb",
+    "app/services/jrc_nico/helpdesk/report_resources.rb",
+    "app/services/jrc_nico/module_actions.rb"
+  ],
+  "tests": {
+    "baseline": "4 cases/2 failures: unsupported source incorrectly remained visible; existing Inbox source not yet explicitly recognized. Authorized Contact and unassigned Inbox cases passed.",
+    "combined": "42/43 passed:5 receipt cases,4 SLA/source-contract,7 existing public history,20 broker sends,7 commercial workflow. Only older public-history bot setup failed its valid-origin guard.",
+    "fixture_correction": "Use with_modified_env FRONTEND_URL=https://nico-history.example.test in the isolated history group. Native FlowOwnership HTTPS validation remains enabled; no actual runtime/server URL changed.",
+    "targeted_corrected_case": "1/0 named latest pending message case; not repeated42 unrelated passing cases.",
+    "ruby_new_or_touched_specs_offenses": 0,
+    "shared_delta": [
+      {
+        "path": "app/services/jrc_nico/domain_access.rb",
+        "baseline": 5,
+        "current": 5,
+        "added": {},
+        "details": []
+      },
+      {
+        "path": "app/services/jrc_nico/operator_session.rb",
+        "baseline": 61,
+        "current": 61,
+        "added": {},
+        "details": []
+      }
+    ],
+    "diff_check": "passed"
+  },
+  "resources": {
+    "combined": {
+      "start": 7174778880,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_nico/operator_session_receipt_types_spec.rb": "92857ea0439949ad8acde09d16077a46448e131e9306adf305b67281627e628e",
+        "spec/services/jrc_nico/domain_access_relationship_sla_spec.rb": "52e02ed592c388dd0c18af4797fc69c55a1eb95e85d53cbb45b433297baee4cd",
+        "spec/services/jrc_nico/operator_session_recent_history_spec.rb": "c1b0a99e60f6d0bee32e9a0d0902e2788cfec97a4d79417ba715c02e582a1956",
+        "spec/services/jrc_nico/operator_session_broker_send_spec.rb": "81470efec5453f8e61df92fcd1c405b1ce537460a6fe208d9796dc5b050c37a1",
+        "spec/services/jrc_nico/commercial_workflow_spec.rb": "53374a28420075c54ac39d3cd743cbecede5a3d060028aefeaecffd45eef1e13"
+      },
+      "minimum": 7154749440,
+      "exit_code": 1,
+      "end": 7174467584
+    },
+    "corrected_case": {
+      "start": 7173406720,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_nico/operator_session_recent_history_spec.rb": "43c3546e6a853013f2fdfbecc5d3c0eab56de0dde507b0e377fdfd6be74d195f"
+      },
+      "minimum": 7173337088,
+      "exit_code": 0,
+      "end": 7174381568
+    },
+    "free_final": 7151751168
+  },
+  "source_sha256": {
+    "app/services/jrc_nico/domain_access.rb": "cd85d41fcd79a8b9f06bab591a9bca7859db8353dd4a41b4ef75a82b28b5aa9c",
+    "app/services/jrc_nico/operator_session.rb": "e9c7ff90dbd29f66bee4e85b0433656bac84a54d012ba8ebda89e83d39ce579f",
+    "spec/services/jrc_nico/operator_session_receipt_types_spec.rb": "92857ea0439949ad8acde09d16077a46448e131e9306adf305b67281627e628e",
+    "spec/services/jrc_nico/domain_access_relationship_sla_spec.rb": "52e02ed592c388dd0c18af4797fc69c55a1eb95e85d53cbb45b433297baee4cd",
+    "spec/services/jrc_nico/operator_session_recent_history_spec.rb": "1927c0e4ecdd274efabbcd19d9ef5c0ec0b80b4c3a7485c31bef61f85bba0f82"
+  },
+  "limits": [
+    "Broker/provider transports and planning inference in specs are simulated; native ORM/jobs/ledger/permissions exercised. No external send, provider inference or current-source Chrome acceptance.",
+    "No build/runtime/container/5379 change, cleanup, migration, push/GHCR/deploy. Existing immutable source versions preserved."
+  ],
+  "next": "G/F native actor eligibility: OperationalAccess/Access recheck member/account but not a reloaded user.active_for_authentication?. Verify stale actors and prepared/queued operations against actual native confirmation state; do not conflate online presence with authentication."
+}

@@ -8,6 +8,7 @@ import { CONTACTS_EVENTS } from 'dashboard/helper/AnalyticsHelper/events';
 import filterQueryGenerator from 'dashboard/helper/filterQueryGenerator';
 import contactFilterItems from 'dashboard/routes/dashboard/contacts/contactFilterItems';
 import { useContactCreation } from 'dashboard/composables/useContactCreation';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
 import { generateValuesForEditCustomViews } from 'dashboard/helper/customViewsHelper';
 import countries from 'shared/constants/countries';
 import {
@@ -46,6 +47,8 @@ const emit = defineEmits([
 const { t } = useI18n();
 const store = useStore();
 const router = useRouter();
+const { enabled: customerMasterEnabled, accountScopedRoute } =
+  useCustomerMaster();
 
 const createNewContactDialogRef = ref(null);
 const contactExportDialogRef = ref(null);
@@ -68,8 +71,16 @@ const activeSegmentName = computed(() => props.activeSegment?.name);
 const openCreateNewContactDialog = () => {
   createNewContactDialogRef.value?.open();
 };
-const openContactImportDialog = () =>
+const openContactImportDialog = () => {
+  if (customerMasterEnabled.value) {
+    router.push({
+      ...accountScopedRoute('jrc_customer_imports'),
+      query: { kind: 'contacts' },
+    });
+    return;
+  }
   contactImportDialogRef.value?.dialogRef.open();
+};
 const openContactExportDialog = () =>
   contactExportDialogRef.value?.dialogRef.open();
 const openCreateSegmentDialog = () =>

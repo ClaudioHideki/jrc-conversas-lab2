@@ -1,0 +1,46 @@
+{
+  "block": "B1",
+  "base": "12edc5db2525f4e1a4f4bc5acad243cec0d022b0",
+  "status": "implemented_awaiting_build_chrome",
+  "word": "P0155",
+  "native_reuse": [
+    "RequesterPeopleController#show/index",
+    "RequesterDirectory#validate!",
+    "TicketFormView quick and advanced",
+    "TicketPolicy#create? unchanged"
+  ],
+  "tests": {
+    "vue_passed": 57,
+    "vue_failed": 0,
+    "native_backend_passed": 4,
+    "native_backend_failed": 0,
+    "eslint_errors": 0,
+    "eslint_warnings": 19,
+    "eslint_initial_error_fixed": "local variable shadowed existing result; renamed before final lint"
+  },
+  "evidence": {
+    "b1-vitest.json": {
+      "path": ".codex/lowdisk-stage-c-20261103/b1-vitest.json",
+      "sha256": "61f530f3d9624797d30478c39de31744e3e29ab26189e0ae5c906df8ff3a4cf0"
+    },
+    "b1-new-tests.json": {
+      "path": ".codex/lowdisk-stage-c-20261103/b1-new-tests.json",
+      "sha256": "5d62d9315f760cee8b8a89e4ef599343b349b27752d45de090d08be3305d70c9"
+    },
+    "b1-native-backend-resource.json": {
+      "path": ".codex/lowdisk-stage-c-20261103/b1-native-backend-resource.json",
+      "sha256": "e26198a7a6ed38d981a5458c92718904439b6bf7e2f14830728dca2a02f6d93f"
+    },
+    "b1-eslint-final-resource.json": {
+      "path": ".codex/lowdisk-stage-c-20261103/b1-eslint-final-resource.json",
+      "sha256": "acaef8439aae0bdccf2404c9dcef3a78565a81e694b9981d121a7f6fcdbae077"
+    }
+  },
+  "permissions": "Explicit authenticated account, native authorized chosen unit, canonical eligible requester/company verification; abort stale responses on identity/unit/role change. No automatic units or links. Final POST retains all native checks.",
+  "chrome": "Pending future single guarded build. Existing D3 assets are not evidence of B1.",
+  "disk_start": 1233350656,
+  "disk_min_observed": 1202909184,
+  "disk_current": 1269280768,
+  "production": false,
+  "cleanup": false
+}

@@ -136,10 +136,24 @@ const buttonStub = {
   props: ['label', 'disabled'],
   template: '<button :disabled="disabled">{{ label }}</button>',
 };
+const decisionDialogStub = {
+  props: [
+    'confirmButtonLabel',
+    'disableConfirmButton',
+    'isLoading',
+    'dismissible',
+  ],
+  emits: ['confirm', 'close'],
+  setup(_, { expose, emit }) {
+    expose({ open: vi.fn(), close: () => emit('close') });
+  },
+  template:
+    '<section role="dialog"><slot /><button data-confirm :disabled="disableConfirmButton || isLoading" @click="$emit(\'confirm\')">{{ confirmButtonLabel }}</button><button data-cancel :disabled="!dismissible" @click="$emit(\'close\')">Cancel</button></section>',
+};
 const options = extra => ({
   global: {
     plugins: [i18n()],
-    stubs: { Button: buttonStub, RouterLink: true },
+    stubs: { Button: buttonStub, RouterLink: true, Dialog: decisionDialogStub },
   },
   ...extra,
 });
@@ -368,12 +382,15 @@ describe('E4 components using bounded real DTO contracts', () => {
   it('renders only allowed decision buttons, requires a reason and emits expected version/delegation', async () => {
     const wrapper = mount(RequestDetail, options({ props: { request } }));
     expect(wrapper.findAll('button').map(b => b.text())).toEqual([
-      'review: approved',
-      'review: returned',
+      'Approve · Step 1',
+      'Return for correction · Step 1',
     ]);
     expect(wrapper.find('button').attributes('disabled')).toBeDefined();
     await wrapper.find('textarea').setValue('Reviewed synthetic evidence');
     await wrapper.find('button').trigger('click');
+    await flushPromises();
+    expect(wrapper.emitted('decide')).toBeUndefined();
+    await wrapper.get('[data-confirm]').trigger('click');
     expect(wrapper.emitted('decide')[0][0]).toEqual({
       step_code: 'review',
       decision: 'approved',
@@ -421,7 +438,9 @@ describe('E4 components using bounded real DTO contracts', () => {
         },
       })
     );
-    expect(wrapper.find('button').text()).toBe('review: approved (#99)');
+    expect(wrapper.find('button').text()).toBe(
+      'Approve · Step 1 · Delegated option 1'
+    );
     expect(wrapper.text()).not.toContain('History / Audit');
   });
   it('edits a detached draft without mutating the response and keeps identity immutable', async () => {
@@ -683,6 +702,212 @@ describe('E4 components using bounded real DTO contracts', () => {
     expect(axios.get).not.toHaveBeenCalled();
     expect(wrapper.text()).toBe('');
   });
+  it('clears protected request detail when the native decision API denies current access', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        ...routes,
+        {
+          name: 'crm_proposals',
+          path: '/app/accounts/:accountId/crm/proposals',
+          component: { template: '<div />' },
+        },
+      ],
+    });
+    await router.push({
+      name: 'jrc_approvals',
+      params: { accountId: 17, screen: 'inbox', id: request.id },
+    });
+    axios.get.mockImplementation(url => {
+      if (url.endsWith('/context')) return Promise.resolve(response(context));
+      if (url.endsWith(`/requests/${request.id}`))
+        return Promise.resolve(response(request));
+      return Promise.resolve(response([]));
+    });
+    axios.post.mockRejectedValue({
+      response: { status: 403, data: { error: 'FORBIDDEN' } },
+    });
+    const wrapper = mount(ApprovalsPage, {
+      global: {
+        plugins: [i18n(), router, createStore({})],
+        stubs: { Button: buttonStub, Dialog: decisionDialogStub },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.findComponent(RequestDetail).exists()).toBe(true);
+    expect(wrapper.find('a[target="_blank"]').attributes('href')).toBe(
+      '/app/accounts/17/crm/proposals?proposalId=601'
+    );
+    wrapper.getComponent(RequestDetail).vm.$emit('decide', {
+      step_code: 'review',
+      decision: 'approved',
+      reason: 'Explicit review',
+      expected_version: 0,
+    });
+    await flushPromises();
+    expect(wrapper.findComponent(RequestDetail).exists()).toBe(false);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+  it('shows the server delegation validation as an actionable error without retrying or displaying success', async () => {
+    const router = createRouter({ history: createMemoryHistory(), routes });
+    await router.push({
+      name: 'jrc_approvals',
+      params: { accountId: 17, screen: 'delegations' },
+    });
+    axios.get.mockImplementation(url =>
+      Promise.resolve(response(url.endsWith('/context') ? context : []))
+    );
+    axios.post.mockRejectedValue({
+      response: { status: 422, data: { error: 'INVALID_DELEGATION' } },
+    });
+    const wrapper = mount(ApprovalsPage, {
+      global: {
+        plugins: [i18n(), router, createStore({})],
+        stubs: { Button: buttonStub },
+      },
+    });
+    await flushPromises();
+    wrapper
+      .getComponent(DelegationView)
+      .vm.$emit('create', { policy_version_id: 401 });
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      'Select different eligible users and a valid period without circular delegations.'
+    );
+    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(wrapper.text()).not.toContain('Saved and reloaded');
+    wrapper.unmount();
+  });
+  it('prevents selecting the principal as their own delegate while preserving native identities and clearing a conflicting selection', async () => {
+    const published = {
+      ...policy,
+      enabled: true,
+      current_version_id: 401,
+      published_definition: { ...definition, delegation_allowed: true },
+    };
+    axios.get.mockImplementation(url =>
+      Promise.resolve(
+        response(
+          url.endsWith('/policies')
+            ? [published]
+            : {
+                account_users: [
+                  { id: 43, name: 'Principal A' },
+                  { id: 44, name: 'Principal B' },
+                ],
+              }
+        )
+      )
+    );
+    const wrapper = mount(
+      DelegationView,
+      options({ props: { context, rows: [] } })
+    );
+    await flushPromises();
+    await wrapper.findAll('select')[0].setValue('301');
+    await flushPromises();
+    const selectors = wrapper.findAll('select');
+    await selectors[1].setValue('review');
+    expect(selectors[1].get('option[value="review"]').text()).toBe('Step 1');
+    await selectors[2].setValue('43');
+    expect(selectors[3].get('option[value="43"]').element.disabled).toBe(true);
+    await selectors[3].setValue('44');
+    await selectors[2].setValue('44');
+    expect(selectors[3].element.value).toBe('');
+    expect(wrapper.emitted('create')).toBeUndefined();
+    wrapper.unmount();
+  });
+  it('reads the authorized source when duplicating and persists only a separate new draft', async () => {
+    const router = createRouter({ history: createMemoryHistory(), routes });
+    await router.push({
+      name: 'jrc_approvals',
+      params: { accountId: 17, screen: 'policies', id: policy.id },
+    });
+    axios.get.mockImplementation(url => {
+      let data = { account_users: [] };
+      if (url.endsWith('/context')) data = context;
+      else if (url.includes('/policies/')) data = policy;
+      else if (url.endsWith('/catalogs')) data = catalog;
+      return Promise.resolve(response(data));
+    });
+    axios.post.mockResolvedValue(
+      response({ ...policy, id: 302, name: 'Copy of Synthetic policy' })
+    );
+    const wrapper = mount(ApprovalsPage, {
+      global: {
+        plugins: [i18n(), router, createStore({})],
+        stubs: { Button: buttonStub },
+      },
+    });
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Duplicate rule')
+      .trigger('click');
+    await flushPromises();
+    expect(router.currentRoute.value.params.id).toBe('new');
+    expect(router.currentRoute.value.query.copy).toBe('301');
+    expect(axios.get).toHaveBeenCalledWith(
+      '/api/v1/accounts/17/approvals/policies/301',
+      { params: {} }
+    );
+    expect(axios.post).not.toHaveBeenCalled();
+    const editor = wrapper.getComponent(PolicyEditor);
+    expect(editor.props('policy')).toBeNull();
+    expect(editor.props('templatePolicy').id).toBe(301);
+    await editor
+      .findAll('button')
+      .find(button => button.text() === 'Save draft')
+      .trigger('click');
+    await flushPromises();
+    expect(axios.post).toHaveBeenCalledWith(
+      '/api/v1/accounts/17/approvals/policies',
+      {
+        policy: {
+          name: 'Copy of Synthetic policy',
+          module_key: 'crm',
+          event_key: 'proposal_send',
+          issuer_company_id: 101,
+          business_unit_id: 202,
+          definition,
+        },
+      }
+    );
+    expect(axios.patch).not.toHaveBeenCalled();
+    expect(router.currentRoute.value.params.id).toBe('302');
+    wrapper.unmount();
+  });
+  it('does not reuse a denied source as a new rule template', async () => {
+    const router = createRouter({ history: createMemoryHistory(), routes });
+    await router.push({
+      name: 'jrc_approvals',
+      params: { accountId: 17, screen: 'policies', id: 'new' },
+      query: { copy: '301' },
+    });
+    axios.get.mockImplementation(url => {
+      if (url.endsWith('/context')) return Promise.resolve(response(context));
+      return Promise.reject(
+        Object.assign(new Error('Synthetic denied source'), {
+          response: { status: 403, data: { error: 'FORBIDDEN' } },
+        })
+      );
+    });
+    const wrapper = mount(ApprovalsPage, {
+      global: {
+        plugins: [i18n(), router, createStore({})],
+        stubs: { Button: buttonStub },
+      },
+    });
+    await flushPromises();
+    expect(
+      wrapper.getComponent(PolicyEditor).props('templatePolicy')
+    ).toBeNull();
+    expect(wrapper.text()).not.toContain('Synthetic policy');
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+    expect(axios.post).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
   it('loads a Central list with endpoint filters and total headers', async () => {
     const router = createRouter({ history: createMemoryHistory(), routes });
     await router.push({
@@ -700,7 +925,10 @@ describe('E4 components using bounded real DTO contracts', () => {
       )
     );
     const wrapper = mount(ApprovalsPage, {
-      global: { plugins: [i18n(), router], stubs: { Button: buttonStub } },
+      global: {
+        plugins: [i18n(), router, createStore({})],
+        stubs: { Button: buttonStub },
+      },
     });
     await flushPromises();
     expect(wrapper.text()).toContain('Synthetic policy');

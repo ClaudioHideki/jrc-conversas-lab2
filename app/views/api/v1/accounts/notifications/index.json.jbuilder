@@ -7,6 +7,13 @@ json.data do
 
   json.payload do
     json.array! @notifications do |notification|
+      if notification.approval_event?
+        payload = notification.push_event_data
+        next if payload.empty?
+
+        json.merge! payload
+        next
+      end
       json.id notification.id
       json.notification_type notification.notification_type
       json.push_message_title notification.push_message_title

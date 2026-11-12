@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-05",
+  "base_checkpoint": "82c796618781c135b5bba4f611ace09e72ad1f2d",
+  "status": "F/G native project handoff acceptance correction; full Word and compiled UI acceptance remain open",
+  "implementation": [
+    "Acceptance now reuses validate_creation_source! for both allowed native origin types, so a reopened project cannot be accepted.",
+    "Account-bound original source row is locked FOR SHARE through the existing decision transaction; current native customer/module scope is rechecked after the lock.",
+    "Completed-project acceptance, explicit reasoned rejection, source-account isolation and immutable decisions retain native behavior. No duplicate handoff motor or provider coupling."
+  ],
+  "files": [
+    "spec/requests/api/v1/accounts/relationship/handoff_project_acceptance_spec.rb",
+    "app/controllers/api/v1/accounts/relationship/handoffs_controller.rb"
+  ],
+  "automated": {
+    "reproduction": "f3projectacceptred01: initial fixture missed required Project key; corrected fixture. f3projectacceptred02: valid reopened project actually returned accepted, reproducing the bug before production change.",
+    "regression": "f3projectaccept01:14 scenarios,13 passed and1 fixture rejected by the existing mandatory nonempty checklist. Corrected that one fixture only. f3projectaccept02:the failed scenario passed; no weakened gate. The10 order-completion scenarios passed in the14-case run because the shared controller was affected; previous109 not rerun.",
+    "lint": "f3projectacceptlint01 new spec RuboCop0 before equivalent nonempty-checklist fixture correction; no broad shared-file formatting.",
+    "git": "git fsck --connectivity-only --no-dangling exit0",
+    "resources": {
+      ".codex/d9-notifications-20261104/f3projectaccept01-resource.json": {
+        "start": 11967537152,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/relationship/handoff_project_acceptance_spec.rb": "0b812e86a3e68e6095e56c9031c690d8b65556ae51f1016b8b0f07a306995dc7",
+          "spec/requests/api/v1/accounts/crm/backoffice_completion_handoff_spec.rb": "bbc11192f473bc52945696a69720425a557bb0512310272131ada7bb087e2dae"
+        },
+        "minimum": 11967451136,
+        "exit_code": 1,
+        "end": 12300587008
+      },
+      ".codex/d9-notifications-20261104/f3projectaccept02-resource.json": {
+        "start": 12537561088,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {},
+        "minimum": 12517900288,
+        "exit_code": 0,
+        "end": 12537450496
+      }
+    }
+  },
+  "runtime_preservation": {
+    "date": "2026-11-05",
+    "purpose": "read-only preservation evidence, not current-source browser acceptance",
+    "no_runtime_changes": true,
+    "free_bytes": 12536918016,
+    "login": {
+      "http": 200,
+      "sha256": "62fdeec11d63846d9fca4f4cb9401c1677e9c525f25e449d0b52b22537056166",
+      "bytes": 8330,
+      "path": "/app/login"
+    },
+    "entry": {
+      "http": 200,
+      "sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+      "bytes": 274583,
+      "path": "/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js"
+    },
+    "entry_matches_preserved_build": true,
+    "containers": [
+      {
+        "name": "jrc-rel-v2-run-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:25.650429595Z"
+      },
+      {
+        "name": "jrc-rel-v2-pg-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:28.691130017Z"
+      },
+      {
+        "name": "jrc-rel-v2-redis-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:29.041643269Z"
+      },
+      {
+        "name": "jrc-customer-b1-b4-proxy-4d4a6de3",
+        "running": true,
+        "started_at": "2026-11-04T12:04:25.285490323Z"
+      }
+    ]
+  },
+  "not_claimed": [
+    "Concurrent stress/SLO or full account/issuer/unit/private-project matrix",
+    "Browser acceptance of new code; no build, no runtime update, no Chrome interaction",
+    "Full native final CS dossier, Central-governed distribution/capacity, cooldown/freshness and autonomous NICO acceptance",
+    "Production or external provider homologation"
+  ],
+  "free_end_bytes": 12535312384,
+  "stages_C_D_E_F_G_complete": false
+}

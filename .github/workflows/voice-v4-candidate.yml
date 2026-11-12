@@ -4,6 +4,7 @@ on:
   push:
     branches: ['codex/voz-v4-*', 'codex/consolidacao-*', 'codex/atendimento-voz-*']
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -11,6 +12,12 @@ permissions:
 concurrency:
   group: voice-v4-${{ github.ref }}
   cancel-in-progress: true
+
+
+env:
+  ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: '11111111111111111111111111111111'
+  ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: '22222222222222222222222222222222'
+  ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: '33333333333333333333333333333333'
 
 jobs:
   rails:
@@ -53,8 +60,7 @@ jobs:
               sudo sed -i -E -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' "$source"
             fi
           done
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev fonts-dejavu-core
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
@@ -76,6 +82,9 @@ jobs:
             spec/requests/api/v1/accounts/jrc_contact_center \
             spec/jobs/jrc_contact_center \
             --format progress --format json --out /tmp/voice-v4-rspec.json
+      - name: Require positive zero-error voice native report
+        run: >-
+          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort "Empty, failed or pending native gate: #{path}" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/voice-v4-rspec.json
       - name: Politica de voz isolada sem Rails
         run: bundle exec ruby spec/standalone/voice_acw_policy_test.rb
       - name: RuboCop do incremento
@@ -119,6 +128,9 @@ jobs:
           --example 'reserves an immutable new storage key'
           --example 'rejects a reserved SQL row'
           --format progress --format json --out /tmp/voice-v4-schema-regression.json
+      - name: Require positive zero-error schema regression
+        run: >-
+          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort "Empty, failed or pending native gate: #{path}" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/voice-v4-schema-regression.json
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -143,6 +155,7 @@ jobs:
           --maxWorkers=2 --minWorkers=1 --no-file-parallelism
           --reporter=default --reporter=json --outputFile=/tmp/voice-v4-vitest.json
       - name: Build frontend real
+        if: github.ref_name != 'codex/lab2-ag-atualizacoes-20261112'
         env:
           NODE_OPTIONS: --max-old-space-size=6144
         run: bundle exec vite build

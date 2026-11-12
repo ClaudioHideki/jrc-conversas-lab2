@@ -13,6 +13,19 @@ class ApiClient {
     return `${this.baseUrl()}/${this.resource}`;
   }
 
+  // Bind an asynchronous workflow to the account captured when it started.
+  urlForAccount(accountId) {
+    const value = String(accountId);
+    if (
+      !this.options.accountScoped ||
+      !/^[1-9]\d*$/.test(value) ||
+      !Number.isSafeInteger(Number(value))
+    ) {
+      throw new Error('Invalid account context');
+    }
+    return `${this.apiVersion}/accounts/${value}/${this.resource}`;
+  }
+
   // eslint-disable-next-line class-methods-use-this
   get isInsideSuperAdminAccountScopedURLs() {
     return window.location.pathname.includes('/super_admin/accounts');

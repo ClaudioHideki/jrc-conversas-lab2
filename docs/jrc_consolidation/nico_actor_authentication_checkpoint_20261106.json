@@ -1,0 +1,106 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "d2c0f36ee0a358dc1df42cee38be2f12200f9f34",
+  "status": "F/G native actor authentication increment locally validated; no stage closure",
+  "confirmed_gap": "OperationalAccess and conversation Access checked account/member but not the reloaded native User authentication state. Stale actor objects, queued planning and late inferred answers survived native confirmation revocation.",
+  "implementation": [
+    "OperationalAccess now reloads User and requires native active_for_authentication?, current membership, active Account and NICO enablement. Offline presence is not authentication status.",
+    "Conversation Access reuses this same core authorizer before its independent current Account/conversation policy. No new role, online constraint or trust in supplied account/user IDs.",
+    "Native prepared/queued command handling records failure before a write/inference; post-inference boundary recheck refuses late answers. Delegated CustomerTurnJob naturally records failed turn and needs_human with no outgoing Message. No real provider request."
+  ],
+  "tests": {
+    "baseline": "5 cases/4 failures. Direct stale actor, queued planning and late answer confirmed gaps. Prepared-contact negative fixture initially omitted native required email and reached domain validation; corrected valid email plus positive idempotent write control added. No claim an unauthorized contact was created in baseline.",
+    "first_combined": "20 passed,0 failed,18 pending,38 total. The18 concurrency cases correctly skipped their explicit disposable-DB opt-in; do not count them as passed.",
+    "protected_suite": "BrokerSendCommitGate invokes TRUNCATE across application tables. No allowlist override, cleanup opt-in or execution performed in the preserved candidateDB.",
+    "replacement_transactional_broker": "20/0 existing native Broker orchestration cases with simulated transport and transactional fixtures. Not a substitute claim for committed concurrency proof.",
+    "final_shared_access": "16/0 =6 authentication/prepared/queued/late/positive/offline cases +3 native context +7 existing public/delegated history cases",
+    "delegated_worker": "1/0 named additional actual CustomerTurnJob, native needs_human, failed turn, no outgoing message or inference",
+    "ruby_new_offenses": 0,
+    "shared_delta": [
+      {
+        "path": "app/services/jrc_nico/access.rb",
+        "baseline": 2,
+        "current": 0,
+        "added": {}
+      },
+      {
+        "path": "app/services/jrc_nico/operational_access.rb",
+        "baseline": 2,
+        "current": 2,
+        "added": {}
+      }
+    ],
+    "diff_check": "passed"
+  },
+  "resources": {
+    "combined_with_protected_skips": {
+      "start": 7150407680,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_nico/operational_access_authentication_spec.rb": "d9d256b570f6495315f0fe9bb909013171e4f5b21c7fdf0ecbe2ce94c2c3dec8",
+        "spec/services/jrc_nico/context_builder_spec.rb": "148ced4ad94acea9592b7d4fb2d969a707a8b51b94ea014606f6d25783f1f35d",
+        "spec/services/jrc_nico/operator_session_recent_history_spec.rb": "1927c0e4ecdd274efabbcd19d9ef5c0ec0b80b4c3a7485c31bef61f85bba0f82",
+        "spec/services/jrc_nico/broker_send_commit_gate_spec.rb": "957fb3f9c2e6bcc36d2e58ef24b7b82053bb7b015121b520c657fd8a467f95f7",
+        "spec/services/jrc_nico/domain_access_relationship_sla_spec.rb": "52e02ed592c388dd0c18af4797fc69c55a1eb95e85d53cbb45b433297baee4cd"
+      },
+      "minimum": 7150194688,
+      "exit_code": 0,
+      "end": 7150170112
+    },
+    "final_access": {
+      "start": 7146881024,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_nico/operational_access_authentication_spec.rb": "d9d256b570f6495315f0fe9bb909013171e4f5b21c7fdf0ecbe2ce94c2c3dec8",
+        "spec/services/jrc_nico/context_builder_spec.rb": "148ced4ad94acea9592b7d4fb2d969a707a8b51b94ea014606f6d25783f1f35d",
+        "spec/services/jrc_nico/operator_session_recent_history_spec.rb": "1927c0e4ecdd274efabbcd19d9ef5c0ec0b80b4c3a7485c31bef61f85bba0f82"
+      },
+      "minimum": 7146819584,
+      "exit_code": 0,
+      "end": 7146754048
+    },
+    "transactional_broker": {
+      "start": 7147065344,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_nico/operator_session_broker_send_spec.rb": "81470efec5453f8e61df92fcd1c405b1ce537460a6fe208d9796dc5b050c37a1"
+      },
+      "minimum": 7146799104,
+      "exit_code": 0,
+      "end": 7146799104
+    },
+    "customer_turn": {
+      "start": 7155482624,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_nico/operational_access_authentication_spec.rb": "76dfa07d78a779abdb0a5d3c874f6e2ca10ca157e49bba32e17ccfe3f9aff66e"
+      },
+      "minimum": 7155478528,
+      "exit_code": 0,
+      "end": 7155478528
+    },
+    "free_final": 7140823040
+  },
+  "source_sha256": {
+    "app/services/jrc_nico/access.rb": "81499a8d4d2767cc044e4b9f46c2d81ae15b914031c2f347cdf0e2f9bd35c6eb",
+    "app/services/jrc_nico/operational_access.rb": "d2d800152a9317ce016db2e2dcf9b169b653fd3f1c19a65da6d521d3451b2282",
+    "spec/services/jrc_nico/operational_access_authentication_spec.rb": "76dfa07d78a779abdb0a5d3c874f6e2ca10ca157e49bba32e17ccfe3f9aff66e"
+  },
+  "limits": [
+    "No actual model inference, transport delivery or fresh current-source Chrome acceptance.",
+    "No production/user-role modification, build, cleanup, schema migration, runtime/server5379 change, container restart, push/deploy/GHCR. User confirmation changes occur only on synthetic test actors."
+  ],
+  "next": "F1/F2 event actor boundary: BatchReviewAuthority already locks/revalidates active users for reviewed batches/cadences; preserve it. SignalJob lacks the equivalent active-owner check even though Scheduler/RefreshJob already have one. Verify and close only that gap, preserving native active-manager monitoring fallback."
+}

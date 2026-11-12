@@ -66,7 +66,9 @@ RSpec.describe 'Authorized survey response reports', type: :request do
     other = create(:conversation, account: sd_account, contact: sd_contact, status: :resolved)
     hidden = JrcRelationship::SurveyEngine.evaluate_closure(source: other, cycle_key: 'inaccessible-inbox').survey
     JrcRelationship::SurveyResponse.new(hidden).call(answers: { rating: 2 }, comment: 'INACCESSIBLE_INBOX_RESPONSE')
-    sd_account_user.update!(role: :agent)
+    exporter = create(:custom_role, account: sd_account,
+                       permissions: %w[contact_manage jrc_relationship_view jrc_relationship_export conversation_unassigned_manage])
+    sd_account_user.update!(role: :agent, custom_role: exporter)
     get "#{url}/survey_responses/export", headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('VISIBLE_RESPONSE')
@@ -106,12 +108,23 @@ RSpec.describe 'Authorized survey response reports', type: :request do
     hidden = JrcRelationship::SurveyEngine.evaluate_closure(source: other, cycle_key: 'other-unit').survey
     JrcRelationship::SurveyResponse.new(hidden).call(answers: { rating: 2 }, comment: 'OTHER_UNIT_RESPONSE')
     other_membership.update!(active: false)
-    sd_account_user.update!(role: :agent)
+    exporter = create(:custom_role, account: sd_account,
+                       permissions: %w[contact_manage jrc_relationship_view jrc_relationship_export
+                                       jrc_service_desk_module_view jrc_service_desk_tickets_view jrc_service_desk_customers_view])
+    sd_account_user.update!(role: :agent, custom_role: exporter)
     get "#{url}/survey_responses/export", params: { source_type: 'JrcServiceDesk::Ticket' }, headers: headers
     expect(response.body).to include('OWN_UNIT_RESPONSE')
     expect(response.body).not_to include('OTHER_UNIT_RESPONSE')
     get "#{url}/survey_responses/export", params: { unit_id: sd_other_unit.id }, headers: headers
     expect(CSV.parse(response.body, headers: true)).to be_empty
+  end
+
+  it 'denies export without the independent export permission even when the source is visible' do
+    JrcRelationship::SurveyResponse.new(survey).call(answers: { rating: 8 }, comment: 'NO_IMPLICIT_EXPORT_GRANT')
+    sd_account_user.update!(role: :agent)
+    get "#{url}/survey_responses/export", headers: headers
+    expect(response).to have_http_status(:forbidden)
+    expect(response.body).not_to include('NO_IMPLICIT_EXPORT_GRANT')
   end
 
   it 'rejects malformed filters instead of ignoring them or widening the report' do

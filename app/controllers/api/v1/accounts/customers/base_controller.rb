@@ -31,6 +31,16 @@ class Api::V1::Accounts::Customers::BaseController < Api::V1::Accounts::BaseCont
     [relation.limit(size).offset((page - 1) * size), { page: page, per_page: size, total: relation.unscope(:order).count }]
   end
 
+  def render_module_records(customer_context)
+    relation = customer_context.sources[params[:kind].to_s]
+    raise ActionController::BadRequest, 'Unsupported or unavailable module' unless relation
+
+    records, meta = page_scope(relation.order(created_at: :desc, id: :desc))
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    render json: { payload: JrcCustomers::RecordSerializer.new.call(records), meta: meta }
+  end
+
   def invalid_record(exception)
     render json: { error: 'Validation failed', details: exception.record.errors.to_hash }, status: :unprocessable_entity
   end

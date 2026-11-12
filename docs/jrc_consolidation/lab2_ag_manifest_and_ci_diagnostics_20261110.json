@@ -1,0 +1,41 @@
+{
+  "utc": "2026-11-10T16:20:58.789557+00:00",
+  "source_checkpoint": "570c140429213f32c47c1047a3f1d6a25960f905",
+  "main_reconfirmed": "d8a83b824b11cc68ddbbce7c79681f368051fb70",
+  "manifest": {
+    "native_generator_write_and_verify": "passed",
+    "canonical_inventory_only": true,
+    "editor_source_preserved": "5f98f767bea9645aa8f3d6029568ce028e053fd2",
+    "installed_proof": false
+  },
+  "full_frontend_observation": {
+    "run": 42851847583,
+    "files": 254,
+    "examples": 2386,
+    "passed": 2385,
+    "failed": 1,
+    "cause": "New GET test assertion omitted existing signal and timeout request options; not a production client defect",
+    "not_a_green_result": true
+  },
+  "targeted_correction": {
+    "evidence": "CONTROLE/sd-get-options-final.json",
+    "examples": 100,
+    "passed": 100,
+    "failed": 0,
+    "unhandled": 0,
+    "full_suite_rerun_pending": true
+  },
+  "native_CI_diagnostics": {
+    "console": "bounded error summaries; full results retained as JSON artifact",
+    "watchdog": "After 300 seconds in one example, record thread stack locations and read-only synthetic PostgreSQL wait/blocking metadata without SQL text, then fail only own GitHub-hosted RSpec process",
+    "no_skipped_assertions": true,
+    "not_yet_executed": true
+  },
+  "restrictions_preserved": [
+    "no app asset build",
+    "no original processes stopped",
+    "no production",
+    "no GHCR",
+    "only authorized test branch"
+  ]
+}

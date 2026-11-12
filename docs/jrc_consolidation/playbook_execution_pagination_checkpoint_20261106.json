@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "e76fb2ce6b6b515db3eda36d3ced7c074b9d2308",
+  "reference": "Relationship P0152/P0181/P0184: native history, pagination, original source guards",
+  "status": "Native and source execution history pagination validated;C-G not closed.",
+  "implementation": [
+    "Optional cursor/per_page/playbook filter on the existing execution-history endpoint; requests without these options retain the exact legacy100candidate contract. Current configure/account/RootScope plus original per-result source guard and projection are retained.",
+    "A cursor is only the last visible returned execution ID. No hidden record IDs or candidate/hidden total counts are returned. Immutable stored definitions and results remain read-only.",
+    "Bounded100-row query chunks, per_page1..50 and1000candidate read budget. An exhausted scan produces controlled422with narrowing guidance instead of a fabricated empty200. Selected existing native playbook filter narrows the scan.",
+    "Existing panel now has previous/next/reload, explicit current-selected-book filter, account formatting and responsive wrapping. Pagination changes do not mutate execution/source records or start Flow/provider work.",
+    "Current membership/role/account changes abort and clear old views. Observed authorization denial removes navigation; malformed200cursors are rejected. A failed page rereads the same requested cursor without mixing an older page."
+  ],
+  "evidence": {
+    "native": "execution-pagination-native01:9/0 (6new including103persisted visible executions,105denied-source candidates above an older visible row, tenant/root/configure/filter/type/read-budget bounds;+3existing native read-access regressions).",
+    "source": "execution-pagination-source01:18/0 (8execution identity/paging/filter/failure cases +10existing catalog/history/attribution regressions).",
+    "static": "ruby-final03:new service/spec0offenses;shared ConfigurationController only inherited ClassLength268/175 (previous258);no new method complexity offenses. Source changed panel0errors/5warnings, down from8;source spec0/0.",
+    "scale_qualification": "103/105synthetic history rows are real native tests. Budget-exhaustion branch uses a reduced3candidate test constant, not a claim of a1000history-row performance pilot.",
+    "browser": "No current-source Chrome/build/assets replacement; source tests are not browser homologation."
+  },
+  "environment": {
+    "initial_free_bytes": 6827667456,
+    "minimum_observed_bytes": 6784036864,
+    "final_free_bytes": 6826848256,
+    "database": "jrc_rel_v2_candidate_test",
+    "migrations": false,
+    "build": false,
+    "server5379_changed": false,
+    "external_operations": false,
+    "push": false
+  },
+  "remaining": [
+    "Very broad all-book histories may require the selected-book filter at the bounded read budget;no hidden total is invented.",
+    "Configuration history remains recent50plus exact stored-version lookup;broad paging UI/native is next.",
+    "Current-source Chrome/Word visual/literal audit, whole-audience group capacity,local group capabilities and remaining C-G gaps remain open.",
+    "TRR,explicitly deferred portfolio-less documents and external homologation dependencies unchanged."
+  ],
+  "next": "Add bounded native configuration-version pagination and source controls that preserve unsaved definitions and reuse fresh native restore review."
+}

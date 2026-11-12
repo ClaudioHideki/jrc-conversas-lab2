@@ -20,6 +20,7 @@ class JrcApprovals::GratuityAuthorities
     valid = definition.slice('execution', 'completion', 'allow_self_approval', 'reopen_mode') == {
       'execution' => 'sequential', 'completion' => 'all_steps', 'allow_self_approval' => false, 'reopen_mode' => 'restart_all'
     } && definition['steps'].pluck('code') == STEPS.keys
+    validate_tier_steps!(definition)
     raise JrcApprovals::Error, 'INVALID_GRATUITY_SEQUENCE' unless valid
     raise JrcApprovals::Error, 'GRATUITY_AUTHORITIES_PENDING' if profile['authorization_reference'].blank?
 
@@ -27,6 +28,14 @@ class JrcApprovals::GratuityAuthorities
     principals = STEPS.values.map { |name| profile["#{name}_gratuity_principal_id"] }
     raise JrcApprovals::Error, 'GRATUITY_AUTHORITY_CONFLICT' unless principals.uniq.length == 2
   end
+
+  def validate_tier_steps!(definition)
+    return unless definition['schema_version'] == 2
+    return if definition['tiers']['rows'].all? { |row| row['step_codes'] == STEPS.keys }
+
+    raise JrcApprovals::Error, 'INVALID_GRATUITY_SEQUENCE'
+  end
+  private :validate_tier_steps!
 
   def validate_step!(step)
     principal = profile["#{STEPS.fetch(step['code'])}_gratuity_principal_id"]

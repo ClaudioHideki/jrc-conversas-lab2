@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "42c54fa106ba75fbcc012fb1487456e0480cfa87",
+  "reference": "Relationship P0152/P0181/P0184/P0185: versioned review, native pagination and protected histories.",
+  "status": "Native catalog/history pagination and sourceUI validated; current-source Chrome and C-G closure remain open.",
+  "implementation": [
+    "Optional page/per_page on existing playbooks endpoint reuses native BaseController page limits1..50 and ordered account scope, without eagerly loading all historical versions. Unpaginated legacy100books/50versions response remains compatible.",
+    "New implemented GET playbooks/:id/history returns current scoped book plus paginated native stored versions. Optional strictly positive persisted-integer source_version supports fresh exact restoration review beyond old list limits. Native configure permission retained; account overrides cannot grant access; no-store.",
+    "Source catalog pages25books. History loads lazily, pages25stored versions, reads fresh selected source/current versions before restoration and verifies saved native readback. Version conflicts, source denial and identity changes cannot render stale reviewed actions.",
+    "Open edit drafts disable catalog navigation and history actions. Existing step identities, metadata/reference conditions and save form behavior remain covered by native source regressions. No new customer, queue, provider integration or permission grant."
+  ],
+  "native_evidence": {
+    "initial": "playbook-catalog-native01:5/0 including103native-valid books,72native stored versions, tenant/native configure denial and page/typed-source limits.",
+    "integrated": "playbook-catalog-native-final03:11/0,5catalog+6previous restoration regressions.",
+    "final": {
+      "label": "playbook-catalog-native-final06",
+      "examples": 5,
+      "failures": 0,
+      "qualification": "Same five catalog cases after extracting typed-version validation; overlaps are not added as unique coverage."
+    },
+    "database": "jrc_rel_v2_candidate_test",
+    "no_data_mutation_read_assertion": true
+  },
+  "source_evidence": {
+    "initial": "playbook-catalog-source01:24/0 (8new catalog/history+9restoration+7API).",
+    "final": "playbook-catalog-source-final03:39/0 (same24 plus15existing complementary native UI regressions).",
+    "qualification": "Mocked sourceVue tests; not Chrome/realDB UI homologation. Existing duplicatei18n registration warnings retained."
+  },
+  "static_evidence": {
+    "new_files": "New Vue/spec/API files0ESLint errors/0warnings; new Ruby requestspec ruby02:0offenses.",
+    "shared_files": "ConfigurationPanel0errors/34existing warnings unchanged. routes0Ruby offenses. Controller inherited ClassLength remains and grew233to254/175; other new ABC/style findings corrected. No globally clean-controller claim.",
+    "diff": "git diff --check clean."
+  },
+  "environment": {
+    "disk_start_bytes": 6757023744,
+    "disk_minimum_observed_bytes": 6737166336,
+    "disk_final_test_bytes": 6926807040,
+    "original_four_containers": "Read-only inspect confirms original2026-11-04StartedAt timestamps unchanged.",
+    "no_build_cleanup_5379change_migration_external_operation": true
+  },
+  "remaining": [
+    "Execution list retains its legacy100bound and native source visibility filtering; this increment does not claim all execution histories paginated.",
+    "Current-source Chrome desktop/mobile/themes and Word visual acceptance remain explicitly unbuilt/unvalidated.",
+    "Local portfolio role matrix, durable grouping jobs, reviewed master allocation batches and other C-G requirements remain open.",
+    "TRR undefined, deferred company documents without portfolio and external provider pilots unchanged."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/playbook_catalog_checkpoint_20261106.json"
+}

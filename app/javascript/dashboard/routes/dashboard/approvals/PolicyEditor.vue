@@ -5,36 +5,47 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import { approvalClient } from 'dashboard/api/approvals';
 import ConditionEditor from './ConditionEditor.vue';
 import StepEditor from './StepEditor.vue';
+import TierEditor from './TierEditor.vue';
+import TierSummary from './TierSummary.vue';
+import AdjustmentRulesForm from './AdjustmentRulesForm.vue';
+import { conditionSummary } from './conditionSummary';
 import {
   copy,
   emptyDefinition,
   emptyStep,
   conditionCount,
-  describeCondition,
   scopeLabel,
 } from './model';
 const props = defineProps({
   policy: { type: Object, default: null },
+  templatePolicy: { type: Object, default: null },
   context: { type: Object, required: true },
   busy: Boolean,
 });
-const emit = defineEmits(['save', 'operation', 'versions']);
+const emit = defineEmits(['save', 'operation', 'versions', 'duplicate']);
 const { t } = useI18n();
 const draft = ref({});
 const tab = ref('general');
 const scopeIndex = ref('');
 const catalogs = ref([]);
 const options = ref({});
+const adjustmentValid = ref(true);
+const routePolicies = ref([]);
+const directionActions = [
+  'request_adjustment',
+  'suggest_redaction',
+  'escalate',
+];
+const directionDraft = ref({ actions: [], escalation_policy_id: null });
 const loadError = ref('');
 const confirmation = ref(null);
-const tabs = [
-  'general',
-  'conditions',
-  'steps',
-  'behavior',
-  'security',
-  'summary',
-];
+const tabs = ['general', 'conditions', 'steps', 'summary'];
+const move = offset => {
+  tab.value =
+    tabs[
+      Math.max(0, Math.min(tabs.length - 1, tabs.indexOf(tab.value) + offset))
+    ];
+};
 
 const tabKey = event => {
   const current = tabs.indexOf(tab.value);
@@ -70,6 +81,72 @@ const fields = computed(
   () => catalogs.value.find(row => row.key === key.value)?.fields || {}
 );
 const definition = computed(() => draft.value.draft_definition);
+const adjustmentFields = computed(
+  () =>
+    catalogs.value.find(row => row.key === key.value)?.adjustment_fields || []
+);
+const setAdjustment = value => {
+  if (value) definition.value.adjustments = value;
+  else delete definition.value.adjustments;
+};
+const setDirections = () => {
+  if (!directionDraft.value.actions.includes('escalate'))
+    directionDraft.value.escalation_policy_id = null;
+  if (!directionDraft.value.actions.length)
+    delete definition.value.review_directions;
+  else definition.value.review_directions = copy(directionDraft.value);
+};
+watch(
+  () => definition.value?.review_directions,
+  value => {
+    directionDraft.value = copy(
+      value || { actions: [], escalation_policy_id: null }
+    );
+  },
+  { deep: true }
+);
+watch(key, (value, old) => {
+  if (old && old !== '.' && value !== old && definition.value) {
+    delete definition.value.adjustments;
+    delete definition.value.review_directions;
+  }
+});
+
+const tierDraft = ref(null);
+const tierMode = enabled => {
+  if (enabled) {
+    definition.value.schema_version = 2;
+    definition.value.tiers = tierDraft.value || {
+      field: '',
+      currency: null,
+      min: null,
+      max: null,
+      coverage: 'complete',
+      rows: [],
+    };
+  } else {
+    tierDraft.value = copy(definition.value.tiers);
+    delete definition.value.tiers;
+    definition.value.schema_version = 1;
+  }
+};
+const addStep = () => {
+  if (definition.value.steps.length < 16)
+    definition.value.steps.push({
+      ...emptyStep(),
+      code: `step_${crypto.randomUUID().replaceAll('-', '')}`,
+    });
+};
+const removeStep = index => {
+  const code = definition.value.steps[index].code;
+  definition.value.steps.splice(index, 1);
+  const ranges = definition.value.tiers || tierDraft.value;
+  if (ranges)
+    ranges.rows = ranges.rows.map(row => ({
+      ...row,
+      step_codes: row.step_codes.filter(value => value !== code),
+    }));
+};
 const gratuityDraft = () => {
   const authorities = options.value.gratuity_authorities || {};
   draft.value.draft_definition = {
@@ -105,25 +182,36 @@ const dirty = computed(
 );
 let generation = 0;
 watch(
-  () => props.policy,
-  policy => {
-    draft.value = policy
-      ? copy(policy)
-      : {
-          name: '',
-          code: '',
-          module_key: '',
-          event_key: '',
-          issuer_company_id: null,
-          business_unit_id: null,
-          draft_definition: emptyDefinition(),
-        };
+  () => [props.policy, props.templatePolicy],
+  ([policy, templatePolicy]) => {
+    tierDraft.value = null;
+    if (policy) draft.value = copy(policy);
+    else if (templatePolicy) {
+      draft.value = {
+        name: t('JRC_APPROVALS.copyName', { name: templatePolicy.name }),
+        module_key: templatePolicy.module_key,
+        event_key: templatePolicy.event_key,
+        issuer_company_id: templatePolicy.issuer_company_id,
+        business_unit_id: templatePolicy.business_unit_id,
+        draft_definition: copy(templatePolicy.draft_definition),
+      };
+    } else {
+      draft.value = {
+        name: '',
+        module_key: '',
+        event_key: '',
+        issuer_company_id: null,
+        business_unit_id: null,
+        draft_definition: emptyDefinition(),
+      };
+    }
     const index = scopes.value.findIndex(
       row =>
         row.issuer_company_id === draft.value.issuer_company_id &&
         row.business_unit_id === draft.value.business_unit_id
     );
-    scopeIndex.value = policy && index >= 0 ? String(index) : '';
+    scopeIndex.value =
+      (policy || templatePolicy) && index >= 0 ? String(index) : '';
   },
   { immediate: true }
 );
@@ -146,10 +234,18 @@ watch(
       const results = await Promise.all([
         api.get('catalogs', params),
         api.get('options', params),
+        api.get('policies', params),
       ]);
       if (current === generation) {
         catalogs.value = results[0].data;
         options.value = results[1].data;
+        routePolicies.value = results[2].data.filter(
+          row =>
+            row.state === 'published' &&
+            row.id !== props.policy?.id &&
+            row.issuer_company_id === params.issuer_company_id &&
+            row.business_unit_id === params.business_unit_id
+        );
       }
     } catch {
       if (current === generation)
@@ -159,11 +255,18 @@ watch(
   { immediate: true }
 );
 const save = () => {
+  if (!adjustmentValid.value) return;
+  if (
+    definition.value.review_directions?.actions.includes('escalate') &&
+    !Number.isSafeInteger(
+      definition.value.review_directions.escalation_policy_id
+    )
+  )
+    return;
   const body = props.policy
     ? { name: draft.value.name, definition: copy(definition.value) }
     : {
         name: draft.value.name,
-        code: draft.value.code,
         module_key: draft.value.module_key,
         event_key: draft.value.event_key,
         issuer_company_id: draft.value.issuer_company_id,
@@ -196,11 +299,17 @@ const confirm = () => {
           {{ policy ? policy.name : t('JRC_APPROVALS.newPolicy') }}
         </h2>
         <p class="text-sm text-n-slate-11">
-          {{ policy?.state || 'draft' }} · {{ t('JRC_APPROVALS.version') }}
-          {{ policy?.current_version || '—' }} · {{ t('JRC_APPROVALS.scope') }}
+          {{ t('JRC_APPROVALS.scope') }}
           {{ scopeLabel(context, draft) || t('JRC_APPROVALS.groupScope') }}
         </p>
       </div>
+      <Button
+        v-if="policy"
+        :label="t('JRC_APPROVALS.duplicate')"
+        variant="faded"
+        :disabled="busy || dirty"
+        @click="emit('duplicate')"
+      />
       <Button
         v-if="policy"
         :label="t('JRC_APPROVALS.versions')"
@@ -220,17 +329,22 @@ const confirm = () => {
       class="flex flex-wrap gap-2"
     >
       <button
-        v-for="name in tabs"
+        v-for="(name, index) in tabs"
         :key="name"
         role="tab"
         :tabindex="tab === name ? 0 : -1"
-        @keydown="tabKey"
         :aria-selected="tab === name"
         class="rounded-lg border border-n-weak px-3 py-2 text-sm focus-visible:outline-blue-500"
         :class="tab === name ? 'bg-n-blue-3 text-n-blue-11' : 'bg-n-solid-2'"
+        @keydown="tabKey"
         @click="tab = name"
       >
-        {{ t(`JRC_APPROVALS.${name}`) }}
+        {{
+          t('JRC_APPROVALS.wizardStep', {
+            number: index + 1,
+            name: t(`JRC_APPROVALS.wizard.${name}`),
+          })
+        }}
       </button>
     </div>
     <p
@@ -249,14 +363,7 @@ const confirm = () => {
         }}<input
           v-model="draft.name"
           required
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2" /></label
-      ><label class="text-sm"
-        >{{ t('JRC_APPROVALS.code')
-        }}<input
-          v-model="draft.code"
-          :disabled="!!policy"
-          required
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 disabled:opacity-60"
+          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
       /></label>
       <label class="text-sm"
         >{{ t('JRC_APPROVALS.scope')
@@ -293,7 +400,9 @@ const confirm = () => {
             :key="row.key"
             :value="row.key"
           >
-            {{ row.key }}
+            {{
+              t(`JRC_APPROVALS.catalogEvents.${row.key.replaceAll('.', '_')}`)
+            }}
           </option>
         </select></label
       >
@@ -323,112 +432,205 @@ const confirm = () => {
       v-if="tab === 'steps'"
       class="space-y-4"
     >
-      <div
-        v-for="(step, index) in definition.steps"
-        :key="index"
-        class="space-y-2"
+      <label
+        class="flex items-center gap-2 rounded-lg border border-n-blue-6 bg-n-blue-2 p-3 text-sm font-medium"
       >
+        <input
+          type="checkbox"
+          :checked="definition.schema_version === 2"
+          @change="tierMode($event.target.checked)"
+        />
+        {{ t('JRC_APPROVALS.tiers.enabled') }}
+      </label>
+      <TierEditor
+        v-if="definition.schema_version === 2"
+        v-model="definition.tiers"
+        :fields="fields"
+        :steps="definition.steps"
+        :options="options"
+      />
+      <h3 class="font-semibold">
+        {{ t('JRC_APPROVALS.tiers.stageDefinitions') }}
+      </h3>
+
+      <component
+        :is="definition.schema_version === 2 ? 'details' : 'div'"
+        v-for="(step, index) in definition.steps"
+        :key="step.code"
+        class="space-y-2"
+        :class="
+          definition.schema_version === 2
+            ? 'rounded-lg border border-n-weak p-3'
+            : ''
+        "
+      >
+        <summary
+          v-if="definition.schema_version === 2"
+          class="cursor-pointer font-semibold"
+        >
+          {{ t('JRC_APPROVALS.stepNumber', { number: index + 1 }) }} ·
+          {{ t('JRC_APPROVALS.tiers.stageDefinitions') }}
+        </summary>
         <StepEditor
           v-model="definition.steps[index]"
           :fields="fields"
           :options="options"
+          :number="index + 1"
         /><button
           class="text-sm text-n-ruby-11"
-          @click="definition.steps.splice(index, 1)"
+          @click="removeStep(index)"
         >
           {{ t('JRC_APPROVALS.remove') }}
         </button>
-      </div>
+      </component>
       <Button
         :disabled="definition.steps.length >= 16"
         :label="t('JRC_APPROVALS.addStep')"
         variant="faded"
-        @click="definition.steps.push(emptyStep())"
+        @click="addStep"
       />
     </div>
-    <div
-      v-show="tab === 'behavior'"
-      class="grid gap-4 md:grid-cols-2"
+    <details
+      v-show="tab === 'steps'"
+      class="rounded-xl border border-n-weak p-4"
     >
-      <label class="text-sm"
-        >{{ t('JRC_APPROVALS.priority')
-        }}<input
-          v-model.number="definition.selection.priority"
-          type="number"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2" /></label
-      ><label class="text-sm"
-        >{{ t('JRC_APPROVALS.selection')
-        }}<select
-          v-model="definition.selection.mode"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
-        >
-          <option value="">{{ t('JRC_APPROVALS.select') }}</option>
-          <option value="exclusive">
-            {{ t('JRC_APPROVALS.enum_exclusive') }}
-          </option>
-          <option value="accumulate">
-            {{ t('JRC_APPROVALS.enum_accumulate') }}
-          </option>
-        </select></label
-      ><label class="text-sm"
-        >{{ t('JRC_APPROVALS.execution')
-        }}<select
-          v-model="definition.execution"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
-        >
-          <option value="">{{ t('JRC_APPROVALS.select') }}</option>
-          <option value="sequential">
-            {{ t('JRC_APPROVALS.enum_sequential') }}
-          </option>
-          <option value="parallel">
-            {{ t('JRC_APPROVALS.enum_parallel') }}
-          </option>
-        </select></label
-      ><label class="text-sm"
-        >{{ t('JRC_APPROVALS.expiry')
-        }}<input
-          v-model.number="definition.expires_in_seconds"
-          type="number"
-          min="1"
-          max="31536000"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
-      /></label>
-      <p class="text-sm">
-        {{ t('JRC_APPROVALS.completion') }}:
-        {{ t('JRC_APPROVALS.enum_all_steps') }}
-      </p>
-    </div>
-    <div
-      v-show="tab === 'security'"
-      class="space-y-4"
+      <summary class="cursor-pointer font-semibold">
+        {{ t('JRC_APPROVALS.advancedBehavior') }}
+      </summary>
+      <div class="mt-4 grid gap-4 md:grid-cols-2">
+        <label class="text-sm"
+          >{{ t('JRC_APPROVALS.priority')
+          }}<input
+            v-model.number="definition.selection.priority"
+            type="number"
+            class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2" /></label
+        ><label class="text-sm"
+          >{{ t('JRC_APPROVALS.selection')
+          }}<select
+            v-model="definition.selection.mode"
+            class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
+          >
+            <option value="">{{ t('JRC_APPROVALS.select') }}</option>
+            <option value="exclusive">
+              {{ t('JRC_APPROVALS.enum_exclusive') }}
+            </option>
+            <option value="accumulate">
+              {{ t('JRC_APPROVALS.enum_accumulate') }}
+            </option>
+          </select></label
+        ><label class="text-sm"
+          >{{ t('JRC_APPROVALS.execution')
+          }}<select
+            v-model="definition.execution"
+            class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
+          >
+            <option value="">{{ t('JRC_APPROVALS.select') }}</option>
+            <option value="sequential">
+              {{ t('JRC_APPROVALS.enum_sequential') }}
+            </option>
+            <option value="parallel">
+              {{ t('JRC_APPROVALS.enum_parallel') }}
+            </option>
+          </select></label
+        ><label class="text-sm"
+          >{{ t('JRC_APPROVALS.expiry')
+          }}<input
+            v-model.number="definition.expires_in_seconds"
+            type="number"
+            min="1"
+            max="31536000"
+            class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
+        /></label>
+        <p class="text-sm">
+          {{ t('JRC_APPROVALS.completion') }}:
+          {{ t('JRC_APPROVALS.enum_all_steps') }}
+        </p>
+      </div>
+    </details>
+    <details
+      v-show="tab === 'steps'"
+      class="rounded-xl border border-n-weak p-4"
     >
-      <label class="block text-sm"
-        ><input
-          v-model="definition.allow_self_approval"
-          type="checkbox"
-        />
-        {{ t('JRC_APPROVALS.selfApproval') }}</label
-      ><label class="block text-sm"
-        ><input
-          v-model="definition.delegation_allowed"
-          type="checkbox"
-        />
-        {{ t('JRC_APPROVALS.allowDelegation') }}</label
-      ><label class="block text-sm"
-        >{{ t('JRC_APPROVALS.reopen')
-        }}<select
-          v-model="definition.reopen_mode"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
+      <summary class="cursor-pointer font-semibold">
+        {{ t('JRC_APPROVALS.security') }}
+      </summary>
+      <div class="mt-4 space-y-4">
+        <label class="block text-sm"
+          ><input
+            v-model="definition.allow_self_approval"
+            type="checkbox"
+          />
+          {{ t('JRC_APPROVALS.selfApproval') }}</label
+        ><label class="block text-sm"
+          ><input
+            v-model="definition.delegation_allowed"
+            type="checkbox"
+          />
+          {{ t('JRC_APPROVALS.allowDelegation') }}</label
+        ><label class="block text-sm"
+          >{{ t('JRC_APPROVALS.reopen')
+          }}<select
+            v-model="definition.reopen_mode"
+            class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
+          >
+            <option value="disabled">
+              {{ t('JRC_APPROVALS.enum_disabled') }}
+            </option>
+            <option value="restart_all">
+              {{ t('JRC_APPROVALS.enum_restart_all') }}
+            </option>
+          </select></label
         >
-          <option value="disabled">
-            {{ t('JRC_APPROVALS.enum_disabled') }}
-          </option>
-          <option value="restart_all">
-            {{ t('JRC_APPROVALS.enum_restart_all') }}
-          </option>
-        </select></label
-      >
-    </div>
+      </div>
+    </details>
+    <section
+      v-show="tab === 'steps'"
+      class="space-y-3"
+    >
+      <AdjustmentRulesForm
+        :model-value="definition.adjustments || null"
+        :allowed="adjustmentFields"
+        :busy="busy"
+        @update:model-value="setAdjustment"
+        @validity="adjustmentValid = $event"
+      />
+      <details>
+        <summary>{{ t('JRC_APPROVALS.directions.configure') }}</summary>
+        <p>{{ t('JRC_APPROVALS.directions.help') }}</p>
+        <label
+          v-for="action in directionActions"
+          :key="action"
+          ><input
+            v-model="directionDraft.actions"
+            type="checkbox"
+            :value="action"
+            :disabled="busy"
+            @change="setDirections"
+          />{{ t(`JRC_APPROVALS.directions.${action}`) }}</label
+        >
+        <label v-if="directionDraft.actions.includes('escalate')"
+          >{{ t('JRC_APPROVALS.directions.target')
+          }}<select
+            v-model.number="directionDraft.escalation_policy_id"
+            :disabled="busy"
+            @change="setDirections"
+          >
+            <option :value="null">—</option>
+            <option
+              v-for="row in routePolicies.filter(
+                item =>
+                  item.module_key === draft.module_key &&
+                  item.event_key === draft.event_key
+              )"
+              :key="row.id"
+              :value="row.id"
+            >
+              {{ row.name }}
+            </option>
+          </select></label
+        >
+      </details>
+    </section>
     <div
       v-show="tab === 'summary'"
       class="space-y-3 rounded-xl border border-n-weak p-4"
@@ -436,41 +638,75 @@ const confirm = () => {
       <p>
         {{
           t('JRC_APPROVALS.humanSummary', {
-            event: key,
-            company: scope?.company_name || 'GROUP',
+            event:
+              key === '.'
+                ? t('JRC_APPROVALS.select')
+                : t(`JRC_APPROVALS.catalogEvents.${key.replaceAll('.', '_')}`),
+            company: scope?.company_name || t('JRC_APPROVALS.groupScope'),
             unit: scope?.unit_name || '—',
             count: definition.steps.length,
-            mode: definition.execution || '—',
+            mode: definition.execution
+              ? t(`JRC_APPROVALS.enum_${definition.execution}`)
+              : '—',
           })
         }}
       </p>
+      <TierSummary
+        v-if="definition.schema_version === 2"
+        :tiers="definition.tiers"
+        :steps="definition.steps"
+        :options="options"
+      />
       <ul class="space-y-2">
         <li
-          v-for="step in definition.steps"
+          v-for="(step, index) in definition.steps"
           :key="step.code"
         >
-          {{ step.code || '—' }} · {{ step.mode || '—' }} ·
-          {{ t('JRC_APPROVALS.quorum') }} {{ step.quorum || '—' }} ·
-          {{ step.actions.join(', ') }}
+          {{ t('JRC_APPROVALS.stepNumber', { number: index + 1 }) }} ·
+          {{
+            step.mode
+              ? t(`JRC_APPROVALS.enum_${step.mode}`)
+              : t('JRC_APPROVALS.select')
+          }}
+          · {{ t('JRC_APPROVALS.quorum') }} {{ step.quorum || '—' }} ·
+          {{
+            step.actions
+              .map(action => t(`JRC_APPROVALS.decisionLabels.${action}`))
+              .join(', ')
+          }}
         </li>
       </ul>
       <p class="text-sm text-n-slate-11">
         {{ t('JRC_APPROVALS.presentationOnly') }}
         <span class="block mt-2 font-medium">{{
-          describeCondition(definition.condition)
+          conditionSummary(definition.condition, t)
         }}</span>
       </p>
       <p
-        v-for="step in policy?.validation_plan || []"
+        v-for="(step, index) in policy?.validation_plan || []"
         :key="step.code"
         class="text-sm"
       >
-        {{ step.code }}: {{ t('JRC_APPROVALS.eligible') }}
-        {{ step.eligible_count }} / {{ t('JRC_APPROVALS.quorum') }}
+        {{ t('JRC_APPROVALS.stepNumber', { number: index + 1 }) }}:
+        {{ t('JRC_APPROVALS.eligible') }} {{ step.eligible_count }} /
+        {{ t('JRC_APPROVALS.quorum') }}
         {{ step.quorum }}
       </p>
     </div>
     <div class="flex flex-wrap gap-2 border-t border-n-weak pt-4">
+      <Button
+        :label="t('JRC_APPROVALS.previous')"
+        variant="faded"
+        :disabled="busy || tab === 'general'"
+        @click="move(-1)"
+      />
+      <Button
+        v-if="tab !== 'summary'"
+        :label="t('JRC_APPROVALS.next')"
+        variant="faded"
+        :disabled="busy"
+        @click="move(1)"
+      />
       <Button
         :label="t('JRC_APPROVALS.saveDraft')"
         :disabled="busy || scopeIndex === '' || !key || key === '.'"
@@ -508,8 +744,8 @@ const confirm = () => {
         {{ t('JRC_APPROVALS.confirmPublication') }}
       </h3>
       <p class="my-4">
-        {{ draft.name }} · {{ key }} · {{ policy?.current_version || 0 }} ·
-        {{ scope?.company_name || 'GROUP' }} / {{ scope?.unit_name || '—' }}
+        {{ draft.name }} · {{ scope?.company_name || 'GROUP' }} /
+        {{ scope?.unit_name || '—' }}
       </p>
       <p class="mb-4 text-sm">{{ t('JRC_APPROVALS.noRollout') }}</p>
       <div class="flex gap-3">

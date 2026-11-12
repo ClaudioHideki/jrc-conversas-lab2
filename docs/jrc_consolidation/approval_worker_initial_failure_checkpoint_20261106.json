@@ -1,0 +1,73 @@
+{
+  "status": "failed_gate_preserved_not_stage_acceptance",
+  "previous_checkpoint": "522d2badb6c79a8b2bec7b66873136761a503c19",
+  "native_result": {
+    "status": "failed",
+    "phase": "native_outbox_recovery",
+    "checks": [
+      "test environment and exact owned names",
+      "exact PostgreSQL URL/database",
+      "no pending migrations",
+      "committed cross-process fixtures",
+      "exact isolated Redis",
+      "Redis ownership claim",
+      "owned artifact directory",
+      "prior business receipts preserved",
+      "new approval receipts and business queue empty",
+      "domain committed its native outbox",
+      "worker registered only the owned business and native health queues",
+      "actual Redis provider delivery ID",
+      "worker made no HTTP requests",
+      "worker requested no email or push"
+    ],
+    "database": "jrc_g_worker_20261106_db4184c50703",
+    "queue": "jrc_g_worker_db4184c50703",
+    "delivery_acknowledgments": 2,
+    "fresh_worker": true,
+    "mode": "approvals",
+    "application_build": false,
+    "production": false,
+    "qualification": "Synthetic-only PostgreSQL; real Redis and Sidekiq. Queue routing overridden only for isolation. No default queue/cron/deployment/Chrome claim."
+  },
+  "resources": {
+    "nonce": "db4184c50703",
+    "database": "jrc_g_worker_20261106_db4184c50703",
+    "redis_index": 15,
+    "queue": "jrc_g_worker_db4184c50703",
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "resume": true,
+    "mode": "approvals",
+    "attempt": "beab5bde",
+    "head": "522d2badb6c79a8b2bec7b66873136761a503c19",
+    "free_start": 6706462720,
+    "minimum_free": 6706425856,
+    "original_containers_changed": false,
+    "application_build": false,
+    "cleanup": false,
+    "phase": "real_worker",
+    "code_sha256": {
+      "spec/integration/jrc_relationship/owned_worker_boot.rb": "e0d0075568e5bfc3f2b8d4a25c8884675c99574b286038adbffe353c380a22b3",
+      "spec/integration/jrc_relationship/owned_worker_gate.rb": "65cffe9b34b43a65c9984ddfe88521d07b45a93bd199b50cdbf0d127c1b7786c",
+      "spec/integration/jrc_relationship/owned_worker_fixtures.rb": "017964b0cf3b195911059770a2802bf35226ebcc9e65bc3c2af9f75596a97baa",
+      "spec/integration/jrc_relationship/owned_approval_worker_gate.rb": "8a6fad1a72298cd7845bb6069179d5d2427c752f316a9949cdbbad6d1fb4654f",
+      "spec/integration/jrc_relationship/owned_approval_witness.rb": "7fac6f5e994cc261affbe8eec119bff71f5aff99e1ec656ed69e393205c23ce6"
+    },
+    "business_data_copied": false,
+    "original_fixture_artifacts": "C:\\Users\\DEV03\\Documents\\Jrc\\relacionamento-v2-20261101\\.codex\\g-worker-20261106\\db4184c50703",
+    "exit_code": 1,
+    "passed": false,
+    "free_end": 6724628480,
+    "artifacts_preserved": true
+  },
+  "confirmed": [
+    "Native Recovery and Projection delivered2ACK and completed native outbox.",
+    "Native event and cable jobs emitted created notice with actual unread_count1/count1 and bounded own-delegation target;private canary absent.",
+    "No active PostgreSQL sessions/locks remained after graceful owned child stop.",
+    "No HTTP,email or push requested."
+  ],
+  "cause": "Runner wait used cached ActiveRecord find_by outbox result from before another process committed completed_at;this is a verification bug,not a PostgreSQL lock or a successful full gate.",
+  "preserved": [
+    "All synthetic rows,original five relationship ACK,approval2ACK/native cable receipt,failed logs and original containers preserved."
+  ],
+  "next": "Make polling uncached and resume exact existing native grant/notice/receipt key;append real replay/read/revocation evidence in a new attempt directory without seeding duplicates or rewriting old results."
+}

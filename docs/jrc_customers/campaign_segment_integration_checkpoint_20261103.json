@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-03",
+  "baseline": "8e924980afa647e11df75f42d830cbaeb52ca4a1",
+  "status": "PARTIAL: automated gates passed; fresh build and actual Chrome pending",
+  "scope": [
+    "Existing CampaignFilters and audience types preserve legacy segment string/department/company behavior",
+    "New published segment uses canonical contacts and existing ModuleSegmentFilter/Directory/financial/native organizational scopes",
+    "Trusted created_by is set server-side for new previews and drafts, remains pinned for jobs; audience user/account/unit identifiers never grant access",
+    "Fresh native administrator and enabled modules required for stored creator; current operator additionally checked for preview/review/audience updates",
+    "Definition and authorized membership hashes invalidate approval when segment or cohort changes; no names/destinations/financial values in new evidence",
+    "Actual reviewed contacts are rechecked in batches of 1000 before approval/use, protecting a simulated review race",
+    "Sanitized lists reject the canonical segment restriction explicitly",
+    "Legacy campaigns without a segment or creator retain their existing contracts"
+  ],
+  "native_policy_fact": "DirectoryPolicy.access? grants all native administrators access even with a custom role; tests use real module/corporate denials and do not invent a separate administrator Directory permission.",
+  "gates": {
+    "final_focused_backend": {
+      "report": ".codex/customer-segment-campaign-admitted-backend.json",
+      "examples": 22,
+      "failures": 0
+    },
+    "native_regression": {
+      "report": ".codex/customer-segment-campaign-final-backend.json",
+      "examples": 52,
+      "failures": 0,
+      "composition": "22 focused + 30 native; rerun 22 after mechanical Array#pluck style change"
+    },
+    "vue": {
+      "report": ".codex/customer-segment-campaign-frontend.json",
+      "examples": 3,
+      "failures": 0,
+      "kind": "component mocks; not browser"
+    },
+    "rubocop_new_files": {
+      "report": ".codex/customer-segment-campaign-admitted-style.json",
+      "files": 3,
+      "offenses": 0
+    },
+    "eslint": {
+      "report": ".codex/customer-segment-campaign-final-eslint.json",
+      "errors": 0,
+      "new_spec_warnings": 0,
+      "component_warnings": 2,
+      "component_baseline_warnings": 2
+    },
+    "source": ".codex/customer-segment-consumers-admitted-source-verified.json"
+  },
+  "preserved_failures": [
+    "Initial contact preservation assertion compared Ruby nanoseconds to PostgreSQL microseconds; baseline now rereads stored rows",
+    "Initial tests incorrectly assumed a custom role removes Directory from a native administrator; corrected to actual native policies",
+    "Review race is simulated in an automated test; no actual external send was performed"
+  ],
+  "pending": [
+    "New guarded Vite build with fresh unique prefix",
+    "Installed Chrome desktop/mobile draft creation, preview and persistence with real local DB",
+    "Remaining module real Chrome gates",
+    "Final C Word audit",
+    "TRR definition pending"
+  ],
+  "restrictions": {
+    "push": false,
+    "deploy": false,
+    "GHCR": false,
+    "production_changes": false,
+    "external_sends": 0,
+    "new_dependencies": false,
+    "new_migrations": false,
+    "deleted_files": false
+  }
+}

@@ -1,3 +1,8 @@
+whatsapp_retry_recovery_job:
+  cron: '* * * * *'
+  class: 'WhatsappRetryRecoveryJob'
+  queue: scheduled_jobs
+
 # https://github.com/ondrejbartas/sidekiq-cron
 jrc_history_media_recovery_job:
   cron: '* * * * *'
@@ -102,6 +107,26 @@ jrc_relationship_signals_job:
   cron: '*/15 * * * *'
   class: 'JrcRelationship::SchedulerJob'
   queue: low
+
+jrc_backoffice_signature_notification_recovery_job:
+  cron: '* * * * *'
+  class: 'JrcBackoffice::SignatureNotificationRecoveryJob'
+  queue: scheduled_jobs
+
+jrc_approval_notification_recovery_job:
+  cron: '* * * * *'
+  class: 'JrcApprovals::NotificationRecoveryJob'
+  queue: scheduled_jobs
+
+jrc_backoffice_signature_reconciliation_recovery_job:
+  cron: '*/5 * * * *'
+  class: 'JrcBackoffice::SignatureReconciliationRecoveryJob'
+  queue: scheduled_jobs
+
+jrc_backoffice_signature_dispatch_recovery_job:
+  cron: '*/5 * * * *'
+  class: 'JrcBackoffice::SignatureDispatchRecoveryJob'
+  queue: scheduled_jobs
 
 jrc_operations_sla_monitor_job:
   cron: '*/5 * * * *'

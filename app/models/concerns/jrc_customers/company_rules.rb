@@ -20,10 +20,25 @@ module JrcCustomers::CompanyRules
     validate :validate_master_classifications, if: :master_columns?
     validate :validate_master_taxonomies, if: :master_columns?
     validate :preserve_internal_company_identity, if: :master_columns?
+    validate :preserve_economic_group_principal, if: :master_columns?
     after_save :synchronize_legacy_company_fields, if: :master_columns?
+    after_save :register_economic_group, if: :master_columns?
   end
 
   private
+
+  def preserve_economic_group_principal
+    return unless persisted? && will_save_change_to_economic_group?
+    return unless JrcCustomers::EconomicGroup.exists?(account_id: account_id, name: economic_group_in_database, principal_company_id: id)
+
+    errors.add(:economic_group, 'clear or replace the group principal before changing its membership')
+  end
+
+  def register_economic_group
+    return unless saved_change_to_economic_group? && economic_group.present?
+
+    JrcCustomers::EconomicGroup.find_or_create_by!(account_id: account_id, name: economic_group)
+  end
 
   def preserve_internal_company_identity
     return unless relationship_type_in_database == 'internal' && relationship_type != 'internal'
@@ -74,7 +89,7 @@ module JrcCustomers::CompanyRules
     end
     return unless will_save_change_to_segment? && segment.present? && JrcCustomers::Taxonomy.table_exists?
 
-    configured = JrcCustomers::Taxonomy.where(account_id: account_id, kind: 'segment', active: true).exists?(name: segment)
+    configured = JrcCustomers::Taxonomy.classifications.active.where(account_id: account_id, kind: 'segment').exists?(name: segment)
     errors.add(:segment, 'must use an active configured segment') unless configured
   end
 

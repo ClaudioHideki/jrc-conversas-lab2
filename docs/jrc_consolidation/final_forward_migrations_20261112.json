@@ -1,0 +1,17 @@
+{
+  "candidate_base": "6195f7d21a0781cd5c5cf4d13bd73a497bb5a452",
+  "source_sha": "cdeace63262f8fab957991899fab0d89b9ebfec0",
+  "historical_admission_unchanged": true,
+  "migrations": [
+    {
+      "path": "db/migrate/20261111150000_create_whatsapp_retry_attempts.rb",
+      "version": "20261111150000",
+      "sha256": "481b757bc0ddda6169d325d42ee48b79d4a7e4eba2de3ecc1f35d03ed928f48f"
+    },
+    {
+      "path": "db/migrate/20261112000000_create_service_desk_report_exports.rb",
+      "version": "20261112000000",
+      "sha256": "14b7cefc0dab82448fce24eab5e29fee29a82f4fd09eeaf81fe264e6ba421b94"
+    }
+  ]
+}

@@ -29,6 +29,7 @@ vi.mock('../helpers/composeConversationHelper', async importOriginal => ({
 const hide = vi.fn();
 const Popover = {
   name: 'Popover',
+  props: { nativeDialog: Boolean },
   emits: ['show', 'hide'],
   setup(_props, { expose }) {
     expose({ hide });
@@ -101,6 +102,7 @@ it('keeps the composer open while its native contact dialog is being used', asyn
 
 it('preserves the generic native conversation creation when no proposal adapter is provided', async () => {
   mountComposer({});
+  expect(wrapper.findComponent(Popover).props('nativeDialog')).toBe(false);
   const payload = { contactId: 11, inboxId: 18, message: { content: 'Hello' } };
   form().vm.$emit('createConversation', { payload, isFromWhatsApp: false });
   await flushPromises();
@@ -110,6 +112,52 @@ it('preserves the generic native conversation creation when no proposal adapter 
   });
   expect(hide).toHaveBeenCalledOnce();
   expect(useAlert.mock.calls[0][1].to).toBe('/app/accounts/7/conversations/42');
+});
+
+it('opts into the native dialog only for a caller that requests it', () => {
+  mountComposer({ nativeDialog: true });
+  expect(wrapper.findComponent(Popover).props('nativeDialog')).toBe(true);
+});
+
+it('opens a native child dialog and closes only that child on cancel', async () => {
+  const originalShow = HTMLDialogElement.prototype.showModal;
+  const originalClose = HTMLDialogElement.prototype.close;
+  HTMLDialogElement.prototype.showModal = function showModal() {
+    this.setAttribute('open', '');
+  };
+  HTMLDialogElement.prototype.close = function close() {
+    this.removeAttribute('open');
+  };
+  try {
+    const parent = document.createElement('dialog');
+    parent.setAttribute('open', '');
+    document.body.append(parent);
+    wrapper = mount(NativePopover, {
+      props: { modal: true, nativeDialog: true, modalLabel: 'Compose' },
+      slots: {
+        default: '<button>Compose</button>',
+        content: '<input aria-label="Draft" />',
+      },
+      attachTo: parent,
+    });
+    await wrapper.vm.show();
+    await flushPromises();
+    const child = document.querySelector('dialog[data-popover-content]');
+    expect(child.open).toBe(true);
+    expect(document.querySelector('[data-popover-backdrop]')).toBeNull();
+    expect(child.querySelector('input')).not.toBeNull();
+    child.dispatchEvent(
+      new Event('cancel', { bubbles: true, cancelable: true })
+    );
+    await flushPromises();
+    expect(wrapper.emitted('hide')).toHaveLength(1);
+    expect(parent.open).toBe(true);
+    expect(document.querySelector('dialog[data-popover-content]')).toBeNull();
+    wrapper.unmount();
+  } finally {
+    HTMLDialogElement.prototype.showModal = originalShow;
+    HTMLDialogElement.prototype.close = originalClose;
+  }
 });
 
 it('keeps recipient and message state after a proposal adapter fails, then closes only on success', async () => {

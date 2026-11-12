@@ -4,7 +4,7 @@ module JrcCrm
       @activity = activity
     end
 
-    def as_json(options = {})
+    def as_json(_options = {})
       {
         id: @activity.id,
         activity_type: @activity.activity_type,
@@ -12,6 +12,9 @@ module JrcCrm
         description: @activity.description,
         status: @activity.status,
         due_at: @activity.due_at,
+        due_at_local: @activity.due_at&.in_time_zone&.strftime('%Y-%m-%dT%H:%M:%S'),
+        time_zone: Time.zone.name,
+        edit_version: @activity.updated_at.utc.iso8601(6),
         due_at_display: format_datetime(@activity.due_at),
         completed_at: @activity.completed_at,
         completed_at_display: format_datetime(@activity.completed_at),

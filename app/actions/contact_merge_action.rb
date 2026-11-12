@@ -10,7 +10,7 @@ class ContactMergeAction
 
     ActiveRecord::Base.transaction do
       lock_contacts_for_merge
-      if @account.feature_enabled?('jrc_customer_master')
+      if preserve_master_data?
         preserver = JrcCustomers::MergePreserver.new(account: @account, base: @base_contact, source: @mergee_contact,
                                                      actor: Current.user)
         preserver.call
@@ -38,6 +38,12 @@ class ContactMergeAction
     return unless groups.group?(@base_contact) || groups.group?(@mergee_contact)
 
     raise JrcCustomers::MergePreserver::Conflict, 'WhatsApp group identity cannot be merged with another recipient'
+  end
+
+  def preserve_master_data?
+    @account.feature_enabled?('jrc_customer_master') ||
+      JrcCustomers::SegmentOverride.where(account_id: @account.id, contact_id: [@base_contact.id, @mergee_contact.id]).exists? ||
+      JrcCustomers::SigningIdentity.where(account_id: @account.id, contact_id: [@base_contact.id, @mergee_contact.id]).exists?
   end
 
   def validate_contacts

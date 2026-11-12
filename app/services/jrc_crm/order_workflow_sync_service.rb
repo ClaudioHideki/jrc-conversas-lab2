@@ -112,7 +112,7 @@ module JrcCrm
       end
       request.save!
       JrcCrm::BackofficeDocumentChecklist.new(request: request, actor: @actor).sync!
-      if @event == 'contract_signed'
+      if @event == 'contract_signed' && request.workflow_version == 1
         begin
           request.advance! while %w[analysis documentation contract].include?(request.stage)
         rescue ActiveRecord::RecordInvalid

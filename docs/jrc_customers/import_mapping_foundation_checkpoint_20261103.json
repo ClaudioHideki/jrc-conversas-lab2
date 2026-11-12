@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-03",
+  "stage": "C5a — Fundação de leitura e mapeamento de CSV",
+  "status": "componente interno validado; central completa ainda não integrada à API/interface",
+  "base_commit": "73275a132a25781195a7f1a87ff0b0910870e3fc",
+  "branch": "codex/relacionamento-v2-20261101",
+  "files": [
+    "app/services/jrc_customers/import_file.rb",
+    "spec/services/jrc_customers/import_file_spec.rb"
+  ],
+  "implemented": [
+    "Leitura UTF-8/BOM e SHA-256 dos bytes originais; nenhuma consulta de identidade ou escrita de contato/empresa durante inspeção.",
+    "Tipos empresas/contatos/ambos; CSV com vírgula, ponto e vírgula ou tabulação; aspas e quebras de linha preservadas.",
+    "Mapeamento explícito de cada coluna, inclusive ignoradas. Destinos somente do catálogo permitido, sem account_id/user_id/modelos arbitrários; destinos duplicados recusados.",
+    "Sem inferência de entidade para coluna ambígua em arquivo combinado. Separação entre valores mapeados de empresa e contato para o plano autorizado subsequente.",
+    "Limites preservam os 1 MiB/500 registros do importador existente; até100 colunas; bytes nulos, encoding/aspas/cabeçalhos inválidos recusados sem truncamento. Metadata não devolve valores de linhas."
+  ],
+  "validation": {
+    "examples": 28,
+    "failures": 0,
+    "pending": 0,
+    "single_green_run": true,
+    "report": ".codex/customer-import-file-final-backend.json",
+    "coverage": [
+      "8 novos exemplos de arquivo/mapeamento",
+      "importação de empresas existente",
+      "escopo corporativo da importação"
+    ],
+    "ruby_files": 2,
+    "ruby_offenses": 0,
+    "style": ".codex/customer-import-file-final-style.json",
+    "snapshot": "/consolidation-customer-import-file-final",
+    "source_files": 11323,
+    "source_mismatches": 0,
+    "raw_sql_preserved": true
+  },
+  "confirmed_integration_constraints": [
+    "DataImport oferece import_file/failed_records/items/errors/initiated_by/stats. Tipos atuais contacts/intercom e callback de CSV legado não podem ser alterados de modo a processar rascunhos.",
+    "DataImport::ContactManager pode gravar ao preparar um contato existente; não serve para a prévia sem efeitos. Preservar o legado e reaproveitar IdentityResolver, CompanyContactWriter, SigningIdentityWriter e cobertura no novo plano.",
+    "ContactPolicy.import? admite administrador; Enterprise também admite custom_role contact_manage. A central deve preservar esse acesso para contatos, enquanto empresas/ambos mantêm a administração atual.",
+    "DataImportsController/start/retry/create são de Intercom; eventual novo tipo de execução deve ser isolado e ter autorização/privacidade próprias.",
+    "O arquivo de histórico exige armazenamento e download privados, sem liberar URLs genéricas do ActiveStorage ou registros de outra conta/operadora/unidade."
+  ],
+  "pending": [
+    "Execução persistida/histórico e arquivo privado",
+    "Prévia de registros por identidade/escopo, tratamento de existentes, duplicidades/ignorados/erros, confirmação e execução real",
+    "Integração de empresas/contatos/ambos com a interface horizontal completa, modelo e relatório de erros",
+    "Validação do fluxo completo no Chrome desktop/celular; não há nova alegação de UI neste componente",
+    "Demais etapas C→D→E→F→G continuam em execução"
+  ],
+  "safety": {
+    "no_new_dependencies": true,
+    "no_migrations": true,
+    "existing_importer_modified": false,
+    "no_push_image_build_publish_deploy_or_production_changes": true
+  }
+}

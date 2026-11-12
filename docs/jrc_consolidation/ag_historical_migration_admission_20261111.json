@@ -1,0 +1,823 @@
+{
+  "format_version": 1,
+  "base_sha": "d8a83b824b11cc68ddbbce7c79681f368051fb70",
+  "audited_source_sha": "4c8968de5d4762e88c87e8da5e28522a014f23fe",
+  "base_schema_sha256": "ec7af48b279a242a89e545836a9162b7e7766960277238eeb7ad40aa85ebdcb1",
+  "base_schema_version": "20261109160000",
+  "scope": "One explicitly reviewed LAB2 A-G historical import; never a general migration waiver.",
+  "summary": {
+    "added": 34,
+    "historical": 27,
+    "forward": 7,
+    "changed_main_migrations": 0,
+    "removed_main_migrations": 0,
+    "already_fully_covered_by_main": 0,
+    "requires_execution_on_main_upgrade": 34
+  },
+  "strategy": {
+    "existing_database": "Run pending migrations using its actual schema_migrations ledger; never infer application from the maximum timestamp.",
+    "fresh_install": "Run all migrations in their existing chronological order.",
+    "schema_load": "Load the candidate schema only into an empty new database; do not overlay it on installed data.",
+    "historical_admission": "Exact reviewed base/source ancestry and byte hashes are mandatory. Unknown retroactive migrations remain rejected by the unchanged default policy.",
+    "ledger_reconstruction": "Only the existing guarded GitHub fixture reconstructs the pinned-main ledger on an empty disposable database. This is not an operational repair command.",
+    "incompatible_history": "Legacy A-G databases with the old 20261102090000/20261102100000 collisions or partially applied objects stay blocked for separate explicit admission. No automatic rename, ledger patch or data repair."
+  },
+  "dependencies_review": {
+    "basis": "Static Ruby/SQL object references, checked against chronological dependencies and the native migration/catalog tests.",
+    "main_prerequisites": [
+      "jrc_relationship_assignments",
+      "jrc_crm_contracts",
+      "jrc_crm_backoffice_requests",
+      "jrc_backoffice_document_versions",
+      "jrc_backoffice_document_decisions",
+      "jrc_approvals_audit_events",
+      "jrc_relationship_batch_items",
+      "jrc_broker_webhook_obligations",
+      "jrc_human_assignment_policy_events"
+    ],
+    "referenced_sql_pinned": 5
+  },
+  "risks": [
+    "Add-column/table/check/FK/index DDL can lock large installed tables; synthetic CI is not production scale or downtime approval.",
+    "20261103090000 uses CREATE INDEX CONCURRENTLY outside a DDL transaction; partial-failure recovery requires inspection, never automatic cleanup.",
+    "20261102040000 copies signature connection snapshots and relinks matching notification origins; it must precede downstream deliveries and must not rewrite historical versions.",
+    "20261103110000 copies legacy company economic groups byte-for-byte within each account; no truncation, case folding or merging across accounts.",
+    "20261107010000 replaces a batch guard while preserving assignment-only v1 receipts; legacy immutable history must remain protected.",
+    "Numerous down methods refuse archival loss; this authorization does not include rollback on installed databases.",
+    "SQL functions loaded from separate files are part of the admission identity and are hash-pinned together with migration Ruby.",
+    "No credentials, providers, users, grants or operating parameters are configured by this admission."
+  ],
+  "evidence": {
+    "baseline_coverage": [
+      {
+        "path": "db/migrate/20261101210000_add_relationship_action_follow_up.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261101220000_create_relationship_customer_documents.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261101230000_create_relationship_processing_runs.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261102010000_create_backoffice_signature_integrations.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261102020000_create_backoffice_signature_notifications.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261102030000_create_customer_signing_identities.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261102040000_pin_signature_provider_connections.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261102050000_create_backoffice_contract_versions.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261102060000_create_backoffice_document_scans.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261102070000_create_backoffice_signer_rosters.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261102080000_create_backoffice_authority_proposals.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261102090100_create_backoffice_signature_deliveries.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261102100100_allow_signature_reconciliation_observations.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261103100000_add_customer_segment_definitions.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261103110000_add_customer_economic_groups.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261104120000_add_relationship_document_responsibility.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261104130000_add_relationship_document_requirement.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261104170000_create_approval_notification_outboxes.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261105120000_create_backoffice_signature_artifact_bundles.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261105121000_create_backoffice_signature_acceptances.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261105122000_pin_backoffice_signature_acceptance_files.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261105130000_create_backoffice_completion_dossiers.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261106100000_add_relationship_withdrawal_to_account_users.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261106101000_version_relationship_eligibility_decisions.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261106113000_add_named_relationship_portfolio_groups.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261107010000_add_master_subjects_to_reviewed_relationship_batches.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261109190000_create_backoffice_requirement_catalog.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261109191000_create_portfolio_history_receipts.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261109200000_add_backoffice_document_validity.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261109210000_create_relationship_retention_history.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261109211000_add_relationship_document_confidentiality.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261109212000_create_relationship_management_requests.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      },
+      {
+        "path": "db/migrate/20261110190000_allow_typed_backoffice_human_responses.rb",
+        "created_tables_already_present": [],
+        "added_columns_already_present": []
+      }
+    ],
+    "initial_proof": "CI 43016237219 passed fresh, pinned-main upgrade and schema reload before this gate correction; it does not validate the new changes.",
+    "new_proof": "Required on the checkpoint containing this manifest: strict/admission negative tests, actual source gate, all 34 executed versions, populated upgrade preservation, idempotent reexecution, schema reload/catalog equivalence and native regressions. Results remain GitHub run artifacts at their exact SHA.",
+    "production_validated": false,
+    "build_executed": false
+  },
+  "migrations": [
+    {
+      "path": "db/migrate/20261101210000_add_relationship_action_follow_up.rb",
+      "sha256": "686b89eece156f55c5d53a97140c149df213611c0bc36657b8249d74cc853b2c",
+      "version": "20261101210000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [
+        {
+          "table": "jrc_relationship_actions",
+          "column": "next_step"
+        },
+        {
+          "table": "jrc_relationship_actions",
+          "column": "return_at"
+        },
+        {
+          "table": "jrc_relationship_actions",
+          "column": "customer_confirmation"
+        },
+        {
+          "table": "jrc_relationship_actions",
+          "column": "customer_feedback"
+        },
+        {
+          "table": "jrc_relationship_actions",
+          "column": "customer_confirmed_at"
+        }
+      ],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261101220000_create_relationship_customer_documents.rb",
+      "sha256": "2ca798613686fe77d40f5472e058c67fab3235f423e5472bd5e16950b3c98aec",
+      "version": "20261101220000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_relationship_customer_documents",
+        "jrc_relationship_document_versions"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261101230000_create_relationship_processing_runs.rb",
+      "sha256": "c55dd31368b47b9a6aab53630cc44a328048dca5cdd97c946b1a79f0d49bb8c7",
+      "version": "20261101230000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_relationship_processing_runs"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261102010000_create_backoffice_signature_integrations.rb",
+      "sha256": "f5023e7288cdf308d74df24f2cab4abc80665d808199853b637a4d20914f5318",
+      "version": "20261102010000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_signature_integrations"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261102020000_create_backoffice_signature_notifications.rb",
+      "sha256": "7cbab128e3a582ab5d51bf1a160a02dbc059662a0231c272006449fdc8451254",
+      "version": "20261102020000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_signature_notifications"
+      ],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261102010000_create_backoffice_signature_integrations.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261102030000_create_customer_signing_identities.rb",
+      "sha256": "83ab6096e6f9116bf4d6af62547fb7573fba28a888506370063f3698b50408cf",
+      "version": "20261102030000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_customer_signing_identities"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261102040000_pin_signature_provider_connections.rb",
+      "sha256": "4493ed4da1f18cf157044818d8f390b880b2b1dd87687968f2e5b7d838e4d5de",
+      "version": "20261102040000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_signature_connections"
+      ],
+      "added_columns": [
+        {
+          "table": "jrc_backoffice_signature_integrations",
+          "column": "provider"
+        }
+      ],
+      "depends_on": [
+        "db/migrate/20261102010000_create_backoffice_signature_integrations.rb",
+        "db/migrate/20261102020000_create_backoffice_signature_notifications.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261102050000_create_backoffice_contract_versions.rb",
+      "sha256": "36a3c84bf381800c134bccdb59ab9e56966be96ac74e0ca6296b9cc5150bf95b",
+      "version": "20261102050000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_contract_versions"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261102060000_create_backoffice_document_scans.rb",
+      "sha256": "999a8a6ab7275e9a324a39e07aff69efb7a14a2e8bb1097c37da5edfe1aabbaa",
+      "version": "20261102060000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_document_scans"
+      ],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261102050000_create_backoffice_contract_versions.rb"
+      ],
+      "sql_dependencies": [
+        "db/functions/20261102060000_backoffice_document_guards.sql"
+      ]
+    },
+    {
+      "path": "db/migrate/20261102070000_create_backoffice_signer_rosters.rb",
+      "sha256": "d6d48b01b6677377db12cfeb7bb0b156013bc272c0cfad64b96faaab0b04401c",
+      "version": "20261102070000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_signer_rosters"
+      ],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261102050000_create_backoffice_contract_versions.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261102080000_create_backoffice_authority_proposals.rb",
+      "sha256": "74b07dd5b43291652b8fcce257ee5c86f0ac197dc9dcc40eb3dab905e0c4fcea",
+      "version": "20261102080000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_authority_proposals"
+      ],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261102050000_create_backoffice_contract_versions.rb",
+        "db/migrate/20261102070000_create_backoffice_signer_rosters.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261102090100_create_backoffice_signature_deliveries.rb",
+      "sha256": "fc201d78a791cf6f0295fbeb7938d0839d91fb3031c226f1d7e60ae08c86e43a",
+      "version": "20261102090100",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_signature_deliveries",
+        "jrc_backoffice_signature_delivery_events"
+      ],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261102040000_pin_signature_provider_connections.rb",
+        "db/migrate/20261102050000_create_backoffice_contract_versions.rb",
+        "db/migrate/20261102070000_create_backoffice_signer_rosters.rb",
+        "db/migrate/20261102080000_create_backoffice_authority_proposals.rb"
+      ],
+      "sql_dependencies": [
+        "db/functions/20261102090000_backoffice_signature_delivery_guards.sql"
+      ]
+    },
+    {
+      "path": "db/migrate/20261102100100_allow_signature_reconciliation_observations.rb",
+      "sha256": "c19a98825bfc12951df958ddbd9682587b948410054eb56f756fab696d5cb84d",
+      "version": "20261102100100",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261102090100_create_backoffice_signature_deliveries.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb",
+      "sha256": "973d07eb1ca71480f0de670210ecce95908a02273d5df7a4ac5f1a5c955921cc",
+      "version": "20261103090000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [
+        {
+          "table": "contacts",
+          "column": "company_role"
+        },
+        {
+          "table": "contacts",
+          "column": "company_primary"
+        },
+        {
+          "table": "contacts",
+          "column": "company_contact_status"
+        }
+      ],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261103100000_add_customer_segment_definitions.rb",
+      "sha256": "649289c402e19b1dd2e4f43f535f91d80a8c01533f9e0c8a1b19e36d04667c38",
+      "version": "20261103100000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_customer_segment_overrides"
+      ],
+      "added_columns": [
+        {
+          "table": "jrc_customer_taxonomies",
+          "column": "description"
+        },
+        {
+          "table": "jrc_customer_taxonomies",
+          "column": "selection_mode"
+        },
+        {
+          "table": "jrc_customer_taxonomies",
+          "column": "criteria"
+        },
+        {
+          "table": "jrc_customer_taxonomies",
+          "column": "modules"
+        }
+      ],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261103110000_add_customer_economic_groups.rb",
+      "sha256": "1c4a5b0f9957e7d772938ce8d3b3127e7d6d96617464c99bf482a2026f570b92",
+      "version": "20261103110000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_customer_economic_groups"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261104120000_add_relationship_document_responsibility.rb",
+      "sha256": "a52e55a540823a7ca7e63aa6054750d407cfdd6ce24e02de7cb808858b183ab2",
+      "version": "20261104120000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [
+        {
+          "table": "jrc_relationship_customer_documents",
+          "column": "lock_version"
+        }
+      ],
+      "depends_on": [
+        "db/migrate/20261101220000_create_relationship_customer_documents.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261104130000_add_relationship_document_requirement.rb",
+      "sha256": "b36681e573807678ac16819153020197c56a0b1efc9bcb345b4e7375f5d0458b",
+      "version": "20261104130000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [
+        {
+          "table": "jrc_relationship_customer_documents",
+          "column": "requirement_key"
+        }
+      ],
+      "depends_on": [
+        "db/migrate/20261101220000_create_relationship_customer_documents.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261104170000_create_approval_notification_outboxes.rb",
+      "sha256": "5ec0d57babfb9b70fa6e8d0fee9556cdd484e4f269131e40b072843130ec34d9",
+      "version": "20261104170000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_approvals_notification_outboxes"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261105120000_create_backoffice_signature_artifact_bundles.rb",
+      "sha256": "e75d58a67fa492f365f8a547820eb7b720c124a5b9cf142820a21949ad9ea1bc",
+      "version": "20261105120000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_signature_artifact_bundles"
+      ],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261102050000_create_backoffice_contract_versions.rb",
+        "db/migrate/20261102090100_create_backoffice_signature_deliveries.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261105121000_create_backoffice_signature_acceptances.rb",
+      "sha256": "02f6b9e8625add7b8d23bdede2d04a5a7479c41097db4577384d5f8dc625fa55",
+      "version": "20261105121000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_signature_acceptances"
+      ],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261105120000_create_backoffice_signature_artifact_bundles.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261105122000_pin_backoffice_signature_acceptance_files.rb",
+      "sha256": "c2499c94392636ba89e2edcb276a7df6b3adb6ea2f523105a2723d339a9d5c01",
+      "version": "20261105122000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261102050000_create_backoffice_contract_versions.rb",
+        "db/migrate/20261102060000_create_backoffice_document_scans.rb",
+        "db/migrate/20261102090100_create_backoffice_signature_deliveries.rb",
+        "db/migrate/20261105120000_create_backoffice_signature_artifact_bundles.rb",
+        "db/migrate/20261105121000_create_backoffice_signature_acceptances.rb"
+      ],
+      "sql_dependencies": [
+        "db/functions/20261105122000_backoffice_signature_acceptance.sql"
+      ]
+    },
+    {
+      "path": "db/migrate/20261105130000_create_backoffice_completion_dossiers.rb",
+      "sha256": "99b6e9328872f8a883dee13590c0165a9199b3d4a04a1671a5d2c79360fc7fc0",
+      "version": "20261105130000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_completion_dossiers"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": [
+        "db/functions/20261105130000_backoffice_dossier_guards.sql"
+      ]
+    },
+    {
+      "path": "db/migrate/20261106100000_add_relationship_withdrawal_to_account_users.rb",
+      "sha256": "e86c3a5bc694f7349de663bbae470a5736b741cf9955d3ab082673b91e408789",
+      "version": "20261106100000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [
+        {
+          "table": "account_users",
+          "column": "jrc_relationship_withdrawn_at"
+        }
+      ],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261106101000_version_relationship_eligibility_decisions.rb",
+      "sha256": "8454612f54463c9095e338e21c9ec33dd006a5f8411096cc70d790b21c95abb8",
+      "version": "20261106101000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [
+        {
+          "table": "account_users",
+          "column": "jrc_relationship_eligibility_version"
+        }
+      ],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261106113000_add_named_relationship_portfolio_groups.rb",
+      "sha256": "3e540e54cd670919a7344c01c9ccf11e5365f2a5b1d9aaf5bb778cf7bd0a9eb2",
+      "version": "20261106113000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_relationship_portfolio_groups",
+        "jrc_relationship_portfolio_group_assignments"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261107010000_add_master_subjects_to_reviewed_relationship_batches.rb",
+      "sha256": "3a551c64ebd177d65775b374c3ae1ea9b22e11f93a5c2cbfc932f8130d7c646f",
+      "version": "20261107010000",
+      "historical": true,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [
+        {
+          "table": "jrc_relationship_batch_items",
+          "column": "company_id"
+        }
+      ],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261109190000_create_backoffice_requirement_catalog.rb",
+      "sha256": "b8dbde50bedc666c966bb07e8c88372ec7d0f62e059610ea6c9866cbf72fd77a",
+      "version": "20261109190000",
+      "historical": false,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_backoffice_requirement_rules",
+        "jrc_backoffice_requirement_plans",
+        "jrc_backoffice_requirement_responses"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261109191000_create_portfolio_history_receipts.rb",
+      "sha256": "af209a8689c30e4662260563cc1bb66a18e86d38ad8e36cd192cb4387499e123",
+      "version": "20261109191000",
+      "historical": false,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_relationship_portfolio_history_receipts"
+      ],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261106113000_add_named_relationship_portfolio_groups.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261109200000_add_backoffice_document_validity.rb",
+      "sha256": "fbbf0128b6a7ee786a8b0283956968576ed0a02bd64cc316d1a23dba51cc8763",
+      "version": "20261109200000",
+      "historical": false,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [
+        {
+          "table": "jrc_backoffice_document_decisions",
+          "column": "expires_on"
+        },
+        {
+          "table": "jrc_backoffice_document_decisions",
+          "column": "validity_timezone"
+        }
+      ],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261109210000_create_relationship_retention_history.rb",
+      "sha256": "c503069a4acadc04157e6fcd7ef73aeeacf97732d971742f333553885f5e1463",
+      "version": "20261109210000",
+      "historical": false,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_relationship_retention_coverages",
+        "jrc_relationship_retention_states"
+      ],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261106113000_add_named_relationship_portfolio_groups.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261109211000_add_relationship_document_confidentiality.rb",
+      "sha256": "badfb20d9a751d384012b0c29c2b55db3d3f6766e4d2fc3b526c67d1a6711ced",
+      "version": "20261109211000",
+      "historical": false,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [
+        {
+          "table": "jrc_relationship_customer_documents",
+          "column": "confidentiality"
+        }
+      ],
+      "depends_on": [
+        "db/migrate/20261101220000_create_relationship_customer_documents.rb"
+      ],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261109212000_create_relationship_management_requests.rb",
+      "sha256": "36a84512ff7d7713fee1b0a9487a3d381269b2754bad946a1b5af33a8dcee4b6",
+      "version": "20261109212000",
+      "historical": false,
+      "requires_execution": true,
+      "created_tables": [
+        "jrc_relationship_management_requests"
+      ],
+      "added_columns": [],
+      "depends_on": [],
+      "sql_dependencies": []
+    },
+    {
+      "path": "db/migrate/20261110190000_allow_typed_backoffice_human_responses.rb",
+      "sha256": "8b4b22a35dad381b376cc6595d6aa2a342596b5a2394f25b6b1fc2003e2da74d",
+      "version": "20261110190000",
+      "historical": false,
+      "requires_execution": true,
+      "created_tables": [],
+      "added_columns": [],
+      "depends_on": [
+        "db/migrate/20261109190000_create_backoffice_requirement_catalog.rb"
+      ],
+      "sql_dependencies": [
+        "db/functions/20261110190000_backoffice_human_requirement_guard.sql"
+      ]
+    }
+  ],
+  "sql_dependencies": [
+    {
+      "path": "db/functions/20261102060000_backoffice_document_guards.sql",
+      "sha256": "fa2a8b0b081e141643a1dadd228989d0232f5693bc1a9f6333e7e2c55dd999a6"
+    },
+    {
+      "path": "db/functions/20261102090000_backoffice_signature_delivery_guards.sql",
+      "sha256": "fd12ceedfbea4a8079d301191c9ee9cccf8076e51899725a59f569f1c0dbfb5b"
+    },
+    {
+      "path": "db/functions/20261105122000_backoffice_signature_acceptance.sql",
+      "sha256": "0df7db83c57c71f975a467cf6bf157b129631cf75e402d649e0c0fb2d31ea17c"
+    },
+    {
+      "path": "db/functions/20261105130000_backoffice_dossier_guards.sql",
+      "sha256": "7d2875d3db1aeaa6f4fb8b89552ae2c445b81c19de07bc55ace81921f59dc7c8"
+    },
+    {
+      "path": "db/functions/20261110190000_backoffice_human_requirement_guard.sql",
+      "sha256": "f8068d08bfa9c0e0faa83007c0213fdd88224a9f012701cb089147fd63fd6b2f"
+    }
+  ]
+}

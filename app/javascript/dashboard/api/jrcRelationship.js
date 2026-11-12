@@ -10,12 +10,105 @@ const base = accountId => {
 const operationsBase = accountId =>
   base(accountId).replace(/\/relationship$/, '/crm');
 export default {
+  managementRequests: (accountId, params, options = {}) =>
+    axios.get(`${base(accountId)}/management_requests`, { ...options, params }),
+  createManagementRequest: (accountId, values, options = {}) =>
+    axios.post(
+      `${base(accountId)}/management_requests`,
+      { management_request: values },
+      options
+    ),
+  managementResolutionOptions: (accountId, id, params, options = {}) =>
+    axios.get(
+      `${base(accountId)}/management_requests/${Number(id)}/resolution_options`,
+      { ...options, params }
+    ),
+  routeManagementRequest: (accountId, id, values, options = {}) =>
+    axios.post(
+      `${base(accountId)}/management_requests/${Number(id)}/route`,
+      { management_request: values },
+      options
+    ),
+  retention: (accountId, params, options = {}) =>
+    axios.get(`${base(accountId)}/retention`, { ...options, params }),
+  retentionStatus: (accountId, options = {}) =>
+    axios.get(`${base(accountId)}/retention/status`, options),
+  startRetentionHistory: (accountId, reason, options = {}) =>
+    axios.post(`${base(accountId)}/retention/start`, { reason }, options),
+  localRoleOptions: (accountId, params, options = {}) =>
+    axios.get(`${base(accountId)}/local_role_options`, { ...options, params }),
+  restoreConfiguration: (accountId, fields, options) =>
+    axios.post(`${base(accountId)}/configuration/restore`, fields, options),
+  restorePlaybook: (accountId, id, fields, options) =>
+    axios.post(
+      `${base(accountId)}/playbooks/${Number(id)}/restore`,
+      fields,
+      options
+    ),
+  portfolioGroups: (accountId, params, options) =>
+    axios.get(`${base(accountId)}/portfolio_groups`, { ...options, params }),
+  portfolioGroup: (accountId, id, options) =>
+    axios.get(`${base(accountId)}/portfolio_groups/${Number(id)}`, options),
+  portfolioGroupWorkload: (accountId, id, options) =>
+    axios.get(
+      `${base(accountId)}/portfolio_groups/${Number(id)}/workload`,
+      options
+    ),
+  portfolioGroupHistory: (accountId, id, params, options) =>
+    axios.get(`${base(accountId)}/portfolio_groups/${Number(id)}/history`, {
+      ...options,
+      params,
+    }),
+  portfolioGroupHistoryDetail: (accountId, id, eventId, options) =>
+    axios.get(
+      `${base(accountId)}/portfolio_groups/${Number(id)}/history_detail`,
+      {
+        ...options,
+        params: { event_id: eventId },
+      }
+    ),
+  exportPortfolioGroupHistory: (accountId, id, params, options) =>
+    axios.get(
+      `${base(accountId)}/portfolio_groups/${Number(id)}/export_history`,
+      { ...options, params }
+    ),
+  savePortfolioGroup: (accountId, fields, id) =>
+    id
+      ? axios.patch(`${base(accountId)}/portfolio_groups/${Number(id)}`, fields)
+      : axios.post(`${base(accountId)}/portfolio_groups`, fields),
+  portfolioGroupCustomers: (accountId, id, params, options) =>
+    axios.get(`${base(accountId)}/portfolio_groups/${Number(id)}/customers`, {
+      ...options,
+      params,
+    }),
+  savePortfolioGroupCustomers: (accountId, id, fields) =>
+    axios.patch(
+      `${base(accountId)}/portfolio_groups/${Number(id)}/customers`,
+      fields
+    ),
+  portfolioGroupCustomerReview: (accountId, id, fields, options) =>
+    axios.post(
+      `${base(accountId)}/portfolio_groups/${Number(id)}/customer_review`,
+      fields,
+      options
+    ),
+  analystNativeResponsibilities: (accountId, analystId, params, options) =>
+    axios.get(
+      `${base(accountId)}/team/${Number(analystId)}/native_responsibilities`,
+      { ...options, params }
+    ),
   metadata: (accountId, options) =>
     axios.get(`${base(accountId)}/metadata`, options),
   playbookOptions: (accountId, params, options) =>
     axios.get(`${base(accountId)}/playbook_options`, { ...options, params }),
   previewPlaybook: (accountId, fields) =>
     axios.post(`${base(accountId)}/playbook_preview`, fields),
+  previewHealthConfiguration: (accountId, fields, options) =>
+    axios.post(
+      `${base(accountId)}/configuration/health_preview`,
+      fields,
+      options
+    ),
   manualAttendance: (accountId, id, fields) =>
     axios.post(
       `${base(accountId)}/portfolio/${Number(id)}/manual_attendance`,
@@ -27,10 +120,51 @@ export default {
     axios.get(`${base(accountId)}/drilldown`, { ...options, params }),
   team: (accountId, params, options) =>
     axios.get(`${base(accountId)}/team`, { ...options, params }),
+  withdrawalReadiness: (accountId, analystId, options) =>
+    axios.get(
+      `${base(accountId)}/team/${Number(analystId)}/withdrawal_readiness`,
+      options
+    ),
+  withdrawAnalyst: (accountId, analystId, withdrawal, options) =>
+    axios.post(
+      `${base(accountId)}/team/${Number(analystId)}/withdraw`,
+      { withdrawal },
+      options
+    ),
+  restoreAnalyst: (accountId, analystId, restoration, options) =>
+    axios.post(
+      `${base(accountId)}/team/${Number(analystId)}/restore`,
+      { restoration },
+      options
+    ),
+  analystCapacity: (accountId, analystId, params, options) =>
+    axios.get(`${base(accountId)}/team/${Number(analystId)}/capacity`, {
+      ...options,
+      params,
+    }),
+  analystCadences: (accountId, analystId, params, options) =>
+    axios.get(`${base(accountId)}/team/${Number(analystId)}/cadences`, {
+      ...options,
+      params,
+    }),
+  stopAnalystCadence: (accountId, analystId, id, data) =>
+    axios.post(
+      `${base(accountId)}/team/${Number(analystId)}/cadences/${Number(id)}/cancel`,
+      data
+    ),
   portfolio: (accountId, params, options) =>
     axios.get(`${base(accountId)}/portfolio`, { ...options, params }),
   customer: (accountId, id, options) =>
     axios.get(`${base(accountId)}/portfolio/${Number(id)}`, options),
+  saveTransferLock: (accountId, id, restriction) =>
+    axios.patch(`${base(accountId)}/portfolio/${Number(id)}/transfer_lock`, {
+      restriction,
+    }),
+  productHealthHistory: (accountId, id, params, options) =>
+    axios.get(
+      `${base(accountId)}/portfolio/${Number(id)}/product_health_history`,
+      { ...options, params }
+    ),
   saveAssignment: (accountId, assignment, id) =>
     id
       ? axios.patch(`${base(accountId)}/portfolio/${Number(id)}`, {
@@ -79,12 +213,31 @@ export default {
     axios.post(`${base(accountId)}/cadences/${Number(id)}/cancel`, {}, options),
   previewPortfolioBatch: (accountId, fields, options) =>
     axios.post(`${base(accountId)}/reviewed_batches`, fields, options),
+  ownReviewedBatches: (accountId, params, options) =>
+    axios.get(`${base(accountId)}/reviewed_batches`, { ...options, params }),
+  stopOwnReviewedBatch: (accountId, id, fields, options) =>
+    axios.post(
+      `${base(accountId)}/reviewed_batches/${Number(id)}/cancel_pending`,
+      fields,
+      options
+    ),
   portfolioBatchReview: (accountId, id, options) =>
     axios.get(`${base(accountId)}/reviewed_batches/${Number(id)}`, options),
   approvePortfolioBatch: (accountId, id, digest, options) =>
     axios.post(
       `${base(accountId)}/reviewed_batches/${Number(id)}/approve`,
       { digest },
+      options
+    ),
+  requestPortfolioBatchApproval: (accountId, id, fields, options) =>
+    axios.post(
+      `${base(accountId)}/reviewed_batches/${Number(id)}/request_approval`,
+      fields,
+      options
+    ),
+  distributionApprovalOrigin: (accountId, id, options) =>
+    axios.get(
+      `${base(accountId)}/distribution_approval_origins/${Number(id)}`,
       options
     ),
   advancePortfolioBatch: (accountId, id, options) =>
@@ -128,6 +281,43 @@ export default {
     }),
   records: (accountId, kind, params, options) =>
     axios.get(`${base(accountId)}/records/${kind}`, { ...options, params }),
+  record: (accountId, kind, id, options) =>
+    axios.get(`${base(accountId)}/records/${kind}/${Number(id)}`, options),
+  documents: (accountId, params, options) =>
+    axios.get(`${base(accountId)}/documents`, { ...options, params }),
+  document: (accountId, id, params, options) =>
+    axios.get(`${base(accountId)}/documents/${Number(id)}`, {
+      ...options,
+      params,
+    }),
+  documentHistory: (accountId, id, params, options) =>
+    axios.get(`${base(accountId)}/documents/${Number(id)}/history`, {
+      ...options,
+      params,
+    }),
+  documentResponsibles: (accountId, id, params, options) =>
+    axios.get(`${base(accountId)}/documents/${Number(id)}/responsibles`, {
+      ...options,
+      params,
+    }),
+  updateDocumentMetadata: (accountId, id, document, options) =>
+    axios.patch(
+      `${base(accountId)}/documents/${Number(id)}`,
+      { document },
+      options
+    ),
+  uploadDocument: (accountId, form, id) =>
+    axios.post(
+      id
+        ? `${base(accountId)}/documents/${Number(id)}/version`
+        : `${base(accountId)}/documents`,
+      form
+    ),
+  downloadDocument: (accountId, id, versionId) =>
+    axios.get(
+      `${base(accountId)}/documents/${Number(id)}/versions/${Number(versionId)}/download`,
+      { responseType: 'blob' }
+    ),
   saveRecord: (accountId, kind, record, id) =>
     id
       ? axios.patch(`${base(accountId)}/records/${kind}/${Number(id)}`, {
@@ -169,6 +359,11 @@ export default {
         }),
   playbooks: (accountId, options) =>
     axios.get(`${base(accountId)}/playbooks`, options),
+  playbookHistory: (accountId, id, params = {}, options = {}) =>
+    axios.get(`${base(accountId)}/playbooks/${Number(id)}/history`, {
+      ...options,
+      params,
+    }),
   playbookExecutions: (accountId, options) =>
     axios.get(`${base(accountId)}/playbook_executions`, options),
   surveyDefinitions: (accountId, options) =>

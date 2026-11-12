@@ -21,8 +21,10 @@ class JrcRelationship::SignalJob < ApplicationJob
             end
     scope.find_each do |assignment|
       member = record.account.account_users.find_by(user_id: assignment.owner_id)
-      next unless member && JrcRelationship::ModulePolicy.new({ account: record.account, user: member.user, account_user: member },
-                                                              record.account).access?
+      next unless member&.user&.active_for_authentication?
+
+      user_context = { account: record.account, user: member.user, account_user: member }
+      next unless JrcRelationship::ModulePolicy.new(user_context, record.account).access?
 
       context = JrcRelationship::Context.new(member)
       next unless context.assignments.exists?(id: assignment.id)
@@ -86,7 +88,7 @@ class JrcRelationship::SignalJob < ApplicationJob
     assignment.with_lock do
       action = processor.action!('post_ticket', "Follow-up após chamado crítico #{record.id}", data,
                                  context.configuration(assignment).effective_rules, key: "post-ticket:#{record.id}")
-      JrcRelationship::Playbooks.new(context).run!(assignment, 'ticket', source_key: action.id)
+      JrcRelationship::Playbooks.new(context).run!(assignment, 'ticket', source_key: action.id) if action
     end
   end
 end

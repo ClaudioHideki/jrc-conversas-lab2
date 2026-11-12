@@ -2,11 +2,13 @@
 
 class Api::V1::Accounts::JrcServiceDesk::ServiceDefinitionsController < Api::V1::Accounts::JrcServiceDesk::OperationsController
   def index
-    values = ::JrcServiceDesk::Input.attributes(query_values, %w[unit_id page])
+    values = ::JrcServiceDesk::Input.attributes(query_values, %w[unit_id page internal_only])
     unit = policy_scope(::JrcServiceDesk::Unit).find(::JrcServiceDesk::Input.id(values.fetch('unit_id')))
     authorize ::JrcServiceDesk::Service.new(account: Current.account, unit: unit), :show?
     page = ::JrcServiceDesk::Input.id(values.fetch('page', 1))
-    render json: base_payload.merge(service_page(unit, page))
+    internal_only = values['internal_only']
+    raise ArgumentError unless [nil, 'true', 'false'].include?(internal_only)
+    render json: base_payload.merge(service_page(unit, page, internal_only: internal_only == 'true'))
   end
 
   def show
@@ -28,8 +30,12 @@ class Api::V1::Accounts::JrcServiceDesk::ServiceDefinitionsController < Api::V1:
 
   private
 
-  def service_page(unit, page)
+  def service_page(unit, page, internal_only: false)
     scope = policy_scope(::JrcServiceDesk::Service).where(unit_id: unit.id, active: true).order(:name, :id)
+    context = ::JrcServiceDesk::OperationalContext.new(pundit_user)
+    if internal_only && ::JrcServiceDesk::EmployeeAccess.isolated_configurations(context).any?
+      scope = scope.where(id: ::JrcServiceDesk::EmployeeAccess.service_ids(context, unit_id: unit.id))
+    end
     { unit_id: unit.id.to_s, items: scope.offset((page - 1) * 20).limit(20).map { |row| project(row) },
       meta: { page: page, per_page: 20, total: scope.count } }
   end

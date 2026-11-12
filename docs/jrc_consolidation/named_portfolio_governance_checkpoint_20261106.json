@@ -1,0 +1,105 @@
+{
+  "date": "2026-11-06",
+  "preserved_previous_checkpoint": "038cde84eaebb464f3a63e293881b277da490d89",
+  "branch": "codex/relacionamento-v2-20261101",
+  "status": "Native governed capacity/transfer rules and source UI implemented/tested; full named-portfolio Word acceptance and C-G remain open.",
+  "implemented": [
+    "New canonical portfolio:<id> namespace uses the existing Configuration/ConfigurationVersion store, audit, optimistic version and Central policy-management checks. No competing group health precedence or parallel policy registry.",
+    "Customer/point/hour limits accumulate with native account/unit/company/team/segment/product and other active group constraints; no group membership multiplies global customer capacity.",
+    "Existing direct owner transfer guard and reviewed engine enforce group limits. Adding an existing allocation also validates native owner eligibility and projected group load under account configuration authority.",
+    "Controlled unlink/archive cannot remove governed constraints; explicit authorized configuration change must clear them first. Archived cleared policies retain immutable history, do not inherit into future transfers, and cannot be edited before reactivation.",
+    "Group revision and configuration version are captured separately. Membership/profile changes invalidate old simulations without mutating version-one snapshots; rules require the currently reviewed group revision.",
+    "Current actor role/grants and configuration authority are refreshed and locked for group rule writes; group metadata visibility never grants configuration over inaccessible native customer records.",
+    "Reviewed policy/capacity facts and Central participation recheck current group visibility; revoked private metadata cannot leak captured rule facts.",
+    "One customer can transfer successfully across multiple configured portfolios; native allocation remains unique. Missing point/hour inputs are not artificial zeros or spare capacity.",
+    "Tabbed source form reuses PortfolioCapacityLimitsForm, reviews explicit limits/transfer flags before persistence, validates exact saved scope/version/group revision, preserves conflicts, clears stale feedback, and returns to authorized customer data on permission revocation."
+  ],
+  "gates": {
+    "native_main": {
+      "label": "named-portfolio-governance-final16",
+      "examples": 30,
+      "failures": 0,
+      "composition": "16new governance +13 existing native capacity regressions +1 existing real concurrency case"
+    },
+    "native_supplements": [
+      {
+        "label": "named-portfolio-governance-source-boundary18",
+        "examples": 2,
+        "failures": 0,
+        "new_cases": 1
+      },
+      {
+        "label": "named-portfolio-governance-current-authority19",
+        "examples": 3,
+        "failures": 0,
+        "new_cases": 1
+      },
+      {
+        "label": "named-portfolio-governance-retirement20",
+        "examples": 3,
+        "failures": 0,
+        "new_cases": 1
+      },
+      {
+        "label": "named-portfolio-governance-scope-alias21",
+        "examples": 1,
+        "failures": 0,
+        "new_cases": 1
+      }
+    ],
+    "unique_new_governance_examples": 20,
+    "overlap_notice": "Supplemental gates overlap earlier passed cases; counts are not added as distinct successes. Main gate predates the final narrowly tested privacy/retirement/canonical-scope corrections.",
+    "source_ui": {
+      "label": "named-portfolio-governance-source-complete12",
+      "tests": 7,
+      "failures": 0,
+      "api_mocked": true,
+      "real_chrome": false
+    },
+    "static": "New classes/spec/model/reader0; shared Context retains14old offenses; other touched native files0 or no added cop counts. New source components/specs0errors/0warnings. Final per-file evidence is retained under .codex/d9-notifications-20261104."
+  },
+  "corrections_observed": [
+    "Baseline new namespace was absent:4/4 native cases initially failed, then passed after actual native integration.",
+    "Partial native customer visibility initially still advertised can_configure; reproduced in source-boundary baseline17, then corrected in both capability projection and server authority.",
+    "Parent-tab test initially had an incomplete useRouter mock; corrected fixture, then whole7-case suite passed.",
+    "Static checks required small responsibility extractions and formatting, without waivers or removing assertions. ConfigurationScope retains the old tenant/kind validation and adds only the new group reference."
+  ],
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupRulesPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupRules.spec.js",
+    "app/services/jrc_relationship/configuration_scope.rb",
+    "app/services/jrc_relationship/portfolio_group_admission.rb",
+    "app/services/jrc_relationship/portfolio_group_configuration.rb",
+    "spec/requests/api/v1/accounts/relationship/portfolio_group_governance_spec.rb",
+    "app/controllers/api/v1/accounts/relationship/configuration_controller.rb",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupsPanel.vue",
+    "app/models/jrc_relationship/configuration.rb",
+    "app/services/jrc_relationship/context.rb",
+    "app/services/jrc_relationship/distribution_approval_catalog.rb",
+    "app/services/jrc_relationship/distribution_capacity.rb",
+    "app/services/jrc_relationship/distribution_configuration_governance.rb",
+    "app/services/jrc_relationship/distribution_configurations.rb",
+    "app/services/jrc_relationship/distribution_policy_binding.rb",
+    "app/services/jrc_relationship/distribution_preview.rb",
+    "app/services/jrc_relationship/portfolio_group_reader.rb",
+    "app/services/jrc_relationship/portfolio_groups.rb",
+    "app/services/jrc_relationship/reviewed_portfolio_batch.rb"
+  ],
+  "database": "Owned jrc_rel_v2_candidate_test only; no new migration in this increment.",
+  "disk": {
+    "free_initial_bytes": 9232912384,
+    "minimum_monitored_bytes": 9179340800,
+    "free_final_bytes": 9214443520,
+    "no_cleanup": true
+  },
+  "pending": [
+    "Representative configured-group/batch scale and remaining scoped group history/export audit.",
+    "P0124: group picker currently uses existing native CS allocations; eligible master records can be added through native Customers first. Consolidated master-selection-to-group flow remains a gap.",
+    "P0126-P0128: full local role/capability matrix and resumable per-item grouping operations are not declared complete. Existing native reviewed allocation transfers keep per-item receipts/resume.",
+    "Current-source build and Chrome desktop/mobile/light/dark prohibited pending authorization; frozen5379assets are not new-version evidence.",
+    "Remaining literal/visual C-G Word fragments, TRR business definition, deferred company documents without native portfolio, external DocuSign/channel/pilot acceptance remain open."
+  ],
+  "restrictions": "No appbuild,cleanup,push,GHCR,deploy,real external operation,production change,5379 modification or original container interruption.",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json"
+}

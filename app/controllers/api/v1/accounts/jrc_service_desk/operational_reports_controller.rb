@@ -5,7 +5,7 @@ class Api::V1::Accounts::JrcServiceDesk::OperationalReportsController < Api::V1:
     authorize :module, :dashboard?, policy_class: ::JrcServiceDesk::ModulePolicy
     query = ::JrcServiceDesk::OperationalReportQuery.new(user_context: pundit_user, parameters: query_values)
     collection = query.collection
-    render json: base_payload.merge(unit_id: query.unit.id.to_s, report: ::JrcServiceDesk::OperationalReportMetrics.new(query).call,
+    render json: base_payload.merge(export_limits: ::JrcServiceDesk::ReportExport::FORMATS.index_with { |format| ::JrcServiceDesk::ReportExport.limit_for(format) }, unit_id: query.unit.id.to_s, report: ::JrcServiceDesk::OperationalReportMetrics.new(query).call,
                                     items: collection[:items].map { |ticket| presenter.ticket(ticket) }, meta: collection[:meta])
   end
 

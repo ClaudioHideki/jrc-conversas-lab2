@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseSourceSha": "b58e093dd3a32fe97829a4566660b83ee48b9eca",
-  "provenanceSourceSha": "e7dba8149be63708dc1b9e38ab9479ec7cca2ffe",
+  "provenanceSourceSha": "570c140429213f32c47c1047a3f1d6a25960f905",
   "compositionCount": 204,
   "paths": [
     "listener",
@@ -36,7 +36,8 @@
     "The final source still requires the candidate CI gates. No installed attestation or running deployment is claimed by this inventory.",
     "The 19 paths cover the implemented Flow, message, attachment, assignment, status, webhook, AgentBot and legacy API paths. AutomationRule email and transcript actions retain their existing behavior and are outside this ownership proof.",
     "Native domain commands enforce CRM coverage; operator voice is not WhatsApp-call media. History v1 covers individual text after the verified identity boundary, excluding group/media history. Capacity and external-provider acceptance remain separate.",
-    "Standard LAB2 base e7dba8149be63708dc1b9e38ab9479ec7cca2ffe preserves the latest connection and availability changes. Only generic native URA fixes were ported; customer branding, credentials and bindings are not part of the standard artifact."
+    "Standard LAB2 base e7dba8149be63708dc1b9e38ab9479ec7cca2ffe preserves the latest connection and availability changes. Only generic native URA fixes were ported; customer branding, credentials and bindings are not part of the standard artifact.",
+    "A-G reconciliation is captured by source checkpoint 570c140429213f32c47c1047a3f1d6a25960f905 on LAB2 main d8a83b824b11cc68ddbbce7c79681f368051fb70. Existing Broker editor provenance is preserved; this regenerated inventory is not an installed attestation or external-provider acceptance."
   ],
   "artifactFiles": [
     ".github/workflows/backoffice-flow.yml",

@@ -1,0 +1,129 @@
+{
+  "date": "2026-11-05",
+  "stage": "E3 / G targeted continuation",
+  "base_checkpoint": "e1c6261c8fc30a97d329b23b5c00982cc7f93206",
+  "status": "Native completion-to-CS navigation implemented; final immutable closure dossier and actual compiled UI acceptance remain open",
+  "recovery": {
+    "branch": "codex/relacionamento-v2-20261101",
+    "clean_on_recovery": true,
+    "unrecorded_code_after_disconnect": false,
+    "ancestors_verified": [
+      "a1fef624",
+      "9bb8d2ec",
+      "3390725e",
+      "07a9e400",
+      "0f768a98",
+      "8fe9a7a8",
+      "6e4f5f37",
+      "776de86e",
+      "4627f9f9",
+      "e1c6261c"
+    ],
+    "initial_free_bytes": 13007831040
+  },
+  "implementation": [
+    "Readonly completion preview uses native Backoffice ContractAccess and Relationship Context/team permission; canonical existing portfolio only, no automatic creation/preparation/acceptance.",
+    "Exact eligible SalesOrder or completed Project selection uses native customer scopes; no client type constantization or unscoped IDs. Approved order with completed Backoffice is now selectable without broadening default lists.",
+    "Link preserves customer segment, selects scoped portfolio/case outside first page, validates matching origin, and rejects stale context, account/user switches and out-of-order case inspection.",
+    "Explicit native handoff POST and decide retain current origin eligibility, checklist, reason, immutable decision and transactional validation."
+  ],
+  "files": [
+    "app/controllers/api/v1/accounts/crm/backoffice_completion_handoffs_controller.rb",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeCompletionHandoff.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeCompletionHandoff.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/HandoffOriginLink.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/WorkContextOrigin.spec.js",
+    "app/services/jrc_backoffice/completion_handoff.rb",
+    "spec/requests/api/v1/accounts/crm/backoffice_completion_handoff_spec.rb",
+    "app/controllers/api/v1/accounts/relationship/handoffs_controller.rb",
+    "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+    "app/javascript/dashboard/api/crm/commercialCycle.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/HandoffPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/WorkContextPanel.vue",
+    "app/services/jrc_relationship/work_context.rb",
+    "config/routes.rb"
+  ],
+  "automated": {
+    "backend": {
+      "label": "e3handoff03",
+      "examples": 10,
+      "failures": 0,
+      "database": "jrc_rel_v2_candidate_test",
+      "coverage": [
+        "readonly counts unchanged",
+        "explicit prepare twice persists one case",
+        "exact eligible source",
+        "existing case unchanged",
+        "acceptance persisted and immutable",
+        "reopened operation denies acceptance",
+        "no portfolio blocked",
+        "current role denied",
+        "foreign account and owner denied",
+        "issuer/unit revocation denied",
+        "forged type/customer source rejected"
+      ]
+    },
+    "Vue": {
+      "initial": "e3handoffui01:23 passed including7 existing CRM segment cases",
+      "final": "e3handoffui02:16 changed-component cases passed"
+    },
+    "lint": "e3handofflint02 service/controller0; e3handofflint04 final spec0; e3handoffeslint04 eight files0 errors,25 existing dynamic-i18n warnings; git diff --check passed",
+    "not_repeated": "109 previous native regressions preserved, not rerun",
+    "failures_preserved": [
+      "e3handoff01 fixture lacked required title: corrected fixture, native validation preserved",
+      "initial lint complexity/formatting/order/increment errors corrected without disabling rules",
+      "Vue fixture emits existing undefined-status translation warning; no success asserted from that text"
+    ],
+    "resources": {
+      ".codex/d9-notifications-20261104/e3handoff03-resource.json": {
+        "start": 12775636992,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/crm/backoffice_completion_handoff_spec.rb": "b4a56811ab3c83e6a91c06bcc10529bf22585e244f4d26dc6d55eb1499c27e12"
+        },
+        "minimum": 12734595072,
+        "exit_code": 0,
+        "end": 12774047744
+      },
+      ".codex/d-approvals-20261104/e3handoffui02-resource.json": {
+        "status": "passed",
+        "free_start": 12772450304,
+        "minimum_free": 12739854336,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 7388,
+        "exit_code": 0,
+        "free_end": 12779888640
+      }
+    }
+  },
+  "runtime": {
+    "no_build": true,
+    "server5379_unchanged": true,
+    "no_push_deploy_GHCR_cleanup_external_operations": true,
+    "containers_start_times_unchanged": true,
+    "no_workers_started": true,
+    "Chrome_acceptance": false,
+    "served_assets_do_not_include_this_change": true
+  },
+  "remaining": [
+    "E1 version-bound signed files/certificate and sealed immutable final dossier",
+    "Full Backoffice approval mirror and current compiled UI acceptance",
+    "F native Central-approved capacity/distribution and full freshness/trend/cooldown/governed automation matrix",
+    "Full C/D/E/F/G Word and desktop/mobile light/dark acceptance",
+    "TRR undefined; company documents without portfolio explicitly deferred; DocuSign external demo not homologated"
+  ],
+  "end_free_bytes": 12787613696,
+  "stage_C_complete": false,
+  "stage_D_complete": false,
+  "stage_E_complete": false,
+  "stage_F_complete": false,
+  "stage_G_complete": false
+}

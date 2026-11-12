@@ -30,6 +30,7 @@ module JrcCrm
 
       key = idempotency_key
       existing = JrcProjects::Project.find_by(account_id: @account.id, idempotency_key: key)
+      return result(existing, JrcBackoffice::SignatureRelease::MESSAGE) unless JrcBackoffice::SignatureRelease.order_satisfied?(@order)
       return result(existing, nil) if existing
 
       membership = @account.account_users.find_by(user_id: @actor&.id)
@@ -92,7 +93,7 @@ module JrcCrm
 
     def due_on
       parsed = Date.iso8601(snapshot[:activation_date].to_s) if snapshot[:activation_date].present?
-      parsed || Date.current + [snapshot[:activation_days].to_i, 30].max
+      parsed || (Date.current + [snapshot[:activation_days].to_i, 30].max)
     rescue ArgumentError
       Date.current + 30
     end

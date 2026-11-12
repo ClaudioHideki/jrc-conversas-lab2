@@ -1,9 +1,19 @@
 <script setup>
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 import { useQuickActionTarget } from 'dashboard/components-next/layout/useQuickActionTarget';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
-import { computed, onMounted, reactive, ref } from 'vue';
+import {
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  watch,
+} from 'vue';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import {
   leadsAPI,
   pipelinesAPI,
@@ -17,8 +27,26 @@ import LeadDetailModal from './LeadDetailModal.vue';
 import LeadCreateModal from './LeadCreateModal.vue';
 
 const store = useStore();
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+let disposed = false;
+let generation = 0;
+const identity = computed(
+  () => `${route.params.accountId}:${authorityScope(store.getters)}`
+);
+const captureContext = () => ({ identity: identity.value, generation });
+const isCurrent = context =>
+  !disposed &&
+  context.identity === identity.value &&
+  context.generation === generation;
+onBeforeUnmount(() => {
+  disposed = true;
+  generation += 1;
+});
+const metadataError = ref('');
+const listError = computed(() => store.getters['jrcCrm/leads/error']);
+const loading = computed(() => store.getters['jrcCrm/leads/isLoading']);
 const showForm = ref(false);
 useQuickActionTarget('crm_leads', () => {
   showForm.value = true;
@@ -84,7 +112,10 @@ const kanbanColumns = computed(() =>
 const selectedLead = computed(() =>
   leads.value.find(item => String(item.id) === String(route.query.leadId))
 );
-const load = () => store.dispatch('jrcCrm/leads/fetchLeads', filters);
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+const load = () =>
+  store.dispatch('jrcCrm/leads/fetchLeads', segmentParams(filters));
+watchSegment(load);
 
 const openDetails = lead =>
   router.replace({ query: { ...route.query, leadId: lead.id } });
@@ -99,29 +130,35 @@ const replaceLead = updated => {
 };
 
 const onLeadCreated = async lead => {
+  const context = captureContext();
   showForm.value = false;
   filters.search = '';
   filters.status = '';
   await load();
-  openDetails(lead);
+  if (isCurrent(context)) openDetails(lead);
 };
 
 const changeStatus = async (lead, status) => {
+  const context = captureContext();
   changingId.value = lead.id;
   try {
     const { data } = await leadsAPI.update(lead.id, { lead: { status } });
+    if (!isCurrent(context)) return;
     replaceLead(data);
     useAlert('Status atualizado com sucesso.');
   } catch (error) {
+    if (!isCurrent(context)) return;
     useAlert(
       error.response?.data?.error || 'Não foi possível alterar o status.'
     );
   } finally {
-    changingId.value = null;
+    if (isCurrent(context)) changingId.value = null;
   }
 };
 
 const deleteLead = async lead => {
+  if (deletingId.value !== null) return;
+  const context = captureContext();
   if (
     !window.confirm(
       `Excluir o lead ${lead.name}?\n\nO contato continuará cadastrado. Negócios vinculados não serão excluídos.`
@@ -132,22 +169,26 @@ const deleteLead = async lead => {
   try {
     await store.dispatch('jrcCrm/leads/deleteLead', {
       leadId: lead.id,
-      params: filters,
+      params: segmentParams(filters),
     });
+    if (!isCurrent(context)) return;
     if (String(route.query.leadId) === String(lead.id)) closeDetails();
     useAlert('Lead excluído com sucesso.');
   } catch (error) {
+    if (!isCurrent(context)) return;
     useAlert(error.response?.data?.error || 'Não foi possível excluir o lead.');
   } finally {
-    deletingId.value = null;
+    if (isCurrent(context)) deletingId.value = null;
   }
 };
 
 const convertLead = async payload => {
-  if (saving.value) return;
+  if (saving.value || !convertingLead.value) return;
+  const context = captureContext();
   saving.value = true;
   try {
     const { data } = await leadsAPI.convert(convertingLead.value.id, payload);
+    if (!isCurrent(context)) return;
     replaceLead(data.lead);
     convertingLead.value = null;
     useAlert(data.message);
@@ -157,11 +198,12 @@ const convertLead = async payload => {
       query: { dealId: data.deal.id },
     });
   } catch (error) {
+    if (!isCurrent(context)) return;
     useAlert(
       error.response?.data?.error || 'Não foi possível converter o lead.'
     );
   } finally {
-    saving.value = false;
+    if (isCurrent(context)) saving.value = false;
   }
 };
 
@@ -187,20 +229,43 @@ const openContact = lead =>
     params: { accountId: route.params.accountId, contactId: lead.contact_id },
   });
 
-onMounted(async () => {
+const initialize = async () => {
+  const context = captureContext();
+  metadataError.value = '';
+  try {
+    const [pipelineResponse, productResponse] = await Promise.all([
+      pipelinesAPI.list(),
+      productsAPI.list({ active: true }),
+      load(),
+    ]);
+    if (!isCurrent(context)) return;
+    const loadedPipelines = await Promise.all(
+      pipelineResponse.data.map(async pipeline => {
+        const { data } = await stagesAPI.list({ pipeline_id: pipeline.id });
+        return { ...pipeline, stages: data };
+      })
+    );
+    if (!isCurrent(context)) return;
+    products.value = productResponse.data;
+    pipelines.value = loadedPipelines;
+  } catch {
+    if (isCurrent(context)) metadataError.value = t('CRM.LEAD_LIST.LOAD_ERROR');
+  }
+};
+watch(identity, () => {
+  generation += 1;
+  showForm.value = false;
+  convertingLead.value = null;
+  pipelines.value = [];
+  products.value = [];
+  saving.value = false;
+  changingId.value = null;
+  deletingId.value = null;
+  initialize();
+});
+onMounted(() => {
   showForm.value = route.query.new === '1';
-  const [pipelineResponse, productResponse] = await Promise.all([
-    pipelinesAPI.list(),
-    productsAPI.list({ active: true }),
-    load(),
-  ]);
-  products.value = productResponse.data;
-  pipelines.value = await Promise.all(
-    pipelineResponse.data.map(async pipeline => {
-      const { data } = await stagesAPI.list({ pipeline_id: pipeline.id });
-      return { ...pipeline, stages: data };
-    })
-  );
+  initialize();
 });
 </script>
 
@@ -310,6 +375,16 @@ onMounted(async () => {
       </button>
     </form>
     <div
+      v-if="listError || metadataError"
+      role="alert"
+      class="mb-3 rounded-xl border border-n-ruby-6 bg-n-ruby-3 p-3 text-sm text-n-ruby-11"
+    >
+      {{ metadataError || t('CRM.LEAD_LIST.LOAD_ERROR') }}
+      <button type="button" class="ml-2 underline" @click="initialize">
+        {{ t('CRM.LEAD_LIST.RETRY') }}
+      </button>
+    </div>
+    <div
       v-if="viewMode === 'list'"
       class="min-h-0 flex-1 overflow-auto rounded-xl border border-n-weak bg-n-solid-2 shadow-sm"
     >
@@ -327,7 +402,12 @@ onMounted(async () => {
           </tr>
         </thead>
         <tbody class="divide-y divide-n-weak">
-          <tr v-if="!leads.length">
+          <tr v-if="loading">
+            <td colspan="6" class="px-5 py-14 text-center text-n-slate-11">
+              {{ t('CRM.LEAD_LIST.LOADING') }}
+            </td>
+          </tr>
+          <tr v-else-if="!listError && !leads.length">
             <td colspan="6" class="px-5 py-14 text-center text-n-slate-11">
               Nenhum lead encontrado.
             </td>
@@ -400,7 +480,7 @@ onMounted(async () => {
             <td class="px-3 py-3 text-right">
               <button
                 type="button"
-                :disabled="deletingId === lead.id"
+                :disabled="deletingId !== null"
                 class="inline-flex size-9 items-center justify-center rounded-lg border border-n-weak text-n-ruby-11 transition hover:bg-n-ruby-3 disabled:opacity-50"
                 title="Excluir lead"
                 @click.stop="deleteLead(lead)"

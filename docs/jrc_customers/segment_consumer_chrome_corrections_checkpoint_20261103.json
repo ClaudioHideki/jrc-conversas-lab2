@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-03",
+  "baseline": "735a24f73be431a9c8f55f403de724c1237b6dc9",
+  "status": "PARTIAL — two real Chrome defects corrected in code; new build/Chrome pending",
+  "actual_application": {
+    "url": "http://127.0.0.1:5374",
+    "database": "jrc_customer_groups_test",
+    "source": "/consolidation-segment-consumers-browser-735a24f7",
+    "prefix": "consolidation-segment-consumers-735a24f7-vite",
+    "assets": 587,
+    "source_files_verified": 11306
+  },
+  "guarded_build": {
+    "report": ".codex/segment-consumers-735a24f7-build.json",
+    "exit": 0,
+    "minimum_free_bytes": 1994735616,
+    "stop_bytes": 750000000,
+    "old_assets_not_reused": true
+  },
+  "actual_chrome_passed": {
+    "definition_create": "segmentos-modulos-c7-criacao-735a24f7-20261103.json",
+    "definition_edit_mobile": "segmentos-modulos-c7-edicao-abas-735a24f7-20261103.json",
+    "projects_four_checks": "segmentos-projetos-c7-tema-validado-735a24f7-20261103.json",
+    "service_desk_five_checks": "segmentos-servicedesk-c7-mobile-735a24f7-20261103.json",
+    "kind": "Installed Chrome; real Rails/API/PostgreSQL; synthetic accounts; desktop 1520x1050 and responsive viewport 390x844, not a physical phone",
+    "permission_five_checks": "segmentos-modulos-c7-permissoes-contas-735a24f7-20261103.json"
+  },
+  "defects": [
+    {
+      "kind": "Relationship 360 native navigation discarded customer_segment_id",
+      "report": "segmentos-relacionamento-c7-navegacao-735a24f7-20261103.json",
+      "reproduced": true,
+      "native_permissions_bypassed": false,
+      "fix": "Preserve segment for 360, quick-create and action metric routes; no change to server write/detail permissions",
+      "red": ".codex/customer-segment-relationship-navigation-red.json",
+      "red_examples": 7,
+      "red_failures": 2,
+      "fixed": ".codex/customer-segment-relationship-navigation-fixed.json",
+      "fixed_examples": 17,
+      "fixed_failures": 0
+    },
+    {
+      "kind": "Campaign dark mode used fixed pastel panels with nearly white text",
+      "report": "segmentos-campanhas-c7-previa-nativa-735a24f7-20261103.json",
+      "measured_heading_contrast": 1.0667521562545164,
+      "functional_preview_checks_passed": 4,
+      "preview_selected_contacts": 52,
+      "financial_contacts": 2,
+      "unfiltered_contacts": 54,
+      "campaigns_created": 0,
+      "fix": "Replace the local fixed scoped CSS with Tailwind utilities using the exact original light colors and existing semantic dark tokens; preserve layout, inputs and all sender behavior",
+      "regression": ".codex/customer-segment-campaign-dark-regression.json",
+      "regression_examples": 20,
+      "regression_failures": 0
+    }
+  ],
+  "lint": {
+    "errors": 0,
+    "ModulePage_warnings_before_after": [
+      114,
+      114
+    ],
+    "CampaignWizard_warnings_before_after": [
+      121,
+      121
+    ],
+    "new_spec_warnings": 0,
+    "global_clean": false
+  },
+  "test_fixture_preservation": {
+    "initial_fixture_preserved_previous_business_rows": 317,
+    "native_sd_controls_report": ".codex/segment-consumers-735a24f7-sd-controls.json",
+    "native_sd_controls_added": 6,
+    "existing_business_rows_verified_before_controls": 476,
+    "original_fixture_file_preserved": true,
+    "roles_and_permissions_unchanged": true,
+    "native_scope": "Agent reads are restricted to creator/assignee/native team/approval; unit membership alone is not tickets_view_all.",
+    "extended_fixture": ".codex/segment-consumers-735a24f7-ui-sd-controls.json"
+  },
+  "pending": [
+    "New guarded build and actual Chrome for both fixes",
+    "Actual Campaign draft creation/edit/persistence; do not request review, launch or send in Chrome",
+    "Final database/private-file integrity and refreshed checks on the new compilation",
+    "Word audit of Stage C and remaining requirements",
+    "TRR undefined; D/E/F/G not declared complete"
+  ],
+  "restrictions": {
+    "push": false,
+    "deploy": false,
+    "image_build_or_publish": false,
+    "production_changed": false,
+    "migrations": false,
+    "deleted_files_or_data": false,
+    "external_operations": 0
+  }
+}

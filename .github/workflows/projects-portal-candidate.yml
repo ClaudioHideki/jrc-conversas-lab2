@@ -4,6 +4,7 @@ on:
   push:
     branches: ['main', 'codex/projetos-portal-*', 'codex/consolidacao-*']
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -39,6 +40,9 @@ jobs:
       REDIS_URL: redis://127.0.0.1:6379/15
       FRONTEND_URL: https://host.example.test
       SECRET_KEY_BASE: isolated-voice-v4-ci-not-a-production-secret
+      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: '11111111111111111111111111111111'
+      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: '22222222222222222222222222222222'
+      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: '33333333333333333333333333333333'
       BUNDLE_FROZEN: 'true'
       SCHEMA: /tmp/projects-portal-schema.rb
       TZ: UTC
@@ -54,8 +58,7 @@ jobs:
               sudo sed -i -E -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' "$source"
             fi
           done
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev fonts-dejavu-core
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
@@ -85,7 +88,9 @@ jobs:
       - name: Concorrencia com fixtures commitadas apos a suite transacional
         run: |
           # Committed concurrency fixtures must not contaminate global-count assertions above.
-          mapfile -t specs < <(git ls-files spec/requests/api/v1/accounts/jrc_operations spec/requests/api/v1/accounts/jrc_service_desk spec/services/jrc_service_desk spec/services/jrc_contact_center | grep 'concurrency_spec.rb$')
+          # These three sources require their named committed databases and are
+          # executed in the dedicated steps below, never as skipped duplicates.
+          mapfile -t specs < <(git ls-files spec/requests/api/v1/accounts/jrc_operations spec/requests/api/v1/accounts/jrc_service_desk spec/services/jrc_service_desk spec/services/jrc_contact_center | grep 'concurrency_spec.rb$' | grep -Ev '/(rich_comments_concurrency|closure_revision_concurrency|integrated_assignment_concurrency)_spec.rb$')
           bundle exec rspec "${specs[@]}" --format progress --format json --out /tmp/projects-portal-concurrency.json
       - name: Concorrencia SD no banco dedicado exigido pelos guards
         env:
@@ -94,7 +99,7 @@ jobs:
         run: |
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
-          bundle exec rspec spec/services/jrc_service_desk/closure_revision_concurrency_spec.rb spec/services/jrc_service_desk/integrated_assignment_concurrency_spec.rb
+          bundle exec rspec spec/services/jrc_service_desk/closure_revision_concurrency_spec.rb spec/services/jrc_service_desk/integrated_assignment_concurrency_spec.rb --format progress --format json --out /tmp/projects-portal-sd-concurrency.json
       - name: Comentarios ricos concorrentes no banco dedicado exigido pelo guard
         env:
           POSTGRES_DATABASE: jrc_four_fronts_concurrency_20261026_test
@@ -102,7 +107,10 @@ jobs:
         run: |
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
-          bundle exec rspec spec/requests/api/v1/accounts/jrc_operations/rich_comments_concurrency_spec.rb
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_operations/rich_comments_concurrency_spec.rb --format progress --format json --out /tmp/projects-portal-comments-concurrency.json
+      - name: Exigir exemplos executados e nenhuma falha ou pendencia nos quatro bancos
+        run: |
+          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort "Empty, failed or pending native gate: #{path}" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/projects-portal-rspec.json /tmp/projects-portal-concurrency.json /tmp/projects-portal-sd-concurrency.json /tmp/projects-portal-comments-concurrency.json
       - name: Baseline revisado do produto ou da extensao
         run: |
           baseline=35976b08077035ee79843b07ad02c0389d002f09
@@ -154,6 +162,9 @@ jobs:
           --maxWorkers=2 --minWorkers=1 --no-file-parallelism
           --reporter=default --reporter=json --outputFile=/tmp/projects-portal-vitest.json
       - name: Build frontend real
+        # The A-G image workflow performs the one protected production build,
+        # verifies fresh entrypoints/CSS and refuses publication on any failure.
+        if: github.ref_name != 'codex/lab2-ag-consolidada-20261110' && github.ref_name != 'codex/lab2-ag-atualizacoes-20261112'
         env:
           NODE_OPTIONS: --max-old-space-size=6144
         run: bundle exec vite build
@@ -173,6 +184,8 @@ jobs:
           path: |
             /tmp/projects-portal-rspec.json
             /tmp/projects-portal-concurrency.json
+            /tmp/projects-portal-sd-concurrency.json
+            /tmp/projects-portal-comments-concurrency.json
             /tmp/projects-portal-vitest.json
             /tmp/projects-portal-schema.rb
             /tmp/projects-portal-schema-regression.json

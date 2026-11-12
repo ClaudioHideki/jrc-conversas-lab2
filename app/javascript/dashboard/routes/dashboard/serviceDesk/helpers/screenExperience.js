@@ -86,6 +86,8 @@ export function namedReportValue(dimension, value, items, context, unitId) {
     by_service: 'service',
     by_category: 'category',
     by_priority: 'priority',
+    by_status: 'status',
+    by_team: 'team',
     by_customer: 'company',
   }[dimension];
   if (!field) return null;

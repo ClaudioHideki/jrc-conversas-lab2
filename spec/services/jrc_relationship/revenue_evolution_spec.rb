@@ -11,6 +11,8 @@ RSpec.describe JrcRelationship::RevenueEvolution, type: :request do
                                     order_origin: 'direct_sale', status: 'pending', monthly_cents: 100_000)
     request = row.backoffice_requests.find_by!(request_kind: 'approval')
     JrcCrm::OrderApprovalService.new(order: row, actor: sd_user).decide!(request: request, decision: 'approved')
+    fulfillment = row.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    fulfillment.advance!(actor: sd_user) while %w[request analysis documentation approval].include?(fulfillment.stage)
     row.reload
   end
   let(:contract) do
@@ -91,6 +93,8 @@ RSpec.describe JrcRelationship::RevenueEvolution, type: :request do
                                                  order_origin: 'direct_sale', status: 'pending', monthly_cents: 100_000)
     approval = additional_order.backoffice_requests.find_by!(request_kind: 'approval')
     JrcCrm::OrderApprovalService.new(order: additional_order, actor: sd_user).decide!(request: approval, decision: 'approved')
+    fulfillment = additional_order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    fulfillment.advance!(actor: sd_user) while %w[request analysis documentation approval].include?(fulfillment.stage)
     additional_contract = additional_order.reload.contracts.find_by!(source_contract_id: nil)
     observation(contracts: [contract.id, additional_contract.id], amount: 200_000)
     observation(assignment: contact_assignment)
@@ -114,6 +118,8 @@ RSpec.describe JrcRelationship::RevenueEvolution, type: :request do
                                              order_origin: 'direct_sale', status: 'pending', monthly_cents: 500_000)
     request = foreign_order.backoffice_requests.find_by!(request_kind: 'approval')
     JrcCrm::OrderApprovalService.new(order: foreign_order, actor: foreign_order.owner).decide!(request: request, decision: 'approved')
+    fulfillment = foreign_order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    fulfillment.advance!(actor: foreign_order.owner) while %w[request analysis documentation approval].include?(fulfillment.stage)
     observation(contracts: [foreign_order.reload.contracts.first.id])
     expect(evolution[:points].first[:evidence].pluck(:snapshot_ids).flatten).to eq([valid.id])
   end

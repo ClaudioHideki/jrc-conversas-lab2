@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-06",
+  "preserved_checkpoint_before_shared_change": "08af931b0efa94726be5a3a77ffd894dbb9df71e",
+  "business_decision": "User explicitly approved multiple active operational portfolios for the same existing customer.",
+  "word": [
+    "Relationship P0123-P0128: named grouping, objectives, segment, owner, team, visibility, capacity/goals, existing-customer membership and explicit native permissions.",
+    "P0091-P0107: configured units, unique global allocation, reviewed transfers and safe eligibility withdrawal."
+  ],
+  "confirmed_source_gap": "Assignment is a unique native company/contact allocation; no named portfolio-group or group membership model/route exists. Native teams cannot be repurposed as artificial portfolios or grants.",
+  "incremental_design": [
+    "Add named portfolio groups and many-to-many links to existing Assignment IDs; never create parallel companies, contacts, assignment owners or teams.",
+    "Keep native module/account/corporate/unit scopes as upper bounds; portfolio visibility only narrows access and cannot grant customer/source access.",
+    "Preserve group metadata/goals separately from native source business changes; no generic source writes, automatic transfers or invented financial formulas.",
+    "Use fresh native transaction authority, optimistic version, immutable native audit and soft deactivation/archive instead of deletion.",
+    "Introduce native account/group/assignment FK protections and deduplicated links; owner/module eligibility and source scopes must be checked on every write/read.",
+    "Active group coordination responsibilities must enter native withdrawal readiness; unrelated module work remains excluded.",
+    "Group membership must not multiply native global capacity. Existing global/scoped limits and v1 review history stay unchanged; future group measures must be explicitly separated and guarded.",
+    "Implement native vertical slice, then integrate source UI, filtering/capacity/preview and tests before declaring the Word requirement complete."
+  ],
+  "pending_business_data": "No inferred language/affinity/conflict-of-interest sources or illustrative default weights.",
+  "restrictions": "No build,push,GHCR,deploy,cleanup,external real operations,5379change or original-container restart. Additive migration only in exact owned synthetic candidateDB.",
+  "disk_bytes": 5140819968,
+  "status": "Implementation starting; design/checkpoint is not functionality acceptance.",
+  "audit_verification_20261106": "Planned immutable native audit is not yet established for generic JrcCrm::AuditEvent; application-readonly ConfigurationVersion and DB-pinned BatchReview are distinct protections. Preserve full requirement as pending and do not claim a seal for operational audit summaries."
+}

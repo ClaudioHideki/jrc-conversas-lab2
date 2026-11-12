@@ -1,0 +1,100 @@
+{
+  "date": "2026-11-10",
+  "branch": "codex/lab2-ag-consolidada-20261110",
+  "main_sha": "d8a83b824b11cc68ddbbce7c79681f368051fb70",
+  "ag_parent": "647fda5177a653b4a08b5b80679e61fa399f1919",
+  "merge_base": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+  "main_advances_since_pdf": [
+    "d8a83b824b11cc68ddbbce7c79681f368051fb70 fix(ci): validate consolidated NICO grants and isolated routing fixtures",
+    "2dbcf184677416f9ddb09adde0ec223647a25c70 merge(core): preserve latest company Portal routing from Claudio",
+    "9f508b8c571937258b16e5e4e100ffee3aa67f80 fix(portal): retain explicit removal of all routing settings",
+    "e4a86a56529a6278cee0c37cddcadc6f21e40daa test(portal): verify routing isolation and recipient revocations",
+    "8a05ec2a2912f5ff77e7c48b159c1f5d208e2d71 feat(portal): route requests to fixed assignees by company"
+  ],
+  "main_only_paths_verified_unchanged": 544,
+  "word_originals": [
+    {
+      "name": "JRC-CONVERSAS-CADASTRO-MESTRE-CLIENTES-ESPECIFICACAO-DEV-20261101 (1).docx",
+      "sha256": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
+      "matches_original": true
+    },
+    {
+      "name": "Especificacao_Central_Aprovacoes_JRC_Conversas_DEV.docx",
+      "sha256": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917",
+      "matches_original": true
+    },
+    {
+      "name": "JRC_Conversas_Backoffice_Projeto_DEV_20261101.docx",
+      "sha256": "ebd5cd1db7fa53cc7bf7e2fa6a801e498735eaef9d67040002a5a9ade4878284",
+      "matches_original": true
+    },
+    {
+      "name": "JRC_Conversas_Relacionamento_V2_Projeto_Completo_Dev_Com_Imagens_20261101.docx",
+      "sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+      "matches_original": true
+    }
+  ],
+  "schema_strategy": "Pinned main schema retained unchanged, including native SQL functions/triggers. Final schema must be regenerated from a proved migrated synthetic PostgreSQL database.",
+  "blocking_migration_collisions": {
+    "20261102090000": [
+      "20261102090000_create_backoffice_signature_deliveries.rb",
+      "20261102090000_create_jrc_broker_webhook_obligations.rb"
+    ],
+    "20261102100000": [
+      "20261102100000_allow_signature_reconciliation_observations.rb",
+      "20261102100000_create_jrc_human_assignment_policy_events.rb"
+    ]
+  },
+  "migration_reconciliation_required": [
+    "Keep both historical origin commits and SQL checksums. Never treat an existing numeric version as evidence both migrations executed.",
+    "Prove main-origin and A-G-origin upgrade fixtures. Distinguish each original schema and existing applied migration before any adoption.",
+    "Choose and test a compatible identity/adoption mechanism; do not silently rename deployed migrations, delete ledger entries on real databases, or use if_not_exists to hide divergent schema.",
+    "The new CI fixture edits the migration ledger only while reproducing pinned main in a newly empty disposable CI database. It is not a production repair script."
+  ],
+  "verified": {
+    "node_state_tests": 229,
+    "migration_identity_unit_tests": 4,
+    "vue_sfc_files": 7,
+    "lint_files": 13,
+    "lint_errors": 0,
+    "lint_warnings": 195
+  },
+  "qualifications": [
+    "Lint passed before the final CompanyEditor layout/test addition; that addition only has fresh SFC verification, not a claimed fresh lint/Vitest pass.",
+    "The 98 Vue examples on A-G parent are historical results, not test proof of the combined tree.",
+    "Native RSpec, PostgreSQL, fresh/upgrade installations, schema regeneration and browser acceptance have not executed on the combined candidate.",
+    "The new workflow is prepared and YAML-checked but unexecuted. Identity gate intentionally blocks native lanes until collisions are genuinely resolved.",
+    "326 native spec files are partitioned by their existing synthetic-database guards; no zero-example or pending suite can pass the prepared gate."
+  ],
+  "prepared_not_executed": [
+    "two scoped establishment CSV RSpec cases",
+    "CompanyEditor establishment/tab/revision Vue case",
+    "eight fresh/upgrade CI lanes across four disposable database groups"
+  ],
+  "remaining": [
+    "two migration identity collisions",
+    "native execution of full A-G APIs/services and affected-module regressions",
+    "Sofia and Backoffice real CSS desktop/mobile light/dark acceptance",
+    "externally authorized DocuSign/demo, scanner and real-channel acceptance",
+    "approved real operational parameters still not configured"
+  ],
+  "resources": {
+    "disk_initial_GiB": 4.97,
+    "disk_min_GiB": 4.556,
+    "disk_current_GiB": 4.556,
+    "ram_min_observed_MiB": 735.7,
+    "vue_attempt_interrupted_by_guard": true
+  },
+  "restrictions_preserved": {
+    "push": false,
+    "workflow_dispatch": false,
+    "image_publication": false,
+    "deploy": false,
+    "local_database_writes": false,
+    "build": false,
+    "original_workspaces_modified": false,
+    "protected_processes_interrupted": false
+  },
+  "ready_for_homologation": false,
+  "all_stages_complete": false
+}

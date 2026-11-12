@@ -2,6 +2,7 @@
 import { surveyClasses } from '../surveys/surveyClasses';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import SatisfactionDashboard from '../components/SatisfactionDashboard.vue';
 import SurveyModelsManager from '../surveys/SurveyModelsManager.vue';
 import ModulePage from '../../jrcRelationship/ModulePage.vue';
 import ScopeBar from '../components/ScopeBar.vue';
@@ -10,7 +11,7 @@ import { useServiceDesk } from '../composables/useServiceDesk';
 import { canonicalId } from '../helpers/access';
 const { t } = useI18n();
 const session = useServiceDesk();
-const tab = ref('results');
+const tab = ref('overview');
 const unitId = ref('');
 const operatorId = ref('');
 const allowed = computed(
@@ -32,7 +33,7 @@ const identity = computed(
 watch(
   [() => session.state.context, () => session.state.status],
   () => {
-    tab.value = 'results';
+    tab.value = 'overview';
     unitId.value = '';
     operatorId.value = '';
   },
@@ -42,24 +43,26 @@ watch(
 
 <template>
   <section class="grid gap-4">
-    <h2 class="sd-page-title">{{ t('JRC_SERVICE_DESK.SCREENS.surveys') }}</h2>
-    <p class="text-sm text-n-slate-11">
-      {{ t('JRC_SERVICE_DESK.SURVEYS.native_scope') }}
-    </p>
+    <header
+      class="rounded-2xl bg-gradient-to-r from-[#031a3a] via-[#073f82] to-blue-700 p-5 text-white shadow-md"
+    >
+      <h2 class="m-0 flex items-center gap-3 text-2xl font-bold !text-white">
+        <span aria-hidden="true" class="i-lucide-user-round-check size-8" />{{
+          t('JRC_SERVICE_DESK.SCREENS.surveys')
+        }}
+      </h2>
+      <p class="mb-0 mt-2 text-sm text-blue-100">
+        {{ t('JRC_SERVICE_DESK.SATISFACTION.subtitle') }}
+      </p>
+    </header>
     <ScopeBar
       v-if="allowed"
       v-model:unit-id="unitId"
       v-model:operator-id="operatorId"
       required
+      class="rounded-xl border border-blue-200 bg-n-solid-1 p-3 [&>p]:hidden"
       data-testid="native-survey-scope"
     />
-    <p v-if="selected" class="rounded-lg border border-n-weak p-3 text-sm">
-      {{
-        t('JRC_SERVICE_DESK.EXPERIENCE.survey_scope_help', {
-          unit: selected.name,
-        })
-      }}
-    </p>
     <nav
       v-if="selected"
       :class="surveyClasses('sv-native-tabs')"
@@ -69,15 +72,22 @@ watch(
     >
       <button
         type="button"
+        :class="[
+          surveyClasses('sv-button'),
+          tab === 'overview' ? '!bg-blue-600 !text-white' : '',
+        ]"
+        :aria-selected="tab === 'overview'"
+        @click="tab = 'overview'"
+      >
+        {{ t('JRC_SERVICE_DESK.SATISFACTION.overview') }}
+      </button>
+      <button
+        type="button"
         :class="surveyClasses('sv-button')"
         :aria-selected="tab === 'results'"
         @click="tab = 'results'"
       >
-        {{
-          $t(
-            'RELATIONSHIP.SURVEY_MODELS_V3.COPY.RESPOSTAS_E_INDICADORES_B03807'
-          )
-        }}
+        {{ t('JRC_SERVICE_DESK.SATISFACTION.responses_tab') }}
       </button>
       <button
         type="button"
@@ -85,11 +95,15 @@ watch(
         :aria-selected="tab === 'models'"
         @click="tab = 'models'"
       >
-        {{
-          $t('RELATIONSHIP.SURVEY_MODELS_V3.COPY.MODELOS_DE_PESQUISA_7678A4')
-        }}
+        {{ t('JRC_SERVICE_DESK.SATISFACTION.models_rules') }}
       </button>
     </nav>
+    <SatisfactionDashboard
+      v-if="selected && tab === 'overview'"
+      :key="identity"
+      :unit-id="selected.id"
+      @responses="tab = 'results'"
+    />
     <SurveyModelsManager
       v-if="selected && tab === 'models'"
       :key="identity"

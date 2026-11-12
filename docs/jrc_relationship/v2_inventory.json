@@ -1,0 +1,174 @@
+{
+  "source_document": "JRC_Conversas_Relacionamento_V2_Projeto_Completo_Dev_Com_Imagens_20261101.docx",
+  "source_sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+  "base_commit": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+  "branch": "codex/relacionamento-v2-20261101",
+  "word_text_read_in_full": true,
+  "figures_inspected": 22,
+  "baseline_tests_status": "Baseline principal: 404 exemplos, 20 falhas investigadas. Checkpoint registra validações incrementais reais; não homologação integral.",
+  "runtime": {
+    "ruby": "3.4.4",
+    "rails": "7.1.5.2",
+    "frontend": "Vue 3, Vite e Tailwind; package.json 4.16.2 é metadado do pacote, não prova de paridade com Chatwoot."
+  },
+  "areas": [
+    {
+      "area": "Dashboard",
+      "baseline_status": "Parcial",
+      "reuse": "Presenter calcula indicadores reais, tendências e prioridades no escopo autorizado.",
+      "remaining": "Meu Painel por usuário, retornos, evidências de atualização e apresentação colorida.",
+      "evidence": [
+        "app/services/jrc_relationship/presenter.rb",
+        "app/controllers/api/v1/accounts/relationship/dashboard_controller.rb"
+      ],
+      "delivery_status": "parcial; consultar checkpoint e matriz de continuidade"
+    },
+    {
+      "area": "Central de Ações",
+      "baseline_status": "Parcial",
+      "reuse": "Action, Workflow, SLA, projeção de agenda e fontes nativas existem.",
+      "remaining": "Drawer com histórico; registrar resultado, próximo passo e retorno; Minhas Ações; confirmação do cliente separada da solução técnica.",
+      "evidence": [
+        "app/models/jrc_relationship/action.rb",
+        "app/services/jrc_relationship/workflow.rb",
+        "app/services/jrc_relationship/action_sources.rb"
+      ],
+      "delivery_status": "parcial; consultar checkpoint e matriz de continuidade"
+    },
+    {
+      "area": "Carteiras",
+      "baseline_status": "Parcial",
+      "reuse": "Assignment vincula cliente do Cadastro Mestre a responsável/unidade; filtros, paginação e escopo reais.",
+      "remaining": "Carteira como agrupamento configurável, editor por abas, equipe/capacidade, preservando os vínculos legados.",
+      "evidence": [
+        "app/models/jrc_relationship/assignment.rb",
+        "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+        "app/policies/jrc_relationship/assignment_policy.rb"
+      ],
+      "delivery_status": "parcial; consultar checkpoint e matriz de continuidade"
+    },
+    {
+      "area": "Cliente 360º e documentos",
+      "baseline_status": "Parcial / documentos ausentes no Relacionamento",
+      "reuse": "Customer360, Visibility, CustomerPanel e WorkContext reutilizam módulos e políticas de origem. Active Storage e scanner ClamAV local já existem no sistema.",
+      "remaining": "Documentos versionados por cliente, validade, solicitação autorizada e acesso/auditoria próprios. Scanner indisponível deve bloquear liberação; não herdar ACL do Backoffice/Service Desk.",
+      "evidence": [
+        "app/services/jrc_customers/customer360.rb",
+        "app/services/jrc_relationship/work_context.rb",
+        "app/services/jrc_service_desk/attachment_scanner.rb"
+      ],
+      "delivery_status": "parcial; consultar checkpoint e matriz de continuidade"
+    },
+    {
+      "area": "Saúde e Riscos",
+      "baseline_status": "Parcial",
+      "reuse": "HealthScore, snapshots por viewer/assinatura de acesso, pesos totalizando 100 e regras versionadas; dados ausentes não viram zero.",
+      "remaining": "Unir navegação, cobertura de dados imputados, histerese, frescor, correlação de sinais e evidências explicáveis.",
+      "evidence": [
+        "app/services/jrc_relationship/health_score.rb",
+        "app/services/jrc_relationship/processor.rb",
+        "app/models/jrc_relationship/configuration.rb"
+      ],
+      "delivery_status": "parcial; consultar checkpoint e matriz de continuidade"
+    },
+    {
+      "area": "Planos de Acompanhamento",
+      "baseline_status": "Existente a evoluir",
+      "reuse": "SuccessPlan/Qbr, metas, marcos, participantes e agenda nativa existem; renovações/expansão encaminham ao CRM.",
+      "remaining": "Organizar dentro da área em pop-ups por abas, sem duplicar CRM, reuniões ou pesquisas.",
+      "evidence": [
+        "app/models/jrc_relationship/success_plan.rb",
+        "app/models/jrc_relationship/qbr.rb",
+        "app/services/jrc_relationship/workflow.rb"
+      ],
+      "delivery_status": "parcial; consultar checkpoint e matriz de continuidade"
+    },
+    {
+      "area": "Automações NICO",
+      "baseline_status": "Parcial",
+      "reuse": "Scheduler/Refresh, processamento, playbooks, prévias, políticas e pesquisas nativas existem.",
+      "remaining": "Cobertura sem responsável, última execução/falhas, governança e distinção entre sugestão, processamento e execução real.",
+      "evidence": [
+        "app/jobs/jrc_relationship/scheduler_job.rb",
+        "app/jobs/jrc_relationship/refresh_job.rb",
+        "app/services/jrc_relationship/playbooks.rb"
+      ],
+      "delivery_status": "parcial; consultar checkpoint e matriz de continuidade"
+    },
+    {
+      "area": "Relatórios e BI",
+      "baseline_status": "Existente a evoluir",
+      "reuse": "ReportMetrics, RevenueMetrics, tendências e exportação usam dados autorizados e ausência explícita em vários indicadores.",
+      "remaining": "Filtro por carteira, permissões específicas, distinção consistente entre zero/dado ausente/integração e evidências de escala.",
+      "evidence": [
+        "app/services/jrc_relationship/report_metrics.rb",
+        "app/services/jrc_relationship/revenue_metrics.rb",
+        "app/controllers/api/v1/accounts/relationship/dashboard_controller.rb"
+      ],
+      "delivery_status": "parcial; consultar checkpoint e matriz de continuidade"
+    },
+    {
+      "area": "Configurações e RBAC",
+      "baseline_status": "Parcial",
+      "reuse": "Quatro permissões do módulo, regras/versionamento e escopos de operadora/unidade já aplicados no servidor.",
+      "remaining": "Separar capacidades sensíveis sem ampliar acesso legado; nove áreas horizontais; políticas de carteira/capacidade e revisão.",
+      "evidence": [
+        "app/policies/jrc_relationship/module_policy.rb",
+        "app/services/jrc_relationship/context.rb",
+        "app/services/jrc_crm/organizational_visibility.rb"
+      ],
+      "delivery_status": "parcial; consultar checkpoint e matriz de continuidade"
+    },
+    {
+      "area": "Redistribuição dentro de Carteiras",
+      "baseline_status": "Parcial",
+      "reuse": "ReviewedPortfolioBatch mantém snapshot/digest e resultados por item; Central é usada por operações nativas.",
+      "remaining": "Três etapas distintas, capacidade, aprovação de proposta sem transferência, execução por job/retry, validação de alterações e remoção segura de compromissos.",
+      "evidence": [
+        "app/services/jrc_relationship/reviewed_portfolio_batch.rb",
+        "app/services/jrc_relationship/batch_review_plan.rb",
+        "app/services/jrc_relationship/portfolio_batch.rb"
+      ],
+      "delivery_status": "parcial; consultar checkpoint e matriz de continuidade"
+    }
+  ],
+  "navigation_baseline": {
+    "screens": 15,
+    "lateral_duplicates": true,
+    "target_main_areas": 9,
+    "legacy_routes_to_preserve": true
+  },
+  "figure_divergences": [
+    "Figuras com submenus laterais/área principal de equipe não devem ser copiadas.",
+    "Figuras 8/22 não autorizam limites fixos, transferência ao salvar capacidade nem execução junto da aprovação.",
+    "Figuras 12/15: resultado parcial não autoriza conclusão global.",
+    "Figura 16: remover analista exige destino efetivo de clientes e todos os compromissos.",
+    "Figuras 17/19: reversão é nova operação controlada; evitar modais empilhados e retry de item concluído.",
+    "Valores, tendências, nomes e probabilidades das imagens são exemplos."
+  ],
+  "phases": [
+    {
+      "phase": "P0",
+      "scope": "Inventário, isolamento, Dashboard/Meu Painel, Central de Ações e Carteiras.",
+      "status": "em análise"
+    },
+    {
+      "phase": "P1",
+      "scope": "360, documentos, saúde, NICO por exceção e integrações.",
+      "status": "pendente"
+    },
+    {
+      "phase": "P2",
+      "scope": "Equipe/capacidade, simulação/aprovação/execução segura, planos e QBR.",
+      "status": "pendente"
+    },
+    {
+      "phase": "P3",
+      "scope": "Relatórios, governança, UX, escala e observabilidade.",
+      "status": "pendente"
+    }
+  ],
+  "production_actions_allowed": false,
+  "backoffice_publication_branch_untouched": true,
+  "checkpoint": "docs/jrc_relationship/v2_checkpoint_20261102.json"
+}

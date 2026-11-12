@@ -1,0 +1,263 @@
+{
+  "date": "2026-11-02",
+  "phase": "B — representação e poderes; B3 e C/D/E/F/G continuam abertos",
+  "global_state": "parcial; não é conclusão das quatro frentes nem homologação jurídica/externa",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "c042363c8a0e9b2fd81e4d075ddbf0312567101e",
+  "implemented": [
+    "Proposta imutável/cifrada com versão contratual, roster e documentos exatos; provas para todas as pessoas obrigatórias, inclusive assinatura conjunta.",
+    "Fundamento, justificativa e validade por pessoa; CPF, OCR e verificação de arquivo não concedem poderes.",
+    "Única Central decide pelo catálogo contracts.signer_authority: versões, etapas, quorum, motivos, delegações, expiração, CAS, deduplicação e auditoria nativos.",
+    "Ausência de política, documento substituído, versão/roster/cadastro alterados, prazo vencido ou contexto sem cobertura bloqueiam validação positiva.",
+    "Verificação física de todos os documentos e do PDF exato antes da aprovação positiva; rejeição autorizada continua possível se os bytes estiverem corrompidos.",
+    "Revisor recebe somente a origem jurídica designada e seus arquivos conhecidos, sem ownership Backoffice, edição de CPF, navegação geral de documentos ou envio.",
+    "Histórico10/página filtra a unidade/emitente selados antes da contagem; mudança de unidade atual não libera o histórico anterior.",
+    "Interface contextual com diálogo nativo limitado, temas, máscara de CPF, download privado/no-store e descarte de respostas tardias após mudança de conta/usuário/permissões.",
+    "Aprovação de poderes não assina contrato nem libera implantação; bloqueio operacional comprovado no navegador."
+  ],
+  "native_code_reused": [
+    "JrcApprovals::Requests/Decisions/RequestVisibility/Authorization/Eligibility/Policies/Delegations",
+    "JrcBackoffice::ContractAccess/ContractVersions/SignerRoster/DocumentSafety",
+    "JrcCustomers::ContactDirectory/Company",
+    "JrcCrm::OrganizationalVisibility/CorporateIssuer/AuditEvent"
+  ],
+  "migrations": {
+    "new": [
+      "20261102080000"
+    ],
+    "schema": "20261102080000",
+    "authority_foreign_keys": 7,
+    "immutable_trigger": true,
+    "fresh_schema_load": {
+      "path": ".codex/consolidation-authority-schema-load.json",
+      "sha256": "dee28e6ad6b3d0a0d3f859fd858fbb682cdb45e9b77c14d2eb49826c94af8792"
+    },
+    "production_applied": false
+  },
+  "validation": {
+    "selected_backend": {
+      "duration": 751.485542365,
+      "example_count": 604,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "artifact": {
+        "path": ".codex/consolidation-authority-backend-final.json",
+        "sha256": "9667bd058f6db9435ba94a93fa1f111e55b198c4452c21f8474a355032d3d2e5"
+      },
+      "scope": "63 arquivos selecionados. Anterior ao ajuste final de rejeição; esse delta foi verificado separadamente. Não é toda a suíte."
+    },
+    "native_approval_negative_regression": {
+      "duration": 723.69896595,
+      "example_count": 83,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "artifact": {
+        "path": ".codex/consolidation-authority-negative-regression-corrected.json",
+        "sha256": "eaaeb1eb38e1c220b6705cfd413020dfdc17cb793be40112239f907add8ea1ca"
+      }
+    },
+    "final_catalog_real_pg_concurrency": {
+      "duration": 56.807733925,
+      "example_count": 7,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "artifact": {
+        "path": ".codex/consolidation-authority-checkpoint-concurrency.json",
+        "sha256": "74fb5876b21c35bfbc7a83380e1d69553457b03d15c89ec9bdb816b2aa9e1dfc"
+      },
+      "scope": "4 catálogo +3 cenários reais PostgreSQL com specs finais. Os11 API constam na regressão corrigida; só alinhamento mudou depois."
+    },
+    "frontend": {
+      "tests": 207,
+      "failures": 0,
+      "pending": 0,
+      "artifact": {
+        "path": ".codex/consolidation-authority-frontend-scroll.json",
+        "sha256": "485b4b7de04b6a53aa967311a214d840425b06de4c238708ef39fcfe340cd8d2"
+      }
+    },
+    "ruby_new_files": {
+      "offense_count": 0,
+      "target_file_count": 20,
+      "inspected_file_count": 20,
+      "artifact": {
+        "path": ".codex/consolidation-authority-checkpoint-ruby.json",
+        "sha256": "db9efea5cd42fba6eae120e0138abdd0e513cf80183fb7232a8de98753f7c52e"
+      }
+    },
+    "ruby_overall": {
+      "passed": false,
+      "artifact": {
+        "path": ".codex/consolidation-authority-ruby-final.json",
+        "sha256": "914cb82466ab70de83984877bf37c4328294f03f18b11c6f09b95cc915d4f00d"
+      },
+      "note": "Relatório inicial geral continha67 infrações em arquivos novos/compartilhados. Novos arquivos foram corrigidos e rechecados; não se declara lint global limpo."
+    },
+    "eslint": {
+      "errors": 0,
+      "warnings": 20,
+      "artifact": {
+        "path": ".codex/consolidation-authority-dialog-lint.json",
+        "sha256": "f78614ab36c4062f0929a9ac8e9d9546233d8dace0023764228c34dc9043b338"
+      }
+    },
+    "assets_build": {
+      "passed": true,
+      "duration": "2m38s",
+      "artifact": {
+        "path": ".codex/consolidation-authority-scroll-production-build.log",
+        "sha256": "6d2a615793f2b8de90b48e47293a80f076e6f2741d3180a16e85e1cc2362b028"
+      },
+      "docker_build": false
+    },
+    "rails_eager_load": {
+      "passed": true,
+      "artifact": {
+        "path": ".codex/consolidation-authority-zeitwerk.log",
+        "sha256": "37ee5a43f04218bf74e9d5dd97235e8f10661820f50e3f170370532a827274fb"
+      }
+    },
+    "source": {
+      "files": 11209,
+      "baseline": "c042363c8a0e9b2fd81e4d075ddbf0312567101e",
+      "mismatches": [],
+      "snapshot": "/consolidation-authority-checkpoint",
+      "sql_raw_hashes": true,
+      "manifest": {
+        "path": ".codex/consolidation-authority-source-manifest.json",
+        "sha256": "726a24ac5d27881e02910f145c5c36513cf8820b9958995a1f066ea7873ad64e"
+      },
+      "note": "Textos normalizam CRLF; dois SQL críticos conferidos por bytes."
+    },
+    "browser": {
+      "proposal_id": 1,
+      "approval_id": 1,
+      "created_by_real_ui": true,
+      "all_required_people": true,
+      "pending_after_create": true,
+      "reload_preserved": true,
+      "private_exact_pdf": true,
+      "mobile_context": true,
+      "reviewer_bounded_origin": true,
+      "reviewer_generic_backoffice_denied": true,
+      "decision_by_real_ui": true,
+      "powers_verified_in_test": true,
+      "implementation_without_signature_blocked": true,
+      "page_errors": [],
+      "external_contracts_sent": 0,
+      "synthetic_only": true,
+      "antivirus_daemon": "simulated protocol response",
+      "external_signature_homologation": false,
+      "legal_validity": false,
+      "status": "passed",
+      "artifact": {
+        "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/poderes-central-resultado.json",
+        "sha256": "820fd4de0157c078c7d57dcfcfe35e2bf23cc2c76d033dca4753c302b0eab238"
+      },
+      "source": "/consolidation-authority-scroll",
+      "note": "Mesmo código de produção do checkpoint; somente três specs receberam correções de estilo/nome depois do browser."
+    },
+    "images_inspected": [
+      {
+        "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/58-poderes-formulario-claro.png",
+        "sha256": "bab219fa3e2a31d4697f57190a8f2e3196a582727043397f8f898d622c6a0449"
+      },
+      {
+        "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/59-poderes-formulario-escuro.png",
+        "sha256": "0a3bb4a06245aa3c005b46557df293c208bfc0bc6a88d591a7ae1635058ec59c"
+      },
+      {
+        "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/60-poderes-contexto-celular.png",
+        "sha256": "49a4cd67d7a97d5a8d4cd3cb6815cf0901a569ea3ac0e23da28db0a5e2895aeb"
+      },
+      {
+        "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/61-central-poderes-revisor-claro.png",
+        "sha256": "fd5335f9b3b88ffaa5085fa959cf8dccb378216e3b9781e873262f862f0ba964"
+      },
+      {
+        "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/62-central-poderes-revisor-escuro.png",
+        "sha256": "e29c531256781011c2ce04cbe1651fb1e035833f8322366e0102d4e6ddef5eca"
+      },
+      {
+        "path": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/63-poderes-aprovados-sem-assinatura.png",
+        "sha256": "1931bff11a9c6419f7bd6665239fc6ed6db2e10d584c461725f9ac37d16148e9"
+      }
+    ]
+  },
+  "failures_preserved": [
+    "Primeira regressão78/12: evento de auditoria novo ausente na lista; corrigido sem relaxar guards.",
+    "Recheck17/2: expectativas divergiam de404 nativo e objeto de política não recarregado; corrigidas mantendo acesso negado.",
+    "Regressão600/1: catálogo novo não estava na expectativa exata legada; adicionada a chave e validado seu schema, sem remover itens.",
+    "Primeiro browser: footer do diálogo fora da viewport; corrigido com contained/useForm=false e novo teste com Dialog real.",
+    "Primeira repetição do browser ocorreu antes do Rails disponível; helper agora espera HTTP200 local antes de executar.",
+    "Uma chamada de regressão tinha caminho de spec inexistente: zero casos executados/exit1, preservada; repetição usa arquivo confirmado.",
+    "Execução conjunta API/concorrência em banco dedicado: guard dos11 specs API recusou o banco. Guard preservado; API coberta no banco candidato e concorrência/catálogo repetidos separadamente.",
+    "Estilo inicial dos specs corrigido; concorrência final separa coordenação e worker, com três testes reais repetidos."
+  ],
+  "simulations_and_limits": [
+    "Dados sintéticos, daemon de antivírus com resposta de protocolo simulada, Poppler real, decisões reais apenas em banco de teste.",
+    "Nenhum ClamAV real, envio externo, assinatura externa ou validade jurídica é declarado.",
+    "DocuSign demo ainda precisa ser preparada; B3 durabilidade/envio/consumidor/evidências finais não está implementado neste incremento.",
+    "Confirmação da decisão/UX geral e demais critérios CA01–15 permanecem na etapa D; apenas a origem jurídica foi integrada aqui.",
+    "Matriz integral contém fragmentos ainda sem classificação; C/D/E/F/G seguem parciais."
+  ],
+  "files": [
+    "app/controllers/api/v1/accounts/approvals/catalogs_controller.rb",
+    "app/controllers/api/v1/accounts/approvals/resources_controller.rb",
+    "app/controllers/api/v1/accounts/crm/backoffice_authorities_controller.rb",
+    "app/javascript/dashboard/api/crm/backofficeAuthorities.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/approvals/AuthorityOrigin.vue",
+    "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/AuthorityCaseView.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/AuthorityDocumentPicker.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/AuthorityProposalEditor.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractAuthority.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractAuthority.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractPanel.spec.js",
+    "app/models/jrc_backoffice/authority_proposal.rb",
+    "app/models/jrc_crm/audit_event.rb",
+    "app/serializers/jrc_approvals/request_serializer.rb",
+    "app/services/jrc_approvals/catalog.rb",
+    "app/services/jrc_approvals/commercial_gate.rb",
+    "app/services/jrc_approvals/decisions.rb",
+    "app/services/jrc_approvals/eligibility.rb",
+    "app/services/jrc_approvals/request_verification.rb",
+    "app/services/jrc_backoffice/authority_access.rb",
+    "app/services/jrc_backoffice/authority_case.rb",
+    "app/services/jrc_backoffice/authority_catalog.rb",
+    "app/services/jrc_backoffice/authority_documents.rb",
+    "app/services/jrc_backoffice/authority_evidence.rb",
+    "app/services/jrc_backoffice/authority_integrity.rb",
+    "app/services/jrc_backoffice/authority_overview.rb",
+    "app/services/jrc_backoffice/authority_proofs.rb",
+    "app/services/jrc_backoffice/authority_proposals.rb",
+    "app/services/jrc_backoffice/authority_source.rb",
+    "app/services/jrc_backoffice/authority_status.rb",
+    "config/initializers/jrc_commercial_approvals.rb",
+    "config/routes.rb",
+    "db/migrate/20261102080000_create_backoffice_authority_proposals.rb",
+    "db/schema.rb",
+    "spec/requests/api/v1/accounts/crm/backoffice_authorities_spec.rb",
+    "spec/requests/api/v1/accounts/jrc_approvals/commercial_api_spec.rb",
+    "spec/services/jrc_approvals/catalog_capture_spec.rb",
+    "spec/services/jrc_backoffice/authority_proposals_concurrency_spec.rb",
+    "spec/services/jrc_backoffice/authority_proposals_spec.rb",
+    "spec/services/jrc_backoffice/contract_version_upgrade_spec.rb",
+    "spec/support/jrc_backoffice_authority_helpers.rb"
+  ],
+  "publication": {
+    "push": false,
+    "docker_build_or_publish": false,
+    "deploy": false,
+    "compose_changed": false,
+    "production_migrations": false,
+    "protected_head": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+    "protected_worktree_clean": true
+  },
+  "next": "B3: intenção durável antes de I/O; conexão/conta/ambiente/versão fixos, envio recuperável sem duplicação, consumidor Connect e evidências antes da liberação."
+}

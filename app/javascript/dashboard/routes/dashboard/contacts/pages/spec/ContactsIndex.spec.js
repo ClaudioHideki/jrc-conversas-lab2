@@ -5,6 +5,14 @@ import { useRoute, useRouter } from 'vue-router';
 import ContactsIndex from '../ContactsIndex.vue';
 import ContactListHeaderWrapper from 'dashboard/components-next/Contacts/ContactsHeader/ContactListHeaderWrapper.vue';
 import ContactHeader from 'dashboard/components-next/Contacts/ContactsHeader/ContactHeader.vue';
+import ContactsBulkActionBar from '../../components/ContactsBulkActionBar.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
+import BulkActionsAPI from 'dashboard/api/bulkActions';
+import crmLocale from 'dashboard/i18n/locale/en/crm.json';
+
+const contactLabels = crmLocale.CRM.CONTACT_LEAD.UI;
+
+vi.mock('dashboard/api/bulkActions', () => ({ default: { create: vi.fn() } }));
 
 vi.mock('vue-router', () => ({ useRoute: vi.fn(), useRouter: vi.fn() }));
 vi.mock('dashboard/composables', () => ({
@@ -46,6 +54,7 @@ describe('Relationship center pagination', () => {
   const button = label =>
     wrapper.findAll('button').find(item => item.text() === label);
   beforeEach(() => {
+    BulkActionsAPI.create.mockReset().mockResolvedValue({});
     route = reactive({
       name: 'contacts_dashboard_index',
       params: { accountId: '1' },
@@ -80,6 +89,58 @@ describe('Relationship center pagination', () => {
     };
   });
   afterEach(() => wrapper?.unmount());
+
+  it('selects contacts through the premium table and calls native bulk label assignment', async () => {
+    wrapper = page();
+    await flushPromises();
+    await wrapper.get('tbody input[type="checkbox"]').setValue(true);
+    const bar = wrapper.getComponent(ContactsBulkActionBar);
+    expect(bar.props('selectedContactIds')).toEqual([42]);
+    bar.vm.$emit('assignLabels', ['synthetic-label']);
+    await flushPromises();
+    expect(BulkActionsAPI.create).toHaveBeenCalledWith({
+      type: 'Contact',
+      ids: [42],
+      labels: { add: ['synthetic-label'] },
+    });
+    expect(wrapper.findComponent(ContactsBulkActionBar).exists()).toBe(false);
+  });
+
+  it('opens the existing confirmation dialog before native bulk deletion', async () => {
+    const open = vi.fn();
+    wrapper = page({
+      Dialog: {
+        name: 'Dialog',
+        template: '<div />',
+        methods: { open, close: vi.fn() },
+      },
+    });
+    await flushPromises();
+    await wrapper.get('tbody input[type="checkbox"]').setValue(true);
+    wrapper.getComponent(ContactsBulkActionBar).vm.$emit('deleteSelected');
+    await flushPromises();
+    expect(open).toHaveBeenCalledOnce();
+    expect(BulkActionsAPI.create).not.toHaveBeenCalled();
+    wrapper.getComponent(Dialog).vm.$emit('confirm');
+    await flushPromises();
+    expect(BulkActionsAPI.create).toHaveBeenCalledWith({
+      type: 'Contact',
+      ids: [42],
+      action_name: 'delete',
+    });
+  });
+
+  it('connects native select-all and clear-selection controls', async () => {
+    wrapper = page();
+    await flushPromises();
+    await wrapper.get('thead input[type="checkbox"]').setValue(true);
+    expect(
+      wrapper.getComponent(ContactsBulkActionBar).props('selectedContactIds')
+    ).toEqual([42]);
+    wrapper.getComponent(ContactsBulkActionBar).vm.$emit('clearSelection');
+    await flushPromises();
+    expect(wrapper.findComponent(ContactsBulkActionBar).exists()).toBe(false);
+  });
 
   it.each(['people', 'unassigned', 'duplicates'])(
     'selects %s using the native account-wide directory and resets pagination',
@@ -338,7 +399,27 @@ describe('Relationship center pagination', () => {
     expect(store.dispatch).toHaveBeenCalledWith('contacts/clearContactFilters');
   });
 
+  it('opens the reviewed import central in the current account when Customer Master is enabled', async () => {
+    route.params.accountId = '2';
+    wrapper = page({ ContactListHeaderWrapper: false });
+    await flushPromises();
+    wrapper
+      .findComponent(ContactListHeaderWrapper)
+      .findComponent(ContactHeader)
+      .vm.$emit('import');
+    await flushPromises();
+    expect(useRouter().push).toHaveBeenCalledWith({
+      name: 'jrc_customer_imports',
+      params: { accountId: 2 },
+      query: { kind: 'contacts' },
+    });
+    expect(
+      store.dispatch.mock.calls.some(([action]) => action === 'contacts/import')
+    ).toBe(false);
+  });
+
   it('opens native create/import dialogs and dispatches their payloads through the existing store', async () => {
+    store.getters['accounts/isFeatureEnabledonAccount'] = () => false;
     const openCreate = vi.fn();
     const openImport = vi.fn();
     const createSuccess = vi.fn();
@@ -430,8 +511,8 @@ describe('Relationship center pagination', () => {
         wrapper.get(`[data-contact-view="${view}"]`).element.disabled
       ).toBe(false);
     });
-    expect(button('Agenda').element.disabled).toBe(true);
-    expect(button('Agenda').attributes('title')).toBe(
+    expect(button(contactLabels.CALENDAR).element.disabled).toBe(true);
+    expect(button(contactLabels.CALENDAR).attributes('title')).toBe(
       'This action is not available in this view.'
     );
     expect(wrapper.text()).toContain(
@@ -452,5 +533,56 @@ describe('Relationship center pagination', () => {
     expect(wrapper.findComponent({ name: 'ContactLeadAction' }).exists()).toBe(
       true
     );
+  });
+
+  it('opens company and contact dialogs without changing the list route, filters or page', async () => {
+    route.query = { page: '2', directory_view: 'people', search: 'Cliente' };
+    store.getters['contacts/getContactsList'] = [
+      { id: 42, name: 'Cliente', companyId: 77, companyName: 'MOCK — Empresa' },
+    ];
+    wrapper = page();
+    await flushPromises();
+    await button('MOCK — Empresa').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'CompanyDetailsDialog' }).props('companyId')
+    ).toBe(77);
+    expect(
+      wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()
+    ).toBe(false);
+    wrapper.getComponent({ name: 'CompanyDetailsDialog' }).vm.$emit('close');
+    await flushPromises();
+    await wrapper.get('tbody tr').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'ContactDetailsDialog' }).props('contactId')
+    ).toBe(42);
+    wrapper.getComponent({ name: 'ContactDetailsDialog' }).vm.$emit('close');
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()
+    ).toBe(false);
+    expect(route.query).toEqual({
+      page: '2',
+      directory_view: 'people',
+      search: 'Cliente',
+    });
+    expect(useRouter().push).not.toHaveBeenCalled();
+  });
+
+  it('preserves the legacy full profile route when Customer Master is unavailable', async () => {
+    store.getters['accounts/isFeatureEnabledonAccount'] = (
+      _accountId,
+      feature
+    ) => feature !== 'jrc_customer_master';
+    wrapper = page();
+    await flushPromises();
+    await button(contactLabels.FULL_PROFILE).trigger('click');
+    expect(
+      wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()
+    ).toBe(false);
+    expect(useRouter().push).toHaveBeenCalledWith({
+      name: 'contacts_edit',
+      params: { accountId: '1', contactId: 42 },
+      query: route.query,
+    });
   });
 });

@@ -115,10 +115,14 @@ export function createServiceDeskLifecycleClient(http) {
         },
         signal
       ),
-    services: (account, unit, page, signal) =>
+    services: (account, unit, page, signal, internalOnly = false) =>
       get(
         `${root(account)}/service_definitions`,
-        { unit_id: id(unit), page: id(page) },
+        {
+          unit_id: id(unit),
+          page: id(page),
+          ...(internalOnly ? { internal_only: true } : {}),
+        },
         signal
       ),
     service: (account, record, signal) =>

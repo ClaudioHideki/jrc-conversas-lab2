@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-07",
+  "branch": "codex/relacionamento-v2-20261101",
+  "recovered_head": "a72d013d29e5cebebd3b7919e3f223dd9b0f4c5e",
+  "candidate_code_commit": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
+  "scope": "Incremental delivered code/native queue/source validation;not completed C-G",
+  "reports": [
+    {
+      "path": "docs/jrc_consolidation/deals_authority_checkpoint_20261107.json",
+      "evidence": "13final source cases;12native API/PostgreSQL cases"
+    },
+    {
+      "path": "docs/jrc_consolidation/calendar_native_actions_checkpoint_20261107.json",
+      "evidence": "26unique source definitions across directed gates"
+    },
+    {
+      "path": "docs/jrc_consolidation/agenda_record_authority_checkpoint_20261107.json",
+      "evidence": "12source cases"
+    },
+    {
+      "path": "docs/jrc_consolidation/approval_authority_lifecycle_checkpoint_20261107.json",
+      "evidence": "100source regressions"
+    },
+    {
+      "path": "docs/jrc_consolidation/master_owned_worker_checkpoint_20261107.json",
+      "evidence": "6real Sidekiq ACK;4negative environment guard checks"
+    },
+    {
+      "path": "docs/jrc_consolidation/calendar_views_checkpoint_20261107.json",
+      "evidence": "19unique source definitions across directed gates"
+    },
+    {
+      "path": "docs/jrc_consolidation/relationship_presence_checkpoint_20261107.json",
+      "evidence": "145source regressions;22files0lint errors"
+    },
+    {
+      "path": "docs/jrc_consolidation/calendar_filters_checkpoint_20261107.json",
+      "evidence": "26source regressions,overlaps earlier calendar gates"
+    }
+  ],
+  "word_reconciliation": "docs/jrc_consolidation/portfolio_word_reconciliation_20261107.json",
+  "checkpoint_preservation": {
+    "count": 16,
+    "all_objects_and_ancestry_verified": true,
+    "artifact": ".codex/d-approvals-20261104/current-checkpoint-preservation-20261107.json"
+  },
+  "disk_bytes": {
+    "recovered": 6485200896,
+    "minimum_recorded_in_relevant_source_gates": 6192746496,
+    "current": 6387355648,
+    "no_cleanup": true,
+    "mandatory_stop": 750000000,
+    "stop_needed": false
+  },
+  "preserved_runtime": {
+    "four_started_at_unchanged": true,
+    "port5379_old_asset_sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+    "current_source_browser_acceptance": false,
+    "old_asset_not_counted_as_new_version": true,
+    "synthetic_waiting_locks_and_retained_connections": 0
+  },
+  "database_qualification": "Native product request tests on owned candidate;new worker DBschema cloned with migration metadata only,no business data copied. New synthetic records retained;Redis12 and oldRedis15 not reset. No production or existing environment schema migration.",
+  "gate_limitations": [
+    "Source tests mock transport and are not actual browser acceptance.",
+    "Shared legacy DealsIndex/Calendar formatting debt and inherited warnings are explicitly retained in reports;no global lint green claim.",
+    "Initial worker CLI preflight failure preserved,diagnosed and recovered only while its owned DB/Redis had zero business data;no results fabricated."
+  ],
+  "next_required_authorization": {
+    "status": "Question submitted;no response yet in this execution",
+    "requested": "One protected build of this exact candidate code and isolated local current-source Chrome acceptance,preserving5379",
+    "no_implicit_approval": true,
+    "build_started": false,
+    "plan": "docs/jrc_consolidation/candidate_browser_acceptance_plan_20261107.json"
+  },
+  "open_items": [
+    "C/D/E/F/G stages remain open",
+    "Local named-role/capability matrix still needs business definition",
+    "TRR undefined",
+    "Full portfolio historic values/reasons and immutable historical-scope design still partial;preserve existing import and account lifecycle",
+    "Company documents without portfolio expansion explicitly deferred",
+    "Real DocuSign demo/scanner/channel acceptance still pending separate environment/authorization",
+    "Literal full Word/visual/mobile acceptance and large-scale Calendar backend pagination still not complete"
+  ],
+  "stage_closure": {
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  },
+  "no_build_push_GHCR_deploy_production_or_real_external_operations": true
+}

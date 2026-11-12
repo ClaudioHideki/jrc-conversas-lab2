@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "a9296b6a6c74c2ccf0e1934c3aacf988c8747502",
+  "reference": "Relationship P0124/P0125/P0128/P0184/P0185: reviewed links, per-item results/recovery and horizontal native workspace.",
+  "implementation": [
+    "Existing customer selection/reason dialog can prepare a resumable review while preserving its original atomic confirm action. Parent opens a themed horizontal batch tab and reuses the EXISTING ReviewedPortfolioBatchPanel and native API; no duplicate engine.",
+    "Group-scoped session pointer preserves the ordinary reviewed-batch pointer. Reopening retrieves the saved native review, with server permissions; terminal unresolved items use fresh group metadata, a NEW reason/UUID and the native previous_review_id link, excluding applied items. Parent retains the new review identity across tabs.",
+    "Strict bounded response checks bind group, request/audience, state and exact per-item revision chain. Malformed200/wrong group/selection/receipts cannot display a successful result or enable confirmation. Unknown preview results retry the SAME UUID; a known rejected preview can be explicitly reviewed against fresh metadata without inventing a prior saved review ID.",
+    "Role/membership/account changes discard late reads. Observed native401/403/404 clears old customer data and processing controls; archived/read-only context disables confirmation/advance while retaining native pending cancellation.",
+    "Display actual linked/unlinked/no-op outcomes. UI explains per-item live validation and preserved earlier commits on later failure; no false whole-audience capacity simulation or Chrome/theme acceptance claim."
+  ],
+  "source_evidence": {
+    "initial": "reviewed-membership-source01:30/0 (13new membership +17existing native reviewed panel).",
+    "expanded": "reviewed-membership-source-final02:65cases,1failure. The execution handler already blocked readonly mode, but its confirm button looked enabled because the disabled binding was applied to the formal approval control. Corrected the confirm binding and guarded all execution/approval actions. Other64cases passed.",
+    "final": "reviewed-membership-source-final03:32/0 (15new membership +17existing reviewed panel). The33existing atomic group/results/master cases had passed in final02 and were not needlessly repeated after the targeted button fix.",
+    "qualification": "SourceVue/API mocks, not real Chrome or UI database homologation. Source tests cover native receipt contracts against the separately32/0real backend tests linked in previous checkpoint.",
+    "warnings": "Own RouterLink fixture declared correctly; old reviewed-panel RouterLink warnings and duplicate i18n fixture registration remain in unchanged existing suites. Missing dependency source map is pre-existing in the shared node_modules; no dependency installation, repair or other-Codex file change."
+  },
+  "static_evidence": {
+    "files": [
+      {
+        "file": "PortfolioGroupCustomersDialog.vue",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "PortfolioGroupsPanel.vue",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "PortfolioMembershipBatchPanel.vue",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "ReviewedPortfolioBatchPanel.vue",
+        "errors": 0,
+        "warnings": 8
+      },
+      {
+        "file": "portfolioMembershipReviewReceipt.js",
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "file": "reviewedPortfolioMembership.spec.js",
+        "errors": 0,
+        "warnings": 0
+      }
+    ],
+    "qualification": "All new files and group screens0errors/0warnings. Existing shared reviewed panel8warnings retained, no suppression. Diff check clean."
+  },
+  "environment": {
+    "disk_initial_bytes": 6893281280,
+    "disk_minimum_observed_bytes": 6817599488,
+    "disk_final_test_bytes": 6864785408,
+    "no_build_cleanup_5379change_migration_external_operation": true
+  },
+  "remaining": [
+    "Current-source Chrome desktop/mobile/light/dark and real Sidekiq/end-to-end UI acceptance remain unvalidated under explicit environment restrictions. Native job revocation used inline job/test adapter, not a live Sidekiq restart.",
+    "Only scoped session recovery and known review IDs are available; broad own saved-operation listing is still pending.",
+    "New integration audit: withdrawal readiness does not yet inventory pending reviewed intentions. Reuse native account/actor authority and source-free operational metadata; preserve private source policies and analyst-only CS eligibility.",
+    "Whole-audience projected group capacity, local group role matrix/master batch allocation/full Word gates remain open; TRR/deferred documents/external pilots unchanged."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/reviewed_portfolio_membership_ui_checkpoint_20261106.json"
+}

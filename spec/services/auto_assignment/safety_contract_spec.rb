@@ -15,6 +15,14 @@ RSpec.describe 'Automatic assignment safety contract' do
     OnlineStatusTracker.update_presence(account.id, 'User', agent.id)
   end
 
+  it 'never redistributes capacity from the after-commit callback of a destroyed conversation' do
+    arrival = create(:conversation, account: account, inbox: inbox)
+    allow(AutoAssignment::AssignmentJob).to receive(:enqueue_for_inbox)
+    arrival.destroy!
+    expect(arrival).to be_destroyed
+    expect(AutoAssignment::AssignmentJob).not_to have_received(:enqueue_for_inbox)
+  end
+
   it 'assigns a new open event once and leaves an unrequested historical row untouched' do
     historical = create(:conversation, account: account, inbox: inbox)
     historical.update_columns(auto_assignment_requested_at: nil)

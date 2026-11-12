@@ -5,13 +5,21 @@ import { FEATURE_FLAGS } from '../../../featureFlags';
 import CompaniesPage from './CompaniesPage.vue';
 import CompanyPage from './CompanyPage.vue';
 import TaxonomyPage from './TaxonomyPage.vue';
+import SegmentDirectory from './SegmentDirectory.vue';
 import ImportsPage from './ImportsPage.vue';
+import OperationalContactsPage from './OperationalContactsPage.vue';
 const scoped = page => ({ render: () => h(CustomerPageBoundary, { page }) });
 const meta = {
   featureFlag: FEATURE_FLAGS.JRC_CUSTOMER_MASTER,
   permissions: ['administrator', 'agent', 'contact_manage'],
 };
 export const routes = [
+  {
+    path: frontendURL('accounts/:accountId/customers/active-contacts'),
+    name: 'jrc_customer_operational_contacts',
+    component: scoped(OperationalContactsPage),
+    meta,
+  },
   {
     path: frontendURL('accounts/:accountId/customers/companies'),
     name: 'jrc_customer_companies',
@@ -27,7 +35,7 @@ export const routes = [
   {
     path: frontendURL('accounts/:accountId/customers/segments'),
     name: 'jrc_customer_segments',
-    component: scoped(TaxonomyPage),
+    component: scoped(SegmentDirectory),
     meta,
   },
   {
@@ -40,6 +48,6 @@ export const routes = [
     path: frontendURL('accounts/:accountId/customers/imports'),
     name: 'jrc_customer_imports',
     component: scoped(ImportsPage),
-    meta: { ...meta, permissions: ['administrator'] },
+    meta: { ...meta, permissions: ['administrator', 'contact_manage'] },
   },
 ];

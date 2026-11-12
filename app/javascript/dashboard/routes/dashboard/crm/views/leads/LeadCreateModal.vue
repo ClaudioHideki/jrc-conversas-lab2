@@ -1,5 +1,8 @@
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, watch, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useFormDraft } from '../../helpers/useFormDraft';
 import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
@@ -14,6 +17,18 @@ import { leadsAPI } from 'dashboard/api/crm';
 import { useAlert } from 'dashboard/composables';
 
 const { t } = useI18n();
+const store = useStore();
+const route = useRoute();
+const identity = () =>
+  `${route.params.accountId}:${authorityScope(store.getters)}`;
+const initialIdentity = identity();
+const invalidated = ref(false);
+let disposed = false;
+const isCurrent = () =>
+  !disposed && !invalidated.value && identity() === initialIdentity;
+onBeforeUnmount(() => {
+  disposed = true;
+});
 const saving = ref(false);
 const errorMessage = ref('');
 const contact = props.contact;
@@ -38,17 +53,41 @@ const activeDraft = ref(true);
 const initialForm = { ...form };
 const initialCompany = companyId.value;
 const draft = useFormDraft('crm:new_lead:' + (contact?.id || 'standalone'), {
-  active: activeDraft, snapshot: () => ({ form: { ...form }, company_id: companyId.value }),
-  restore: value => { Object.assign(form, value.form || {}); companyId.value = value.company_id || null; },
-  reset: () => { Object.assign(form, initialForm); companyId.value = initialCompany; },
+  active: activeDraft,
+  snapshot: () => ({ form: { ...form }, company_id: companyId.value }),
+  restore: value => {
+    Object.assign(form, value.form || {});
+    companyId.value = value.company_id || null;
+  },
+  reset: () => {
+    Object.assign(form, initialForm);
+    companyId.value = initialCompany;
+  },
 });
 draft.open();
+watch(
+  identity,
+  () => {
+    if (invalidated.value) return;
+    draft.flush();
+    activeDraft.value = false;
+    invalidated.value = true;
+    errorMessage.value = '';
+    saving.value = false;
+    emit('close');
+  },
+  { flush: 'sync' }
+);
 const close = () => {
-  if (!saving.value) { draft.flush(); activeDraft.value = false; emit('close'); }
+  if (!saving.value) {
+    draft.flush();
+    activeDraft.value = false;
+    emit('close');
+  }
 };
 const save = async () => {
   const savingDraftKey = draft.key.value;
-  if (saving.value) return;
+  if (saving.value || !isCurrent()) return;
   errorMessage.value = '';
   saving.value = true;
   try {
@@ -59,20 +98,21 @@ const save = async () => {
         ...(contact ? { contact_id: contact.id } : {}),
       },
     });
+    if (!isCurrent() || !draft.complete(savingDraftKey)) return;
     useAlert(
       status === 201 ? t('CRM.LEAD_FORM.SUCCESS') : t('CRM.LEAD_FORM.EXISTING')
     );
-    if (!draft.complete(savingDraftKey)) return;
     activeDraft.value = false;
     emit('created', data);
   } catch (error) {
+    if (!isCurrent()) return;
     const errors = error.response?.data?.errors;
     errorMessage.value =
       [409, 422].includes(error.response?.status) && Array.isArray(errors)
         ? errors.join(', ')
         : t('CRM.LEAD_FORM.ERROR');
   } finally {
-    saving.value = false;
+    if (isCurrent()) saving.value = false;
   }
 };
 </script>
@@ -80,7 +120,9 @@ const save = async () => {
 <template>
   <Teleport to="body">
     <div
-      :class="crmControlClasses" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/55 p-4"
+      v-if="!invalidated"
+      :class="crmControlClasses"
+      class="fixed inset-0 z-[80] flex items-center justify-center bg-black/55 p-4"
       @click.self="close"
       @keydown.esc="close"
     >
@@ -204,7 +246,14 @@ const save = async () => {
           {{ errorMessage }}
         </p>
         <div class="flex justify-end gap-2">
-          <button type="button" :disabled="saving" class="mr-auto rounded-xl border border-n-weak px-3 py-2" @click="draft.discard">{{ t('CRM.CREATION.DISCARD') }}</button>
+          <button
+            type="button"
+            :disabled="saving"
+            class="mr-auto rounded-xl border border-n-weak px-3 py-2"
+            @click="draft.discard"
+          >
+            {{ t('CRM.CREATION.DISCARD') }}
+          </button>
           <button
             type="button"
             :disabled="saving"

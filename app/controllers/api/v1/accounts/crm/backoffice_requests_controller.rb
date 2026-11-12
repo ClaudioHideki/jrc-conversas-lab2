@@ -5,7 +5,7 @@ module Api::V1::Accounts::Crm
     around_action :lock_operational_change, only: %i[update advance document_status add_issue resolve_issue confirm_provisioning reopen]
 
     def index
-      scope = visible_to_current_user(crm_scope.jrc_crm_backoffice_requests)
+      scope = customer_segment_scope(visible_to_current_user(crm_scope.jrc_crm_backoffice_requests), module_key: 'backoffice')
               .includes(:sales_order, :contract, :contact, :owner, :requested_by, :business_unit, documents_attachments: :blob)
               .order(created_at: :desc)
       scope = scope.where(request_kind: params[:kind]) if params[:kind].present?
@@ -19,12 +19,12 @@ module Api::V1::Accounts::Crm
     end
 
     def workspace
-      scope = visible_to_current_user(crm_scope.jrc_crm_backoffice_requests)
+      scope = customer_segment_scope(visible_to_current_user(crm_scope.jrc_crm_backoffice_requests), module_key: 'backoffice')
       render json: JrcCrm::BackofficeWorkspace.new(scope: scope, user: Current.user, params: params, account: crm_scope).call
     end
 
     def summary
-      scope = visible_to_current_user(crm_scope.jrc_crm_backoffice_requests)
+      scope = customer_segment_scope(visible_to_current_user(crm_scope.jrc_crm_backoffice_requests), module_key: 'backoffice')
       active = scope.where(status: JrcCrm::BackofficeRequest::ACTIVE_STATUSES)
       render json: {
         total: scope.count, pending: active.where(stage: %w[request analysis]).count,
@@ -38,11 +38,33 @@ module Api::V1::Accounts::Crm
       }
     end
 
+    def order_options
+      company = intake_company!
+      kind = params.require(:kind).to_s
+      raise ActionController::BadRequest, 'Unsupported request kind' unless JrcCrm::BackofficeRequest.request_kinds.key?(kind)
+
+      orders = intake_orders(company, kind)
+      number = params.fetch(:page, 1).to_i.clamp(1, 10_000)
+      size = params.fetch(:per_page, 20).to_i.clamp(1, 50)
+      total = orders.count
+      rows = orders.includes(:contact).order(created_at: :desc, id: :desc).limit(size).offset((number - 1) * size)
+      render json: { payload: rows.map { |order| intake_order(order) }, meta: { page: number, per_page: size, total: total } }
+    end
+
     def create
       attributes = request_params.to_h
       attributes['stage'] = 'analysis'
       attributes['status'] = 'pending'
       order = visible_to_current_user(crm_scope.jrc_crm_sales_orders).find(attributes.delete('sales_order_id'))
+      if params[:company_id].present?
+        company = intake_company!
+        if order.contact&.company_id != company.id
+          return render json: { message: 'O pedido não pertence ao cliente selecionado.' }, status: :unprocessable_entity
+        end
+        unless intake_orders(company, attributes.fetch('request_kind', 'fulfillment')).exists?(id: order.id)
+          return render json: { message: 'O pedido não está mais elegível para este tipo de solicitação.' }, status: :unprocessable_entity
+        end
+      end
       contract_id = attributes.delete('contract_id')
       contract = contract_id.present? ? order.contracts.find(contract_id) : order.contracts.order(created_at: :desc).first
       owner_id = attributes.delete('owner_id')
@@ -171,9 +193,10 @@ module Api::V1::Accounts::Crm
 
     def confirm_provisioning
       if @request.workflow_version == 2 && (@request.stage != 'provisioning' ||
-         (@request.stage_applicable?('contract') && @request.contract&.signature_status != 'signed'))
+         (@request.stage_applicable?('contract') && !JrcBackoffice::SignatureRelease.satisfied?(@request)))
         return render json: { message: 'Confirme o provisionamento na etapa própria, após a assinatura exigida.' }, status: :unprocessable_entity
       end
+      JrcBackoffice::Requirements.check!(request: @request, actor: Current.user, through: 'implementation')
       mode = params[:mode].to_s
       unless mode.in?(%w[manual external])
         return render json: { message: 'Modo de provisionamento inválido.' }, status: :unprocessable_entity
@@ -209,7 +232,7 @@ module Api::V1::Accounts::Crm
 
       before = audit_snapshot(@request)
       if @request.fulfillment? && %w[implementation provisioning finance completed].include?(target_stage) &&
-         (@request.stage_applicable?('contract') && @request.contract&.signature_status != 'signed')
+         (@request.stage_applicable?('contract') && !JrcBackoffice::SignatureRelease.satisfied?(@request))
         return render json: { message: 'A assinatura do contrato ainda está pendente.' }, status: :unprocessable_entity
       end
       @request.update!(stage: target_stage, status: 'in_progress', completed_at: nil)
@@ -227,6 +250,25 @@ module Api::V1::Accounts::Crm
     end
 
     private
+
+    def intake_company!
+      authorize :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy
+      corporate_records(:master_companies).find(params.require(:company_id))
+    end
+
+    def intake_order(order)
+      { id: order.id, order_number: order.order_number, status: order.status,
+        contact: order.contact && { id: order.contact.id, name: order.contact.name } }
+    end
+
+    def intake_orders(company, kind)
+      orders = visible_to_current_user(crm_scope.jrc_crm_sales_orders)
+               .where(contact_id: crm_scope.contacts.where(company_id: company.id).select(:id))
+      return orders unless kind == 'fulfillment'
+
+      existing = crm_scope.jrc_crm_backoffice_requests.where(request_kind: 'fulfillment').select(:sales_order_id)
+      orders.where(status: JrcCrm::OrderWorkflowSyncService::QUALIFYING_STATUSES).where.not(id: existing)
+    end
 
     def lock_operational_change
       @request.sales_order.with_lock do
@@ -280,7 +322,8 @@ module Api::V1::Accounts::Crm
         data[:company] = company && { id: company.id, name: company.name }
         data[:queue] = request.operations_queue && { id: request.operations_queue.id, name: request.operations_queue.name }
         data[:sla] = JrcOperations::SlaClock.new(request).snapshot
-        data[:stage_blockers] = request.stage_blockers
+        data[:stage_blockers] = request.stage_blockers +
+          JrcBackoffice::Requirements.blocking_messages(request: request, actor: Current.user)
         data[:workflow_stages] = request.order_approval? ? ['approval'] : request.workflow_stages.select { |stage| request.stage_applicable?(stage) || stage == request.stage }
         data[:commercial] = commercial_context(order)
         data[:commercial][:contract_accessible] = request.contract && visible_to_current_user(crm_scope.jrc_crm_contracts).exists?(id: request.contract.id)

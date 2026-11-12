@@ -88,5 +88,26 @@ export function decodeResources(payload, context, unitId, kind, page) {
   );
   if (new Set(items.map(row => row.id)).size !== items.length)
     throw new ContractError();
-  return { items, meta: payload.meta };
+  let summary = null;
+  if (payload.summary) {
+    const values = payload.summary;
+    if (
+      !Number.isSafeInteger(values.total) ||
+      values.total !== payload.meta.total ||
+      values.total < 0 ||
+      !values.by_state ||
+      typeof values.by_state !== 'object' ||
+      Object.keys(values.by_state).some(
+        key => !resourceStates[kind].includes(key)
+      ) ||
+      Object.values(values.by_state).some(
+        value => !Number.isSafeInteger(value) || value < 0
+      ) ||
+      Object.values(values.by_state).reduce((sum, value) => sum + value, 0) !==
+        values.total
+    )
+      throw new ContractError();
+    summary = { total: values.total, by_state: { ...values.by_state } };
+  }
+  return { items, meta: payload.meta, summary };
 }

@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "52f2c39f024d386464ca58fea48aff76d4b0b4a7",
+  "status": "Committed grouping-item receipts and controlled in-dialog re-review implemented/tested. Not a durable batch execution queue; full P0128 and C-G remain open.",
+  "implementation": [
+    "Existing atomic set_customers! response now adds only submitted assignment IDs and actual linked/already_linked/unlinked/already_unlinked results. Metadata/handoff receipts remain unchanged.",
+    "Shared strict native ID parser extracted without relaxing 1to50/unique/positive/type checks.",
+    "New read-only POST customer_review reloads selected current subjects and optimistic group revision under fresh native account/member/group/customer authority. No model writes, audit writes, approval or capacity-simulation claim.",
+    "409 dialog reload preserves reason and selected IDs, replaces labels only with current authorized data, shows current link state and requires explicit confirmation again. Denied scope clears selected names. Wrong group/selection or late identity response cannot rebase the draft.",
+    "Frontend confirms exact receipt IDs, states and changed/no-op revision before success. Missing/malformed HTTP200 receipt retains the review; per-item outcomes appear only for a confirmed write and authorized current group view.",
+    "A failed native atomic request commits no links, revision or success audit. No partial success, automatic retry or fictitious background progress."
+  ],
+  "native_tests": {
+    "final_new_cases": { "label": "named-portfolio-results-native36", "examples": 6, "failures": 0 },
+    "shared_regression_gate": { "label": "named-portfolio-results-native34", "examples": 30, "passed": 29, "failures": 1,
+      "qualification": "24existing writer/governance regressions passed;5new passed. The remaining new fixture expected422 but correctly received404 without corporate grant. Fixture now uses native COMPANY coverage and two accessible units to reach the intended model-unit rejection; all6new cases subsequently passed in native36. Do not claim native34 exit0 or add overlapping counts." },
+    "initial_fixture_correction": "native32:5pass/1fixture-error, nonexistent BusinessUnit.company association; corrected to native operating_company. No authorization code was relaxed.",
+    "database": "jrc_rel_v2_candidate_test",
+    "coverage": "Actual persistence/results/no-op revisions; read-only re-review; real stale write/reconfirm; foreign and hidden subjects; malformed/excessive IDs; archived group; rollback after later unit mismatch."
+  },
+  "source_tests": {
+    "first": { "label": "named-portfolio-results-source01", "tests": 33, "failures": 0, "breakdown": "6new receipt/re-review +17existing grouping +10existing master-flow tests" },
+    "final_directed": { "label": "named-portfolio-results-source02", "tests": 10, "failures": 0, "breakdown": "6receipt/re-review overlap +4API contracts including new re-review binding" },
+    "qualification": "Source Vue/API tests with mocks, not Chrome or real UI/database end-to-end acceptance. Existing duplicate-i18n warnings retained."
+  },
+  "static_validation": "Ruby35/37:0offenses; ESLint03:0errors/0warnings in6changedJS/Vue/spec files; git diff --check clean.",
+  "environment": { "disk_start_recorded_bytes": 6622670848, "disk_minimum_observed_bytes": 6594600960, "disk_final_observed_bytes": 6623629312,
+    "no_build": true, "no_migration": true, "no_server_original_container_or_external_change": true },
+  "remaining": [
+    "P0128 durable resumable grouping batches still require a distinct reviewed execution integration; interactive atomic retry is not a substitute.",
+    "P0126/P0127 full local role matrix, true multi-select master allocation batches and protected full historic audit remain pending.",
+    "Current-source Chrome/Word visual acceptance remains blocked by no-build/no5379-change. TRR/deferred docs/external acceptance remain separate dependencies."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_link_results_checkpoint_20261106.json"
+}

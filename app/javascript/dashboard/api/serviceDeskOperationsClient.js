@@ -81,6 +81,7 @@ export function createServiceDeskOperationsClient(http) {
         'service_id',
         'files',
         'file_fingerprints',
+        'internal_request',
       ]);
       const ticket = fields(payload.ticket, [
         'title',
@@ -113,6 +114,9 @@ export function createServiceDeskOperationsClient(http) {
       const body = {
         unit_id: id(payload.unit_id),
         ticket,
+        ...(payload.internal_request === true
+          ? { internal_request: true }
+          : {}),
         ...(payload.service_id ? { service_id: id(payload.service_id) } : {}),
         ...(payload.conversation_id
           ? { conversation_id: id(payload.conversation_id) }

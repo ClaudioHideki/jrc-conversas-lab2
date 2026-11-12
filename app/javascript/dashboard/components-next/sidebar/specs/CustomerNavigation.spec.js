@@ -110,7 +110,10 @@ describe('Clientes navigation in the final sidebar', () => {
     }
   );
 
-  it('preserves all six submenu destinations and the other CRM items', () => {
+  it('preserves all six customer destinations and uses the separate C6 operational list', () => {
+    expect(
+      routes.some(route => route.name === 'jrc_customer_operational_contacts')
+    ).toBe(true);
     const result = sections(true, true).find(section => section.name === 'crm');
     expect(result.items.map(item => item.name)).toEqual([
       'CRM',
@@ -125,7 +128,7 @@ describe('Clientes navigation in the final sidebar', () => {
       ['Segmentos', 'jrc_customer_segments'],
       ['Grupos', 'jrc_customer_groups'],
       ['Importações', 'jrc_customer_imports'],
-      ['Contatos ativos', 'contacts_dashboard_active'],
+      ['Contatos ativos', 'jrc_customer_operational_contacts'],
     ]);
   });
 

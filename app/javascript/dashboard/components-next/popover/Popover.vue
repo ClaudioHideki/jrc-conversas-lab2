@@ -9,9 +9,11 @@ import {
 import { useDropdownPosition } from 'dashboard/composables/useDropdownPosition';
 import { useKeyboardEvents } from 'dashboard/composables/useKeyboardEvents';
 import TeleportWithDirection from 'dashboard/components-next/TeleportWithDirection.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 
 const props = defineProps({
   modal: { type: Boolean, default: false },
+  nativeDialog: { type: Boolean, default: false },
   modalClass: { type: String, default: 'max-w-lg' },
   modalLabel: { type: String, default: '' },
   align: {
@@ -39,6 +41,8 @@ const isActive = ref(false);
 const triggerRef = ref(null);
 const popoverRef = ref(null);
 const mobileContentRef = ref(null);
+const nativeDialogRef = ref(null);
+const useNativeDialog = computed(() => props.modal && props.nativeDialog);
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const belowMd = breakpoints.smaller('md');
@@ -63,6 +67,11 @@ const show = async () => {
   if (!isMobile.value) {
     await nextTick();
     updatePosition();
+  }
+  if (useNativeDialog.value) {
+    await nextTick();
+    if (!isActive.value) return;
+    nativeDialogRef.value?.open();
   }
   emit('show');
   if (props.modal) {
@@ -161,7 +170,24 @@ defineExpose({ show, hide, toggle });
     <slot :is-open="isActive" />
   </span>
 
-  <TeleportWithDirection to="body">
+  <Dialog
+    v-if="isActive && useNativeDialog"
+    ref="nativeDialogRef"
+    width="5xl"
+    :title="modalLabel"
+    :use-form="false"
+    :show-confirm-button="false"
+    :show-cancel-button="false"
+    show-close-button
+    contained
+    overflow-y-auto
+    nested-popover
+    @close="hide"
+  >
+    <slot name="content" :hide="hide" />
+  </Dialog>
+
+  <TeleportWithDirection v-else to="body">
     <!-- Mobile: centered modal with backdrop -->
     <div
       v-if="isActive && isMobile"

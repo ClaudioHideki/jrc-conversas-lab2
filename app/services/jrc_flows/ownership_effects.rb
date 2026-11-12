@@ -39,6 +39,7 @@ class JrcFlows::OwnershipEffects
                    token, context[:scope_key], context[:generation], context[:execution_id], reference.to_s, kind
                  ))
     end
+    completed=false
     begin
       JrcFlows::OwnershipGuard.checkpoint!
       invoked=true
@@ -56,13 +57,17 @@ class JrcFlows::OwnershipEffects
       else
         context[:pending] << [token, kind, message_id]
       end
+      completed=true
       result
-    rescue Exception
-      JrcFlows::OwnershipLedger.transaction_sql do |db|
-        db.execute(JrcFlows::OwnershipLedger.sql('UPDATE jrc_flow_ownership_effects SET state=?,updated_at=clock_timestamp() WHERE id=?',
-                                                 invoked ? 'UNKNOWN' : 'CANCELED', token))
+    ensure
+      unless completed
+        # Interruptions must retain uncertainty and propagate; never mark an
+        # unconfirmed external effect as safely replayable.
+        JrcFlows::OwnershipLedger.transaction_sql do |db|
+          db.execute(JrcFlows::OwnershipLedger.sql('UPDATE jrc_flow_ownership_effects SET state=?,updated_at=clock_timestamp() WHERE id=?',
+                                                   invoked ? 'UNKNOWN' : 'CANCELED', token))
+        end
       end
-      raise
     end
   end
 
@@ -81,6 +86,25 @@ class JrcFlows::OwnershipEffects
                  ))
     end
     refresh_message!(message_id) if committed && message_id
+  end
+
+  def self.replay_message!(reference:, message:)
+    JrcFlows::OwnershipGuard.checkpoint!
+    context = Thread.current[:jrc_flow_ownership]
+    raise JrcFlows::OwnershipGuard::Closed unless context
+
+    row = JrcFlows::OwnershipLedger.connection_pool.with_connection do |db|
+      db.select_one(JrcFlows::OwnershipLedger.sql(
+        'SELECT kind,state,message_id FROM jrc_flow_ownership_effects WHERE scope_key=? AND generation=? AND effect_reference=?',
+        context.fetch(:scope_key), context.fetch(:generation), reference.to_s
+      ))
+    end
+    unless row && row['kind'] == 'MESSAGE' && %w[OBSERVED QUEUED CONFIRMED].include?(row['state']) && row['message_id'].to_i == message.id
+      raise Duplicate, 'FLOW_EFFECT_RECONCILIATION_REQUIRED'
+    end
+
+    JrcFlows::OwnershipGuard.checkpoint!
+    message
   end
 
   def self.finish_pending!(committed)

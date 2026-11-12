@@ -51,6 +51,21 @@ class JrcCustomers::Visibility
     JrcServiceDesk::TicketPolicy::Scope.new(service_desk_context.to_h, JrcServiceDesk::Ticket).resolve_for('customers_view')
   end
 
+  def service_desk_sla?
+    service_desk? && service_desk_context.capability?(:sla_view)
+  end
+
+  def sla_clocks(ticket_scope = tickets)
+    return JrcServiceDesk::SlaClock.none unless service_desk_sla?
+
+    # Keep the independent native customer/SLA scopes as a set intersection;
+    # flattening their complete predicates produced expensive nested plans.
+    permitted = JrcServiceDesk::TicketPolicy::Scope.new(service_desk_context.to_h, JrcServiceDesk::Ticket).resolve_for('sla_view')
+    customer_ids = ticket_scope.reselect(:id).reorder(nil).to_sql
+    sla_ids = permitted.reselect(:id).reorder(nil).to_sql
+    JrcServiceDesk::SlaClock.where(account_id: @account.id).where("ticket_id IN (#{customer_ids} INTERSECT #{sla_ids})")
+  end
+
   def ticket_events(ticket_scope)
     scope = JrcServiceDesk::TicketEventPolicy::Scope.new(service_desk_context.to_h, JrcServiceDesk::TicketEvent).resolve
                                                     .where(ticket_id: ticket_scope.select(:id))

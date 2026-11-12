@@ -111,7 +111,7 @@ const render = async (component, screen = 'new') => {
   if (component === TicketFormView) {
     await wrapper
       .findAll('button')
-      .find(row => row.text() === keys.QUICK.advanced)
+      .find(row => row.text() === keys.INTERNAL_EXPERIENCE.customer_mode)
       .trigger('click');
     await flushPromises();
   }

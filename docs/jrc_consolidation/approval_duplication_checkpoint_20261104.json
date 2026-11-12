@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-04",
+  "stage": "D5 native rule duplication",
+  "parent": "0d457522ca12cdb5132e6e2b21b71b64071953ea",
+  "changes": [
+    "Duplicate saved rule opens a detached new draft in the same four-step editor. Uses native scoped policy show and native create, no new endpoint/model.",
+    "Explicit account and bounded source ID. Denied source cannot populate the template. Only editable definition/name/module/event/scope are copied; record ID, code, publication state and version are omitted. New internal rule code remains server-generated.",
+    "Nothing is persisted on duplication until Save draft. Original rule, immutable versions and in-flight requests are untouched. The new draft cannot publish before native save/validate.",
+    "Duplicate disabled while the current draft has unsaved changes to avoid losing the edit. Native advanced conditions/steps/delegations retained."
+  ],
+  "tests": {
+    "vue": {
+      "tests": 72,
+      "failures": 0,
+      "exit_code": 0,
+      "unhandled_errors": 0,
+      "artifact": ".codex\\d-approvals-20261104\\vue-duplication-final.json"
+    },
+    "eslint": {
+      "errors": 0,
+      "warnings": 68,
+      "artifact": ".codex\\d-approvals-20261104\\eslint-duplication-final.json"
+    },
+    "backend": "No Ruby changes. Exact existing scoped policy show/create used; server-generation/denial regression passed 12/0 in D3. No separate mocked backend counted as new backend evidence."
+  },
+  "disk": {
+    "status": "passed",
+    "free_start": 16581935104,
+    "minimum_free": 16541986816,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 6748,
+    "exit_code": 0,
+    "free_end": 16581804032
+  },
+  "free_at_checkpoint": 16590065664,
+  "limits": [
+    "Compilation and real browser QA pending, server5379 continues frozen4d4a6de3",
+    "Does not implement numeric tiers, generic adjustments, global delegation or notifications",
+    "D remains incomplete"
+  ],
+  "preservation": [
+    "No new dependencies or migrations",
+    "No cleanup, push, publication, deploy, production or external operations"
+  ]
+}

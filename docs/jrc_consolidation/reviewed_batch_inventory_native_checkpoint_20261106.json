@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "6d29a947113376f4c4d1e023bef60bcbcf3deecb",
+  "reference": "Relationship P0128/P0181/P0184/P0185: recover saved own operations and safely stop pending work.",
+  "status": "Native/API own operational inventory validated; frontend and withdrawal-readiness integration are next, not C-G closure.",
+  "implementation": [
+    "Implemented GET reviewed_batches with native fresh manage authority and hard account/actor scope, bounded native-style pages, status/group filters and batched progress counts. SQL projection omits inputs/snapshots/reasons/digests/customer/group names. Full detail GET retains its native source gates.",
+    "Implemented POST reviewed_batches/:id/cancel_pending with exact current revision and bounded explicit reason. It stops only the authenticated actor own remaining intent, even after source-management/read access changes; it cannot read source details, change customers, undo receipts or cancel another actor operation, including when caller is administrator.",
+    "This is an explicit source-free own-intent purpose, not a new permission to execute or view sources. Existing module manage, active membership/account/eligibility and tenant authorization remain necessary. Identity override filters are rejected.",
+    "Extracted the existing pending-state transition into ReviewedBatchCancellation and reused it from the old full-detail cancel path. That old path still rolls back if its native detail projection is denied; its v1 audit behavior is retained. New explicit own-intent cancellations add a bounded native audit event, with reason filtered from request logs.",
+    "Terminal retries do not mutate history or add duplicate audit. Selected metadata rows use shared locks so their status and item counters are read together. No queue/model/schema duplication."
+  ],
+  "evidence": {
+    "baseline": "reviewed-inventory-baseline01:6/6failed before the routes existed.",
+    "initial": "reviewed-inventory-native02:20/0 (6new HTTP +14existing reviewed-engine regressions).",
+    "final": "reviewed-inventory-native-final05:21/0 (7new HTTP +14same existing regressions).",
+    "coverage": "Own-only pagination/filter/counters; no serialized private context; other actor administrator denial; own stop after lost source management; committed receipt/link preservation; stale revision conflict/idempotent terminal retry; foreign account/identity/filter/manage bounds; old full-detail cancel authorization and rollback contract.",
+    "static": "New files ruby04:0offenses after splitting query/filter/paging complexity. Shared controller/service ruby06:0offenses; diff check clean.",
+    "qualification": "Real native requests/PostgreSQL test data; no current-source frontend/Chrome proof or live Sidekiq pilot.",
+    "database": "jrc_rel_v2_candidate_test"
+  },
+  "environment": {
+    "disk_initial_bytes": 6862143488,
+    "disk_minimum_observed_bytes": 6857191424,
+    "disk_final_test_bytes": 6857064448,
+    "original_four_containers": "Read-only inspect confirms original2026-11-04StartedAt timestamps unchanged.",
+    "preserved_ancestry": [
+      "a1fef624",
+      "9bb8d2ec",
+      "3390725e",
+      "07a9e400fa8394ddc49645e8c782c59bc3a2433d",
+      "3b31577e",
+      "53d0b022"
+    ],
+    "no_build_cleanup_5379change_migration_external_operation": true
+  },
+  "remaining": [
+    "Add source inventory/filter/paging/open/explicit cancellation controls to native reviewed interfaces; details must still revalidate origin/source scope.",
+    "Withdrawal readiness currently misses pending reviewed intentions; add conservative current-scope source-free blocker without manager access to another actor private snapshots or cancellation authority.",
+    "Detailed typed membership failure causes, whole-audience projected group capacity, local role matrix, master allocation batches and full Word/current-source visual gates remain open.",
+    "TRR undefined/deferred portfolio-less documents/external provider pilots unchanged."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/reviewed_batch_inventory_native_checkpoint_20261106.json"
+}

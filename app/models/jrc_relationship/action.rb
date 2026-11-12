@@ -2,13 +2,32 @@ class JrcRelationship::Action < JrcRelationship::Record
   WAITING_STATUSES = %w[waiting_customer waiting_finance].freeze
   ACTIVE_STATUSES = (%w[open in_progress] + WAITING_STATUSES).freeze
   self.table_name = 'jrc_relationship_actions'
+  store_accessor :metadata, :waiting_reason
+  validates :waiting_reason, length: { maximum: 4000 }
+  validate :valid_waiting_review
+  before_validation :refresh_priority_band, if: :will_save_change_to_priority?
   belongs_to :operations_queue, class_name: 'JrcOperations::Queue', optional: true
   belongs_to :operations_sla_policy, class_name: 'JrcOperations::SlaPolicy', optional: true
   after_save :sync_sla_pause, if: :saved_change_to_status?
   after_create_commit :notify_critical_action
-  validate { errors.add(:operations_sla_policy, 'must use relationship scope') if operations_sla_policy && operations_sla_policy.scope_kind != 'relationship' }
+  validate do
+    errors.add(:operations_sla_policy, 'must use relationship scope') if operations_sla_policy && operations_sla_policy.scope_kind != 'relationship'
+  end
   belongs_to :activity, class_name: 'JrcCrm::Activity', optional: true
   belongs_to :completed_by, class_name: 'User', optional: true
+  belongs_to :customer_confirmed_by, class_name: 'User', optional: true
+  validates :customer_confirmation, inclusion: { in: %w[pending confirmed unresolved not_applicable] }
+  validates :customer_feedback, :customer_confirmed_at, :customer_confirmed_by, presence: true,
+                                                                                if: -> { %w[confirmed unresolved].include?(customer_confirmation) }
+  validates :next_step, length: { maximum: 4000 }
+  validates :customer_feedback, length: { maximum: 8000 }
+  validates :next_step, presence: true, if: -> { return_at.present? }
+  validates :return_at, presence: true, if: -> { next_step.present? && ACTIVE_STATUSES.include?(status) }
+  validate do
+    if customer_confirmed_by_id && !AccountUser.exists?(account_id: account_id, user_id: customer_confirmed_by_id)
+      errors.add(:customer_confirmed_by, 'must belong to the account')
+    end
+  end
   validates :kind, :reason, :source_key, presence: true
   validates :status, inclusion: { in: ACTIVE_STATUSES + %w[completed dismissed] }
   validates :priority, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
@@ -20,6 +39,21 @@ class JrcRelationship::Action < JrcRelationship::Record
   end
 
   private
+
+  def refresh_priority_band
+    self.factors = JrcRelationship::PriorityBands.refresh_captured(factors, priority)
+  end
+
+  def valid_waiting_review
+    return unless WAITING_STATUSES.include?(status) && waiting_review_changed?
+
+    errors.add(:waiting_reason, 'must be nonempty text') unless waiting_reason.is_a?(String) && waiting_reason.present?
+    errors.add(:return_at, 'must be a future reassessment time') unless return_at && return_at > Time.current
+  end
+
+  def waiting_review_changed?
+    new_record? || waiting_reason_changed? || changed_attribute_names_to_save.intersect?(%w[status next_step return_at])
+  end
 
   def notify_critical_action
     JrcRelationship::Notifications.call(self) if priority >= 80 || kind == 'retention'

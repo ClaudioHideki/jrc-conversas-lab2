@@ -1,0 +1,64 @@
+{
+  "RELATIONSHIP": {
+    "NAMED_PORTFOLIOS": {
+      "HISTORY": {
+        "DETAIL": {
+          "OPEN": "Consultar valores e motivo",
+          "CLOSE": "Fechar detalhes",
+          "LOADING": "Verificando o acesso ao histórico...",
+          "DENIED": "O histórico não está disponível no seu acesso atual. Consulte novamente antes de continuar.",
+          "FAILED": "Não foi possível confirmar o histórico. Nenhum valor anterior foi mantido na tela.",
+          "LEGACY": "Este registro não possui prova do escopo original. O resumo permanece disponível, sem revelar valores ou motivos antigos.",
+          "NOTICE": "Valores preservados no evento original. A exibição depende também das permissões atuais; compartilhar a carteira não libera seu histórico privado.",
+          "BEFORE": "Antes",
+          "AFTER": "Depois",
+          "REASON": "Motivo",
+          "NOT_RECORDED": "Não registrado",
+          "EMPTY": "Não informado",
+          "UNAVAILABLE": "Indisponível",
+          "YES": "Sim",
+          "NO": "Não",
+          "ASSIGNMENT": "Alocação",
+          "ACTIVE": "Ativa",
+          "INACTIVE": "Inativa",
+          "AVAILABILITY": "Disponibilidade",
+          "DEDICATION": "Dedicação",
+          "FIELDS": {
+            "name": "Nome",
+            "objective": "Objetivo",
+            "owner_id": "Coordenador",
+            "team_id": "Equipe",
+            "business_unit_id": "Unidade",
+            "segment_id": "Segmento",
+            "visibility": "Visibilidade",
+            "status": "Situação",
+            "goals": "Metas",
+            "customers": "Vínculos de clientes",
+            "version": "Revisão",
+            "rules": "Regras",
+            "portfolio_capacity_limits": "Limites de capacidade",
+            "portfolio_transfer_approval_required": "Aprovação obrigatória",
+            "portfolio_review_validity_minutes": "Validade da revisão (minutos)"
+          },
+          "GOALS": {
+            "baseline": "Referência",
+            "target": "Meta",
+            "current": "Atual"
+          },
+          "UNITS": {
+            "customers": "clientes",
+            "points": "pontos",
+            "hours": "horas"
+          },
+          "VALUES": {
+            "private": "Privada",
+            "team": "Equipe",
+            "account": "Conta",
+            "active": "Ativa",
+            "archived": "Arquivada"
+          }
+        }
+      }
+    }
+  }
+}

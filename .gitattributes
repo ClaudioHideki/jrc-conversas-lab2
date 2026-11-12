@@ -1,0 +1,3 @@
+/db/functions/20261015160000_native_responder_config_fence.sql text eol=lf
+/db/functions/20261102060000_backoffice_document_guards.sql text eol=lf
+/db/functions/20261102090000_backoffice_signature_delivery_guards.sql text eol=lf

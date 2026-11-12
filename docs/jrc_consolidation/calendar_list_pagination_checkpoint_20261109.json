@@ -1,0 +1,171 @@
+{
+  "date": "2026-11-09",
+  "previous_head": "32558d464fa7827f3adcb2cfd81c07f0daf43a96",
+  "branch": "codex/relacionamento-v2-20261101",
+  "status": "Calendar list paging implementation and directed automated source behavior validated;actual Chrome/CSS/database acceptance pending",
+  "implemented": [
+    "25appointments per page with preserved day headers and stable native authorized order",
+    "Filter,period,view and authority changes reset page;smaller current source clamps page",
+    "Month/day/week views retain all authorized appointments;no parallel appointment registry or backend grant",
+    "Native source calls/editor/completion,scope replacement and access-denied behavior retained"
+  ],
+  "validation": {
+    "vue_final": "31passed/0failed across4files (14views,9filters,7native actions,1legacycontrol);not62summed across repeats",
+    "pure_final": "4passed/0failed;actual shared pagination utility,not a duplicate test implementation",
+    "unique_final_cases": 35,
+    "lint": "4new/modified JS/spec files0errors0warnings;shared CalendarView remains27pre-existing Prettier errors and10markupwarnings,matching prior recorded baseline. No rule suppression or unrelated cleanup.",
+    "initial_resource_failures": "04blocked before launching worker;05exit134 at128MiB Node heap before assertions,not a functional failure. Both retained.",
+    "harness_optimization": "Owned focused English source messages/native Vue plugins and one worker;PostCSS plugins disabled ONLY in JSDOM behavior configuration. This is not style/build/Chrome evidence and does not change application Vite/PostCSS config.",
+    "new_behavior_failure_after_changes": false
+  },
+  "resources": {
+    "calendar-list-pagination04": {
+      "kind": "source_tests_not_application_build",
+      "ram_start": 548392960,
+      "disk_start": 7397847040,
+      "minimum_ram": 548392960,
+      "minimum_disk": 7397847040,
+      "status": "preflight_blocked",
+      "start_ram_threshold": 1342177280,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "ram_end": 548483072,
+      "disk_end": 7397847040
+    },
+    "calendar-list-pagination05": {
+      "kind": "source_tests_not_application_build",
+      "ram_start": 1560498176,
+      "disk_start": 7390973952,
+      "minimum_ram": 998522880,
+      "minimum_disk": 7390715904,
+      "status": "failed",
+      "start_ram_threshold": 1342177280,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "pid": 11508,
+      "exit_code": 134,
+      "log_tail": "t: caniuse-lite is outdated. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme\n\n<--- Last few GCs --->\nince start of marking 30 ms) (average mu = 0.270, cu[11508:0000026E3ADF1000]    10352 ms: Mark-Compact (reduce) 127.0 (128.4) -> 125.3 (128.4) MB, pooled: 0 MB, 30.33 / 0.00 ms  (+ 0.0 ms in 7 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 32 ms) (average mu = 0.241, cur[11508:0000026E3ADF1000]    10392 ms: Mark-Compact 126.3 (128.4) -> 125.1 (130.6) MB, pooled: 0 MB, 38.44 / 0.00 ms  (average mu = 0.143, current mu = 0.048) allocation failure; scavenge might not succeed\n\nFATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory\n----- Native stack trace -----\n\n 1: 00007FF6E85A65C6 node::SetAbortHandler+54\n 2: 00007FF6E85A6B04 node::OnFatalError+1284\n 3: 00007FF6E7192407 v8::Function::NewInstance+423\n 4: 00007FF6E6F92C47 v8::HeapStatistics::used_global_handles_size+54423\n 5: 00007FF6E6F96954 v8::HeapStatistics::used_global_handles_size+70052\n 6: 00007FF6E6FA58BC v8::internal::StrongRootAllocatorBase::deallocate_impl+16604\n 7: 00007FF6E6FA50FB v8::internal::StrongRootAllocatorBase::deallocate_impl+14619\n 8: 00007FF6E88D92ED node::AsyncResource::CallbackScope::CallbackScope+2124541\n 9: 00007FF6E6F90710 v8::HeapStatistics::used_global_handles_size+44896\n10: 00007FF6E6FAAF6A X509_STORE_set_cleanup+5098\n11: 00007FF6E6FB6DC8 uv_timer_set_repeat+19096\n12: 00007FF6E6FD1FD4 uv_timer_set_repeat+130212\n13: 00007FF6E6FD1EAC uv_timer_set_repeat+129916\n14: 00007FF6E66EA14E v8::base::TimeTicks::TimeTicks+25054\n15: 00007FF6E6B723CF v8::CodeEvent::GetFunctionName+38015\n16: 00007FF6E878A37A node::AsyncResource::CallbackScope::CallbackScope+752522\n17: 00007FF6E8823EC6 node::AsyncResource::CallbackScope::CallbackScope+1382102\n18: 00007FF6E877503F node::AsyncResource::CallbackScope::CallbackScope+665679\n19: 0000026E53C3399E \n",
+      "ram_end": 1397313536,
+      "disk_end": 7390715904
+    },
+    "calendar-list-pagination06": {
+      "kind": "source_tests_not_application_build",
+      "ram_start": 1900285952,
+      "disk_start": 7392292864,
+      "minimum_ram": 1413406720,
+      "minimum_disk": 7392178176,
+      "status": "passed",
+      "start_ram_threshold": 1342177280,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "pid": 18200,
+      "exit_code": 0,
+      "log_tail": "\n RUN  v3.0.5 C:/Users/DEV03/Documents/Jrc/relacionamento-v2-20261101\n\n ✓ app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarViews.spec.js (14 tests) 1316ms\nstderr | app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarFilters.spec.js > clears paged content after a denied native account replacement\nCRM activities list request failed { status: 403 }\n\nstderr | app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarFilters.spec.js > clears paged content after a denied native role replacement\nCRM activities list request failed { status: 403 }\n\n ✓ app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarFilters.spec.js (9 tests) 738ms\n ✓ app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarNativeActions.spec.js (7 tests) 422ms\n ✓ app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarView.spec.js (1 test) 263ms\n\n Test Files  4 passed (4)\n      Tests  31 passed (31)\n   Start at  10:12:33\n   Duration  11.97s (transform 448ms, setup 998ms, collect 1.04s, tests 2.74s, environment 4.93s, prepare 789ms)\n\nJSON report written to C:/Users/DEV03/Documents/Jrc/relacionamento-v2-20261101/.codex/d-approvals-20261104/calendar-list-pagination06-tests.json\n",
+      "ram_end": 1937297408,
+      "disk_end": 7392165888
+    },
+    "calendar-list-pagination07": {
+      "kind": "source_tests_not_application_build",
+      "ram_start": 1381003264,
+      "disk_start": 8665034752,
+      "minimum_ram": 1093791744,
+      "minimum_disk": 8665034752,
+      "status": "passed",
+      "start_ram_threshold": 1342177280,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "pid": 14392,
+      "exit_code": 0,
+      "log_tail": "\n RUN  v3.0.5 C:/Users/DEV03/Documents/Jrc/relacionamento-v2-20261101\n\n ✓ app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarViews.spec.js (14 tests) 1508ms\nstderr | app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarFilters.spec.js > clears paged content after a denied native account replacement\nCRM activities list request failed { status: 403 }\n\nstderr | app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarFilters.spec.js > clears paged content after a denied native role replacement\nCRM activities list request failed { status: 403 }\n\n ✓ app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarFilters.spec.js (9 tests) 845ms\n ✓ app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarNativeActions.spec.js (7 tests) 542ms\n ✓ app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarView.spec.js (1 test) 311ms\n   ✓ explains unsupported calendar controls while preserving the weekly view and completion 310ms\n\n Test Files  4 passed (4)\n      Tests  31 passed (31)\n   Start at  10:16:36\n   Duration  13.00s (transform 652ms, setup 1.10s, collect 1.34s, tests 3.21s, environment 5.15s, prepare 769ms)\n\nJSON report written to C:/Users/DEV03/Documents/Jrc/relacionamento-v2-20261101/.codex/d-approvals-20261104/calendar-list-pagination07-tests.json\n",
+      "ram_end": 1436667904,
+      "disk_end": 9401094144
+    },
+    "calendar-pagination-pure-final01": {
+      "kind": "directed_source_pure_not_application_build",
+      "ram_start": 1603940352,
+      "disk_start": 12901871616,
+      "minimum_ram": 1589817344,
+      "minimum_disk": 12901871616,
+      "status": "passed",
+      "start_ram_threshold": 1092616192,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "pid": 21488,
+      "exit_code": 0,
+      "log_tail": "(node:21488) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/DEV03/Documents/Jrc/relacionamento-v2-20261101/app/javascript/dashboard/routes/dashboard/crm/utils/calendarPagination.js is not specified and it doesn't parse as CommonJS.\nReparsing as ES module because module syntax was detected. This incurs a performance overhead.\nTo eliminate this warning, add \"type\": \"module\" to \\\\?\\C:\\Users\\DEV03\\Documents\\Jrc\\relacionamento-v2-20261101\\package.json.\n(Use `node --trace-warnings ...` to show where the warning was created)\n✔ pages across a day boundary without losing, duplicating or reordering appointments (11.2499ms)\n✔ clamps an old page after a filtered or refreshed authorized result shrinks (0.4296ms)\n✔ returns no synthetic rows or empty headers for an empty authorized list (0.3141ms)\n✔ keeps the 25/26 appointment page boundary exact without adding a blank page (0.3032ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 24.0922\n",
+      "ram_end": 1600405504,
+      "disk_end": 12901867520
+    },
+    "calendar-pagination-lint03": {
+      "kind": "directed_eslint_not_application_build",
+      "ram_start": 1603604480,
+      "disk_start": 12901863424,
+      "minimum_ram": 1383444480,
+      "minimum_disk": 12901863424,
+      "status": "failed",
+      "start_ram_threshold": 1428160512,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "heap_mib": 256,
+      "native_allowance_mib": 256,
+      "pid": 28172,
+      "exit_code": 1,
+      "log_tail": "",
+      "ram_end": 1611296768,
+      "disk_end": 12901343232
+    }
+  },
+  "resources_qualification": "RAM/disk monitored during owned source processes;no application build. Disk increases occurred concurrently outside these source operations;no cleanup performed here.",
+  "files_sha256": {
+    "app/javascript/dashboard/routes/dashboard/crm/utils/calendarPagination.js": "3c7960677502d83f60143071d364feee5f5cb0b237b6a3add6bc8a98d4799644",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/CalendarView.vue": "1ebd998e74782bbdd66c7c7c3bf4f6d10b96f53f1b429a6c3cb846b123a7baeb",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarViews.spec.js": "78bc165c90bd9b396bb213a435e76abb973d3b116b24fb06c94a3ba1bfddf5c3",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarFilters.spec.js": "17c42ce42ede15c97175fb2fba1f960fe377a4029036d39d7670837e468bfd55",
+    "script/jrc_calendar_pagination.test.mjs": "8ece8c1bd249f267f9624388f99ee91381c204c1fc82cbc9f24949ef269f26a9"
+  },
+  "focused_source_configuration": {
+    ".codex/calendar-focused-20261109/vitest.config.ts": "import { defineConfig } from 'vitest/config';\nimport path from 'node:path';\nimport base from '../../vitest.config';\n\nexport default defineConfig({\n  ...base,\n  cacheDir: path.resolve('.codex/calendar-focused-20261109/cache'),\n  // These JSDOM gates assert native Vue behavior, not compiled CSS/layout.\n  // Do not load the application-wide Tailwind/PostCSS pipeline for them.\n  css: { postcss: { plugins: [] } },\n  server: { fs: { allow: [path.resolve('..')] } },\n  test: {\n    ...base.test,\n    setupFiles: [path.resolve('.codex/calendar-focused-20261109/setup.js')],\n    pool: 'threads',\n    minWorkers: 1,\n    maxWorkers: 1,\n    fileParallelism: false,\n  },\n});\n",
+    ".codex/calendar-focused-20261109/setup.js": "import { config } from '@vue/test-utils';\nimport { createI18n } from 'vue-i18n';\nimport FloatingVue from 'floating-vue';\nimport crm from '../../app/javascript/dashboard/i18n/locale/en/crm.json';\n\n// Same native plugins and source CRM messages; no unrelated locale bundle.\nconfig.global.plugins = [\n  createI18n({ legacy: false, locale: 'en', messages: { en: crm } }),\n  FloatingVue,\n];\nconfig.global.stubs = {\n  WootModal: { template: '<div><slot/></div>' },\n  WootModalHeader: { template: '<div><slot/></div>' },\n  NextButton: { template: '<button><slot/></button>' },\n};\n"
+  },
+  "approved_candidate": {
+    "sha": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
+    "actual_new_vite_builds": 0,
+    "new_attempt_consumed": false,
+    "snapshot_selected_files_verified_exact_canonical_source": [
+      "app/javascript/dashboard/routes/dashboard/crm/views/calendar/CalendarView.vue",
+      "app/policies/jrc_relationship/module_policy.rb",
+      "app/services/jrc_relationship/portfolio_group_history.rb",
+      "vite.config.ts",
+      "pnpm-lock.yaml"
+    ],
+    "current_paging_code_is_post_candidate": true,
+    "new_paging_not_silently_included_in_d8d7": true
+  },
+  "git_tooling": "PATH Git launcher failed after earlier reads;existing bundled Git2.56.0.windows.4 works and reports same HEAD. No reinstall,PATH edit,repository repair/reset or cleanup. Use bundled Git for local checkpoints.",
+  "preserved": {
+    "no_existing_DB_or_Redis_write": true,
+    "no5379_or_original_container_change": true,
+    "no_push_GHCR_deploy_external_ops": true,
+    "prior_untracked_diagnostic_reports": "Preserved and excluded from this source checkpoint"
+  },
+  "remaining": [
+    "Current-source desktop/mobile/light/dark Chrome with real synthetic DB",
+    "Native backend date filtering/pagination and representative Calendar transport scale are not implemented by this local DOM paging",
+    "D8d7 build only after fresh5GiB hostRAM/3GiBdisk preflight/no competing build;one conditional attempt remains unconsumed",
+    "C-G full literal/visual reconciliation,history scope protection,local role matrix,TRR,deferred documents and real external acceptance remain distinct"
+  ],
+  "stage_closure": {
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  },
+  "next_independent_task": "Reproduce stale history rows after explicit native history-export401/403/404,then preserve current read authority on failures without changing backend grants."
+}

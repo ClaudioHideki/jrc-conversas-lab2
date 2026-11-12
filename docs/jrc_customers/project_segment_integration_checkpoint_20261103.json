@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-03",
+  "status": "PARTIAL — automated gates passed; new build and real Chrome pending",
+  "branch": "codex/relacionamento-v2-20261101",
+  "baseline": "03c764da85014826b8245ecd07dc2020b0b578d6",
+  "scope": [
+    "Native Project list and portfolio intersect published customer segment",
+    "Native project owner/member/account visibility preserved; detail and write policies unchanged",
+    "Same segment in list, portfolio task aggregates, pagination, export query and detail/return navigation",
+    "No migrations, dependencies, external operations or changes to presence"
+  ],
+  "gates": {
+    "focused_backend": {
+      "report": ".codex/customer-segment-projects-final-backend.json",
+      "examples": 9,
+      "failures": 0
+    },
+    "native_regression": {
+      "report": ".codex/customer-segment-projects-native-regression.json",
+      "examples": 32,
+      "failures": 0
+    },
+    "vue": {
+      "report": ".codex/customer-segment-projects-frontend-run.json",
+      "tests": 4,
+      "failures": 0,
+      "kind": "component tests with mocks; not Chrome"
+    },
+    "eslint": {
+      "errors": 0,
+      "warnings": {
+        "ProjectList.vue": 23,
+        "ProjectDetail.vue": 17,
+        "ProjectSegments.spec.js": 0
+      },
+      "baseline_warnings_equal": true
+    },
+    "rubocop": {
+      "new_spec_offenses": 0,
+      "report": ".codex/customer-segment-projects-checked-style.json",
+      "native_controllers_not_globally_clean": true,
+      "final_controller_delta": "Whitespace/alignment adjusted after gate; final aggregate style admission pending"
+    },
+    "source_preservation": {
+      "report": ".codex/customer-segment-projects-checked-source-preservation.json",
+      "original_C6_verified": 11375,
+      "snapshot_verified": 11300,
+      "mismatches": 0
+    }
+  },
+  "failures_preserved": [
+    "Initial test fixture used nil instead of required native idempotency key; fixed using SecureRandom.uuid, no production service changed",
+    "Initial Vitest sandbox esbuild spawn EPERM; rerun with local process permission passed",
+    "Initial RuboCop temporary path used generic rules; final spec tested under repository spec path and configuration"
+  ],
+  "pending": [
+    "Fresh guarded Vite build",
+    "Real Chrome desktop/mobile and persistence/perms with local database",
+    "Service Desk build/Chrome",
+    "Relationship and Campaign integrations",
+    "Final Word audit of Stage C",
+    "TRR undefined — no invented formula"
+  ],
+  "restrictions": {
+    "push": false,
+    "deploy": false,
+    "GHCR": false,
+    "production_changes": false,
+    "deleted_files": false
+  },
+  "checkpoint_method": "Local commit with command-only core.hooksPath=.codex/git-hooks because repository husky helper is absent; manual gates recorded"
+}

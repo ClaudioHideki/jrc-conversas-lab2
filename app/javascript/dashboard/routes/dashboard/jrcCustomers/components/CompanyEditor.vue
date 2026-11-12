@@ -1,10 +1,7 @@
 <script setup>
-import { computed, reactive, ref, watch, onMounted } from 'vue';
+import { computed, reactive, ref, watch, onMounted, nextTick } from 'vue';
 import API from 'dashboard/api/jrcCustomers';
 import { useI18n } from 'vue-i18n';
-const props = defineProps({ company: { type: Object, default: null } });
-const emit = defineEmits(['saved', 'cancel']);
-const { t } = useI18n();
 import CompanyPicker from './CompanyPicker.vue';
 import {
   T,
@@ -18,6 +15,42 @@ import {
   primaryClass,
   errorMessage,
 } from '../copy';
+
+const props = defineProps({ company: { type: Object, default: null } });
+const emit = defineEmits(['saved', 'cancel']);
+const { t } = useI18n();
+const section = ref('identity');
+const formElement = ref(null);
+const sections = computed(() => [
+  {
+    key: 'identity',
+    label: t('CRM.CUSTOMER_MASTER_360.EDITOR_IDENTITY'),
+    tone: 'bg-n-blue-3 text-n-blue-11 border-n-blue-7',
+  },
+  {
+    key: 'communication',
+    label: t('CRM.CUSTOMER_MASTER_360.EDITOR_COMMUNICATION'),
+    tone: 'bg-n-teal-3 text-n-teal-11 border-n-teal-7',
+  },
+  {
+    key: 'classification',
+    label: t('CRM.CUSTOMER_MASTER_360.EDITOR_CLASSIFICATION'),
+    tone: 'bg-n-amber-3 text-n-amber-11 border-n-amber-7',
+  },
+  {
+    key: 'structure',
+    label: t('CRM.CUSTOMER_MASTER_360.EDITOR_STRUCTURE'),
+    tone: 'bg-n-violet-3 text-n-violet-11 border-n-violet-7',
+  },
+]);
+const identityFields = [
+  'name',
+  'trade_name',
+  'tax_id',
+  'state_registration',
+  'municipal_registration',
+];
+const communicationFields = ['website', 'domain', 'email', 'phone_number'];
 
 const textFields = [
   'name',
@@ -92,6 +125,16 @@ onMounted(async () => {
 });
 
 const save = async () => {
+  const invalid = formElement.value.querySelector(
+    'input:invalid, select:invalid, textarea:invalid'
+  );
+  if (invalid) {
+    section.value = invalid.closest('fieldset').dataset.section;
+    await nextTick();
+    invalid.reportValidity();
+    invalid.focus();
+    return;
+  }
   busy.value = true;
   error.value = '';
   try {
@@ -131,40 +174,11 @@ const save = async () => {
 
 <template>
   <form
+    ref="formElement"
+    novalidate
     class="rounded-xl border border-n-weak bg-n-solid-2 p-5"
     @submit.prevent="save"
   >
-    <fieldset
-      class="col-span-full space-y-3 rounded-lg border border-n-weak p-3"
-    >
-      <legend class="px-1 text-sm font-semibold">
-        {{ t('PORTAL.STORE') }}
-      </legend>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <label class="text-sm"
-          >{{ t('PORTAL.STORE_CODE')
-          }}<input
-            v-model="form.storeCode"
-            :class="inputClass"
-            maxlength="80"
-        /></label>
-        <label class="text-sm"
-          >{{ t('PORTAL.CLUSTER')
-          }}<input
-            v-model="form.storeCluster"
-            :class="inputClass"
-            maxlength="255"
-        /></label>
-      </div>
-      <label class="block text-sm"
-        >{{ t('PORTAL.STORE_PHONES')
-        }}<textarea
-          v-model="form.storePhones"
-          :class="inputClass"
-          rows="3"
-        />
-      </label>
-    </fieldset>
     <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
       <div>
         <h2 class="text-xl font-semibold">
@@ -180,7 +194,31 @@ const save = async () => {
       </span>
     </div>
 
+    <nav
+      class="mb-5 flex flex-wrap gap-2"
+      :aria-label="t('CRM.CUSTOMER_MASTER_360.EDITOR_SECTIONS')"
+    >
+      <button
+        v-for="item in sections"
+        :key="item.key"
+        type="button"
+        class="rounded-lg border px-3 py-2 text-sm font-medium"
+        :class="[
+          item.tone,
+          section === item.key
+            ? 'ring-2 ring-n-brand ring-offset-2 ring-offset-n-solid-2'
+            : 'opacity-80',
+        ]"
+        :aria-current="section === item.key ? 'page' : undefined"
+        @click="section = item.key"
+      >
+        {{ item.label }}
+      </button>
+    </nav>
+
     <fieldset
+      v-show="section === 'identity'"
+      data-section="identity"
       :disabled="busy"
       class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
     >
@@ -201,7 +239,7 @@ const save = async () => {
       </label>
 
       <label
-        v-for="field in textFields"
+        v-for="field in identityFields"
         :key="field"
         class="text-sm"
       >
@@ -214,14 +252,44 @@ const save = async () => {
           :class="inputClass"
         />
       </label>
+    </fieldset>
 
+    <fieldset
+      v-show="section === 'communication'"
+      data-section="communication"
+      :disabled="busy"
+      class="grid gap-4 md:grid-cols-2"
+    >
+      <label
+        v-for="field in communicationFields"
+        :key="field"
+        class="text-sm"
+      >
+        {{ FIELD_LABELS[field] }}
+        <input
+          v-model.trim="form[field]"
+          :type="field === 'email' ? 'email' : 'text'"
+          maxlength="1000"
+          :class="inputClass"
+        />
+      </label>
+    </fieldset>
+
+    <fieldset
+      v-show="section === 'classification'"
+      data-section="classification"
+      :disabled="busy"
+      class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+    >
       <label class="text-sm">
         {{ FIELD_LABELS.segment }}
         <select
           v-model="form.segment"
           :class="inputClass"
         >
-          <option value="">—</option>
+          <option value="">
+            {{ t('CRM.CUSTOMER_MASTER_360.UNSPECIFIED') }}
+          </option>
           <option
             v-for="value in metadata.segments || []"
             :key="value"
@@ -238,7 +306,9 @@ const save = async () => {
           v-model="form.size"
           :class="inputClass"
         >
-          <option value="">—</option>
+          <option value="">
+            {{ t('CRM.CUSTOMER_MASTER_360.UNSPECIFIED') }}
+          </option>
           <option
             v-for="(label, key) in SIZE_OPTIONS"
             :key="key"
@@ -255,7 +325,9 @@ const save = async () => {
           v-model="form.source"
           :class="inputClass"
         >
-          <option value="">—</option>
+          <option value="">
+            {{ t('CRM.CUSTOMER_MASTER_360.UNSPECIFIED') }}
+          </option>
           <option
             v-for="(label, key) in SOURCE_OPTIONS"
             :key="key"
@@ -299,14 +371,6 @@ const save = async () => {
         </select>
       </label>
 
-      <div class="text-sm md:col-span-2">
-        <p>{{ T.parent }}</p>
-        <CompanyPicker
-          v-model="form.parent_company_id"
-          :exclude-id="company?.id"
-        />
-      </div>
-
       <div class="text-sm md:col-span-2 xl:col-span-3">
         <p class="mb-2 font-medium">{{ T.secondaryRelationships }}</p>
         <div class="flex flex-wrap gap-2">
@@ -341,6 +405,29 @@ const save = async () => {
           type="checkbox"
         />{{ T.active }}
       </label>
+    </fieldset>
+
+    <fieldset
+      v-show="section === 'structure'"
+      data-section="structure"
+      :disabled="busy"
+      class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+    >
+      <label class="text-sm">
+        {{ FIELD_LABELS.economic_group }}
+        <input
+          v-model.trim="form.economic_group"
+          maxlength="1000"
+          :class="inputClass"
+        />
+      </label>
+      <div class="text-sm md:col-span-2">
+        <p>{{ T.parent }}</p>
+        <CompanyPicker
+          v-model="form.parent_company_id"
+          :exclude-id="company?.id"
+        />
+      </div>
 
       <label class="text-sm md:col-span-2 xl:col-span-3">
         {{ FIELD_LABELS.description }}
@@ -351,6 +438,39 @@ const save = async () => {
           :class="inputClass"
         />
       </label>
+      <fieldset
+        data-section="structure"
+        data-testid="establishment-fields"
+        class="col-span-full space-y-3 rounded-lg border border-n-weak p-3"
+      >
+        <legend class="px-1 text-sm font-semibold">
+          {{ t('PORTAL.STORE') }}
+        </legend>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="text-sm"
+            >{{ t('PORTAL.STORE_CODE')
+            }}<input
+              v-model="form.storeCode"
+              :class="inputClass"
+              maxlength="80"
+          /></label>
+          <label class="text-sm"
+            >{{ t('PORTAL.CLUSTER')
+            }}<input
+              v-model="form.storeCluster"
+              :class="inputClass"
+              maxlength="255"
+          /></label>
+        </div>
+        <label class="block text-sm"
+          >{{ t('PORTAL.STORE_PHONES')
+          }}<textarea
+            v-model="form.storePhones"
+            :class="inputClass"
+            rows="3"
+          />
+        </label>
+      </fieldset>
     </fieldset>
 
     <p

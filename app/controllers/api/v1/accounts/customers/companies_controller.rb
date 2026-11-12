@@ -6,6 +6,11 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
                                              filters: params.permit(:q, :relationship_type,
                                                                     :person_kind, :segment, :owner_id,
                                                                     :city, :active, :parent_company_id, :economic_group)).call
+    if params[:taxonomy_id].present?
+      taxonomy = JrcCustomers::Taxonomy.active.where(account_id: Current.account.id).find(params[:taxonomy_id])
+      members = JrcCustomers::SegmentMembers.new(account: Current.account, actor: Current.user, taxonomy: taxonomy)
+      scope = scope.where(id: members.companies.reselect(:id))
+    end
     records, meta = page_scope(corporate_companies(scope))
     render json: { payload: serializer.companies(records.to_a), meta: meta }
   end
@@ -48,29 +53,28 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
     render json: context(company: @company).relationship_map
   end
 
+  def backoffice
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    query = JrcCustomers::BackofficeContext.new(account: Current.account, actor: Current.user, company: @company)
+    render json: query.call(params: params.permit(:view, :page, :per_page, :q, :status))
+  end
+
   def timeline
     value = JrcCustomers::Timeline.new(context: context(company: @company), account: Current.account, user: Current.user)
     render json: value.call(cursor: params[:cursor], limit: params.fetch(:per_page, 30))
   end
 
-  def records
-    relation = context(company: @company).sources[params[:kind].to_s]
-    raise ActionController::BadRequest, 'Unsupported or unavailable module' unless relation
+  def attendance
+    response.headers['Cache-Control'] = 'no-store'
+    metrics = JrcCustomers::AttendanceMetrics.new(
+      account: Current.account, user: Current.user, member: Current.account_user, customer: context(company: @company)
+    )
+    render json: metrics.call(params.permit(:from, :to, :channel).to_h.symbolize_keys)
+  end
 
-    records, meta = page_scope(relation.order(created_at: :desc, id: :desc))
-    # Explicit safe fields: never return tokens, transcripts, private messages, configuration or audit snapshots.
-    fields = %w[id display_id title name status created_at updated_at contact_id company_id deal_id lead_id
-                requester_id unit_id status_id priority_id project_id key due_on starts_on contract_number order_number
-                due_at completed_at direction duration_seconds provider started_at campaign_id sent_at value_cents total_cents proposal_number]
-    payload = records.map do |record|
-      row = record.attributes.slice(*fields)
-      if record.is_a?(JrcServiceDesk::Ticket)
-        row['status'] = record.status.name
-        row['phase'] = record.status.phase
-      end
-      row
-    end
-    render json: { payload: payload, meta: meta }
+  def records
+    render_module_records(context(company: @company))
   end
 
   private

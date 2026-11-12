@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-06",
+  "preserved_previous_checkpoint": "0db8bb4a7d85542db391b47945a0089bdae6ed7f",
+  "branch": "codex/relacionamento-v2-20261101",
+  "status": "Native grouping/filter/workload increment validated; C-G and full named portfolio Word scope remain open.",
+  "implemented": [
+    "Named group filter only narrows current native Assignment scope; private/foreign/malformed group IDs cannot expand access.",
+    "Native customer list, dashboard, actions and other record lists through filtered_assignments share the same active linked customer cohort; removal restores the native ungrouped scope.",
+    "Existing customer segment filters remain additive; grouping persists in operational navigation and is excluded from configuration tabs.",
+    "Existing native reviewed batch panel remains the mutation engine; linking a group changes no original responsibility or allocation.",
+    "Read-only observed active customer/points/hours workload reuses CapacityWorkload and native load statuses; no invented weights, admission limits or automatic transfers.",
+    "Any hidden member makes full workload unavailable; missing explicit points/hours are unavailable, not zero or spare capacity.",
+    "Horizontal workload tab, filtered-list entry/removal banner and explicit permission-aware refresh; role/account changes abort pending reads and reload operational data.",
+    "Grouped native responses and workload use no-store."
+  ],
+  "gates": {
+    "native_new_cases": {
+      "count": 11,
+      "failures": 0,
+      "evidence": [
+        "named-portfolio-native-integration09:9/0",
+        "named-portfolio-native-scale10:2/0",
+        "named-portfolio-native-validated-fixtures11:2/0(overlap; final fully validated fixture preparation plus no-store check)"
+      ],
+      "database": "jrc_rel_v2_candidate_test"
+    },
+    "source_ui_new": {
+      "count": 7,
+      "failures": 0,
+      "label": "named-portfolio-integration-source-final06",
+      "mocked_api": true,
+      "real_chrome": false
+    },
+    "existing_segment_source_regressions": {
+      "count": 7,
+      "failures": 0,
+      "label": "named-portfolio-integration-source04",
+      "other_new_suite_initially_failed_collection": true
+    },
+    "scoped_api_helpers": {
+      "count": 3,
+      "failures": 0,
+      "label": "named-portfolio-workload-api07",
+      "overlaps_previous_checkpoint_api_tests": true
+    },
+    "native_scale": {
+      "customers": 1000,
+      "queries": 40,
+      "elapsed_seconds": 1.0861,
+      "real_database": true
+    },
+    "ruby": "New services/controller/spec0; shared Base19->19, routes0->0; no added cops.",
+    "eslint": "All changed files0errors; existing ModulePage114warnings and Layout2warnings retained, no new warnings."
+  },
+  "corrections_observed": [
+    "New suite initially could not collect because its Vuex mock omitted mapGetters; changed to native partial mock. No source failure concealed.",
+    "Expanded UI suite exposed missing role-driven operational reload; fixed native page watcher and proposal invalidation.",
+    "Settings navigation fixture now explicitly grants configuration access.",
+    "Denied workload refresh now always clears previous facts and shows an explicit unavailable message.",
+    "Initial synthetic scale setup used insert_all!; replaced with create! throughout and reran actual1000-customer proof; no skipped-model-validation lint waiver."
+  ],
+  "disk": {
+    "free_initial_bytes": 9240424448,
+    "minimum_monitored_bytes": 9210064896,
+    "free_final_bytes": 9237053440,
+    "no_cleanup": true
+  },
+  "pending": [
+    "Named group configurable capacity/rules must enter the existing native immutable governance and admission/review guards; current workload tab is an observation, not this missing enforcement.",
+    "Distinct capabilities/history/export and literal/visual Word fragments remain under incremental review.",
+    "Current-source appbuild/Chrome desktop/mobile/light/dark forbidden pending authorization; frozen5379assets are not evidence.",
+    "TRR undefined; docs without portfolio deferred; external providers/channel/pilot remain unperformed."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,real external operation,production change,5379 modification or original container interruption.",
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupWorkloadPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupIntegration.spec.js",
+    "app/services/jrc_relationship/portfolio_group_filter.rb",
+    "app/services/jrc_relationship/portfolio_group_workload.rb",
+    "spec/requests/api/v1/accounts/relationship/portfolio_group_integration_spec.rb",
+    "app/controllers/api/v1/accounts/relationship/base_controller.rb",
+    "app/controllers/api/v1/accounts/relationship/portfolio_groups_controller.rb",
+    "app/javascript/dashboard/api/jrcRelationship.js",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupsPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/RelationshipLayout.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/namedPortfolioApi.spec.js",
+    "config/routes.rb"
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_native_integration_checkpoint_20261106.json"
+}

@@ -18,7 +18,7 @@ class JrcServiceDesk::ServicePortalConfiguration
   end
 
   def permitted?
-    context = JrcServiceDesk::OperationalContext.new(account: @service.account, user: @member.user, account_user: @member)
+    context = JrcServiceDesk::OperationalContext.new(account: @service.account, user: @member.user, account_user: @member, customer_execution: true)
     return false unless context.unit_allowed?(@service.unit) && CAPABILITIES.all? { |key| context.capability?(key) }
 
     JrcServiceDesk::NativeExecutionContext.with(context.to_h) { InboxPolicy.new(context.to_h, @service.portal_inbox).show? }

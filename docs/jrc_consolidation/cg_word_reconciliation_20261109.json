@@ -1,0 +1,461 @@
+{
+  "date": "2026-11-09",
+  "branch": "codex/relacionamento-v2-20261101",
+  "source_parent": "f82ddf2255caa422c86bc196384502a64cdbc5f9",
+  "scope": "Incremental exact literal reconciliation and current source review;not a complete requirement or visual acceptance matrix",
+  "original_documents": [
+    {
+      "id": "cadastro-mestre",
+      "sha256": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
+      "body_paragraphs": 244,
+      "all_paragraphs_including_tables": 421,
+      "tables": 20,
+      "fragments": 373,
+      "matches_original": true
+    },
+    {
+      "id": "relacionamento",
+      "sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+      "body_paragraphs": 223,
+      "all_paragraphs_including_tables": 326,
+      "tables": 6,
+      "fragments": 298,
+      "matches_original": true
+    },
+    {
+      "id": "backoffice",
+      "sha256": "ebd5cd1db7fa53cc7bf7e2fa6a801e498735eaef9d67040002a5a9ade4878284",
+      "body_paragraphs": 201,
+      "all_paragraphs_including_tables": 497,
+      "tables": 27,
+      "fragments": 449,
+      "matches_original": true
+    },
+    {
+      "id": "central-aprovacoes",
+      "sha256": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917",
+      "body_paragraphs": 197,
+      "all_paragraphs_including_tables": 465,
+      "tables": 20,
+      "fragments": 426,
+      "matches_original": true
+    }
+  ],
+  "total_original_inventory_fragments": 1546,
+  "fragment_count_qualification": "Includes context/headings/reference/table text;not that many independent functional requirements. Original classification_pending is preserved;new matrix is an incremental overlay.",
+  "raw_reread_artifact": ".codex/d-approvals-20261104/word-native-reread-20261109.json",
+  "matrix": [
+    {
+      "stage": "C",
+      "id": "C-master-lists-segments",
+      "word": [
+        "cadastro-mestre:P0250",
+        "cadastro-mestre:P0346",
+        "cadastro-mestre:P0414"
+      ],
+      "classification": "Implemented with remaining business/scale/current-source acceptance dependencies",
+      "facts": "Master company list already uses native DirectoryQuery,corporate visibility,authorized SegmentMembers and page_scope. Financial segment basis remains invoiced orders in a period. Do not duplicate these native lists.",
+      "reports": [
+        "docs/jrc_customers/financial_segments_crm_checkpoint_20261103.json",
+        "docs/jrc_customers/segment_consumers_validation_checkpoint_20261103.json"
+      ],
+      "code": [
+        "app/controllers/api/v1/accounts/customers/companies_controller.rb"
+      ],
+      "remaining": [
+        "TRR definition absent",
+        "Representative integrated current-source popup/list acceptance;do not treat local DOM paging as fulfillment of all server-pagination requirements"
+      ],
+      "word_text": {
+        "cadastro-mestre:P0250": "Campos parametrizados: faturamento, contratos, TRR, segmento, região, status e outros dados autorizados.",
+        "cadastro-mestre:P0346": "Paginação, busca e filtros devem ocorrer no servidor para bases grandes.",
+        "cadastro-mestre:P0414": "Listas e popups respondem com paginação/queries adequadas em base real."
+      },
+      "current_code_sha256": {
+        "app/controllers/api/v1/accounts/customers/companies_controller.rb": "499508491e7965cc3b9e7c097519d23b4ee8607d162a440398c5ae2b62b6f018"
+      }
+    },
+    {
+      "stage": "C",
+      "id": "C-B1-B4",
+      "word": [
+        "cadastro-mestre:P0155",
+        "cadastro-mestre:P0163",
+        "cadastro-mestre:P0151",
+        "cadastro-mestre:P0136"
+      ],
+      "classification": "Native implementations and prior directed automated evidence retained;current-source Chrome pending",
+      "facts": "Existing company/contact Service Desk context,versioned document catalog/history/native grants,attendance real-source metrics and contractual renewal are preserved.",
+      "reports": [
+        "docs/jrc_customers/stage_c_word_audit_20261104.json",
+        "docs/jrc_customers/contract_renewal_validated_checkpoint_20261104.json",
+        "docs/jrc_customers/document_history_checkpoint_20261104.json"
+      ],
+      "code": [],
+      "remaining": [
+        "Consolidated synthetic local DB desktop/mobile/themes B1-B4",
+        "Real scanner acceptance distinct from synthetic quarantine cases",
+        "Documents for companies without portfolio explicitly deferred by user"
+      ],
+      "word_text": {
+        "cadastro-mestre:P0155": "Consolidar os chamados de Service Desk associados à empresa. O botão “Novo chamado” deve abrir o fluxo real do Service Desk já com empresa/contato pré-preenchidos.",
+        "cadastro-mestre:P0163": "Central documental do cliente, com categorias, validade, versão, status, responsável e pendências. Deve suportar documentos obrigatórios configuráveis e metadados como quem assina contrato quando aplicável.",
+        "cadastro-mestre:P0151": "Visão consolidada das conversas/atendimentos do cliente, com período, canais, volume, satisfação, SLA e últimos atendimentos. A abertura/gestão completa continua no módulo Atendimento.",
+        "cadastro-mestre:P0136": "Quantidade de contratos, ativos, valor mensal total e próxima renovação."
+      },
+      "current_code_sha256": {}
+    },
+    {
+      "stage": "D",
+      "id": "D-tiers",
+      "word": [
+        "central-aprovacoes:P0016",
+        "central-aprovacoes:P0167"
+      ],
+      "classification": "Native implementation and prior automated validation;actual interface acceptance pending",
+      "facts": "Numeric versioned tiers and native planner exist;v1 original requests/history remain distinct. No UI-only authority table is proposed.",
+      "reports": [
+        "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json"
+      ],
+      "code": [
+        "app/services/jrc_approvals/definition.rb",
+        "app/services/jrc_approvals/selection.rb"
+      ],
+      "remaining": [
+        "Current-source native-DB Chrome tier boundaries,wizard and version conflicts"
+      ],
+      "word_text": {
+        "central-aprovacoes:P0016": "Alçadas por faixa de percentual ou valor.",
+        "central-aprovacoes:P0167": "Aprovação por alçada deve ser configurada em linhas simples. Exemplo: de 10% até 20% → Gerente Comercial; acima de 20% → Diretor Comercial."
+      },
+      "current_code_sha256": {
+        "app/services/jrc_approvals/definition.rb": "a29c474637ab3109db6b8a921eb1ce280dd2bad1df1ac54440e5fa44ada1f22f",
+        "app/services/jrc_approvals/selection.rb": "5fe70a8a1286d1c99667020623cf622e1bb989b7bd543b72edd086323c5c0ff5"
+      }
+    },
+    {
+      "stage": "D",
+      "id": "D-atomic-adjustment",
+      "word": [
+        "central-aprovacoes:P0112"
+      ],
+      "classification": "Partial source-domain coverage",
+      "facts": "Existing general proposal discount adjustment creates an immutable revision and atomically decides through native services. It is not a generic permission to update arbitrary origin models or fields.",
+      "reports": [
+        "docs/jrc_consolidation/approval_adjustment_checkpoint_20261104.json"
+      ],
+      "code": [
+        "app/services/jrc_approvals/decisions.rb"
+      ],
+      "remaining": [
+        "Other requested origin fields/types require specific native domain mutation adapters and tests",
+        "Do not impersonate requester or rewrite historical snapshots"
+      ],
+      "word_text": {
+        "central-aprovacoes:P0112": "O aprovador pode corrigir uma condição antes de aprovar. Exemplo: solicitante pede 25% de desconto; Diretor autoriza 20%. O sistema deve preservar valor original e valor ajustado."
+      },
+      "current_code_sha256": {
+        "app/services/jrc_approvals/decisions.rb": "e31daea3fbea93b1f83632ed0c2d023d634c95cb58b38cec5940ca9eaa472d67"
+      }
+    },
+    {
+      "stage": "D",
+      "id": "D-own-delegation-notices",
+      "word": [
+        "central-aprovacoes:P0327",
+        "central-aprovacoes:P0020"
+      ],
+      "classification": "Native scoped lifecycle/feed and retained real synthetic worker evidence;browser/default routing acceptance pending",
+      "facts": "Own global delegation intersects native account/company/unit/principal/action/window grants. Later retained evidence proves5realSidekiq acknowledgments;the older generic worker-pending note is superseded only for that owned queue.",
+      "reports": [
+        "docs/jrc_consolidation/approval_own_delegation_checkpoint_20261104.json",
+        "docs/jrc_consolidation/approval_worker_runtime_checkpoint_20261106.json"
+      ],
+      "code": [
+        "app/services/jrc_approvals/authorization.rb"
+      ],
+      "remaining": [
+        "Browser delivery/read-state and integrated native-default routing acceptance",
+        "No email/browser-push or real external message success inferred"
+      ],
+      "word_text": {
+        "central-aprovacoes:P0327": "Criar/cancelar delegação própria.",
+        "central-aprovacoes:P0020": "Notificações internas para solicitante e aprovador."
+      },
+      "current_code_sha256": {
+        "app/services/jrc_approvals/authorization.rb": "f7aca176732faaad8d8c7818a11c78c303b9cb5c62a7c106dffc3038ba63035f"
+      }
+    },
+    {
+      "stage": "E",
+      "id": "E-versioned-signature-dossier",
+      "word": [
+        "backoffice:P0035",
+        "backoffice:P0206"
+      ],
+      "classification": "Implemented native boundaries/sealed dossier;external acceptance incomplete",
+      "facts": "Provider connector and internal contract/version/signer/gate flow remain separated. Signed evidence is pinned to exact version;native sealed dossier archive exists. A server seal is not independent legal validation of PDF signatures.",
+      "reports": [
+        "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json"
+      ],
+      "code": [
+        "app/services/jrc_backoffice/signatures/gateway.rb",
+        "app/services/jrc_backoffice/completion_dossiers.rb",
+        "app/services/jrc_backoffice/dossier_access.rb"
+      ],
+      "remaining": [
+        "DocuSign demo/account/consent/Connect and real scanner require environment and explicit external authorization",
+        "Fresh-build native-DB document/contract/dossier interface acceptance",
+        "No second provider or manually accepted unscanned evidence"
+      ],
+      "word_text": {
+        "backoffice:P0035": "Gerar/revisar/versionar/enviar assinatura e bloquear implantação até assinatura quando obrigatória.",
+        "backoffice:P0206": "Somente liberar implantação após assinatura obrigatória concluída."
+      },
+      "current_code_sha256": {
+        "app/services/jrc_backoffice/signatures/gateway.rb": "be147ccd298be863c95803f4b3a34f58c83fc0c6760ecd354f220f412ec32714",
+        "app/services/jrc_backoffice/completion_dossiers.rb": "eaeef486e8b9f311ae6bbe506d7c308a9ed0251e4ad897c15d353472413d34e4",
+        "app/services/jrc_backoffice/dossier_access.rb": "6c4fa9529026be38df4404b8b6aea8bd5a10910edf9c650deb3107b99470b702"
+      }
+    },
+    {
+      "stage": "E",
+      "id": "E-native-CS-handoff",
+      "word": [
+        "backoffice:P0220"
+      ],
+      "classification": "Implemented and prior native/source validation retained",
+      "facts": "Completion-to-CS uses native prepare/accept and canonical origin/permission gates;it does not automatically reassign unrelated module responsibilities.",
+      "reports": [
+        "docs/jrc_consolidation/backoffice_cs_handoff_checkpoint_20261105.json",
+        "docs/jrc_consolidation/withdrawal_formal_handoff_checkpoint_20261106.json",
+        "docs/jrc_consolidation/withdrawal_multiorder_scale_checkpoint_20261106.json"
+      ],
+      "code": [
+        "app/services/jrc_relationship/withdrawal_readiness.rb"
+      ],
+      "remaining": [
+        "Real current-source full handoff interface walkthrough;existing synthetic1000task/25order observations are not production throughput"
+      ],
+      "word_text": {
+        "backoffice:P0220": "Transferir contexto para Relacionamento/CS quando a operação for concluída."
+      },
+      "current_code_sha256": {
+        "app/services/jrc_relationship/withdrawal_readiness.rb": "d1d3c0881fce3470db3fad4089bdaf81a5758eb8bdb908b0bf6bfcade1464898"
+      }
+    },
+    {
+      "stage": "F",
+      "id": "F-named-portfolios",
+      "word": [
+        "relacionamento:P0123",
+        "relacionamento:P0124",
+        "relacionamento:P0125"
+      ],
+      "classification": "Implemented with documented visual differences/remaining acceptance",
+      "facts": "Multiple active named portfolios reuse a single native customer allocation;master reviewed operations and per-item receipts exist. Rule editor is separately versioned;exact Word tab equivalence is not asserted.",
+      "reports": [
+        "docs/jrc_consolidation/portfolio_word_reconciliation_20261107.json",
+        "docs/jrc_consolidation/master_maximum_scale_checkpoint_20261107.json",
+        "docs/jrc_consolidation/master_owned_worker_checkpoint_20261107.json"
+      ],
+      "code": [
+        "app/services/jrc_relationship/portfolio_groups.rb",
+        "app/services/jrc_relationship/portfolio_group_scope.rb"
+      ],
+      "remaining": [
+        "Current-source desktop/mobile/light-dark group/editor/selection/revision conflicts",
+        "Real pilot at600-1000customers is not proven by50root/100link native maximum cohort or6owned queue acknowledgments"
+      ],
+      "word_text": {
+        "relacionamento:P0123": "Criar carteira com nome, empresa/unidade, objetivo, segmento, responsável, equipe, visibilidade, capacidade, metas e regras.",
+        "relacionamento:P0124": "Adicionar clientes existentes por busca no Cadastro Mestre, seleção individual ou lote revisado; deduplicar vínculos.",
+        "relacionamento:P0125": "Editar por abas de dados gerais, regras e metas, equipe e permissões; etapa única de revisão/resultado."
+      },
+      "current_code_sha256": {
+        "app/services/jrc_relationship/portfolio_groups.rb": "4422f6da435f928896911baa18560b22a0e1975cfc8fe5090204e36b3b677e63",
+        "app/services/jrc_relationship/portfolio_group_scope.rb": "549bb4bc53739080927b252283abfcf3524ff13aa4ea6397fe12ab3d4d80f723"
+      }
+    },
+    {
+      "stage": "F",
+      "id": "F-typed-capacity-withdrawal",
+      "word": [
+        "relacionamento:P0092",
+        "relacionamento:P0102"
+      ],
+      "classification": "Native implementation/prior directed tests retained;fresh interface acceptance pending",
+      "facts": "Capacity count/points/equivalent hours remain typed;illustrative Word factors are not defaults. Withdrawal changes only Relationship eligibility and requires native reviewed responsibilities;account membership and unrelated module access remain intact.",
+      "reports": [
+        "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
+        "docs/jrc_consolidation/analyst_current_capacity_checkpoint_20261105.json",
+        "docs/jrc_consolidation/analyst_withdrawal_checkpoint_20261106.json",
+        "docs/jrc_consolidation/withdrawal_cs_native_boundary_checkpoint_20261106.json"
+      ],
+      "code": [
+        "app/services/jrc_relationship/analyst_withdrawal.rb",
+        "app/services/jrc_relationship/batch_review_authority.rb"
+      ],
+      "remaining": [
+        "Current-source controlled withdrawal/restore,typed-capacity and native-origin UI acceptance",
+        "Do not reactivate a withdrawn owner or convert units implicitly"
+      ],
+      "word_text": {
+        "relacionamento:P0092": "Definir capacidade por quantidade de clientes, pontos ponderados ou horas equivalentes; nunca somar percentuais com semânticas diferentes.",
+        "relacionamento:P0102": "Toda proposta possui ID, versão, justificativa, snapshot e destino por cliente e por responsabilidade pendente."
+      },
+      "current_code_sha256": {
+        "app/services/jrc_relationship/analyst_withdrawal.rb": "850797698371ecfb54638dff753292d8c7d81d948b448f21e856b5025197bd98",
+        "app/services/jrc_relationship/batch_review_authority.rb": "e9b73860eb10f8e42ec5be79b94f4bd59c39e321e5e8fd0d2ae07d41902eb753"
+      }
+    },
+    {
+      "stage": "F",
+      "id": "F-local-role-matrix",
+      "word": [
+        "relacionamento:P0126",
+        "relacionamento:P0127"
+      ],
+      "classification": "Dependent on business capability definition",
+      "facts": "Native global view/manage/team/configure/document checks and source restrictions exist. Local manager/supervisor/analyst/viewer labels do not grant additional rights.",
+      "reports": [
+        "docs/jrc_consolidation/portfolio_word_reconciliation_20261107.json"
+      ],
+      "code": [
+        "app/policies/jrc_relationship/module_policy.rb",
+        "app/services/jrc_relationship/portfolio_group_access.rb"
+      ],
+      "remaining": [
+        "Business must define each local role across view,edit,assign,transfer,approve,execute,export,documents",
+        "No local grant may widen native account/company/operator/unit/private-project access"
+      ],
+      "word_text": {
+        "relacionamento:P0126": "Atribuir papéis como gestor, supervisor, analista e consulta; respeitar permissões globais e restrições de empresa.",
+        "relacionamento:P0127": "Separar ver, editar, atribuir, transferir, aprovar, executar, exportar e gerenciar documentos."
+      },
+      "current_code_sha256": {
+        "app/policies/jrc_relationship/module_policy.rb": "f7acfd150d9be2b7b5a37004d45b8e1adb8a6ecfbf18f89ba9bfc34a2ff5e289",
+        "app/services/jrc_relationship/portfolio_group_access.rb": "7a29d04ec0e6213e526a0dd73b7307476f36ba368909d100e81f960c26918910"
+      }
+    },
+    {
+      "stage": "F",
+      "id": "F-protected-history",
+      "word": [
+        "relacionamento:P0188",
+        "relacionamento:P0128"
+      ],
+      "classification": "Partial technical audit protection;safe operational projection retained",
+      "facts": "Native current-authority operational history omits raw historical values,reasons/customer IDs. New UI export-denial regression reproduced4failures,then6new cases passed after clearing old rows/page/rule choices on401/403/404;500retains read data. Full generic audit is not declared sealed. Final13source cases and2file lint0/0 now passed;earlier blocked preflights retained.",
+      "reports": [
+        "docs/jrc_consolidation/named_portfolio_history_checkpoint_20261106.json",
+        "docs/jrc_consolidation/portfolio_word_reconciliation_20261107.json",
+        "docs/jrc_consolidation/portfolio_history_denial_checkpoint_20261109.json"
+      ],
+      "code": [
+        "app/services/jrc_relationship/portfolio_group_history.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupHistoryPanel.vue",
+        "app/services/jrc_crm/sales_import_service.rb",
+        "app/models/account.rb"
+      ],
+      "remaining": [
+        "Exact immutable historical sharing/version evidence before exposing prior private values/reasons",
+        "Preserve idempotent legacy stage import and native account deletion lifecycle;no blanket shared-table write/delete denial"
+      ],
+      "word_text": {
+        "relacionamento:P0188": "Auditoria imutável ou protegida: ator, antes/depois, motivo, correlação, IP quando permitido e resultado.",
+        "relacionamento:P0128": "Ação em lote retorna resultado por item, erros, motivo, retomada e auditoria."
+      },
+      "current_code_sha256": {
+        "app/services/jrc_relationship/portfolio_group_history.rb": "a9a79831065718c536dfcc686bb3d58b7931ae40cec9388af3507fb3cf22d345",
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupHistoryPanel.vue": "549ceec73a75548a7b5fffd0b06626cae9b44bbac320e5522d89c7b96628492e",
+        "app/services/jrc_crm/sales_import_service.rb": "c770de21877fde10df0781317bd1fbe19e734d48c6fd315d58b8020f32baed50",
+        "app/models/account.rb": "5ae8e0d8a51159c397d4f58de95d87fddf9da95a1d1a29da0641ec02f7896ae2"
+      }
+    },
+    {
+      "stage": "F",
+      "id": "F2-governed-NICO",
+      "word": [
+        "relacionamento:P0147",
+        "relacionamento:P0215"
+      ],
+      "classification": "Implemented dimensions/budgets with broader pilot/visual acceptance remaining",
+      "facts": "Existing scoped health windows/priority/hysteresis,automatic action/cadence/playbook budgets and immutable receipts are retained. No event-free blanket customer task creation or real external send.",
+      "reports": [
+        "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json",
+        "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
+        "docs/jrc_consolidation/master_owned_worker_checkpoint_20261107.json"
+      ],
+      "code": [],
+      "remaining": [
+        "Whole-Word dimension/aggregation reconciliation and representative monitored pilot",
+        "External channel authorization/environment and operational monitoring evidence"
+      ],
+      "word_text": {
+        "relacionamento:P0147": "Motor por eventos e agendamentos com janela, limite, canal, destinatário, condição e ação.",
+        "relacionamento:P0215": "Paginação e jobs suportam bases crescentes; não criar uma tarefa para cada cliente sem sinal."
+      },
+      "current_code_sha256": {}
+    },
+    {
+      "stage": "G",
+      "id": "G-calendar-source-validation",
+      "word": [
+        "relacionamento:P0181"
+      ],
+      "classification": "Directed source behavior validated;actual browser/layout/database acceptance pending",
+      "facts": "Calendar31Vue+4pure plus history13Vue(6new+7legacy) =48distinct final cases passed;repeats not added. No application build or Chrome/nativeDB acceptance.",
+      "reports": [
+        "docs/jrc_consolidation/calendar_list_pagination_checkpoint_20261109.json"
+      ],
+      "code": [
+        "app/javascript/dashboard/routes/dashboard/crm/views/calendar/CalendarView.vue",
+        "app/javascript/dashboard/routes/dashboard/crm/utils/calendarPagination.js"
+      ],
+      "remaining": [
+        "Approved d8d7 build only with5GiB hostRAM/3GiBdisk/no competing Vite and guards from startup",
+        "Post-d8d7 paging/history fixes require their own future candidate-build scope;do not silently substitute current HEAD",
+        "Native backend Calendar date pagination/full-array transport scale remains separate",
+        "Fresh native synthetic DB desktop/mobile/themes,persistence,current denials and version conflicts;no old5379assets as evidence"
+      ],
+      "word_text": {
+        "relacionamento:P0181": "Rotas apenas indicativas; não assumir disponibilidade atual. Adotar contratos e padrões de autenticação, paginação, escopo, jobs e versionamento já usados no projeto."
+      },
+      "current_code_sha256": {
+        "app/javascript/dashboard/routes/dashboard/crm/views/calendar/CalendarView.vue": "1ebd998e74782bbdd66c7c7c3bf4f6d10b96f53f1b429a6c3cb846b123a7baeb",
+        "app/javascript/dashboard/routes/dashboard/crm/utils/calendarPagination.js": "3c7960677502d83f60143071d364feee5f5cb0b237b6a3add6bc8a98d4799644"
+      }
+    }
+  ],
+  "visual_status": "No new Word image rendering or Chrome acceptance. Exact figures/layouts and full literal remainder remain open;source utilities/classes are not visual proof.",
+  "native_test_status": "Prior native/queue evidence cited and source-preserved;not rerun this increment because backend rules unchanged and existing databases/Redis must remain preserved. New tests in this turn are source-only or pureJS.",
+  "technical_blockers": [
+    "5GiB available physical Windows RAM not reached;build not started",
+    "Fresh compiled current-code browser/native-DB acceptance and remaining source gates",
+    "Historically scoped audit evidence/storage lifecycle design and tests",
+    "Other source-domain atomic approval mutations and representative full-system scale"
+  ],
+  "business_dependencies": [
+    "TRR formula/unit/source undefined",
+    "Local portfolio role/capability matrix undefined",
+    "Company document expansion without portfolio explicitly deferred;not permission to implement now"
+  ],
+  "external_dependencies": [
+    "DocuSign demo/consent/Connect and real scanner/channel pilot need environment and explicit authorization;none attempted"
+  ],
+  "preserved_decisions": [
+    "Multiple active portfolios per customer;one native allocation/global capacity",
+    "Withdrawal only from Relationship;unrelated native module responsibilities stay in their origins",
+    "Financial segments use invoiced orders in a period",
+    "Original v1 approval rules/snapshots and integrations remain intact"
+  ],
+  "stage_closure": {
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  },
+  "latest_tooling_condition": "Default Git launcher unavailable internally;bundled Git2.56.0 works with unchanged repository. docker.exe later absent fromPATH/known installed locations;backend still alive. Final protected metadata were read through local Docker Engine namedpipe GET only. No install/repair/restart;original asset hash not freshly rechecked."
+}

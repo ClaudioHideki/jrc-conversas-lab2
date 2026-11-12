@@ -8,6 +8,10 @@ class Api::V1::Accounts::Actions::ContactMergesController < Api::V1::Accounts::B
 
   def create
     authorize :directory, :administer?, policy_class: JrcCustomers::DirectoryPolicy if Current.account.feature_enabled?('jrc_customer_master')
+    if JrcCustomers::SigningIdentity.where(account_id: Current.account.id, contact_id: [@base_contact.id, @mergee_contact.id]).exists?
+      member = Current.account.account_users.find_by(user_id: Current.user.id)
+      raise Pundit::NotAuthorizedError unless member&.administrator?
+    end
     contact_merge_action = ContactMergeAction.new(
       account: Current.account,
       base_contact: @base_contact,
@@ -27,6 +31,7 @@ class Api::V1::Accounts::Actions::ContactMergesController < Api::V1::Accounts::B
   end
 
   def contacts
-    @contacts ||= JrcBroker::GroupContactAccess.new(account: Current.account, user: Current.user || @resource).restrict(Current.account.contacts)
+    @contacts ||= JrcBroker::GroupContactAccess.new(account: Current.account, user: Current.user || @resource)
+                                             .restrict(JrcCustomers::ContactDirectory.covered_scope(account: Current.account, actor: Current.user || @resource))
   end
 end

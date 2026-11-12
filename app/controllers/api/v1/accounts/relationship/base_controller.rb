@@ -7,7 +7,10 @@ class Api::V1::Accounts::Relationship::BaseController < Api::V1::Accounts::BaseC
   rescue_from ArgumentError, KeyError do |error|
     render json: { errors: [error.message] }, status: :unprocessable_entity
   end
-  rescue_from ActiveRecord::StaleObjectError, ActiveRecord::RecordNotUnique do |_error|
+  rescue_from JrcRelationship::OperationalPeriod::Invalid do |error|
+    render json: { errors: [error.message], code: 'INVALID_OPERATIONAL_PERIOD' }, status: :unprocessable_entity
+  end
+  rescue_from ActiveRecord::StaleObjectError, ActiveRecord::RecordNotUnique, ActiveRecord::LockWaitTimeout, ActiveRecord::Deadlocked do |_error|
     render json: { errors: ['Record changed. Refresh before retrying.'] }, status: :conflict
   end
 
@@ -36,7 +39,12 @@ class Api::V1::Accounts::Relationship::BaseController < Api::V1::Accounts::BaseC
   end
 
   def filtered_assignments
+    response.headers['Cache-Control'] = 'no-store' if params[:portfolio_group_id].present?
     scope = relationship_context.assignments
+    filter = JrcCustomers::ModuleSegmentFilter.new(account: Current.account, actor: Current.user, module_key: 'relationship',
+                                                   segment_id: params[:customer_segment_id])
+    scope = filter.call(scope, company_column: :company_id, contact_column: :contact_id)
+    scope = JrcRelationship::PortfolioGroupFilter.call(relationship_context, scope, params[:portfolio_group_id])
     scope = scope.where(id: params[:assignment_id]) if params[:assignment_id].present?
     %w[owner_id team_id company_id business_unit_id status].each { |key| scope = scope.where(key => params[key]) if params[key].present? }
     scope = scope.where(owner_id: Current.user.id) if params[:mode] == 'mine'
@@ -92,9 +100,6 @@ class Api::V1::Accounts::Relationship::BaseController < Api::V1::Accounts::BaseC
   end
 
   def report_period
-    return unless params[:from].present?
-    from = Date.iso8601(params[:from]); to = Date.iso8601(params.fetch(:to, params[:from]).presence || params[:from])
-    raise ArgumentError, 'Invalid period' if to < from || (to - from).to_i > 366
-    from.beginning_of_day..to.end_of_day
+    JrcRelationship::OperationalPeriod.call(params)
   end
 end
