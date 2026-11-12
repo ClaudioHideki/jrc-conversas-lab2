@@ -62,6 +62,10 @@ class JrcBroker::Client
     request(:get, connection_path(id, 'status'))
   end
 
+  def history_sync(id)
+    request(:get, connection_path(id, 'history-sync/v2/progress'))
+  end
+
   def campaign_transport(id)
     request(:get, connection_path(id, 'campaign-transport'))
   end

@@ -364,6 +364,7 @@ Rails.application.routes.draw do
             post 'onboarding/:operation_id/recover', action: :recover_onboarding
             get 'inboxes/:inbox_id/status', action: :status
             get 'inboxes/:inbox_id/summary', action: :connection_summary
+            get 'inboxes/:inbox_id/history-sync', action: :history_sync
             post 'inboxes/:inbox_id/pair', action: :pair
             get 'inboxes/:inbox_id/pair-operations/:operation_id', action: :pair_operation
             post 'inboxes/:inbox_id/disconnect', action: :disconnect

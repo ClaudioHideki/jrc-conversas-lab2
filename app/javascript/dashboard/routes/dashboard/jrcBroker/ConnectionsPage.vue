@@ -13,6 +13,7 @@ import HumanAssignmentPolicy from 'dashboard/components-next/jrc-broker/HumanAss
 import ConnectionDistributionPolicy from 'dashboard/components-next/jrc-broker/ConnectionDistributionPolicy.vue';
 import ConnectionDistributionTable from 'dashboard/components-next/jrc-broker/ConnectionDistributionTable.vue';
 import ConnectionInsights from 'dashboard/components-next/jrc-broker/ConnectionInsights.vue';
+import HistorySyncStatus from 'dashboard/components-next/jrc-broker/HistorySyncStatus.vue';
 import OnboardingFlow from 'dashboard/components-next/jrc-broker/OnboardingFlow.vue';
 
 const { t, locale } = useI18n();
@@ -838,6 +839,12 @@ onBeforeUnmount(() => {
                   ? null
                   : connectionState(selectedInbox.id) === 'CONNECTED'
               "
+            />
+            <HistorySyncStatus
+              v-if="activeTab === 'overview' && !reconnectMode"
+              :key="`sync:${accountId}:${selectedInbox.id}`"
+              :account-id="accountId"
+              :inbox-id="selectedInbox.id"
             />
             <ConnectionInsights
               v-if="activeTab === 'overview' && !reconnectMode"

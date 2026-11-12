@@ -30,6 +30,14 @@ export const createJrcBrokerApi = accountId => {
     },
     configuration: signal => request('get', '', undefined, undefined, signal),
     configure: (data, signal) => request('patch', '', data, undefined, signal),
+    historySync: (id, signal) =>
+      request(
+        'get',
+        inboxPath(id, 'history-sync'),
+        undefined,
+        undefined,
+        signal
+      ),
     assignmentPolicy: signal =>
       request('get', '/assignment_policy', undefined, undefined, signal),
     saveAssignmentPolicy: (data, signal) =>

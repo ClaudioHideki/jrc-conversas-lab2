@@ -16,6 +16,17 @@ class JrcBroker::Control
     value
   end
 
+  def history_sync
+    authorize!(:status)
+    snapshot = context.integration.attributes.slice('organization_id', 'destination_revision', 'broker_origin', 'encrypted_control_key')
+    value = context.client.history_sync(@binding.integration_id)
+    authorize!(:status)
+    current = JrcBrokerIntegration.find_by!(account_id: @account.id)
+    raise JrcBroker::Client::Error, 'JRC_BROKER_INVALID_RESPONSE' unless current.attributes.slice(*snapshot.keys) == snapshot
+
+    JrcBroker::HistoryProgress.present!(value, binding: @binding.reload, integration: current)
+  end
+
   def pair(key:)
     authorize!(:pair)
     state = remote_status

@@ -5,7 +5,7 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
   before_action :verify_control_csrf!
   before_action :reject_query!
   before_action :authorize_management!, except: [:status, :pair, :pair_operation, :disconnect, :confirm_identity,
-                                                 :connection_history, :connection_summary]
+                                                 :connection_history, :connection_summary, :history_sync]
   rescue_from JrcBroker::Client::Error, with: :broker_error
   rescue_from JrcBroker::Configuration::InvalidConfiguration, JrcBroker::CredentialStore::InvalidCredential, with: :configuration_error
 
@@ -57,6 +57,10 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
 
     render json: JrcBroker::ConnectionSummary.new(binding: binding, manage: policy.manage?,
                                                   reports: ReportPolicy.new(pundit_user, :report).view?).perform
+  end
+
+  def history_sync
+    render json: control.history_sync
   end
 
   def update_connection_distribution

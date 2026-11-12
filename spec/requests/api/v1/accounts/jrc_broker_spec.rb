@@ -35,6 +35,26 @@ RSpec.describe 'JRC Broker account control', type: :request do
     stub_request(:get, "#{remote}/connections/#{connection_id}/status").to_return(status: 200, body: health.to_json)
   end
 
+  it 'reads history progress only for the member inbox and discards secrets from the remote response' do
+    member = create(:inbox_member, inbox: inbox, user: agent)
+    payload = { schemaVersion: 2, organizationId: organization_id, channelId: SecureRandom.uuid,
+                integrationId: connection_id, accountId: account.id, inboxId: inbox.id, destinationRevision: 1, run: nil,
+                private_payload: 'SYNTHETIC_NEVER_EXPOSE' }
+    stub_request(:get, "#{remote}/connections/#{connection_id}/history-sync/v2/progress").to_return(status: 200, body: payload.to_json)
+    headers = agent.create_new_auth_token
+    get "#{inbox_url}/history-sync", headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body).to include('schemaVersion' => 2, 'inboxId' => inbox.id, 'run' => nil)
+    expect(response.body).not_to include('SYNTHETIC_NEVER_EXPOSE', 'synthetic-control')
+    stub_request(:get, "#{remote}/connections/#{connection_id}/history-sync/v2/progress")
+      .to_return(status: 200, body: payload.merge(inboxId: inbox.id + 1).to_json)
+    get "#{inbox_url}/history-sync", headers: headers
+    expect(response).not_to have_http_status(:ok)
+    member.destroy!
+    get "#{inbox_url}/history-sync", headers: headers
+    expect(response).to have_http_status(:forbidden)
+  end
+
   it 'audits reconnection, expiry and identity mismatch once without retaining the pairing code' do
     headers = admin.create_new_auth_token.merge('Idempotency-Key' => 'synthetic-audit-intent')
     operation_id = SecureRandom.uuid
