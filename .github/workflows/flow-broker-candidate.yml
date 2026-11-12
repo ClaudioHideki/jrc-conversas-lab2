@@ -98,7 +98,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: '3.4.12'
           bundler: 2.5.16
           bundler-cache: true
       - name: Preparar banco descartavel da suite

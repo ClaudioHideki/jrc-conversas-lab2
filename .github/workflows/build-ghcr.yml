@@ -48,7 +48,7 @@ jobs:
 
   build-and-push:
     needs: precimech-regression
-    if: ${{ !cancelled() && (inputs.component != 'app' || needs.precimech-regression.result == 'success') }}
+    if: ${{ github.ref_name != 'codex/runtime-alpine324-20261112' && !cancelled() && (inputs.component != 'app' || needs.precimech-regression.result == 'success') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     concurrency:
@@ -223,7 +223,7 @@ jobs:
         if: inputs.component == 'app'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: '3.4.12'
           bundler: 2.5.16
           bundler-cache: true
 

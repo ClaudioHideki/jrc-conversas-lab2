@@ -68,7 +68,7 @@ jobs:
         run: pg_config --version
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: '3.4.12'
           bundler: 2.5.16
           bundler-cache: true
       - name: Prepare disposable test schema

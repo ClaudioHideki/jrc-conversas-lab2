@@ -1,8 +1,8 @@
 # pre-build stage
-FROM mirror.gcr.io/library/node:24.13.0-alpine@sha256:26eb49fbfdf03bf69f728b73178fa6f9e7c2cef88b06561b65497f5ae8e50a3d AS node
-FROM docker.io/library/ruby:3.4.4-alpine3.21@sha256:bf74912af8989a3ca3f353123b5db2424cd77af809cc500c2e0d93aec602c77f AS pre-builder
+FROM docker.io/library/node:24.22.3-alpine3.24@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5 AS node
+FROM docker.io/library/ruby:3.4.12-alpine3.24@sha256:a28982cf8ed78eb0d222e51bc6788335d33ef191bfc6fc39da138577e611741d AS pre-builder
 
-ARG NODE_VERSION="24.13.0"
+ARG NODE_VERSION="24.22.3"
 ARG PNPM_VERSION="10.2.0"
 ENV NODE_VERSION=${NODE_VERSION}
 ENV PNPM_VERSION=${PNPM_VERSION}
@@ -27,6 +27,8 @@ ENV BUNDLE_FROZEN=true
 
 RUN apk update && apk add --no-cache \
   openssl \
+  libstdc++ \
+  libgcc \
   tar \
   build-base \
   tzdata \
@@ -63,7 +65,7 @@ COPY Gemfile Gemfile.lock ./
 # https://github.com/googleapis/google-cloud-ruby/issues/13306
 # adding xz as nokogiri was failing to build libxml
 # https://github.com/chatwoot/chatwoot/issues/4045
-RUN apk update && apk add --no-cache build-base musl ruby-full ruby-dev gcc make musl-dev openssl openssl-dev g++ linux-headers xz vips
+RUN apk update && apk add --no-cache build-base musl gcc make musl-dev openssl openssl-dev g++ linux-headers xz vips
 RUN bundle config set --local force_ruby_platform true
 
 # gRPC otherwise uses every visible host CPU while compiling its C++ library.
@@ -104,14 +106,14 @@ RUN rm -rf /gems/ruby/3.4.0/cache/*.gem \
   && rm .gitignore
 
 # final build stage
-FROM docker.io/library/ruby:3.4.4-alpine3.21@sha256:bf74912af8989a3ca3f353123b5db2424cd77af809cc500c2e0d93aec602c77f
+FROM docker.io/library/ruby:3.4.12-alpine3.24@sha256:a28982cf8ed78eb0d222e51bc6788335d33ef191bfc6fc39da138577e611741d
 
 ARG GIT_SHA
 LABEL org.opencontainers.image.revision=$GIT_SHA \
       org.opencontainers.image.title="JRC Conversas Grupo JRC" \
       org.opencontainers.image.description="Imagem padrao LAB2 com Broker e Flow nativo configuraveis por empresa"
 
-ARG NODE_VERSION="24.13.0"
+ARG NODE_VERSION="24.22.3"
 ARG PNPM_VERSION="10.2.0"
 ENV NODE_VERSION=${NODE_VERSION}
 ENV PNPM_VERSION=${PNPM_VERSION}
@@ -136,6 +138,8 @@ ENV BUNDLE_PATH="/gems"
 RUN apk update && apk add --no-cache \
   build-base \
   openssl \
+  libstdc++ \
+  libgcc \
   tzdata \
   postgresql-client \
   imagemagick \

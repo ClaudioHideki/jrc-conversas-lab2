@@ -2,7 +2,7 @@ name: A-G consolidated native candidate (no publication)
 
 on:
   push:
-    branches: [codex/lab2-ag-consolidada-20261110, codex/lab2-ag-atualizacoes-20261112]
+    branches: [codex/lab2-ag-consolidada-20261110, codex/lab2-ag-atualizacoes-20261112, codex/runtime-alpine324-20261112]
   workflow_dispatch:
     inputs:
       expected_validation_sha:
@@ -72,6 +72,14 @@ jobs:
           if GITHUB_REPOSITORY=unrelated/repository bash .github/scripts/jrc_ci_apt_setup.sh; then exit 1; fi
       - name: Test HTTPS mirror selection with isolated simulated curl and APT
         run: python3 -B .github/scripts/jrc_ci_apt_setup_test.py
+      - name: Prove declared runtime and unchanged functional source
+        run: python3 -B script/jrc_runtime_contract_test.py /tmp/runtime-contract.json
+      - name: Preserve runtime preparation contract
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: runtime-contract-${{ github.sha }}
+          path: /tmp/runtime-contract.json
+          if-no-files-found: error
       - run: node --test script/validate_ag_migration_identity.test.mjs
       - run: node --test script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
       - run: python3 script/jrc_ag_native_plan_test.py
@@ -93,7 +101,7 @@ jobs:
           fetch-depth: 0
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: '3.4.12'
           bundler: 2.5.16
           bundler-cache: true
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -119,7 +127,7 @@ jobs:
       - run: git diff --exit-code
 
   migration-admission:
-    needs: [identities, incremental-lint]
+    needs: [identities, incremental-lint, runtime-compatibility]
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
@@ -170,7 +178,7 @@ jobs:
           bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: '3.4.12'
           bundler: 2.5.16
           bundler-cache: true
       - name: Prove fresh, pinned-main upgrade and real schema reload on three new databases
@@ -284,7 +292,7 @@ jobs:
           bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: '3.4.12'
           bundler: 2.5.16
           bundler-cache: true
       - name: Admit only an empty disposable native database
@@ -396,7 +404,7 @@ jobs:
           bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: '3.4.12'
           bundler: 2.5.16
           bundler-cache: true
       - name: Plan every native example source, respecting existing database guards
@@ -462,7 +470,7 @@ jobs:
           run_install: false
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: '3.4.12'
           bundler: 2.5.16
       - run: pnpm install --frozen-lockfile
       - name: Lint reconciled application components and establishment regression
@@ -519,22 +527,98 @@ jobs:
 
 
   incorporated-projects:
-    needs: [identities, incremental-lint]
+    needs: [identities, incremental-lint, runtime-compatibility]
     uses: ./.github/workflows/projects-portal-candidate.yml
   incorporated-whatsapp:
-    needs: [identities, incremental-lint]
+    needs: [identities, incremental-lint, runtime-compatibility]
     uses: ./.github/workflows/precimech-hotfix-tests.yml
     with:
       source_sha: ${{ github.sha }}
   incorporated-voice:
-    needs: [identities, incremental-lint]
+    needs: [identities, incremental-lint, runtime-compatibility]
     uses: ./.github/workflows/voice-v4-candidate.yml
 
+
+
+  runtime-compatibility:
+    needs: [identities, incremental-lint]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      JRC_RUNTIME_CANDIDATE: '1'
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_runtime_compatibility_20261112_test
+      REDIS_URL: redis://127.0.0.1:6379/14
+      FRONTEND_URL: https://host.example.test
+      SECRET_KEY_BASE: synthetic-runtime-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/runtime-schema.rb
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Prove disposable services and install real native tools
+        env:
+          RUNTIME_PG_ID: ${{ job.services.postgres.id }}
+          RUNTIME_REDIS_ID: ${{ job.services.redis.id }}
+        run: |
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test "$(docker inspect "$RUNTIME_PG_ID" --format '{{json .HostConfig.Binds}}')" = null
+          test "$(docker inspect "$RUNTIME_REDIS_ID" --format '{{json .HostConfig.Binds}}')" = null
+          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev fonts-dejavu-core imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.12'
+          bundler: 2.5.16
+          bundler-cache: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Record actual host runtime; this is not an Alpine image smoke
+        run: |
+          bundle exec ruby -rjson -ropen3 -e 'abort "Wrong Ruby" unless RUBY_VERSION == "3.4.12" && RUBY_PATCHLEVEL == 148; node=Open3.capture3("node","--version"); abort "Wrong Node" unless node[2].success? && node[0].strip == "v24.22.3"; File.write("/tmp/runtime-host.json", JSON.pretty_generate(source_sha: ENV.fetch("GITHUB_SHA"), ruby: RUBY_VERSION, ruby_patchlevel: RUBY_PATCHLEVEL, node: node[0].strip, platform: RUBY_PLATFORM, runner_os: "Ubuntu 24.04", alpine_image_tested: false))'
+      - name: Native migrations only in the owned synthetic database
+        run: bundle exec rails db:create db:migrate
+      - name: Real native libraries, PDF, XLSX, OCR, Rails and Sidekiq
+        run: |
+          bundle exec rspec test/jrc_runtime/runtime_compatibility_spec.rb \
+            spec/requests/api/v1/accounts/jrc_service_desk/report_exports_spec.rb \
+            --format progress --format json --out /tmp/runtime-rspec.json
+          ruby -rjson -e 's=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Invalid runtime report" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero?' /tmp/runtime-rspec.json
+      - name: Product checkout remains unchanged
+        run: git diff --exit-code
+      - name: Preserve native runtime evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: runtime-native-${{ github.sha }}
+          path: |
+            /tmp/runtime-host.json
+            /tmp/runtime-rspec.json
+            /tmp/runtime-schema.rb
+            ${{ runner.temp }}/runtime-sidekiq.log
+          if-no-files-found: error
 
   guarded-candidate-build:
     # This is NOT authorized by a push or ordinary CI testing. The agent must
     # obtain separate explicit authorization before dispatching with this input.
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_candidate }}
+    if: ${{ github.ref_name != 'codex/runtime-alpine324-20261112' && github.event_name == 'workflow_dispatch' && inputs.build_candidate }}
     needs: [identities, migration-admission, native-focused, rails, frontend, incorporated-projects, incorporated-whatsapp, incorporated-voice]
     runs-on: ubuntu-24.04
     timeout-minutes: 40
