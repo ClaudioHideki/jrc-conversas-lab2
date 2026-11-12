@@ -4,6 +4,10 @@
 class JrcServiceDesk::EmployeeAccess
   READ_CAPABILITIES = %i[module_view tickets_view tickets_create notes_view notes_add history_view sla_view lookups_view].freeze
 
+  def self.capabilities(context)
+    context.employee_portal? ? READ_CAPABILITIES : READ_CAPABILITIES + %i[resolve close dashboard_view]
+  end
+
   def self.isolated_configurations(context)
     return {} unless context.account && context.account_user
 
@@ -24,6 +28,7 @@ class JrcServiceDesk::EmployeeAccess
 
   def self.restricted?(context)
     return false if context.customer_execution?
+
     values = isolated_configurations(context)
     return false if values.empty?
     return true if context.employee_portal?
@@ -68,8 +73,9 @@ class JrcServiceDesk::EmployeeAccess
     return scope unless restricted?(context)
 
     links = JrcServiceDesk::TicketEvent.where(account_id: context.account.id, event_type: 'creation_context_recorded')
-      .where('data @> ?::jsonb', { internal_request: true }.to_json).select(:ticket_id)
-    scope.where(id: links, created_by_membership_id: context.creator_memberships)
+                                       .where('data @> ?::jsonb', { internal_request: true }.to_json).select(:ticket_id)
+    records = scope.where(id: links)
+    context.employee_portal? ? records.where(created_by_membership_id: context.creator_memberships) : records
   end
 
   def self.verify_service!(context, unit_id, service_id)

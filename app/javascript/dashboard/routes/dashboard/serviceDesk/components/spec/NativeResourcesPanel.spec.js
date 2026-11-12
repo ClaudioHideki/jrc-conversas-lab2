@@ -20,7 +20,11 @@ vi.mock('../../composables/useServiceDesk', () => ({
 const context = () => ({
   account_id: '1',
   units: [{ id: '2' }],
-  capabilities: { incidents: { index: true } },
+  capabilities: {
+    incidents: { index: true },
+    assets: { index: true },
+    changes: { index: true },
+  },
 });
 const asset = () => ({
   id: '8',
@@ -98,7 +102,7 @@ describe('Native resource UI uses persisted authorized readback', () => {
     await flushPromises();
     await wrapper
       .findAll('button')
-      .find(button => button.text().includes('create_resource'))
+      .find(button => button.text().includes('new_asset'))
       .trigger('click');
     await wrapper.find('input[required]').setValue('Router LAB');
     await wrapper.findAll('form')[1].trigger('submit');

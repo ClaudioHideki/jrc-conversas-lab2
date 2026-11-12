@@ -536,15 +536,11 @@ const submit = async () => {
 <template>
   <InternalTicketForm
     v-if="
-      !edit &&
-      (employeeOnly ||
-        (!advanced &&
-          !relationshipSeed &&
-          session.state.context?.units.some(
-            row => row.internal_intake && row.permissions.create_ticket
-          )))
+      !edit && (employeeOnly || (!advanced && !relationshipSeed && !quickSeed))
     "
     ref="quickForm"
+    :can-open-customer="!employeeOnly"
+    @advanced="advanced = true"
     @cancel="cancel"
     @open="openCreatedTicket"
   />

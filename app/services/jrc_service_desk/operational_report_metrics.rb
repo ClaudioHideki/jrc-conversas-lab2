@@ -8,11 +8,18 @@ class JrcServiceDesk::OperationalReportMetrics
   end
 
   def call
-    { observed_at: Time.current.iso8601(6), cohort: 'authorized_tickets_opened_in_half_open_period', total: @relation.count,
+    phases = @relation.joins(:status).group('jrc_service_desk_ticket_statuses.phase').count
+    total = @relation.count
+    completed = phases.fetch('resolved', 0) + phases.fetch('closed', 0)
+    { observed_at: Time.current.iso8601(6), cohort: 'authorized_tickets_opened_in_half_open_period', total: total,
+      resolution_rate: total.positive? ? 100.0 * completed / total : nil,
       by_unit: grouped('unit_id'), by_service: grouped('service_id'), by_origin: grouped('origin_channel'),
-      by_category: grouped('category_id'), by_priority: grouped('priority_id'),
+      by_category: grouped('category_id'), by_priority: grouped('priority_id'), by_status: grouped('status_id'), by_team: grouped('team_id'),
+      workforce: JrcServiceDesk::OperationalWorkforceMetrics.new(@query).call,
+      activity: JrcServiceDesk::OperationalActivityMetrics.new(@query).summary,
+      daily_activity: JrcServiceDesk::OperationalActivityMetrics.new(@query).daily,
       by_customer: @query.customer_dimension? ? grouped('company_id', @query.relation_for('customers_view')) : nil, by_channel: channel_counts,
-      phases: @relation.joins(:status).group('jrc_service_desk_ticket_statuses.phase').count,
+      phases: phases,
       reopen: reopen_metrics, sla: sla_metrics,
       fcr: { value: nil, reason: 'approved_first_contact_resolution_definition_required' },
       quality: { value: nil, reason: 'approved_quality_definition_required' },
@@ -51,7 +58,7 @@ class JrcServiceDesk::OperationalReportMetrics
     return nil unless @context.capability?(:sla_view)
 
     cycles = JrcServiceDesk::SlaCycle.where(account_id: @context.account.id, unit_id: @query.unit.id,
-                                           ticket_id: @query.relation_for('sla_view').select(:id))
+                                            ticket_id: @query.relation_for('sla_view').select(:id))
                                      .group(:ticket_id).select('MAX(id)')
     clocks = JrcServiceDesk::SlaClock.where(account_id: @context.account.id, unit_id: @query.unit.id, sla_cycle_id: cycles)
     %w[first_response attendance resolution].to_h do |kind|

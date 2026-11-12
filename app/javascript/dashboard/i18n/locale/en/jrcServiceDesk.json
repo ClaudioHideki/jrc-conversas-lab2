@@ -1072,7 +1072,9 @@
         "by_origin": "By opening origin",
         "by_category": "By category ID",
         "by_priority": "By priority ID",
-        "by_customer": "By customer ID"
+        "by_customer": "By customer ID",
+        "by_status": "By status",
+        "by_team": "By team"
       },
       "no_data": "Unavailable / no observations",
       "metric_definition": "FCR and quality are not calculated without an approved definition. Reopen percentage uses the visible ticket cohort, not first-contact resolution.",
@@ -1159,7 +1161,8 @@
       "ticket_ids": "Ticket numbers, separated by commas (maximum 100)",
       "not_available": "Unavailable",
       "channels": "Authorized channels",
-      "suggestions": "Find recurrence suggestions"
+      "suggestions": "Find recurrence suggestions",
+      "report_total_short": "Count"
     },
     "EXPERIENCE": {
       "help": {
@@ -2985,6 +2988,71 @@
       },
       "partial_save": "The operation did not complete. The current membership and automatic assignment setting were reloaded; review them before trying again.",
       "readback_failed": "Could not confirm the current membership and automatic assignment setting. Reopen the assignee and review both before trying again."
+    },
+    "INTERNAL_EXPERIENCE": {
+      "setup_required": "Internal ticket creation is not enabled in your authorized units. Ask the Service Desk administrator to enable internal requests.",
+      "customer_mode": "Advanced ticket creation"
+    },
+    "REPORT_EXPERIENCE": {
+      "export_view": "Export this view (CSV)",
+      "field": "Field",
+      "value": "Value",
+      "results": "Results",
+      "summary": "Summary by group",
+      "asset_scope": "Inventory counts within the selected scope and filters.",
+      "asset_active": "Active",
+      "asset_inactive": "Inactive",
+      "asset_retired": "Archived",
+      "asset_linked": "Linked to tickets",
+      "filters": "Query filters",
+      "metrics": {
+        "total": "Tickets in opening cohort",
+        "resolved": "Resolved",
+        "waiting": "Waiting",
+        "closed": "Closed",
+        "running_breached": "Overdue clocks",
+        "resolution_rate": "Resolution rate"
+      },
+      "employee_filter": "Employee (creator or assignee)",
+      "in_time": "On time",
+      "workforce": "Creators, assignees and closure actors",
+      "workforce_help": "Creation and assignment use the opening cohort. Closures use events in the selected period, including tickets opened earlier. These counts are separate and do not represent a productivity score.",
+      "employee": "Employee",
+      "created": "Created",
+      "assigned": "Assigned",
+      "pending": "Pending",
+      "closed": "Closed",
+      "closed_for_other_assignee": "Closed for another assignee",
+      "asset_total": "Total assets",
+      "asset_columns": {
+        "title": "Asset / Equipment",
+        "code": "Code",
+        "serial": "Serial number",
+        "manufacturer": "Manufacturer",
+        "location": "Location",
+        "status": "Status",
+        "priority": "Priority",
+        "actions": "Actions"
+      },
+      "closed_by_other": "Closed by another employee",
+      "resolution_mean": "Mean resolution (seconds)",
+      "assignee_sla": "SLA of assigned tickets",
+      "flow": "Opening, closure and backlog evolution",
+      "flow_help": "Days in UTC. Backlog change uses openings and observed transitions between active and final phases; it is not a reconstructed historical balance.",
+      "date": "Date (UTC)",
+      "flow_opened": "Opened",
+      "flow_closed": "Closures",
+      "flow_reopened": "Reopens",
+      "flow_backlog_change": "Observed backlog change",
+      "asset_search": "Search name, code, serial, manufacturer or location",
+      "all_states": "All statuses",
+      "new_asset": "New asset",
+      "assets_help": "Assets, equipment and links to unit tickets.",
+      "from": "From (inclusive)",
+      "to": "Until (exclusive)",
+      "sla_title": "Period SLA",
+      "all_services": "All services",
+      "resolution_rate_help": "Tickets opened in the period that are currently resolved or closed, divided by all openings in that cohort."
     }
   },
   "PORTAL": {

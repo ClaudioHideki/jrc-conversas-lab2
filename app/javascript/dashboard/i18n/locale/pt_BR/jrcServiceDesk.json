@@ -1072,7 +1072,9 @@
         "by_origin": "Por origem da abertura",
         "by_category": "Por ID da categoria",
         "by_priority": "Por ID da prioridade",
-        "by_customer": "Por ID do cliente"
+        "by_customer": "Por ID do cliente",
+        "by_status": "Por status",
+        "by_team": "Por equipe"
       },
       "no_data": "Indisponível / sem observações",
       "metric_definition": "FCR e qualidade exigem definição aprovada. O percentual de reabertura usa o conjunto visível de chamados, não a resolução no primeiro contato.",
@@ -1159,7 +1161,8 @@
       "ticket_ids": "Números dos chamados, separados por vírgula (máximo 100)",
       "not_available": "Indisponível",
       "channels": "Canais autorizados",
-      "suggestions": "Buscar sugestões de recorrência"
+      "suggestions": "Buscar sugestões de recorrência",
+      "report_total_short": "Quantidade"
     },
     "EXPERIENCE": {
       "help": {
@@ -2985,6 +2988,71 @@
       },
       "partial_save": "A operação não foi concluída. O vínculo e a configuração da atribuição automática foram relidos; revise os dois antes de tentar novamente.",
       "readback_failed": "Não foi possível confirmar o vínculo e a configuração da atribuição automática. Reabra o responsável e revise os dois antes de tentar novamente."
+    },
+    "INTERNAL_EXPERIENCE": {
+      "setup_required": "A abertura interna ainda não está habilitada nas suas unidades autorizadas. Solicite ao administrador do Service Desk a ativação desse acesso.",
+      "customer_mode": "Modo avançado de abertura"
+    },
+    "REPORT_EXPERIENCE": {
+      "export_view": "Exportar esta visão (CSV)",
+      "field": "Campo",
+      "value": "Valor",
+      "results": "Resultados",
+      "summary": "Resumo por agrupamento",
+      "asset_scope": "Contagens do inventário no escopo e filtros selecionados.",
+      "asset_active": "Ativos",
+      "asset_inactive": "Inativos",
+      "asset_retired": "Arquivados",
+      "asset_linked": "Vinculados a chamados",
+      "filters": "Filtros da consulta",
+      "metrics": {
+        "total": "Chamados abertos no período",
+        "resolved": "Resolvidos",
+        "waiting": "Aguardando",
+        "closed": "Encerrados",
+        "running_breached": "Relógios de SLA vencidos",
+        "resolution_rate": "Taxa de resolução"
+      },
+      "employee_filter": "Funcionário (criador ou responsável)",
+      "in_time": "No prazo",
+      "workforce": "Criadores, responsáveis e executores do encerramento",
+      "workforce_help": "Criação e atribuição usam os chamados abertos no período. Encerramentos usam os eventos do período, inclusive de chamados abertos antes. Essas contagens são distintas e não representam uma nota de produtividade.",
+      "employee": "Funcionário",
+      "created": "Criados",
+      "assigned": "Atribuídos",
+      "pending": "Pendentes",
+      "closed": "Encerrados",
+      "closed_for_other_assignee": "Encerrados para outro responsável",
+      "asset_total": "Total de ativos",
+      "asset_columns": {
+        "title": "Ativo / Equipamento",
+        "code": "Código",
+        "serial": "Nº de série",
+        "manufacturer": "Fabricante",
+        "location": "Localização",
+        "status": "Status",
+        "priority": "Prioridade",
+        "actions": "Ações"
+      },
+      "closed_by_other": "Encerrados por outro funcionário",
+      "resolution_mean": "Resolução média (segundos)",
+      "assignee_sla": "SLA dos chamados atribuídos",
+      "flow": "Evolução de abertura, encerramento e backlog",
+      "flow_help": "Dias em UTC. A variação do backlog usa as aberturas e as mudanças observadas entre fases ativas e finais; não representa um saldo histórico reconstruído.",
+      "date": "Data (UTC)",
+      "flow_opened": "Abertos",
+      "flow_closed": "Encerramentos",
+      "flow_reopened": "Reaberturas",
+      "flow_backlog_change": "Variação observada do backlog",
+      "asset_search": "Buscar por nome, código, série, fabricante ou localização",
+      "all_states": "Todos os status",
+      "new_asset": "Novo ativo",
+      "assets_help": "Ativos, equipamentos e vínculos com os chamados da unidade.",
+      "from": "De (inclusive)",
+      "to": "Até (exclusive)",
+      "sla_title": "SLA do período",
+      "all_services": "Todos os serviços",
+      "resolution_rate_help": "Chamados abertos no período atualmente resolvidos ou encerrados, divididos pelo total de aberturas desse grupo."
     }
   },
   "PORTAL": {

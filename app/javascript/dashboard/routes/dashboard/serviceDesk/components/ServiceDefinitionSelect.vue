@@ -9,6 +9,7 @@ import State from './ServiceDeskState.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { decodeConfigurationList } from '../helpers/lifecycle';
 const props = defineProps({
+  showRefresh: { type: Boolean, default: true },
   modelValue: { type: String, default: '' },
   unitId: { type: String, default: '' },
   disabled: Boolean,
@@ -161,6 +162,7 @@ onBeforeUnmount(() => {
       @update:current-page="page = $event"
     />
     <Button
+      v-if="showRefresh"
       size="xs"
       variant="ghost"
       :disabled="!unitId || disabled"

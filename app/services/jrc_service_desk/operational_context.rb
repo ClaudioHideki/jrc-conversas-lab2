@@ -71,7 +71,7 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
     return memberships.take! unless administrator?
 
     memberships.first || JrcServiceDesk::UnitMembership.new(account: account, unit: unit, account_user: account_user,
-                                                           administrative_actor: true, active: false, availability: 'unavailable')
+                                                            administrative_actor: true, active: false, availability: 'unavailable')
   end
 
   def creator_memberships(unit = nil)
@@ -100,8 +100,9 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
   def capability?(key)
     return false unless available? && capability_set.allowed?(key)
     if JrcServiceDesk::EmployeeAccess.restricted?(self) && !(administrator? && !employee_portal?)
-      return JrcServiceDesk::EmployeeAccess::READ_CAPABILITIES.include?(key.to_sym)
+      return JrcServiceDesk::EmployeeAccess.capabilities(self).include?(key.to_sym)
     end
+
     true
   end
 
@@ -112,6 +113,19 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
     JrcServiceDesk::EmployeeAccess.restricted?(self) ? values.select { |key| capability?(key) } : values
   end
 
+  def reporting_allowed?(permission: 'reports_view', unit: nil)
+    return false unless capability?(:dashboard_view) && capability?(:tickets_view)
+
+    access = supervision_access
+    if unit
+      return false unless unit_allowed?(unit)
+
+      !access.restricted?(unit.id) || access.grants(permission).any? { |grant| grant[:unit_id] == unit.id }
+    else
+      unit_scope.where.not(id: access.restricted_units).exists? || access.any?(permission)
+    end
+  end
+
   def supervision_access
     JrcServiceDesk::SupervisionAccess.new(self)
   end
@@ -120,9 +134,11 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
 
   def capability_set
     return JrcServiceDesk::Capabilities.new unless available?
+
     if custom_role_present?
       # Do not accept a foreign/dangling native role or downgrade it to a default role.
       return JrcServiceDesk::Capabilities.new unless account_user.respond_to?(:custom_role)
+
       role = account_user.custom_role
       return JrcServiceDesk::Capabilities.new unless role && role.persisted? && role.id == account_user.custom_role_id && role.account_id == account.id
       return JrcServiceDesk::Capabilities.new unless account_user.permissions.include?('custom_role')

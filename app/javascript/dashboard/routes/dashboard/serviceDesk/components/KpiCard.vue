@@ -29,9 +29,9 @@ const { t } = useI18n();
   <component
     :is="interactive ? 'button' : 'section'"
     :type="interactive ? 'button' : undefined"
-    class="flex flex-col gap-2 rounded-xl border border-n-weak border-t-4 p-4 text-start focus-visible:ring-2 focus-visible:ring-n-blue-9"
+    class="relative isolate flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/70 bg-gradient-to-br p-4 text-start shadow-md shadow-blue-900/10 transition hover:shadow-lg focus-visible:ring-2 focus-visible:ring-n-blue-9 dark:border-n-weak"
     :class="[
-      tones[tone].soft,
+      tones[tone].gradient,
       interactive ? 'cursor-pointer hover:border-n-blue-8' : '',
     ]"
     :title="
@@ -43,6 +43,10 @@ const { t } = useI18n();
     :aria-label="`${label}: ${value === null ? t('JRC_SERVICE_DESK.OVERVIEW.kpi_label') : displayValue || value}`"
     @click="interactive && $emit('activate')"
   >
+    <span
+      aria-hidden="true"
+      class="pointer-events-none absolute -bottom-12 -right-6 -z-10 h-32 w-48 -rotate-12 rounded-full bg-white/25"
+    />
     <div class="flex items-center justify-between gap-2">
       <span class="text-xs font-medium text-n-slate-11">
         {{ label }}

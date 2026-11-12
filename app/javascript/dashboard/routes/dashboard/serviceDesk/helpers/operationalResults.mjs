@@ -6,6 +6,13 @@ const assert = value => {
 const object = value =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 const count = value => integer(value, 0);
+const duration = value => {
+  assert(
+    value === null ||
+      (typeof value === 'number' && Number.isFinite(value) && value >= 0)
+  );
+  return value;
+};
 const id = value => {
   const result = canonicalId(value);
   assert(result);
@@ -22,6 +29,8 @@ export const reportDimensions = Object.freeze([
   'by_category',
   'by_priority',
   'by_customer',
+  'by_status',
+  'by_team',
 ]);
 export function decodeMetrics(value, context) {
   assert(
@@ -30,7 +39,10 @@ export function decodeMetrics(value, context) {
   );
   const dimensions = {};
   reportDimensions.forEach(key => {
-    if (value[key] === null) {
+    if (
+      value[key] === null ||
+      (['by_status', 'by_team'].includes(key) && value[key] === undefined)
+    ) {
       dimensions[key] = null;
       return;
     }
@@ -109,9 +121,91 @@ export function decodeMetrics(value, context) {
     });
   }
   assert(value.fcr?.value === null && value.quality?.value === null);
+  if (value.workforce || value.activity || value.daily_activity)
+    assert(has('history_view'));
+  if (value.workforce)
+    assert(
+      Array.isArray(value.workforce.items) &&
+        value.workforce.items.length <= 100
+    );
+  if (value.daily_activity)
+    assert(
+      Array.isArray(value.daily_activity.items) &&
+        value.daily_activity.items.length <= 366
+    );
+  const resolutionRate = value.resolution_rate ?? null;
+  assert(
+    resolutionRate === null ||
+      (typeof resolutionRate === 'number' &&
+        Number.isFinite(resolutionRate) &&
+        resolutionRate >= 0 &&
+        resolutionRate <= 100)
+  );
   return {
+    resolution_rate: resolutionRate,
     observed_at: stamp(value.observed_at),
     total: count(value.total),
+    phases: object(value.phases)
+      ? Object.fromEntries(
+          Object.entries(value.phases).map(([key, val]) => [key, count(val)])
+        )
+      : null,
+    activity: value.activity
+      ? Object.fromEntries(
+          [
+            'opened',
+            'closures',
+            'closed_tickets',
+            'resolutions',
+            'reopened',
+            'active_backlog',
+          ].map(key => [key, count(value.activity[key])])
+        )
+      : null,
+    workforce: value.workforce
+      ? {
+          truncated: value.workforce.truncated === true,
+          items: value.workforce.items.map(row => ({
+            account_user_id: id(row.account_user_id),
+            name: typeof row.name === 'string' ? row.name : '',
+            resolution_mean_seconds: duration(
+              row.resolution_mean_seconds ?? null
+            ),
+            sla_completed:
+              row.sla_completed == null ? null : count(row.sla_completed),
+            sla_breached:
+              row.sla_breached == null ? null : count(row.sla_breached),
+            ...Object.fromEntries(
+              [
+                'created',
+                'assigned',
+                'pending',
+                'closed',
+                'closed_for_other_assignee',
+                'closed_by_other',
+              ].map(key => [key, count(row[key])])
+            ),
+          })),
+        }
+      : null,
+    daily_activity: value.daily_activity
+      ? {
+          truncated: value.daily_activity.truncated === true,
+          items: value.daily_activity.items.map(row => {
+            assert(
+              /^\d{4}-\d{2}-\d{2}$/.test(row.date) &&
+                Number.isSafeInteger(row.backlog_change)
+            );
+            return {
+              date: row.date,
+              opened: count(row.opened),
+              closed: count(row.closed),
+              reopened: count(row.reopened),
+              backlog_change: row.backlog_change,
+            };
+          }),
+        }
+      : null,
     ...dimensions,
     by_channel: channels,
     reopen,

@@ -13,7 +13,8 @@ import CatalogueAnswers from './CatalogueAnswers.vue';
 import TicketCreationReceipt from './TicketCreationReceipt.vue';
 import WriteFeedback from './WriteFeedback.vue';
 
-const emit = defineEmits(['cancel', 'open']);
+defineProps({ canOpenCustomer: { type: Boolean, default: false } });
+const emit = defineEmits(['cancel', 'open', 'advanced']);
 const { t } = useI18n({
   useScope: 'local',
   messages: { pt_BR: portalPt, en: portalEn },
@@ -167,6 +168,31 @@ defineExpose({ busy: locked });
       icon="headset"
       :title="t('PORTAL.NEW')"
     />
+    <div
+      v-if="!units.length"
+      role="alert"
+      class="mt-5 grid gap-4 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-amber-950"
+    >
+      <p class="m-0">
+        {{ t('JRC_SERVICE_DESK.INTERNAL_EXPERIENCE.setup_required') }}
+      </p>
+      <button
+        type="button"
+        class="justify-self-end rounded-xl border border-blue-200 px-5 py-3 font-semibold text-blue-800"
+        @click="emit('cancel')"
+      >
+        {{ t('JRC_SERVICE_DESK.COMMON.cancel') }}
+      </button>
+    </div>
+    <button
+      v-if="canOpenCustomer && !created"
+      type="button"
+      class="mt-4 text-sm font-semibold text-blue-800 underline"
+      :disabled="locked"
+      @click="emit('advanced')"
+    >
+      {{ t('JRC_SERVICE_DESK.INTERNAL_EXPERIENCE.customer_mode') }}
+    </button>
     <TicketCreationReceipt
       v-if="created"
       :ticket="created"
@@ -175,7 +201,7 @@ defineExpose({ busy: locked });
       @create-another="reset"
     />
     <form
-      v-else
+      v-else-if="units.length"
       class="mt-5 grid min-w-0 grid-cols-1 gap-5 rounded-2xl border border-blue-100 bg-white/95 p-4 shadow-sm sm:p-6"
       @submit.prevent="submit"
     >
@@ -225,6 +251,7 @@ defineExpose({ busy: locked });
       >
         <ServiceDefinitionSelect
           v-model="draft.service"
+          :show-refresh="false"
           :unit-id="unitId"
           :general-label="t('JRC_SERVICE_DESK.REDESIGN_FORM.general_request')"
           unrestricted-only

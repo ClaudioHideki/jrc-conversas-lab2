@@ -149,7 +149,11 @@ async function renderForm(writeClient) {
   });
   await wrapper
     .findAll('button')
-    .find(row => row.text() === messages.JRC_SERVICE_DESK.QUICK.advanced)
+    .find(
+      row =>
+        row.text() ===
+        messages.JRC_SERVICE_DESK.INTERNAL_EXPERIENCE.customer_mode
+    )
     .trigger('click');
   await flushPromises();
   await wrapper.findAll('select')[1].setValue('10');

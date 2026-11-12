@@ -262,7 +262,7 @@ const openAttendance = () => {
       <button
         v-if="!active"
         type="button"
-        class="min-h-10 rounded-lg border border-n-strong px-4 text-xs font-semibold text-n-brand focus-visible:ring-2 focus-visible:ring-n-brand disabled:opacity-40"
+        class="ml-auto min-h-10 rounded-lg border border-n-strong px-4 text-xs font-semibold text-n-brand focus-visible:ring-2 focus-visible:ring-n-brand disabled:opacity-40"
         :disabled="
           !sameAccount || !sip.registered.value || qualificationPending
         "

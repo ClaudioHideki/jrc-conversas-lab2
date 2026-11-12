@@ -1,4 +1,5 @@
 <script setup>
+import { downloadCsv, metricRows } from '../helpers/csvExport';
 import { computed, onBeforeUnmount, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -108,6 +109,21 @@ const filterStatus = statusId =>
     params: { accountId: session.accountId.value },
     query: { ...route.query, phase: undefined, status_id: statusId, page: '1' },
   });
+const canExport = computed(() => dashboard.value.status === 'ready');
+const exportCsv = () => {
+  if (canExport.value)
+    downloadCsv(
+      [
+        [
+          t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.field'),
+          t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.value'),
+        ],
+        ...metricRows(dashboard.value.data),
+      ],
+      'dashboard-indicadores.csv'
+    );
+};
+defineExpose({ canExport, exportCsv });
 </script>
 
 <template>

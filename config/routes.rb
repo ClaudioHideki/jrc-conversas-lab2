@@ -211,6 +211,7 @@ Rails.application.routes.draw do
             post 'tickets/:id/approvals/:record_id/escalate', to: 'cockpit#escalate_approval'
             get 'resources', to: 'resources#index'
             post 'resources', to: 'resources#create'
+            get 'resources/export', to: 'resources#export'
             get 'resources/:resource_id', to: 'resources#show'
             patch 'resources/:resource_id', to: 'resources#update'
             delete 'resources/:resource_id', to: 'resources#destroy'

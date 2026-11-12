@@ -1,4 +1,5 @@
 <script setup>
+import { downloadCsv } from '../helpers/csvExport';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -19,6 +20,7 @@ import { routeQuery } from '../helpers/query';
 import { CATALOG_COLUMNS, catalogValue } from '../helpers/presentation';
 const props = defineProps({
   resource: { type: String, required: true },
+  reportOnly: { type: Boolean, default: false },
   screen: { type: String, required: true },
 });
 const { t } = useI18n();
@@ -33,8 +35,9 @@ const router = useRouter();
 const key = computed(() => `catalog:${props.resource}`);
 const mayManage = computed(
   () =>
+    !props.reportOnly &&
     session.state.context?.capabilities?.configuration?.[props.resource] ===
-    true
+      true
 );
 const result = computed(() => session.resource(key.value));
 const selected = ref(null);
@@ -128,11 +131,26 @@ const hint = computed(
     })[props.resource] || 'form_notice'
 );
 onBeforeUnmount(() => session.resetResource(key.value));
+const canExport = computed(() => result.value?.status === 'ready');
+const exportCsv = () => {
+  if (canExport.value)
+    downloadCsv(
+      [
+        columns.value.map(field => t(`JRC_SERVICE_DESK.FIELDS.${field}`)),
+        ...(result.value?.items || []).map(row =>
+          columns.value.map(field => valueFor(row, field))
+        ),
+      ],
+      'cadastro-pagina.csv'
+    );
+};
+defineExpose({ canExport, exportCsv });
 </script>
 
 <template>
   <AssigneesManager
     v-if="
+      !reportOnly &&
       resource === 'assignees' &&
       structure.state.context?.capabilities?.unit_memberships
     "

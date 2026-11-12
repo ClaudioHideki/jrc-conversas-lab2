@@ -106,7 +106,8 @@ RSpec.describe 'Integrated Service Desk assignment, clocks and indicators', type
     %w[resolve close].each do |action|
       get "#{base}/tickets/#{ticket.id}/lifecycle", headers: agent_b.user.create_new_auth_token
       read = response.parsed_body
-      command = { rule_key: action, solution: 'Synthetic integrated resolution',
+      command = { rule_key: action, closing_reason: 'Synthetic integrated closure reason',
+        solution: 'Synthetic integrated resolution',
         expected_lock_version: read.fetch('lock_version'), expected_policy_version_id: read.dig('policy', 'id') }
       2.times do
         post "#{base}/tickets/#{ticket.id}/lifecycle", headers: agent_b.user.create_new_auth_token.merge('Idempotency-Key' => "integrated-#{action}"),

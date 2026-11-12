@@ -39,6 +39,9 @@ module JrcServiceDeskLifecycleFixtures
 
   def lc_execute(ticket, key, values = {}, request_key: SecureRandom.uuid, **additional)
     values = values.merge(additional)
+    if key == 'close' && !values.key?(:closing_reason)
+      values[:closing_reason] = values.dig(:fields, :closing_reason) || 'Explicit synthetic closure reason'
+    end
     ticket.reload
     policy = JrcServiceDesk::LifecycleSelector.new(ticket).applicable
     JrcServiceDesk::LifecycleTransitionService.new(user_context: sd_context).call(ticket_id: ticket.id,
