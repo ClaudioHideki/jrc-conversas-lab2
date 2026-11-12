@@ -164,7 +164,7 @@ jobs:
       - name: Build frontend real
         # The A-G image workflow performs the one protected production build,
         # verifies fresh entrypoints/CSS and refuses publication on any failure.
-        if: github.ref_name != 'codex/lab2-ag-consolidada-20261110' && github.ref_name != 'codex/lab2-ag-atualizacoes-20261112' && github.ref_name != 'codex/runtime-alpine324-20261112'
+        if: github.ref_name != 'codex/lab2-ag-consolidada-20261110' && github.ref_name != 'codex/lab2-ag-atualizacoes-20261112' && !startsWith(github.ref_name, 'codex/runtime-alpine324-')
         env:
           NODE_OPTIONS: --max-old-space-size=6144
         run: bundle exec vite build

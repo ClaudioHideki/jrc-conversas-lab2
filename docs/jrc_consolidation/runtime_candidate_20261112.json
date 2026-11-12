@@ -1,6 +1,6 @@
 {
   "base_sha": "cad427d400d824fc1fdc06c1c1079f324e7f3f6c",
-  "branch": "codex/runtime-alpine324-20261112",
+  "branch": "codex/runtime-alpine324-numbering-20261112",
   "ruby": {
     "version": "3.4.12",
     "patchlevel": 148,
@@ -20,10 +20,11 @@
     "Keep gem dependency versions and pnpm lock unchanged",
     "Align both Ruby stages with Node on Alpine 3.24; explicit libstdc++/libgcc; remove distro Ruby packages conflicting with official Ruby headers",
     "Keep the 36 native identities and incorporated regressions; add owned Ubuntu runtime compatibility proof",
-    "Block production Vite/image builds for preparation branch; leave approved release-infrastructure branch untouched"
+    "Block production Vite/image builds for preparation branch; leave approved release-infrastructure branch untouched",
+    "Audited Backoffice protocol allocation correction: bounded attempts against existing account-scoped numbers, same format and unchanged unique index/history."
   ],
   "protected": [
-    "Application sources, migrations, SQL, schemas, policies, synthetic fixture guards, APT helper",
+    "Application sources except the exact reviewed protocol generator; migrations, SQL, schemas, policies, unit/account scopes and all other functional sources unchanged.",
     "Main and both old candidate branches",
     "Independent NICO/Flows image sources",
     "Local workspace, servers, containers, banks and budgets"
@@ -43,5 +44,26 @@
     "Bind new native evidence to new source; never transfer cad427d4 approval",
     "Guard start with >=5 GiB RAM and >=3 GiB disk; stop at approved reserves; one owned disposable builder",
     "After authorized build only: inspect Alpine versions/ELF/native libs/fonts/assets; boot Rails/Sidekiq same image and validate isolated smoke"
-  ]
+  ],
+  "previous_runtime_sha": "3f416a50dc13859c57ab4258ad84f2f8c4adbbf1",
+  "reviewed_functional_fixes": [
+    {
+      "path": "app/models/jrc_crm/backoffice_request.rb",
+      "sha256": "599bc1fce954fe4bcc58aa98117722628001939b24f77522f178bd0bb90331bd",
+      "regression": "spec/services/jrc_crm/backoffice_request_number_spec.rb",
+      "regression_sha256": "f424461b1008fc5942e421e430a283485e7dd54b8d4551a339ece28abaaa2172",
+      "cause": "Original scale test failed with duplicate generated request number. No historical renumbering, no uniqueness relaxation, no fixture count reduction."
+    }
+  ],
+  "number_proof": {
+    "run": 43280307250,
+    "sha": "e681d46886d689b307f2206928cff447fdc419db",
+    "evidence": {
+      "commit": "6f5dae5379b36973f1c24d4e0602209ded922a7c",
+      "manifest_path": "evidence/6195f7d21a0781cd5c5cf4d13bd73a497bb5a452/runtime-candidate/number-proof-validated-e681d46886d6/manifest.json",
+      "manifest_sha256": "dbc67b3a5355f2eb58d1106130058035636ffcf8665ff846297009733e48e67e",
+      "verified_files": 9,
+      "private": true
+    }
+  }
 }

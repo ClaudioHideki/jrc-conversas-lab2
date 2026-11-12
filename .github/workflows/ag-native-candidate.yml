@@ -2,7 +2,7 @@ name: A-G consolidated native candidate (no publication)
 
 on:
   push:
-    branches: [codex/lab2-ag-consolidada-20261110, codex/lab2-ag-atualizacoes-20261112, codex/runtime-alpine324-20261112]
+    branches: [codex/lab2-ag-consolidada-20261110, codex/lab2-ag-atualizacoes-20261112, codex/runtime-alpine324-20261112, codex/runtime-alpine324-numbering-20261112]
   workflow_dispatch:
     inputs:
       expected_validation_sha:
@@ -618,7 +618,7 @@ jobs:
   guarded-candidate-build:
     # This is NOT authorized by a push or ordinary CI testing. The agent must
     # obtain separate explicit authorization before dispatching with this input.
-    if: ${{ github.ref_name != 'codex/runtime-alpine324-20261112' && github.event_name == 'workflow_dispatch' && inputs.build_candidate }}
+    if: ${{ !startsWith(github.ref_name, 'codex/runtime-alpine324-') && github.event_name == 'workflow_dispatch' && inputs.build_candidate }}
     needs: [identities, migration-admission, native-focused, rails, frontend, incorporated-projects, incorporated-whatsapp, incorporated-voice]
     runs-on: ubuntu-24.04
     timeout-minutes: 40

@@ -291,7 +291,12 @@ module JrcCrm
     end
 
     def assign_number
-      self.request_number ||= "BKO-#{Time.zone.today.year}-#{SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')}"
+      return unless request_number.nil?
+
+      10.times do
+        self.request_number = "BKO-#{Time.zone.today.year}-#{SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')}"
+        return unless self.class.exists?(account_id: account_id, request_number: request_number)
+      end
     end
 
     def associations_belong_to_account

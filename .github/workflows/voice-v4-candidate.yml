@@ -155,7 +155,7 @@ jobs:
           --maxWorkers=2 --minWorkers=1 --no-file-parallelism
           --reporter=default --reporter=json --outputFile=/tmp/voice-v4-vitest.json
       - name: Build frontend real
-        if: github.ref_name != 'codex/lab2-ag-atualizacoes-20261112' && github.ref_name != 'codex/runtime-alpine324-20261112'
+        if: github.ref_name != 'codex/lab2-ag-atualizacoes-20261112' && !startsWith(github.ref_name, 'codex/runtime-alpine324-')
         env:
           NODE_OPTIONS: --max-old-space-size=6144
         run: bundle exec vite build
