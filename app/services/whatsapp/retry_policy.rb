@@ -1,8 +1,9 @@
 require 'digest'
 
 class Whatsapp::RetryPolicy
-  VERSION = 'cloud-template-transient-v1'.freeze
+  VERSION = 'cloud-template-manual-v2'.freeze
   TRANSIENT_CODES = %w[130429 131016].freeze
+  MANUAL_RETRY_CODES = (TRANSIENT_CODES + %w[130472]).freeze
 
   def self.error_code(message)
     message.external_error.to_s[/\A\s*(\d{6})(?=\s*:|\s*\z)/, 1]
@@ -23,7 +24,7 @@ class Whatsapp::RetryPolicy
     channel = message.inbox.channel
     return 'retry_unavailable' unless channel.is_a?(Channel::Whatsapp) && channel.provider == 'whatsapp_cloud'
     return 'retry_unavailable' unless message.failed? && message.outgoing? && message.content_type == 'text' && message.source_id.present? && !message.private?
-    return 'retry_unavailable' unless TRANSIENT_CODES.include?(code) && allowed_actor?(message, actor)
+    return 'retry_unavailable' unless MANUAL_RETRY_CODES.include?(code) && allowed_actor?(message, actor)
     return 'retry_unavailable' if cooldown && message.updated_at > 60.seconds.ago
     return 'retry_unavailable' unless message.sender_type == 'User' && message.attachments.empty?
     return 'retry_unavailable' if message.content_attributes.except('external_error', 'in_reply_to', 'in_reply_to_external_id').present?
@@ -42,7 +43,7 @@ class Whatsapp::RetryPolicy
         item['category'].to_s.casecmp?(params['category'].to_s)
     end
     return false unless template && template['components'].is_a?(Array)
-    return false unless template['components'].all? { |component| %w[BODY FOOTER].include?(component['type']) }
+    return false unless template['components'].all? { |component| supported_component?(component) }
 
     body = template['components'].find { |component| component['type'] == 'BODY' }
     return false unless body && body['text'].is_a?(String)
@@ -57,6 +58,14 @@ class Whatsapp::RetryPolicy
 
     values.is_a?(Hash) && values.keys.sort == placeholders && values.values.all? { |value| value.is_a?(String) && value.present? }
   end
+
+  def self.supported_component?(component)
+    return true if %w[BODY FOOTER].include?(component['type'])
+
+    component['type'] == 'HEADER' && component['format'] == 'TEXT' &&
+      component['text'].is_a?(String) && component['text'].present? && component['text'].exclude?('{{')
+  end
+  private_class_method :supported_component?
 
   def self.fingerprint(message)
     channel = message.inbox.channel

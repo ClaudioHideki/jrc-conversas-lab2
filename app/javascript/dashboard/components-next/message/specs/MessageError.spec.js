@@ -23,6 +23,7 @@ describe('WhatsApp failure explanation', () => {
     ['queued', 'queued'],
     ['submitting', 'Submitting'],
     ['unknown', 'unconfirmed'],
+    ['failed', 'rejected'],
   ])(
     'shows persisted retry %s after reload without presenting it as sent or permitting another retry',
     (state, label) => {
@@ -58,6 +59,50 @@ describe('WhatsApp failure explanation', () => {
     });
     expect(wrapper.text()).toContain('Synthetic timeout');
     expect(wrapper.text()).toContain('Retry blocked for review');
+  });
+
+  it('explains a Meta experiment restriction while keeping manual retry available', () => {
+    const wrapper = mount(MessageError, {
+      props: { error: '130472: Synthetic experiment' },
+    });
+    expect(wrapper.text()).toContain('130472');
+    expect(wrapper.text().toLowerCase()).toContain('experiment');
+    expect(wrapper.text()).toContain('Meta');
+    expect(wrapper.find('button').exists()).toBe(true);
+  });
+
+  it('permits a manual Cloud template retry outside the 24-hour service window', () => {
+    const context = useMessageContext();
+    context.createdAt.value = Math.floor(Date.now() / 1000) - 2 * 86400;
+    context.additionalAttributes.value = {
+      templateParams: { name: 'synthetic_retry' },
+    };
+    const wrapper = mount(MessageError, {
+      props: { error: '130472: Synthetic experiment' },
+    });
+    expect(wrapper.find('button').exists()).toBe(true);
+  });
+
+  it('preserves the age limit for an ordinary message without template metadata', () => {
+    useMessageContext().createdAt.value =
+      Math.floor(Date.now() / 1000) - 2 * 86400;
+    const wrapper = mount(MessageError, {
+      props: { error: 'Synthetic ordinary error' },
+    });
+    expect(wrapper.find('button').exists()).toBe(false);
+  });
+
+  it('preserves the age limit for template metadata on a non-Cloud provider', () => {
+    const context = useMessageContext();
+    context.isWhatsappCloud.value = false;
+    context.createdAt.value = Math.floor(Date.now() / 1000) - 2 * 86400;
+    context.additionalAttributes.value = {
+      templateParams: { name: 'synthetic_retry' },
+    };
+    const wrapper = mount(MessageError, {
+      props: { error: 'Synthetic provider error' },
+    });
+    expect(wrapper.find('button').exists()).toBe(false);
   });
 
   it('preserves the existing retry control for the same error on a non-Cloud provider', () => {

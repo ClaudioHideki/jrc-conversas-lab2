@@ -43,7 +43,7 @@ const attemptLabel = computed(() => {
 
 const policyCode = computed(() =>
   isWhatsappCloud.value
-    ? props.error.match(/^\s*(131049|131026)(?=\s*:|\s*$)/)?.[1]
+    ? props.error.match(/^\s*(131049|131026|130472)(?=\s*:|\s*$)/)?.[1]
     : null
 );
 const retryExplanation = computed(() => {
@@ -51,15 +51,23 @@ const retryExplanation = computed(() => {
     return t('CHAT_LIST.WHATSAPP_RETRY.MARKETING');
   if (policyCode.value === '131026')
     return t('CHAT_LIST.WHATSAPP_RETRY.DESTINATION');
+  if (policyCode.value === '130472')
+    return meta.value.error || t('CHAT_LIST.WHATSAPP_RETRY.EXPERIMENT');
   return meta.value.error || '';
 });
 
 const canRetry = computed(() => {
   if (attempt.value) return false;
-  if (policyCode.value) return false;
+  if (policyCode.value && policyCode.value !== '130472') return false;
   const hasContent = content.value !== null;
   const hasAttachments = attachments.value && attachments.value.length > 0;
-  return !hasOneDayPassed(createdAt.value) && (hasContent || hasAttachments);
+  const hasTemplate =
+    isWhatsappCloud.value &&
+    Boolean(additionalAttributes?.value?.templateParams?.name);
+  return (
+    (!hasOneDayPassed(createdAt.value) || hasTemplate) &&
+    (hasContent || hasAttachments)
+  );
 });
 </script>
 
