@@ -138,11 +138,48 @@ class EvidenceGateTest(unittest.TestCase):
         self.assertEqual(gate.report_kind("whatsapp-ui-results.json"), "vue")
         self.assertEqual(gate.report_kind("tmp/ag-rspec.json"), "rspec")
         self.assertEqual(gate.report_kind("tmp/voice-v4-vitest.json"), "vue")
+        for name in ("projects-portal-concurrency.json", "projects-portal-sd-concurrency.json",
+                     "projects-portal-comments-concurrency.json"):
+            self.assertEqual(gate.report_kind("tmp/" + name), "rspec")
         self.assertIsNone(gate.report_kind("unknown.json"))
         bad = copy.deepcopy(self.report)
         bad["summary"]["errors_outside_of_examples_count"] = 1
         with self.assertRaises(gate.GateError):
             gate.rspec(bad)
+
+    def test_migration_catalog_ledger_and_isolation_denials(self):
+        versions = [str(i) for i in range(34)] + ["20261111150000", "20261112000000"]
+        report = {"source_sha": self.lock["product_sha"], "production_changed": False,
+                  "docker_build_executed": False, "catalog_equivalence_passed": True,
+                  "schema_paths_passed": ["fresh_migrate_and_reexecute",
+                      "populated_main_upgrade_and_reexecute", "empty_schema_reload"],
+                  "upgrade": {"required_versions": versions, "historical_versions": versions[:27],
+                      "preserved_subjects": 11, "existing_versions_preserved": True,
+                      "populated_upgrade": True, "missing_after": [], "pending_after": False},
+                  "sha256": {"/tmp/schema.rb": gate.sha(b"synthetic")}}
+        for mutation in ("none", "catalog", "pending", "isolation", "missing_migration", "schema_hash"):
+            with self.subTest(mutation=mutation):
+                r = copy.deepcopy(report)
+                if mutation == "catalog":
+                    r["catalog_equivalence_passed"] = False
+                elif mutation == "pending":
+                    r["upgrade"]["pending_after"] = True
+                elif mutation == "isolation":
+                    r["production_changed"] = True
+                elif mutation == "missing_migration":
+                    r["upgrade"]["required_versions"][-1] = "unreviewed"
+                elif mutation == "schema_hash":
+                    r["sha256"]["/tmp/schema.rb"] = "0"*64
+                b = io.BytesIO()
+                with zipfile.ZipFile(b, "w") as z:
+                    z.writestr("ag-migration-audit-result.json", json.dumps(r))
+                    z.writestr("schema.rb", b"synthetic")
+                z = gate.archive(b.getvalue(), gate.sha(b.getvalue()))
+                if mutation == "none":
+                    gate.migration(z, self.lock["product_sha"])
+                else:
+                    with self.assertRaises(gate.GateError):
+                        gate.migration(z, self.lock["product_sha"])
 
     def test_artifact_identity_positive(self):
         self.assertEqual(len(gate.artifact_identity(self.lock, self.artifacts)), 44)

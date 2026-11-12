@@ -154,7 +154,7 @@ def apt(log):
 def report_kind(name):
     base = PurePosixPath(name).name
     if base.endswith(".json") and ("rspec" in base or "schema-regression" in base
-                                  or base == "whatsapp-native.json"):
+                                  or base.endswith("-concurrency.json") or base == "whatsapp-native.json"):
         return "rspec"
     if base == "ag-vue-results.json" or base.endswith("vitest.json") or base == "whatsapp-ui-results.json":
         return "vue"
@@ -171,6 +171,7 @@ def migration(z, product_sha):
     u = r["upgrade"]
     require(len(u["required_versions"]) == len(set(u["required_versions"])) == 36, "Migration count mismatch")
     require(len(u["historical_versions"]) == 27 and u["preserved_subjects"] == 11, "Historical proof missing")
+    require({"20261111150000", "20261112000000"} <= set(u["required_versions"]), "New migration proof missing")
     require(u["existing_versions_preserved"] and u["populated_upgrade"]
             and u["missing_after"] == [] and u["pending_after"] is False, "Upgrade ledger or rows not preserved")
     for path, expected in r["sha256"].items():
@@ -288,6 +289,8 @@ def execute(lock, infra, product, output):
     run_identity(lock, gh.api("/actions/runs/" + str(lock["native_run_id"])))
     require(subprocess.check_output(["git", "-C", str(product), "rev-parse", "HEAD"], text=True).strip()
             == lock["product_sha"], "Product changed during verification")
+    require(not subprocess.check_output(["git", "-C", str(product), "status", "--porcelain",
+                                        "--untracked-files=all"], text=True).strip(), "Product changed during gate")
     report = {"passed": True, "product_sha": lock["product_sha"], "infrastructure_sha": infra,
               "lock_sha256": sha(json.dumps(lock, sort_keys=True).encode()),
               "native_run_id": lock["native_run_id"], "native_attempt": 1,
