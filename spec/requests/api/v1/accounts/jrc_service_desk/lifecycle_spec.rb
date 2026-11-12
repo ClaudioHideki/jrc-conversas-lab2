@@ -40,6 +40,7 @@ RSpec.describe 'CP4-D01 lifecycle HTTP persistence and readback', type: :request
       expect(selected).to be_present
       attributes = { rule_key: key, expected_lock_version: json['lock_version'], expected_policy_version_id: json.dig('policy', 'id') }
       attributes[:reason_code] = 'customer' if key == 'pause'
+      attributes[:closing_reason] = 'Synthetic HTTP closure reason' if key == 'close'
       post "#{base}/tickets/#{row.id}/lifecycle", headers: headers.merge('Idempotency-Key' => "flow-#{index}"), as: :json, params: attributes
       expect(response).to have_http_status(:ok)
       transition_id = json.fetch('result_id')

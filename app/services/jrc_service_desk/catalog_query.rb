@@ -37,6 +37,9 @@ class JrcServiceDesk::CatalogQuery
 
   def collection
     records = MODELS.key?(resource) ? scoped_catalog : scoped_native
+    if JrcServiceDesk::EmployeeAccess.restricted?(context) && %w[contracts requesters assignees teams categories ticket_types queues].include?(resource)
+      records = records.is_a?(Array) ? [] : records.none
+    end
     records = authorized_records(records)
     if records.is_a?(Array)
       { items: records.slice(parameters.offset, parameters.per_page) || [],

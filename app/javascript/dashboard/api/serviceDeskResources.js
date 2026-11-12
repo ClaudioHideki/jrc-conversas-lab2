@@ -10,6 +10,18 @@ const base = account =>
 const options = signal => ({ signal, timeout: 30000 });
 
 export default {
+  export: (account, query, signal) =>
+    axios
+      .get(`${base(account)}/export`, {
+        ...options(signal),
+        params: query,
+        responseType: 'blob',
+      })
+      .then(result => {
+        if (!String(result.headers['content-type']).startsWith('text/csv'))
+          throw new TypeError('Invalid export response');
+        return result.data;
+      }),
   linkTickets: (account, unit, row, tickets, signal) =>
     axios
       .post(

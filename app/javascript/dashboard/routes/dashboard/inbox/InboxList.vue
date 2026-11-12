@@ -37,6 +37,7 @@ const statusFilter = ref(resolveStatus(route.query.status));
 const channelFilter = ref(route.query.channel || 'all');
 const assigneeFilter = ref(ASSIGNEE_FILTERS.ME);
 const sharedScope = ref({ enabled: false, inbox_ids: [] });
+const admittedSharedConversations = ref(new Set());
 const supervisedInboxIds = ref([]);
 const voiceCalls = ref([]);
 const voiceLoading = ref(false);
@@ -47,7 +48,7 @@ let accountGeneration = 0;
 let voiceGeneration = 0;
 let sharingGeneration = 0;
 let listGeneration = 0;
-let listRequests = 0;
+const listRequests = ref(0);
 let sharingRequest = false;
 let sharingDirty = false;
 let sharingTimer;
@@ -144,6 +145,17 @@ const conversationFilters = computed(() => ({
   page: page.value,
 }));
 
+// Only preserve rows whose access-relevant identity was already checked. A new
+// realtime row or changed assignment must wait for the next authoritative scope.
+const sharingIdentity = conversation =>
+  JSON.stringify([
+    conversation.id,
+    conversation.inbox_id,
+    conversation.meta?.assignee?.id,
+    conversation.meta?.assignee_type,
+    conversation.meta?.team?.id,
+  ]);
+
 const acceptSharedScope = scope => {
   supervisedInboxIds.value = Array.isArray(scope?.supervised_inbox_ids)
     ? scope.supervised_inbox_ids.filter(
@@ -155,6 +167,16 @@ const acceptSharedScope = scope => {
     Array.isArray(scope.inbox_ids) &&
     scope.inbox_ids.every(id => Number.isInteger(id) && id > 0);
   sharedScope.value = valid ? scope : { enabled: false, inbox_ids: [] };
+  admittedSharedConversations.value = new Set(
+    valid
+      ? allStatusConversations
+          .value({ status: statusFilter.value })
+          .filter(conversation =>
+            scope.inbox_ids.includes(conversation.inbox_id)
+          )
+          .map(sharingIdentity)
+      : []
+  );
   if (!valid && assigneeFilter.value === ASSIGNEE_FILTERS.MINE_OR_SHARED) {
     assigneeFilter.value = ASSIGNEE_FILTERS.ME;
     store.dispatch('updateChatListFilters', conversationFilters.value);
@@ -228,7 +250,9 @@ const conversations = computed(() => {
         conversation,
         assigneeFilter.value,
         currentUser.value?.id,
-        sharedScope.value.inbox_ids
+        admittedSharedConversations.value.has(sharingIdentity(conversation))
+          ? sharedScope.value.inbox_ids
+          : []
       )
     );
 
@@ -254,18 +278,22 @@ const currentCallId = computed(() =>
 const isCurrentListLoading = computed(() =>
   channelFilter.value === 'voice'
     ? voiceLoading.value
-    : isLoading.value || (channelFilter.value === 'all' && voiceLoading.value)
+    : isLoading.value ||
+      listRequests.value > 0 ||
+      (channelFilter.value === 'all' && voiceLoading.value)
 );
 
 const canLoadMore = computed(
   () =>
     channelFilter.value !== 'voice' &&
+    !listRequests.value &&
     !isLoading.value &&
     !conversationError.value &&
     !hasEndReached.value(assigneeFilter.value)
 );
 
-// Drop absence proof before re-reading. Coalesce event bursts behind one batch request.
+// Keep admitted rows stable while refreshing. New rows remain fenced until the
+// response, and errors/revocations still remove the grant. Coalesce event bursts.
 const refreshSharedScope = async () => {
   if (
     isInitializing.value ||
@@ -275,9 +303,8 @@ const refreshSharedScope = async () => {
   sharingGeneration += 1;
   const request = sharingGeneration;
   const generation = accountGeneration;
-  sharedScope.value = { ...sharedScope.value, inbox_ids: [] };
   if (document.visibilityState === 'hidden') return;
-  if (sharingRequest || listRequests) {
+  if (sharingRequest || listRequests.value) {
     sharingDirty = true;
     return;
   }
@@ -307,7 +334,7 @@ const fetchConversations = async ({ reset = false } = {}) => {
   }
   store.dispatch('updateChatListFilters', conversationFilters.value);
   const generation = accountGeneration;
-  listRequests += 1;
+  listRequests.value += 1;
   try {
     const data = await store.dispatch('fetchAllConversations');
     if (
@@ -319,8 +346,10 @@ const fetchConversations = async ({ reset = false } = {}) => {
       acceptSharedScope(data?.meta?.shared_scope);
     }
   } finally {
-    listRequests -= 1;
-    if (!listRequests && sharingDirty) refreshSharedScope();
+    if (generation === accountGeneration) {
+      listRequests.value -= 1;
+      if (!listRequests.value && sharingDirty) refreshSharedScope();
+    }
   }
 };
 
@@ -426,7 +455,7 @@ const openVoiceCall = call => {
 };
 
 const loadMore = async () => {
-  if (!canLoadMore.value) return;
+  if (!canLoadMore.value || listRequests.value) return;
   page.value += 1;
   await fetchConversations();
 };
@@ -483,6 +512,7 @@ watch(
   ],
   async () => {
     accountGeneration += 1;
+    listRequests.value = 0;
     sharingGeneration += 1;
     sharingDirty = false;
     const version = accountGeneration;
@@ -497,6 +527,7 @@ watch(
     contactCenterContext.value = null;
     voiceError.value = false;
     sharedScope.value = { enabled: false, inbox_ids: [] };
+    admittedSharedConversations.value = new Set();
     store.dispatch('clearSelectedState');
     store.dispatch('emptyAllConversations');
 

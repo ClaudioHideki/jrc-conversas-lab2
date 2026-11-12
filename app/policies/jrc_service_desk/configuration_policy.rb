@@ -18,7 +18,10 @@ class JrcServiceDesk::ConfigurationPolicy < JrcServiceDesk::OperationalPolicy
   end
 
   def show?
-    record_unit_visible? && capability?(:lookups_view)
+    return false unless record_unit_visible? && capability?(:lookups_view)
+    return true unless JrcServiceDesk::EmployeeAccess.restricted?(operational_context)
+
+    record.new_record? || JrcServiceDesk::EmployeeAccess.catalogue(record.class.all, operational_context).exists?(id: record.id)
   end
 
   def create?
@@ -34,7 +37,7 @@ class JrcServiceDesk::ConfigurationPolicy < JrcServiceDesk::OperationalPolicy
     def resolve
       return scope.none unless operational_context.capability?(:lookups_view)
 
-      unit_scope
+      JrcServiceDesk::EmployeeAccess.catalogue(unit_scope, operational_context)
     end
   end
 end

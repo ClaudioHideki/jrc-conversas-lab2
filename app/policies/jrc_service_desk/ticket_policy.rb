@@ -50,6 +50,11 @@ class JrcServiceDesk::TicketPolicy < JrcServiceDesk::OperationalPolicy
   protected
 
   def capability?(name)
+    if JrcServiceDesk::EmployeeAccess.restricted?(operational_context) &&
+       JrcServiceDesk::EmployeeAccess.capabilities(operational_context).exclude?(name)
+      return false
+    end
+
     super && (record.is_a?(Class) || scoped_permission?(name))
   end
 
@@ -62,9 +67,14 @@ class JrcServiceDesk::TicketPolicy < JrcServiceDesk::OperationalPolicy
       context = operational_context
       return scope.none unless context.capability?(:tickets_view)
 
-      records = JrcServiceDesk::RecordWithdrawal.excluding(scope.where(account_id: context.account.id, unit_id: context.unit_scope.select(:id)), :ticket)
+      records = JrcServiceDesk::RecordWithdrawal.excluding(scope.where(account_id: context.account.id, unit_id: context.unit_scope.select(:id)),
+                                                           :ticket)
+      records = JrcServiceDesk::EmployeeAccess.tickets(records, context)
       restricted = context.supervision_access.scope(records, permission: permission)
       return restricted if context.capability?(:tickets_view_all)
+      if JrcServiceDesk::EmployeeAccess.restricted?(context) && !context.employee_portal? && JrcServiceDesk::EmployeeAccess.registered?(context)
+        return restricted
+      end
 
       memberships = context.active_memberships.select(:id)
       permitted = records.where(created_by_membership_id: context.creator_memberships)

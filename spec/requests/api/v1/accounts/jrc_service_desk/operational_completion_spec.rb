@@ -22,13 +22,13 @@ RSpec.describe 'Service Desk completion configuration and reports', type: :reque
     expect(response.headers['Cache-Control']).to include('no-store')
   end
 
-  it 'denies publication and report data to an ordinary agent' do
+  it 'denies administrative publication while allowing an ordinary agent to report visible tickets' do
     sd_account_user.update!(role: :agent)
     get "#{base}/operational_rules", params: { unit_id: sd_unit.id, kind: 'recurrence' }, headers: headers
     expect(response).to have_http_status(:forbidden)
     get "#{base}/operational_reports", params: { unit_id: sd_unit.id }, headers: headers
-    expect(response).to have_http_status(:forbidden)
-    expect(response.parsed_body).not_to have_key('report')
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body).to have_key('report')
   end
 
   it 'uses the same authorized cohort for reports and escaped CSV export' do

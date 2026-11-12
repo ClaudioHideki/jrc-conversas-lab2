@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import KpiCard from './KpiCard.vue';
 import API from 'dashboard/api/serviceDeskResources';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Pagination from 'dashboard/components-next/pagination/PaginationFooter.vue';
@@ -37,6 +38,7 @@ const mayChooseCompany = computed(
 );
 const status = ref('idle');
 const result = ref(null);
+const appliedFilters = ref(null);
 const query = ref('');
 const stateFilter = ref('');
 const page = ref(1);
@@ -44,6 +46,7 @@ const editing = ref(null);
 const formOpen = ref(false);
 const busy = ref(false);
 const feedback = ref('');
+const selectedAsset = ref(null);
 const fields = reactive({
   name: '',
   code: '',
@@ -70,7 +73,9 @@ const keys = new Map();
 const allowed = computed(
   () =>
     session.state.status === 'ready' &&
-    session.state.context?.capabilities?.incidents?.index === true &&
+    session.state.context?.capabilities?.[
+      props.kind === 'asset' ? 'assets' : 'changes'
+    ]?.index === true &&
     session.state.context.units.some(unit => unit.id === props.unitId)
 );
 const read = async () => {
@@ -79,11 +84,13 @@ const read = async () => {
   controller?.abort();
   controller = new AbortController();
   result.value = null;
+  selectedAsset.value = null;
   if (!allowed.value) {
     status.value = props.unitId ? 'denied' : 'idle';
     return;
   }
   const context = session.state.context;
+  const selectedFilters = { query: query.value, state: stateFilter.value };
   status.value = 'loading';
   try {
     const payload = await API.list(
@@ -106,6 +113,7 @@ const read = async () => {
       props.kind,
       page.value
     );
+    appliedFilters.value = selectedFilters;
     status.value = result.value.items.length ? 'ready' : 'empty';
   } catch (error) {
     if (turn === epoch) status.value = errorStatus(error);
@@ -311,6 +319,58 @@ onBeforeUnmount(() => {
   result.value = null;
   keys.clear();
 });
+const canExport = computed(
+  () =>
+    allowed.value &&
+    ['ready', 'empty'].includes(status.value) &&
+    appliedFilters.value?.query === query.value &&
+    appliedFilters.value?.state === stateFilter.value
+);
+const exportCsv = async () => {
+  if (!canExport.value || busy.value) return;
+  const context = session.state.context;
+  const turn = epoch;
+  busy.value = true;
+  try {
+    const blob = await API.export(
+      context.account_id,
+      {
+        unit_id: props.unitId,
+        resource_kind: props.kind,
+        ...(query.value ? { query: query.value } : {}),
+        ...(stateFilter.value ? { state: stateFilter.value } : {}),
+      },
+      controller.signal
+    );
+    if (turn !== epoch || context !== session.state.context || !allowed.value)
+      return;
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = `${props.kind}.csv`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+  } catch {
+    if (turn === epoch) feedback.value = 'error';
+  } finally {
+    if (turn === epoch) busy.value = false;
+  }
+};
+const assetCards = computed(() => [
+  { key: 'total', tone: 'blue', value: result.value?.summary?.total ?? null },
+  ...[
+    ['active', 'teal'],
+    ['inactive', 'amber'],
+    ['retired', 'iris'],
+  ].map(([key, tone]) => ({
+    key,
+    tone,
+    value: result.value?.summary
+      ? result.value.summary.by_state[key] || 0
+      : null,
+  })),
+]);
+defineExpose({ canExport, exportCsv });
 </script>
 
 <template>
@@ -319,8 +379,21 @@ onBeforeUnmount(() => {
       {{ t('JRC_SERVICE_DESK.R3.select_unit') }}
     </p>
     <template v-else>
+      <div
+        v-if="kind === 'asset'"
+        class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        <KpiCard
+          v-for="card in assetCards"
+          :key="card.key"
+          :value="card.value"
+          :tone="card.tone"
+          :label="t(`JRC_SERVICE_DESK.REPORT_EXPERIENCE.asset_${card.key}`)"
+          compact
+        />
+      </div>
       <form
-        class="flex flex-wrap gap-2"
+        class="flex flex-wrap items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50/70 p-4 dark:border-n-weak dark:bg-n-solid-2"
         @submit.prevent="
           page = 1;
           read();
@@ -329,15 +402,18 @@ onBeforeUnmount(() => {
         <input
           v-model="query"
           maxlength="200"
-          class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+          class="min-w-0 flex-1 rounded-xl border border-n-weak bg-n-solid-1 p-2.5"
+          :placeholder="t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.asset_search')"
           :aria-label="t('JRC_SERVICE_DESK.COMMON.search')"
         />
         <select
           v-model="stateFilter"
-          class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+          class="w-full rounded-xl border border-n-weak bg-n-solid-1 p-2.5 sm:w-48"
           :aria-label="t('JRC_SERVICE_DESK.FIELDS.status')"
         >
-          <option value="">{{ t('JRC_SERVICE_DESK.COMMON.all') }}</option>
+          <option value="">
+            {{ t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.all_states') }}
+          </option>
           <option
             v-for="value in resourceStates[kind]"
             :key="value"
@@ -348,16 +424,29 @@ onBeforeUnmount(() => {
         </select>
         <Button type="submit" :label="t('JRC_SERVICE_DESK.COMMON.search')" />
         <Button
+          type="button"
+          variant="outline"
+          icon="i-lucide-download"
+          :disabled="!canExport || busy"
+          :label="t('JRC_SERVICE_DESK.COMPLETION.export')"
+          @click="exportCsv"
+        />
+        <Button
           v-if="allowed"
           type="button"
           variant="outline"
-          :label="t('JRC_SERVICE_DESK.R3.create_resource')"
+          :label="
+            kind === 'asset'
+              ? t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.new_asset')
+              : t('JRC_SERVICE_DESK.R3.create_resource')
+          "
+          icon="i-lucide-plus"
           @click="begin(null)"
         />
       </form>
       <form
         v-if="formOpen"
-        class="grid gap-3 rounded-lg border border-n-weak bg-n-solid-1 p-4"
+        class="grid gap-4 rounded-2xl border border-blue-200 bg-n-solid-1 p-5 md:grid-cols-2"
         @submit.prevent="save"
       >
         <label
@@ -506,12 +595,132 @@ onBeforeUnmount(() => {
           />
         </div>
       </form>
+      <div
+        v-if="kind === 'asset' && result?.items.length"
+        class="overflow-x-auto rounded-2xl border border-blue-200 bg-n-solid-1 shadow-sm dark:border-n-weak"
+      >
+        <table class="w-full min-w-[800px] text-sm">
+          <thead
+            class="bg-gradient-to-r from-blue-100 to-sky-50 text-start dark:from-n-solid-2 dark:to-n-solid-2"
+          >
+            <tr>
+              <th
+                v-for="field in [
+                  'title',
+                  'code',
+                  'serial',
+                  'manufacturer',
+                  'location',
+                  'status',
+                  'priority',
+                  'actions',
+                ]"
+                :key="field"
+                class="px-4 py-3 text-start"
+              >
+                {{
+                  t(`JRC_SERVICE_DESK.REPORT_EXPERIENCE.asset_columns.${field}`)
+                }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="row in result.items"
+              :key="row.id"
+              class="border-t border-n-weak hover:bg-blue-50/60 dark:hover:bg-n-solid-2"
+            >
+              <td class="px-4 py-4">
+                <button
+                  type="button"
+                  class="flex items-center gap-3 text-start font-semibold text-n-blue-11"
+                  @click="selectedAsset = row.id"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="i-lucide-monitor size-6 shrink-0"
+                  />{{ row.name }}
+                </button>
+              </td>
+              <td class="px-4 py-4">
+                <span
+                  class="rounded-lg bg-blue-50 px-2 py-1 font-mono text-xs text-blue-900"
+                  >{{ row.code }}</span
+                >
+              </td>
+              <td
+                v-for="field in ['serial', 'manufacturer', 'location']"
+                :key="field"
+                class="px-4 py-4"
+              >
+                {{
+                  row.details[field] || t('JRC_SERVICE_DESK.COMMON.no_value')
+                }}
+              </td>
+              <td class="px-4 py-4">
+                <span
+                  class="whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold"
+                  :class="
+                    {
+                      active: 'bg-emerald-100 text-emerald-800',
+                      inactive: 'bg-amber-100 text-amber-900',
+                      retired: 'bg-violet-100 text-violet-800',
+                    }[row.state]
+                  "
+                  >{{ t(`JRC_SERVICE_DESK.R3.states.${row.state}`) }}</span
+                >
+              </td>
+              <td class="px-4 py-4">
+                <span
+                  class="rounded-full px-3 py-1 text-xs font-semibold"
+                  :class="
+                    ['high', 'critical'].includes(row.priority)
+                      ? 'bg-rose-100 text-rose-800'
+                      : 'bg-blue-100 text-blue-800'
+                  "
+                  >{{ t(`JRC_SERVICE_DESK.R3.priority.${row.priority}`) }}</span
+                >
+              </td>
+              <td class="px-4 py-4">
+                <div class="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon="i-lucide-eye"
+                    :aria-label="t('JRC_SERVICE_DESK.COMMON.preview')"
+                    @click="selectedAsset = row.id"
+                  /><Button
+                    v-if="row.permissions.update && row.state !== 'retired'"
+                    size="sm"
+                    variant="ghost"
+                    icon="i-lucide-pencil"
+                    :aria-label="t('JRC_SERVICE_DESK.COMMON.edit')"
+                    @click="begin(row)"
+                  />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <article
-        v-for="row in result?.items || []"
+        v-for="row in (result?.items || []).filter(
+          item => kind !== 'asset' || selectedAsset === item.id
+        )"
         :key="row.id"
         class="grid gap-2 rounded-lg border border-n-weak bg-n-solid-1 p-4"
       >
-        <h3 class="font-semibold">{{ row.name }}</h3>
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="font-semibold">{{ row.name }}</h3>
+          <Button
+            v-if="kind === 'asset'"
+            size="sm"
+            variant="ghost"
+            icon="i-lucide-x"
+            :label="t('JRC_SERVICE_DESK.COMMON.close')"
+            @click="selectedAsset = null"
+          />
+        </div>
         <p class="text-sm">
           {{ t(`JRC_SERVICE_DESK.R3.states.${row.state}`) }}
         </p>

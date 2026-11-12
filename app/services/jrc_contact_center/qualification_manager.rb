@@ -8,6 +8,7 @@ class JrcContactCenter::QualificationManager
 
   def self.ensure_voice!(session)
     return unless session.account.feature_enabled?('jrc_contact_center')
+    return unless JrcContactCenter::AcwPolicy.new(account: session.account).voice_required?
 
     session.legs.where.not(account_user_id: nil).where.not(answered_at: nil).includes(:account_user).find_each do |leg|
       next unless %w[ended failed].include?(session.status) || %w[ended failed transferred].include?(leg.status)

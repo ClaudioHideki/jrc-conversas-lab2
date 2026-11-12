@@ -9,6 +9,10 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
     result = with_unit(unit_id) do |unit|
       raise Pundit::NotAuthorizedError unless context.capability?(:tickets_create)
 
+      if inputs[:origin_channel] == 'manual' && JrcServiceDesk::EmployeeAccess.restricted?(context)
+        inputs[:internal_request] = true
+        raise Pundit::NotAuthorizedError if inputs[:conversation_id]
+      end
       validate_conversation!(inputs[:conversation_id])
       existing = existing_ticket(unit, key, inputs)
       ticket = create_ticket(unit, attributes, key, inputs)

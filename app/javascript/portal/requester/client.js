@@ -11,11 +11,12 @@ export class PortalError extends Error {
 
 export async function request(
   path,
-  { body, method = 'GET', headers = {}, blob = false } = {}
+  { body, method = 'GET', headers = {}, blob = false, signal } = {}
 ) {
   const multipart = body instanceof FormData;
   const response = await fetch(path, {
     method,
+    signal,
     credentials: 'same-origin',
     cache: 'no-store',
     headers: {

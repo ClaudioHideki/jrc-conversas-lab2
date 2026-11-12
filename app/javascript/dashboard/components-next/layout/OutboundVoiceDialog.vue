@@ -23,6 +23,7 @@ const calls = useCallsStore();
 const { isInitiating } = useWhatsappCallSession();
 const dialog = ref(null);
 const phone = ref(props.initialPhone);
+const tones = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'];
 const reason = ref('');
 const observations = ref('');
 const contacts = ref([]);
@@ -35,6 +36,15 @@ const contact = computed(() =>
 const sameAccount = computed(
   () => Number(sip.accountId.value) === props.accountId
 );
+const pressTone = tone => {
+  if (
+    !busy.value &&
+    props.allowed &&
+    sameAccount.value &&
+    phone.value.length < 30
+  )
+    phone.value += tone;
+};
 const canDial = computed(
   () =>
     props.allowed &&
@@ -47,10 +57,24 @@ const canDial = computed(
     !isInitiating.value &&
     !props.qualificationPending &&
     !busy.value &&
-    reason.value.trim() &&
     /^\+?[\d\s().-]{2,30}$/.test(phone.value.trim()) &&
     normalizeSipDialNumber(phone.value)
 );
+const dialBlocked = computed(() => {
+  if (!props.allowed || !sameAccount.value) return 'VOICE_V4.DIAL_RESTRICTED';
+  if (
+    sip.hasCall.value ||
+    calls.hasActiveCall ||
+    calls.hasIncomingCall ||
+    isInitiating.value
+  )
+    return 'VOICE_V4.CALL_ALREADY_ACTIVE';
+  if (props.qualificationPending)
+    return 'SOFTPHONE.INBOX.QUALIFICATION_PENDING';
+  if (!sip.registered.value || !sip.credential.value?.extension)
+    return 'VOICE_V4.EXTENSION_REQUIRED';
+  return null;
+});
 watch(
   [phone, () => props.canLookup],
   ([number, allowed], _, cleanup) => {
@@ -127,84 +151,132 @@ onMounted(() => dialog.value?.open());
     :show-close-button="!busy"
     @close="emit('close')"
   >
-    <form class="space-y-4" @submit.prevent="dial">
-      <label class="block text-sm"
-        >{{ t('VOICE_V4.CONTACT') }}
-        <select
-          v-model="contactId"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1"
-          :disabled="!contacts.length"
+    <form class="space-y-3" @submit.prevent="dial">
+      <div
+        class="space-y-3 rounded-xl bg-n-slate-12 p-4 text-n-slate-1 dark:bg-n-solid-3 dark:text-n-slate-12"
+      >
+        <div class="flex items-center justify-between gap-2 text-xs">
+          <label for="outbound-extension" class="!text-white">{{
+            t('VOICE_V4.SOURCE')
+          }}</label>
+          <input
+            id="outbound-extension"
+            data-outbound-source
+            :value="sameAccount ? sip.credential.value?.extension || '' : ''"
+            readonly
+            class="w-20 rounded-md border-0 bg-n-alpha-2 px-2 py-1 text-right !text-white"
+          />
+        </div>
+        <label
+          for="outbound-number"
+          class="block text-sm font-medium !text-white"
         >
-          <option value="">{{ t('VOICE_V4.CUSTOMER_UNKNOWN') }}</option>
-          <option
-            v-for="item in contacts"
-            :key="item.id"
-            :value="String(item.id)"
+          {{ t('SOFTPHONE.CENTRAL.PHONE') }}
+        </label>
+        <div
+          class="flex items-center gap-1 rounded-lg border border-n-slate-8 bg-n-alpha-2"
+        >
+          <input
+            id="outbound-number"
+            v-model="phone"
+            data-outbound-phone
+            type="tel"
+            inputmode="tel"
+            required
+            autocomplete="off"
+            maxlength="30"
+            :disabled="busy"
+            class="min-w-0 flex-1 border-0 bg-transparent px-3 py-3 text-xl tabular-nums !text-white focus:ring-0"
+          />
+          <button
+            type="button"
+            data-outbound-backspace
+            :disabled="busy || !phone"
+            :aria-label="t('VOICE_V4.BACKSPACE')"
+            class="grid size-11 shrink-0 place-items-center rounded-lg hover:bg-n-alpha-2 disabled:opacity-40"
+            @click="phone = phone.slice(0, -1)"
           >
-            {{ item.name }}
-          </option>
-        </select>
-      </label>
-      <label class="block text-sm"
-        >{{ t('SOFTPHONE.CENTRAL.PHONE') }}
-        <input
-          v-model="phone"
-          data-outbound-phone
-          type="tel"
-          required
-          autocomplete="off"
-          maxlength="30"
-          :disabled="busy"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1"
-        />
-      </label>
-      <label class="block text-sm"
-        >{{ t('VOICE_V4.COMPANY') }}
-        <input
-          :value="contact?.company?.name || ''"
-          readonly
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-alpha-2"
-        />
-      </label>
-      <label class="block text-sm"
-        >{{ t('VOICE_V4.SOURCE') }}
-        <input
-          data-outbound-source
-          :value="sameAccount ? sip.credential.value?.extension || '' : ''"
-          readonly
-          required
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-alpha-2"
-        />
-        <span class="mt-1 block text-xs text-n-slate-10">{{
-          t('VOICE_V4.SOURCE_HINT')
-        }}</span>
-      </label>
-      <label class="block text-sm"
-        >{{ t('VOICE_V4.REASON') }}
-        <input
-          v-model="reason"
-          data-outbound-reason
-          required
-          maxlength="180"
-          :disabled="busy"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1"
-        />
-      </label>
-      <label class="block text-sm"
-        >{{ t('VOICE_V4.OBSERVATIONS') }}
-        <textarea
-          v-model="observations"
-          maxlength="700"
-          rows="3"
-          :disabled="busy"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1"
-        />
-      </label>
+            <span class="i-lucide-delete size-5" aria-hidden="true" />
+          </button>
+        </div>
+        <div
+          class="grid grid-cols-3 gap-2"
+          :aria-label="t('SOFTPHONE.CENTRAL.KEYPAD')"
+        >
+          <button
+            v-for="tone in tones"
+            :key="tone"
+            type="button"
+            :data-outbound-tone="tone"
+            :disabled="busy || !allowed || !sameAccount"
+            class="min-h-11 rounded-lg bg-n-alpha-2 text-lg hover:bg-n-alpha-3 focus-visible:outline focus-visible:outline-2 disabled:opacity-40"
+            @click="pressTone(tone)"
+          >
+            {{ tone }}
+          </button>
+        </div>
+      </div>
+      <p class="m-0 text-xs text-n-slate-11">{{ t('VOICE_V4.SOURCE_HINT') }}</p>
+      <details class="rounded-lg border border-n-weak p-3">
+        <summary class="cursor-pointer text-sm font-medium">
+          {{ t('VOICE_V4.CALL_DETAILS') }}
+        </summary>
+        <div class="mt-3 space-y-3">
+          <label class="block text-sm"
+            >{{ t('VOICE_V4.CONTACT') }}
+            <select
+              v-model="contactId"
+              class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1"
+              :disabled="!contacts.length || busy"
+            >
+              <option value="">{{ t('VOICE_V4.CUSTOMER_UNKNOWN') }}</option>
+              <option
+                v-for="item in contacts"
+                :key="item.id"
+                :value="String(item.id)"
+              >
+                {{ item.name }}
+              </option>
+            </select>
+          </label>
+          <p v-if="contact?.company?.name" class="text-xs text-n-slate-11">
+            {{ t('VOICE_V4.COMPANY') }}: {{ contact.company.name }}
+          </p>
+          <label class="block text-sm"
+            >{{ t('VOICE_V4.REASON') }}
+            <input
+              v-model="reason"
+              data-outbound-reason
+              maxlength="180"
+              :disabled="busy"
+              class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1"
+            />
+          </label>
+          <label class="block text-sm"
+            >{{ t('VOICE_V4.OBSERVATIONS') }}
+            <textarea
+              v-model="observations"
+              maxlength="700"
+              rows="3"
+              :disabled="busy"
+              class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1"
+            />
+          </label>
+        </div>
+      </details>
       <p class="text-xs text-n-slate-10">
         {{ t('VOICE_V4.OUTBOUND_PENDING') }}
       </p>
       <p v-if="failed" role="alert" class="text-sm text-n-ruby-11">
-        {{ t('VOICE_V4.CALL_FAILED') }}
+        {{ sip.errorMessage.value || t('VOICE_V4.CALL_FAILED') }}
+      </p>
+      <p
+        v-if="dialBlocked"
+        data-outbound-blocked
+        role="status"
+        class="rounded-lg bg-n-amber-2 p-3 text-xs text-n-amber-11"
+      >
+        {{ t(dialBlocked) }}
       </p>
       <div class="flex justify-end gap-3">
         <button

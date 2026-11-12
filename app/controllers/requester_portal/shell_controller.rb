@@ -21,7 +21,7 @@ class RequesterPortal::ShellController < ActionController::Base
 
   def authorize_private_shell
     return redirect_to '/portal/login' unless current_user
-    return if requester_grants.any?
+    return if employee_portal_context || requester_grants.any?
 
     head :forbidden
   end

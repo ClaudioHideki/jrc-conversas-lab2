@@ -1,4 +1,5 @@
 <script setup>
+import { downloadCsv, metricRows } from '../helpers/csvExport';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -146,6 +147,21 @@ const editIncident = row => {
   editedIncident.value = row.incident;
   formOpen.value = true;
 };
+const canExport = computed(() => ['ready', 'empty'].includes(status.value));
+const exportCsv = () => {
+  if (canExport.value)
+    downloadCsv(
+      [
+        [
+          t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.field'),
+          t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.value'),
+        ],
+        ...metricRows(result.value),
+      ],
+      'atividades-pagina.csv'
+    );
+};
+defineExpose({ canExport, exportCsv });
 </script>
 
 <template>

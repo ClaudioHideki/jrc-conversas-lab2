@@ -8,7 +8,28 @@ class Api::V1::Accounts::JrcServiceDesk::ResourcesController < Api::V1::Accounts
     paging = ::JrcServiceDesk::QueryParameters.new(values.slice('page', 'per_page'))
     items = rows.order(updated_at: :desc, id: :desc).offset(paging.offset).limit(paging.per_page)
     render json: base_payload.merge(items: items.map { |row| resource_payload(row) },
+                                    summary: resource_summary(rows),
                                     meta: { page: paging.page, per_page: paging.per_page, total: rows.count })
+  end
+
+  def export
+    context = ::JrcServiceDesk::OperationalContext.new(pundit_user)
+    authorize ::JrcServiceDesk::OperationalResource, :index?
+    values = ::JrcServiceDesk::Input.attributes(query_values, %w[unit_id ticket_id resource_kind state query])
+    rows = filtered_resources(values)
+    raise ArgumentError, 'Export is limited to 10000 resources; narrow the filters' if rows.count > 10_000
+
+    unit = policy_scope(::JrcServiceDesk::Unit).find(::JrcServiceDesk::Input.id(values.fetch('unit_id')))
+    data = rows.order(:id).map do |row|
+      [row.id, row.name, row.code, row.details['serial'], row.details['manufacturer'], row.details['location'], row.state, row.priority]
+    end
+    content = ::JrcServiceDesk::OperationalCsv.generate(%w[id name code serial manufacturer location state priority], data)
+    metadata = { namespace: 'jrc_sd_resource_export_v1', account_id: Current.account.id, unit_id: unit.id,
+                 account_user_id: context.account_user.id, filters: values, count: data.size,
+                 sha256: Digest::SHA256.hexdigest(content) }
+    Audited::Audit.create!(auditable: unit, associated: unit, user: context.user, action: 'export', audited_changes: {},
+                           comment: ::JrcServiceDesk::CanonicalJson.dump(metadata), request_uuid: SecureRandom.uuid)
+    send_data "\uFEFF#{content}", filename: 'service-desk-resources.csv', type: 'text/csv; charset=utf-8', disposition: 'attachment'
   end
 
   def show
@@ -62,6 +83,10 @@ class Api::V1::Accounts::JrcServiceDesk::ResourcesController < Api::V1::Accounts
 
   private
 
+  def resource_summary(rows)
+    { total: rows.count, by_state: rows.group(:state).count }
+  end
+
   def filtered_resources(values)
     rows = policy_scope(::JrcServiceDesk::OperationalResource)
     if values['unit_id']
@@ -83,7 +108,8 @@ class Api::V1::Accounts::JrcServiceDesk::ResourcesController < Api::V1::Accounts
     raise ArgumentError unless query.is_a?(String) && query.size <= 200
 
     term = "%#{ActiveRecord::Base.sanitize_sql_like(query)}%"
-    rows.where('name ILIKE ? OR code ILIKE ?', term, term)
+    rows.where("name ILIKE ? OR code ILIKE ? OR details->>'serial' ILIKE ? OR details->>'manufacturer' ILIKE ? OR details->>'location' ILIKE ?",
+               term, term, term, term, term)
   end
 
   def command

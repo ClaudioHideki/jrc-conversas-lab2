@@ -16,7 +16,7 @@ class JrcServiceDesk::PortalCatalogue
     member = @service.portal_execution_membership&.account_user
     return [] unless member
 
-    context = JrcServiceDesk::OperationalContext.new(account: @service.account, user: member.user, account_user: member)
+    context = JrcServiceDesk::OperationalContext.new(account: @service.account, user: member.user, account_user: member, customer_execution: true)
     rows = JrcServiceDesk::CatalogueContracts.new(context).scope.where(status: %w[active expiring], signature_status: 'signed')
     rows = rows.where(id: @service.allowed_contract_ids) if @service.allowed_contract_ids.any?
     rows.includes(:contact, :deal).select do |contract|

@@ -46,6 +46,10 @@ class JrcServiceDesk::InternalIntake
     contact = context.account.contacts.where('LOWER(email) = ?', context.user.email.downcase).first
     contact ||= context.account.contacts.create!(name: context.user.name, email: context.user.email,
                                                 identifier: "internal-user:#{context.user.id}", additional_attributes: { entity_type: 'person' })
+    if JrcServiceDesk::EmployeeAccess.restricted?(context) && contact.company_id.present?
+      allowed = JrcServiceDesk::EmployeeAccess.configurations(context).values.map { |row| row['internal_company_id'] }.compact
+      raise Pundit::NotAuthorizedError unless allowed.include?(contact.company_id)
+    end
     JrcServiceDesk::RequesterDirectory.new(context).validate!(contact)
     contact
   end

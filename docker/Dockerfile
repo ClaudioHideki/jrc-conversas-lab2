@@ -143,6 +143,7 @@ RUN apk update && apk add --no-cache \
   tesseract-ocr \
   tesseract-ocr-data-por \
   tesseract-ocr-data-eng \
+  ttf-dejavu \
   git \
   vips \
   && gem install bundler -v "$BUNDLER_VERSION"

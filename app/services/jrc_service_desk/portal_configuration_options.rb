@@ -40,7 +40,7 @@ class JrcServiceDesk::PortalConfigurationOptions
 
   def eligible?(membership, unit, inbox)
     member = membership.account_user
-    actor = JrcServiceDesk::OperationalContext.new(account: @context.account, user: member.user, account_user: member)
+    actor = JrcServiceDesk::OperationalContext.new(account: @context.account, user: member.user, account_user: member, customer_execution: true)
     allowed = actor.unit_allowed?(unit) && CAPABILITIES.all? { |key| actor.capability?(key) }
     allowed &&= JrcServiceDesk::NativeExecutionContext.with(actor.to_h) { InboxPolicy.new(actor.to_h, inbox).show? } if inbox
     allowed

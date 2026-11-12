@@ -2,7 +2,6 @@
 
 class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
   FIELDS = %w[rule_key expected_lock_version expected_policy_version_id reason_code closing_reason note solution evidence_note_ids fields].freeze
-
   def call(ticket_id:, attributes:, idempotency_key:, execution_command: nil)
     data = JrcServiceDesk::Input.attributes(attributes, FIELDS)
     key = JrcServiceDesk::Input.request_key(idempotency_key)
@@ -19,7 +18,12 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
       prior = ticket.lifecycle_transitions.find_by(actor_membership_id: actor_membership.id, request_key: key)
       if prior
         raise Pundit::NotAuthorizedError unless JrcServiceDesk::LifecycleActionPolicy.new(context.to_h, ticket).action?(prior.action)
-        verify_allowed_role!(prior.lifecycle_policy_version.rules.rule(prior.rule_key))
+
+        prior_rule = prior.lifecycle_policy_version.rules.rule(prior.rule_key)
+        if !execution_command && (prior.action == 'close' || prior.payload.key?('closing_reason'))
+          prior_rule = JrcServiceDesk::OperationalClosure.rule(prior_rule, context, ticket)
+        end
+        verify_allowed_role!(prior_rule)
         raise JrcServiceDesk::IdempotencyConflict, 'Transition key reused for different input' unless prior.fingerprint == fingerprint
 
         next prior
@@ -30,7 +34,14 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
       raise JrcServiceDesk::IdempotencyConflict, 'Policy selection changed; reload' unless version.id == expected_policy
 
       revision = JrcServiceDesk::ClosureRevisionBinding.new(ticket, version)
+      # Legacy clients may send the same reason only in the configured fields.
+      # Normalize after the replay fingerprint, preserving pre-upgrade request keys.
+      if !normalized.key?('closing_reason') && normalized.dig('fields', 'closing_reason')
+        normalized['closing_reason'] = normalized.dig('fields', 'closing_reason')
+      end
       rule = revision.rule(version.rules.rule(normalized.fetch('rule_key')))
+      rule = JrcServiceDesk::OperationalClosure.prepare(rule, normalized, context, ticket, automated: execution_command.present?)
+
       verify_allowed_role!(rule)
       raise Pundit::NotAuthorizedError unless JrcServiceDesk::LifecycleActionPolicy.new(context.to_h, ticket).action?(rule.fetch('action'))
       unless JrcServiceDesk::LifecycleActionPolicy.new(context.to_h, ticket).requirements_allowed?(rule.fetch('requirements'))
@@ -68,6 +79,7 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
         payload: transition_payload(normalized, previous, target, version, sla).merge('origin' => origin, 'closure_revision' => closure_revision&.stringify_keys)
       )
       append_transition_event!(ticket, transition, previous, sla)
+      audit_closure!(ticket, transition) if transition.action == 'close'
       transition
     end
     dispatch_closure_hooks(result)
@@ -75,6 +87,16 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
   end
 
   private
+
+  def audit_closure!(ticket, transition)
+    metadata = { namespace: 'jrc_sd_operational_closure_v1', account_id: ticket.account_id, unit_id: ticket.unit_id,
+                 ticket_id: ticket.id, transition_id: transition.id, account_user_id: actor_membership.account_user_id,
+                 occurred_at: transition.occurred_at.iso8601(6),
+                 closing_reason_sha256: Digest::SHA256.hexdigest(transition.payload['closing_reason'].to_s) }
+    Audited::Audit.create!(auditable: ticket, associated: ticket.unit, user: context.user, action: 'close',
+                           audited_changes: { 'status_id' => [transition.from_status_id, transition.to_status_id] },
+                           comment: JrcServiceDesk::CanonicalJson.dump(metadata), request_uuid: SecureRandom.uuid)
+  end
 
   def verify_allowed_role!(rule)
     roles = rule['allowed_account_roles']
@@ -99,9 +121,9 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
   def append_transition_event!(ticket, transition, previous, sla)
     version = transition.lifecycle_policy_version
     data = { 'transition_id' => transition.id, 'action' => transition.action,
-                                                    'from_status_id' => previous.id, 'to_status_id' => transition.to_status_id,
-                                                    'policy_version_id' => version.id,
-                                                    'policy_version' => version.version, 'cycle_id' => sla['cycle_id'],
+             'from_status_id' => previous.id, 'to_status_id' => transition.to_status_id,
+             'policy_version_id' => version.id,
+             'policy_version' => version.version, 'cycle_id' => sla['cycle_id'],
              'origin' => transition.payload['origin'] }
     data['closing_reason'] = transition.payload['closing_reason'] if transition.payload.key?('closing_reason')
     append_event!(ticket, 'lifecycle_transitioned', data)

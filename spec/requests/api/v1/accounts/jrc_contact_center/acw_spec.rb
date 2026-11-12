@@ -34,6 +34,30 @@ RSpec.describe 'Contact Center ACW persistent API', type: :request do
     expect(JrcContactCenter::AcwPolicy.new(account: create(:account)).call[:limits]).to eq('voice' => 180, 'whatsapp' => 180)
   end
 
+  it 'lets administration configure optional voice tabulation without affecting another account or erasing the choice on legacy limit updates' do
+    patch "#{base}/acw_policy", headers: admin.create_new_auth_token, as: :json,
+                                params: { limits: { voice: 12, whatsapp: 34 }, voice_required: false }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['item']['voice_required']).to be(false)
+    expect(JrcContactCenter::AcwPolicy.new(account: create(:account)).call[:voice_required]).to be(true)
+    patch "#{base}/acw_policy", headers: admin.create_new_auth_token, as: :json,
+                                params: { limits: { voice: 15, whatsapp: 45 } }
+    expect(response.parsed_body['item']['voice_required']).to be(false)
+  end
+
+  it 'does not let an agent change the voice tabulation policy' do
+    patch "#{base}/acw_policy", headers: headers, as: :json,
+                                params: { limits: { voice: 12, whatsapp: 34 }, voice_required: false }
+    expect(response).to have_http_status(:unauthorized)
+    expect(JrcContactCenter::AcwPolicy.new(account: account.reload).call[:voice_required]).to be(true)
+  end
+
+  it 'rejects non-boolean voice tabulation policy values' do
+    patch "#{base}/acw_policy", headers: admin.create_new_auth_token, as: :json,
+                                params: { limits: { voice: 12, whatsapp: 34 }, voice_required: 'false' }
+    expect(response).to have_http_status(:unprocessable_entity)
+  end
+
   it 'rejects invalid or missing limits rather than taking a frontend fallback' do
     patch "#{base}/acw_policy", headers: admin.create_new_auth_token, as: :json, params: { limits: { voice: 0, whatsapp: 9999 } }
     expect(response).to have_http_status(:unprocessable_entity)

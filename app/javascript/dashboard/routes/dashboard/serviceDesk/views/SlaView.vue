@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import { downloadCsv, metricRows } from '../helpers/csvExport';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import SupervisorPanel from '../components/SupervisorPanel.vue';
@@ -22,6 +23,21 @@ const { result, status, load } = useSupervisionReport(
   () => filters.value
 );
 const slaData = computed(() => result.value?.supervision || null);
+const canExport = computed(() => status.value === 'ready');
+const exportCsv = () => {
+  if (canExport.value)
+    downloadCsv(
+      [
+        [
+          t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.field'),
+          t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.value'),
+        ],
+        ...metricRows(slaData.value),
+      ],
+      'sla-indicadores.csv'
+    );
+};
+defineExpose({ canExport, exportCsv });
 </script>
 
 <template>

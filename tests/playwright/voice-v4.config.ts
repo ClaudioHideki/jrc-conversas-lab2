@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 import path from 'node:path';
 const evidenceDir = path.resolve(__dirname, '../../.codex/voice-v4-e2e');
+const fixtureOrigin = `http://127.0.0.1:${Number(process.env.JRC_VOICE_FIXTURE_PORT || 5226)}`;
 export default defineConfig({
   testDir: './tests/e2e/ui',
   testMatch: 'voice-v4.spec.ts',
@@ -11,7 +12,7 @@ export default defineConfig({
   reporter: [['line'], ['json', { outputFile: `${evidenceDir}/results.json` }]],
   outputDir: evidenceDir,
   use: {
-    baseURL: 'http://127.0.0.1:5226',
+    baseURL: fixtureOrigin,
     headless: true,
     channel: process.env.JRC_VOICE_E2E_CHANNEL || undefined,
     locale: 'pt-BR',
@@ -20,11 +21,11 @@ export default defineConfig({
   },
   webServer: {
     command:
-      'node node_modules/vite/bin/vite.js --config tests/playwright/fixtures/voice-v4/vite.config.mjs',
+      'node node_modules/vite/bin/vite.js build --config tests/playwright/fixtures/voice-v4/vite.config.mjs && node node_modules/vite/bin/vite.js preview --config tests/playwright/fixtures/voice-v4/vite.config.mjs',
     cwd: '../..',
-    url: 'http://127.0.0.1:5226/tests/playwright/fixtures/voice-v4/index.html',
+    url: `${fixtureOrigin}/tests/playwright/fixtures/voice-v4/index.html`,
     reuseExistingServer: !process.env.CI,
-    timeout: 180000,
+    timeout: 300000,
   },
   projects: [
     { name: 'tablet', use: { viewport: { width: 768, height: 1024 } } },

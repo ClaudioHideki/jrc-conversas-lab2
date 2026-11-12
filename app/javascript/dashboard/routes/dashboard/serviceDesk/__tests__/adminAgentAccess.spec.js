@@ -95,4 +95,31 @@ describe('Service Desk administration and operation stay independent', () => {
       }
     );
   });
+  it('accepts the reported Ronald HTTP context for New ticket without requiring dashboard or administration', async () => {
+    const payload = profile(false, true);
+    payload.user_id = '33';
+    payload.units = [{ ...payload.units[0], id: '1' }];
+    const guard = createIntegratedGuard(
+      {
+        getters: {
+          getCurrentUserID: '33',
+          'accounts/isFeatureEnabledonAccount': () => true,
+        },
+      },
+      async () => ({ id: '1', features: { jrc_service_desk: true } }),
+      async () => payload
+    );
+    expect(
+      await guard({
+        params: { accountId: '1' },
+        meta: { serviceDeskScreen: 'new' },
+      })
+    ).toBe(true);
+    expect(
+      screenAccessible(
+        decodeContext(payload, { accountId: '1', userId: '33' }),
+        definition('new')
+      )
+    ).toBe(true);
+  });
 });

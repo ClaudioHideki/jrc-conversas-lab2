@@ -136,7 +136,7 @@ const blocked = computed(() =>
     <template v-if="enabled">
       <main
         :key="`${accountId}:${userId}`"
-        class="flex-1 min-h-0 min-w-0 overflow-auto p-4 xl:p-5"
+        class="flex-1 min-h-0 min-w-0 overflow-auto bg-gradient-to-br from-blue-100/80 via-sky-50/70 to-indigo-100/70 p-4 dark:from-n-solid-1 dark:via-n-solid-2 dark:to-n-solid-1 xl:p-5"
       >
         <Button
           v-if="blocked && route.query.customer_segment_id"

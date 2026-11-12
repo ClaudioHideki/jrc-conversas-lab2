@@ -57,7 +57,7 @@ jobs:
               sudo sed -i -E -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' "$source"
             fi
           done
-          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev
+          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev fonts-dejavu-core
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
@@ -163,7 +163,7 @@ jobs:
       - name: Build frontend real
         # The A-G image workflow performs the one protected production build,
         # verifies fresh entrypoints/CSS and refuses publication on any failure.
-        if: github.ref_name != 'codex/lab2-ag-consolidada-20261110'
+        if: github.ref_name != 'codex/lab2-ag-consolidada-20261110' && github.ref_name != 'codex/lab2-ag-atualizacoes-20261112'
         env:
           NODE_OPTIONS: --max-old-space-size=6144
         run: bundle exec vite build

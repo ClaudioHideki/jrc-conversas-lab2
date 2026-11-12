@@ -1,4 +1,5 @@
 <script setup>
+import { downloadCsv, metricRows } from '../helpers/csvExport';
 import { computed, onBeforeUnmount, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -108,6 +109,21 @@ const filterStatus = statusId =>
     params: { accountId: session.accountId.value },
     query: { ...route.query, phase: undefined, status_id: statusId, page: '1' },
   });
+const canExport = computed(() => dashboard.value.status === 'ready');
+const exportCsv = () => {
+  if (canExport.value)
+    downloadCsv(
+      [
+        [
+          t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.field'),
+          t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.value'),
+        ],
+        ...metricRows(dashboard.value.data),
+      ],
+      'dashboard-indicadores.csv'
+    );
+};
+defineExpose({ canExport, exportCsv });
 </script>
 
 <template>
@@ -155,7 +171,14 @@ const filterStatus = statusId =>
     />
     <div class="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_17rem]">
       <div class="min-w-0">
-        <template v-if="session.state.context?.capabilities?.reports?.index">
+        <details
+          v-if="session.state.context?.capabilities?.reports?.index"
+          class="mb-4 rounded-xl border border-n-weak bg-n-solid-1 p-4"
+        >
+          <summary class="cursor-pointer font-semibold text-n-blue-11">
+            {{ t('JRC_SERVICE_DESK.REDESIGN_LIST.evolution_utc') }} ·
+            {{ t('JRC_SERVICE_DESK.FIELDS.category') }}
+          </summary>
           <OverviewOperations
             v-if="reportStatus === 'ready'"
             section="charts"
@@ -169,7 +192,7 @@ const filterStatus = statusId =>
             retry
             @retry="reloadDashboard"
           />
-        </template>
+        </details>
         <Panel
           :title="t('JRC_SERVICE_DESK.OVERVIEW.recent')"
           icon="i-lucide-ticket"

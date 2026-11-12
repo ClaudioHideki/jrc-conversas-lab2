@@ -14,6 +14,10 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       raise Pundit::NotAuthorizedError unless context.capability?(:tickets_create)
       raise ArgumentError if internal_request && origin_channel != 'manual'
 
+      if origin_channel == 'manual' && JrcServiceDesk::EmployeeAccess.restricted?(context)
+        internal_request = true
+        JrcServiceDesk::EmployeeAccess.verify_service!(context, unit.id, service_id)
+      end
       fields = internal_request ? %w[title description service_fields] : creation_fields
       values = JrcServiceDesk::Input.attributes(attributes, fields)
       normalized = (FIELDS - CLASSIFICATION_FIELDS).index_with { |name| values[name] }

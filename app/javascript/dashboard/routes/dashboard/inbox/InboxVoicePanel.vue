@@ -514,7 +514,7 @@ defineExpose({ endCall, canEnd, duration });
 <template>
   <section
     data-inbox-softphone
-    class="min-w-0"
+    class="relative min-w-0"
     :class="controlsOnly ? 'w-full' : 'space-y-5 p-4 sm:p-5'"
   >
     <div
@@ -673,7 +673,7 @@ defineExpose({ endCall, canEnd, duration });
       </div>
       <div
         v-if="showControls"
-        class="gap-3"
+        class="gap-1.5"
         :class="
           controlsOnly
             ? 'flex flex-wrap items-center'
@@ -687,6 +687,7 @@ defineExpose({ endCall, canEnd, duration });
           type="button"
           :data-voice-action="control.key"
           :aria-label="t(`SOFTPHONE.CENTRAL.${control.label}`)"
+          :title="t(`SOFTPHONE.CENTRAL.${control.label}`)"
           :disabled="!control.enabled"
           :aria-pressed="
             control.key === 'MUTE'
@@ -707,22 +708,15 @@ defineExpose({ endCall, canEnd, duration });
         >
           <span class="grid size-6 place-items-center"
             ><span class="size-5" :class="control.icon" /></span
-          >{{ t(`SOFTPHONE.CENTRAL.${control.label}`) }}
-        </button>
-        <button
-          v-if="controlsOnly"
-          type="button"
-          disabled
-          :title="t('VOICE_V4.CONFERENCE_UNAVAILABLE')"
-          class="min-h-11 rounded-lg border border-n-strong px-3 text-xs opacity-50"
-        >
-          {{ t('VOICE_V4.CONFERENCE') }}
+          ><span :class="controlsOnly ? 'sr-only' : ''">{{
+            t(`SOFTPHONE.CENTRAL.${control.label}`)
+          }}</span>
         </button>
         <button
           v-if="controlsOnly && !sip.incoming.value"
           type="button"
           :disabled="!canEnd"
-          class="ml-auto flex min-h-11 min-w-32 items-center justify-center gap-2 rounded-lg border border-n-ruby-10 bg-n-ruby-9 px-5 font-semibold text-white shadow-[0_3px_0_0_rgba(0,0,0,0.25)] transition-[transform,box-shadow] duration-150 active:translate-y-0.5 active:shadow-none active:duration-100 motion-reduce:transform-none motion-reduce:transition-none disabled:shadow-none disabled:opacity-40"
+          class="ml-auto flex min-h-11 items-center justify-center gap-2 rounded-lg border border-n-ruby-10 bg-n-ruby-9 px-3 text-xs font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
           @click="endCall"
         >
           <span class="i-lucide-phone-off size-5" aria-hidden="true" />
@@ -735,7 +729,12 @@ defineExpose({ endCall, canEnd, duration });
       </div>
       <form
         v-if="transferOpen && canControl"
-        class="flex flex-wrap gap-3 rounded-lg border border-n-weak p-4"
+        class="flex flex-wrap gap-3 rounded-lg border border-n-weak bg-n-solid-1 p-4 shadow-lg"
+        :class="
+          controlsOnly
+            ? 'absolute right-0 top-full z-40 mt-2 w-80 max-w-full'
+            : ''
+        "
         @submit.prevent="transfer"
       >
         <select
@@ -814,7 +813,14 @@ defineExpose({ endCall, canEnd, duration });
     </form>
     <div
       v-if="keypadOpen && canControl"
-      class="mx-auto grid max-w-xs grid-cols-3 gap-2"
+      role="group"
+      :aria-label="t('SOFTPHONE.CENTRAL.KEYPAD')"
+      class="grid grid-cols-3 gap-2 rounded-xl border border-n-strong bg-n-solid-1 p-3 shadow-lg"
+      :class="
+        controlsOnly
+          ? 'absolute right-0 top-full z-40 mt-2 w-64 max-w-full'
+          : 'mx-auto max-w-xs'
+      "
       data-call-keypad
     >
       <button

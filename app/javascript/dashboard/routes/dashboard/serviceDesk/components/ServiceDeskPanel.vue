@@ -7,8 +7,13 @@ defineProps({
 </script>
 
 <template>
-  <section class="sd-panel !rounded-xl shadow-sm">
-    <header v-if="title" class="sd-panel-heading !bg-n-solid-1 !px-4 !py-3">
+  <section
+    class="sd-panel !rounded-2xl !border-blue-200/70 shadow-md shadow-blue-900/5 dark:!border-n-weak"
+  >
+    <header
+      v-if="title"
+      class="sd-panel-heading !bg-gradient-to-r !from-blue-100/80 !via-sky-50 !to-blue-50 !px-4 !py-3 dark:!from-n-solid-2 dark:!via-n-solid-2 dark:!to-n-solid-2"
+    >
       <div class="flex items-center gap-2 min-w-0">
         <Icon
           v-if="icon"

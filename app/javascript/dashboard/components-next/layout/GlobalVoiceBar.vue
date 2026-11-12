@@ -175,7 +175,7 @@ watch(attendance, value => {
   const baseline = value.record.metadata?.attendance_observations?.text || '';
   const text = [
     baseline,
-    draft ? `${t('VOICE_V4.REASON')}: ${draft.reason}` : '',
+    draft?.reason ? `${t('VOICE_V4.REASON')}: ${draft.reason}` : '',
     draft?.notes,
     pendingNote?.text,
   ]
@@ -207,10 +207,10 @@ const openAttendance = () => {
     v-if="allowed"
     data-global-voice-bar
     :aria-label="t('VOICE_V4.BAR_LABEL')"
-    class="shrink-0 border-b border-n-strong px-3 py-2 sm:px-5"
+    class="shrink-0 border-b border-n-strong px-3 py-1.5 sm:px-4"
     :class="active ? 'bg-n-teal-3' : 'bg-n-solid-1'"
   >
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
       <div class="md:hidden">
         <VoicePresenceControl
           :account-id="Number(accountId)"
@@ -221,7 +221,7 @@ const openAttendance = () => {
         class="i-lucide-phone size-5 shrink-0 text-n-teal-10"
         aria-hidden="true"
       />
-      <div class="min-w-40 flex-1 text-sm">
+      <div class="min-w-0 flex-1 text-xs sm:flex-none sm:max-w-72">
         <div
           class="flex flex-wrap items-center gap-2 font-semibold"
           role="status"
@@ -262,7 +262,7 @@ const openAttendance = () => {
       <button
         v-if="!active"
         type="button"
-        class="min-h-10 rounded-lg border border-n-strong px-4 text-xs font-semibold text-n-brand focus-visible:ring-2 focus-visible:ring-n-brand disabled:opacity-40"
+        class="ml-auto min-h-10 rounded-lg border border-n-strong px-4 text-xs font-semibold text-n-brand focus-visible:ring-2 focus-visible:ring-n-brand disabled:opacity-40"
         :disabled="
           !sameAccount || !sip.registered.value || qualificationPending
         "
@@ -277,9 +277,16 @@ const openAttendance = () => {
         :qualification-pending="qualificationPending"
         session-view
         controls-only
-        class="basis-full xl:basis-auto xl:flex-1"
+        class="basis-full sm:ml-auto sm:w-auto sm:flex-1 sm:basis-auto"
       />
     </div>
+    <p
+      v-if="sameAccount && !active && sip.errorMessage.value"
+      role="alert"
+      class="mb-0 mt-1 rounded-lg bg-n-ruby-2 px-3 py-2 text-xs text-n-ruby-11"
+    >
+      {{ sip.errorMessage.value }}
+    </p>
     <OutboundVoiceDialog
       v-if="outboundOpen"
       :account-id="Number(accountId)"
