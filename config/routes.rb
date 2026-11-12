@@ -531,6 +531,7 @@ Rails.application.routes.draw do
           get 'jrc_history_sync/v2/inboxes/:inbox_id', to: 'jrc_history_syncs#capability'
           post 'jrc_history_sync/v2/inboxes/:inbox_id/bootstrap', to: 'jrc_history_syncs#bootstrap'
           post 'jrc_history_sync/v2/inboxes/:inbox_id/messages', to: 'jrc_history_syncs#create'
+          post 'jrc_history_sync/v2/inboxes/:inbox_id/media', to: 'jrc_history_syncs#media'
           get 'jrc_history_sync/v2/inboxes/:inbox_id/receipts/:receipt_id', to: 'jrc_history_syncs#receipt'
           post 'jrc_history_import/inboxes/:inbox_id/bootstrap', to: 'jrc_history_imports#bootstrap'
           post 'conversations/:conversation_id/jrc_history_import', to: 'jrc_history_imports#create'

@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe 'Broker history synchronization V2', type: :request do
+  # Acceptance cases correlate storage bytes, immutable receipts and zero live effects.
+  # rubocop:disable RSpec/MultipleExpectations
   let(:account) { create(:account) }
   let(:admin) { create(:user, account: account, role: :administrator) }
   let(:agent) { create(:user, account: account, role: :agent) }
@@ -22,7 +24,11 @@ RSpec.describe 'Broker history synchronization V2', type: :request do
   end
 
   around do |example|
+    previous_storage = ActiveStorage::Blob.service
+    ActiveStorage::Blob.service = ActiveStorage::Blob.services.fetch('s3_compatible') if ENV['HISTORY_PHYSICAL_STORAGE_TEST'] == 'true'
     with_modified_env(JRC_BROKER_ENABLED: 'true', JRC_HISTORY_SYNC_V2_ENABLED: 'true') { example.run }
+  ensure
+    ActiveStorage::Blob.service = previous_storage
   end
 
   before do
@@ -34,11 +40,170 @@ RSpec.describe 'Broker history synchronization V2', type: :request do
     clear_enqueued_jobs
   end
 
+  it 'keeps media pending until physical bytes and the attachment are verified, recovering a lost upload acknowledgement' do
+    path = Rails.root.join('spec/assets/sample.png')
+    bytes = File.binread(path)
+    metadata = { reference_id: SecureRandom.uuid, media_type: 'IMAGE', filename: 'synthetic.png', mime_type: 'image/png',
+                 byte_size: bytes.bytesize, sha256: Digest::SHA256.hexdigest(bytes) }
+    uploads = Array.new(2) do
+      post "#{base}/media", params: { scope: scope.to_json, metadata: metadata.to_json,
+                                      file: Rack::Test::UploadedFile.new(path, 'image/png') }, headers: headers
+      expect(response).to have_http_status(:ok)
+      response.parsed_body
+    end
+    expect(uploads.first).to eq(uploads.last)
+    expect(uploads.first).to include('state' => 'STORED', 'sha256' => metadata.fetch(:sha256))
+    input = bootstrap
+    post "#{base}/bootstrap", params: input, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    content = metadata.merge(type: 'MEDIA', caption: 'Synthetic historical caption')
+    message = scope.merge(broker_conversation_id: input.fetch(:broker_conversation_id), broker_message_id: SecureRandom.uuid,
+                          provider_message_id: 'SYNTHETIC-MEDIA', content: content,
+                          direction: 'incoming', participant_jid: nil, occurred_at: input.fetch(:occurred_at), status: 'delivered')
+    clear_enqueued_jobs
+    post "#{base}/messages", params: message, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    pending = response.parsed_body
+    expect(pending).to include('state' => 'MEDIA_PENDING')
+    intent = JrcBrokerHistoryMedia.find_by!(reference_id: metadata.fetch(:reference_id))
+    JrcBroker::HistorySyncMediaJob.perform_now(intent.id)
+    JrcBroker::HistorySyncMediaJob.perform_now(intent.id)
+    get "#{base}/receipts/#{pending.fetch('receipt_id')}", params: scope, headers: headers
+    expect(response.parsed_body).to include('state' => 'PERSISTED', 'media_sha256' => metadata.fetch(:sha256))
+    stored = Message.find(pending.fetch('message_id'))
+    expect(stored.attachments.count).to eq(1)
+    expect(Digest::SHA256.hexdigest(stored.attachments.first.file.download)).to eq(metadata.fetch(:sha256))
+    expect(stored).to have_attributes(content: 'Synthetic historical caption', created_at: Time.at(input.fetch(:occurred_at)).utc)
+    expect(enqueued_jobs.map { |job| job.fetch(:job) }.uniq).to eq([JrcBroker::HistorySyncMediaJob])
+  end
+
+  it 'rejects truncated or altered media without issuing a physical custody receipt' do
+    path = Rails.root.join('spec/assets/sample.png')
+    bytes = File.binread(path)
+    metadata = { reference_id: SecureRandom.uuid, media_type: 'IMAGE', filename: 'synthetic.png', mime_type: 'image/png',
+                 byte_size: bytes.bytesize, sha256: 'f' * 64 }
+    post "#{base}/media", params: { scope: scope.to_json, metadata: metadata.to_json,
+                                    file: Rack::Test::UploadedFile.new(path, 'image/png') }, headers: headers
+    expect(response).to have_http_status(:conflict)
+    expect(JrcBrokerHistoryMedia.where(account: account).count).to eq(0)
+  end
+
+  it 'recovers a missing private object and rechecks user revocation before completing historical media' do
+    path = Rails.root.join('spec/assets/sample.png')
+    bytes = File.binread(path)
+    descriptor = { reference_id: SecureRandom.uuid, media_type: 'IMAGE', filename: 'synthetic.png', mime_type: 'image/png',
+                   byte_size: bytes.bytesize, sha256: Digest::SHA256.hexdigest(bytes) }
+    upload = lambda do
+      post "#{base}/media", params: { scope: scope.to_json, metadata: descriptor.to_json,
+                                      file: Rack::Test::UploadedFile.new(path, 'image/png') }, headers: headers
+      expect(response).to have_http_status(:ok)
+    end
+    upload.call
+    input = bootstrap
+    post "#{base}/bootstrap", params: input, headers: headers, as: :json
+    message = scope.merge(broker_conversation_id: input.fetch(:broker_conversation_id), broker_message_id: SecureRandom.uuid,
+                          provider_message_id: 'SYNTHETIC-RECOVERY', content: descriptor.merge(type: 'MEDIA', caption: 'Synthetic recovery'),
+                          direction: 'incoming', participant_jid: nil, occurred_at: input.fetch(:occurred_at), status: 'delivered')
+    post "#{base}/messages", params: message, headers: headers, as: :json
+    expect(response.parsed_body).to include('state' => 'MEDIA_PENDING')
+    intent = JrcBrokerHistoryMedia.find_by!(reference_id: descriptor.fetch(:reference_id))
+    intent.blob.service.delete(intent.blob.key) # Deliberate loss of synthetic test bytes only.
+    JrcBroker::HistorySyncMediaJob.perform_now(intent.id)
+    expect(intent.reload).to have_attributes(state: 'ATTACH_PENDING', attempts: 1)
+    expect(intent.message.attachments).to be_empty
+    upload.call
+    account.account_users.find_by!(user: admin).update!(role: :agent)
+    JrcBroker::HistorySyncMediaJob.perform_now(intent.id)
+    expect(intent.reload.state).to eq('ATTACH_PENDING')
+    account.account_users.find_by!(user: admin).update!(role: :administrator)
+    JrcBroker::HistorySyncMediaJob.perform_now(intent.id)
+    expect(intent.reload.state).to eq('READY')
+    expect(intent.message.attachments.count).to eq(1)
+    expect(Digest::SHA256.hexdigest(intent.message.attachments.first.file.download)).to eq(descriptor.fetch(:sha256))
+  end
+
+  it 'shows proven resolved history in a member personal inbox even when remote routing is unavailable, preserving exclusive queues' do
+    create(:inbox_member, inbox: inbox, user: agent)
+    input = bootstrap
+    post "#{base}/bootstrap", params: input, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    historical_id = response.parsed_body.fetch('conversation_id')
+    url = "/api/v1/accounts/#{account.id}/conversations"
+    %w[me mine_or_shared].each do |filter|
+      get url, params: { assignee_type: filter, inbox_scope: 'member', status: 'all' }, headers: agent.create_new_auth_token
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body.dig('data', 'payload').pluck('id')).to include(historical_id)
+    end
+    account.update!(custom_attributes: { 'jrc_human_assignment' => { 'connections' => {
+                      inbox.id.to_s => { 'visibility' => 'assigned_only', 'supervisor_ids' => [admin.id] }
+                    } } })
+    get url, params: { assignee_type: 'me', inbox_scope: 'member', status: 'all' }, headers: agent.create_new_auth_token
+    expect(response.parsed_body.dig('data', 'payload').pluck('id')).not_to include(historical_id)
+  end
+
+  it 'revokes personal history proof after a receipt is deleted without depending on model callbacks' do
+    create(:inbox_member, inbox: inbox, user: agent)
+    input = bootstrap
+    post "#{base}/bootstrap", params: input, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    retained = response.parsed_body.fetch('conversation_id')
+    service = lambda {
+      Conversations::SharedInboxScope.new(conversations: account.conversations, account: account, user: agent, member_inboxes_only: true)
+    }
+    before = service.call.metadata.fetch(:historical_proof_revisions).fetch(inbox.id.to_s)
+    expect(service.call.perform.pluck(:display_id)).to include(retained)
+    JrcBrokerHistoryReceipt.where(inbox: inbox, record_kind: 'CHAT').delete_all
+    expect(service.call.metadata.fetch(:historical_proof_revisions).fetch(inbox.id.to_s)).not_to eq(before)
+    expect(service.call.perform.pluck(:display_id)).not_to include(retained)
+    expect { account.destroy! }.not_to raise_error
+  end
+
+  it 'rejects reacknowledging a stored intent after changing the destination revision' do
+    path = Rails.root.join('spec/assets/sample.png')
+    bytes = File.binread(path)
+    descriptor = { reference_id: SecureRandom.uuid, media_type: 'IMAGE', filename: 'synthetic.png', mime_type: 'image/png',
+                   byte_size: bytes.bytesize, sha256: Digest::SHA256.hexdigest(bytes) }
+    upload = lambda { |revision|
+      post "#{base}/media", params: { scope: scope.merge(destination_revision: revision).to_json, metadata: descriptor.to_json,
+                                      file: Rack::Test::UploadedFile.new(path, 'image/png') }, headers: headers
+    }
+    upload.call(1)
+    expect(response).to have_http_status(:ok)
+    JrcBrokerIntegration.find_by!(account: account).update!(destination_revision: 2)
+    upload.call(2)
+    expect(response).to have_http_status(:conflict)
+    expect(JrcBrokerHistoryMedia.find_by!(reference_id: descriptor.fetch(:reference_id))).to have_attributes(state: 'STORED', destination_revision: 1)
+  end
+
+  it 'does not inherit a replacement credential when the service token rotates on the same database row' do
+    path = Rails.root.join('spec/assets/sample.png')
+    bytes = File.binread(path)
+    descriptor = { reference_id: SecureRandom.uuid, media_type: 'IMAGE', filename: 'synthetic.png', mime_type: 'image/png',
+                   byte_size: bytes.bytesize, sha256: Digest::SHA256.hexdigest(bytes) }
+    post "#{base}/media", params: { scope: scope.to_json, metadata: descriptor.to_json,
+                                    file: Rack::Test::UploadedFile.new(path, 'image/png') }, headers: headers
+    expect(response).to have_http_status(:ok)
+    input = bootstrap
+    post "#{base}/bootstrap", params: input, headers: headers, as: :json
+    message = scope.merge(broker_conversation_id: input.fetch(:broker_conversation_id), broker_message_id: SecureRandom.uuid,
+                          provider_message_id: 'SYNTHETIC-TOKEN-ROTATION', content: descriptor.merge(type: 'MEDIA', caption: 'Synthetic token fence'),
+                          direction: 'incoming', participant_jid: nil, occurred_at: input.fetch(:occurred_at), status: 'delivered')
+    post "#{base}/messages", params: message, headers: headers, as: :json
+    expect(response.parsed_body).to include('state' => 'MEDIA_PENDING')
+    intent = JrcBrokerHistoryMedia.find_by!(reference_id: descriptor.fetch(:reference_id))
+    token_id = admin.access_token.id
+    admin.access_token.regenerate_token
+    expect(admin.access_token.id).to eq(token_id)
+    JrcBroker::HistorySyncMediaJob.perform_now(intent.id)
+    expect(intent.reload.state).to eq('ATTACH_PENDING')
+    expect(intent.message.attachments).to be_empty
+  end
+
   it 'advertises only implemented categories behind an explicit gate and the current destination revision' do
     get base, params: scope, headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body).to include('protocol' => 'jrc-history-sync/2', 'supports_text' => true,
-                                            'supports_groups' => true, 'supports_media' => false, 'destination_revision' => 1)
+                                            'supports_groups' => true, 'supports_media' => true, 'destination_revision' => 1)
     with_modified_env(JRC_HISTORY_SYNC_V2_ENABLED: 'false') do
       get base, params: scope, headers: headers
       expect(response).to have_http_status(:not_found)
@@ -392,3 +557,4 @@ RSpec.describe 'Broker history synchronization V2', type: :request do
       .to eq(messages: 1, message: old_message.merge('status' => 'delivered'), conversation: old_conversation, jobs: [])
   end
 end
+# rubocop:enable RSpec/MultipleExpectations

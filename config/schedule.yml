@@ -1,4 +1,9 @@
 # https://github.com/ondrejbartas/sidekiq-cron
+jrc_history_media_recovery_job:
+  cron: '* * * * *'
+  class: 'JrcBroker::HistorySyncMediaSchedulerJob'
+  queue: scheduled_jobs
+
 jrc_broker_inbox_sync_job:
   cron: '* * * * *'
   class: 'JrcBroker::InboxSyncSchedulerJob'

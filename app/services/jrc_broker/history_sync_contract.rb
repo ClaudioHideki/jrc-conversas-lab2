@@ -16,7 +16,9 @@ module JrcBroker::HistorySyncContract
     case value
     when Hash then "{#{value.sort.map { |key, item| "#{key.to_json}:#{canonical_json(item)}" }.join(',')}}"
     when Array then "[#{value.map { |item| canonical_json(item) }.join(',')}]"
-    else value.to_json
+    # ActiveSupport String#to_json escapes HTML/separators and differs from
+    # JSON.stringify. Protocol hashes use standard JSON UTF-8, not HTML-safe JSON.
+    else JSON.generate(value)
     end
   end
 
@@ -41,7 +43,7 @@ module JrcBroker::HistorySyncContract
     validate_ids!(input, %w[broker_conversation_id broker_message_id])
     validate_time!(input)
     valid = %w[incoming outgoing].include?(input['direction']) && %w[sent delivered read failed].include?(input['status']) &&
-            bounded_string?(input['provider_message_id'], 256) && text_content?(input['content'])
+            bounded_string?(input['provider_message_id'], 256) && (text_content?(input['content']) || media_content?(input['content']))
     raise ArgumentError, 'historical_message' unless valid
   end
 
@@ -59,6 +61,12 @@ module JrcBroker::HistorySyncContract
 
   def text_content?(content)
     content.is_a?(Hash) && content.keys.sort == %w[text type] && content['type'] == 'TEXT' && bounded_string?(content['text'], 4096)
+  end
+
+  def media_content?(content)
+    content.is_a?(Hash) && content['type'] == 'MEDIA' && content['caption'].is_a?(String) && content['caption'].length <= 4096 &&
+      content.keys.sort == (JrcBroker::HistorySyncMedia::KEYS + %w[type caption]).sort &&
+      JrcBroker::HistorySyncMedia.valid_descriptor?(content.except('type', 'caption'))
   end
 
   def individual_jid?(value)

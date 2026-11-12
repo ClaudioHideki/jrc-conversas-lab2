@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_11_170000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_12_120000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -9401,5 +9401,120 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_11_170000) do
   add_foreign_key "jrc_broker_history_receipts", "contacts", on_delete: :cascade
   add_foreign_key "jrc_broker_history_receipts", "conversations", on_delete: :cascade
   add_foreign_key "jrc_broker_history_receipts", "messages", on_delete: :cascade
+
+
+  create_table "jrc_broker_history_media", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "inbox_id", null: false
+    t.bigint "user_id"
+    t.bigint "access_token_id"
+    t.string "access_token_sha256", limit: 64, null: false
+    t.bigint "message_id"
+    t.bigint "receipt_id"
+    t.bigint "blob_id", null: false
+    t.uuid "organization_id", null: false
+    t.uuid "integration_id", null: false
+    t.uuid "instance_id", null: false
+    t.uuid "history_account_identity", null: false
+    t.uuid "reference_id", null: false
+    t.integer "destination_revision", null: false
+    t.jsonb "descriptor", null: false
+    t.string "descriptor_hash", limit: 64, null: false
+    t.string "state", default: "RESERVED", null: false
+    t.integer "attempts", default: 0, null: false
+    t.datetime "next_attempt_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.string "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["access_token_id"], name: "index_jrc_broker_history_media_on_access_token_id"
+    t.index ["account_id", "inbox_id", "integration_id", "history_account_identity", "reference_id"], name: "jrc_history_media_source_identity", unique: true
+    t.index ["account_id"], name: "index_jrc_broker_history_media_on_account_id"
+    t.index ["blob_id"], name: "index_jrc_broker_history_media_on_blob_id"
+    t.index ["inbox_id"], name: "index_jrc_broker_history_media_on_inbox_id"
+    t.index ["message_id"], name: "index_jrc_broker_history_media_on_message_id"
+    t.index ["message_id"], name: "jrc_history_media_message", unique: true, where: "(message_id IS NOT NULL)"
+    t.index ["next_attempt_at"], name: "jrc_history_media_pending", where: "((state)::text = 'ATTACH_PENDING'::text)"
+    t.index ["receipt_id"], name: "index_jrc_broker_history_media_on_receipt_id"
+    t.index ["user_id"], name: "index_jrc_broker_history_media_on_user_id"
+    t.check_constraint "(state::text = ANY (ARRAY['RESERVED'::character varying, 'STORED'::character varying]::text[])) AND message_id IS NULL AND receipt_id IS NULL OR (state::text = ANY (ARRAY['ATTACH_PENDING'::character varying, 'READY'::character varying]::text[])) AND message_id IS NOT NULL AND receipt_id IS NOT NULL", name: "jrc_history_media_attachment"
+    t.check_constraint "access_token_sha256::text ~ '^[a-f0-9]{64}$'::text", name: "jrc_history_media_token_fence"
+    t.check_constraint "descriptor_hash::text ~ '^[a-f0-9]{64}$'::text AND destination_revision > 0 AND attempts >= 0", name: "jrc_history_media_descriptor"
+    t.check_constraint "state::text = ANY (ARRAY['RESERVED'::character varying, 'STORED'::character varying, 'ATTACH_PENDING'::character varying, 'READY'::character varying]::text[])", name: "jrc_history_media_state"
+  end
+
+  create_table "jrc_broker_history_visibilities", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "inbox_id", null: false
+    t.bigint "revision", default: 0, null: false
+    t.index ["account_id"], name: "index_jrc_broker_history_visibilities_on_account_id"
+    t.index ["inbox_id"], name: "index_jrc_broker_history_visibilities_on_inbox_id", unique: true
+  end
+
+  add_foreign_key "jrc_broker_history_media", "access_tokens", on_delete: :nullify
+  add_foreign_key "jrc_broker_history_media", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_broker_history_media", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "jrc_broker_history_media", "inboxes", on_delete: :cascade
+  add_foreign_key "jrc_broker_history_media", "jrc_broker_history_receipts", column: "receipt_id", on_delete: :cascade
+  add_foreign_key "jrc_broker_history_media", "messages", on_delete: :cascade
+  add_foreign_key "jrc_broker_history_media", "users", on_delete: :nullify
+  add_foreign_key "jrc_broker_history_visibilities", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_broker_history_visibilities", "inboxes", on_delete: :cascade
+
+  execute <<~'JRC_SCHEMA_SQL_e1bdc55800f5'
+    ALTER TABLE "jrc_broker_history_media" DROP CONSTRAINT "jrc_history_media_attachment";
+  JRC_SCHEMA_SQL_e1bdc55800f5
+
+  execute <<~'JRC_SCHEMA_SQL_792543c59dba'
+    ALTER TABLE "jrc_broker_history_media" ADD CONSTRAINT "jrc_history_media_attachment" CHECK (((((state)::text = ANY ((ARRAY['RESERVED'::character varying, 'STORED'::character varying])::text[])) AND (message_id IS NULL) AND (receipt_id IS NULL)) OR (((state)::text = ANY ((ARRAY['ATTACH_PENDING'::character varying, 'READY'::character varying])::text[])) AND (message_id IS NOT NULL) AND (receipt_id IS NOT NULL))));
+  JRC_SCHEMA_SQL_792543c59dba
+
+  execute <<~'JRC_SCHEMA_SQL_4fa2916d9850'
+    ALTER TABLE "jrc_broker_history_media" DROP CONSTRAINT "jrc_history_media_descriptor";
+  JRC_SCHEMA_SQL_4fa2916d9850
+
+  execute <<~'JRC_SCHEMA_SQL_cffbea35a69d'
+    ALTER TABLE "jrc_broker_history_media" ADD CONSTRAINT "jrc_history_media_descriptor" CHECK ((((descriptor_hash)::text ~ '^[a-f0-9]{64}$'::text) AND (destination_revision > 0) AND (attempts >= 0)));
+  JRC_SCHEMA_SQL_cffbea35a69d
+
+  execute <<~'JRC_SCHEMA_SQL_775c7b1cc61a'
+    ALTER TABLE "jrc_broker_history_media" DROP CONSTRAINT "jrc_history_media_state";
+  JRC_SCHEMA_SQL_775c7b1cc61a
+
+  execute <<~'JRC_SCHEMA_SQL_88eb7f56e4e0'
+    ALTER TABLE "jrc_broker_history_media" ADD CONSTRAINT "jrc_history_media_state" CHECK (((state)::text = ANY ((ARRAY['RESERVED'::character varying, 'STORED'::character varying, 'ATTACH_PENDING'::character varying, 'READY'::character varying])::text[])));
+  JRC_SCHEMA_SQL_88eb7f56e4e0
+
+  execute <<~'JRC_SCHEMA_SQL_0a7b6c2a9be8'
+    ALTER TABLE "jrc_broker_history_media" DROP CONSTRAINT "jrc_history_media_token_fence";
+  JRC_SCHEMA_SQL_0a7b6c2a9be8
+
+  execute <<~'JRC_SCHEMA_SQL_4de66d55bcda'
+    ALTER TABLE "jrc_broker_history_media" ADD CONSTRAINT "jrc_history_media_token_fence" CHECK (((access_token_sha256)::text ~ '^[a-f0-9]{64}$'::text));
+  JRC_SCHEMA_SQL_4de66d55bcda
+
+  execute <<~'JRC_SCHEMA_SQL_7ad66d110289'
+    CREATE OR REPLACE FUNCTION public.jrc_history_visibility_revoke()
+     RETURNS trigger
+     LANGUAGE plpgsql
+     SET search_path TO 'pg_catalog', 'public'
+    AS $function$
+    BEGIN
+      IF OLD.record_kind = 'CHAT' AND EXISTS (
+        SELECT 1 FROM public.inboxes b JOIN public.accounts a ON a.id=b.account_id
+        WHERE b.id=OLD.inbox_id AND a.id=OLD.account_id
+      ) THEN
+        INSERT INTO public.jrc_broker_history_visibilities(account_id,inbox_id,revision)
+        VALUES(OLD.account_id,OLD.inbox_id,1)
+        ON CONFLICT(inbox_id) DO UPDATE SET revision=jrc_broker_history_visibilities.revision+1;
+      END IF;
+      RETURN OLD;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_7ad66d110289
+
+  execute <<~'JRC_SCHEMA_SQL_6f3efd2cc93b'
+    CREATE TRIGGER jrc_history_visibility_revoke AFTER DELETE ON jrc_broker_history_receipts FOR EACH ROW EXECUTE FUNCTION jrc_history_visibility_revoke();
+  JRC_SCHEMA_SQL_6f3efd2cc93b
+
 
 end

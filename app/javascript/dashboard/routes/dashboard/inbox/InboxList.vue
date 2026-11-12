@@ -42,6 +42,9 @@ const personalInboxView = computed(() =>
 const sharedScope = ref({ enabled: false, inbox_ids: [] });
 const memberInboxIds = ref([]);
 const admittedSharedConversations = ref(new Set());
+const historicalInboxIds = ref([]);
+const historicalProofRevisions = ref({});
+const admittedHistoricalConversations = ref(new Set());
 const supervisedInboxIds = ref([]);
 const voiceCalls = ref([]);
 const voiceLoading = ref(false);
@@ -160,11 +163,49 @@ const sharingIdentity = conversation =>
     conversation.meta?.assignee_type,
     conversation.meta?.team?.id,
   ]);
+const historicalIdentity = conversation =>
+  JSON.stringify([sharingIdentity(conversation), conversation.status]);
 
 const acceptSharedScope = scope => {
   memberInboxIds.value = Array.isArray(scope?.member_inbox_ids)
     ? scope.member_inbox_ids.filter(id => Number.isSafeInteger(id) && id > 0)
     : [];
+  historicalInboxIds.value = Array.isArray(scope?.historical_inbox_ids)
+    ? scope.historical_inbox_ids.filter(id => memberInboxIds.value.includes(id))
+    : [];
+  const historicalIds = Array.isArray(scope?.historical_conversation_ids)
+    ? scope.historical_conversation_ids.filter(
+        id => Number.isSafeInteger(id) && id > 0
+      )
+    : [];
+  const nextProofs = Object.fromEntries(
+    historicalInboxIds.value
+      .filter(id =>
+        /^[a-f0-9]{64}$/.test(scope?.historical_proof_revisions?.[id] || '')
+      )
+      .map(id => [id, scope.historical_proof_revisions[id]])
+  );
+  // Only page IDs proved by the backend are admitted. Realtime replacements
+  // must retain the same access-relevant identity and resolved state.
+  admittedHistoricalConversations.value = new Set(
+    allStatusConversations
+      .value({ status: statusFilter.value })
+      .filter(
+        conversation =>
+          conversation.status === 'resolved' &&
+          conversation.meta?.assignee_type !== 'AgentBot' &&
+          historicalInboxIds.value.includes(conversation.inbox_id) &&
+          nextProofs[conversation.inbox_id] &&
+          (historicalIds.includes(conversation.id) ||
+            (historicalProofRevisions.value[conversation.inbox_id] ===
+              nextProofs[conversation.inbox_id] &&
+              admittedHistoricalConversations.value.has(
+                historicalIdentity(conversation)
+              )))
+      )
+      .map(historicalIdentity)
+  );
+  historicalProofRevisions.value = nextProofs;
   supervisedInboxIds.value = Array.isArray(scope?.supervised_inbox_ids)
     ? scope.supervised_inbox_ids.filter(
         id => Number.isSafeInteger(id) && id > 0
@@ -263,9 +304,18 @@ const conversations = computed(() => {
         conversation,
         assigneeFilter.value,
         currentUser.value?.id,
-        admittedSharedConversations.value.has(sharingIdentity(conversation))
-          ? sharedScope.value.inbox_ids
-          : [],
+        [
+          ...(admittedSharedConversations.value.has(
+            sharingIdentity(conversation)
+          )
+            ? sharedScope.value.inbox_ids
+            : []),
+          ...(admittedHistoricalConversations.value.has(
+            historicalIdentity(conversation)
+          )
+            ? historicalInboxIds.value
+            : []),
+        ],
         personalInboxView.value
       )
     );
@@ -541,6 +591,9 @@ watch(
     sharedScope.value = { enabled: false, inbox_ids: [] };
     memberInboxIds.value = [];
     admittedSharedConversations.value = new Set();
+    historicalInboxIds.value = [];
+    historicalProofRevisions.value = {};
+    admittedHistoricalConversations.value = new Set();
     store.dispatch('clearSelectedState');
     store.dispatch('emptyAllConversations');
 

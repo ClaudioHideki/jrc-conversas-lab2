@@ -98,6 +98,87 @@ const mountInbox = () =>
   });
 
 describe('omnichannel inbox', () => {
+  it('shows only server-proven resolved history while remote live routing is unavailable', async () => {
+    const scope = {
+      enabled: false,
+      inbox_ids: [],
+      member_inbox_ids: [11],
+      historical_inbox_ids: [11],
+      historical_proof_revisions: { 11: 'a'.repeat(64) },
+      historical_conversation_ids: [901],
+    };
+    ConversationAPI.sharedContext.mockResolvedValue({
+      data: { meta: { shared_scope: scope } },
+    });
+    store.state.sharedScopeResult = scope;
+    store.state.conversationPayload = [
+      { id: 901, inbox_id: 11, status: 'resolved', meta: {} },
+    ];
+    const wrapper = mountInbox();
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).toEqual(['901']);
+    store.state.conversations.push({
+      id: 999,
+      inbox_id: 11,
+      status: 'resolved',
+      meta: {},
+    });
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).toEqual(['901']);
+    store.state.conversations[0].status = 'open';
+    await flushPromises();
+    expect(wrapper.findAll('[data-testid="conversation"]')).toHaveLength(0);
+  });
+  it('revokes cached historical rows when the server proof changes without losing unchanged pages', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    try {
+      const scope = {
+        enabled: false,
+        inbox_ids: [],
+        member_inbox_ids: [11],
+        historical_inbox_ids: [11],
+        historical_proof_revisions: { 11: 'a'.repeat(64) },
+        historical_conversation_ids: [901],
+      };
+      ConversationAPI.sharedContext.mockResolvedValue({
+        data: { meta: { shared_scope: scope } },
+      });
+      store.state.sharedScopeResult = scope;
+      store.state.conversationPayload = [
+        { id: 901, inbox_id: 11, status: 'resolved', meta: {} },
+      ];
+      const wrapper = mountInbox();
+      await flushPromises();
+      const { historical_conversation_ids: _page, ...metadata } = scope;
+      ConversationAPI.sharedContext.mockResolvedValue({
+        data: { meta: { shared_scope: metadata } },
+      });
+      await vi.advanceTimersByTimeAsync(15000);
+      await flushPromises();
+      expect(
+        wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+      ).toEqual(['901']);
+      ConversationAPI.sharedContext.mockResolvedValue({
+        data: {
+          meta: {
+            shared_scope: {
+              ...metadata,
+              historical_proof_revisions: { 11: 'b'.repeat(64) },
+            },
+          },
+        },
+      });
+      await vi.advanceTimersByTimeAsync(15000);
+      await flushPromises();
+      expect(wrapper.findAll('[data-testid="conversation"]')).toHaveLength(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it('keeps an explicit open selection in the URL when the history view is the default', async () => {
     const wrapper = mountInbox();
     await flushPromises();

@@ -48,8 +48,10 @@ class ConversationFinder
 
     filter_by_assignee_type
 
+    page = conversations
+
     {
-      conversations: conversations,
+      conversations: page,
       count: {
         mine_count: mine_count,
         assigned_count: assigned_count,
@@ -57,7 +59,7 @@ class ConversationFinder
         all_count: all_count,
         mine_or_shared_count: shared_count
       }.compact,
-      shared_scope: shared&.metadata
+      shared_scope: shared_page_metadata(shared, page)
     }.compact
   end
 
@@ -81,6 +83,13 @@ class ConversationFinder
   end
 
   private
+
+  def shared_page_metadata(shared, page)
+    metadata = shared&.metadata
+    return metadata unless shared && params[:inbox_scope] == 'member'
+
+    metadata.merge(historical_conversation_ids: shared.historical_page_ids(page))
+  end
 
   def set_up
     set_inboxes

@@ -37,7 +37,7 @@ class JrcBroker::HistorySyncMessages
 
   def matching_candidate?(message)
     expected = { 'inbox_id' => @scope.inbox.id, 'conversation_id' => @conversation.id, 'private' => false,
-                 'content_type' => 'text', 'message_type' => @input.fetch('direction'), 'content' => @input.dig('content', 'text') }
+                 'content_type' => 'text', 'message_type' => @input.fetch('direction'), 'content' => display_content }
     identity = history_metadata.except('jrc_broker_historical', 'jrc_broker_message_id')
     message.attributes.slice(*expected.keys) == expected && message.created_at.to_i == @input['occurred_at'] &&
       message.content_attributes.slice(*identity.keys) == identity && message.attachments.none?
@@ -55,10 +55,14 @@ class JrcBroker::HistorySyncMessages
     source = ['jrc-history-v2', @input.fetch('organization_id'), @input.fetch('history_account_identity'),
               @input.fetch('broker_message_id')].join(':')
     { account_id: @scope.account.id, inbox_id: @scope.inbox.id, conversation_id: @conversation.id, source_id: source,
-      content: @input.dig('content', 'text'), processed_message_content: @input.dig('content', 'text'),
+      content: display_content, processed_message_content: display_content,
       content_type: Message.content_types.fetch('text'), message_type: Message.message_types.fetch(@input.fetch('direction')),
       status: Message.statuses.fetch(@input.fetch('status')), private: false,
       sender_type: incoming ? 'Contact' : nil, sender_id: incoming ? @conversation.contact_id : nil,
       content_attributes: history_metadata, additional_attributes: {}, created_at: stamp, updated_at: stamp }
+  end
+
+  def display_content
+    @input.dig('content', @input.dig('content', 'type') == 'MEDIA' ? 'caption' : 'text')
   end
 end

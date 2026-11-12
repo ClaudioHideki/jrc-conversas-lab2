@@ -5,6 +5,8 @@ class JrcBroker::HistorySyncV2
 
   def initialize(account:, user:, access_token:)
     @authority = JrcFlowEffects::Authority.new(account: account, user: user, access_token: access_token)
+    @access_token_id = access_token&.id
+    @access_token_sha256 = access_token && Digest::SHA256.hexdigest(access_token.token)
   end
 
   def self.lock_key(value)
@@ -16,7 +18,8 @@ class JrcBroker::HistorySyncV2
     validate_keys!(input, SCOPE_KEYS)
     Message.transaction do
       scope = scope!(inbox_id, input)
-      envelope(scope, input).merge(supports_text: true, supports_groups: true, supports_media: false, supports_silent_bootstrap: true)
+      envelope(scope, input).merge(supports_text: true, supports_groups: true, supports_media: true,
+                                   max_media_bytes: JrcBroker::HistorySyncMedia::MAX_BYTES, supports_silent_bootstrap: true)
     end
   end
 
@@ -43,15 +46,20 @@ class JrcBroker::HistorySyncV2
 
   def call(inbox_id, input)
     validate_message!(input)
-    Message.transaction do
+    result = Message.transaction do
       scope = scope!(inbox_id, input)
       route = find_receipt(scope, input, 'CHAT', input.fetch('broker_conversation_id'))
       raise ActiveRecord::RecordNotFound unless route
 
       validate_participant!(route.recipient, input)
       receipt = receive_message(scope, input, route)
+      JrcBroker::HistorySyncMedia.bind!(scope, input, receipt)
       receipt_payload(scope, input, receipt)
     end
+    # The durable ATTACH_PENDING row, not this enqueue, owns completion.
+    media = JrcBrokerHistoryMedia.joins(:receipt).find_by(jrc_broker_history_receipts: { receipt_id: result[:receipt_id] }, state: 'ATTACH_PENDING')
+    JrcBroker::HistorySyncMediaJob.perform_later(media.id) if media
+    result
   end
 
   def receipt(inbox_id, receipt_id, input)
@@ -61,6 +69,14 @@ class JrcBroker::HistorySyncV2
       scope = scope!(inbox_id, input)
       receipt = receipt_scope(scope, input).find_by!(receipt_id: receipt_id)
       receipt_payload(scope, input, receipt)
+    end
+  end
+
+  def with_scope(inbox_id, input)
+    validate_keys!(input, SCOPE_KEYS)
+    Message.transaction do
+      scope = scope!(inbox_id, input)
+      yield(scope, @authority.user, @access_token_id, @access_token_sha256)
     end
   end
 
@@ -125,10 +141,13 @@ class JrcBroker::HistorySyncV2
   end
 
   def receipt_payload(scope, input, receipt)
-    envelope(scope, input).merge(receipt_id: receipt.receipt_id, request_hash: receipt.request_hash, state: 'PERSISTED',
+    media = JrcBrokerHistoryMedia.find_by(receipt_id: receipt.id)
+    envelope(scope, input).merge(receipt_id: receipt.receipt_id, request_hash: receipt.request_hash,
+                                 state: media && media.state != 'READY' ? 'MEDIA_PENDING' : 'PERSISTED',
                                  conversation_id: receipt.conversation.display_id, contact_id: receipt.contact_id,
                                  source_id: receipt.conversation.contact_inbox.source_id,
                                  broker_conversation_id: receipt.broker_conversation_id,
                                  broker_message_id: receipt.record_kind == 'MESSAGE' ? receipt.source_id : nil, message_id: receipt.message_id)
+                          .merge(media&.state == 'READY' ? { media_sha256: media.descriptor.fetch('sha256') } : {})
   end
 end
