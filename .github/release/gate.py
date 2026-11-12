@@ -151,6 +151,16 @@ def apt(log):
     return mirror
 
 
+def report_kind(name):
+    base = PurePosixPath(name).name
+    if base.endswith(".json") and ("rspec" in base or "schema-regression" in base
+                                  or base == "whatsapp-native.json"):
+        return "rspec"
+    if base == "ag-vue-results.json" or base.endswith("vitest.json") or base == "whatsapp-ui-results.json":
+        return "vue"
+    return None
+
+
 def migration(z, product_sha):
     r = json.loads(member(z, "ag-migration-audit-result.json"))
     require(r["source_sha"] == product_sha and r["production_changed"] is False
@@ -255,9 +265,9 @@ def execute(lock, infra, product, output):
             result["logical_identity"] = key
             result["examples"] = m["examples"]
         for name in z.namelist():
-            if name.endswith(".json") and ("rspec" in name or "schema-regression" in name):
+            if report_kind(name) == "rspec":
                 result["reports"].append({"path": name, "examples": rspec(json.loads(z.read(name)))})
-            elif name.endswith(("ag-vue-results.json", "vitest.json", "whatsapp-vue-results.json")):
+            elif report_kind(name) == "vue":
                 result["reports"].append({"path": name, "vue_examples": vue(json.loads(z.read(name)))})
             elif name.endswith("/results.json") and "voice-v4-e2e" in name:
                 report = json.loads(z.read(name));s = report["stats"]

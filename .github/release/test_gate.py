@@ -133,6 +133,17 @@ class EvidenceGateTest(unittest.TestCase):
         with self.assertRaises(gate.GateError):
             gate.vue(r)
 
+    def test_actual_whatsapp_report_names_use_strict_validators(self):
+        self.assertEqual(gate.report_kind("whatsapp-native.json"), "rspec")
+        self.assertEqual(gate.report_kind("whatsapp-ui-results.json"), "vue")
+        self.assertEqual(gate.report_kind("tmp/ag-rspec.json"), "rspec")
+        self.assertEqual(gate.report_kind("tmp/voice-v4-vitest.json"), "vue")
+        self.assertIsNone(gate.report_kind("unknown.json"))
+        bad = copy.deepcopy(self.report)
+        bad["summary"]["errors_outside_of_examples_count"] = 1
+        with self.assertRaises(gate.GateError):
+            gate.rspec(bad)
+
     def test_artifact_identity_positive(self):
         self.assertEqual(len(gate.artifact_identity(self.lock, self.artifacts)), 44)
 
