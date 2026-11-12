@@ -32,7 +32,7 @@ class JrcServiceDesk::UiCapabilityProjection
       'lifecycle_policies' => { index: policy, publish: policy }, 'configuration' => configuration,
       'operational_rules' => JrcServiceDesk::OperationalRuleContract::KINDS
         .index_with { |kind| JrcServiceDesk::OperationalRuleAccess.allowed?(@context, kind) },
-      'operational_reports' => { index: @context.reporting_allowed? } }
+      'operational_reports' => { index: @context.reporting_allowed?, export: @context.reporting_allowed?(permission: 'reports_export') } }
   end
 
   def configuration
@@ -40,11 +40,12 @@ class JrcServiceDesk::UiCapabilityProjection
   end
 
   def operations
+    surveys = @context.capability?(:tickets_view) && @context.capability?(:customers_view) &&
+              JrcRelationship::ModulePolicy.new(@context.to_h, @context.account).access?
     services = { index: @context.capability?(:lookups_view), create: @context.capability?(:services_manage) }
     { 'services' => services, 'catalog' => services, 'reports' => { index: @context.capability?(:dashboard_view) },
       'sla' => { index: @context.capability?(:dashboard_view) && @context.capability?(:sla_view) },
-      'surveys' => { index: @context.capability?(:tickets_view) && @context.capability?(:customers_view) &&
-        JrcRelationship::ModulePolicy.new(@context.to_h, @context.account).access? },
+      'surveys' => { index: surveys, export: surveys && @context.reporting_allowed?(permission: 'reports_export') },
       'automations' => { index: @context.capability?(:settings_view) &&
         %i[lifecycle_policies_manage notifications_manage queues_manage priorities_manage incidents_manage]
           .any? { |key| @context.capability?(key) } },

@@ -5,13 +5,15 @@ class JrcServiceDesk::OperationalReportMetrics
     @query = query
     @relation = query.relation
     @context = query.context
+    @observed_at = Time.current
   end
 
   def call
     phases = @relation.joins(:status).group('jrc_service_desk_ticket_statuses.phase').count
     total = @relation.count
     completed = phases.fetch('resolved', 0) + phases.fetch('closed', 0)
-    { observed_at: Time.current.iso8601(6), cohort: 'authorized_tickets_opened_in_half_open_period', total: total,
+    { observed_at: @observed_at.iso8601(6), cohort: 'authorized_tickets_opened_in_half_open_period', total: total,
+      satisfaction: JrcServiceDesk::ReportSurveyScope.summary(@query),
       resolution_rate: total.positive? ? 100.0 * completed / total : nil,
       by_unit: grouped('unit_id'), by_service: grouped('service_id'), by_origin: grouped('origin_channel'),
       by_category: grouped('category_id'), by_priority: grouped('priority_id'), by_status: grouped('status_id'), by_team: grouped('team_id'),
@@ -54,6 +56,20 @@ class JrcServiceDesk::OperationalReportMetrics
       definition: 'observed_reopen_events_in_period_for_ticket_cohort_not_FCR' }
   end
 
+  def near_due_count(clocks)
+    configured = false
+    count = 0
+    clocks.includes(sla_cycle: [:sla_snapshot, :lifecycle_policy_version]).find_each do |clock|
+      settings = clock.sla_cycle.lifecycle_policy_version.definition.dig('sla', 'escalation_policy') || {}
+      policy = JrcServiceDesk::ClockEscalationPolicy.new(settings)
+      configured ||= policy.enabled? && policy.thresholds.any? { |row| row['percent'] < 100 }
+      next unless clock.state == 'running'
+
+      count += 1 if JrcServiceDesk::ClockProjection.new(clock, now: @observed_at).call[:deadline_state] == 'near_due'
+    end
+    configured ? count : nil
+  end
+
   def sla_metrics
     return nil unless @context.capability?(:sla_view)
 
@@ -67,7 +83,9 @@ class JrcServiceDesk::OperationalReportMetrics
       [kind, { observed: selected.count, completed: completed.count,
                mean_elapsed_seconds: completed.average(:elapsed_seconds)&.to_f,
                completed_breached: completed.where('achieved_at > due_at').count,
-               running_overdue: JrcServiceDesk::ClockBreachQuery.count(selected),
+               running_overdue: JrcServiceDesk::ClockBreachQuery.count(selected, now: @observed_at),
+               running_near_due: near_due_count(selected),
+               unmeasured_tickets: @query.relation_for('sla_view').count - selected.distinct.count(:ticket_id),
                basis: 'latest_native_cycle_clock_elapsed_seconds', missing_is_not_zero: true }]
     end
   end

@@ -4,7 +4,7 @@ require 'time'
 
 # Reports use an explicit unit and intersect the native Ticket/Conversation scopes.
 class JrcServiceDesk::OperationalReportQuery
-  FIELDS = %w[unit_id service_id company_id inbox_id channel_type category_id priority_id status_id team_id account_user_id from to page
+  FIELDS = %w[unit_id service_id company_id inbox_id channel_type category_id priority_id status_id queue_id team_id account_user_id from to page
               per_page].freeze
   attr_reader :context, :unit, :relation, :filters, :from, :to, :activity_relation
 
@@ -72,7 +72,7 @@ class JrcServiceDesk::OperationalReportQuery
 
   def apply_filters!
     { 'service_id' => JrcServiceDesk::Service, 'category_id' => JrcServiceDesk::Category,
-      'priority_id' => JrcServiceDesk::Priority, 'status_id' => JrcServiceDesk::TicketStatus }.each do |field, model|
+      'priority_id' => JrcServiceDesk::Priority, 'queue_id' => JrcServiceDesk::Queue, 'status_id' => JrcServiceDesk::TicketStatus }.each do |field, model|
       next unless filters[field]
 
       id = JrcServiceDesk::Input.id(filters[field])

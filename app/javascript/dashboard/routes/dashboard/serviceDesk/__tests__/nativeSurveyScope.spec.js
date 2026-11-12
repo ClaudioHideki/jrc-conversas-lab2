@@ -29,6 +29,7 @@ vi.mock('../composables/useServiceDesk', () => ({
 }));
 import ModulePage from '../../jrcRelationship/ModulePage.vue';
 import NativeSurveysView from '../views/NativeSurveysView.vue';
+import SatisfactionDashboard from '../components/SatisfactionDashboard.vue';
 import CatalogView from '../views/CatalogView.vue';
 let wrapper;
 beforeEach(() => {
@@ -84,6 +85,11 @@ describe('native Service Desk surveys and contract lookup reuse', () => {
     expect(wrapper.findComponent(ModulePage).exists()).toBe(false);
     wrapper.findComponent({ name: 'ScopeBar' }).vm.$emit('update:unitId', '10');
     await flushPromises();
+    expect(wrapper.findComponent(SatisfactionDashboard).props('unitId')).toBe(
+      '10'
+    );
+    wrapper.findComponent(SatisfactionDashboard).vm.$emit('responses');
+    await flushPromises();
     expect(wrapper.findComponent(ModulePage).props('fixedSurveyScope')).toEqual(
       fixed('10')
     );
@@ -98,7 +104,7 @@ describe('native Service Desk surveys and contract lookup reuse', () => {
     wrapper = shallowMount(NativeSurveysView);
     wrapper.findComponent({ name: 'ScopeBar' }).vm.$emit('update:unitId', '10');
     await flushPromises();
-    expect(wrapper.findComponent(ModulePage).exists()).toBe(true);
+    expect(wrapper.findComponent(SatisfactionDashboard).exists()).toBe(true);
     mocks.session.state.context.capabilities.surveys.index = false;
     await flushPromises();
     expect(wrapper.findComponent(ModulePage).exists()).toBe(false);

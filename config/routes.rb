@@ -180,6 +180,11 @@ Rails.application.routes.draw do
             get 'intake_options', to: 'operational_rules#intake_options'
             get 'operational_reports', to: 'operational_reports#show'
             get 'operational_reports/export', to: 'operational_reports#export'
+            resources :report_exports, only: [:index, :create] do
+              get :download, on: :member
+            end
+            get 'satisfaction_reports', to: 'satisfaction_reports#show'
+            get 'satisfaction_reports/export', to: 'satisfaction_reports#export'
             get 'recurrence_suggestions', to: 'incident_batches#suggestions'
             post 'incidents/:incident_id/batch_preview', to: 'incident_batches#preview'
             post 'incidents/:incident_id/batches', to: 'incident_batches#create'

@@ -3053,6 +3053,90 @@
       "sla_title": "SLA do período",
       "all_services": "Todos os serviços",
       "resolution_rate_help": "Chamados abertos no período atualmente resolvidos ou encerrados, divididos pelo total de aberturas desse grupo."
+    },
+    "EXPORT_FILES": {
+      "title": "Exportar relatório",
+      "help": "O arquivo usará os mesmos filtros aplicados e o conjunto completo de {count} chamados autorizados. O processamento é realizado no servidor.",
+      "formats": {
+        "csv_summary": "CSV resumido",
+        "csv_detailed": "CSV detalhado",
+        "xlsx": "Excel completo (.xlsx)",
+        "pdf": "PDF executivo"
+      },
+      "limit": "Esta exportação possui limite de {limit} registros.",
+      "narrow": "Acima do limite, selecione um período menor ou aplique filtros adicionais. Nenhum resultado é truncado silenciosamente.",
+      "schedule_later": "Agendar exportação: disponível em etapa futura, com regras de recorrência e destinatários autorizados. Nenhum envio automático está ativado.",
+      "history": "Exportações desta unidade",
+      "download": "Baixar arquivo",
+      "retention": "Arquivos disponíveis por até 24 horas. O download exige autenticação e uma nova conferência das permissões.",
+      "states": {
+        "queued": "Na fila",
+        "processing": "Processando",
+        "ready": "Disponível",
+        "failed": "Falha",
+        "expired": "Expirado"
+      },
+      "errors": {
+        "unavailable": "Não foi possível concluir a solicitação. Confira os filtros e tente novamente.",
+        "access_changed": "O acesso ou o conjunto autorizado mudou. Atualize o relatório e gere outro arquivo.",
+        "report_changed": "O relatório mudou desde a consulta. Atualize os dados antes de exportar.",
+        "limit_or_criteria": "O limite ou os critérios não permitem esta exportação. Reduza o período e tente novamente.",
+        "generation_failed": "O arquivo não pôde ser gerado. Tente novamente ou consulte o administrador.",
+        "queue_unavailable": "A fila de processamento está indisponível. Tente novamente ou consulte o administrador."
+      },
+      "save_query": "Salvar / abrir consulta",
+      "saved_local": "Os critérios são salvos somente neste navegador para seu usuário. Ao abrir a consulta, as permissões são verificadas novamente.",
+      "query_name": "Nome da consulta",
+      "storage_failed": "Não foi possível acessar o armazenamento deste navegador.",
+      "action": "Exportar"
+    },
+    "SATISFACTION": {
+      "subtitle": "Acompanhe a satisfação dos clientes com o atendimento do Service Desk.",
+      "overview": "Visão geral",
+      "filters": "Filtros da pesquisa",
+      "from": "De",
+      "to": "Até (inclusive)",
+      "type": "Tipo de pesquisa",
+      "all": "Todos",
+      "period_basis": "Critério do período",
+      "cohort": "Coorte de inscrição",
+      "response_period": "Data da resposta",
+      "basis_help": "O período da coorte considera a inscrição da pesquisa. Por data de resposta, os indicadores de envio ficam indisponíveis quando não há uma coorte comparável. Sem período, o gráfico mostra até 90 dias.",
+      "export": "Exportar respostas CSV",
+      "unavailable": "Não foi possível consultar a pesquisa. Confira os critérios, o acesso à unidade e tente novamente.",
+      "export_failed": "Não foi possível exportar. O limite é de 10.000 respostas; reduza o período e confira suas permissões.",
+      "metrics": {
+        "sent": "Pesquisas enviadas",
+        "delivered": "Entregas confirmadas",
+        "responses": "Respostas recebidas",
+        "response_rate": "Taxa de resposta",
+        "csat": "CSAT médio",
+        "nps": "NPS"
+      },
+      "delivery_help": "Envios e entregas exigem registro real. Links públicos não são contados como entregues. A taxa de resposta usa inscrições elegíveis, sem presumir entrega.",
+      "denominator": "Base da taxa: {count} inscrições elegíveis.",
+      "trend": "Evolução da satisfação (CSAT)",
+      "distribution": "Distribuição das avaliações (CSAT)",
+      "services": "Serviços com menor satisfação",
+      "no_data": "Não há dados autorizados para este recorte.",
+      "show_data": "Ver valores por dia",
+      "normalized": "CSAT normalizado na escala de 1 a 5. As faixas do gráfico arredondam a nota; a média mantém a precisão original.",
+      "unclassified": "Sem serviço",
+      "recent": "Respostas recentes",
+      "all_responses": "Ver todas as respostas",
+      "columns": {
+        "date": "Data da resposta",
+        "company": "Cliente",
+        "ticket": "Chamado",
+        "service": "Serviço",
+        "rating": "Avaliação",
+        "comment": "Comentário"
+      },
+      "view": "Ver resposta",
+      "scale": "{value} / 5",
+      "scope_help": "Selecione a unidade para consultar as pesquisas autorizadas.",
+      "responses_tab": "Respostas",
+      "models_rules": "Modelos e regras"
     }
   },
   "PORTAL": {

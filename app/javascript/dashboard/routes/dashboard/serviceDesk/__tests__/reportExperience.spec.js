@@ -111,7 +111,7 @@ describe('Report windows and exports preserve the current workspace', () => {
     await click('Resumo por empresa');
     expect(wrapper.find('dialog').attributes('open')).toBe('');
     expect(wrapper.find('[data-report-data]').exists()).toBe(true);
-    await click(messages.JRC_SERVICE_DESK.REPORT_EXPERIENCE.export_view);
+    await click(messages.JRC_SERVICE_DESK.EXPORT_FILES.action);
     expect(mocks.export).toHaveBeenCalledTimes(1);
     await wrapper.find('dialog').trigger('cancel');
     expect(wrapper.find('dialog').exists()).toBe(false);

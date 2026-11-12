@@ -3,6 +3,8 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import KpiCard from './KpiCard.vue';
+import ReportExportMenu from './ReportExportMenu.vue';
+import SavedReportQueries from './SavedReportQueries.vue';
 import { downloadCsv } from '../helpers/csvExport';
 import Pagination from 'dashboard/components-next/pagination/PaginationFooter.vue';
 import API from 'dashboard/api/serviceDeskOperationalRules';
@@ -43,6 +45,7 @@ const fields = [
   'category_id',
   'priority_id',
   'status_id',
+  'queue_id',
   'team_id',
   'account_user_id',
   'from',
@@ -50,6 +53,7 @@ const fields = [
 ];
 const filters = reactive(Object.fromEntries(fields.map(key => [key, ''])));
 const result = ref(null);
+const exportMenu = ref(null);
 const customerAllowed = computed(
   () =>
     masterAllowed.value &&
@@ -110,7 +114,12 @@ const load = async (targetPage = 1) => {
     );
     if (!items.every(row => row.unit_id === lease.unit))
       throw new Error('Foreign unit');
-    result.value = { metrics, items, meta: payload.meta };
+    result.value = {
+      metrics,
+      items,
+      meta: payload.meta,
+      limits: payload.export_limits || {},
+    };
     page.value = targetPage;
   } catch {
     if (scope.live(lease)) {
@@ -121,31 +130,7 @@ const load = async (targetPage = 1) => {
     if (scope.live(lease)) busy.value = false;
   }
 };
-const exportTickets = async () => {
-  if (busy.value) return;
-  const lease = scope.begin();
-  if (!lease) return;
-  busy.value = true;
-  try {
-    const blob = await API.export(
-      lease.context.account_id,
-      lease.unit,
-      reportFilters({ ...filters }),
-      lease.signal
-    );
-    if (!scope.live(lease)) return;
-    const href = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = href;
-    link.download = 'service-desk-tickets.csv';
-    link.click();
-    window.setTimeout(() => URL.revokeObjectURL(href), 1000);
-  } catch {
-    if (scope.live(lease)) feedback.value = 'unavailable';
-  } finally {
-    if (scope.live(lease)) busy.value = false;
-  }
-};
+const exportTickets = () => exportMenu.value?.openMenu();
 function dimensionName(dimension, value) {
   const name = namedReportValue(
     dimension,
@@ -180,31 +165,15 @@ const visibleDimensions = computed(() =>
     : reportDimensions
 );
 const canExport = computed(
-  () => !!result.value && !busy.value && scope.allowed.value
+  () =>
+    !!result.value &&
+    !busy.value &&
+    scope.allowed.value &&
+    scope.session.state.context?.capabilities?.operational_reports?.export ===
+      true
 );
 const exportCsv = () => {
-  if (!canExport.value) return;
-  if (resultTab.value === 'results') {
-    exportTickets();
-    return;
-  }
-  downloadCsv(
-    [
-      [
-        t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.field'),
-        t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.value'),
-        t('JRC_SERVICE_DESK.COMPLETION.report_total_short'),
-      ],
-      ...visibleDimensions.value.flatMap(key =>
-        (result.value.metrics[key]?.items || []).map(row => [
-          t(`JRC_SERVICE_DESK.COMPLETION.dimensions.${key}`),
-          dimensionName(key, row.id),
-          row.count,
-        ])
-      ),
-    ],
-    'service-desk-resumo.csv'
-  );
+  if (canExport.value) exportTickets();
 };
 const localDates = reactive({ from: '', to: '' });
 watch([scope.identity, unitId], () => {
@@ -296,6 +265,21 @@ const cards = computed(() => {
     },
   ];
 });
+const loadSaved = row => {
+  unitId.value = row.unit_id;
+  fields.forEach(key => {
+    filters[key] = row.filters[key] || '';
+  });
+  ['from', 'to'].forEach(key => {
+    const date = filters[key] && new Date(filters[key]);
+    localDates[key] = date
+      ? new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+          .toISOString()
+          .slice(0, 16)
+      : '';
+  });
+  load(1);
+};
 defineExpose({ canExport, exportCsv });
 </script>
 
@@ -305,6 +289,19 @@ defineExpose({ canExport, exportCsv });
     class="grid gap-5"
     data-testid="operational-report"
   >
+    <SavedReportQueries
+      :unit-id="unitId"
+      :filters="{ ...filters }"
+      @load="loadSaved"
+    />
+    <ReportExportMenu
+      v-if="result"
+      ref="exportMenu"
+      :unit-id="unitId"
+      :filters="{ ...filters }"
+      :total="result.meta.total"
+      :limits="result.limits"
+    />
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
       <KpiCard
         v-for="card in cards"
@@ -385,8 +382,8 @@ defineExpose({ canExport, exportCsv });
             type="button"
             variant="outline"
             icon="i-lucide-download"
-            :disabled="busy || !scope.allowed.value"
-            :label="t('JRC_SERVICE_DESK.COMPLETION.export')"
+            :disabled="!canExport"
+            :label="t('JRC_SERVICE_DESK.EXPORT_FILES.action')"
             @click="exportTickets"
           />
         </div>
@@ -463,7 +460,7 @@ defineExpose({ canExport, exportCsv });
               variant="outline"
               icon="i-lucide-download"
               :disabled="!canExport"
-              :label="t('JRC_SERVICE_DESK.COMPLETION.export')"
+              :label="t('JRC_SERVICE_DESK.EXPORT_FILES.action')"
               @click="exportCsv"
             />
           </template>

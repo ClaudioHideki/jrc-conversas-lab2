@@ -3053,6 +3053,90 @@
       "sla_title": "Period SLA",
       "all_services": "All services",
       "resolution_rate_help": "Tickets opened in the period that are currently resolved or closed, divided by all openings in that cohort."
+    },
+    "EXPORT_FILES": {
+      "title": "Export report",
+      "help": "The file uses the applied filters and the complete set of {count} authorized tickets. Processing runs on the server.",
+      "formats": {
+        "csv_summary": "Summary CSV",
+        "csv_detailed": "Detailed CSV",
+        "xlsx": "Complete Excel (.xlsx)",
+        "pdf": "Executive PDF"
+      },
+      "limit": "This export has a limit of {limit} records.",
+      "narrow": "Above the limit, choose a shorter period or add filters. Results are never silently truncated.",
+      "schedule_later": "Scheduled export: planned for a future stage, with recurrence rules and authorized recipients. No automatic delivery is enabled.",
+      "history": "Exports for this unit",
+      "download": "Download file",
+      "retention": "Files are available for up to 24 hours. Download requires authentication and a fresh permission check.",
+      "states": {
+        "queued": "Queued",
+        "processing": "Processing",
+        "ready": "Ready",
+        "failed": "Failed",
+        "expired": "Expired"
+      },
+      "errors": {
+        "unavailable": "The request could not be completed. Review the filters and retry.",
+        "access_changed": "Access or the authorized dataset changed. Refresh the report and generate another file.",
+        "report_changed": "The report changed since your query. Refresh before exporting.",
+        "limit_or_criteria": "The limit or criteria do not allow this export. Narrow the period and retry.",
+        "generation_failed": "The file could not be generated. Retry or contact your administrator.",
+        "queue_unavailable": "The processing queue is unavailable. Retry or contact your administrator."
+      },
+      "save_query": "Save / open query",
+      "saved_local": "Criteria are saved only in this browser for your user. Opening a query rechecks permissions.",
+      "query_name": "Query name",
+      "storage_failed": "Browser storage is unavailable.",
+      "action": "Export"
+    },
+    "SATISFACTION": {
+      "subtitle": "Track customer satisfaction with Service Desk support.",
+      "overview": "Overview",
+      "filters": "Survey filters",
+      "from": "From",
+      "to": "Through (inclusive)",
+      "type": "Survey type",
+      "all": "All",
+      "period_basis": "Period basis",
+      "cohort": "Enrollment cohort",
+      "response_period": "Response date",
+      "basis_help": "Cohort periods use enrollment time. Delivery metrics are unavailable for response-date periods without a comparable cohort. Without a period, the chart shows up to 90 days.",
+      "export": "Export response CSV",
+      "unavailable": "The survey report could not be loaded. Review criteria, unit access and retry.",
+      "export_failed": "Export failed. The limit is 10,000 responses; narrow the period and check your permissions.",
+      "metrics": {
+        "sent": "Surveys sent",
+        "delivered": "Confirmed deliveries",
+        "responses": "Responses received",
+        "response_rate": "Response rate",
+        "csat": "Average CSAT",
+        "nps": "NPS"
+      },
+      "delivery_help": "Sent and delivered require real evidence. Public links are not counted as delivered. Response rate uses eligible enrollments without assuming delivery.",
+      "denominator": "Rate denominator: {count} eligible enrollments.",
+      "trend": "Satisfaction trend (CSAT)",
+      "distribution": "Rating distribution (CSAT)",
+      "services": "Lowest satisfaction services",
+      "no_data": "No authorized data is available for these criteria.",
+      "show_data": "View daily values",
+      "normalized": "CSAT is normalized to 1–5. Chart buckets round scores; the average preserves original precision.",
+      "unclassified": "No service",
+      "recent": "Recent responses",
+      "all_responses": "View all responses",
+      "columns": {
+        "date": "Response date",
+        "company": "Customer",
+        "ticket": "Ticket",
+        "service": "Service",
+        "rating": "Rating",
+        "comment": "Comment"
+      },
+      "view": "View response",
+      "scale": "{value} / 5",
+      "scope_help": "Choose a unit to view its authorized surveys.",
+      "responses_tab": "Responses",
+      "models_rules": "Models and rules"
     }
   },
   "PORTAL": {

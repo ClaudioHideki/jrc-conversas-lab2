@@ -124,6 +124,9 @@ const open = ticketId =>
       v-if="selection"
       :title="selection.title"
       :can-export="exportReady"
+      :export-label="
+        mode === 'operational' ? t('JRC_SERVICE_DESK.EXPORT_FILES.action') : ''
+      "
       @close="closeReport"
       @export="exportReport"
     >

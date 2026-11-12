@@ -99,6 +99,8 @@ describe('report SLA coverage and completed-clock denominator', () => {
           stubs: {
             Panel: { template: '<section><slot /></section>' },
             ScopeBar: true,
+            SavedReportQueries: true,
+            ReportExportMenu: true,
             LookupSelect: true,
             ServiceSelect: true,
             CompanyPicker: true,

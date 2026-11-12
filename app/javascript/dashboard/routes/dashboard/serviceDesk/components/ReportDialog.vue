@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n';
 defineProps({
   title: { type: String, required: true },
   canExport: { type: Boolean, default: false },
+  showExport: { type: Boolean, default: true },
+  exportLabel: { type: String, default: '' },
 });
 const emit = defineEmits(['close', 'export']);
 const { t } = useI18n();
@@ -33,13 +35,14 @@ onMounted(() => dialog.value.showModal());
       </h2>
       <div class="flex items-center gap-2">
         <button
+          v-if="showExport"
           type="button"
           :disabled="!canExport"
           class="flex items-center gap-2 rounded-xl border border-white/40 bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/20 disabled:opacity-40"
           @click="emit('export')"
         >
           <span aria-hidden="true" class="i-lucide-download size-4" />{{
-            t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.export_view')
+            exportLabel || t('JRC_SERVICE_DESK.REPORT_EXPERIENCE.export_view')
           }}
         </button>
         <button

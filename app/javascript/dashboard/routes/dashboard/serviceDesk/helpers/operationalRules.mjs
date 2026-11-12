@@ -218,6 +218,7 @@ export function reportFilters(values) {
     'category_id',
     'priority_id',
     'status_id',
+    'queue_id',
     'team_id',
     'account_user_id',
     'from',
