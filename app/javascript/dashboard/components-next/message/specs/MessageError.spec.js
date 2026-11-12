@@ -39,35 +39,48 @@ describe('WhatsApp failure explanation', () => {
   );
 
   it.each([
-    ['131049: Synthetic restriction', 'marketing'],
-    ['131026: Synthetic undeliverable', 'destination'],
+    ['131049: Synthetic restriction', 0],
+    ['131026: Synthetic undeliverable', 0],
+    ['131049: Synthetic restriction', 2 * 86400],
+    ['131026: Synthetic undeliverable', 2 * 86400],
   ])(
-    'keeps the technical error %s and explains the required review after reload',
-    (error, explanation) => {
+    'allows a manual template retry for %s at age %s without an inline explanation',
+    (error, age) => {
+      const context = useMessageContext();
+      context.createdAt.value = Math.floor(Date.now() / 1000) - age;
+      context.additionalAttributes.value = {
+        templateParams: { name: 'synthetic_retry' },
+      };
       const wrapper = mount(MessageError, { props: { error } });
       expect(wrapper.text()).toContain(error);
-      expect(wrapper.text().toLowerCase()).toContain(explanation);
-      expect(wrapper.find('button').exists()).toBe(false);
+      expect(wrapper.text()).toContain('Failed to send');
+      expect(wrapper.find('[role="status"]').exists()).toBe(false);
+      expect(wrapper.find('button').exists()).toBe(true);
+      wrapper.find('button').trigger('click');
+      expect(wrapper.emitted('retry')).toHaveLength(1);
     }
   );
 
-  it('shows a denied retry explanation while retaining the provider error', () => {
+  it('keeps failure details in the tooltip without adding a paragraph to the conversation', () => {
     const context = useMessageContext();
     context.meta.value = { error: 'Retry blocked for review' };
     const wrapper = mount(MessageError, {
       props: { error: 'Synthetic timeout' },
     });
     expect(wrapper.text()).toContain('Synthetic timeout');
-    expect(wrapper.text()).toContain('Retry blocked for review');
+    expect(wrapper.text()).toContain('Failed to send');
+    expect(wrapper.text()).not.toContain('Retry blocked for review');
+    expect(wrapper.find('[role="status"]').exists()).toBe(false);
   });
 
-  it('explains a Meta experiment restriction while keeping manual retry available', () => {
+  it('keeps manual experiment retry available without adding a policy explanation', () => {
     const wrapper = mount(MessageError, {
       props: { error: '130472: Synthetic experiment' },
     });
     expect(wrapper.text()).toContain('130472');
     expect(wrapper.text().toLowerCase()).toContain('experiment');
-    expect(wrapper.text()).toContain('Meta');
+    expect(wrapper.text()).not.toContain('Meta');
+    expect(wrapper.find('[role="status"]').exists()).toBe(false);
     expect(wrapper.find('button').exists()).toBe(true);
   });
 

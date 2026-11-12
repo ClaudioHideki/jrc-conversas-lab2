@@ -1,9 +1,9 @@
 require 'digest'
 
 class Whatsapp::RetryPolicy
-  VERSION = 'cloud-template-manual-v2'.freeze
+  VERSION = 'cloud-template-manual-v3'.freeze
   TRANSIENT_CODES = %w[130429 131016].freeze
-  MANUAL_RETRY_CODES = (TRANSIENT_CODES + %w[130472]).freeze
+  MANUAL_RETRY_CODES = (TRANSIENT_CODES + %w[130472 131049 131026]).freeze
 
   def self.error_code(message)
     message.external_error.to_s[/\A\s*(\d{6})(?=\s*:|\s*\z)/, 1]
@@ -18,9 +18,6 @@ class Whatsapp::RetryPolicy
 
   def self.reason(message, actor, cooldown: true)
     code = error_code(message)
-    return 'marketing_restriction' if code == '131049'
-    return 'destination_verification_required' if code == '131026'
-
     channel = message.inbox.channel
     return 'retry_unavailable' unless channel.is_a?(Channel::Whatsapp) && channel.provider == 'whatsapp_cloud'
     return 'retry_unavailable' unless message.failed? && message.outgoing? && message.content_type == 'text' && message.source_id.present? && !message.private?

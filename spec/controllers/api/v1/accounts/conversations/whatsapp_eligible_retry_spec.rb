@@ -123,16 +123,18 @@ RSpec.describe 'WhatsApp Cloud eligible retry', type: :request do
     expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
   end
 
-  it 'allows one operator-requested retry of a Meta experiment rejection' do
-    message.update!(external_error: '130472: Synthetic experiment', updated_at: 2.minutes.ago)
-    original = message.reload.attributes.deep_dup
-    2.times { post retry_path, headers: agent.create_new_auth_token, as: :json }
-    expect(response).to have_http_status(:accepted)
-    expect(response.parsed_body.dig('retry', 'status')).to eq('already_requested')
-    expect(WhatsappRetryAttempt.where(original_message: message).count).to eq(1)
-    expect(WhatsappRetryAttempt.last.prior_error_code).to eq('130472')
-    expect(message.reload.attributes).to eq(original)
-    expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
+  %w[130472 131049 131026].each do |code|
+    it "allows one operator-requested retry of a #{code} rejection" do
+      message.update!(external_error: "#{code}: Synthetic rejection", updated_at: 2.minutes.ago)
+      original = message.reload.attributes.deep_dup
+      2.times { post retry_path, headers: agent.create_new_auth_token, as: :json }
+      expect(response).to have_http_status(:accepted)
+      expect(response.parsed_body.dig('retry', 'status')).to eq('already_requested')
+      expect(WhatsappRetryAttempt.where(original_message: message).count).to eq(1)
+      expect(WhatsappRetryAttempt.last.prior_error_code).to eq(code)
+      expect(message.reload.attributes).to eq(original)
+      expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
+    end
   end
 
   context 'when a template has a static text header' do
@@ -142,9 +144,9 @@ RSpec.describe 'WhatsApp Cloud eligible retry', type: :request do
       channel.update!(message_templates: [data])
     end
 
-    %w[delivered failed].each do |receipt_status|
-      it "submits one manual experiment retry and records the #{receipt_status} receipt without changing the original" do
-        message.update!(external_error: '130472: Synthetic experiment', updated_at: 2.minutes.ago)
+    %w[130472 131049 131026].product(%w[delivered failed]).each do |code, receipt_status|
+      it "submits one manual #{code} retry and records the #{receipt_status} receipt without changing the original" do
+        message.update!(external_error: "#{code}: Synthetic rejection", updated_at: 2.minutes.ago)
         original = message.reload.attributes.deep_dup
         stub_request(:get, %r{https://graph.facebook.com/v14.0/.*/message_templates}).to_return(
           status: 200, body: { data: channel.reload.message_templates }.to_json, headers: { 'Content-Type' => 'application/json' }
@@ -161,14 +163,14 @@ RSpec.describe 'WhatsApp Cloud eligible retry', type: :request do
         2.times { WhatsappRetryJob.perform_now(attempt.id) }
         expect(attempt.reload.state).to eq('accepted')
         receipt = { id: 'wamid.synthetic-static-header', status: receipt_status }
-        receipt[:errors] = [{ code: 130_472, title: 'Synthetic experiment' }] if receipt_status == 'failed'
+        receipt[:errors] = [{ code: code.to_i, title: 'Synthetic rejection' }] if receipt_status == 'failed'
         callback = { entry: [{ changes: [{ value: { statuses: [receipt] } }] }] }.with_indifferent_access
         Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
         WhatsappRetryRecoveryJob.perform_now
         WhatsappRetryJob.perform_now(attempt.id)
         expect(attempt.reload.state).to eq(receipt_status)
         expect(attempt.message.reload).to have_attributes(status: receipt_status, source_id: 'wamid.synthetic-static-header')
-        expect(attempt.message.external_error).to start_with('130472:') if receipt_status == 'failed'
+        expect(attempt.message.external_error).to start_with("#{code}:") if receipt_status == 'failed'
         expect(request).to have_been_requested.once
         expect(message.reload.attributes).to eq(original)
       end

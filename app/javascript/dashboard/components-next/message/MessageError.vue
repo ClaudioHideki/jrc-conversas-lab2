@@ -18,7 +18,6 @@ const {
   createdAt,
   content,
   attachments,
-  meta,
   isWhatsappCloud,
   additionalAttributes,
 } = useMessageContext();
@@ -43,27 +42,18 @@ const attemptLabel = computed(() => {
 
 const policyCode = computed(() =>
   isWhatsappCloud.value
-    ? props.error.match(/^\s*(131049|131026|130472)(?=\s*:|\s*$)/)?.[1]
+    ? props.error.match(/^\s*(131049|131026)(?=\s*:|\s*$)/)?.[1]
     : null
 );
-const retryExplanation = computed(() => {
-  if (policyCode.value === '131049')
-    return t('CHAT_LIST.WHATSAPP_RETRY.MARKETING');
-  if (policyCode.value === '131026')
-    return t('CHAT_LIST.WHATSAPP_RETRY.DESTINATION');
-  if (policyCode.value === '130472')
-    return meta.value.error || t('CHAT_LIST.WHATSAPP_RETRY.EXPERIMENT');
-  return meta.value.error || '';
-});
 
 const canRetry = computed(() => {
   if (attempt.value) return false;
-  if (policyCode.value && policyCode.value !== '130472') return false;
   const hasContent = content.value !== null;
   const hasAttachments = attachments.value && attachments.value.length > 0;
   const hasTemplate =
     isWhatsappCloud.value &&
     Boolean(additionalAttributes?.value?.templateParams?.name);
+  if (policyCode.value && !hasTemplate) return false;
   return (
     (!hasOneDayPassed(createdAt.value) || hasTemplate) &&
     (hasContent || hasAttachments)
@@ -96,9 +86,6 @@ const canRetry = computed(() => {
         {{ error }}
       </div>
     </div>
-    <span v-if="retryExplanation" role="status" class="select-text">
-      {{ retryExplanation }}
-    </span>
     <button
       v-if="canRetry"
       type="button"
