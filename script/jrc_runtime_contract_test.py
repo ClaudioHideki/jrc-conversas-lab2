@@ -16,13 +16,25 @@ def original(path):
     return subprocess.check_output(["git", "show", BASE + ":" + path], cwd=ROOT).decode()
 
 
+def verify_reviewed_lock(lock, baseline):
+    expected = baseline.replace("ruby 3.4.4p34", "ruby 3.4.12p148")
+    assert expected.count("    scout_apm (5.3.3)\n") == 1
+    assert expected.count("\n  scout_apm\n") == 1
+    expected = expected.replace("    scout_apm (5.3.3)\n", "    scout_apm (5.7.0)\n")
+    expected = expected.replace("\n  scout_apm\n", "\n  scout_apm (= 5.7.0)\n")
+    assert lock == expected, "Only the reviewed Scout 5.7.0 update and Ruby runtime change are permitted"
+
+
 def verify():
     assert (ROOT / ".ruby-version").read_text().strip() == "3.4.12"
     assert (ROOT / ".nvmrc").read_text().strip() == "24.22.3"
     assert "ruby '3.4.12'" in (ROOT / "Gemfile").read_text()
     lock = (ROOT / "Gemfile.lock").read_text()
     assert "\n   ruby 3.4.12p148\n" in lock
-    assert lock.replace("ruby 3.4.12p148", "ruby 3.4.4p34") == original("Gemfile.lock")
+    verify_reviewed_lock(lock, original("Gemfile.lock"))
+    expected_gemfile = original("Gemfile").replace("ruby '3.4.4'", "ruby '3.4.12'").replace(
+        "gem 'scout_apm', require: false", "gem 'scout_apm', '5.7.0', require: false")
+    assert (ROOT / "Gemfile").read_text() == expected_gemfile
     assert (ROOT / "pnpm-lock.yaml").read_text() == original("pnpm-lock.yaml")
     docker = (ROOT / "docker/Dockerfile").read_text()
     ruby_base = "docker.io/library/ruby:3.4.12-alpine3.24@sha256:" + RUBY_DIGEST
@@ -52,7 +64,10 @@ def verify():
     assert (ROOT / ".dockerignore").read_text() == original(".dockerignore")
     assert "test\n" in (ROOT / ".dockerignore").read_text()
     return {"passed": True, "base_sha": BASE, "ruby": "3.4.12", "patchlevel": 148,
-            "node": "24.22.3", "alpine": "3.24", "gem_versions_unchanged": True,
+            "node": "24.22.3", "alpine": "3.24", "gem_versions_unchanged": False,
+            "all_other_gem_versions_unchanged": True,
+            "reviewed_gem_changes": [{"gem": "scout_apm", "from": "5.3.3", "to": "5.7.0",
+                "upstream_fix": "https://github.com/scoutapp/scout_apm_ruby/pull/552"}],
             "pnpm_lock_unchanged": True, "functional_sources_unchanged": False,
             "all_other_functional_sources_unchanged": True, "migrations_unchanged": True,
             "reviewed_functional_fixes": fixes,
