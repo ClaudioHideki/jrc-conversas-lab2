@@ -4,6 +4,7 @@ require 'digest'
 require 'open3'
 require 'securerandom'
 require 'fileutils'
+require_relative 'receipt'
 
 out = ENV.fetch('RUNTIME_SMOKE_OUTPUT')
 nonce = ENV.fetch('RUNTIME_SMOKE_NONCE')
@@ -116,9 +117,9 @@ begin
     end
     raise 'Sidekiq receipt missing' unless receipt
     data = JSON.parse(receipt)
-    raise 'Wrong worker source' unless data.fetch('product_sha') == ENV.fetch('RUNTIME_PRODUCT_SHA') && data.fetch('pid') > 1
-    persisted = ActiveRecord::Base.connection.select_value("SELECT details->>'product_sha' FROM jrc_runtime_smoke_receipts WHERE nonce=" + ActiveRecord::Base.connection.quote(nonce))
-    raise 'Real database persistence missing' unless persisted == ENV.fetch('RUNTIME_PRODUCT_SHA')
+    persisted = ActiveRecord::Base.connection.select_value("SELECT details::text FROM jrc_runtime_smoke_receipts WHERE nonce=" + ActiveRecord::Base.connection.quote(nonce))
+    RuntimeSmokeReceipt.verify!(data: data, persisted: persisted && JSON.parse(persisted),
+                                product_sha: ENV.fetch('RUNTIME_PRODUCT_SHA'), nonce: nonce)
     report[:checks] << 'real_sidekiq_process_redis_postgresql_persistence'
   else
     raise 'Unknown probe phase'
