@@ -18,7 +18,20 @@ connection = ActiveRecord::Base.connection
 marker_path = ENV.fetch('JRC_AG_FIXTURE_RECEIPT')
 admission = JSON.parse(Rails.root.join('docs/jrc_consolidation/ag_historical_migration_admission_20261111.json').read)
 raise 'Pinned main admission mismatch' unless admission.fetch('base_sha') == base
-admitted_versions = admission.fetch('migrations').map { |entry| entry.fetch('version') }.sort
+forward = JSON.parse(Rails.root.join('docs/jrc_consolidation/final_forward_migrations_20261112.json').read)
+raise 'Forward migration base mismatch' unless forward.fetch('candidate_base') == '6195f7d21a0781cd5c5cf4d13bd73a497bb5a452'
+historical_versions = admission.fetch('migrations').map { |entry| entry.fetch('version') }
+forward_versions = forward.fetch('migrations').map do |entry|
+  path = entry.fetch('path')
+  version = entry.fetch('version')
+  raise 'Unexpected forward migration path' unless path.match?(%r{\Adb/migrate/\d{14}_[a-z0-9_]+\.rb\z}) && File.basename(path).start_with?(version)
+  raise 'Forward migration must follow audited history' unless version > historical_versions.max
+  raise 'Forward migration content changed' unless Digest::SHA256.file(Rails.root.join(path)).hexdigest == entry.fetch('sha256')
+
+  version
+end
+admitted_versions = (historical_versions + forward_versions).sort
+raise 'Duplicate admitted migration version' unless admitted_versions.uniq == admitted_versions
 case ARGV.fetch(0)
 when 'load_main'
   raise 'Existing database contents must remain intact' unless connection.tables.empty?

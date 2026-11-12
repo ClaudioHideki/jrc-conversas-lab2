@@ -15,13 +15,19 @@ on:
         type: string
 permissions:
   contents: read
+
+env:
+  ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: '11111111111111111111111111111111'
+  ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: '22222222222222222222222222222222'
+  ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: '33333333333333333333333333333333'
+
 jobs:
   regression:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     services:
       postgres:
-        image: pgvector/pgvector:pg16
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
         env:
           POSTGRES_DB: precimech_hotfix_test
           POSTGRES_USER: postgres
@@ -31,7 +37,7 @@ jobs:
           --health-cmd "pg_isready -U postgres -d precimech_hotfix_test"
           --health-interval 5s --health-timeout 5s --health-retries 20
       redis:
-        image: redis:7.4-alpine
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
         ports: ['6379:6379']
     env:
       RAILS_ENV: test
@@ -81,6 +87,16 @@ jobs:
           spec/services/whatsapp/oneoff_campaign_service_spec.rb
           spec/services/whatsapp/incoming_message_whatsapp_cloud_service_spec.rb
           spec/jobs/send_reply_job_spec.rb
+          --format progress --format json --out /tmp/whatsapp-native.json
+      - name: Require positive zero-error native report
+        run: >-
+          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort "Empty, failed or pending native gate: #{path}" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/whatsapp-native.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: whatsapp-native-${{ github.sha }}
+          path: /tmp/whatsapp-native.json
+          if-no-files-found: error
       - name: Ensure source remains clean
         run: git diff --exit-code
   frontend:
@@ -105,6 +121,7 @@ jobs:
           app/javascript/dashboard/store/modules/specs/conversations/whatsappRetry.spec.js
           app/javascript/dashboard/components-next/message/specs/MessageError.spec.js
           --maxWorkers=2 --no-file-parallelism
+          --reporter=default --reporter=json --outputFile=/tmp/whatsapp-ui-results.json
       - name: Lint dos arquivos frontend do retry
         run: >-
           pnpm exec eslint
@@ -113,3 +130,10 @@ jobs:
           app/javascript/dashboard/store/modules/conversations/actions.js
           app/javascript/dashboard/components-next/message/specs/MessageError.spec.js
           app/javascript/dashboard/store/modules/specs/conversations/whatsappRetry.spec.js
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: whatsapp-ui-${{ github.sha }}
+          path: /tmp/whatsapp-ui-results.json
+          if-no-files-found: error

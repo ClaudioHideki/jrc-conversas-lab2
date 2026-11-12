@@ -9,12 +9,16 @@ import crm from 'dashboard/i18n/locale/en/crm.json';
 const mocks = vi.hoisted(() => ({
   session: null,
   requesterContext: vi.fn(),
+  relationshipChannels: vi.fn(),
   access: null,
 }));
 vi.mock('../../composables/useServiceDesk', () => ({
   useServiceDesk: () => mocks.session,
 }));
 vi.mock('dashboard/api/serviceDesk', () => ({ default: mocks }));
+vi.mock('dashboard/api/jrcRelationship', () => ({
+  default: { channels: mocks.relationshipChannels },
+}));
 vi.mock('dashboard/routes/dashboard/jrcCustomers/useCustomerMaster', () => ({
   useCustomerMaster: () => ({ canAccess: computed(() => mocks.access.value) }),
 }));
@@ -28,6 +32,7 @@ let wrapper;
 let router;
 beforeEach(() => {
   mocks.access = ref(true);
+  mocks.relationshipChannels.mockReset();
   mocks.session = {
     accountId: ref('1'),
     userId: ref('7'),
@@ -173,3 +178,42 @@ it.each(['account', 'user', 'role'])(
     expect(wrapper.findComponent(Quick).props('customerContext')).toBeNull();
   }
 );
+
+it('keeps employee-only intake isolated from master and relationship URL seeds', async () => {
+  mocks.session.state.context.units[0].employee_only = true;
+  await render({
+    master_company_id: '80',
+    master_contact_id: '33',
+    relationship_assignment_id: '44',
+    requester_id: '33',
+  });
+  expect(wrapper.find('internal-ticket-form-stub').exists()).toBe(true);
+  expect(wrapper.findComponent(Quick).exists()).toBe(false);
+  expect(mocks.requesterContext).not.toHaveBeenCalled();
+  expect(mocks.relationshipChannels).not.toHaveBeenCalled();
+});
+it('discards a pending master response across an employee-only profile transition', async () => {
+  let finish;
+  mocks.requesterContext.mockImplementation(
+    () =>
+      new Promise(resolve => {
+        finish = resolve;
+      })
+  );
+  await render();
+  wrapper.findComponent(Quick).vm.$emit('unitChange', '10');
+  await flushPromises();
+  const finishOld = finish;
+  mocks.session.state.context.units[0].employee_only = true;
+  await flushPromises();
+  expect(wrapper.find('internal-ticket-form-stub').exists()).toBe(true);
+  mocks.session.state.context.units[0].employee_only = false;
+  await flushPromises();
+  finishOld({
+    contract_version: 1,
+    account_id: '1',
+    person: { id: 33, company_id: 80, requester_eligible: true },
+  });
+  await flushPromises();
+  expect(wrapper.findComponent(Quick).props('customerContext')).toBeNull();
+});
