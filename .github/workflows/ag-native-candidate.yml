@@ -1,647 +1,102 @@
-name: A-G consolidated native candidate (no publication)
+name: Runtime candidate release evidence gate (no image or publication)
 
 on:
-  push:
-    branches: [codex/lab2-ag-consolidada-20261110, codex/lab2-ag-atualizacoes-20261112, codex/runtime-alpine324-20261112, codex/runtime-alpine324-numbering-20261112]
   workflow_dispatch:
     inputs:
-      expected_validation_sha:
-        description: 'Exact immutable consolidated SHA authorized for tests'
+      expected_infrastructure_sha:
+        description: Full SHA of the authorized release infrastructure
         type: string
         required: true
-      build_candidate:
-        description: 'Execute one guarded consolidated build only after explicit user authorization'
-        type: boolean
-        default: false
-      expected_build_sha:
-        description: 'Full SHA explicitly authorized for the consolidated build; separate from d8d7c960'
+      expected_product_sha:
+        description: Approved immutable product SHA
         type: string
-        default: ''
+        required: true
 
 permissions:
   contents: read
-
-# Synthetic encryption keys belong only to disposable CI databases. They allow
-# the native MFA regression to execute; no real installation keys are used.
-env:
-  ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: '11111111111111111111111111111111'
-  ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: '22222222222222222222222222222222'
-  ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: '33333333333333333333333333333333'
+  actions: read
 
 concurrency:
-  group: ag-native-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-evidence-runtime-20261112
+  cancel-in-progress: false
 
 jobs:
-  identities:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version-file: .nvmrc
-      - name: Verify exact source for the authorized validation
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          EXPECTED_VALIDATION_SHA: ${{ inputs.expected_validation_sha }}
-        shell: bash
-        run: |
-          [[ "$EXPECTED_VALIDATION_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test "$(git rev-parse HEAD)" = "$EXPECTED_VALIDATION_SHA"
-      - name: Validate integrated workflow syntax before native dependencies
-        shell: bash
-        run: |
-          test "$GITHUB_ACTIONS" = true
-          test "$RUNNER_ENVIRONMENT" = github-hosted
-          test "$GITHUB_REPOSITORY" = ClaudioHideki/jrc-conversas-lab2
-          url='https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz'
-          archive="$RUNNER_TEMP/ci17-actionlint.tar.gz"
-          curl --proto '=https' --proto-redir '=https' --location --fail --silent --show-error --connect-timeout 10 --max-time 60 --output "$archive" "$url"
-          printf '%s  %s\n' '8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8' "$archive" | sha256sum -c -
-          mkdir "$RUNNER_TEMP/ci17-linter"
-          tar -xzf "$archive" -C "$RUNNER_TEMP/ci17-linter" actionlint
-          "$RUNNER_TEMP/ci17-linter/actionlint" .github/workflows/ag-native-candidate.yml .github/workflows/projects-portal-candidate.yml .github/workflows/precimech-hotfix-tests.yml .github/workflows/voice-v4-candidate.yml
-      - run: git merge-base --is-ancestor d8a83b824b11cc68ddbbce7c79681f368051fb70 HEAD
-      - name: Verify disposable APT helper syntax and refusal outside owned CI
-        run: |
-          bash -n .github/scripts/jrc_ci_apt_setup.sh
-          if GITHUB_ACTIONS=false bash .github/scripts/jrc_ci_apt_setup.sh; then exit 1; fi
-          if GITHUB_REPOSITORY=unrelated/repository bash .github/scripts/jrc_ci_apt_setup.sh; then exit 1; fi
-      - name: Test HTTPS mirror selection with isolated simulated curl and APT
-        run: python3 -B .github/scripts/jrc_ci_apt_setup_test.py
-      - name: Prove declared runtime and unchanged functional source
-        run: python3 -B script/jrc_runtime_contract_test.py /tmp/runtime-contract.json
-      - name: Preserve runtime preparation contract
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: runtime-contract-${{ github.sha }}
-          path: /tmp/runtime-contract.json
-          if-no-files-found: error
-      - run: node --test script/validate_ag_migration_identity.test.mjs
-      - run: node --test script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
-      - run: python3 script/jrc_ag_native_plan_test.py
-      - run: python3 script/jrc_ag_catalog_compare_test.py
-      - run: python3 script/jrc_ag_guarded_frontend_build_test.py
-      - run: python3 script/jrc_ag_guarded_image_build_test.py
-      # Known identity collisions must be resolved with a tested history-adoption plan.
-      # Never mark the current combined tree as database-ready while this gate fails.
-      - run: node script/validate_ag_migration_identity.mjs
-
-  incremental-lint:
-    needs: identities
+  evidence-gate:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.12'
-          bundler: 2.5.16
-          bundler-cache: true
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version-file: .nvmrc
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - run: pnpm install --frozen-lockfile
-      - name: Validate complete consolidated sources and the exact historical import
-        run: >-
-          node script/validate_changed_source.mjs d8a83b824b11cc68ddbbce7c79681f368051fb70
-          --historical-admission docs/jrc_consolidation/ag_historical_migration_admission_20261111.json
-      - name: Same complete increment lint as the native Projects and Portal gate
-        shell: bash
-        run: |
-          baseline=35976b08077035ee79843b07ad02c0389d002f09
-          git merge-base --is-ancestor "$baseline" HEAD
-          mapfile -t ruby_files < <(git diff --name-only --diff-filter=ACMR "$baseline" HEAD -- '*.rb')
-          bundle exec rubocop --force-exclusion --only Lint --format simple "${ruby_files[@]}"
-          mapfile -t ui_files < <(git diff --name-only --diff-filter=ACMR "$baseline" HEAD -- app/javascript | grep -E '\.(js|vue)$')
-          pnpm exec eslint "${ui_files[@]}"
-      - run: git diff --exit-code
-
-  migration-admission:
-    needs: [identities, incremental-lint, runtime-compatibility]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: disposable-test-only
-        ports: ['5432:5432']
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
-      redis:
-        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
-        ports: ['6379:6379']
     env:
-      RAILS_ENV: test
-      FRONTEND_URL: https://host.example.test
-      POSTGRES_HOST: jrc-rel-v2-pg-20261101
-      POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: disposable-test-only
-      POSTGRES_DATABASE: jrc_rel_v2_candidate_test
-      REDIS_URL: redis://127.0.0.1:6379/15
-      SECRET_KEY_BASE: synthetic-ag-ci-not-a-production-secret
-      BUNDLE_FROZEN: 'true'
-      SCHEMA: /tmp/ag-fresh-schema.rb
-      JRC_AG_FIXTURE_RECEIPT: /tmp/ag-fixture-receipt.json
-      JRC_SD_CONCURRENCY: '1'
-      JRC_BO_TEST_SOCKET_DIRECTORY: /run/jrc-ag-ci-av
-      JRC_REVIEWED_CONCURRENCY: '1'
-      DB_POOL_SIZE: '10'
-      TZ: UTC
+      PYTHONDONTWRITEBYTECODE: '1'
+      EXPECTED_INFRASTRUCTURE_SHA: ${{ inputs.expected_infrastructure_sha }}
+      EXPECTED_PRODUCT_SHA: ${{ inputs.expected_product_sha }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Checkout immutable infrastructure
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify dispatch identity before any verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_INFRASTRUCTURE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$GITHUB_SHA" = "$EXPECTED_INFRASTRUCTURE_SHA"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_INFRASTRUCTURE_SHA"
+          test "$EXPECTED_PRODUCT_SHA" = cabfac0807404295f8405fadbe2255239c0c6719
+          test "$GITHUB_REF_NAME" = ci/release-gate-runtime-20261112
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+      - name: Validate workflow with checksum-pinned actionlint
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/release-actionlint.tar.gz"
+          curl --proto '=https' --proto-redir '=https' --location --fail --silent --show-error --connect-timeout 10 --max-time 60 \
+            -o "$archive" https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+          printf '%s  %s\n' 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8 "$archive" | sha256sum -c -
+          mkdir "$RUNNER_TEMP/release-linter"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/release-linter" actionlint
+          "$RUNNER_TEMP/release-linter/actionlint" .github/workflows/ag-native-candidate.yml
+      - name: Syntax and denial tests of the release gate
+        env:
+          GATE_TEST_REPORT: ${{ runner.temp }}/gate-tests.json
+        run: |
+          python3 -B -c "import ast,pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('.github/release').glob('*.py')]"
+          python3 -B .github/release/test_gate.py
+      - name: Checkout approved product without infrastructure overlay
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: cabfac0807404295f8405fadbe2255239c0c6719
+          path: product
           persist-credentials: false
           fetch-depth: 0
-      - name: Prove disposable service; legacy spec alias exists only on this ephemeral runner
-        shell: bash
+      - name: Validate all modified product workflows and runtime contract
+        working-directory: product
+        run: |
+          "$RUNNER_TEMP/release-linter/actionlint" .github/workflows/ag-native-candidate.yml .github/workflows/backoffice-flow.yml .github/workflows/broker-customer-candidate.yml .github/workflows/build-ghcr.yml .github/workflows/campaign-workflow-candidate.yml .github/workflows/contacts-native.yml .github/workflows/flow-broker-candidate.yml .github/workflows/nico-broker-candidate.yml .github/workflows/nico-capacity-native.yml .github/workflows/nico-legacy-reservations-native.yml .github/workflows/precimech-hotfix-tests.yml .github/workflows/projects-candidate.yml .github/workflows/projects-portal-candidate.yml .github/workflows/sd-contact-softphone-native.yml .github/workflows/service-desk-global-native.yml .github/workflows/voice-v4-candidate.yml .github/workflows/whatsapp-connections-candidate.yml
+          python3 -B script/jrc_runtime_contract_test.py
+      - name: Configure declared Node for original migration protection tests
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: product/.nvmrc
+      - name: Preserve original migration identity and history protections
+        working-directory: product
+        run: |
+          node script/validate_ag_migration_identity.mjs
+          node --test script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
+      - name: Verify exact native run and all immutable evidence
         env:
-          JRC_AG_POSTGRES_SERVICE_ID: ${{ job.services.postgres.id }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          test "$GITHUB_ACTIONS" = true
-          test "$RUNNER_ENVIRONMENT" = github-hosted
-          docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{.Id}} {{.Config.Image}}'
-          test "$(docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{json .HostConfig.Binds}}')" = null
-          echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
-          echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
-          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/jrc-ag-ci-av
-          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.12'
-          bundler: 2.5.16
-          bundler-cache: true
-      - name: Prove fresh, pinned-main upgrade and real schema reload on three new databases
-        shell: bash
-        run: |
-          bundle exec rails db:create db:migrate
-          bundle exec rails db:migrate
-          bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
-          bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
-          bundle exec rails db:schema:dump
-          JRC_AG_CATALOG_OUTPUT=/tmp/ag-fresh-catalog.json bundle exec rails runner script/jrc_ag_ci_fixture.rb catalog
-          POSTGRES_DATABASE=jrc_jornada_candidate_test bundle exec rails db:create
-          POSTGRES_DATABASE=jrc_jornada_candidate_test JRC_AG_POPULATED_UPGRADE=1 bundle exec rails runner script/jrc_ag_ci_fixture.rb load_main
-          POSTGRES_DATABASE=jrc_jornada_candidate_test SCHEMA=/tmp/ag-upgrade-schema.rb bundle exec rails db:migrate
-          POSTGRES_DATABASE=jrc_jornada_candidate_test SCHEMA=/tmp/ag-upgrade-schema.rb bundle exec rails db:migrate
-          POSTGRES_DATABASE=jrc_jornada_candidate_test bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
-          POSTGRES_DATABASE=jrc_jornada_candidate_test bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
-          POSTGRES_DATABASE=jrc_jornada_candidate_test JRC_AG_CATALOG_OUTPUT=/tmp/ag-upgrade-catalog.json bundle exec rails runner script/jrc_ag_ci_fixture.rb catalog
-          POSTGRES_DATABASE=jrc_four_domains_schema_test bundle exec rails db:create db:schema:load
-          POSTGRES_DATABASE=jrc_four_domains_schema_test bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
-          POSTGRES_DATABASE=jrc_four_domains_schema_test JRC_AG_FIXTURE_RECEIPT=/tmp/ag-reload-receipt.json bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
-          POSTGRES_DATABASE=jrc_four_domains_schema_test JRC_AG_CATALOG_OUTPUT=/tmp/ag-reload-catalog.json bundle exec rails runner script/jrc_ag_ci_fixture.rb catalog
-          python3 script/jrc_ag_catalog_compare.py /tmp/ag-fresh-catalog.json /tmp/ag-upgrade-catalog.json /tmp/ag-reload-catalog.json
-          python3 - <<'PYTHON'
-          import hashlib, json, os, pathlib
-          manifest = json.loads(pathlib.Path('docs/jrc_consolidation/ag_historical_migration_admission_20261111.json').read_text())
-          receipt = json.loads(pathlib.Path('/tmp/ag-fixture-receipt-execution.json').read_text())
-          assert receipt['populated_upgrade'] and receipt['preserved_subjects'] >= 10
-          assert len(receipt['required_versions']) == 36 and len(receipt['historical_versions']) == 27
-          assert receipt['missing_after'] == [] and receipt['pending_after'] is False and receipt['existing_versions_preserved']
-          paths = ['/tmp/ag-fresh-schema.rb', '/tmp/ag-upgrade-schema.rb',
-                   '/tmp/ag-fresh-catalog.json', '/tmp/ag-upgrade-catalog.json', '/tmp/ag-reload-catalog.json']
-          result = {'source_sha': os.environ['GITHUB_SHA'], 'base_sha': manifest['base_sha'],
-                    'schema_paths_passed': ['fresh_migrate_and_reexecute', 'populated_main_upgrade_and_reexecute', 'empty_schema_reload'],
-                    'catalog_equivalence_passed': True, 'upgrade': receipt,
-                    'sha256': {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in paths},
-                    'production_changed': False, 'docker_build_executed': False}
-          pathlib.Path('/tmp/ag-migration-audit-result.json').write_text(json.dumps(result, indent=2) + '\n')
-          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
-              output.write('Migration audit for ' + result['source_sha'] + ': 36 applied versions (27 historical), ' +
-                           str(receipt['preserved_subjects']) + ' preserved synthetic subjects; fresh/upgrade/reload passed.\n')
-          print(json.dumps(result))
-          PYTHON
-      - name: Preserve actual synthetic catalogs and generated schema, including failure evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ag-migration-admission-${{ github.sha }}
-          path: |
-            /tmp/ag-fresh-schema.rb
-            /tmp/ag-upgrade-schema.rb
-            /tmp/ag-*-catalog*.json
-            /tmp/ag-fixture-receipt.json
-            /tmp/ag-*-execution.json
-            /tmp/ag-migration-audit-result.json
-          if-no-files-found: warn
-
-  native-focused:
-    needs: [identities, migration-admission]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        installation: [fresh, upgrade]
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: disposable-test-only
-        ports: ['5432:5432']
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
-      redis:
-        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
-        ports: ['6379:6379']
-    env:
-      RAILS_ENV: test
-      FRONTEND_URL: https://host.example.test
-      POSTGRES_HOST: jrc-rel-v2-pg-20261101
-      POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: disposable-test-only
-      POSTGRES_DATABASE: jrc_rel_v2_candidate_test
-      REDIS_URL: redis://127.0.0.1:6379/15
-      SECRET_KEY_BASE: synthetic-ag-ci-not-a-production-secret
-      BUNDLE_FROZEN: 'true'
-      SCHEMA: /tmp/ag-focused-schema.rb
-      JRC_AG_FIXTURE_RECEIPT: /tmp/ag-fixture-receipt.json
-      JRC_SD_CONCURRENCY: '1'
-      JRC_BO_TEST_SOCKET_DIRECTORY: /run/jrc-ag-ci-av
-      JRC_REVIEWED_CONCURRENCY: '1'
-      DB_POOL_SIZE: '10'
-      TZ: UTC
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - name: Prove disposable service; legacy spec alias exists only on this ephemeral runner
-        shell: bash
-        env:
-          JRC_AG_POSTGRES_SERVICE_ID: ${{ job.services.postgres.id }}
-        run: |
-          test "$GITHUB_ACTIONS" = true
-          test "$RUNNER_ENVIRONMENT" = github-hosted
-          docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{.Id}} {{.Config.Image}}'
-          test "$(docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{json .HostConfig.Binds}}')" = null
-          echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
-          echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
-          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/jrc-ag-ci-av
-          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.12'
-          bundler: 2.5.16
-          bundler-cache: true
-      - name: Admit only an empty disposable native database
-        run: bundle exec rails db:create
-      - name: Reproduce pinned main before the focused upgrade scenarios
-        if: matrix.installation == 'upgrade'
-        run: bundle exec rails runner script/jrc_ag_ci_fixture.rb load_main
-      - name: Verify native migrations and the retained synthetic account
-        run: |
-          bundle exec rails db:migrate
-          bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
-          bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
-      - name: Reproduce corrected native failures before the full regression matrix
-        shell: bash
-        run: |
-          bundle exec rspec \
-            spec/services/jrc_flows/ownership_effects_spec.rb \
-            spec/services/jrc_service_desk/internal_intake_integration_spec.rb \
-            spec/services/jrc_crm/nexora_end_to_end_spec.rb \
-            spec/requests/api/v1/accounts/relationship/sofia_operational_journey_spec.rb \
-            spec/requests/api/v1/accounts/relationship/native_completions_spec.rb \
-            spec/requests/api/v1/accounts/crm/commercial_flow_spec.rb \
-            spec/requests/api/v1/accounts/relationship/survey_models_integrated_spec.rb \
-            spec/services/jrc_relationship/survey_models_delivery_spec.rb \
-            --seed 20261110 --require ./script/jrc_ag_ci_formatter.rb --format JrcAgCiFormatter --format json --out /tmp/ag-focused-rspec.json
-          ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero? && r.fetch("errors_outside_of_examples_count").zero?' /tmp/ag-focused-rspec.json
-      - name: Preserve focused native failures and evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ag-native-focused-${{ github.sha }}-${{ matrix.installation }}
-          path: /tmp/ag-focused-rspec.json
-          if-no-files-found: warn
-
-  rails:
-    needs: [identities, migration-admission, native-focused]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        installation: [fresh, upgrade]
-        target:
-          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 6, exclusive: ''}
-          - {database: jrc_rel_v2_candidate_test, shard: 1, count: 6, exclusive: ''}
-          - {database: jrc_rel_v2_candidate_test, shard: 2, count: 6, exclusive: ''}
-          - {database: jrc_rel_v2_candidate_test, shard: 3, count: 6, exclusive: ''}
-          - {database: jrc_rel_v2_candidate_test, shard: 4, count: 6, exclusive: ''}
-          - {database: jrc_rel_v2_candidate_test, shard: 5, count: 6, exclusive: ''}
-          - {database: jrc_four_domains_schema_admission_test, shard: 0, count: 1, exclusive: ''}
-          - {database: jrc_rel_sd_candidate_test, shard: 0, count: 1, exclusive: ''}
-          - {database: jrc_jornada_candidate_test, shard: 0, count: 1, exclusive: ''}
-          - {database: jrc_four_domains_schema_authority_test, shard: 0, count: 1, exclusive: ''}
-          - {database: jrc_four_domains_schema_test, shard: 0, count: 1, exclusive: ''}
-          - {database: jrc_ag_retention_native_test, shard: 0, count: 1, exclusive: ''}
-          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 1, exclusive: signing_identity}
-          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 1, exclusive: document_scan}
-          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 1, exclusive: contract_version}
-          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 1, exclusive: signature_integration}
-          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 1, exclusive: signature_connection}
-          - {database: jrc_jornada_candidate_test, shard: 0, count: 1, exclusive: reviewed_operations}
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: disposable-test-only
-        ports: ['5432:5432']
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
-      redis:
-        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
-        ports: ['6379:6379']
-    env:
-      RAILS_ENV: test
-      FRONTEND_URL: https://host.example.test
-      POSTGRES_HOST: jrc-rel-v2-pg-20261101
-      POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: disposable-test-only
-      POSTGRES_DATABASE: ${{ matrix.target.database }}
-      JRC_AG_EXCLUSIVE_SPEC: ${{ matrix.target.exclusive }}
-      REDIS_URL: redis://127.0.0.1:6379/15
-      SECRET_KEY_BASE: synthetic-ag-ci-not-a-production-secret
-      BUNDLE_FROZEN: 'true'
-      SCHEMA: /tmp/ag-schema.rb
-      JRC_AG_FIXTURE_RECEIPT: /tmp/ag-fixture-receipt.json
-      JRC_SD_CONCURRENCY: '1'
-      JRC_BO_TEST_SOCKET_DIRECTORY: /run/jrc-ag-ci-av
-      JRC_REVIEWED_CONCURRENCY: '1'
-      DB_POOL_SIZE: '10'
-      TZ: UTC
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - name: Prove disposable service; legacy spec alias exists only on this ephemeral runner
-        shell: bash
-        env:
-          JRC_AG_POSTGRES_SERVICE_ID: ${{ job.services.postgres.id }}
-        run: |
-          test "$GITHUB_ACTIONS" = true
-          test "$RUNNER_ENVIRONMENT" = github-hosted
-          docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{.Id}} {{.Config.Image}}'
-          test "$(docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{json .HostConfig.Binds}}')" = null
-          echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
-          echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
-          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/jrc-ag-ci-av
-          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.12'
-          bundler: 2.5.16
-          bundler-cache: true
-      - name: Plan every native example source, respecting existing database guards
-        run: python3 script/jrc_ag_native_plan.py > /tmp/ag-test-plan.json
-      - name: Create exclusive empty test database
-        run: bundle exec rails db:create
-      - name: Reproduce pinned main and its actual migration ledger
-        if: matrix.installation == 'upgrade'
-        run: bundle exec rails runner script/jrc_ag_ci_fixture.rb load_main
-      - name: Native migrations and idempotent reexecution
-        run: |
-          bundle exec rails db:migrate
-          bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
-          bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
-          bundle exec rails db:migrate
-          bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
-          bundle exec rails zeitwerk:check
-      - name: Focused cumulative and integration regressions before the broad suite
-        if: matrix.target.database == 'jrc_rel_v2_candidate_test' && matrix.target.shard == 0 && matrix.target.exclusive == ''
-        run: |
-          bundle exec rspec spec/services/jrc_relationship/approved_local_roles_spec.rb \
-            spec/requests/api/v1/accounts/crm/approved_human_requirements_spec.rb \
-            spec/requests/api/v1/accounts/jrc_approvals/approved_financial_adjustments_spec.rb \
-            spec/services/jrc_customers/company_import_corporate_scope_spec.rb \
-            spec/services/jrc_backoffice/consolidated_migration_identity_spec.rb \
-            --seed 20261110 --require ./script/jrc_ag_ci_formatter.rb --format JrcAgCiFormatter --format json --out /tmp/ag-focused-rspec.json
-          ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero? && r.fetch("errors_outside_of_examples_count").zero?' /tmp/ag-focused-rspec.json
-      - name: Authenticated APIs, policies, immutable history, signatures and real transactions
-        shell: bash
-        run: |
-          mapfile -t specs < <(python3 script/jrc_ag_native_plan.py --database "$POSTGRES_DATABASE" --paths --shard-index "${{ matrix.target.shard }}" --shard-count "${{ matrix.target.count }}" --exclusive "${{ matrix.target.exclusive }}")
-          test "${#specs[@]}" -gt 0
-          bundle exec rspec "${specs[@]}" --seed 20261110 --require ./script/jrc_ag_ci_formatter.rb --format JrcAgCiFormatter --format json --out /tmp/ag-rspec.json
-          ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero? && r.fetch("errors_outside_of_examples_count").zero?' /tmp/ag-rspec.json
-      - name: Preserve synthetic evidence, including failures
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ag-native-${{ github.sha }}-${{ matrix.installation }}-${{ matrix.target.database }}-${{ matrix.target.shard }}-${{ matrix.target.exclusive }}
-          path: |
-            /tmp/ag-test-plan.json
-            /tmp/ag-rspec.json
-            /tmp/ag-focused-rspec.json
-            /tmp/ag-schema.rb
-            /tmp/ag-fixture-receipt.json
-          if-no-files-found: warn
-      - name: Source remains unchanged
-        run: git diff --exit-code
-
-  frontend:
-    needs: identities
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version-file: .nvmrc
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.12'
-          bundler: 2.5.16
-      - run: pnpm install --frozen-lockfile
-      - name: Lint reconciled application components and establishment regression
-        run: |
-          pnpm exec eslint app/javascript/dashboard/components-next/sidebar/Sidebar.vue \
-            app/javascript/dashboard/routes/dashboard/crm/views/contracts/ContractsView.vue \
-            app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.vue \
-            app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.spec.js \
-            app/javascript/dashboard/routes/dashboard/jrcOperations/views/ProjectDetail.vue \
-            app/javascript/dashboard/routes/dashboard/jrcOperations/views/ProjectList.vue \
-            app/javascript/dashboard/routes/dashboard/serviceDesk/components/QuickTicketForm.vue \
-            app/javascript/dashboard/routes/dashboard/serviceDesk/views/TicketFormView.vue \
-            app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue \
-            app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentMetadataDialog.vue \
-            app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentMetadataDialog.spec.js \
-            app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.spec.js \
-            app/javascript/dashboard/routes/dashboard/jrcRelationship/distributionConfiguration.spec.js \
-            app/javascript/dashboard/routes/dashboard/jrcRelationship/nativeLineage.spec.js \
-            app/javascript/dashboard/routes/dashboard/jrcRelationship/operations.spec.js \
-            app/javascript/dashboard/routes/dashboard/approvals/specs/policyWizard.spec.js \
-            app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeLegacyFlow.spec.js
-      - name: Frontend state boundaries, including native Ruby role-ceiling parity
-        run: |
-          node --test script/jrc_approved_ui_state.test.mjs script/jrc_backoffice_context_privacy.test.mjs \
-            script/jrc_calendar_dates.test.mjs script/jrc_calendar_pagination.test.mjs \
-            script/jrc_calendar_server_state.test.mjs script/jrc_local_role_boundaries.test.mjs \
-            script/jrc_portfolio_history_state.test.mjs script/jrc_requirement_history_state.test.mjs \
-            script/jrc_requirement_state.test.mjs
-      - name: Bounded historical proof capture and disclosure regression
-        run: |
-          ruby script/jrc_portfolio_history_capture.test.rb
-          ruby script/jrc_portfolio_history_boundary.test.rb
-          ruby test/jrc_consolidation/candidate_fixture_scanner_test.rb
-      - name: Vue integration regressions on the exact consolidated source
-        run: |
-          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcCustomers \
-            app/javascript/dashboard/routes/dashboard/jrcRelationship \
-            app/javascript/dashboard/routes/dashboard/crm \
-            app/javascript/dashboard/routes/dashboard/approvals \
-            app/javascript/dashboard/routes/dashboard/jrcOperations \
-            app/javascript/dashboard/routes/dashboard/serviceDesk \
-            app/javascript/dashboard/routes/dashboard/contacts/pages/spec \
-            app/javascript/dashboard/components-next/sidebar \
-            --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            --reporter=default --reporter=json --outputFile=/tmp/ag-vue-results.json
-      - name: Preserve native frontend evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ag-frontend-${{ github.sha }}
-          path: /tmp/ag-vue-results.json
-          if-no-files-found: warn
-      - run: git diff --exit-code
-
-
-  incorporated-projects:
-    needs: [identities, incremental-lint, runtime-compatibility]
-    uses: ./.github/workflows/projects-portal-candidate.yml
-  incorporated-whatsapp:
-    needs: [identities, incremental-lint, runtime-compatibility]
-    uses: ./.github/workflows/precimech-hotfix-tests.yml
-    with:
-      source_sha: ${{ github.sha }}
-  incorporated-voice:
-    needs: [identities, incremental-lint, runtime-compatibility]
-    uses: ./.github/workflows/voice-v4-candidate.yml
-
-
-
-  runtime-compatibility:
-    needs: [identities, incremental-lint]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: disposable-test-only
-        ports: ['5432:5432']
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
-      redis:
-        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
-        ports: ['6379:6379']
-    env:
-      JRC_RUNTIME_CANDIDATE: '1'
-      RAILS_ENV: test
-      POSTGRES_HOST: 127.0.0.1
-      POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: disposable-test-only
-      POSTGRES_DATABASE: jrc_runtime_compatibility_20261112_test
-      REDIS_URL: redis://127.0.0.1:6379/14
-      FRONTEND_URL: https://host.example.test
-      SECRET_KEY_BASE: synthetic-runtime-ci-not-a-production-secret
-      BUNDLE_FROZEN: 'true'
-      SCHEMA: /tmp/runtime-schema.rb
-      TZ: UTC
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - name: Prove disposable services and install real native tools
-        env:
-          RUNTIME_PG_ID: ${{ job.services.postgres.id }}
-          RUNTIME_REDIS_ID: ${{ job.services.redis.id }}
-        run: |
-          test "$RUNNER_ENVIRONMENT" = github-hosted
-          test "$(docker inspect "$RUNTIME_PG_ID" --format '{{json .HostConfig.Binds}}')" = null
-          test "$(docker inspect "$RUNTIME_REDIS_ID" --format '{{json .HostConfig.Binds}}')" = null
-          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev fonts-dejavu-core imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.12'
-          bundler: 2.5.16
-          bundler-cache: true
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version-file: .nvmrc
-      - name: Record actual host runtime; this is not an Alpine image smoke
-        run: |
-          bundle exec ruby -rjson -ropen3 -e 'abort "Wrong Ruby" unless RUBY_VERSION == "3.4.12" && RUBY_PATCHLEVEL == 148; node=Open3.capture3("node","--version"); abort "Wrong Node" unless node[2].success? && node[0].strip == "v24.22.3"; File.write("/tmp/runtime-host.json", JSON.pretty_generate(source_sha: ENV.fetch("GITHUB_SHA"), ruby: RUBY_VERSION, ruby_patchlevel: RUBY_PATCHLEVEL, node: node[0].strip, platform: RUBY_PLATFORM, runner_os: "Ubuntu 24.04", alpine_image_tested: false))'
-      - name: Native migrations only in the owned synthetic database
-        run: bundle exec rails db:create db:migrate
-      - name: Real native libraries, PDF, XLSX, OCR, Rails and Sidekiq
-        run: |
-          bundle exec rspec test/jrc_runtime/runtime_compatibility_spec.rb \
-            spec/requests/api/v1/accounts/jrc_service_desk/report_exports_spec.rb \
-            --format progress --format json --out /tmp/runtime-rspec.json
-          ruby -rjson -e 's=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Invalid runtime report" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero?' /tmp/runtime-rspec.json
-      - name: Product checkout remains unchanged
-        run: git diff --exit-code
-      - name: Preserve native runtime evidence
+          python3 -B .github/release/gate.py \
+            --lock .github/release/release-evidence-lock.json \
+            --infrastructure-sha "$EXPECTED_INFRASTRUCTURE_SHA" \
+            --product product --output "$RUNNER_TEMP/release-gate-report.json"
+      - name: Preserve gate results only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: runtime-native-${{ github.sha }}
+          name: release-evidence-gate-${{ github.sha }}
           path: |
-            /tmp/runtime-host.json
-            /tmp/runtime-rspec.json
-            /tmp/runtime-schema.rb
-            ${{ runner.temp }}/runtime-sidekiq.log
+            ${{ runner.temp }}/gate-tests.json
+            ${{ runner.temp }}/release-gate-report.json
           if-no-files-found: error
-
-  guarded-candidate-build:
-    # This is NOT authorized by a push or ordinary CI testing. The agent must
-    # obtain separate explicit authorization before dispatching with this input.
-    if: ${{ !startsWith(github.ref_name, 'codex/runtime-alpine324-') && github.event_name == 'workflow_dispatch' && inputs.build_candidate }}
-    needs: [identities, migration-admission, native-focused, rails, frontend, incorporated-projects, incorporated-whatsapp, incorporated-voice]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version-file: .nvmrc
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - run: pnpm install --frozen-lockfile
-      - name: Guard one exact-source build; no server, database, image or publication
-        env:
-          JRC_AG_AUTHORIZED_BUILD_SHA: ${{ inputs.expected_build_sha }}
-        run: python3 script/jrc_ag_guarded_frontend_build.py --execute --expected-sha "$JRC_AG_AUTHORIZED_BUILD_SHA"
-      - name: Preserve build evidence and new assets for isolated acceptance only
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ag-guarded-build-${{ github.sha }}
-          path: ${{ runner.temp }}/jrc-ag-build-${{ github.sha }}/
-          if-no-files-found: warn
+          retention-days: 7
