@@ -239,6 +239,7 @@ jobs:
           fixture_pid=$!
           trap 'kill -TERM "$fixture_pid" 2>/dev/null || true; wait "$fixture_pid" 2>/dev/null || true' EXIT
           for attempt in {1..60}; do
+            printf 'MinIO synthetic readiness attempt %s/60\n' "$attempt"
             if curl --fail --silent "$JRC_IMPORT_MINIO_ENDPOINT/minio/health/cluster"; then break; fi
             sleep 1
           done

@@ -1,6 +1,6 @@
 {
   "base_sha": "cad427d400d824fc1fdc06c1c1079f324e7f3f6c",
-  "branch": "codex/runtime-alpine324-numbering-20261112",
+  "branch": "codex/runtime-alpine324-ci-20261112",
   "ruby": {
     "version": "3.4.12",
     "patchlevel": 148,
@@ -21,7 +21,8 @@
     "Align both Ruby stages with Node on Alpine 3.24; explicit libstdc++/libgcc; remove distro Ruby packages conflicting with official Ruby headers",
     "Keep the 36 native identities and incorporated regressions; add owned Ubuntu runtime compatibility proof",
     "Block production Vite/image builds for preparation branch; leave approved release-infrastructure branch untouched",
-    "Audited Backoffice protocol allocation correction: bounded attempts against existing account-scoped numbers, same format and unchanged unique index/history."
+    "Audited Backoffice protocol allocation correction: bounded attempts against existing account-scoped numbers, same format and unchanged unique index/history.",
+    "Fix two pre-existing shell lint findings and validate all 17 modified workflows before running the native matrix; no test or lint suppression."
   ],
   "protected": [
     "Application sources except the exact reviewed protocol generator; migrations, SQL, schemas, policies, unit/account scopes and all other functional sources unchanged.",
@@ -65,5 +66,22 @@
       "verified_files": 9,
       "private": true
     }
+  },
+  "native_validated_parent_sha": "cabfac0807404295f8405fadbe2255239c0c6719",
+  "native_validated_parent_run": 43282356085,
+  "ci_lint_followup": {
+    "gate_run": 43295736531,
+    "previous_gate_infrastructure_sha": "fdbb12734a0c695d5b123d6d60e5cfff5c52bc39",
+    "findings": [
+      "SC2034 unused readiness counter",
+      "SC2086 implicit splitting of fixed RSpec path list"
+    ],
+    "corrections": [
+      "Log synthetic readiness attempt counter",
+      "Split declared spec list once into Bash array and pass quoted arguments"
+    ],
+    "no_shellcheck_suppression": true,
+    "all_17_workflows_checked_before_native_matrix": true,
+    "application_and_migrations_unchanged_from_parent": true
   }
 }

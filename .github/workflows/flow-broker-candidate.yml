@@ -109,7 +109,9 @@ jobs:
           bundle exec rails db:migrate
       - name: Executar contratos e corridas contra PostgreSQL
         run: |
-          bundle exec rspec $SPEC_ARGS --exclude-pattern spec/services/jrc_broker/routing_context_connection_spec.rb --format progress --format json --out /tmp/flow-broker-rspec.json
+          read -r -a spec_args <<< "$SPEC_ARGS"
+          test "${#spec_args[@]}" -gt 0
+          bundle exec rspec "${spec_args[@]}" --exclude-pattern spec/services/jrc_broker/routing_context_connection_spec.rb --format progress --format json --out /tmp/flow-broker-rspec.json
           python3 - <<'PYTHON'
           import json, os
           summary = json.load(open('/tmp/flow-broker-rspec.json'))['summary']

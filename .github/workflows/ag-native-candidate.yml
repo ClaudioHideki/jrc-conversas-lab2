@@ -2,7 +2,7 @@ name: A-G consolidated native candidate (no publication)
 
 on:
   push:
-    branches: [codex/lab2-ag-consolidada-20261110, codex/lab2-ag-atualizacoes-20261112, codex/runtime-alpine324-20261112, codex/runtime-alpine324-numbering-20261112]
+    branches: [codex/lab2-ag-consolidada-20261110, codex/lab2-ag-atualizacoes-20261112, codex/runtime-alpine324-20261112, codex/runtime-alpine324-numbering-20261112, codex/runtime-alpine324-ci-20261112]
   workflow_dispatch:
     inputs:
       expected_validation_sha:
@@ -63,7 +63,7 @@ jobs:
           printf '%s  %s\n' '8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8' "$archive" | sha256sum -c -
           mkdir "$RUNNER_TEMP/ci17-linter"
           tar -xzf "$archive" -C "$RUNNER_TEMP/ci17-linter" actionlint
-          "$RUNNER_TEMP/ci17-linter/actionlint" .github/workflows/ag-native-candidate.yml .github/workflows/projects-portal-candidate.yml .github/workflows/precimech-hotfix-tests.yml .github/workflows/voice-v4-candidate.yml
+          "$RUNNER_TEMP/ci17-linter/actionlint" .github/workflows/ag-native-candidate.yml .github/workflows/backoffice-flow.yml .github/workflows/broker-customer-candidate.yml .github/workflows/build-ghcr.yml .github/workflows/campaign-workflow-candidate.yml .github/workflows/contacts-native.yml .github/workflows/flow-broker-candidate.yml .github/workflows/nico-broker-candidate.yml .github/workflows/nico-capacity-native.yml .github/workflows/nico-legacy-reservations-native.yml .github/workflows/precimech-hotfix-tests.yml .github/workflows/projects-candidate.yml .github/workflows/projects-portal-candidate.yml .github/workflows/sd-contact-softphone-native.yml .github/workflows/service-desk-global-native.yml .github/workflows/voice-v4-candidate.yml .github/workflows/whatsapp-connections-candidate.yml
       - run: git merge-base --is-ancestor d8a83b824b11cc68ddbbce7c79681f368051fb70 HEAD
       - name: Verify disposable APT helper syntax and refusal outside owned CI
         run: |
