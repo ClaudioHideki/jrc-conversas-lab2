@@ -88,9 +88,14 @@ COPY . /app
 # https://github.com/chatwoot/chatwoot/issues/701
 RUN mkdir -p /app/log
 
+# This larger heap is used only by the Vite child in the assets RUN.
+ARG JRC_VITE_BUILD_HEAP_MIB=6144
 # generate production assets if production environment
 RUN if [ "$RAILS_ENV" = "production" ]; then \
-  SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled bundle exec rake assets:precompile \
+  SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled \
+  JRC_VITE_BUILD_HEAP_MIB="$JRC_VITE_BUILD_HEAP_MIB" \
+  VITE_RUBY_VITE_BIN_PATH=/app/script/jrc_vite_build.mjs \
+  bundle exec rake assets:precompile \
   && rm -rf spec node_modules tmp/cache; \
   fi
 

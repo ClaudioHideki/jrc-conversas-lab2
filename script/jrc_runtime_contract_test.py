@@ -37,6 +37,20 @@ def verify():
     assert (ROOT / "Gemfile").read_text() == expected_gemfile
     assert (ROOT / "pnpm-lock.yaml").read_text() == original("pnpm-lock.yaml")
     docker = (ROOT / "docker/Dockerfile").read_text()
+    baseline_docker = subprocess.check_output(
+        ["git", "show", "d11c879a3d6e27499e1aea45736797a6e913b829:docker/Dockerfile"], cwd=ROOT, text=True)
+    old_assets = "  SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled bundle exec rake assets:precompile " + chr(92)
+    scoped_assets = "\n".join([
+        "  SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled " + chr(92),
+        '  JRC_VITE_BUILD_HEAP_MIB="$JRC_VITE_BUILD_HEAP_MIB" ' + chr(92),
+        "  VITE_RUBY_VITE_BIN_PATH=/app/script/jrc_vite_build.mjs " + chr(92),
+        "  bundle exec rake assets:precompile " + chr(92)])
+    expected_docker = baseline_docker.replace(
+        "# generate production assets if production environment\n",
+        "# This larger heap is used only by the Vite child in the assets RUN.\n"
+        "ARG JRC_VITE_BUILD_HEAP_MIB=6144\n# generate production assets if production environment\n").replace(old_assets, scoped_assets)
+    assert docker == expected_docker, "Only the reviewed frontend heap scope may change"
+    assert docker.split("# final build stage\n", 1)[1] == baseline_docker.split("# final build stage\n", 1)[1]
     ruby_base = "docker.io/library/ruby:3.4.12-alpine3.24@sha256:" + RUBY_DIGEST
     node_base = "docker.io/library/node:24.22.3-alpine3.24@sha256:" + NODE_DIGEST
     assert docker.count(ruby_base) == 2 and docker.count(node_base) == 1
@@ -68,6 +82,8 @@ def verify():
             "all_other_gem_versions_unchanged": True,
             "reviewed_gem_changes": [{"gem": "scout_apm", "from": "5.3.3", "to": "5.7.0",
                 "upstream_fix": "https://github.com/scoutapp/scout_apm_ruby/pull/552"}],
+            "frontend_vite_heap_mib": 6144, "frontend_effective_memory_min_gib": 8,
+            "runtime_image_stage_unchanged_from_d11c879a": True,
             "pnpm_lock_unchanged": True, "functional_sources_unchanged": False,
             "all_other_functional_sources_unchanged": True, "migrations_unchanged": True,
             "reviewed_functional_fixes": fixes,

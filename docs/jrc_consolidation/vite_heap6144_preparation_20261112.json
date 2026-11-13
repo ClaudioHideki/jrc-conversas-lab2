@@ -1,0 +1,25 @@
+{
+  "base_sha": "d11c879a3d6e27499e1aea45736797a6e913b829",
+  "scope": "Vite frontend build heap only",
+  "heap_mib": 6144,
+  "process_start_memory_gib": 8,
+  "start_disk_gib": 3,
+  "reserve_ram_mib": 750,
+  "reserve_disk_bytes": 750000000,
+  "integration": "VITE_RUBY_VITE_BIN_PATH in the production assets RUN; standard Rails assets task preserved",
+  "parent_node_options": "Existing 4096 MiB pre-builder setting preserved; 6144 is a CLI argument only for the owned Vite child",
+  "runtime_stage": "Byte-identical to the approved base; no 6144 setting for normal container/Rails/Sidekiq",
+  "effective_memory": "minimum of Linux MemAvailable and Node process.availableMemory; process.constrainedMemory recorded",
+  "monitoring": "500 ms child/cgroup-aware resource sampling; stop only the ChildProcess created by this wrapper",
+  "no_new_dependencies": true,
+  "no_migration_or_business_logic_changes": true,
+  "validation_scope": "Node policy/child-process tests, Vite Ruby 3.10.2 runner with command fixture, real 24.22.3 Alpine process/cgroup probes; no real Vite compilation",
+  "third_docker_build_authorized": false,
+  "publication_authorized": false,
+  "full_image_validation": "Pending explicit authorization for a single third protected attempt; previous 36/36 do not automatically approve a new SHA",
+  "official_references": [
+    "https://vite-ruby.netlify.app/config/#vitebinpath",
+    "https://nodejs.org/docs/latest-v24.x/api/process.html#processavailablememory",
+    "https://nodejs.org/docs/latest-v24.x/api/process.html#processconstrainedmemory"
+  ]
+}
