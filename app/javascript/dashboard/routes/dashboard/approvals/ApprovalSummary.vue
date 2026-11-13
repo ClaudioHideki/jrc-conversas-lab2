@@ -34,6 +34,7 @@ const cards = [
   },
 ];
 </script>
+
 <template>
   <section
     :aria-label="t('JRC_APPROVALS.workspace.indicators')"

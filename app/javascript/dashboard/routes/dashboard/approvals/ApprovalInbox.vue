@@ -29,6 +29,7 @@ const date = value =>
       ).format(new Date(value))
     : '—';
 </script>
+
 <template>
   <div
     class="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(18rem,0.95fr)_minmax(0,1.05fr)]"

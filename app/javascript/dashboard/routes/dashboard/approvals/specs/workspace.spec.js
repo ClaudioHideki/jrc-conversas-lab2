@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { describe, it, expect } from 'vitest';
 import { createI18n } from 'vue-i18n';
 import locale from 'dashboard/i18n/locale/en/jrcApprovals.json';
 import ApprovalInbox from '../ApprovalInbox.vue';

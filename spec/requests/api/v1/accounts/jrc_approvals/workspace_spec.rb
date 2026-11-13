@@ -42,6 +42,28 @@ RSpec.describe 'Approval workspace authorized indicators and search', type: :req
     expect(response).to have_http_status(:unauthorized)
   end
 
+  it 'does not count requests outside the members native business-unit coverage' do
+    approval
+    other = approval_scope(account: scope[:account])
+    outsider = approval_actor(other, permissions: %w[jrc_approvals_view_audit])
+    get "#{url}/summary", params: { issuer_company_id: scope[:company].id, business_unit_id: scope[:unit].id },
+                            headers: outsider.user.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body).to include('pending' => 0, 'approved' => 0, 'rejected' => 0)
+  end
+
+  it 'does not count approvals after the feature is disabled' do
+    approval
+    scope[:account].disable_features!('jrc_approvals')
+    get "#{url}/summary", headers: headers
+    expect(response).to have_http_status(:unauthorized)
+  end
+
+  it 'rejects invalid time zones rather than returning an invented reporting period' do
+    get "#{url}/summary", params: { time_zone: 'unconfigured-zone' }, headers: headers
+    expect(response).to have_http_status(:unprocessable_entity)
+  end
+
   it 'searches policy names with literal wildcard characters and retains native pagination' do
     approval
     get url, params: { q: policy.name, order: 'recent', page: 1, per_page: 1 }, headers: headers

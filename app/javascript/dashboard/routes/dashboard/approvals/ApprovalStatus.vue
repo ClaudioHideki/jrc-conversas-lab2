@@ -21,6 +21,7 @@ const label = computed(() => {
   return te(key) ? t(key) : props.state;
 });
 </script>
+
 <template>
   <span
     class="inline-flex shrink-0 items-center rounded-lg border px-2.5 py-1 text-xs font-semibold"

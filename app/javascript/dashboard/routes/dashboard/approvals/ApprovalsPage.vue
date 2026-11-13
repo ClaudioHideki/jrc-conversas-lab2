@@ -59,22 +59,22 @@ const versions = ref(null);
 const catalogs = ref([]);
 const simulation = ref(null);
 const notice = ref('');
-const inbox = computed(() =>
-  [
-    'assigned',
-    'requested',
-    'returned',
-    'escalated',
-    'all',
-    'pending_scope',
-  ].includes(route.query.box)
-    ? route.query.box
-    : can('decide')
-      ? 'assigned'
-      : 'pending_scope'
-);
+const can = action => capability(state.context, action);
+const inbox = computed(() => {
+  if (
+    [
+      'assigned',
+      'requested',
+      'returned',
+      'escalated',
+      'all',
+      'pending_scope',
+    ].includes(route.query.box)
+  )
+    return route.query.box;
+  return can('decide') ? 'assigned' : 'pending_scope';
+});
 const summary = ref(null);
-const summaryKey = ref(null);
 const requestKey = ref('');
 const resourceId = ref('');
 const filters = ref({
@@ -94,7 +94,6 @@ const adjustmentIntent = intent();
 const ownDelegationIntent = intent();
 const screen = computed(() => route.params.screen || 'inbox');
 const id = computed(() => route.params.id);
-const can = action => capability(state.context, action);
 const allowed = computed(() => {
   if (!state.context) return false;
   if (['policies', 'simulate', 'delegations'].includes(screen.value))
@@ -176,12 +175,13 @@ const loadSummary = async () => {
     time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
   delete params.state;
-  const key = JSON.stringify([accessIdentity.value, params]);
-  if (summaryKey.value === key || state.error) return;
+  if (state.error) {
+    summary.value = null;
+    return;
+  }
   const result = await run(api => api.get('requests/summary', params));
   if (result) {
     summary.value = result.data;
-    summaryKey.value = key;
   } else if ([401, 403, 404].includes(state.error?.status)) {
     summary.value = null;
     state.rows = [];
@@ -194,28 +194,6 @@ const selectRequest = value =>
     page: state.page.page,
     box: inbox.value,
   });
-const applyInboxFilters = async () => {
-  const query = { box: inbox.value, page: 1 };
-  Object.entries(filters.value).forEach(([key, value]) => {
-    if (value !== '') query[key] = value;
-  });
-  const destination = {
-    name: 'jrc_approvals',
-    params: { accountId: state.accountId, screen: 'inbox' },
-    query,
-  };
-  if (router.resolve(destination).fullPath === route.fullPath) {
-    summaryKey.value = null;
-    await load();
-  } else await router.push(destination);
-};
-const clearInboxFilters = () => {
-  Object.keys(filters.value).forEach(key => {
-    filters.value[key] = key === 'order' ? 'recent' : '';
-  });
-  return applyInboxFilters();
-};
-
 const load = async () => {
   if (disposed) return;
   const context = captureView();
@@ -268,8 +246,11 @@ const load = async () => {
     if (inbox.value === 'returned') params.state = 'returned';
     if (inbox.value === 'escalated') params.state = 'escalated';
     await list('requests', params);
-    if (!isCurrent(context) || request !== loadGeneration || state.error)
+    if (!isCurrent(context) || request !== loadGeneration) return;
+    if (state.error) {
+      summary.value = null;
       return;
+    }
     if (id.value) {
       const result = await run(api => api.get('requests/' + id.value));
       if (result) record.value = result.data;
@@ -295,10 +276,30 @@ const load = async () => {
     if (result) catalogs.value = result.data;
   }
 };
+const applyInboxFilters = async () => {
+  const query = { box: inbox.value, page: 1 };
+  Object.entries(filters.value).forEach(([key, value]) => {
+    if (value !== '') query[key] = value;
+  });
+  const destination = {
+    name: 'jrc_approvals',
+    params: { accountId: state.accountId, screen: 'inbox' },
+    query,
+  };
+  if (router.resolve(destination).fullPath === route.fullPath) {
+    await load();
+  } else await router.push(destination);
+};
+const clearInboxFilters = () => {
+  Object.keys(filters.value).forEach(key => {
+    filters.value[key] = key === 'order' ? 'recent' : '';
+  });
+  return applyInboxFilters();
+};
+
 const refresh = async () => {
   if (disposed || state.loading) return;
   const context = captureView();
-  summaryKey.value = null;
   if (!state.context) await loadContext();
   if (isCurrent(context) && state.context) await load();
 };
@@ -322,7 +323,6 @@ watch(
       reset(account);
       if (changedAccess) {
         summary.value = null;
-        summaryKey.value = null;
         filters.value = {
           q: '',
           order: 'recent',
@@ -339,9 +339,12 @@ watch(
       }
       await loadContext();
     }
+    if (!isCurrent(context)) return;
     Object.keys(filters.value).forEach(key => {
       if (typeof route.query[key] === 'string')
         filters.value[key] = route.query[key];
+      else if (screen.value === 'inbox')
+        filters.value[key] = key === 'order' ? 'recent' : '';
     });
     if (isCurrent(context) && state.context) await load();
   },
@@ -404,7 +407,6 @@ const decide = async decision => {
   );
   if (!isCurrent(context)) return;
   if (result) {
-    summaryKey.value = null;
     await load();
     if (!isCurrent(context)) return;
     notice.value = t('JRC_APPROVALS.saved');
@@ -438,7 +440,6 @@ const adjust = async body => {
   );
   if (!isCurrent(context)) return;
   if (result) {
-    summaryKey.value = null;
     const access = accessIdentity.value;
     const target = result.data.request?.id;
     await navigate('inbox', target);
@@ -469,7 +470,6 @@ const grant = async delegation => {
   const result = await run(api => api.post('delegations', { delegation }));
   if (!isCurrent(context)) return;
   if (result) {
-    summaryKey.value = null;
     await load();
     if (!isCurrent(context)) return;
     notice.value = t('JRC_APPROVALS.saved');
@@ -481,7 +481,6 @@ const revoke = async grantId => {
   const result = await run(api => api.revoke(grantId));
   if (!isCurrent(context)) return;
   if (result) {
-    summaryKey.value = null;
     await load();
     if (!isCurrent(context)) return;
     notice.value = t('JRC_APPROVALS.revoked');
@@ -500,7 +499,6 @@ const grantOwn = async delegation => {
   );
   if (!isCurrent(context)) return;
   if (result) {
-    summaryKey.value = null;
     await load();
     if (!isCurrent(context)) return;
     notice.value = t('JRC_APPROVALS.saved');
@@ -512,7 +510,6 @@ const revokeOwn = async grantId => {
   const result = await run(api => api.revokeOwn(grantId));
   if (!isCurrent(context)) return;
   if (result) {
-    summaryKey.value = null;
     await load();
     if (!isCurrent(context)) return;
     notice.value = t('JRC_APPROVALS.revoked');
@@ -534,7 +531,6 @@ const createRequest = async () => {
   );
   if (!isCurrent(context)) return;
   if (result) {
-    summaryKey.value = null;
     await load();
     if (!isCurrent(context)) return;
     notice.value = result.data.length

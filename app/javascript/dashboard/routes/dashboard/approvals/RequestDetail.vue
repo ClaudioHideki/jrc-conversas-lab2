@@ -31,8 +31,11 @@ const displayDate = value =>
         timeStyle: 'short',
       }).format(new Date(value))
     : '—';
-const decisionColor = decision =>
-  decision === 'approved' ? 'teal' : decision === 'rejected' ? 'ruby' : 'amber';
+const decisionColor = decision => {
+  if (decision === 'approved') return 'teal';
+  if (decision === 'rejected') return 'ruby';
+  return 'amber';
+};
 const reason = ref('');
 const choices = computed(() => decisionChoices(props.request));
 const selectedChoice = ref(null);
