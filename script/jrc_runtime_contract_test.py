@@ -62,14 +62,16 @@ def verify():
     pagination_fixture = "app/javascript/dashboard/routes/dashboard/inbox/specs/InboxList.spec.js"
     pagination_sha = "0dd4f4ed7960eb673cadf1c388073ff2af99c90de2f2dd6119321dff05c630a7"
     reviewed_schema = "db/schema.rb"
-    schema_sha = "96d4d91e522dd61be81edb5f4e19d840241693702a910ecea4e2d48c4e1db78c"
+    schema_sha = "ca110aa5f83259333a4399a3d88d34b17c77a70fcabe6ae542110f0ee813322e"
     # The old pagination fixture omitted the backend membership proof. Admit
     # only this reviewed test update; the product authorization is unchanged.
     assert changed == sorted([reviewed_path, pagination_fixture, reviewed_schema]), changed
     assert hashlib.sha256((ROOT / reviewed_path).read_bytes()).hexdigest() == reviewed_sha
     assert hashlib.sha256((ROOT / regression).read_bytes()).hexdigest() == regression_sha
     assert hashlib.sha256((ROOT / pagination_fixture).read_bytes()).hexdigest() == pagination_sha
-    assert hashlib.sha256((ROOT / reviewed_schema).read_bytes()).hexdigest() == schema_sha
+    # Git's text checkout uses CRLF on Windows and LF in the hosted runner.
+    # Check the exact canonical text, without admitting any content changes.
+    assert hashlib.sha256((ROOT / reviewed_schema).read_text().encode()).hexdigest() == schema_sha
     fixes = [{"path": reviewed_path, "sha256": reviewed_sha,
               "regression": regression, "regression_sha256": regression_sha}]
     assert (ROOT / ".dockerignore").read_text() == original(".dockerignore")
