@@ -1,4 +1,4 @@
-name: Approval Word layout independent release evidence gate
+name: Approval Word real native Chrome before Docker
 on:
   workflow_dispatch:
     inputs:
@@ -9,45 +9,29 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: approvals-word-independent-gate
+  group: approvals-native-visual-98e201ef
   cancel-in-progress: false
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+  EXPECTED_EXECUTION_SHA: ${{ inputs.expected_execution_sha }}
 jobs:
-  evidence-gate:
+  source-gate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    env:
-      PYTHONDONTWRITEBYTECODE: '1'
-      EXPECTED_EXECUTION_SHA: ${{ inputs.expected_execution_sha }}
-      EXPECTED_SOURCE_PRODUCT_SHA: d68885508f36a8fda2725a3c03d78470e9f9ff70
-      EXPECTED_VALIDATION_SHA: 77bef89d84eb523a1fab8a725a70a5a700a80dd9
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 77bef89d84eb523a1fab8a725a70a5a700a80dd9
+          ref: 98e201efd33e1cf66706c4d51c5383052754cd34
           path: product
-          persist-credentials: false
           fetch-depth: 0
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: d68885508f36a8fda2725a3c03d78470e9f9ff70
-          path: image_source
           persist-credentials: false
-          fetch-depth: 0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version-file: image_source/.nvmrc
-      - name: Immutable hosted authorization
-        run: |
-          [[ "$EXPECTED_EXECUTION_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test "$(git rev-parse HEAD)" = "$EXPECTED_EXECUTION_SHA"
-          test "$GITHUB_SHA" = "$EXPECTED_EXECUTION_SHA"
-          test "$GITHUB_REF_NAME" = ci/approvals-word-release-gate-20261113
-          test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$RUNNER_ENVIRONMENT" = github-hosted
+      - name: Immutable source and independently preserved native and updated frontend evidence
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/layout_release/combined_source_gate.py
       - name: Pin and validate actionlint
         shell: bash
         run: |
@@ -57,32 +41,109 @@ jobs:
           mkdir "$RUNNER_TEMP/approval-linter"
           tar -xzf "$archive" -C "$RUNNER_TEMP/approval-linter" actionlint
           "$RUNNER_TEMP/approval-linter/actionlint" .github/workflows/ag-native-candidate.yml
-      - name: Preserve original evidence, Scout and resource denial tests
-        env:
-          GATE_TEST_REPORT: ${{ runner.temp }}/gate-tests.json
-          GUARD_TEST_REPORT: ${{ runner.temp }}/guard-tests.json
-          SCOUT_PROOF_TEST_REPORT: ${{ runner.temp }}/scout-proof-tests.json
+      - name: Validate browser and guard syntax
         run: |
-          python3 -B .github/release/test_gate.py
-          python3 -B .github/release/test_scout_probe.py
-          python3 -B .github/runtime_build/test_guard.py
-          python3 -B .github/layout_release/test_layout_release_adapter.py
-      - name: Revalidate frontend-only heap contract
-        run: node --test --test-reporter=junit image_source/script/jrc_vite_build.test.mjs > "$RUNNER_TEMP/vite-heap-tests.xml"
-      - name: Independently verify native artifacts and exact functional source equivalence
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/layout_release/layout_release_adapter.py
+          node --check .github/runtime_build/approval_browser.spec.cjs
+          node --check .github/runtime_build/approval_browser.config.cjs
+          python3 -B -c "import ast,pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('.github/runtime_build').glob('*.py')]"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: approvals-layout-release-gate-${{ github.sha }}
+          name: approvals-final-source-${{ github.sha }}
+          path: ${{ runner.temp }}/combined-source-gate.json
+          if-no-files-found: error
+          retention-days: 7
+  native-visual:
+    needs: source-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: production
+      RAILS_SERVE_STATIC_FILES: 'true'
+      RAILS_LOG_TO_STDOUT: 'true'
+      FRONTEND_URL: http://127.0.0.1:3000
+      FORCE_SSL: 'false'
+      INSTALLATION_ENV: docker
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_runtime_image_test
+      REDIS_URL: redis://127.0.0.1:6379/15
+      SECRET_KEY_BASE: synthetic-approval-browser-not-production-secret-000000000000000000000000000000
+      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: '11111111111111111111111111111111'
+      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: '22222222222222222222222222222222'
+      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: '33333333333333333333333333333333'
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: ${{ runner.temp }}/approval-native-schema.rb
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 98e201efd33e1cf66706c4d51c5383052754cd34
+          path: product
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: product/.nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: product/package.json
+          run_install: false
+      - name: Preflight memory, cgroups, disk and concurrent Vite before dependency installation
+        run: |
+          python3 -B - <<'PYTHON'
+          import sys
+          sys.path.insert(0, '.github/runtime_build')
+          import guard
+          limits = guard.limits()
+          sample = guard.effective_sample(limits)
+          assert sample['ram_available'] >= 8*1024**3
+          assert limits.resource_reason(sample['disk_free'], sample['ram_available'], starting=True) is None
+          limits.no_other_vite_build()
+          print(sample)
+          PYTHON
+      - name: Preserve HTTPS and signed Ubuntu repositories
+        run: bash product/.github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.12'
+          bundler: 2.5.16
+          bundler-cache: true
+          working-directory: product
+      - name: Locked frontend and Chrome test dependencies
+        run: |
+          pnpm --dir product install --frozen-lockfile
+          pnpm --dir product/tests/playwright install --frozen-lockfile
+          google-chrome --version
+          git -C product diff --exit-code
+      - name: Fresh guarded CSS and real native Rails Chrome acceptance
+        env:
+          JRC_VISUAL_POSTGRES_ID: ${{ job.services.postgres.id }}
+          JRC_VISUAL_REDIS_ID: ${{ job.services.redis.id }}
+        run: python3 -B .github/runtime_build/native_visual_guard.py
+      - name: Preserve sanitized real browser, CSS and resource evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: approvals-native-visual-${{ github.sha }}-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/gate-tests.json
-            ${{ runner.temp }}/guard-tests.json
-            ${{ runner.temp }}/scout-proof-tests.json
-            ${{ runner.temp }}/vite-heap-tests.xml
-            ${{ runner.temp }}/validated-native-tree.json
-            ${{ runner.temp }}/layout-release-gate-report.json
+            ${{ runner.temp }}/approvals-native-visual-${{ github.run_id }}/**/*.json
+            ${{ runner.temp }}/approvals-native-visual-${{ github.run_id }}/**/*.log
+            ${{ runner.temp }}/approvals-native-visual-${{ github.run_id }}/**/*.png
+            ${{ runner.temp }}/approvals-native-visual-${{ github.run_id }}/**/*.md
           if-no-files-found: error
           retention-days: 7

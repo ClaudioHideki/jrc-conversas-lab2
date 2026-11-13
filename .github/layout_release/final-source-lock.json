@@ -1,0 +1,92 @@
+{
+  "product_branch": "codex/approvals-word-layout-20261113",
+  "product_sha": "98e201efd33e1cf66706c4d51c5383052754cd34",
+  "base": "5640793988fbf63ac46b0db3466722fc650f0d01",
+  "files": [
+    {
+      "path": "app/controllers/api/v1/accounts/approvals/requests_controller.rb",
+      "sha256": "a537a402cc25da031133ec23416a54eb9894e543fa8ac69f5db3a307890e212c"
+    },
+    {
+      "path": "app/javascript/dashboard/i18n/locale/en/jrcApprovals.json",
+      "sha256": "24e17c34d21de2f851170a884b5784c02f97af01c6be41f17c27fa6b2f83f6ef"
+    },
+    {
+      "path": "app/javascript/dashboard/i18n/locale/pt_BR/jrcApprovals.json",
+      "sha256": "2d507600fd7b528519c71fb2a914570b5a4a459bde5886a591f823616e144e85"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/ApprovalInbox.vue",
+      "sha256": "fc6a13b401537a72dc61ffa6a03963bf47db79f4fd9c9a725496ce22d1a90b58"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/ApprovalStatus.vue",
+      "sha256": "92d9639f58f2269665856db75cfb8724b6dd3e84f044499ec2ae47d7764419ce"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/ApprovalSummary.vue",
+      "sha256": "c26d419ff78e02bae067cb428f1af8937b2f9d43b01f0e7b880c7e0ba5aeaf14"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/ApprovalsPage.vue",
+      "sha256": "59c61953ec47f40464d9609286a14ffef2928f7a2913ccc7cae07361d43da4f4"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/PolicyEditor.vue",
+      "sha256": "2047349671a7ee490f93a7213bef591a5e0ca52ae5ca48da386d42ae13c354d3"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+      "sha256": "18c3f8248e39c54424c37f96a71d0c71ca435c63914482c2af388b942be292c4"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/specs/workspace.spec.js",
+      "sha256": "d40106b78c9a06e1e5412b6661ef4e05d6990ce408ed6cbc3fbb049e5b80f589"
+    },
+    {
+      "path": "config/routes/jrc_approvals.rb",
+      "sha256": "184f60925c75386000d2945e1f14e2b8d30c5ebf5177b70b5bc8e2b842eb5326"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_approvals/workspace_spec.rb",
+      "sha256": "3f81940703dd516fd886fc2634d1d1e7dfc3a6980dba66ecb0bc93893044d1e6"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/specs/authorityLifecycle.spec.js",
+      "sha256": "21fdde00f456bdf2ca1b118d51eac18621bc6e1f2e749b8d8911c8bca689f5ba"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/SimulatorView.vue",
+      "sha256": "8f55e195a8f48d0edf5ceb1af1d87278d4487696ecfea7dc247099fb0b383758"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/specs/simulatorSelection.spec.js",
+      "sha256": "3f91f2600a6afc4cce3f9083be79fc39db4c85cdb2b7951ddbf4fef28897322d"
+    }
+  ],
+  "main_modified": false,
+  "image_built": false,
+  "browser_validated": false,
+  "infrastructure_branch": "ci/approvals-simulator-fixed-frontend-20261113",
+  "infrastructure_sha": "3552bae70a36a56ccd7adc69b0ee7a53896e5c85",
+  "infrastructure_files": [
+    {
+      "path": ".github/workflows/ag-native-candidate.yml",
+      "sha256": "36cd6f594dbf91a4e66f42d0f4ab893e80bced8caf8b5e6247404b50218f2c50"
+    }
+  ],
+  "previous_product_sha": "d68885508f36a8fda2725a3c03d78470e9f9ff70",
+  "backend_validation_product_sha": "d68885508f36a8fda2725a3c03d78470e9f9ff70",
+  "backend_validation_sha": "77bef89d84eb523a1fab8a725a70a5a700a80dd9",
+  "backend_validation_run": 43477028469,
+  "frontend_only_delta": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/SimulatorView.vue",
+      "sha256": "8f55e195a8f48d0edf5ceb1af1d87278d4487696ecfea7dc247099fb0b383758"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/approvals/specs/simulatorSelection.spec.js",
+      "sha256": "3f91f2600a6afc4cce3f9083be79fc39db4c85cdb2b7951ddbf4fef28897322d"
+    }
+  ]
+}
