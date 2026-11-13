@@ -17,7 +17,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: release-evidence-runtime-20261112
+  group: release-evidence-heap56407939
   cancel-in-progress: false
 
 jobs:
@@ -41,8 +41,8 @@ jobs:
           [[ "$EXPECTED_INFRASTRUCTURE_SHA" =~ ^[0-9a-f]{40}$ ]]
           test "$GITHUB_SHA" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$(git rev-parse HEAD)" = "$EXPECTED_INFRASTRUCTURE_SHA"
-          test "$EXPECTED_PRODUCT_SHA" = d11c879a3d6e27499e1aea45736797a6e913b829
-          test "$GITHUB_REF_NAME" = ci/release-gate-scout-d11c879a-20261112
+          test "$EXPECTED_PRODUCT_SHA" = 5640793988fbf63ac46b0db3466722fc650f0d01
+          test "$GITHUB_REF_NAME" = ci/release-gate-heap56407939-20261112
           test "$RUNNER_ENVIRONMENT" = github-hosted
       - name: Validate workflow with checksum-pinned actionlint
         shell: bash
@@ -65,7 +65,7 @@ jobs:
       - name: Checkout approved product without infrastructure overlay
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: d11c879a3d6e27499e1aea45736797a6e913b829
+          ref: 5640793988fbf63ac46b0db3466722fc650f0d01
           path: product
           persist-credentials: false
           fetch-depth: 0
@@ -84,6 +84,18 @@ jobs:
         run: |
           node script/validate_ag_migration_identity.mjs
           node --test script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
+      - name: Recheck frontend-only heap and owned-process controls on the exact product
+        run: |
+          node --test --test-reporter=tap --test-reporter-destination=stdout \
+            --test-reporter=junit --test-reporter-destination="$RUNNER_TEMP/vite-heap-tests.xml" \
+            product/script/jrc_vite_build.test.mjs
+          python3 - <<'PY'
+          import os,xml.etree.ElementTree as ET
+          from pathlib import Path
+          r=ET.parse(Path(os.environ['RUNNER_TEMP'])/'vite-heap-tests.xml').getroot()
+          assert len(list(r.iter('testcase'))) == 13
+          assert not any(list(r.iter(k)) for k in ['failure','error','skipped'])
+          PY
       - name: Ruby syntax and preserved PID receipt checks
         uses: ruby/setup-ruby@v1
         with:
@@ -95,6 +107,21 @@ jobs:
           for file in .github/runtime_build/{probe,worker,receipt,extra,test_receipt}.rb; do ruby -c "$file"; done
           ruby .github/runtime_build/test_receipt.rb "$RUNNER_TEMP/receipt-unit.json"
           GUARD_TEST_REPORT="$RUNNER_TEMP/guard-tests.json" python3 -B .github/runtime_build/test_guard.py
+      - name: Verify real hosted-runner memory and disk before admitting a future image attempt
+        run: |
+          python3 -B - <<'PY'
+          import importlib.util,json,os
+          from pathlib import Path
+          spec=importlib.util.spec_from_file_location('guard','.github/runtime_build/guard.py')
+          guard=importlib.util.module_from_spec(spec);spec.loader.exec_module(guard)
+          sample=guard.effective_sample(guard.limits())
+          assert guard.starting_memory_reason(sample['ram_available'],True) is None
+          assert guard.limits().resource_reason(sample['disk_free'],sample['ram_available'],starting=True) is None
+          (Path(os.environ['RUNNER_TEMP'])/'guard-preflight.json').write_text(json.dumps({
+              'passed':True,'resources':sample,'minimum_effective_ram_gib':8,
+              'minimum_disk_gib':3,'memory_reserve_mib':750,'disk_reserve_bytes':750000000,
+              'image_build_executed':False},indent=2))
+          PY
       - name: Verify exact native run and all immutable evidence
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -114,5 +141,7 @@ jobs:
             ${{ runner.temp }}/guard-tests.json
             ${{ runner.temp }}/receipt-unit.json
             ${{ runner.temp }}/release-gate-report.json
+            ${{ runner.temp }}/vite-heap-tests.xml
+            ${{ runner.temp }}/guard-preflight.json
           if-no-files-found: error
           retention-days: 7

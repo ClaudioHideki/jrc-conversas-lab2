@@ -190,6 +190,10 @@ def runtime_contract(report):
         "regression": "spec/services/jrc_crm/backoffice_request_number_spec.rb",
         "regression_sha256": "f424461b1008fc5942e421e430a283485e7dd54b8d4551a339ece28abaaa2172"
     }], "Unexpected functional change")
+    require(report["frontend_vite_heap_mib"] == 6144
+            and report["frontend_effective_memory_min_gib"] == 8
+            and report["runtime_image_stage_unchanged_from_d11c879a"] is True,
+            "Frontend-only heap or effective memory contract changed")
     require(report["docker_build_executed"] is False, "Unauthorized image build")
 
 

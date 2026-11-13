@@ -212,13 +212,16 @@ class EvidenceGateTest(unittest.TestCase):
                       "sha256": "599bc1fce954fe4bcc58aa98117722628001939b24f77522f178bd0bb90331bd",
                       "regression": "spec/services/jrc_crm/backoffice_request_number_spec.rb",
                       "regression_sha256": "f424461b1008fc5942e421e430a283485e7dd54b8d4551a339ece28abaaa2172"
-                  }], "docker_build_executed": False}
+                  }], "frontend_vite_heap_mib": 6144, "frontend_effective_memory_min_gib": 8,
+                  "runtime_image_stage_unchanged_from_d11c879a": True, "docker_build_executed": False}
         gate.runtime_contract(report)
         for key, value in [("docker_build_executed", True), ("gem_versions_unchanged", True),
                            ("all_other_gem_versions_unchanged", False), ("reviewed_gem_changes", []),
                            ("reviewed_gem_changes", [{"gem": "scout_apm", "from": "5.3.3", "to": "5.3.3"}]),
                            ("all_other_functional_sources_unchanged", False), ("ruby", "3.4.4"),
-                           ("reviewed_functional_fixes", []), ("functional_sources_unchanged", True)]:
+                           ("reviewed_functional_fixes", []), ("functional_sources_unchanged", True),
+                           ("frontend_vite_heap_mib", 4096), ("frontend_effective_memory_min_gib", 5),
+                           ("runtime_image_stage_unchanged_from_d11c879a", False)]:
             with self.subTest(key=key):
                 r = copy.deepcopy(report);r[key] = value
                 with self.assertRaises(gate.GateError):

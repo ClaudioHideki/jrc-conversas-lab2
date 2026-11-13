@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
   "repository": "ClaudioHideki/jrc-conversas-lab2",
-  "product_sha": "d11c879a3d6e27499e1aea45736797a6e913b829",
-  "product_branch": "codex/runtime-alpine324-scout-fix-20261112",
-  "infrastructure_branch": "ci/release-gate-scout-d11c879a-20261112",
-  "native_run_id": 43323289272,
+  "product_sha": "5640793988fbf63ac46b0db3466722fc650f0d01",
+  "product_branch": "codex/runtime-vite-heap6144-20261112",
+  "infrastructure_branch": "ci/release-gate-heap56407939-20261112",
+  "native_run_id": 43344850748,
   "native_attempt": 1,
   "native_workflow": ".github/workflows/ag-native-candidate.yml",
   "protected_refs": {
@@ -18,686 +18,689 @@
     "ci/release-gate-runtime-20261112": "fdbb12734a0c695d5b123d6d60e5cfff5c52bc39",
     "codex/runtime-alpine324-scout-fix-20261112": "d11c879a3d6e27499e1aea45736797a6e913b829",
     "ci/runtime-scout-probe-fix-20261112": "9131d1784a8256fed273b15f6f7b18389223612e",
-    "ci/release-gate-runtime-dce80589-20261112": "716647d67e96b77e8a56125ab0033c173bd68485"
+    "ci/release-gate-runtime-dce80589-20261112": "716647d67e96b77e8a56125ab0033c173bd68485",
+    "codex/runtime-vite-heap6144-20261112": "5640793988fbf63ac46b0db3466722fc650f0d01",
+    "ci/release-gate-scout-d11c879a-20261112": "87cf2661a2cb027bdf8fea8f36a800b991bac6cb",
+    "ci/runtime-vite-heap-config-20261112": "5e07e5c1c6296ddeb4832855007d31a6217d34c0"
   },
   "matrix": [
     {
-      "identity": "fresh|jrc_rel_v2_candidate_test|1|6|",
-      "job_id": 131555531745,
-      "examples": 431,
-      "report_sha256": "1cd3172d249c4c6c8fe74bf6b19412c37a6dee009a46b8fdcfc1a14a66619e92",
-      "artifact_id": 13992014881
-    },
-    {
-      "identity": "fresh|jrc_rel_v2_candidate_test|3|6|",
-      "job_id": 131555531581,
-      "examples": 398,
-      "report_sha256": "8583ad8168621708d73c98a988826df6494228cc2fc2ba0d215889b555e12e20",
-      "artifact_id": 13992697345
-    },
-    {
-      "identity": "fresh|jrc_rel_v2_candidate_test|0|6|",
-      "job_id": 131555531796,
-      "examples": 412,
-      "report_sha256": "ce3ef111852926ded70e6645dc3d51cbdd17a36eef427c2a3444a0e08163092e",
-      "artifact_id": 13992713369
-    },
-    {
-      "identity": "fresh|jrc_rel_v2_candidate_test|4|6|",
-      "job_id": 131555531610,
-      "examples": 437,
-      "report_sha256": "e3093850248df60a363afb0e4eabce153e5b5f3f9a79b032e213bc9447c053c1",
-      "artifact_id": 13992803273
-    },
-    {
-      "identity": "fresh|jrc_rel_v2_candidate_test|2|6|",
-      "job_id": 131555531622,
-      "examples": 467,
-      "report_sha256": "22ff5833589e2b3e230e30b36602508b2d4a559e638a0f1c9d98242973e44cda",
-      "artifact_id": 13993570739
-    },
-    {
-      "identity": "fresh|jrc_jornada_candidate_test|0|1|",
-      "job_id": 131555531701,
-      "examples": 4,
-      "report_sha256": "d867f4fc91e715f973e3d81a71b524cc95f05467e2217aeca1a9a328f32d5355",
-      "artifact_id": 13993278798
-    },
-    {
-      "identity": "fresh|jrc_rel_v2_candidate_test|5|6|",
-      "job_id": 131555531687,
-      "examples": 507,
-      "report_sha256": "f90b3c62707c65430899e30989264bebf044ab4a350e7d51f5713cdbd8c8a353",
-      "artifact_id": 13993637682
-    },
-    {
-      "identity": "fresh|jrc_rel_sd_candidate_test|0|1|",
-      "job_id": 131555531641,
-      "examples": 33,
-      "report_sha256": "d9a26e471b0d7be4dc03f7f6798e78f529f2350c6731eddfcece4fc99b9d13bf",
-      "artifact_id": 13993637708
-    },
-    {
-      "identity": "fresh|jrc_four_domains_schema_test|0|1|",
-      "job_id": 131555531649,
-      "examples": 5,
-      "report_sha256": "d8d042b9a3f7f008f6fece444e8d8b5c753c751698a5b5962e6165b1fb758937",
-      "artifact_id": 13994036697
-    },
-    {
-      "identity": "fresh|jrc_four_domains_schema_authority_test|0|1|",
-      "job_id": 131555531741,
-      "examples": 3,
-      "report_sha256": "d55cbee4404fb2666f6fa1fa4bd58e6da93ddae18a5ebb82ec096b0ca438ad78",
-      "artifact_id": 13994985295
-    },
-    {
-      "identity": "fresh|jrc_rel_v2_candidate_test|0|1|document_scan",
-      "job_id": 131555531711,
-      "examples": 3,
-      "report_sha256": "faced054c0d09cff88646df19210ae2b10838311011c8c860ada1be90f4afc32",
-      "artifact_id": 13993243783
+      "identity": "fresh|jrc_ag_retention_native_test|0|1|",
+      "job_id": 131626667035,
+      "artifact_id": 14002329163,
+      "report_sha256": "9631f699d53960833469ef11f1e2fdc7c9992c34a8bdfe7e9caacfe8e8a737c2",
+      "examples": 12
     },
     {
       "identity": "fresh|jrc_four_domains_schema_admission_test|0|1|",
-      "job_id": 131555531660,
-      "examples": 59,
-      "report_sha256": "04e899b5ec9b35635700d4e7e158e4b89f4cc03e608fae3afe1512758239ab7d",
-      "artifact_id": 13993732199
+      "job_id": 131626666970,
+      "artifact_id": 14002679784,
+      "report_sha256": "ae07af43a987d4fe51f75618fb6fa515cc5187ecac6d98d685255d1def4b5137",
+      "examples": 59
     },
     {
-      "identity": "fresh|jrc_ag_retention_native_test|0|1|",
-      "job_id": 131555531643,
-      "examples": 12,
-      "report_sha256": "49d4d16223c1e5462586d821f6b23c4a940718f914e1b6dd62c2e44899641340",
-      "artifact_id": 13993837035
+      "identity": "fresh|jrc_four_domains_schema_authority_test|0|1|",
+      "job_id": 131626667014,
+      "artifact_id": 14002123984,
+      "report_sha256": "d813e4f0abc0f33647027a8bc4f60572d1f887b6bab30322e755b4248c01410e",
+      "examples": 3
     },
     {
-      "identity": "fresh|jrc_rel_v2_candidate_test|0|1|signing_identity",
-      "job_id": 131555531759,
-      "examples": 1,
-      "report_sha256": "c48c03396412776e97adae281c5f0b8afca643b59b901848c7cd3ff89b5b78c8",
-      "artifact_id": 13993628568
+      "identity": "fresh|jrc_four_domains_schema_test|0|1|",
+      "job_id": 131626667134,
+      "artifact_id": 14003116193,
+      "report_sha256": "e0b66828f71fcfcf344f0055d57c81d42e213a387fb9ed11f208c07e3a36c9c7",
+      "examples": 5
     },
     {
-      "identity": "fresh|jrc_rel_v2_candidate_test|0|1|contract_version",
-      "job_id": 131555534247,
-      "examples": 2,
-      "report_sha256": "5a569becd6681e59b94a6e75a4e8c11e3a35fa3100dab34f5e4236c49ef61920",
-      "artifact_id": 13994896076
+      "identity": "fresh|jrc_jornada_candidate_test|0|1|",
+      "job_id": 131626667011,
+      "artifact_id": 14002328340,
+      "report_sha256": "1c9e573e91386a2fb545495e1ace86d9b2106a7827f700e780bf4e24a4767b4c",
+      "examples": 4
     },
     {
       "identity": "fresh|jrc_jornada_candidate_test|0|1|reviewed_operations",
-      "job_id": 131555534425,
-      "examples": 1,
-      "report_sha256": "710f4031f7cf0a8b093a1a6d2d6fe2a84a6d3e0c9eb28dea1a1a5bd65c60e642",
-      "artifact_id": 13993668355
+      "job_id": 131626668868,
+      "artifact_id": 14003202038,
+      "report_sha256": "7ae348460538ae649b87e89b0bce4939cd8ee22b1d68724b505e58d93cb9756c",
+      "examples": 1
+    },
+    {
+      "identity": "fresh|jrc_rel_sd_candidate_test|0|1|",
+      "job_id": 131626667065,
+      "artifact_id": 14002956370,
+      "report_sha256": "19bf3a29d3b3496a9257dfeda44f21b20b89c10c0868602415971397a2ee52e4",
+      "examples": 33
+    },
+    {
+      "identity": "fresh|jrc_rel_v2_candidate_test|0|1|contract_version",
+      "job_id": 131626668858,
+      "artifact_id": 14003401472,
+      "report_sha256": "b9e60052f5312879dd1c9ee8e0432786da3ff8bff38a53e4ed313999b9d433c8",
+      "examples": 2
+    },
+    {
+      "identity": "fresh|jrc_rel_v2_candidate_test|0|1|document_scan",
+      "job_id": 131626666998,
+      "artifact_id": 14003670752,
+      "report_sha256": "111c8b0d8cb897cd6df8d6600e62bd16b1a0c7525021496d179b553edcc3262d",
+      "examples": 3
     },
     {
       "identity": "fresh|jrc_rel_v2_candidate_test|0|1|signature_connection",
-      "job_id": 131555534288,
-      "examples": 1,
-      "report_sha256": "7f3d55a5ea6f3fe9e4074bd451e58843a5eaa4867a75e683c3900a460b4c4b99",
-      "artifact_id": 13994546369
+      "job_id": 131626668916,
+      "artifact_id": 14003656679,
+      "report_sha256": "6d82f184f9578acd30a1328cc5b2cd08eb95ca6762551855caae98a252b8fd34",
+      "examples": 1
     },
     {
       "identity": "fresh|jrc_rel_v2_candidate_test|0|1|signature_integration",
-      "job_id": 131555534272,
-      "examples": 1,
-      "report_sha256": "282b4dc1d4fa9350d7c23ef39c7cda99540e9130e176d2583021776106436d10",
-      "artifact_id": 13995130075
+      "job_id": 131626668902,
+      "artifact_id": 14003785716,
+      "report_sha256": "0b23ba15c12265e0a075c09932701f273f1ed4e0a2dcdea8625a72791063c5f8",
+      "examples": 1
     },
     {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|3|6|",
-      "job_id": 131555534562,
-      "examples": 398,
-      "report_sha256": "4ea45f525ff8e5807b07597b3148b0cc2fc4843b8fda687122d8da7caad5f98b",
-      "artifact_id": 13994039156
+      "identity": "fresh|jrc_rel_v2_candidate_test|0|1|signing_identity",
+      "job_id": 131626667043,
+      "artifact_id": 14003301795,
+      "report_sha256": "31c8e4e06f7dc1ece1fc72a99afbb83bfcc55b7fc199cd7a5accca08e719cdc0",
+      "examples": 1
     },
     {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|0|6|",
-      "job_id": 131555534482,
-      "examples": 412,
-      "report_sha256": "fc43f96ab982c883ad841626860eb7fd02ba44a5ef5f33e647c93ae483773a54",
-      "artifact_id": 13995490893
+      "identity": "fresh|jrc_rel_v2_candidate_test|0|6|",
+      "job_id": 131626667007,
+      "artifact_id": 14002810495,
+      "report_sha256": "6cf9f8f35808256294d671d2f548e866562037498e39eb5f1ca0763f33fd64b2",
+      "examples": 412
     },
     {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|1|6|",
-      "job_id": 131555534330,
-      "examples": 431,
-      "report_sha256": "1cd184b9d08e03daea05be481479557fdea1c30646eaa6d7b4022c6884144537",
-      "artifact_id": 13995171567
+      "identity": "fresh|jrc_rel_v2_candidate_test|1|6|",
+      "job_id": 131626667048,
+      "artifact_id": 14002562161,
+      "report_sha256": "d304dcf8d9244371b5e51bb3346d6f376f5e974650285010ab454539b6ceaea0",
+      "examples": 431
     },
     {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|2|6|",
-      "job_id": 131555534499,
-      "examples": 467,
-      "report_sha256": "7da909a7188a8a43fcb1bc113f1d773cfd172c380a7b245f88b5760638e72e7a",
-      "artifact_id": 13994608513
+      "identity": "fresh|jrc_rel_v2_candidate_test|2|6|",
+      "job_id": 131626666967,
+      "artifact_id": 14001694202,
+      "report_sha256": "db3a629a6b32f40bbbeb625063bf5c5e7ddf86ab610070aca81fd2aec2763865",
+      "examples": 467
     },
     {
-      "identity": "upgrade|jrc_rel_sd_candidate_test|0|1|",
-      "job_id": 131555536429,
-      "examples": 33,
-      "report_sha256": "042808a07f9a1c6f2887ffae454ea39af4f0d7bc1df8386a5c9b62d93c33f887",
-      "artifact_id": 13995083366
+      "identity": "fresh|jrc_rel_v2_candidate_test|3|6|",
+      "job_id": 131626667047,
+      "artifact_id": 14001413545,
+      "report_sha256": "19c62340f01bfdecde303da398633480abed39454ec00e4243c9619e842cc7aa",
+      "examples": 398
     },
     {
-      "identity": "upgrade|jrc_jornada_candidate_test|0|1|",
-      "job_id": 131555536447,
-      "examples": 4,
-      "report_sha256": "42420b9c5fbfbb47b30b91941f79b18c912ac951d13f8a37a39332a0c4357627",
-      "artifact_id": 13995990836
+      "identity": "fresh|jrc_rel_v2_candidate_test|4|6|",
+      "job_id": 131626667079,
+      "artifact_id": 14003025829,
+      "report_sha256": "13a87a3c9c2f0eb7d2a60cd8c7356dbee9b91ef6f3b4b4bb5af0bfc794b564a6",
+      "examples": 437
     },
     {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|4|6|",
-      "job_id": 131555534604,
-      "examples": 437,
-      "report_sha256": "c6b163581b67ce9ab70743d044ef401a30709b9e56309e7048722baa80230ae6",
-      "artifact_id": 13995168577
-    },
-    {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|5|6|",
-      "job_id": 131555534834,
-      "examples": 507,
-      "report_sha256": "34d8079fcb1e592167cd8b50017dad19993a4335a4fbbcb0ecdd7ea0ab85f5cf",
-      "artifact_id": 13996375536
-    },
-    {
-      "identity": "upgrade|jrc_four_domains_schema_authority_test|0|1|",
-      "job_id": 131555536566,
-      "examples": 3,
-      "report_sha256": "aab4d4f929f6cec1b222af71518330c56df329d60edf1da38810e426910edb8a",
-      "artifact_id": 13995128964
+      "identity": "fresh|jrc_rel_v2_candidate_test|5|6|",
+      "job_id": 131626666965,
+      "artifact_id": 14003286822,
+      "report_sha256": "ff2724e95f5f067e9dcf17edc8aff0861e9e6cf0618b6054a3868841fb115582",
+      "examples": 507
     },
     {
       "identity": "upgrade|jrc_ag_retention_native_test|0|1|",
-      "job_id": 131555536715,
-      "examples": 12,
-      "report_sha256": "264044a004151cac714e6cde3c4a5b404e840912305cd3c606d58b628677fb78",
-      "artifact_id": 13995782121
-    },
-    {
-      "identity": "upgrade|jrc_four_domains_schema_test|0|1|",
-      "job_id": 131555536637,
-      "examples": 5,
-      "report_sha256": "35b7094824c9ee54c6622a995480bc3e6760fdff893db2f70121afb0a1d3f0e6",
-      "artifact_id": 13995866662
-    },
-    {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|0|1|signing_identity",
-      "job_id": 131555536725,
-      "examples": 1,
-      "report_sha256": "59e2729a53f954320dd58747d07f564b165358bdfb57704c27dbc63aced36a54",
-      "artifact_id": 13995837095
-    },
-    {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|0|1|document_scan",
-      "job_id": 131555536846,
-      "examples": 3,
-      "report_sha256": "dff183014f96acd0fce73a4c6838d248844fd2842f7bea2dad0bdafc41605bf3",
-      "artifact_id": 13995084508
-    },
-    {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|0|1|contract_version",
-      "job_id": 131555536847,
-      "examples": 2,
-      "report_sha256": "77bef68f4c6514b33678ccf7cac8b0a813c07a8e47c8b87c33016ee79ba280e6",
-      "artifact_id": 13995946623
-    },
-    {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|0|1|signature_connection",
-      "job_id": 131555538681,
-      "examples": 1,
-      "report_sha256": "7ef544eb4d5be92b6081610dfe98a44384f81964106a23dbd52e9309faaf22f1",
-      "artifact_id": 13995184542
-    },
-    {
-      "identity": "upgrade|jrc_jornada_candidate_test|0|1|reviewed_operations",
-      "job_id": 131555538652,
-      "examples": 1,
-      "report_sha256": "f9ee9e7acc9d6679dbb16124a3528fa234e559184d45243919885106fd590309",
-      "artifact_id": 13995329345
-    },
-    {
-      "identity": "upgrade|jrc_rel_v2_candidate_test|0|1|signature_integration",
-      "job_id": 131555536870,
-      "examples": 1,
-      "report_sha256": "063058d790353f74b657b0baf187271cf0226096bbb4509504868221ec479d37",
-      "artifact_id": 13995697769
+      "job_id": 131626670727,
+      "artifact_id": 14004771497,
+      "report_sha256": "4274640d5c6e153456c2cef553a3cec2db90d3099099999ad9bfab2ee3841c70",
+      "examples": 12
     },
     {
       "identity": "upgrade|jrc_four_domains_schema_admission_test|0|1|",
-      "job_id": 131555536306,
-      "examples": 59,
-      "report_sha256": "4812e74fb3fe3c9377f0c4c2a074b798c297c44605ee9b2177d154705c0c4705",
-      "artifact_id": 13996841511
+      "job_id": 131626670486,
+      "artifact_id": 14004946603,
+      "report_sha256": "723b4dba96a172b0722e0b13d2f0b359c497f113bdb5e6ec4e5e8dfe2ccf22b7",
+      "examples": 59
+    },
+    {
+      "identity": "upgrade|jrc_four_domains_schema_authority_test|0|1|",
+      "job_id": 131626670622,
+      "artifact_id": 14004566627,
+      "report_sha256": "734ccc445c6e96b213b7a3ba96ff2a27471ca4e534d682af0731dd4ff904548a",
+      "examples": 3
+    },
+    {
+      "identity": "upgrade|jrc_four_domains_schema_test|0|1|",
+      "job_id": 131626670638,
+      "artifact_id": 14004711871,
+      "report_sha256": "a073c830f45c5b0740bf747c2a67d8805da4d9f75044aeb305a1b86ff51098f4",
+      "examples": 5
+    },
+    {
+      "identity": "upgrade|jrc_jornada_candidate_test|0|1|",
+      "job_id": 131626670569,
+      "artifact_id": 14004546800,
+      "report_sha256": "b7d3518d6817707516879e2a66b7689c313f0da2c25631aff1068fb074f287f2",
+      "examples": 4
+    },
+    {
+      "identity": "upgrade|jrc_jornada_candidate_test|0|1|reviewed_operations",
+      "job_id": 131626672290,
+      "artifact_id": 14004309669,
+      "report_sha256": "4b51d6d5d674ed4d8bd81817e0aa148b0dcc841954d0883acce19ba1acb6891e",
+      "examples": 1
+    },
+    {
+      "identity": "upgrade|jrc_rel_sd_candidate_test|0|1|",
+      "job_id": 131626670488,
+      "artifact_id": 14004885808,
+      "report_sha256": "cbda1bb5aa21b3f810a9c1378655f83dc33c8594544db09b8720acdee495ef02",
+      "examples": 33
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|0|1|contract_version",
+      "job_id": 131626670650,
+      "artifact_id": 14004567118,
+      "report_sha256": "c120ec881aa1a5cef17c562fb0c8c26cb41c2571e2570528b072f2a8dba04538",
+      "examples": 2
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|0|1|document_scan",
+      "job_id": 131626670741,
+      "artifact_id": 14004398935,
+      "report_sha256": "9036c5bb424f05be5bfba2702d88d1ff56ad1fb2ee27a458bde0c0f7350c5633",
+      "examples": 3
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|0|1|signature_connection",
+      "job_id": 131626672169,
+      "artifact_id": 14005455604,
+      "report_sha256": "8d66e575fcc15052e3f6bc7dd6d51ee1a636d1b76f9985f7c48a208b1ceadd04",
+      "examples": 1
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|0|1|signature_integration",
+      "job_id": 131626670634,
+      "artifact_id": 14005405755,
+      "report_sha256": "8875e5c47e0c7edeb5e15674acaad47964ae798557fa50cf1bf789c78394059b",
+      "examples": 1
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|0|1|signing_identity",
+      "job_id": 131626670647,
+      "artifact_id": 14005106055,
+      "report_sha256": "b11f6ece418b7b3f93d5c61e3b4ac35875bfb5814a0889360e84e39934626b79",
+      "examples": 1
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|0|6|",
+      "job_id": 131626668923,
+      "artifact_id": 14004191229,
+      "report_sha256": "11b04ddfd4aac31e74cb67358f3f101387d429b82261932462ae659c79641426",
+      "examples": 412
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|1|6|",
+      "job_id": 131626668900,
+      "artifact_id": 14003788356,
+      "report_sha256": "40706e9f34802d10b10fd7f52f8e763c8387470f04d17a84833de1fb633ffa32",
+      "examples": 431
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|2|6|",
+      "job_id": 131626669009,
+      "artifact_id": 14004421213,
+      "report_sha256": "a97af619f6456bfb3f5204f9aa61a6bc3ff5b0fdaad34e5d9f07205022036acc",
+      "examples": 467
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|3|6|",
+      "job_id": 131626669043,
+      "artifact_id": 14004356471,
+      "report_sha256": "07144cdf7f1cb793970c7ab5ac232831841edb72dfa096a62209253540b9cb34",
+      "examples": 398
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|4|6|",
+      "job_id": 131626669037,
+      "artifact_id": 14005215673,
+      "report_sha256": "30eb3604ae0af991ae7ac77c489ab1fd6f3b2604ecafb1172822a926fe3e1f05",
+      "examples": 437
+    },
+    {
+      "identity": "upgrade|jrc_rel_v2_candidate_test|5|6|",
+      "job_id": 131626669091,
+      "artifact_id": 14005260145,
+      "report_sha256": "704b64fdd464bea69ddd0f52a5afc806b0a1936e07361400c0a571c37a68e1f9",
+      "examples": 507
     }
   ],
   "artifacts": [
     {
-      "id": 13990899885,
-      "name": "ag-native-focused-d11c879a3d6e27499e1aea45736797a6e913b829-fresh",
-      "sha256": "09e51d4641d49a36cc72f1c89bea72d8bcebe96a69d88d3e945d9307e2562b16"
+      "id": 14005455604,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-0-signature_connection",
+      "sha256": "ec48b68f65afa369f60598ff43ae143a6a9c5c695c8532a9aee5f793c69ff90a"
     },
     {
-      "id": 13991084259,
-      "name": "ag-migration-admission-d11c879a3d6e27499e1aea45736797a6e913b829",
-      "sha256": "1d014194bc0a1f6525501fc3b04f1d3b1f63cf734c27eb445d184a6d5bd56b3b"
+      "id": 14005405755,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-0-signature_integration",
+      "sha256": "34c53361352a89ccd9dba9c689ceac55158e786d7bb7b3c0fd02f119573645bf"
     },
     {
-      "id": 13991598209,
-      "name": "voice-v4-rails-d11c879a3d6e27499e1aea45736797a6e913b829",
-      "sha256": "7f304f08e80c5d66a116bab52fd8e8b573aeb764a71333ef258eb0251b1f76aa"
+      "id": 14005260145,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-5-",
+      "sha256": "f5b0fbfe2f1c11833173256edd8ac37c494601bb6ad2bc14a25526b7de4a2d9e"
     },
     {
-      "id": 13991662581,
-      "name": "whatsapp-native-d11c879a3d6e27499e1aea45736797a6e913b829",
-      "sha256": "f2a9edfcf4ebe89348730b9ba71b82785d8a6fb2b56d5122fa7c9d46db8d59a2"
+      "id": 14005215673,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-4-",
+      "sha256": "3888e558a28995fc82a224d37c96a724acef2fff02df34af042dccfb30b4977f"
     },
     {
-      "id": 13991954600,
-      "name": "projects-portal-validation-d11c879a3d6e27499e1aea45736797a6e913b829",
-      "sha256": "25d1ff4ba29166861e555fdd87f0712abd308ccb2d86020064eaa45817ac2112"
+      "id": 14005106055,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-0-signing_identity",
+      "sha256": "f828b0cb1d97f16313d13a7715a4bd4db5493bd983523f5cf9ac21a7381204c8"
     },
     {
-      "id": 13991981743,
-      "name": "runtime-native-d11c879a3d6e27499e1aea45736797a6e913b829",
-      "sha256": "e865755c63fd476b4034a8fd788d6b356242a50b61dc7fdf74ae846218aa3a32"
+      "id": 14004946603,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_four_domains_schema_admission_test-0-",
+      "sha256": "7113ec97cf50e70129d0aed6b2f071007e7119106a22ba16a0d72f74fa540219"
     },
     {
-      "id": 13992014881,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-1-",
-      "sha256": "22ce1a040db30df25062b323232040b632c13fd8f18c786b5ba570e06e0482e7"
+      "id": 14004885808,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_sd_candidate_test-0-",
+      "sha256": "b0166398879e827b5c01268ca19f6252df142f55b3a29c0aa7bca42601a8989b"
     },
     {
-      "id": 13992222278,
-      "name": "ag-native-focused-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade",
-      "sha256": "01e7a83cd7413ba980130f9a6ca86e373352a8a9f3137074afef3d5555050f26"
+      "id": 14004771497,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_ag_retention_native_test-0-",
+      "sha256": "bcb02df2cf80939f52daf91d03b180b21049802094f9d4e4a7f79b0f17aa6eff"
     },
     {
-      "id": 13992340182,
-      "name": "runtime-contract-d11c879a3d6e27499e1aea45736797a6e913b829",
-      "sha256": "68e0e76680c1d456977a27e392e2c611bb5c2e0852d00c10608e65990c01d691"
+      "id": 14004711871,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_four_domains_schema_test-0-",
+      "sha256": "c243d4b23e1ee8993f6edb3c31d6acbe167f464873518c6e179943c7fa2f1f71"
     },
     {
-      "id": 13992356135,
-      "name": "whatsapp-ui-d11c879a3d6e27499e1aea45736797a6e913b829",
-      "sha256": "b3542cb5ed166efea2dfc95d182c6785da8c571709c02a723ad942267cf5a480"
+      "id": 14004567118,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-0-contract_version",
+      "sha256": "db89067a56958e593dcb5a1ac29e3e32bc1489ece4f86901d675b243fc66dfe9"
     },
     {
-      "id": 13992697345,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-3-",
-      "sha256": "7fcebb84aaca2c85ae58f16dd20667cff7bca9f342f634162a222d8785db4013"
+      "id": 14004566627,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_four_domains_schema_authority_test-0-",
+      "sha256": "503316ff35e7ae09bb23ef6ebc018b1853a41f2c3a528c76b043b492e9674b63"
     },
     {
-      "id": 13992713369,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-0-",
-      "sha256": "757b0f5f839dce0483b4e2c1717cdfa18c675ea2445b4df935d5eb9d64f00c74"
+      "id": 14004546800,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_jornada_candidate_test-0-",
+      "sha256": "70c2f76805899ce9bba4e196901252b603655ab41fc5207ee4eb7cb90df90d37"
     },
     {
-      "id": 13992770333,
-      "name": "ag-frontend-d11c879a3d6e27499e1aea45736797a6e913b829",
-      "sha256": "ed6a23fc902de485e62ddec2194c283883d780e3167a7b5b7a37459fe63b182b"
+      "id": 14004421213,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-2-",
+      "sha256": "6e4ff9ff18b4be2962650439317b08c6189337b18a3737f916d72c08f79629d9"
     },
     {
-      "id": 13992803273,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-4-",
-      "sha256": "8efc2b2345dd3cc5231b708f8eaadb34bc090fc5f35c7ee0316228c64fdb70e1"
+      "id": 14004398935,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-0-document_scan",
+      "sha256": "7852a4442184af837de3905f35a16eb0f98ae8356d5ba06d46122fc70c2120c5"
     },
     {
-      "id": 13993570739,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-2-",
-      "sha256": "12394178d9d30e2fb2e2861692800d67e9e16e55287b1bc9fc664e1f7a3cbb60"
+      "id": 14004356471,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-3-",
+      "sha256": "a00de9b2d14028070515ced4ba0ec9958805c0d7daafef384d5be10c7c53ca11"
     },
     {
-      "id": 13993278798,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_jornada_candidate_test-0-",
-      "sha256": "28479ff168691ea0d1f9f9363f7934a872f6d8390a284a5365a573020842789f"
+      "id": 14004309669,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_jornada_candidate_test-0-reviewed_operations",
+      "sha256": "1ca3944dbf889427b40893401276342518c8caae8beea1eb9fbd2e7802b4290a"
     },
     {
-      "id": 13993637682,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-5-",
-      "sha256": "3a2c24e4d1e29484ab3bf971db95352fe3c0ec6b493b369dc15d060fcbd2e820"
+      "id": 14004191229,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-0-",
+      "sha256": "347d3a32810e46fd0416f4ba49eb2577dd74d34d746fb22b25c3d3fa325a5465"
     },
     {
-      "id": 13993637708,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_sd_candidate_test-0-",
-      "sha256": "54184eb446f22d95348d61062811112b4e49d25a7ea0261e322a239654688dfc"
+      "id": 14003788356,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade-jrc_rel_v2_candidate_test-1-",
+      "sha256": "a9b43e52ea516190c671733665caccd17c79874fafd85485aaeaf444b0b1b864"
     },
     {
-      "id": 13994036697,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_four_domains_schema_test-0-",
-      "sha256": "a5d6782d582766cd386c7a3f43d849b8d30bd9b338897bd2f7b74cd7c5baf512"
+      "id": 14003785716,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-0-signature_integration",
+      "sha256": "b15adf6fbbce05dfa3629d5252b46cf8d1f6b29a30198db2b562175716e50a33"
     },
     {
-      "id": 13994985295,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_four_domains_schema_authority_test-0-",
-      "sha256": "fdd30e727f6be318fd9a9d832c6e8a492723119f48f88ad1c5203a4b7d0c4a2d"
+      "id": 14003670752,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-0-document_scan",
+      "sha256": "b8cf67fcd0833a936a7bbee8c81700b34e99b5740492e5669d4cdff9b9f7ba04"
     },
     {
-      "id": 13993243783,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-0-document_scan",
-      "sha256": "73afb9450ce30283ae2b3294ac1a6ddb187a06fb45f33e0a8e022441abd0c221"
+      "id": 14003656679,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-0-signature_connection",
+      "sha256": "0e87187e20155c5369e2101370822e9ef1000a1013abf9ad24ce45c75b722152"
     },
     {
-      "id": 13993732199,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_four_domains_schema_admission_test-0-",
-      "sha256": "bc71f5af78b004fc49c13f82e86ae44ec6d057f327c74a1c76cba2a2a61b6c13"
+      "id": 14003401472,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-0-contract_version",
+      "sha256": "c6fa1e5afb8aea06a1ad563b7ceef063c687c3de3eb810e64b9e620fcf75f7c9"
     },
     {
-      "id": 13993837035,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_ag_retention_native_test-0-",
-      "sha256": "14e1d09239a929f1488af4df936d4906dbba50411eef739c5826e812ae6655b2"
+      "id": 14003301795,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-0-signing_identity",
+      "sha256": "c89a252b7a113698012337b5fd465ed3c3c77ad102fa3cc641efe19d8e0775b6"
     },
     {
-      "id": 13993628568,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-0-signing_identity",
-      "sha256": "a5f58ec7264e1891884f714e1a1b0dc1175bba70bbf44157de15f606a037884d"
+      "id": 14003286822,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-5-",
+      "sha256": "250e387d7eb1b232e0574bffea430c8f205061168785585913135492806455c0"
     },
     {
-      "id": 13994896076,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-0-contract_version",
-      "sha256": "ab4d4c546cec60726702e5ff9f4039fa90365462bd7caa0c0e6adf659709cd45"
+      "id": 14003202038,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_jornada_candidate_test-0-reviewed_operations",
+      "sha256": "1a517a7feaecf921ba254d2a6a05fbee1b30e51f41f18a59e547310bf280f29e"
     },
     {
-      "id": 13993668355,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_jornada_candidate_test-0-reviewed_operations",
-      "sha256": "5a4af56f0bc0b38f30b044a7ad74c9007ea42afaafc193214c6189ee256c6a54"
+      "id": 14003116193,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_four_domains_schema_test-0-",
+      "sha256": "d6493a34331e31e11106b2028f06a1adc50358f4917accf966f83817354da325"
     },
     {
-      "id": 13994546369,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-0-signature_connection",
-      "sha256": "05093bdec57548f493159008bd7a196431bc6a1e35b1df5c99c0e3159ba4d734"
+      "id": 14003025829,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-4-",
+      "sha256": "a005c692fc1c4eb716f1863fd5bd938e0229f3c3c2b470492f087eb9eab4a19f"
     },
     {
-      "id": 13995130075,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-fresh-jrc_rel_v2_candidate_test-0-signature_integration",
-      "sha256": "3ec4946ae87a1d5ce4ba1d866207584c1bbcbf71d808ab362d20030cdbe66da6"
+      "id": 14002956370,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_sd_candidate_test-0-",
+      "sha256": "77f98bda0439e956607c67d42e047391a2d69565cc094c21a60676e502b4453d"
     },
     {
-      "id": 13994039156,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-3-",
-      "sha256": "0c05837ea4e93d951d767579340be576fdd136e064afd805ba2fcb6cdb305ae4"
+      "id": 14002810495,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-0-",
+      "sha256": "04a9ed1f00678ba36b3935c81665e1fb57a6cdf790455ec8ca2f2d5a1db30d03"
     },
     {
-      "id": 13995490893,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-0-",
-      "sha256": "b4a2bf445ac657353be9ff5d0ea1acb6d6b8d3ea0a0051b70aab552d08090f54"
+      "id": 14002679784,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_four_domains_schema_admission_test-0-",
+      "sha256": "6bef656162a37d5f6f8d9bcb52452d5eabc7ee0421a704c31f54c64bedb7f532"
     },
     {
-      "id": 13995171567,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-1-",
-      "sha256": "7525c795073d2f29c23b3a11d6b0145d9152695ff129b63e3a36065a3e4b87b7"
+      "id": 14002562161,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-1-",
+      "sha256": "53462751d909251e27730a78d3188afe1cd7a138cd3cf66aeaf65f7b45b47911"
     },
     {
-      "id": 13994608513,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-2-",
-      "sha256": "420c02e2a302ea47e077dbac0fcc162a18494674c59b7c2210b6d78072cae67a"
+      "id": 14002355248,
+      "name": "whatsapp-native-5640793988fbf63ac46b0db3466722fc650f0d01",
+      "sha256": "735fafbb882f051cf2b1d77f810237f860f25dcadbf75ea80ba03149646d2545"
     },
     {
-      "id": 13995083366,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_sd_candidate_test-0-",
-      "sha256": "ecccd28ab698df732580f15e9250eb7070b61519187fbdf7f555f867b29808ed"
+      "id": 14002329163,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_ag_retention_native_test-0-",
+      "sha256": "80740366ea2c16245dc9ff7d1a73038cf80ca08ed9f4e46811a8c2409bd8ab29"
     },
     {
-      "id": 13995990836,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_jornada_candidate_test-0-",
-      "sha256": "ed2d98010e6140c1ae2ca48b24bf7d57fd1c835f87cfdd5ae671c4551a823bf9"
+      "id": 14002328340,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_jornada_candidate_test-0-",
+      "sha256": "61381ad1bc7f82001e86a99f5915e91b44c705872d0d908e51fcd085955485bc"
     },
     {
-      "id": 13995168577,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-4-",
-      "sha256": "2f3b5608b279144c587328451d48ae6164346cb8769168281a62aa5da838aa4f"
+      "id": 14002135486,
+      "name": "ag-frontend-5640793988fbf63ac46b0db3466722fc650f0d01",
+      "sha256": "af76706dfa599d4f79c13e04d33336ff0b20f26e7d5214b9549a8ff7bc52b6c6"
     },
     {
-      "id": 13996375536,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-5-",
-      "sha256": "2ea419de4c16edcce26c0f42799b965215b1c2d470615ab499cab0aa2ca7d437"
+      "id": 14002123984,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_four_domains_schema_authority_test-0-",
+      "sha256": "95710e97ab7ef069e8745dfba94471efd402b4dbc2498e79235410739c6a5951"
     },
     {
-      "id": 13995128964,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_four_domains_schema_authority_test-0-",
-      "sha256": "cdf3451dc4fd0e68aa08ee51f1a71d411a13fc2bb220f945b37a5c621e0bb938"
+      "id": 14001694202,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-2-",
+      "sha256": "bb428b66f55d3f63958fe9e86b2421d9923f22795424a7fb8f9a2eb23e90653e"
     },
     {
-      "id": 13995782121,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_ag_retention_native_test-0-",
-      "sha256": "0cd9e705d7c9e2ac9df455ef1d86aa1ab18749353028b29055296c75b364cfa7"
+      "id": 14001611064,
+      "name": "runtime-native-5640793988fbf63ac46b0db3466722fc650f0d01",
+      "sha256": "9cd6dc4bb1b5d93cc5f25d611518dc3f8e1b90e6c3325492251aeb6da86b606d"
     },
     {
-      "id": 13995866662,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_four_domains_schema_test-0-",
-      "sha256": "9d43ec400ad90fcadc5c56b7d51269fa83a42a2cff04311845c9006fb2f407f1"
+      "id": 14001552155,
+      "name": "ag-native-focused-5640793988fbf63ac46b0db3466722fc650f0d01-upgrade",
+      "sha256": "ed00b6321b19694849ff4c89486d57771e81dac3ef1dc612a1999120d6f1e4fd"
     },
     {
-      "id": 13995837095,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-0-signing_identity",
-      "sha256": "f111f70c02ddf0072e9bdcd40a211753b494d62258bab0e30991a41a21bd2c2d"
+      "id": 14001419399,
+      "name": "projects-portal-validation-5640793988fbf63ac46b0db3466722fc650f0d01",
+      "sha256": "490ef46790c8182712f4b0954953068fca2323161afbc75fee184d574741576c"
     },
     {
-      "id": 13995084508,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-0-document_scan",
-      "sha256": "a5a3f557cebd0aee6081f817d97e9f1c0d37a8c51e553634713390f08e48d232"
+      "id": 14001413545,
+      "name": "ag-native-5640793988fbf63ac46b0db3466722fc650f0d01-fresh-jrc_rel_v2_candidate_test-3-",
+      "sha256": "0bb37529247e5b8874fb95f850012074a761e6a4f10fdefd4634380714fc5dc2"
     },
     {
-      "id": 13995946623,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-0-contract_version",
-      "sha256": "1dcb2bd44a8fd2372d81cc347c4f28d70cdda13405def8001659ef109d9ab4c7"
+      "id": 14001302357,
+      "name": "ag-migration-admission-5640793988fbf63ac46b0db3466722fc650f0d01",
+      "sha256": "444002ac1928b3842c4ea559672a1ea86d6f38a451750b0d97c7a0c22e94f3e9"
     },
     {
-      "id": 13995184542,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-0-signature_connection",
-      "sha256": "abcd23fa291046acba8d5b1204a2bcd31344cc5e6d01db629678c7b7c8f9c1b3"
+      "id": 14000913723,
+      "name": "voice-v4-rails-5640793988fbf63ac46b0db3466722fc650f0d01",
+      "sha256": "8996c80cdd762c1538dd0cea7f87b60a5143b3c662689f2ff1ac4a4981e7975b"
     },
     {
-      "id": 13995329345,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_jornada_candidate_test-0-reviewed_operations",
-      "sha256": "1440a7c799854c0c8da6334370c7b8dea22f70d75da4bbcd5bef8cff1cc6b75a"
+      "id": 14000893704,
+      "name": "ag-native-focused-5640793988fbf63ac46b0db3466722fc650f0d01-fresh",
+      "sha256": "3e193b4cf125e481e5ff442f9b3e9322044caa04c6348118af0733027f406b21"
     },
     {
-      "id": 13995697769,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_rel_v2_candidate_test-0-signature_integration",
-      "sha256": "d5038cac72bc88f24697e36bd7035272fed8f7b16da60432f24f3adc6885a8f3"
+      "id": 14000842321,
+      "name": "runtime-contract-5640793988fbf63ac46b0db3466722fc650f0d01",
+      "sha256": "cb3e0e8b868a0cc7386a37bdb2bd0364668886cec43174df9596f4a6e766d5a4"
     },
     {
-      "id": 13996841511,
-      "name": "ag-native-d11c879a3d6e27499e1aea45736797a6e913b829-upgrade-jrc_four_domains_schema_admission_test-0-",
-      "sha256": "6bcebdc149b9c9eb1a14c544b03dc78fc2fb26ddcf1b881368a385def9b9eb12"
+      "id": 14000783967,
+      "name": "whatsapp-ui-5640793988fbf63ac46b0db3466722fc650f0d01",
+      "sha256": "3197e414020ef7b4fa36c26e3514a2de14bf019750d772e4bf9f6cb6091ef5b7"
     }
   ],
   "mandatory_jobs": [
     {
-      "id": 131549240492,
+      "id": 131621604986,
       "name": "identities"
     },
     {
-      "id": 131549442600,
-      "name": "frontend"
-    },
-    {
-      "id": 131549442646,
+      "id": 131621759057,
       "name": "incremental-lint"
     },
     {
-      "id": 131551306029,
+      "id": 131621759064,
+      "name": "frontend"
+    },
+    {
+      "id": 131623278371,
       "name": "runtime-compatibility"
     },
     {
-      "id": 131552267802,
+      "id": 131624166454,
       "name": "migration-admission"
     },
     {
-      "id": 131552268000,
-      "name": "incorporated-whatsapp / frontend"
-    },
-    {
-      "id": 131552268053,
+      "id": 131624166672,
       "name": "incorporated-whatsapp / regression"
     },
     {
-      "id": 131552268539,
+      "id": 131624166679,
+      "name": "incorporated-whatsapp / frontend"
+    },
+    {
+      "id": 131624167090,
       "name": "incorporated-voice / rails"
     },
     {
-      "id": 131552268598,
+      "id": 131624167190,
       "name": "incorporated-projects / rails"
     },
     {
-      "id": 131553972087,
-      "name": "native-focused (fresh)"
-    },
-    {
-      "id": 131553972164,
+      "id": 131625416676,
       "name": "native-focused (upgrade)"
     },
     {
-      "id": 131555531581,
-      "name": "rails (fresh, jrc_rel_v2_candidate_test, 3, 6)"
+      "id": 131625416754,
+      "name": "native-focused (fresh)"
     },
     {
-      "id": 131555531610,
-      "name": "rails (fresh, jrc_rel_v2_candidate_test, 4, 6)"
-    },
-    {
-      "id": 131555531622,
-      "name": "rails (fresh, jrc_rel_v2_candidate_test, 2, 6)"
-    },
-    {
-      "id": 131555531641,
-      "name": "rails (fresh, jrc_rel_sd_candidate_test, 0, 1)"
-    },
-    {
-      "id": 131555531643,
-      "name": "rails (fresh, jrc_ag_retention_native_test, 0, 1)"
-    },
-    {
-      "id": 131555531649,
-      "name": "rails (fresh, jrc_four_domains_schema_test, 0, 1)"
-    },
-    {
-      "id": 131555531660,
-      "name": "rails (fresh, jrc_four_domains_schema_admission_test, 0, 1)"
-    },
-    {
-      "id": 131555531687,
+      "id": 131626666965,
       "name": "rails (fresh, jrc_rel_v2_candidate_test, 5, 6)"
     },
     {
-      "id": 131555531701,
-      "name": "rails (fresh, jrc_jornada_candidate_test, 0, 1)"
+      "id": 131626666967,
+      "name": "rails (fresh, jrc_rel_v2_candidate_test, 2, 6)"
     },
     {
-      "id": 131555531711,
+      "id": 131626666970,
+      "name": "rails (fresh, jrc_four_domains_schema_admission_test, 0, 1)"
+    },
+    {
+      "id": 131626666998,
       "name": "rails (fresh, jrc_rel_v2_candidate_test, 0, 1, document_scan)"
     },
     {
-      "id": 131555531741,
-      "name": "rails (fresh, jrc_four_domains_schema_authority_test, 0, 1)"
-    },
-    {
-      "id": 131555531745,
-      "name": "rails (fresh, jrc_rel_v2_candidate_test, 1, 6)"
-    },
-    {
-      "id": 131555531759,
-      "name": "rails (fresh, jrc_rel_v2_candidate_test, 0, 1, signing_identity)"
-    },
-    {
-      "id": 131555531796,
+      "id": 131626667007,
       "name": "rails (fresh, jrc_rel_v2_candidate_test, 0, 6)"
     },
     {
-      "id": 131555534247,
+      "id": 131626667011,
+      "name": "rails (fresh, jrc_jornada_candidate_test, 0, 1)"
+    },
+    {
+      "id": 131626667014,
+      "name": "rails (fresh, jrc_four_domains_schema_authority_test, 0, 1)"
+    },
+    {
+      "id": 131626667035,
+      "name": "rails (fresh, jrc_ag_retention_native_test, 0, 1)"
+    },
+    {
+      "id": 131626667043,
+      "name": "rails (fresh, jrc_rel_v2_candidate_test, 0, 1, signing_identity)"
+    },
+    {
+      "id": 131626667047,
+      "name": "rails (fresh, jrc_rel_v2_candidate_test, 3, 6)"
+    },
+    {
+      "id": 131626667048,
+      "name": "rails (fresh, jrc_rel_v2_candidate_test, 1, 6)"
+    },
+    {
+      "id": 131626667065,
+      "name": "rails (fresh, jrc_rel_sd_candidate_test, 0, 1)"
+    },
+    {
+      "id": 131626667079,
+      "name": "rails (fresh, jrc_rel_v2_candidate_test, 4, 6)"
+    },
+    {
+      "id": 131626667134,
+      "name": "rails (fresh, jrc_four_domains_schema_test, 0, 1)"
+    },
+    {
+      "id": 131626668858,
       "name": "rails (fresh, jrc_rel_v2_candidate_test, 0, 1, contract_version)"
     },
     {
-      "id": 131555534272,
-      "name": "rails (fresh, jrc_rel_v2_candidate_test, 0, 1, signature_integration)"
-    },
-    {
-      "id": 131555534288,
-      "name": "rails (fresh, jrc_rel_v2_candidate_test, 0, 1, signature_connection)"
-    },
-    {
-      "id": 131555534330,
-      "name": "rails (upgrade, jrc_rel_v2_candidate_test, 1, 6)"
-    },
-    {
-      "id": 131555534425,
+      "id": 131626668868,
       "name": "rails (fresh, jrc_jornada_candidate_test, 0, 1, reviewed_operations)"
     },
     {
-      "id": 131555534482,
+      "id": 131626668900,
+      "name": "rails (upgrade, jrc_rel_v2_candidate_test, 1, 6)"
+    },
+    {
+      "id": 131626668902,
+      "name": "rails (fresh, jrc_rel_v2_candidate_test, 0, 1, signature_integration)"
+    },
+    {
+      "id": 131626668916,
+      "name": "rails (fresh, jrc_rel_v2_candidate_test, 0, 1, signature_connection)"
+    },
+    {
+      "id": 131626668923,
       "name": "rails (upgrade, jrc_rel_v2_candidate_test, 0, 6)"
     },
     {
-      "id": 131555534499,
+      "id": 131626669009,
       "name": "rails (upgrade, jrc_rel_v2_candidate_test, 2, 6)"
     },
     {
-      "id": 131555534562,
-      "name": "rails (upgrade, jrc_rel_v2_candidate_test, 3, 6)"
-    },
-    {
-      "id": 131555534604,
+      "id": 131626669037,
       "name": "rails (upgrade, jrc_rel_v2_candidate_test, 4, 6)"
     },
     {
-      "id": 131555534834,
+      "id": 131626669043,
+      "name": "rails (upgrade, jrc_rel_v2_candidate_test, 3, 6)"
+    },
+    {
+      "id": 131626669091,
       "name": "rails (upgrade, jrc_rel_v2_candidate_test, 5, 6)"
     },
     {
-      "id": 131555536306,
+      "id": 131626670486,
       "name": "rails (upgrade, jrc_four_domains_schema_admission_test, 0, 1)"
     },
     {
-      "id": 131555536429,
+      "id": 131626670488,
       "name": "rails (upgrade, jrc_rel_sd_candidate_test, 0, 1)"
     },
     {
-      "id": 131555536447,
+      "id": 131626670569,
       "name": "rails (upgrade, jrc_jornada_candidate_test, 0, 1)"
     },
     {
-      "id": 131555536566,
+      "id": 131626670622,
       "name": "rails (upgrade, jrc_four_domains_schema_authority_test, 0, 1)"
     },
     {
-      "id": 131555536637,
-      "name": "rails (upgrade, jrc_four_domains_schema_test, 0, 1)"
-    },
-    {
-      "id": 131555536715,
-      "name": "rails (upgrade, jrc_ag_retention_native_test, 0, 1)"
-    },
-    {
-      "id": 131555536725,
-      "name": "rails (upgrade, jrc_rel_v2_candidate_test, 0, 1, signing_identity)"
-    },
-    {
-      "id": 131555536846,
-      "name": "rails (upgrade, jrc_rel_v2_candidate_test, 0, 1, document_scan)"
-    },
-    {
-      "id": 131555536847,
-      "name": "rails (upgrade, jrc_rel_v2_candidate_test, 0, 1, contract_version)"
-    },
-    {
-      "id": 131555536870,
+      "id": 131626670634,
       "name": "rails (upgrade, jrc_rel_v2_candidate_test, 0, 1, signature_integration)"
     },
     {
-      "id": 131555538652,
-      "name": "rails (upgrade, jrc_jornada_candidate_test, 0, 1, reviewed_operations)"
+      "id": 131626670638,
+      "name": "rails (upgrade, jrc_four_domains_schema_test, 0, 1)"
     },
     {
-      "id": 131555538681,
+      "id": 131626670647,
+      "name": "rails (upgrade, jrc_rel_v2_candidate_test, 0, 1, signing_identity)"
+    },
+    {
+      "id": 131626670650,
+      "name": "rails (upgrade, jrc_rel_v2_candidate_test, 0, 1, contract_version)"
+    },
+    {
+      "id": 131626670727,
+      "name": "rails (upgrade, jrc_ag_retention_native_test, 0, 1)"
+    },
+    {
+      "id": 131626670741,
+      "name": "rails (upgrade, jrc_rel_v2_candidate_test, 0, 1, document_scan)"
+    },
+    {
+      "id": 131626672169,
       "name": "rails (upgrade, jrc_rel_v2_candidate_test, 0, 1, signature_connection)"
+    },
+    {
+      "id": 131626672290,
+      "name": "rails (upgrade, jrc_jornada_candidate_test, 0, 1, reviewed_operations)"
     }
   ],
   "approved_skipped_job": {
-    "id": 131585675268,
+    "id": 131650579225,
     "name": "guarded-candidate-build"
   },
   "source_hashes": {
@@ -726,7 +729,7 @@
     "app/models/jrc_crm/backoffice_request.rb": "599bc1fce954fe4bcc58aa98117722628001939b24f77522f178bd0bb90331bd",
     "db/migrate/20261111150000_create_whatsapp_retry_attempts.rb": "481b757bc0ddda6169d325d42ee48b79d4a7e4eba2de3ecc1f35d03ed928f48f",
     "db/migrate/20261112000000_create_service_desk_report_exports.rb": "14b7cefc0dab82448fce24eab5e29fee29a82f4fd09eeaf81fe264e6ba421b94",
-    "docker/Dockerfile": "e1355092f12dfcec85903bf5c7923a66a790dde78d7a40fdd67407f9f49da2d6",
+    "docker/Dockerfile": "78b0eabbef23ff1bfbff54ea713bfed90084258108eb01248da140c596e16b07",
     "docs/jrc_consolidation/ag_historical_migration_admission_20261111.json": "1a91e8cb39d883d84f7fb9daf1d2947b14cc644a195b8767e0003853ae0572e6",
     "docs/jrc_consolidation/runtime_candidate_20261112.json": "0ac318034fb77d96d61a6dd8b90e646af1637509d704854b103aa66d4ec57a10",
     "package.json": "a92f47574ac0c9294f26819dbc87e6694e7c85b6dab6eba04c75e800e560a080",
@@ -734,7 +737,7 @@
     "script/jrc_ag_guarded_frontend_build.py": "18fa3a0e7af674e78e59cda0815805f65c88072dbfb80e6a327c87cf5f84e2c4",
     "script/jrc_ag_guarded_image_build.py": "f8d98a4ecfe255dad5a859c99d3f823bf50e045f021e814a3c1b0f97b5951b16",
     "script/jrc_ag_native_plan.py": "d6541ccbab07c864b0840644b578b5270c69a8db2c349aa7aac39dcd06154fa9",
-    "script/jrc_runtime_contract_test.py": "6b04f17cd0d50895dcf7524ce81e2448065bfc08d356da3dc50333776a85b18d",
+    "script/jrc_runtime_contract_test.py": "d8fa635c7560596ebc6750bc5ca8a4f088f9451d06b8bfdde397bd61d470b125",
     "script/validate_ag_historical_migrations.mjs": "9a9223426da70dfdca3376d8153671b365cde9dca1fabeaec767ed3fc21ff27a",
     "script/validate_ag_migration_identity.mjs": "44cf4712f475845e3d31864b161c9807b48bf7f76d7d13df410d1c6cef048baf",
     "script/validate_migration_timestamps.mjs": "d9d2e69219c19ba23c70ddd0e4bca4f91b37b31a8c09cf0c9ef662afd27b8f36",
@@ -742,20 +745,23 @@
     "test/jrc_runtime/runtime_compatibility_spec.rb": "69f23c23df906a2c2a131b391be8ec410ac5f44a6dde58c6a72975855a1f11cf",
     "test/jrc_runtime/sidekiq_worker.rb": "07badc8d904daa403a5ec52895d2b1b357e2a132b8dd28d0150a51467ad84485",
     "script/jrc_runtime_contract_test_test.py": "05e6acbea28de5a00fc9ca326c457098d0a63458cd973462040692e04ccc5d5d",
-    "docs/jrc_consolidation/scout_native_fix_20261112.json": "0208361723b74f5c1a97ad0748f9fb481892e0a71b6b595c1ba041a82b133a39"
+    "docs/jrc_consolidation/scout_native_fix_20261112.json": "0208361723b74f5c1a97ad0748f9fb481892e0a71b6b595c1ba041a82b133a39",
+    "script/jrc_vite_build.mjs": "3d5b5eae4baa1a67f0f2a79aa43d24c412fba6a6a35200915924defdc46fc3f5",
+    "script/jrc_vite_build.test.mjs": "4012f8f9ed9d9677a94754aa0bee6cbbd6d357b2ebd6390c106131b6a688ef36",
+    "docs/jrc_consolidation/vite_heap6144_preparation_20261112.json": "3024265afb980ceb9108d5806c51b035c9f1c54e8b1c03c8fdae864b7f178706"
   },
   "evidence": {
     "repository": "ClaudioHideki/jrc-conversas-ci-evidencias",
     "namespace_base_sha": "6195f7d21a0781cd5c5cf4d13bd73a497bb5a452",
-    "product_sha": "d11c879a3d6e27499e1aea45736797a6e913b829",
+    "product_sha": "5640793988fbf63ac46b0db3466722fc650f0d01",
     "coverage_receipt": {
-      "commit": "9b3335f4db847642a09e44c459675985d14b369b",
-      "manifest_path": "evidence/6195f7d21a0781cd5c5cf4d13bd73a497bb5a452/runtime-image-d11c879a/native-43323289272/complete/manifest.json",
-      "manifest_sha256": "d0d8cdffad135ae3aad290f058f61aae4d0494d1b312076e9c161a8758b4acd3",
-      "verified_files": 5,
+      "commit": "248557a2b34d3f7888de83493f3ab398054d6318",
+      "manifest_path": "evidence/6195f7d21a0781cd5c5cf4d13bd73a497bb5a452/runtime-image-heap56407939/native-43344850748/complete/manifest.json",
+      "manifest_sha256": "95a4bd4d445b8f02c9831e22eb2e8de83b38ab62aa6442e8041923c66f05e096",
+      "verified_files": 53,
       "private": true
     },
-    "coverage_sha256": "100771d32ec09ff02b8774542c2e54c47a2a3662c979e346f938b77b345fbddc"
+    "coverage_sha256": "181bae73fdda98257bb1f172ab16e8dfe81eeab790df6361ae670c5201cea4a2"
   },
   "expected_matrix_examples": 5554,
   "expected_artifact_count": 46,

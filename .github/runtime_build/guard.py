@@ -13,9 +13,9 @@ import urllib.request
 import urllib.error
 import uuid
 
-PRODUCT = "d11c879a3d6e27499e1aea45736797a6e913b829"
-APPROVED = "716647d67e96b77e8a56125ab0033c173bd68485"
-BRANCH = "ci/runtime-build-scout-d11c879a-20261112"
+PRODUCT = "5640793988fbf63ac46b0db3466722fc650f0d01"
+APPROVED = "87cf2661a2cb027bdf8fea8f36a800b991bac6cb"
+BRANCH = "ci/runtime-build-heap56407939-20261112"
 REPO = "ClaudioHideki/jrc-conversas-lab2"
 BUILDKIT = "mirror.gcr.io/moby/buildkit:v0.33.1@sha256:98cc6a3fc46220d00f8224ae483f3274fc874e9be8d7dd1e2e2c5481209228b5"
 PG = "pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a"
@@ -52,6 +52,76 @@ def limits():
     return module
 
 
+START_EFFECTIVE_RAM = 8 * 1024 ** 3
+
+
+def effective_memory(host_available, capacities):
+    require(type(host_available) is int and host_available >= 0, "Invalid physical memory sample")
+    free = host_available
+    for limit, current in capacities:
+        require(type(limit) is int and type(current) is int and limit > 0 and current >= 0,
+                "Invalid cgroup memory sample")
+        free = min(free, max(0, limit - current))
+    return free
+
+
+def cgroup_capacities():
+    root = Path("/sys/fs/cgroup")
+    unified = [line.split(":", 2)[2] for line in Path("/proc/self/cgroup").read_text().splitlines()
+               if line.startswith("0::")]
+    require(len(unified) == 1, "Unified cgroup hierarchy required on Ubuntu 24.04")
+    relative = Path(unified[0].lstrip("/"))
+    require(".." not in relative.parts, "Unexpected cgroup namespace")
+    current = root / relative
+    require(current.is_dir(), "Process cgroup directory unavailable")
+    values = []
+    while True:
+        limit_path = current / "memory.max"
+        if limit_path.is_file():
+            raw = limit_path.read_text().strip()
+            if raw != "max":
+                values.append((int(raw), int((current / "memory.current").read_text().strip())))
+        if current == root:
+            break
+        current = current.parent
+    return values
+
+
+def effective_sample(limits_module):
+    sample = limits_module.sample()
+    sample["physical_ram_available"] = sample["ram_available"]
+    sample["cgroup_capacities"] = cgroup_capacities()
+    sample["ram_available"] = effective_memory(sample["ram_available"], sample["cgroup_capacities"])
+    return sample
+
+
+def starting_memory_reason(available, starting):
+    return "effective_ram_start_below_8_GiB" if starting and available < START_EFFECTIVE_RAM else None
+
+
+def frontend_receipt(log):
+    events = []
+    marker = '{"component":"jrc_vite_heap"'
+    for line in log.splitlines():
+        if marker in line:
+            events.append(json.loads(line[line.index(marker):]))
+    starts = [e for e in events if "initial" in e]
+    ends = [e for e in events if "passed" in e]
+    require(len(starts) == len(ends) == 1, "Actual guarded Vite execution receipt missing or duplicated")
+    require(starts[0]["heapMiB"] == 6144 and starts[0]["initial"]["availableMemory"] >= START_EFFECTIVE_RAM
+            and starts[0]["initial"]["diskFree"] >= 3*1024**3, "Actual Vite start budget differs")
+    require(ends[0]["passed"] is True and ends[0]["code"] == 0 and ends[0]["reason"] is None
+            and ends[0]["minimumMemory"] > 750*1024**2 and ends[0]["minimumDisk"] > 750000000,
+            "Actual Vite resource/exit receipt failed")
+    return {"passed": True, "events": events, "heap_mib": 6144, "build_only": True}
+
+
+def runtime_environment(env):
+    require(not any(item.startswith(("JRC_VITE_BUILD_HEAP_MIB=", "VITE_RUBY_VITE_BIN_PATH="))
+                    or (item.startswith("NODE_OPTIONS=") and "6144" in item) for item in env),
+            "Frontend build heap leaked into normal runtime environment")
+
+
 def build_command(builder, output):
     return ["docker", "buildx", "build", "--builder", builder, "--load", "--platform", "linux/amd64",
             "--file", "docker/Dockerfile", "--build-arg", "GIT_SHA=" + PRODUCT,
@@ -75,14 +145,14 @@ class Attempt:
         self.builder_id = None
         self.builder_created = False
         self.builder_stopped = False
-        self.result = {"authorized_image_attempt": 2, "previous_image_run": 43314230369,
+        self.result = {"authorized_image_attempt": 3, "previous_image_run": 43335745347,
                        "product_sha": PRODUCT, "approved_gate_sha": APPROVED,
                        "execution_sha": os.environ["GITHUB_SHA"], "run_id": os.environ["GITHUB_RUN_ID"],
                        "build_started": False, "build_passed": False, "smoke_passed": False,
                        "published": False, "phases": [], "initial": None, "disk_min": None, "ram_min": None}
 
     def sample(self, starting=False):
-        s = self.limits.sample()
+        s = effective_sample(self.limits)
         if self.result["initial"] is None:
             self.result["initial"] = s
             self.result["disk_min"] = s["disk_free"]
@@ -90,7 +160,7 @@ class Attempt:
         self.result["disk_min"] = min(self.result["disk_min"], s["disk_free"])
         self.result["ram_min"] = min(self.result["ram_min"], s["ram_available"])
         self.result["final"] = s
-        reason = self.limits.resource_reason(s["disk_free"], s["ram_available"], starting=starting)
+        reason = starting_memory_reason(s["ram_available"], starting) or self.limits.resource_reason(s["disk_free"], s["ram_available"], starting=starting)
         require(not reason, reason or "resources")
         return s
 
@@ -184,6 +254,7 @@ class Attempt:
         self.command(["docker", "buildx", "inspect", "--builder", self.name, "--bootstrap"], "bootstrap-builder", 300)
         builder = self.inspect("buildx_buildkit_" + self.name + "0")
         require(builder["Config"]["Image"] == BUILDKIT and builder["State"]["Running"], "Pinned owned builder required")
+        require(builder["HostConfig"].get("Memory", 0) == 0, "Unexpected builder memory cap; separate validation required")
         self.builder_id = builder["Id"]
         self.sample(starting=True)
         self.limits.no_other_vite_build()
@@ -192,11 +263,15 @@ class Attempt:
         with marker.open("x") as stream:
             json.dump({"product_sha": PRODUCT, "execution_sha": os.environ["GITHUB_SHA"], "builder_id": self.builder_id}, stream)
         self.result["build_started"] = True
-        self.command(build_command(self.name, self.output), "image-build", 3600, SOURCE)
+        build_log = self.command(build_command(self.name, self.output), "image-build", 3600, SOURCE)
+        self.result["frontend_heap"] = frontend_receipt(build_log)
+        (self.output / "frontend-heap-receipt.json").write_text(json.dumps(self.result["frontend_heap"], indent=2) + "\n")
         image = "jrc-runtime-candidate:sha-" + PRODUCT
         info = json.loads(self.command(["docker", "image", "inspect", image], "image-inspect"))[0]
         metadata = json.loads((self.output / "metadata.json").read_text())
         require(info["Os"] == "linux" and info["Architecture"] == "amd64", "Wrong image platform")
+        runtime_environment(info["Config"].get("Env", []))
+        self.result["runtime_heap_environment_unchanged"] = True
         require(info["Config"]["Labels"]["org.opencontainers.image.revision"] == PRODUCT, "Wrong image revision")
         digest = metadata.get("containerimage.digest", "")
         require(re.fullmatch("sha256:[0-9a-f]{64}", digest), "Image manifest digest missing")
@@ -306,7 +381,7 @@ class Attempt:
                 subprocess.run(["docker", "stop", "--time", "10", current["Id"]], check=True, stdout=subprocess.DEVNULL, timeout=20)
             except Exception as error:
                 self.result.setdefault("owned_stop_errors", []).append(type(error).__name__)
-        self.result["final"] = self.limits.sample()
+        self.result["final"] = effective_sample(self.limits)
         self.result["seconds"] = round(time.monotonic() - self.start, 3)
         (self.output / "result.json").write_text(json.dumps(self.result, indent=2) + "\n")
         files = [{"path": p.name, "bytes": p.stat().st_size, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}

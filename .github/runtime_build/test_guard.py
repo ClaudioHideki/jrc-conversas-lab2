@@ -109,9 +109,57 @@ class GuardTest(unittest.TestCase):
             kill.assert_not_called()
 
 
+    def test_effective_start_requires_eight_gib(self):
+        self.assertIsNone(guard.starting_memory_reason(8*1024**3, True))
+        self.assertEqual(guard.starting_memory_reason(8*1024**3-1, True), "effective_ram_start_below_8_GiB")
+        self.assertEqual(guard.starting_memory_reason(5*1024**3, True), "effective_ram_start_below_8_GiB")
+        self.assertIsNone(guard.starting_memory_reason(7*1024**3, False))
+
+    def test_effective_memory_respects_all_actual_cgroup_constraints(self):
+        self.assertEqual(guard.effective_memory(14*1024**3, []), 14*1024**3)
+        self.assertEqual(guard.effective_memory(14*1024**3, [(10*1024**3, 3*1024**3)]), 7*1024**3)
+        self.assertEqual(guard.effective_memory(6*1024**3, [(10*1024**3, 3*1024**3)]), 6*1024**3)
+        self.assertEqual(guard.effective_memory(14*1024**3, [(10*1024**3, 3*1024**3), (8*1024**3, 4*1024**3)]), 4*1024**3)
+        self.assertEqual(guard.effective_memory(100, [(1, 2)]), 0)
+        for capacities in [[(0, 1)], [(1, -1)], [("max", 1)]]:
+            with self.assertRaises(RuntimeError):
+                guard.effective_memory(100, capacities)
+
+    def test_effective_sample_keeps_physical_and_process_budgets_separate(self):
+        module = unittest.mock.Mock()
+        module.sample.return_value = {"ram_available": 14*1024**3, "disk_free": 4*1024**3}
+        with patch("guard.cgroup_capacities", return_value=[(10*1024**3, 3*1024**3)]):
+            result = guard.effective_sample(module)
+        self.assertEqual(result["physical_ram_available"], 14*1024**3)
+        self.assertEqual(result["ram_available"], 7*1024**3)
+        self.assertEqual(result["disk_free"], 4*1024**3)
+
+
+
+    def test_actual_frontend_receipt_requires_guarded_six_gib_child_and_budget(self):
+        first = {"component":"jrc_vite_heap","heapMiB":6144,"initial":{"availableMemory":8*1024**3,"diskFree":3*1024**3}}
+        last = {"component":"jrc_vite_heap","passed":True,"code":0,"reason":None,
+                "minimumMemory":750*1024**2+1,"minimumDisk":750000001}
+        log = "#1 0.1 " + json.dumps(first,separators=(",",":")) + "\n#1 2.0 " + json.dumps(last,separators=(",",":"))
+        self.assertTrue(guard.frontend_receipt(log)["passed"])
+        for invalid in ["", log+"\n"+json.dumps(last,separators=(",",":")),
+                        log.replace('"heapMiB":6144','"heapMiB":4096'),
+                        log.replace('"passed":true','"passed":false')]:
+            with self.assertRaises(RuntimeError):
+                guard.frontend_receipt(invalid)
+
+    def test_normal_runtime_must_not_inherit_frontend_heap_hook(self):
+        guard.runtime_environment(["RAILS_ENV=production","NODE_OPTIONS=--max-old-space-size=4096"])
+        for env in [["NODE_OPTIONS=--max-old-space-size=6144"],
+                    ["JRC_VITE_BUILD_HEAP_MIB=6144"],
+                    ["VITE_RUBY_VITE_BIN_PATH=/app/script/jrc_vite_build.mjs"]]:
+            with self.assertRaises(RuntimeError):
+                guard.runtime_environment(env)
+
+
 if __name__ == "__main__":
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(GuardTest)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     report = {"tests":result.testsRun,"failures":len(result.failures),"errors":len(result.errors),"skipped":len(result.skipped)}
     Path(os.environ["GUARD_TEST_REPORT"]).write_text(json.dumps(report)+"\n")
-    sys.exit(0 if result.wasSuccessful() and result.testsRun==11 and not result.skipped else 1)
+    sys.exit(0 if result.wasSuccessful() and result.testsRun==16 and not result.skipped else 1)
