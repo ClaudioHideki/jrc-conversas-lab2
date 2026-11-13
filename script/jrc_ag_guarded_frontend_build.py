@@ -21,6 +21,7 @@ START_RAM = 5 * GIB
 STOP_DISK = 750_000_000
 STOP_RAM = 750 * 1024 ** 2
 BRANCH = 'refs/heads/codex/lab2-ag-consolidada-20261110'
+APPROVED_BRANCHES = {BRANCH, 'refs/heads/codex/whatsapp-history-order-20261111'}
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -39,7 +40,7 @@ def resource_reason(disk, ram, starting=False):
 
 def authorize(env, expected):
     allowed = (sys.platform == 'linux' and env.get('GITHUB_ACTIONS') == 'true' and
-               env.get('RUNNER_ENVIRONMENT') == 'github-hosted' and env.get('GITHUB_REF') == BRANCH and
+               env.get('RUNNER_ENVIRONMENT') == 'github-hosted' and env.get('GITHUB_REF') in APPROVED_BRANCHES and
                env.get('GITHUB_EVENT_NAME') == 'workflow_dispatch' and env.get('GITHUB_RUN_ATTEMPT') == '1')
     if not allowed:
         raise RuntimeError('Exclusive hosted first-attempt manual workflow required')

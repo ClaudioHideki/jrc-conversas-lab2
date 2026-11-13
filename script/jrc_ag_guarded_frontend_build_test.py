@@ -37,6 +37,13 @@ class BuildAdmissionTest(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 authorize(self.env, self.sha)
 
+    def test_exact_history_consolidation_branch_keeps_all_existing_guards(self):
+        candidate = {**self.env, 'GITHUB_REF': 'refs/heads/codex/whatsapp-history-order-20261111'}
+        with patch('jrc_ag_guarded_frontend_build.sys.platform', 'linux'):
+            authorize(candidate, self.sha)
+            with self.assertRaises(RuntimeError):
+                authorize({**candidate, 'GITHUB_SHA': 'b' * 40}, self.sha)
+
 
 if __name__ == '__main__':
     unittest.main()

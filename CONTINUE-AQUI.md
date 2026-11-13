@@ -1,3 +1,11 @@
+# Consolidação A–G + runtime + histórico — 12/11/2026
+
+Base A–G/histórico consolidada em `c6eb87661bfd2dd5f50e3868f30706770b562655`; runtime/Scout de `d11c879a3d6e27499e1aea45736797a6e913b829` incorporado seletivamente, sem descartar os incrementos abaixo. Main `d8a83b824b11cc68ddbbce7c79681f368051fb70` reconferida e ancestral. Branch `codex/whatsapp-history-order-20261111`; nenhuma main alterada. Detalhes, conflitos, provas e gates: `docs/jrc_consolidation/whatsapp_history_release_20261112.md`.
+
+Os contratos estáticos e de segurança do build passaram. A CI nova deverá testar o SHA consolidado e construir/provar o runtime Alpine antes da publicação opcional. Gates antigos não aprovam este binário. Deploy autorizado para a etapa final, mas ainda não executado neste checkpoint; controle do Dokploy indisponível. Não habilitar captura de sessões reais por efeito da atualização nem confundir teste sintético com histórico completo do telefone. Nenhuma rotina de backup/dump/restore.
+
+---
+
 # Continuação local: mídia de origem e progresso, 12/11/2026
 
 Este registro substitui as pendências já implementadas dos checkpoints abaixo, sem transformar evidência antiga em aprovação do novo candidato. Bases preservadas: Broker ece27d13584b8eee661ccc2e8a792308c7fcd827 e LAB2 e919b0ac7eaa95f844880e6f60bb8092d603f94b. Mains reconferidas nesta rodada: Broker29095bea e LAB2d8a83b82, ambas ancestrais; sem merge/push/deploy.

@@ -1,0 +1,22 @@
+{
+  "source_sha": "dce805894696416ed5397c268efb4acecb8ecfc7",
+  "scope": "Official Scout GCC 15 fix and isolated Sidekiq probe correction; no application image build.",
+  "scout": {
+    "from": "5.3.3",
+    "to": "5.7.0",
+    "gem_sha256": "5d13f38018d437fcf18aab954b5a1618cc4114c80175d565069bb287e487c7a6",
+    "upstream_pr": "https://github.com/scoutapp/scout_apm_ruby/pull/552",
+    "upstream_merge": "4e67852ba76a3c44e2dfe6b9012fc56d7b4df04e",
+    "reason": "C23 zero-argument callback declaration is incompatible with Ruby VALUE receiver; official release corrects callback signature.",
+    "configuration_unchanged": true,
+    "monitoring_not_disabled": true
+  },
+  "sidekiq": {
+    "location": "Separate CI infrastructure branch; positive Integer PID, including 1, with exact SHA, nonce, Redis and PostgreSQL receipt equality."
+  },
+  "pending": [
+    "Focused native execution results recorded separately in private evidence repository.",
+    "New product SHA must pass required release gates; prior SHA approvals do not transfer automatically.",
+    "Full application image build and smoke tests require new authorization."
+  ]
+}

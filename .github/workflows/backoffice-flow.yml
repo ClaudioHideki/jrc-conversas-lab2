@@ -69,7 +69,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng redis-server
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: '3.4.12'
           bundler: 2.5.16
           bundler-cache: true
       - name: Preparar banco descartavel
@@ -180,7 +180,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: '3.4.12'
           bundler: 2.5.16
           bundler-cache: true
       - uses: actions/setup-node@v4
@@ -239,6 +239,7 @@ jobs:
           fixture_pid=$!
           trap 'kill -TERM "$fixture_pid" 2>/dev/null || true; wait "$fixture_pid" 2>/dev/null || true' EXIT
           for attempt in {1..60}; do
+            printf 'MinIO synthetic readiness attempt %s/60\n' "$attempt"
             if curl --fail --silent "$JRC_IMPORT_MINIO_ENDPOINT/minio/health/cluster"; then break; fi
             sleep 1
           done

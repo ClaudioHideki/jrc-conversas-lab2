@@ -1,0 +1,87 @@
+{
+  "base_sha": "cad427d400d824fc1fdc06c1c1079f324e7f3f6c",
+  "branch": "codex/runtime-alpine324-ci-20261112",
+  "ruby": {
+    "version": "3.4.12",
+    "patchlevel": 148,
+    "tag": "docker.io/library/ruby:3.4.12-alpine3.24",
+    "digest": "sha256:a28982cf8ed78eb0d222e51bc6788335d33ef191bfc6fc39da138577e611741d",
+    "amd64_digest": "sha256:ced200c03628547d672775c35a4aa03e5b27fb3d6f4d067c9c2308b2f4d80f16",
+    "patchlevel_source": "https://raw.githubusercontent.com/ruby/ruby/v3_4_12/version.h"
+  },
+  "node": {
+    "version": "24.22.3",
+    "tag": "docker.io/library/node:24.22.3-alpine3.24",
+    "digest": "sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5",
+    "amd64_digest": "sha256:d8d97e479cdc64f052f81f129362168717c59783ade8dcc1abd22e1cca8dbd7c"
+  },
+  "changes": [
+    "Align declared versions and all project Ruby workflow pins",
+    "Keep gem dependency versions and pnpm lock unchanged",
+    "Align both Ruby stages with Node on Alpine 3.24; explicit libstdc++/libgcc; remove distro Ruby packages conflicting with official Ruby headers",
+    "Keep the 36 native identities and incorporated regressions; add owned Ubuntu runtime compatibility proof",
+    "Block production Vite/image builds for preparation branch; leave approved release-infrastructure branch untouched",
+    "Audited Backoffice protocol allocation correction: bounded attempts against existing account-scoped numbers, same format and unchanged unique index/history.",
+    "Fix two pre-existing shell lint findings and validate all 17 modified workflows before running the native matrix; no test or lint suppression."
+  ],
+  "protected": [
+    "Application sources except the exact reviewed protocol generator; migrations, SQL, schemas, policies, unit/account scopes and all other functional sources unchanged.",
+    "Main and both old candidate branches",
+    "Independent NICO/Flows image sources",
+    "Local workspace, servers, containers, banks and budgets"
+  ],
+  "preparation_validation": [
+    "Static source/version/lock contract",
+    "Actionlint, Bash and existing migration safety tests",
+    "New exact-SHA Rails A–G 36 matrix, focused, migration fresh/upgrade/reload, frontend, incorporated Projects/Portal/Voice/WhatsApp",
+    "Real Ubuntu native libs, PDF/DejaVu, XLSX scoped exports, Poppler/Tesseract por+eng, Rails and one owned Sidekiq process on synthetic PostgreSQL/Redis"
+  ],
+  "build_authorized": false,
+  "ghcr_authorized": false,
+  "deploy_authorized": false,
+  "before_future_build": [
+    "Present final source SHA and all preparation results",
+    "Obtain specific user authorization",
+    "Bind new native evidence to new source; never transfer cad427d4 approval",
+    "Guard start with >=5 GiB RAM and >=3 GiB disk; stop at approved reserves; one owned disposable builder",
+    "After authorized build only: inspect Alpine versions/ELF/native libs/fonts/assets; boot Rails/Sidekiq same image and validate isolated smoke"
+  ],
+  "previous_runtime_sha": "3f416a50dc13859c57ab4258ad84f2f8c4adbbf1",
+  "reviewed_functional_fixes": [
+    {
+      "path": "app/models/jrc_crm/backoffice_request.rb",
+      "sha256": "599bc1fce954fe4bcc58aa98117722628001939b24f77522f178bd0bb90331bd",
+      "regression": "spec/services/jrc_crm/backoffice_request_number_spec.rb",
+      "regression_sha256": "f424461b1008fc5942e421e430a283485e7dd54b8d4551a339ece28abaaa2172",
+      "cause": "Original scale test failed with duplicate generated request number. No historical renumbering, no uniqueness relaxation, no fixture count reduction."
+    }
+  ],
+  "number_proof": {
+    "run": 43280307250,
+    "sha": "e681d46886d689b307f2206928cff447fdc419db",
+    "evidence": {
+      "commit": "6f5dae5379b36973f1c24d4e0602209ded922a7c",
+      "manifest_path": "evidence/6195f7d21a0781cd5c5cf4d13bd73a497bb5a452/runtime-candidate/number-proof-validated-e681d46886d6/manifest.json",
+      "manifest_sha256": "dbc67b3a5355f2eb58d1106130058035636ffcf8665ff846297009733e48e67e",
+      "verified_files": 9,
+      "private": true
+    }
+  },
+  "native_validated_parent_sha": "cabfac0807404295f8405fadbe2255239c0c6719",
+  "native_validated_parent_run": 43282356085,
+  "ci_lint_followup": {
+    "gate_run": 43295736531,
+    "previous_gate_infrastructure_sha": "fdbb12734a0c695d5b123d6d60e5cfff5c52bc39",
+    "findings": [
+      "SC2034 unused readiness counter",
+      "SC2086 implicit splitting of fixed RSpec path list"
+    ],
+    "corrections": [
+      "Log synthetic readiness attempt counter",
+      "Split declared spec list once into Bash array and pass quoted arguments"
+    ],
+    "no_shellcheck_suppression": true,
+    "all_17_workflows_checked_before_native_matrix": true,
+    "application_and_migrations_unchanged_from_parent": true
+  }
+}
