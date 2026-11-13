@@ -46,6 +46,20 @@ const source = (id = 501, name = 'Synthetic private approval') => ({
     },
   ],
 });
+const nativeResponse = (
+  path,
+  record = source(Number(navigation.route.params.id))
+) => {
+  let data = record;
+  if (path === 'context') data = context();
+  if (path === 'requests') data = [record];
+  if (path === 'requests/summary')
+    data = { pending: 1, approved: 0, rejected: 0, due_today: 0 };
+  return {
+    data,
+    headers: { 'x-total-count': '1', 'x-page': '1', 'x-per-page': '25' },
+  };
+};
 const decision = () => ({
   expected_version: 4,
   step_code: 'review',
@@ -80,12 +94,9 @@ beforeEach(() => {
     },
   });
   api = {
-    get: vi.fn().mockImplementation(path =>
-      Promise.resolve({
-        data:
-          path === 'context' ? context() : source(Number(path.split('/')[1])),
-      })
-    ),
+    get: vi
+      .fn()
+      .mockImplementation(path => Promise.resolve(nativeResponse(path))),
     post: vi.fn().mockResolvedValue({ data: source() }),
   };
   approvalClient.mockReturnValue(api);
@@ -123,18 +134,15 @@ it('clears a protected request and rereads native capabilities after a same-acco
 it('ignores an old actor request read after a replacement actor loads the same route', async () => {
   let finish;
   api.get.mockImplementation(path =>
-    path === 'context'
-      ? Promise.resolve({ data: context() })
+    path === 'context' || path === 'requests' || path === 'requests/summary'
+      ? Promise.resolve(nativeResponse(path))
       : new Promise(resolve => {
           finish = resolve;
         })
   );
   await render();
   api.get.mockImplementation(path =>
-    Promise.resolve({
-      data:
-        path === 'context' ? context() : source(501, 'Current actor approval'),
-    })
+    Promise.resolve(nativeResponse(path, source(501, 'Current actor approval')))
   );
   member.actor = 99;
   await flushPromises();
@@ -207,7 +215,12 @@ it('preserves a review reason and context through native presence-only updates',
   member.presence = 'offline';
   await flushPromises();
   expect(wrapper.get('textarea').element.value).toBe('Current review reason');
-  expect(api.get).toHaveBeenCalledTimes(2);
+  expect(api.get.mock.calls.map(([path]) => path)).toEqual([
+    'context',
+    'requests',
+    'requests/501',
+    'requests/summary',
+  ]);
 });
 
 it('retries the initial native context through Refresh after a network failure', async () => {
