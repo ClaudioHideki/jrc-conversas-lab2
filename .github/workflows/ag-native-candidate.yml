@@ -85,7 +85,6 @@ jobs:
       ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: '22222222222222222222222222222222'
       ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: '33333333333333333333333333333333'
       BUNDLE_FROZEN: 'true'
-      SCHEMA: ${{ runner.temp }}/approval-native-schema.rb
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -132,6 +131,7 @@ jobs:
           git -C product diff --exit-code
       - name: Fresh guarded CSS and real native Rails Chrome acceptance
         env:
+          SCHEMA: ${{ runner.temp }}/approval-native-schema.rb
           JRC_VISUAL_POSTGRES_ID: ${{ job.services.postgres.id }}
           JRC_VISUAL_REDIS_ID: ${{ job.services.redis.id }}
         run: python3 -B .github/runtime_build/native_visual_guard.py
