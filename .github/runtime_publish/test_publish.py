@@ -141,6 +141,25 @@ class PublicationTests(unittest.TestCase):
         bad = self.jobs(["evidence-gate", "image-build", "verify-published"]);bad["jobs"][-1]["status"] = "in_progress"
         with self.assertRaises(RuntimeError):p.validate_job_snapshot(bad, "build")
 
+
+    def test_release_gate_import_resolves_scout_dependency(self):
+        gate = p.module("release_gate_import_regression", ROOT/".github/release/gate.py")
+        self.assertTrue(callable(gate.GitHub))
+        self.assertTrue(callable(gate.execute))
+
+    def test_source_publication_receipt_is_separately_bound(self):
+        source = copy.deepcopy(self.receipt);source["execution_sha"] = "b"*40
+        with self.assertRaises(RuntimeError):p.validate_build(source)
+        self.assertEqual(p.validate_build(source, "b"*40), ID)
+        with self.assertRaises(RuntimeError):p.validate_build(source, "c"*40)
+
+    def test_source_job_snapshot_is_separately_bound(self):
+        source = self.jobs(["evidence-gate", "image-build", "verify-published"])
+        for row in source["jobs"]:row["head_sha"] = "b"*40
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(source, "verify")
+        self.assertEqual(len(p.validate_job_snapshot(source, "verify", "b"*40)), 3)
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(source, "verify", "c"*40)
+
 if __name__ == "__main__":
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PublicationTests)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
@@ -148,4 +167,4 @@ if __name__ == "__main__":
               "skipped": len(result.skipped)}
     if os.environ.get("RUNNER_TEMP"):
         (Path(os.environ["RUNNER_TEMP"])/"publication-tests.json").write_text(json.dumps(report, indent=2)+"\n")
-    raise SystemExit(0 if result.wasSuccessful() and result.testsRun == 20 and not result.skipped else 1)
+    raise SystemExit(0 if result.wasSuccessful() and result.testsRun == 23 and not result.skipped else 1)

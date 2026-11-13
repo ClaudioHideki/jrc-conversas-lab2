@@ -16,7 +16,7 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
 PRODUCT = "5640793988fbf63ac46b0db3466722fc650f0d01"
-BRANCH = "ci/runtime-ghcr-56407939-20261113-r2"
+BRANCH = "ci/runtime-ghcr-verify-56407939-20261113"
 IMAGE = "ghcr.io/claudiohideki/jrc-conversas-lab2"
 TAG = IMAGE + ":sha-" + PRODUCT
 LOCAL = "jrc-runtime-candidate:sha-" + PRODUCT
@@ -29,6 +29,7 @@ def require(ok, message):
         raise RuntimeError(message)
 
 def module(name, path):
+    sys.path.insert(0, str(path.parent))
     spec = importlib.util.spec_from_file_location(name, path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -52,7 +53,7 @@ def execution_identity():
     return sha
 
 
-def validate_job_snapshot(snapshot, phase):
+def validate_job_snapshot(snapshot, phase, expected_execution_sha=None):
     rows = snapshot.get("jobs", [])
     require(snapshot.get("total_count") == len(rows), "Incomplete job snapshot")
     names = [j.get("name") for j in rows]
@@ -68,7 +69,7 @@ def validate_job_snapshot(snapshot, phase):
         require(not future or (future[0]["status"] in ["queued", "waiting"] and not future[0].get("runner_id")),
                 "Premature verification execution")
     for row in rows:
-        require(row.get("head_sha") == os.environ["EXPECTED_EXECUTION_SHA"] and row.get("run_attempt") == 1,
+        require(row.get("head_sha") == (expected_execution_sha or os.environ["EXPECTED_EXECUTION_SHA"]) and row.get("run_attempt") == 1,
                 "Logical job SHA/attempt differs")
     return rows
 
@@ -103,8 +104,8 @@ def registry_manifest(reference, token, absent_ok=False):
 def assert_absent(manifest):
     require(manifest is None, "Destination tag already exists; overwrite forbidden")
 
-def validate_build(receipt):
-    require(receipt.get("product_sha") == PRODUCT and receipt.get("execution_sha") == os.environ["EXPECTED_EXECUTION_SHA"],
+def validate_build(receipt, expected_execution_sha=None):
+    require(receipt.get("product_sha") == PRODUCT and receipt.get("execution_sha") == (expected_execution_sha or os.environ["EXPECTED_EXECUTION_SHA"]),
             "Build receipt identity differs")
     require(receipt.get("build_passed") is True and receipt.get("smoke_passed") is True
             and receipt.get("runtime_heap_environment_unchanged") is True
@@ -194,19 +195,20 @@ def publish():
 def build_artifact():
     gate = module("publication_gate", ROOT/".github/release/gate.py")
     gh = gate.GitHub("ClaudioHideki/jrc-conversas-lab2", os.environ["GH_TOKEN"])
-    rid = os.environ["GITHUB_RUN_ID"]
+    rid = "43389554316"
     run = gh.api("/actions/runs/" + rid)
-    require(run["head_sha"] == os.environ["EXPECTED_EXECUTION_SHA"] and run["run_attempt"] == 1
-            and run["status"] == "in_progress" and run["conclusion"] is None, "Wrong verification run")
+    require(run["head_sha"] == "9803f31a5a7d313b7590be6dc1ece726747c2b86" and run["run_attempt"] == 1
+            and run["head_branch"] == "ci/runtime-ghcr-56407939-20261113-r2"
+            and run["status"] == "completed" and run["conclusion"] == "failure", "Wrong source publication run")
     jobs = gh.api("/actions/runs/" + rid + "/attempts/1/jobs?per_page=100")
-    validate_job_snapshot(jobs, "verify")
+    validate_job_snapshot(jobs, "verify", "9803f31a5a7d313b7590be6dc1ece726747c2b86")
     for name in ["evidence-gate", "image-build"]:
         rows = [j for j in jobs["jobs"] if j["name"] == name]
         require(len(rows) == 1 and rows[0]["status"] == "completed" and rows[0]["conclusion"] == "success"
-                and rows[0]["head_sha"] == os.environ["EXPECTED_EXECUTION_SHA"] and rows[0]["run_attempt"] == 1,
+                and rows[0]["head_sha"] == "9803f31a5a7d313b7590be6dc1ece726747c2b86" and rows[0]["run_attempt"] == 1,
                 "Source gate/build not approved")
     arts = gh.api("/actions/runs/" + rid + "/artifacts?per_page=100")
-    wanted = "runtime-image-attempt-" + os.environ["EXPECTED_EXECUTION_SHA"] + "-" + rid
+    wanted = "runtime-image-attempt-" + "9803f31a5a7d313b7590be6dc1ece726747c2b86" + "-" + rid
     matches = [a for a in arts["artifacts"] if a["name"] == wanted and not a["expired"]]
     require(len(matches) == 1, "Build publication artifact missing/duplicated")
     a = matches[0]
@@ -217,10 +219,10 @@ def build_artifact():
         require(len(b) == row["bytes"] and hashlib.sha256(b).hexdigest() == row["sha256"],
                 "Build artifact member hash differs")
     receipt = json.loads(gate.member(z, "result.json"))
-    image_id = validate_build(receipt)
+    image_id = validate_build(receipt, "9803f31a5a7d313b7590be6dc1ece726747c2b86")
     p = json.loads(gate.member(z, "publication.json"))
     require(p["published"] and p["product_sha"] == PRODUCT
-            and p["execution_sha"] == os.environ["EXPECTED_EXECUTION_SHA"] and p["run_id"] == rid
+            and p["execution_sha"] == "9803f31a5a7d313b7590be6dc1ece726747c2b86" and p["run_id"] == rid
             and p["image"] == IMAGE and p["tag"] == TAG and p["image_id"] == image_id
             and p["same_tested_image"] and p["no_rebuild_after_smoke"]
             and not p["latest_modified"] and not p["existing_tag_overwritten"], "Publication receipt invalid")
@@ -269,7 +271,9 @@ class PublishedAttempt:
         self.result.update(phase="fresh_runner_pull_verification", authorized_image_attempt=None,
                            build_started=False, build_passed=False, published=True,
                            manifest_digest=receipt["digest"], image_id=receipt["image_id"],
-                           publication_artifact=artifact, image_tag=IMAGE + "@" + receipt["digest"])
+                           publication_artifact=artifact, image_tag=IMAGE + "@" + receipt["digest"],
+                           source_publication_run_id=43389554316,
+                           source_publication_execution_sha="9803f31a5a7d313b7590be6dc1ece726747c2b86")
         return self
 
     def __init__(self, guard, receipt, artifact):

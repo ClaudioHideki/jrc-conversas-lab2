@@ -1,4 +1,4 @@
-name: Controlled GHCR publication of approved 56407939
+name: Verify already-published immutable 56407939 without build or push
 
 on:
   workflow_dispatch:
@@ -44,7 +44,7 @@ jobs:
           test "$GITHUB_SHA" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$(git rev-parse HEAD)" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$EXPECTED_PRODUCT_SHA" = 5640793988fbf63ac46b0db3466722fc650f0d01
-          test "$GITHUB_REF_NAME" = ci/runtime-ghcr-56407939-20261113-r2
+          test "$GITHUB_REF_NAME" = ci/runtime-ghcr-verify-56407939-20261113
           test "$RUNNER_ENVIRONMENT" = github-hosted
       - name: Checkout approved product without infrastructure overlay
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -170,73 +170,8 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  image-build:
-    needs: evidence-gate
-    runs-on: ubuntu-24.04
-    timeout-minutes: 85
-    permissions:
-      contents: read
-      actions: read
-      packages: write
-    outputs:
-      digest: ${{ steps.publish.outputs.digest }}
-      image_id: ${{ steps.publish.outputs.image_id }}
-    env:
-      PYTHONDONTWRITEBYTECODE: '1'
-      EXPECTED_EXECUTION_SHA: ${{ inputs.expected_execution_sha }}
-      EXPECTED_PRODUCT_SHA: ${{ inputs.expected_product_sha }}
-      EXPECTED_APPROVED_SHA: 48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d
-      AUTHORIZED_BUILD_SHA: 5640793988fbf63ac46b0db3466722fc650f0d01
-    steps:
-      - name: Checkout immutable execution wrapper
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Checkout exact authorized product
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: 5640793988fbf63ac46b0db3466722fc650f0d01
-          path: product
-          persist-credentials: false
-      - name: Checkout exact approved gate infrastructure
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: 48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d
-          path: approved
-          persist-credentials: false
-      - name: Admit only this successful fresh gate and exact authorization
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/runtime_publish/admission.py --mode build
-      - name: Confirm registry authorization and absent destination tag
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/runtime_publish/publish.py --preflight
-      - name: One resource-guarded image attempt and real isolated smoke
-        run: python3 -B .github/runtime_build/guard.py --execute
-      - name: Publish exactly the tested image without another build
-        id: publish
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/runtime_publish/publish.py --publish
-      - name: Preserve reports and synthetic smoke evidence
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: runtime-image-attempt-${{ github.sha }}-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.json
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.log
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.pdf
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.png
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.xlsx
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/ocr.txt
-          if-no-files-found: error
-          retention-days: 7
-
   verify-published:
-    needs: image-build
+    needs: evidence-gate
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     permissions:
@@ -249,8 +184,8 @@ jobs:
       EXPECTED_PRODUCT_SHA: ${{ inputs.expected_product_sha }}
       EXPECTED_APPROVED_SHA: 48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d
       AUTHORIZED_BUILD_SHA: 5640793988fbf63ac46b0db3466722fc650f0d01
-      EXPECTED_PUBLISHED_DIGEST: ${{ needs.image-build.outputs.digest }}
-      EXPECTED_PUBLISHED_IMAGE_ID: ${{ needs.image-build.outputs.image_id }}
+      EXPECTED_PUBLISHED_DIGEST: sha256:9249e3bfe2c0ebea5ec97a585983423692c33976855404ead7bcdc3525a3f578
+      EXPECTED_PUBLISHED_IMAGE_ID: sha256:6b588b69b0fcfa3e2b46d720248e7cd8653dbf5d4c397bc88a59d70b3f3868c0
     steps:
       - name: Checkout immutable publication infrastructure
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262

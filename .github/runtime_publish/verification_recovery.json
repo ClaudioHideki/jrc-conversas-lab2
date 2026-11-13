@@ -1,0 +1,14 @@
+{
+  "product_sha": "5640793988fbf63ac46b0db3466722fc650f0d01",
+  "source_publication_run_id": 43389554316,
+  "source_publication_execution_sha": "9803f31a5a7d313b7590be6dc1ece726747c2b86",
+  "image": "ghcr.io/claudiohideki/jrc-conversas-lab2",
+  "digest": "sha256:9249e3bfe2c0ebea5ec97a585983423692c33976855404ead7bcdc3525a3f578",
+  "image_id": "sha256:6b588b69b0fcfa3e2b46d720248e7cd8653dbf5d4c397bc88a59d70b3f3868c0",
+  "cause": "release gate dynamically imported without adding its directory; scout_probe dependency not resolvable",
+  "correction": "resolve imports from the pinned trusted module directory; bind source publication evidence independently from recovery infrastructure",
+  "new_build_permitted": false,
+  "new_push_permitted": false,
+  "product_changed": false,
+  "new_regression_tests": 3
+}

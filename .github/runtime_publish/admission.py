@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 PRODUCT = "5640793988fbf63ac46b0db3466722fc650f0d01"
 APPROVED = "48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d"
-BRANCH = "ci/runtime-ghcr-56407939-20261113-r2"
+BRANCH = "ci/runtime-ghcr-verify-56407939-20261113"
 
 
 def require(value, message):
