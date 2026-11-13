@@ -29,7 +29,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: '65050f6d3d52245af407ecadb4656f00073f7233'
+          ref: '5640793988fbf63ac46b0db3466722fc650f0d01'
           path: product
           fetch-depth: 0
           persist-credentials: false
@@ -37,7 +37,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$EXPECTED_PRODUCT_SHA" = 65050f6d3d52245af407ecadb4656f00073f7233
+          test "$EXPECTED_PRODUCT_SHA" = 5640793988fbf63ac46b0db3466722fc650f0d01
           test "$GITHUB_SHA" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$(git -C infrastructure rev-parse HEAD)" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$(git -C product rev-parse HEAD)" = "$EXPECTED_PRODUCT_SHA"
