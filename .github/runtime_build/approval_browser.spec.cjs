@@ -35,6 +35,8 @@ for (const [index, mode] of modes.entries()) {
     const authenticated = page.waitForResponse(r => r.url().endsWith('/auth/sign_in') && r.request().method() === 'POST');
     await page.locator('button[type="submit"]').click();
     expect((await authenticated).status()).toBe(200);
+    await page.waitForURL(/\/app\/accounts\/\d+/);
+    await page.waitForLoadState('domcontentloaded');
     const base = `${origin}/app/accounts/${fixture.account_id}/approvals/inbox`;
     await page.goto(base);
     await expect(page.locator('[data-approval-workspace]')).toBeVisible();
@@ -62,7 +64,7 @@ for (const [index, mode] of modes.entries()) {
     await page.locator(`[data-approval-request="${id}"]`).click();
     const detail = page.locator('[data-approval-workspace] > section').nth(1);
     await expect(detail.locator('textarea').first()).toBeVisible();
-    const approve = detail.getByRole('button', { name: labels.decisionLabels.approved, exact: true });
+    const approve = detail.getByRole('button', { name: new RegExp('^' + labels.decisionLabels.approved + '(?: ·|$)') }).first();
     await expect(approve).toBeDisabled();
     await detail.locator('textarea').first().fill(`Synthetic ${mode.name} native evidence`);
     await expect(approve).toBeEnabled();
@@ -107,6 +109,8 @@ async function actualLogin(page, person = { email: fixture.email, password: fixt
   await page.locator('button[type="submit"]').click();
   const result = await response;
   expect(result.status()).toBe(200);
+  await page.waitForURL(/\/app\/accounts\/\d+/);
+  await page.waitForLoadState('domcontentloaded');
   const headers = await result.allHeaders();
   return Object.fromEntries(['access-token', 'client', 'uid', 'token-type'].filter(key => headers[key]).map(key => [key, headers[key]]));
 }
