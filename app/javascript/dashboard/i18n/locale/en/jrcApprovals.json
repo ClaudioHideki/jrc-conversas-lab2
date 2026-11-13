@@ -390,6 +390,68 @@
       "recorded": "Orientacao registrada; a origem nao foi modificada.",
       "configure": "Orientacoes e encaminhamento permitido",
       "target": "Regra de destino publicada"
+    },
+    "workspace": {
+      "subtitle": "Review requests, inspect their origin and decide within your authority.",
+      "configure": "Configure approvals",
+      "indicators": "Approval indicators",
+      "indicatorScope": "Authorized scope and current filters. Completed requests are counted by their last decision in the current month.",
+      "metrics": {
+        "pending": "Pending",
+        "approved": "Approved this month",
+        "rejected": "Rejected this month",
+        "due_today": "Due today"
+      },
+      "tabs": {
+        "pending": "Pending approvals",
+        "requested": "My requests",
+        "history": "History",
+        "policies": "Approval rules",
+        "delegations": "Delegations"
+      },
+      "queue": "Approval inbox",
+      "detail": "Request summary",
+      "backToQueue": "Back to the inbox",
+      "selectRequest": "Select a request",
+      "selectRequestHelp": "Open an item to inspect its context, origin and available actions.",
+      "search": "Search",
+      "searchPlaceholder": "Request, source number, requester or rule",
+      "module": "Module",
+      "allModules": "All modules",
+      "order": "Sort by",
+      "recent": "Most recent",
+      "oldest": "Oldest first",
+      "clearFilters": "Clear filters",
+      "moreFilters": "Additional filters",
+      "authorizedScope": "All authorized scopes",
+      "authorizedPending": "Pending in my authorized scope",
+      "ruleDelegations": "Manage rule-specific delegations",
+      "technicalDetails": "Technical details and approval stages",
+      "decisionHelp": "Enter a reason before confirming a decision. Only actions authorized by the server are available.",
+      "sourceHelp": "Open the original record to review its full commercial information, according to its native permissions.",
+      "requestedAt": "Requested on",
+      "modules": {
+        "crm": "CRM",
+        "contracts": "Contracts",
+        "backoffice": "Backoffice",
+        "relationship": "Relationship",
+        "service_desk": "Service Desk",
+        "other": "Other module"
+      },
+      "states": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "returned": "Returned for adjustment",
+        "escalated": "Escalated",
+        "expired": "Expired",
+        "canceled": "Canceled",
+        "stale": "Source changed",
+        "draft": "Draft",
+        "validated": "Validated",
+        "published": "Active",
+        "retired": "Paused"
+      }
     }
   }
 }

@@ -326,7 +326,7 @@ const confirm = () => {
     <div
       role="tablist"
       :aria-label="t('JRC_APPROVALS.editor')"
-      class="flex flex-wrap gap-2"
+      class="grid grid-cols-2 gap-2 rounded-2xl border border-n-weak bg-n-alpha-1 p-2 lg:grid-cols-4"
     >
       <button
         v-for="(name, index) in tabs"
@@ -334,8 +334,12 @@ const confirm = () => {
         role="tab"
         :tabindex="tab === name ? 0 : -1"
         :aria-selected="tab === name"
-        class="rounded-lg border border-n-weak px-3 py-2 text-sm focus-visible:outline-blue-500"
-        :class="tab === name ? 'bg-n-blue-3 text-n-blue-11' : 'bg-n-solid-2'"
+        class="min-w-0 rounded-xl border px-3 py-3 text-left text-sm font-medium focus-visible:outline-blue-500"
+        :class="
+          tab === name
+            ? 'border-n-blue-8 bg-n-blue-3 text-n-blue-11 shadow-sm'
+            : 'border-n-weak bg-n-solid-2 text-n-slate-11'
+        "
         @keydown="tabKey"
         @click="tab = name"
       >

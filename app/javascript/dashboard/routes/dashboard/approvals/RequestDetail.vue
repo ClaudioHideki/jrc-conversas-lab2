@@ -11,6 +11,8 @@ import FinancialAdjustmentDialog from './FinancialAdjustmentDialog.vue';
 import ReviewDirectionsPanel from './ReviewDirectionsPanel.vue';
 import ApprovalRequestReport from './ApprovalRequestReport.vue';
 import DistributionApprovalOrigin from './DistributionApprovalOrigin.vue';
+import Icon from 'next/icon/Icon.vue';
+import ApprovalStatus from './ApprovalStatus.vue';
 const props = defineProps({
   request: { type: Object, required: true },
   context: { type: Object, default: null },
@@ -21,7 +23,16 @@ const props = defineProps({
   errorState: { type: Object, default: null },
 });
 const emit = defineEmits(['decide', 'adjust', 'audit', 'refresh']);
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const displayDate = value =>
+  value
+    ? new Intl.DateTimeFormat(locale.value.replaceAll('_', '-'), {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      }).format(new Date(value))
+    : '—';
+const decisionColor = decision =>
+  decision === 'approved' ? 'teal' : decision === 'rejected' ? 'ruby' : 'amber';
 const reason = ref('');
 const choices = computed(() => decisionChoices(props.request));
 const selectedChoice = ref(null);
@@ -84,47 +95,92 @@ const confirm = payload => {
 </script>
 
 <template>
-  <section class="space-y-5">
-    <h2 class="text-xl font-semibold">
-      {{ t('JRC_APPROVALS.request') }} #{{ request.id }}
-    </h2>
-    <p class="text-sm">
-      {{ scopeLabel(context, request) || t('JRC_APPROVALS.groupScope') }}
-    </p>
-    <dl
-      class="grid gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-4 sm:grid-cols-2"
+  <section class="min-w-0 space-y-5">
+    <header
+      class="flex flex-wrap items-start justify-between gap-3 border-b border-n-weak pb-4"
     >
-      <div
-        v-for="field in [
-          'resource_type',
-          'resource_id',
-          'requester_name',
-          'policy_name',
-          'policy_version',
-          'issuer_company_id',
-          'business_unit_id',
-          'state',
-          'expires_at',
-          'cycle',
-        ]"
-        :key="field"
-      >
-        <dt class="text-xs text-n-slate-11">
-          {{ t(`JRC_APPROVALS.${field}`) }}
+      <div class="flex min-w-0 gap-3">
+        <span
+          class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-n-blue-3 text-n-blue-11"
+          ><Icon
+            icon="i-lucide-file-check-2"
+            class="size-6"
+        /></span>
+        <div class="min-w-0">
+          <h2 class="break-words text-lg font-bold">
+            {{ request.policy_name || t('JRC_APPROVALS.request') }}
+          </h2>
+          <p class="mt-1 break-words text-xs text-n-slate-11">
+            {{ t('JRC_APPROVALS.request') }} #{{ request.id }} ·
+            {{ scopeLabel(context, request) || t('JRC_APPROVALS.groupScope') }}
+          </p>
+        </div>
+      </div>
+      <ApprovalStatus :state="request.state" />
+    </header>
+    <dl class="grid min-w-0 gap-4 sm:grid-cols-2">
+      <div class="min-w-0">
+        <dt class="text-xs font-medium text-n-slate-11">
+          {{ t('JRC_APPROVALS.requester_name') }}
         </dt>
-        <dd class="break-words text-sm">{{ request[field] ?? '—' }}</dd>
+        <dd class="mt-1 break-words text-sm font-semibold">
+          {{ request.requester_name || '—' }}
+        </dd>
+      </div>
+      <div class="min-w-0">
+        <dt class="text-xs font-medium text-n-slate-11">
+          {{ t('JRC_APPROVALS.scope') }}
+        </dt>
+        <dd class="mt-1 break-words text-sm">
+          {{ scopeLabel(context, request) || t('JRC_APPROVALS.groupScope') }}
+        </dd>
+      </div>
+      <div class="min-w-0">
+        <dt class="text-xs font-medium text-n-slate-11">
+          {{ t('JRC_APPROVALS.workspace.requestedAt') }}
+        </dt>
+        <dd class="mt-1 text-sm">{{ displayDate(request.created_at) }}</dd>
+      </div>
+      <div class="min-w-0">
+        <dt class="text-xs font-medium text-n-slate-11">
+          {{ t('JRC_APPROVALS.expires_at') }}
+        </dt>
+        <dd class="mt-1 text-sm">{{ displayDate(request.expires_at) }}</dd>
       </div>
     </dl>
-    <div class="space-y-2">
-      <h3 class="font-semibold">{{ t('JRC_APPROVALS.steps') }}</h3>
+    <p
+      class="rounded-xl border border-n-blue-5 bg-n-blue-2 p-3 text-sm text-n-slate-11"
+    >
+      {{ t('JRC_APPROVALS.workspace.sourceHelp') }}
+    </p>
+    <details class="rounded-xl border border-n-weak bg-n-background p-3">
+      <summary class="cursor-pointer text-xs font-medium text-n-slate-11">
+        {{ t('JRC_APPROVALS.workspace.technicalDetails') }}
+      </summary>
+      <dl class="mt-3 grid gap-3 text-xs sm:grid-cols-2">
+        <div
+          v-for="field in [
+            'resource_type',
+            'resource_id',
+            'policy_version',
+            'issuer_company_id',
+            'business_unit_id',
+            'cycle',
+          ]"
+          :key="field"
+        >
+          <dt class="text-n-slate-11">{{ t('JRC_APPROVALS.' + field) }}</dt>
+          <dd class="break-words">{{ request[field] ?? '—' }}</dd>
+        </div>
+      </dl>
       <p
         v-for="step in request.stages || []"
         :key="step.code"
-        class="rounded-lg border border-n-weak p-3 text-sm"
+        class="mt-3 break-words rounded-lg bg-n-alpha-2 p-2 text-xs"
       >
         {{ step.code }} · {{ step.approved_count }}/{{ step.quorum }}
       </p>
-    </div>
+    </details>
     <section
       v-if="request.origin?.kind === 'portfolio_distribution'"
       ref="authoritySection"
@@ -153,6 +209,12 @@ const confirm = payload => {
     >
       <h3 class="font-semibold">{{ t('JRC_APPROVALS.decision') }}</h3>
       <p
+        v-if="choices.length"
+        class="text-xs text-n-slate-11"
+      >
+        {{ t('JRC_APPROVALS.workspace.decisionHelp') }}
+      </p>
+      <p
         v-if="!choices.length"
         class="text-sm text-n-slate-11"
       >
@@ -173,6 +235,7 @@ const confirm = payload => {
             v-for="(choice, index) in choices"
             :key="index"
             :label="label(choice, index)"
+            :color="decisionColor(choice.decision)"
             :disabled="busy || !reason.trim()"
             @click="choose(choice)"
           />

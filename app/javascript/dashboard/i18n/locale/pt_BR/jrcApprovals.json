@@ -182,6 +182,68 @@
     "groupScope": "Escopo de toda a conta",
     "status_GRATUITY_POLICY_REQUIRED": "Gratuidade bloqueada: configure e habilite o controle após homologação",
     "status_GRATUITY_VALUE_PENDING": "Impacto da gratuidade pendente de referência oficial",
-    "status_GRATUITY_AUTHORITIES_PENDING": "Titulares e autorização formal pendentes"
+    "status_GRATUITY_AUTHORITIES_PENDING": "Titulares e autorização formal pendentes",
+    "workspace": {
+      "subtitle": "Analise as solicitações, consulte a origem e decida dentro da sua alçada.",
+      "configure": "Configurar aprovações",
+      "indicators": "Indicadores de aprovações",
+      "indicatorScope": "Escopo autorizado e filtros atuais. Solicitações concluídas são contadas pela última decisão no mês atual.",
+      "metrics": {
+        "pending": "Pendentes",
+        "approved": "Aprovadas no mês",
+        "rejected": "Rejeitadas no mês",
+        "due_today": "Vencendo hoje"
+      },
+      "tabs": {
+        "pending": "Aprovações pendentes",
+        "requested": "Minhas solicitações",
+        "history": "Histórico",
+        "policies": "Regras de aprovação",
+        "delegations": "Delegações"
+      },
+      "queue": "Fila de aprovações",
+      "detail": "Resumo da solicitação",
+      "backToQueue": "Voltar para a fila",
+      "selectRequest": "Selecione uma solicitação",
+      "selectRequestHelp": "Abra um item para consultar o contexto, o registro de origem e as ações disponíveis.",
+      "search": "Pesquisar",
+      "searchPlaceholder": "Solicitação, número de origem, solicitante ou regra",
+      "module": "Módulo",
+      "allModules": "Todos os módulos",
+      "order": "Ordenar por",
+      "recent": "Mais recentes",
+      "oldest": "Mais antigas",
+      "clearFilters": "Limpar filtros",
+      "moreFilters": "Mais filtros",
+      "authorizedScope": "Todos os escopos autorizados",
+      "authorizedPending": "Pendentes no meu escopo autorizado",
+      "ruleDelegations": "Gerenciar delegações por regra",
+      "technicalDetails": "Detalhes técnicos e etapas da aprovação",
+      "decisionHelp": "Informe uma justificativa antes de confirmar a decisão. Somente as ações autorizadas pelo servidor estão disponíveis.",
+      "sourceHelp": "Consulte o registro de origem para revisar as informações comerciais completas, respeitando as permissões do módulo.",
+      "requestedAt": "Data da solicitação",
+      "modules": {
+        "crm": "CRM",
+        "contracts": "Contratos",
+        "backoffice": "Backoffice",
+        "relationship": "Relacionamento",
+        "service_desk": "Service Desk",
+        "other": "Outro módulo"
+      },
+      "states": {
+        "pending": "Pendente",
+        "approved": "Aprovada",
+        "rejected": "Rejeitada",
+        "returned": "Devolvida para ajuste",
+        "escalated": "Escalada",
+        "expired": "Expirada",
+        "canceled": "Cancelada",
+        "stale": "Origem alterada",
+        "draft": "Rascunho",
+        "validated": "Validada",
+        "published": "Ativa",
+        "retired": "Pausada"
+      }
+    }
   }
 }
