@@ -3,7 +3,7 @@
   "repository": "ClaudioHideki/jrc-conversas-lab2",
   "product_sha": "d11c879a3d6e27499e1aea45736797a6e913b829",
   "product_branch": "codex/runtime-alpine324-scout-fix-20261112",
-  "infrastructure_branch": "ci/release-gate-scout-d11c879a-20261112",
+  "infrastructure_branch": "ci/runtime-build-scout-d11c879a-20261112",
   "native_run_id": 43323289272,
   "native_attempt": 1,
   "native_workflow": ".github/workflows/ag-native-candidate.yml",

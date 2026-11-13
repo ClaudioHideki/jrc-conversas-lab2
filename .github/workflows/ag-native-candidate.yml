@@ -1,10 +1,10 @@
-name: Runtime candidate release evidence gate (no image or publication)
+name: Authorized second runtime image attempt and isolated smoke
 
 on:
   workflow_dispatch:
     inputs:
-      expected_infrastructure_sha:
-        description: Full SHA of the authorized release infrastructure
+      expected_execution_sha:
+        description: Full SHA of this isolated execution wrapper
         type: string
         required: true
       expected_product_sha:
@@ -17,7 +17,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: release-evidence-runtime-20261112
+  group: single-runtime-image-scout-d11c879a
   cancel-in-progress: false
 
 jobs:
@@ -26,7 +26,9 @@ jobs:
     timeout-minutes: 15
     env:
       PYTHONDONTWRITEBYTECODE: '1'
-      EXPECTED_INFRASTRUCTURE_SHA: ${{ inputs.expected_infrastructure_sha }}
+      EXPECTED_INFRASTRUCTURE_SHA: ${{ inputs.expected_execution_sha }}
+      EXPECTED_EXECUTION_SHA: ${{ inputs.expected_execution_sha }}
+      EXPECTED_APPROVED_SHA: 87cf2661a2cb027bdf8fea8f36a800b991bac6cb
       EXPECTED_PRODUCT_SHA: ${{ inputs.expected_product_sha }}
     steps:
       - name: Checkout immutable infrastructure
@@ -42,8 +44,25 @@ jobs:
           test "$GITHUB_SHA" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$(git rev-parse HEAD)" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$EXPECTED_PRODUCT_SHA" = d11c879a3d6e27499e1aea45736797a6e913b829
-          test "$GITHUB_REF_NAME" = ci/release-gate-scout-d11c879a-20261112
+          test "$GITHUB_REF_NAME" = ci/runtime-build-scout-d11c879a-20261112
           test "$RUNNER_ENVIRONMENT" = github-hosted
+      - name: Checkout approved product without infrastructure overlay
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: d11c879a3d6e27499e1aea45736797a6e913b829
+          path: product
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Checkout immutable approved gate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 87cf2661a2cb027bdf8fea8f36a800b991bac6cb
+          path: approved
+          persist-credentials: false
+      - name: Verify approved infrastructure and historical gate evidence
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/runtime_build/admission.py --mode prepare
       - name: Validate workflow with checksum-pinned actionlint
         shell: bash
         run: |
@@ -62,19 +81,27 @@ jobs:
           python3 -B -c "import ast,pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('.github/release').glob('*.py')]"
           python3 -B .github/release/test_gate.py
           SCOUT_PROOF_TEST_REPORT="$RUNNER_TEMP/scout-proof-tests.json" python3 -B .github/release/test_scout_probe.py
-      - name: Checkout approved product without infrastructure overlay
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: d11c879a3d6e27499e1aea45736797a6e913b829
-          path: product
-          persist-credentials: false
-          fetch-depth: 0
+          python3 -B -c "import ast,pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('.github/runtime_build').glob('*.py')]"
+          GUARD_TEST_REPORT="$RUNNER_TEMP/guard-tests.json" python3 -B .github/runtime_build/test_guard.py
       - name: Validate all modified product workflows and runtime contract
         working-directory: product
         run: |
           "$RUNNER_TEMP/release-linter/actionlint" .github/workflows/ag-native-candidate.yml .github/workflows/backoffice-flow.yml .github/workflows/broker-customer-candidate.yml .github/workflows/build-ghcr.yml .github/workflows/campaign-workflow-candidate.yml .github/workflows/contacts-native.yml .github/workflows/flow-broker-candidate.yml .github/workflows/nico-broker-candidate.yml .github/workflows/nico-capacity-native.yml .github/workflows/nico-legacy-reservations-native.yml .github/workflows/precimech-hotfix-tests.yml .github/workflows/projects-candidate.yml .github/workflows/projects-portal-candidate.yml .github/workflows/sd-contact-softphone-native.yml .github/workflows/service-desk-global-native.yml .github/workflows/voice-v4-candidate.yml .github/workflows/whatsapp-connections-candidate.yml
           python3 -B script/jrc_runtime_contract_test.py
           python3 -B script/jrc_runtime_contract_test_test.py
+      - name: Configure declared Ruby for smoke syntax validation
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.12'
+          bundler: none
+          bundler-cache: false
+      - name: Validate real smoke syntax before allowing build
+        run: |
+          ruby -c .github/runtime_build/probe.rb
+          ruby -c .github/runtime_build/worker.rb
+          ruby -c .github/runtime_build/receipt.rb
+          ruby -c .github/runtime_build/extra.rb
+          ruby .github/runtime_build/test_receipt.rb "$RUNNER_TEMP/receipt-unit.json"
       - name: Configure declared Node for original migration protection tests
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -84,17 +111,6 @@ jobs:
         run: |
           node script/validate_ag_migration_identity.mjs
           node --test script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
-      - name: Ruby syntax and preserved PID receipt checks
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.12'
-          bundler: none
-          bundler-cache: false
-      - name: Verify image smoke syntax without starting an image build
-        run: |
-          for file in .github/runtime_build/{probe,worker,receipt,extra,test_receipt}.rb; do ruby -c "$file"; done
-          ruby .github/runtime_build/test_receipt.rb "$RUNNER_TEMP/receipt-unit.json"
-          GUARD_TEST_REPORT="$RUNNER_TEMP/guard-tests.json" python3 -B .github/runtime_build/test_guard.py
       - name: Verify exact native run and all immutable evidence
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -111,8 +127,57 @@ jobs:
           path: |
             ${{ runner.temp }}/gate-tests.json
             ${{ runner.temp }}/scout-proof-tests.json
-            ${{ runner.temp }}/guard-tests.json
             ${{ runner.temp }}/receipt-unit.json
+            ${{ runner.temp }}/guard-tests.json
             ${{ runner.temp }}/release-gate-report.json
+          if-no-files-found: error
+          retention-days: 7
+
+  image-build:
+    needs: evidence-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 85
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      EXPECTED_EXECUTION_SHA: ${{ inputs.expected_execution_sha }}
+      EXPECTED_PRODUCT_SHA: ${{ inputs.expected_product_sha }}
+      EXPECTED_APPROVED_SHA: 87cf2661a2cb027bdf8fea8f36a800b991bac6cb
+      AUTHORIZED_BUILD_SHA: d11c879a3d6e27499e1aea45736797a6e913b829
+    steps:
+      - name: Checkout immutable execution wrapper
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Checkout exact authorized product
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: d11c879a3d6e27499e1aea45736797a6e913b829
+          path: product
+          persist-credentials: false
+      - name: Checkout exact approved gate infrastructure
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 87cf2661a2cb027bdf8fea8f36a800b991bac6cb
+          path: approved
+          persist-credentials: false
+      - name: Admit only this successful fresh gate and exact authorization
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/runtime_build/admission.py --mode build
+      - name: One resource-guarded image attempt and real isolated smoke
+        run: python3 -B .github/runtime_build/guard.py --execute
+      - name: Preserve reports and synthetic smoke evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: runtime-image-attempt-${{ github.sha }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.json
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.log
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.pdf
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.png
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.xlsx
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/ocr.txt
           if-no-files-found: error
           retention-days: 7

@@ -14,7 +14,7 @@ import urllib.error
 import uuid
 
 PRODUCT = "d11c879a3d6e27499e1aea45736797a6e913b829"
-APPROVED = "716647d67e96b77e8a56125ab0033c173bd68485"
+APPROVED = "87cf2661a2cb027bdf8fea8f36a800b991bac6cb"
 BRANCH = "ci/runtime-build-scout-d11c879a-20261112"
 REPO = "ClaudioHideki/jrc-conversas-lab2"
 BUILDKIT = "mirror.gcr.io/moby/buildkit:v0.33.1@sha256:98cc6a3fc46220d00f8224ae483f3274fc874e9be8d7dd1e2e2c5481209228b5"

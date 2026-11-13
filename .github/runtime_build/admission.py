@@ -9,9 +9,9 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-PRODUCT = "dce805894696416ed5397c268efb4acecb8ecfc7"
-APPROVED = "716647d67e96b77e8a56125ab0033c173bd68485"
-BRANCH = "ci/runtime-build-dce80589-20261112"
+PRODUCT = "d11c879a3d6e27499e1aea45736797a6e913b829"
+APPROVED = "87cf2661a2cb027bdf8fea8f36a800b991bac6cb"
+BRANCH = "ci/runtime-build-scout-d11c879a-20261112"
 
 
 def require(value, message):
@@ -36,35 +36,48 @@ def main(mode):
         require(set(extras) <= {"product/", "approved/"} if folder == ROOT else not extras, "Unexpected untracked source")
     approved = ROOT / "approved/.github/release"
     current = ROOT / ".github/release"
-    require(filehash(approved / "release-evidence-lock.json") == "3785e9512116e1e20cc9a60e65e96236a0466910859cbd93cec4a3439546d42a", "Approved lock changed")
-    for name in ["gate.py", "test_gate.py"]:
+    require(filehash(approved / "release-evidence-lock.json") == "5283cb4afe6478c0cd4ebfa26bcad13a9d150b85380fe6ba9a6a90a2030c76d5", "Approved lock changed")
+    for name in ["gate.py", "test_gate.py", "scout_probe.py", "test_scout_probe.py"]:
         require((current / name).read_bytes() == (approved / name).read_bytes(), "Approved gate or denial tests changed")
     oldlock = json.loads((approved / "release-evidence-lock.json").read_text())
     wanted = {**oldlock, "infrastructure_branch": BRANCH}
     lock = json.loads((current / "release-evidence-lock.json").read_text())
     require(lock == wanted, "Only the execution branch binding may differ in the lock")
+    for path, expected in oldlock["probe_hashes"].items():
+        require(filehash(ROOT / path) == expected, "Approved probe differs: " + path)
+    expected_guard = (ROOT / "approved/.github/runtime_build/guard.py").read_text().replace(
+        'APPROVED = "716647d67e96b77e8a56125ab0033c173bd68485"', 'APPROVED = "' + APPROVED + '"')
+    require((ROOT / ".github/runtime_build/guard.py").read_text() == expected_guard, "Approved resource guard template changed")
+    require((ROOT / ".github/runtime_build/test_guard.py").read_bytes() ==
+            (ROOT / "approved/.github/runtime_build/test_guard.py").read_bytes(), "Guard denial tests changed")
     for path, expected in oldlock["source_hashes"].items():
         require(filehash(ROOT / "product" / path) == expected, "Source hash differs: " + path)
+    sys.path.insert(0, str(current))
     spec = importlib.util.spec_from_file_location("approved_gate", current / "gate.py")
     gate = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(gate)
     gh = gate.GitHub("ClaudioHideki/jrc-conversas-lab2", os.environ["GH_TOKEN"])
     runs = gh.api("/actions/workflows/ag-native-candidate.yml/runs?branch=" + BRANCH + "&event=workflow_dispatch&per_page=100")
     require(runs["total_count"] == 1 and len(runs["workflow_runs"]) == 1 and str(runs["workflow_runs"][0]["id"]) == os.environ["GITHUB_RUN_ID"], "Single authorized workflow run required")
-    require(gh.api("/git/ref/heads/ci/release-gate-runtime-dce80589-20261112")["object"]["sha"] == APPROVED, "Approved ref moved")
-    r = gh.api("/actions/runs/43310498138")
+    require(gh.api("/git/ref/heads/ci/release-gate-scout-d11c879a-20261112")["object"]["sha"] == APPROVED, "Approved ref moved")
+    r = gh.api("/actions/runs/43334518514")
     require(r["head_sha"] == APPROVED and r["run_attempt"] == 1 and r["conclusion"] == "success" and r["status"] == "completed", "Approved gate run not successful")
-    arts = gh.api("/actions/runs/43310498138/artifacts?per_page=100")
+    arts = gh.api("/actions/runs/43334518514/artifacts?per_page=100")
     require(arts["total_count"] == len(arts["artifacts"]) == 1, "Approved gate artifact missing")
     artifact = arts["artifacts"][0]
-    require(artifact["digest"] == "sha256:502adb1692718e8b34362d81d9057512758db3ff35cc0a5a8f425821d4e5fa76" and not artifact["expired"], "Approved gate artifact changed")
+    require(artifact["digest"] == "sha256:67a454115bbf6c930b4002c4d0062a9c33aaaf8adfb024cec6425c8f4b3d2368" and not artifact["expired"], "Approved gate artifact changed")
     z = gate.archive(gh.download(artifact["archive_download_url"]), artifact["digest"][7:])
     raw = gate.member(z, "release-gate-report.json")
-    require(hashlib.sha256(raw).hexdigest() == "4b8bcc8d1a7970eca505bef169d259f6bd08583309365e5363bbce5fab7c42ea", "Approved report differs")
+    require(hashlib.sha256(raw).hexdigest() == "82e19b22000c9b87b8d313b6b3dc6bbecd2d99b29bb0682cba7940ab4313236e", "Approved report differs")
     report = json.loads(raw)
     require(report["passed"] and report["product_sha"] == PRODUCT and report["infrastructure_sha"] == APPROVED, "Approved report identity differs")
-    require(json.loads(gate.member(z, "gate-tests.json")) == {"tests":31,"failures":0,"errors":0,"skipped":0}, "Approved denial tests differ")
-    gate.run_identity(oldlock, gh.api("/actions/runs/43296936629"))
+    require(json.loads(gate.member(z, "gate-tests.json")) == {"tests":32,"failures":0,"errors":0,"skipped":0}, "Approved denial tests differ")
+    require(report["scout_probe_evidence"]["passed"] and report["scout_probe_evidence"]["probe_sha"] == "9131d1784a8256fed273b15f6f7b18389223612e", "Focused Scout/probe evidence missing")
+    require(json.loads(gate.member(z, "scout-proof-tests.json")) == {"tests":2,"failures":0,"errors":0,"skipped":0}, "Focused denial tests failed")
+    require(json.loads(gate.member(z, "guard-tests.json")) == {"tests":11,"failures":0,"errors":0,"skipped":0}, "Resource/initialization denial tests failed")
+    receipt_unit = json.loads(gate.member(z, "receipt-unit.json"))
+    require(receipt_unit["passed"] is True and receipt_unit["examples"] > 0 and receipt_unit["failures"] == 0 and receipt_unit["pending"] == 0, "Receipt unit checks missing")
+    gate.run_identity(oldlock, gh.api("/actions/runs/43323289272"))
     if mode == "build":
         rid = os.environ["GITHUB_RUN_ID"]
         run = gh.api("/actions/runs/" + rid)
@@ -81,8 +94,9 @@ def main(mode):
         z = gate.archive(gh.download(a["archive_download_url"]), a["digest"][7:])
         fresh = json.loads(gate.member(z, "release-gate-report.json"))
         require(fresh["passed"] and fresh["product_sha"] == PRODUCT and fresh["infrastructure_sha"] == execution, "Fresh report identity differs")
+        require(fresh["scout_probe_evidence"]["passed"] and fresh["scout_probe_evidence"]["actual_pid_one"], "Fresh focused evidence missing")
         require(fresh["matrix_identities"] == 36 and fresh["matrix_example_executions"] == 5554 and len(fresh["artifacts"]) == 46, "Fresh evidence incomplete")
-        require(json.loads(gate.member(z, "gate-tests.json")) == {"tests":31,"failures":0,"errors":0,"skipped":0}, "Fresh gate denial tests failed")
+        require(json.loads(gate.member(z, "gate-tests.json")) == {"tests":32,"failures":0,"errors":0,"skipped":0}, "Fresh gate denial tests failed")
     print(json.dumps({"admitted":True,"mode":mode,"product_sha":PRODUCT,"approved_gate_sha":APPROVED,
                       "execution_sha":execution,"original_gate_unchanged":True,"no_registry_publication":True}))
 
