@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 
-from jrc_ag_guarded_frontend_build import ROOT, authorize, git, no_other_vite_build, resource_reason, sample
+from jrc_ag_guarded_frontend_build import ROOT, authorize, git, no_other_vite_build, node_heap_mib, resource_reason, sample
 
 BUILDKIT_IMAGE = 'mirror.gcr.io/moby/buildkit:v0.33.1@sha256:98cc6a3fc46220d00f8224ae483f3274fc874e9be8d7dd1e2e2c5481209228b5'
 
@@ -51,6 +51,7 @@ def execute():
     image = f"ghcr.io/{os.environ['IMAGE']}:sha-{sha}"
     command = ['docker', 'buildx', 'build', '--builder', builder, '--load', '--platform', 'linux/amd64',
                '--file', 'docker/Dockerfile', '--build-arg', f'GIT_SHA={sha}', '--tag', image,
+               '--build-arg', f'NODE_OPTIONS=--max-old-space-size={node_heap_mib(initial["ram_available"])} --openssl-legacy-provider',
                '--label', f'org.opencontainers.image.revision={sha}', '--label',
                'org.opencontainers.image.source=https://github.com/ClaudioHideki/jrc-conversas-lab2',
                '--provenance=false', '--progress=plain', '--metadata-file', str(output / 'metadata.json'), '.']

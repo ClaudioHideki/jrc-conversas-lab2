@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import patch
 
-from jrc_ag_guarded_frontend_build import authorize, resource_reason, node_heap_mib, START_RAM, START_DISK, STOP_RAM, STOP_DISK, BRANCH
+from jrc_ag_guarded_frontend_build import authorize, resource_reason, node_heap_mib, vite_output_environment, START_RAM, START_DISK, STOP_RAM, STOP_DISK, BRANCH
+from pathlib import Path
 
 
 class BuildAdmissionTest(unittest.TestCase):
@@ -52,6 +53,12 @@ class BuildAdmissionTest(unittest.TestCase):
         self.assertEqual(node_heap_mib(32 * gib), 6144)
         with self.assertRaises(RuntimeError):
             node_heap_mib(5 * gib - 1)
+
+    def test_actual_ruby_plugin_receives_the_owned_output_directory(self):
+        output = Path('owned-runner-output').resolve() / 'frontend'
+        env = vite_output_environment(output)
+        self.assertEqual(Path(env['VITE_RUBY_PUBLIC_DIR']) / env['VITE_RUBY_PUBLIC_OUTPUT_DIR'], output)
+        self.assertEqual(env['VITE_RUBY_PUBLIC_OUTPUT_DIR'], 'frontend')
 
 
 if __name__ == '__main__':

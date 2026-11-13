@@ -47,6 +47,12 @@ def node_heap_mib(available_ram):
     return min(6144, (available_ram - GIB) // (1024 ** 2))
 
 
+def vite_output_environment(output):
+    # vite-plugin-ruby overrides Vite's CLI outDir. Its supported publicDir
+    # options must point at this invocation's exclusive temporary directory.
+    return {'VITE_RUBY_PUBLIC_DIR': str(output.parent), 'VITE_RUBY_PUBLIC_OUTPUT_DIR': output.name}
+
+
 def authorize(env, expected):
     allowed = (sys.platform == 'linux' and env.get('GITHUB_ACTIONS') == 'true' and
                env.get('RUNNER_ENVIRONMENT') == 'github-hosted' and env.get('GITHUB_REF') in APPROVED_BRANCHES and
@@ -113,6 +119,7 @@ def execute(expected):
     env = os.environ.copy()
     heap_mib = node_heap_mib(initial['ram_available'])
     env.update(RAILS_ENV='production', VITE_RUBY_MODE='production', NODE_OPTIONS=f'--max-old-space-size={heap_mib}')
+    env.update(vite_output_environment(output))
     result = {'sha': expected, 'started': False, 'build_passed': False, 'publication': False,
               'node_heap_mib': heap_mib,
               'initial': initial, 'disk_min': initial['disk_free'], 'ram_min': initial['ram_available']}
@@ -126,7 +133,7 @@ def execute(expected):
             raise RuntimeError(reason)
         no_other_vite_build()
         with (attempt / 'build.log').open('x', encoding='utf-8') as log:
-            proc = subprocess.Popen(['pnpm', 'exec', 'vite', 'build', '--outDir', str(output)], cwd=ROOT,
+            proc = subprocess.Popen(['pnpm', 'exec', 'vite', 'build'], cwd=ROOT,
                                     env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
             result['started'] = True
             while proc.poll() is None:
