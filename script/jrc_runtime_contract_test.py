@@ -13,6 +13,16 @@ ROOT = Path(__file__).resolve().parent.parent
 BASE = "c6eb87661bfd2dd5f50e3868f30706770b562655"
 RUBY_DIGEST = "a28982cf8ed78eb0d222e51bc6788335d33ef191bfc6fc39da138577e611741d"
 NODE_DIGEST = "116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5"
+REVIEWED_RETRY_SOURCES = {
+    "app/javascript/dashboard/components-next/message/MessageError.vue":
+        "c09c8373e8fdc40ecefa7610edad4d335853fa715c8d760c22062d202280d568",
+    "app/javascript/dashboard/components-next/message/specs/MessageError.spec.js":
+        "bf73b6435280320edcec71b8dd9a816f081c6f480cc4a4ca1350adf9f099f361",
+    "app/javascript/dashboard/i18n/locale/en/chatlist.json":
+        "45bcaa5fb6743dc22d912db7cd71137d34f669f4d8d33a9aa4ed177be90873ec",
+    "app/services/whatsapp/retry_policy.rb":
+        "ec633e354766baff4881f73dc27ffc3dbe9d37579ccb6ac0fc61e1661e36598f",
+}
 
 
 def original(path):
@@ -26,6 +36,12 @@ def verify_reviewed_lock(lock, baseline):
     expected = expected.replace("    scout_apm (5.3.3)\n", "    scout_apm (5.7.0)\n")
     expected = expected.replace("\n  scout_apm\n", "\n  scout_apm (= 5.7.0)\n")
     assert lock == expected, "Only the reviewed Scout 5.7.0 update and Ruby runtime change are permitted"
+
+
+def verify_reviewed_retry_sources(root):
+    for name, expected in REVIEWED_RETRY_SOURCES.items():
+        actual = hashlib.sha256((root / name).read_text(encoding="utf-8").encode()).hexdigest()
+        assert actual == expected, "Unreviewed retry source: " + name
 
 
 def verify():
@@ -79,7 +95,8 @@ def verify():
     schema_sha = "ca110aa5f83259333a4399a3d88d34b17c77a70fcabe6ae542110f0ee813322e"
     # The old pagination fixture omitted the backend membership proof. Admit
     # only this reviewed test update; the product authorization is unchanged.
-    assert changed == sorted([reviewed_path, pagination_fixture, reviewed_schema]), changed
+    assert changed == sorted([reviewed_path, pagination_fixture, reviewed_schema, *REVIEWED_RETRY_SOURCES]), changed
+    verify_reviewed_retry_sources(ROOT)
     assert hashlib.sha256((ROOT / reviewed_path).read_bytes()).hexdigest() == reviewed_sha
     assert hashlib.sha256((ROOT / regression).read_bytes()).hexdigest() == regression_sha
     assert hashlib.sha256((ROOT / pagination_fixture).read_bytes()).hexdigest() == pagination_sha
@@ -100,6 +117,10 @@ def verify():
             "pnpm_lock_unchanged": True, "functional_sources_unchanged": False,
             "all_other_functional_sources_unchanged": True, "migrations_unchanged": True,
             "reviewed_functional_fixes": fixes,
+            "reviewed_retry_commit": "549102e44a0141d088e88551cb552d1157c17076",
+            "reviewed_retry_overlay": "Preserve backend retry denial in the existing tooltip, with null metadata regression",
+            "reviewed_retry_files": [{"path": path, "sha256_canonical_utf8": sha}
+                                     for path, sha in REVIEWED_RETRY_SOURCES.items()],
             "reviewed_test_fixtures": [{"path": pagination_fixture, "sha256": pagination_sha}],
             "reviewed_schema_reconciliation": {"path": reviewed_schema, "sha256": schema_sha,
                 "tables": ["whatsapp_retry_attempts", "whatsapp_retry_receipts", "jrc_service_desk_report_exports"],

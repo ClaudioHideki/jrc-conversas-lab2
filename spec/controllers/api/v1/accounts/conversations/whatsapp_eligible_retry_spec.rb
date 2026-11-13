@@ -123,6 +123,101 @@ RSpec.describe 'WhatsApp Cloud eligible retry', type: :request do
     expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
   end
 
+  %w[130472 131049 131026].each do |code|
+    it "allows one operator-requested retry of a #{code} rejection" do
+      message.update!(external_error: "#{code}: Synthetic rejection", updated_at: 2.minutes.ago)
+      original = message.reload.attributes.deep_dup
+      2.times { post retry_path, headers: agent.create_new_auth_token, as: :json }
+      expect(response).to have_http_status(:accepted)
+      expect(response.parsed_body.dig('retry', 'status')).to eq('already_requested')
+      expect(WhatsappRetryAttempt.where(original_message: message).count).to eq(1)
+      expect(WhatsappRetryAttempt.last.prior_error_code).to eq(code)
+      expect(message.reload.attributes).to eq(original)
+      expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
+    end
+  end
+
+  context 'when a template has a static text header' do
+    before do
+      data = channel.message_templates.first.deep_dup
+      data['components'].unshift({ 'type' => 'HEADER', 'format' => 'TEXT', 'text' => 'Synthetic heading' })
+      channel.update!(message_templates: [data])
+    end
+
+    %w[130472 131049 131026].product(%w[delivered failed]).each do |code, receipt_status|
+      it "submits one manual #{code} retry and records the #{receipt_status} receipt without changing the original" do
+        message.update!(external_error: "#{code}: Synthetic rejection", updated_at: 2.minutes.ago)
+        original = message.reload.attributes.deep_dup
+        stub_request(:get, %r{https://graph.facebook.com/v14.0/.*/message_templates}).to_return(
+          status: 200, body: { data: channel.reload.message_templates }.to_json, headers: { 'Content-Type' => 'application/json' }
+        )
+        request = stub_request(:post, 'https://graph.facebook.com/v13.0/123456789/messages').with do |http|
+          body = JSON.parse(http.body)
+          body['type'] == 'template' && body.dig('template', 'name') == 'synthetic_retry' &&
+            body.dig('template', 'components') == [{ 'type' => 'body', 'parameters' => [{ 'type' => 'text', 'text' => 'Synthetic' }] }]
+        end.to_return(status: 200, body: { messages: [{ id: 'wamid.synthetic-static-header' }] }.to_json,
+                      headers: { 'Content-Type' => 'application/json' })
+        post retry_path, headers: agent.create_new_auth_token, as: :json
+        expect(response).to have_http_status(:accepted)
+        attempt = WhatsappRetryAttempt.find(response.parsed_body.dig('retry', 'attempt_id'))
+        2.times { WhatsappRetryJob.perform_now(attempt.id) }
+        expect(attempt.reload.state).to eq('accepted')
+        receipt = { id: 'wamid.synthetic-static-header', status: receipt_status }
+        receipt[:errors] = [{ code: code.to_i, title: 'Synthetic rejection' }] if receipt_status == 'failed'
+        callback = { entry: [{ changes: [{ value: { statuses: [receipt] } }] }] }.with_indifferent_access
+        Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: inbox, params: callback).perform
+        WhatsappRetryRecoveryJob.perform_now
+        WhatsappRetryJob.perform_now(attempt.id)
+        expect(attempt.reload.state).to eq(receipt_status)
+        expect(attempt.message.reload).to have_attributes(status: receipt_status, source_id: 'wamid.synthetic-static-header')
+        expect(attempt.message.external_error).to start_with("#{code}:") if receipt_status == 'failed'
+        expect(request).to have_been_requested.once
+        expect(message.reload.attributes).to eq(original)
+      end
+    end
+
+    [
+      { 'type' => 'HEADER', 'format' => 'TEXT', 'text' => 'Synthetic {{1}}' },
+      { 'type' => 'HEADER', 'format' => 'IMAGE' },
+      { 'type' => 'HEADER', 'format' => 'DOCUMENT' },
+      { 'type' => 'HEADER', 'format' => 'TEXT' }
+    ].each do |header|
+      it "rejects an unsupported header #{header.inspect} without reserving or sending an attempt" do
+        data = channel.message_templates.first.deep_dup
+        data['components'][0] = header
+        channel.update!(message_templates: [data])
+        post retry_path, headers: agent.create_new_auth_token, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(WhatsappRetryAttempt.where(original_message: message)).not_to exist
+        expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
+      end
+    end
+
+    it 'cancels before POST if the live header becomes dynamic after the request' do
+      post retry_path, headers: agent.create_new_auth_token, as: :json
+      expect(response).to have_http_status(:accepted)
+      attempt = WhatsappRetryAttempt.last
+      data = channel.reload.message_templates.first.deep_dup
+      data['components'][0]['text'] = 'Synthetic {{1}}'
+      stub_request(:get, %r{https://graph.facebook.com/v14.0/.*/message_templates}).to_return(
+        status: 200, body: { data: [data] }.to_json, headers: { 'Content-Type' => 'application/json' }
+      )
+      WhatsappRetryJob.perform_now(attempt.id)
+      expect(attempt.reload.state).to eq('cancelled')
+      expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
+    end
+
+    it 'rejects extra header parameters rather than dropping them' do
+      params = message.additional_attributes['template_params'].deep_dup
+      params['processed_params']['header'] = { '1' => 'Synthetic unexpected parameter' }
+      message.update!(additional_attributes: { template_params: params }, updated_at: 2.minutes.ago)
+      post retry_path, headers: agent.create_new_auth_token, as: :json
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(WhatsappRetryAttempt.where(original_message: message)).not_to exist
+      expect(a_request(:post, /graph\.facebook\.com/)).not_to have_been_made
+    end
+  end
+
   context 'when processing the queued attempt' do
     let(:post_url) { "https://graph.facebook.com/v13.0/#{channel.provider_config['phone_number_id']}/messages" }
     let(:template_data) { channel.reload.message_templates }

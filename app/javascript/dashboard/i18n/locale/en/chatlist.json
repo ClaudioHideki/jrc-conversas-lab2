@@ -12,6 +12,7 @@
     "WHATSAPP_RETRY": {
       "MARKETING": "Meta restricted delivery of this marketing message (131049). Retry is blocked pending review; delivery is not guaranteed later.",
       "DESTINATION": "Meta could not deliver this message (131026). Verify the destination before considering a new attempt. Retry is blocked.",
+      "EXPERIMENT": "Meta restricted this recipient through a marketing experiment (130472). You may request one manual retry; Meta may reject it again.",
       "STATES": {
         "QUEUED": "Retry of message #{id}: queued; not yet sent.",
         "SUBMITTING": "Retry of message #{id}: Submitting; awaiting confirmation.",
