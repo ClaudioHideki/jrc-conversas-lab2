@@ -76,8 +76,8 @@ jobs:
         run: pnpm -C tests/playwright exec playwright test --config whatsapp-word.config.ts
       - name: Build frontend completo
         env:
-          RAILS_ENV: production
-        run: pnpm exec vite build --outDir "$RUNNER_TEMP/whatsapp-connections-frontend"
+          JRC_AG_AUTHORIZED_BUILD_SHA: ${{ github.sha }}
+        run: python3 script/jrc_ag_guarded_frontend_build.py --execute --expected-sha "$GITHUB_SHA"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -85,6 +85,8 @@ jobs:
           path: |
             .codex/whatsapp-word-e2e/
             /tmp/whatsapp-connections-vitest.json
+            ${{ runner.temp }}/jrc-ag-build-${{ github.sha }}/build.log
+            ${{ runner.temp }}/jrc-ag-build-${{ github.sha }}/build-result.json
           if-no-files-found: ignore
       - run: git diff --exit-code && git diff --check
 

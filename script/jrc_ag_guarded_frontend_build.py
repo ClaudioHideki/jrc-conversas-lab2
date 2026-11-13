@@ -38,6 +38,15 @@ def resource_reason(disk, ram, starting=False):
     return None
 
 
+def node_heap_mib(available_ram):
+    # The consolidated A-G entrypoints exceed Node's 4 GiB default. Allocate
+    # only from observed free RAM, keep 1 GiB for native/runner allocations,
+    # and retain the existing admission/continuous physical-memory guards.
+    if available_ram < START_RAM:
+        raise RuntimeError('physical_ram_start_below_5_GiB')
+    return min(6144, (available_ram - GIB) // (1024 ** 2))
+
+
 def authorize(env, expected):
     allowed = (sys.platform == 'linux' and env.get('GITHUB_ACTIONS') == 'true' and
                env.get('RUNNER_ENVIRONMENT') == 'github-hosted' and env.get('GITHUB_REF') in APPROVED_BRANCHES and
@@ -102,8 +111,10 @@ def execute(expected):
     attempt.mkdir()  # Existing attempt/output must never be overwritten or cleaned.
     output = attempt / 'frontend'
     env = os.environ.copy()
-    env.update(RAILS_ENV='production', VITE_RUBY_MODE='production', NODE_OPTIONS='--max-old-space-size=4096')
+    heap_mib = node_heap_mib(initial['ram_available'])
+    env.update(RAILS_ENV='production', VITE_RUBY_MODE='production', NODE_OPTIONS=f'--max-old-space-size={heap_mib}')
     result = {'sha': expected, 'started': False, 'build_passed': False, 'publication': False,
+              'node_heap_mib': heap_mib,
               'initial': initial, 'disk_min': initial['disk_free'], 'ram_min': initial['ram_available']}
     proc = None
     started = time.monotonic()

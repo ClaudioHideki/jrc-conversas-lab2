@@ -1,0 +1,17 @@
+{
+  "base_sha": "d8a83b824b11cc68ddbbce7c79681f368051fb70",
+  "scope": "additional_whatsapp_history_migrations",
+  "historical_admission_unchanged": true,
+  "migrations": [
+    {
+      "path": "db/migrate/20261111170000_create_jrc_broker_history_receipts.rb",
+      "version": "20261111170000",
+      "sha256": "71d17271f12867e1601000a4375e6d4c90f6c5b355c2bac4bb19881c7fd4a01a"
+    },
+    {
+      "path": "db/migrate/20261112120000_create_jrc_broker_history_media.rb",
+      "version": "20261112120000",
+      "sha256": "d5d85e40e97693e200fc3616033dc45e78c2d51acfe03e7b0cb041c16a9c7fd7"
+    }
+  ]
+}

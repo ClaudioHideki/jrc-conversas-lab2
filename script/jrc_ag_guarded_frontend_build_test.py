@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from jrc_ag_guarded_frontend_build import authorize, resource_reason, START_RAM, START_DISK, STOP_RAM, STOP_DISK, BRANCH
+from jrc_ag_guarded_frontend_build import authorize, resource_reason, node_heap_mib, START_RAM, START_DISK, STOP_RAM, STOP_DISK, BRANCH
 
 
 class BuildAdmissionTest(unittest.TestCase):
@@ -43,6 +43,15 @@ class BuildAdmissionTest(unittest.TestCase):
             authorize(candidate, self.sha)
             with self.assertRaises(RuntimeError):
                 authorize({**candidate, 'GITHUB_SHA': 'b' * 40}, self.sha)
+
+    def test_heap_is_bounded_by_observed_ram_with_a_non_heap_reserve(self):
+        gib = 1024 ** 3
+        self.assertEqual(node_heap_mib(5 * gib), 4096)
+        self.assertEqual(node_heap_mib(6 * gib), 5120)
+        self.assertEqual(node_heap_mib(8 * gib), 6144)
+        self.assertEqual(node_heap_mib(32 * gib), 6144)
+        with self.assertRaises(RuntimeError):
+            node_heap_mib(5 * gib - 1)
 
 
 if __name__ == '__main__':

@@ -8,7 +8,8 @@ import sys
 
 ROOT = Path(__file__).resolve().parent.parent
 # Reviewed merge of A-G and the retained WhatsApp history increment. The
-# runtime delta remains restricted to its reviewed model fix and lock update.
+# runtime delta remains restricted to reviewed fixes and the exact schema
+# reconciliation of tables already defined by unchanged migrations.
 BASE = "c6eb87661bfd2dd5f50e3868f30706770b562655"
 RUBY_DIGEST = "a28982cf8ed78eb0d222e51bc6788335d33ef191bfc6fc39da138577e611741d"
 NODE_DIGEST = "116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5"
@@ -60,12 +61,15 @@ def verify():
     regression_sha = "f424461b1008fc5942e421e430a283485e7dd54b8d4551a339ece28abaaa2172"
     pagination_fixture = "app/javascript/dashboard/routes/dashboard/inbox/specs/InboxList.spec.js"
     pagination_sha = "0dd4f4ed7960eb673cadf1c388073ff2af99c90de2f2dd6119321dff05c630a7"
+    reviewed_schema = "db/schema.rb"
+    schema_sha = "96d4d91e522dd61be81edb5f4e19d840241693702a910ecea4e2d48c4e1db78c"
     # The old pagination fixture omitted the backend membership proof. Admit
     # only this reviewed test update; the product authorization is unchanged.
-    assert changed == sorted([reviewed_path, pagination_fixture]), changed
+    assert changed == sorted([reviewed_path, pagination_fixture, reviewed_schema]), changed
     assert hashlib.sha256((ROOT / reviewed_path).read_bytes()).hexdigest() == reviewed_sha
     assert hashlib.sha256((ROOT / regression).read_bytes()).hexdigest() == regression_sha
     assert hashlib.sha256((ROOT / pagination_fixture).read_bytes()).hexdigest() == pagination_sha
+    assert hashlib.sha256((ROOT / reviewed_schema).read_bytes()).hexdigest() == schema_sha
     fixes = [{"path": reviewed_path, "sha256": reviewed_sha,
               "regression": regression, "regression_sha256": regression_sha}]
     assert (ROOT / ".dockerignore").read_text() == original(".dockerignore")
@@ -79,6 +83,9 @@ def verify():
             "all_other_functional_sources_unchanged": True, "migrations_unchanged": True,
             "reviewed_functional_fixes": fixes,
             "reviewed_test_fixtures": [{"path": pagination_fixture, "sha256": pagination_sha}],
+            "reviewed_schema_reconciliation": {"path": reviewed_schema, "sha256": schema_sha,
+                "tables": ["whatsapp_retry_attempts", "whatsapp_retry_receipts", "jrc_service_desk_report_exports"],
+                "migration_sources_unchanged": True},
             "separate_nico_image_unchanged": True, "docker_build_executed": False}
 
 

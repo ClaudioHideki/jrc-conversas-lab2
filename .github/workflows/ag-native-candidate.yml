@@ -192,7 +192,6 @@ jobs:
           bundle exec rails db:migrate
           bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
           bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
-          bundle exec rails db:schema:dump
           JRC_AG_CATALOG_OUTPUT=/tmp/ag-fresh-catalog.json bundle exec rails runner script/jrc_ag_ci_fixture.rb catalog
           POSTGRES_DATABASE=jrc_jornada_candidate_test bundle exec rails db:create
           POSTGRES_DATABASE=jrc_jornada_candidate_test JRC_AG_POPULATED_UPGRADE=1 bundle exec rails runner script/jrc_ag_ci_fixture.rb load_main
@@ -201,7 +200,7 @@ jobs:
           POSTGRES_DATABASE=jrc_jornada_candidate_test bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
           POSTGRES_DATABASE=jrc_jornada_candidate_test bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
           POSTGRES_DATABASE=jrc_jornada_candidate_test JRC_AG_CATALOG_OUTPUT=/tmp/ag-upgrade-catalog.json bundle exec rails runner script/jrc_ag_ci_fixture.rb catalog
-          POSTGRES_DATABASE=jrc_four_domains_schema_test bundle exec rails db:create db:schema:load
+          POSTGRES_DATABASE=jrc_four_domains_schema_test SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           POSTGRES_DATABASE=jrc_four_domains_schema_test bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
           POSTGRES_DATABASE=jrc_four_domains_schema_test JRC_AG_FIXTURE_RECEIPT=/tmp/ag-reload-receipt.json bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
           POSTGRES_DATABASE=jrc_four_domains_schema_test JRC_AG_CATALOG_OUTPUT=/tmp/ag-reload-catalog.json bundle exec rails runner script/jrc_ag_ci_fixture.rb catalog
@@ -211,7 +210,7 @@ jobs:
           manifest = json.loads(pathlib.Path('docs/jrc_consolidation/ag_historical_migration_admission_20261111.json').read_text())
           receipt = json.loads(pathlib.Path('/tmp/ag-fixture-receipt-execution.json').read_text())
           assert receipt['populated_upgrade'] and receipt['preserved_subjects'] >= 10
-          assert len(receipt['required_versions']) == 36 and len(receipt['historical_versions']) == 27
+          assert len(receipt['required_versions']) == 38 and len(receipt['historical_versions']) == 27
           assert receipt['missing_after'] == [] and receipt['pending_after'] is False and receipt['existing_versions_preserved']
           paths = ['/tmp/ag-fresh-schema.rb', '/tmp/ag-upgrade-schema.rb',
                    '/tmp/ag-fresh-catalog.json', '/tmp/ag-upgrade-catalog.json', '/tmp/ag-reload-catalog.json']
@@ -222,7 +221,7 @@ jobs:
                     'production_changed': False, 'docker_build_executed': False}
           pathlib.Path('/tmp/ag-migration-audit-result.json').write_text(json.dumps(result, indent=2) + '\n')
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
-              output.write('Migration audit for ' + result['source_sha'] + ': 36 applied versions (27 historical), ' +
+              output.write('Migration audit for ' + result['source_sha'] + ': 38 applied versions (27 historical), ' +
                            str(receipt['preserved_subjects']) + ' preserved synthetic subjects; fresh/upgrade/reload passed.\n')
           print(json.dumps(result))
           PYTHON

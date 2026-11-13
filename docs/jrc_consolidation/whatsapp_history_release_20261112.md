@@ -1,5 +1,15 @@
 # Candidata consolidada de histórico WhatsApp — 12/11/2026
 
+## Fechamento dos gates de consolidação
+
+A CI de `c307e774` comprovou a suíte Rails de conexões, mas o build completo excedeu o heap padrão de 4 GiB. A guarda existente agora calcula 4096–6144 MiB a partir da RAM livre observada, conservando 1 GiB para alocações nativas/runner, o piso inicial de 5 GiB e a interrupção por reserva física. Seis regressões cobrem limites, autorização de SHA/branch e recusa no Windows; não houve alteração de recursos do servidor.
+
+A CI nativa também detectou divergência entre migrations e schema: as migrations existentes de retry e exportação de relatório estavam presentes, mas `whatsapp_retry_attempts`, `whatsapp_retry_receipts` e `jrc_service_desk_report_exports` faltavam no schema consolidado. Foram acrescentadas somente suas definições, índices e FKs, sem editar migrations já publicadas nem reduzir a versão do schema. A guarda de runtime admite o hash exato dessa reconciliação e continua recusando mudanças não revistas.
+
+O recibo de upgrade passa a exigir 38 versões: as 36 já admitidas mais as duas migrations de histórico desta branch, verificadas por hash em `history_forward_migrations_20261112.json`. A lista histórica de 27 migrations permanece intacta. O terceiro caminho do gate agora carrega explicitamente o `db/schema.rb` versionado, e não o schema temporário gerado pelo primeiro caminho; a comparação de catálogos de instalação nova, upgrade populado e carga de schema continua obrigatória. Apenas metadados de schema são produzidos em bases descartáveis; nenhuma rotina de backup de dados é executada.
+
+Os 25 testes Python dos contratos/guardas passaram localmente. A carga corrigida foi executada em um PostgreSQL adicional, efêmero, sem volumes ou portas do host; não modificou o banco usado pelo E2E HTTP já realizado. As provas de CI e imagem devem corresponder ao SHA final deste incremento.
+
 ## Origem preservada
 
 - Branch de trabalho: `codex/whatsapp-history-order-20261111`.

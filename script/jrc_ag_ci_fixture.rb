@@ -20,8 +20,10 @@ admission = JSON.parse(Rails.root.join('docs/jrc_consolidation/ag_historical_mig
 raise 'Pinned main admission mismatch' unless admission.fetch('base_sha') == base
 forward = JSON.parse(Rails.root.join('docs/jrc_consolidation/final_forward_migrations_20261112.json').read)
 raise 'Forward migration base mismatch' unless forward.fetch('candidate_base') == '6195f7d21a0781cd5c5cf4d13bd73a497bb5a452'
+history_forward = JSON.parse(Rails.root.join('docs/jrc_consolidation/history_forward_migrations_20261112.json').read)
+raise 'History migration base mismatch' unless history_forward.fetch('base_sha') == base
 historical_versions = admission.fetch('migrations').map { |entry| entry.fetch('version') }
-forward_versions = forward.fetch('migrations').map do |entry|
+forward_versions = (forward.fetch('migrations') + history_forward.fetch('migrations')).map do |entry|
   path = entry.fetch('path')
   version = entry.fetch('version')
   raise 'Unexpected forward migration path' unless path.match?(%r{\Adb/migrate/\d{14}_[a-z0-9_]+\.rb\z}) && File.basename(path).start_with?(version)

@@ -11267,5 +11267,74 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_12_120000) do
     CREATE TRIGGER jrc_history_visibility_revoke AFTER DELETE ON jrc_broker_history_receipts FOR EACH ROW EXECUTE FUNCTION jrc_history_visibility_revoke();
   JRC_SCHEMA_SQL_6f3efd2cc93b
 
+  create_table "whatsapp_retry_attempts", force: :cascade do |t|
+    t.integer "account_id", null: false
+    t.integer "inbox_id", null: false
+    t.integer "original_message_id", null: false
+    t.integer "message_id", null: false
+    t.integer "actor_id"
+    t.string "state", default: "queued", null: false
+    t.datetime "next_attempt_at"
+    t.integer "validation_failures", default: 0, null: false
+    t.string "prior_error_code", null: false
+    t.string "policy_version", null: false
+    t.string "payload_fingerprint", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_whatsapp_retry_attempts_on_account_id"
+    t.index ["actor_id"], name: "index_whatsapp_retry_attempts_on_actor_id"
+    t.index ["inbox_id"], name: "index_whatsapp_retry_attempts_on_inbox_id"
+    t.index ["message_id"], name: "index_whatsapp_retry_attempts_on_message_id", unique: true
+    t.index ["original_message_id"], name: "index_whatsapp_retry_attempts_on_original_message_id", unique: true
+    t.index ["state", "next_attempt_at"], name: "index_whatsapp_retry_attempts_on_state_and_next_attempt_at"
+    t.index ["state", "updated_at"], name: "index_whatsapp_retry_attempts_on_state_and_updated_at"
+    t.check_constraint "state IN ('queued','submitting','accepted','delivered','read','failed','unknown','cancelled')", name: "whatsapp_retry_state"
+  end
+
+  create_table "whatsapp_retry_receipts", force: :cascade do |t|
+    t.integer "inbox_id", null: false
+    t.bigint "whatsapp_retry_attempt_id"
+    t.string "source_id", null: false
+    t.string "status", null: false
+    t.string "error_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inbox_id"], name: "index_whatsapp_retry_receipts_on_inbox_id"
+    t.index ["inbox_id", "source_id", "status"], name: "whatsapp_retry_receipt_identity", unique: true
+    t.index ["whatsapp_retry_attempt_id"], name: "index_whatsapp_retry_receipts_on_whatsapp_retry_attempt_id"
+  end
+
+  add_foreign_key "whatsapp_retry_attempts", "accounts", on_delete: :cascade
+  add_foreign_key "whatsapp_retry_attempts", "inboxes", on_delete: :cascade
+  add_foreign_key "whatsapp_retry_attempts", "messages", column: "original_message_id", on_delete: :cascade
+  add_foreign_key "whatsapp_retry_attempts", "messages", on_delete: :cascade
+  add_foreign_key "whatsapp_retry_attempts", "users", column: "actor_id", on_delete: :nullify
+  add_foreign_key "whatsapp_retry_receipts", "inboxes", on_delete: :cascade
+  add_foreign_key "whatsapp_retry_receipts", "whatsapp_retry_attempts", on_delete: :cascade
+
+  create_table "jrc_service_desk_report_exports", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "unit_id", null: false
+    t.bigint "account_user_id", null: false
+    t.string "format", null: false
+    t.string "state", default: "queued", null: false
+    t.jsonb "filters", default: {}, null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.integer "record_count"
+    t.integer "expected_count", null: false
+    t.string "authorization_signature"
+    t.string "error_code"
+    t.datetime "observed_at"
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_service_desk_report_exports_on_account_id"
+    t.index ["account_user_id"], name: "index_jrc_service_desk_report_exports_on_account_user_id"
+    t.index ["unit_id"], name: "index_jrc_service_desk_report_exports_on_unit_id"
+    t.index ["account_id", "account_user_id", "created_at"], name: "jrc_sd_report_exports_owner"
+  end
+  add_foreign_key "jrc_service_desk_report_exports", "accounts"
+  add_foreign_key "jrc_service_desk_report_exports", "account_users"
+  add_foreign_key "jrc_service_desk_report_exports", "jrc_service_desk_units", column: "unit_id"
 
 end
