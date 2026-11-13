@@ -332,7 +332,7 @@ def execute(lock, infra, product, output):
             require(any("vue_examples" in r for r in result["reports"]), "Required Vue JSON missing")
         validations.append(result)
         print("Verified artifact", a["id"], a["name"], flush=True)
-    require(total == lock["expected_matrix_examples"] == 5554, "Matrix example coverage differs")
+    require(total == lock["expected_matrix_examples"] == 5572, "Matrix example coverage differs")
     require(len(validations) == lock["expected_artifact_count"] == len(lock["artifacts"]) and len(matrix) == 36,
             "Evidence coverage incomplete")
     # Re-read after downloads: a concurrent rerun cannot be silently accepted.

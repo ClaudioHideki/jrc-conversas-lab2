@@ -1,215 +1,88 @@
-name: Authorized corrective fourth runtime image attempt and isolated smoke
-
+name: Approval Word layout independent release evidence gate
 on:
   workflow_dispatch:
     inputs:
       expected_execution_sha:
-        description: Full SHA of this isolated execution wrapper
         type: string
         required: true
-      expected_product_sha:
-        description: Approved immutable product SHA
-        type: string
-        required: true
-
 permissions:
   contents: read
   actions: read
-
 concurrency:
-  group: single-runtime-image-http-fix
+  group: approvals-word-independent-gate
   cancel-in-progress: false
-
 jobs:
   evidence-gate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       PYTHONDONTWRITEBYTECODE: '1'
-      EXPECTED_INFRASTRUCTURE_SHA: ${{ inputs.expected_execution_sha }}
       EXPECTED_EXECUTION_SHA: ${{ inputs.expected_execution_sha }}
-      EXPECTED_APPROVED_SHA: 48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d
-      EXPECTED_PRODUCT_SHA: ${{ inputs.expected_product_sha }}
+      EXPECTED_SOURCE_PRODUCT_SHA: d68885508f36a8fda2725a3c03d78470e9f9ff70
+      EXPECTED_VALIDATION_SHA: 77bef89d84eb523a1fab8a725a70a5a700a80dd9
     steps:
-      - name: Checkout immutable infrastructure
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Verify dispatch identity before any verification
-        shell: bash
-        run: |
-          set -euo pipefail
-          [[ "$EXPECTED_INFRASTRUCTURE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test "$GITHUB_SHA" = "$EXPECTED_INFRASTRUCTURE_SHA"
-          test "$(git rev-parse HEAD)" = "$EXPECTED_INFRASTRUCTURE_SHA"
-          test "$EXPECTED_PRODUCT_SHA" = 5640793988fbf63ac46b0db3466722fc650f0d01
-          test "$GITHUB_REF_NAME" = ci/runtime-build-http-fix-20261113
-          test "$RUNNER_ENVIRONMENT" = github-hosted
-      - name: Checkout approved product without infrastructure overlay
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 5640793988fbf63ac46b0db3466722fc650f0d01
+          ref: 77bef89d84eb523a1fab8a725a70a5a700a80dd9
           path: product
           persist-credentials: false
           fetch-depth: 0
-      - name: Checkout immutable approved gate
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d
-          path: approved
+          ref: d68885508f36a8fda2725a3c03d78470e9f9ff70
+          path: image_source
           persist-credentials: false
-      - name: Verify approved infrastructure and historical gate evidence
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/runtime_build/admission.py --mode prepare
-      - name: Validate workflow with checksum-pinned actionlint
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: image_source/.nvmrc
+      - name: Immutable hosted authorization
+        run: |
+          [[ "$EXPECTED_EXECUTION_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_EXECUTION_SHA"
+          test "$GITHUB_SHA" = "$EXPECTED_EXECUTION_SHA"
+          test "$GITHUB_REF_NAME" = ci/approvals-word-release-gate-20261113
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+      - name: Pin and validate actionlint
         shell: bash
         run: |
-          set -euo pipefail
-          archive="$RUNNER_TEMP/release-actionlint.tar.gz"
-          curl --proto '=https' --proto-redir '=https' --location --fail --silent --show-error --connect-timeout 10 --max-time 60 \
-            -o "$archive" https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+          archive="$RUNNER_TEMP/approval-actionlint.tar.gz"
+          curl --proto '=https' --proto-redir '=https' --location --fail --silent --show-error --connect-timeout 10 --max-time 60 -o "$archive" https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
           printf '%s  %s\n' 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8 "$archive" | sha256sum -c -
-          mkdir "$RUNNER_TEMP/release-linter"
-          tar -xzf "$archive" -C "$RUNNER_TEMP/release-linter" actionlint
-          "$RUNNER_TEMP/release-linter/actionlint" .github/workflows/ag-native-candidate.yml
-      - name: Syntax and denial tests of the release gate
+          mkdir "$RUNNER_TEMP/approval-linter"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/approval-linter" actionlint
+          "$RUNNER_TEMP/approval-linter/actionlint" .github/workflows/ag-native-candidate.yml
+      - name: Preserve original evidence, Scout and resource denial tests
         env:
           GATE_TEST_REPORT: ${{ runner.temp }}/gate-tests.json
+          GUARD_TEST_REPORT: ${{ runner.temp }}/guard-tests.json
+          SCOUT_PROOF_TEST_REPORT: ${{ runner.temp }}/scout-proof-tests.json
         run: |
-          python3 -B -c "import ast,pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('.github/release').glob('*.py')]"
           python3 -B .github/release/test_gate.py
-          SCOUT_PROOF_TEST_REPORT="$RUNNER_TEMP/scout-proof-tests.json" python3 -B .github/release/test_scout_probe.py
-          python3 -B -c "import ast,pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('.github/runtime_build').glob('*.py')]"
-          GUARD_TEST_REPORT="$RUNNER_TEMP/guard-tests.json" python3 -B .github/runtime_build/test_guard.py
-      - name: Validate all modified product workflows and runtime contract
-        working-directory: product
-        run: |
-          "$RUNNER_TEMP/release-linter/actionlint" .github/workflows/ag-native-candidate.yml .github/workflows/backoffice-flow.yml .github/workflows/broker-customer-candidate.yml .github/workflows/build-ghcr.yml .github/workflows/campaign-workflow-candidate.yml .github/workflows/contacts-native.yml .github/workflows/flow-broker-candidate.yml .github/workflows/nico-broker-candidate.yml .github/workflows/nico-capacity-native.yml .github/workflows/nico-legacy-reservations-native.yml .github/workflows/precimech-hotfix-tests.yml .github/workflows/projects-candidate.yml .github/workflows/projects-portal-candidate.yml .github/workflows/sd-contact-softphone-native.yml .github/workflows/service-desk-global-native.yml .github/workflows/voice-v4-candidate.yml .github/workflows/whatsapp-connections-candidate.yml
-          python3 -B script/jrc_runtime_contract_test.py
-          python3 -B script/jrc_runtime_contract_test_test.py
-      - name: Configure declared Ruby for smoke syntax validation
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.12'
-          bundler: none
-          bundler-cache: false
-      - name: Validate real smoke syntax before allowing build
-        run: |
-          ruby -c .github/runtime_build/probe.rb
-          ruby -c .github/runtime_build/worker.rb
-          ruby -c .github/runtime_build/receipt.rb
-          ruby -c .github/runtime_build/extra.rb
-          ruby .github/runtime_build/test_receipt.rb "$RUNNER_TEMP/receipt-unit.json"
-      - name: Configure declared Node for original migration protection tests
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version-file: product/.nvmrc
-      - name: Preserve original migration identity and history protections
-        working-directory: product
-        run: |
-          node script/validate_ag_migration_identity.mjs
-          node --test script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
-      - name: Recheck frontend-only heap and owned-process controls on the exact product
-        run: |
-          node --test --test-reporter=tap --test-reporter-destination=stdout \
-            --test-reporter=junit --test-reporter-destination="$RUNNER_TEMP/vite-heap-tests.xml" \
-            product/script/jrc_vite_build.test.mjs
-          python3 - <<'PY'
-          import os,xml.etree.ElementTree as ET
-          from pathlib import Path
-          r=ET.parse(Path(os.environ['RUNNER_TEMP'])/'vite-heap-tests.xml').getroot()
-          assert len(list(r.iter('testcase'))) == 13
-          assert not any(list(r.iter(k)) for k in ['failure','error','skipped'])
-          PY
-      - name: Real HTTP and assets regression on owned internal network without host ports
-        run: python3 -B .github/runtime_build/test_http_network.py
-      - name: Verify real hosted-runner memory and disk before admitting a future image attempt
-        run: |
-          python3 -B - <<'PY'
-          import importlib.util,json,os
-          from pathlib import Path
-          spec=importlib.util.spec_from_file_location('guard','.github/runtime_build/guard.py')
-          guard=importlib.util.module_from_spec(spec);spec.loader.exec_module(guard)
-          sample=guard.effective_sample(guard.limits())
-          assert guard.starting_memory_reason(sample['ram_available'],True) is None
-          assert guard.limits().resource_reason(sample['disk_free'],sample['ram_available'],starting=True) is None
-          (Path(os.environ['RUNNER_TEMP'])/'guard-preflight.json').write_text(json.dumps({
-              'passed':True,'resources':sample,'minimum_effective_ram_gib':8,
-              'minimum_disk_gib':3,'memory_reserve_mib':750,'disk_reserve_bytes':750000000,
-              'image_build_executed':False},indent=2))
-          PY
-      - name: Verify exact native run and all immutable evidence
+          python3 -B .github/release/test_scout_probe.py
+          python3 -B .github/runtime_build/test_guard.py
+          python3 -B .github/layout_release/test_layout_release_adapter.py
+      - name: Revalidate frontend-only heap contract
+        run: node --test --test-reporter=junit image_source/script/jrc_vite_build.test.mjs > "$RUNNER_TEMP/vite-heap-tests.xml"
+      - name: Independently verify native artifacts and exact functional source equivalence
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python3 -B .github/release/gate.py \
-            --lock .github/release/release-evidence-lock.json \
-            --infrastructure-sha "$EXPECTED_INFRASTRUCTURE_SHA" \
-            --product product --output "$RUNNER_TEMP/release-gate-report.json"
-      - name: Preserve gate results only
+        run: python3 -B .github/layout_release/layout_release_adapter.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: release-evidence-gate-${{ github.sha }}
+          name: approvals-layout-release-gate-${{ github.sha }}
           path: |
             ${{ runner.temp }}/gate-tests.json
-            ${{ runner.temp }}/scout-proof-tests.json
-            ${{ runner.temp }}/receipt-unit.json
             ${{ runner.temp }}/guard-tests.json
-            ${{ runner.temp }}/release-gate-report.json
+            ${{ runner.temp }}/scout-proof-tests.json
             ${{ runner.temp }}/vite-heap-tests.xml
-            ${{ runner.temp }}/guard-preflight.json
-            ${{ runner.temp }}/http-network-regression.json
-          if-no-files-found: error
-          retention-days: 7
-
-  image-build:
-    needs: evidence-gate
-    runs-on: ubuntu-24.04
-    timeout-minutes: 85
-    env:
-      PYTHONDONTWRITEBYTECODE: '1'
-      EXPECTED_EXECUTION_SHA: ${{ inputs.expected_execution_sha }}
-      EXPECTED_PRODUCT_SHA: ${{ inputs.expected_product_sha }}
-      EXPECTED_APPROVED_SHA: 48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d
-      AUTHORIZED_BUILD_SHA: 5640793988fbf63ac46b0db3466722fc650f0d01
-    steps:
-      - name: Checkout immutable execution wrapper
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Checkout exact authorized product
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: 5640793988fbf63ac46b0db3466722fc650f0d01
-          path: product
-          persist-credentials: false
-      - name: Checkout exact approved gate infrastructure
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: 48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d
-          path: approved
-          persist-credentials: false
-      - name: Admit only this successful fresh gate and exact authorization
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/runtime_build/admission.py --mode build
-      - name: One resource-guarded image attempt and real isolated smoke
-        run: python3 -B .github/runtime_build/guard.py --execute
-      - name: Preserve reports and synthetic smoke evidence
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: runtime-image-attempt-${{ github.sha }}-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.json
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.log
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.pdf
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.png
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.xlsx
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/ocr.txt
+            ${{ runner.temp }}/validated-native-tree.json
+            ${{ runner.temp }}/layout-release-gate-report.json
           if-no-files-found: error
           retention-days: 7
