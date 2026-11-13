@@ -7,11 +7,12 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
-PRODUCT = "dce805894696416ed5397c268efb4acecb8ecfc7"
-APPROVED = "716647d67e96b77e8a56125ab0033c173bd68485"
-BRANCH = "ci/runtime-build-dce80589-20261112"
+PRODUCT = "5640793988fbf63ac46b0db3466722fc650f0d01"
+APPROVED = "48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d"
+BRANCH = "ci/runtime-build-http-fix-20261113"
 
 
 def require(value, message):
@@ -22,6 +23,28 @@ def require(value, message):
 def filehash(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
+
+
+def heap_evidence(gate, z, infrastructure):
+    xml = ET.fromstring(gate.member(z, "vite-heap-tests.xml"))
+    require(len(list(xml.iter("testcase"))) == 13
+            and not any(list(xml.iter(k)) for k in ["failure", "error", "skipped"]),
+            "Frontend-only heap tests incomplete")
+    report = json.loads(gate.member(z, "guard-preflight.json"))
+    require(report["passed"] and report["minimum_effective_ram_gib"] == 8
+            and report["minimum_disk_gib"] == 3 and report["memory_reserve_mib"] == 750
+            and report["disk_reserve_bytes"] == 750000000 and report["image_build_executed"] is False,
+            "Effective memory/disk preflight missing")
+    require(report["resources"]["ram_available"] >= 8*1024**3
+            and report["resources"]["disk_free"] >= 3*1024**3, "Preflight resources inadequate")
+
+    network = json.loads(gate.member(z, "http-network-regression.json"))
+    require(network["passed"] and network["product_sha"] == PRODUCT
+            and network["infrastructure_sha"] == infrastructure and network["network_is_internal"]
+            and network["host_ports_published"] is False and network["login_status"] == 200
+            and len(network["verified_assets"]) == 3 and network["inherited_proxies_bypassed"]
+            and network["missing_route_rejected"] and network["transport"] == "owned_internal_ipv4"
+            and network["application_image_built"] is False, "Real internal-network HTTP regression missing")
 
 def main(mode):
     execution = os.environ["EXPECTED_EXECUTION_SHA"]
@@ -36,35 +59,51 @@ def main(mode):
         require(set(extras) <= {"product/", "approved/"} if folder == ROOT else not extras, "Unexpected untracked source")
     approved = ROOT / "approved/.github/release"
     current = ROOT / ".github/release"
-    require(filehash(approved / "release-evidence-lock.json") == "3785e9512116e1e20cc9a60e65e96236a0466910859cbd93cec4a3439546d42a", "Approved lock changed")
-    for name in ["gate.py", "test_gate.py"]:
+    require(filehash(approved / "release-evidence-lock.json") == "e0ca903ef12ac36e90395765d30cdb4b4330e6e4452d4809503afad4f4c9c5b0", "Approved lock changed")
+    for name in ["gate.py", "test_gate.py", "scout_probe.py", "test_scout_probe.py"]:
         require((current / name).read_bytes() == (approved / name).read_bytes(), "Approved gate or denial tests changed")
     oldlock = json.loads((approved / "release-evidence-lock.json").read_text())
     wanted = {**oldlock, "infrastructure_branch": BRANCH}
     lock = json.loads((current / "release-evidence-lock.json").read_text())
     require(lock == wanted, "Only the execution branch binding may differ in the lock")
+    for path, expected in oldlock["probe_hashes"].items():
+        require(filehash(ROOT / path) == expected, "Approved probe differs: " + path)
+    expected_guard = (ROOT / "approved/.github/runtime_build/guard.py").read_text().replace(
+        'APPROVED = "3d1e41db6cd2a085cc7f6b988aa017bbed4d3a46"', 'APPROVED = "' + APPROVED + '"')
+    require((ROOT / ".github/runtime_build/guard.py").read_text() == expected_guard, "Approved resource guard template changed")
+    require((ROOT / ".github/runtime_build/test_guard.py").read_bytes() ==
+            (ROOT / "approved/.github/runtime_build/test_guard.py").read_bytes(), "Guard denial tests changed")
+    require((ROOT / ".github/runtime_build/test_http_network.py").read_bytes() ==
+            (ROOT / "approved/.github/runtime_build/test_http_network.py").read_bytes(), "Approved HTTP regression changed")
     for path, expected in oldlock["source_hashes"].items():
         require(filehash(ROOT / "product" / path) == expected, "Source hash differs: " + path)
+    sys.path.insert(0, str(current))
     spec = importlib.util.spec_from_file_location("approved_gate", current / "gate.py")
     gate = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(gate)
     gh = gate.GitHub("ClaudioHideki/jrc-conversas-lab2", os.environ["GH_TOKEN"])
     runs = gh.api("/actions/workflows/ag-native-candidate.yml/runs?branch=" + BRANCH + "&event=workflow_dispatch&per_page=100")
     require(runs["total_count"] == 1 and len(runs["workflow_runs"]) == 1 and str(runs["workflow_runs"][0]["id"]) == os.environ["GITHUB_RUN_ID"], "Single authorized workflow run required")
-    require(gh.api("/git/ref/heads/ci/release-gate-runtime-dce80589-20261112")["object"]["sha"] == APPROVED, "Approved ref moved")
-    r = gh.api("/actions/runs/43310498138")
+    require(gh.api("/git/ref/heads/ci/release-gate-http-fix-20261113")["object"]["sha"] == APPROVED, "Approved ref moved")
+    r = gh.api("/actions/runs/43359959371")
     require(r["head_sha"] == APPROVED and r["run_attempt"] == 1 and r["conclusion"] == "success" and r["status"] == "completed", "Approved gate run not successful")
-    arts = gh.api("/actions/runs/43310498138/artifacts?per_page=100")
+    arts = gh.api("/actions/runs/43359959371/artifacts?per_page=100")
     require(arts["total_count"] == len(arts["artifacts"]) == 1, "Approved gate artifact missing")
     artifact = arts["artifacts"][0]
-    require(artifact["digest"] == "sha256:502adb1692718e8b34362d81d9057512758db3ff35cc0a5a8f425821d4e5fa76" and not artifact["expired"], "Approved gate artifact changed")
+    require(artifact["digest"] == "sha256:a7e9fe030bbc9dfd054ee46a3a468804946cbaa2dedff5354ce6331d443188ee" and not artifact["expired"], "Approved gate artifact changed")
     z = gate.archive(gh.download(artifact["archive_download_url"]), artifact["digest"][7:])
     raw = gate.member(z, "release-gate-report.json")
-    require(hashlib.sha256(raw).hexdigest() == "4b8bcc8d1a7970eca505bef169d259f6bd08583309365e5363bbce5fab7c42ea", "Approved report differs")
+    require(hashlib.sha256(raw).hexdigest() == "2e52ab662420193f2098a98c5df9c077a4a484e2c04c4cb085057eea06624f43", "Approved report differs")
     report = json.loads(raw)
     require(report["passed"] and report["product_sha"] == PRODUCT and report["infrastructure_sha"] == APPROVED, "Approved report identity differs")
-    require(json.loads(gate.member(z, "gate-tests.json")) == {"tests":31,"failures":0,"errors":0,"skipped":0}, "Approved denial tests differ")
-    gate.run_identity(oldlock, gh.api("/actions/runs/43296936629"))
+    require(json.loads(gate.member(z, "gate-tests.json")) == {"tests":32,"failures":0,"errors":0,"skipped":0}, "Approved denial tests differ")
+    require(report["scout_probe_evidence"]["passed"] and report["scout_probe_evidence"]["probe_sha"] == "9131d1784a8256fed273b15f6f7b18389223612e", "Focused Scout/probe evidence missing")
+    require(json.loads(gate.member(z, "scout-proof-tests.json")) == {"tests":2,"failures":0,"errors":0,"skipped":0}, "Focused denial tests failed")
+    require(json.loads(gate.member(z, "guard-tests.json")) == {"tests":19,"failures":0,"errors":0,"skipped":0}, "Resource/initialization denial tests failed")
+    receipt_unit = json.loads(gate.member(z, "receipt-unit.json"))
+    require(receipt_unit["passed"] is True and receipt_unit["examples"] > 0 and receipt_unit["failures"] == 0 and receipt_unit["pending"] == 0, "Receipt unit checks missing")
+    heap_evidence(gate, z, APPROVED)
+    gate.run_identity(oldlock, gh.api("/actions/runs/43344850748"))
     if mode == "build":
         rid = os.environ["GITHUB_RUN_ID"]
         run = gh.api("/actions/runs/" + rid)
@@ -81,8 +120,11 @@ def main(mode):
         z = gate.archive(gh.download(a["archive_download_url"]), a["digest"][7:])
         fresh = json.loads(gate.member(z, "release-gate-report.json"))
         require(fresh["passed"] and fresh["product_sha"] == PRODUCT and fresh["infrastructure_sha"] == execution, "Fresh report identity differs")
+        require(fresh["scout_probe_evidence"]["passed"] and fresh["scout_probe_evidence"]["actual_pid_one"], "Fresh focused evidence missing")
         require(fresh["matrix_identities"] == 36 and fresh["matrix_example_executions"] == 5554 and len(fresh["artifacts"]) == 46, "Fresh evidence incomplete")
-        require(json.loads(gate.member(z, "gate-tests.json")) == {"tests":31,"failures":0,"errors":0,"skipped":0}, "Fresh gate denial tests failed")
+        require(json.loads(gate.member(z, "gate-tests.json")) == {"tests":32,"failures":0,"errors":0,"skipped":0}, "Fresh gate denial tests failed")
+        require(json.loads(gate.member(z, "guard-tests.json")) == {"tests":19,"failures":0,"errors":0,"skipped":0}, "Fresh resource tests failed")
+        heap_evidence(gate, z, execution)
     print(json.dumps({"admitted":True,"mode":mode,"product_sha":PRODUCT,"approved_gate_sha":APPROVED,
                       "execution_sha":execution,"original_gate_unchanged":True,"no_registry_publication":True}))
 

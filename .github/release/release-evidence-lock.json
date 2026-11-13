@@ -3,7 +3,7 @@
   "repository": "ClaudioHideki/jrc-conversas-lab2",
   "product_sha": "5640793988fbf63ac46b0db3466722fc650f0d01",
   "product_branch": "codex/runtime-vite-heap6144-20261112",
-  "infrastructure_branch": "ci/release-gate-http-fix-20261113",
+  "infrastructure_branch": "ci/runtime-build-http-fix-20261113",
   "native_run_id": 43344850748,
   "native_attempt": 1,
   "native_workflow": ".github/workflows/ag-native-candidate.yml",
