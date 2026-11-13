@@ -1,4 +1,4 @@
-name: Authorized corrective fourth runtime image attempt and isolated smoke
+name: Controlled GHCR publication of approved 56407939
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: single-runtime-image-http-fix
+  group: single-runtime-ghcr-56407939
   cancel-in-progress: false
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
           test "$GITHUB_SHA" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$(git rev-parse HEAD)" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$EXPECTED_PRODUCT_SHA" = 5640793988fbf63ac46b0db3466722fc650f0d01
-          test "$GITHUB_REF_NAME" = ci/runtime-build-http-fix-20261113
+          test "$GITHUB_REF_NAME" = ci/runtime-ghcr-56407939-20261113
           test "$RUNNER_ENVIRONMENT" = github-hosted
       - name: Checkout approved product without infrastructure overlay
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -62,7 +62,7 @@ jobs:
       - name: Verify approved infrastructure and historical gate evidence
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/runtime_build/admission.py --mode prepare
+        run: python3 -B .github/runtime_publish/admission.py --mode prepare
       - name: Validate workflow with checksum-pinned actionlint
         shell: bash
         run: |
@@ -74,6 +74,10 @@ jobs:
           mkdir "$RUNNER_TEMP/release-linter"
           tar -xzf "$archive" -C "$RUNNER_TEMP/release-linter" actionlint
           "$RUNNER_TEMP/release-linter/actionlint" .github/workflows/ag-native-candidate.yml
+      - name: Publication syntax and denial tests
+        run: |
+          python3 -B -c "import ast,pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('.github/runtime_publish').glob('*.py')]"
+          python3 -B .github/runtime_publish/test_publish.py
       - name: Syntax and denial tests of the release gate
         env:
           GATE_TEST_REPORT: ${{ runner.temp }}/gate-tests.json
@@ -154,6 +158,7 @@ jobs:
         with:
           name: release-evidence-gate-${{ github.sha }}
           path: |
+            ${{ runner.temp }}/publication-tests.json
             ${{ runner.temp }}/gate-tests.json
             ${{ runner.temp }}/scout-proof-tests.json
             ${{ runner.temp }}/receipt-unit.json
@@ -169,6 +174,13 @@ jobs:
     needs: evidence-gate
     runs-on: ubuntu-24.04
     timeout-minutes: 85
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    outputs:
+      digest: ${{ steps.publish.outputs.digest }}
+      image_id: ${{ steps.publish.outputs.image_id }}
     env:
       PYTHONDONTWRITEBYTECODE: '1'
       EXPECTED_EXECUTION_SHA: ${{ inputs.expected_execution_sha }}
@@ -196,14 +208,70 @@ jobs:
       - name: Admit only this successful fresh gate and exact authorization
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/runtime_build/admission.py --mode build
+        run: python3 -B .github/runtime_publish/admission.py --mode build
+      - name: Confirm registry authorization and absent destination tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/runtime_publish/publish.py --preflight
       - name: One resource-guarded image attempt and real isolated smoke
         run: python3 -B .github/runtime_build/guard.py --execute
+      - name: Publish exactly the tested image without another build
+        id: publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/runtime_publish/publish.py --publish
       - name: Preserve reports and synthetic smoke evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: runtime-image-attempt-${{ github.sha }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.json
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.log
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.pdf
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.png
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.xlsx
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/ocr.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  verify-published:
+    needs: image-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+      packages: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      EXPECTED_EXECUTION_SHA: ${{ inputs.expected_execution_sha }}
+      EXPECTED_PRODUCT_SHA: ${{ inputs.expected_product_sha }}
+      EXPECTED_APPROVED_SHA: 48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d
+      AUTHORIZED_BUILD_SHA: 5640793988fbf63ac46b0db3466722fc650f0d01
+      EXPECTED_PUBLISHED_DIGEST: ${{ needs.image-build.outputs.digest }}
+      EXPECTED_PUBLISHED_IMAGE_ID: ${{ needs.image-build.outputs.image_id }}
+    steps:
+      - name: Checkout immutable publication infrastructure
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Checkout exact approved product for original resource guard
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 5640793988fbf63ac46b0db3466722fc650f0d01
+          path: product
+          persist-credentials: false
+      - name: Download by digest and repeat original real smoke tests on a fresh runner
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/runtime_publish/publish.py --verify
+      - name: Preserve fresh-pull verification reports and sanitized logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: published-pull-verification-${{ github.sha }}-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.json
             ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.log

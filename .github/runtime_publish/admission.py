@@ -83,7 +83,7 @@ def main(mode):
     gate = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(gate)
     gh = gate.GitHub("ClaudioHideki/jrc-conversas-lab2", os.environ["GH_TOKEN"])
-    runs = gh.api("/actions/workflows/publish-approved-runtime.yml/runs?branch=" + BRANCH + "&event=workflow_dispatch&per_page=100")
+    runs = gh.api("/actions/workflows/ag-native-candidate.yml/runs?branch=" + BRANCH + "&event=workflow_dispatch&per_page=100")
     require(runs["total_count"] == 1 and len(runs["workflow_runs"]) == 1 and str(runs["workflow_runs"][0]["id"]) == os.environ["GITHUB_RUN_ID"], "Single authorized workflow run required")
     require(gh.api("/git/ref/heads/ci/release-gate-http-fix-20261113")["object"]["sha"] == APPROVED, "Approved ref moved")
     r = gh.api("/actions/runs/43359959371")
