@@ -74,6 +74,7 @@ jobs:
         run: |
           "$RUNNER_TEMP/release-linter/actionlint" .github/workflows/ag-native-candidate.yml .github/workflows/backoffice-flow.yml .github/workflows/broker-customer-candidate.yml .github/workflows/build-ghcr.yml .github/workflows/campaign-workflow-candidate.yml .github/workflows/contacts-native.yml .github/workflows/flow-broker-candidate.yml .github/workflows/nico-broker-candidate.yml .github/workflows/nico-capacity-native.yml .github/workflows/nico-legacy-reservations-native.yml .github/workflows/precimech-hotfix-tests.yml .github/workflows/projects-candidate.yml .github/workflows/projects-portal-candidate.yml .github/workflows/sd-contact-softphone-native.yml .github/workflows/service-desk-global-native.yml .github/workflows/voice-v4-candidate.yml .github/workflows/whatsapp-connections-candidate.yml
           python3 -B script/jrc_runtime_contract_test.py
+          python3 -B script/jrc_runtime_contract_test_test.py
       - name: Configure declared Node for original migration protection tests
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:

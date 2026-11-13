@@ -193,6 +193,11 @@ class EvidenceGateTest(unittest.TestCase):
                 with self.assertRaises(gate.GateError):
                     gate.runtime_host(r, self.lock["product_sha"])
 
+    def test_unfinished_native_evidence_cannot_authorize_release(self):
+        draft = {**self.lock, "evidence_state": "awaiting-native-run"}
+        with self.assertRaises(gate.GateError):
+            gate.execute(draft, "a" * 40, Path("."), Path("must-not-be-written.json"))
+
     def test_runtime_contract_preserves_dependencies_and_blocks_image_claim(self):
         report = {"passed": True, "base_sha": "cad427d400d824fc1fdc06c1c1079f324e7f3f6c",
                   "ruby": "3.4.12", "patchlevel": 148, "node": "24.22.3", "alpine": "3.24",
@@ -287,4 +292,4 @@ if __name__ == "__main__":
                "errors": len(result.errors), "skipped": len(result.skipped)}
     target = Path(__import__("os").environ["GATE_TEST_REPORT"])
     target.write_text(json.dumps(summary) + "\n")
-    raise SystemExit(0 if result.wasSuccessful() and result.testsRun > 0 and not result.skipped else 1)
+    raise SystemExit(0 if result.wasSuccessful() and result.testsRun == 32 and not result.skipped else 1)
