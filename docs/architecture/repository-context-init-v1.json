@@ -1,0 +1,56 @@
+{
+  "captured_on": "2026-11-13",
+  "project_id": "precimech",
+  "project_name": "JRC Conversas Precimech",
+  "nature": "Brownfield",
+  "scope": "application",
+  "source_branch": "codex/hotfix-precimech-whatsapp-retry-20261111",
+  "source_head": "549102e44a0141d088e88551cb552d1157c17076",
+  "origin": "https://github.com/ClaudioHideki/jrc-conversas-lab2.git",
+  "stack_description": "Ruby/Rails, Vue, PostgreSQL, Redis/Sidekiq e WhatsApp Cloud API.",
+  "application_runtime_verified": false,
+  "deployment_verified": false,
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "kind": "file",
+      "sha256": "e9bd8b305496a6617ad89a391bdcdb2b269b292bab4244f0fe8c7e0f0f7f69fc"
+    },
+    {
+      "path": "README.md",
+      "kind": "file",
+      "sha256": "2bd2cfb258f57271c829ac1c670eab7090297579fa0f8005935874aeb1537c3b"
+    },
+    {
+      "path": "package.json",
+      "kind": "file",
+      "sha256": "7201dd0aa44dd1528031dca578aaa2af240b66a7150ddd8e4c2c98a1b7817d96"
+    },
+    {
+      "path": "Gemfile",
+      "kind": "file",
+      "sha256": "81527f9550c453d0a2ac1730e9c3e68c57e822b7907c2d4b09adef9cd6ede120"
+    },
+    {
+      "path": "db/schema.rb",
+      "kind": "file",
+      "sha256": "8690de91a2a521b3851499a51ec3d622f113353782ae0a9657608096862bfc9e"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-11-11-whatsapp-durable-retry-design.md",
+      "kind": "file",
+      "sha256": "5c472055437bf26ab493c91bb90f61e156678e947103a5b8b843b5b651704bfe"
+    }
+  ],
+  "declared_versions": {
+    "node_nvmrc": "24.13.0",
+    "ruby_declared": "3.4.4",
+    "name": "@chatwoot/chatwoot",
+    "version": "4.16.2",
+    "packageManager": "pnpm@10.2.0+sha512.0d27364e0139c6aadeed65ada153135e0ca96c8da42123bd50047f961339dc7a758fc2e944b428f52be570d1bd3372455c1c65fa2e7aa0bfbf931190f9552001",
+    "engines": {
+      "node": "24.x",
+      "pnpm": "10.x"
+    }
+  }
+}
