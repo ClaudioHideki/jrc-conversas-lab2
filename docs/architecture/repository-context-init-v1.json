@@ -1,0 +1,69 @@
+{
+  "captured_on": "2026-11-13",
+  "project_id": "lab2",
+  "project_name": "JRC Conversas LAB2 — Grupo JRC",
+  "nature": "Brownfield",
+  "scope": "application",
+  "source_branch": "codex/whatsapp-history-order-20261111",
+  "source_head": "787dff99f087aec453e40dd19497758704a89e1a",
+  "origin": "https://github.com/ClaudioHideki/jrc-conversas-lab2.git",
+  "stack_description": "Ruby/Rails, Vue, Vite, PostgreSQL, Redis/Sidekiq, ActiveStorage/S3, SIP e APIs Broker/Meta.",
+  "application_runtime_verified": false,
+  "deployment_verified": false,
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "kind": "file",
+      "sha256": "e9bd8b305496a6617ad89a391bdcdb2b269b292bab4244f0fe8c7e0f0f7f69fc"
+    },
+    {
+      "path": "README.md",
+      "kind": "file",
+      "sha256": "2bd2cfb258f57271c829ac1c670eab7090297579fa0f8005935874aeb1537c3b"
+    },
+    {
+      "path": "CONTINUE-AQUI.md",
+      "kind": "file",
+      "sha256": "5076479789a13e99de09dde0b95f89115ed67aee71cbe633bf5e68e0c782c67b"
+    },
+    {
+      "path": "package.json",
+      "kind": "file",
+      "sha256": "7201dd0aa44dd1528031dca578aaa2af240b66a7150ddd8e4c2c98a1b7817d96"
+    },
+    {
+      "path": "Gemfile",
+      "kind": "file",
+      "sha256": "4588f29aa9c0cbdc0053f29e9ebb93f0e8fd9a5180e3f6819c5914063e85739c"
+    },
+    {
+      "path": "db/schema.rb",
+      "kind": "file",
+      "sha256": "96d4d91e522dd61be81edb5f4e19d840241693702a910ecea4e2d48c4e1db78c"
+    },
+    {
+      "path": "app/models",
+      "kind": "directory"
+    },
+    {
+      "path": "app/javascript/dashboard",
+      "kind": "directory"
+    },
+    {
+      "path": "config/routes.rb",
+      "kind": "file",
+      "sha256": "9a7bd72d315f1a5c475758de004ec9d0be757c7f0bfcfcc89a7af0e60a2f9f79"
+    }
+  ],
+  "declared_versions": {
+    "node_nvmrc": "24.22.3",
+    "ruby_declared": "3.4.12",
+    "name": "@chatwoot/chatwoot",
+    "version": "4.16.2",
+    "packageManager": "pnpm@10.2.0+sha512.0d27364e0139c6aadeed65ada153135e0ca96c8da42123bd50047f961339dc7a758fc2e944b428f52be570d1bd3372455c1c65fa2e7aa0bfbf931190f9552001",
+    "engines": {
+      "node": "24.x",
+      "pnpm": "10.x"
+    }
+  }
+}

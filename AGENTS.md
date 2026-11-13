@@ -116,3 +116,22 @@ Practical checklist for any change impacting core logic or public APIs
 ## Branding / White-labeling note
 
 - For user-facing strings that currently contain "Chatwoot" but should adapt to branded/self-hosted installs, prefer applying `replaceInstallationName` from `shared/composables/useBranding` in the UI layer (for example tooltip and suggestion labels) instead of adding hardcoded brand-specific copy.
+
+<!-- jrc-operational-init:v1 -->
+## Segundo Cérebro e Governança Operacional
+
+- **Projeto:** JRC Conversas LAB2 — Grupo JRC.
+- **Descrição:** Produto omnichannel base completo do Grupo JRC, com atendimento, canais, distribuição e integrações; referência para melhorias genéricas.
+- **Stack principal:** Ruby/Rails, Vue, Vite, PostgreSQL, Redis/Sidekiq, ActiveStorage/S3, SIP e APIs Broker/Meta.
+- **Natureza:** Brownfield; preservar fontes, histórico e regras anteriores.
+- **Tipo desta raiz:** application.
+
+### Leitura e manutenção do contexto
+
+1. Leia as instruções específicas anteriores deste arquivo e o checkpoint/README do checkout real.
+2. Consulte [ROADMAP.md](ROADMAP.md), [TASKS.md](TASKS.md) e [a regra operacional](.agents/rules/operational-governance.md).
+3. Consulte [domínio](docs/domain/glossary.md), [regras de negócio](docs/domain/business-rules.md), [personas](docs/domain/personas.md), [arquitetura](docs/architecture/system-overview.md) e [modelo de dados](docs/architecture/data-model.md).
+4. Registre uma mudança relevante de decisão em [ADR](docs/adr/README.md); não reescreva a história de uma decisão já aceita.
+5. Ao fechar um incremento, atualize tarefas, evidências e limites reais. Confira o estado do repositório e preserve alterações concorrentes.
+
+Esta adição organiza o contexto e não revoga instruções anteriores. Não concede autorização de publicação, deploy, alteração de credenciais, envio real, pareamento ou migração. Nesta tarefa não executar backup, dump, restore ou comandos agregados que os acionem; preservar os mecanismos existentes.
