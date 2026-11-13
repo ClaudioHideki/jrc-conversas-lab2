@@ -44,7 +44,7 @@ jobs:
           test "$GITHUB_SHA" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$(git rev-parse HEAD)" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$EXPECTED_PRODUCT_SHA" = 5640793988fbf63ac46b0db3466722fc650f0d01
-          test "$GITHUB_REF_NAME" = ci/runtime-ghcr-56407939-20261113
+          test "$GITHUB_REF_NAME" = ci/runtime-ghcr-56407939-20261113-r2
           test "$RUNNER_ENVIRONMENT" = github-hosted
       - name: Checkout approved product without infrastructure overlay
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262

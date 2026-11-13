@@ -16,7 +16,7 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
 PRODUCT = "5640793988fbf63ac46b0db3466722fc650f0d01"
-BRANCH = "ci/runtime-ghcr-56407939-20261113"
+BRANCH = "ci/runtime-ghcr-56407939-20261113-r2"
 IMAGE = "ghcr.io/claudiohideki/jrc-conversas-lab2"
 TAG = IMAGE + ":sha-" + PRODUCT
 LOCAL = "jrc-runtime-candidate:sha-" + PRODUCT
@@ -50,6 +50,27 @@ def execution_identity():
     require(not subprocess.check_output(["git", "-C", str(ROOT/"product"), "status", "--porcelain",
                                         "--untracked-files=all"], text=True).strip(), "Product checkout dirty")
     return sha
+
+
+def validate_job_snapshot(snapshot, phase):
+    rows = snapshot.get("jobs", [])
+    require(snapshot.get("total_count") == len(rows), "Incomplete job snapshot")
+    names = [j.get("name") for j in rows]
+    require(len(set(names)) == len(names), "Duplicate logical jobs")
+    required = {"evidence-gate", "image-build"}
+    allowed = required | {"verify-published"}
+    require(required <= set(names) <= allowed, "Unexpected logical jobs")
+    if phase == "verify":
+        require(set(names) == allowed, "Final verification job missing")
+    else:
+        require(phase == "build", "Unknown admission phase")
+        future = [j for j in rows if j["name"] == "verify-published"]
+        require(not future or (future[0]["status"] in ["queued", "waiting"] and not future[0].get("runner_id")),
+                "Premature verification execution")
+    for row in rows:
+        require(row.get("head_sha") == os.environ["EXPECTED_EXECUTION_SHA"] and row.get("run_attempt") == 1,
+                "Logical job SHA/attempt differs")
+    return rows
 
 def registry_token(write):
     token = os.environ["GH_TOKEN"]
@@ -178,7 +199,7 @@ def build_artifact():
     require(run["head_sha"] == os.environ["EXPECTED_EXECUTION_SHA"] and run["run_attempt"] == 1
             and run["status"] == "in_progress" and run["conclusion"] is None, "Wrong verification run")
     jobs = gh.api("/actions/runs/" + rid + "/attempts/1/jobs?per_page=100")
-    require(jobs["total_count"] == len(jobs["jobs"]) == 3, "Unexpected verification jobs")
+    validate_job_snapshot(jobs, "verify")
     for name in ["evidence-gate", "image-build"]:
         rows = [j for j in jobs["jobs"] if j["name"] == name]
         require(len(rows) == 1 and rows[0]["status"] == "completed" and rows[0]["conclusion"] == "success"

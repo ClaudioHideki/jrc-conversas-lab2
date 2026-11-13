@@ -114,6 +114,33 @@ class PublicationTests(unittest.TestCase):
         self.assertNotIn('":latest"', text)
         self.assertIn('["docker", "tag", image_id, TAG]', text)
 
+
+    def jobs(self, names):
+        return {"total_count": len(names), "jobs": [{"name": n, "head_sha": "a"*40, "run_attempt": 1,
+             "status": "queued" if n == "verify-published" else "in_progress", "runner_id": None} for n in names]}
+
+    def test_build_snapshot_before_downstream_materialization(self):
+        self.assertEqual(len(p.validate_job_snapshot(self.jobs(["evidence-gate", "image-build"]), "build")), 2)
+
+    def test_build_snapshot_with_queued_downstream(self):
+        self.assertEqual(len(p.validate_job_snapshot(self.jobs(["evidence-gate", "image-build", "verify-published"]), "build")), 3)
+
+    def test_duplicate_or_unknown_logical_jobs_denied(self):
+        for names in [["evidence-gate", "image-build", "image-build"], ["evidence-gate", "image-build", "foreign-job"]]:
+            with self.assertRaises(RuntimeError):p.validate_job_snapshot(self.jobs(names), "build")
+
+    def test_final_verification_requires_all_three(self):
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(self.jobs(["evidence-gate", "image-build"]), "verify")
+        self.assertEqual(len(p.validate_job_snapshot(self.jobs(["evidence-gate", "image-build", "verify-published"]), "verify")), 3)
+
+    def test_incomplete_wrong_sha_or_active_downstream_denied(self):
+        bad = self.jobs(["evidence-gate", "image-build"]);bad["total_count"] = 3
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(bad, "build")
+        bad = self.jobs(["evidence-gate", "image-build"]);bad["jobs"][0]["head_sha"] = "b"*40
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(bad, "build")
+        bad = self.jobs(["evidence-gate", "image-build", "verify-published"]);bad["jobs"][-1]["status"] = "in_progress"
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(bad, "build")
+
 if __name__ == "__main__":
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PublicationTests)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
@@ -121,4 +148,4 @@ if __name__ == "__main__":
               "skipped": len(result.skipped)}
     if os.environ.get("RUNNER_TEMP"):
         (Path(os.environ["RUNNER_TEMP"])/"publication-tests.json").write_text(json.dumps(report, indent=2)+"\n")
-    raise SystemExit(0 if result.wasSuccessful() and result.testsRun == 15 and not result.skipped else 1)
+    raise SystemExit(0 if result.wasSuccessful() and result.testsRun == 20 and not result.skipped else 1)

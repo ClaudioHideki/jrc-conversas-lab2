@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 PRODUCT = "5640793988fbf63ac46b0db3466722fc650f0d01"
 APPROVED = "48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d"
-BRANCH = "ci/runtime-ghcr-56407939-20261113"
+BRANCH = "ci/runtime-ghcr-56407939-20261113-r2"
 
 
 def require(value, message):
@@ -110,7 +110,9 @@ def main(mode):
         run = gh.api("/actions/runs/" + rid)
         require(run["head_sha"] == execution and run["run_attempt"] == 1 and run["status"] in ["queued", "in_progress"] and run["conclusion"] is None, "Wrong active build run")
         jobs = gh.api("/actions/runs/" + rid + "/attempts/1/jobs?per_page=100")
-        require(jobs["total_count"] == len(jobs["jobs"]) == 3, "Unexpected jobs")
+        sys.path.insert(0, str(ROOT / ".github/runtime_publish"))
+        from publish import validate_job_snapshot
+        validate_job_snapshot(jobs, "build")
         g = next(j for j in jobs["jobs"] if j["name"] == "evidence-gate")
         b = next(j for j in jobs["jobs"] if j["name"] == "image-build")
         require(g["conclusion"] == "success" and g["status"] == "completed" and b["status"] == "in_progress" and b["runner_id"] and b["head_sha"] == execution and b["run_attempt"] == 1, "Fresh gate not completed")
