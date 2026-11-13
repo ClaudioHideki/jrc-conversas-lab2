@@ -1,5 +1,6 @@
 """Single authorized image attempt; resources and owned processes only."""
 import hashlib
+import ipaddress
 import importlib.util
 import json
 import os
@@ -14,8 +15,8 @@ import urllib.error
 import uuid
 
 PRODUCT = "5640793988fbf63ac46b0db3466722fc650f0d01"
-APPROVED = "87cf2661a2cb027bdf8fea8f36a800b991bac6cb"
-BRANCH = "ci/runtime-build-heap56407939-20261112"
+APPROVED = "3d1e41db6cd2a085cc7f6b988aa017bbed4d3a46"
+BRANCH = "ci/runtime-build-http-fix-20261113"
 REPO = "ClaudioHideki/jrc-conversas-lab2"
 BUILDKIT = "mirror.gcr.io/moby/buildkit:v0.33.1@sha256:98cc6a3fc46220d00f8224ae483f3274fc874e9be8d7dd1e2e2c5481209228b5"
 PG = "pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a"
@@ -122,6 +123,27 @@ def runtime_environment(env):
             "Frontend build heap leaked into normal runtime environment")
 
 
+def internal_origin(info, network):
+    require(info.get("Config", {}).get("Labels", {}).get("jrc.runtime.run") == network,
+            "Foreign web container refused")
+    require(info.get("State", {}).get("Running") is True, "Owned web container is not running")
+    networks = info.get("NetworkSettings", {}).get("Networks", {})
+    require(set(networks) == {network}, "Web must use only the owned internal network")
+    try:
+        address = ipaddress.ip_address(networks[network].get("IPAddress", ""))
+    except ValueError:
+        raise RuntimeError("Owned web private IPv4 address missing") from None
+    require(isinstance(address, ipaddress.IPv4Address) and address.is_private
+            and not address.is_loopback and not address.is_multicast and not address.is_unspecified,
+            "Owned web private IPv4 required")
+    return "http://" + str(address) + ":3000"
+
+
+def http_open(url, timeout):
+    # The target is the owned container IP; inherited host proxies must not reroute it.
+    return urllib.request.build_opener(urllib.request.ProxyHandler({})).open(url, timeout=timeout)
+
+
 def build_command(builder, output):
     return ["docker", "buildx", "build", "--builder", builder, "--load", "--platform", "linux/amd64",
             "--file", "docker/Dockerfile", "--build-arg", "GIT_SHA=" + PRODUCT,
@@ -145,7 +167,7 @@ class Attempt:
         self.builder_id = None
         self.builder_created = False
         self.builder_stopped = False
-        self.result = {"authorized_image_attempt": 3, "previous_image_run": 43335745347,
+        self.result = {"authorized_image_attempt": 4, "previous_image_run": 43355070847,
                        "product_sha": PRODUCT, "approved_gate_sha": APPROVED,
                        "execution_sha": os.environ["GITHUB_SHA"], "run_id": os.environ["GITHUB_RUN_ID"],
                        "build_started": False, "build_passed": False, "smoke_passed": False,
@@ -332,27 +354,28 @@ class Attempt:
         probe("worker_pid_one", "extra.rb")
         web = self.name + "-web"
         self.run_container(web, image, ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"],
-                           envfile, mount, ["127.0.0.1::3000"])
-        info = self.inspect(web)
-        port = info["NetworkSettings"]["Ports"]["3000/tcp"][0]["HostPort"]
-        origin = "http://127.0.0.1:" + port
+                           envfile, mount)
+        info = self.own(web)
+        origin = internal_origin(info, self.name)
         def webready():
             try:
-                with urllib.request.urlopen(origin + "/app/login", timeout=3) as response:
+                with http_open(origin + "/app/login", timeout=3) as response:
                     return response.status == 200
             except (OSError, urllib.error.HTTPError):
                 return False
         self.wait(webready, "Rails HTTP", 90)
-        with urllib.request.urlopen(origin + "/app/login", timeout=10) as response:
+        with http_open(origin + "/app/login", timeout=10) as response:
             html = response.read()
         require(b"<html" in html.lower() and b"/vite/" in html, "Actual Rails login/assets missing")
         assets = json.loads((self.output / "assets.json").read_text())
         for item in assets["required_http"]:
             self.sample()
-            with urllib.request.urlopen(origin + "/vite/" + item["file"], timeout=15) as response:
+            with http_open(origin + "/vite/" + item["file"], timeout=15) as response:
                 body = response.read()
                 require(response.status == 200 and hashlib.sha256(body).hexdigest() == item["sha256"], "Served asset differs")
-        self.result["http"] = {"login_status": 200, "verified_assets": len(assets["required_http"]), "same_image_id": info["Image"] == self.result["image_id"]}
+        self.result["http"] = {"login_status": 200, "verified_assets": len(assets["required_http"]), "same_image_id": info["Image"] == self.result["image_id"],
+                               "transport": "owned_internal_ipv4", "origin": origin, "network": self.name,
+                               "host_ports_published": False}
         require(self.result["http"]["same_image_id"] and self.inspect(worker)["Image"] == self.result["image_id"], "Rails/Sidekiq image mismatch")
         self.result["smoke_passed"] = True
 

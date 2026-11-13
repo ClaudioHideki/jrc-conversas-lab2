@@ -17,7 +17,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: release-evidence-heap56407939
+  group: release-evidence-http-fix
   cancel-in-progress: false
 
 jobs:
@@ -42,7 +42,7 @@ jobs:
           test "$GITHUB_SHA" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$(git rev-parse HEAD)" = "$EXPECTED_INFRASTRUCTURE_SHA"
           test "$EXPECTED_PRODUCT_SHA" = 5640793988fbf63ac46b0db3466722fc650f0d01
-          test "$GITHUB_REF_NAME" = ci/release-gate-heap56407939-20261112
+          test "$GITHUB_REF_NAME" = ci/release-gate-http-fix-20261113
           test "$RUNNER_ENVIRONMENT" = github-hosted
       - name: Validate workflow with checksum-pinned actionlint
         shell: bash
@@ -107,6 +107,8 @@ jobs:
           for file in .github/runtime_build/{probe,worker,receipt,extra,test_receipt}.rb; do ruby -c "$file"; done
           ruby .github/runtime_build/test_receipt.rb "$RUNNER_TEMP/receipt-unit.json"
           GUARD_TEST_REPORT="$RUNNER_TEMP/guard-tests.json" python3 -B .github/runtime_build/test_guard.py
+      - name: Real HTTP and assets regression on owned internal network without host ports
+        run: python3 -B .github/runtime_build/test_http_network.py
       - name: Verify real hosted-runner memory and disk before admitting a future image attempt
         run: |
           python3 -B - <<'PY'
@@ -143,5 +145,6 @@ jobs:
             ${{ runner.temp }}/release-gate-report.json
             ${{ runner.temp }}/vite-heap-tests.xml
             ${{ runner.temp }}/guard-preflight.json
+            ${{ runner.temp }}/http-network-regression.json
           if-no-files-found: error
           retention-days: 7

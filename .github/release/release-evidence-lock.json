@@ -3,7 +3,7 @@
   "repository": "ClaudioHideki/jrc-conversas-lab2",
   "product_sha": "5640793988fbf63ac46b0db3466722fc650f0d01",
   "product_branch": "codex/runtime-vite-heap6144-20261112",
-  "infrastructure_branch": "ci/release-gate-heap56407939-20261112",
+  "infrastructure_branch": "ci/release-gate-http-fix-20261113",
   "native_run_id": 43344850748,
   "native_attempt": 1,
   "native_workflow": ".github/workflows/ag-native-candidate.yml",
@@ -21,7 +21,9 @@
     "ci/release-gate-runtime-dce80589-20261112": "716647d67e96b77e8a56125ab0033c173bd68485",
     "codex/runtime-vite-heap6144-20261112": "5640793988fbf63ac46b0db3466722fc650f0d01",
     "ci/release-gate-scout-d11c879a-20261112": "87cf2661a2cb027bdf8fea8f36a800b991bac6cb",
-    "ci/runtime-vite-heap-config-20261112": "5e07e5c1c6296ddeb4832855007d31a6217d34c0"
+    "ci/runtime-vite-heap-config-20261112": "5e07e5c1c6296ddeb4832855007d31a6217d34c0",
+    "ci/release-gate-heap56407939-20261112": "3d1e41db6cd2a085cc7f6b988aa017bbed4d3a46",
+    "ci/runtime-build-heap56407939-20261112": "21c02da5535a2af295010ac652b4a5e891a8520e"
   },
   "matrix": [
     {

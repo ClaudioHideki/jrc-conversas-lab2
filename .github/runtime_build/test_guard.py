@@ -157,9 +157,35 @@ class GuardTest(unittest.TestCase):
                 guard.runtime_environment(env)
 
 
+
+    def test_http_origin_uses_owned_internal_ip_without_published_port(self):
+        info = {"Config":{"Labels":{"jrc.runtime.run":"owned"}},"State":{"Running":True},
+                "NetworkSettings":{"Ports":{},"Networks":{"owned":{"IPAddress":"172.20.0.2"}}}}
+        self.assertEqual(guard.internal_origin(info,"owned"),"http://172.20.0.2:3000")
+
+    def test_http_origin_rejects_foreign_stopped_or_extra_network(self):
+        info = {"Config":{"Labels":{"jrc.runtime.run":"owned"}},"State":{"Running":True},
+                "NetworkSettings":{"Ports":{},"Networks":{"owned":{"IPAddress":"172.20.0.2"}}}}
+        variants = [copy.deepcopy(info) for _ in range(4)]
+        variants[0]["Config"]["Labels"]["jrc.runtime.run"] = "other"
+        variants[1]["State"]["Running"] = False
+        variants[2]["NetworkSettings"]["Networks"] = {}
+        variants[3]["NetworkSettings"]["Networks"]["foreign"] = {"IPAddress":"172.21.0.2"}
+        for variant in variants:
+            with self.assertRaises(RuntimeError):
+                guard.internal_origin(variant,"owned")
+
+    def test_http_origin_rejects_public_loopback_missing_or_invalid_ip(self):
+        for address in ["8.8.8.8","127.0.0.1","0.0.0.0","224.0.0.1","::1","", "invalid"]:
+            info = {"Config":{"Labels":{"jrc.runtime.run":"owned"}},"State":{"Running":True},
+                    "NetworkSettings":{"Networks":{"owned":{"IPAddress":address}}}}
+            with self.assertRaises(RuntimeError):
+                guard.internal_origin(info,"owned")
+
+
 if __name__ == "__main__":
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(GuardTest)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     report = {"tests":result.testsRun,"failures":len(result.failures),"errors":len(result.errors),"skipped":len(result.skipped)}
     Path(os.environ["GUARD_TEST_REPORT"]).write_text(json.dumps(report)+"\n")
-    sys.exit(0 if result.wasSuccessful() and result.testsRun==16 and not result.skipped else 1)
+    sys.exit(0 if result.wasSuccessful() and result.testsRun==19 and not result.skipped else 1)
