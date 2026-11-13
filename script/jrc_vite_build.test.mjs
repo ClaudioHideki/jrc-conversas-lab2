@@ -96,7 +96,8 @@ test('changes only the Vite child CLI while preserving the requested Vite argume
   assert.equal(exe, process.execPath);
   assert.equal(command[0], '--max-old-space-size=6144');
   assert.deepEqual(command.slice(2), args);
-  assert.deepEqual(process.env, env);
+  assert(Object.keys(env).length === Object.keys(process.env).length
+    && Object.entries(env).every(([key, value]) => process.env[key] === value), 'Parent environment changed');
 });
 
 test('refuses dev, preview, missing or non-production mode', () => {
