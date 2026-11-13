@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 from jrc_ag_guarded_image_build import identity
 
@@ -22,6 +23,19 @@ class ImageIdentityTest(unittest.TestCase):
         with patch('jrc_ag_guarded_frontend_build.sys.platform', 'win32'):
             with self.assertRaises(RuntimeError):
                 identity(env)
+
+
+class ImageFrontendHeapTest(unittest.TestCase):
+    def test_assets_use_the_scoped_vite_process_without_changing_runtime(self):
+        docker = (Path(__file__).resolve().parent.parent / 'docker/Dockerfile').read_text()
+        builder, runtime = docker.split('# final build stage\n', 1)
+        assets = builder.split('# generate production assets if production environment\n', 1)[1]
+        self.assertIn('ARG JRC_VITE_BUILD_HEAP_MIB=6144', builder)
+        self.assertIn('VITE_RUBY_VITE_BIN_PATH=/app/script/jrc_vite_build.mjs', assets)
+        self.assertIn('bundle exec rake assets:precompile', assets)
+        self.assertNotIn('JRC_VITE_BUILD_HEAP_MIB', runtime)
+        self.assertNotIn('VITE_RUBY_VITE_BIN_PATH', runtime)
+        self.assertNotIn('6144', runtime)
 
 
 if __name__ == '__main__':
