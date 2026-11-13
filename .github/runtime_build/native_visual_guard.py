@@ -134,7 +134,7 @@ def main():
                  str(ROOT / '.github/runtime_build/approval_browser.config.cjs')], 'native-chrome', env, 1800)
         report = json.loads((output / 'browser/playwright-results.json').read_text())
         stats = report['stats']
-        require(stats['expected'] > 0 and all(stats[k] == 0 for k in ['unexpected', 'skipped', 'flaky']), 'Native browser acceptance failed or incomplete')
+        require(stats['expected'] == 9 and not report.get('errors') and all(stats[k] == 0 for k in ['unexpected', 'skipped', 'flaky']), 'Native browser acceptance failed or incomplete')
         result['browser_stats'] = stats
         result['passed'] = True
     except Exception as error:

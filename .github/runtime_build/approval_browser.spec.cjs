@@ -60,7 +60,7 @@ for (const [index, mode] of modes.entries()) {
     await page.locator('input[type="search"]').locator('xpath=ancestor::form').evaluate(form => form.requestSubmit());
     await expect(page.locator(`[data-approval-request="${id}"]`)).toBeVisible();
     await page.locator(`[data-approval-request="${id}"]`).click();
-    const detail = page.locator('[data-approval-workspace] section').last();
+    const detail = page.locator('[data-approval-workspace] > section').nth(1);
     await expect(detail.locator('textarea').first()).toBeVisible();
     const approve = detail.getByRole('button', { name: labels.decisionLabels.approved, exact: true });
     await expect(approve).toBeDisabled();
@@ -97,3 +97,152 @@ for (const [index, mode] of modes.entries()) {
     await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-rule-summary.png`, fullPage: true });
   });
 }
+
+
+async function actualLogin(page, person = { email: fixture.email, password: fixture.password }) {
+  await page.goto(origin + '/app/login');
+  await page.locator('input[name="email_address"]').fill(person.email);
+  await page.locator('input[type="password"]').fill(person.password);
+  const response = page.waitForResponse(r => new URL(r.url()).pathname === '/auth/sign_in' && r.request().method() === 'POST');
+  await page.locator('button[type="submit"]').click();
+  const result = await response;
+  expect(result.status()).toBe(200);
+  const headers = await result.allHeaders();
+  return Object.fromEntries(['access-token', 'client', 'uid', 'token-type'].filter(key => headers[key]).map(key => [key, headers[key]]));
+}
+async function isolatedTransport(context) {
+  await context.route('**/*', route => route.request().url().startsWith(origin + '/') ? route.continue() : route.abort('blockedbyclient'));
+  await context.routeWebSocket('**/*', socket => socket.url().startsWith('ws://127.0.0.1:3000/') ? socket.connectToServer() : socket.close());
+}
+for (const [index, mode] of modes.entries()) {
+  test(`native simulation delegation adjustment and audit ${mode.name}`, async ({ page, context }) => {
+    await page.setViewportSize({ width: mode.width, height: mode.height });
+    await isolatedTransport(context);
+    const headers = await actualLogin(page);
+    const base = `${origin}/app/accounts/${fixture.account_id}/approvals`;
+    const api = `${origin}/api/v1/accounts/${fixture.account_id}/approvals`;
+    await page.goto(base + '/simulate');
+    await expect(page.getByLabel(labels.event, { exact: true })).toBeVisible();
+    await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
+    await page.getByLabel(labels.event, { exact: true }).selectOption('crm.proposal_send');
+    await page.getByLabel(labels.resource, { exact: true }).selectOption(String(fixture.simulation_resource_id));
+    const simulation = page.waitForResponse(r => r.url().endsWith('/requests/simulate') && r.request().method() === 'POST');
+    await page.getByRole('button', { name: labels.simulate, exact: true }).last().click();
+    const simulated = await simulation;
+    expect(simulated.status()).toBe(200);
+    expect(simulated.request().postDataJSON().key).toBe('crm.proposal_send');
+    const simulationBody = await simulated.json();
+    expect(simulationBody.effects).toEqual([]);
+    expect(simulationBody.versions.length).toBeGreaterThan(0);
+    await expect(page.getByText(labels.noEffects, { exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-simulation.png`, fullPage: true });
+
+    await page.getByRole('button', { name: labels.workspace.tabs.delegations, exact: true }).click();
+    await expect(page.getByLabel(labels.scope, { exact: true })).toBeVisible();
+    await page.getByLabel(labels.scope, { exact: true }).selectOption({ index: 1 });
+    await page.getByLabel(labels.ownDelegation.recipient, { exact: true }).selectOption(String(fixture.users.delegate.id));
+    const localTime = offset => new Date(Date.now() + offset).toISOString().slice(0, 16);
+    await page.getByLabel(labels.starts_at, { exact: true }).fill(localTime(10 * 60 * 1000));
+    await page.getByLabel(labels.ends_at, { exact: true }).fill(localTime(40 * 60 * 1000));
+    await page.getByLabel(labels.decisionLabels.approved, { exact: true }).check();
+    const reason = `Synthetic ${mode.name} temporary delegation`;
+    await page.getByLabel(labels.ownDelegation.reason, { exact: true }).fill(reason);
+    const creation = page.waitForResponse(r => r.url().endsWith('/own_delegations') && r.request().method() === 'POST');
+    await page.getByRole('button', { name: labels.ownDelegation.create, exact: true }).click();
+    const created = await creation;
+    expect(created.status()).toBe(201);
+    const grant = await created.json();
+    await page.reload();
+    await expect(page.locator('article').filter({ hasText: reason })).toHaveCount(1);
+    await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-delegation.png`, fullPage: true });
+    const revoke = page.waitForResponse(r => r.url().endsWith(`/own_delegations/${grant.id}`) && r.request().method() === 'DELETE');
+    await page.locator('article').filter({ hasText: reason }).getByRole('button', { name: labels.ownDelegation.revoke, exact: true }).click();
+    expect((await revoke).status()).toBe(204);
+    const persistedGrants = await context.request.get(api + '/own_delegations', { headers });
+    expect(persistedGrants.status()).toBe(200);
+    expect((await persistedGrants.json()).find(row => row.id === grant.id).revoked).toBe(true);
+
+    const id = fixture.request_ids[4 + index];
+    await page.goto(base + `/inbox/${id}`);
+    await page.getByRole('button', { name: labels.adjustment.title, exact: true }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await dialog.getByLabel(labels.adjustment.discount, { exact: true }).fill('1.00');
+    const save = dialog.getByRole('button', { name: labels.adjustment.save, exact: true });
+    await expect(save).toBeDisabled();
+    await dialog.getByLabel(labels.reason, { exact: true }).fill(`Synthetic ${mode.name} adjustment audit`);
+    await expect(save).toBeEnabled();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-adjustment.png`, fullPage: true });
+    const adjustment = page.waitForResponse(r => r.url().endsWith(`/requests/${id}/adjust`) && r.request().method() === 'POST');
+    await save.click();
+    const adjusted = await adjustment;
+    expect(adjusted.status()).toBe(200);
+    const adjustedBody = await adjusted.json();
+    expect(adjustedBody.saved).toBe(true);
+    expect(adjustedBody.request.id).toBeGreaterThan(id);
+    const readBack = await context.request.get(api + `/requests/${adjustedBody.request.id}`, { headers });
+    expect(readBack.status()).toBe(200);
+    expect((await readBack.json()).adjustment.values.discount_cents).toBe(100);
+
+    await page.getByRole('button', { name: labels.workspace.tabs.history, exact: true }).click();
+    await expect(page.getByRole('table')).toBeVisible();
+    await page.getByRole('button', { name: labels.open, exact: true }).first().click();
+    await expect(page.locator('article')).not.toHaveCount(0);
+    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-history.png`, fullPage: true });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  });
+}
+
+test('native denial isolation empty state and stale navigation', async ({ page, context }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await isolatedTransport(context);
+  const headers = await actualLogin(page);
+  const base = `${origin}/app/accounts/${fixture.account_id}/approvals`;
+  const api = `${origin}/api/v1/accounts/${fixture.account_id}/approvals`;
+  const noUnit = await context.request.get(api + `/requests/${fixture.other_unit_request_id}`, { headers });
+  expect([403, 404]).toContain(noUnit.status());
+  expect(await noUnit.text()).not.toContain('CONFIDENTIAL_OTHER_UNIT');
+  const noAccount = await context.request.get(`${origin}/api/v1/accounts/${fixture.foreign_account_id}/approvals/requests`, { headers });
+  expect([401, 403, 404]).toContain(noAccount.status());
+  await page.goto(base + '/inbox');
+  await expect(page.locator('[data-approval-request]')).not.toHaveCount(0);
+  await page.locator('input[type="search"]').fill('UNMATCHED_SYNTHETIC_QUEUE_SEARCH');
+  await page.locator('input[type="search"]').locator('xpath=ancestor::form').evaluate(form => form.requestSubmit());
+  await expect(page.locator('[data-approval-request]')).toHaveCount(0);
+  await expect(page.getByText(labels.empty, { exact: true }).first()).toBeVisible();
+  await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/desktop-empty.png`, fullPage: true });
+  let release;
+  let captured;
+  const capturedPromise = new Promise(resolve => { captured = resolve; });
+  const releasePromise = new Promise(resolve => { release = resolve; });
+  await page.route('**/approvals/requests?*', async route => {
+    const response = await route.fetch();
+    captured();
+    await releasePromise;
+    await route.fulfill({ response }); // Unmodified real server response, delayed only.
+  }, { times: 1 });
+  await page.getByRole('button', { name: labels.workspace.clearFilters, exact: true }).click();
+  await capturedPromise;
+  await expect(page.getByRole('status').filter({ hasText: labels.loading })).toBeVisible();
+  await page.getByRole('button', { name: labels.workspace.tabs.policies, exact: true }).click();
+  release();
+  await expect(page).toHaveURL(/\/policies$/);
+  await expect(page.getByRole('table')).toBeVisible();
+  await expect(page.locator('[data-approval-request]')).toHaveCount(0);
+  // Replace the actual authenticated session through native authentication, never a Vue store injection.
+  await page.getByRole('button', { name: /Synthetic reviewer/ }).last().click();
+  const loggedOut = page.waitForResponse(r => new URL(r.url()).pathname === '/auth/sign_out' && r.request().method() === 'DELETE');
+  await page.getByText(/^(Sair|Logout|Log out)$/, { exact: true }).click();
+  expect((await loggedOut).status()).toBe(200);
+  await page.waitForURL(/\/app\/login/);
+  await actualLogin(page, fixture.users.denied);
+  await page.goto(base + '/inbox');
+  await expect(page.getByText(labels.denied, { exact: true }).first()).toBeVisible();
+  await expect(page.locator('[data-approval-request]')).toHaveCount(0);
+  await expect(page.locator('[data-metric]')).toHaveCount(0);
+  await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/desktop-denied-profile.png`, fullPage: true });
+});
