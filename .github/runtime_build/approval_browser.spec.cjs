@@ -122,14 +122,28 @@ for (const [index, mode] of modes.entries()) {
   test(`native simulation delegation adjustment and audit ${mode.name}`, async ({ page, context }) => {
     await page.setViewportSize({ width: mode.width, height: mode.height });
     await isolatedTransport(context);
-    const headers = await actualLogin(page);
+    const headers = await actualLogin(page, fixture.users.manager);
     const base = `${origin}/app/accounts/${fixture.account_id}/approvals`;
     const api = `${origin}/api/v1/accounts/${fixture.account_id}/approvals`;
     await page.goto(base + '/simulate');
-    await expect(page.getByLabel(labels.event, { exact: true })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: labels.event, exact: true })).toBeVisible();
     await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
-    await page.getByLabel(labels.event, { exact: true }).selectOption('crm.proposal_send');
-    await page.getByLabel(labels.resource, { exact: true }).selectOption(String(fixture.simulation_resource_id));
+    expect((await page.getByRole('combobox', { name: labels.event, exact: true }).locator('option').allTextContents()).some(text => text.includes('JRC_APPROVALS.'))).toBe(false);
+    await page.getByRole('combobox', { name: labels.event, exact: true }).selectOption('crm.proposal_send');
+
+    const resourcePicker = page.getByRole('combobox', { name: labels.resource, exact: true });
+    const resourceOption = resourcePicker.locator('option[value="' + fixture.simulation_resource_id + '"]');
+    for (let resourcePage = 0; resourcePage < 3 && (await resourceOption.count()) === 0; resourcePage += 1) {
+      await expect(resourcePicker).toBeEnabled();
+      if ((await resourceOption.count()) > 0) break;
+      const response = page.waitForResponse(r => new URL(r.url()).pathname.endsWith('/approvals/resources') && r.request().method() === 'GET');
+      await resourcePicker.locator('xpath=../..').getByRole('button', { name: labels.next, exact: true }).click();
+      expect((await response).status()).toBe(200);
+      await expect(resourcePicker).toBeEnabled();
+    }
+    await expect(resourceOption).toHaveCount(1);
+    await resourcePicker.selectOption(String(fixture.simulation_resource_id));
+
     const simulation = page.waitForResponse(r => r.url().endsWith('/requests/simulate') && r.request().method() === 'POST');
     await page.getByRole('button', { name: labels.simulate, exact: true }).last().click();
     const simulated = await simulation;
@@ -143,9 +157,9 @@ for (const [index, mode] of modes.entries()) {
     await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-simulation.png`, fullPage: true });
 
     await page.getByRole('button', { name: labels.workspace.tabs.delegations, exact: true }).click();
-    await expect(page.getByLabel(labels.scope, { exact: true })).toBeVisible();
-    await page.getByLabel(labels.scope, { exact: true }).selectOption({ index: 1 });
-    await page.getByLabel(labels.ownDelegation.recipient, { exact: true }).selectOption(String(fixture.users.delegate.id));
+    await expect(page.getByRole('combobox', { name: labels.scope, exact: true })).toBeVisible();
+    await page.getByRole('combobox', { name: labels.scope, exact: true }).selectOption({ index: 1 });
+    await page.getByRole('combobox', { name: labels.ownDelegation.recipient, exact: true }).selectOption(String(fixture.users.delegate.id));
     const localTime = offset => new Date(Date.now() + offset).toISOString().slice(0, 16);
     await page.getByLabel(labels.starts_at, { exact: true }).fill(localTime(10 * 60 * 1000));
     await page.getByLabel(labels.ends_at, { exact: true }).fill(localTime(40 * 60 * 1000));
@@ -201,7 +215,7 @@ for (const [index, mode] of modes.entries()) {
   });
 }
 
-test('native denial isolation empty state and stale navigation', async ({ page, context }) => {
+test('native denial isolation empty state and stale navigation', async ({ page, context, browser }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await isolatedTransport(context);
   const headers = await actualLogin(page);
@@ -212,6 +226,45 @@ test('native denial isolation empty state and stale navigation', async ({ page, 
   expect(await noUnit.text()).not.toContain('CONFIDENTIAL_OTHER_UNIT');
   const noAccount = await context.request.get(`${origin}/api/v1/accounts/${fixture.foreign_account_id}/approvals/requests`, { headers });
   expect([401, 403, 404]).toContain(noAccount.status());
+
+  const conflictId = fixture.request_ids[9];
+  await page.goto(base + '/inbox/' + conflictId);
+  const conflictDetail = page.locator('[data-approval-workspace] > section').nth(1);
+  await expect(conflictDetail.getByRole('button', { name: labels.adjustment.title, exact: true })).toHaveCount(0);
+  const snapshot = await context.request.get(api + '/requests/' + conflictId, { headers });
+  expect(snapshot.status()).toBe(200);
+  const current = await snapshot.json();
+  const deniedEdit = await context.request.post(api + '/requests/' + conflictId + '/adjust', {
+    headers, data: { adjustment: { changes: { discount_cents: 100 }, mode: 'save',
+      reason: 'Synthetic reviewer cannot edit another owners CRM source',
+      expected_version: current.lock_version, idempotency_key: require('crypto').randomUUID() } },
+  });
+  expect(deniedEdit.status()).toBe(403);
+  await conflictDetail.locator('textarea').first().fill('Synthetic stale reviewer decision');
+  const other = await browser.newContext();
+  try {
+    const authenticated = await other.request.post(origin + '/auth/sign_in', {
+      data: { email: fixture.users.recipient.email, password: fixture.users.recipient.password },
+    });
+    expect(authenticated.status()).toBe(200);
+    const auth = authenticated.headers();
+    const recipientHeaders = Object.fromEntries(['access-token', 'client', 'uid', 'token-type'].filter(k => auth[k]).map(k => [k, auth[k]]));
+    const first = await other.request.post(api + '/requests/' + conflictId + '/decide', {
+      headers: recipientHeaders, data: { decision: { step_code: 'review', decision: 'approved',
+        reason: 'Synthetic concurrent eligible principal', expected_version: current.lock_version,
+        idempotency_key: require('crypto').randomUUID() } },
+    });
+    expect(first.status()).toBe(200);
+  } finally { await other.close(); }
+  await conflictDetail.getByRole('button', { name: new RegExp('^' + labels.decisionLabels.approved + '(?: ·|$)') }).first().click();
+  const stale = page.waitForResponse(r => r.url().endsWith('/requests/' + conflictId + '/decide') && r.request().method() === 'POST');
+  await page.getByRole('dialog').getByRole('button', { name: labels.decisionLabels.approved, exact: true }).click();
+  expect((await stale).status()).toBe(409);
+  await expect(page.getByText(labels.concurrent, { exact: true })).toBeVisible();
+  await page.screenshot({ path: process.env.JRC_BROWSER_OUTPUT + '/desktop-real-conflict.png', fullPage: true });
+  const final = await context.request.get(api + '/requests/' + conflictId, { headers });
+  expect((await final.json()).decisions).toHaveLength(1);
+
   await page.goto(base + '/inbox');
   await expect(page.locator('[data-approval-request]')).not.toHaveCount(0);
   await page.locator('input[type="search"]').fill('UNMATCHED_SYNTHETIC_QUEUE_SEARCH');

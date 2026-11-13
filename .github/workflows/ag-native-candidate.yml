@@ -24,7 +24,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 98e201efd33e1cf66706c4d51c5383052754cd34
+          ref: 56bacc36cf6bf65f18a5f637eeb5a4bff1f42acb
           path: product
           fetch-depth: 0
           persist-credentials: false
@@ -43,6 +43,7 @@ jobs:
           "$RUNNER_TEMP/approval-linter/actionlint" .github/workflows/ag-native-candidate.yml
       - name: Validate browser and guard syntax
         run: |
+          python3 -B .github/layout_release/test_combined_source_gate.py
           node --check .github/runtime_build/approval_browser.spec.cjs
           node --check .github/runtime_build/approval_browser.config.cjs
           python3 -B -c "import ast,pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('.github/runtime_build').glob('*.py')]"
@@ -50,7 +51,9 @@ jobs:
         if: always()
         with:
           name: approvals-final-source-${{ github.sha }}
-          path: ${{ runner.temp }}/combined-source-gate.json
+          path: |
+            ${{ runner.temp }}/combined-source-gate.json
+            ${{ runner.temp }}/combined-source-denial-tests.json
           if-no-files-found: error
           retention-days: 7
   native-visual:
@@ -91,7 +94,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 98e201efd33e1cf66706c4d51c5383052754cd34
+          ref: 56bacc36cf6bf65f18a5f637eeb5a4bff1f42acb
           path: product
           fetch-depth: 0
           persist-credentials: false
@@ -123,6 +126,11 @@ jobs:
           bundler: 2.5.16
           bundler-cache: true
           working-directory: product
+      - name: Ruby fixture syntax and native rights remain explicit
+        working-directory: product
+        run: |
+          ruby -c ../.github/runtime_build/approval_browser_fixture.rb
+          ruby -c ../.github/runtime_build/approval_native_seed.rb
       - name: Locked frontend and Chrome test dependencies
         run: |
           pnpm --dir product install --frozen-lockfile

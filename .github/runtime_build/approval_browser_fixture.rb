@@ -4,7 +4,7 @@ module JrcApprovalBrowserFixture
     user = User.create!(name: "Synthetic #{name}", email: "#{name}-#{nonce}@example.test", password: password,
                         password_confirmation: password, confirmed_at: Time.current, ui_settings: { locale: 'pt_BR' })
     role = CustomRole.create!(account: account, name: "Synthetic approval #{name}", permissions: permissions) if permissions
-    membership = AccountUser.create!(account: account, user: user, role: :agent, custom_role: role)
+    membership = AccountUser.create!(account: account, user: user, role: name == 'manager' ? :administrator : :agent, custom_role: role)
     if permissions
       JrcCrm::UserBusinessUnit.create!(account: account, user: user, company: company, business_unit: unit,
                                       scope: 'BUSINESS_UNIT', structure_managed: true, active: true)
@@ -49,12 +49,12 @@ module JrcApprovalBrowserFixture
     password = "Synthetic-#{SecureRandom.hex(16)}!9"
     full = JrcApprovals::Authorization::PERMISSIONS + ['jrc_crm']
     people = {}
-    %w[requester reviewer recipient delegate denied].each do |name|
+    %w[requester reviewer recipient delegate manager denied].each do |name|
       permissions = name == 'denied' ? nil : full
       people[name] = member(account, company, unit, nonce, name, password, permissions)
     end
     requester, reviewer, recipient = people.values_at('requester', 'reviewer', 'recipient')
-    rule = policy(account, unit, requester, [reviewer, recipient], nonce, 'Synthetic commercial approval — Word layout')
+    rule = policy(account, unit, requester, [reviewer, recipient, people.fetch('manager')], nonce, 'Synthetic commercial approval — Word layout')
     contact = Contact.create!(account: account, name: 'Synthetic customer, no external channels')
     product = JrcCrm::Product.create!(account: account, name: 'Synthetic product', sku: nonce, unit_price_cents: 1000,
                                      minimum_price_cents: 900, maximum_discount_percent: 100, discount_approval_percent: 100,

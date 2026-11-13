@@ -15,7 +15,7 @@ import uuid
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / 'product'
-PRODUCT = '98e201efd33e1cf66706c4d51c5383052754cd34'
+PRODUCT = '56bacc36cf6bf65f18a5f637eeb5a4bff1f42acb'
 BRANCH = 'ci/approvals-word-native-visual-20261113'
 sys.path.insert(0, str(ROOT / '.github/runtime_build'))
 import guard as preserved_guard
@@ -58,6 +58,7 @@ def main():
     def command(args, name, env=None, timeout=600):
         sample()
         start = time.monotonic()
+        print(json.dumps({'phase': name, 'event': 'started'}), flush=True)
         phase = {'name': name}
         result['phases'].append(phase)
         with (output / (name + '.log')).open('x') as stream:
@@ -69,6 +70,7 @@ def main():
                     require(time.monotonic() - start < timeout, 'Owned phase timed out: ' + name)
                     time.sleep(0.5)
                 phase['exit_code'] = process.wait()
+                print(json.dumps({'phase': name, 'exit_code': phase['exit_code']}), flush=True)
                 require(phase['exit_code'] == 0, 'Native phase failed: ' + name)
             finally:
                 stop(process)
