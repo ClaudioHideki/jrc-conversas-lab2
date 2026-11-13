@@ -22,7 +22,9 @@ Os contratos de lock/runtime (6 testes), guarda de build (5 testes), identidade 
 
 `ag-native-candidate.yml` permite build/publicação somente por dispatch explícito, na branch de histórico, com SHA exato. O build depende dos testes nativos, frontend e compatibilidade. A imagem real deve passar o probe `test/jrc_runtime/image_smoke.rb`: Ruby/Node exatos, gems nativas, Vips, decimal, PDF e XLSX sem rede, sessões ou dados reais. O push GHCR é posterior ao probe e opcional. O workflow de conexões também inclui os novos specs de recepção V2 e jobs de mídia.
 
-No momento deste checkpoint, CI do novo SHA, build Alpine, digest publicado e deploy ainda não têm evidência. Não reutilizar a CI do pai ou o build Vite anterior como aprovação desta candidata. Branches de outros clientes, credenciais, produção, sessões e mecanismos existentes permanecem preservados. Nenhuma rotina de backup/dump/restore foi executada.
+A primeira CI do merge `a3c10814` comprovou identidades/contrato/migrations e frontend A–G, mas falhou no fixture antigo de paginação (2 casos) e em um stub vazio do harness Ruby. O fixture passou a fornecer o membership confirmado pelo servidor em cada resposta, inclusive após load more; a autorização do produto não foi afrouxada. Paginação e 43 regressões de escopo passaram juntas (45 testes). O stub retorna nil explicitamente, sem mudar seu comportamento. A guarda do runtime admite apenas o hash exato desse fixture adicional e continua rejeitando outras mudanças funcionais.
+
+CI do próximo SHA, build Alpine, digest publicado e deploy ainda precisam de evidência. Não reutilizar a CI do pai ou o build Vite anterior como aprovação desta candidata. Branches de outros clientes, credenciais, produção, sessões e mecanismos existentes permanecem preservados. Nenhuma rotina de backup/dump/restore foi executada.
 
 ## Release
 

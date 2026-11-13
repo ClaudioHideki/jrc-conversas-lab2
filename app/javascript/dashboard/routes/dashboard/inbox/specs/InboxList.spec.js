@@ -2,6 +2,7 @@ import { mount, flushPromises } from '@vue/test-utils';
 import { createStore } from 'vuex';
 import { createPinia } from 'pinia';
 import InboxList from '../InboxList.vue';
+import ConversationAPI from 'dashboard/api/conversations';
 import { routes as webphoneRoutes } from '../../webphone/routes';
 
 vi.mock('vue-router', () => ({
@@ -14,6 +15,11 @@ vi.mock('vue-router', () => ({
     push: vi.fn(),
     resolve: target => webphoneRoutes.find(row => row.name === target.name),
   }),
+}));
+vi.mock('dashboard/api/conversations', () => ({
+  default: {
+    sharedContext: vi.fn(),
+  },
 }));
 vi.mock(
   'dashboard/components/widgets/conversation/ConversationCard.vue',
@@ -29,6 +35,14 @@ describe('InboxList channel pagination', () => {
   it.each([0, 2])(
     'keeps subsequent pages reachable with only %s WhatsApp matches',
     async matches => {
+      const sharedScope = {
+        enabled: false,
+        inbox_ids: [],
+        member_inbox_ids: [1, 2],
+      };
+      ConversationAPI.sharedContext.mockResolvedValue({
+        data: { meta: { shared_scope: sharedScope } },
+      });
       const inboxes = [
         { id: 1, channel_type: 'Channel::Whatsapp' },
         { id: 2, channel_type: 'Channel::Email' },
@@ -59,7 +73,15 @@ describe('InboxList channel pagination', () => {
           'conversationPage/getHasEndReached': state => () => state.ended,
         },
       });
-      const dispatch = vi.spyOn(store, 'dispatch').mockResolvedValue();
+      const dispatch = vi
+        .spyOn(store, 'dispatch')
+        .mockImplementation(action =>
+          Promise.resolve(
+            action === 'fetchAllConversations'
+              ? { meta: { shared_scope: sharedScope } }
+              : undefined
+          )
+        );
       const wrapper = mount(InboxList, {
         global: {
           plugins: [store, createPinia()],

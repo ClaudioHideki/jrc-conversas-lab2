@@ -47,7 +47,7 @@ def check_clock(initial, imported, expected)
   account = Struct.new(:conversations).new(conversation)
   importer = JrcBroker::HistoryImport.allocate
   importer.instance_variable_set(:@authority, Struct.new(:account).new(account))
-  importer.define_singleton_method(:validate!) { |_| }
+  importer.define_singleton_method(:validate!) { |_| nil }
   importer.define_singleton_method(:scope!) { |*| Struct.new(:id).new(1) }
   importer.define_singleton_method(:receipt_scope) { |*| {} }
   importer.define_singleton_method(:persist_message) { |*, **| Struct.new(:created_at, :id).new(imported, 9) }

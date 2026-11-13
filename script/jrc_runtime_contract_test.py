@@ -58,9 +58,14 @@ def verify():
     reviewed_sha = "599bc1fce954fe4bcc58aa98117722628001939b24f77522f178bd0bb90331bd"
     regression = "spec/services/jrc_crm/backoffice_request_number_spec.rb"
     regression_sha = "f424461b1008fc5942e421e430a283485e7dd54b8d4551a339ece28abaaa2172"
-    assert changed == [reviewed_path], changed
+    pagination_fixture = "app/javascript/dashboard/routes/dashboard/inbox/specs/InboxList.spec.js"
+    pagination_sha = "0dd4f4ed7960eb673cadf1c388073ff2af99c90de2f2dd6119321dff05c630a7"
+    # The old pagination fixture omitted the backend membership proof. Admit
+    # only this reviewed test update; the product authorization is unchanged.
+    assert changed == sorted([reviewed_path, pagination_fixture]), changed
     assert hashlib.sha256((ROOT / reviewed_path).read_bytes()).hexdigest() == reviewed_sha
     assert hashlib.sha256((ROOT / regression).read_bytes()).hexdigest() == regression_sha
+    assert hashlib.sha256((ROOT / pagination_fixture).read_bytes()).hexdigest() == pagination_sha
     fixes = [{"path": reviewed_path, "sha256": reviewed_sha,
               "regression": regression, "regression_sha256": regression_sha}]
     assert (ROOT / ".dockerignore").read_text() == original(".dockerignore")
@@ -73,6 +78,7 @@ def verify():
             "pnpm_lock_unchanged": True, "functional_sources_unchanged": False,
             "all_other_functional_sources_unchanged": True, "migrations_unchanged": True,
             "reviewed_functional_fixes": fixes,
+            "reviewed_test_fixtures": [{"path": pagination_fixture, "sha256": pagination_sha}],
             "separate_nico_image_unchanged": True, "docker_build_executed": False}
 
 
