@@ -13,6 +13,12 @@ const modes = [
   { name: 'mobile-dark', width: 390, height: 844, dark: true },
 ];
 
+async function captureTheme(page, mode, path) {
+  await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
+  expect(await page.evaluate(() => document.documentElement.classList.contains('dark'))).toBe(mode.dark);
+  await page.screenshot({ path, fullPage: true });
+}
+
 for (const [index, mode] of modes.entries()) {
   test(`native approval workspace ${mode.name}`, async ({ page, context, browser }) => {
     test.info().annotations.push({ type: 'browser', description: browser.version() });
@@ -48,7 +54,7 @@ for (const [index, mode] of modes.entries()) {
       getComputedStyle(metric.closest('article')).backgroundColor));
     expect(new Set(colors).size).toBe(4);
     expect(colors.every(color => color !== 'rgba(0, 0, 0, 0)')).toBe(true);
-    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-inbox.png`, fullPage: true });
+    await captureTheme(page, mode, `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-inbox.png`);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
     await page.getByRole('button', { name: labels.next, exact: true }).click();
@@ -68,12 +74,12 @@ for (const [index, mode] of modes.entries()) {
     await expect(approve).toBeDisabled();
     await detail.locator('textarea').first().fill(`Synthetic ${mode.name} native evidence`);
     await expect(approve).toBeEnabled();
-    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-detail.png`, fullPage: true });
+    await captureTheme(page, mode, `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-detail.png`);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await approve.click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
-    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-confirmation.png`, fullPage: true });
+    await captureTheme(page, mode, `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-confirmation.png`);
     const saved = page.waitForResponse(r => r.url().endsWith(`/requests/${id}/decide`) && r.request().method() === 'POST');
     await dialog.getByRole('button', { name: labels.decisionLabels.approved, exact: true }).click();
     expect((await saved).status()).toBe(200);
@@ -96,7 +102,7 @@ for (const [index, mode] of modes.entries()) {
       await expect(tabs.nth(step)).toHaveAttribute('aria-selected', 'true');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     }
-    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-rule-summary.png`, fullPage: true });
+    await captureTheme(page, mode, `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-rule-summary.png`);
   });
 }
 
@@ -154,7 +160,7 @@ for (const [index, mode] of modes.entries()) {
     expect(simulationBody.versions.length).toBeGreaterThan(0);
     await expect(page.getByText(labels.noEffects, { exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-simulation.png`, fullPage: true });
+    await captureTheme(page, mode, `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-simulation.png`);
 
     await page.getByRole('button', { name: labels.workspace.tabs.delegations, exact: true }).click();
     await expect(page.getByRole('combobox', { name: labels.scope, exact: true })).toBeVisible();
@@ -175,7 +181,7 @@ for (const [index, mode] of modes.entries()) {
     await expect(page.locator('article').filter({ hasText: reason })).toHaveCount(1);
     await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-delegation.png`, fullPage: true });
+    await captureTheme(page, mode, `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-delegation.png`);
     const revoke = page.waitForResponse(r => r.url().endsWith(`/own_delegations/${grant.id}`) && r.request().method() === 'DELETE');
     await page.locator('article').filter({ hasText: reason }).getByRole('button', { name: labels.ownDelegation.revoke, exact: true }).click();
     expect((await revoke).status()).toBe(204);
@@ -185,6 +191,7 @@ for (const [index, mode] of modes.entries()) {
 
     const id = fixture.request_ids[4 + index];
     await page.goto(base + `/inbox/${id}`);
+    await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
     await page.getByRole('button', { name: labels.adjustment.title, exact: true }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
@@ -194,7 +201,7 @@ for (const [index, mode] of modes.entries()) {
     await dialog.getByLabel(labels.reason, { exact: true }).fill(`Synthetic ${mode.name} adjustment audit`);
     await expect(save).toBeEnabled();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-adjustment.png`, fullPage: true });
+    await captureTheme(page, mode, `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-adjustment.png`);
     const adjustment = page.waitForResponse(r => r.url().endsWith(`/requests/${id}/adjust`) && r.request().method() === 'POST');
     await save.click();
     const adjusted = await adjustment;
@@ -210,7 +217,7 @@ for (const [index, mode] of modes.entries()) {
     await expect(page.getByRole('table')).toBeVisible();
     await page.getByRole('button', { name: labels.open, exact: true }).first().click();
     await expect(page.locator('article')).not.toHaveCount(0);
-    await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-history.png`, fullPage: true });
+    await captureTheme(page, mode, `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-history.png`);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }
