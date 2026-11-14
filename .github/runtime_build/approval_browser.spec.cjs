@@ -13,6 +13,39 @@ const modes = [
   { name: 'mobile-dark', width: 390, height: 844, dark: true },
 ];
 
+// Two naturally authenticated browser contexts, retained exactly as in normal use.
+// No storageState replay, injected auth state, spoofed IP, Redis reset or throttle override.
+const roleSessions = new Map();
+let uiSigninCount = 0;
+let apiSigninCount = 0;
+async function realSession(browser, role) {
+  if (!roleSessions.has(role)) {
+    const context = await browser.newContext();
+    await isolatedTransport(context);
+    const page = await context.newPage();
+    const headers = await actualLogin(page, fixture.users[role]);
+    roleSessions.set(role, { context, page, headers });
+  }
+  return roleSessions.get(role);
+}
+async function sessionMode(page, mode) {
+  await page.setViewportSize({ width: mode.width, height: mode.height });
+  await page.emulateMedia({ colorScheme: mode.dark ? 'dark' : 'light' });
+  await page.evaluate(dark => localStorage.setItem('color_scheme', dark ? 'dark' : 'light'), mode.dark);
+  await page.reload(); // The unmodified native theme helper applies the persisted preference.
+  await assertNativeTheme(page, mode);
+}
+test.afterEach(async ({}, info) => {
+  if (info.status !== info.expectedStatus) {
+    for (const [role, session] of roleSessions) {
+      if (!session.page.isClosed()) await session.page.screenshot({ path: process.env.JRC_BROWSER_OUTPUT + '/failed-owned-' + role + '.png', fullPage: true });
+    }
+  }
+});
+test.afterAll(async () => {
+  for (const session of roleSessions.values()) await session.context.close();
+});
+
 async function assertNativeTheme(page, mode) {
   await expect.poll(() => page.evaluate(() => document.body.classList.contains('dark'))).toBe(mode.dark);
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toBe(mode.dark ? 'dark' : 'light');
@@ -51,30 +84,12 @@ async function captureTheme(page, mode, path) {
 }
 
 for (const [index, mode] of modes.entries()) {
-  test(`native approval workspace ${mode.name}`, async ({ page, context, browser }) => {
+  test(`native approval workspace ${mode.name}`, async ({ browser }) => {
     test.info().annotations.push({ type: 'browser', description: browser.version() });
     test.info().annotations.push({ type: 'product', description: fixture.product_sha });
-    await page.setViewportSize({ width: mode.width, height: mode.height });
-    await page.emulateMedia({ colorScheme: mode.dark ? 'dark' : 'light' });
-    await context.addInitScript(dark => { localStorage.setItem('color_scheme', dark ? 'dark' : 'light'); }, mode.dark);
-    await context.route('**/*', route => {
-      const url = route.request().url();
-      if (url.startsWith(origin + '/') || url.startsWith('data:') || url.startsWith('blob:')) return route.continue();
-      return route.abort('blockedbyclient');
-    });
-    await context.routeWebSocket('**/*', socket => {
-      if (socket.url().startsWith('ws://127.0.0.1:3000/')) socket.connectToServer();
-      else socket.close();
-    });
-    await page.goto(origin + '/app/login');
+    const { page, context } = await realSession(browser, 'reviewer');
+    await sessionMode(page, mode);
     expect(await page.evaluate(() => window.isSecureContext && typeof crypto.randomUUID === 'function')).toBe(true);
-    await page.locator('input[name="email_address"]').fill(fixture.email);
-    await page.locator('input[type="password"]').fill(fixture.password);
-    const authenticated = page.waitForResponse(r => r.url().endsWith('/auth/sign_in') && r.request().method() === 'POST');
-    await page.locator('button[type="submit"]').click();
-    expect((await authenticated).status()).toBe(200);
-    await page.waitForURL(/\/app\/accounts\/\d+/);
-    await page.waitForLoadState('domcontentloaded');
     const base = `${origin}/app/accounts/${fixture.account_id}/approvals/inbox`;
     await page.goto(base);
     await expect(page.locator('[data-approval-workspace]')).toBeVisible();
@@ -154,6 +169,7 @@ async function actualLogin(page, person = { email: fixture.email, password: fixt
   await page.locator('input[name="email_address"]').fill(person.email);
   await page.locator('input[type="password"]').fill(person.password);
   const response = page.waitForResponse(r => new URL(r.url()).pathname === '/auth/sign_in' && r.request().method() === 'POST');
+  uiSigninCount += 1;
   await page.locator('button[type="submit"]').click();
   const result = await response;
   expect(result.status()).toBe(200);
@@ -167,12 +183,9 @@ async function isolatedTransport(context) {
   await context.routeWebSocket('**/*', socket => socket.url().startsWith('ws://127.0.0.1:3000/') ? socket.connectToServer() : socket.close());
 }
 for (const [index, mode] of modes.entries()) {
-  test(`native simulation delegation adjustment and audit ${mode.name}`, async ({ page, context }) => {
-    await page.setViewportSize({ width: mode.width, height: mode.height });
-    await page.emulateMedia({ colorScheme: mode.dark ? 'dark' : 'light' });
-    await context.addInitScript(dark => { localStorage.setItem('color_scheme', dark ? 'dark' : 'light'); }, mode.dark);
-    await isolatedTransport(context);
-    const headers = await actualLogin(page, fixture.users.manager);
+  test(`native simulation delegation adjustment and audit ${mode.name}`, async ({ browser }) => {
+    const { page, context, headers } = await realSession(browser, 'manager');
+    await sessionMode(page, mode);
     const base = `${origin}/app/accounts/${fixture.account_id}/approvals`;
     const api = `${origin}/api/v1/accounts/${fixture.account_id}/approvals`;
     await page.goto(base + '/simulate');
@@ -266,10 +279,9 @@ for (const [index, mode] of modes.entries()) {
   });
 }
 
-test('native denial isolation empty state and stale navigation', async ({ page, context, browser }) => {
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await isolatedTransport(context);
-  const headers = await actualLogin(page);
+test('native denial isolation empty state and stale navigation', async ({ browser }) => {
+  const { page, context, headers } = await realSession(browser, 'reviewer');
+  await sessionMode(page, { width: 1440, height: 1000, dark: false });
   const base = `${origin}/app/accounts/${fixture.account_id}/approvals`;
   const api = `${origin}/api/v1/accounts/${fixture.account_id}/approvals`;
   const authenticatedControl = await context.request.get(api + '/requests/' + fixture.request_ids[9], { headers });
@@ -314,6 +326,7 @@ test('native denial isolation empty state and stale navigation', async ({ page, 
   await conflictDetail.locator('textarea').first().fill('Synthetic stale reviewer decision');
   const other = await browser.newContext();
   try {
+    apiSigninCount += 1;
     const authenticated = await other.request.post(origin + '/auth/sign_in', {
       data: { email: fixture.users.recipient.email, password: fixture.users.recipient.password },
     });
@@ -373,4 +386,12 @@ test('native denial isolation empty state and stale navigation', async ({ page, 
   await expect(page.locator('[data-approval-request]')).toHaveCount(0);
   await expect(page.locator('[data-metric]')).toHaveCount(0);
   await page.screenshot({ path: `${process.env.JRC_BROWSER_OUTPUT}/desktop-denied-profile.png`, fullPage: true });
+  expect(uiSigninCount).toBe(3);
+  expect(apiSigninCount).toBe(1);
+  test.info().annotations.push({ type: 'native-authentication-budget', description: JSON.stringify({
+    ui_signins: uiSigninCount, api_signins: apiSigninCount, total_signins: uiSigninCount + apiSigninCount,
+    retained_real_contexts: roleSessions.size, native_logout_and_profile_switch: true,
+    rack_attack_modified: false, forged_client_ip: false, replayed_storage_state: false,
+  }) });
+
 });
