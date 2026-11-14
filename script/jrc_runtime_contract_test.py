@@ -26,6 +26,8 @@ REVIEWED_RETRY_SOURCES = {
 
 # Reviewed approvals increment 56bacc36 plus the stale-summary regression.
 REVIEWED_APPROVAL_SOURCES = {
+    # Native Chrome QA: semantic text color in teleported adjustment content, no authorization change.
+    "app/javascript/dashboard/routes/dashboard/approvals/AdjustmentDialog.vue": "ca159d7699d5f699a9d343c16007f1e304db1288d0487dfd253be194b022a6a1",
     "app/controllers/api/v1/accounts/approvals/requests_controller.rb": "a537a402cc25da031133ec23416a54eb9894e543fa8ac69f5db3a307890e212c",
     "app/javascript/dashboard/i18n/locale/en/jrcApprovals.json": "36666da071f803394558d74527c7770b4fc5706bb1d4f9329f849db70b844a0d",
     "app/javascript/dashboard/i18n/locale/pt_BR/jrcApprovals.json": "2d507600fd7b528519c71fb2a914570b5a4a459bde5886a591f823616e144e85",
