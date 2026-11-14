@@ -275,12 +275,27 @@ test('native denial isolation empty state and stale navigation', async ({ page, 
   const authenticatedControl = await context.request.get(api + '/requests/' + fixture.request_ids[9], { headers });
   expect(authenticatedControl.status()).toBe(200);
   expect((await authenticatedControl.json()).id).toBe(fixture.request_ids[9]);
+  expect(fixture.other_unit_issuer_company_id).toBe(fixture.issuer_company_id);
+  expect(fixture.other_unit_id).not.toBe(fixture.business_unit_id);
   const noUnit = await context.request.get(api + `/requests/${fixture.other_unit_request_id}`, { headers });
   expect(noUnit.status()).toBe(401);
   expect(await noUnit.json()).toEqual({ error: 'You are not authorized to do this action' });
   expect(await noUnit.text()).not.toContain('CONFIDENTIAL_OTHER_UNIT');
+  expect(await noUnit.text()).not.toContain('CONFIDENTIAL_SIBLING_UNIT');
+  const noCompany = await context.request.get(api + `/requests/${fixture.other_company_request_id}`, { headers });
+  expect(noCompany.status()).toBe(401);
+  expect(await noCompany.json()).toEqual({ error: 'You are not authorized to do this action' });
+  expect(await noCompany.text()).not.toContain('CONFIDENTIAL_OTHER_UNIT');
   const noAccount = await context.request.get(`${origin}/api/v1/accounts/${fixture.foreign_account_id}/approvals/requests`, { headers });
   expect([401, 403, 404]).toContain(noAccount.status());
+  test.info().annotations.push({ type: 'scope-isolation', description: JSON.stringify({
+    same_account: true, issuer_company_id: fixture.issuer_company_id,
+    sibling_issuer_company_id: fixture.other_unit_issuer_company_id,
+    allowed_unit_id: fixture.business_unit_id, denied_unit_id: fixture.other_unit_id,
+    authenticated_control_status: authenticatedControl.status(), same_company_unit_denial_status: noUnit.status(),
+    other_company_denial_status: noCompany.status(), foreign_account_denial_status: noAccount.status(),
+  }) });
+
 
   const conflictId = fixture.request_ids[9];
   await page.goto(base + '/inbox/' + conflictId);

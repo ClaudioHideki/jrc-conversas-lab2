@@ -74,16 +74,30 @@ module JrcApprovalBrowserFixture
     other_origin = proposal(account, other_unit, requester, product, contact, 'CONFIDENTIAL_OTHER_UNIT_SOURCE')
     other_request = JrcApprovals::CommercialGate.new(account: account, user: requester.user)
       .request!(key: 'crm.proposal_send', resource_id: other_origin.id, idempotency_key: "#{nonce}-other").first
+    # Same issuer, different business unit: company authorization cannot mask a unit leak.
+    sibling_unit = JrcCrm::BusinessUnit.create!(account: account, operating_company: company,
+      name: 'Denied unit in the same synthetic issuer', code: "#{nonce.first(10)}-u2")
+    JrcCrm::UserBusinessUnit.create!(account: account, user: requester.user, company: company, business_unit: sibling_unit,
+      scope: 'BUSINESS_UNIT', structure_managed: true, active: true)
+    sibling_actor = member(account, company, sibling_unit, nonce, 'same-company-other-unit', password, full)
+    policy(account, sibling_unit, requester, [sibling_actor], "#{nonce}-sibling", 'CONFIDENTIAL_SIBLING_UNIT')
+    sibling_origin = proposal(account, sibling_unit, requester, product, contact, 'CONFIDENTIAL_SIBLING_UNIT_SOURCE')
+    sibling_request = JrcApprovals::CommercialGate.new(account: account, user: requester.user)
+      .request!(key: 'crm.proposal_send', resource_id: sibling_origin.id, idempotency_key: "#{nonce}-sibling").first
+    raise 'Same-company unit fixture invalid' unless sibling_request.issuer_company_id == company.id &&
+      sibling_request.business_unit_id == sibling_unit.id && sibling_unit.id != unit.id
     foreign_account = Account.create!(name: "Foreign approval browser #{nonce}", locale: 'pt_BR')
     foreign_account.enable_features!('jrc_approvals', 'jrc_crm')
     credentials = { account_id: account.id, email: reviewer.user.email, password: password, policy_id: rule.id,
                     request_ids: requests, source_ids: origins.map(&:id), simulation_resource_id: simulation.id,
-                    other_unit_request_id: other_request.id, other_unit_id: other_unit.id, foreign_account_id: foreign_account.id,
+                    issuer_company_id: company.id, business_unit_id: unit.id,
+                    other_unit_request_id: sibling_request.id, other_unit_id: sibling_unit.id, other_unit_issuer_company_id: company.id,
+                    other_company_request_id: other_request.id, foreign_account_id: foreign_account.id,
                     users: people.transform_values { |member| { id: member.id, email: member.user.email, password: password } },
                     product_sha: product_sha }
     File.write(output, JSON.generate(credentials))
     File.chmod(0o600, output)
     puts JSON.generate(passed: true, fixture: 'isolated_native_commercial', requests: requests.length,
-                       covered_units: 1, denied_units: 1, foreign_accounts: 1, external_operations: false)
+                       covered_units: 1, denied_units: 2, denied_companies: 1, same_company_unit_isolation: true, foreign_accounts: 1, external_operations: false)
   end
 end
