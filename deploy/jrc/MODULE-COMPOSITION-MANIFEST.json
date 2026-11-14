@@ -1007,8 +1007,8 @@
     {
       "path": "script/lab2_release_gates.test.mjs",
       "baseSha256": null,
-      "sha256": "9b8c30d857c4d7706bbf1d9bf1269b45bdcb4973e6388287b624398a9f7a919c",
-      "bytes": 4643
+      "sha256": "78607694e66c827dfb7b124edd5ebf5ee9dd45598030daf7eb51e9f86d40331e",
+      "bytes": 5056
     },
     {
       "path": "script/smoke_backoffice_candidate.sh",
