@@ -1,0 +1,1008 @@
+{
+  "report": {
+    "passed": true,
+    "product_sha": "55da80eb1254aee54ee0f1fb5c42f2be46a98737",
+    "infrastructure_sha": "e694fc8c50f518dcd82262cffaa2fc0364a14e20",
+    "image_built": false,
+    "mocked_application": false,
+    "phases": [
+      {
+        "name": "isolated-database",
+        "exit_code": 0,
+        "seconds": 5.006
+      },
+      {
+        "name": "isolated-schema",
+        "exit_code": 0,
+        "seconds": 6.507
+      },
+      {
+        "name": "fresh-frontend-assets",
+        "exit_code": 0,
+        "seconds": 82.639
+      },
+      {
+        "name": "synthetic-fixture",
+        "exit_code": 0,
+        "seconds": 11.514
+      },
+      {
+        "name": "native-chrome",
+        "exit_code": 0,
+        "seconds": 120.154
+      }
+    ],
+    "resources": {
+      "initial": {
+        "at_monotonic": 192.278632656,
+        "disk_free": 91392466944,
+        "source_disk_free": 91392466944,
+        "output_disk_free": 91392466944,
+        "ram_available": 14949212160,
+        "physical_ram_available": 14949212160,
+        "cgroup_capacities": []
+      },
+      "ram_min": 8740769792,
+      "disk_min": 91138424832,
+      "final": {
+        "at_monotonic": 425.900698527,
+        "disk_free": 91138424832,
+        "source_disk_free": 91138424832,
+        "output_disk_free": 91138424832,
+        "ram_available": 13162553344,
+        "physical_ram_available": 13162553344,
+        "cgroup_capacities": []
+      }
+    },
+    "frontend_heap": {
+      "passed": true,
+      "events": [
+        {
+          "component": "jrc_vite_heap",
+          "heapMiB": 6144,
+          "initial": {
+            "hostAvailable": 14683082752,
+            "processAvailable": 14683082752,
+            "constrainedMemory": 18446744073709552000,
+            "availableMemory": 14683082752,
+            "diskFree": 91263012864
+          },
+          "vitePid": 5907
+        },
+        {
+          "component": "jrc_vite_heap",
+          "passed": true,
+          "code": 0,
+          "signal": null,
+          "reason": null,
+          "minimumMemory": 8729800704,
+          "minimumDisk": 91179311104
+        }
+      ],
+      "heap_mib": 6144,
+      "build_only": true
+    },
+    "assets": [
+      {
+        "path": "/vite/assets/v3app-B4UP88Hx.js",
+        "sha256": "dbfffba3db4a2f24c2e7a1db46aad2c5fca5422c941769cc848d337349228e0c",
+        "bytes": 274585
+      },
+      {
+        "path": "/vite/assets/vue.esm-bundler-BDWlAJV0.js",
+        "sha256": "d397e948716dd690ee4b6b448827474379a3db53e0650053c2dfee7e32d142b5",
+        "bytes": 172073
+      },
+      {
+        "path": "/vite/assets/vuex.esm-bundler-BFr9yoBr.js",
+        "sha256": "d6b1c0181dbb51126195caaf1fa1254aac2145d078afcece19707f5c3e0ee2bb",
+        "bytes": 78424
+      },
+      {
+        "path": "/vite/assets/index-DN3rM4CW.js",
+        "sha256": "05d7fb1274805e9bad539d9eae2da84497f2f78d20db272560e59671ea62e365",
+        "bytes": 886
+      },
+      {
+        "path": "/vite/assets/Icon-BwdYybex.js",
+        "sha256": "cf88d925d68d69a866c45c7e3e783ce4cc26539fb5cb55ac4635f21b7e27f15e",
+        "bytes": 23884
+      },
+      {
+        "path": "/vite/assets/store-CDPgc2mj.js",
+        "sha256": "4017b635d11e295192715ad80dd534d5a7a7e3a664ea2fb7fec18b9549fcd9e5",
+        "bytes": 480
+      },
+      {
+        "path": "/vite/assets/_commonjsHelpers-gnU0ypJ3.js",
+        "sha256": "29f36d59656904cdfd77b28a7161f191f49668502f6470cfa3ec197a9281fa1f",
+        "bytes": 665
+      },
+      {
+        "path": "/vite/assets/_plugin-vue_export-helper-DlAUqK2U.js",
+        "sha256": "a0479e753bb06a77a996553a6f09742ee0cefa80c1ea92d5f92f73d82109519c",
+        "bytes": 154
+      },
+      {
+        "path": "/vite/assets/utils.esm-ROdlb_je.js",
+        "sha256": "f52af9a25944474bbce84338ee286b3245453f6fd19b0a4af4499685394a29b7",
+        "bytes": 93230
+      },
+      {
+        "path": "/vite/assets/useBranding-MYitlnp1.js",
+        "sha256": "c3e8cb29d8f8475467479ecaddf7c843e3c170b86316c2d8ab55c53c6663beb7",
+        "bytes": 12839
+      },
+      {
+        "path": "/vite/assets/Validators-CJBcYdPy.js",
+        "sha256": "2511b523b0a2d996fbc808fd6750b6c82e8ade9594caf13aa4c3499234285ad9",
+        "bytes": 68084
+      },
+      {
+        "path": "/vite/assets/js.cookie-DhuBleE4.js",
+        "sha256": "8c4d02a73ba6db46699df8ae24123749445e0b38f84231a06c09e22b33b9b2c6",
+        "bytes": 1494
+      },
+      {
+        "path": "/vite/assets/jrcServiceDesk-7wPbSTb0.js",
+        "sha256": "11705c3cafb94e80740195197a66e24f570682414fbf917178f68b63584fc5bc",
+        "bytes": 296454
+      },
+      {
+        "path": "/vite/assets/Button-Dcv3wnUS.js",
+        "sha256": "ccce19f367ea5fe1fe724c3e7d40d55b372a90f53ec133d66681114a1a2c2cdb",
+        "bytes": 6795
+      },
+      {
+        "path": "/vite/assets/Dialog-B6VbEbHh.js",
+        "sha256": "3efa0c8ba1f0f6f831bce1945fac8b8149b786da9d917f989d9fd1b4a04eb2ba",
+        "bytes": 24870
+      },
+      {
+        "path": "/vite/assets/index-5ZiOr8tm.js",
+        "sha256": "355b6351c37d6a2d1c5efcdf206324b091c38fb52314e2ec2dace0b28b28227f",
+        "bytes": 175557
+      },
+      {
+        "path": "/vite/assets/index-Dl2ZdB49.js",
+        "sha256": "2a498096bcdf5f06ead2c7068300998c84f3cc0e929c1ae51349fe9f8372c7ab",
+        "bytes": 16512
+      },
+      {
+        "path": "/vite/assets/Icon-BauR08ci.js",
+        "sha256": "bac69c4d01e90af6a8f047be8e2d53b821091dd5aaf8c44e40db9dce3702b45f",
+        "bytes": 5983
+      },
+      {
+        "path": "/vite/assets/DashboardIcon-CVlsz_5o.js",
+        "sha256": "8e52d1dcc68cf5330100f9180672519d54552f65e47af5930cd4f370ffaabbef",
+        "bytes": 14411940
+      },
+      {
+        "path": "/vite/assets/v3app-soq5Yow5.css",
+        "sha256": "276f4f63e3e51fed281b4e5b0f7a359dcf3777e8f709c00c8ff2b597db7df102",
+        "bytes": 2001206
+      },
+      {
+        "path": "/vite/assets/useBranding-DSFJg_40.css",
+        "sha256": "8a428133338294b7fe41c8f691a0ded3e66e1fe62f834902ab9b9d68257e7078",
+        "bytes": 1422
+      },
+      {
+        "path": "/vite/assets/Dialog-CrBJzbZP.css",
+        "sha256": "6b6478bbf74e7263535b5aa740fcfff747f28787925d3c47c4a7ba9e057090c3",
+        "bytes": 1238
+      }
+    ],
+    "browser_stats": {
+      "startTime": "2026-11-14T18:46:58.868Z",
+      "duration": 119305.709,
+      "expected": 9,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "browser": {
+    "config": {
+      "configFile": "/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.github/runtime_build/approval_browser.config.cjs",
+      "rootDir": "/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.github/runtime_build",
+      "forbidOnly": true,
+      "fullyParallel": false,
+      "globalSetup": null,
+      "globalTeardown": null,
+      "globalTimeout": 0,
+      "grep": {},
+      "grepInvert": null,
+      "maxFailures": 1,
+      "metadata": {
+        "ci": {
+          "commitHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/commit/e694fc8c50f518dcd82262cffaa2fc0364a14e20",
+          "commitHash": "e694fc8c50f518dcd82262cffaa2fc0364a14e20",
+          "buildHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/43627975600"
+        },
+        "gitCommit": {
+          "shortHash": "e694fc8",
+          "hash": "e694fc8c50f518dcd82262cffaa2fc0364a14e20",
+          "subject": "ci(approvals): bind contrast candidate to fresh native reports and effective theme assertions",
+          "body": "ci(approvals): bind contrast candidate to fresh native reports and effective theme assertions",
+          "author": {
+            "name": "ClaudioHideki",
+            "email": "claudio.hideki@jrcgrupo.com.br",
+            "time": 1794681668000
+          },
+          "committer": {
+            "name": "ClaudioHideki",
+            "email": "claudio.hideki@jrcgrupo.com.br",
+            "time": 1794681668000
+          },
+          "branch": "ci/central-aprovacoes-consolidada-native-20261114"
+        },
+        "actualWorkers": 1
+      },
+      "preserveOutput": "always",
+      "projects": [
+        {
+          "outputDir": "/home/runner/work/_temp/approvals-native-visual-43627975600/browser/browser-results",
+          "repeatEach": 1,
+          "retries": 0,
+          "metadata": {
+            "ci": {
+              "commitHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/commit/e694fc8c50f518dcd82262cffaa2fc0364a14e20",
+              "commitHash": "e694fc8c50f518dcd82262cffaa2fc0364a14e20",
+              "buildHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/43627975600"
+            },
+            "gitCommit": {
+              "shortHash": "e694fc8",
+              "hash": "e694fc8c50f518dcd82262cffaa2fc0364a14e20",
+              "subject": "ci(approvals): bind contrast candidate to fresh native reports and effective theme assertions",
+              "body": "ci(approvals): bind contrast candidate to fresh native reports and effective theme assertions",
+              "author": {
+                "name": "ClaudioHideki",
+                "email": "claudio.hideki@jrcgrupo.com.br",
+                "time": 1794681668000
+              },
+              "committer": {
+                "name": "ClaudioHideki",
+                "email": "claudio.hideki@jrcgrupo.com.br",
+                "time": 1794681668000
+              },
+              "branch": "ci/central-aprovacoes-consolidada-native-20261114"
+            },
+            "actualWorkers": 1
+          },
+          "id": "",
+          "name": "",
+          "testDir": "/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.github/runtime_build",
+          "testIgnore": [],
+          "testMatch": [
+            "approval_browser.spec.cjs"
+          ],
+          "timeout": 120000
+        }
+      ],
+      "quiet": false,
+      "reporter": [
+        [
+          "list",
+          null
+        ],
+        [
+          "json",
+          {
+            "outputFile": "/home/runner/work/_temp/approvals-native-visual-43627975600/browser/playwright-results.json"
+          }
+        ]
+      ],
+      "reportSlowTests": {
+        "max": 5,
+        "threshold": 300000
+      },
+      "shard": null,
+      "tags": [],
+      "updateSnapshots": "missing",
+      "updateSourceMethod": "patch",
+      "version": "1.59.1",
+      "workers": 1,
+      "webServer": null
+    },
+    "suites": [
+      {
+        "title": "approval_browser.spec.cjs",
+        "file": "approval_browser.spec.cjs",
+        "column": 0,
+        "line": 0,
+        "specs": [
+          {
+            "title": "native approval workspace desktop-light",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "browser",
+                    "description": "157.0.8103.50"
+                  },
+                  {
+                    "type": "product",
+                    "description": "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-inbox.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-detail.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-confirmation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-rule-summary.png\"}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 18673,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-14T18:46:59.364Z",
+                    "annotations": [
+                      {
+                        "type": "browser",
+                        "description": "157.0.8103.50"
+                      },
+                      {
+                        "type": "product",
+                        "description": "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-inbox.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-detail.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-confirmation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-rule-summary.png\"}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-574232a272025f0940c0",
+            "file": "approval_browser.spec.cjs",
+            "line": 54,
+            "column": 3
+          },
+          {
+            "title": "native approval workspace desktop-dark",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "browser",
+                    "description": "157.0.8103.50"
+                  },
+                  {
+                    "type": "product",
+                    "description": "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-inbox.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-detail.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-confirmation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-rule-summary.png\"}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 13699,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-14T18:47:25.475Z",
+                    "annotations": [
+                      {
+                        "type": "browser",
+                        "description": "157.0.8103.50"
+                      },
+                      {
+                        "type": "product",
+                        "description": "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-inbox.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-detail.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-confirmation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-rule-summary.png\"}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-407c96c003ddf108f917",
+            "file": "approval_browser.spec.cjs",
+            "line": 54,
+            "column": 3
+          },
+          {
+            "title": "native approval workspace mobile-light",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "browser",
+                    "description": "157.0.8103.50"
+                  },
+                  {
+                    "type": "product",
+                    "description": "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-inbox.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-detail.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-confirmation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-rule-summary.png\"}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 12552,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-14T18:47:39.186Z",
+                    "annotations": [
+                      {
+                        "type": "browser",
+                        "description": "157.0.8103.50"
+                      },
+                      {
+                        "type": "product",
+                        "description": "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-inbox.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-detail.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-confirmation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-rule-summary.png\"}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-a2f72781af6531791996",
+            "file": "approval_browser.spec.cjs",
+            "line": 54,
+            "column": 3
+          },
+          {
+            "title": "native approval workspace mobile-dark",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "browser",
+                    "description": "157.0.8103.50"
+                  },
+                  {
+                    "type": "product",
+                    "description": "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-inbox.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-detail.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-confirmation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-rule-summary.png\"}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 11453,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-14T18:47:51.750Z",
+                    "annotations": [
+                      {
+                        "type": "browser",
+                        "description": "157.0.8103.50"
+                      },
+                      {
+                        "type": "product",
+                        "description": "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-inbox.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-detail.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-confirmation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-rule-summary.png\"}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-915385f7abdb8ae23f15",
+            "file": "approval_browser.spec.cjs",
+            "line": 54,
+            "column": 3
+          },
+          {
+            "title": "native simulation delegation adjustment and audit desktop-light",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-simulation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-delegation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-adjustment.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-history.png\"}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 10379,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-14T18:48:03.213Z",
+                    "annotations": [
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-simulation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-delegation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-adjustment.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":1440,\"screenshot\":\"desktop-light-history.png\"}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-b0d4f35e765d22e4740e",
+            "file": "approval_browser.spec.cjs",
+            "line": 170,
+            "column": 3
+          },
+          {
+            "title": "native simulation delegation adjustment and audit desktop-dark",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-simulation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-delegation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-adjustment.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-history.png\"}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 10530,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-14T18:48:13.607Z",
+                    "annotations": [
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-simulation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-delegation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-adjustment.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":1440,\"screenshot\":\"desktop-dark-history.png\"}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-f8323d5647af2827e392",
+            "file": "approval_browser.spec.cjs",
+            "line": 170,
+            "column": 3
+          },
+          {
+            "title": "native simulation delegation adjustment and audit mobile-light",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-simulation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-delegation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-adjustment.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-history.png\"}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 9882,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-14T18:48:24.155Z",
+                    "annotations": [
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-simulation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-delegation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-adjustment.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":false,\"color_scheme\":\"light\",\"stored_preference\":\"light\",\"viewport\":390,\"screenshot\":\"mobile-light-history.png\"}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-9f3bb86c5d1f3b4de321",
+            "file": "approval_browser.spec.cjs",
+            "line": 170,
+            "column": 3
+          },
+          {
+            "title": "native simulation delegation adjustment and audit mobile-dark",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-simulation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-delegation.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-adjustment.png\"}"
+                  },
+                  {
+                    "type": "native-theme",
+                    "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-history.png\"}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 10154,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-14T18:48:34.050Z",
+                    "annotations": [
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-simulation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-delegation.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-adjustment.png\"}"
+                      },
+                      {
+                        "type": "native-theme",
+                        "description": "{\"body_dark\":true,\"color_scheme\":\"dark\",\"stored_preference\":\"dark\",\"viewport\":390,\"screenshot\":\"mobile-dark-history.png\"}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-8d201b873d96f17b503b",
+            "file": "approval_browser.spec.cjs",
+            "line": 170,
+            "column": 3
+          },
+          {
+            "title": "native denial isolation empty state and stale navigation",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 13882,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-14T18:48:44.214Z",
+                    "annotations": [],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-bdf9455bd75c207d76a4",
+            "file": "approval_browser.spec.cjs",
+            "line": 269,
+            "column": 1
+          }
+        ]
+      }
+    ],
+    "errors": [],
+    "stats": {
+      "startTime": "2026-11-14T18:46:58.868Z",
+      "duration": 119305.709,
+      "expected": 9,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "screenshots": [
+    "desktop-dark-adjustment.png",
+    "desktop-dark-confirmation.png",
+    "desktop-dark-delegation.png",
+    "desktop-dark-detail.png",
+    "desktop-dark-history.png",
+    "desktop-dark-inbox.png",
+    "desktop-dark-rule-summary.png",
+    "desktop-dark-simulation.png",
+    "desktop-denied-profile.png",
+    "desktop-empty.png",
+    "desktop-light-adjustment.png",
+    "desktop-light-confirmation.png",
+    "desktop-light-delegation.png",
+    "desktop-light-detail.png",
+    "desktop-light-history.png",
+    "desktop-light-inbox.png",
+    "desktop-light-rule-summary.png",
+    "desktop-light-simulation.png",
+    "desktop-real-conflict.png",
+    "mobile-dark-adjustment.png",
+    "mobile-dark-confirmation.png",
+    "mobile-dark-delegation.png",
+    "mobile-dark-detail.png",
+    "mobile-dark-history.png",
+    "mobile-dark-inbox.png",
+    "mobile-dark-rule-summary.png",
+    "mobile-dark-simulation.png",
+    "mobile-light-adjustment.png",
+    "mobile-light-confirmation.png",
+    "mobile-light-delegation.png",
+    "mobile-light-detail.png",
+    "mobile-light-history.png",
+    "mobile-light-inbox.png",
+    "mobile-light-rule-summary.png",
+    "mobile-light-simulation.png"
+  ]
+}

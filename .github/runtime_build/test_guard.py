@@ -56,7 +56,7 @@ class GuardTest(unittest.TestCase):
         self.assertIsNone(limits.resource_reason(750_000_001,750*1024**2+1))
 
     def test_image_schema_is_brought_to_current_migrations(self):
-        self.assertEqual(guard.schema_command(), ["bundle", "exec", "rails", "db:schema:load", "db:migrate"])
+        self.assertEqual(guard.schema_command(), ["bundle", "exec", "ruby", "/smoke/migrate_without_export.rb"])
 
     def test_local_amd64_build_only(self):
         cmd = guard.build_command("owned-builder", Path("/tmp/output"))

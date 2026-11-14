@@ -14,9 +14,9 @@ import urllib.request
 import urllib.error
 import uuid
 
-PRODUCT = "5640793988fbf63ac46b0db3466722fc650f0d01"
-APPROVED = "48b8a4f891f5cdd0ea3fcf4a3846c8b10c95015d"
-BRANCH = "ci/runtime-build-http-fix-20261113"
+PRODUCT = "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
+APPROVED = "e694fc8c50f518dcd82262cffaa2fc0364a14e20"
+BRANCH = "ci/approvals-word-image-consolidada-20261114"
 REPO = "ClaudioHideki/jrc-conversas-lab2"
 BUILDKIT = "mirror.gcr.io/moby/buildkit:v0.33.1@sha256:98cc6a3fc46220d00f8224ae483f3274fc874e9be8d7dd1e2e2c5481209228b5"
 PG = "pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a"
@@ -153,8 +153,18 @@ def build_command(builder, output):
 
 
 def schema_command():
-    return ["bundle", "exec", "rails", "db:schema:load", "db:migrate"]
+    return ["bundle", "exec", "ruby", "/smoke/migrate_without_export.rb"]
 
+
+REF_TOKEN = os.environ.pop("GH_TOKEN", "")
+BASE_MAIN = "309a3e04f32ae1ca469fc202f6d1be0f9e50a20a"
+def check_preserved_refs():
+    for branch, expected in [("main", BASE_MAIN), ("codex/central-aprovacoes-consolidada-20261114", PRODUCT)]:
+        headers = {"Accept":"application/vnd.github+json", "User-Agent":"jrc-approved-image-controller"}
+        if REF_TOKEN: headers["Authorization"] = "Bearer " + REF_TOKEN
+        request = urllib.request.Request("https://api.github.com/repos/" + REPO + "/git/ref/heads/" + branch, headers=headers)
+        with urllib.request.urlopen(request, timeout=30) as response: value=json.load(response)
+        require(value["object"]["sha"] == expected, "Protected reference advanced: " + branch)
 
 class Attempt:
     def __init__(self):
@@ -167,7 +177,7 @@ class Attempt:
         self.builder_id = None
         self.builder_created = False
         self.builder_stopped = False
-        self.result = {"authorized_image_attempt": 4, "previous_image_run": 43355070847,
+        self.result = {"authorized_image_attempt": 1, "base_approved_image_run": 43389554316,
                        "product_sha": PRODUCT, "approved_gate_sha": APPROVED,
                        "execution_sha": os.environ["GITHUB_SHA"], "run_id": os.environ["GITHUB_RUN_ID"],
                        "build_started": False, "build_passed": False, "smoke_passed": False,
@@ -187,6 +197,7 @@ class Attempt:
         return s
 
     def command(self, args, label, timeout=120, cwd=None):
+        check_preserved_refs()
         self.sample()
         phase = {"name": label, "started_seconds": round(time.monotonic() - self.start, 3)}
         self.result["phases"].append(phase)
@@ -196,8 +207,12 @@ class Attempt:
             with logpath.open("x") as log:
                 process = subprocess.Popen(args, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
                 started = time.monotonic()
+                last_ref_check = started
                 while process.poll() is None:
                     self.sample()
+                    if time.monotonic() - last_ref_check >= 30:
+                        check_preserved_refs()
+                        last_ref_check = time.monotonic()
                     require(time.monotonic() - started < timeout, "Owned phase timeout: " + label)
                     time.sleep(0.5)
                 phase["exit_code"] = process.wait()
@@ -332,6 +347,8 @@ class Attempt:
                  "type=bind,src=" + str(self.output) + ",dst=/evidence"]
         base = ["docker", "create", "--name", self.name + "-schema", "--label", "jrc.runtime.run=" + self.name,
                 "--network", self.name, "--env-file", str(envfile)]
+        for item in mount:
+            base += ["--mount", item]
         self.command(base + [image] + schema_command(), "create-schema-and-migrate")
         self.own(self.name + "-schema")
         self.command(["docker", "start", "-a", self.name + "-schema"], "schema-load-and-migrate", 600)
@@ -352,6 +369,7 @@ class Attempt:
                                            "-q", env["RUNTIME_SMOKE_QUEUE"], "-c", "1"], envfile, mount)
         probe("verify_worker")
         probe("worker_pid_one", "extra.rb")
+        probe("approval_workspace", "approval_browser_seed.rb")
         web = self.name + "-web"
         self.run_container(web, image, ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"],
                            envfile, mount)
@@ -377,7 +395,60 @@ class Attempt:
                                "transport": "owned_internal_ipv4", "origin": origin, "network": self.name,
                                "host_ports_published": False}
         require(self.result["http"]["same_image_id"] and self.inspect(worker)["Image"] == self.result["image_id"], "Rails/Sidekiq image mismatch")
+        self.browser(origin, info)
+        check_preserved_refs()
         self.result["smoke_passed"] = True
+
+    def browser(self, origin, web):
+        from browser_proxy import LoopbackImage
+        require(web["Image"] == self.result["image_id"], "Browser must use the actually tested image")
+        raw = subprocess.check_output(["docker", "exec", self.name + "-web", "cat", "/evidence/browser-synthetic-credentials.private"],
+                                      text=True, timeout=10)
+        credentials = json.loads(raw)
+        require(credentials["product_sha"] == PRODUCT and len(credentials["request_ids"]) == 29, "Wrong native browser fixture")
+        private = self.output.parent / (self.name + "-browser.private")
+        with private.open("x") as stream:
+            stream.write(raw)
+        private.chmod(0o600)
+        output = self.output / "browser"
+        output.mkdir()
+        settings = {"JRC_PLAYWRIGHT_MODULE": str(SOURCE / "tests/playwright/node_modules/@playwright/test"),
+                    "JRC_BROWSER_CREDENTIALS": str(private), "JRC_BROWSER_OUTPUT": str(output),
+                    "JRC_BROWSER_PRODUCT_SHA": PRODUCT,
+                    "JRC_BROWSER_LOCALE_FILE": str(SOURCE / "app/javascript/dashboard/i18n/locale/pt_BR/jrcApprovals.json")}
+        previous = {key: os.environ.get(key) for key in [*settings, "JRC_BROWSER_ORIGIN"]}
+        try:
+            os.environ.update(settings)
+            with LoopbackImage(origin) as local:
+                os.environ["JRC_BROWSER_ORIGIN"] = local
+                self.command(["node", str(SOURCE / "tests/playwright/node_modules/playwright/cli.js"), "test", "--config",
+                              str(ROOT / ".github/runtime_build/approval_browser.config.cjs")], "approval-browser", 900, SOURCE)
+            report = json.loads((output / "playwright-results.json").read_text())
+            stats = report["stats"]
+            require(report["errors"] == [], "Browser errors outside scenarios")
+            require(stats["expected"] == 9 and all(stats[key] == 0 for key in ["unexpected", "skipped", "flaky"]),
+                    "Desktop/mobile light/dark native acceptance incomplete")
+            screenshots = sorted(path.name for path in output.glob("*.png"))
+            require(len(screenshots) == 35, "Expected real inbox, detail, confirmation and rule screenshots missing")
+            self.result["browser"] = {"passed": True, "cases": 9, "stats": stats, "screenshots": screenshots,
+                                      "transport": "owned_loopback_tcp_forwarder", "docker_ports_published": False,
+                                      "actual_database": True, "mocked_application": False, "same_image_id": True,
+                                      "viewports": [1440, 390], "themes": ["light", "dark"]}
+        finally:
+            # Never retain credentials in logs or JSON, even if Playwright includes
+            # an input value in a failure call-log. No trace/storage-state is exported.
+            secret = credentials["password"]
+            paths = [self.output / "approval-browser.log", *output.rglob("*.json"), *output.rglob("*.txt"), *output.rglob("*.md")]
+            for path in paths:
+                if path.is_file():
+                    text = path.read_text(errors="replace")
+                    path.write_text(text.replace(secret, "[SYNTHETIC_CREDENTIAL_REDACTED]"))
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
 
     def finish(self):
         try:
@@ -408,7 +479,7 @@ class Attempt:
         self.result["seconds"] = round(time.monotonic() - self.start, 3)
         (self.output / "result.json").write_text(json.dumps(self.result, indent=2) + "\n")
         files = [{"path": p.name, "bytes": p.stat().st_size, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
-                 for p in self.output.iterdir() if p.is_file() and p.name != "synthetic.env"]
+                 for p in self.output.iterdir() if p.is_file() and p.name != "synthetic.env" and p.suffix != ".private"]
         (self.output / "hashes.json").write_text(json.dumps(files, indent=2) + "\n")
 
 
