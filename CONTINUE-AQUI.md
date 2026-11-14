@@ -1,3 +1,11 @@
+# Reconciliação dos gates da release — 14/11/2026
+
+Os gates auxiliares de `0eca12e8` reproduziram dois defeitos de validação: manifestos derivados desatualizados (três fontes já integradas e nove payloads) e o ensaio de DOWN parcial de duas migrations antigas, cujas tabelas já têm FKs adicionadas posteriormente. Os dois manifestos foram regenerados com o gerador existente, sem mudar sua base, proveniência, conjunto de módulos ou fontes. A admissão de runtime confere seus hashes exatos e recusa adulteração/ausência; 15 testes Python e 52 testes Node de manifestos, ownership, gates e migrations passaram localmente.
+
+O ensaio de Backoffice agora verifica convergência forward idempotente e preservação do ledger/dados no banco CI descartável. Não remove FKs/tabelas nem muda migrations do produto. A prova complementar de upgrade da main populada passa a incluir um pedido e uma solicitação legada (workflow 1), com recibos de identidade, bytes e timestamps antes/depois. Essa parte Ruby/PostgreSQL depende de nova execução nativa no SHA corrigido; não declarar sua aprovação pelos testes estáticos. O run A–G `43596190226`, desta tarefa, foi cancelado como superado para evitar publicar o SHA anterior. A nova candidata precisa de CI e imagem próprias antes da promoção.
+
+---
+
 # Release consolidada autorizada — 14/11/2026
 
 Branch de preparação `codex/consolidacao-producao-20261114`, preservando `205fee78` (funcional `787dff99`) e integrando os cinco commits de aprovações até `56bacc36`. Merge seletivo sem conflitos, sem mudanças em migrations, dependências, histórico, campanhas, voz ou extensão GLPI. A main foi reconferida em `d8a83b82`; não confundir esta preparação com sua atualização ou implantação.

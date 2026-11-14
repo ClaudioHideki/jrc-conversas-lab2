@@ -4,6 +4,7 @@
 ## Em progresso (WIP)
 
 - [ ] **RELEASE-20261114:** Promover a consolidação de histórico/runtime/aprovações após CI e imagem do SHA exato; verificar versão, migrations e saúde no Grupo JRC. Código e testes locais registrados em CONTINUE-AQUI.md; implantação ainda não comprovada.
+- [ ] **GATES-20261114:** Confirmar na CI nativa os manifestos reconciliados e o upgrade populado de Backoffice com workflow legado. Provas locais: 15 testes Python e 52 Node; Ruby/PostgreSQL ainda dependem do runner. Nenhuma migration do produto foi modificada.
 
 Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em andamento permanecem nos planos/checkpoints existentes.
 

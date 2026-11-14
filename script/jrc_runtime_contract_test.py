@@ -44,6 +44,12 @@ REVIEWED_APPROVAL_SOURCES = {
 }
 
 
+REVIEWED_MODULE_MANIFESTS = {
+    "config/jrc_flow_ownership_guards.json": "ba18d05301e9501e2e931c194c7b6a133dfee2843b4c0cb17c809cb5f4cdc2ad",
+    "deploy/jrc/MODULE-COMPOSITION-MANIFEST.json": "d599a9536bd0ecaeff62a210e4bb692892cc162b4d6b2d034f611a0c6a79b2b1",
+}
+
+
 def original(path):
     return subprocess.check_output(["git", "show", BASE + ":" + path], cwd=ROOT).decode()
 
@@ -67,6 +73,12 @@ def verify_reviewed_approval_sources(root):
     for name, expected in REVIEWED_APPROVAL_SOURCES.items():
         actual = hashlib.sha256((root / name).read_text(encoding="utf-8").encode()).hexdigest()
         assert actual == expected, "Unreviewed approval source: " + name
+
+
+def verify_reviewed_module_manifests(root):
+    for name, expected in REVIEWED_MODULE_MANIFESTS.items():
+        actual = hashlib.sha256((root / name).read_text(encoding="utf-8").encode()).hexdigest()
+        assert actual == expected, "Unreviewed module manifest: " + name
 
 
 def verify():
@@ -121,8 +133,10 @@ def verify():
     # The old pagination fixture omitted the backend membership proof. Admit
     # only this reviewed test update; the product authorization is unchanged.
     approval_paths = [name for name in REVIEWED_APPROVAL_SOURCES if name.startswith(("app/", "config/"))]
-    assert changed == sorted([reviewed_path, pagination_fixture, reviewed_schema, *REVIEWED_RETRY_SOURCES, *approval_paths]), changed
+    module_paths = [name for name in REVIEWED_MODULE_MANIFESTS if name.startswith(("app/", "config/"))]
+    assert changed == sorted([reviewed_path, pagination_fixture, reviewed_schema, *REVIEWED_RETRY_SOURCES, *approval_paths, *module_paths]), changed
     verify_reviewed_approval_sources(ROOT)
+    verify_reviewed_module_manifests(ROOT)
     verify_reviewed_retry_sources(ROOT)
     assert hashlib.sha256((ROOT / reviewed_path).read_bytes()).hexdigest() == reviewed_sha
     assert hashlib.sha256((ROOT / regression).read_bytes()).hexdigest() == regression_sha
@@ -147,6 +161,8 @@ def verify():
             "reviewed_approval_commit": "56bacc36cf6bf65f18a5f637eeb5a4bff1f42acb",
             "reviewed_approval_files": [{"path": path, "sha256_canonical_utf8": sha}
                                         for path, sha in REVIEWED_APPROVAL_SOURCES.items()],
+            "reviewed_module_manifests": [{"path": path, "sha256_canonical_utf8": sha}
+                                          for path, sha in REVIEWED_MODULE_MANIFESTS.items()],
             "reviewed_retry_commit": "549102e44a0141d088e88551cb552d1157c17076",
             "reviewed_retry_overlay": "Preserve backend retry denial in the existing tooltip, with null metadata regression",
             "reviewed_retry_files": [{"path": path, "sha256_canonical_utf8": sha}

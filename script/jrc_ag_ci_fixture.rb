@@ -77,16 +77,32 @@ when 'load_main'
     assignment_id = connection.select_value("INSERT INTO jrc_relationship_assignments(account_id, company_id, created_at, updated_at) VALUES (#{Integer(id)}, #{Integer(company_ids.first)}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id")
     action_id = connection.select_value("INSERT INTO jrc_relationship_actions(account_id, assignment_id, kind, reason, source_key, created_at, updated_at) VALUES (#{Integer(id)}, #{Integer(assignment_id)}, 'contact', 'SYNTHETIC migration receipt', 'synthetic-upgrade-receipt', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id")
     taxonomy_id = connection.select_value("INSERT INTO jrc_customer_taxonomies(account_id, kind, name, created_at, updated_at) VALUES (#{Integer(id)}, 'segment', 'SYNTHETIC upgrade segment', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id")
+    order_id = connection.select_value(<<~SQL.squish)
+      INSERT INTO jrc_crm_sales_orders
+        (account_id, owner_id, order_number, status, source_type, order_origin, created_at, updated_at)
+      VALUES (#{Integer(id)}, #{Integer(user_id)}, 'SYNTHETIC-UPGRADE-ORDER', 'approved', 'manual', 'direct_sale',
+              '2026-01-10 10:00:00', '2026-01-11 11:00:00') RETURNING id
+    SQL
+    backoffice_id = connection.select_value(<<~SQL.squish)
+      INSERT INTO jrc_crm_backoffice_requests
+        (account_id, sales_order_id, owner_id, requested_by_id, request_number, title, stage,
+         workflow_version, metadata, created_at, updated_at)
+      VALUES (#{Integer(id)}, #{Integer(order_id)}, #{Integer(user_id)}, #{Integer(user_id)},
+              'SYNTHETIC-UPGRADE-BACKOFFICE', 'SYNTHETIC legacy Backoffice', 'finance', 1,
+              '{"migration_fixture":true}'::jsonb, '2026-01-10 10:00:00', '2026-01-11 11:00:00') RETURNING id
+    SQL
     subjects = company_ids.map { |value| ['companies', value] } +
                [['accounts', second_account], ['users', user_id], ['account_users', member_id],
                 ['contacts', contact_id], ['jrc_relationship_assignments', assignment_id],
-                ['jrc_relationship_actions', action_id], ['jrc_customer_taxonomies', taxonomy_id]]
+                ['jrc_relationship_actions', action_id], ['jrc_customer_taxonomies', taxonomy_id],
+                ['jrc_crm_sales_orders', order_id], ['jrc_crm_backoffice_requests', backoffice_id]]
     receipt[:preserved_rows] = subjects.map do |table, row_id|
       row = connection.select_one("SELECT * FROM #{connection.quote_table_name(table)} WHERE id = #{Integer(row_id)}")
       { table: table, id: row_id, columns: row.keys, digest: Digest::SHA256.hexdigest(JSON.generate(row)) }
     end
     receipt[:economic_groups] = connection.select_all("SELECT account_id, economic_group AS name, MIN(created_at) AS created_at, MAX(updated_at) AS updated_at FROM companies GROUP BY account_id, economic_group ORDER BY account_id, economic_group").to_a
     receipt[:defaults] = { member_id: member_id, contact_id: contact_id, action_id: action_id, taxonomy_id: taxonomy_id }
+    receipt[:legacy_backoffice] = { order_id: order_id, request_id: backoffice_id }
   end
   File.write(marker_path, JSON.generate(receipt))
 when 'validate_constraints'
@@ -186,6 +202,16 @@ when 'verify'
       columns = subject.fetch('columns').map { |name| connection.quote_column_name(name) }.join(', ')
       row = connection.select_one("SELECT #{columns} FROM #{connection.quote_table_name(subject.fetch('table'))} WHERE id = #{Integer(subject.fetch('id'))}")
       raise 'Existing synthetic subject changed during upgrade' unless Digest::SHA256.hexdigest(JSON.generate(row)) == subject.fetch('digest')
+    end
+    if receipt.key?('legacy_backoffice')
+      legacy = receipt.fetch('legacy_backoffice')
+      legacy_intact = connection.select_value(<<~SQL.squish)
+        SELECT workflow_version = 1 AND stage = 'finance' AND metadata = '{"migration_fixture":true}'::jsonb
+        FROM jrc_crm_backoffice_requests
+        WHERE account_id = #{Integer(receipt.fetch('account_id'))} AND id = #{Integer(legacy.fetch('request_id'))}
+          AND sales_order_id = #{Integer(legacy.fetch('order_id'))}
+      SQL
+      raise 'Legacy Backoffice workflow or identity changed during upgrade' unless legacy_intact
     end
     if receipt.key?('economic_groups')
       groups = connection.select_all('SELECT account_id, name, created_at, updated_at FROM jrc_customer_economic_groups ORDER BY account_id, name').to_a

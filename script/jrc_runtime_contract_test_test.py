@@ -93,5 +93,36 @@ class ReviewedApprovalSourceTest(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             runtime_contract.verify_reviewed_approval_sources(self.root)
 
+
+class ReviewedModuleManifestTest(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.root = Path(self.directory.name)
+        source = Path(__file__).resolve().parent.parent
+        for name in runtime_contract.REVIEWED_MODULE_MANIFESTS:
+            destination = self.root / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes((source / name).read_bytes())
+
+    def test_exact_reviewed_manifests_are_accepted(self):
+        runtime_contract.verify_reviewed_module_manifests(self.root)
+
+    def test_each_modified_manifest_is_rejected(self):
+        for name in runtime_contract.REVIEWED_MODULE_MANIFESTS:
+            with self.subTest(path=name):
+                path = self.root / name
+                original = path.read_bytes()
+                path.write_bytes(original + b'\nUNREVIEWED_CHANGE\n')
+                with self.assertRaisesRegex(AssertionError, 'Unreviewed module manifest'):
+                    runtime_contract.verify_reviewed_module_manifests(self.root)
+                path.write_bytes(original)
+
+    def test_missing_manifest_is_rejected(self):
+        name = next(iter(runtime_contract.REVIEWED_MODULE_MANIFESTS))
+        (self.root / name).unlink()
+        with self.assertRaises(FileNotFoundError):
+            runtime_contract.verify_reviewed_module_manifests(self.root)
+
 if __name__ == "__main__":
     unittest.main()

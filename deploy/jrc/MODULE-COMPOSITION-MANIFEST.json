@@ -23,20 +23,20 @@
     {
       "path": ".github/workflows/backoffice-flow.yml",
       "baseSha256": null,
-      "sha256": "c2a46225307176931407272ecf23fc1356ae183a56da305c4cc3add3e907164c",
-      "bytes": 15258
+      "sha256": "962ea2124bcbd20eb7222cd3c7df57516c3ef8e395532b08ed6c7ab1c2ab823c",
+      "bytes": 15330
     },
     {
       "path": ".github/workflows/build-ghcr.yml",
       "baseSha256": "05b856abe74f1897c52e76910a03a77065e8c12418b7cffbc74b15d906ce9fd2",
-      "sha256": "1240064b644ab6a5026c7c23210ff75f768b5eeab4d29c0b14d64b5004a7c912",
-      "bytes": 26008
+      "sha256": "1fd2099e2b097636e5a6345f6dab95a4b06f0e59a1b8b794c998ac3cce94dc0f",
+      "bytes": 27960
     },
     {
       "path": ".github/workflows/nico-broker-candidate.yml",
       "baseSha256": null,
-      "sha256": "092ca723d5041069fa737dc16f9d3c7acbc2ae87aba323d3b03b916ab437ea1a",
-      "bytes": 12463
+      "sha256": "330aab9c270e806763c1c00c6406ba9b6acde3e9906809b6bb69aa0cb60e8b59",
+      "bytes": 12464
     },
     {
       "path": "app/controllers/api/v1/accounts/jrc_domain_commands_controller.rb",
@@ -323,8 +323,8 @@
     {
       "path": "app/jobs/send_reply_job.rb",
       "baseSha256": "439ead02ef0873d96f511a3dd6ff1f1c8e23d02fd1d53654abc26af666982884",
-      "sha256": "c682f2308749f3239fa635d8cb4e8b29f5eee9ceadc9cfe546b979feb6fa1ed9",
-      "bytes": 3956
+      "sha256": "55be7d1f500641fb849b376655f49a2bb33c620c9c1a4c32c74a37e851039a32",
+      "bytes": 4033
     },
     {
       "path": "app/jobs/webhook_job.rb",
@@ -449,8 +449,8 @@
     {
       "path": "app/services/jrc_broker/history_import.rb",
       "baseSha256": null,
-      "sha256": "52313eae8d39e2112097fb55351c2b01524e7a8b7b20198b620e06727760fe95",
-      "bytes": 6050
+      "sha256": "47236698904777cf698f623e8973b06bb880afafe59eeb448bab7cf7543fda66",
+      "bytes": 5750
     },
     {
       "path": "app/services/jrc_broker/webhook_delivery.rb",
@@ -809,7 +809,7 @@
     {
       "path": "config/jrc_flow_ownership_guards.json",
       "baseSha256": null,
-      "sha256": "59458f6c0db6dc191f42354b10e233554897363c4bcdc71fffe2606c05058a9a",
+      "sha256": "ba18d05301e9501e2e931c194c7b6a133dfee2843b4c0cb17c809cb5f4cdc2ad",
       "bytes": 11718
     },
     {
@@ -821,14 +821,14 @@
     {
       "path": "config/routes.rb",
       "baseSha256": "a00b0f9b8f9735ec0673eed1719ac5b5df16f8b19e24bbd20cb7bd2cfee38596",
-      "sha256": "14a3767ac74d15872e09cc0bdf64d7e6539bd7651d6a8e95533a311e11a799a7",
-      "bytes": 76420
+      "sha256": "15bcfbba9f0093b4f8db9384e14e5bcc4dbc79ff3dad72a510f274da72af4c5a",
+      "bytes": 77313
     },
     {
       "path": "config/schedule.yml",
       "baseSha256": "be8bbc19451f6acb9d15919a08b6cc860bc8dbb4bc0630f1a4a58a9ef8ad751d",
-      "sha256": "0e00aa13dcec24d801b9a89277d4b9907ebbed5b71d8afa82dc2e774a4ea0c81",
-      "bytes": 5011
+      "sha256": "94e9d74d4b1317af16ed509afc5389e82df1c371864296064a28f98d36abb0d8",
+      "bytes": 5249
     },
     {
       "path": "db/functions/20261015160000_native_responder_config_fence.sql",
@@ -1031,8 +1031,8 @@
     {
       "path": "script/validate_changed_source.mjs",
       "baseSha256": "b108658ee82d4af68e913f321603d173eb19383a00367ffddf57a503855b6542",
-      "sha256": "4b8431469e04fcf150152a49bad4a1d6b518a82bc403253fd35230c25a64f4b2",
-      "bytes": 2387
+      "sha256": "b846b88dbd52462b952782680ea0717beffb7c14d5552e01d01a36eb1a6f3195",
+      "bytes": 3890
     },
     {
       "path": "script/validate_migration_timestamps.mjs",
@@ -1127,8 +1127,8 @@
     {
       "path": "spec/requests/jrc_history_import_spec.rb",
       "baseSha256": null,
-      "sha256": "d56067d74c8202a12384bdb3d13bd1baec16f44a71cc42d2ea8e7cc1be5a2a50",
-      "bytes": 6478
+      "sha256": "499dad9cfd44cc262e49ffde29a69fb9cd3db16c3c7be8058f9360e8d6a75446",
+      "bytes": 8100
     },
     {
       "path": "spec/services/csat_survey_service_concurrency_spec.rb",
