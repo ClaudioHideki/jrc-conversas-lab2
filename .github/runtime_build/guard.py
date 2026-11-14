@@ -16,7 +16,7 @@ import urllib.error
 import uuid
 
 PRODUCT = "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
-APPROVED = "e694fc8c50f518dcd82262cffaa2fc0364a14e20"
+APPROVED = "42a534a0774edff03d56d47707d77ec4de5cfdfd"
 BRANCH = "ci/approvals-word-image-consolidada-20261114"
 REPO = "ClaudioHideki/jrc-conversas-lab2"
 BUILDKIT = "mirror.gcr.io/moby/buildkit:v0.33.1@sha256:98cc6a3fc46220d00f8224ae483f3274fc874e9be8d7dd1e2e2c5481209228b5"
@@ -192,7 +192,7 @@ class Attempt:
         self.builder_id = None
         self.builder_created = False
         self.builder_stopped = False
-        self.result = {"authorized_image_attempt": 1, "base_approved_image_run": 43389554316,
+        self.result = {"authorized_image_attempt": 2, "previous_image_run": 43629519476, "base_approved_image_run": 43389554316,
                        "product_sha": PRODUCT, "approved_gate_sha": APPROVED,
                        "execution_sha": os.environ["GITHUB_SHA"], "run_id": os.environ["GITHUB_RUN_ID"],
                        "build_started": False, "build_passed": False, "smoke_passed": False,

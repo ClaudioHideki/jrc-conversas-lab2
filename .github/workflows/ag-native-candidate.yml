@@ -21,7 +21,7 @@ env:
   EXPECTED_EXECUTION_SHA: ${{ inputs.expected_execution_sha }}
   EXPECTED_PRODUCT_SHA: ${{ inputs.expected_product_sha }}
   AUTHORIZED_BUILD_SHA: 55da80eb1254aee54ee0f1fb5c42f2be46a98737
-  EXPECTED_APPROVED_SHA: e694fc8c50f518dcd82262cffaa2fc0364a14e20
+  EXPECTED_APPROVED_SHA: 42a534a0774edff03d56d47707d77ec4de5cfdfd
 jobs:
   evidence-gate:
     runs-on: ubuntu-24.04

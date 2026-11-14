@@ -2,55 +2,55 @@
   "report": {
     "passed": true,
     "product_sha": "55da80eb1254aee54ee0f1fb5c42f2be46a98737",
-    "infrastructure_sha": "e694fc8c50f518dcd82262cffaa2fc0364a14e20",
+    "infrastructure_sha": "42a534a0774edff03d56d47707d77ec4de5cfdfd",
     "image_built": false,
     "mocked_application": false,
     "phases": [
       {
         "name": "isolated-database",
         "exit_code": 0,
-        "seconds": 5.006
+        "seconds": 6.007
       },
       {
         "name": "isolated-schema",
         "exit_code": 0,
-        "seconds": 6.507
+        "seconds": 7.008
       },
       {
         "name": "fresh-frontend-assets",
         "exit_code": 0,
-        "seconds": 82.639
+        "seconds": 85.632
       },
       {
         "name": "synthetic-fixture",
         "exit_code": 0,
-        "seconds": 11.514
+        "seconds": 11.513
       },
       {
         "name": "native-chrome",
         "exit_code": 0,
-        "seconds": 120.154
+        "seconds": 107.144
       }
     ],
     "resources": {
       "initial": {
-        "at_monotonic": 192.278632656,
-        "disk_free": 91392466944,
-        "source_disk_free": 91392466944,
-        "output_disk_free": 91392466944,
-        "ram_available": 14949212160,
-        "physical_ram_available": 14949212160,
+        "at_monotonic": 133.232635958,
+        "disk_free": 91387281408,
+        "source_disk_free": 91387281408,
+        "output_disk_free": 91387281408,
+        "ram_available": 14803251200,
+        "physical_ram_available": 14803251200,
         "cgroup_capacities": []
       },
-      "ram_min": 8740769792,
-      "disk_min": 91138424832,
+      "ram_min": 8794308608,
+      "disk_min": 91134603264,
       "final": {
-        "at_monotonic": 425.900698527,
-        "disk_free": 91138424832,
-        "source_disk_free": 91138424832,
-        "output_disk_free": 91138424832,
-        "ram_available": 13162553344,
-        "physical_ram_available": 13162553344,
+        "at_monotonic": 358.489546441,
+        "disk_free": 91134603264,
+        "source_disk_free": 91134603264,
+        "output_disk_free": 91134603264,
+        "ram_available": 12470276096,
+        "physical_ram_available": 12470276096,
         "cgroup_capacities": []
       }
     },
@@ -61,13 +61,13 @@
           "component": "jrc_vite_heap",
           "heapMiB": 6144,
           "initial": {
-            "hostAvailable": 14683082752,
-            "processAvailable": 14683082752,
+            "hostAvailable": 14875668480,
+            "processAvailable": 14875668480,
             "constrainedMemory": 18446744073709552000,
-            "availableMemory": 14683082752,
-            "diskFree": 91263012864
+            "availableMemory": 14875668480,
+            "diskFree": 91257790464
           },
-          "vitePid": 5907
+          "vitePid": 5919
         },
         {
           "component": "jrc_vite_heap",
@@ -75,8 +75,8 @@
           "code": 0,
           "signal": null,
           "reason": null,
-          "minimumMemory": 8729800704,
-          "minimumDisk": 91179311104
+          "minimumMemory": 8796684288,
+          "minimumDisk": 91174166528
         }
       ],
       "heap_mib": 6144,
@@ -195,8 +195,8 @@
       }
     ],
     "browser_stats": {
-      "startTime": "2026-11-14T18:46:58.868Z",
-      "duration": 119305.709,
+      "startTime": "2026-11-14T19:49:21.810Z",
+      "duration": 106357.018,
       "expected": 9,
       "skipped": 0,
       "unexpected": 0,
@@ -217,24 +217,24 @@
       "maxFailures": 1,
       "metadata": {
         "ci": {
-          "commitHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/commit/e694fc8c50f518dcd82262cffaa2fc0364a14e20",
-          "commitHash": "e694fc8c50f518dcd82262cffaa2fc0364a14e20",
-          "buildHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/43627975600"
+          "commitHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/commit/42a534a0774edff03d56d47707d77ec4de5cfdfd",
+          "commitHash": "42a534a0774edff03d56d47707d77ec4de5cfdfd",
+          "buildHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/43633710797"
         },
         "gitCommit": {
-          "shortHash": "e694fc8",
-          "hash": "e694fc8c50f518dcd82262cffaa2fc0364a14e20",
-          "subject": "ci(approvals): bind contrast candidate to fresh native reports and effective theme assertions",
-          "body": "ci(approvals): bind contrast candidate to fresh native reports and effective theme assertions",
+          "shortHash": "42a534a",
+          "hash": "42a534a0774edff03d56d47707d77ec4de5cfdfd",
+          "subject": "test(approvals): retain real per-profile browser sessions within native login budget",
+          "body": "test(approvals): retain real per-profile browser sessions within native login budget",
           "author": {
             "name": "ClaudioHideki",
             "email": "claudio.hideki@jrcgrupo.com.br",
-            "time": 1794681668000
+            "time": 1794685459000
           },
           "committer": {
             "name": "ClaudioHideki",
             "email": "claudio.hideki@jrcgrupo.com.br",
-            "time": 1794681668000
+            "time": 1794685459000
           },
           "branch": "ci/central-aprovacoes-consolidada-native-20261114"
         },
@@ -243,29 +243,29 @@
       "preserveOutput": "always",
       "projects": [
         {
-          "outputDir": "/home/runner/work/_temp/approvals-native-visual-43627975600/browser/browser-results",
+          "outputDir": "/home/runner/work/_temp/approvals-native-visual-43633710797/browser/browser-results",
           "repeatEach": 1,
           "retries": 0,
           "metadata": {
             "ci": {
-              "commitHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/commit/e694fc8c50f518dcd82262cffaa2fc0364a14e20",
-              "commitHash": "e694fc8c50f518dcd82262cffaa2fc0364a14e20",
-              "buildHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/43627975600"
+              "commitHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/commit/42a534a0774edff03d56d47707d77ec4de5cfdfd",
+              "commitHash": "42a534a0774edff03d56d47707d77ec4de5cfdfd",
+              "buildHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/43633710797"
             },
             "gitCommit": {
-              "shortHash": "e694fc8",
-              "hash": "e694fc8c50f518dcd82262cffaa2fc0364a14e20",
-              "subject": "ci(approvals): bind contrast candidate to fresh native reports and effective theme assertions",
-              "body": "ci(approvals): bind contrast candidate to fresh native reports and effective theme assertions",
+              "shortHash": "42a534a",
+              "hash": "42a534a0774edff03d56d47707d77ec4de5cfdfd",
+              "subject": "test(approvals): retain real per-profile browser sessions within native login budget",
+              "body": "test(approvals): retain real per-profile browser sessions within native login budget",
               "author": {
                 "name": "ClaudioHideki",
                 "email": "claudio.hideki@jrcgrupo.com.br",
-                "time": 1794681668000
+                "time": 1794685459000
               },
               "committer": {
                 "name": "ClaudioHideki",
                 "email": "claudio.hideki@jrcgrupo.com.br",
-                "time": 1794681668000
+                "time": 1794685459000
               },
               "branch": "ci/central-aprovacoes-consolidada-native-20261114"
             },
@@ -290,7 +290,7 @@
         [
           "json",
           {
-            "outputFile": "/home/runner/work/_temp/approvals-native-visual-43627975600/browser/playwright-results.json"
+            "outputFile": "/home/runner/work/_temp/approvals-native-visual-43633710797/browser/playwright-results.json"
           }
         ]
       ],
@@ -354,12 +354,12 @@
                     "workerIndex": 0,
                     "parallelIndex": 0,
                     "status": "passed",
-                    "duration": 18673,
+                    "duration": 17786,
                     "errors": [],
                     "stdout": [],
                     "stderr": [],
                     "retry": 0,
-                    "startTime": "2026-11-14T18:46:59.364Z",
+                    "startTime": "2026-11-14T19:49:22.291Z",
                     "annotations": [
                       {
                         "type": "browser",
@@ -394,7 +394,7 @@
             ],
             "id": "dd53ab7f99690f717afc-574232a272025f0940c0",
             "file": "approval_browser.spec.cjs",
-            "line": 54,
+            "line": 87,
             "column": 3
           },
           {
@@ -438,12 +438,12 @@
                     "workerIndex": 0,
                     "parallelIndex": 0,
                     "status": "passed",
-                    "duration": 13699,
+                    "duration": 12059,
                     "errors": [],
                     "stdout": [],
                     "stderr": [],
                     "retry": 0,
-                    "startTime": "2026-11-14T18:47:25.475Z",
+                    "startTime": "2026-11-14T19:49:45.746Z",
                     "annotations": [
                       {
                         "type": "browser",
@@ -478,7 +478,7 @@
             ],
             "id": "dd53ab7f99690f717afc-407c96c003ddf108f917",
             "file": "approval_browser.spec.cjs",
-            "line": 54,
+            "line": 87,
             "column": 3
           },
           {
@@ -522,12 +522,12 @@
                     "workerIndex": 0,
                     "parallelIndex": 0,
                     "status": "passed",
-                    "duration": 12552,
+                    "duration": 9237,
                     "errors": [],
                     "stdout": [],
                     "stderr": [],
                     "retry": 0,
-                    "startTime": "2026-11-14T18:47:39.186Z",
+                    "startTime": "2026-11-14T19:49:57.811Z",
                     "annotations": [
                       {
                         "type": "browser",
@@ -562,7 +562,7 @@
             ],
             "id": "dd53ab7f99690f717afc-a2f72781af6531791996",
             "file": "approval_browser.spec.cjs",
-            "line": 54,
+            "line": 87,
             "column": 3
           },
           {
@@ -606,12 +606,12 @@
                     "workerIndex": 0,
                     "parallelIndex": 0,
                     "status": "passed",
-                    "duration": 11453,
+                    "duration": 9043,
                     "errors": [],
                     "stdout": [],
                     "stderr": [],
                     "retry": 0,
-                    "startTime": "2026-11-14T18:47:51.750Z",
+                    "startTime": "2026-11-14T19:50:07.055Z",
                     "annotations": [
                       {
                         "type": "browser",
@@ -646,7 +646,7 @@
             ],
             "id": "dd53ab7f99690f717afc-915385f7abdb8ae23f15",
             "file": "approval_browser.spec.cjs",
-            "line": 54,
+            "line": 87,
             "column": 3
           },
           {
@@ -682,12 +682,12 @@
                     "workerIndex": 0,
                     "parallelIndex": 0,
                     "status": "passed",
-                    "duration": 10379,
+                    "duration": 11167,
                     "errors": [],
                     "stdout": [],
                     "stderr": [],
                     "retry": 0,
-                    "startTime": "2026-11-14T18:48:03.213Z",
+                    "startTime": "2026-11-14T19:50:16.105Z",
                     "annotations": [
                       {
                         "type": "native-theme",
@@ -714,7 +714,7 @@
             ],
             "id": "dd53ab7f99690f717afc-b0d4f35e765d22e4740e",
             "file": "approval_browser.spec.cjs",
-            "line": 170,
+            "line": 186,
             "column": 3
           },
           {
@@ -750,12 +750,12 @@
                     "workerIndex": 0,
                     "parallelIndex": 0,
                     "status": "passed",
-                    "duration": 10530,
+                    "duration": 9424,
                     "errors": [],
                     "stdout": [],
                     "stderr": [],
                     "retry": 0,
-                    "startTime": "2026-11-14T18:48:13.607Z",
+                    "startTime": "2026-11-14T19:50:27.280Z",
                     "annotations": [
                       {
                         "type": "native-theme",
@@ -782,7 +782,7 @@
             ],
             "id": "dd53ab7f99690f717afc-f8323d5647af2827e392",
             "file": "approval_browser.spec.cjs",
-            "line": 170,
+            "line": 186,
             "column": 3
           },
           {
@@ -818,12 +818,12 @@
                     "workerIndex": 0,
                     "parallelIndex": 0,
                     "status": "passed",
-                    "duration": 9882,
+                    "duration": 9128,
                     "errors": [],
                     "stdout": [],
                     "stderr": [],
                     "retry": 0,
-                    "startTime": "2026-11-14T18:48:24.155Z",
+                    "startTime": "2026-11-14T19:50:36.711Z",
                     "annotations": [
                       {
                         "type": "native-theme",
@@ -850,7 +850,7 @@
             ],
             "id": "dd53ab7f99690f717afc-9f3bb86c5d1f3b4de321",
             "file": "approval_browser.spec.cjs",
-            "line": 170,
+            "line": 186,
             "column": 3
           },
           {
@@ -886,12 +886,12 @@
                     "workerIndex": 0,
                     "parallelIndex": 0,
                     "status": "passed",
-                    "duration": 10154,
+                    "duration": 9205,
                     "errors": [],
                     "stdout": [],
                     "stderr": [],
                     "retry": 0,
-                    "startTime": "2026-11-14T18:48:34.050Z",
+                    "startTime": "2026-11-14T19:50:45.847Z",
                     "annotations": [
                       {
                         "type": "native-theme",
@@ -918,7 +918,7 @@
             ],
             "id": "dd53ab7f99690f717afc-8d201b873d96f17b503b",
             "file": "approval_browser.spec.cjs",
-            "line": 170,
+            "line": 186,
             "column": 3
           },
           {
@@ -928,7 +928,16 @@
             "tests": [
               {
                 "timeout": 120000,
-                "annotations": [],
+                "annotations": [
+                  {
+                    "type": "scope-isolation",
+                    "description": "{\"same_account\":true,\"issuer_company_id\":1,\"sibling_issuer_company_id\":1,\"allowed_unit_id\":1,\"denied_unit_id\":3,\"authenticated_control_status\":200,\"same_company_unit_denial_status\":401,\"other_company_denial_status\":401,\"foreign_account_denial_status\":401}"
+                  },
+                  {
+                    "type": "native-authentication-budget",
+                    "description": "{\"ui_signins\":3,\"api_signins\":1,\"total_signins\":4,\"retained_real_contexts\":2,\"native_logout_and_profile_switch\":true,\"rack_attack_modified\":false,\"forged_client_ip\":false,\"replayed_storage_state\":false}"
+                  }
+                ],
                 "expectedStatus": "passed",
                 "projectId": "",
                 "projectName": "",
@@ -937,13 +946,22 @@
                     "workerIndex": 0,
                     "parallelIndex": 0,
                     "status": "passed",
-                    "duration": 13882,
+                    "duration": 12900,
                     "errors": [],
                     "stdout": [],
                     "stderr": [],
                     "retry": 0,
-                    "startTime": "2026-11-14T18:48:44.214Z",
-                    "annotations": [],
+                    "startTime": "2026-11-14T19:50:55.059Z",
+                    "annotations": [
+                      {
+                        "type": "scope-isolation",
+                        "description": "{\"same_account\":true,\"issuer_company_id\":1,\"sibling_issuer_company_id\":1,\"allowed_unit_id\":1,\"denied_unit_id\":3,\"authenticated_control_status\":200,\"same_company_unit_denial_status\":401,\"other_company_denial_status\":401,\"foreign_account_denial_status\":401}"
+                      },
+                      {
+                        "type": "native-authentication-budget",
+                        "description": "{\"ui_signins\":3,\"api_signins\":1,\"total_signins\":4,\"retained_real_contexts\":2,\"native_logout_and_profile_switch\":true,\"rack_attack_modified\":false,\"forged_client_ip\":false,\"replayed_storage_state\":false}"
+                      }
+                    ],
                     "attachments": []
                   }
                 ],
@@ -952,7 +970,7 @@
             ],
             "id": "dd53ab7f99690f717afc-bdf9455bd75c207d76a4",
             "file": "approval_browser.spec.cjs",
-            "line": 269,
+            "line": 282,
             "column": 1
           }
         ]
@@ -960,8 +978,8 @@
     ],
     "errors": [],
     "stats": {
-      "startTime": "2026-11-14T18:46:58.868Z",
-      "duration": 119305.709,
+      "startTime": "2026-11-14T19:49:21.810Z",
+      "duration": 106357.018,
       "expected": 9,
       "skipped": 0,
       "unexpected": 0,
@@ -997,9 +1015,9 @@
     "mobile-dark-rule-summary.png",
     "mobile-dark-simulation.png",
     "mobile-light-adjustment.png",
-    "mobile-light-confirmation.png",
     "mobile-light-delegation.png",
     "mobile-light-detail.png",
+    "mobile-light-confirmation.png",
     "mobile-light-history.png",
     "mobile-light-inbox.png",
     "mobile-light-rule-summary.png",

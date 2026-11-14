@@ -57,4 +57,52 @@ class VisualAdmissionTest(unittest.TestCase):
         remove(self.fixture['browser']['suites'])
         with self.assertRaises(RuntimeError): self.check()
 
+    def test_same_unit_false_positive_is_denied(self):
+        def change(suites):
+            for suite in suites:
+                for spec in suite.get('specs',[]):
+                    for test in spec['tests']:
+                        for a in test['annotations']:
+                            if a['type']=='scope-isolation':
+                                scope=json.loads(a['description']);scope['denied_unit_id']=scope['allowed_unit_id'];a['description']=json.dumps(scope)
+                change(suite.get('suites',[]))
+        change(self.fixture['browser']['suites'])
+        with self.assertRaises(RuntimeError): self.check()
+
+    def test_different_company_cannot_substitute_unit_proof(self):
+        def change(suites):
+            for suite in suites:
+                for spec in suite.get('specs',[]):
+                    for test in spec['tests']:
+                        for a in test['annotations']:
+                            if a['type']=='scope-isolation':
+                                scope=json.loads(a['description']);scope['sibling_issuer_company_id']=scope['issuer_company_id']+1;a['description']=json.dumps(scope)
+                change(suite.get('suites',[]))
+        change(self.fixture['browser']['suites'])
+        with self.assertRaises(RuntimeError): self.check()
+
+    def test_authentication_throttle_bypass_is_denied(self):
+        def change(suites):
+            for suite in suites:
+                for spec in suite.get('specs',[]):
+                    for test in spec['tests']:
+                        for a in test['annotations']:
+                            if a['type']=='native-authentication-budget':
+                                auth=json.loads(a['description']);auth['rack_attack_modified']=True;a['description']=json.dumps(auth)
+                change(suite.get('suites',[]))
+        change(self.fixture['browser']['suites'])
+        with self.assertRaises(RuntimeError): self.check()
+
+    def test_excess_authentication_is_not_silently_accepted(self):
+        def change(suites):
+            for suite in suites:
+                for spec in suite.get('specs',[]):
+                    for test in spec['tests']:
+                        for a in test['annotations']:
+                            if a['type']=='native-authentication-budget':
+                                auth=json.loads(a['description']);auth['total_signins']=11;a['description']=json.dumps(auth)
+                change(suite.get('suites',[]))
+        change(self.fixture['browser']['suites'])
+        with self.assertRaises(RuntimeError): self.check()
+
 if __name__=='__main__': unittest.main(verbosity=2)

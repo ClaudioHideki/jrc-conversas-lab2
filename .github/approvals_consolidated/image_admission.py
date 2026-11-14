@@ -39,6 +39,23 @@ def visual_valid(report, browser, names):
         require(item['body_dark'] is dark and item['color_scheme']==('dark' if dark else 'light')
                 and item['stored_preference']==('dark' if dark else 'light')
                 and item['viewport']==(390 if item['screenshot'].startswith('mobile-') else 1440), 'Artificial or wrong theme/viewport')
+    scopes=[json.loads(a['description']) for t in tests for a in t['annotations'] if a['type']=='scope-isolation']
+    require(len(scopes)==1, 'Same-company unit proof missing')
+    scope=scopes[0]
+    require(scope['same_account'] is True and type(scope['issuer_company_id']) is int and scope['issuer_company_id']>0
+            and scope['issuer_company_id']==scope['sibling_issuer_company_id']
+            and type(scope['allowed_unit_id']) is int and type(scope['denied_unit_id']) is int
+            and scope['allowed_unit_id']>0 and scope['denied_unit_id']>0 and scope['allowed_unit_id']!=scope['denied_unit_id']
+            and scope['authenticated_control_status']==200 and scope['same_company_unit_denial_status']==401
+            and scope['other_company_denial_status']==401 and scope['foreign_account_denial_status'] in [401,403,404],
+            'Unit denial must be independent of company/account denial')
+    budgets=[json.loads(a['description']) for t in tests for a in t['annotations'] if a['type']=='native-authentication-budget']
+    require(len(budgets)==1, 'Real-session authentication proof missing')
+    auth=budgets[0]
+    require(auth['ui_signins']==3 and auth['api_signins']==1 and auth['total_signins']==4
+            and auth['retained_real_contexts']==2 and auth['native_logout_and_profile_switch'] is True
+            and auth['rack_attack_modified'] is False and auth['forged_client_ip'] is False
+            and auth['replayed_storage_state'] is False, 'Authentication budget or security was bypassed')
     require({p['name'] for p in report['phases']} >= {'isolated-database','isolated-schema','fresh-frontend-assets','synthetic-fixture','native-chrome'}
             and all(p['exit_code']==0 for p in report['phases']), 'Native runtime phase failed')
     require(report['frontend_heap']['passed'] is True and report['frontend_heap']['heap_mib']==6144
