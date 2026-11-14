@@ -1,3 +1,13 @@
+# Release consolidada autorizada — 14/11/2026
+
+Branch de preparação `codex/consolidacao-producao-20261114`, preservando `205fee78` (funcional `787dff99`) e integrando os cinco commits de aprovações até `56bacc36`. Merge seletivo sem conflitos, sem mudanças em migrations, dependências, histórico, campanhas, voz ou extensão GLPI. A main foi reconferida em `d8a83b82`; não confundir esta preparação com sua atualização ou implantação.
+
+A revisão reproduziu indicadores antigos após trocar filtros e receber erro de rede/500/422. Três casos RED passaram após limpar a summary ao iniciar cada carga; suíte de aprovações final:167/167 em15 arquivos. ESLint dos10 arquivos:0 erros e128 avisos já presentes no incremento upstream; não declarar lint global limpo. A admissão de runtime conserva os locks anteriores e admite somente15 arquivos revisados por hash canônico;12 regressões de integridade e35 testes de migrations passaram. Schema336 migrations sem colisões; nenhum banco produtivo foi alterado.
+
+Antes da promoção, exigir Rails/Sidekiq nativos, CI e imagem no SHA consolidado. Ruby não está disponível no host Windows; os testes nativos serão executados no runner isolado. Dokploy/CUA e Computer Use falharam na inicialização com os error3; acesso solicitado. Publicação e deploy foram autorizados pelo usuário, mas precisam de evidências próprias. Captura histórica, números, credenciais e UNKNOWN não são ativados/reprocessados por esta release; backup/dump/restore continuam fora do escopo.
+
+---
+
 # Atualização remota adicional — 13/11/2026
 
 Base publicada `6ca6c6cd6f6a2fcce78a709226f159fcaf9b4ce0` preservada. Nova conferência remota encontrou a main ainda em `d8a83b824b11cc68ddbbce7c79681f368051fb70` e as frentes A–G/runtime/heap já incorporadas. A PR #8, origem `549102e44a0141d088e88551cb552d1157c17076`, continha três commits equivalentes já presentes e dois incrementos faltantes de retry manual Meta Cloud. O merge seletivo muda seis caminhos; upload privado, histórico, schema, dependências e runtime permanecem inalterados. As novas branches CI de 13/11 são wrappers fixados em um produto anterior; não foram usadas para substituir os gates completos da candidata.

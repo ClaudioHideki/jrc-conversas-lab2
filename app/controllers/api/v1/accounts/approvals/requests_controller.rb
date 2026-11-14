@@ -1,9 +1,28 @@
 class Api::V1::Accounts::Approvals::RequestsController < Api::V1::Accounts::Approvals::BaseController
   def index
-    relation = filtered(JrcApprovals::Request.where(account_id: Current.account.id),
-                        %w[state issuer_company_id business_unit_id module_key event_key resource_type resource_id])
-    rows = relation.includes(:policy_version, :decisions, requester: :user).order(:id).filter_map { |record| visible_row(record) }
+    rows = request_relation.includes(:policy_version, :decisions, requester: :user).filter_map { |record| visible_row(record) }
     render json: paginated(rows)
+  end
+
+  def summary
+    response.headers['Cache-Control'] = 'no-store'
+    zone = Time.find_zone!(params[:time_zone].presence || 'UTC')
+    now = Time.current.in_time_zone(zone)
+    period = now.beginning_of_month...now.next_month.beginning_of_month
+    today = now.beginning_of_day...now.tomorrow.beginning_of_day
+    counts = { pending: 0, approved: 0, rejected: 0, due_today: 0 }
+    request_relation(except_state: true).includes(:policy_version, :decisions, requester: :user).each do |record|
+      next unless summary_visible?(record)
+
+      counts[:pending] += 1 if record.state == 'pending'
+      counts[:due_today] += 1 if record.state == 'pending' && record.expires_at && today.cover?(record.expires_at)
+      decision_at = record.decisions.max_by(&:created_at)&.created_at
+      next unless decision_at && period.cover?(decision_at)
+
+      counts[:approved] += 1 if record.state == 'approved'
+      counts[:rejected] += 1 if record.state == 'rejected'
+    end
+    render json: counts.merge(time_zone: zone.name, period_start: period.begin.iso8601, period_end: period.end.iso8601)
   end
 
   def show
@@ -91,6 +110,35 @@ class Api::V1::Accounts::Approvals::RequestsController < Api::V1::Accounts::Appr
   end
 
   private
+
+  def request_relation(except_state: false)
+    fields = %w[state issuer_company_id business_unit_id module_key event_key resource_type resource_id]
+    fields -= ['state'] if except_state
+    relation = filtered(JrcApprovals::Request.where(account_id: Current.account.id), fields)
+    if params[:q].present?
+      query = params[:q].to_s.strip
+      raise JrcApprovals::Error, 'INVALID_INPUT' if query.length > 200
+
+      match = "%#{ActiveRecord::Base.sanitize_sql_like(query)}%"
+      relation = relation.joins(:policy_version, requester: :user).where(
+        "jrc_approvals_policy_versions.publication ->> 'name' ILIKE :match OR users.name ILIKE :match OR " \
+        'jrc_approvals_requests.id::text = :query OR jrc_approvals_requests.resource_id::text = :query', match: match, query: query
+      )
+    end
+    case params[:order].presence
+    when nil then relation.order(:id)
+    when 'recent' then relation.order(created_at: :desc, id: :desc)
+    when 'oldest' then relation.order(created_at: :asc, id: :asc)
+    else raise JrcApprovals::Error, 'INVALID_INPUT'
+    end
+  end
+
+  def summary_visible?(record)
+    JrcApprovals::RequestVisibility.authorize!(account: Current.account, user: Current.user, record: record)
+    true
+  rescue Pundit::NotAuthorizedError
+    false
+  end
 
   def visible_row(record)
     member = JrcApprovals::RequestVisibility.authorize!(account: Current.account, user: Current.user, record: record)

@@ -24,6 +24,25 @@ REVIEWED_RETRY_SOURCES = {
         "ec633e354766baff4881f73dc27ffc3dbe9d37579ccb6ac0fc61e1661e36598f",
 }
 
+# Reviewed approvals increment 56bacc36 plus the stale-summary regression.
+REVIEWED_APPROVAL_SOURCES = {
+    "app/controllers/api/v1/accounts/approvals/requests_controller.rb": "a537a402cc25da031133ec23416a54eb9894e543fa8ac69f5db3a307890e212c",
+    "app/javascript/dashboard/i18n/locale/en/jrcApprovals.json": "36666da071f803394558d74527c7770b4fc5706bb1d4f9329f849db70b844a0d",
+    "app/javascript/dashboard/i18n/locale/pt_BR/jrcApprovals.json": "2d507600fd7b528519c71fb2a914570b5a4a459bde5886a591f823616e144e85",
+    "app/javascript/dashboard/routes/dashboard/approvals/ApprovalInbox.vue": "fc6a13b401537a72dc61ffa6a03963bf47db79f4fd9c9a725496ce22d1a90b58",
+    "app/javascript/dashboard/routes/dashboard/approvals/ApprovalStatus.vue": "92d9639f58f2269665856db75cfb8724b6dd3e84f044499ec2ae47d7764419ce",
+    "app/javascript/dashboard/routes/dashboard/approvals/ApprovalSummary.vue": "c26d419ff78e02bae067cb428f1af8937b2f9d43b01f0e7b880c7e0ba5aeaf14",
+    "app/javascript/dashboard/routes/dashboard/approvals/ApprovalsPage.vue": "3e8ca63b1c44882b95f783b5744d44017d68246b8fbae1949ed2eb1770b05e22",
+    "app/javascript/dashboard/routes/dashboard/approvals/PolicyEditor.vue": "2047349671a7ee490f93a7213bef591a5e0ca52ae5ca48da386d42ae13c354d3",
+    "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue": "18c3f8248e39c54424c37f96a71d0c71ca435c63914482c2af388b942be292c4",
+    "app/javascript/dashboard/routes/dashboard/approvals/SimulatorView.vue": "8f55e195a8f48d0edf5ceb1af1d87278d4487696ecfea7dc247099fb0b383758",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/authorityLifecycle.spec.js": "81151f55ca2a08f3cb953ef4d17fd47ebfac516a95b32a5e8d5b9bbef8f40353",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/simulatorSelection.spec.js": "3f91f2600a6afc4cce3f9083be79fc39db4c85cdb2b7951ddbf4fef28897322d",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/workspace.spec.js": "d40106b78c9a06e1e5412b6661ef4e05d6990ce408ed6cbc3fbb049e5b80f589",
+    "config/routes/jrc_approvals.rb": "184f60925c75386000d2945e1f14e2b8d30c5ebf5177b70b5bc8e2b842eb5326",
+    "spec/requests/api/v1/accounts/jrc_approvals/workspace_spec.rb": "3f81940703dd516fd886fc2634d1d1e7dfc3a6980dba66ecb0bc93893044d1e6"
+}
+
 
 def original(path):
     return subprocess.check_output(["git", "show", BASE + ":" + path], cwd=ROOT).decode()
@@ -42,6 +61,12 @@ def verify_reviewed_retry_sources(root):
     for name, expected in REVIEWED_RETRY_SOURCES.items():
         actual = hashlib.sha256((root / name).read_text(encoding="utf-8").encode()).hexdigest()
         assert actual == expected, "Unreviewed retry source: " + name
+
+
+def verify_reviewed_approval_sources(root):
+    for name, expected in REVIEWED_APPROVAL_SOURCES.items():
+        actual = hashlib.sha256((root / name).read_text(encoding="utf-8").encode()).hexdigest()
+        assert actual == expected, "Unreviewed approval source: " + name
 
 
 def verify():
@@ -95,7 +120,9 @@ def verify():
     schema_sha = "ca110aa5f83259333a4399a3d88d34b17c77a70fcabe6ae542110f0ee813322e"
     # The old pagination fixture omitted the backend membership proof. Admit
     # only this reviewed test update; the product authorization is unchanged.
-    assert changed == sorted([reviewed_path, pagination_fixture, reviewed_schema, *REVIEWED_RETRY_SOURCES]), changed
+    approval_paths = [name for name in REVIEWED_APPROVAL_SOURCES if name.startswith(("app/", "config/"))]
+    assert changed == sorted([reviewed_path, pagination_fixture, reviewed_schema, *REVIEWED_RETRY_SOURCES, *approval_paths]), changed
+    verify_reviewed_approval_sources(ROOT)
     verify_reviewed_retry_sources(ROOT)
     assert hashlib.sha256((ROOT / reviewed_path).read_bytes()).hexdigest() == reviewed_sha
     assert hashlib.sha256((ROOT / regression).read_bytes()).hexdigest() == regression_sha
@@ -117,6 +144,9 @@ def verify():
             "pnpm_lock_unchanged": True, "functional_sources_unchanged": False,
             "all_other_functional_sources_unchanged": True, "migrations_unchanged": True,
             "reviewed_functional_fixes": fixes,
+            "reviewed_approval_commit": "56bacc36cf6bf65f18a5f637eeb5a4bff1f42acb",
+            "reviewed_approval_files": [{"path": path, "sha256_canonical_utf8": sha}
+                                        for path, sha in REVIEWED_APPROVAL_SOURCES.items()],
             "reviewed_retry_commit": "549102e44a0141d088e88551cb552d1157c17076",
             "reviewed_retry_overlay": "Preserve backend retry denial in the existing tooltip, with null metadata regression",
             "reviewed_retry_files": [{"path": path, "sha256_canonical_utf8": sha}

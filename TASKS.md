@@ -3,6 +3,8 @@
 
 ## Em progresso (WIP)
 
+- [ ] **RELEASE-20261114:** Promover a consolidação de histórico/runtime/aprovações após CI e imagem do SHA exato; verificar versão, migrations e saúde no Grupo JRC. Código e testes locais registrados em CONTINUE-AQUI.md; implantação ainda não comprovada.
+
 Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em andamento permanecem nos planos/checkpoints existentes.
 
 ## A fazer (To Do)

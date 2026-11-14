@@ -2,6 +2,7 @@
 import unittest
 from pathlib import Path
 import tempfile
+import jrc_runtime_contract_test as runtime_contract
 from jrc_runtime_contract_test import verify_reviewed_lock, verify_reviewed_retry_sources, REVIEWED_RETRY_SOURCES
 
 OLD = "    scout_apm (5.3.3)\n      parser\n    rails (7.1.5.2)\n\n  scout_apm\n   ruby 3.4.4p34\n"
@@ -60,6 +61,37 @@ class ReviewedRetrySourceTest(unittest.TestCase):
         (self.root / 'app/services/whatsapp/retry_policy.rb').unlink()
         with self.assertRaises(FileNotFoundError):
             verify_reviewed_retry_sources(self.root)
+
+
+class ReviewedApprovalSourceTest(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.root = Path(self.directory.name)
+        source = Path(__file__).resolve().parent.parent
+        for name in runtime_contract.REVIEWED_APPROVAL_SOURCES:
+            destination = self.root / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes((source / name).read_bytes())
+
+    def test_exact_reviewed_approval_files_are_accepted(self):
+        runtime_contract.verify_reviewed_approval_sources(self.root)
+
+    def test_each_modified_approval_file_is_rejected(self):
+        for name in runtime_contract.REVIEWED_APPROVAL_SOURCES:
+            with self.subTest(path=name):
+                path = self.root / name
+                original = path.read_bytes()
+                path.write_bytes(original + b'\nUNREVIEWED_CHANGE\n')
+                with self.assertRaisesRegex(AssertionError, 'Unreviewed approval source'):
+                    runtime_contract.verify_reviewed_approval_sources(self.root)
+                path.write_bytes(original)
+
+    def test_missing_approval_source_is_rejected(self):
+        name = next(iter(runtime_contract.REVIEWED_APPROVAL_SOURCES))
+        (self.root / name).unlink()
+        with self.assertRaises(FileNotFoundError):
+            runtime_contract.verify_reviewed_approval_sources(self.root)
 
 if __name__ == "__main__":
     unittest.main()

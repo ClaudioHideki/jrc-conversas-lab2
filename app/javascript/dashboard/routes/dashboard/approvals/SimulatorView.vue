@@ -60,6 +60,7 @@ const simulate = () => {
           <option
             v-for="row in catalogs"
             :key="row.key"
+            :value="row.key"
           >
             {{
               t(`JRC_APPROVALS.catalogEvents.${row.key.replaceAll('.', '_')}`)

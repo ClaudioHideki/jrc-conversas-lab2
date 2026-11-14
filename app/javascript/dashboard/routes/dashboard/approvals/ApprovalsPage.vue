@@ -11,6 +11,10 @@ import SimulatorView from './SimulatorView.vue';
 import DelegationView from './DelegationView.vue';
 import OwnDelegationView from './OwnDelegationView.vue';
 import ResourcePicker from './ResourcePicker.vue';
+import Icon from 'next/icon/Icon.vue';
+import ApprovalInbox from './ApprovalInbox.vue';
+import ApprovalSummary from './ApprovalSummary.vue';
+import ApprovalStatus from './ApprovalStatus.vue';
 import { minorAmountText } from './tierPresentation';
 import { useApprovals } from './useApprovals';
 import {
@@ -55,10 +59,27 @@ const versions = ref(null);
 const catalogs = ref([]);
 const simulation = ref(null);
 const notice = ref('');
-const inbox = ref('assigned');
+const can = action => capability(state.context, action);
+const inbox = computed(() => {
+  if (
+    [
+      'assigned',
+      'requested',
+      'returned',
+      'escalated',
+      'all',
+      'pending_scope',
+    ].includes(route.query.box)
+  )
+    return route.query.box;
+  return can('decide') ? 'assigned' : 'pending_scope';
+});
+const summary = ref(null);
 const requestKey = ref('');
 const resourceId = ref('');
 const filters = ref({
+  q: '',
+  order: 'recent',
   state: '',
   module_key: '',
   event_key: '',
@@ -73,7 +94,6 @@ const adjustmentIntent = intent();
 const ownDelegationIntent = intent();
 const screen = computed(() => route.params.screen || 'inbox');
 const id = computed(() => route.params.id);
-const can = action => capability(state.context, action);
 const allowed = computed(() => {
   if (!state.context) return false;
   if (['policies', 'simulate', 'delegations'].includes(screen.value))
@@ -105,6 +125,75 @@ const navigate = (target, targetId, query = {}) =>
     params: { accountId: state.accountId, screen: target, id: targetId },
     query,
   });
+
+const workspaceTabs = computed(() =>
+  [
+    {
+      key: 'pending',
+      target: 'inbox',
+      box: can('decide') ? 'assigned' : 'pending_scope',
+      icon: 'i-lucide-inbox',
+      show: ['request_create', 'decide', 'view_audit'].some(can),
+    },
+    {
+      key: 'requested',
+      target: 'inbox',
+      box: 'requested',
+      icon: 'i-lucide-send',
+      show: ['request_create', 'decide', 'view_audit'].some(can),
+    },
+    {
+      key: 'history',
+      target: 'history',
+      icon: 'i-lucide-history',
+      show: can('view_audit'),
+    },
+    {
+      key: 'policies',
+      target: 'policies',
+      icon: 'i-lucide-list-checks',
+      show: can('policy_manage'),
+    },
+    {
+      key: 'delegations',
+      target: 'own-delegations',
+      icon: 'i-lucide-users',
+      show: can('delegate') || can('decide') || can('policy_manage'),
+    },
+  ].filter(tab => tab.show)
+);
+const activeTab = computed(() => {
+  if (screen.value === 'inbox')
+    return inbox.value === 'requested' ? 'requested' : 'pending';
+  if (['own-delegations', 'delegations'].includes(screen.value))
+    return 'delegations';
+  return screen.value === 'simulate' ? 'policies' : screen.value;
+});
+const loadSummary = async () => {
+  const params = {
+    ...filters.value,
+    time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
+  delete params.state;
+  if (state.error) {
+    summary.value = null;
+    return;
+  }
+  const result = await run(api => api.get('requests/summary', params));
+  if (result) {
+    summary.value = result.data;
+  } else if ([401, 403, 404].includes(state.error?.status)) {
+    summary.value = null;
+    state.rows = [];
+    record.value = null;
+  }
+};
+const selectRequest = value =>
+  navigate('inbox', value, {
+    ...route.query,
+    page: state.page.page,
+    box: inbox.value,
+  });
 const load = async () => {
   if (disposed) return;
   const context = captureView();
@@ -114,6 +203,7 @@ const load = async () => {
   templatePolicy.value = null;
   versions.value = null;
   simulation.value = null;
+  summary.value = null;
   state.rows = [];
   state.error = null;
   if (!allowed.value) return;
@@ -122,6 +212,10 @@ const load = async () => {
     page: Number(route.query.page || 1),
     per_page: 25,
   };
+  if (screen.value !== 'inbox') {
+    delete params.q;
+    delete params.order;
+  }
   Object.keys(params).forEach(key => {
     if (params[key] === '') delete params[key];
   });
@@ -144,19 +238,25 @@ const load = async () => {
       templatePolicy.value = result.data;
     } else if (!id.value) await list('policies', params);
   } else if (screen.value === 'inbox') {
-    if (id.value) {
-      const result = await run(api => api.get(`requests/${id.value}`));
-      if (result) record.value = result.data;
-    } else {
-      if (inbox.value === 'assigned') {
-        params.assigned_to_me = true;
-        params.state = 'pending';
-      }
-      if (inbox.value === 'requested') params.requested_by_me = true;
-      if (inbox.value === 'returned') params.state = 'returned';
-      if (inbox.value === 'escalated') params.state = 'escalated';
-      await list('requests', params);
+    if (inbox.value === 'assigned') {
+      params.assigned_to_me = true;
+      params.state = 'pending';
     }
+    if (inbox.value === 'pending_scope') params.state = 'pending';
+    if (inbox.value === 'requested') params.requested_by_me = true;
+    if (inbox.value === 'returned') params.state = 'returned';
+    if (inbox.value === 'escalated') params.state = 'escalated';
+    await list('requests', params);
+    if (!isCurrent(context) || request !== loadGeneration) return;
+    if (state.error) {
+      summary.value = null;
+      return;
+    }
+    if (id.value) {
+      const result = await run(api => api.get('requests/' + id.value));
+      if (result) record.value = result.data;
+    }
+    if (isCurrent(context) && request === loadGeneration) await loadSummary();
   } else if (screen.value === 'history') {
     if (id.value) await list(`requests/${id.value}/audit`, params);
     else await list('requests', params);
@@ -177,6 +277,27 @@ const load = async () => {
     if (result) catalogs.value = result.data;
   }
 };
+const applyInboxFilters = async () => {
+  const query = { box: inbox.value, page: 1 };
+  Object.entries(filters.value).forEach(([key, value]) => {
+    if (value !== '') query[key] = value;
+  });
+  const destination = {
+    name: 'jrc_approvals',
+    params: { accountId: state.accountId, screen: 'inbox' },
+    query,
+  };
+  if (router.resolve(destination).fullPath === route.fullPath) {
+    await load();
+  } else await router.push(destination);
+};
+const clearInboxFilters = () => {
+  Object.keys(filters.value).forEach(key => {
+    filters.value[key] = key === 'order' ? 'recent' : '';
+  });
+  return applyInboxFilters();
+};
+
 const refresh = async () => {
   if (disposed || state.loading) return;
   const context = captureView();
@@ -202,7 +323,10 @@ watch(
       loadedAccess = accessIdentity.value;
       reset(account);
       if (changedAccess) {
+        summary.value = null;
         filters.value = {
+          q: '',
+          order: 'recent',
           state: '',
           module_key: '',
           event_key: '',
@@ -216,6 +340,13 @@ watch(
       }
       await loadContext();
     }
+    if (!isCurrent(context)) return;
+    Object.keys(filters.value).forEach(key => {
+      if (typeof route.query[key] === 'string')
+        filters.value[key] = route.query[key];
+      else if (screen.value === 'inbox')
+        filters.value[key] = key === 'order' ? 'recent' : '';
+    });
     if (isCurrent(context) && state.context) await load();
   },
   { immediate: true, flush: 'sync' }
@@ -439,44 +570,82 @@ const errorText = computed(() => {
 <template>
   <section
     aria-labelledby="approval-center-title"
-    class="h-full overflow-auto bg-n-background p-4 text-n-slate-12 md:p-6"
+    class="h-full min-w-0 overflow-auto bg-n-background p-3 text-n-slate-12 md:p-6"
   >
-    <div class="mx-auto max-w-6xl space-y-5">
-      <header class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p class="text-xs text-n-slate-11">
-            {{ t('JRC_APPROVALS.administration') }}
-          </p>
-          <h1
-            id="approval-center-title"
-            class="text-2xl font-bold"
-          >
-            {{ t('JRC_APPROVALS.title') }}
-          </h1>
+    <div class="mx-auto min-w-0 max-w-[1600px] space-y-5">
+      <header class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex min-w-0 items-center gap-3">
+          <span
+            class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-n-blue-3 text-n-blue-11"
+            ><Icon
+              icon="i-lucide-shield-check"
+              class="size-7"
+          /></span>
+          <div class="min-w-0">
+            <p class="mb-1 text-xs text-n-slate-11">
+              {{ t('JRC_APPROVALS.administration') }} /
+              {{ t('JRC_APPROVALS.title') }}
+            </p>
+            <h1
+              id="approval-center-title"
+              class="break-words text-xl font-bold sm:text-2xl"
+            >
+              {{ t('JRC_APPROVALS.title') }}
+            </h1>
+            <p class="mt-1 text-sm text-n-slate-11">
+              {{ t('JRC_APPROVALS.workspace.subtitle') }}
+            </p>
+          </div>
         </div>
-        <Button
-          :label="t('JRC_APPROVALS.refresh')"
-          variant="faded"
-          :disabled="state.loading"
-          @click="refresh"
-        />
+        <div class="flex flex-wrap gap-2">
+          <Button
+            v-if="can('policy_manage')"
+            :label="t('JRC_APPROVALS.workspace.configure')"
+            icon="i-lucide-settings"
+            variant="faded"
+            :disabled="state.loading"
+            @click="navigate('policies')"
+          />
+          <Button
+            :label="t('JRC_APPROVALS.refresh')"
+            icon="i-lucide-refresh-cw"
+            variant="ghost"
+            :disabled="state.loading"
+            @click="refresh"
+          />
+        </div>
       </header>
       <nav
         :aria-label="t('JRC_APPROVALS.title')"
-        class="flex flex-wrap gap-2"
+        class="flex min-w-0 gap-2 overflow-x-auto rounded-xl border border-n-weak bg-n-solid-2 p-2"
       >
         <button
-          v-for="tab in tabs"
+          v-for="tab in workspaceTabs"
           :key="tab.key"
-          class="rounded-lg border border-n-weak px-3 py-2 text-sm focus-visible:outline-blue-500"
+          type="button"
+          class="inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium focus-visible:outline-blue-500"
           :class="
-            screen === tab.key ? 'bg-n-blue-3 text-n-blue-11' : 'bg-n-solid-2'
+            activeTab === tab.key
+              ? 'border-n-blue-9 bg-n-blue-9 text-white shadow-sm'
+              : 'border-transparent bg-n-solid-2 text-n-slate-12 hover:bg-n-alpha-2'
           "
-          @click="navigate(tab.key)"
+          :aria-current="activeTab === tab.key ? 'page' : undefined"
+          @click="
+            navigate(tab.target, undefined, tab.box ? { box: tab.box } : {})
+          "
         >
-          {{ t(`JRC_APPROVALS.${tab.key}`) }}
+          <Icon
+            :icon="tab.icon"
+            class="size-4"
+          />{{ t('JRC_APPROVALS.workspace.tabs.' + tab.key) }}
         </button>
       </nav>
+      <ApprovalSummary
+        v-if="screen === 'inbox' && allowed"
+        :summary="summary"
+        :loading="state.loading"
+      />
+
       <p
         v-if="state.loading"
         role="status"
@@ -528,6 +697,33 @@ const errorText = computed(() => {
         {{ t('JRC_APPROVALS.denied') }}
       </p>
       <template v-if="allowed">
+        <div
+          v-if="
+            ['policies', 'simulate', 'delegations', 'own-delegations'].includes(
+              screen
+            )
+          "
+          class="flex flex-wrap gap-2 rounded-xl border border-n-weak bg-n-solid-2 p-3"
+        >
+          <Button
+            v-if="can('policy_manage')"
+            :label="t('JRC_APPROVALS.simulate')"
+            variant="faded"
+            @click="navigate('simulate')"
+          />
+          <Button
+            v-if="can('policy_manage')"
+            :label="t('JRC_APPROVALS.workspace.ruleDelegations')"
+            variant="faded"
+            @click="navigate('delegations')"
+          />
+          <Button
+            v-if="can('delegate') || can('decide') || can('policy_manage')"
+            :label="t('JRC_APPROVALS.own-delegations')"
+            variant="faded"
+            @click="navigate('own-delegations')"
+          />
+        </div>
         <Button
           v-if="id"
           :label="t('JRC_APPROVALS.back')"
@@ -592,27 +788,233 @@ const errorText = computed(() => {
             />
           </div>
         </section>
-        <RequestDetail
-          v-if="screen === 'inbox' && record"
-          :key="`${accessIdentity}:${record.id}`"
-          :request="record"
-          :error="state.error ? errorText : ''"
-          :error-state="state.error"
-          :context="state.context"
-          :busy="state.loading"
-          :audit-allowed="
-            capability(
-              state.context,
-              'view_audit',
-              record.issuer_company_id,
-              record.business_unit_id
-            )
-          "
-          @decide="decide"
-          @adjust="adjust"
-          @audit="navigate('history', record.id)"
-          @refresh="refresh"
-        />
+        <section
+          v-if="screen === 'inbox'"
+          class="space-y-4"
+        >
+          <form
+            class="grid min-w-0 gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-3 sm:grid-cols-2 xl:grid-cols-4"
+            @submit.prevent="applyInboxFilters"
+          >
+            <label class="min-w-0 text-xs font-medium text-n-slate-11"
+              >{{ t('JRC_APPROVALS.workspace.search')
+              }}<input
+                v-model="filters.q"
+                type="search"
+                maxlength="200"
+                :placeholder="t('JRC_APPROVALS.workspace.searchPlaceholder')"
+                class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-background px-3 py-2.5 text-sm text-n-slate-12"
+            /></label>
+            <label class="min-w-0 text-xs font-medium text-n-slate-11"
+              >{{ t('JRC_APPROVALS.workspace.module')
+              }}<select
+                v-model="filters.module_key"
+                class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-background px-3 py-2.5 text-sm text-n-slate-12"
+              >
+                <option value="">
+                  {{ t('JRC_APPROVALS.workspace.allModules') }}
+                </option>
+                <option
+                  v-for="key in [
+                    'crm',
+                    'contracts',
+                    'backoffice',
+                    'relationship',
+                    'service_desk',
+                  ]"
+                  :key="key"
+                  :value="key"
+                >
+                  {{ t('JRC_APPROVALS.workspace.modules.' + key) }}
+                </option>
+              </select></label
+            >
+            <label class="min-w-0 text-xs font-medium text-n-slate-11"
+              >{{ t('JRC_APPROVALS.scope')
+              }}<select
+                v-model="filters.issuer_company_id"
+                class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-background px-3 py-2.5 text-sm text-n-slate-12"
+              >
+                <option value="">
+                  {{ t('JRC_APPROVALS.workspace.authorizedScope') }}
+                </option>
+                <option
+                  v-for="scope in state.context.scopes.filter(
+                    row => row.issuer_company_id && !row.business_unit_id
+                  )"
+                  :key="scope.issuer_company_id"
+                  :value="scope.issuer_company_id"
+                >
+                  {{ scope.company_name }}
+                </option>
+              </select></label
+            >
+            <label class="min-w-0 text-xs font-medium text-n-slate-11"
+              >{{ t('JRC_APPROVALS.workspace.order')
+              }}<select
+                v-model="filters.order"
+                class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-background px-3 py-2.5 text-sm text-n-slate-12"
+              >
+                <option value="recent">
+                  {{ t('JRC_APPROVALS.workspace.recent') }}
+                </option>
+                <option value="oldest">
+                  {{ t('JRC_APPROVALS.workspace.oldest') }}
+                </option>
+              </select></label
+            >
+            <div
+              class="flex flex-wrap items-center gap-2 sm:col-span-2 xl:col-span-4"
+            >
+              <Button
+                type="submit"
+                :label="t('JRC_APPROVALS.apply')"
+                :disabled="state.loading"
+              />
+              <Button
+                :label="t('JRC_APPROVALS.workspace.clearFilters')"
+                variant="ghost"
+                :disabled="state.loading"
+                @click="clearInboxFilters"
+              />
+              <label
+                class="flex min-w-0 flex-wrap items-center gap-2 text-xs text-n-slate-11 sm:ml-auto"
+                >{{ t('JRC_APPROVALS.workspace.queue')
+                }}<select
+                  :value="inbox"
+                  class="min-w-0 rounded-lg border border-n-weak bg-n-background p-2 text-n-slate-12"
+                  @change="
+                    navigate('inbox', undefined, {
+                      ...route.query,
+                      page: 1,
+                      box: $event.target.value,
+                    })
+                  "
+                >
+                  <option
+                    v-for="name in [
+                      'assigned',
+                      'requested',
+                      'returned',
+                      'escalated',
+                      'all',
+                      'pending_scope',
+                    ]"
+                    :key="name"
+                    :value="name"
+                  >
+                    {{
+                      name === 'pending_scope'
+                        ? t('JRC_APPROVALS.workspace.authorizedPending')
+                        : t('JRC_APPROVALS.' + name)
+                    }}
+                  </option>
+                </select></label
+              >
+            </div>
+            <details class="min-w-0 sm:col-span-2 xl:col-span-4">
+              <summary
+                class="cursor-pointer text-xs font-medium text-n-slate-11"
+              >
+                {{ t('JRC_APPROVALS.workspace.moreFilters') }}
+              </summary>
+              <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                <label
+                  v-for="field in [
+                    'event_key',
+                    'business_unit_id',
+                    'resource_type',
+                    'resource_id',
+                  ]"
+                  :key="field"
+                  class="text-xs"
+                  >{{ t('JRC_APPROVALS.' + field)
+                  }}<input
+                    v-model="filters[field]"
+                    class="mt-1 w-full rounded-lg border border-n-weak bg-n-background p-2 text-sm"
+                /></label>
+              </div>
+            </details>
+          </form>
+          <ApprovalInbox
+            :rows="state.rows"
+            :request="record"
+            :context="state.context"
+            :loading="state.loading"
+            :show-detail="!!id"
+            @select="selectRequest"
+            @back="navigate('inbox', undefined, { ...route.query, box: inbox })"
+          >
+            <template #detail>
+              <RequestDetail
+                v-if="record"
+                :key="`${accessIdentity}:${record.id}`"
+                :request="record"
+                :error="state.error ? errorText : ''"
+                :error-state="state.error"
+                :context="state.context"
+                :busy="state.loading"
+                :audit-allowed="
+                  capability(
+                    state.context,
+                    'view_audit',
+                    record.issuer_company_id,
+                    record.business_unit_id
+                  )
+                "
+                @decide="decide"
+                @adjust="adjust"
+                @audit="navigate('history', record.id)"
+                @refresh="refresh"
+              />
+            </template>
+          </ApprovalInbox>
+          <details
+            v-if="can('request_create')"
+            class="rounded-xl border border-n-weak bg-n-solid-2 p-4"
+          >
+            <summary class="cursor-pointer text-sm font-semibold">
+              {{ t('JRC_APPROVALS.newRequest') }}
+            </summary>
+            <form
+              v-if="can('request_create')"
+              class="space-y-3 rounded-xl border border-n-weak p-4"
+              @submit.prevent="createRequest"
+            >
+              <h3 class="font-semibold">{{ t('JRC_APPROVALS.newRequest') }}</h3>
+              <label class="block text-sm"
+                >{{ t('JRC_APPROVALS.event')
+                }}<select
+                  v-model="requestKey"
+                  class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
+                >
+                  <option value="">{{ t('JRC_APPROVALS.select') }}</option>
+                  <option
+                    v-for="key in [
+                      'crm.deal_price',
+                      'crm.proposal_send',
+                      'crm.proposal_convert',
+                      'crm.order_price',
+                      'backoffice.release',
+                      'contracts.company_signature',
+                    ]"
+                    :key="key"
+                  >
+                    {{ key }}
+                  </option>
+                </select></label
+              ><ResourcePicker
+                v-model="resourceId"
+                :account-id="state.accountId"
+                :resource-key="requestKey"
+              /><Button
+                type="submit"
+                :disabled="state.loading || !resourceId || !requestKey"
+                :label="t('JRC_APPROVALS.newRequest')"
+              />
+            </form>
+          </details>
+        </section>
         <SimulatorView
           v-if="screen === 'simulate'"
           :context="state.context"
@@ -681,35 +1083,13 @@ const errorText = computed(() => {
             {{ t('JRC_APPROVALS.empty') }}
           </p>
         </section>
-        <template
-          v-if="!id && ['policies', 'inbox', 'history'].includes(screen)"
-        >
+        <template v-if="!id && ['policies', 'history'].includes(screen)">
           <div class="flex flex-wrap gap-2">
             <Button
               v-if="screen === 'policies'"
               :label="t('JRC_APPROVALS.newPolicy')"
               @click="navigate('policies', 'new')"
-            /><template v-if="screen === 'inbox'">
-              <button
-                v-for="name in [
-                  'assigned',
-                  'requested',
-                  'returned',
-                  'escalated',
-                  'all',
-                ]"
-                :key="name"
-                class="rounded-lg border border-n-weak px-3 py-2 text-sm"
-                :class="inbox === name ? 'bg-n-blue-3' : 'bg-n-solid-2'"
-                @click="
-                  inbox = name;
-                  pageTo(1);
-                  load();
-                "
-              >
-                {{ t(`JRC_APPROVALS.${name}`) }}
-              </button>
-            </template>
+            />
           </div>
           <form
             class="grid gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-4 sm:grid-cols-2 lg:grid-cols-4"
@@ -813,9 +1193,9 @@ const errorText = computed(() => {
                   </td>
                   <td class="p-3">{{ row.module_key }}.{{ row.event_key }}</td>
                   <td class="p-3">
-                    <span class="rounded-full bg-n-alpha-2 px-2 py-1">{{
-                      row.state
-                    }}</span>
+                    <span class="rounded-full bg-n-alpha-2 px-2 py-1"
+                      ><ApprovalStatus :state="row.state"
+                    /></span>
                     <p
                       v-if="screen === 'policies'"
                       class="mt-1 text-xs"
@@ -867,46 +1247,9 @@ const errorText = computed(() => {
               </tbody>
             </table>
           </div>
-          <form
-            v-if="screen === 'inbox' && can('request_create')"
-            class="space-y-3 rounded-xl border border-n-weak p-4"
-            @submit.prevent="createRequest"
-          >
-            <h3 class="font-semibold">{{ t('JRC_APPROVALS.newRequest') }}</h3>
-            <label class="block text-sm"
-              >{{ t('JRC_APPROVALS.event')
-              }}<select
-                v-model="requestKey"
-                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
-              >
-                <option value="">{{ t('JRC_APPROVALS.select') }}</option>
-                <option
-                  v-for="key in [
-                    'crm.deal_price',
-                    'crm.proposal_send',
-                    'crm.proposal_convert',
-                    'crm.order_price',
-                    'backoffice.release',
-                    'contracts.company_signature',
-                  ]"
-                  :key="key"
-                >
-                  {{ key }}
-                </option>
-              </select></label
-            ><ResourcePicker
-              v-model="resourceId"
-              :account-id="state.accountId"
-              :resource-key="requestKey"
-            /><Button
-              type="submit"
-              :disabled="state.loading || !resourceId || !requestKey"
-              :label="t('JRC_APPROVALS.newRequest')"
-            />
-          </form>
         </template>
         <footer
-          v-if="!id || screen === 'history'"
+          v-if="!id || ['inbox', 'history'].includes(screen)"
           class="flex flex-wrap items-center gap-3 text-sm"
         >
           <span

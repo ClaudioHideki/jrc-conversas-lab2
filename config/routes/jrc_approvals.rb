@@ -11,7 +11,7 @@ namespace :api, defaults: { format: 'json' } do
           member { post :validate; post :publish; post :retire; get :versions }
         end
         resources :requests, only: %i[index show create] do
-          collection { post :simulate }
+          collection { post :simulate; get :summary }
           member { post :decide; post :adjust; post :review_direction; post :transition; get :audit; get :report }
         end
         resources :delegations, only: %i[index create destroy]
