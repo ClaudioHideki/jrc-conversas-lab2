@@ -127,7 +127,7 @@ onMounted(() => dialog.value.open());
     @confirm="confirm"
     @close="emit('close')"
   >
-    <section class="min-w-0 space-y-4">
+    <section class="min-w-0 space-y-4 text-n-slate-12">
       <p class="break-words font-medium">
         {{ request.policy_name }} · #{{ request.id }}
       </p>
