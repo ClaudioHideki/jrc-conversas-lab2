@@ -3,8 +3,10 @@ raise 'Use the Rails test environment and a disposable database' unless Rails.en
 
 require 'minitest/autorun'
 require 'rack/test'
+require_relative '../jrc_consolidation/exact_document_scan_fixture'
 
 class BackofficeCommercialFlowTest < Minitest::Test
+  include ExactDocumentScanFixture
   def setup
     ActiveRecord::Base.connection.begin_transaction(joinable: false)
     Current.reset
@@ -37,15 +39,15 @@ class BackofficeCommercialFlowTest < Minitest::Test
     @api.response.parsed_body
   end
 
-  def test_native_order_to_document_signature_implementation_provisioning_payment_and_completion
+  def approved_operation(requires_contract:)
     @account.jrc_crm_contract_templates.create!(name: 'Synthetic contract', body: '<p>Contract for the test customer.</p>')
     product = @account.jrc_crm_products.create!(name: 'Installation service', unit_price_cents: 100_000,
-      requires_contract: true, document_rules: [{ 'key' => 'identity', 'label' => 'Customer identity',
+      requires_contract: requires_contract, document_rules: [{ 'key' => 'identity', 'label' => 'Customer identity',
         'source' => 'manual', 'required' => true, 'blocking' => true }])
     order = call_api(:post, 'sales_orders', { sales_order: {
       contact_id: @contact.id, owner_id: @agent.id, status: 'pending', order_origin: 'direct_sale',
       items: [{ product_id: product.id, name: product.name, quantity: 1, unit_cents: 100_000, one_time_cents: 100_000 }],
-      snapshot: { generate_contract: true, send_to_implementation: true, requires_provisioning: true,
+      snapshot: { generate_contract: requires_contract, send_to_implementation: true, requires_provisioning: true,
                   checklist: [{ label: 'Validate activation', done: false }] }
     } }, status: 201)
     order_id = order.fetch('id')
@@ -58,19 +60,34 @@ class BackofficeCommercialFlowTest < Minitest::Test
     call_api(:post, "backoffice_requests/#{approval.id}/decide_order", { decision: 'approved' })
     call_api(:post, "backoffice_requests/#{approval.id}/decide_order", { decision: 'approved' }, status: 422)
     request = @account.jrc_crm_backoffice_requests.find_by!(sales_order_id: order_id, request_kind: 'fulfillment')
-    path = "backoffice_requests/#{request.id}"
     assert_equal 1, @account.jrc_crm_backoffice_requests.where(sales_order_id: order_id, request_kind: 'fulfillment').count
     assert_equal 'analysis', request.stage
     assert_equal 2, request.workflow_version
     assert_nil request.contract
+    [order_id, request]
+  end
+
+  def approve_current_document(request)
+    path = "backoffice_requests/#{request.id}"
     assert_equal 'documentation', call_api(:post, "#{path}/advance")['stage']
     call_api(:post, "#{path}/advance", {}, status: 422)
     call_api(:post, "#{path}/document_status", { document_key: 'identity', status: 'approved' }, status: 422)
     file = Rack::Test::UploadedFile.new(@pdf_path, 'application/pdf')
-    upload = call_api(:post, "#{path}/documents", { files: [file] }, status: 201, multipart: true)
-    attachment_id = upload.fetch('documents').first.fetch('id')
-    assert_equal File.binread(@pdf_path), call_api(:get, "#{path}/documents/#{attachment_id}")
-    call_api(:post, "#{path}/document_status", { document_key: 'identity', attachment_id: attachment_id, status: 'approved' })
+    call_api(:post, "#{path}/document_versions", { document_key: 'identity', file: file,
+      idempotency_key: SecureRandom.uuid }, status: 201, multipart: true)
+    version = request.document_versions.first!
+    scan_synthetic_document!(version)
+    JrcBackoffice::DocumentPreanalysisJob.perform_now(version.id)
+    assert_equal 'review_required', version.reload.analysis&.state
+    call_api(:post, "#{path}/document_versions/#{version.id}/decision",
+      { status: 'approved', reason: 'Synthetic authorized human review of exact fixture bytes' })
+    assert_equal File.binread(@pdf_path), call_api(:get, "#{path}/document_versions/#{version.id}")
+  end
+
+  def test_v2_manual_signature_alone_does_not_release_implementation
+    _order_id, request = approved_operation(requires_contract: true)
+    path = "backoffice_requests/#{request.id}"
+    approve_current_document(request)
     assert_equal 'contract', call_api(:post, "#{path}/advance")['stage']
     contract_path = "contracts/#{request.reload.contract_id}"
     call_api(:post, "#{contract_path}/register_manual_signature", { signed_by_name: 'Synthetic signatory',
@@ -80,6 +97,23 @@ class BackofficeCommercialFlowTest < Minitest::Test
     call_api(:post, "#{contract_path}/register_manual_signature", { signed_by_name: 'Synthetic signatory',
       signed_at: Time.current.iso8601, signed_file: Rack::Test::UploadedFile.new(@pdf_path, 'application/pdf') }, multipart: true)
     assert_equal File.binread(@pdf_path), call_api(:get, "#{contract_path}/signed_document")
+    assert_equal 'contract', call_api(:get, path)['stage']
+    refute JrcBackoffice::SignatureRelease.verified?(request.reload.contract)
+    assert_equal 'signed', request.contract.reload.signature_status
+    assert_equal 'awaiting_signature', request.contract.status
+    refute JrcBackoffice::SignatureRelease.satisfied?(request)
+    call_api(:post, "#{path}/advance", {}, status: 422)
+  end
+
+  def test_native_order_without_contract_to_documents_implementation_provisioning_payment_and_completion
+    order_id, request = approved_operation(requires_contract: false)
+    order = JrcCrm::SalesOrder.find(order_id)
+    refute JrcCrm::OrderContractService.new(order: order).required?
+    refute request.metadata['contract_required']
+    assert_empty order.contracts
+    path = "backoffice_requests/#{request.id}"
+    approve_current_document(request)
+    assert_equal 'implementation', call_api(:post, "#{path}/advance")['stage']
     assert_equal 'implementation', call_api(:get, path)['stage']
     call_api(:post, "#{path}/advance", {}, status: 422)
     call_api(:patch, path, { backoffice_request: { metadata: {
@@ -104,7 +138,8 @@ class BackofficeCommercialFlowTest < Minitest::Test
     detail = call_api(:get, path)
     assert(detail['history'].any? { |event| event['event_type'] == 'backoffice_stage_changed' })
     assert_equal 'approved', detail.dig('metadata', 'document_statuses', 'identity')
-    assert_equal 'signed', detail.dig('contract', 'signature_status')
+    assert_nil detail['contract']
+    assert_empty order.reload.contracts
     call_api(:patch, "sales_orders/#{order_id}", { sales_order: { status: 'shipped' } })
     assert_equal 'completed', call_api(:patch, "sales_orders/#{order_id}", { sales_order: { status: 'completed' } })['status']
   end

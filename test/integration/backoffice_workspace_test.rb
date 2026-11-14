@@ -4,10 +4,11 @@ raise 'Use the Rails test environment and a disposable test database' unless Rai
 
 require 'minitest/autorun'
 require 'active_support/testing/time_helpers'
-require_relative '../jrc_consolidation/candidate_fixture_scanner'
+require_relative '../jrc_consolidation/exact_document_scan_fixture'
 
 class BackofficeWorkspaceIntegrationTest < Minitest::Test
   include ActiveSupport::Testing::TimeHelpers
+  include ExactDocumentScanFixture
   def setup
     ActiveRecord::Base.connection.begin_transaction(joinable: false)
     Current.reset
@@ -417,33 +418,4 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     assert_equal 1, result[:page_limit]
   end
 
-  private
-
-  # Real INSTREAM transport and durable scan receipt, with a synthetic daemon
-  # that accepts only this fixture's exact checksum. This is not antivirus
-  # homologation and never changes the application's quarantine policy.
-  def scan_synthetic_document!(version)
-    previous_socket = ENV['JRC_BO_CLAMAV_SOCKET']
-    path = "#{ENV.fetch('JRC_BO_TEST_SOCKET_DIRECTORY', '/run')}/jrc-workspace-av-#{SecureRandom.hex(8)}.sock"
-    server = UNIXServer.new(path)
-    worker = Thread.new do
-      peer = server.accept
-      begin
-        peer.write(CandidateFixtureScanner.reply(peer, [version.sha256]))
-      ensure
-        peer.close
-      end
-    end
-    ENV['JRC_BO_CLAMAV_SOCKET'] = path
-    scan = JrcBackoffice::DocumentSafety.new(version).scan!
-    Timeout.timeout(10) { worker.value }
-    assert scan.clean?, "Synthetic fixture was not scanned: #{scan.state}"
-    assert_equal version.sha256, scan.observed_sha256
-    assert_equal version.file.blob.id, scan.source_blob_id
-  ensure
-    ENV['JRC_BO_CLAMAV_SOCKET'] = previous_socket
-    worker&.kill if worker&.alive?
-    server&.close
-    File.unlink(path) if path && File.socket?(path)
-  end
 end

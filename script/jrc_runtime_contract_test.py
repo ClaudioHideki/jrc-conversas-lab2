@@ -46,7 +46,7 @@ REVIEWED_APPROVAL_SOURCES = {
 
 REVIEWED_MODULE_MANIFESTS = {
     "config/jrc_flow_ownership_guards.json": "ba18d05301e9501e2e931c194c7b6a133dfee2843b4c0cb17c809cb5f4cdc2ad",
-    "deploy/jrc/MODULE-COMPOSITION-MANIFEST.json": "9aade6afe2e6239360592b1c53c786c38cd17e336eb66db84631dfe8f40906d8",
+    "deploy/jrc/MODULE-COMPOSITION-MANIFEST.json": "58779aabf5487bfb3ca0542ca45dbd7681ba44447dbb5363106faa11779b77f0",
 }
 
 

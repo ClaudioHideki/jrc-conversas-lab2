@@ -23,8 +23,8 @@
     {
       "path": ".github/workflows/backoffice-flow.yml",
       "baseSha256": null,
-      "sha256": "20455eadc51145e9d3f80b1f4198a8f346d9879896bcd448e3359fadd69ac114",
-      "bytes": 15564
+      "sha256": "e0401af48bc158cdfaa8966275e85b5fb99f2d99b0dd4365c0861a5c190905b5",
+      "bytes": 17166
     },
     {
       "path": ".github/workflows/build-ghcr.yml",

@@ -89,6 +89,8 @@ jobs:
         run: bundle exec rails runner test/integration/backoffice_commercial_flow_test.rb
       - name: Regressao de comissoes
         run: bundle exec ruby test/jrc_consolidation/commission_domain_test.rb
+      - name: Contrato do particionamento integral sem perda de exemplos
+        run: python3 script/jrc_backoffice_ci_plan_test.py
       - name: Coletar plano completo dos exemplos nativos sem executar testes
         run: |
           bundle exec rspec spec/services/jrc_crm spec/requests/api/v1/accounts/crm \
@@ -97,12 +99,39 @@ jobs:
             spec/requests/api/v1/accounts/jrc_service_desk --dry-run --seed 20261101 --order defined \
             --format json --out /tmp/backoffice-candidate-plan-rspec.json
       - name: Regressao principal CRM, Central, Service Desk e permissoes
+        shell: bash
         run: |
-          bundle exec rspec spec/services/jrc_crm spec/requests/api/v1/accounts/crm \
-            spec/services/jrc_approvals spec/requests/api/v1/accounts/jrc_approvals \
-            spec/models/jrc_service_desk spec/policies/jrc_service_desk spec/services/jrc_service_desk \
-            spec/requests/api/v1/accounts/jrc_service_desk --tag '~sd_concurrency' --seed 20261101 --order defined \
-            --format progress --format json --out /tmp/backoffice-candidate-core-rspec.json
+          mapfile -t legacy_specs < <(python3 script/jrc_backoffice_ci_plan.py --group legacy)
+          test "${#legacy_specs[@]}" -gt 0
+          bundle exec rspec "${legacy_specs[@]}" --tag '~sd_concurrency' --seed 20261101 --order defined \
+            --format progress --format json --out /tmp/backoffice-candidate-core-legacy-rspec.json
+      - name: Bases descartaveis exigidas pelas fixtures de autoridade e commit
+        shell: bash
+        run: |
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
+          for database in jrc_rel_v2_candidate_test jrc_four_domains_schema_admission_test; do
+            POSTGRES_HOST=jrc-rel-v2-pg-20261101 POSTGRES_DATABASE="$database" bundle exec rails db:create db:schema:load
+            POSTGRES_HOST=jrc-rel-v2-pg-20261101 POSTGRES_DATABASE="$database" bundle exec rails runner script/prepare_lab2_candidate_database.rb
+          done
+      - name: Mesmos exemplos de autoridade nas bases que seus guards exigem
+        shell: bash
+        env:
+          POSTGRES_HOST: jrc-rel-v2-pg-20261101
+          DB_POOL_SIZE: '10'
+        run: |
+          for group in current submission; do
+            database=jrc_rel_v2_candidate_test
+            if [ "$group" = submission ]; then database=jrc_four_domains_schema_admission_test; fi
+            mapfile -t guarded_specs < <(python3 script/jrc_backoffice_ci_plan.py --group "$group")
+            test "${#guarded_specs[@]}" -eq 4
+            POSTGRES_DATABASE="$database" bundle exec rspec "${guarded_specs[@]}" \
+              --seed 20261101 --order defined --format progress --format json --out "/tmp/backoffice-candidate-core-$group-rspec.json"
+          done
+          python3 script/jrc_backoffice_ci_plan.py --merge-core /tmp/backoffice-candidate-core-legacy-rspec.json \
+            /tmp/backoffice-candidate-core-current-rspec.json /tmp/backoffice-candidate-core-submission-rspec.json \
+            --output /tmp/backoffice-candidate-core-rspec.json
       - name: Banco exclusivo para testes que confirmam dados em conexoes independentes
         env:
           POSTGRES_DATABASE: jrc_sd_bc_portal_concurrency_20261025_test
@@ -115,10 +144,9 @@ jobs:
           JRC_SD_CONCURRENCY: '1'
           JRC_SD_INTEGRATED_CONCURRENCY: '1'
         run: |
-          bundle exec rspec spec/services/jrc_crm spec/requests/api/v1/accounts/crm \
-            spec/services/jrc_approvals spec/requests/api/v1/accounts/jrc_approvals \
-            spec/models/jrc_service_desk spec/policies/jrc_service_desk spec/services/jrc_service_desk \
-            spec/requests/api/v1/accounts/jrc_service_desk --tag sd_concurrency --seed 20261101 --order defined \
+          mapfile -t legacy_specs < <(python3 script/jrc_backoffice_ci_plan.py --group legacy)
+          test "${#legacy_specs[@]}" -gt 0
+          bundle exec rspec "${legacy_specs[@]}" --tag sd_concurrency --seed 20261101 --order defined \
             --format progress --format json --out /tmp/backoffice-candidate-concurrency-rspec.json
       - name: Exigir execucao de todo o plano, sem exemplos omitidos ou pendentes
         run: |
