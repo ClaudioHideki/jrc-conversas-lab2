@@ -8,7 +8,7 @@ import zipfile
 import gate
 
 
-LOCK = json.loads(Path(__file__).with_name("release-evidence-lock.json").read_text())
+LOCK = json.loads(Path(__file__).with_name("historical-unit-fixture.json").read_text())
 
 
 class EvidenceGateTest(unittest.TestCase):

@@ -47,6 +47,16 @@ for (const [index, mode] of modes.entries()) {
     await page.goto(base);
     await expect(page.locator('[data-approval-workspace]')).toBeVisible();
     await expect(page.locator('[data-approval-request]')).toHaveCount(25);
+    if (index === 0) {
+      const menuEntry = page.getByRole('button', { name: labels.title, exact: true });
+      await menuEntry.click();
+      await expect(page).toHaveURL(/\/approvals\/policies$/);
+      await page.getByRole('button', { name: labels.workspace.tabs.requested, exact: true }).click();
+      await expect(page.locator('[data-approval-request]')).toHaveCount(0);
+      await page.getByRole('button', { name: labels.workspace.tabs.pending, exact: true }).click();
+      await expect(page.locator('[data-approval-request]')).toHaveCount(25);
+    }
+
     await expect(page.locator('[data-metric="pending"]')).not.toHaveText('—');
     await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
     await expect(page.locator('input[type="search"]')).toBeVisible();

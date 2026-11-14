@@ -45,6 +45,10 @@ jobs:
         with:
           node-version-file: product/.nvmrc
       - name: Validate browser and guard syntax
+        env:
+          GATE_TEST_REPORT: ${{ runner.temp }}/historical-validator-tests.json
+          SCOUT_PROOF_TEST_REPORT: ${{ runner.temp }}/scout-validator-tests.json
+          GUARD_TEST_REPORT: ${{ runner.temp }}/resource-validator-tests.json
         run: |
           python3 -B .github/approvals_consolidated/test_quality_gate.py
           python3 -B .github/release/test_gate.py
@@ -62,6 +66,9 @@ jobs:
           path: |
             ${{ runner.temp }}/consolidated-quality-gate.json
             ${{ runner.temp }}/consolidated-denial-tests.json
+            ${{ runner.temp }}/historical-validator-tests.json
+            ${{ runner.temp }}/scout-validator-tests.json
+            ${{ runner.temp }}/resource-validator-tests.json
           if-no-files-found: error
           retention-days: 7
   native-visual:
