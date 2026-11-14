@@ -23,3 +23,7 @@ Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em a
 ## Como manter
 
 Uma tarefa deve registrar problema, escopo, critério de aceite, evidência/arquivo e limite. Só mover para Concluído com a prova correspondente; não converter publicação de imagem em aceite operacional.
+
+## Central de Aprovações — candidata isolada 2026-11-14
+
+- [ ] **APPROVALS-QA-309:** Preservar produto `309a3e04` e seus 24 commits; conferir 49 jobs/48 artefatos do mesmo SHA; validar nove cenários Chrome antes do build protegido. Sem GHCR, merge, deploy ou bancos reais.
