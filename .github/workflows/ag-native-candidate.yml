@@ -1,4 +1,4 @@
-name: Controlled Approvals GHCR publication and independent pull
+name: Approvals existing digest verification only
 on:
   workflow_dispatch:
     inputs:
@@ -14,7 +14,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: single-approvals-publication-55da80eb
+  group: single-approvals-pull-verification-55da80eb
   cancel-in-progress: false
 env:
   PYTHONDONTWRITEBYTECODE: '1'
@@ -74,103 +74,12 @@ jobs:
           path: |
             ${{ runner.temp }}/image-admission-prepare.json
             ${{ runner.temp }}/guard-tests.json
+            ${{ runner.temp }}/publication-tests.json
             ${{ runner.temp }}/vite-heap-tests.xml
           if-no-files-found: error
           retention-days: 7
-  image-build:
-    permissions:
-      contents: read
-      actions: read
-      packages: write
-    outputs:
-      digest: ${{ steps.publish.outputs.digest }}
-      image_id: ${{ steps.publish.outputs.image_id }}
-    needs: evidence-gate
-    runs-on: ubuntu-24.04
-    timeout-minutes: 100
-    steps:
-      - name: Immutable infrastructure
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Exact product source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: 55da80eb1254aee54ee0f1fb5c42f2be46a98737
-          path: product
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version-file: product/.nvmrc
-      - uses: pnpm/action-setup@v4
-        with:
-          package_json_file: product/package.json
-          run_install: false
-      - name: Preflight physical and cgroup memory, disk and absence of concurrent Vite
-        run: |
-          python3 -B - <<'PYTHON'
-          import importlib.util, json, os, pathlib, sys
-          sys.path.insert(0, '.github/runtime_build')
-          import guard
-          guard.identity(os.environ)
-          limits = guard.limits()
-          sample = guard.effective_sample(limits)
-          assert sample['ram_available'] >= 8 * 1024**3
-          assert sample['disk_free'] >= 3 * 1024**3
-          assert limits.resource_reason(sample['disk_free'], sample['ram_available'], starting=True) is None
-          limits.no_other_vite_build()
-          pathlib.Path(os.environ['RUNNER_TEMP'], 'layout-image-preflight.json').write_text(json.dumps(sample, indent=2))
-          print(json.dumps(sample))
-          PYTHON
-      - name: Native Chrome and pinned Playwright dependencies, without product build
-        shell: bash
-        run: |
-          test "$RUNNER_ENVIRONMENT" = github-hosted
-          command -v google-chrome
-          google-chrome --version
-          pnpm --dir product/tests/playwright install --frozen-lockfile
-          git -C product diff --exit-code
-          git diff --exit-code
-      - name: Recheck fresh admission and preserved native evidence immediately before build
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/approvals_consolidated/image_admission.py build
-      - name: Refuse existing SHA tag and preserve rollback manifest
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/runtime_publish/publish.py --preflight
-      - name: Guarded Linux amd64 image, preserved runtime smokes and real desktop/mobile Chrome
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/runtime_build/guard.py --execute
-      - name: Publish only the exact tested image
-        id: publish
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/runtime_publish/publish.py --publish
-      - name: Preserve sanitized smoke, resource and browser evidence only
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: approvals-layout-image-${{ github.sha }}-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/layout-image-preflight.json
-            ${{ runner.temp }}/image-admission-build.json
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.json
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.log
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.pdf
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.png
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.xlsx
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/ocr.txt
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/browser/**/*.json
-            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/browser/**/*.png
-          if-no-files-found: error
-          retention-days: 7
-
   verify-published:
-    needs: image-build
+    needs: evidence-gate
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     permissions:
@@ -178,8 +87,8 @@ jobs:
       actions: read
       packages: read
     env:
-      EXPECTED_PUBLISHED_DIGEST: ${{ needs.image-build.outputs.digest }}
-      EXPECTED_PUBLISHED_IMAGE_ID: ${{ needs.image-build.outputs.image_id }}
+      EXPECTED_PUBLISHED_DIGEST: sha256:dcaf8688cb1b0d38a3e6dff4b2ce047123202a7d342435b33b9d88bb2404ebf0
+      EXPECTED_PUBLISHED_IMAGE_ID: sha256:67e8c7c70708389e41c8584869afdb4dd8252de1ce3c5f04e94b29a4e31ee8bd
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:

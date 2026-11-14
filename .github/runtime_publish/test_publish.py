@@ -161,6 +161,37 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(len(p.validate_job_snapshot(source, "verify", "b"*40)), 3)
         with self.assertRaises(RuntimeError):p.validate_job_snapshot(source, "verify", "c"*40)
 
+
+    def reference_nodes(self):
+        tree=ast.parse(Path(p.__file__).read_text())
+        cls=next(n for n in tree.body if isinstance(n,ast.ClassDef) and n.name=="PublishedAttempt")
+        method=next(n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name=="execute")
+        binding=next(n for n in method.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="check_preserved_refs" for t in n.targets))
+        call=next(n for n in method.body if isinstance(n,ast.Expr) and isinstance(n.value,ast.Call) and isinstance(n.value.func,ast.Name) and n.value.func.id=="check_preserved_refs")
+        return binding,call
+
+    def test_regression_previous_unbound_reference_call_raises_nameerror(self):
+        _,call=self.reference_nodes()
+        code=compile(ast.Module(body=[call],type_ignores=[]),"previous-unbound-reference-check","exec")
+        with self.assertRaisesRegex(NameError,"check_preserved_refs"):
+            exec(code,{})
+
+    def test_regression_fixed_binding_calls_real_guard_reference_check(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        checker=Mock()
+        binding,call=self.reference_nodes()
+        exec(compile(ast.Module(body=[binding,call],type_ignores=[]),"fixed-reference-check","exec"),{"guard":SimpleNamespace(check_preserved_refs=checker)})
+        checker.assert_called_once_with()
+
+    def test_regression_reference_divergence_is_never_swallowed(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        checker=Mock(side_effect=RuntimeError("Protected reference advanced"))
+        binding,call=self.reference_nodes()
+        with self.assertRaisesRegex(RuntimeError,"Protected reference advanced"):
+            exec(compile(ast.Module(body=[binding,call],type_ignores=[]),"denied-reference-check","exec"),{"guard":SimpleNamespace(check_preserved_refs=checker)})
+
 if __name__ == "__main__":
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PublicationTests)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
@@ -168,4 +199,4 @@ if __name__ == "__main__":
               "skipped": len(result.skipped)}
     if os.environ.get("RUNNER_TEMP"):
         (Path(os.environ["RUNNER_TEMP"])/"publication-tests.json").write_text(json.dumps(report, indent=2)+"\n")
-    raise SystemExit(0 if result.wasSuccessful() and result.testsRun == 23 and not result.skipped else 1)
+    raise SystemExit(0 if result.wasSuccessful() and result.testsRun == 26 and not result.skipped else 1)

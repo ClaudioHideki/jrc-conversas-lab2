@@ -17,7 +17,7 @@ import urllib.request
 AUTH = os.environ.pop("GH_TOKEN", "")
 ROOT = Path(__file__).resolve().parents[2]
 PRODUCT = "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
-BRANCH = "ci/approvals-ghcr-55da80eb-20261114"
+BRANCH = "ci/approvals-ghcr-verify-55da80eb-20261114"
 IMAGE = "ghcr.io/claudiohideki/jrc-conversas-lab2"
 TAG = IMAGE + ":sha-" + PRODUCT
 LOCAL = "jrc-runtime-candidate:sha-" + PRODUCT
@@ -213,10 +213,11 @@ def publish():
 def build_artifact():
     gate = module("publication_gate", ROOT/".github/release/gate.py")
     gh = gate.GitHub("ClaudioHideki/jrc-conversas-lab2", AUTH)
-    rid = os.environ["GITHUB_RUN_ID"]
-    sha = os.environ["EXPECTED_EXECUTION_SHA"]
+    rid = "43639050612"
+    sha = "aed1f8e679e45ab47c0ebdddc32a13ef84302c34"
     run = gh.api("/actions/runs/" + rid)
-    require(run["head_sha"] == sha and run["head_branch"] == BRANCH and run["run_attempt"] == 1, "Wrong publication run")
+    require(run["head_sha"] == sha and run["head_branch"] == "ci/approvals-ghcr-55da80eb-20261114" and run["run_attempt"] == 1
+            and run["status"] == "completed" and run["conclusion"] == "failure", "Wrong publication run")
     jobs = gh.api("/actions/runs/"+rid+"/attempts/1/jobs?per_page=100")
     validate_job_snapshot(jobs, "verify", sha)
     require(all(j["status"] == "completed" and j["conclusion"] == "success" for j in jobs["jobs"] if j["name"] in ["evidence-gate", "image-build"]), "Gate/build not successful")
@@ -224,6 +225,7 @@ def build_artifact():
     matches = [a for a in arts["artifacts"] if a["name"] == "approvals-layout-image-"+sha+"-"+rid and not a["expired"]]
     require(len(matches)==1, "Publication artifact missing/duplicated")
     a=matches[0]
+    require(a["id"]==14132681619 and a["digest"]=="sha256:a278c671cd2977c519817629405e24f2f16037bb65b3c55be3544c28c6c13d41", "Publication artifact identity changed")
     z=gate.archive(gh.download(a["archive_download_url"]),a["digest"][7:])
     values=json.loads(gate.member(z,"hashes.json"))
     for row in values:
@@ -280,8 +282,8 @@ class PublishedAttempt:
                            build_started=False, build_passed=False, published=True,
                            manifest_digest=receipt["digest"], image_id=receipt["image_id"],
                            publication_artifact=artifact, image_tag=IMAGE + "@" + receipt["digest"],
-                           source_publication_run_id=os.environ["GITHUB_RUN_ID"],
-                           source_publication_execution_sha=os.environ["EXPECTED_EXECUTION_SHA"])
+                           source_publication_run_id=43639050612,
+                           source_publication_execution_sha="aed1f8e679e45ab47c0ebdddc32a13ef84302c34")
         return self
 
     def __init__(self, guard, receipt, artifact):
@@ -293,6 +295,7 @@ class PublishedAttempt:
         self.limits.no_other_vite_build()
         self.no_foreign_vite()
         guard, receipt = self.guard, self.receipt
+        check_preserved_refs = guard.check_preserved_refs
         # This runner must not already have the tested image in its Docker store.
         old = subprocess.run(["docker", "image", "inspect", receipt["image_id"]],
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=15)
@@ -393,16 +396,9 @@ class PublishedAttempt:
 def main():
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--preflight", action="store_true")
-    group.add_argument("--publish", action="store_true")
     group.add_argument("--verify", action="store_true")
     args = parser.parse_args()
-    if args.preflight:
-        preflight()
-    elif args.publish:
-        publish()
-    else:
-        verify()
+    verify()
 
 if __name__ == "__main__":
     main()
