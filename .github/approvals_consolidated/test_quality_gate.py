@@ -12,6 +12,7 @@ class ConsolidatedDenials(unittest.TestCase):
             **job, 'head_sha':gate.PRODUCT, 'run_id':self.lock['native_run_id'], 'run_attempt':1,
             'status':'completed','conclusion':'success','runner_id':1,'steps':[{'conclusion':'success'}]
         } for job in self.lock['jobs']]}
+        self.snapshot['jobs'] += [{**j, 'head_sha':gate.PRODUCT,'run_id':self.lock['native_run_id'],'run_attempt':1,'status':'completed','conclusion':'skipped','runner_id':None,'steps':[]} for j in self.lock['expected_skipped_image_jobs']]
 
     def test_exact_positive_snapshot(self):
         gate.jobs_valid(self.lock, self.snapshot)
@@ -61,6 +62,14 @@ class ConsolidatedDenials(unittest.TestCase):
             with self.subTest(key=key):
                 data=copy.deepcopy(self.lock['migration_audit']);data['upgrade'][key]=value
                 with self.assertRaises(RuntimeError): gate.migration_metadata_valid(data)
+
+    def test_unexpected_image_execution_denied(self):
+        self.snapshot['jobs'][-1]['conclusion']='success'
+        with self.assertRaises(RuntimeError): gate.jobs_valid(self.lock,self.snapshot)
+
+    def test_skipped_mandatory_test_denied(self):
+        self.snapshot['jobs'][0]['conclusion']='skipped'
+        with self.assertRaises(RuntimeError): gate.jobs_valid(self.lock,self.snapshot)
 
 if __name__ == '__main__':
     result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(ConsolidatedDenials))

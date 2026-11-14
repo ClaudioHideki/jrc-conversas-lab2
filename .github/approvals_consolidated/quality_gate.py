@@ -8,7 +8,8 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / 'product'
-PRODUCT = '309a3e04f32ae1ca469fc202f6d1be0f9e50a20a'
+PRODUCT = '55da80eb1254aee54ee0f1fb5c42f2be46a98737'
+BASE_MAIN = '309a3e04f32ae1ca469fc202f6d1be0f9e50a20a'
 REPO = 'ClaudioHideki/jrc-conversas-lab2'
 CANDIDATE = 'codex/central-aprovacoes-consolidada-20261114'
 sys.path.insert(0, str(ROOT / '.github/release'))
@@ -23,13 +24,18 @@ def client():
 
 def check_refs():
     gh = client()
-    require(gh.api('/git/ref/heads/main')['object']['sha'] == PRODUCT, 'Main advanced; stop consolidation')
+    require(gh.api('/git/ref/heads/main')['object']['sha'] == BASE_MAIN, 'Main advanced; stop consolidation')
     require(gh.api('/git/ref/heads/' + CANDIDATE)['object']['sha'] == PRODUCT, 'Candidate moved')
 
 def jobs_valid(lock, snapshot):
-    jobs = snapshot['jobs']
-    require(snapshot['total_count'] == len(jobs) == len(lock['jobs']) == 49, 'Incomplete mandatory jobs')
-    require(len({j['id'] for j in jobs}) == len({j['name'] for j in jobs}) == 49, 'Duplicate jobs')
+    all_jobs = snapshot['jobs']
+    require(snapshot['total_count'] == len(all_jobs) == 49, 'Incomplete overall jobs')
+    skipped = [j for j in all_jobs if j['name'] in ['guarded-candidate-build','guarded-consolidated-image']]
+    require({(j['id'],j['name']) for j in skipped} == {(j['id'],j['name']) for j in lock['expected_skipped_image_jobs']}, 'Unexpected image jobs')
+    require(all(j['status']=='completed' and j['conclusion']=='skipped' and j['head_sha']==PRODUCT and j['run_attempt']==1 and j['run_id']==lock['native_run_id'] for j in skipped), 'Image executed before admission')
+    jobs = [j for j in all_jobs if j not in skipped]
+    require(len(jobs) == len(lock['jobs']) == 47, 'Incomplete mandatory jobs')
+    require(len({j['id'] for j in jobs}) == len({j['name'] for j in jobs}) == 47, 'Duplicate jobs')
     require({(j['id'], j['name']) for j in jobs} == {(j['id'], j['name']) for j in lock['jobs']}, 'Changed jobs')
     matrix = {}
     for job in jobs:
@@ -71,7 +77,7 @@ def main():
     require(not subprocess.check_output(['git','status','--porcelain'],cwd=SOURCE,text=True).strip(), 'Dirty product')
     check_refs()
     lock = json.loads((ROOT / '.github/approvals_consolidated/quality-lock.json').read_text())
-    require(lock['product_sha'] == PRODUCT and lock['authorized_main'] == PRODUCT and lock['native_run_id'] == 43602733038, 'Wrong evidence lock')
+    require(lock['product_sha'] == PRODUCT and lock['authorized_main'] == BASE_MAIN and lock['native_run_id'] == 43620872234, 'Wrong evidence lock')
     for path, digest in lock['reviewed_source_hashes'].items():
         require(hashlib.sha256((SOURCE / path).read_bytes()).hexdigest() == digest, 'Reviewed source changed: ' + path)
     gh = client()
@@ -80,9 +86,9 @@ def main():
             and run['run_attempt'] == 1 and run['status'] == 'completed' and run['conclusion'] == 'success', 'Native run not approved')
     jobs_valid(lock, gh.api('/actions/runs/' + str(lock['native_run_id']) + '/attempts/1/jobs?per_page=100'))
     snapshot = gh.api('/actions/runs/' + str(lock['native_run_id']) + '/artifacts?per_page=100')
-    require(snapshot['total_count'] == len(snapshot['artifacts']) == len(lock['artifacts']) == 48, 'Artifacts missing')
+    require(snapshot['total_count'] == len(snapshot['artifacts']) == len(lock['artifacts']) == 46, 'Artifacts missing')
     expected = {v['id']:v for v in lock['artifacts']}
-    require(len(expected) == 48 and {v['id'] for v in snapshot['artifacts']} == set(expected), 'Artifact identity differs')
+    require(len(expected) == 46 and {v['id'] for v in snapshot['artifacts']} == set(expected), 'Artifact identity differs')
     verified_reports = []
     matrix = []
     migrations = None
@@ -117,9 +123,9 @@ def main():
     require(canonical(verified_reports) == canonical(lock['reports']) and migrations is not None, 'Report coverage differs')
     require(next(v['examples'] for v in verified_reports if v['path']=='ag-vue-results.json') == 2505, 'Consolidated frontend missing')
     check_refs()
-    result = {'passed':True,'product_sha':PRODUCT,'infrastructure_sha':infra,'authorized_main':PRODUCT,
+    result = {'passed':True,'product_sha':PRODUCT,'infrastructure_sha':infra,'authorized_main':BASE_MAIN,
               'native_run':lock['native_run_id'],'matrix_identities':36,'matrix_examples':5572,'frontend_examples':2505,
-              'mandatory_jobs':49,'artifacts':48,'reports':len(verified_reports),'required_migrations':38,
+              'mandatory_jobs':47,'artifacts':46,'reports':len(verified_reports),'required_migrations':38,
               'additional_history_migrations_verified':True,'old_candidate_evidence_reused':False,
               'browser_homologated':False,'image_built_by_this_task':False,'published_by_this_task':False}
     Path(os.environ['RUNNER_TEMP'],'consolidated-quality-gate.json').write_text(json.dumps(result,indent=2))

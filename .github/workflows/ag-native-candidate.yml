@@ -24,7 +24,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 309a3e04f32ae1ca469fc202f6d1be0f9e50a20a
+          ref: 55da80eb1254aee54ee0f1fb5c42f2be46a98737
           path: product
           fetch-depth: 0
           persist-credentials: false
@@ -109,7 +109,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 309a3e04f32ae1ca469fc202f6d1be0f9e50a20a
+          ref: 55da80eb1254aee54ee0f1fb5c42f2be46a98737
           path: product
           fetch-depth: 0
           persist-credentials: false

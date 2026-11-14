@@ -15,7 +15,7 @@ import uuid
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / 'product'
-PRODUCT = '309a3e04f32ae1ca469fc202f6d1be0f9e50a20a'
+PRODUCT = '55da80eb1254aee54ee0f1fb5c42f2be46a98737'
 BRANCH = 'ci/central-aprovacoes-consolidada-native-20261114'
 sys.path.insert(0, str(ROOT / '.github/runtime_build'))
 import guard as preserved_guard

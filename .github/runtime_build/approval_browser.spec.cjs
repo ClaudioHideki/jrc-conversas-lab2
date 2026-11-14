@@ -13,9 +13,40 @@ const modes = [
   { name: 'mobile-dark', width: 390, height: 844, dark: true },
 ];
 
+async function assertNativeTheme(page, mode) {
+  await expect.poll(() => page.evaluate(() => document.body.classList.contains('dark'))).toBe(mode.dark);
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toBe(mode.dark ? 'dark' : 'light');
+}
+
 async function captureTheme(page, mode, path) {
-  await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
-  expect(await page.evaluate(() => document.documentElement.classList.contains('dark'))).toBe(mode.dark);
+  await assertNativeTheme(page, mode);
+  if (path.endsWith('-adjustment.png')) {
+    const text = page.getByRole('dialog').locator('section').first();
+    const rgb = await text.evaluate(el => getComputedStyle(el).color);
+    const expected = await text.evaluate(el => {
+      const probe = document.createElement('span'); probe.className='text-n-slate-12';
+      el.appendChild(probe); const color=getComputedStyle(probe).color; probe.remove(); return color;
+    });
+    expect(rgb).toBe(expected);
+    const channels = rgb.match(/[\d.]+/g).slice(0,3).map(Number);
+    expect(channels.every(value => mode.dark ? value > 150 : value < 100)).toBe(true);
+  }
+  if (path.endsWith('-delegation.png') && mode.dark) {
+    for (const field of await page.locator('input[type="datetime-local"], textarea, select:not(:disabled)').all()) {
+      const colors = await field.evaluate(el => {
+        const css=getComputedStyle(el); return { foreground:css.color, background:css.backgroundColor };
+      });
+      const rgb = value => value.match(/[\d.]+/g).slice(0,3).map(Number);
+      expect(rgb(colors.foreground).every(value => value > 150)).toBe(true);
+      expect(rgb(colors.background).every(value => value < 110)).toBe(true);
+    }
+  }
+  const effective = await page.evaluate(() => ({
+    body_dark: document.body.classList.contains('dark'),
+    color_scheme: getComputedStyle(document.documentElement).colorScheme,
+    stored_preference: localStorage.getItem('color_scheme'), viewport: innerWidth,
+  }));
+  test.info().annotations.push({ type: 'native-theme', description: JSON.stringify({ ...effective, screenshot: path.split('/').pop() }) });
   await page.screenshot({ path, fullPage: true });
 }
 
@@ -25,6 +56,7 @@ for (const [index, mode] of modes.entries()) {
     test.info().annotations.push({ type: 'product', description: fixture.product_sha });
     await page.setViewportSize({ width: mode.width, height: mode.height });
     await page.emulateMedia({ colorScheme: mode.dark ? 'dark' : 'light' });
+    await context.addInitScript(dark => { localStorage.setItem('color_scheme', dark ? 'dark' : 'light'); }, mode.dark);
     await context.route('**/*', route => {
       const url = route.request().url();
       if (url.startsWith(origin + '/') || url.startsWith('data:') || url.startsWith('blob:')) return route.continue();
@@ -58,7 +90,7 @@ for (const [index, mode] of modes.entries()) {
     }
 
     await expect(page.locator('[data-metric="pending"]')).not.toHaveText('—');
-    await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
+    await assertNativeTheme(page, mode);
     await expect(page.locator('input[type="search"]')).toBeVisible();
     const colors = await page.locator('[data-metric]').evaluateAll(metrics => metrics.map(metric =>
       getComputedStyle(metric.closest('article')).backgroundColor));
@@ -95,7 +127,7 @@ for (const [index, mode] of modes.entries()) {
     expect((await saved).status()).toBe(200);
     await page.reload();
     await expect(detail).toContainText(labels.workspace.states.approved);
-    await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
+    await assertNativeTheme(page, mode);
     if (mode.width === 390) {
       await page.getByRole('button', { name: labels.workspace.backToQueue, exact: true }).click();
       await expect(page.locator('input[type="search"]')).toBeVisible();
@@ -137,13 +169,15 @@ async function isolatedTransport(context) {
 for (const [index, mode] of modes.entries()) {
   test(`native simulation delegation adjustment and audit ${mode.name}`, async ({ page, context }) => {
     await page.setViewportSize({ width: mode.width, height: mode.height });
+    await page.emulateMedia({ colorScheme: mode.dark ? 'dark' : 'light' });
+    await context.addInitScript(dark => { localStorage.setItem('color_scheme', dark ? 'dark' : 'light'); }, mode.dark);
     await isolatedTransport(context);
     const headers = await actualLogin(page, fixture.users.manager);
     const base = `${origin}/app/accounts/${fixture.account_id}/approvals`;
     const api = `${origin}/api/v1/accounts/${fixture.account_id}/approvals`;
     await page.goto(base + '/simulate');
     await expect(page.getByRole('combobox', { name: labels.event, exact: true })).toBeVisible();
-    await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
+    await assertNativeTheme(page, mode);
     expect((await page.getByRole('combobox', { name: labels.event, exact: true }).locator('option').allTextContents()).some(text => text.includes('JRC_APPROVALS.'))).toBe(false);
     await page.getByRole('combobox', { name: labels.event, exact: true }).selectOption('crm.proposal_send');
 
@@ -189,7 +223,7 @@ for (const [index, mode] of modes.entries()) {
     const grant = await created.json();
     await page.reload();
     await expect(page.locator('article').filter({ hasText: reason })).toHaveCount(1);
-    await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
+    await assertNativeTheme(page, mode);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await captureTheme(page, mode, `${process.env.JRC_BROWSER_OUTPUT}/${mode.name}-delegation.png`);
     const revoke = page.waitForResponse(r => r.url().endsWith(`/own_delegations/${grant.id}`) && r.request().method() === 'DELETE');
@@ -201,7 +235,7 @@ for (const [index, mode] of modes.entries()) {
 
     const id = fixture.request_ids[4 + index];
     await page.goto(base + `/inbox/${id}`);
-    await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode.dark);
+    await assertNativeTheme(page, mode);
     await page.getByRole('button', { name: labels.adjustment.title, exact: true }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();

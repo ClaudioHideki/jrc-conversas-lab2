@@ -27,3 +27,8 @@ Uma tarefa deve registrar problema, escopo, critério de aceite, evidência/arqu
 ## Central de Aprovações — candidata isolada 2026-11-14
 
 - [ ] **APPROVALS-QA-309:** Preservar produto `309a3e04` e seus 24 commits; conferir 49 jobs/48 artefatos do mesmo SHA; validar nove cenários Chrome antes do build protegido. Sem GHCR, merge, deploy ou bancos reais.
+
+
+## Central consolidation contrast QA — 2026-11-14 [WIP]
+
+Main reference remains `309a3e04f32ae1ca469fc202f6d1be0f9e50a20a`. Product `55da80eb1254aee54ee0f1fb5c42f2be46a98737` adds only native semantic text color in AdjustmentDialog and its exact runtime-contract hash. All native gates rerun on this product in run `43620872234`; 36 Rails identities, no image jobs in this test phase. Chrome acceptance uses persisted `color_scheme`, native `body.dark` and effective color-scheme/contrast assertions. Image remains blocked until all nine real cases pass.
