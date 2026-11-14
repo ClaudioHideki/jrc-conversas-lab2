@@ -61,6 +61,7 @@ jobs:
       BUNDLE_FROZEN: 'true'
       LOG_LEVEL: error
       TZ: UTC
+      JRC_BO_TEST_SOCKET_DIRECTORY: /run/jrc-backoffice-workspace-ci
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -80,6 +81,8 @@ jobs:
         run: bundle exec rails runner script/validate_backoffice_candidate.rb
       - name: Redis de concorrencia nativa
         run: redis-server --bind 127.0.0.1 --port 6380 --daemonize yes --save '' --appendonly no
+      - name: Socket privado da verificacao sintetica de documentos
+        run: sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" "$JRC_BO_TEST_SOCKET_DIRECTORY"
       - name: Acesso, filtros, paginacao e SLA
         run: bundle exec rails runner test/integration/backoffice_workspace_test.rb
       - name: Pedido ate conclusao do Backoffice
