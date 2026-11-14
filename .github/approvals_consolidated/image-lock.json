@@ -71,7 +71,7 @@
     }
   ],
   "infrastructure_hashes": {
-    ".github/runtime_build/guard.py": "1bc6d60f1bb62436c42181b099557b6315aa03f1503a1422212748a1f43422f1",
+    ".github/runtime_build/guard.py": "341af060356b2f20ef1b4afff1a1dedefc89f8351b6d336281f586d461d34d3b",
     ".github/runtime_build/test_guard.py": "547523c961a0c2570437e1c428635ac3b734154c04bb50bf3e99608a834e565f",
     ".github/runtime_build/approval_browser_seed.rb": "fd7000e8d16f4bd929e608eee1f519d36774c7eff39937f0ff2e4f3ee2f21012",
     ".github/approvals_consolidated/image_admission.py": "2c17c82565bc34a674af36d05534db150b3ff2f90568120b06099f47c33db979",
@@ -89,11 +89,13 @@
     ".github/approvals_consolidated/quality_gate.py": "ceeba88a55720859c5fb62e138ed7ad27bbe84df6be759b59d9104cd03d05e15",
     ".github/approvals_consolidated/test_quality_gate.py": "fb1746a2d46c1029d9e4a6ce7c80ddb4583db79dcc40ee79fe1137bd737495c5",
     ".github/approvals_consolidated/quality-lock.json": "1078aee1f62567035bd6397ca3ae6590758d6432b21922b319bd5939466fdecc",
-    ".github/workflows/ag-native-candidate.yml": "3a7e27cee48bb7d6b3c446d5dcf1a6bcd680886d74542c8f1ef5db2429679ad5",
+    ".github/workflows/ag-native-candidate.yml": "30f3a2ea19e75aa5ade476f4ca8868213c5d3a0333c7065787eef89c31111c47",
     ".github/runtime_build/test_guard_integrity.py": "aae626735a0cdda3dcb69118bf2de6e633816cb1e63c4eb433f0bb3477ce8041",
     ".github/runtime_build/approved-guard.fixture.txt": "4ef817b48c81de8659bb7e92bdfe909ca67977056abf147673db91761fe1938d",
     ".github/approvals_consolidated/test_image_admission.py": "f966720c7756d41b09c397a77fe0a46a81ee958599a6fa68e7e55cbb56009122",
-    ".github/approvals_consolidated/visual-test-fixture.json": "12165263acd600c38242e3e9ca051814f36f1b8f85214cf4d9b2427e1b0b48ee"
+    ".github/approvals_consolidated/visual-test-fixture.json": "12165263acd600c38242e3e9ca051814f36f1b8f85214cf4d9b2427e1b0b48ee",
+    ".github/runtime_publish/publish.py": "f4f8f5101cbbc88b18922290143979ab0ecacc749525bf19e6d27fbd9fa64368",
+    ".github/runtime_publish/test_publish.py": "ba7b622402fade15131b0d3e801a37064b08dd8c58da57bac8e40e92ca7c055d"
   },
   "baseline_guard_sha256": "4ef817b48c81de8659bb7e92bdfe909ca67977056abf147673db91761fe1938d",
   "resource_helper_sha256": "8077fab63e75152e6a56ec3a03811214491656ebac253df08cc2fd211d801cc0",

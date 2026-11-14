@@ -1,4 +1,4 @@
-name: Approval Word layout guarded image and real Chrome acceptance
+name: Controlled Approvals GHCR publication and independent pull
 on:
   workflow_dispatch:
     inputs:
@@ -14,7 +14,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: single-approvals-word-image-55da80eb
+  group: single-approvals-publication-55da80eb
   cancel-in-progress: false
 env:
   PYTHONDONTWRITEBYTECODE: '1'
@@ -63,6 +63,7 @@ jobs:
           python3 -B .github/runtime_build/test_browser_proxy.py
           python3 -B .github/runtime_build/test_guard_integrity.py
           python3 -B .github/approvals_consolidated/test_image_admission.py
+          python3 -B .github/runtime_publish/test_publish.py
           node --check .github/runtime_build/approval_browser.spec.cjs
           node --check .github/runtime_build/approval_browser.config.cjs
           node --test --test-reporter=junit product/script/jrc_vite_build.test.mjs > "$RUNNER_TEMP/vite-heap-tests.xml"
@@ -77,6 +78,13 @@ jobs:
           if-no-files-found: error
           retention-days: 7
   image-build:
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    outputs:
+      digest: ${{ steps.publish.outputs.digest }}
+      image_id: ${{ steps.publish.outputs.image_id }}
     needs: evidence-gate
     runs-on: ubuntu-24.04
     timeout-minutes: 100
@@ -129,10 +137,19 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 -B .github/approvals_consolidated/image_admission.py build
+      - name: Refuse existing SHA tag and preserve rollback manifest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/runtime_publish/publish.py --preflight
       - name: Guarded Linux amd64 image, preserved runtime smokes and real desktop/mobile Chrome
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 -B .github/runtime_build/guard.py --execute
+      - name: Publish only the exact tested image
+        id: publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/runtime_publish/publish.py --publish
       - name: Preserve sanitized smoke, resource and browser evidence only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -146,6 +163,56 @@ jobs:
             ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.pdf
             ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.png
             ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.xlsx
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/ocr.txt
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/browser/**/*.json
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/browser/**/*.png
+          if-no-files-found: error
+          retention-days: 7
+
+  verify-published:
+    needs: image-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      actions: read
+      packages: read
+    env:
+      EXPECTED_PUBLISHED_DIGEST: ${{ needs.image-build.outputs.digest }}
+      EXPECTED_PUBLISHED_IMAGE_ID: ${{ needs.image-build.outputs.image_id }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 55da80eb1254aee54ee0f1fb5c42f2be46a98737
+          path: product
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: product/.nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: product/package.json
+          run_install: false
+      - name: Prepare only browser test dependencies
+        run: pnpm --dir product/tests/playwright install --frozen-lockfile
+      - name: Independent pull by immutable digest and complete runtime smokes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/runtime_publish/publish.py --verify
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: approvals-published-verification-${{ github.sha }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.json
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.log
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.pdf
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.xlsx
+            ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/*.png
             ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/ocr.txt
             ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/browser/**/*.json
             ${{ runner.temp }}/jrc-runtime-${{ github.run_id }}-1/browser/**/*.png

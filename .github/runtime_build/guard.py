@@ -17,7 +17,7 @@ import uuid
 
 PRODUCT = "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
 APPROVED = "42a534a0774edff03d56d47707d77ec4de5cfdfd"
-BRANCH = "ci/approvals-word-image-consolidada-20261114"
+BRANCH = "ci/approvals-ghcr-55da80eb-20261114"
 REPO = "ClaudioHideki/jrc-conversas-lab2"
 BUILDKIT = "mirror.gcr.io/moby/buildkit:v0.33.1@sha256:98cc6a3fc46220d00f8224ae483f3274fc874e9be8d7dd1e2e2c5481209228b5"
 PG = "pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a"
