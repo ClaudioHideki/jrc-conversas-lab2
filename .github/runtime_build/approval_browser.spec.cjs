@@ -315,7 +315,7 @@ test('native denial isolation empty state and stale navigation', async ({ page, 
   // Replace the actual authenticated session through native authentication, never a Vue store injection.
   await page.getByRole('button', { name: /Synthetic reviewer/ }).last().click();
   const loggedOut = page.waitForResponse(r => new URL(r.url()).pathname === '/auth/sign_out' && r.request().method() === 'DELETE');
-  await page.getByText(/^(Sair|Logout|Log out)$/, { exact: true }).click();
+  await page.getByText(/^(Encerrar sessão|Sair|Logout|Log out)$/, { exact: true }).click();
   expect((await loggedOut).status()).toBe(200);
   await page.waitForURL(/\/app\/login/);
   await actualLogin(page, fixture.users.denied);
