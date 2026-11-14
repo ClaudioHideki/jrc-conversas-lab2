@@ -145,7 +145,7 @@ def main():
         for process in reversed(owned): stop(process)
         if credentials.exists():
             secret = json.loads(credentials.read_text())['password']
-            for path in [*output.rglob('*.log'), *output.rglob('*.json'), *output.rglob('*.txt')]:
+            for path in [*output.rglob('*.log'), *output.rglob('*.json'), *output.rglob('*.txt'), *output.rglob('*.md')]:
                 if path.is_file(): path.write_text(path.read_text(errors='replace').replace(secret, '[SYNTHETIC_CREDENTIAL_REDACTED]'))
         (output / 'native-visual-result.json').write_text(json.dumps(result, indent=2) + '\n')
         hashes = [{'path': str(p.relative_to(output)), 'bytes': p.stat().st_size, 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()}

@@ -221,8 +221,12 @@ test('native denial isolation empty state and stale navigation', async ({ page, 
   const headers = await actualLogin(page);
   const base = `${origin}/app/accounts/${fixture.account_id}/approvals`;
   const api = `${origin}/api/v1/accounts/${fixture.account_id}/approvals`;
+  const authenticatedControl = await context.request.get(api + '/requests/' + fixture.request_ids[9], { headers });
+  expect(authenticatedControl.status()).toBe(200);
+  expect((await authenticatedControl.json()).id).toBe(fixture.request_ids[9]);
   const noUnit = await context.request.get(api + `/requests/${fixture.other_unit_request_id}`, { headers });
-  expect([403, 404]).toContain(noUnit.status());
+  expect(noUnit.status()).toBe(401);
+  expect(await noUnit.json()).toEqual({ error: 'You are not authorized to do this action' });
   expect(await noUnit.text()).not.toContain('CONFIDENTIAL_OTHER_UNIT');
   const noAccount = await context.request.get(`${origin}/api/v1/accounts/${fixture.foreign_account_id}/approvals/requests`, { headers });
   expect([401, 403, 404]).toContain(noAccount.status());
@@ -239,7 +243,8 @@ test('native denial isolation empty state and stale navigation', async ({ page, 
       reason: 'Synthetic reviewer cannot edit another owners CRM source',
       expected_version: current.lock_version, idempotency_key: require('crypto').randomUUID() } },
   });
-  expect(deniedEdit.status()).toBe(403);
+  expect(deniedEdit.status()).toBe(401);
+  expect(await deniedEdit.json()).toEqual({ error: 'You are not authorized to do this action' });
   await conflictDetail.locator('textarea').first().fill('Synthetic stale reviewer decision');
   const other = await browser.newContext();
   try {
