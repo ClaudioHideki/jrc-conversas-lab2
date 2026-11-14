@@ -146,6 +146,7 @@ jobs:
         run: |
           ruby -c ../.github/runtime_build/approval_browser_fixture.rb
           ruby -c ../.github/runtime_build/approval_native_seed.rb
+          ruby -c ../.github/runtime_build/migrate_without_export.rb
       - name: Locked frontend and Chrome test dependencies
         run: |
           pnpm --dir product install --frozen-lockfile

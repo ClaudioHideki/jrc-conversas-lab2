@@ -99,7 +99,7 @@ def main():
         with socket.socket() as probe:
             require(probe.connect_ex(('127.0.0.1', 3000)) != 0, 'Native visual port already occupied')
         command(['bundle', 'exec', 'rails', 'db:create'], 'isolated-database', env, 300)
-        command(['bundle', 'exec', 'rails', 'runner', 'ActiveRecord::Migration.verbose = false; ActiveRecord::Base.connection.migration_context.migrate'], 'isolated-schema', env, 600)
+        command(['bundle', 'exec', 'ruby', str(ROOT / '.github/runtime_build/migrate_without_export.rb')], 'isolated-schema', env, 600)
         build = {**env, 'JRC_VITE_BUILD_HEAP_MIB': '6144', 'VITE_RUBY_VITE_BIN_PATH': str(SOURCE / 'script/jrc_vite_build.mjs')}
         manifest_candidates = [SOURCE / 'public/vite/.vite/manifest.json', SOURCE / 'public/vite/manifest.json']
         require(not any(p.exists() for p in manifest_candidates), 'Previously built assets refused')
