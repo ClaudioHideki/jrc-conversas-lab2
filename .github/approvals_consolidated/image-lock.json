@@ -71,7 +71,7 @@
     }
   ],
   "infrastructure_hashes": {
-    ".github/runtime_build/guard.py": "b8a7c9189f60ecf2fb57685f13d9bed7045ef4c83d28336f4751812adbc52b48",
+    ".github/runtime_build/guard.py": "945893a8f52d96405bc8a408d43f4147a77bccfa2be1f6858fca5847852e3f73",
     ".github/runtime_build/test_guard.py": "547523c961a0c2570437e1c428635ac3b734154c04bb50bf3e99608a834e565f",
     ".github/runtime_build/approval_browser_seed.rb": "fd7000e8d16f4bd929e608eee1f519d36774c7eff39937f0ff2e4f3ee2f21012",
     ".github/approvals_consolidated/image_admission.py": "2123aced9918c32cb1aa92abc058a3497c928bfb4247c67c8c4cdf744a7ce3fa",
@@ -90,7 +90,7 @@
     ".github/approvals_consolidated/test_quality_gate.py": "fb1746a2d46c1029d9e4a6ce7c80ddb4583db79dcc40ee79fe1137bd737495c5",
     ".github/approvals_consolidated/quality-lock.json": "1078aee1f62567035bd6397ca3ae6590758d6432b21922b319bd5939466fdecc",
     ".github/workflows/ag-native-candidate.yml": "dd9de97b2252f4266461a66c12fd2c9b82e90d89637d632cd5822dc1ca2950c5",
-    ".github/runtime_build/test_guard_integrity.py": "01252b9fe976d12dccc8430afdc1012e4b7183b4cf582e2095776eacfa12aa48",
+    ".github/runtime_build/test_guard_integrity.py": "aae626735a0cdda3dcb69118bf2de6e633816cb1e63c4eb433f0bb3477ce8041",
     ".github/runtime_build/approved-guard.fixture.txt": "4ef817b48c81de8659bb7e92bdfe909ca67977056abf147673db91761fe1938d",
     ".github/approvals_consolidated/test_image_admission.py": "7774dffa2fd86d11eae8ebd89fbf64ac76242575642194e6376fe97b2255d85a",
     ".github/approvals_consolidated/visual-test-fixture.json": "c221b1e81aadfdde2ecb659fc2c569e88006b0d4b3ee70f36fed40bfc16a4ace"

@@ -10,6 +10,7 @@ import signal
 import subprocess
 import sys
 import time
+import threading
 import urllib.request
 import urllib.error
 import uuid
@@ -166,6 +167,20 @@ def check_preserved_refs():
         with urllib.request.urlopen(request, timeout=30) as response: value=json.load(response)
         require(value["object"]["sha"] == expected, "Protected reference advanced: " + branch)
 
+def start_ref_monitor():
+    check_preserved_refs()
+    stop = threading.Event()
+    state = {"error": None}
+    def observe():
+        while not stop.wait(15):
+            try:
+                check_preserved_refs()
+            except Exception as error:
+                state["error"] = str(error) if isinstance(error, RuntimeError) else "Reference observation failed: " + type(error).__name__
+                stop.set()
+    threading.Thread(target=observe, name="owned-reference-observer", daemon=True).start()
+    return stop, state
+
 class Attempt:
     def __init__(self):
         self.name = identity(os.environ)
@@ -183,7 +198,11 @@ class Attempt:
                        "build_started": False, "build_passed": False, "smoke_passed": False,
                        "published": False, "phases": [], "initial": None, "disk_min": None, "ram_min": None}
 
+        self.ref_stop = None
+        self.ref_state = {"error": None}
+
     def sample(self, starting=False):
+        require(not self.ref_state.get("error"), self.ref_state.get("error") or "Reference observation")
         s = effective_sample(self.limits)
         if self.result["initial"] is None:
             self.result["initial"] = s
@@ -207,12 +226,8 @@ class Attempt:
             with logpath.open("x") as log:
                 process = subprocess.Popen(args, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
                 started = time.monotonic()
-                last_ref_check = started
                 while process.poll() is None:
                     self.sample()
-                    if time.monotonic() - last_ref_check >= 30:
-                        check_preserved_refs()
-                        last_ref_check = time.monotonic()
                     require(time.monotonic() - started < timeout, "Owned phase timeout: " + label)
                     time.sleep(0.5)
                 phase["exit_code"] = process.wait()
@@ -275,6 +290,7 @@ class Attempt:
         raise RuntimeError("Readiness timeout: " + label)
 
     def execute(self):
+        self.ref_stop, self.ref_state = start_ref_monitor()
         require(subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip() == os.environ["EXPECTED_EXECUTION_SHA"], "Execution checkout differs")
         require(subprocess.check_output(["git", "-C", str(SOURCE), "rev-parse", "HEAD"], text=True).strip() == PRODUCT, "Product checkout differs")
         require(not subprocess.check_output(["git", "-C", str(SOURCE), "status", "--porcelain", "--untracked-files=all"], text=True).strip(), "Product dirty")
@@ -451,6 +467,8 @@ class Attempt:
 
 
     def finish(self):
+        if self.ref_stop is not None:
+            self.ref_stop.set()
         try:
             owned = subprocess.check_output(["docker", "ps", "-a", "--filter", "label=jrc.runtime.run=" + self.name, "--format", "{{.Names}}"], text=True, timeout=10)
             for name in owned.splitlines():

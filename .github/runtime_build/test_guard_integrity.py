@@ -17,7 +17,7 @@ class GuardIntegrity(unittest.TestCase):
         before,after=functions(self.original),functions(self.current)
         for name in before:
             if name not in ['limits','schema_command']: self.assertEqual(before[name],after[name],name)
-        self.assertEqual(set(after)-set(before),{'check_preserved_refs'})
+        self.assertEqual(set(after)-set(before),{'check_preserved_refs','start_ref_monitor'})
 
     def test_original_owned_resources_and_readiness_preserved(self):
         def methods(s):
@@ -25,7 +25,7 @@ class GuardIntegrity(unittest.TestCase):
             return {n.name:ast.dump(n) for n in c.body if isinstance(n,ast.FunctionDef)}
         before,after=methods(self.original),methods(self.current)
         for name in before:
-            if name not in ['__init__','execute','finish','command']: self.assertEqual(before[name],after[name],name)
+            if name not in ['__init__','execute','finish','command','sample']: self.assertEqual(before[name],after[name],name)
         self.assertEqual(set(after)-set(before),{'browser'})
 
     def test_all_original_smokes_remain_mandatory(self):
@@ -40,8 +40,18 @@ class GuardIntegrity(unittest.TestCase):
                      'self.limits.no_other_vite_build()','self.no_foreign_vite()','time.sleep(0.5)']:
             self.assertGreaterEqual(self.current.count(text),self.original.count(text),text)
         self.assertIn('REF_TOKEN = os.environ.pop("GH_TOKEN", "")',self.current)
-        self.assertIn('time.monotonic() - last_ref_check >= 30',self.current)
+        self.assertIn('while not stop.wait(15):',self.current)
+        self.assertNotIn('last_ref_check',self.current)
         self.assertIn('p.suffix != ".private"',self.current)
+
+    def test_original_sampling_body_is_preserved_after_reference_state_check(self):
+        def sample(source):
+            cls=next(n for n in ast.parse(source).body if isinstance(n,ast.ClassDef) and n.name=='Attempt')
+            return next(n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name=='sample')
+        before,after=sample(self.original),sample(self.current)
+        self.assertIn('self.ref_state',ast.unparse(after.body[0]))
+        after.body.pop(0)
+        self.assertEqual(ast.dump(before),ast.dump(after))
 
     def test_schema_uses_owned_fresh_migrations_without_exports(self):
         self.assertEqual(guard.schema_command(),['bundle','exec','ruby','/smoke/migrate_without_export.rb'])
