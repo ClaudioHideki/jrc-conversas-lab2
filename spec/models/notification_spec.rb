@@ -11,13 +11,15 @@ RSpec.describe Notification do
   end
 
   context 'with default order by' do
-    it 'sort by primary id desc' do
-      notification1 = create(:notification)
+    it 'selects first and last by ascending primary id despite unrelated records' do
       create(:notification)
+      notification1 = create(:notification)
+      notification2 = create(:notification)
       notification3 = create(:notification)
+      notifications = described_class.where(id: [notification3.id, notification1.id, notification2.id])
 
-      expect(described_class.all.first.id).to eq notification1.id
-      expect(described_class.all.last.id).to eq notification3.id
+      expect(notifications.first.id).to eq notification1.id
+      expect(notifications.last.id).to eq notification3.id
     end
   end
 

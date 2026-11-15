@@ -38,9 +38,9 @@ Files: teste authorityLifecycle.spec.js; harness approval_browser.spec.cjs da br
 
 Files: fixtures e runners existentes labs/history-sync-lab2 nos dois produtos; specs jrc_history_sync_v2, conversations_member_inboxes e integração history-sync-operational-lab2.
 
-- [ ] Executar testes contra o candidato LAB2 e Broker exatos em infraestrutura descartável, incluindo texto, imagem/legenda, áudio, PDF, grupos, concorrência e ACK perdido.
-- [ ] Comparar IDs da origem/Broker/JRC e checksum dos bytes, em duas Accounts isoladas, incluindo membro e agente sem acesso à outra caixa.
-- [ ] Ler estado produtivo autorizado por metadados: vínculos, filas, recibos e contagens, sem payloads nem reprocessamento.
+- [x] Produto1224ea08: laboratório43768493424 executou63 Rails e dois E2Es privados com Brokerc3bae632; texto, imagem/legenda, áudio, PDF, vídeo, grupos e ACK perdido. Repetir no próximo SHA antes da publicação.
+- [x] Laboratório43768493424 comparou IDs origem/Broker/JRC e checksums em duas Accounts por cenário, incluindo membership e negativa cruzada.
+- [x] Leitura produtiva autorizada de vínculos/filas/recibos, sem payloads ou replay; pendências operacionais registradas somente no relatório privado.
 - [ ] Qualquer defeito funcional encontrado recebe RED, correção mínima e novo GREEN antes da próxima etapa.
 
 ### Task 3: Publicar e conferir
@@ -59,3 +59,4 @@ Ruling: o retorno201 é um contrato legítimo; não alterar a API para mascarar 
 Ruling: Docker local está parado; a infraestrutura descartável deve ser retomada de modo controlado ou executada no runner isolado, sem usar bancos produtivos para testes.
 Ruling: Docker retomado somente localmente; o Rails antigo recusou Ruby3.4.4 contra Gemfile3.4.12. Manter o runtime correto, sem diminuir a versão exigida para obter um passe artificial.
 Ruling: três P2 reproduzidos receberam correção e revisão independente: identidade do anexo, substituição de arquivo de catálogo e limite nativo de texto. A admissão de fontes exige lista explícita, comparação contra 2be22e86 e oito fingerprints da revisão; nunca admitir tudo encontrado por git diff.
+Ruling: corrigir somente a fixture global de Notification após RED nativo do shard5, preservando first/last e acrescentando registro externo. Não mudar ordenação do produto nem limpar dados para mascarar a falha. Revalidar a candidata nova e manter as evidências anteriores identificadas por SHA.

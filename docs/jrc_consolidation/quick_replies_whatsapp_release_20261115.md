@@ -23,6 +23,10 @@ Preservar a base completa LAB2 55da80eb e incorporar a frente de respostas rápi
 
 ## Gates restantes
 
+Atualização: no produto1224ea08, a CI43765226812 comprovou380 exemplos Rails/504 Vue; Chrome43766707410 aprovou13/13 sem skips/flaky e assets novos; laboratório43768493424 aprovou63 exemplos Rails e dois E2Es com IDs/bytes privados, ACK perdido, indisponibilidade e Minhas entre duas Accounts por cenário. Broker:100 regressões unitárias dirigidas aprovadas, sem alteração de código. Essas evidências não comprovam sessão real nem histórico completo do celular.
+
+A matriz geral43766948449 reproduziu uma falha preexistente de isolamento em spec/models/notification_spec.rb: a consulta global incluía uma notificação fora da fixture. O teste agora inclui explicitamente um registro externo, filtra os três IDs criados em ordem embaralhada e preserva first/last originais, sem order/unscoped. A revisão independente aprovou a correção de fixture; o modelo permanece byte-idêntico à main55. A CI consolidada e a imagem precisam concluir novamente no novo SHA. Não tratar o verde anterior como execução do spec corrigido.
+
 - Rails/PostgreSQL/Redis no SHA corrigido, incluindo concorrência, acesso negado, cópia privada, intenção durável e ACK perdido.
 - Chrome desktop/mobile, claro/escuro, com assets compilados do mesmo produto e os13 cenários previstos, sem cenários omitidos.
 - E2E Broker c3bae632→Rails/Sidekiq do candidato→MinIO com comparação independente de IDs e bytes, mídia, grupos, retry e recibos. O laboratório antigo3.4.4 não aprova o runtime3.4.12.

@@ -1,5 +1,11 @@
 # Respostas rápidas e percurso WhatsApp — 15/11/2026
 
+Atualização do checkpoint: o produto funcional1224ea08 passou504 testes Vue,380 Rails,13 Chrome reais (desktop/mobile,claro/escuro),63 exemplos Rails com MinIO e dois E2E Broker→Rails/Sidekiq privados. IDs e bytes foram reconciliados em duas Accounts por cenário, com grupos, áudio, PDF, vídeo, imagem/legenda e perda de ACK. Não é homologação de sessão física.
+
+A matriz completa43766948449 revelou um spec legado de Notification acoplado à tabela global:474 exemplos no shard5, uma falha (esperado19, recebido1). Modelo e spec eram iguais à main55. O spec agora cria um registro externo e confere first/last somente nos três IDs selecionados em ordem de entrada embaralhada, sem acrescentar order/unscoped nem alterar o modelo. A revisão independente confirmou que mantém as expectativas originais; não identifica quem criou o registro antigo. Nova candidata exige nova CI e imagem antes da promoção. Nenhuma alteração funcional desde1224ea08.
+
+A leitura produtiva encontrou sessões desconectadas e grupos sem pré-condições de espelhamento; a atualização de respostas rápidas não os corrige por efeito colateral. Não ativar captura, parear, limpar registros ou fazer replay de UNKNOWN. Relatório privado de metadados fora do Git; sem payloads, telefones ou credenciais versionados.
+
 Branch de trabalho `codex/quick-replies-whatsapp-release-20261115`, derivada de `2be22e86baecbe75c302bb03208e78e67301c743`, descendente da main produtiva `55da80eb`. Preserva as correções publicadas de expansão Liquid, cópia independente de anexos, rascunhos pendentes e ciclo de vida do Dialog. Não reaplicar esses patches.
 
 Os testes Chrome anteriores tinham expectativa HTTP 200 incorreta para criação nativa (201) e reutilizavam um evento de aprovação entre temas. A proteção de conflito do backend deve permanecer. A revisão independente identificou três defeitos adicionais: arquivo de catálogo anterior reutilizável após seleção rejeitada/pendente, download de bytes de outra revisão do anexo e envio direto sem o limite de texto nativo. Corrigidos com testes de regressão; detalhes em `docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md`.
