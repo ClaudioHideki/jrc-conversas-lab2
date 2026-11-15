@@ -20,6 +20,7 @@ const busy = ref(false);
 const error = ref('');
 const confirmed = ref(false);
 let generation = 0;
+let catalogGeneration = 0;
 let intent = crypto.randomUUID();
 const sourcePeople = computed(() => {
   try {
@@ -61,17 +62,21 @@ watch(
   ],
   async () => {
     invalidate();
+    catalogGeneration += 1;
     catalogs.value = [];
     if (scopeIndex.value === '' || !scope.value) return;
-    const current = generation;
+    const current = catalogGeneration;
     try {
       const result = await approvalClient(props.context.account_id).get(
         'catalogs',
-        scope.value
+        {
+          issuer_company_id: scope.value.issuer_company_id,
+          business_unit_id: scope.value.business_unit_id,
+        }
       );
-      if (current === generation) catalogs.value = result.data;
+      if (current === catalogGeneration) catalogs.value = result.data;
     } catch {
-      if (current === generation)
+      if (current === catalogGeneration)
         error.value = t('JRC_APPROVALS.importCatalog.invalid');
     }
   }
@@ -117,7 +122,10 @@ const request = async dryRun => {
   }
 };
 const changeMapping = invalidate;
-onBeforeUnmount(invalidate);
+onBeforeUnmount(() => {
+  invalidate();
+  catalogGeneration += 1;
+});
 </script>
 
 <template>

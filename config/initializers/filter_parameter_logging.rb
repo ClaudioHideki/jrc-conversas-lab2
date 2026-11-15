@@ -26,3 +26,6 @@ Rails.application.config.filter_parameters += [:column_mapping, :import_options]
 
 # Configurable Backoffice answers may contain private signer/customer values.
 Rails.application.config.filter_parameters += [:answer]
+
+# Approval catalog imports contain proposed people and must never become request-log payloads.
+Rails.application.config.filter_parameters += [:catalog_import]

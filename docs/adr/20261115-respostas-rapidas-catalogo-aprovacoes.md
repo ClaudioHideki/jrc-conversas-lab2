@@ -19,3 +19,5 @@ Instagram/TikTok exigem mensagens separadas de texto/mídia: o envio direto comb
 ## Evidência exigida
 
 RSpec com PostgreSQL/Redis descartáveis, concorrência independente, testes Vue, lint, migrations e gates pertinentes. Chrome com Rails/banco sintético, assets recém-compilados no GitHub, viewport 1440/390, preferências de tema persistidas, prévia/inserção/confirmação, contexto, anexos, configuração/importação e acessos negados. Resultados, SHAs, falhas e pendências registrados em relatório de controle; testes unitários não substituem o navegador. Nenhum build pesado no Windows, imagem Docker, publicação ou deploy é autorizado neste incremento.
+
+Confirmação do usuário em 15/11/2026: manter o catálogo e os anexos compartilhados na conta, com as permissões nativas. Não foi autorizada uma nova partição por unidade dos modelos; cobertura corporativa e acesso à conversa continuam obrigatórios no contexto. O payload `catalog_import` é filtrado integralmente dos logs Rails. A geração do catálogo por escopo é independente da geração de leitura do arquivo/prévia, impedindo que um upload invalide a resposta autorizada do catálogo.

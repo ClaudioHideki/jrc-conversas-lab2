@@ -72,7 +72,7 @@ class JrcApprovals::CatalogImport
 
     data = if format == 'csv'
              csv = CSV.parse(document.delete_prefix("\uFEFF"), headers: true, col_sep: ';')
-             raise JrcApprovals::Error, 'INVALID_IMPORT' unless %w[codigo modulo finalidade estado_importacao].all? { |h| csv.headers.include?(h) }
+             raise JrcApprovals::Error, 'INVALID_IMPORT' unless %w[codigo modulo finalidade estado_importacao].all? { |h| Array(csv.headers).include?(h) }
 
              { 'schema_version' => '1.0', 'activate' => false, 'people' => [], 'approval_rules' => csv.map do |row|
                raise JrcApprovals::Error, 'INVALID_IMPORT' unless row['estado_importacao'] == 'RASCUNHO_INATIVO'

@@ -150,4 +150,18 @@ RSpec.describe 'Approval catalog draft import', type: :request, approval_core: t
       JrcApprovals::Catalog.instance_variable_get(:@entries).delete('synthetic.alternate')
     end
   end
+  it 'filters the entire import document from request logs without filtering unrelated values' do
+    filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
+    safe = filter.filter('catalog_import' => { 'document' => seed.to_json }, 'unrelated_value' => 'kept')
+    expect(safe).to eq('catalog_import' => '[FILTERED]', 'unrelated_value' => 'kept')
+  end
+
+  it 'rejects an empty CSV or missing headers without writes' do
+    ["\n", 'invalid_header'].each do |csv|
+      post url, params: { catalog_import: input.merge(document: csv, format: 'csv') }, headers: headers, as: :json
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(JrcApprovals::Policy.where(account_id: scope[:account].id)).to be_empty
+    end
+  end
+
 end
