@@ -654,6 +654,7 @@ const errorText = computed(() => {
         :title="t('JRC_APPROVALS.workspace.configure')"
         :show-confirm-button="false"
         show-close-button
+        contained
         width="3xl"
       >
         <div class="space-y-4 text-n-slate-12">
@@ -805,6 +806,7 @@ const errorText = computed(() => {
           :title="t('JRC_APPROVALS.workspace.configure')"
           :show-confirm-button="false"
           show-close-button
+          contained
           width="5xl"
           @close="screen === 'policies' && id && navigate('policies')"
         >

@@ -400,7 +400,9 @@
         "pending_adapter": "Integração nativa ainda não instalada",
         "conflict": "Conflito: requer revisão humana",
         "update": "Atualizar somente campos gerenciados do rascunho"
-      }
+      },
+      "batch": "Lote de importação",
+      "executedBy": "Executado pelo usuário"
     },
     "duplicate": "Duplicar regra",
     "copyName": "Cópia de {name}",

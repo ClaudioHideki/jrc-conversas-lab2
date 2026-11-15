@@ -18,7 +18,7 @@ class CannedResponses::Delivery
     raise Invalid, 'UNRESOLVED_VARIABLES' if content.match?(/\[(nome|vendedor|empresa|cidade|região|data|produto\/serviço)\]|\{\{|\{%/)
 
     @conversation.with_lock do
-      @response.reload
+      @response.lock!
       digest = Digest::SHA256.hexdigest([@response.id, revision, content, @user.id].to_json)
       old = @conversation.messages.where("additional_attributes -> 'quick_reply' ->> 'key' = ?", key).first
       if old

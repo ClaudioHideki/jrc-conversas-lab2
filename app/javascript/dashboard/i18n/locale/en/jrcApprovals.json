@@ -478,7 +478,9 @@
         "pending_adapter": "Native adapter not installed",
         "conflict": "Conflict requiring human review",
         "update": "Update only managed draft fields"
-      }
+      },
+      "batch": "Import batch",
+      "executedBy": "Executed by user"
     }
   }
 }

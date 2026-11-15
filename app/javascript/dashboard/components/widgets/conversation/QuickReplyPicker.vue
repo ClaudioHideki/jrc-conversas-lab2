@@ -212,6 +212,7 @@ defineExpose({ open, close });
     :title="t('CANNED_MGMT.QUICK.TITLE')"
     :show-confirm-button="false"
     show-close-button
+    contained
     width="xl"
     @close="reset"
   >

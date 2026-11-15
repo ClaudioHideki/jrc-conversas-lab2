@@ -110,7 +110,8 @@ const request = async dryRun => {
   } catch (cause) {
     if (current === generation)
       error.value =
-        cause.response?.data?.error || t('JRC_APPROVALS.importCatalog.invalid');
+        t('JRC_APPROVALS.importCatalog.invalid') +
+        (cause.response?.data?.error ? ` (${cause.response.data.error})` : '');
   } finally {
     if (current === generation) busy.value = false;
   }
@@ -189,6 +190,22 @@ onBeforeUnmount(invalidate);
           )
         }}
       </p>
+      <p
+        v-if="report.batch_key"
+        class="break-all text-xs text-n-slate-11"
+      >
+        {{ t('JRC_APPROVALS.importCatalog.batch') }}: {{ report.batch_key }} ·
+        {{ t('JRC_APPROVALS.importCatalog.executedBy') }}:
+        {{ report.executed_by_user_id }}
+      </p>
+      <ul class="m-0 flex flex-wrap gap-3 text-sm">
+        <li
+          v-for="(count, action) in report.counts"
+          :key="action"
+        >
+          {{ t('JRC_APPROVALS.importCatalog.actions.' + action) }}: {{ count }}
+        </li>
+      </ul>
       <div class="max-h-80 space-y-3 overflow-auto">
         <article
           v-for="row in mappedRows"

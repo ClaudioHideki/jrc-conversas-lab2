@@ -1237,7 +1237,10 @@ export default {
       if (this.attachedFiles && this.attachedFiles.length) {
         messagePayload.files = [];
         this.attachedFiles.forEach(attachment => {
-          if (attachment.blobSignedId) {
+          if (
+            this.globalConfig.directUploadsEnabled &&
+            attachment.blobSignedId
+          ) {
             messagePayload.files.push(attachment.blobSignedId);
             if (attachment.isVoiceMessage) {
               messagePayload.isVoiceMessage = true;
