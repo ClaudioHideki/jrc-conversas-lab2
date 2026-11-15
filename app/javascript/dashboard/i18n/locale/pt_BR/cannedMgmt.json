@@ -75,6 +75,24 @@
         "YES": "Sim, excluir ",
         "NO": "Não, manter "
       }
+    },
+    "QUICK": {
+      "TITLE": "Respostas rápidas",
+      "ERROR": "Não foi possível concluir. O conteúdo foi preservado; confira o anexo e tente novamente.",
+      "SEND_ERROR": "Não foi possível confirmar o envio. Consulte o histórico antes de tentar novamente. A mesma chave será usada para evitar duplicidade; o conteúdo foi preservado.",
+      "LOADING": "Carregando…",
+      "SEARCH": "Pesquisar respostas rápidas",
+      "REVIEW": "Revise a mensagem antes de inserir ou enviar",
+      "MISSING": "Há variáveis sem dados. Preencha os campos pendentes no texto antes de enviar.",
+      "CHANNEL": "O canal não permite este anexo ou exige envios separados de texto e mídia. Revise no editor.",
+      "BACK": "Voltar",
+      "INSERT": "Inserir no editor",
+      "SEND": "Enviar agora",
+      "CONFIRM": "Confirmar envio da resposta rápida",
+      "CONFIRM_HELP": "Confirma o envio do texto revisado e do anexo para a conversa selecionada? As regras do canal continuam valendo.",
+      "FILE_HELP": "Um anexo por resposta. São aplicados os limites de formato e tamanho do armazenamento e do canal.",
+      "ATTACH": "Anexar imagem ou arquivo",
+      "REMOVE": "Remover anexo"
     }
   }
 }

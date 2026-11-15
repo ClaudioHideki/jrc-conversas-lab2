@@ -342,7 +342,9 @@ Rails.application.routes.draw do
               post :reauthorize_page
             end
           end
-          resources :canned_responses, only: [:index, :create, :update, :destroy]
+          resources :canned_responses, only: [:index, :create, :update, :destroy] do
+            member { post :preview; get :file; post :deliver }
+          end
           resources :automation_rules, only: [:index, :create, :show, :update, :destroy] do
             post :clone
           end

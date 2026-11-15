@@ -454,6 +454,30 @@
         "published": "Active",
         "retired": "Paused"
       }
+    },
+    "importCatalog": {
+      "title": "Import catalog (drafts)",
+      "help": "Loading does not activate policies or grant authority. Review identities by ID. Select native events explicitly; items without an installed event stay pending and are not imported. Existing policies remain unchanged.",
+      "choose": "Select an authorized scope",
+      "file": "JSON or CSV file (up to 256 KiB)",
+      "userId": "Existing user ID (optional; grants no authority)",
+      "preview": "Preview without writing",
+      "previewReady": "Preview ready. No policy was activated.",
+      "saved": "Batch recorded. New drafts remain inactive; pending items were not imported.",
+      "invalid": "Invalid file or scope. Check the format and permissions.",
+      "adapter": "Reviewed native event",
+      "pending": "Mapping pending",
+      "pendingIdentity": "Identity review pending",
+      "confirm": "I reviewed the diff and confirm only mapped inactive drafts. Suggested names will not grant authority. Pending items will be skipped.",
+      "apply": "Create inactive drafts",
+      "configurePending": "Imported draft has no triggers, deadlines or approvers. Complete and validate its configuration before publication. Loading approved no parameters.",
+      "actions": {
+        "create": "Create inactive draft",
+        "preserved": "Preserved without changes",
+        "pending_mapping": "Event mapping pending",
+        "pending_adapter": "Native adapter not installed",
+        "conflict": "Conflict requiring human review"
+      }
     }
   }
 }

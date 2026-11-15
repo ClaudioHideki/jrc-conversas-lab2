@@ -131,6 +131,7 @@ export default {
     'selectWhatsappTemplate',
     'selectContentTemplate',
     'toggleQuotedReply',
+    'openQuickReplies',
   ],
   setup(props) {
     const { setSignatureFlagForInbox, fetchSignatureFlagFromUISettings } =
@@ -276,8 +277,8 @@ export default {
 </script>
 
 <template>
-  <div class="flex justify-between p-3" :class="wrapClass">
-    <div class="left-wrap">
+  <div class="flex flex-wrap justify-between gap-2 p-3" :class="wrapClass">
+    <div class="left-wrap flex-wrap">
       <NextButton
         v-if="!isEditorDisabled"
         v-tooltip.top-end="$t('CONVERSATION.REPLYBOX.TIP_EMOJI_ICON')"
@@ -329,6 +330,17 @@ export default {
         sm
         :label="recordingAudioDurationText"
         @click="toggleAudioRecorderPlayPause"
+      />
+      <NextButton
+        v-if="!isOnPrivateNote"
+        :aria-label="$t('CANNED_MGMT.QUICK.TITLE')"
+        v-tooltip.top-end="$t('CANNED_MGMT.QUICK.TITLE')"
+        icon="i-ph-chat-text"
+        slate
+        faded
+        sm
+        :disabled="isEditorDisabled"
+        @click="$emit('openQuickReplies')"
       />
       <NextButton
         v-if="showMessageSignatureButton"

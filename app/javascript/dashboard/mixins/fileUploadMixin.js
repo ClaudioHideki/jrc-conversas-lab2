@@ -56,21 +56,21 @@ export default {
     },
     onFileUpload(file) {
       if (this.globalConfig.directUploadsEnabled) {
-        this.onDirectFileUpload(file);
+        return this.onDirectFileUpload(file);
       } else {
-        this.onIndirectFileUpload(file);
+        return this.onIndirectFileUpload(file);
       }
     },
 
     onDirectFileUpload(file) {
-      if (!file) return;
+      if (!file) return Promise.resolve(false);
 
       const mime = file.file?.type || file.type;
       const maxSizeMB = this.maxSizeFor(mime);
 
       if (!checkFileSizeLimit(file, maxSizeMB)) {
         this.alertOverLimit(maxSizeMB);
-        return;
+        return Promise.resolve(false);
       }
 
       const upload = new DirectUpload(
@@ -83,27 +83,30 @@ export default {
         }
       );
 
-      upload.create((error, blob) => {
-        if (error) {
-          useAlert(error);
-        } else {
-          this.attachFile({ file, blob });
-        }
+      return new Promise(resolve => {
+        upload.create(async (error, blob) => {
+          if (error) {
+            useAlert(error);
+            resolve(false);
+          } else {
+            resolve(await this.attachFile({ file, blob }));
+          }
+        });
       });
     },
 
     onIndirectFileUpload(file) {
-      if (!file) return;
+      if (!file) return false;
 
       const mime = file.file?.type || file.type;
       const maxSizeMB = this.maxSizeFor(mime);
 
       if (!checkFileSizeLimit(file, maxSizeMB)) {
         this.alertOverLimit(maxSizeMB);
-        return;
+        return false;
       }
 
-      this.attachFile({ file });
+      return this.attachFile({ file });
     },
   },
 };

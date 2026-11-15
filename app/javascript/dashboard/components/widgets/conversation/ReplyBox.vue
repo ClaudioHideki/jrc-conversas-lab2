@@ -7,6 +7,8 @@ import { useTrack } from 'dashboard/composables';
 import keyboardEventListenerMixins from 'shared/mixins/keyboardEventListenerMixins';
 
 import ReplyToMessage from './ReplyToMessage.vue';
+import QuickReplyPicker from './QuickReplyPicker.vue';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import AttachmentPreview from 'dashboard/components/widgets/AttachmentsPreview.vue';
 import ReplyTopPanel from 'dashboard/components/widgets/WootWriter/ReplyTopPanel.vue';
 import ReplyEmailHead from './ReplyEmailHead.vue';
@@ -72,6 +74,7 @@ export default {
     EmojiIconPicker,
     MessageSignatureMissingAlert,
     ReplyBottomPanel,
+    QuickReplyPicker,
     ReplyEmailHead,
     ReplyToMessage,
     ReplyTopPanel,
@@ -388,6 +391,9 @@ export default {
         return AUDIO_FORMATS.MP3;
       }
       return AUDIO_FORMATS.WAV;
+    },
+    quickReplyIdentity() {
+      return JSON.stringify(authorityScope(this.$store.getters));
     },
     messageVariables() {
       const variables = getMessageVariables({
@@ -946,6 +952,60 @@ export default {
     clearEditorSelection() {
       this.updateEditorSelectionWith = '';
     },
+    canAttachQuickReply(file) {
+      return (
+        this.showFileUpload &&
+        file.byte_size <= this.maxSizeFor(file.content_type) * 1024 * 1024 &&
+        isFileTypeAllowedForChannel(
+          {
+            name: file.filename,
+            type: file.content_type,
+            size: file.byte_size,
+          },
+          {
+            channelType: this.channelType || this.inbox?.channel_type,
+            medium: this.inbox?.medium,
+            conversationType: this.conversationType,
+            isInstagramChannel: this.isAnInstagramChannel,
+            isOnPrivateNote: false,
+          }
+        )
+      );
+    },
+    prepareQuickReply(content) {
+      return this.sendWithSignature && this.messageSignature
+        ? appendSignature(
+            content,
+            this.messageSignature,
+            getEffectiveChannelType(this.channelType, this.inbox?.medium || '')
+          )
+        : content;
+    },
+    async insertQuickReply({ content, file, conversationId }) {
+      if (
+        conversationId !== this.currentChat.id ||
+        this.isEditorDisabled ||
+        this.isPrivate
+      )
+        return;
+      if (file) {
+        const success = await this.onFileUpload({
+          file,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          quickReplyConversationId: conversationId,
+        });
+        if (!success) throw new Error('Quick reply upload failed');
+      }
+      if (
+        conversationId !== this.currentChat.id ||
+        this.isEditorDisabled ||
+        this.isPrivate
+      )
+        return;
+      this.addIntoEditor(content);
+    },
     addIntoEditor(content) {
       this.updateEditorSelectionWith = content;
       this.onFocus();
@@ -1047,20 +1107,32 @@ export default {
       });
     },
     attachFile({ blob, file }) {
-      if (!this.showFileUpload && !this.isOnPrivateNote) return;
+      if (!this.showFileUpload && !this.isOnPrivateNote)
+        return Promise.resolve(false);
 
-      const reader = new FileReader();
-      reader.readAsDataURL(file.file);
-      reader.onloadend = () => {
-        this.attachedFiles.push({
-          currentChatId: this.currentChat.id,
-          resource: blob || file,
-          isPrivate: this.isPrivate,
-          thumb: reader.result,
-          blobSignedId: blob ? blob.signed_id : undefined,
-          isVoiceMessage: file?.isVoiceMessage || false,
-        });
-      };
+      const conversationId =
+        file.quickReplyConversationId || this.currentChat.id;
+      if (conversationId !== this.currentChat.id) return Promise.resolve(false);
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.file);
+        reader.onerror = () => resolve(false);
+        reader.onloadend = () => {
+          if (reader.error || conversationId !== this.currentChat.id) {
+            resolve(false);
+            return;
+          }
+          this.attachedFiles.push({
+            currentChatId: conversationId,
+            resource: blob || file,
+            isPrivate: this.isPrivate,
+            thumb: reader.result,
+            blobSignedId: blob ? blob.signed_id : undefined,
+            isVoiceMessage: file?.isVoiceMessage || false,
+          });
+          resolve(true);
+        };
+      });
     },
     removeAttachment(attachments) {
       this.attachedFiles = attachments;
@@ -1437,6 +1509,7 @@ export default {
         :message="message"
         :portal-slug="connectedPortalSlug"
         :new-conversation-modal-active="newConversationModalActive"
+        @open-quick-replies="$refs.quickReplies.open()"
         @select-whatsapp-template="openWhatsappTemplateModal"
         @select-content-template="openContentTemplateModal"
         @toggle-insert-article="toggleInsertArticle"
@@ -1444,6 +1517,18 @@ export default {
       />
     </Transition>
 
+    <QuickReplyPicker
+      v-if="currentChat.id"
+      ref="quickReplies"
+      :account-id="accountId"
+      :conversation-id="currentChat.id"
+      :authority-key="quickReplyIdentity"
+      :disabled="isEditorDisabled || isPrivate"
+      :can-attach="canAttachQuickReply"
+      :can-send-combined="!isAnInstagramChannel && !isATiktokChannel"
+      :prepare-content="prepareQuickReply"
+      :on-insert="insertQuickReply"
+    />
     <WhatsappTemplates
       :inbox-id="inbox.id"
       :show="showWhatsAppTemplatesModal"

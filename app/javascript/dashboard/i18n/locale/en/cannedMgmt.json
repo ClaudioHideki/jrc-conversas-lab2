@@ -75,6 +75,24 @@
         "YES": "Yes, delete ",
         "NO": "No, keep "
       }
+    },
+    "QUICK": {
+      "TITLE": "Quick replies",
+      "ERROR": "Unable to complete. Your content was preserved; check the attachment and try again.",
+      "SEND_ERROR": "Delivery could not be confirmed. Check the history before retrying. The same key prevents duplicate delivery; content was preserved.",
+      "LOADING": "Loading…",
+      "SEARCH": "Search quick replies",
+      "REVIEW": "Review before inserting or sending",
+      "MISSING": "Some variables have no data. Fill the unresolved fields before sending.",
+      "CHANNEL": "This channel cannot use this file or requires separate text and media messages. Review in the editor.",
+      "BACK": "Back",
+      "INSERT": "Insert into editor",
+      "SEND": "Send now",
+      "CONFIRM": "Confirm quick reply delivery",
+      "CONFIRM_HELP": "Send the reviewed message and attachment to the selected conversation? Channel rules still apply.",
+      "FILE_HELP": "One attachment per response. Storage and channel file type and size limits apply.",
+      "ATTACH": "Attach image or file",
+      "REMOVE": "Remove attachment"
     }
   }
 }

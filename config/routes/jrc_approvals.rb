@@ -8,6 +8,7 @@ namespace :api, defaults: { format: 'json' } do
         resources :catalogs, only: :index
         get 'gates', to: 'gates#show'
         resources :policies, only: %i[index show create update] do
+          collection { post :import }
           member { post :validate; post :publish; post :retire; get :versions }
         end
         resources :requests, only: %i[index show create] do

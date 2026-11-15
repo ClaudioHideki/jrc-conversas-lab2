@@ -1,4 +1,5 @@
 <script>
+import CannedFileInput from './CannedFileInput.vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength } from '@vuelidate/validators';
 import { useAlert } from 'dashboard/composables';
@@ -10,6 +11,7 @@ import WootMessageEditor from 'dashboard/components/widgets/WootWriter/Editor.vu
 export default {
   name: 'AddCanned',
   components: {
+    CannedFileInput,
     NextButton,
     Modal,
     WootMessageEditor,
@@ -36,6 +38,7 @@ export default {
         message: '',
       },
       show: true,
+      fileChange: {},
     };
   },
   validations: {
@@ -62,6 +65,7 @@ export default {
         .dispatch('createCannedResponse', {
           short_code: this.shortCode,
           content: this.content,
+          ...this.fileChange,
         })
         .then(() => {
           // Reset Form, Show success message
@@ -118,6 +122,7 @@ export default {
             />
           </div>
         </div>
+        <CannedFileInput @change="fileChange = $event" />
         <div class="flex flex-row justify-end w-full gap-2 px-0 py-2">
           <NextButton
             faded

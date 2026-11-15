@@ -844,6 +844,7 @@ onBeforeUnmount(() => {
         <span class="i-lucide-chevron-down ml-auto size-3 shrink-0" />
       </button>
       <button
+        v-if="isVoice"
         type="button"
         :disabled="!hasSelection"
         class="flex h-8 shrink-0 items-center gap-2 rounded-md border border-n-violet-6 bg-n-violet-2 px-2.5 text-xs font-semibold text-n-violet-11 hover:bg-n-violet-3 disabled:opacity-40"

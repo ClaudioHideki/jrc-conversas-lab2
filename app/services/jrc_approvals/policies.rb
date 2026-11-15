@@ -70,6 +70,8 @@ class JrcApprovals::Policies
   end
 
   def validate_definition!(policy)
+    raise JrcApprovals::Error, 'IMPORT_CONFIGURATION_PENDING' if policy.draft_definition.key?('catalog_import')
+
     entry = JrcApprovals::Catalog.fetch("#{policy.module_key}.#{policy.event_key}")
     definition = JrcApprovals::Definition.validate!(policy.draft_definition, entry)
     if JrcApprovals::GratuityCatalog.gratuity_key?(entry.key)

@@ -1,4 +1,5 @@
 <script>
+import CannedFileInput from './CannedFileInput.vue';
 /* eslint no-console: 0 */
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength } from '@vuelidate/validators';
@@ -9,11 +10,13 @@ import Modal from '../../../../components/Modal.vue';
 
 export default {
   components: {
+    CannedFileInput,
     NextButton,
     Modal,
     WootMessageEditor,
   },
   props: {
+    initialFile: { type: Object, default: null },
     id: { type: Number, default: null },
     edcontent: { type: String, default: '' },
     edshortCode: { type: String, default: '' },
@@ -31,6 +34,7 @@ export default {
       shortCode: this.edshortCode,
       content: this.edcontent,
       show: true,
+      fileChange: {},
     };
   },
   validations: {
@@ -67,6 +71,7 @@ export default {
           id: this.id,
           short_code: this.shortCode,
           content: this.content,
+          ...this.fileChange,
         })
         .then(() => {
           // Reset Form, Show success message
@@ -122,6 +127,10 @@ export default {
             />
           </div>
         </div>
+        <CannedFileInput
+          :initial-file="initialFile"
+          @change="fileChange = $event"
+        />
         <div class="flex flex-row justify-end w-full gap-2 px-0 py-2">
           <NextButton
             faded

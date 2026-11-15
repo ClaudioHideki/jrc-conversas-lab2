@@ -185,8 +185,11 @@ watch(
   () => [props.policy, props.templatePolicy],
   ([policy, templatePolicy]) => {
     tierDraft.value = null;
-    if (policy) draft.value = copy(policy);
-    else if (templatePolicy) {
+    if (policy) {
+      draft.value = copy(policy);
+      if (policy.draft_definition?.catalog_import)
+        draft.value.draft_definition = emptyDefinition();
+    } else if (templatePolicy) {
       draft.value = {
         name: t('JRC_APPROVALS.copyName', { name: templatePolicy.name }),
         module_key: templatePolicy.module_key,
@@ -289,6 +292,13 @@ const confirm = () => {
 </script>
 
 <template>
+  <p
+    v-if="policy?.draft_definition?.catalog_import"
+    role="status"
+    class="rounded-xl bg-n-amber-3 p-3 text-n-amber-11"
+  >
+    {{ t('JRC_APPROVALS.importCatalog.configurePending') }}
+  </p>
   <section
     v-if="definition"
     class="space-y-5"

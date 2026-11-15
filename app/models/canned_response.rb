@@ -17,6 +17,29 @@ class CannedResponse < ApplicationRecord
   validates :short_code, uniqueness: { scope: :account_id }
 
   belongs_to :account
+  has_one_attached :file
+  validate :safe_quick_reply_file
+
+  def file_metadata
+    return unless file.attached?
+
+    { id: file.id, filename: file.filename.to_s, content_type: file.content_type, byte_size: file.byte_size }
+  end
+
+  private
+
+  def safe_quick_reply_file
+    return unless file.attached?
+
+    limit = GlobalConfigService.load('MAXIMUM_FILE_UPLOAD_SIZE', 40).to_i
+    limit = 40 if limit <= 0
+    errors.add(:file, 'size is too big') if file.byte_size > limit.megabytes
+    errors.add(:file, 'must not be empty') unless file.byte_size.positive?
+    allowed = %w[image/jpeg image/png image/webp image/gif] + Attachment::ACCEPTABLE_FILE_TYPES
+    errors.add(:file, 'type not supported') unless allowed.include?(file.content_type)
+  end
+
+  public
 
   scope :order_by_search, lambda { |search|
     short_code_starts_with = sanitize_sql_array(['WHEN short_code ILIKE ? THEN 1', "#{search}%"])

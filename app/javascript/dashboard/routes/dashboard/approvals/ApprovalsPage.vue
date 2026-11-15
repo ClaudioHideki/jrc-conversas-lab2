@@ -1,11 +1,13 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import PolicyEditor from './PolicyEditor.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
+import CatalogImport from './CatalogImport.vue';
 import RequestDetail from './RequestDetail.vue';
 import SimulatorView from './SimulatorView.vue';
 import DelegationView from './DelegationView.vue';
@@ -59,6 +61,14 @@ const versions = ref(null);
 const catalogs = ref([]);
 const simulation = ref(null);
 const notice = ref('');
+const configurationDialog = ref(null);
+const policyDialog = ref(null);
+const configurationView = ref('menu');
+const configure = () => {
+  configurationView.value = 'menu';
+  configurationDialog.value?.open();
+};
+
 const can = action => capability(state.context, action);
 const inbox = computed(() => {
   if (
@@ -94,6 +104,22 @@ const adjustmentIntent = intent();
 const ownDelegationIntent = intent();
 const screen = computed(() => route.params.screen || 'inbox');
 const id = computed(() => route.params.id);
+watch(
+  () => [screen.value, id.value, record.value, accessIdentity.value],
+  async () => {
+    await nextTick();
+    if (
+      screen.value === 'policies' &&
+      (id.value === 'new' || record.value) &&
+      can('policy_manage')
+    )
+      policyDialog.value?.open();
+    else policyDialog.value?.close();
+  },
+  { flush: 'post' }
+);
+watch(accessIdentity, () => configurationDialog.value?.close());
+
 const allowed = computed(() => {
   if (!state.context) return false;
   if (['policies', 'simulate', 'delegations'].includes(screen.value))
@@ -604,7 +630,7 @@ const errorText = computed(() => {
             icon="i-lucide-settings"
             variant="faded"
             :disabled="state.loading"
-            @click="navigate('policies')"
+            @click="configure"
           />
           <Button
             :label="t('JRC_APPROVALS.refresh')"
@@ -615,6 +641,42 @@ const errorText = computed(() => {
           />
         </div>
       </header>
+      <Dialog
+        v-if="state.context && can('policy_manage')"
+        ref="configurationDialog"
+        :title="t('JRC_APPROVALS.workspace.configure')"
+        :show-confirm-button="false"
+        show-close-button
+        width="3xl"
+      >
+        <div class="space-y-4 text-n-slate-12">
+          <div class="flex flex-wrap gap-2">
+            <Button
+              :label="t('JRC_APPROVALS.workspace.tabs.policies')"
+              @click="
+                configurationDialog.close();
+                navigate('policies');
+              "
+            />
+            <Button
+              :label="t('JRC_APPROVALS.newPolicy')"
+              @click="
+                configurationDialog.close();
+                navigate('policies', 'new');
+              "
+            />
+            <Button
+              :label="t('JRC_APPROVALS.importCatalog.title')"
+              @click="configurationView = 'import'"
+            />
+          </div>
+          <CatalogImport
+            v-if="configurationView === 'import'"
+            :key="accessIdentity"
+            :context="state.context"
+          />
+        </div>
+      </Dialog>
       <nav
         :aria-label="t('JRC_APPROVALS.title')"
         class="flex min-w-0 gap-2 overflow-x-auto rounded-xl border border-n-weak bg-n-solid-2 p-2"
@@ -730,64 +792,76 @@ const errorText = computed(() => {
           variant="faded"
           @click="navigate(screen)"
         />
-        <PolicyEditor
-          v-if="screen === 'policies' && (id === 'new' || record)"
-          :key="`${state.accountId}:${id}`"
-          :policy="record"
-          :template-policy="templatePolicy"
-          :context="state.context"
-          :busy="state.loading"
-          @save="savePolicy"
-          @operation="operate"
-          @versions="loadVersions(1)"
-          @duplicate="navigate('policies', 'new', { copy: String(record.id) })"
-        />
-        <section
-          v-if="versions"
-          class="space-y-3"
+        <Dialog
+          v-if="screen === 'policies' && allowed && (id === 'new' || record)"
+          ref="policyDialog"
+          :title="t('JRC_APPROVALS.workspace.configure')"
+          :show-confirm-button="false"
+          show-close-button
+          width="5xl"
+          @close="screen === 'policies' && id && navigate('policies')"
         >
-          <h2 class="text-xl font-semibold">
-            {{ t('JRC_APPROVALS.versions') }}
-          </h2>
-          <article
-            v-for="version in versions.rows"
-            :key="version.id"
-            class="space-y-2 rounded-xl border border-n-weak p-4"
+          <PolicyEditor
+            :key="`${state.accountId}:${id}`"
+            :policy="record"
+            :template-policy="templatePolicy"
+            :context="state.context"
+            :busy="state.loading"
+            @save="savePolicy"
+            @operation="operate"
+            @versions="loadVersions(1)"
+            @duplicate="
+              navigate('policies', 'new', { copy: String(record.id) })
+            "
+          />
+          <section
+            v-if="versions"
+            class="space-y-3"
           >
-            <h3 class="font-semibold">
-              {{ t('JRC_APPROVALS.versionPrefix') }}{{ version.version }} ·
-              {{ version.publisher_name }}
-            </h3>
-            <p class="text-xs">{{ version.created_at }}</p>
-            <p class="break-all font-mono text-xs">
-              {{ t('JRC_APPROVALS.hash') }} {{ version.digest }}
-            </p>
-            <p class="text-sm">
-              {{ version.definition.execution }} ·
-              {{ version.definition.selection.mode }} ·
-              {{ version.definition.selection.priority }}
-            </p>
-            <p
-              v-for="step in version.definition.steps"
-              :key="step.code"
-              class="text-sm"
+            <h2 class="text-xl font-semibold">
+              {{ t('JRC_APPROVALS.versions') }}
+            </h2>
+            <article
+              v-for="version in versions.rows"
+              :key="version.id"
+              class="space-y-2 rounded-xl border border-n-weak p-4"
             >
-              {{ step.code }} · {{ step.mode }} ·
-              {{ t('JRC_APPROVALS.quorum') }} {{ step.quorum }}
-            </p>
-          </article>
-          <div class="flex gap-3">
-            <Button
-              :label="t('JRC_APPROVALS.previous')"
-              :disabled="versions.page <= 1"
-              @click="loadVersions(versions.page - 1)"
-            /><Button
-              :label="t('JRC_APPROVALS.next')"
-              :disabled="versions.page * 25 >= versions.total"
-              @click="loadVersions(versions.page + 1)"
-            />
-          </div>
-        </section>
+              <h3 class="font-semibold">
+                {{ t('JRC_APPROVALS.versionPrefix') }}{{ version.version }} ·
+                {{ version.publisher_name }}
+              </h3>
+              <p class="text-xs">{{ version.created_at }}</p>
+              <p class="break-all font-mono text-xs">
+                {{ t('JRC_APPROVALS.hash') }} {{ version.digest }}
+              </p>
+              <p class="text-sm">
+                {{ version.definition.execution }} ·
+                {{ version.definition.selection.mode }} ·
+                {{ version.definition.selection.priority }}
+              </p>
+              <p
+                v-for="step in version.definition.steps"
+                :key="step.code"
+                class="text-sm"
+              >
+                {{ step.code }} · {{ step.mode }} ·
+                {{ t('JRC_APPROVALS.quorum') }} {{ step.quorum }}
+              </p>
+            </article>
+            <div class="flex gap-3">
+              <Button
+                :label="t('JRC_APPROVALS.previous')"
+                :disabled="versions.page <= 1"
+                @click="loadVersions(versions.page - 1)"
+              /><Button
+                :label="t('JRC_APPROVALS.next')"
+                :disabled="versions.page * 25 >= versions.total"
+                @click="loadVersions(versions.page + 1)"
+              />
+            </div>
+          </section>
+        </Dialog>
+
         <section
           v-if="screen === 'inbox'"
           class="space-y-4"

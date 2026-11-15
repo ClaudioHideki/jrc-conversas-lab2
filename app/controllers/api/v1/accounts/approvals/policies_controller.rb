@@ -30,6 +30,21 @@ class Api::V1::Accounts::Approvals::PoliciesController < Api::V1::Accounts::Appr
     render json: payload(service(JrcApprovals::Policies).create!(**values.reverse_merge(code: nil))), status: :created
   end
 
+  def import
+    input = params.require(:catalog_import)
+    raise JrcApprovals::Error, 'INVALID_IMPORT' unless [true, false].include?(input[:dry_run])
+
+    result = service(JrcApprovals::CatalogImport).call(
+      document: input[:document], format: input[:format],
+      mappings: input.permit(mappings: {}).fetch(:mappings, {}).to_h,
+      people_mappings: input.permit(people_mappings: {}).fetch(:people_mappings, {}).to_h,
+      company_id: input[:issuer_company_id].presence, unit_id: input[:business_unit_id].presence,
+      dry_run: input[:dry_run], confirmed: input[:confirmed], key: input[:idempotency_key], expected_digest: input[:expected_digest]
+    )
+    response.headers['Cache-Control'] = 'no-store'
+    render json: result
+  end
+
   def update
     values = params.require(:policy).permit(:name, definition: {}).to_h.symbolize_keys
     record = service(JrcApprovals::Policies).edit!(policy_id: params[:id], expected_version: params[:expected_version], **values)
