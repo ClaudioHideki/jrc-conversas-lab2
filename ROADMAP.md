@@ -23,3 +23,8 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 - [ ] Revisar proveniência, isolamento e versões a cada candidata de release.
 
 Veja [TASKS.md](TASKS.md). Roadmaps e planos anteriores continuam válidos no seu escopo.
+
+
+### Incremento autorizado de 15/11/2026
+
+Respostas rápidas contextuais e configuração/importação da Central de Aprovações evoluem os módulos existentes. Aceite exige testes nativos e interface real em desktop/celular, claro/escuro. A importação não ativa regras, não cria aprovadores por nome e mantém integrações não mapeadas como pendências explícitas.

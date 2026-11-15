@@ -981,6 +981,15 @@ export default {
           )
         : content;
     },
+    onQuickReplyDelivered(message) {
+      if (
+        message.conversation_id === this.currentChat.id &&
+        !this.isEditorDisabled &&
+        !this.isPrivate
+      ) {
+        this.$store.dispatch('addMessage', message);
+      }
+    },
     quickReplyIsCurrent({ accountId, conversationId, authorityKey }) {
       return (
         accountId === this.accountId &&
@@ -1555,6 +1564,7 @@ export default {
       :prepare-content="prepareQuickReply"
       :on-insert="insertQuickReply"
       :is-context-current="quickReplyIsCurrent"
+      @delivered="onQuickReplyDelivered"
     />
     <WhatsappTemplates
       :inbox-id="inbox.id"

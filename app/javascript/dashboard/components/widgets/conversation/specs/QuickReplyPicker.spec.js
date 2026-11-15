@@ -119,8 +119,9 @@ describe('native quick reply review', () => {
       revision: 'revision-1',
       actor_id: 5,
     });
-    finish({ data: { id: 99 } });
+    finish({ data: { id: 99, conversation_id: 11 } });
     await flushPromises();
+    expect(w.emitted('delivered')).toEqual([[{ id: 99, conversation_id: 11 }]]);
   });
   it('preserves content and intent after an uncertain send failure', async () => {
     API.deliver.mockRejectedValue(new Error('Network lost'));

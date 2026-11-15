@@ -15,6 +15,7 @@ const props = defineProps({
   onInsert: { type: Function, required: true },
   isContextCurrent: { type: Function, required: true },
 });
+const emit = defineEmits(['delivered']);
 const { t } = useI18n();
 const dialog = ref(null);
 const confirmation = ref(null);
@@ -164,7 +165,7 @@ const send = async () => {
   busy.value = true;
   error.value = '';
   try {
-    await API.deliver(
+    const result = await API.deliver(
       selected.value.id,
       {
         conversation_id: props.conversationId,
@@ -176,7 +177,10 @@ const send = async () => {
       },
       props.accountId
     );
-    if (current === generation) close();
+    if (current === generation && currentContext()) {
+      emit('delivered', result.data);
+      close();
+    }
   } catch (cause) {
     if (current === generation) {
       const rejected = [
