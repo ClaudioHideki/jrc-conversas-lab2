@@ -3,6 +3,8 @@
 
 ## Em progresso (WIP)
 
+- [ ] **QUICK-REPLIES-RELEASE-20261115:** Correções de anexo/revisão, seleção de catálogo e limite nativo implementadas e revisadas; 504 testes Vue e 15 negativas do contrato passaram. Concluir Rails/Chrome/E2E/CI/imagem e aplicação autorizada no Grupo JRC antes de marcar a release concluída. Plano e evidências: `docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md`.
+
 - [ ] **RELEASE-20261114:** Promover a consolidação de histórico/runtime/aprovações após CI e imagem do SHA exato; verificar versão, migrations e saúde no Grupo JRC. Código e testes locais registrados em CONTINUE-AQUI.md; implantação ainda não comprovada.
 - [ ] **GATES-20261114:** Confirmar na CI nativa os manifestos reconciliados e o upgrade populado de Backoffice com workflow legado. Provas locais: 15 testes Python e 52 Node; Ruby/PostgreSQL ainda dependem do runner. Nenhuma migration do produto foi modificada.
 

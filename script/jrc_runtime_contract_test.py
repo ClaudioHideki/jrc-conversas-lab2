@@ -25,30 +25,61 @@ REVIEWED_RETRY_SOURCES = {
 }
 
 # Reviewed approvals increment 56bacc36 plus the stale-summary regression.
+# Explicit quick-reply review: 2be22e86 and eight independently fingerprinted
+# release fixes. No path discovery, wildcard admission or relaxed assertions.
 REVIEWED_APPROVAL_SOURCES = {
-    # Native Chrome QA: semantic text color in teleported adjustment content, no authorization change.
-    "app/javascript/dashboard/routes/dashboard/approvals/AdjustmentDialog.vue": "ca159d7699d5f699a9d343c16007f1e304db1288d0487dfd253be194b022a6a1",
+    "app/controllers/api/v1/accounts/approvals/policies_controller.rb": "750f974b5c632702795954077575c389887c9dd11ffae3fc0df7258021813967",
     "app/controllers/api/v1/accounts/approvals/requests_controller.rb": "a537a402cc25da031133ec23416a54eb9894e543fa8ac69f5db3a307890e212c",
-    "app/javascript/dashboard/i18n/locale/en/jrcApprovals.json": "36666da071f803394558d74527c7770b4fc5706bb1d4f9329f849db70b844a0d",
-    "app/javascript/dashboard/i18n/locale/pt_BR/jrcApprovals.json": "2d507600fd7b528519c71fb2a914570b5a4a459bde5886a591f823616e144e85",
+    "app/controllers/api/v1/accounts/canned_responses_controller.rb": "53c52dfa08d321809ad02be486477a2ce2faf36fb3358510fd3d13ce8f50c970",
+    "app/javascript/dashboard/api/cannedResponse.js": "fdf786cde7e366aa952b899494d8c19588600347cdec5fd27d8f6a29e3bbff15",
+    "app/javascript/dashboard/api/specs/cannedResponseRevision.spec.js": "0fb389fa3b5c8a325eecd77820b2765a6f7e9b3a5107c6065c6b349210cd76af",
+    "app/javascript/dashboard/components/widgets/WootWriter/Editor.vue": "6318e88a065c806f4ae5e16d1bd92a3b33b5ae5d145382347b77d886806fb154",
+    "app/javascript/dashboard/components/widgets/WootWriter/ReplyBottomPanel.vue": "f01761ccc4c83aa3b396cd1e34a9d1a1fe8b54aac540e2772591b31850a904a0",
+    "app/javascript/dashboard/components/widgets/conversation/CannedResponse.vue": "113a5a49778c1dfd49d2e901b83ba80ca31de3ae6583360c9dada94d7cfd5f1f",
+    "app/javascript/dashboard/components/widgets/conversation/QuickReplyPicker.vue": "8ca89389991b3f32c83b5a4301a9306931da561bb21aeecdaee07969361c93d4",
+    "app/javascript/dashboard/components/widgets/conversation/ReplyBox.vue": "80a54f1814e425a0d0893dbcf77b9c75cdb066ed9d0900b7057feaae0d1c0c82",
+    "app/javascript/dashboard/components/widgets/conversation/specs/CannedResponseReview.spec.js": "a2589977c9c9798f073559b57bbc81a1945d3f6fe1c62946563d81c927e29471",
+    "app/javascript/dashboard/components/widgets/conversation/specs/QuickReplyPicker.spec.js": "f7ba120464df8699fbf32aa04e0931bafb0c5154e2e93e3e2709e5a9b2262af2",
+    "app/javascript/dashboard/i18n/locale/en/cannedMgmt.json": "3da939cdd4efaca4046c2697a77e565eed6ad43076f2b8be60fa005410bc6fa6",
+    "app/javascript/dashboard/i18n/locale/en/jrcApprovals.json": "6445f258bd366911252678fdfbb1b1ff2884d798beaebd04b6083d198459d13a",
+    "app/javascript/dashboard/i18n/locale/pt_BR/cannedMgmt.json": "ae18052084e0913c8cbe4470510202c0d23908534fb48b9c5dd8ebd0ae8fbd51",
+    "app/javascript/dashboard/i18n/locale/pt_BR/jrcApprovals.json": "0ddf3ff17c5bf9613a132def1914ff7b9a519458daae08eb615224ae5791711d",
+    "app/javascript/dashboard/mixins/fileUploadMixin.js": "66b16ab042c84c682b52e6a75f2fecdb28d14bf1f9c1edcf8cae5b117883af8e",
+    "app/javascript/dashboard/routes/dashboard/approvals/AdjustmentDialog.vue": "ca159d7699d5f699a9d343c16007f1e304db1288d0487dfd253be194b022a6a1",
     "app/javascript/dashboard/routes/dashboard/approvals/ApprovalInbox.vue": "fc6a13b401537a72dc61ffa6a03963bf47db79f4fd9c9a725496ce22d1a90b58",
     "app/javascript/dashboard/routes/dashboard/approvals/ApprovalStatus.vue": "92d9639f58f2269665856db75cfb8724b6dd3e84f044499ec2ae47d7764419ce",
     "app/javascript/dashboard/routes/dashboard/approvals/ApprovalSummary.vue": "c26d419ff78e02bae067cb428f1af8937b2f9d43b01f0e7b880c7e0ba5aeaf14",
-    "app/javascript/dashboard/routes/dashboard/approvals/ApprovalsPage.vue": "3e8ca63b1c44882b95f783b5744d44017d68246b8fbae1949ed2eb1770b05e22",
-    "app/javascript/dashboard/routes/dashboard/approvals/PolicyEditor.vue": "2047349671a7ee490f93a7213bef591a5e0ca52ae5ca48da386d42ae13c354d3",
+    "app/javascript/dashboard/routes/dashboard/approvals/ApprovalsPage.vue": "23425102a6b867dd417b210d39af4403817912f9871d2bd87df51a87f4d4df15",
+    "app/javascript/dashboard/routes/dashboard/approvals/CatalogImport.vue": "66550cc863a215f673b94e0435816c3fdedddb7ac57a5bf647c13dc59b858c63",
+    "app/javascript/dashboard/routes/dashboard/approvals/PolicyEditor.vue": "e8778b0b7dec3ba05c2d91745e7ed680cdc990006926520810f28911d92ad961",
     "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue": "18c3f8248e39c54424c37f96a71d0c71ca435c63914482c2af388b942be292c4",
     "app/javascript/dashboard/routes/dashboard/approvals/SimulatorView.vue": "8f55e195a8f48d0edf5ceb1af1d87278d4487696ecfea7dc247099fb0b383758",
-    "app/javascript/dashboard/routes/dashboard/approvals/specs/authorityLifecycle.spec.js": "81151f55ca2a08f3cb953ef4d17fd47ebfac516a95b32a5e8d5b9bbef8f40353",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/approvals.spec.js": "63355d656c416369bdbfb0b21bd7900c3cb1e63b2d86f82fc6d44ba9af23504b",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/authorityLifecycle.spec.js": "4bd8315e69e7bbe1fbfbb204dfa79968aab1bb21a9c11134680fed5012aff2b8",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/catalogImport.spec.js": "01019f001c0f08ed1932fc6f4b4562c827dd586e0878067c707ea2496da39de4",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/portugueseCatalog.spec.js": "78688a3ed3612227e2d4642a30c488110638194dd5715eacb2bcb97d68b9b133",
     "app/javascript/dashboard/routes/dashboard/approvals/specs/simulatorSelection.spec.js": "3f91f2600a6afc4cce3f9083be79fc39db4c85cdb2b7951ddbf4fef28897322d",
     "app/javascript/dashboard/routes/dashboard/approvals/specs/workspace.spec.js": "d40106b78c9a06e1e5412b6661ef4e05d6990ce408ed6cbc3fbb049e5b80f589",
-    "config/routes/jrc_approvals.rb": "184f60925c75386000d2945e1f14e2b8d30c5ebf5177b70b5bc8e2b842eb5326",
-    "spec/requests/api/v1/accounts/jrc_approvals/workspace_spec.rb": "3f81940703dd516fd886fc2634d1d1e7dfc3a6980dba66ecb0bc93893044d1e6"
+    "app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue": "b4b3a026e7a09e3ef56b51d327109cfd69e7d6bf3340264c2ea07e14e2c8fa29",
+    "app/javascript/dashboard/routes/dashboard/settings/canned/AddCanned.vue": "f221cbb952890219b4572317141437319d04e6fe8e6a7f6973003ffe8fd91238",
+    "app/javascript/dashboard/routes/dashboard/settings/canned/CannedFileInput.vue": "086e8156b28cace5b94a01c79d79ea48901ac3dea4e15ba3a6f9cf9f132ac7e8",
+    "app/javascript/dashboard/routes/dashboard/settings/canned/EditCanned.vue": "863409ba8f4122e3ec48919a74c243d4ccf6c8ffdc107a29c1f3c8ab479d9bea",
+    "app/javascript/dashboard/routes/dashboard/settings/canned/Index.vue": "2ce9c27576c4e8375632f0edde0e53551288d5b81a08f09f4dd6f018d9507cda",
+    "app/models/canned_response.rb": "35ef1967c148dabebdef870f2adeb83e6e0e08bed5ab3a9e1fdd6724944c801e",
+    "app/services/canned_responses/delivery.rb": "b59679f6ae5e348843b6e6d565810f13275ec66cd0ee331b3c8da0adb5d20c32",
+    "app/services/canned_responses/preview.rb": "99e03d5a70de498f4ab37f9d9b3cbc1922e27e76cfb5bf0c52d48371435027b1",
+    "app/services/jrc_approvals/catalog_import.rb": "aa9d81af11915a189e407f517d921880885e57076aafb6615b18bd1c6f87ff01",
+    "app/services/jrc_approvals/policies.rb": "abd58f8875250c41bab31ea0d3fe954cb8beb2795f692fbbc45b2002e8a5d0c6",
+    "config/initializers/filter_parameter_logging.rb": "364b0cb66b93313ddd965faa1742190f7ea031c6b1e585e5e5c499bdfb33f1aa",
+    "config/routes.rb": "ef44c34897d052579395f94795f1e5ae724c3af93e551f30896b4e727403d97c",
+    "config/routes/jrc_approvals.rb": "7823d2773c93ede1b3d7877deb77fa5cce005068a56fc27bd0e5b8ff8bf6b5f3",
+    "spec/requests/api/v1/accounts/jrc_approvals/workspace_spec.rb": "3f81940703dd516fd886fc2634d1d1e7dfc3a6980dba66ecb0bc93893044d1e6",
 }
 
 
 REVIEWED_MODULE_MANIFESTS = {
-    "config/jrc_flow_ownership_guards.json": "ba18d05301e9501e2e931c194c7b6a133dfee2843b4c0cb17c809cb5f4cdc2ad",
-    "deploy/jrc/MODULE-COMPOSITION-MANIFEST.json": "a4ff7863fe33c3b757efbedb558b13adead056d91fcd0449c71eb067c372a3d9",
+    "config/jrc_flow_ownership_guards.json": "f468a2d820e4bf42f32c32e80a9591d23cda72c7cd7144e547ed4ef8d8625cb5",
+    "deploy/jrc/MODULE-COMPOSITION-MANIFEST.json": "fee2a9a7985c4345a11256fb8dd326e62b0893b676a436098d3fd473175cc9d5",
 }
 
 
@@ -161,6 +192,8 @@ def verify():
             "all_other_functional_sources_unchanged": True, "migrations_unchanged": True,
             "reviewed_functional_fixes": fixes,
             "reviewed_approval_commit": "56bacc36cf6bf65f18a5f637eeb5a4bff1f42acb",
+            "reviewed_quick_reply_base_commit": "2be22e86baecbe75c302bb03208e78e67301c743",
+            "reviewed_release_regressions": ["attachment_revision", "catalog_file_replacement", "native_channel_length"],
             "reviewed_approval_files": [{"path": path, "sha256_canonical_utf8": sha}
                                         for path, sha in REVIEWED_APPROVAL_SOURCES.items()],
             "reviewed_module_manifests": [{"path": path, "sha256_canonical_utf8": sha}

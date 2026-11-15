@@ -84,6 +84,7 @@
       "SEARCH": "Search quick replies",
       "REVIEW": "Review before inserting or sending",
       "MISSING": "Some variables have no data. Fill the unresolved fields before sending.",
+      "TOO_LONG": "The text exceeds this channel's {limit} character limit. Shorten it before sending.",
       "CHANNEL": "This channel cannot use this file or requires separate text and media messages. Review in the editor.",
       "BACK": "Back",
       "INSERT": "Insert into editor",

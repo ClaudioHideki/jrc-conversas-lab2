@@ -17,6 +17,7 @@ const peopleMappings = ref({});
 const catalogs = ref([]);
 const report = ref(null);
 const busy = ref(false);
+const reading = ref(false);
 const error = ref('');
 const confirmed = ref(false);
 let generation = 0;
@@ -37,22 +38,32 @@ const invalidate = () => {
   confirmed.value = false;
   error.value = '';
   busy.value = false;
+  reading.value = false;
   intent = crypto.randomUUID();
 };
 const read = async event => {
   invalidate();
+  document.value = '';
+  mappings.value = {};
+  peopleMappings.value = {};
   const file = event.target.files?.[0];
   if (!file || file.size > 262144) {
     error.value = t('JRC_APPROVALS.importCatalog.invalid');
     return;
   }
   const current = generation;
-  const value = await file.text();
-  if (current !== generation) return;
-  format.value = file.name.toLowerCase().endsWith('.csv') ? 'csv' : 'json';
-  document.value = value;
-  mappings.value = {};
-  peopleMappings.value = {};
+  reading.value = true;
+  try {
+    const value = await file.text();
+    if (current !== generation) return;
+    format.value = file.name.toLowerCase().endsWith('.csv') ? 'csv' : 'json';
+    document.value = value;
+  } catch {
+    if (current === generation)
+      error.value = t('JRC_APPROVALS.importCatalog.invalid');
+  } finally {
+    if (current === generation) reading.value = false;
+  }
 };
 watch(
   () => [
@@ -85,6 +96,7 @@ const mappedRows = computed(() => report.value?.rows || []);
 const request = async dryRun => {
   if (
     busy.value ||
+    reading.value ||
     scopeIndex.value === '' ||
     !document.value ||
     (!dryRun && (!confirmed.value || !report.value))
@@ -195,7 +207,7 @@ onBeforeUnmount(() => {
     </p>
     <Button
       :label="t('JRC_APPROVALS.importCatalog.preview')"
-      :disabled="busy || scopeIndex === '' || !document"
+      :disabled="busy || reading || scopeIndex === '' || !document"
       @click="request(true)"
     />
     <div

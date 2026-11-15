@@ -28,13 +28,21 @@ class Api::V1::Accounts::CannedResponsesController < Api::V1::Accounts::BaseCont
   end
 
   def file
-    raise ActiveRecord::RecordNotFound unless @canned_response.file.attached?
-    authorize_file!
+    blob = @canned_response.with_lock do
+      raise ActiveRecord::RecordNotFound unless @canned_response.file.attached?
+
+      if params.key?(:revision) || params.key?(:attachment_id)
+        unless params[:revision] == @canned_response.updated_at.iso8601(6) && params[:attachment_id].to_s == @canned_response.file.id.to_s
+          raise CannedResponses::Preview::Invalid, 'RESPONSE_CHANGED'
+        end
+      end
+      authorize_file!
+      @canned_response.file.blob
+    end
 
     response.headers['Cache-Control'] = 'private, no-store'
     response.headers['X-Content-Type-Options'] = 'nosniff'
-    send_data @canned_response.file.download, filename: @canned_response.file.filename.to_s,
-                                            type: @canned_response.file.content_type, disposition: 'attachment'
+    send_data blob.download, filename: blob.filename.to_s, type: blob.content_type, disposition: 'attachment'
   end
 
   def deliver

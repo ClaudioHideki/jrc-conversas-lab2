@@ -1575,6 +1575,7 @@ export default {
       :can-attach="canAttachQuickReply"
       :can-insert="!showAudioRecorderEditor && !copilot.isActive.value"
       :can-send-combined="!isAnInstagramChannel && !isATiktokChannel"
+      :max-length="maxLength"
       :prepare-content="prepareQuickReply"
       :on-insert="insertQuickReply"
       :is-context-current="quickReplyIsCurrent"

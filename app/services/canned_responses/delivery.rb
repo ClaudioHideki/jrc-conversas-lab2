@@ -5,6 +5,12 @@ require 'digest'
 class CannedResponses::Delivery
   class Invalid < StandardError; end
 
+  # Match the existing public ReplyBox limits; direct review cannot bypass them.
+  MAX_CONTENT_LENGTH = {
+    'Channel::FacebookPage' => 2000, 'Channel::Instagram' => 1000, 'Channel::Telegram' => 4096,
+    'Channel::Tiktok' => 6000, 'Channel::Sms' => 320, 'Channel::Email' => 25_000, 'Channel::Whatsapp' => 4096
+  }.freeze
+
   def initialize(response:, conversation:, user:)
     @response, @conversation, @user = response, conversation, user
     raise ActiveRecord::RecordNotFound unless response.account_id == conversation.account_id
@@ -15,6 +21,7 @@ class CannedResponses::Delivery
     raise Invalid, 'CONFIRMATION_REQUIRED' unless confirmed == true
     raise Invalid, 'INVALID_DELIVERY_KEY' unless key.is_a?(String) && key.match?(/\A[a-zA-Z0-9_-]{16,80}\z/)
     raise Invalid, 'INVALID_CONTENT' unless content.is_a?(String) && content.present? && content.bytesize <= 65_536
+    raise Invalid, 'CONTENT_TOO_LONG' if content.encode(Encoding::UTF_16LE).bytesize / 2 > max_content_length
     raise Invalid, 'UNRESOLVED_VARIABLES' if content.match?(/\[(nome|vendedor|empresa|cidade|região|data|produto\/serviço)\]|\{\{|\{%/)
 
     values = { content: content, key: key, revision: revision }
@@ -32,6 +39,13 @@ class CannedResponses::Delivery
   end
 
   private
+
+  def max_content_length
+    inbox = @conversation.inbox
+    return inbox.twilio_whatsapp? ? 1600 : 320 if inbox.twilio?
+
+    MAX_CONTENT_LENGTH.fetch(inbox.channel_type, 10_000)
+  end
 
   def perform(content:, key:, revision:, upload:, source_blob:)
     @conversation.with_lock do

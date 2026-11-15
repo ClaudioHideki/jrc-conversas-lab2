@@ -84,6 +84,7 @@
       "SEARCH": "Pesquisar respostas rápidas",
       "REVIEW": "Revise a mensagem antes de inserir ou enviar",
       "MISSING": "Há variáveis sem dados. Preencha os campos pendentes no texto antes de enviar.",
+      "TOO_LONG": "O texto ultrapassa o limite de {limit} caracteres deste canal. Reduza antes de enviar.",
       "CHANNEL": "O canal não permite este anexo ou exige envios separados de texto e mídia. Revise no editor.",
       "BACK": "Voltar",
       "INSERT": "Inserir no editor",

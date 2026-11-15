@@ -28,9 +28,10 @@ class CannedResponse extends ApiClient {
     });
   }
 
-  file(id, accountId) {
+  file(id, accountId, expected = {}) {
     return axios.get(`${this.scopedUrl(accountId)}/${id}/file`, {
       responseType: 'blob',
+      params: expected,
     });
   }
 

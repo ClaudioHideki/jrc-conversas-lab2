@@ -12,6 +12,7 @@ const props = defineProps({
   canAttach: { type: Function, required: true },
   canInsert: { type: Boolean, default: true },
   canSendCombined: { type: Boolean, default: true },
+  maxLength: { type: Number, default: 10000 },
   prepareContent: { type: Function, default: value => value },
   onInsert: { type: Function, required: true },
   isContextCurrent: { type: Function, required: true },
@@ -57,6 +58,7 @@ const sendAllowed = computed(
   () =>
     !props.disabled &&
     !hasUnresolved.value &&
+    content.value.length <= props.maxLength &&
     attachmentAllowed.value &&
     (!selected.value?.file || props.canSendCombined)
 );
@@ -99,7 +101,10 @@ const choose = async row => {
     intent = crypto.randomUUID();
     uncertain.value = false;
     if (result.data.file?.content_type?.startsWith('image/')) {
-      const image = await API.file(row.id, props.accountId);
+      const image = await API.file(row.id, props.accountId, {
+        revision: result.data.revision,
+        attachment_id: result.data.file.id,
+      });
       if (current !== generation) return;
       cachedFile = new File([image.data], result.data.file.filename, {
         type: result.data.file.content_type,
@@ -154,7 +159,10 @@ const insert = async () => {
     if (selected.value.file) {
       if (cachedFile) file = cachedFile;
       else {
-        const result = await API.file(selected.value.id, props.accountId);
+        const result = await API.file(selected.value.id, props.accountId, {
+          revision: selected.value.revision,
+          attachment_id: selected.value.file.id,
+        });
         if (current !== generation) return;
         file = new File([result.data], selected.value.file.filename, {
           type: selected.value.file.content_type,
@@ -201,6 +209,7 @@ const send = async () => {
         'RESPONSE_CHANGED',
         'MESSAGE_WINDOW_CLOSED',
         'CHANNEL_REQUIRES_SEPARATE_MESSAGES',
+        'CONTENT_TOO_LONG',
       ].includes(cause.response?.data?.error);
       uncertain.value = !rejected;
       error.value = t('CANNED_MGMT.QUICK.SEND_ERROR');
@@ -272,6 +281,13 @@ defineExpose({ open, close });
         </label>
         <p v-if="hasUnresolved" class="text-sm text-n-amber-11">
           {{ t('CANNED_MGMT.QUICK.MISSING') }}
+        </p>
+        <p
+          v-if="content.length > maxLength"
+          role="status"
+          class="text-sm text-n-amber-11"
+        >
+          {{ t('CANNED_MGMT.QUICK.TOO_LONG', { limit: maxLength }) }}
         </p>
         <p
           v-if="selected.file"

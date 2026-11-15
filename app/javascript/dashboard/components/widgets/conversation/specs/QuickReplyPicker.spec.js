@@ -46,12 +46,24 @@ beforeEach(() => {
 });
 describe('native quick reply review', () => {
   it('keeps an over-limit signed review editable but refuses direct delivery until corrected', async () => {
-    const w = mountPicker({ maxLength: 4096, prepareContent: value => value + ' signed' });
-    API.preview.mockResolvedValue({ data: { id: 3, content: 'x'.repeat(4096), revision: 'revision-1', actor_id: 5 } });
+    const w = mountPicker({
+      maxLength: 4096,
+      prepareContent: value => value + ' signed',
+    });
+    API.preview.mockResolvedValue({
+      data: {
+        id: 3,
+        content: 'x'.repeat(4096),
+        revision: 'revision-1',
+        actor_id: 5,
+      },
+    });
     await w.vm.open(3);
     await flushPromises();
     expect(w.get('textarea').element.value.length).toBe(4103);
-    const button = w.findAll('button').find(row => row.text().includes('QUICK.SEND'));
+    const button = w
+      .findAll('button')
+      .find(row => row.text().includes('QUICK.SEND'));
     expect(button.attributes('disabled')).toBeDefined();
     w.findAllComponents({ name: 'Dialog' })[1].vm.$emit('confirm');
     await flushPromises();
@@ -59,24 +71,40 @@ describe('native quick reply review', () => {
     await w.get('textarea').setValue('x'.repeat(4096));
     expect(button.attributes('disabled')).toBeUndefined();
   });
-  it.each(['application/pdf', 'image/png'])('binds %s bytes to the reviewed revision and rejects a replacement', async contentType => {
-    const insert = vi.fn().mockResolvedValue();
-    API.preview.mockResolvedValue({ data: {
-      id: 3, content: 'Approved text', revision: 'approved-revision', actor_id: 5,
-      file: { id: 41, filename: 'approved-file', content_type: contentType, byte_size: 10 },
-    } });
-    API.file.mockRejectedValue({ response: { data: { error: 'RESPONSE_CHANGED' } } });
-    const w = mountPicker({ onInsert: insert });
-    await w.vm.open(3);
-    await flushPromises();
-    await click(w, 'QUICK.INSERT');
-    await flushPromises();
-    expect(API.file).toHaveBeenCalledWith(3, 1, {
-      revision: 'approved-revision', attachment_id: 41,
-    });
-    expect(insert).not.toHaveBeenCalled();
-    expect(w.get('[role="alert"]').text()).toContain('QUICK.ERROR');
-  });
+  it.each(['application/pdf', 'image/png'])(
+    'binds %s bytes to the reviewed revision and rejects a replacement',
+    async contentType => {
+      const insert = vi.fn().mockResolvedValue();
+      API.preview.mockResolvedValue({
+        data: {
+          id: 3,
+          content: 'Approved text',
+          revision: 'approved-revision',
+          actor_id: 5,
+          file: {
+            id: 41,
+            filename: 'approved-file',
+            content_type: contentType,
+            byte_size: 10,
+          },
+        },
+      });
+      API.file.mockRejectedValue({
+        response: { data: { error: 'RESPONSE_CHANGED' } },
+      });
+      const w = mountPicker({ onInsert: insert });
+      await w.vm.open(3);
+      await flushPromises();
+      await click(w, 'QUICK.INSERT');
+      await flushPromises();
+      expect(API.file).toHaveBeenCalledWith(3, 1, {
+        revision: 'approved-revision',
+        attachment_id: 41,
+      });
+      expect(insert).not.toHaveBeenCalled();
+      expect(w.get('[role="alert"]').text()).toContain('QUICK.ERROR');
+    }
+  );
   it('loads the existing catalog and resolves only the selected conversation', async () => {
     const w = mountPicker();
     await w.vm.open();

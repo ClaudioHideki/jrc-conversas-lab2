@@ -1,3 +1,13 @@
+# Respostas rápidas e percurso WhatsApp — 15/11/2026
+
+Branch de trabalho `codex/quick-replies-whatsapp-release-20261115`, derivada de `2be22e86baecbe75c302bb03208e78e67301c743`, descendente da main produtiva `55da80eb`. Preserva as correções publicadas de expansão Liquid, cópia independente de anexos, rascunhos pendentes e ciclo de vida do Dialog. Não reaplicar esses patches.
+
+Os testes Chrome anteriores tinham expectativa HTTP 200 incorreta para criação nativa (201) e reutilizavam um evento de aprovação entre temas. A proteção de conflito do backend deve permanecer. A revisão independente identificou três defeitos adicionais: arquivo de catálogo anterior reutilizável após seleção rejeitada/pendente, download de bytes de outra revisão do anexo e envio direto sem o limite de texto nativo. Corrigidos com testes de regressão; detalhes em `docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md`.
+
+Provas locais atuais: 504 testes Vue em 40 arquivos passaram; contrato estrito de runtime e 15 regressões de adulteração passaram. A lista de admissão é explícita: oito hashes conferidos contra a revisão independente, demais fontes do incremento iguais ao commit revisado 2be22e86 e dez pins anteriores preservados. Não automatizar descoberta/aceite de novas fontes por diff.
+
+Pendentes antes da publicação: GREEN Rails/PostgreSQL no candidato corrigido, Chrome com assets novos, percurso privado de mídia com filas e reconciliação de IDs, CI consolidada/imagem no SHA exato e conferência produtiva. O laboratório antigo usa Ruby 3.4.4 e recusou corretamente o Gemfile 3.4.12; não alterar o Gemfile para mascarar a incompatibilidade. Usar o runtime correto no runner isolado. Nada neste checkpoint comprova entrega física, captura completa do celular ou perda zero. Não executar envio real, replay cego, pareamento ou rotinas de backup/dump/restore.
+
 # Reconciliação dos gates da release — 14/11/2026
 
 Em `0fef27e8`, workspace, fluxos comerciais e comissões avançaram; o job auxiliar de gates reproduziu um metateste que ainda contava três chamadas de preparo SQL. Atualizado para os quatro pontos de chamada (um loop cobre duas bases), exigindo os mesmos nomes/HOST/DB no schema e no preparo. O comando exato do job passou22/22 localmente; não se dispensou nenhum SQL guard. A CI nativa completa e a imagem precisam ser executadas novamente no SHA deste ajuste.

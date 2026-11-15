@@ -62,9 +62,13 @@ describe('approval import native catalog race', () => {
     });
     await wrapper.get('input[type="file"]').trigger('change');
     post.mockClear();
-    const button = wrapper.findAll('button').find(row => row.text().includes('importCatalog.preview'));
+    const button = wrapper
+      .findAll('button')
+      .find(row => row.text().includes('importCatalog.preview'));
     expect(button.attributes('disabled')).toBeDefined();
-    expect(wrapper.get('[role="alert"]').text()).toContain('importCatalog.invalid');
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      'importCatalog.invalid'
+    );
     expect(wrapper.find('article').exists()).toBe(false);
     await preview(wrapper);
     expect(post).not.toHaveBeenCalled();
@@ -76,15 +80,28 @@ describe('approval import native catalog race', () => {
     await loadFile(wrapper);
     let fail;
     Object.defineProperty(wrapper.get('input[type="file"]').element, 'files', {
-      value: [{ name: 'unreadable.csv', size: 20, text: () => new Promise((resolve, reject) => { fail = reject; }) }],
+      value: [
+        {
+          name: 'unreadable.csv',
+          size: 20,
+          text: () =>
+            new Promise((resolve, reject) => {
+              fail = reject;
+            }),
+        },
+      ],
       configurable: true,
     });
     await wrapper.get('input[type="file"]').trigger('change');
-    const button = wrapper.findAll('button').find(row => row.text().includes('importCatalog.preview'));
+    const button = wrapper
+      .findAll('button')
+      .find(row => row.text().includes('importCatalog.preview'));
     expect(button.attributes('disabled')).toBeDefined();
     fail(new Error('Synthetic file read failure'));
     await flushPromises();
-    expect(wrapper.get('[role="alert"]').text()).toContain('importCatalog.invalid');
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      'importCatalog.invalid'
+    );
     await preview(wrapper);
     expect(post).not.toHaveBeenCalled();
   });
@@ -94,7 +111,16 @@ describe('approval import native catalog race', () => {
     await wrapper.get('select').setValue('0');
     let finish;
     Object.defineProperty(wrapper.get('input[type="file"]').element, 'files', {
-      value: [{ name: 'old.json', size: 20, text: () => new Promise(resolve => { finish = resolve; }) }],
+      value: [
+        {
+          name: 'old.json',
+          size: 20,
+          text: () =>
+            new Promise(resolve => {
+              finish = resolve;
+            }),
+        },
+      ],
       configurable: true,
     });
     await wrapper.get('input[type="file"]').trigger('change');
