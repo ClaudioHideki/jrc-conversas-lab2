@@ -170,6 +170,7 @@ watch(
 onBeforeUnmount(reset);
 defineExpose({ open, close });
 </script>
+
 <template>
   <Dialog
     ref="dialog"

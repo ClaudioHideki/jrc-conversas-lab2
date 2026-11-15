@@ -39,8 +39,6 @@ class CannedResponse < ApplicationRecord
     errors.add(:file, 'type not supported') unless allowed.include?(file.content_type)
   end
 
-  public
-
   scope :order_by_search, lambda { |search|
     short_code_starts_with = sanitize_sql_array(['WHEN short_code ILIKE ? THEN 1', "#{search}%"])
     short_code_like = sanitize_sql_array(['WHEN short_code ILIKE ? THEN 0.5', "%#{search}%"])

@@ -90,7 +90,7 @@ RSpec.describe 'Contextual quick replies', type: :request do
   it 'enforces the installation upload limit' do
     allow(GlobalConfigService).to receive(:load).and_call_original
     allow(GlobalConfigService).to receive(:load).with('MAXIMUM_FILE_UPLOAD_SIZE', 40).and_return(1)
-    canned.file.attach(io: StringIO.new('x' * (1024 * 1024 + 1)), filename: 'large.txt', content_type: 'text/plain')
+    canned.file.attach(io: StringIO.new('x' * ((1024 * 1024) + 1)), filename: 'large.txt', content_type: 'text/plain')
     expect(canned).not_to be_valid
     expect(canned.errors[:file]).to include('size is too big')
   end

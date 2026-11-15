@@ -40,6 +40,7 @@ const remove = () => {
 };
 onBeforeUnmount(release);
 </script>
+
 <template>
   <div class="space-y-2 rounded-lg border border-n-weak p-3 text-n-slate-12">
     <p class="m-0 text-sm">{{ t('CANNED_MGMT.QUICK.FILE_HELP') }}</p>

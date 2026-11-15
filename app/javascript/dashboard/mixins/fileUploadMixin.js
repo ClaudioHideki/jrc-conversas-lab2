@@ -57,9 +57,8 @@ export default {
     onFileUpload(file) {
       if (this.globalConfig.directUploadsEnabled) {
         return this.onDirectFileUpload(file);
-      } else {
-        return this.onIndirectFileUpload(file);
       }
+      return this.onIndirectFileUpload(file);
     },
 
     onDirectFileUpload(file) {

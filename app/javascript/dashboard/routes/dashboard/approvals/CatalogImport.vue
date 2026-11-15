@@ -118,6 +118,7 @@ const request = async dryRun => {
 const changeMapping = invalidate;
 onBeforeUnmount(invalidate);
 </script>
+
 <template>
   <section class="min-w-0 space-y-4 text-n-slate-12">
     <p class="text-sm">{{ t('JRC_APPROVALS.importCatalog.help') }}</p>
