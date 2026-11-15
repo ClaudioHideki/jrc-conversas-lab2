@@ -277,3 +277,50 @@ it('sends the original native version, explicit decision and reason once while a
   finish({ data: source() });
   await flushPromises();
 });
+
+it('renders pending catalog drafts without inventing a selection and localizes filter labels while preserving API values', async () => {
+  navigation.route.params.screen = 'policies';
+  navigation.route.params.id = undefined;
+  navigation.route.fullPath = '/app/accounts/1/approvals/policies';
+  const policy = {
+    id: 9,
+    name: 'Synthetic imported draft',
+    code: 'SYNTHETIC_IMPORT',
+    state: 'draft',
+    enabled: false,
+    module_key: 'crm',
+    event_key: 'proposal_send',
+    draft_definition: { catalog_import: { configuration_pending: true } },
+  };
+  api.get.mockImplementation(path =>
+    Promise.resolve({
+      data:
+        path === 'context'
+          ? {
+              ...context(),
+              scopes: [
+                {
+                  issuer_company_id: 10,
+                  business_unit_id: 20,
+                  capabilities: ['policy_manage'],
+                },
+              ],
+            }
+          : [policy],
+      headers: { 'x-total-count': '1', 'x-page': '1', 'x-per-page': '25' },
+    })
+  );
+  await render();
+  expect(wrapper.text()).toContain(policy.name);
+  const draft = wrapper
+    .findAll('option')
+    .find(option => option.element.value === 'draft');
+  expect(draft.text()).toBe(locale.JRC_APPROVALS.workspace.states.draft);
+  await wrapper.get('form select').setValue('draft');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(api.get).toHaveBeenCalledWith(
+    'policies',
+    expect.objectContaining({ state: 'draft' })
+  );
+});

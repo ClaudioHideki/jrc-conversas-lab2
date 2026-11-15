@@ -1193,8 +1193,9 @@ const errorText = computed(() => {
                     ? ['draft', 'validated', 'published', 'retired']
                     : STATES"
                   :key="value"
+                  :value="value"
                 >
-                  {{ value }}
+                  {{ t(`JRC_APPROVALS.workspace.states.${value}`) }}
                 </option>
               </select></label
             ><label
@@ -1307,11 +1308,15 @@ const errorText = computed(() => {
                   <td class="p-3">
                     {{ row.current_version || row.policy_version || '—' }}
                     <p
-                      v-if="row.draft_definition"
+                      v-if="row.draft_definition?.selection"
                       class="text-xs"
                     >
                       {{ row.draft_definition.selection.priority }} ·
-                      {{ row.draft_definition.selection.mode }}
+                      {{
+                        t(
+                          `JRC_APPROVALS.enum_${row.draft_definition.selection.mode}`
+                        )
+                      }}
                     </p>
                   </td>
                   <td class="p-3">
