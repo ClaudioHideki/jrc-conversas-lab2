@@ -398,7 +398,8 @@
         "preserved": "Preservado, sem alterações",
         "pending_mapping": "Evento pendente de mapeamento",
         "pending_adapter": "Integração nativa ainda não instalada",
-        "conflict": "Conflito: requer revisão humana"
+        "conflict": "Conflito: requer revisão humana",
+        "update": "Atualizar somente campos gerenciados do rascunho"
       }
     },
     "duplicate": "Duplicar regra",

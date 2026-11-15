@@ -764,7 +764,7 @@ describe('E4 components using bounded real DTO contracts', () => {
     const wrapper = mount(ApprovalsPage, {
       global: {
         plugins: [i18n(), router, createStore({})],
-        stubs: { Button: buttonStub },
+        stubs: { Button: buttonStub, Dialog: decisionDialogStub },
       },
     });
     await flushPromises();
@@ -837,7 +837,7 @@ describe('E4 components using bounded real DTO contracts', () => {
     const wrapper = mount(ApprovalsPage, {
       global: {
         plugins: [i18n(), router, createStore({})],
-        stubs: { Button: buttonStub },
+        stubs: { Button: buttonStub, Dialog: decisionDialogStub },
       },
     });
     await flushPromises();
@@ -896,7 +896,7 @@ describe('E4 components using bounded real DTO contracts', () => {
     const wrapper = mount(ApprovalsPage, {
       global: {
         plugins: [i18n(), router, createStore({})],
-        stubs: { Button: buttonStub },
+        stubs: { Button: buttonStub, Dialog: decisionDialogStub },
       },
     });
     await flushPromises();
@@ -927,7 +927,7 @@ describe('E4 components using bounded real DTO contracts', () => {
     const wrapper = mount(ApprovalsPage, {
       global: {
         plugins: [i18n(), router, createStore({})],
-        stubs: { Button: buttonStub },
+        stubs: { Button: buttonStub, Dialog: decisionDialogStub },
       },
     });
     await flushPromises();

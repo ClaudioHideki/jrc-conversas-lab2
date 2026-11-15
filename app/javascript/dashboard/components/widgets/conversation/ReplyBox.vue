@@ -981,30 +981,44 @@ export default {
           )
         : content;
     },
-    async insertQuickReply({ content, file, conversationId }) {
-      if (
-        conversationId !== this.currentChat.id ||
-        this.isEditorDisabled ||
-        this.isPrivate
-      )
-        return;
+    quickReplyIsCurrent({ accountId, conversationId, authorityKey }) {
+      return (
+        accountId === this.accountId &&
+        conversationId === this.currentChat.id &&
+        authorityKey === this.quickReplyIdentity &&
+        !this.isEditorDisabled &&
+        !this.isPrivate
+      );
+    },
+    async insertQuickReply({ content, file, ...context }) {
+      if (!this.quickReplyIsCurrent(context))
+        throw new Error('Quick reply context changed');
       if (file) {
-        const success = await this.onFileUpload({
+        // Keep the native File in the editor; upload only when the user sends it.
+        // This avoids creating unattached storage blobs while reviewing a model.
+        const success = await this.onIndirectFileUpload({
           file,
           name: file.name,
           type: file.type,
           size: file.size,
-          quickReplyConversationId: conversationId,
+          quickReplyContext: context,
         });
-        if (!success) throw new Error('Quick reply upload failed');
+        if (!success) throw new Error('Quick reply attachment failed');
       }
-      if (
-        conversationId !== this.currentChat.id ||
-        this.isEditorDisabled ||
-        this.isPrivate
-      )
-        return;
-      this.addIntoEditor(content);
+      if (!this.quickReplyIsCurrent(context))
+        throw new Error('Quick reply context changed');
+      this.addIntoEditor(
+        this.sendWithSignature
+          ? removeSignature(
+              content,
+              this.messageSignature,
+              getEffectiveChannelType(
+                this.channelType,
+                this.inbox?.medium || ''
+              )
+            )
+          : content
+      );
     },
     addIntoEditor(content) {
       this.updateEditorSelectionWith = content;
@@ -1111,14 +1125,24 @@ export default {
         return Promise.resolve(false);
 
       const conversationId =
-        file.quickReplyConversationId || this.currentChat.id;
-      if (conversationId !== this.currentChat.id) return Promise.resolve(false);
+        file.quickReplyContext?.conversationId || this.currentChat.id;
+      if (
+        conversationId !== this.currentChat.id ||
+        (file.quickReplyContext &&
+          !this.quickReplyIsCurrent(file.quickReplyContext))
+      )
+        return Promise.resolve(false);
       return new Promise(resolve => {
         const reader = new FileReader();
         reader.readAsDataURL(file.file);
         reader.onerror = () => resolve(false);
         reader.onloadend = () => {
-          if (reader.error || conversationId !== this.currentChat.id) {
+          if (
+            reader.error ||
+            conversationId !== this.currentChat.id ||
+            (file.quickReplyContext &&
+              !this.quickReplyIsCurrent(file.quickReplyContext))
+          ) {
             resolve(false);
             return;
           }
@@ -1157,9 +1181,8 @@ export default {
         let caption =
           this.isAnInstagramChannel || this.isATiktokChannel ? '' : message;
         this.attachedFiles.forEach(attachment => {
-          const attachedFile = this.globalConfig.directUploadsEnabled
-            ? attachment.blobSignedId
-            : attachment.resource.file;
+          const attachedFile =
+            attachment.blobSignedId || attachment.resource.file;
           let attachmentPayload = {
             conversationId: this.currentChat.id,
             files: [attachedFile],
@@ -1214,7 +1237,7 @@ export default {
       if (this.attachedFiles && this.attachedFiles.length) {
         messagePayload.files = [];
         this.attachedFiles.forEach(attachment => {
-          if (this.globalConfig.directUploadsEnabled) {
+          if (attachment.blobSignedId) {
             messagePayload.files.push(attachment.blobSignedId);
             if (attachment.isVoiceMessage) {
               messagePayload.isVoiceMessage = true;
@@ -1528,6 +1551,7 @@ export default {
       :can-send-combined="!isAnInstagramChannel && !isATiktokChannel"
       :prepare-content="prepareQuickReply"
       :on-insert="insertQuickReply"
+      :is-context-current="quickReplyIsCurrent"
     />
     <WhatsappTemplates
       :inbox-id="inbox.id"

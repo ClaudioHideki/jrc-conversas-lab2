@@ -200,7 +200,7 @@ onBeforeUnmount(invalidate);
             {{ row.name }} —
             {{ t('JRC_APPROVALS.importCatalog.actions.' + row.action) }}
           </p>
-          <label v-if="row.action !== 'preserved'"
+          <label v-if="!['preserved', 'update'].includes(row.action)"
             >{{ t('JRC_APPROVALS.importCatalog.adapter') }}
             <select
               v-model="mappings[row.code]"
@@ -249,7 +249,7 @@ onBeforeUnmount(invalidate);
         :disabled="
           busy ||
           !confirmed ||
-          !report.counts.create ||
+          !(report.counts.create || report.counts.update) ||
           !!report.counts.conflict
         "
         @click="request(false)"

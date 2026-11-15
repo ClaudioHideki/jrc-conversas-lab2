@@ -32,6 +32,34 @@ RSpec.describe 'Contextual quick replies', type: :request do
     expect(response.parsed_body['content']).to include('[nome]')
   end
 
+  it 'uses an authorized master-company name and preserves the placeholder when corporate coverage denies it' do
+    account.enable_features!('jrc_customer_master')
+    company = JrcCustomers::Company.create!(account: account, name: 'Empresa Sintética', relationship_type: 'customer')
+    contact.update!(company_id: company.id)
+    post "#{base}/#{canned.id}/preview", params: { conversation_id: conversation.display_id }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['content']).to include('Empresa Sintética')
+    company.update!(relationship_type: 'internal')
+    post "#{base}/#{canned.id}/preview", params: { conversation_id: conversation.display_id }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['content']).to include('[empresa]')
+    expect(response.parsed_body['content']).not_to include('Empresa Sintética')
+  end
+
+  it 'does not turn a structured or absent attribute into invented text' do
+    contact.update!(additional_attributes: { city: { hidden: 'not a city' }, region: nil })
+    post "#{base}/#{canned.id}/preview", params: { conversation_id: conversation.display_id }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['content']).to include('[cidade]', '[região]')
+  end
+
+  it 'limits the existing Liquid renderer without changing global limits' do
+    canned.update!(content: '{% for i in (1..50000) %}x{% endfor %}')
+    post "#{base}/#{canned.id}/preview", params: { conversation_id: conversation.display_id }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body['error']).to eq('RENDER_LIMIT')
+  end
+
   it 'continues to resolve legacy Liquid templates with native drops' do
     canned.update!(content: 'Olá {{ contact.first_name }}. {{ agent.name }}')
     post "#{base}/#{canned.id}/preview", params: { conversation_id: conversation.display_id }, headers: headers, as: :json
@@ -96,28 +124,48 @@ RSpec.describe 'Contextual quick replies', type: :request do
   end
 
   it 'requires explicit confirmation and creates only one native message for repeated delivery' do
-    values = { conversation_id: conversation.display_id, content: 'Texto revisado', delivery_key: 'synthetic-intent-1234', revision: canned.updated_at.iso8601(6) }
+    values = { conversation_id: conversation.display_id, content: 'Texto revisado', delivery_key: 'synthetic-intent-1234', actor_id: agent.id, revision: canned.updated_at.iso8601(6) }
     post "#{base}/#{canned.id}/deliver", params: values.merge(confirmed: false), headers: headers, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     2.times { post "#{base}/#{canned.id}/deliver", params: values.merge(confirmed: true), headers: headers, as: :json; expect(response).to have_http_status(:ok) }
     expect(conversation.messages.outgoing.where(content: 'Texto revisado').count).to eq(1)
+    saved = conversation.messages.outgoing.find_by!(content: 'Texto revisado')
+    expect(saved.reload.additional_attributes.dig('quick_reply', 'key')).to eq(values[:delivery_key])
+    expect(saved.sender).to eq(agent)
   end
 
   it 'refuses changed content under the same intent key and stale template revisions' do
-    service = CannedResponses::Delivery.new(response: canned, conversation: conversation, user: agent)
-    values = { content: 'Original', key: 'synthetic-intent-4567', confirmed: true, revision: canned.updated_at.iso8601(6) }
+    service = CannedResponses::Delivery.new(response: canned, conversation: conversation.reload, user: agent)
+    values = { content: 'Original', key: 'synthetic-intent-4567', expected_actor_id: agent.id, confirmed: true, revision: canned.updated_at.iso8601(6) }
     service.call(**values)
     expect { service.call(**values.merge(content: 'Alterado')) }.to raise_error(CannedResponses::Delivery::Invalid, 'DELIVERY_CONTENT_CHANGED')
     expect { service.call(**values.merge(key: 'synthetic-intent-9876', revision: 'old')) }.to raise_error(CannedResponses::Delivery::Invalid, 'RESPONSE_CHANGED')
   end
 
   it 'does not create a message when the native WhatsApp window is closed' do
+    conversation.reload
     allow(conversation).to receive(:can_reply?).and_return(false)
     expect do
       CannedResponses::Delivery.new(response: canned, conversation: conversation, user: agent).call(
-        content: 'Revisado', key: 'synthetic-intent-closed', confirmed: true, revision: canned.updated_at.iso8601(6)
+        content: 'Revisado', key: 'synthetic-intent-closed', expected_actor_id: agent.id, confirmed: true, revision: canned.updated_at.iso8601(6)
       )
     end.to raise_error(CannedResponses::Delivery::Invalid, 'MESSAGE_WINDOW_CLOSED')
     expect(conversation.messages.outgoing).to be_empty
   end
+  it 'rejects a preview made under another authenticated actor without creating a message' do
+    post "#{base}/#{canned.id}/deliver", params: { conversation_id: conversation.display_id, content: 'Reviewed',
+      confirmed: true, actor_id: agent.id + 100_000, delivery_key: 'synthetic-actor-changed', revision: canned.updated_at.iso8601(6) }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body['error']).to eq('ACTOR_CHANGED')
+    expect(conversation.messages.outgoing).to be_empty
+  end
+
+  it 'treats alias values as data instead of executing embedded Liquid' do
+    contact.update!(name: '{{ account.name }}')
+    canned.update!(content: 'Nome: [nome]')
+    post "#{base}/#{canned.id}/preview", params: { conversation_id: conversation.display_id }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['content']).to eq('Nome: {{ account.name }}')
+  end
+
 end

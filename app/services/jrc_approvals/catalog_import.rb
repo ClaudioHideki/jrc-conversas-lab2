@@ -24,6 +24,7 @@ class JrcApprovals::CatalogImport
       repeated = rows.select { |row| row['action'] == 'create' }.group_by { |row| row['catalog_key'] }.select { |_key, values| values.size > 1 }.keys
       rows.each { |row| row['action'] = 'conflict' if row['action'] == 'create' && repeated.include?(row['catalog_key']) }
       result = { 'rows' => rows, 'people' => people, 'counts' => rows.map { |row| row['action'] }.tally,
+                 'scope' => { 'issuer_company_id' => company_id, 'business_unit_id' => unit_id },
                  'dry_run' => dry_run, 'activated' => false, 'requests_created' => 0 }
       result['plan_digest'] = JrcApprovals::Ledger.digest(input.merge('rows' => rows))
       return result if dry_run
@@ -40,18 +41,24 @@ class JrcApprovals::CatalogImport
       raise JrcApprovals::Error, 'VERSION_CONFLICT' unless expected_digest == result['plan_digest']
       raise JrcApprovals::Error, 'IMPORT_CONFLICT' if rows.any? { |row| row['action'] == 'conflict' }
 
-      rows.select { |row| row['action'] == 'create' }.each do |row|
+      rows.select { |row| %w[create update].include?(row['action']) }.each do |row|
         module_key, event_key = row.fetch('catalog_key').split('.', 2)
-        policy = JrcApprovals::Policies.new(account: @account, user: @user).create!(
-          code: row['code'], name: row['name'], module_key: module_key, event_key: event_key,
-          issuer_company_id: company_id, business_unit_id: unit_id,
-          definition: { 'catalog_import' => { 'schema_version' => '1.0', 'source_digest' => digest,
-                        'source_module' => row['source_module'], 'configuration_pending' => true } }
-        )
+        definition = { 'catalog_import' => { 'schema_version' => '1.0', 'source_digest' => digest, 'source_title' => row['name'],
+                       'source_module' => row['source_module'], 'configuration_pending' => true } }
+        service = JrcApprovals::Policies.new(account: @account, user: @user)
+        policy = if row['action'] == 'update'
+                   service.edit!(policy_id: row['policy_id'], expected_version: row['lock_version'], name: row['name'], definition: definition)
+                 else
+                   service.create!(code: row['code'], name: row['name'], module_key: module_key, event_key: event_key,
+                                   issuer_company_id: company_id, business_unit_id: unit_id, definition: definition)
+                 end
         raise JrcApprovals::Error, 'IMPORT_UNSAFE_STATE' unless policy.state == 'draft' && !policy.enabled && policy.current_version_id.nil?
 
         row['policy_id'] = policy.id
       end
+      result['batch_key'] = key
+      result['executed_by_user_id'] = actor.user_id
+      result['input_digest'] = digest
       JrcApprovals::Ledger.audit!(account: @account, actor: actor, event: 'catalog_imported', key: correlation,
                                  data: { input_digest: digest, result: result })
       result
@@ -116,7 +123,17 @@ class JrcApprovals::CatalogImport
     existing = JrcApprovals::Policy.find_by(account_id: @account.id, code: row['code'])
     if existing
       @authorization.authorize!('policy_manage', company_id: existing.issuer_company_id, unit_id: existing.business_unit_id)
-      return value.merge('action' => 'preserved', 'policy_id' => existing.id, 'lock_version' => existing.lock_version)
+      imported = existing.draft_definition['catalog_import']
+      result = value.merge('action' => 'preserved', 'policy_id' => existing.id, 'lock_version' => existing.lock_version)
+      return result unless imported && existing.state == 'draft' && !existing.enabled && existing.current_version_id.nil?
+
+      key = "#{existing.module_key}.#{existing.event_key}"
+      untouched = existing.draft_definition.keys == ['catalog_import'] && existing.name == imported['source_title'] &&
+        existing.issuer_company_id == @company_id && existing.business_unit_id == @unit_id &&
+        (mappings[row['code']].blank? || mappings[row['code']] == key)
+      return result.merge('action' => 'conflict') unless untouched
+
+      return result.merge('catalog_key' => key, 'action' => existing.name == row['title'] ? 'preserved' : 'update')
     end
     key = mappings[row['code']]
     return value.merge('action' => 'pending_mapping') if key.blank?

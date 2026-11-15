@@ -13,6 +13,7 @@ const mountPicker = (values = {}) =>
       accountId: 1,
       conversationId: 11,
       canAttach: () => true,
+      isContextCurrent: () => true,
       onInsert: vi.fn().mockResolvedValue(),
       ...values,
     },
@@ -38,6 +39,7 @@ beforeEach(() => {
       content: 'Hello Synthetic',
       unresolved: [],
       revision: 'revision-1',
+      actor_id: 5,
     },
   });
   API.deliver.mockResolvedValue({ data: { id: 99 } });
@@ -49,7 +51,7 @@ describe('native quick reply review', () => {
     await flushPromises();
     await click(w, 'Greeting');
     await flushPromises();
-    expect(API.preview).toHaveBeenCalledWith(3, 11);
+    expect(API.preview).toHaveBeenCalledWith(3, 11, 1);
     expect(w.get('textarea').element.value).toBe('Hello Synthetic');
     expect(API.deliver).not.toHaveBeenCalled();
   });
@@ -67,6 +69,8 @@ describe('native quick reply review', () => {
       content: 'Reviewed',
       file: undefined,
       conversationId: 11,
+      accountId: 1,
+      authorityKey: '',
     });
     expect(API.deliver).not.toHaveBeenCalled();
   });
@@ -113,6 +117,7 @@ describe('native quick reply review', () => {
       confirmed: true,
       content: 'Hello Synthetic',
       revision: 'revision-1',
+      actor_id: 5,
     });
     finish({ data: { id: 99 } });
     await flushPromises();
@@ -174,5 +179,40 @@ describe('native quick reply review', () => {
         .attributes('disabled')
     ).toBeDefined();
     expect(API.deliver).not.toHaveBeenCalled();
+  });
+  it('rejects a stale live store context even before the prop watcher runs', async () => {
+    let current = true;
+    const w = mountPicker({ isContextCurrent: () => current });
+    await w.vm.open();
+    await flushPromises();
+    await click(w, 'Greeting');
+    await flushPromises();
+    current = false;
+    w.findAllComponents({ name: 'Dialog' })[1].vm.$emit('confirm');
+    await flushPromises();
+    expect(API.deliver).not.toHaveBeenCalled();
+  });
+  it('keeps unresolved variables reviewable and prevents direct delivery', async () => {
+    API.preview.mockResolvedValue({
+      data: { id: 3, content: 'Hello [nome]', actor_id: 5 },
+    });
+    const w = mountPicker();
+    await w.vm.open();
+    await flushPromises();
+    await click(w, 'Greeting');
+    await flushPromises();
+    expect(
+      w
+        .findAll('button')
+        .find(b => b.text().includes('QUICK.SEND'))
+        .attributes('disabled')
+    ).toBeDefined();
+    await w.get('textarea').setValue('Hello corrected');
+    expect(
+      w
+        .findAll('button')
+        .find(b => b.text().includes('QUICK.SEND'))
+        .attributes('disabled')
+    ).toBeUndefined();
   });
 });

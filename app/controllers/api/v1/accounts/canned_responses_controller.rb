@@ -1,7 +1,7 @@
 class Api::V1::Accounts::CannedResponsesController < Api::V1::Accounts::BaseController
   before_action :fetch_canned_response, only: [:update, :destroy, :preview, :file, :deliver]
   before_action :authorized_conversation, only: [:preview, :deliver]
-  rescue_from CannedResponses::Delivery::Invalid do |error|
+  rescue_from CannedResponses::Delivery::Invalid, CannedResponses::Preview::Invalid do |error|
     render json: { error: error.message }, status: :unprocessable_entity
   end
 
@@ -21,13 +21,15 @@ class Api::V1::Accounts::CannedResponsesController < Api::V1::Accounts::BaseCont
   end
 
   def preview
+    authorize_file!
     response.headers['Cache-Control'] = 'no-store'
     resolved = CannedResponses::Preview.new(response: @canned_response, conversation: @conversation, user: Current.user).call
-    render json: payload(@canned_response).merge(resolved).merge(revision: @canned_response.updated_at.iso8601(6))
+    render json: payload(@canned_response).merge(resolved).merge(revision: @canned_response.updated_at.iso8601(6), actor_id: Current.user.id)
   end
 
   def file
     raise ActiveRecord::RecordNotFound unless @canned_response.file.attached?
+    authorize_file!
 
     response.headers['Cache-Control'] = 'private, no-store'
     response.headers['X-Content-Type-Options'] = 'nosniff'
@@ -37,7 +39,7 @@ class Api::V1::Accounts::CannedResponsesController < Api::V1::Accounts::BaseCont
 
   def deliver
     message = CannedResponses::Delivery.new(response: @canned_response, conversation: @conversation, user: Current.user).call(
-      content: params[:content], key: params[:delivery_key], confirmed: params[:confirmed], revision: params[:revision]
+      content: params[:content], key: params[:delivery_key], confirmed: params[:confirmed], revision: params[:revision], expected_actor_id: params[:actor_id]
     )
     render json: message.push_event_data
   end
@@ -71,6 +73,12 @@ class Api::V1::Accounts::CannedResponsesController < Api::V1::Accounts::BaseCont
     data = record.as_json
     data['file'] = record.file_metadata if record.file.attached?
     data
+  end
+
+  def authorize_file!
+    return unless @canned_response.file.attached?
+
+    JrcServiceDesk::OutboundAttachments.authorize_blob!(@canned_response.file.blob, user: Current.user, account_id: Current.account.id)
   end
 
   def canned_responses

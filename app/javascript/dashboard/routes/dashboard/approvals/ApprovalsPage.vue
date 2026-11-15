@@ -105,7 +105,14 @@ const ownDelegationIntent = intent();
 const screen = computed(() => route.params.screen || 'inbox');
 const id = computed(() => route.params.id);
 watch(
-  () => [screen.value, id.value, record.value, accessIdentity.value],
+  () => [
+    screen.value,
+    id.value,
+    record.value,
+    templatePolicy.value,
+    state.context,
+    accessIdentity.value,
+  ],
   async () => {
     await nextTick();
     if (
@@ -116,7 +123,7 @@ watch(
       policyDialog.value?.open();
     else policyDialog.value?.close();
   },
-  { flush: 'post' }
+  { flush: 'post', immediate: true }
 );
 watch(accessIdentity, () => configurationDialog.value?.close());
 

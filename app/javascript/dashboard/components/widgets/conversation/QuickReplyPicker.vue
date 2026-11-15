@@ -13,6 +13,7 @@ const props = defineProps({
   canSendCombined: { type: Boolean, default: true },
   prepareContent: { type: Function, default: value => value },
   onInsert: { type: Function, required: true },
+  isContextCurrent: { type: Function, required: true },
 });
 const { t } = useI18n();
 const dialog = ref(null);
@@ -38,9 +39,22 @@ const filtered = computed(() =>
 const attachmentAllowed = computed(
   () => !selected.value?.file || props.canAttach(selected.value.file)
 );
+const hasUnresolved = computed(() =>
+  /\[(nome|vendedor|empresa|cidade|região|data|produto\/serviço)\]|\{\{|\{%/.test(
+    content.value
+  )
+);
+const currentContext = () =>
+  !props.disabled &&
+  props.isContextCurrent({
+    accountId: props.accountId,
+    conversationId: props.conversationId,
+    authorityKey: props.authorityKey,
+  });
 const sendAllowed = computed(
   () =>
     !props.disabled &&
+    !hasUnresolved.value &&
     attachmentAllowed.value &&
     (!selected.value?.file || props.canSendCombined)
 );
@@ -64,13 +78,13 @@ const close = () => {
   dialog.value?.close();
 };
 const open = async () => {
-  if (props.disabled) return;
+  if (!currentContext()) return;
   reset();
   const current = generation;
   dialog.value.open();
   busy.value = true;
   try {
-    const result = await API.get({ searchKey: '' });
+    const result = await API.get({ searchKey: '', accountId: props.accountId });
     if (current === generation) records.value = result.data;
   } catch {
     if (current === generation) error.value = t('CANNED_MGMT.QUICK.ERROR');
@@ -79,7 +93,7 @@ const open = async () => {
   }
 };
 const choose = async row => {
-  if (busy.value) return;
+  if (busy.value || !currentContext()) return;
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
   previewUrl.value = '';
   cachedFile = null;
@@ -87,14 +101,18 @@ const choose = async row => {
   busy.value = true;
   error.value = '';
   try {
-    const result = await API.preview(row.id, props.conversationId);
+    const result = await API.preview(
+      row.id,
+      props.conversationId,
+      props.accountId
+    );
     if (current !== generation) return;
     selected.value = result.data;
     content.value = props.prepareContent(result.data.content);
     intent = crypto.randomUUID();
     uncertain.value = false;
     if (result.data.file?.content_type?.startsWith('image/')) {
-      const image = await API.file(row.id);
+      const image = await API.file(row.id, props.accountId);
       if (current !== generation) return;
       cachedFile = new File([image.data], result.data.file.filename, {
         type: result.data.file.content_type,
@@ -109,9 +127,13 @@ const choose = async row => {
   }
 };
 const insert = async () => {
-  if (busy.value || props.disabled || !attachmentAllowed.value) return;
+  if (busy.value || !currentContext() || !attachmentAllowed.value) return;
   const current = generation;
-  const conversationId = props.conversationId;
+  const context = {
+    accountId: props.accountId,
+    conversationId: props.conversationId,
+    authorityKey: props.authorityKey,
+  };
   busy.value = true;
   error.value = '';
   try {
@@ -119,14 +141,15 @@ const insert = async () => {
     if (selected.value.file) {
       if (cachedFile) file = cachedFile;
       else {
-        const result = await API.file(selected.value.id);
+        const result = await API.file(selected.value.id, props.accountId);
         if (current !== generation) return;
         file = new File([result.data], selected.value.file.filename, {
           type: selected.value.file.content_type,
         });
       }
     }
-    await props.onInsert({ content: content.value, file, conversationId });
+    if (!currentContext()) return;
+    await props.onInsert({ content: content.value, file, ...context });
     if (current === generation) close();
   } catch {
     if (current === generation) error.value = t('CANNED_MGMT.QUICK.ERROR');
@@ -136,22 +159,34 @@ const insert = async () => {
 };
 const send = async () => {
   confirmation.value.close();
-  if (busy.value || !sendAllowed.value) return;
+  if (busy.value || !currentContext() || !sendAllowed.value) return;
   const current = generation;
   busy.value = true;
   error.value = '';
   try {
-    await API.deliver(selected.value.id, {
-      conversation_id: props.conversationId,
-      content: content.value,
-      delivery_key: intent,
-      confirmed: true,
-      revision: selected.value.revision,
-    });
+    await API.deliver(
+      selected.value.id,
+      {
+        conversation_id: props.conversationId,
+        content: content.value,
+        delivery_key: intent,
+        confirmed: true,
+        revision: selected.value.revision,
+        actor_id: selected.value.actor_id,
+      },
+      props.accountId
+    );
     if (current === generation) close();
-  } catch {
+  } catch (cause) {
     if (current === generation) {
-      uncertain.value = true;
+      const rejected = [
+        'ACTOR_CHANGED',
+        'UNRESOLVED_VARIABLES',
+        'RESPONSE_CHANGED',
+        'MESSAGE_WINDOW_CLOSED',
+        'CHANNEL_REQUIRES_SEPARATE_MESSAGES',
+      ].includes(cause.response?.data?.error);
+      uncertain.value = !rejected;
       error.value = t('CANNED_MGMT.QUICK.SEND_ERROR');
     }
   } finally {
@@ -218,7 +253,7 @@ defineExpose({ open, close });
             class="mt-2 w-full bg-n-solid-2 text-n-slate-12"
           />
         </label>
-        <p v-if="selected.unresolved?.length" class="text-sm text-n-amber-11">
+        <p v-if="hasUnresolved" class="text-sm text-n-amber-11">
           {{ t('CANNED_MGMT.QUICK.MISSING') }}
         </p>
         <p

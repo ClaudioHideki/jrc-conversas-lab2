@@ -476,7 +476,8 @@
         "preserved": "Preserved without changes",
         "pending_mapping": "Event mapping pending",
         "pending_adapter": "Native adapter not installed",
-        "conflict": "Conflict requiring human review"
+        "conflict": "Conflict requiring human review",
+        "update": "Update only managed draft fields"
       }
     }
   }

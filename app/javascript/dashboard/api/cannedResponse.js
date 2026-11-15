@@ -7,25 +7,35 @@ class CannedResponse extends ApiClient {
     super('canned_responses', { accountScoped: true });
   }
 
-  get({ searchKey }) {
+  scopedUrl(accountId) {
+    if (accountId === undefined) return this.url;
+    if (!Number.isSafeInteger(Number(accountId)) || Number(accountId) <= 0)
+      throw new Error('INVALID_ACCOUNT');
+    return `/api/v1/accounts/${Number(accountId)}/canned_responses`;
+  }
+
+  get({ searchKey, accountId }) {
+    const base = this.scopedUrl(accountId);
     const url = searchKey
-      ? `${this.url}?search=${encodeURIComponent(searchKey)}`
-      : this.url;
+      ? `${base}?search=${encodeURIComponent(searchKey)}`
+      : base;
     return axios.get(url);
   }
 
-  preview(id, conversationId) {
-    return axios.post(`${this.url}/${id}/preview`, {
+  preview(id, conversationId, accountId) {
+    return axios.post(`${this.scopedUrl(accountId)}/${id}/preview`, {
       conversation_id: conversationId,
     });
   }
 
-  file(id) {
-    return axios.get(`${this.url}/${id}/file`, { responseType: 'blob' });
+  file(id, accountId) {
+    return axios.get(`${this.scopedUrl(accountId)}/${id}/file`, {
+      responseType: 'blob',
+    });
   }
 
-  deliver(id, values) {
-    return axios.post(`${this.url}/${id}/deliver`, values);
+  deliver(id, values, accountId) {
+    return axios.post(`${this.scopedUrl(accountId)}/${id}/deliver`, values);
   }
 
   static payload(values) {
