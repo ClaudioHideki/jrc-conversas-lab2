@@ -69,6 +69,8 @@ const decision = () => ({
 });
 beforeEach(() => {
   vi.resetAllMocks();
+  HTMLDialogElement.prototype.showModal = vi.fn();
+  HTMLDialogElement.prototype.close = vi.fn();
   member = reactive({ actor: 7, role: 'agent', grant: 1, presence: 'online' });
   navigation.route = reactive({
     params: { accountId: '1', screen: 'inbox', id: '501' },
