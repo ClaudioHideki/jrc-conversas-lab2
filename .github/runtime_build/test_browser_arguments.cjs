@@ -1,0 +1,12 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync(__dirname + '/approval_browser.spec.cjs', 'utf8');
+const expression = source.match(/evaluateAll\((\(options,choice\)=>[^\n]+),index\)/);
+assert.ok(expression, 'The actual browser function must receive the choice explicitly');
+const evaluate = vm.runInNewContext('(' + expression[1] + ')');
+const options = ['', 'crm.proposal_send', 'synthetic.one', 'synthetic.two', 'synthetic.three', 'synthetic.four'].map(value => ({ value }));
+const old = vm.runInNewContext('(options => options.map(o => o.value).filter(Boolean)[index])');
+assert.throws(() => old(options), /index is not defined/);
+for (let choice = 0; choice < 4; choice++) assert.equal(evaluate(options, choice), options[choice + 2].value);
+console.log('Browser serialization regression: old closure rejected; all 4 independent choices passed');
