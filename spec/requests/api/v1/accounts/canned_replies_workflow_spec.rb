@@ -168,4 +168,13 @@ RSpec.describe 'Contextual quick replies', type: :request do
     expect(response.parsed_body['content']).to eq('Nome: {{ account.name }}')
   end
 
+  it 'bounds alias expansion after Liquid even when the stored model is small' do
+    contact.update!(name: 'x' * 255)
+    canned.update!(content: '[nome]' * 300)
+    post "#{base}/#{canned.id}/preview", params: { conversation_id: conversation.display_id }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body['error']).to eq('RENDER_LIMIT')
+    expect(conversation.messages.outgoing).to be_empty
+  end
+
 end

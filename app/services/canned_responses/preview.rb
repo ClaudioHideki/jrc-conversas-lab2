@@ -31,9 +31,15 @@ class CannedResponses::Preview
     rescue Liquid::Error
       # Keep the template visible for manual correction instead of silently erasing missing data.
     end
+    resolved_bytes = text.bytesize
     text = text.gsub(/\[(nome|vendedor|empresa|cidade|região|data|produto\/serviço)\]/) do |token|
       value = aliases[Regexp.last_match(1)]
-      value.is_a?(String) && value.present? ? value : token
+      next token unless value.is_a?(String) && value.present?
+
+      resolved_bytes += value.bytesize - token.bytesize
+      raise Invalid, 'RENDER_LIMIT' if resolved_bytes > 65_536
+
+      value
     end
     { content: text, unresolved: text.scan(/\[[^\]\n]+\]|\{\{[^}]+\}\}/).uniq }
   end
