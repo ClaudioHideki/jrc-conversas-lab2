@@ -49,6 +49,62 @@ beforeEach(() => {
   });
 });
 describe('approval import native catalog race', () => {
+  it('forgets the previous document and mappings when a replacement file is rejected', async () => {
+    get.mockResolvedValue({ data: [{ key: 'crm.proposal_send' }] });
+    const wrapper = mount(CatalogImport, { props: { context } });
+    await wrapper.get('select').setValue('0');
+    await loadFile(wrapper);
+    await preview(wrapper);
+    await wrapper.get('article select').setValue('crm.proposal_send');
+    Object.defineProperty(wrapper.get('input[type="file"]').element, 'files', {
+      value: [{ name: 'rejected.json', size: 262145, text: vi.fn() }],
+      configurable: true,
+    });
+    await wrapper.get('input[type="file"]').trigger('change');
+    post.mockClear();
+    const button = wrapper.findAll('button').find(row => row.text().includes('importCatalog.preview'));
+    expect(button.attributes('disabled')).toBeDefined();
+    expect(wrapper.get('[role="alert"]').text()).toContain('importCatalog.invalid');
+    expect(wrapper.find('article').exists()).toBe(false);
+    await preview(wrapper);
+    expect(post).not.toHaveBeenCalled();
+  });
+  it('blocks preview while reading a replacement and handles a failed file read without reusing old data', async () => {
+    get.mockResolvedValue({ data: [] });
+    const wrapper = mount(CatalogImport, { props: { context } });
+    await wrapper.get('select').setValue('0');
+    await loadFile(wrapper);
+    let fail;
+    Object.defineProperty(wrapper.get('input[type="file"]').element, 'files', {
+      value: [{ name: 'unreadable.csv', size: 20, text: () => new Promise((resolve, reject) => { fail = reject; }) }],
+      configurable: true,
+    });
+    await wrapper.get('input[type="file"]').trigger('change');
+    const button = wrapper.findAll('button').find(row => row.text().includes('importCatalog.preview'));
+    expect(button.attributes('disabled')).toBeDefined();
+    fail(new Error('Synthetic file read failure'));
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain('importCatalog.invalid');
+    await preview(wrapper);
+    expect(post).not.toHaveBeenCalled();
+  });
+  it('keeps only the latest selected file when reads finish out of order', async () => {
+    get.mockResolvedValue({ data: [] });
+    const wrapper = mount(CatalogImport, { props: { context } });
+    await wrapper.get('select').setValue('0');
+    let finish;
+    Object.defineProperty(wrapper.get('input[type="file"]').element, 'files', {
+      value: [{ name: 'old.json', size: 20, text: () => new Promise(resolve => { finish = resolve; }) }],
+      configurable: true,
+    });
+    await wrapper.get('input[type="file"]').trigger('change');
+    await loadFile(wrapper);
+    finish('{"people":[{"full_name":"Stale person"}]}');
+    await flushPromises();
+    await preview(wrapper);
+    expect(post.mock.calls[0][1].catalog_import.document).toBe('{"people":[]}');
+    expect(wrapper.text()).not.toContain('Stale person');
+  });
   it('retains an authorized late catalog when a file is selected during its request', async () => {
     let finish;
     get.mockImplementation(

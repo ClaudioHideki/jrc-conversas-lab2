@@ -108,6 +108,28 @@ RSpec.describe 'Contextual quick replies', type: :request do
     expect(canned.reload.file).not_to be_attached
   end
 
+  it 'returns exactly the reviewed attachment and refuses replacements under a stale preview' do
+    canned.file.attach(io: File.open(Rails.root.join('spec/assets/sample.pdf')), filename: 'reviewed.pdf', content_type: 'application/pdf')
+    post "#{base}/#{canned.id}/preview", params: { conversation_id: conversation.display_id }, headers: headers, as: :json
+    preview = response.parsed_body
+    expected = { revision: preview.fetch('revision'), attachment_id: preview.fetch('file').fetch('id') }
+    get "#{base}/#{canned.id}/file", params: expected, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.body.b).to eq(File.binread(Rails.root.join('spec/assets/sample.pdf')))
+    canned.file.attach(io: File.open(Rails.root.join('spec/assets/sample.png')), filename: 'replacement.png', content_type: 'image/png')
+    get "#{base}/#{canned.id}/file", params: expected, headers: headers
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body['error']).to eq('RESPONSE_CHANGED')
+    expect(conversation.messages.outgoing).to be_empty
+  end
+
+  it 'refuses a mismatched attachment ID even when the current revision matches' do
+    canned.file.attach(io: File.open(Rails.root.join('spec/assets/sample.png')), filename: 'reviewed.png', content_type: 'image/png')
+    get "#{base}/#{canned.id}/file", params: { revision: canned.reload.updated_at.iso8601(6), attachment_id: canned.file.id + 1 }, headers: headers
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body['error']).to eq('RESPONSE_CHANGED')
+  end
+
   it 'rejects HTML content and foreign signed blob references' do
     canned.file.attach(io: StringIO.new('<script>alert(1)</script>'), filename: 'bad.html', content_type: 'text/html')
     expect(canned).not_to be_valid
@@ -132,6 +154,21 @@ RSpec.describe 'Contextual quick replies', type: :request do
     saved = conversation.messages.outgoing.find_by!(content: 'Texto revisado')
     expect(saved.reload.additional_attributes.dig('quick_reply', 'key')).to eq(values[:delivery_key])
     expect(saved.sender).to eq(agent)
+  end
+
+  it 'preserves the native WhatsApp text boundary before creating an outgoing quick reply' do
+    whatsapp = create(:channel_whatsapp, account: account)
+    conversation.update!(inbox: create(:inbox, account: account, channel: whatsapp))
+    create(:message, conversation: conversation, message_type: :incoming)
+    values = { conversation_id: conversation.display_id, confirmed: true, actor_id: agent.id,
+               revision: canned.updated_at.iso8601(6), delivery_key: 'synthetic-channel-limit-1234' }
+    post "#{base}/#{canned.id}/deliver", params: values.merge(content: 'x' * 4097), headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body['error']).to eq('CONTENT_TOO_LONG')
+    expect(conversation.messages.outgoing).to be_empty
+    post "#{base}/#{canned.id}/deliver", params: values.merge(content: 'x' * 4096), headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(conversation.messages.outgoing.sole.content.length).to eq(4096)
   end
 
   it 'refuses changed content under the same intent key and stale template revisions' do
