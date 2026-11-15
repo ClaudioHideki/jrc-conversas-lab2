@@ -157,8 +157,8 @@ RSpec.describe 'Contextual quick replies', type: :request do
   end
 
   it 'preserves the native WhatsApp text boundary before creating an outgoing quick reply' do
-    whatsapp = create(:channel_whatsapp, account: account)
-    conversation.update!(inbox: create(:inbox, account: account, channel: whatsapp))
+    whatsapp = create(:channel_whatsapp, account: account, provider: 'whatsapp_cloud', sync_templates: false, validate_provider_config: false)
+    conversation.update!(inbox: whatsapp.inbox)
     create(:message, conversation: conversation, message_type: :incoming)
     values = { conversation_id: conversation.display_id, confirmed: true, actor_id: agent.id,
                revision: canned.updated_at.iso8601(6), delivery_key: 'synthetic-channel-limit-1234' }
