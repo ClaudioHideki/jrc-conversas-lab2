@@ -78,21 +78,6 @@ const close = () => {
   reset();
   dialog.value?.close();
 };
-const open = async () => {
-  if (!currentContext()) return;
-  reset();
-  const current = generation;
-  dialog.value.open();
-  busy.value = true;
-  try {
-    const result = await API.get({ searchKey: '', accountId: props.accountId });
-    if (current === generation) records.value = result.data;
-  } catch {
-    if (current === generation) error.value = t('CANNED_MGMT.QUICK.ERROR');
-  } finally {
-    if (current === generation) busy.value = false;
-  }
-};
 const choose = async row => {
   if (busy.value || !currentContext()) return;
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
@@ -126,6 +111,26 @@ const choose = async row => {
   } finally {
     if (current === generation) busy.value = false;
   }
+};
+const open = async responseId => {
+  if (!currentContext()) return;
+  reset();
+  const current = generation;
+  dialog.value.open();
+  busy.value = true;
+  let initial;
+  try {
+    const result = await API.get({ searchKey: '', accountId: props.accountId });
+    if (current === generation) {
+      records.value = result.data;
+      initial = records.value.find(row => row.id === responseId);
+    }
+  } catch {
+    if (current === generation) error.value = t('CANNED_MGMT.QUICK.ERROR');
+  } finally {
+    if (current === generation) busy.value = false;
+  }
+  if (initial && current === generation) await choose(initial);
 };
 const insert = async () => {
   if (busy.value || !currentContext() || !attachmentAllowed.value) return;
@@ -255,7 +260,7 @@ defineExpose({ open, close });
             v-model="content"
             :disabled="busy || uncertain"
             rows="8"
-            class="mt-2 w-full bg-n-solid-2 text-n-slate-12"
+            class="mt-2 min-h-40 w-full resize-y bg-n-solid-2 text-n-slate-12"
           />
         </label>
         <p v-if="hasUnresolved" class="text-sm text-n-amber-11">

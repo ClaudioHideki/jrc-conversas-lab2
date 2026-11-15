@@ -981,6 +981,9 @@ export default {
           )
         : content;
     },
+    openQuickReply(id) {
+      this.$refs.quickReplies?.open(id);
+    },
     onQuickReplyDelivered(message) {
       if (
         message.conversation_id === this.currentChat.id &&
@@ -1444,6 +1447,7 @@ export default {
           ref="messageEditor"
           v-model="message"
           :conversation-id="conversationId"
+          review-canned-responses
           :editor-id="editorStateId"
           class="input popover-prosemirror-menu"
           :is-private="isOnPrivateNote"
@@ -1462,6 +1466,7 @@ export default {
           @focus="onFocus"
           @blur="onBlur"
           @toggle-user-mention="toggleUserMention"
+          @review-canned-response="openQuickReply"
           @toggle-canned-menu="toggleCannedMenu"
           @toggle-variables-menu="toggleVariablesMenu"
           @clear-selection="clearEditorSelection"

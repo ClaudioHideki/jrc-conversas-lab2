@@ -480,7 +480,8 @@
         "update": "Update only managed draft fields"
       },
       "batch": "Import batch",
-      "executedBy": "Executed by user"
+      "executedBy": "Executed by user",
+      "identities": "Review identities"
     }
   }
 }

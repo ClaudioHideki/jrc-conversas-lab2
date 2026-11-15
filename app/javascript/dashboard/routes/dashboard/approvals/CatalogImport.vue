@@ -158,21 +158,34 @@ onBeforeUnmount(() => {
         :disabled="busy"
         @change="read"
     /></label>
-    <div
-      v-for="person in sourcePeople"
-      :key="person.full_name"
-      class="flex flex-wrap items-center gap-2"
+    <details
+      v-if="sourcePeople.length"
+      class="rounded-lg border border-n-weak p-3"
     >
-      <label
-        >{{ person.full_name }} — {{ t('JRC_APPROVALS.importCatalog.userId')
-        }}<input
-          v-model="peopleMappings[person.full_name]"
-          type="number"
-          min="1"
-          class="bg-n-solid-2 text-n-slate-12"
-          @input="changeMapping"
-      /></label>
-    </div>
+      <summary class="cursor-pointer text-sm font-medium">
+        {{ t('JRC_APPROVALS.importCatalog.identities') }} ({{
+          sourcePeople.length
+        }})
+      </summary>
+      <div class="mt-3 max-h-64 space-y-3 overflow-y-auto">
+        <div
+          v-for="person in sourcePeople"
+          :key="person.full_name"
+          class="flex flex-wrap items-center gap-2"
+        >
+          <label
+            >{{ person.full_name }} —
+            {{ t('JRC_APPROVALS.importCatalog.userId')
+            }}<input
+              v-model="peopleMappings[person.full_name]"
+              type="number"
+              min="1"
+              class="bg-n-solid-2 text-n-slate-12"
+              @input="changeMapping"
+          /></label>
+        </div>
+      </div>
+    </details>
     <p
       v-if="error"
       role="alert"
@@ -246,7 +259,7 @@ onBeforeUnmount(() => {
           </label>
         </article>
       </div>
-      <ul>
+      <ul class="max-h-40 overflow-y-auto text-sm">
         <li
           v-for="person in report.people"
           :key="person.name"

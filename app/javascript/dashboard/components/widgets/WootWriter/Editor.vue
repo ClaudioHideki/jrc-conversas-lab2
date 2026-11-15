@@ -85,6 +85,7 @@ const props = defineProps({
   updateSelectionWith: { type: String, default: '' },
   enableVariables: { type: Boolean, default: false },
   enableCannedResponses: { type: Boolean, default: true },
+  reviewCannedResponses: { type: Boolean, default: false },
   enableCaptainTools: { type: Boolean, default: false },
   variables: { type: Object, default: () => ({}) },
   signature: { type: String, default: '' },
@@ -110,6 +111,7 @@ const emit = defineEmits([
   'input',
   'update:modelValue',
   'executeCopilotAction',
+  'reviewCannedResponse',
 ]);
 
 const { t } = useI18n();
@@ -711,6 +713,14 @@ function insertSpecialContent(type, content) {
   useTrack(event_map[type]);
 }
 
+function reviewCannedResponse(id) {
+  if (!editorView || !range.value || props.disabled) return;
+  const { from, to } = range.value;
+  editorView.dispatch(editorView.state.tr.delete(from, to));
+  showCannedMenu.value = false;
+  emit('reviewCannedResponse', id);
+}
+
 function handleLineBreakWhenCmdAndEnterToSendEnabled(event) {
   if (
     hasPressedCommandAndEnter(event) &&
@@ -885,6 +895,8 @@ useEmitter(BUS_EVENTS.INSERT_INTO_RICH_EDITOR, insertContentIntoEditor);
     <CannedResponse
       v-if="shouldShowCannedResponses"
       :search-key="cannedSearchTerm"
+      :review-before-insert="reviewCannedResponses"
+      @review="reviewCannedResponse"
       @replace="content => insertSpecialContent('cannedResponse', content)"
     />
     <VariableList

@@ -216,4 +216,12 @@ describe('native quick reply review', () => {
         .attributes('disabled')
     ).toBeUndefined();
   });
+  it('uses the same authorized preview for a model chosen with the existing slash shortcut', async () => {
+    const w = mountPicker();
+    await w.vm.open(3);
+    await flushPromises();
+    expect(API.preview).toHaveBeenCalledWith(3, 11, 1);
+    expect(w.get('textarea').element.value).toBe('Hello Synthetic');
+    expect(API.deliver).not.toHaveBeenCalled();
+  });
 });
