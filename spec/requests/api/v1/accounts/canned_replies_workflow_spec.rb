@@ -177,4 +177,39 @@ RSpec.describe 'Contextual quick replies', type: :request do
     expect(conversation.messages.outgoing).to be_empty
   end
 
+  it 'delivers a real PDF with a separate native blob and no duplicate attachment on retry' do
+    canned.file.attach(io: File.open(Rails.root.join('spec/assets/sample.pdf')), filename: 'synthetic.pdf', content_type: 'application/pdf')
+    original = canned.reload.file.blob
+    blobs_before = ActiveStorage::Blob.count
+    values = { conversation_id: conversation.display_id, content: 'Documento revisado', confirmed: true, actor_id: agent.id,
+               delivery_key: 'synthetic-pdf-copy-1234', revision: canned.updated_at.iso8601(6) }
+    2.times do
+      post "#{base}/#{canned.id}/deliver", params: values, headers: headers, as: :json
+      expect(response).to have_http_status(:ok)
+    end
+    expect(conversation.messages.outgoing.count).to eq(1)
+    attachment = conversation.messages.outgoing.first.attachments.sole
+    expect(attachment.file.blob_id).not_to eq(original.id)
+    expect(attachment.file.download).to eq(original.download)
+    expect(attachment).to be_file
+    expect(ActiveStorage::Blob.count).to eq(blobs_before + 1)
+  end
+
+  it 'keeps the shared model readable when the sent copy becomes a protected Service Desk attachment' do
+    canned.file.attach(io: File.open(Rails.root.join('spec/assets/sample.png')), filename: 'synthetic.png', content_type: 'image/png')
+    ticket = create(:jrc_sd_ticket, account: account, unit: create(:jrc_sd_unit, operator_company: create(:jrc_sd_operator_company, account: account)))
+    JrcServiceDesk::TicketConversation.create!(account: account, unit: ticket.unit, ticket: ticket,
+      conversation: conversation, linked_by_membership: ticket.created_by_membership)
+    values = { conversation_id: conversation.display_id, content: 'Imagem revisada', confirmed: true, actor_id: agent.id,
+               delivery_key: 'synthetic-sd-copy-1234', revision: canned.reload.updated_at.iso8601(6) }
+    post "#{base}/#{canned.id}/deliver", params: values, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    sent = conversation.messages.outgoing.first.attachments.sole.file.blob
+    expect(JrcServiceDesk::ProtectedBlobAccess.new(blob: sent, user: nil)).to be_protected
+    expect(JrcServiceDesk::ProtectedBlobAccess.new(blob: canned.file.blob, user: nil)).not_to be_protected
+    other_member = create(:user, account: account, role: :agent)
+    get "#{base}/#{canned.id}/file", headers: other_member.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+  end
+
 end

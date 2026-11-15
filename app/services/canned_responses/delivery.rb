@@ -17,6 +17,23 @@ class CannedResponses::Delivery
     raise Invalid, 'INVALID_CONTENT' unless content.is_a?(String) && content.present? && content.bytesize <= 65_536
     raise Invalid, 'UNRESOLVED_VARIABLES' if content.match?(/\[(nome|vendedor|empresa|cidade|região|data|produto\/serviço)\]|\{\{|\{%/)
 
+    values = { content: content, key: key, revision: revision }
+    return perform(**values, upload: nil, source_blob: nil) unless @response.file.attached?
+
+    blob = @response.file.blob
+    JrcServiceDesk::OutboundAttachments.authorize_blob!(blob, user: @user, account_id: @conversation.account_id)
+    # Keep the native checked tempfile open through the Message transaction and
+    # its upload callbacks. Each message owns a copy, so a later SD link cannot
+    # change the authority of the shared model's original blob.
+    blob.open do |file|
+      upload = ActionDispatch::Http::UploadedFile.new(tempfile: file, filename: blob.filename.to_s, type: blob.content_type)
+      perform(**values, upload: upload, source_blob: blob)
+    end
+  end
+
+  private
+
+  def perform(content:, key:, revision:, upload:, source_blob:)
     @conversation.with_lock do
       @response.lock!
       digest = Digest::SHA256.hexdigest([@response.id, revision, content, @user.id].to_json)
@@ -26,7 +43,8 @@ class CannedResponses::Delivery
 
         return old
       end
-      raise Invalid, 'RESPONSE_CHANGED' unless revision == @response.updated_at.iso8601(6)
+      current_blob_id = @response.file.attached? ? @response.file.blob_id : nil
+      raise Invalid, 'RESPONSE_CHANGED' unless revision == @response.updated_at.iso8601(6) && current_blob_id == source_blob&.id
       raise Invalid, 'MESSAGE_WINDOW_CLOSED' unless @conversation.can_reply?
       # These channels require separate text/media messages. Do not silently partially send.
       if @response.file.attached? && %w[Channel::Instagram Channel::Tiktok].include?(@conversation.inbox.channel_type)
@@ -36,7 +54,10 @@ class CannedResponses::Delivery
       values = {
         content: content, private: false, message_type: 'outgoing'
       }
-      values[:attachments] = [@response.file.blob.signed_id] if @response.file.attached?
+      if upload
+        JrcServiceDesk::OutboundAttachments.authorize_blob!(source_blob.reload, user: @user, account_id: @conversation.account_id)
+        values[:attachments] = [upload]
+      end
       message = Messages::MessageBuilder.new(@user, @conversation, values).perform
       message.update!(additional_attributes: (message.additional_attributes || {}).merge(
         'quick_reply' => { 'key' => key, 'digest' => digest, 'response_id' => @response.id }

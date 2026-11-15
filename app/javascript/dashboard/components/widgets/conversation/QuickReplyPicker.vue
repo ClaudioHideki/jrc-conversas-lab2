@@ -10,6 +10,7 @@ const props = defineProps({
   disabled: Boolean,
   authorityKey: { type: String, default: '' },
   canAttach: { type: Function, required: true },
+  canInsert: { type: Boolean, default: true },
   canSendCombined: { type: Boolean, default: true },
   prepareContent: { type: Function, default: value => value },
   onInsert: { type: Function, required: true },
@@ -133,7 +134,13 @@ const open = async responseId => {
   if (initial && current === generation) await choose(initial);
 };
 const insert = async () => {
-  if (busy.value || !currentContext() || !attachmentAllowed.value) return;
+  if (
+    busy.value ||
+    !props.canInsert ||
+    !currentContext() ||
+    !attachmentAllowed.value
+  )
+    return;
   const current = generation;
   const context = {
     accountId: props.accountId,
@@ -294,7 +301,7 @@ defineExpose({ open, close });
           />
           <Button
             :label="t('CANNED_MGMT.QUICK.INSERT')"
-            :disabled="busy || disabled || !attachmentAllowed"
+            :disabled="busy || disabled || !canInsert || !attachmentAllowed"
             @click="insert"
           />
           <Button

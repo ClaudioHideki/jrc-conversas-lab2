@@ -1003,24 +1003,23 @@ export default {
       );
     },
     async insertQuickReply({ content, file, ...context }) {
-      if (!this.quickReplyIsCurrent(context))
-        throw new Error('Quick reply context changed');
-      if (file) {
-        // Keep the native File in the editor; upload only when the user sends it.
-        // This avoids creating unattached storage blobs while reviewing a model.
-        const success = await this.onIndirectFileUpload({
-          file,
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          quickReplyContext: context,
-        });
-        if (!success) throw new Error('Quick reply attachment failed');
-      }
-      if (!this.quickReplyIsCurrent(context))
-        throw new Error('Quick reply context changed');
-      this.addIntoEditor(
-        this.sendWithSignature
+      if (!this.quickReplyIsCurrent(context) || !this.$refs.messageEditor)
+        throw new Error('Quick reply editor context changed');
+      try {
+        if (file) {
+          // The native File stays local until the ordinary message send.
+          const success = await this.onIndirectFileUpload({
+            file,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            quickReplyContext: context,
+          });
+          if (!success) throw new Error('Quick reply attachment failed');
+        }
+        if (!this.quickReplyIsCurrent(context) || !this.$refs.messageEditor)
+          throw new Error('Quick reply editor context changed');
+        const reviewed = this.sendWithSignature
           ? removeSignature(
               content,
               this.messageSignature,
@@ -1029,8 +1028,17 @@ export default {
                 this.inbox?.medium || ''
               )
             )
-          : content
-      );
+          : content;
+        const inserted =
+          await this.$refs.messageEditor.insertReviewedCannedResponse(reviewed);
+        if (!inserted) throw new Error('Quick reply editor unavailable');
+      } catch (error) {
+        if (file)
+          this.attachedFiles = this.attachedFiles.filter(
+            attachment => attachment.resource?.file !== file
+          );
+        throw error;
+      }
     },
     addIntoEditor(content) {
       this.updateEditorSelectionWith = content;
@@ -1565,6 +1573,7 @@ export default {
       :authority-key="quickReplyIdentity"
       :disabled="isEditorDisabled || isPrivate"
       :can-attach="canAttachQuickReply"
+      :can-insert="!showAudioRecorderEditor && !copilot.isActive.value"
       :can-send-combined="!isAnInstagramChannel && !isATiktokChannel"
       :prepare-content="prepareQuickReply"
       :on-insert="insertQuickReply"

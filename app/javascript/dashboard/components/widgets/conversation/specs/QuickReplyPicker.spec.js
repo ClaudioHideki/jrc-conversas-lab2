@@ -224,4 +224,22 @@ describe('native quick reply review', () => {
     expect(w.get('textarea').element.value).toBe('Hello Synthetic');
     expect(API.deliver).not.toHaveBeenCalled();
   });
+  it('keeps direct review available while the ordinary editor is occupied', async () => {
+    const w = mountPicker({ canInsert: false });
+    await w.vm.open(3);
+    await flushPromises();
+    expect(
+      w
+        .findAll('button')
+        .find(b => b.text().includes('QUICK.INSERT'))
+        .attributes('disabled')
+    ).toBeDefined();
+    expect(
+      w
+        .findAll('button')
+        .find(b => b.text().includes('QUICK.SEND'))
+        .attributes('disabled')
+    ).toBeUndefined();
+    expect(API.deliver).not.toHaveBeenCalled();
+  });
 });

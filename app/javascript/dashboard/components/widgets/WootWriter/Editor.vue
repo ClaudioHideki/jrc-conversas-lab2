@@ -666,7 +666,11 @@ async function insertNodeIntoEditor(node, from = 0, to = 0) {
   scrollCursorIntoView(editorView);
 }
 
-function insertContentIntoEditor(content, defaultFrom = 0) {
+function insertContentIntoEditor(
+  content,
+  defaultFrom = 0,
+  defaultTo = undefined
+) {
   const from = defaultFrom || editorView.state.selection.from || 0;
   // Use the editor's current schema to ensure compatibility with buildMessageSchema
   const currentSchema = editorView.state.schema;
@@ -677,7 +681,7 @@ function insertContentIntoEditor(content, defaultFrom = 0) {
     sanitizedContent
   );
 
-  insertNodeIntoEditor(node, from, undefined);
+  return insertNodeIntoEditor(node, from, defaultTo);
 }
 
 /**
@@ -711,6 +715,14 @@ function insertSpecialContent(type, content) {
   };
 
   useTrack(event_map[type]);
+}
+
+async function insertReviewedCannedResponse(content) {
+  if (!editorView || props.disabled || props.isPrivate) return false;
+  const { from, to } = editorView.state.selection;
+  await insertContentIntoEditor(content, from, to);
+  useTrack(CONVERSATION_EVENTS.INSERTED_A_CANNED_RESPONSE);
+  return true;
 }
 
 function reviewCannedResponse(id) {
@@ -870,7 +882,7 @@ onMounted(() => {
   }
 });
 
-defineExpose({ focusEditorInputField });
+defineExpose({ focusEditorInputField, insertReviewedCannedResponse });
 
 // BUS Event to insert text or markdown into the editor at the
 // current cursor position.
