@@ -160,6 +160,8 @@ jobs:
           done
           echo 'Isolated servers did not become ready; no external fallback permitted'
           exit 1
+      - name: Require actual Chrome bootstrap before the full UI assertions
+        run: node tests/playwright/fixtures/call-center-native/probe.mjs
       - name: Chrome desktop and mobile, real CSS and PostgreSQL persistence
         run: |
           node tests/playwright/node_modules/@playwright/test/cli.js test --config tests/playwright/call-center-native.config.ts

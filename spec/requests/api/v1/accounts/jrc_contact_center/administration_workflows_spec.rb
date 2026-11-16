@@ -91,6 +91,14 @@ RSpec.describe 'Call Center administrative workflows', type: :request do
     expect(response.parsed_body.fetch('native_links')).to include('permissions' => false, 'role_editor' => false)
   end
 
+  it 'provides real authorized Account feature flags to the native permission editor' do
+    account.enable_features!('custom_roles')
+    get "/api/v1/accounts/#{account.id}", headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('id')).to eq(account.id)
+    expect(response.parsed_body.fetch('features')).to include('jrc_contact_center' => true, 'custom_roles' => true)
+  end
+
   context 'with a corporate business-unit boundary' do
     let(:company) { JrcCustomers::Company.create!(account: account, name: 'Issuer', relationship_type: 'internal', active: true) }
     let(:allowed_business_unit) { JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'A', code: 'A', active: true) }
