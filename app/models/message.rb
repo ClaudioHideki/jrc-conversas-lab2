@@ -521,7 +521,9 @@ class Message < ApplicationRecord
                 .update_all(last_activity_at: created_at, updated_at: Time.current)
     # Dispatch payloads must use the committed database clock, not a stale
     # association or a maximum computed from an old ORM snapshot.
-    conversation.reload
+    # Refresh this message's target without discarding unsaved changes on a
+    # Conversation instance shared with its caller through inverse associations.
+    association(:conversation).reload(true)
     # rubocop:enable Rails/SkipsModelValidations
   end
 

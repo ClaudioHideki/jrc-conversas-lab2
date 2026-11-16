@@ -228,6 +228,24 @@ jobs:
         run: |
           bundle exec rails db:schema:load
           bundle exec rails runner script/prepare_lab2_candidate_database.rb
+      - name: Preparar banco exclusivo de concorrencia LIVE
+        env:
+          POSTGRES_DATABASE: jrc_delivery_reliability_test
+        run: |
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_DATABASE" = jrc_delivery_reliability_test
+          bundle exec rails db:create db:schema:load
+          bundle exec rails runner script/prepare_lab2_candidate_database.rb
+      - name: Concorrencia LIVE com commits reais no banco autorizado
+        env:
+          POSTGRES_DATABASE: jrc_delivery_reliability_test
+          JRC_LIVE_CONCURRENCY: '1'
+        run: |
+          bundle exec rspec spec/services/jrc_broker/live_ingress_concurrency_spec.rb \
+            --format progress --format json --out /tmp/broker-live-concurrency-rspec.json
+          python3 script/jrc_delivery_evidence.py rspec /tmp/broker-live-concurrency-rspec.json 4
       - name: Regressao de contratos e integridade
         run: |
           bundle exec rspec spec/services/jrc_broker spec/requests/api/v1/accounts/jrc_broker*_spec.rb \
@@ -250,6 +268,7 @@ jobs:
             spec/services/jrc_nico/migration*_spec.rb spec/requests/jrc_nico_migration_browser_boundary_spec.rb \
             spec/services/jrc_nico/native_browser_command_concurrency_spec.rb spec/requests/jrc_nico_native*concurrency_spec.rb \
             spec/services/jrc_flows spec/services/jrc_flow_effects spec/requests/jrc_flow*_spec.rb \
+            --exclude-pattern 'spec/services/jrc_broker/live_ingress_concurrency_spec.rb' \
             --format progress --format json --out /tmp/broker-candidate-rspec.json
           ruby -rjson -e 'abort "Pending examples are not an approved gate" unless JSON.parse(File.read(ARGV.fetch(0))).fetch("summary").fetch("pending_count").zero?' /tmp/broker-candidate-rspec.json
       - name: Importador com S3 MinIO fisico isolado
@@ -308,6 +327,7 @@ jobs:
           name: broker-import-candidate-results
           path: |
             /tmp/broker-candidate-rspec.json
+            /tmp/broker-live-concurrency-rspec.json
             /tmp/broker-import-minio-rspec.json
             /tmp/broker-import-minio.log
             /tmp/broker-first-worker.log

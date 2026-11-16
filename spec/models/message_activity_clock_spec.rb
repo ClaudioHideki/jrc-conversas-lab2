@@ -24,6 +24,19 @@ RSpec.describe Message do
     expect(enqueued_jobs.map { |job| job[:job] }).to include(ActionCableBroadcastJob)
   end
 
+  it 'preserves pending caller attributes while dispatching the persisted conversation clock' do
+    conversation.custom_attributes = { 'synthetic_pending' => 'retained' }
+
+    message = conversation.messages.create!(account: account, inbox: inbox, message_type: :incoming, content: 'Synthetic clock isolation')
+    persisted = Conversation.find(conversation.id)
+
+    expect(conversation.custom_attributes).to eq('synthetic_pending' => 'retained')
+    expect(conversation.will_save_change_to_custom_attributes?).to be(true)
+    expect(persisted.custom_attributes).to eq({})
+    expect(message.conversation.custom_attributes).to eq({})
+    expect(message.push_event_data.dig(:conversation, :last_activity_at)).to eq(persisted.last_activity_at.to_i)
+  end
+
   it 'continues ignoring generic caller timestamp parameters' do
     clock = 1.day.ago
     message = Messages::MessageBuilder.new(nil, conversation, content: 'Synthetic generic clock', message_type: 'incoming',

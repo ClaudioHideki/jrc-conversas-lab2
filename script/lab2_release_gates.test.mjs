@@ -43,7 +43,9 @@ test('main retains the native regression and exact-SHA image release gates after
 
 test('every schema-loaded validation database applies SQL guards without dumping source', () => {
   assert.doesNotMatch(native, /rails db:prepare/);
-  assert.equal((native.match(/rails runner script\/prepare_lab2_candidate_database.rb/g) || []).length, 4);
+  assert.equal((native.match(/rails runner script\/prepare_lab2_candidate_database.rb/g) || []).length, 5);
+  assert.match(native, /name: Preparar banco exclusivo de concorrencia LIVE[\s\S]*?POSTGRES_DATABASE: jrc_delivery_reliability_test[\s\S]*?rails db:create db:schema:load[\s\S]*?rails runner script\/prepare_lab2_candidate_database.rb/);
+  assert.match(native, /name: Concorrencia LIVE com commits reais no banco autorizado[\s\S]*?JRC_LIVE_CONCURRENCY: '1'[\s\S]*?bundle exec rspec spec\/services\/jrc_broker\/live_ingress_concurrency_spec.rb/);
   assert.match(native, /for database in jrc_rel_v2_candidate_test jrc_four_domains_schema_admission_test; do/);
   assert.match(native, /POSTGRES_HOST=jrc-rel-v2-pg-20261101 POSTGRES_DATABASE="\$database" bundle exec rails db:create db:schema:load/);
   assert.match(native, /POSTGRES_HOST=jrc-rel-v2-pg-20261101 POSTGRES_DATABASE="\$database" bundle exec rails runner script\/prepare_lab2_candidate_database.rb/);
