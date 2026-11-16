@@ -6,7 +6,7 @@ FactoryBot.define do
     status { 'sent' }
     message_type { 'incoming' }
     content_type { 'text' }
-    account { create(:account) }
+    account { conversation&.account || inbox&.account || create(:account) }
 
     trait :instagram_story_mention do
       content_attributes { { image_type: 'story_mention' } }
