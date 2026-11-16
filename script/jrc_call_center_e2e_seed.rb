@@ -1,5 +1,6 @@
 # Executed only by the exclusive disposable runner. No provider is configured.
 raise 'Owned synthetic runner required' unless ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted'
+
 owned_database = Rails.env.test? && ENV['POSTGRES_HOST'] == '127.0.0.1'
 owned_database &&= ActiveRecord::Base.connection_db_config.database == 'jrc_sd_bc_portal_concurrency_20261025_test'
 raise 'Owned database required' unless owned_database
