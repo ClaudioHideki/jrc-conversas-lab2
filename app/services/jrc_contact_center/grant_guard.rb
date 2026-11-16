@@ -8,10 +8,13 @@ class JrcContactCenter::GrantGuard
     raise Pundit::NotAuthorizedError if coverage.configured? && !coverage.group?
 
     policy = JrcContactCenter::ModulePolicy.new({ account: account, account_user: member, user: actor }, :contact_center)
-    allowed = added.all? do |permission|
-      action = permission.delete_prefix('jrc_contact_center_')
-      policy.public_send("#{action == 'view' ? 'access' : action}?")
-    end
+    allowed = added.all? { |permission| action_allowed?(policy, permission) }
     raise Pundit::NotAuthorizedError unless allowed
   end
+
+  def self.action_allowed?(policy, permission)
+    action = permission.delete_prefix('jrc_contact_center_')
+    policy.public_send("#{action == 'view' ? 'access' : action}?")
+  end
+  private_class_method :action_allowed?
 end

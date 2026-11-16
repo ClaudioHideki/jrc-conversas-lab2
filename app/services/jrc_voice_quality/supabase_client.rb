@@ -1,5 +1,14 @@
 class JrcVoiceQuality::SupabaseClient
   REQUEST_TIMEOUT = 20
+  ANALYSIS_FIELDS = %w[
+    resumo_conversa sentimento_cliente sentimento_atendente temperatura_conversa tom_cliente tom_atendente risco_churn
+    risco_reclamacao classificacao_ligacao status_monitoria confianca_transcricao observacao_transcricao
+  ].freeze
+  ANALYSIS_FLAGS = %w[
+    houve_agressividade_cliente houve_agressividade_atendente houve_empatia houve_cordialidade houve_interrupcao
+    cliente_demonstrou_insatisfacao cliente_ameacou_cancelar cliente_mencionou_procon_anatel cliente_mencionou_processo
+    problema_resolvido necessita_retorno alerta_supervisao
+  ].freeze
 
   # A legacy schema without Account columns is unavailable, never an excuse
   # to retry a query without its tenant predicate.
@@ -52,10 +61,7 @@ class JrcVoiceQuality::SupabaseClient
     )
 
     Array(rows).each_with_object({}) do |row, memo|
-      verify_row!(row, account_id)
-      unless call_ids.map(&:to_s).include?(row['call_id'].to_s)
-        raise JrcVoiceQuality::PersistenceError.new('Chamada fora da consulta.', code: :scope_unverified)
-      end
+      verify_analysis_row!(row, account_id, call_ids)
       memo[row['call_id']] ||= summary_payload(row)
     end
   rescue JrcVoiceQuality::PersistenceError => e
@@ -121,9 +127,7 @@ class JrcVoiceQuality::SupabaseClient
         texto_transcrito: text,
         modelo_transcricao: model
       },
-      headers: {
-        'Prefer' => 'return=minimal'
-      }
+      headers: { 'Prefer' => 'return=minimal' }
     )
   end
 
@@ -137,26 +141,9 @@ class JrcVoiceQuality::SupabaseClient
       body: {
         account_id: scope_id!(account_id),
         chamada_id: chamada_id,
-        resumo_conversa: analysis['resumo_conversa'],
+        **analysis_fields(analysis),
+        **analysis_flags(analysis),
         assuntos_abordados: array_value(analysis['assuntos_abordados']),
-        sentimento_cliente: analysis['sentimento_cliente'],
-        sentimento_atendente: analysis['sentimento_atendente'],
-        temperatura_conversa: analysis['temperatura_conversa'],
-        tom_cliente: analysis['tom_cliente'],
-        tom_atendente: analysis['tom_atendente'],
-        houve_agressividade_cliente: truthy?(analysis['houve_agressividade_cliente']),
-        houve_agressividade_atendente: truthy?(analysis['houve_agressividade_atendente']),
-        houve_empatia: truthy?(analysis['houve_empatia']),
-        houve_cordialidade: truthy?(analysis['houve_cordialidade']),
-        houve_interrupcao: truthy?(analysis['houve_interrupcao']),
-        cliente_demonstrou_insatisfacao: truthy?(analysis['cliente_demonstrou_insatisfacao']),
-        cliente_ameacou_cancelar: truthy?(analysis['cliente_ameacou_cancelar']),
-        cliente_mencionou_procon_anatel: truthy?(analysis['cliente_mencionou_procon_anatel']),
-        cliente_mencionou_processo: truthy?(analysis['cliente_mencionou_processo']),
-        problema_resolvido: truthy?(analysis['problema_resolvido']),
-        necessita_retorno: truthy?(analysis['necessita_retorno']),
-        risco_churn: analysis['risco_churn'],
-        risco_reclamacao: analysis['risco_reclamacao'],
         cordialidade: bounded_integer(av['cordialidade'], 0, 10),
         empatia: bounded_integer(av['empatia'], 0, 10),
         clareza_comunicacao: bounded_integer(av['clareza_comunicacao'], 0, 10),
@@ -175,17 +162,10 @@ class JrcVoiceQuality::SupabaseClient
         pontos_negativos: array_value(analysis['pontos_negativos']),
         oportunidades_melhoria: array_value(analysis['oportunidades_melhoria']),
         treinamento_recomendado: array_value(analysis['treinamento_recomendado']),
-        classificacao_ligacao: analysis['classificacao_ligacao'],
-        status_monitoria: analysis['status_monitoria'],
-        alerta_supervisao: truthy?(analysis['alerta_supervisao']),
         motivo_alerta: analysis['motivo_alerta'].to_s,
-        confianca_transcricao: analysis['confianca_transcricao'],
-        observacao_transcricao: analysis['observacao_transcricao'],
         payload_completo: analysis
       },
-      headers: {
-        'Prefer' => 'return=minimal'
-      }
+      headers: { 'Prefer' => 'return=minimal' }
     )
   end
 
@@ -198,12 +178,8 @@ class JrcVoiceQuality::SupabaseClient
         account_id: "eq.#{scope_id!(account_id)}",
         id: "eq.#{chamada_id}"
       },
-      body: {
-        status: status
-      },
-      headers: {
-        'Prefer' => 'return=minimal'
-      }
+      body: { status: status },
+      headers: { 'Prefer' => 'return=minimal' }
     )
   rescue JrcVoiceQuality::PersistenceError => e
     raise if e.code == :scope_unverified
@@ -214,6 +190,14 @@ class JrcVoiceQuality::SupabaseClient
   end
 
   private
+
+  def analysis_fields(analysis)
+    ANALYSIS_FIELDS.index_with { |field| analysis[field] }.symbolize_keys
+  end
+
+  def analysis_flags(analysis)
+    ANALYSIS_FLAGS.index_with { |field| truthy?(analysis[field]) }.symbolize_keys
+  end
 
   def resource_id!(value)
     valid = value.is_a?(String) || value.is_a?(Integer)
@@ -232,6 +216,13 @@ class JrcVoiceQuality::SupabaseClient
   def verify_row!(row, account_id)
     valid = row.is_a?(Hash) && row['account_id'].to_s == scope_id!(account_id).to_s
     raise JrcVoiceQuality::PersistenceError.new('Escopo de qualidade nao confirmado.', code: :scope_unverified) unless valid
+  end
+
+  def verify_analysis_row!(row, account_id, call_ids)
+    verify_row!(row, account_id)
+    return if call_ids.map(&:to_s).include?(row['call_id'].to_s)
+
+    raise JrcVoiceQuality::PersistenceError.new('Chamada fora da consulta.', code: :scope_unverified)
   end
 
   def verify_call!(account_id, chamada_id)

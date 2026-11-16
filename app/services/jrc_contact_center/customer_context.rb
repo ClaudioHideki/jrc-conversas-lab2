@@ -44,13 +44,21 @@ class JrcContactCenter::CustomerContext
 
     member = @account.account_users.find(@user_context.fetch(:account_user).id)
     coverage = JrcCrm::CorporateCoverage.new(account: @account, user: member.user)
-    companies = coverage.companies(@account.master_companies).select(:id)
-    relation = @account.contacts.where(company_id: nil).or(@account.contacts.where(company_id: companies))
-    return relation if member.administrator? && member.custom_role_id.nil? && (!coverage.configured? || coverage.group?)
+    relation = corporate_contacts(coverage)
+    return relation if unrestricted_native_member?(member, coverage)
 
     conversations = Conversations::PermissionFilterService.new(@account.conversations, member.user, @account).perform
     calls = JrcContactCenter::AccessScope.new(user_context: @user_context).call_sessions
     relation.where(id: conversations.select(:contact_id)).or(relation.where(id: calls.select(:contact_id)))
+  end
+
+  def corporate_contacts(coverage)
+    companies = coverage.companies(@account.master_companies).select(:id)
+    @account.contacts.where(company_id: nil).or(@account.contacts.where(company_id: companies))
+  end
+
+  def unrestricted_native_member?(member, coverage)
+    member.administrator? && member.custom_role_id.nil? && (!coverage.configured? || coverage.group?)
   end
 
   def linked_contact(id)

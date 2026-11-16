@@ -23,15 +23,19 @@ class JrcContactCenter::SupervisorSnapshot
     member_ids = JrcContactCenter::QueueMembership.where(account: @account, queue_id: @access.queues.select(:id), active: true)
                                                   .select(:account_user_id)
     @agents = @account.account_users.where(id: member_ids).includes(:user).order(:id).map do |member|
-      data = JrcContactCenter::AgentStateSnapshot.new(account_user: member).call
-      permitted = @access.queues.pluck(:id).map(&:to_s)
-      data[:queues] = data[:queues].select { |queue| permitted.include?(queue[:id]) }
-      data[:eligible_queue_ids] &= permitted
-      data[:pending_qualifications] = data[:pending_qualifications].select do |qualification|
-        qualification['call_session_id'] && @access.call_sessions.exists?(id: qualification['call_session_id'])
-      end
-      data.merge(name: member.user.available_name)
+      scoped_agent_data(member).merge(name: member.user.available_name)
     end
+  end
+
+  def scoped_agent_data(member)
+    data = JrcContactCenter::AgentStateSnapshot.new(account_user: member).call
+    permitted = @access.queues.pluck(:id).map(&:to_s)
+    data[:queues] = data[:queues].select { |queue| permitted.include?(queue[:id]) }
+    data[:eligible_queue_ids] &= permitted
+    data[:pending_qualifications] = data[:pending_qualifications].select do |qualification|
+      qualification['call_session_id'] && @access.call_sessions.exists?(id: qualification['call_session_id'])
+    end
+    data
   end
 
   def queues

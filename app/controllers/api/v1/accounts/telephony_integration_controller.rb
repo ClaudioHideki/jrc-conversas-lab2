@@ -11,17 +11,7 @@ class Api::V1::Accounts::TelephonyIntegrationController < Api::V1::Accounts::Bas
     raise Pabx::Error, 'INVALID_SETTINGS' unless raw_settings.is_a?(ActionController::Parameters)
 
     row.with_lock do
-      settings = raw_settings.permit(*Pabx::Settings::KEYS.excluding('cdr_fields', Pabx::ScopeMapping::KEY),
-                                     cdr_fields: Pabx::Settings::CDR_FIELDS).to_h
-      previous_mapping = row.pabx_settings[Pabx::ScopeMapping::KEY]
-      row.pabx_settings = settings
-      row.pabx_settings[Pabx::ScopeMapping::KEY] = previous_mapping if previous_mapping
-      if params.key?(:scope_mapping)
-        mapping = params.require(:scope_mapping).permit(:accountcode, :cdr_identity)
-        row.pabx_settings[Pabx::ScopeMapping::KEY] = Pabx::ScopeMapping.authorize(
-          integration: row, actor: Current.user, accountcode: mapping.fetch(:accountcode), cdr_identity: mapping.fetch(:cdr_identity)
-        )
-      end
+      assign_settings(row, raw_settings)
       row.pabx_username = params[:api_username] if params[:api_username].present?
       row.pabx_password = params[:api_password] if params[:api_password].present?
       row.pabx_sync_state = {}
@@ -54,6 +44,22 @@ class Api::V1::Accounts::TelephonyIntegrationController < Api::V1::Accounts::Bas
   end
 
   private
+
+  def assign_settings(row, raw_settings)
+    settings = raw_settings.permit(*Pabx::Settings::KEYS.excluding('cdr_fields', Pabx::ScopeMapping::KEY),
+                                   cdr_fields: Pabx::Settings::CDR_FIELDS).to_h
+    previous_mapping = row.pabx_settings[Pabx::ScopeMapping::KEY]
+    row.pabx_settings = settings
+    row.pabx_settings[Pabx::ScopeMapping::KEY] = previous_mapping if previous_mapping
+    assign_scope_mapping(row) if params.key?(:scope_mapping)
+  end
+
+  def assign_scope_mapping(row)
+    mapping = params.require(:scope_mapping).permit(:accountcode, :cdr_identity)
+    row.pabx_settings[Pabx::ScopeMapping::KEY] = Pabx::ScopeMapping.authorize(
+      integration: row, actor: Current.user, accountcode: mapping.fetch(:accountcode), cdr_identity: mapping.fetch(:cdr_identity)
+    )
+  end
 
   def integration
     Current.account.telephony_integration || Current.account.build_telephony_integration

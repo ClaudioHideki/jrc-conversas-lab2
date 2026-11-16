@@ -27,7 +27,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
 }));
 const Dialog = defineComponent({
   emits: ['confirm'],
-  setup(_props, { expose }) {
+  setup(_props, { expose, emit }) {
     const visible = ref(false);
     expose({
       open: () => {
@@ -37,10 +37,10 @@ const Dialog = defineComponent({
         visible.value = false;
       },
     });
-    return { visible };
+    return { visible, confirm: () => emit('confirm'), label: 'SAVE' };
   },
   template:
-    '<form v-if="visible" data-dialog @submit.prevent="$emit(\'confirm\')"><slot /><button data-submit type="submit">Save</button></form>',
+    '<form v-if="visible" data-dialog @submit.prevent="confirm"><slot /><button data-submit type="submit">{{ label }}</button></form>',
 });
 enableAutoUnmount(afterEach);
 const context = {

@@ -20,23 +20,9 @@ class JrcContactCenter::Administration
   end
 
   def call
-    integration = @account.telephony_integration
     {
       observed_at: Time.current,
-      cards: CARDS.filter_map do |key, (permission, state)|
-        next unless @policy.public_send("#{permission}?")
-
-        { key: key, state: state, count: count_for(key) }
-      end,
-      capabilities: %w[configure administer audit publish approve recordings_view recordings_listen recordings_download monitor]
-                    .index_with { |key| @policy.public_send("#{key}?") }.merge('control' => @policy.control?),
-      native_links: {
-        permissions: @account.feature_enabled?('custom_roles') && @context.fetch(:account_user).administrator?,
-        approvals: @account.feature_enabled?('jrc_approvals') &&
-          JrcCrm::UserBusinessUnit.structure_managed.active.exists?(account: @account, user: @context.fetch(:user))
-      },
-      provider: { state: 'pending_contract', last_sync_at: integration&.pabx_sync_state&.fetch('last_success_at', nil),
-                  last_error: integration&.pabx_sync_state&.fetch('last_error', nil).present? },
+      cards: cards, capabilities: capabilities, native_links: native_links, provider: provider_state,
       units: @access.units.order(:name, :id).map { |unit| { id: unit.id, name: unit.name } },
       queues: @access.queues.order(:name, :id).map { |queue| { id: queue.id, name: queue.name } },
       corporate: corporate_options
@@ -52,10 +38,37 @@ class JrcContactCenter::Administration
 
   private
 
+  def cards
+    CARDS.filter_map do |key, (permission, state)|
+      next unless @policy.public_send("#{permission}?")
+
+      { key: key, state: state, count: count_for(key) }
+    end
+  end
+
+  def capabilities
+    actions = %w[configure administer audit publish approve recordings_view recordings_listen recordings_download monitor]
+    actions.index_with { |key| @policy.public_send("#{key}?") }.merge('control' => @policy.control?)
+  end
+
+  def native_links
+    { permissions: @account.feature_enabled?('custom_roles') && @context.fetch(:account_user).administrator?,
+      approvals: @account.feature_enabled?('jrc_approvals') &&
+        JrcCrm::UserBusinessUnit.structure_managed.active.exists?(account: @account, user: @context.fetch(:user)) }
+  end
+
+  def provider_state
+    integration = @account.telephony_integration
+    { state: 'pending_contract', last_sync_at: integration&.pabx_sync_state&.fetch('last_success_at', nil),
+      last_error: integration&.pabx_sync_state&.fetch('last_error', nil).present? }
+  end
+
   def count_for(key)
     return @access.queues.count if key == 'queues'
     return @access.units.count if key == 'general'
-    return JrcContactCenter::Qualification.pending.where(account: @account, call_session_id: @access.call_sessions.select(:id)).count if key == 'closures'
+    if key == 'closures'
+      return JrcContactCenter::Qualification.pending.where(account: @account, call_session_id: @access.call_sessions.select(:id)).count
+    end
 
     nil
   end
@@ -63,6 +76,8 @@ class JrcContactCenter::Administration
   def corporate_options
     coverage = JrcCrm::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
     { companies: @account.master_companies.where(id: coverage.company_ids).order(:name).map { |row| { id: row.id, name: row.name } },
-      units: @account.jrc_crm_business_units.where(id: coverage.unit_ids).order(:name).map { |row| { id: row.id, name: row.name, company_id: row.company_id } } }
+      units: @account.jrc_crm_business_units.where(id: coverage.unit_ids).order(:name).map do |row|
+        { id: row.id, name: row.name, company_id: row.company_id }
+      end }
   end
 end

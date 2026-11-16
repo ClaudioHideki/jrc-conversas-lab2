@@ -39,7 +39,8 @@ const selected = computed(() =>
   data.value?.cards.find(card => card.key === section.value)
 );
 const load = async () => {
-  const version = ++generation;
+  generation += 1;
+  const version = generation;
   loading.value = true;
   failed.value = false;
   data.value = null;
@@ -56,7 +57,10 @@ watch(accountId, load, { immediate: true });
 </script>
 
 <template>
-  <div class="min-w-0 space-y-5 p-4 sm:p-6" data-control-desk>
+  <div
+    class="min-w-0 space-y-5 p-4 sm:p-6"
+    data-control-desk
+  >
     <header class="rounded-2xl border border-n-blue-6 bg-n-blue-2 p-5 sm:p-6">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div class="flex min-w-0 items-start gap-3">
@@ -82,7 +86,10 @@ watch(accountId, load, { immediate: true });
           {{ t('JRC_CONTACT_CENTER.COMMON.REFRESH') }}
         </button>
       </div>
-      <p class="mt-4 text-sm text-n-amber-11" role="status">
+      <p
+        class="mt-4 text-sm text-n-amber-11"
+        role="status"
+      >
         {{ t('JRC_CONTACT_CENTER.ADMIN.PROVIDER_PENDING') }}
       </p>
       <p
@@ -92,12 +99,19 @@ watch(accountId, load, { immediate: true });
         {{ t('JRC_CONTACT_CENTER.ADMIN.LAST_SYNC') }}:
         {{ data.provider.last_sync_at }}
       </p>
-      <p v-if="data?.provider.last_error" class="mt-2 text-sm text-n-ruby-11">
+      <p
+        v-if="data?.provider.last_error"
+        class="mt-2 text-sm text-n-ruby-11"
+      >
         {{ t('JRC_CONTACT_CENTER.ADMIN.SYNC_ERROR') }}
       </p>
     </header>
 
-    <p v-if="loading" role="status" class="text-sm text-n-slate-11">
+    <p
+      v-if="loading"
+      role="status"
+      class="text-sm text-n-slate-11"
+    >
       {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}
     </p>
     <p
@@ -146,7 +160,10 @@ watch(accountId, load, { immediate: true });
           }}</span>
         </RouterLink>
       </div>
-      <p v-if="!section && !data.cards.length" class="text-sm text-n-slate-11">
+      <p
+        v-if="!section && !data.cards.length"
+        class="text-sm text-n-slate-11"
+      >
         {{ t('JRC_CONTACT_CENTER.ADMIN.NO_CARDS') }}
       </p>
       <AdministrationSection
@@ -171,7 +188,11 @@ watch(accountId, load, { immediate: true });
         :card="{ key: 'events', state: 'read_only' }"
         :context="data"
       />
-      <p v-else-if="section" role="alert" class="text-sm text-n-ruby-11">
+      <p
+        v-else-if="section"
+        role="alert"
+        class="text-sm text-n-ruby-11"
+      >
         {{ t('JRC_CONTACT_CENTER.ADMIN.DENIED') }}
       </p>
       <RouterLink

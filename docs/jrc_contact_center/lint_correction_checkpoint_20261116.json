@@ -1,0 +1,40 @@
+{
+  "base": "cb7ccc1b8fb1f271fad049e0911bd4da1ece2df5",
+  "source_run": 43875019859,
+  "artifact": 14229418441,
+  "artifact_sha256": "e0eeaae8cedcdd6166c05dec52e2a048db3e2fc2b6a5f41a8826d843690b363d",
+  "original_findings": {
+    "frontend_errors": 8,
+    "ruby_reported_new": 84,
+    "ruby_preexisting": 103
+  },
+  "classification_correction": {
+    "proven_improved_existing_metrics": 2,
+    "actual_new_or_worse_on_cb7ccc1": 82,
+    "strict_comparison": "same method/class, every component non-increasing, same limit; no new method allowance"
+  },
+  "changes": [
+    "mechanical Vue lint corrections",
+    "split new controller/service methods without changing ordering or permission checks",
+    "group equivalent analysis fields preserving all 43 payload keys",
+    "strict incremental comparator regression tests",
+    "safe formatter suggestions in CI without mutating validated source"
+  ],
+  "executed": [
+    "7 comparator regression tests passed",
+    "git diff --check passed",
+    "Vue source formatted and parsed"
+  ],
+  "pending": [
+    "native lint",
+    "Rails and Vue on this checkpoint",
+    "Chrome after lint gates pass"
+  ],
+  "restrictions": [
+    "no global lint changes",
+    "no exclusions or suppressed rules",
+    "no main change",
+    "no Docker build/publication",
+    "no production"
+  ]
+}

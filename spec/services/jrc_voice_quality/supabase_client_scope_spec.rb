@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe JrcVoiceQuality::SupabaseClient do
   let(:client) { described_class.new }
   let(:url) { 'https://quality.example.test/rest/v1' }
+
   around { |example| with_modified_env('SUPABASE_URL' => 'https://quality.example.test', 'SUPABASE_SERVICE_ROLE_KEY' => 'synthetic-only') { example.run } }
 
   it 'queries the same external identifier independently in two Accounts' do
@@ -54,5 +55,25 @@ RSpec.describe JrcVoiceQuality::SupabaseClient do
     client.save_transcription!(account_id: 11, chamada_id: 'a1-b2', text: 'synthetic', model: 'test')
     expect(update).to have_been_requested.once
     expect(transcript).to have_been_requested.once
+  end
+
+  it 'preserves the approved analysis fields, nils, booleans, arrays and score bounds' do
+    stub_request(:get, "#{url}/chamadas_pabx").with(query: hash_including('account_id' => 'eq.11', 'id' => 'eq.a1-b2'))
+      .to_return(body: [{ id: 'a1-b2', account_id: 11 }].to_json)
+    analysis = { 'houve_empatia' => 'false', 'alerta_supervisao' => '1', 'assuntos_abordados' => 'synthetic',
+                 'pontos_positivos' => ['synthetic'], 'nota_final' => 120,
+                 'avaliacao_atendente' => { 'cordialidade' => 999, 'empatia' => -5, 'resolucao_problema' => 99 } }
+    request = stub_request(:post, "#{url}/analises_qualidade_pabx").with do |http|
+      payload = JSON.parse(http.body)
+      expected_keys = JSON.parse(Rails.root.join('spec/fixtures/jrc_voice_quality_analysis_keys.json').read)
+      expect(payload.keys.sort).to eq(expected_keys)
+      expect(payload).to include('account_id' => 11, 'chamada_id' => 'a1-b2', 'resumo_conversa' => nil,
+                                 'houve_empatia' => false, 'alerta_supervisao' => true, 'necessita_retorno' => nil,
+                                 'assuntos_abordados' => ['synthetic'], 'pontos_positivos' => ['synthetic'],
+                                 'cordialidade' => 10, 'empatia' => 0, 'resolucao_problema' => 15, 'nota_final' => 100,
+                                 'payload_completo' => analysis)
+    end.to_return(body: '')
+    client.save_analysis!(account_id: 11, chamada_id: 'a1-b2', analysis: analysis)
+    expect(request).to have_been_requested.once
   end
 end

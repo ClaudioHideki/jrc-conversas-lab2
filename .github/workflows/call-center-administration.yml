@@ -127,12 +127,19 @@ jobs:
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/call-center-vitest.json
       - name: Frontend lint of changed sources
+        id: frontend_lint
         run: |
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR a24adc6dd8bb660f955b76cce0172ae1638deee2 HEAD -- app/javascript | grep -E '\.(js|vue)$')
           pnpm exec eslint "${files[@]}"
       - name: Incremental Ruby lint without suppressing new offenses
+        id: ruby_lint
         if: always() && steps.ruby_runtime.outcome == 'success'
-        run: python3 script/jrc_call_center_lint.py
+        run: |
+          python3 -B script/jrc_call_center_lint_test.py
+          python3 -B script/jrc_call_center_lint.py
+      - name: Preserve safe formatter suggestions without changing candidate source
+        if: failure() && (steps.frontend_lint.outcome == 'failure' || steps.ruby_lint.outcome == 'failure')
+        run: python3 -B script/jrc_call_center_lint_suggestions.py
       - name: Guarded build of real CSS and components for the isolated Chrome test
         env:
           JRC_VITE_BUILD_HEAP_MIB: '6144'

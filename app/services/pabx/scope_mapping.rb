@@ -22,11 +22,7 @@ class Pabx::ScopeMapping
     return unless @settings.key?(KEY)
 
     row = @settings[KEY]
-    valid = row.is_a?(Hash) && row.keys.sort == FIELDS.sort && row['account_id'] == @integration.account_id &&
-            row['tenant'] == @settings['expected_tenant'].to_s && IDENTIFIER.match?(row['tenant'].to_s) &&
-            IDENTIFIER.match?(row['accountcode'].to_s) && %w[tenant accountcode].include?(row['cdr_identity']) &&
-            row['authorized_by_id'].is_a?(Integer) && SuperAdmin.exists?(id: row['authorized_by_id']) &&
-            row['authorized_at'].is_a?(String)
+    valid = authorized_row?(row) && valid_contract?(row)
     raise Pabx::Error, 'INVALID_SCOPE_MAPPING' unless valid
 
     Time.iso8601(row.fetch('authorized_at'))
@@ -48,5 +44,20 @@ class Pabx::ScopeMapping
     row = @settings[KEY]
     expected = row && row['cdr_identity'] == 'accountcode' ? accountcode : @settings.fetch('expected_tenant').to_s
     returned.to_s == expected
+  end
+
+  private
+
+  def authorized_row?(row)
+    row.is_a?(Hash) && row.keys.sort == FIELDS.sort && row['account_id'] == @integration.account_id && authorized_actor?(row)
+  end
+
+  def authorized_actor?(row)
+    row['authorized_by_id'].is_a?(Integer) && SuperAdmin.exists?(id: row['authorized_by_id']) && row['authorized_at'].is_a?(String)
+  end
+
+  def valid_contract?(row)
+    row['tenant'] == @settings['expected_tenant'].to_s && IDENTIFIER.match?(row['tenant'].to_s) &&
+      IDENTIFIER.match?(row['accountcode'].to_s) && %w[tenant accountcode].include?(row['cdr_identity'])
   end
 end

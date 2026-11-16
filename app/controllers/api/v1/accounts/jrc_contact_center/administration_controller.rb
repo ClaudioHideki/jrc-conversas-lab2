@@ -12,18 +12,19 @@ class Api::V1::Accounts::JrcContactCenter::AdministrationController < Api::V1::A
     when 'pabx' then render_pabx
     when 'audit', 'events' then render_events
     when 'teams' then render_teams
-    when 'integrations'
-      entries = JrcContactCenter::Providers::JrcPabxAdapter.new(account: Current.account).capabilities
-      entries = entries.select { |name, _status| name.include?(params[:q].to_s) } if params[:q].present?
-      render json: base_payload.merge(items: entries.map do |name, status|
-        { name: name, status: status }
-      end)
+    when 'integrations' then render_integrations
     else
       render json: base_payload.merge(items: [], state: 'pending_contract')
     end
   end
 
   private
+
+  def render_integrations
+    entries = JrcContactCenter::Providers::JrcPabxAdapter.new(account: Current.account).capabilities
+    entries = entries.select { |name, _status| name.include?(params[:q].to_s) } if params[:q].present?
+    render json: base_payload.merge(items: entries.map { |name, status| { name: name, status: status } })
+  end
 
   def render_teams
     authorize ::Team, :index?
@@ -43,10 +44,7 @@ class Api::V1::Accounts::JrcContactCenter::AdministrationController < Api::V1::A
     relation = Current.account.sip_credentials.includes(:user).order(:extension, :id)
     organizational = JrcContactCenter::OrganizationalScope.new(account: Current.account, account_user: Current.account_user)
     relation = relation.where(user: Current.user) if organizational.restricted?
-    if params[:q].present?
-      relation = relation.joins(:user).where('sip_credentials.extension ILIKE :query OR users.name ILIKE :query',
-                                            query: "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.first(100))}%")
-    end
+    relation = search_extensions(relation) if params[:q].present?
     payload = list_payload(relation) do |credential|
       { id: credential.id, name: credential.user.available_name, extension: credential.extension,
         enabled: credential.enabled?, configured: credential.configured? }
@@ -54,12 +52,17 @@ class Api::V1::Accounts::JrcContactCenter::AdministrationController < Api::V1::A
     render json: payload
   end
 
+  def search_extensions(relation)
+    query = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.first(100))}%"
+    relation.joins(:user).where('sip_credentials.extension ILIKE :query OR users.name ILIKE :query', query: query)
+  end
+
   def render_pabx
     row = Current.account.telephony_integration
     # Infrastructure secrets and transport addresses are not a module-admin grant.
-    render json: base_payload.merge(items: [{ configured: row.present? && Pabx::Settings.new(row).configured?,
-                                             state: 'pending_external_homologation',
-                                             last_sync_at: row&.pabx_sync_state&.fetch('last_success_at', nil) }])
+    item = { configured: row.present? && Pabx::Settings.new(row).configured?, state: 'pending_external_homologation',
+             last_sync_at: row&.pabx_sync_state&.fetch('last_success_at', nil) }
+    render json: base_payload.merge(items: [item])
   end
 
   def render_events

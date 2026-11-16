@@ -7,16 +7,9 @@ class Pabx::Diagnostics
   def call
     provider = Pabx::Provider.new(@integration)
     dashboard = provider.dashboard
-    expected = @settings.data.fetch('expected_tenant').to_s
-    returned = dashboard.fetch('accountcode').to_s
-    extension = @settings.data['test_extension'].to_s
-    mapping = Pabx::ScopeMapping.new(@integration)
-    compatible = mapping.matches?(returned)
-    result = { api: 'connected', authentication: 'ok', expected_tenant: expected, returned_accountcode: returned,
-               tenant_compatible: compatible, expected_accountcode: mapping.accountcode, extension: extension,
-               external_homologation: 'pending', checked_at: Time.current.iso8601,
-               insecure_http: @settings.data['base_url'].to_s.start_with?('http://') }
-    unless compatible
+    result = scope_result(dashboard)
+    extension = result[:extension]
+    unless result[:tenant_compatible]
       return result.merge(overall: 'blocked_scope', error: 'TENANT_MISMATCH', extension_registry: 'blocked_scope',
                           cdr: 'blocked_scope', recordings: 'blocked_scope')
     end
@@ -37,6 +30,18 @@ class Pabx::Diagnostics
   end
 
   private
+
+  def scope_result(dashboard)
+    expected = @settings.data.fetch('expected_tenant').to_s
+    returned = dashboard.fetch('accountcode').to_s
+    extension = @settings.data['test_extension'].to_s
+    mapping = Pabx::ScopeMapping.new(@integration)
+    compatible = mapping.matches?(returned)
+    { api: 'connected', authentication: 'ok', expected_tenant: expected, returned_accountcode: returned,
+               tenant_compatible: compatible, expected_accountcode: mapping.accountcode, extension: extension,
+               external_homologation: 'pending', checked_at: Time.current.iso8601,
+               insecure_http: @settings.data['base_url'].to_s.start_with?('http://') }
+  end
 
   def probe
     yield

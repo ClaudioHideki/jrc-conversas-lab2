@@ -36,11 +36,10 @@ class JrcVoiceQuality::Processor
         filename: download.filename,
         content_type: download.content_type
       )
-      @supabase.save_transcription!(account_id: @account.id, chamada_id: registered_call['id'], text: transcript, model: @openai.transcription_model)
+      persist_transcription(transcript, registered_call['id'])
 
       analysis, mode = analyze(transcript)
-      @supabase.save_analysis!(account_id: @account.id, chamada_id: registered_call['id'], analysis: analysis)
-      @supabase.update_call_status!(account_id: @account.id, chamada_id: registered_call['id'], status: 'concluido')
+      persist_analysis(analysis, registered_call['id'])
       result = {
         status: 'analyzed',
         already_analyzed: false,
@@ -70,6 +69,15 @@ class JrcVoiceQuality::Processor
   end
 
   private
+
+  def persist_transcription(transcript, registered_call_id)
+    @supabase.save_transcription!(account_id: @account.id, chamada_id: registered_call_id, text: transcript, model: @openai.transcription_model)
+  end
+
+  def persist_analysis(analysis, registered_call_id)
+    @supabase.save_analysis!(account_id: @account.id, chamada_id: registered_call_id, analysis: analysis)
+    @supabase.update_call_status!(account_id: @account.id, chamada_id: registered_call_id, status: 'concluido')
+  end
 
   def validate_call!
     raise JrcVoiceQuality::RecordingError.new('Chamada sem identificador.', code: :missing_call_id) if call_id.blank?
