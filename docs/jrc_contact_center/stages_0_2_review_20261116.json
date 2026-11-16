@@ -60,7 +60,13 @@
       ],
       "external_dependencies": [
         "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "PABX online/confirmed indicators require an actual provider response"
+        ]
+      }
     },
     {
       "figure": 2,
@@ -109,7 +115,13 @@
       ],
       "external_dependencies": [
         "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Recent administrative before/after and external alerts belong to stages 3/8"
+        ]
+      }
     },
     {
       "figure": 3,
@@ -122,7 +134,8 @@
         6
       ],
       "implemented_in_0_2": [
-        "Native Team fields/members; local Queue CRUD; independent tab/filter/page state; explicit queue participation/supervision"
+        "Native Team fields/members; local Queue CRUD; independent tab/filter/page state; explicit queue participation/supervision",
+        "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português."
       ],
       "remaining_or_external": [
         "No native Team-to-Queue/primary-supervisor model; DAC/calendar/publication need stages 3/4/6 and provider contract"
@@ -162,12 +175,18 @@
       ],
       "external_dependencies": [
         "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "No native Team-to-Queue/primary-supervisor model; DAC/calendar/publication need stages 3/4/6 and provider contract"
+        ]
+      }
     },
     {
       "figure": 4,
       "title": "Painel técnico PABX e atalhos",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         0,
         1,
@@ -205,7 +224,7 @@
       ],
       "desktop_and_mobile": {
         "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
-        "tested": "Interface específica não homologada nesta etapa.",
+        "tested": "Fundação/consulta nativa existente; interface específica completa da referência não homologada nesta etapa.",
         "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
       },
       "apis_and_persistence": [
@@ -213,7 +232,13 @@
       ],
       "external_dependencies": [
         "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "No fake connection test or resource publication; real diagnostics/ACK contract and URA editor remain later"
+        ]
+      }
     },
     {
       "figure": 5,
@@ -255,7 +280,13 @@
       ],
       "external_dependencies": [
         "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Institutional TTS editor, voices, codec, limits and external authorization are stage 4"
+        ]
+      }
     },
     {
       "figure": 6,
@@ -297,7 +328,13 @@
       ],
       "external_dependencies": [
         "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Institutional audio folders/versioning/storage are stage 4; call recordings are not this catalog"
+        ]
+      }
     },
     {
       "figure": 7,
@@ -339,7 +376,13 @@
       "apis_and_persistence": [
         "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
       ],
-      "external_dependencies": []
+      "external_dependencies": [],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Pause catalog and safe call-to-pause transition require stage 6 and operational policy"
+        ]
+      }
     },
     {
       "figure": 8,
@@ -379,7 +422,13 @@
       "apis_and_persistence": [
         "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
       ],
-      "external_dependencies": []
+      "external_dependencies": [],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "HH:MM minimum/default/maximum pause form belongs to stage 6; no backend catalog is invented"
+        ]
+      }
     },
     {
       "figure": 9,
@@ -426,7 +475,13 @@
       "apis_and_persistence": [
         "GET/PATCH /api/v1/accounts/:account_id/jrc_contact_center/acw_policy"
       ],
-      "external_dependencies": []
+      "external_dependencies": [],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Per-reason/queue/team templates and precedence remain stage 6; native 1..3600 second engine unchanged"
+        ]
+      }
     },
     {
       "figure": 10,
@@ -466,7 +521,13 @@
       "apis_and_persistence": [
         "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
       ],
-      "external_dependencies": []
+      "external_dependencies": [],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Per-reason CRM/SD/task orchestration, per-destination receipts and retries remain stage 6"
+        ]
+      }
     },
     {
       "figure": 11,
@@ -528,7 +589,17 @@
         "GET/POST/PUT/PATCH /api/v1/accounts/:account_id/custom_roles",
         "Armazenamento custom_roles; auditoria nativa audits, somente capacidades CC neste incremento."
       ],
-      "external_dependencies": []
+      "external_dependencies": [],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Pendente 0–2: herança por equipe/usuário não possui contrato ou armazenamento nativo; requer decisão arquitetural, sem concessões por suposição.",
+          "Pendente 0–2: revisão esperada pelo navegador não existe no payload; bloqueio transacional impede restauração de poder revogado, mas não detecta sobrescrita de campos por dois formulários.",
+          "Exclusão de perfil com membros usa dependência nullify nativa; mudança de política exige avaliar todos os módulos.",
+          "Pendente 0–2: matriz visual completa multi-módulo da figura; as concessões existentes seguem explícitas e revisadas.",
+          "Pendente 0–2: native_role? mantém acesso legado quando custom_role_id é nulo. O requisito de não ativar novos usuários automaticamente exige política de elegibilidade/migração que preserve usuários existentes; não foi alterado por suposição."
+        ]
+      }
     },
     {
       "figure": 12,
@@ -541,14 +612,18 @@
         6
       ],
       "implemented_in_0_2": [
-        "Native team fields and member editor; separate native queue member flags and deactivation"
+        "Native team fields and member editor; separate native queue member flags and deactivation",
+        "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português."
       ],
       "remaining_or_external": [
-        "Native Team has no corporate scope or supervisor/queue hierarchy; no fictitious team status; richer mapping, schedules and distribution remain later"
+        "Native Team has no corporate scope or supervisor/queue hierarchy; no fictitious team status; richer mapping, schedules and distribution remain later",
+        "Elegibilidade de usuário inativo não é inferida da presença online; regras de disponibilidade/capacidade PABX e impacto da última cobertura continuam dependentes do contrato operacional."
       ],
       "code_references": [
         "AdministrationSection.vue",
-        "team_members_controller.rb"
+        "team_members_controller.rb",
+        "app/controllers/api/v1/accounts/jrc_contact_center/queue_memberships_controller.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/membership_enrollment_spec.rb"
       ],
       "reference": {
         "document_1_figure": 12,
@@ -578,12 +653,19 @@
       ],
       "external_dependencies": [
         "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Native Team has no corporate scope or supervisor/queue hierarchy; no fictitious team status; richer mapping, schedules and distribution remain later",
+          "Elegibilidade de usuário inativo não é inferida da presença online; regras de disponibilidade/capacidade PABX e impacto da última cobertura continuam dependentes do contrato operacional."
+        ]
+      }
     },
     {
       "figure": 13,
       "title": "Conexão e sincronização PABX",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         0,
         1,
@@ -620,7 +702,7 @@
       ],
       "desktop_and_mobile": {
         "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
-        "tested": "Interface específica não homologada nesta etapa.",
+        "tested": "Fundação/consulta nativa existente; interface específica completa da referência não homologada nesta etapa.",
         "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
       },
       "apis_and_persistence": [
@@ -628,7 +710,13 @@
       ],
       "external_dependencies": [
         "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Inventory synchronization/publication/ACK is not inferred from successful CDR import; needs stage 3/provider"
+        ]
+      }
     },
     {
       "figure": 14,
@@ -679,7 +767,14 @@
       ],
       "external_dependencies": [
         "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Full administrative before/after, exports and per-operation histories remain stage 3",
+          "Pendente 0–2: auditoria de alterações de unidades/filas/participantes e superfície local de consulta; este incremento cobre somente capacidades de perfis."
+        ]
+      }
     },
     {
       "figure": 15,
@@ -729,7 +824,13 @@
       ],
       "external_dependencies": [
         "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "PABX approval adapter, snapshots, technical execution and rollback require stages 3/5 and policy/ACK contract"
+        ]
+      }
     },
     {
       "figure": 16,
@@ -772,12 +873,18 @@
       ],
       "external_dependencies": [
         "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Corrected Word caption: institutional audio details, not a recording policy. Library is stage 4; call recording policy has its own visual gap"
+        ]
+      }
     },
     {
       "figure": 17,
       "title": "Consulta de gravações e player",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         1,
         7
@@ -812,7 +919,7 @@
       ],
       "desktop_and_mobile": {
         "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
-        "tested": "Interface específica não homologada nesta etapa.",
+        "tested": "Fundação/consulta nativa existente; interface específica completa da referência não homologada nesta etapa.",
         "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
       },
       "apis_and_persistence": [
@@ -821,12 +928,18 @@
       "external_dependencies": [
         "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado.",
         "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Retention/legal hold, library search/player and access audit require stage 7 and external storage validation"
+        ]
+      }
     },
     {
       "figure": 18,
       "title": "Gravações e Qualidade existente",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         7
       ],
@@ -857,7 +970,7 @@
       ],
       "desktop_and_mobile": {
         "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
-        "tested": "Interface específica não homologada nesta etapa.",
+        "tested": "Fundação/consulta nativa existente; interface específica completa da referência não homologada nesta etapa.",
         "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
       },
       "apis_and_persistence": [
@@ -865,12 +978,18 @@
       ],
       "external_dependencies": [
         "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Not an operational proof; full integrated quality UI belongs to stage 7"
+        ]
+      }
     },
     {
       "figure": 19,
       "title": "Painel de sentimentos",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         1,
         7
@@ -904,7 +1023,7 @@
       ],
       "desktop_and_mobile": {
         "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
-        "tested": "Interface específica não homologada nesta etapa.",
+        "tested": "Fundação/consulta nativa existente; interface específica completa da referência não homologada nesta etapa.",
         "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
       },
       "apis_and_persistence": [
@@ -912,7 +1031,13 @@
       ],
       "external_dependencies": [
         "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Sentiment dashboard, denominators, error states and insights require stage 7; no illustrative metrics are promoted"
+        ]
+      }
     },
     {
       "figure": 20,
@@ -954,12 +1079,18 @@
       ],
       "external_dependencies": [
         "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Five-tab timed transcript/audio/graph popup requires real segments and stage 7"
+        ]
+      }
     },
     {
       "figure": 21,
       "title": "Contexto do cliente",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         1,
         7
@@ -993,7 +1124,7 @@
       ],
       "desktop_and_mobile": {
         "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
-        "tested": "Interface específica não homologada nesta etapa.",
+        "tested": "Fundação/consulta nativa existente; interface específica completa da referência não homologada nesta etapa.",
         "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
       },
       "apis_and_persistence": [
@@ -1001,7 +1132,13 @@
       ],
       "external_dependencies": [
         "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Full analysis context popup, linked contracts and source-specific navigation are stage 7"
+        ]
+      }
     },
     {
       "figure": 22,
@@ -1044,7 +1181,13 @@
       ],
       "external_dependencies": [
         "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Native actions/history orchestration with idempotency and separate review completion require stages 6/7"
+        ]
+      }
     },
     {
       "figure": 23,
@@ -1086,7 +1229,13 @@
       ],
       "external_dependencies": [
         "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
-      ]
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Append-only human review/version conflicts and explicit justification require stage 7"
+        ]
+      }
     }
   ],
   "new_acceptance": [
@@ -1148,5 +1297,14 @@
     "vue": 178,
     "chrome": 52
   },
-  "final_evidence": "O artefato da CI final inclui call-center-acceptance.json com SHA, hashes da matriz/fontes/capturas e resultados reais. A criação do recibo não declara conclusão integral das etapas 0–2."
+  "final_evidence": "O artefato da CI final inclui call-center-acceptance.json com SHA, hashes da matriz/fontes/capturas e resultados reais. A criação do recibo não declara conclusão integral das etapas 0–2.",
+  "scope_increment_evidence": {
+    "sha": "d648747d2259d0aeb526f2efb8a640e7e5583989",
+    "run": 43956197984,
+    "artifact": 14271509209,
+    "sha256": "8bb322a3ae0e5e36b9b84515aac1ebe795f7c8b6807e828ec4ad8754e52db8c0",
+    "rails": 420,
+    "vue": 178,
+    "chrome": 52
+  }
 }

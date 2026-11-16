@@ -65,7 +65,7 @@ RSpec.describe 'Call Center native role concurrent revocation', type: :request d
         Thread.current[:cc_native_role_request] = true
         session = ActionDispatch::Integration::Session.new(Rails.application)
         session.patch "/api/v1/accounts/#{account.id}/custom_roles/#{target_id}",
-                      headers: headers, params: { custom_role: { permissions: %w[jrc_contact_center_view jrc_contact_center_publish] } }
+                      headers: headers, params: { custom_role: { permissions: %w[jrc_contact_center_publish jrc_contact_center_view] } }
         results << session.response.status
       end
     rescue StandardError => e

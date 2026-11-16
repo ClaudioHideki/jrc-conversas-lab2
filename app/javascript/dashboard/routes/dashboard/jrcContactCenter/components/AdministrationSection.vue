@@ -351,12 +351,16 @@ const save = async () => {
     emit('changed');
   } catch (error) {
     if (version === generation) {
-      invalidAttributes.value = error.response?.data?.attributes || [];
-      formError.value =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        label('SAVE_ERROR');
+      const inactiveQueue = error.response?.data?.error === 'inactive_queue';
+      invalidAttributes.value = inactiveQueue
+        ? ['queue_id']
+        : error.response?.data?.attributes || [];
+      formError.value = inactiveQueue
+        ? [label('QUEUE'), label('INACTIVE'), label('SAVE_ERROR')].join(' · ')
+        : error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message ||
+          label('SAVE_ERROR');
     }
   } finally {
     saving.value = false;

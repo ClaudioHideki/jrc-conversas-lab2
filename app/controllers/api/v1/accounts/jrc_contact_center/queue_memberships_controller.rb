@@ -79,8 +79,23 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
   end
 
   def validate_scope!(attributes)
-    contact_center_access.queues.find(attributes[:queue_id]) if attributes[:queue_id].present?
+    queue = contact_center_access.queues.find(attributes[:queue_id]) if attributes[:queue_id].present?
     eligible_members.find(attributes[:account_user_id]) if attributes[:account_user_id].present?
+    membership = scoped_memberships.find(params[:id]) if action_name == 'update'
+    queue ||= membership&.queue
+    return unless queue && queue.status != 'active' && new_enrollment?(attributes, membership)
+
+    raise JrcContactCenter::OperationError, 'inactive_queue'
+  end
+
+  def new_enrollment?(attributes, membership)
+    return true unless membership
+
+    changed_target = attributes.slice(:queue_id, :account_user_id).any? do |key, value|
+      value.to_s != membership.public_send(key).to_s
+    end
+    activate = attributes.key?(:active) && ActiveModel::Type::Boolean.new.cast(attributes[:active]) && !membership.active?
+    changed_target || activate
   end
 
   def serialize(membership)
