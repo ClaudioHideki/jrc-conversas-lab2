@@ -9,7 +9,8 @@ module Enterprise::SearchService
       where: where_conditions,
       order: { created_at: :desc },
       page: params[:page] || 1,
-      per_page: 15
+      per_page: 15,
+      scope_results: ->(records) { records.with_broker_delivery_display }
     )
   end
 
