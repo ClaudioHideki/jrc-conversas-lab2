@@ -1,7 +1,7 @@
 class Api::V1::Accounts::CallHistoryController < Api::V1::Accounts::BaseController
   MAX_PERIOD_DAYS = 31
   MAX_PER_PAGE = 100
-  before_action :private_recording_response, only: [:recording, :recording_metadata]
+  before_action :private_recording_response, only: [:recording, :playback, :recording_metadata]
 
   def show
     integration = Current.account.telephony_integration
@@ -26,14 +26,26 @@ class Api::V1::Accounts::CallHistoryController < Api::V1::Accounts::BaseControll
   end
 
   def recording
+    authorize_recording!(:download)
+    transmit_recording('attachment')
+  end
+
+  def playback
+    authorize_recording!(:listen)
+    transmit_recording('inline')
+  end
+
+  def transmit_recording(disposition)
     record = Pabx::Access.new(account: Current.account, user: Current.user).records.find(params[:id])
     raise Pabx::Error, 'RECORDING_UNAVAILABLE' unless record.has_recording?
 
     result = Pabx::Provider.new(Current.account.telephony_integration).recording(record)
-    send_data result[:body], type: result[:content_type], filename: "call-#{record.id}.audio", disposition: 'attachment'
+    send_data result[:body], type: result[:content_type], filename: "call-#{record.id}.audio", disposition: disposition
   end
+  private :transmit_recording
 
   def recording_metadata
+    authorize_recording!(:view)
     record = Pabx::Access.new(account: Current.account, user: Current.user).records.find(params[:id])
     settings = Pabx::Settings.new(Current.account.telephony_integration)
     render json: { id: record.id, has_recording: record.has_recording?, recording_state: record.recording_state(settings) }
@@ -47,6 +59,10 @@ class Api::V1::Accounts::CallHistoryController < Api::V1::Accounts::BaseControll
   end
 
   private
+
+  def authorize_recording!(action)
+    JrcContactCenter::RecordingAccess.authorize!(account: Current.account, user: Current.user, action: action)
+  end
 
   def private_recording_response
     response.headers['Cache-Control'] = 'private, no-store'
@@ -93,6 +109,12 @@ class Api::V1::Accounts::CallHistoryController < Api::V1::Accounts::BaseControll
   end
 
   def with_quality_analyses(calls)
+    if Current.account.feature_enabled?('jrc_contact_center')
+      member = Current.account.account_users.find_by!(user: Current.user)
+      policy = JrcContactCenter::ModulePolicy.new(pundit_user.merge(account_user: member), :contact_center)
+      return calls unless policy.recordings_view?
+    end
+
     call_ids = calls.filter_map { |call| JrcVoiceQuality.call_id_for(call) }
     analyses = JrcVoiceQuality::SupabaseClient.new.find_analyses_by_call_ids(account_id: Current.account.id, call_ids: call_ids)
 

@@ -14,8 +14,17 @@ class JrcContactCenter::Unit < JrcContactCenter::ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
   validates :timezone, presence: true
   validate :known_timezone
+  validate :corporate_links
 
   private
+
+  def corporate_links
+    return if settings['issuer_company_id'].blank? && settings['business_unit_id'].blank?
+
+    JrcApprovals::Authorization.scope!(account, settings['issuer_company_id'].presence, settings['business_unit_id'].presence)
+  rescue ActiveRecord::RecordNotFound, JrcApprovals::Error
+    errors.add(:settings, 'invalid_corporate_scope')
+  end
 
   def known_timezone
     errors.add(:timezone, 'is invalid') unless Time.find_zone(timezone)

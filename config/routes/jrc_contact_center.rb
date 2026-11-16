@@ -2,6 +2,7 @@ namespace :api, defaults: { format: 'json' } do
   namespace :v1 do
     resources :accounts, only: [] do
       namespace :jrc_contact_center, module: 'accounts/jrc_contact_center' do
+        resources :administration, only: %i[index show]
         get 'context', to: 'context#show'
         get 'customer_context', to: 'customer_context#show'
         resource :agent_state, only: %i[show update], controller: 'agent_states'

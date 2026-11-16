@@ -3,8 +3,8 @@
 class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::JrcContactCenter::BaseController
   def index
     authorize_contact_center!
-    units = contact_center_access.units.order(:kind, :name)
-    render json: base_payload.merge(items: units.map { |unit| serialize(unit) })
+    units = search_records(contact_center_access.units).order(:kind, :name, :id)
+    render json: list_payload(units) { |unit| serialize(unit) }
   end
 
   def create
@@ -15,7 +15,7 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
 
   def update
     authorize_contact_center!(:configure?)
-    unit = JrcContactCenter::Unit.where(account: Current.account).find(params[:id])
+    unit = contact_center_access.units.find(params[:id])
     unit.update!(unit_params)
     render json: base_payload.merge(item: serialize(unit))
   end
@@ -24,7 +24,11 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
 
   def unit_params
     permitted = params.require(:unit).permit(:code, :name, :kind, :status, :timezone, :parent_unit_id, settings: {})
-    JrcContactCenter::Unit.where(account: Current.account).find(permitted[:parent_unit_id]) if permitted[:parent_unit_id].present?
+    contact_center_access.units.find(permitted[:parent_unit_id]) if permitted[:parent_unit_id].present?
+    settings = permitted[:settings]&.to_h || {}
+    settings = contact_center_access.units.find(params[:id]).settings.merge(settings) if action_name == 'update'
+    JrcContactCenter::OrganizationalScope.new(account: Current.account, account_user: Current.account_user).authorize_links!(settings)
+    permitted[:settings] = settings
     permitted
   end
 

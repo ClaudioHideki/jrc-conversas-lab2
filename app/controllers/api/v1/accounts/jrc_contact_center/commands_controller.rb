@@ -31,8 +31,7 @@ class Api::V1::Accounts::JrcContactCenter::CommandsController < Api::V1::Account
   private
 
   def scoped_commands
-    scope = JrcContactCenter::Command.where(account: Current.account)
-    contact_center_access.full_access? ? scope : scope.where(actor_account_user: Current.account_user)
+    contact_center_access.commands
   end
 
   def command_params

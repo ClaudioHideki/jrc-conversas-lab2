@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class JrcContactCenter::CustomerContext
-  def initialize(account:)
+  def initialize(account:, user_context: nil)
     @account = account
+    @user_context = user_context
   end
 
   def by_phone(phone)
@@ -12,7 +13,7 @@ class JrcContactCenter::CustomerContext
     normalized = phone.to_s.gsub(/\D/, '')
     return empty_result unless normalized.length.between?(8, 15)
 
-    contacts = @account.contacts.where("regexp_replace(phone_number, '[^0-9]', '', 'g') = ?", normalized).limit(10).to_a
+    contacts = authorized_contacts.where("regexp_replace(phone_number, '[^0-9]', '', 'g') = ?", normalized).limit(10).to_a
     company_ids = contacts.filter_map(&:company_id).uniq
     companies = @account.master_companies.where(id: company_ids).index_by(&:id)
     {
@@ -38,8 +39,22 @@ class JrcContactCenter::CustomerContext
 
   private
 
+  def authorized_contacts
+    raise Pundit::NotAuthorizedError unless @user_context && @user_context.fetch(:account).id == @account.id
+
+    member = @account.account_users.find(@user_context.fetch(:account_user).id)
+    coverage = JrcCrm::CorporateCoverage.new(account: @account, user: member.user)
+    companies = coverage.companies(@account.master_companies).select(:id)
+    relation = @account.contacts.where(company_id: nil).or(@account.contacts.where(company_id: companies))
+    return relation if member.administrator? && member.custom_role_id.nil? && (!coverage.configured? || coverage.group?)
+
+    conversations = Conversations::PermissionFilterService.new(@account.conversations, member.user, @account).perform
+    calls = JrcContactCenter::AccessScope.new(user_context: @user_context).call_sessions
+    relation.where(id: conversations.select(:contact_id)).or(relation.where(id: calls.select(:contact_id)))
+  end
+
   def linked_contact(id)
-    contact = @account.contacts.find_by(id: id)
+    contact = authorized_contacts.find_by(id: id)
     return empty_result.merge(status: 'unavailable') unless contact
 
     company = @account.master_companies.find_by(id: contact.company_id) if contact.company_id
@@ -53,7 +68,8 @@ class JrcContactCenter::CustomerContext
   end
 
   def module_capabilities(policy)
-    { operate: policy.operate?, supervise: policy.supervise?, configure: policy.configure?, reports: policy.reports? }
+    %w[operate supervise configure reports administer monitor recordings_view recordings_listen recordings_download publish approve audit]
+      .index_with { |action| policy.public_send("#{action}?") }.symbolize_keys
   end
 
   def provider_context

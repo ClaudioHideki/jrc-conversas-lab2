@@ -3,8 +3,9 @@
 class Api::V1::Accounts::JrcContactCenter::QueuesController < Api::V1::Accounts::JrcContactCenter::BaseController
   def index
     authorize_contact_center!
-    queues = contact_center_access.queues.includes(:unit).order(:name)
-    render json: base_payload.merge(items: queues.map { |queue| serialize(queue) })
+    queues = search_records(contact_center_access.queues).includes(:unit).order(:name, :id)
+    queues = queues.where(unit_id: params[:unit_id]) if params[:unit_id].present?
+    render json: list_payload(queues) { |queue| serialize(queue) }
   end
 
   def create
@@ -15,7 +16,7 @@ class Api::V1::Accounts::JrcContactCenter::QueuesController < Api::V1::Accounts:
 
   def update
     authorize_contact_center!(:configure?)
-    queue = JrcContactCenter::Queue.where(account: Current.account).find(params[:id])
+    queue = contact_center_access.queues.find(params[:id])
     queue.update!(queue_params)
     render json: base_payload.merge(item: serialize(queue))
   end
@@ -25,7 +26,7 @@ class Api::V1::Accounts::JrcContactCenter::QueuesController < Api::V1::Accounts:
   def queue_params
     permitted = params.require(:queue).permit(:unit_id, :code, :name, :external_ref, :service_kind, :strategy, :status,
                                               :max_wait_seconds, :active_from, :active_until, settings: {})
-    JrcContactCenter::Unit.where(account: Current.account).find(permitted[:unit_id]) if permitted[:unit_id].present?
+    contact_center_access.units.find(permitted[:unit_id]) if permitted[:unit_id].present?
     permitted
   end
 

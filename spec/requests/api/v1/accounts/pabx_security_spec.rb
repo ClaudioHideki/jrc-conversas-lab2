@@ -37,6 +37,18 @@ RSpec.describe 'PABX persistence and HTTP isolation', :pabx, type: :request do
     expect(enqueued_jobs.none? { |job| job[:job] == Pabx::SyncJob }).to be(true)
   end
 
+  it 'authorizes a distinct accountcode server-side and ignores forged provenance fields' do
+    patch path, params: { settings: settings, scope_mapping: { accountcode: '12', cdr_identity: 'accountcode',
+                                                              account_id: 999, authorized_by_id: 999 } },
+                headers: root.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:ok)
+    mapping = integration.reload.pabx_settings.fetch('scope_mapping')
+    expect(mapping).to include('account_id' => account.id, 'tenant' => '8', 'accountcode' => '12', 'authorized_by_id' => root.id)
+    expect(Pabx::ScopeMapping.new(integration).matches?('12')).to be(true)
+    expect(enqueued_jobs.none? { |job| job[:job] == Pabx::SyncJob }).to be(true)
+    expect(a_request(:any, %r{https://pbx\.example\.test/})).not_to have_been_made
+  end
+
   it 'persistence separates credentials and configurations between two Accounts' do
     other = create(:telephony_integration, history_enabled: false, pabx_settings: settings.merge('expected_tenant' => '99'),
                    pabx_username: 'block2b-user-b', pabx_password: 'block2b-secret-b')

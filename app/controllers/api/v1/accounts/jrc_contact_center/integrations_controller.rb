@@ -3,7 +3,7 @@
 class Api::V1::Accounts::JrcContactCenter::IntegrationsController < Api::V1::Accounts::JrcContactCenter::BaseController
   def health
     authorize_contact_center!(:control?)
-    render json: base_payload.merge(JrcContactCenter::OperationalHealth.new(account: Current.account).call)
+    render json: base_payload.merge(JrcContactCenter::OperationalHealth.new(account: Current.account, access: contact_center_access).call)
   end
 
   def capabilities

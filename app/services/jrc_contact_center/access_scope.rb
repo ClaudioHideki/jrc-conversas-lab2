@@ -24,26 +24,27 @@ class JrcContactCenter::AccessScope
   end
 
   def units
-    relation = JrcContactCenter::Unit.where(account: account)
+    relation = organizational.units
     return relation if full_access?
 
     relation.where(id: JrcContactCenter::Queue.where(account: account, id: queue_ids).select(:unit_id))
   end
 
   def queues
-    relation = JrcContactCenter::Queue.where(account: account)
+    relation = JrcContactCenter::Queue.where(account: account, unit_id: organizational.units.select(:id))
     full_access? ? relation : relation.where(id: queue_ids)
   end
 
   def call_sessions
-    relation = JrcContactCenter::CallSession.where(account: account)
+    relation = organizational.records(JrcContactCenter::CallSession.where(account: account),
+                                      unit_column: :current_unit_id, queue_column: :current_queue_id)
     return relation if full_access?
 
     relation.where(id: my_call_session_ids)
   end
 
   def my_call_sessions
-    JrcContactCenter::CallSession.where(account: account, id: my_call_session_ids)
+    call_sessions.where(id: my_call_session_ids)
   end
 
   def unassigned_call_sessions
@@ -53,31 +54,56 @@ class JrcContactCenter::AccessScope
                    .where(account: account)
                    .where.not(account_user_id: nil)
                    .select(:call_session_id)
-    JrcContactCenter::CallSession.where(account: account).where.not(id: assigned_ids)
+    call_sessions.where.not(id: assigned_ids)
   end
 
   def cases
-    relation = JrcContactCenter::Case.where(account: account)
+    relation = organizational.records(JrcContactCenter::Case.where(account: account), unit_column: :unit_id, queue_column: :queue_id)
     return relation if full_access?
 
     relation.where(queue_id: queue_ids).or(relation.where(owner_account_user_id: account_user.id))
   end
 
   def callbacks
-    relation = JrcContactCenter::Callback.where(account: account)
+    relation = organizational.records(JrcContactCenter::Callback.where(account: account), unit_column: nil, queue_column: :queue_id)
     return relation if full_access?
 
     relation.where(queue_id: queue_ids).or(relation.where(owner_account_user_id: account_user.id))
   end
 
   def daily_facts
-    relation = JrcContactCenter::DailyFact.where(account: account)
+    relation = organizational.records(JrcContactCenter::DailyFact.where(account: account), unit_column: :unit_id, queue_column: :queue_id)
     return relation if full_access?
 
     relation.where(queue_id: queue_ids).or(relation.where(account_user_id: account_user.id))
   end
 
+  def commands
+    relation = JrcContactCenter::Command.where(account: account)
+    relation = relation.where(call_session_id: call_sessions.select(:id)) if organizational.restricted?
+    full_access? ? relation : relation.where(actor_account_user: account_user)
+  end
+
+  def events
+    relation = JrcContactCenter::EventInbox.where(account: account)
+    return relation unless organizational.restricted?
+
+    # Unmapped administrative/provider events cannot be attributed to a unit
+    # by guessing. Only already-authorized, provider-correlated calls qualify.
+    calls = call_sessions.to_sql
+    relation.where(<<~SQL.squish)
+      EXISTS (SELECT 1 FROM (#{calls}) scoped_calls
+        WHERE scoped_calls.provider = jrc_contact_center_event_inboxes.provider
+        AND (scoped_calls.correlation_id = jrc_contact_center_event_inboxes.payload ->> 'correlation_id'
+          OR scoped_calls.external_session_id = jrc_contact_center_event_inboxes.payload ->> 'call_session_id'))
+    SQL
+  end
+
   private
+
+  def organizational
+    @organizational ||= JrcContactCenter::OrganizationalScope.new(account: account, account_user: account_user)
+  end
 
   def my_call_session_ids
     JrcContactCenter::CallLeg

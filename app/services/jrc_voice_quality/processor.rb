@@ -40,7 +40,7 @@ class JrcVoiceQuality::Processor
 
       analysis, mode = analyze(transcript)
       @supabase.save_analysis!(account_id: @account.id, chamada_id: registered_call['id'], analysis: analysis)
-      @supabase.update_call_status!(chamada_id: registered_call['id'], status: 'concluido')
+      @supabase.update_call_status!(account_id: @account.id, chamada_id: registered_call['id'], status: 'concluido')
       result = {
         status: 'analyzed',
         already_analyzed: false,
@@ -95,7 +95,7 @@ class JrcVoiceQuality::Processor
   def update_error_status
     return if @registered_call_id.blank?
 
-    @supabase.update_call_status!(chamada_id: @registered_call_id, status: 'erro')
+    @supabase.update_call_status!(account_id: @account.id, chamada_id: @registered_call_id, status: 'erro')
   end
 
   def call_id

@@ -278,6 +278,7 @@ Rails.application.routes.draw do
             post :synchronize
           end
           get 'call_history/:id/recording', to: 'call_history#recording', as: :call_history_recording
+          get 'call_history/:id/playback', to: 'call_history#playback'
           get 'call_history/:id/recording_metadata', to: 'call_history#recording_metadata'
           resources :call_quality_analyses, only: [:index, :create]
           namespace :captain do

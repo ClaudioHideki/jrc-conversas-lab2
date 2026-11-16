@@ -32,7 +32,26 @@ class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::B
     @contact_center_access ||= JrcContactCenter::AccessScope.new(user_context: pundit_user)
   end
 
+  def list_payload(relation)
+    page = params.fetch(:page, 1).to_i.clamp(1, 1_000_000)
+    per_page = params.fetch(:per_page, 20).to_i.clamp(1, 100)
+    total = relation.count
+    rows = params.key?(:page) ? relation.offset((page - 1) * per_page).limit(per_page) : relation
+    base_payload.merge(items: rows.map { |row| yield row },
+                       meta: { page: page, per_page: per_page, total: total, pages: (total.to_f / per_page).ceil })
+  end
+
+  def search_records(relation, fields: %w[name code])
+    query = params[:q].to_s.strip.first(100)
+    relation = relation.where(fields.map { |field| "#{field} ILIKE :query" }.join(' OR '),
+                              query: "%#{ActiveRecord::Base.sanitize_sql_like(query)}%") if query.present?
+    relation = relation.where(status: params[:status]) if %w[active inactive].include?(params[:status]) && relation.klass.column_names.include?('status')
+    relation
+  end
+
   def ensure_contact_center_assignment!(queue_id: nil, owner_account_user_id: nil, require_accessible_assignment: false)
+    contact_center_access.queues.find(queue_id) if queue_id.present?
+    Current.account.account_users.find(owner_account_user_id) if owner_account_user_id.present?
     return if contact_center_access.full_access?
 
     queue_allowed = accessible_queue?(queue_id)
@@ -47,7 +66,7 @@ class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::B
   end
 
   def accessible_queue?(queue_id)
-    queue_id.present? && contact_center_access.queue_ids.include?(queue_id.to_i)
+    queue_id.present? && contact_center_access.queues.exists?(id: queue_id)
   end
 
   def own_assignment?(owner_account_user_id)

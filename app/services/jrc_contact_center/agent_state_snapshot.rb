@@ -26,6 +26,8 @@ class JrcContactCenter::AgentStateSnapshot
   def memberships
     now = Time.current
     JrcContactCenter::QueueMembership.where(account: @account, account_user: @member, active: true, role: 'agent')
+                                      .where(queue_id: JrcContactCenter::Queue.where(account: @account,
+                                             unit_id: JrcContactCenter::OrganizationalScope.new(account: @account, account_user: @member).units.select(:id)).select(:id))
                                      .joins(queue: :unit).where(jrc_contact_center_queues: { status: 'active' },
                                                                 jrc_contact_center_units: { status: 'active' })
                                      .where('starts_at IS NULL OR starts_at <= ?', now)

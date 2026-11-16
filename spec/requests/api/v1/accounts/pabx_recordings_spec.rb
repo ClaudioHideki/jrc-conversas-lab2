@@ -34,6 +34,35 @@ RSpec.describe 'PABX private recording requests', :pabx, type: :request do
     expect(response.headers.to_json).not_to include('synthetic-token', '/var/spool', 'synthetic-password')
   end
 
+  it 'denies recording bytes without explicit authority when Call Center is enabled' do
+    account.enable_features!('jrc_contact_center')
+    expect(Pabx::Client).not_to receive(:new)
+    get path, headers: user.create_new_auth_token
+    expect(response).to have_http_status(:unauthorized)
+    get path.sub('/recording', '/playback'), headers: user.create_new_auth_token
+    expect(response).to have_http_status(:unauthorized)
+  end
+
+  it 'separates listening from direct download and retains own-extension authorization' do
+    account.enable_features!('jrc_contact_center')
+    role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_recordings_view
+                                                               jrc_contact_center_recordings_listen])
+    account.account_users.find_by!(user: user).update!(custom_role: role)
+    get path.sub('/recording', '/playback'), headers: user.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.body.b).to eq(audio)
+    expect(response.headers['Content-Disposition']).to include('inline')
+    get path, headers: user.create_new_auth_token
+    expect(response).to have_http_status(:unauthorized)
+    role.update!(permissions: role.permissions + ['jrc_contact_center_recordings_download'])
+    get path, headers: user.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.headers['Content-Disposition']).to include('attachment')
+    record.update!(extension: '9999')
+    get path, headers: user.create_new_auth_token
+    expect(response).to have_http_status(:not_found)
+  end
+
   it 'exposes only local recording eligibility metadata without connecting or returning a public URL' do
     expect(Pabx::Client).not_to receive(:new)
     get "#{path}_metadata", headers: user.create_new_auth_token

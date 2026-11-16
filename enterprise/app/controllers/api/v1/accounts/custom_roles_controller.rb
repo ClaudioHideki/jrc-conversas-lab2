@@ -22,7 +22,12 @@ class Api::V1::Accounts::CustomRolesController < Api::V1::Accounts::EnterpriseAc
   end
 
   def permitted_params
-    params.require(:custom_role).permit(:name, :description, permissions: [])
+    attributes = params.require(:custom_role).permit(:name, :description, permissions: [])
+    if attributes.key?(:permissions)
+      JrcContactCenter::GrantGuard.check!(actor: Current.user, account: Current.account, proposed: attributes[:permissions],
+                                         previous: @custom_role&.permissions || [])
+    end
+    attributes
   end
 
   def fetch_custom_role

@@ -68,7 +68,7 @@ class Api::V1::Accounts::JrcContactCenter::CallSessionsController < Api::V1::Acc
   def call_customer(call)
     return { status: 'restricted', contacts: [], ambiguous: false } unless contact_center_access.policy.operate?
 
-    JrcContactCenter::CustomerContext.new(account: Current.account).for_call(call)
+    JrcContactCenter::CustomerContext.new(account: Current.account, user_context: pundit_user).for_call(call)
   end
 
   def journey(call)

@@ -1,10 +1,10 @@
 class JrcVoiceQuality::SupabaseClient
   REQUEST_TIMEOUT = 20
 
-  # Compatibilidade temporaria com o Supabase antigo.
-  # account_id foi removido da consulta porque a view atual
-  # vw_qualidade_pabx_dashboard ainda nao possui essa coluna.
+  # A legacy schema without Account columns is unavailable, never an excuse
+  # to retry a query without its tenant predicate.
   SUMMARY_FIELDS = %w[
+    account_id
     analise_id
     chamada_id
     call_id
@@ -45,15 +45,22 @@ class JrcVoiceQuality::SupabaseClient
       '/vw_qualidade_pabx_dashboard',
       query: {
         select: SUMMARY_FIELDS.join(','),
+        account_id: "eq.#{scope_id!(account_id)}",
         call_id: "in.(#{postgrest_list(call_ids)})",
         order: 'analise_criada_em.desc'
       }
     )
 
     Array(rows).each_with_object({}) do |row, memo|
+      verify_row!(row, account_id)
+      unless call_ids.map(&:to_s).include?(row['call_id'].to_s)
+        raise JrcVoiceQuality::PersistenceError.new('Chamada fora da consulta.', code: :scope_unverified)
+      end
       memo[row['call_id']] ||= summary_payload(row)
     end
   rescue JrcVoiceQuality::PersistenceError => e
+    raise if e.code == :scope_unverified
+
     Rails.logger.warn("[JRC Voice Quality] Supabase indisponivel ao buscar analises: #{e.message}")
     {}
   end
@@ -68,78 +75,48 @@ class JrcVoiceQuality::SupabaseClient
       '/vw_qualidade_pabx_dashboard',
       query: {
         select: SUMMARY_FIELDS.join(','),
-        call_id: "eq.#{call_id}",
+        account_id: "eq.#{scope_id!(account_id)}",
+        call_id: "eq.#{resource_id!(call_id)}",
         order: 'analise_criada_em.desc',
         limit: 1
       }
     )
 
     row = Array(rows).first
+    verify_row!(row, account_id) if row
+    if row && row['call_id'].to_s != call_id.to_s
+      raise JrcVoiceQuality::PersistenceError.new('Chamada fora da consulta.', code: :scope_unverified)
+    end
     row ? summary_payload(row) : nil
   end
 
   def upsert_call!(metadata)
-  raise_configuration! unless configured?
+    raise_configuration! unless configured?
+    attributes = metadata.to_h.stringify_keys
+    account_id = scope_id!(attributes.fetch('account_id'))
+    call_id = resource_id!(attributes.fetch('call_id'))
+    existing = request(:get, '/chamadas_pabx', query: { select: 'id,account_id,call_id', account_id: "eq.#{account_id}",
+                                                      call_id: "eq.#{call_id}", limit: 1 }).first
+    if existing
+      verify_row!(existing, account_id)
+      return existing
+    end
 
-  compatible_metadata = metadata.except(
-    :account_id,
-    'account_id',
-    :user_id,
-    'user_id',
-    :conversation_id,
-    'conversation_id',
-    :inbox_id,
-    'inbox_id',
-    :direction,
-    'direction',
-    :telefone_destino,
-    'telefone_destino',
-    :recording_url,
-    'recording_url'
-  )
+    row = Array(request(:post, '/chamadas_pabx', body: attributes.merge('account_id' => account_id),
+                        headers: { 'Prefer' => 'return=representation' })).first
+    raise JrcVoiceQuality::PersistenceError.new('Chamada nao persistida.', code: :supabase_error) unless row
 
-  call_id = compatible_metadata[:call_id] || compatible_metadata['call_id']
-
-  # Compatibilidade temporaria com o Supabase antigo:
-  # evita UPDATE porque o trigger antigo referencia NEW.atualizado_em.
-  if call_id.present?
-    existing_rows = request(
-      :get,
-      '/chamadas_pabx',
-      query: {
-        select: '*',
-        call_id: "eq.#{call_id}",
-        limit: 1
-      }
-    )
-
-    existing_call = Array(existing_rows).first
-    return existing_call if existing_call.present?
+    verify_row!(row, account_id)
+    row
   end
 
-  rows = request(
-    :post,
-    '/chamadas_pabx',
-    body: compatible_metadata,
-    headers: {
-      'Prefer' => 'return=representation'
-    }
-  )
-
-  Array(rows).first ||
-    raise(
-      JrcVoiceQuality::PersistenceError.new(
-        'Supabase nao retornou a chamada registrada',
-        code: :supabase_error
-      )
-    )
-end
-
   def save_transcription!(account_id:, chamada_id:, text:, model:)
+    verify_call!(account_id, chamada_id)
     request(
       :post,
       '/transcricoes_pabx',
       body: {
+        account_id: scope_id!(account_id),
         chamada_id: chamada_id,
         texto_transcrito: text,
         modelo_transcricao: model
@@ -151,12 +128,14 @@ end
   end
 
   def save_analysis!(account_id:, chamada_id:, analysis:)
+    verify_call!(account_id, chamada_id)
     av = analysis.fetch('avaliacao_atendente', {})
 
     request(
       :post,
       '/analises_qualidade_pabx',
       body: {
+        account_id: scope_id!(account_id),
         chamada_id: chamada_id,
         resumo_conversa: analysis['resumo_conversa'],
         assuntos_abordados: array_value(analysis['assuntos_abordados']),
@@ -210,11 +189,13 @@ end
     )
   end
 
-  def update_call_status!(chamada_id:, status:)
+  def update_call_status!(account_id:, chamada_id:, status:)
+    verify_call!(account_id, chamada_id)
     request(
       :patch,
       '/chamadas_pabx',
       query: {
+        account_id: "eq.#{scope_id!(account_id)}",
         id: "eq.#{chamada_id}"
       },
       body: {
@@ -225,12 +206,39 @@ end
       }
     )
   rescue JrcVoiceQuality::PersistenceError => e
+    raise if e.code == :scope_unverified
+
     Rails.logger.warn(
       "[JRC Voice Quality] Falha ao atualizar status no Supabase: #{e.message}"
     )
   end
 
   private
+
+  def resource_id!(value)
+    valid = value.is_a?(String) || value.is_a?(Integer)
+    unless valid && value.to_s.match?(/\A[0-9A-Za-z_.:-]{1,255}\z/)
+      raise JrcVoiceQuality::PersistenceError.new('Identificador de qualidade invalido.', code: :scope_unverified)
+    end
+    value.to_s
+  end
+
+  def scope_id!(value)
+    raise JrcVoiceQuality::PersistenceError.new('Conta de qualidade invalida.', code: :scope_unverified) unless value.to_s.match?(/\A[1-9]\d*\z/)
+
+    value.to_i
+  end
+
+  def verify_row!(row, account_id)
+    valid = row.is_a?(Hash) && row['account_id'].to_s == scope_id!(account_id).to_s
+    raise JrcVoiceQuality::PersistenceError.new('Escopo de qualidade nao confirmado.', code: :scope_unverified) unless valid
+  end
+
+  def verify_call!(account_id, chamada_id)
+    rows = request(:get, '/chamadas_pabx', query: { select: 'id,account_id', id: "eq.#{resource_id!(chamada_id)}",
+                                                  account_id: "eq.#{scope_id!(account_id)}", limit: 1 })
+    verify_row!(Array(rows).first, account_id)
+  end
 
   def supabase_url
     ENV.fetch('SUPABASE_URL', '').to_s.delete_suffix('/')
@@ -264,7 +272,7 @@ end
     return parse_response(response) if response.success?
 
     raise JrcVoiceQuality::PersistenceError.new(
-      "Supabase retornou HTTP #{response.code}: #{response.body}",
+      "Supabase retornou HTTP #{response.code}.",
       code: :supabase_error
     )
   rescue HTTParty::Error,
@@ -273,7 +281,7 @@ end
          Net::OpenTimeout,
          Net::ReadTimeout => e
     raise JrcVoiceQuality::PersistenceError.new(
-      "Falha ao conectar no Supabase: #{e.message}",
+      "Falha ao conectar no Supabase (#{e.class.name}).",
       code: :supabase_error
     )
   end
@@ -306,7 +314,7 @@ end
     Array(values)
       .compact
       .uniq
-      .map { |value| %("#{value.to_s.gsub('"', '\"')}") }
+      .map { |value| %("#{resource_id!(value)}") }
       .join(',')
   end
 

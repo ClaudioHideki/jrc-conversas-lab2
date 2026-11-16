@@ -1,0 +1,41 @@
+{
+  "stage": 1,
+  "base": "a24adc6dd8bb660f955b76cce0172ae1638deee2",
+  "checkpoint_0": "80db4b4e8a511ac91f248b2358b1bc9d1ca2381d",
+  "status": "implemented_native_validation_pending",
+  "scope": [
+    "explicit_account_local_pabx_mapping",
+    "granular_authorities_without_automatic_grants",
+    "native_grant_guard",
+    "corporate_unit_queue_intersection",
+    "authorized_customer_context",
+    "recording_view_listen_download_separation",
+    "account_scoped_quality_reads_and_writes",
+    "additive_external_storage_guard_not_applied_to_real_supabase"
+  ],
+  "executed": [
+    "JSON syntax",
+    "lightweight source formatting",
+    "git diff whitespace check"
+  ],
+  "not_executed": [
+    "Rails and PostgreSQL",
+    "Vue tests",
+    "Chrome desktop/mobile/light/dark",
+    "real provider or Supabase audit"
+  ],
+  "restrictions_preserved": [
+    "main",
+    "published_image",
+    "production",
+    "5379",
+    "existing_containers",
+    "real_grants",
+    "no_external_commands"
+  ],
+  "remaining": [
+    "native CI and corrections",
+    "external Supabase schema and bucket policies require separate authorization",
+    "stage 2 UI and Chrome"
+  ]
+}

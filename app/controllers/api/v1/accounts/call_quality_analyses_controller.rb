@@ -2,6 +2,7 @@ class Api::V1::Accounts::CallQualityAnalysesController < Api::V1::Accounts::Base
   MAX_LOOKUP_DAYS = 31
 
   def index
+    JrcContactCenter::RecordingAccess.authorize!(account: Current.account, user: Current.user, action: :view)
     call = find_call_from_hodupbx!
     analysis = JrcVoiceQuality::SupabaseClient.new.find_analysis(
       account_id: Current.account.id,
@@ -18,6 +19,7 @@ class Api::V1::Accounts::CallQualityAnalysesController < Api::V1::Accounts::Base
   end
 
   def create
+    JrcContactCenter::RecordingAccess.authorize!(account: Current.account, user: Current.user, action: :listen)
     credential = current_credential!
     call = find_call_from_hodupbx!(credential)
     result = JrcVoiceQuality::Processor.new(

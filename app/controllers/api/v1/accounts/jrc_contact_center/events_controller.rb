@@ -3,13 +3,13 @@
 class Api::V1::Accounts::JrcContactCenter::EventsController < Api::V1::Accounts::JrcContactCenter::BaseController
   def index
     authorize_contact_center!(:control?)
-    records = JrcContactCenter::EventInbox.where(account: Current.account).order(received_at: :desc).limit(100)
+    records = contact_center_access.events.order(received_at: :desc).limit(100)
     render json: base_payload.merge(items: records.map { |record| serialize(record) })
   end
 
   def reprocess
     authorize_contact_center!(:control?)
-    record = JrcContactCenter::EventInbox.where(account: Current.account).find(params[:id])
+    record = contact_center_access.events.find(params[:id])
     record.with_lock do
       raise JrcContactCenter::OperationError, 'event_signature_unverified' unless record.signature_verified?
       raise JrcContactCenter::OperationError.new('event_not_failed', status: :conflict) unless record.status == 'failed'
