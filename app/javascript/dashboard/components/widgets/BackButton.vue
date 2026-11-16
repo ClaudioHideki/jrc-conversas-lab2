@@ -1,5 +1,7 @@
 <script setup>
-import router from '../../routes/index';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 const props = defineProps({
   backUrl: {
     type: [String, Object],

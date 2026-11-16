@@ -1,0 +1,49 @@
+{
+  "scope": "Call Center stages 0-2 bootstrap; no deployment or registry publication",
+  "preserved_checkpoints": [
+    "b77ffe55c9d7bc93a904f9cabb88453b6eb1eb5f",
+    "dcc7a8e39013bd602ba725aba49d3302f3d7a147"
+  ],
+  "diagnostic_checkpoint": "92c22a76a31416290c4ee68ece27abc63b1f8249",
+  "diagnostic_run": 43933038359,
+  "artifact": {
+    "id": 14259008371,
+    "sha256": "2e67a73b4682605e076b7d481bb351e1099c75943e0a40091b5847a93ffd99da"
+  },
+  "observed": {
+    "message": "Cannot access 'lo' before initialization",
+    "generated": "assets/index-HpwZollL.js:86:19756",
+    "original": "app/javascript/dashboard/routes/dashboard/settings/account/Index.vue:22:4",
+    "binding": "BaseSettingsHeader"
+  },
+  "cycle": [
+    "customRoles/Index.vue",
+    "settings/components/BaseSettingsHeader.vue",
+    "components/widgets/BackButton.vue",
+    "routes/index.js",
+    "dashboard/dashboard.routes.js",
+    "settings/settings.routes.js",
+    "settings/account/account.routes.js",
+    "settings/account/Index.vue",
+    "settings/components/BaseSettingsHeader.vue"
+  ],
+  "cause": "The shared BackButton statically imported the complete global router, causing an eager route/component cycle and a temporal dead zone before BaseSettingsHeader initialization.",
+  "correction": "Resolve the installed application router through Vue Router useRouter; retain backUrl string/object handling, history behavior, labels and CSS.",
+  "regressions": [
+    "real memory router: explicit URL",
+    "real memory router: named route",
+    "real memory router: history back"
+  ],
+  "required_validation": [
+    "Rails and real Account API",
+    "PABX concurrency",
+    "migration identities/schema/SQL guards",
+    "Vue plus BackButton regressions",
+    "frontend and incremental Ruby lint",
+    "guarded minified CSS/assets build",
+    "source-mapped bootstrap probe",
+    "all 44 desktop/mobile/light/dark Chrome scenarios"
+  ],
+  "instrumentation": "Hidden maps remain only inside the disposable QA runner; artifacts contain stack/mapped locations, not the map or its source contents.",
+  "restrictions": "No local writes, local checkout changes, main update, permission changes, Docker publication or deploy."
+}
