@@ -66,6 +66,7 @@ jobs:
       - name: Native dependencies over verified HTTPS APT
         run: bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev fonts-dejavu-core postgresql-client
       - uses: ruby/setup-ruby@v1
+        id: ruby_runtime
         with:
           ruby-version: '3.4.12'
           bundler: 2.5.16
@@ -96,10 +97,19 @@ jobs:
             spec/requests/api/v1/accounts/pabx_security_spec.rb spec/requests/api/v1/accounts/pabx_history_spec.rb \
             spec/requests/api/v1/accounts/pabx_recordings_spec.rb spec/requests/api/v1/accounts/pabx_diagnostics_spec.rb \
             spec/requests/api/v1/accounts/call_history_spec.rb spec/services/jrc_voice_quality \
+            --exclude-pattern spec/services/pabx/sync_concurrency_spec.rb \
             --format progress --format json --out /tmp/call-center-rspec.json
+      - name: PABX concurrency in its explicitly guarded disposable database
+        env:
+          POSTGRES_DATABASE: corporate_gratuity_disposable
+          SCHEMA: /tmp/call-center-pabx-schema.rb
+        run: |
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
       - name: Require positive examples and zero failures, pending or outside errors
         run: >-
-          ruby -rjson -e 's=JSON.parse(File.read(ARGV[0])).fetch("summary"); abort s.inspect unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero?' /tmp/call-center-rspec.json
+          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort s.inspect unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/call-center-rspec.json /tmp/call-center-pabx-rspec.json
       - name: Supabase storage guards in a separate synthetic database
         env:
           PGPASSWORD: disposable-test-only
@@ -121,7 +131,29 @@ jobs:
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR a24adc6dd8bb660f955b76cce0172ae1638deee2 HEAD -- app/javascript | grep -E '\.(js|vue)$')
           pnpm exec eslint "${files[@]}"
       - name: Incremental Ruby lint without suppressing new offenses
+        if: always() && steps.ruby_runtime.outcome == 'success'
         run: python3 script/jrc_call_center_lint.py
+      - name: Guarded build of real CSS and components for the isolated Chrome test
+        env:
+          JRC_VITE_BUILD_HEAP_MIB: '6144'
+        run: |
+          node script/jrc_vite_build.mjs build --mode production --config tests/playwright/fixtures/call-center-native/vite.config.mjs | tee /tmp/call-center-frontend-build.txt
+          pnpm --dir tests/playwright install --frozen-lockfile --ignore-scripts
+          google-chrome --version | tee /tmp/call-center-chrome-version.txt
+      - name: Synthetic authenticated Rails and isolated preview
+        run: |
+          bundle exec rails runner script/jrc_call_center_e2e_seed.rb
+          bundle exec rails server -b 127.0.0.1 -p 5387 > /tmp/call-center-rails-server.private 2>&1 &
+          echo "$!" > /tmp/call-center-rails.pid
+          node node_modules/vite/bin/vite.js preview --config tests/playwright/fixtures/call-center-native/vite.config.mjs > /tmp/call-center-preview.private 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl --silent --output /dev/null http://127.0.0.1:5387/app/login && curl --fail --silent --output /dev/null http://127.0.0.1:5386/; then exit 0; fi
+            sleep 2
+          done
+          echo 'Isolated servers did not become ready; no external fallback permitted'
+          exit 1
+      - name: Chrome desktop and mobile, real CSS and PostgreSQL persistence
+        run: node tests/playwright/node_modules/@playwright/test/cli.js test --config tests/playwright/call-center-native.config.ts
       - name: Preserve source identity
         if: always()
         run: git diff --exit-code && git diff --check
@@ -133,5 +165,6 @@ jobs:
             /tmp/call-center-*.json
             /tmp/call-center-*.txt
             /tmp/call-center-schema.rb
+            .codex/call-center-native-e2e
           if-no-files-found: error
           retention-days: 7

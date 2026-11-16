@@ -1,0 +1,31 @@
+{
+  "sha": "0036238479df6ce52477a745468c1a0e208638d3",
+  "run_id": 43871581711,
+  "artifact_id": 14227793723,
+  "artifact_sha256": "fc4d99953ab34705dede9b52eb7145a1d507d719f6a96fa373b28873d622b639",
+  "result": "failed_not_approved",
+  "rspec": {
+    "examples": 346,
+    "failures": 12,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "causes": [
+    "Unintended restriction of legacy native agents: restore existing access, keep new authorities explicit",
+    "Queue assignment denial changed 401 to 404: preserve native forbidden contract",
+    "Scope mapping synthetic fixture lacked required credentials",
+    "HTTP mapping example lazily created duplicate integration after request",
+    "PABX concurrency guard requires a separately named disposable database"
+  ],
+  "unchanged_controls": [
+    "no test disabled",
+    "concurrency moved to its required database without changing its guard",
+    "all historical migrations unchanged",
+    "no real PABX request"
+  ],
+  "not_run": [
+    "Vue",
+    "lint",
+    "Chrome"
+  ]
+}

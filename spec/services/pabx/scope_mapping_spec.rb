@@ -29,7 +29,7 @@ RSpec.describe Pabx::ScopeMapping, :pabx do
 
   it 'rejects copying an authorization to another Account or changing its tenant' do
     row = described_class.authorize(integration: integration, actor: root, accountcode: '12', cdr_identity: 'accountcode')
-    other = create(:telephony_integration, pabx_settings: pabx_settings)
+    other = create(:telephony_integration, pabx_settings: pabx_settings(enabled: false, sync_enabled: false))
     other.pabx_settings['scope_mapping'] = row
     expect { described_class.new(other).validate! }.to raise_error(Pabx::Error, 'INVALID_SCOPE_MAPPING')
     integration.pabx_settings.merge!('scope_mapping' => row, 'expected_tenant' => '99')

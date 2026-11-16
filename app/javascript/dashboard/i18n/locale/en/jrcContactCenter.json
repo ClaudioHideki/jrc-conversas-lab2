@@ -1782,7 +1782,29 @@
         "real": "Implementado",
         "synthetic": "Somente sintético",
         "false": "Não disponível",
-        "true": "Disponível"
+        "true": "Disponível",
+        "proposed": "Contrato proposto, sem homologação"
+      },
+      "DESCRIPTION_FIELD": "Descrição",
+      "CAPABILITIES": {
+        "sip_webrtc": "Ramal SIP / WebRTC",
+        "acd_queues": "Filas de atendimento",
+        "ivr": "URA",
+        "ddd_routing": "Roteamento por DDD",
+        "fallback": "Rota alternativa",
+        "agent_states": "Estados dos agentes",
+        "cdr": "Histórico de chamadas",
+        "recordings": "Gravações",
+        "originate": "Originar chamada",
+        "hold": "Espera",
+        "transfer_blind": "Transferência cega",
+        "transfer_attended": "Transferência assistida",
+        "callback": "Retorno agendado",
+        "signed_events": "Eventos assinados",
+        "high_availability": "Alta disponibilidade",
+        "provider_adapter": "Adaptador nativo",
+        "external_api": "API externa",
+        "event_schema": "Contrato de eventos"
       }
     }
   }

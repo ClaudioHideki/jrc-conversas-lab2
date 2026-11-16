@@ -38,6 +38,7 @@ RSpec.describe 'PABX persistence and HTTP isolation', :pabx, type: :request do
   end
 
   it 'authorizes a distinct accountcode server-side and ignores forged provenance fields' do
+    integration
     patch path, params: { settings: settings, scope_mapping: { accountcode: '12', cdr_identity: 'accountcode',
                                                               account_id: 999, authorized_by_id: 999 } },
                 headers: root.create_new_auth_token, as: :json

@@ -18,10 +18,12 @@ RSpec.describe 'Call Center administration isolation', type: :request do
     expect(response).to have_http_status(:unauthorized)
   end
 
-  it 'does not automatically activate a newly created unassigned agent' do
+  it 'preserves legacy agent access without granting new administrative authorities' do
     agent = create(:user, account: account, role: :agent)
     get "#{base}/context", headers: agent.create_new_auth_token
-    expect(response).to have_http_status(:unauthorized)
+    expect(response).to have_http_status(:ok)
+    get "#{base}/administration", headers: agent.create_new_auth_token
+    expect(response.parsed_body.fetch('cards')).to be_empty
   end
 
   it 'keeps publication blocked without permission or a provider contract' do

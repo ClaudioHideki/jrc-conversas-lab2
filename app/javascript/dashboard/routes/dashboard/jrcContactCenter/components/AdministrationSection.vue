@@ -53,12 +53,20 @@ const title = computed(() =>
     : t(`JRC_CONTACT_CENTER.ADMIN.CARDS.${key.value}.NAME`)
 );
 const queryValue = suffix => route.query[`${resource.value}_${suffix}`];
-const page = computed(() => Math.max(1, Number(queryValue('page') || 1)));
+const page = computed(() => {
+  const value = Number(queryValue('page') || 1);
+  return Number.isSafeInteger(value) && value > 0 ? value : 1;
+});
 const tableRows = computed(() =>
   items.value.map(row => ({
     ...row,
     displayName:
-      row.name || row.user_name || row.event_type || label('PABX_CONNECTION'),
+      (resource.value === 'integrations'
+        ? label(`CAPABILITIES.${row.name}`)
+        : row.name) ||
+      row.user_name ||
+      row.event_type ||
+      label('PABX_CONNECTION'),
     detail:
       row.code ||
       row.extension ||
@@ -492,6 +500,8 @@ onBeforeUnmount(() => {
     </template>
     <Dialog
       ref="dialog"
+      contained
+      overflow-y-auto
       :title="`${title} — ${label(editing ? 'EDIT' : 'CREATE')}`"
       :confirm-button-label="label('SAVE')"
       :cancel-button-label="label('CANCEL')"
@@ -520,7 +530,7 @@ onBeforeUnmount(() => {
               v-model="draft[channel]"
               required
               pattern="[0-9]{2}:[0-5][0-9]"
-              placeholder="HH:MM"
+              :placeholder="label('TIME_FORMAT')"
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
           /></label>
           <label class="flex items-center gap-2 text-sm sm:col-span-2"
@@ -598,7 +608,7 @@ onBeforeUnmount(() => {
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
           /></label>
           <label v-if="resource === 'teams'" class="text-sm sm:col-span-2"
-            >{{ label('DESCRIPTION')
+            >{{ label('DESCRIPTION_FIELD')
             }}<textarea
               v-model="draft.description"
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"

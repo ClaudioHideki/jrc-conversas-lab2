@@ -50,7 +50,7 @@ class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::B
   end
 
   def ensure_contact_center_assignment!(queue_id: nil, owner_account_user_id: nil, require_accessible_assignment: false)
-    contact_center_access.queues.find(queue_id) if queue_id.present?
+    raise Pundit::NotAuthorizedError if queue_id.present? && !contact_center_access.queues.exists?(id: queue_id)
     Current.account.account_users.find(owner_account_user_id) if owner_account_user_id.present?
     return if contact_center_access.full_access?
 

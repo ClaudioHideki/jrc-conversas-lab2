@@ -19,7 +19,7 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
 
   def access?
     account&.active? && account_user && account.feature_enabled?('jrc_contact_center') &&
-      (administrator? || permission?('jrc_contact_center_view') || assigned_operator?)
+      (native_role? || permission?('jrc_contact_center_view'))
   end
 
   def operate?
@@ -60,15 +60,6 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
   end
 
   private
-
-  def assigned_operator?
-    return false unless native_role?
-
-    now = Time.current
-    memberships = JrcContactCenter::QueueMembership.where(account: account, account_user: account_user, active: true)
-    memberships.where('starts_at IS NULL OR starts_at <= ?', now).where('ends_at IS NULL OR ends_at > ?', now).exists? ||
-      JrcContactCenter::CallLeg.exists?(account: account, account_user: account_user)
-  end
 
   def native_role?
     account_user.custom_role_id.nil?
