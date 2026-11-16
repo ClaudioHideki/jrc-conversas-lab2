@@ -49,7 +49,7 @@ RSpec.describe 'Broker custody survives deletion requests', type: :request do
   end
 
   def expect_retained_error(&operation)
-    expect(&operation).to raise_error { |error| expect(error.class.name).to eq('JrcBroker::HistoryRetention::Protected') }
+    expect(&operation).to(raise_error { |error| expect(error.class.name).to eq('JrcBroker::HistoryRetention::Protected') })
   end
 
   it 'returns 409 before enqueueing inbox deletion even after the Broker feature is disabled' do

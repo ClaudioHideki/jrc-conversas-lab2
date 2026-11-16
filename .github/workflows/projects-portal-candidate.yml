@@ -64,6 +64,23 @@ jobs:
           ruby-version: '3.4.12'
           bundler: 2.5.16
           bundler-cache: true
+      - name: Baseline revisado do produto ou da extensao
+        run: |
+          baseline=35976b08077035ee79843b07ad02c0389d002f09
+          if [ -f deploy/jrc/EXTENSION-REFERENCE.json ]; then
+            baseline=$(ruby -rjson -e 'puts JSON.parse(File.read(ARGV.fetch(0))).fetch("extensionBaselineSha")' deploy/jrc/EXTENSION-REFERENCE.json)
+          fi
+          [[ "$baseline" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags origin "$baseline"
+          git merge-base --is-ancestor "$baseline" HEAD
+          echo "REVIEW_BASE_SHA=$baseline" >> "$GITHUB_ENV"
+      - name: Sintaxe Ruby do incremento
+        run: |
+          git diff --name-only --diff-filter=ACMR "$REVIEW_BASE_SHA" HEAD -- '*.rb' | xargs -r -n 1 ruby -c
+      - name: RuboCop Lint dos fontes Ruby alterados
+        run: |
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$REVIEW_BASE_SHA" HEAD -- '*.rb')
+          bundle exec rubocop --force-exclusion --only Lint --format simple "${files[@]}"
       - name: Schema somente no banco descartavel
         run: |
           test "$RAILS_ENV" = test
@@ -111,23 +128,6 @@ jobs:
       - name: Exigir exemplos executados e nenhuma falha ou pendencia nos quatro bancos
         run: |
           ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort "Empty, failed or pending native gate: #{path}" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/projects-portal-rspec.json /tmp/projects-portal-concurrency.json /tmp/projects-portal-sd-concurrency.json /tmp/projects-portal-comments-concurrency.json
-      - name: Baseline revisado do produto ou da extensao
-        run: |
-          baseline=35976b08077035ee79843b07ad02c0389d002f09
-          if [ -f deploy/jrc/EXTENSION-REFERENCE.json ]; then
-            baseline=$(ruby -rjson -e 'puts JSON.parse(File.read(ARGV.fetch(0))).fetch("extensionBaselineSha")' deploy/jrc/EXTENSION-REFERENCE.json)
-          fi
-          [[ "$baseline" =~ ^[0-9a-f]{40}$ ]]
-          git fetch --no-tags origin "$baseline"
-          git merge-base --is-ancestor "$baseline" HEAD
-          echo "REVIEW_BASE_SHA=$baseline" >> "$GITHUB_ENV"
-      - name: Sintaxe Ruby do incremento
-        run: |
-          git diff --name-only --diff-filter=ACMR "$REVIEW_BASE_SHA" HEAD -- '*.rb' | xargs -r -n 1 ruby -c
-      - name: RuboCop Lint dos fontes Ruby alterados
-        run: |
-          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$REVIEW_BASE_SHA" HEAD -- '*.rb')
-          bundle exec rubocop --force-exclusion --only Lint --format simple "${files[@]}"
       - name: Preservar guards existentes de custodia ao carregar o schema
         run: >-
           bundle exec rspec spec/services/jrc_migrations/media_protocol_spec.rb

@@ -22,8 +22,8 @@ class RelationshipHealthPriorityTest < Minitest::Test
     result = JrcRelationship::HealthScore.call(observations: observations('relationship' => 40, 'finance' => 60), weights: { 'relationship' => 75, 'finance' => 25 })
     assert_equal 45, result[:score]
     assert_equal 'risk', result[:band]
-    assert_equal 45, result[:factors].sum { |factor| factor[:contribution] }
-    assert result[:factors].all? { |factor| factor[:evidence] == 'test source' }
+    assert_equal(45, result[:factors].sum { |factor| factor[:contribution] })
+    assert(result[:factors].all? { |factor| factor[:evidence] == 'test source' })
   end
 
   def test_unavailable_source_is_excluded_from_denominator
