@@ -78,7 +78,7 @@ class ConsolidatedDenials(unittest.TestCase):
     def test_live_main_is_distinct_from_the_historical_evidence_base(self):
         from unittest.mock import patch
         class Refs:
-            live=gate.PRODUCT
+            live=gate.PROTECTED_MAIN
             def api(self,path):
                 value=self.live if path.endswith('/main') else gate.PRODUCT
                 if path.endswith('/codex/respostas-rapidas-aprovacoes-20261115'):
@@ -88,7 +88,7 @@ class ConsolidatedDenials(unittest.TestCase):
         with patch.object(gate,'client',return_value=refs):
             gate.check_refs()
             self.assertNotEqual(gate.BASE_MAIN,gate.PROTECTED_MAIN)
-            for wrong in [gate.BASE_MAIN,'0'*40]:
+            for wrong in [gate.BASE_MAIN,gate.PRODUCT,'0'*40]:
                 refs.live=wrong
                 with self.assertRaises(RuntimeError):gate.check_refs()
 

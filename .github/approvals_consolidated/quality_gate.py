@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / 'product'
 PRODUCT = '5c3fb7f700d7bb685f17292f59b873df14ddf34d'
 BASE_MAIN = '55da80eb1254aee54ee0f1fb5c42f2be46a98737'
-PROTECTED_MAIN = PRODUCT
+PROTECTED_MAIN = 'a24adc6dd8bb660f955b76cce0172ae1638deee2'
 REPO = 'ClaudioHideki/jrc-conversas-lab2'
 CANDIDATE = 'codex/quick-release-image-5c3fb7f7-20261115'
 sys.path.insert(0, str(ROOT / '.github/release'))

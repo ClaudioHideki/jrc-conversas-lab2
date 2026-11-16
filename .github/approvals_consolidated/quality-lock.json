@@ -1309,5 +1309,17 @@
     "spec/requests/api/v1/accounts/jrc_approvals/catalog_import_spec.rb": "5e597a68aec35a65546b6751b052ca94c61c3af94f2e96936d635cc3ab6c631a",
     "spec/services/jrc_approvals/quick_reply_import_concurrency_spec.rb": "5811fc3854481822a482e9bd1865fb55247607f3dc56319640ec8b29ea91925f"
   },
-  "protected_main": "5c3fb7f700d7bb685f17292f59b873df14ddf34d"
+  "protected_main": "a24adc6dd8bb660f955b76cce0172ae1638deee2",
+  "live_main_delta": {
+    "product_sha": "5c3fb7f700d7bb685f17292f59b873df14ddf34d",
+    "main_sha": "a24adc6dd8bb660f955b76cce0172ae1638deee2",
+    "only_documentation_paths": [
+      "CONTINUE-AQUI.md",
+      "ROADMAP.md",
+      "TASKS.md",
+      "docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md",
+      "docs/superpowers/plans/2026-11-15-quick-replies-whatsapp-release.md"
+    ],
+    "functional_changes": false
+  }
 }
