@@ -80,6 +80,44 @@ describe SearchService do
     context 'when message search' do
       let!(:message2) { create(:message, account: account, inbox: inbox, content: 'harry is cool') }
 
+      [false, true].each do |gin|
+        it "loads Broker display proof in bulk for #{gin ? 'GIN' : 'LIKE'} results without breaking pagination counts" do
+          allow(account).to receive(:feature_enabled?).and_call_original
+          allow(account).to receive(:feature_enabled?).with('search_with_gin').and_return(gin)
+          service = described_class.new(current_user: user, current_account: account, params: { q: 'Harry' }, search_type: 'Message')
+          results = service.perform.fetch(:messages)
+          expect(results.count).to eq(2)
+          expect(results.total_count).to eq(2)
+          rows = results.to_a
+          expect(rows.map(&:id)).to match_array([message.id, message2.id])
+          queries = []
+          ActiveSupport::Notifications.subscribed(lambda { |_name, _start, _finish, _id, payload|
+            queries << payload[:sql] if payload[:sql].include?('jrc_broker_live_receipts') || payload[:sql].include?('jrc_broker_webhook_obligations')
+          }, 'sql.active_record') do
+            rows.each do |row|
+              row.broker_published_at
+              row.display_content_attributes
+            end
+          end
+          expect(queries).to be_empty
+        end
+      end
+
+      it 'projects display proof in the advanced-search record loader without changing search pagination' do
+        service = described_class.new(current_user: user, current_account: account, params: { q: 'Harry', page: 2 }, search_type: 'Message')
+        service.extend(Enterprise::SearchService)
+        loader = nil
+        allow(Message).to receive(:search) do |_query, **options|
+          expect(options).to include(page: 2, per_page: 15, order: { created_at: :desc })
+          loader = options.fetch(:scope_results)
+          :synthetic_search_result
+        end
+        expect(service.advanced_search).to eq(:synthetic_search_result)
+        rows = loader.call(Message.where(account: account, id: [message.id, message2.id])).to_a
+        expect(rows.map(&:id)).to match_array([message.id, message2.id])
+        expect(rows).to all(have_attributes(attributes: a_hash_including('jrc_broker_published_at', 'jrc_broker_obligation_exists')))
+      end
+
       it 'searches across message content and return in created_at desc' do
         # random messages in another account
         create(:message, content: 'Harry Potter is a wizard')

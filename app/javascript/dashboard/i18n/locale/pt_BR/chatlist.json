@@ -9,6 +9,21 @@
       "404": "Não há conversas ativas neste grupo."
     },
     "FAILED_TO_SEND": "Falha ao enviar",
+    "WHATSAPP_RETRY": {
+      "MARKETING": "A Meta restringiu a entrega desta mensagem de marketing (131049). O reenvio está bloqueado até a revisão; a entrega posterior não é garantida.",
+      "DESTINATION": "A Meta não conseguiu entregar esta mensagem (131026). Verifique o destinatário antes de considerar uma nova tentativa. O reenvio está bloqueado.",
+      "EXPERIMENT": "A Meta restringiu este destinatário em um experimento de marketing (130472). Você pode solicitar uma tentativa manual; a Meta pode rejeitá-la novamente.",
+      "STATES": {
+        "QUEUED": "Reenvio da mensagem #{id}: na fila; ainda não enviada.",
+        "SUBMITTING": "Reenvio da mensagem #{id}: enviando; aguardando confirmação.",
+        "UNKNOWN": "Reenvio da mensagem #{id}: resultado não confirmado. Verifique o resultado antes de reenviar.",
+        "ACCEPTED": "Reenvio da mensagem #{id}: aceito pela Meta; entrega ainda não confirmada.",
+        "DELIVERED": "Reenvio da mensagem #{id}: entregue.",
+        "READ": "Reenvio da mensagem #{id}: lida.",
+        "FAILED": "Reenvio da mensagem #{id}: rejeitado. Consulte o erro do provedor.",
+        "CANCELLED": "Reenvio da mensagem #{id}: interrompido antes do envio. Revise o acesso e o modelo."
+      }
+    },
     "TAB_HEADING": "Conversas",
     "MENTION_HEADING": "Menções",
     "UNATTENDED_HEADING": "Não Atendidas",

@@ -177,6 +177,11 @@ jobs:
             spec/configs/schedule_spec.rb \
             --format progress --format json --out /tmp/delivery-history-outbound.json
           python3 script/jrc_delivery_evidence.py rspec /tmp/delivery-history-outbound.json 50
+      - name: Search projection and pagination regressions
+        run: |
+          bundle exec rspec spec/services/search_service_spec.rb \
+            --format progress --format json --out /tmp/delivery-search.json
+          python3 script/jrc_delivery_evidence.py rspec /tmp/delivery-search.json 3
       - name: Preserved source and no schema dump
         run: git diff --exit-code && git diff --check
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
