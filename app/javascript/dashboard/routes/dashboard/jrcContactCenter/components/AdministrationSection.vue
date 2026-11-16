@@ -602,41 +602,44 @@ onBeforeUnmount(() => {
               maxlength="120"
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
           /></label>
-          <label v-if="resource !== 'teams'"
-class="text-sm"
-            >{{ label('CODE')
-            }}<input
-              v-model="draft.code"
-              required
-              maxlength="80"
-              class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-          /></label>
-          <label v-if="resource === 'teams'"
-class="text-sm sm:col-span-2"
-            >{{ label('DESCRIPTION_FIELD')
-            }}<textarea
-              v-model="draft.description"
-              class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-            />
-          </label>
-          <label v-if="resource === 'queues'"
-class="text-sm"
-            >{{ label('UNIT')
-            }}<select
-              v-model="draft.unit_id"
-              required
-              class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-            >
-              <option value="">{{ label('SELECT') }}</option>
-              <option
-                v-for="row in context.units"
-                :key="row.id"
-                :value="row.id"
+          <template v-if="resource !== 'teams'">
+            <label class="text-sm"
+              >{{ label('CODE')
+              }}<input
+                v-model="draft.code"
+                required
+                maxlength="80"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+            /></label>
+          </template>
+          <template v-if="resource === 'teams'">
+            <label class="text-sm sm:col-span-2"
+              >{{ label('DESCRIPTION_FIELD')
+              }}<textarea
+                v-model="draft.description"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+              />
+            </label>
+          </template>
+          <template v-if="resource === 'queues'">
+            <label class="text-sm"
+              >{{ label('UNIT')
+              }}<select
+                v-model="draft.unit_id"
+                required
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
               >
-                {{ row.name }}
-              </option>
-            </select></label
-          >
+                <option value="">{{ label('SELECT') }}</option>
+                <option
+                  v-for="row in context.units"
+                  :key="row.id"
+                  :value="row.id"
+                >
+                  {{ row.name }}
+                </option>
+              </select></label
+            >
+          </template>
           <template v-if="resource === 'units'">
             <label class="text-sm"
               >{{ label('KIND')
@@ -697,17 +700,18 @@ class="text-sm"
               </select></label
             >
           </template>
-          <label v-if="resource !== 'teams'"
-class="text-sm"
-            >{{ label('STATUS')
-            }}<select
-              v-model="draft.status"
-              class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+          <template v-if="resource !== 'teams'">
+            <label class="text-sm"
+              >{{ label('STATUS')
+              }}<select
+                v-model="draft.status"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+              >
+                <option value="active">{{ label('ACTIVE') }}</option>
+                <option value="inactive">{{ label('INACTIVE') }}</option>
+              </select></label
             >
-              <option value="active">{{ label('ACTIVE') }}</option>
-              <option value="inactive">{{ label('INACTIVE') }}</option>
-            </select></label
-          >
+          </template>
         </template>
       </div>
     </Dialog>

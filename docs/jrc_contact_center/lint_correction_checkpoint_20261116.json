@@ -55,5 +55,28 @@
     "artifact_id": 14232510367,
     "artifact_sha256": "e7e92ef2cedc7db80c1ab077d13ed04c1f4325d17cfcf26431df7f34409cb87e",
     "next_changes": "Ruby layout/block forwarding corrections; exact pinned formatter output for two Vue templates; disambiguated synthetic Chrome status locator without changing assertions"
+  },
+  "second_validation": {
+    "sha": "369f73684ab07ecadd76426d0d18993a24ee1c5e",
+    "run": 43881961651,
+    "rspec_examples": 347,
+    "rspec_failures": 0,
+    "vue_examples": 166,
+    "vue_failures": 0,
+    "remaining_at_that_sha": {
+      "ruby": 1,
+      "frontend": 4
+    },
+    "artifact_id": 14233690907,
+    "artifact_sha256": "d8a6386d4b661c55e31e0fc55747f79f345d14bf9fd930821457e4d4821343b4"
+  },
+  "final_correction_preflight": {
+    "targeted_eslint_errors": 0,
+    "targeted_eslint_warnings": 40,
+    "tools": "existing ESLint 8.57.0 / Prettier 3.3.3 matching frozen CI dependencies; full repository rules",
+    "template_fix": "four v-if conditions moved to non-rendering template wrappers, same rendered labels and bindings",
+    "seed_fix": "same short-circuit synthetic database assertion, split into a local boolean",
+    "global_configuration_changed": false,
+    "native_revalidation": "pending"
   }
 }
