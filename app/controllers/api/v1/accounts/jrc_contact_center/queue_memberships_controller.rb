@@ -81,17 +81,21 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
   def validate_scope!(attributes)
     queue = contact_center_access.queues.find(attributes[:queue_id]) if attributes[:queue_id].present?
     eligible_members.find(attributes[:account_user_id]) if attributes[:account_user_id].present?
+    validate_queue_enrollment!(attributes, queue)
+  end
+
+  def validate_queue_enrollment!(attributes, queue)
     membership = scoped_memberships.find(params[:id]) if action_name == 'update'
     queue ||= membership&.queue
-    return unless queue && queue.status != 'active' && new_enrollment?(attributes, membership)
+    return if queue.nil? || queue.status == 'active'
 
-    raise JrcContactCenter::OperationError, 'inactive_queue'
+    raise JrcContactCenter::OperationError, 'inactive_queue' if new_enrollment?(attributes, membership)
   end
 
   def new_enrollment?(attributes, membership)
     return true unless membership
 
-    changed_target = attributes.slice(:queue_id, :account_user_id).any? do |key, value|
+    changed_target = attributes.slice(:queue_id, :account_user_id).to_h.any? do |key, value|
       value.to_s != membership.public_send(key).to_s
     end
     activate = attributes.key?(:active) && ActiveModel::Type::Boolean.new.cast(attributes[:active]) && !membership.active?
