@@ -9,6 +9,12 @@ const base = accountId => {
 };
 
 export default {
+  administration: accountId => axios.get(`${base(accountId)}/administration`),
+  administrativeList: (accountId, section, params = {}) =>
+    axios.get(
+      `${base(accountId)}/administration/${encodeURIComponent(section)}`,
+      { params }
+    ),
   acwPolicy: accountId => axios.get(`${base(accountId)}/acw_policy`),
   updateAcwPolicy: (accountId, limits, options = {}) =>
     axios.patch(`${base(accountId)}/acw_policy`, { ...options, limits }),
@@ -36,12 +42,14 @@ export default {
     axios.get(`${base(accountId)}/context`, { timeout: 30000 }),
   customerContext: (accountId, phone) =>
     axios.get(`${base(accountId)}/customer_context`, { params: { phone } }),
-  units: accountId => axios.get(`${base(accountId)}/units`),
+  units: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/units`, { params }),
   saveUnit: (accountId, unit, id) =>
     id
       ? axios.patch(`${base(accountId)}/units/${Number(id)}`, { unit })
       : axios.post(`${base(accountId)}/units`, { unit }),
-  queues: accountId => axios.get(`${base(accountId)}/queues`),
+  queues: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/queues`, { params }),
   queueMemberships: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/queue_memberships`, { params }),
   saveQueueMembership: (accountId, queueMembership, id) =>

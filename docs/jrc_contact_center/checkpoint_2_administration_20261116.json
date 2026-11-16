@@ -1,0 +1,44 @@
+{
+  "stage": 2,
+  "status": "implemented_validation_pending",
+  "cards": 15,
+  "native_forms": [
+    "units",
+    "queues",
+    "team_name_description",
+    "queue_membership_participation_and_supervision",
+    "local_acw_policy"
+  ],
+  "honest_pending": [
+    "numbers_external_configuration",
+    "ivr",
+    "hours",
+    "audio_nico",
+    "pause_catalog",
+    "distribution_publication",
+    "recordings_admin_library"
+  ],
+  "preserved": [
+    "native_teams",
+    "native_custom_roles",
+    "native_approvals",
+    "legacy_event_reprocessing",
+    "legacy_settings",
+    "no_provider_commands"
+  ],
+  "test_execution": [
+    "lightweight_PrettiER_format_and_parse_only",
+    "git_diff_whitespace_check"
+  ],
+  "required_next": [
+    "Rails_PostgreSQL_scope_and_persistence",
+    "Vue",
+    "lint",
+    "Chrome_real_CSS_real_backend_desktop_mobile_light_dark"
+  ],
+  "not_homologated": [
+    "provider_API",
+    "Supabase_live_schema_and_storage"
+  ],
+  "no_release": true
+}

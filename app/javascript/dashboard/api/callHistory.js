@@ -12,7 +12,7 @@ class CallHistoryAPI extends ApiClient {
   }
 
   recording(id, options = {}) {
-    return axios.get(`${this.url}/${id}/recording`, {
+    return axios.get(`${this.url}/${id}/playback`, {
       responseType: 'blob',
       signal: options.signal,
     });

@@ -20,6 +20,13 @@ const canSupervise = computed(
     capabilities.value.configure === true
 );
 const canConfigure = computed(() => capabilities.value.configure === true);
+const canAdminister = computed(
+  () =>
+    canSupervise.value ||
+    ['administer', 'audit', 'approve', 'publish', 'recordings_view'].some(
+      key => capabilities.value[key] === true
+    )
+);
 const canReport = computed(
   () =>
     capabilities.value.reports === true ||
@@ -87,7 +94,7 @@ const navigationGroups = computed(() => [
         name: 'jrc_contact_center_control_desk',
         label: t('JRC_CONTACT_CENTER.NAV.CONTROL_DESK'),
         icon: 'i-lucide-radar',
-        visible: canSupervise.value,
+        visible: canAdminister.value,
       },
       {
         name: 'jrc_contact_center_order_lookup',

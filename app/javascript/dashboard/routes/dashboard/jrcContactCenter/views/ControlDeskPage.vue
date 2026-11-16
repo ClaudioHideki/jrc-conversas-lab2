@@ -3,259 +3,191 @@ import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
-import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
-import VisualShowcasePage from '../components/visual/VisualShowcasePage.vue';
-import VisualSectionCard from '../components/visual/VisualSectionCard.vue';
-import VisualStatusBadge from '../components/visual/VisualStatusBadge.vue';
-import { contactCenterScreen } from '../demo/contactCenterVisualCatalog';
+import API from 'dashboard/api/jrcContactCenter';
+import AdministrationSection from '../components/AdministrationSection.vue';
 
 const route = useRoute();
 const { t } = useI18n();
-const loading = ref(true);
+const data = ref(null);
+const loading = ref(false);
 const failed = ref(false);
-const integration = ref(null);
-const health = ref(null);
-const events = ref([]);
-const reprocessing = ref(false);
-const accountId = computed(() => route.params.accountId);
-const capabilityRows = computed(() =>
-  Object.entries(integration.value?.capabilities || {})
-);
-
-const controlDeskScreen = computed(() => {
-  const source = contactCenterScreen('controlDesk', t);
-  const eventStatuses = health.value?.events?.statuses || {};
-  const commandStatuses = health.value?.commands?.statuses || {};
-  const eventTotal = Object.values(eventStatuses).reduce(
-    (total, count) => total + Number(count || 0),
-    0
-  );
-  const alertCount =
-    Number(health.value?.events?.unverified || 0) +
-    Number(eventStatuses.failed || 0) +
-    Number(commandStatuses.unknown || 0);
-  const metrics = source.metrics.map((item, index) => {
-    const values = [
-      item.value,
-      item.value,
-      alertCount || item.value,
-      eventTotal ? `${eventTotal}` : item.value,
-    ];
-    return { ...item, value: values[index] };
-  });
-  return { ...source, metrics };
-});
-
 let generation = 0;
+const accountId = computed(() => route.params.accountId);
+const section = computed(() => route.params.section || '');
+const icons = {
+  numbers: 'phone',
+  extensions: 'grid-3x3',
+  queues: 'layers',
+  ivr: 'network',
+  hours: 'calendar',
+  audio: 'volume-2',
+  pauses: 'pause-circle',
+  closures: 'flag',
+  distribution: 'shuffle',
+  permissions: 'users',
+  recordings: 'mic',
+  pabx: 'server',
+  approvals: 'shield-check',
+  general: 'settings',
+  integrations: 'plug',
+};
+const destination = key => ({
+  name: 'jrc_contact_center_admin_section',
+  params: { accountId: accountId.value, section: key },
+});
+const selected = computed(() =>
+  data.value?.cards.find(card => card.key === section.value)
+);
 const load = async () => {
-  generation += 1;
-  const version = generation;
+  const version = ++generation;
   loading.value = true;
   failed.value = false;
-  integration.value = null;
-  health.value = null;
-  events.value = [];
+  data.value = null;
   try {
-    const [capabilitiesResponse, healthResponse, eventsResponse] =
-      await Promise.all([
-        JrcContactCenterAPI.integrationCapabilities(accountId.value),
-        JrcContactCenterAPI.operationalHealth(accountId.value),
-        JrcContactCenterAPI.events(accountId.value),
-      ]);
-    if (version !== generation) return;
-    integration.value = capabilitiesResponse.data;
-    health.value = healthResponse.data;
-    events.value = eventsResponse.data.items || [];
+    const response = await API.administration(accountId.value);
+    if (generation === version) data.value = response.data;
   } catch {
-    if (version === generation) failed.value = true;
+    if (generation === version) failed.value = true;
   } finally {
-    if (version === generation) loading.value = false;
+    if (generation === version) loading.value = false;
   }
 };
-
-const reprocess = async event => {
-  if (
-    reprocessing.value ||
-    !event.signature_verified ||
-    event.status !== 'failed'
-  )
-    return;
-  const version = generation;
-  reprocessing.value = true;
-  try {
-    await JrcContactCenterAPI.reprocessEvent(accountId.value, event.id);
-    if (version === generation) await load();
-  } catch {
-    if (version === generation) failed.value = true;
-  } finally {
-    reprocessing.value = false;
-  }
-};
-
-const statusTone = status => {
-  if (['processed', 'confirmed', 'ready', 'available'].includes(status))
-    return 'emerald';
-  if (['failed', 'rejected', 'unknown'].includes(status)) return 'ruby';
-  if (['pending_contract', 'requested', 'pending'].includes(status))
-    return 'amber';
-  return 'blue';
-};
-
 watch(accountId, load, { immediate: true });
 </script>
 
 <template>
-  <div>
-    <VisualShowcasePage :screen="controlDeskScreen" />
-
-    <section class="space-y-5 px-4 pb-6 sm:px-6">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <p class="text-sm font-semibold text-n-slate-12">
-            {{ t('JRC_CONTACT_CENTER.CONTROL_DESK.CAPABILITIES') }}
-          </p>
-          <p class="mt-1 text-xs text-n-slate-10">
-            {{
-              integration?.provider || t('JRC_CONTACT_CENTER.COMMON.UNKNOWN')
-            }}
-          </p>
+  <div class="min-w-0 space-y-5 p-4 sm:p-6" data-control-desk>
+    <header class="rounded-2xl border border-n-blue-6 bg-n-blue-2 p-5 sm:p-6">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="flex min-w-0 items-start gap-3">
+          <Icon
+            icon="i-lucide-settings"
+            class="size-9 shrink-0 text-n-blue-11"
+          />
+          <div class="min-w-0">
+            <h1 class="text-2xl font-bold text-n-slate-12">
+              {{ t('JRC_CONTACT_CENTER.ADMIN.TITLE') }}
+            </h1>
+            <p class="mt-2 text-sm text-n-slate-11">
+              {{ t('JRC_CONTACT_CENTER.ADMIN.DESCRIPTION') }}
+            </p>
+          </div>
         </div>
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-xl border border-n-weak bg-n-solid-2 px-3 py-2 text-sm font-semibold text-n-slate-11 shadow-sm"
+          class="rounded-lg border border-n-blue-7 px-3 py-2 text-sm text-n-blue-11"
+          :disabled="loading"
           @click="load"
         >
-          <Icon icon="i-lucide-refresh-cw" class="size-4" />
           {{ t('JRC_CONTACT_CENTER.COMMON.REFRESH') }}
         </button>
       </div>
-
-      <div
-        v-if="failed"
-        class="rounded-2xl border border-n-ruby-6 bg-n-ruby-2 p-4 text-sm text-n-ruby-11"
+      <p class="mt-4 text-sm text-n-amber-11" role="status">
+        {{ t('JRC_CONTACT_CENTER.ADMIN.PROVIDER_PENDING') }}
+      </p>
+      <p
+        v-if="data?.provider.last_sync_at"
+        class="mt-2 break-words text-xs text-n-slate-11"
       >
-        {{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}
-      </div>
+        {{ t('JRC_CONTACT_CENTER.ADMIN.LAST_SYNC') }}:
+        {{ data.provider.last_sync_at }}
+      </p>
+      <p v-if="data?.provider.last_error" class="mt-2 text-sm text-n-ruby-11">
+        {{ t('JRC_CONTACT_CENTER.ADMIN.SYNC_ERROR') }}
+      </p>
+    </header>
 
-      <div
-        class="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]"
+    <p v-if="loading" role="status" class="text-sm text-n-slate-11">
+      {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}
+    </p>
+    <p
+      v-else-if="failed"
+      role="alert"
+      class="rounded-xl border border-n-ruby-6 p-4 text-n-ruby-11"
+    >
+      {{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}
+    </p>
+    <template v-else-if="data">
+      <RouterLink
+        v-if="section"
+        :to="{ name: 'jrc_contact_center_control_desk', params: { accountId } }"
+        class="inline-block text-sm text-n-blue-11"
       >
-        <VisualSectionCard
-          :title="$t('JRC_CONTACT_CENTER.VISUAL.EVENTOS_E_RECONCILIACAO')"
-          :subtitle="
-            loading
-              ? t('JRC_CONTACT_CENTER.COMMON.LOADING')
-              : $t('JRC_CONTACT_CENTER.VISUAL.TEXT_1148')
-          "
-          icon="i-lucide-webhook"
-          flush
+        {{ t('JRC_CONTACT_CENTER.ADMIN.BACK') }}
+      </RouterLink>
+      <div
+        v-if="!section"
+        class="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+      >
+        <RouterLink
+          v-for="card in data.cards"
+          :key="card.key"
+          :to="destination(card.key)"
+          :data-card="card.key"
+          class="flex min-w-0 flex-col gap-3 rounded-xl border border-n-blue-6 bg-n-solid-2 p-4 transition hover:border-n-blue-8 focus-visible:ring-2 focus-visible:ring-n-blue-7"
         >
-          <div v-if="events.length === 0" class="p-5 text-sm text-n-slate-10">
-            {{ t('JRC_CONTACT_CENTER.COMMON.EMPTY') }}
-          </div>
-          <div v-else class="divide-y divide-n-weak">
-            <div
-              v-for="event in events"
-              :key="event.id"
-              class="flex flex-wrap items-center gap-3 px-4 py-4 sm:px-5"
-            >
-              <span
-                class="grid size-10 shrink-0 place-content-center rounded-xl bg-n-blue-2 text-n-blue-11"
-              >
-                <Icon icon="i-lucide-webhook" class="size-5" />
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-semibold text-n-slate-12">
-                  {{ event.event_type }}
-                </p>
-                <p class="mt-1 text-xs text-n-slate-10">
-                  {{ $t('JRC_CONTACT_CENTER.VISUAL.TEXT_1149') }}{{ event.id
-                  }}{{ $t('JRC_CONTACT_CENTER.VISUAL.ASSINATURA')
-                  }}{{
-                    event.signature_verified
-                      ? $t('JRC_CONTACT_CENTER.VISUAL.VERIFIED')
-                      : $t('JRC_CONTACT_CENTER.VISUAL.NOT_VERIFIED')
-                  }}
-                </p>
-              </div>
-              <VisualStatusBadge
-                :label="event.status"
-                :tone="statusTone(event.status)"
-              />
-              <button
-                v-if="event.status === 'failed' && event.signature_verified"
-                type="button"
-                :disabled="reprocessing"
-                class="rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2 text-xs font-semibold text-n-slate-11 shadow-sm disabled:opacity-50"
-                @click="reprocess(event)"
-              >
-                {{ t('JRC_CONTACT_CENTER.CONTROL_DESK.REPROCESS') }}
-              </button>
-            </div>
-          </div>
-        </VisualSectionCard>
-
-        <VisualSectionCard
-          :title="$t('JRC_CONTACT_CENTER.VISUAL.MATRIZ_DE_CAPACIDADES')"
-          :subtitle="
-            $t(
-              'JRC_CONTACT_CENTER.VISUAL.CONTRATO_EXTERNO_E_DISPONIBILIDADE_POR_RECURSO'
-            )
-          "
-          icon="i-lucide-list-checks"
-          flush
-        >
-          <div
-            v-if="capabilityRows.length === 0"
-            class="p-5 text-sm text-n-slate-10"
-          >
-            {{ t('JRC_CONTACT_CENTER.COMMON.EMPTY') }}
-          </div>
-          <div v-else class="divide-y divide-n-weak">
-            <div
-              v-for="[capability, status] in capabilityRows"
-              :key="capability"
-              class="flex items-center justify-between gap-3 px-4 py-3.5"
-            >
-              <span class="text-sm font-medium text-n-slate-11">{{
-                capability
-              }}</span>
-              <VisualStatusBadge :label="status" :tone="statusTone(status)" />
-            </div>
-          </div>
-        </VisualSectionCard>
-      </div>
-
-      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article
-          v-for="[status, count] in Object.entries(
-            health?.events?.statuses || {}
-          )"
-          :key="`event-${status}`"
-          class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
-        >
-          <p
-            class="text-xs font-semibold uppercase tracking-wide text-n-slate-9"
-          >
-            {{ $t('JRC_CONTACT_CENTER.VISUAL.EVENTO') }}{{ status }}
+          <Icon
+            :icon="`i-lucide-${icons[card.key]}`"
+            class="size-7 text-n-blue-11"
+          />
+          <h2 class="text-base font-semibold text-n-slate-12">
+            {{ t(`JRC_CONTACT_CENTER.ADMIN.CARDS.${card.key}.NAME`) }}
+          </h2>
+          <p class="text-sm text-n-slate-11">
+            {{ t(`JRC_CONTACT_CENTER.ADMIN.CARDS.${card.key}.DESCRIPTION`) }}
           </p>
-          <p class="mt-2 text-2xl font-bold text-n-slate-12">{{ count }}</p>
-        </article>
-        <article
-          v-for="[status, count] in Object.entries(
-            health?.commands?.statuses || {}
-          )"
-          :key="`command-${status}`"
-          class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
-        >
-          <p
-            class="text-xs font-semibold uppercase tracking-wide text-n-slate-9"
+          <span
+            v-if="card.count !== null"
+            class="text-xl font-bold text-n-slate-12"
+            >{{ card.count }}</span
           >
-            {{ $t('JRC_CONTACT_CENTER.VISUAL.COMANDO') }}{{ status }}
-          </p>
-          <p class="mt-2 text-2xl font-bold text-n-slate-12">{{ count }}</p>
-        </article>
+          <span class="mt-auto text-xs text-n-blue-11">{{
+            t(`JRC_CONTACT_CENTER.ADMIN.STATES.${card.state}`)
+          }}</span>
+        </RouterLink>
       </div>
-    </section>
+      <p v-if="!section && !data.cards.length" class="text-sm text-n-slate-11">
+        {{ t('JRC_CONTACT_CENTER.ADMIN.NO_CARDS') }}
+      </p>
+      <AdministrationSection
+        v-if="section && selected"
+        :key="`${accountId}:${section}`"
+        :account-id="accountId"
+        :card="selected"
+        :context="data"
+        @changed="load"
+      />
+      <AdministrationSection
+        v-else-if="section === 'audit' && data.capabilities.audit"
+        :key="`${accountId}:audit`"
+        :account-id="accountId"
+        :card="{ key: 'audit', state: 'read_only' }"
+        :context="data"
+      />
+      <AdministrationSection
+        v-else-if="section === 'events' && data.capabilities.control"
+        :key="`${accountId}:events`"
+        :account-id="accountId"
+        :card="{ key: 'events', state: 'read_only' }"
+        :context="data"
+      />
+      <p v-else-if="section" role="alert" class="text-sm text-n-ruby-11">
+        {{ t('JRC_CONTACT_CENTER.ADMIN.DENIED') }}
+      </p>
+      <RouterLink
+        v-if="!section && data.capabilities.audit"
+        :to="destination('audit')"
+        class="inline-block rounded-lg border border-n-blue-6 px-4 py-2 text-sm text-n-blue-11"
+      >
+        {{ t('JRC_CONTACT_CENTER.ADMIN.AUDIT') }}
+      </RouterLink>
+      <RouterLink
+        v-if="!section && data.capabilities.control"
+        :to="destination('events')"
+        class="inline-block rounded-lg border border-n-blue-6 px-4 py-2 text-sm text-n-blue-11"
+      >
+        {{ t('JRC_CONTACT_CENTER.ADMIN.EVENTS') }}
+      </RouterLink>
+    </template>
   </div>
 </template>

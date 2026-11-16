@@ -127,7 +127,15 @@
       "JRC_APPROVALS_DECIDE": "Decide assigned approval stages",
       "JRC_APPROVALS_VIEW_AUDIT": "View approval audit within native scope",
       "JRC_APPROVALS_ADJUST": "Adjust installed approval fields (also requires native module edit access)",
-      "JRC_APPROVALS_DELEGATE": "Create and revoke own approval delegations (also requires decision permission)"
+      "JRC_APPROVALS_DELEGATE": "Create and revoke own approval delegations (also requires decision permission)",
+      "JRC_CONTACT_CENTER_ADMINISTER": "Call Center: administrar",
+      "JRC_CONTACT_CENTER_MONITOR": "Call Center: monitorar",
+      "JRC_CONTACT_CENTER_RECORDINGS_VIEW": "Call Center: visualizar gravações",
+      "JRC_CONTACT_CENTER_RECORDINGS_LISTEN": "Call Center: ouvir gravações",
+      "JRC_CONTACT_CENTER_RECORDINGS_DOWNLOAD": "Call Center: baixar gravações",
+      "JRC_CONTACT_CENTER_PUBLISH": "Call Center: publicar configurações",
+      "JRC_CONTACT_CENTER_APPROVE": "Call Center: aprovar alterações",
+      "JRC_CONTACT_CENTER_AUDIT": "Call Center: consultar auditoria"
     },
     "FORM": {
       "NAME": {

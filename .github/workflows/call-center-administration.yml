@@ -1,0 +1,137 @@
+name: Call Center stages 0-2 - isolated native validation
+on:
+  push:
+    branches: [codex/call-center-control-desk-20261116]
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        type: string
+        required: true
+        description: Exact immutable candidate SHA
+permissions:
+  contents: read
+concurrency:
+  group: call-center-administration-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d postgres" --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_sd_bc_portal_concurrency_20261025_test
+      JRC_SD_CONCURRENCY: '1'
+      DB_POOL_SIZE: '10'
+      REDIS_URL: redis://127.0.0.1:6379/15
+      FRONTEND_URL: http://127.0.0.1:5386
+      SECRET_KEY_BASE: isolated-call-center-test-only-not-an-installation-secret
+      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: '11111111111111111111111111111111'
+      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: '22222222222222222222222222222222'
+      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: '33333333333333333333333333333333'
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/call-center-schema.rb
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirm immutable identity and disposable resources
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha || github.sha }}
+        run: |
+          test "$GITHUB_REF_NAME" = codex/call-center-control-desk-20261116
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          git merge-base --is-ancestor a24adc6dd8bb660f955b76cce0172ae1638deee2 HEAD
+          git diff --check a24adc6dd8bb660f955b76cce0172ae1638deee2 HEAD
+          free -h
+          df -h /
+      - name: Native dependencies over verified HTTPS APT
+        run: bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev fonts-dejavu-core postgresql-client
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.12'
+          bundler: 2.5.16
+          bundler-cache: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Preserve migration identities and unchanged historical source
+        run: |
+          node --test script/validate_ag_migration_identity.test.mjs script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
+          node script/validate_ag_migration_identity.mjs
+          git diff --exit-code a24adc6dd8bb660f955b76cce0172ae1638deee2 HEAD -- db/migrate db/schema.rb db/sql
+      - name: Disposable application schema and pending migrations
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = jrc_sd_bc_portal_concurrency_20261025_test
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+      - name: Rails authorization, persistence and affected regressions
+        run: |
+          bundle exec rspec spec/services/jrc_contact_center spec/models/jrc_contact_center \
+            spec/requests/api/v1/accounts/jrc_contact_center spec/jobs/jrc_contact_center \
+            spec/services/pabx spec/requests/api/v1/accounts/pabx_spec.rb \
+            spec/requests/api/v1/accounts/pabx_security_spec.rb spec/requests/api/v1/accounts/pabx_history_spec.rb \
+            spec/requests/api/v1/accounts/pabx_recordings_spec.rb spec/requests/api/v1/accounts/pabx_diagnostics_spec.rb \
+            spec/requests/api/v1/accounts/call_history_spec.rb spec/services/jrc_voice_quality \
+            --format progress --format json --out /tmp/call-center-rspec.json
+      - name: Require positive examples and zero failures, pending or outside errors
+        run: >-
+          ruby -rjson -e 's=JSON.parse(File.read(ARGV[0])).fetch("summary"); abort s.inspect unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero?' /tmp/call-center-rspec.json
+      - name: Supabase storage guards in a separate synthetic database
+        env:
+          PGPASSWORD: disposable-test-only
+        run: |
+          createdb -h 127.0.0.1 -U postgres jrc_quality_storage_synthetic
+          psql -h 127.0.0.1 -U postgres -d jrc_quality_storage_synthetic -f spec/sql/voice_quality_scope_test.sql | tee /tmp/call-center-storage.txt
+      - name: Frozen frontend dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Syntax and migration timestamp protections
+        run: node script/validate_changed_source.mjs a24adc6dd8bb660f955b76cce0172ae1638deee2
+      - name: Vue administrative workflows and affected telephony integration
+        run: |
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter \
+            app/javascript/dashboard/routes/dashboard/webphone app/javascript/dashboard/routes/dashboard/settings/customRoles \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json --outputFile=/tmp/call-center-vitest.json
+      - name: Frontend lint of changed sources
+        run: |
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR a24adc6dd8bb660f955b76cce0172ae1638deee2 HEAD -- app/javascript | grep -E '\.(js|vue)$')
+          pnpm exec eslint "${files[@]}"
+      - name: Incremental Ruby lint without suppressing new offenses
+        run: python3 script/jrc_call_center_lint.py
+      - name: Preserve source identity
+        if: always()
+        run: git diff --exit-code && git diff --check
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: call-center-native-${{ github.sha }}
+          path: |
+            /tmp/call-center-*.json
+            /tmp/call-center-*.txt
+            /tmp/call-center-schema.rb
+          if-no-files-found: error
+          retention-days: 7

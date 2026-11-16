@@ -4,4 +4,12 @@ export const CONTACT_CENTER_CUSTOM_ROLE_PERMISSIONS = Object.freeze([
   'jrc_contact_center_supervise',
   'jrc_contact_center_configure',
   'jrc_contact_center_reports',
+  'jrc_contact_center_administer',
+  'jrc_contact_center_monitor',
+  'jrc_contact_center_recordings_view',
+  'jrc_contact_center_recordings_listen',
+  'jrc_contact_center_recordings_download',
+  'jrc_contact_center_publish',
+  'jrc_contact_center_approve',
+  'jrc_contact_center_audit',
 ]);

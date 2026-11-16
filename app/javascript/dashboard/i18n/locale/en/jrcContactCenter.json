@@ -1642,6 +1642,148 @@
         "callback": "Agendado retorno",
         "forwarded": "Encaminhado"
       }
+    },
+    "ADMIN": {
+      "TITLE": "Central Administrativa",
+      "DESCRIPTION": "Administre o Call Center com dados locais, permissões específicas e integração controlada.",
+      "PROVIDER_PENDING": "Operações externas e publicação no PABX aguardam homologação do contrato.",
+      "LAST_SYNC": "Última sincronização registrada",
+      "SYNC_ERROR": "Última falha registrada",
+      "BACK": "Voltar à Central Administrativa",
+      "NO_CARDS": "Nenhuma configuração administrativa autorizada para seu perfil.",
+      "DENIED": "Seção indisponível no seu escopo de acesso.",
+      "AUDIT": "Auditoria técnica",
+      "EVENTS": "Eventos operacionais",
+      "REPROCESS": "Reprocessar evento verificado",
+      "LOCAL_ONLY": "As alterações locais não publicam configurações nem enviam comandos ao fornecedor.",
+      "PENDING": "Funcionalidade pendente de backend ou contrato externo. Nenhuma operação será simulada.",
+      "ACW_SCOPE": "Informe HH:MM entre 00:01 e 01:00. A política local mantém o limite nativo de uma hora.",
+      "NATIVE_INTEGRATION": "Esta seção reutiliza o módulo nativo. Políticas, escopos e versões continuam sendo validados na origem.",
+      "NATIVE_PERMISSIONS": "Abrir papéis e permissões",
+      "NATIVE_APPROVALS": "Abrir Central de Aprovações",
+      "NATIVE_DENIED": "O módulo de origem não está disponível para este perfil ou nesta conta.",
+      "CONFIGURE": "Configurar",
+      "CREATE": "Novo registro",
+      "EDIT": "Editar",
+      "SAVE": "Salvar",
+      "CANCEL": "Cancelar",
+      "SEARCH": "Pesquisar",
+      "STATUS": "Status",
+      "ALL": "Todos",
+      "ACTIVE": "Ativo",
+      "INACTIVE": "Inativo",
+      "FILTER": "Aplicar filtros",
+      "CLEAR": "Limpar filtros",
+      "PAGINATION": "Paginação",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "TOTAL": "Total",
+      "PAGE": "Página",
+      "NAME": "Nome",
+      "CODE": "Código",
+      "UNIT": "Unidade operacional",
+      "COMPANY": "Empresa emissora",
+      "BUSINESS_UNIT": "Unidade de negócio",
+      "TIMEZONE": "Fuso horário",
+      "KIND": "Tipo de unidade",
+      "SELECT": "Selecione",
+      "QUEUE": "Fila",
+      "AGENT": "Usuário",
+      "PARTICIPATES": "Participa da distribuição",
+      "SUPERVISES": "Supervisiona esta fila (não concede permissão de monitoria)",
+      "VOICE": "Voz",
+      "WHATSAPP": "WhatsApp",
+      "VOICE_REQUIRED": "Exigir finalização na voz",
+      "TIME_INVALID": "Informe HH:MM entre 00:01 e 01:00.",
+      "SAVE_ERROR": "Não foi possível salvar. Seus dados foram preservados.",
+      "PABX_CONNECTION": "Conexão do PABX",
+      "TIME_FORMAT": "HH:MM",
+      "CARDS": {
+        "numbers": {
+          "NAME": "Números",
+          "DESCRIPTION": "Números públicos e vínculos com filas; contrato do fornecedor pendente."
+        },
+        "extensions": {
+          "NAME": "Ramais",
+          "DESCRIPTION": "Consulte ramais existentes, sem exibir senhas ou segredos."
+        },
+        "queues": {
+          "NAME": "Filas e equipes",
+          "DESCRIPTION": "Gerencie filas locais, equipes nativas e participantes autorizados."
+        },
+        "ivr": {
+          "NAME": "URA",
+          "DESCRIPTION": "Menus e publicação dependem do contrato homologado do PABX."
+        },
+        "hours": {
+          "NAME": "Horários",
+          "DESCRIPTION": "Calendários operacionais aguardam integração autorizada."
+        },
+        "audio": {
+          "NAME": "Biblioteca de áudios",
+          "DESCRIPTION": "Armazenamento, revisão e geração de voz ainda não habilitados."
+        },
+        "pauses": {
+          "NAME": "Pausas",
+          "DESCRIPTION": "O catálogo administrativo depende da etapa operacional de pausas."
+        },
+        "closures": {
+          "NAME": "Finalizações",
+          "DESCRIPTION": "Configure a política local de pós-atendimento dos canais existentes."
+        },
+        "distribution": {
+          "NAME": "Distribuição",
+          "DESCRIPTION": "Estratégias e publicação no fornecedor aguardam contrato."
+        },
+        "permissions": {
+          "NAME": "Permissões",
+          "DESCRIPTION": "Utilize os papéis personalizados e as permissões nativas."
+        },
+        "recordings": {
+          "NAME": "Gravações",
+          "DESCRIPTION": "Acesso separado para visualizar, ouvir e baixar; catálogo administrativo pendente."
+        },
+        "pabx": {
+          "NAME": "Conexão PABX",
+          "DESCRIPTION": "Consulte o estado local sem expor credenciais ou executar comandos."
+        },
+        "approvals": {
+          "NAME": "Aprovações",
+          "DESCRIPTION": "Abra a Central existente; sem ativar alçadas ou publicação automaticamente."
+        },
+        "general": {
+          "NAME": "Configurações gerais",
+          "DESCRIPTION": "Unidades operacionais, empresa emissora, unidade de negócio e fuso."
+        },
+        "integrations": {
+          "NAME": "Integrações",
+          "DESCRIPTION": "Capacidades declaradas pelos adaptadores existentes e seus limites."
+        }
+      },
+      "RESOURCES": {
+        "queues": "Filas",
+        "teams": "Equipes",
+        "memberships": "Participantes",
+        "units": "Unidades"
+      },
+      "STATES": {
+        "available": "Configuração local disponível",
+        "read_only": "Somente consulta",
+        "native_module": "Módulo nativo",
+        "pending_contract": "Contrato ou backend pendente",
+        "pending_external_homologation": "Homologação externa pendente",
+        "active": "Ativo",
+        "inactive": "Inativo",
+        "pending": "Pendente",
+        "failed": "Falhou",
+        "processed": "Processado",
+        "received": "Recebido",
+        "unsupported": "Não suportado",
+        "real": "Implementado",
+        "synthetic": "Somente sintético",
+        "false": "Não disponível",
+        "true": "Disponível"
+      }
     }
   }
 }

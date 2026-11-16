@@ -98,7 +98,13 @@ export const routes = [
         path: 'control-desk',
         name: 'jrc_contact_center_control_desk',
         component: () => import('./views/ControlDeskPage.vue'),
-        meta: managementMeta,
+        meta: baseMeta,
+      },
+      {
+        path: 'control-desk/:section',
+        name: 'jrc_contact_center_admin_section',
+        component: () => import('./views/ControlDeskPage.vue'),
+        meta: baseMeta,
       },
       {
         path: 'ura',

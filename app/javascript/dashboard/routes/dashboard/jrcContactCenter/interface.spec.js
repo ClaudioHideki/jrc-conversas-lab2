@@ -14,6 +14,7 @@ const expectedScreens = [
   'jrc_contact_center_finance',
   'jrc_contact_center_coes',
   'jrc_contact_center_control_desk',
+  'jrc_contact_center_admin_section',
   'jrc_contact_center_ivr',
   'jrc_contact_center_order_lookup',
   'jrc_contact_center_pabx',
