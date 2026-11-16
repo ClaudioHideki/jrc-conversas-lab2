@@ -158,7 +158,7 @@ def schema_command():
 
 
 REF_TOKEN = os.environ.pop("GH_TOKEN", "")
-BASE_MAIN = "55da80eb1254aee54ee0f1fb5c42f2be46a98737"
+BASE_MAIN = "5c3fb7f700d7bb685f17292f59b873df14ddf34d"
 def check_preserved_refs():
     for branch, expected in [("main", BASE_MAIN), ("codex/quick-release-image-5c3fb7f7-20261115", PRODUCT), ("codex/respostas-rapidas-aprovacoes-20261115", "2be22e86baecbe75c302bb03208e78e67301c743")]:
         headers = {"Accept":"application/vnd.github+json", "User-Agent":"jrc-approved-image-controller"}

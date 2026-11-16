@@ -75,6 +75,23 @@ class ConsolidatedDenials(unittest.TestCase):
         self.snapshot['jobs'][0]['conclusion']='skipped'
         with self.assertRaises(RuntimeError): gate.jobs_valid(self.lock,self.snapshot)
 
+    def test_live_main_is_distinct_from_the_historical_evidence_base(self):
+        from unittest.mock import patch
+        class Refs:
+            live=gate.PRODUCT
+            def api(self,path):
+                value=self.live if path.endswith('/main') else gate.PRODUCT
+                if path.endswith('/codex/respostas-rapidas-aprovacoes-20261115'):
+                    value='2be22e86baecbe75c302bb03208e78e67301c743'
+                return {'object':{'sha':value}}
+        refs=Refs()
+        with patch.object(gate,'client',return_value=refs):
+            gate.check_refs()
+            self.assertNotEqual(gate.BASE_MAIN,gate.PROTECTED_MAIN)
+            for wrong in [gate.BASE_MAIN,'0'*40]:
+                refs.live=wrong
+                with self.assertRaises(RuntimeError):gate.check_refs()
+
     def test_authorized_auxiliary_builds_require_both_real_successes(self):
         data=copy.deepcopy(self.snapshot);lock=copy.deepcopy(self.lock)
         if 'authorized_native_image_jobs' not in lock:

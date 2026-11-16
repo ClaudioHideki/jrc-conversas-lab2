@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / 'product'
 PRODUCT = '5c3fb7f700d7bb685f17292f59b873df14ddf34d'
 BASE_MAIN = '55da80eb1254aee54ee0f1fb5c42f2be46a98737'
+PROTECTED_MAIN = PRODUCT
 REPO = 'ClaudioHideki/jrc-conversas-lab2'
 CANDIDATE = 'codex/quick-release-image-5c3fb7f7-20261115'
 sys.path.insert(0, str(ROOT / '.github/release'))
@@ -24,7 +25,7 @@ def client():
 
 def check_refs():
     gh = client()
-    require(gh.api('/git/ref/heads/main')['object']['sha'] == BASE_MAIN, 'Main advanced; stop consolidation')
+    require(gh.api('/git/ref/heads/main')['object']['sha'] == PROTECTED_MAIN, 'Main advanced; stop consolidation')
     require(gh.api('/git/ref/heads/' + CANDIDATE)['object']['sha'] == PRODUCT, 'Candidate moved')
     require(gh.api('/git/ref/heads/codex/respostas-rapidas-aprovacoes-20261115')['object']['sha'] == '2be22e86baecbe75c302bb03208e78e67301c743', 'Original candidate moved')
 
@@ -86,7 +87,8 @@ def main():
     require(not subprocess.check_output(['git','status','--porcelain'],cwd=SOURCE,text=True).strip(), 'Dirty product')
     check_refs()
     lock = json.loads((ROOT / '.github/approvals_consolidated/quality-lock.json').read_text())
-    require(lock['product_sha'] == PRODUCT and lock['authorized_main'] == BASE_MAIN and lock['native_run_id'] == 43770789984, 'Wrong evidence lock')
+    require(lock['product_sha'] == PRODUCT and lock['authorized_main'] == BASE_MAIN
+            and lock['protected_main'] == PROTECTED_MAIN and lock['native_run_id'] == 43770789984, 'Wrong evidence lock')
     for path, digest in lock['reviewed_source_hashes'].items():
         require(hashlib.sha256((SOURCE / path).read_bytes()).hexdigest() == digest, 'Reviewed source changed: ' + path)
     gh = client()
