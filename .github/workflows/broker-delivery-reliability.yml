@@ -145,9 +145,9 @@ jobs:
           curl --fail --silent http://127.0.0.1:9000/minio/health/cluster
       - name: CSAT caller state and persisted publication clock
         run: |
-          bundle exec rspec spec/services/message_templates/template/csat_survey_spec.rb spec/models/message_activity_clock_spec.rb \
+          bundle exec rspec spec/services/message_templates/template/csat_survey_spec.rb spec/models/message_activity_clock_spec.rb spec/lib/webhooks/trigger_spec.rb \
             --format progress --format json --out /tmp/delivery-csat-clock.json
-          python3 script/jrc_delivery_evidence.py rspec /tmp/delivery-csat-clock.json 8
+          python3 script/jrc_delivery_evidence.py rspec /tmp/delivery-csat-clock.json 28
       - name: History retention refuses destructive cleanup before side effects
         run: |
           bundle exec rspec spec/requests/jrc_broker_history_retention_spec.rb spec/services/jrc_broker/live_ingress_concurrency_spec.rb spec/services/account_deletion_service_spec.rb spec/services/internal/remove_stale_contacts_service_spec.rb spec/services/internal/remove_stale_contact_inboxes_service_spec.rb \
