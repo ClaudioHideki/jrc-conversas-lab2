@@ -3,8 +3,6 @@
 
 ## Em progresso (WIP)
 
-- [ ] **PROPOSTA-POPUP-20261116:** Detalhes comerciais em popup nativo, com X/Esc/fundo e preservação do rascunho. 46 testes locais aprovados; concluir CI e imagem. Escopo: [ADR](docs/adr/20261116-proposta-popup.md).
-
 - [ ] **QUICK-REPLIES-RELEASE-20261115:** Correções de anexo/revisão, seleção de catálogo e limite nativo implementadas e revisadas; 504 testes Vue e 15 negativas do contrato passaram. Concluir Rails/Chrome/E2E/CI/imagem e aplicação autorizada no Grupo JRC antes de marcar a release concluída. Plano e evidências: `docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md`.
 
 - [ ] **RELEASE-20261114:** Promover a consolidação de histórico/runtime/aprovações após CI e imagem do SHA exato; verificar versão, migrations e saúde no Grupo JRC. Código e testes locais registrados em CONTINUE-AQUI.md; implantação ainda não comprovada.
@@ -20,6 +18,8 @@ Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em a
 - [ ] **OPS-02:** Manter homologação de voz, histórico e mídias distinta de teste sintético e de publicação.
 
 ## Concluído (Done)
+
+- [x] **PROPOSTA-POPUP-20261116:** Popup nativo com X/Esc/fundo, reabertura e preservação do rascunho. Produto `5d57f3ce`, CI `43954203225`: três jobs aprovados, 2.752 testes Vue e 168 Rails; imagem publicada e conferida por digest, com smokes antes/depois da publicação. Implantação não realizada. [Referência e evidências](docs/adr/20261116-proposta-popup.md).
 
 - [x] **REMOVER-FILTRO-SEGMENTO-20261116:** Painel retirado das oito superfícies; imagem do produto `c8efa1d68e1b5706e47cd022fa8e31df1e156e6c` publicada e verificada por digest. CI `43941168985`: três jobs aprovados, 2.752 testes Vue e 168 Rails aprovados, smokes antes/depois da publicação. Implantação não realizada. Referência e limites: [ADR](docs/adr/20261116-remocao-filtro-segmento.md).
 
