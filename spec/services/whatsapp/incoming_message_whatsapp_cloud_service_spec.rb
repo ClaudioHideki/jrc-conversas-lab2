@@ -347,7 +347,8 @@ describe Whatsapp::IncomingMessageWhatsappCloudService do
           # Create a conversation and the original message that will be replied to first
           contact = create(:contact, phone_number: '+16503071063', account: whatsapp_channel.account)
           contact_inbox = create(:contact_inbox, contact: contact, inbox: whatsapp_channel.inbox, source_id: '16503071063')
-          conversation = create(:conversation, contact: contact, inbox: whatsapp_channel.inbox, contact_inbox: contact_inbox)
+          conversation = create(:conversation, account: whatsapp_channel.account, contact: contact,
+                                inbox: whatsapp_channel.inbox, contact_inbox: contact_inbox)
 
           original_message = create(:message,
                                     conversation: conversation,
