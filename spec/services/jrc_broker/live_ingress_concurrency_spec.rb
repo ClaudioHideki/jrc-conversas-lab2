@@ -11,6 +11,66 @@ RSpec.describe JrcBroker::LiveIngress do
     with_modified_env(JRC_BROKER_ENABLED: 'true') { example.run }
   end
 
+  it 'waits for in-flight custody before deletion and never removes an unprotected sibling first' do
+    account = create(:account)
+    account.enable_features!('jrc_broker')
+    admin = create(:user, account: account, role: :administrator)
+    inbox = create(:channel_api, account: account).inbox
+    sibling = create(:conversation, account: account, inbox: inbox)
+    conversation = create(:conversation, account: account, inbox: inbox)
+    integration = JrcBrokerIntegration.create!(account: account, broker_origin: 'https://broker.example.test', organization_id: SecureRandom.uuid,
+                                               destination_revision: 1, encrypted_control_key: 'synthetic-unused')
+    binding = JrcBrokerInboxBinding.create!(account: account, inbox: inbox, integration_id: SecureRandom.uuid, instance_id: SecureRandom.uuid)
+    input = { 'protocol' => 'jrc-live-ingress/1', 'organization_id' => integration.organization_id, 'integration_id' => binding.integration_id,
+              'instance_id' => binding.instance_id, 'destination_revision' => 1, 'broker_message_id' => SecureRandom.uuid,
+              'conversation_id' => conversation.display_id, 'message_type' => 'incoming', 'message_origin' => 'LIVE',
+              'content' => 'Synthetic deletion race', 'media' => nil }
+    input['request_hash'] = Digest::SHA256.hexdigest(JSON.generate(input.sort.to_h))
+    ready = Queue.new
+    commit = Queue.new
+    deletion_pid = Queue.new
+    allow(JrcBrokerLiveReceipt).to receive(:create!).and_wrap_original do |method, **attributes|
+      result = method.call(**attributes)
+      if attributes.fetch(:account).id == account.id
+        ready << true
+        commit.pop
+      end
+      result
+    end
+    writer = Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        described_class.new(account: account, user: admin, access_token: admin.access_token).receive(inbox.id, input)
+      end
+    end
+    Timeout.timeout(10) { ready.pop }
+    deletion = Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do |connection|
+        deletion_pid << connection.select_value('SELECT pg_backend_pid()')
+        DeleteObjectJob.perform_now(inbox)
+      rescue StandardError => error
+        error.class.name
+      end
+    end
+    pid = Timeout.timeout(10) { deletion_pid.pop }
+    Timeout.timeout(10) do
+      loop do
+        break if ActiveRecord::Base.connection.select_value("SELECT wait_event_type FROM pg_stat_activity WHERE pid=#{Integer(pid)}") == 'Lock'
+
+        sleep 0.02
+      end
+    end
+    expect(Conversation.exists?(sibling.id)).to be(true)
+    commit << true
+    result = Timeout.timeout(10) { writer.value }
+    expect(Timeout.timeout(10) { deletion.value }).to eq('JrcBroker::HistoryRetention::Protected')
+    expect(JrcBrokerLiveReceipt.find(result.fetch('receipt_id')).message).to be_persisted
+    expect(conversation.reload).to be_persisted
+    expect(inbox.reload).to be_persisted
+  ensure
+    commit << true if commit
+    [writer, deletion].compact.each { |thread| thread.join(10) }
+  end
+
   it 'serializes simultaneous same-key commits without duplicate normal LIVE effects' do
     account = create(:account)
     account.enable_features!('jrc_broker')
