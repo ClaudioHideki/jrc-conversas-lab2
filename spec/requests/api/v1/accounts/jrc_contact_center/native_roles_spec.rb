@@ -57,7 +57,7 @@ RSpec.describe 'Call Center native role boundaries', type: :request do
     end
 
     it 'denies removals and deletion without turning a restricted scope into global authority' do
-      patch url, headers: headers, params: { custom_role: { permissions: [] } }
+      patch url, headers: headers, params: { custom_role: { permissions: [] } }, as: :json
       expect(response).to have_http_status(:unauthorized)
       delete url, headers: headers
       expect(response).to have_http_status(:unauthorized)
@@ -74,8 +74,8 @@ RSpec.describe 'Call Center native role boundaries', type: :request do
 
     it 'permits an explicitly configured synthetic Group authority to remove a power' do
       JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
-      patch url, headers: headers, params: { custom_role: { permissions: [] } }
-      expect(response).to have_http_status(:success)
+      patch url, headers: headers, params: { custom_role: { permissions: [] } }, as: :json
+      expect(response).to have_http_status(:success), response.body
       expect(role.reload.permissions).to eq([])
     end
 
