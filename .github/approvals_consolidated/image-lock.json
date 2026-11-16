@@ -1,0 +1,132 @@
+{
+  "product_sha": "5c3fb7f700d7bb685f17292f59b873df14ddf34d",
+  "main_reference": "55da80eb1254aee54ee0f1fb5c42f2be46a98737",
+  "native_run_id": 43770789984,
+  "visual_run_id": 43771653630,
+  "visual_branch": "codex/ci-quick-reply-release-chrome-r4-20261115",
+  "visual_infrastructure_sha": "b4693a91ff904320e68dc847855e12183163a48f",
+  "visual_artifacts": [
+    {
+      "id": 14184577721,
+      "name": "approvals-native-visual-b4693a91ff904320e68dc847855e12183163a48f-43771653630",
+      "sha256": "e298c2756585e4c1c2fb11e1ea460864bbb50d607b226771a92097978f21e4d3",
+      "members": {
+        "browser/desktop-dark-approval-import-list.png": "ce8fb9021ab905b462514e86f4965ed7dc5d88d93e2512a740035fd291a03beb",
+        "browser/desktop-dark-approval-import-saved.png": "d7c593611378972755b3ccbbbd256a190cae7cc92351634dda25ffaf01465fef",
+        "browser/desktop-dark-approval-import-diff.png": "df22930d42d51da68dccc1c056326811fc6a6a18283c0362394613b1b595f647",
+        "browser/desktop-dark-approval-policy-popup.png": "1f4a52b37caea91e67e16ee1ff0dde7d23f453e0ab7d34a8d31cdc5ce7d62300",
+        "browser/desktop-dark-quick-confirmation.png": "a8372b42a521e011867b61100b44d95699fa38a4e83e546ffbe86e958f63837d",
+        "browser/desktop-dark-quick-image.png": "ae76606023c3d7fe939bae072d53d0f999289d75e2ade6e89c2cc70b6f068aac",
+        "browser/desktop-dark-quick-native-image-editor.png": "f0ce788e7f71239c500cab49c833b340ede8edb343a6cc1f42501f957520380f",
+        "browser/desktop-dark-quick-review.png": "cd56d14abe6c9cd732d80d13e9f5a4ada7b387c556810fb3fb1ebe8779d58bf2",
+        "browser/desktop-dark-settings-create-image.png": "f1b4b9068c85aef8c195161bf1e5b1848fa4487b92863f8dacf2d881a5c842e3",
+        "browser/desktop-dark-translated-delegations.png": "4a86d555d523a86ba824fa0296537479457cb1f962dd173fe221dd4ec7a9c921",
+        "browser/desktop-light-approval-import-diff.png": "86e631508df189edaca40a52a433daa1039dc64e7bde404a0f755ac9d95c2790",
+        "browser/desktop-light-approval-import-list.png": "4bda3abd2554284559f1392249151aceeaf47d630f18a98902082476e11250e4",
+        "browser/desktop-light-approval-import-saved.png": "adc303ab5073429028724bf6e6fb7a1ab47ba4b6397f01aed2911a10a2df334e",
+        "browser/desktop-light-approval-policy-popup.png": "4cf290c2fe55905239fce90e72b601990dbcbecad5aef4e822e75e1291584cb3",
+        "browser/desktop-light-quick-confirmation.png": "deac46f9ca0c672432bfe85e096d4fccdbd06f98f036a6f9859cd04509faf6e2",
+        "browser/desktop-light-quick-native-image-editor.png": "0077e463a7c79b59697b0eab942939c48ac3d5a9aab856ddbce4dc3db68d76a5",
+        "browser/desktop-light-quick-review.png": "36410dc34ef2e291608426d59886790084735e0adefd2fcb4dba2ff5d7e2ee13",
+        "browser/desktop-light-quick-image.png": "ca483d852dcd25a3ee6af588696a14375fc7edefa3b7bbc8d78340700171d46f",
+        "browser/desktop-light-settings-create-image.png": "a9880777f16db07eb6c9ea2c8ea3edd380a25d0f68f440445f1cd80e83e34bcc",
+        "browser/desktop-light-translated-delegations.png": "2c440f42b5b8ac3a038d6e35f4ac5301e04ac5d6f5a0524ba611f5efa4ce763d",
+        "browser/mobile-dark-approval-import-diff.png": "c1d82cf3c223c9b411a2405a4ecf2aaea38fa9119a18144f13044148845db99e",
+        "browser/mobile-dark-approval-import-list.png": "598cfe6c5ed331175f890b135cf4e425c36db98ae57cf2a55a3dcec36dc849fc",
+        "browser/mobile-dark-approval-import-saved.png": "65776d24a413f14dd722e235e5fa99e8cbb7f9af770b8b2e844ef95c9b3f9131",
+        "browser/mobile-dark-quick-confirmation.png": "e4fb2b8e75aa6ef3c938c0bdf2c14595078ce8aae2543b562d9dec40da3a0850",
+        "browser/mobile-dark-quick-image.png": "f9a056061694559c38fee4a5fcfaa158d304ec6a870401d514fc010a9fdf7bf2",
+        "browser/mobile-dark-approval-policy-popup.png": "ed351a7714bb7f38d8dfbe9afd6d95915b305f9f18c6844681848c3689d3226f",
+        "browser/mobile-dark-quick-native-image-editor.png": "5edf3dd03b6a57331d6c7fb5680bff536b34e7279684f06e8237e3ccfbd0eb6e",
+        "browser/mobile-dark-quick-review.png": "a3c27c8d2fd417554c9240658fe780bfa2b06d6f9a2c29593dfe32cb4b7c27c4",
+        "browser/mobile-dark-settings-create-image.png": "7119215157b9743ee48e8c5933ea3b3ca3754b2588d1428d044407e19f6f3547",
+        "browser/mobile-dark-translated-delegations.png": "0cbd8d01840beef03431ee84e03b3fc2d1b6b1f4efc2ba710ec41aa07a4c31f8",
+        "browser/mobile-light-approval-import-diff.png": "b52554590de9c2b8e7f46a5a2ac97f338e47e4a1c593918e17a635b93da05cd7",
+        "browser/mobile-light-approval-import-list.png": "b24db894672506f874a11325ddb97408937be72a87d4a616b1e8f80d20fa3dcd",
+        "browser/mobile-light-approval-import-saved.png": "43bb1fc9860495c7de60d1d407141237ad7075915cbfa0f31a0d6ff92503054d",
+        "browser/mobile-light-approval-policy-popup.png": "17ef6b0d3025fb11790c49c5fb94e5e9e707ff6d460194a8822694c1f09feece",
+        "browser/mobile-light-quick-confirmation.png": "4b685cba5b76fbebfc49b71f1917b9785191b4593f0ab454a0ca1da3a9c37e5d",
+        "browser/mobile-light-quick-image.png": "692994b681834f4e43af5f38cc14baa519826f5cd0c0e216288740e329a3262e",
+        "browser/mobile-light-quick-native-image-editor.png": "e82f2118a81e5ae987bf9ba545b0e4fe9b9b61244cca4adc4dfc0571ffc1587c",
+        "browser/mobile-light-quick-review.png": "d01823f9f744ea2e8062eb5001b92f60ca6349b9bec0e417e6ef6e8ed9e74578",
+        "browser/mobile-light-settings-create-image.png": "54e2def80e708442aeec6e6369bc42919f8c1578171a19d6e8697042f26c9ead",
+        "browser/mobile-light-translated-delegations.png": "9f2561ca8c539c066b825553dc38641a4e4fdb4cc67e9c6ba3553859e3fbcbad",
+        "fresh-frontend-assets.log": "a37f48817915c83c788104d47ff29d02c3bd1b9f1a90df8b829dee08675cec33",
+        "browser/playwright-results.json": "d88df18490973f9b46c4a2c5ecb24b7550a5154534d787336e8c840e3771b694",
+        "hashes.json": "72bbaa1cb5844ab129dec1438f0ea76c97fd1f315131ed9f50ffb4beb3a9fdcb",
+        "isolated-database.log": "52fbbadfa0d9e61faf8dd7b16493c9587dafff2bf12e408a6e3c84fb0ae28ae3",
+        "isolated-schema.log": "2ef5cfa8110d96b3a2f3217a3a68b447352b6ebdf2ecb7cf485dbaf5b9b3c714",
+        "native-chrome.log": "af5c35c2c3aa5e161ce17a4a0d0ab72eaee052abc1d1cd379c78c7a3515034c0",
+        "native-visual-result.json": "22297fa7e739e84fb273dec4329272c8e4b1ef6c58ad79875f9b54e7dc74791b",
+        "rails-http.log": "8e90f4f4c1fd2ea2460635bd2f9784c8c1b6cdb007353de772663bc54f288c8d",
+        "synthetic-fixture.log": "3e7bafb93aa5707734fd5afda08112b3759c8db9cdd2bf900a1b3de4f6a9a42e"
+      }
+    },
+    {
+      "id": 14184219301,
+      "name": "approvals-final-source-b4693a91ff904320e68dc847855e12183163a48f",
+      "sha256": "1debdeb1529ecb8e451a30fa02420424f6605119aafc0aad12ac23a15a9dc422",
+      "members": {
+        "scoped-source-gate.json": "fc6b3b01822b17100fcbbc697121fa7670da5a8c3fb202ed4aa323762521cb33",
+        "resource-validator-tests.json": "24938cc88317340813247315b86581d82cc44deef72146d336e601bce86825ba"
+      }
+    }
+  ],
+  "scoped_run_id": 43770871972,
+  "scoped_infrastructure_sha": "99f94f2f97eea10490bca8f5ae77de129bef476a",
+  "scoped_artifacts": [
+    {
+      "id": 14184253976,
+      "name": "quick-approval-native-5c3fb7f700d7bb685f17292f59b873df14ddf34d",
+      "sha256": "8cff985bb6f816c1f66b2089cd8e00ccfd80f46c8f1a468de31c5c4ce9317a96",
+      "members": {
+        "quick-rspec.json": "5ca94c5cc74a0952e7655d7de87149418aa8deb27d4de45f845f3cd59d37d9b0"
+      }
+    },
+    {
+      "id": 14183744935,
+      "name": "quick-approval-vue-5c3fb7f700d7bb685f17292f59b873df14ddf34d",
+      "sha256": "0753a7b461b6c82c423f740749f313de18a7385bc1d037ccb0536e0bd4e2c760",
+      "members": {
+        "quick-vue.json": "4647635de9f360e2bb6bffcecfc8e3041905559c16b335630df1705c0dd52fbc"
+      }
+    }
+  ],
+  "infrastructure_hashes": {
+    ".github/approvals_consolidated/accepted-quick-browser.fixture.cjs": "0ad8e27fb7510d6fb05c80fd92f02890e6494865a6b7a2e2b9ee1f581244592f",
+    ".github/approvals_consolidated/image_admission.py": "c334bd138bf08255ef70fafa34bc5a807c88adfe3280afe51f412e531068b2ad",
+    ".github/approvals_consolidated/quality-lock.json": "5f5116b31cce78c8101690776fcd24098c510c2a298014df06d6b5ce78b84b9a",
+    ".github/approvals_consolidated/quality_gate.py": "562db75a18fd69aa186c2189ecb058ad8594c399ec2e4c74166d05b96ecc4755",
+    ".github/approvals_consolidated/quick-visual-fixture.json": "fc54fef610515fdafa6f51da930d7909c8e05e51bb31923455dfeae059269089",
+    ".github/approvals_consolidated/test_image_admission.py": "f966720c7756d41b09c397a77fe0a46a81ee958599a6fa68e7e55cbb56009122",
+    ".github/approvals_consolidated/test_quality_gate.py": "5ca355129ed039b05df52a2c220cf4ff373f719ae4b3972d8f49516755ba8fd6",
+    ".github/approvals_consolidated/test_quick_visual.py": "561b31c212ccb9e543f2596d5321854646ca6cd2e13ad126002562c5f08204d8",
+    ".github/approvals_consolidated/visual-test-fixture.json": "055f8f26e72f2433f413f328a0c3d19bd1ae13e5c8905d012d4e87ad095bd22f",
+    ".github/release/gate.py": "ff57cb8dc15d3614d4959f0bb41ba688b4757ab180886ddac97aee6b48bfbdbf",
+    ".github/release/historical-unit-fixture.json": "1d43979de468165b873f39acb9aab4acb22231261c0a6688b65ea22d8b04b955",
+    ".github/release/scout_probe.py": "16caa8966f9bb378233b48b445126c06d658a3afb14ca3bc3fac733f550afdf8",
+    ".github/release/test_gate.py": "86da4045e0909d1ec875537ed519c373f387b0ca3cc57c8ecbe04247b9be61f2",
+    ".github/release/test_scout_probe.py": "1c1d115be5e86a1de81e8fff0f297d817b651936b5b056e3e196ca9a75982a90",
+    ".github/runtime_build/approval_browser.config.cjs": "30f4b42cfb37f8eb66181d8beb6d97dfadfe5a30936e365ce894710c47e3af10",
+    ".github/runtime_build/approval_browser.spec.cjs": "7d3e6469758ad3f361b75b3d48dc0cfe5449ec63455bd62aeaa643d7c1ac8893",
+    ".github/runtime_build/approval_browser_fixture.rb": "b68d44406f904732a2cf89dc16790a599c2e8f82a2c3c54a5d733783e2bcffad",
+    ".github/runtime_build/approval_browser_seed.rb": "fd7000e8d16f4bd929e608eee1f519d36774c7eff39937f0ff2e4f3ee2f21012",
+    ".github/runtime_build/approval_native_seed.rb": "d5146f999c8e959ec58548b0f2d0a6640011e432d67b3ffa62bd9864f33b6cc8",
+    ".github/runtime_build/approved-guard.fixture.txt": "4ef817b48c81de8659bb7e92bdfe909ca67977056abf147673db91761fe1938d",
+    ".github/runtime_build/browser_proxy.py": "8382f2e0c99d265bc436de40731b9670b3787f99e08d6d8728d195fdbfa13c26",
+    ".github/runtime_build/extra.rb": "fdcfa1dc5faa1d2b45b06dae720d956bc042faa2f2a8054bb4b292a4eee87df4",
+    ".github/runtime_build/guard.py": "566a76d5b794d8121a151268bb8ff88e9508ba45f9e5004c72d60f78fd99a336",
+    ".github/runtime_build/migrate_without_export.rb": "0b06441c20c31faca7a85a55d26383ab6898d3d29eb420de3aa621f677d04ea7",
+    ".github/runtime_build/native_visual_guard.py": "89f144ee725498984b5d0911fca0ccd7d6de7e5727d2436eed39e49e6180f199",
+    ".github/runtime_build/probe.rb": "7a09a3010b76bdb9cc4398923171a788e4223cec59025b0f617dd0bf2583f75f",
+    ".github/runtime_build/receipt.rb": "245c2fe0f80676aa0318636301d58a5cb1fe44c74704858b5890f05891706643",
+    ".github/runtime_build/test_browser_proxy.py": "8273ff7dcdc38ee651bd5ff41933231a6fd12621f8c4005f93f8c115c67e3bef",
+    ".github/runtime_build/test_guard.py": "547523c961a0c2570437e1c428635ac3b734154c04bb50bf3e99608a834e565f",
+    ".github/runtime_build/test_guard_integrity.py": "aae626735a0cdda3dcb69118bf2de6e633816cb1e63c4eb433f0bb3477ce8041",
+    ".github/runtime_build/test_receipt.rb": "ed0e4ef29cae544877da6abdb3b74581c8caafafe047b90adc79d4d298cfdc7d",
+    ".github/runtime_build/worker.rb": "eb1cc09fc16dc1dcb581ab4f5b18a9bb41f851bf2e5860c3a5ba8ebbbc895a98",
+    ".github/runtime_publish/publish.py": "87c9fca6d52218fe7b95845d766e454cc7f389d9f593f396f6ad95f6abe9d790",
+    ".github/runtime_publish/test_publish.py": "d2e2401b2b2921c391fcaf9040f1dc17fea1bbad798f90b5fa74a8827c75d848",
+    ".github/workflows/ag-native-candidate.yml": "27feeb128fb0fbe9489ae14b6d50f900640b537bb05890f31776d6e95ae5bd65"
+  }
+}

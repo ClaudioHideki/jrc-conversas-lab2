@@ -1,0 +1,1189 @@
+{
+  "report": {
+    "passed": true,
+    "product_sha": "5c3fb7f700d7bb685f17292f59b873df14ddf34d",
+    "infrastructure_sha": "b4693a91ff904320e68dc847855e12183163a48f",
+    "image_built": false,
+    "mocked_application": false,
+    "phases": [
+      {
+        "name": "isolated-database",
+        "exit_code": 0,
+        "seconds": 5.506
+      },
+      {
+        "name": "isolated-schema",
+        "exit_code": 0,
+        "seconds": 7.008
+      },
+      {
+        "name": "fresh-frontend-assets",
+        "exit_code": 0,
+        "seconds": 72.617
+      },
+      {
+        "name": "synthetic-fixture",
+        "exit_code": 0,
+        "seconds": 10.512
+      },
+      {
+        "name": "native-chrome",
+        "exit_code": 0,
+        "seconds": 88.641
+      }
+    ],
+    "resources": {
+      "initial": {
+        "at_monotonic": 202.992080474,
+        "disk_free": 87783309312,
+        "source_disk_free": 87783309312,
+        "output_disk_free": 87783309312,
+        "ram_available": 15334146048,
+        "physical_ram_available": 15334146048,
+        "cgroup_capacities": []
+      },
+      "ram_min": 8762593280,
+      "disk_min": 87525060608,
+      "final": {
+        "at_monotonic": 398.395128755,
+        "disk_free": 87527075840,
+        "source_disk_free": 87527075840,
+        "output_disk_free": 87527075840,
+        "ram_available": 14286585856,
+        "physical_ram_available": 14286585856,
+        "cgroup_capacities": []
+      }
+    },
+    "frontend_heap": {
+      "passed": true,
+      "events": [
+        {
+          "component": "jrc_vite_heap",
+          "heapMiB": 6144,
+          "initial": {
+            "hostAvailable": 15183953920,
+            "processAvailable": 15183953920,
+            "constrainedMemory": 18446744073709552000,
+            "availableMemory": 15183953920,
+            "diskFree": 87653810176
+          },
+          "vitePid": 10396
+        },
+        {
+          "component": "jrc_vite_heap",
+          "passed": true,
+          "code": 0,
+          "signal": null,
+          "reason": null,
+          "minimumMemory": 9013993472,
+          "minimumDisk": 87570264064
+        }
+      ],
+      "heap_mib": 6144,
+      "build_only": true
+    },
+    "assets": [
+      {
+        "path": "/vite/assets/v3app-DGcKJ9rr.js",
+        "sha256": "04a0aebaac5c7619695e29c08eb6b7a77e0015c584b61e19260c4f9ff070eeeb",
+        "bytes": 274585
+      },
+      {
+        "path": "/vite/assets/vue.esm-bundler-BDWlAJV0.js",
+        "sha256": "d397e948716dd690ee4b6b448827474379a3db53e0650053c2dfee7e32d142b5",
+        "bytes": 172073
+      },
+      {
+        "path": "/vite/assets/vuex.esm-bundler-BFr9yoBr.js",
+        "sha256": "d6b1c0181dbb51126195caaf1fa1254aac2145d078afcece19707f5c3e0ee2bb",
+        "bytes": 78424
+      },
+      {
+        "path": "/vite/assets/index-DN3rM4CW.js",
+        "sha256": "05d7fb1274805e9bad539d9eae2da84497f2f78d20db272560e59671ea62e365",
+        "bytes": 886
+      },
+      {
+        "path": "/vite/assets/Icon-BwdYybex.js",
+        "sha256": "cf88d925d68d69a866c45c7e3e783ce4cc26539fb5cb55ac4635f21b7e27f15e",
+        "bytes": 23884
+      },
+      {
+        "path": "/vite/assets/store-CDPgc2mj.js",
+        "sha256": "4017b635d11e295192715ad80dd534d5a7a7e3a664ea2fb7fec18b9549fcd9e5",
+        "bytes": 480
+      },
+      {
+        "path": "/vite/assets/_commonjsHelpers-gnU0ypJ3.js",
+        "sha256": "29f36d59656904cdfd77b28a7161f191f49668502f6470cfa3ec197a9281fa1f",
+        "bytes": 665
+      },
+      {
+        "path": "/vite/assets/_plugin-vue_export-helper-DlAUqK2U.js",
+        "sha256": "a0479e753bb06a77a996553a6f09742ee0cefa80c1ea92d5f92f73d82109519c",
+        "bytes": 154
+      },
+      {
+        "path": "/vite/assets/utils.esm-ROdlb_je.js",
+        "sha256": "f52af9a25944474bbce84338ee286b3245453f6fd19b0a4af4499685394a29b7",
+        "bytes": 93230
+      },
+      {
+        "path": "/vite/assets/useBranding-MYitlnp1.js",
+        "sha256": "c3e8cb29d8f8475467479ecaddf7c843e3c170b86316c2d8ab55c53c6663beb7",
+        "bytes": 12839
+      },
+      {
+        "path": "/vite/assets/Validators-CJBcYdPy.js",
+        "sha256": "2511b523b0a2d996fbc808fd6750b6c82e8ade9594caf13aa4c3499234285ad9",
+        "bytes": 68084
+      },
+      {
+        "path": "/vite/assets/js.cookie-DhuBleE4.js",
+        "sha256": "8c4d02a73ba6db46699df8ae24123749445e0b38f84231a06c09e22b33b9b2c6",
+        "bytes": 1494
+      },
+      {
+        "path": "/vite/assets/jrcServiceDesk-7wPbSTb0.js",
+        "sha256": "11705c3cafb94e80740195197a66e24f570682414fbf917178f68b63584fc5bc",
+        "bytes": 296454
+      },
+      {
+        "path": "/vite/assets/Button-Dcv3wnUS.js",
+        "sha256": "ccce19f367ea5fe1fe724c3e7d40d55b372a90f53ec133d66681114a1a2c2cdb",
+        "bytes": 6795
+      },
+      {
+        "path": "/vite/assets/Dialog-B6VbEbHh.js",
+        "sha256": "3efa0c8ba1f0f6f831bce1945fac8b8149b786da9d917f989d9fd1b4a04eb2ba",
+        "bytes": 24870
+      },
+      {
+        "path": "/vite/assets/index-5ZiOr8tm.js",
+        "sha256": "355b6351c37d6a2d1c5efcdf206324b091c38fb52314e2ec2dace0b28b28227f",
+        "bytes": 175557
+      },
+      {
+        "path": "/vite/assets/index-Dl2ZdB49.js",
+        "sha256": "2a498096bcdf5f06ead2c7068300998c84f3cc0e929c1ae51349fe9f8372c7ab",
+        "bytes": 16512
+      },
+      {
+        "path": "/vite/assets/Icon-BauR08ci.js",
+        "sha256": "bac69c4d01e90af6a8f047be8e2d53b821091dd5aaf8c44e40db9dce3702b45f",
+        "bytes": 5983
+      },
+      {
+        "path": "/vite/assets/DashboardIcon-D_i-_xOi.js",
+        "sha256": "f10b715eb12e91863e6e4e87305428e8766b99df0179f29ab15b87e20c063b19",
+        "bytes": 14429292
+      },
+      {
+        "path": "/vite/assets/v3app-EOZYCIv3.css",
+        "sha256": "22f70c400bb0a4be76753e8b0a796470c995bc04368f2acbaa0ad0df59bc2415",
+        "bytes": 2002920
+      },
+      {
+        "path": "/vite/assets/useBranding-DSFJg_40.css",
+        "sha256": "8a428133338294b7fe41c8f691a0ded3e66e1fe62f834902ab9b9d68257e7078",
+        "bytes": 1422
+      },
+      {
+        "path": "/vite/assets/Dialog-CrBJzbZP.css",
+        "sha256": "6b6478bbf74e7263535b5aa740fcfff747f28787925d3c47c4a7ba9e057090c3",
+        "bytes": 1238
+      }
+    ],
+    "browser_stats": {
+      "startTime": "2026-11-15T22:57:09.416Z",
+      "duration": 87698.02799999999,
+      "expected": 13,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "browser": {
+    "config": {
+      "configFile": "/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.github/runtime_build/approval_browser.config.cjs",
+      "rootDir": "/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.github/runtime_build",
+      "forbidOnly": true,
+      "fullyParallel": false,
+      "globalSetup": null,
+      "globalTeardown": null,
+      "globalTimeout": 0,
+      "grep": {},
+      "grepInvert": null,
+      "maxFailures": 1,
+      "metadata": {
+        "ci": {
+          "commitHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/commit/b4693a91ff904320e68dc847855e12183163a48f",
+          "commitHash": "b4693a91ff904320e68dc847855e12183163a48f",
+          "buildHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/43771653630"
+        },
+        "gitCommit": {
+          "shortHash": "b4693a9",
+          "hash": "b4693a91ff904320e68dc847855e12183163a48f",
+          "subject": "test(ci): isolated exact-source validation for 5c3fb7f7",
+          "body": "test(ci): isolated exact-source validation for 5c3fb7f7\r\n",
+          "author": {
+            "name": "Welton Alves",
+            "email": "welton.alves@jrcgrupo.com.br",
+            "time": 1794783093000
+          },
+          "committer": {
+            "name": "Welton Alves",
+            "email": "welton.alves@jrcgrupo.com.br",
+            "time": 1794783093000
+          },
+          "branch": "codex/ci-quick-reply-release-chrome-r4-20261115"
+        },
+        "actualWorkers": 1
+      },
+      "preserveOutput": "always",
+      "projects": [
+        {
+          "outputDir": "/home/runner/work/_temp/approvals-native-visual-43771653630/browser/browser-results",
+          "repeatEach": 1,
+          "retries": 0,
+          "metadata": {
+            "ci": {
+              "commitHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/commit/b4693a91ff904320e68dc847855e12183163a48f",
+              "commitHash": "b4693a91ff904320e68dc847855e12183163a48f",
+              "buildHref": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/43771653630"
+            },
+            "gitCommit": {
+              "shortHash": "b4693a9",
+              "hash": "b4693a91ff904320e68dc847855e12183163a48f",
+              "subject": "test(ci): isolated exact-source validation for 5c3fb7f7",
+              "body": "test(ci): isolated exact-source validation for 5c3fb7f7\r\n",
+              "author": {
+                "name": "Welton Alves",
+                "email": "welton.alves@jrcgrupo.com.br",
+                "time": 1794783093000
+              },
+              "committer": {
+                "name": "Welton Alves",
+                "email": "welton.alves@jrcgrupo.com.br",
+                "time": 1794783093000
+              },
+              "branch": "codex/ci-quick-reply-release-chrome-r4-20261115"
+            },
+            "actualWorkers": 1
+          },
+          "id": "",
+          "name": "",
+          "testDir": "/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.github/runtime_build",
+          "testIgnore": [],
+          "testMatch": [
+            "approval_browser.spec.cjs"
+          ],
+          "timeout": 120000
+        }
+      ],
+      "quiet": false,
+      "reporter": [
+        [
+          "list",
+          null
+        ],
+        [
+          "json",
+          {
+            "outputFile": "/home/runner/work/_temp/approvals-native-visual-43771653630/browser/playwright-results.json"
+          }
+        ]
+      ],
+      "reportSlowTests": {
+        "max": 5,
+        "threshold": 300000
+      },
+      "shard": null,
+      "tags": [],
+      "updateSnapshots": "missing",
+      "updateSourceMethod": "patch",
+      "version": "1.59.1",
+      "workers": 1,
+      "webServer": null
+    },
+    "suites": [
+      {
+        "title": "approval_browser.spec.cjs",
+        "file": "approval_browser.spec.cjs",
+        "column": 0,
+        "line": 0,
+        "specs": [
+          {
+            "title": "real contextual quick replies desktop-light",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 12897,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:57:09.829Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-f7f03342b7ef21e36a41",
+            "file": "approval_browser.spec.cjs",
+            "line": 53,
+            "column": 3
+          },
+          {
+            "title": "real translated approval configuration desktop-light",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                  },
+                  {
+                    "type": "synthetic-mapping",
+                    "description": "crm.deal_price"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 9207,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:57:23.151Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                      },
+                      {
+                        "type": "synthetic-mapping",
+                        "description": "crm.deal_price"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-a79cd26a32abd91d35ec",
+            "file": "approval_browser.spec.cjs",
+            "line": 142,
+            "column": 3
+          },
+          {
+            "title": "real contextual quick replies desktop-dark",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 9060,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:57:32.367Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-7925a8d431b9f04304fa",
+            "file": "approval_browser.spec.cjs",
+            "line": 53,
+            "column": 3
+          },
+          {
+            "title": "real translated approval configuration desktop-dark",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                  },
+                  {
+                    "type": "synthetic-mapping",
+                    "description": "crm.proposal_convert"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 8647,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:57:41.434Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                      },
+                      {
+                        "type": "synthetic-mapping",
+                        "description": "crm.proposal_convert"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-d612e963841054da20a2",
+            "file": "approval_browser.spec.cjs",
+            "line": 142,
+            "column": 3
+          },
+          {
+            "title": "real contextual quick replies mobile-light",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 8006,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:57:50.087Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-c68b98b2ed04aefe2e36",
+            "file": "approval_browser.spec.cjs",
+            "line": 53,
+            "column": 3
+          },
+          {
+            "title": "real translated approval configuration mobile-light",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                  },
+                  {
+                    "type": "synthetic-mapping",
+                    "description": "crm.order_price"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 6758,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:57:58.101Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                      },
+                      {
+                        "type": "synthetic-mapping",
+                        "description": "crm.order_price"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-406b00e6ef5fd214a059",
+            "file": "approval_browser.spec.cjs",
+            "line": 142,
+            "column": 3
+          },
+          {
+            "title": "real contextual quick replies mobile-dark",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 8020,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:58:04.867Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-238414edb571ecb49983",
+            "file": "approval_browser.spec.cjs",
+            "line": 53,
+            "column": 3
+          },
+          {
+            "title": "real translated approval configuration mobile-dark",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                  },
+                  {
+                    "type": "synthetic-mapping",
+                    "description": "backoffice.release"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                  },
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 6883,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:58:12.902Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                      },
+                      {
+                        "type": "synthetic-mapping",
+                        "description": "backoffice.release"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                      },
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-6a01576cd3b7e47c027e",
+            "file": "approval_browser.spec.cjs",
+            "line": 142,
+            "column": 3
+          },
+          {
+            "title": "real account unit and conversation denials",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 1749,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:58:19.792Z",
+                    "annotations": [],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-3da2a269b23d0cab4815",
+            "file": "approval_browser.spec.cjs",
+            "line": 207,
+            "column": 1
+          },
+          {
+            "title": "real quick reply attachment settings desktop-light",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 5332,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:58:21.553Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":false}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-8bd5c2a2606775755725",
+            "file": "approval_browser.spec.cjs",
+            "line": 216,
+            "column": 27
+          },
+          {
+            "title": "real quick reply attachment settings desktop-dark",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 3763,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:58:26.893Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":1440,\"dark\":true}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-3166c41d97eb67cba7ff",
+            "file": "approval_browser.spec.cjs",
+            "line": 216,
+            "column": 27
+          },
+          {
+            "title": "real quick reply attachment settings mobile-light",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 2989,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:58:30.663Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":false}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-e3e8b7915e37670d21db",
+            "file": "approval_browser.spec.cjs",
+            "line": 216,
+            "column": 27
+          },
+          {
+            "title": "real quick reply attachment settings mobile-dark",
+            "ok": true,
+            "tags": [],
+            "tests": [
+              {
+                "timeout": 120000,
+                "annotations": [
+                  {
+                    "type": "source-theme",
+                    "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                  }
+                ],
+                "expectedStatus": "passed",
+                "projectId": "",
+                "projectName": "",
+                "results": [
+                  {
+                    "workerIndex": 0,
+                    "parallelIndex": 0,
+                    "status": "passed",
+                    "duration": 3043,
+                    "errors": [],
+                    "stdout": [],
+                    "stderr": [],
+                    "retry": 0,
+                    "startTime": "2026-11-15T22:58:33.661Z",
+                    "annotations": [
+                      {
+                        "type": "source-theme",
+                        "description": "{\"product\":\"5c3fb7f700d7bb685f17292f59b873df14ddf34d\",\"viewport\":390,\"dark\":true}"
+                      }
+                    ],
+                    "attachments": []
+                  }
+                ],
+                "status": "expected"
+              }
+            ],
+            "id": "dd53ab7f99690f717afc-ffe3efb5f9c395502a90",
+            "file": "approval_browser.spec.cjs",
+            "line": 216,
+            "column": 27
+          }
+        ]
+      }
+    ],
+    "errors": [],
+    "stats": {
+      "startTime": "2026-11-15T22:57:09.416Z",
+      "duration": 87698.02799999999,
+      "expected": 13,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "screenshots": [
+    "desktop-dark-approval-import-diff.png",
+    "desktop-dark-approval-import-list.png",
+    "desktop-dark-approval-import-saved.png",
+    "desktop-dark-approval-policy-popup.png",
+    "desktop-dark-quick-confirmation.png",
+    "desktop-dark-quick-image.png",
+    "desktop-dark-quick-native-image-editor.png",
+    "desktop-dark-quick-review.png",
+    "desktop-dark-settings-create-image.png",
+    "desktop-dark-translated-delegations.png",
+    "desktop-light-approval-import-diff.png",
+    "desktop-light-approval-import-list.png",
+    "desktop-light-approval-import-saved.png",
+    "desktop-light-approval-policy-popup.png",
+    "desktop-light-quick-confirmation.png",
+    "desktop-light-quick-image.png",
+    "desktop-light-quick-native-image-editor.png",
+    "desktop-light-quick-review.png",
+    "desktop-light-settings-create-image.png",
+    "desktop-light-translated-delegations.png",
+    "mobile-dark-approval-import-diff.png",
+    "mobile-dark-approval-import-list.png",
+    "mobile-dark-approval-import-saved.png",
+    "mobile-dark-approval-policy-popup.png",
+    "mobile-dark-quick-confirmation.png",
+    "mobile-dark-quick-image.png",
+    "mobile-dark-quick-native-image-editor.png",
+    "mobile-dark-quick-review.png",
+    "mobile-dark-settings-create-image.png",
+    "mobile-dark-translated-delegations.png",
+    "mobile-light-approval-import-diff.png",
+    "mobile-light-approval-import-list.png",
+    "mobile-light-approval-import-saved.png",
+    "mobile-light-approval-policy-popup.png",
+    "mobile-light-quick-confirmation.png",
+    "mobile-light-quick-image.png",
+    "mobile-light-quick-native-image-editor.png",
+    "mobile-light-quick-review.png",
+    "mobile-light-settings-create-image.png",
+    "mobile-light-translated-delegations.png"
+  ]
+}

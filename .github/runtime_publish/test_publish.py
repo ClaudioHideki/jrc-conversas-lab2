@@ -1,0 +1,220 @@
+"""Denial tests for publication, immutable identities and preserved smoke coverage."""
+import ast
+import copy
+import importlib.util
+import json
+import os
+from pathlib import Path
+import unittest
+from unittest.mock import patch
+
+ROOT = Path(__file__).resolve().parents[2]
+spec = importlib.util.spec_from_file_location("publication", Path(__file__).with_name("publish.py"))
+p = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(p)
+ID = "sha256:" + "1"*64
+DIGEST = "sha256:" + "2"*64
+
+class PublicationTests(unittest.TestCase):
+    def setUp(self):
+        self.env = patch.dict(os.environ, {"EXPECTED_EXECUTION_SHA": "a"*40})
+        self.env.start()
+        self.addCleanup(self.env.stop)
+        self.receipt = {"product_sha": p.PRODUCT, "execution_sha": "a"*40,
+                        "build_passed": True, "smoke_passed": True,
+                        "runtime_heap_environment_unchanged": True, "image_tag": p.LOCAL, "image_id": ID,
+                        "frontend_heap": {"passed": True, "heap_mib": 6144},
+                        "http": {"login_status": 200, "verified_assets": 3, "same_image_id": True,
+                                 "host_ports_published": False}}
+        self.manifest = {"digest": DIGEST, "body": {"schemaVersion": 2,
+            "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+            "config": {"digest": ID}, "layers": [{"digest": "sha256:"+"3"*64}]}}
+        self.info = {"Id": ID, "Os": "linux", "Architecture": "amd64",
+                     "Config": {"Labels": {"org.opencontainers.image.revision": p.PRODUCT}}}
+        self.receipt.update(browser={"passed":True,"cases":9,"actual_database":True,"same_image_id":True}, phases=[{"exit_code":0}], initial={"ram_available":9*1024**3,"disk_free":4*1024**3},ram_min=2*1024**3,disk_min=2*1024**3)
+
+    def test_approved_build(self):
+        self.assertEqual(p.validate_build(self.receipt), ID)
+
+    def test_failed_or_missing_smoke_denied(self):
+        for key in ["build_passed", "smoke_passed", "runtime_heap_environment_unchanged"]:
+            with self.subTest(key=key):
+                bad = copy.deepcopy(self.receipt);bad[key] = False
+                with self.assertRaises(RuntimeError):p.validate_build(bad)
+
+    def test_wrong_sha_denied(self):
+        for key in ["product_sha", "execution_sha"]:
+            bad = copy.deepcopy(self.receipt);bad[key] = "b"*40
+            with self.assertRaises(RuntimeError):p.validate_build(bad)
+
+    def test_failed_phase_or_owned_stop_denied(self):
+        for key in ["failure", "owned_stop_errors"]:
+            bad = copy.deepcopy(self.receipt);bad[key] = ["error"]
+            with self.assertRaises(RuntimeError):p.validate_build(bad)
+
+    def test_heap_receipt_required(self):
+        bad = copy.deepcopy(self.receipt);bad["frontend_heap"]["heap_mib"] = 4096
+        with self.assertRaises(RuntimeError):p.validate_build(bad)
+
+    def test_http_assets_required(self):
+        for key, value in [("verified_assets", 0), ("same_image_id", False), ("host_ports_published", True)]:
+            bad = copy.deepcopy(self.receipt);bad["http"][key] = value
+            with self.assertRaises(RuntimeError):p.validate_build(bad)
+
+    def test_existing_tag_never_overwritten(self):
+        p.assert_absent(None)
+        with self.assertRaises(RuntimeError):p.assert_absent(self.manifest)
+
+    def test_remote_manifest_config_matches_tested_image(self):
+        self.assertEqual(p.validate_manifest(self.manifest, ID), DIGEST)
+
+    def test_remote_different_image_denied(self):
+        with self.assertRaises(RuntimeError):p.validate_manifest(self.manifest, "sha256:"+"4"*64)
+
+    def test_remote_index_or_empty_layers_denied(self):
+        for key, value in [("mediaType", "application/vnd.oci.image.index.v1+json"), ("layers", [])]:
+            bad = copy.deepcopy(self.manifest);bad["body"][key] = value
+            with self.assertRaises(RuntimeError):p.validate_manifest(bad, ID)
+
+    def test_fresh_image_revision_and_platform(self):
+        self.assertEqual(p.validate_image(self.info, ID)["Id"], ID)
+        for key, value in [("Architecture", "arm64"), ("Os", "windows"), ("Id", "sha256:"+"4"*64)]:
+            bad = copy.deepcopy(self.info);bad[key] = value
+            with self.assertRaises(RuntimeError):p.validate_image(bad, ID)
+
+    def test_fresh_image_wrong_source_denied(self):
+        bad = copy.deepcopy(self.info);bad["Config"]["Labels"]["org.opencontainers.image.revision"] = "b"*40
+        with self.assertRaises(RuntimeError):p.validate_image(bad, ID)
+
+    def test_full_original_smoke_ast_preserved(self):
+        old = ast.parse((ROOT/".github/runtime_build/guard.py").read_text())
+        old_cls = next(n for n in old.body if isinstance(n, ast.ClassDef) and n.name == "Attempt")
+        old_ex = next(n for n in old_cls.body if isinstance(n, ast.FunctionDef) and n.name == "execute")
+        new = ast.parse(Path(__file__).with_name("publish.py").read_text())
+        new_cls = next(n for n in new.body if isinstance(n, ast.ClassDef) and n.name == "PublishedAttempt")
+        new_ex = next(n for n in new_cls.body if isinstance(n, ast.FunctionDef) and n.name == "execute")
+        marker = 'self.command(["docker", "network", "create", "--internal"'
+        def tail(nodes):
+            start = next(i for i,n in enumerate(nodes) if ast.unparse(n).replace("'", '"').startswith(marker))
+            return ast.dump(ast.Module(body=nodes[start:], type_ignores=[]), include_attributes=False)
+        self.assertEqual(tail(old_ex.body), tail(new_ex.body))
+
+    def test_verification_contains_no_build_or_push_command(self):
+        new = ast.parse(Path(__file__).with_name("publish.py").read_text())
+        cls = next(n for n in new.body if isinstance(n, ast.ClassDef) and n.name == "PublishedAttempt")
+        text = ast.unparse(cls)
+        self.assertNotIn('"buildx"', text.replace("'", '"'))
+        self.assertNotIn('"push"', text.replace("'", '"'))
+        self.assertIn("fresh-pull-by-digest", text)
+        self.assertIn("already contains candidate image", text)
+
+    def test_only_one_explicit_tag_push_no_latest(self):
+        text = Path(__file__).with_name("publish.py").read_text()
+        self.assertEqual(text.count('["docker", "push", TAG]'), 1)
+        self.assertNotIn("--all-tags", text)
+        self.assertNotIn('":latest"', text)
+        self.assertIn('["docker", "tag", image_id, TAG]', text)
+
+
+    def jobs(self, names):
+        return {"total_count": len(names), "jobs": [{"name": n, "head_sha": "a"*40, "run_attempt": 1,
+             "status": "queued" if n == "verify-published" else "in_progress", "runner_id": None} for n in names]}
+
+    def test_build_snapshot_before_downstream_materialization(self):
+        self.assertEqual(len(p.validate_job_snapshot(self.jobs(["evidence-gate", "image-build"]), "build")), 2)
+
+    def test_build_snapshot_with_queued_downstream(self):
+        self.assertEqual(len(p.validate_job_snapshot(self.jobs(["evidence-gate", "image-build", "verify-published"]), "build")), 3)
+
+    def test_duplicate_or_unknown_logical_jobs_denied(self):
+        for names in [["evidence-gate", "image-build", "image-build"], ["evidence-gate", "image-build", "foreign-job"]]:
+            with self.assertRaises(RuntimeError):p.validate_job_snapshot(self.jobs(names), "build")
+
+    def test_final_verification_requires_all_three(self):
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(self.jobs(["evidence-gate", "image-build"]), "verify")
+        self.assertEqual(len(p.validate_job_snapshot(self.jobs(["evidence-gate", "image-build", "verify-published"]), "verify")), 3)
+
+    def test_incomplete_wrong_sha_or_active_downstream_denied(self):
+        bad = self.jobs(["evidence-gate", "image-build"]);bad["total_count"] = 3
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(bad, "build")
+        bad = self.jobs(["evidence-gate", "image-build"]);bad["jobs"][0]["head_sha"] = "b"*40
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(bad, "build")
+        bad = self.jobs(["evidence-gate", "image-build", "verify-published"]);bad["jobs"][-1]["status"] = "in_progress"
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(bad, "build")
+
+
+    def test_release_gate_import_resolves_scout_dependency(self):
+        gate = p.module("release_gate_import_regression", ROOT/".github/release/gate.py")
+        self.assertTrue(callable(gate.GitHub))
+        self.assertTrue(callable(gate.execute))
+
+    def test_source_publication_receipt_is_separately_bound(self):
+        source = copy.deepcopy(self.receipt);source["execution_sha"] = "b"*40
+        with self.assertRaises(RuntimeError):p.validate_build(source)
+        self.assertEqual(p.validate_build(source, "b"*40), ID)
+        with self.assertRaises(RuntimeError):p.validate_build(source, "c"*40)
+
+    def test_source_job_snapshot_is_separately_bound(self):
+        source = self.jobs(["evidence-gate", "image-build", "verify-published"])
+        for row in source["jobs"]:row["head_sha"] = "b"*40
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(source, "verify")
+        self.assertEqual(len(p.validate_job_snapshot(source, "verify", "b"*40)), 3)
+        with self.assertRaises(RuntimeError):p.validate_job_snapshot(source, "verify", "c"*40)
+
+
+    def reference_nodes(self):
+        tree=ast.parse(Path(p.__file__).read_text())
+        cls=next(n for n in tree.body if isinstance(n,ast.ClassDef) and n.name=="PublishedAttempt")
+        method=next(n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name=="execute")
+        binding=next(n for n in method.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="check_preserved_refs" for t in n.targets))
+        call=next(n for n in method.body if isinstance(n,ast.Expr) and isinstance(n.value,ast.Call) and isinstance(n.value.func,ast.Name) and n.value.func.id=="check_preserved_refs")
+        return binding,call
+
+    def test_regression_previous_unbound_reference_call_raises_nameerror(self):
+        _,call=self.reference_nodes()
+        code=compile(ast.Module(body=[call],type_ignores=[]),"previous-unbound-reference-check","exec")
+        with self.assertRaisesRegex(NameError,"check_preserved_refs"):
+            exec(code,{})
+
+    def test_regression_fixed_binding_calls_real_guard_reference_check(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        checker=Mock()
+        binding,call=self.reference_nodes()
+        exec(compile(ast.Module(body=[binding,call],type_ignores=[]),"fixed-reference-check","exec"),{"guard":SimpleNamespace(check_preserved_refs=checker)})
+        checker.assert_called_once_with()
+
+    def test_regression_reference_divergence_is_never_swallowed(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        checker=Mock(side_effect=RuntimeError("Protected reference advanced"))
+        binding,call=self.reference_nodes()
+        with self.assertRaisesRegex(RuntimeError,"Protected reference advanced"):
+            exec(compile(ast.Module(body=[binding,call],type_ignores=[]),"denied-reference-check","exec"),{"guard":SimpleNamespace(check_preserved_refs=checker)})
+
+    def test_all_tag_lookups_use_the_declared_unique_publication_tag(self):
+        from unittest.mock import Mock
+        tree=ast.parse(Path(p.__file__).read_text())
+        calls=[n for f in tree.body if isinstance(f,ast.FunctionDef) and f.name in ['preflight','publish','verify']
+               for n in ast.walk(f) if isinstance(n,ast.Call) and isinstance(n.func,ast.Name)
+               and n.func.id=='registry_manifest' and not (isinstance(n.args[0],ast.Name) and n.args[0].id=='digest')]
+        self.assertEqual(len(calls),4)
+        declared=p.IMAGE+':sha-'+p.PRODUCT+'-different-immutable-suffix'
+        for call in calls:
+            lookup=Mock();token=Mock(return_value='synthetic-only')
+            exec(compile(ast.fix_missing_locations(ast.Module(body=[ast.Expr(value=call)],type_ignores=[])),'unique-tag-regression','exec'),
+                 {'registry_manifest':lookup,'registry_token':token,'IMAGE':p.IMAGE,'PRODUCT':p.PRODUCT,'TAG':declared})
+            self.assertEqual(lookup.call_args.args[0],declared.removeprefix(p.IMAGE+':'))
+
+    def test_legacy_bare_sha_lookup_would_check_a_different_tag(self):
+        declared=p.IMAGE+':sha-'+p.PRODUCT+'-different-immutable-suffix'
+        self.assertNotEqual('sha-'+p.PRODUCT,declared.removeprefix(p.IMAGE+':'))
+
+if __name__ == "__main__":
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(PublicationTests)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    report = {"tests": result.testsRun, "failures": len(result.failures), "errors": len(result.errors),
+              "skipped": len(result.skipped)}
+    if os.environ.get("RUNNER_TEMP"):
+        (Path(os.environ["RUNNER_TEMP"])/"publication-tests.json").write_text(json.dumps(report, indent=2)+"\n")
+    raise SystemExit(0 if result.wasSuccessful() and result.testsRun == 28 and not result.skipped else 1)
