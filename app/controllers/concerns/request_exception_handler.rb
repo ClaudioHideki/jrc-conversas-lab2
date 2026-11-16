@@ -8,6 +8,7 @@ module RequestExceptionHandler
   ].freeze
 
   included do
+    rescue_from JrcBroker::HistoryRetention::Protected, with: :render_broker_history_retained
     rescue_from ActiveRecord::RecordInvalid, with: :render_record_invalid
     rescue_from CustomExceptions::Inbox::LimitExceeded,
                 CustomExceptions::Account::EmailLimitExceeded,
@@ -15,6 +16,10 @@ module RequestExceptionHandler
   end
 
   private
+
+  def render_broker_history_retained(exception)
+    render json: { code: 'JRC_BROKER_HISTORY_RETAINED', error: exception.message }, status: :conflict
+  end
 
   def handle_with_exception
     yield

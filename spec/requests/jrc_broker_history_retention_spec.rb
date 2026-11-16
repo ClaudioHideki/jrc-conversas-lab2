@@ -106,6 +106,19 @@ RSpec.describe 'Broker custody survives deletion requests', type: :request do
     end
   end
 
+  it 'refuses account cleanup before changing user emails or enqueueing compliance notifications' do
+    receipt
+    original_email = admin.reload.email
+    clear_enqueued_jobs
+
+    expect_retained_error { AccountDeletionService.new(account: account).perform }
+
+    expect(admin.reload.email).to eq(original_email)
+    expect(enqueued_jobs).to be_empty
+    expect(account.reload).to be_persisted
+    expect(receipt.reload.message.reload).to be_persisted
+  end
+
   %i[account inbox conversation].each do |target|
     it "also refuses direct #{target} destruction before dependent callbacks" do
       receipt

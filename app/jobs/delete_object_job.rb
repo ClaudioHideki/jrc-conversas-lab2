@@ -1,14 +1,17 @@
 class DeleteObjectJob < ApplicationJob
   queue_as :low
+  before_enqueue { JrcBroker::HistoryRetention.check!(arguments.first) }
 
   BATCH_SIZE = 5_000
 
   def perform(object, user = nil, ip = nil)
     # Pre-purge heavy associations for large objects to avoid
     # timeouts & race conditions due to destroy_async fan-out.
-    purge_heavy_associations(object)
-    object.destroy!
-    process_post_deletion_tasks(object, user, ip)
+    JrcBroker::HistoryRetention.guard(object) do
+      purge_heavy_associations(object)
+      object.destroy!
+      process_post_deletion_tasks(object, user, ip)
+    end
   end
 
   def process_post_deletion_tasks(object, user, ip); end

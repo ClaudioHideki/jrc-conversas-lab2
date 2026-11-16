@@ -93,6 +93,8 @@ class SuperAdmin::AccountsController < SuperAdmin::ApplicationController
     # rubocop:disable Rails/I18nLocaleTexts
     redirect_back(fallback_location: [namespace, requested_resource], notice: 'Account deletion is in progress.')
     # rubocop:enable Rails/I18nLocaleTexts
+  rescue JrcBroker::HistoryRetention::Protected => e
+    render plain: e.message, status: :conflict
   end
 
   private

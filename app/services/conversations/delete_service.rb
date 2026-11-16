@@ -2,6 +2,7 @@ class Conversations::DeleteService
   pattr_initialize [:conversation!, :user, :ip]
 
   def perform
+    JrcBroker::HistoryRetention.check!(conversation)
     track_deleted_email_messages
     ::DeleteObjectJob.perform_later(conversation, user, ip)
   end
