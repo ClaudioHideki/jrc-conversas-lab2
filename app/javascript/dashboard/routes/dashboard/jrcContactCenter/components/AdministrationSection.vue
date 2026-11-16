@@ -5,6 +5,8 @@ import { useRoute, useRouter } from 'vue-router';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import API from 'dashboard/api/jrcContactCenter';
 import TeamsAPI from 'dashboard/api/teams';
+import CustomRoleAPI from 'dashboard/api/customRole';
+import NativeRoleEditor from './NativeRoleEditor.vue';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -38,10 +40,12 @@ const editing = ref(null);
 const saving = ref(false);
 const opening = ref(false);
 const savingMembers = ref(false);
+const savingRole = ref(false);
 const teamMemberIds = ref([]);
 const savedTeamMemberIds = ref([]);
 const membersSaved = ref(false);
 const invalidAttributes = ref([]);
+const selectedRoleId = ref('');
 const formError = ref('');
 let generation = 0;
 const resource = computed(() =>
@@ -58,6 +62,9 @@ const canEdit = computed(
     props.context.capabilities.configure &&
     local.value &&
     (resource.value !== 'teams' || teamManage.value)
+);
+const canEditRoles = computed(
+  () => key.value === 'permissions' && props.context.native_links?.role_editor
 );
 const label = name => t(`JRC_CONTACT_CENTER.ADMIN.${name}`);
 const invalid = name => invalidAttributes.value.includes(name) || undefined;
@@ -118,7 +125,8 @@ const load = async () => {
   failed.value = false;
   if (
     pending.value ||
-    ['closures', 'permissions', 'approvals'].includes(key.value)
+    ['closures', 'approvals'].includes(key.value) ||
+    (key.value === 'permissions' && !canEditRoles.value)
   )
     return;
   loading.value = true;
@@ -130,6 +138,13 @@ const load = async () => {
   };
   try {
     let response;
+    if (resource.value === 'permissions') {
+      response = await CustomRoleAPI.get();
+      if (version !== generation) return;
+      items.value = response.data;
+      selectedRoleId.value = '';
+      return;
+    }
     if (resource.value === 'units')
       response = await API.units(props.accountId, params);
     else if (resource.value === 'queues')
@@ -252,6 +267,7 @@ const saveTeamMembers = async () => {
   }
 };
 const save = async () => {
+  if (key.value === 'permissions') return;
   if (saving.value || savingMembers.value) return;
   if (
     resource.value === 'teams' &&
@@ -345,6 +361,12 @@ const save = async () => {
   } finally {
     saving.value = false;
   }
+};
+const closeRoleEditor = async () => {
+  if (savingRole.value) return;
+  dialog.value.close();
+  await load();
+  emit('changed');
 };
 watch(
   [
@@ -446,6 +468,62 @@ onBeforeUnmount(() => {
     >
       {{ label('NATIVE_APPROVALS') }}
     </RouterLink>
+    <template v-if="canEditRoles">
+      <p v-if="loading" role="status" class="text-sm text-n-slate-11">
+        {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}
+      </p>
+      <p v-else-if="failed" role="alert" class="text-sm text-n-ruby-11">
+        {{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}
+      </p>
+      <form
+        v-else
+        class="flex flex-wrap items-end gap-3"
+        @submit.prevent="
+          open(items.find(row => String(row.id) === String(selectedRoleId)))
+        "
+      >
+        <label class="min-w-0 flex-1 text-sm">
+          {{ label('NATIVE_ROLE') }}
+          <select
+            v-model="selectedRoleId"
+            required
+            class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+          >
+            <option value="">{{ label('SELECT') }}</option>
+            <option v-for="role in items" :key="role.id" :value="role.id">
+              {{ role.name }}
+            </option>
+          </select>
+        </label>
+        <button
+          type="submit"
+          :disabled="!selectedRoleId || opening"
+          class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11 disabled:opacity-40"
+          data-edit-native-role
+        >
+          {{ label('EDIT_NATIVE_ROLE') }}
+        </button>
+        <button
+          type="button"
+          :disabled="opening"
+          class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
+          data-new-native-role
+          @click="open()"
+        >
+          {{ label('NEW_NATIVE_ROLE') }}
+        </button>
+      </form>
+    </template>
+    <p
+      v-if="
+        key === 'permissions' &&
+        context.native_links?.permissions &&
+        !canEditRoles
+      "
+      class="text-sm text-n-amber-11"
+    >
+      {{ label('SCOPED_ROLE_READONLY') }}
+    </p>
     <nav
       v-if="key === 'queues'"
       class="flex flex-wrap gap-2"
@@ -621,13 +699,22 @@ onBeforeUnmount(() => {
       :cancel-button-label="label('CANCEL')"
       :disable-confirm-button="saving || savingMembers"
       :is-loading="saving"
-      :dismissible="!saving && !savingMembers"
-      :show-cancel-button="!saving && !savingMembers"
+      :dismissible="!saving && !savingMembers && !savingRole"
+      :show-cancel-button="key !== 'permissions' && !saving && !savingMembers"
       :close-on-click-outside="false"
+      :use-form="key !== 'permissions'"
+      :show-confirm-button="key !== 'permissions'"
       width="2xl"
       @confirm="save"
     >
-      <div class="grid min-w-0 gap-4 sm:grid-cols-2">
+      <NativeRoleEditor
+        v-if="canEditRoles"
+        :roles="items"
+        :selected-role="editing"
+        @busy="savingRole = $event"
+        @close="closeRoleEditor"
+      />
+      <div v-else class="grid min-w-0 gap-4 sm:grid-cols-2">
         <p
           v-if="formError"
           role="alert"

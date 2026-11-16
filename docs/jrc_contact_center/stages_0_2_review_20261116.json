@@ -244,15 +244,18 @@
         6
       ],
       "implemented_in_0_2": [
-        "13 native CC permissions, separate recording rights, anti-escalation and fresh checks; native role editor is reused"
+        "Editor nativo de perfis em popup, com feature flag, administração nativa e cobertura corporativa irrestrita; sem novo cadastro de permissões",
+        "Seleções explícitas de capacidades, validações e persistência pela API e pelo store nativos; nenhum grant automático do Call Center",
+        "Falhas de carregamento visíveis, rascunho nativo preservado em erro e fechamento bloqueado durante o salvamento"
       ],
       "remaining_or_external": [
         "Full multi-module/profile/team matrix from the mockup is not recreated; native editor navigation/installation restrictions remain; legacy native role access is preserved"
       ],
       "code_references": [
-        "module_policy.rb",
-        "grant_guard.rb",
-        "CustomRoleModal.vue"
+        "AdministrationSection.vue",
+        "NativeRoleEditor.vue",
+        "settings/customRoles/component/CustomRoleModal.vue",
+        "administration.rb"
       ],
       "reference": {
         "document_1_figure": 11,
@@ -535,10 +538,24 @@
     "Corporate options reset without silently changing stored links",
     "Fresh permission checks and negative writes after role change",
     "Synthetic corporate-unit and foreign Account denial",
-    "Desktop 1440/mobile 390, both themes, real Rails and PostgreSQL, no API aliases"
+    "Desktop 1440/mobile 390, both themes, real Rails and PostgreSQL, no API aliases",
+    "Popup nativo de perfis com persistência explícita, feature flags reais e limites da cobertura corporativa"
   ],
   "provider_contracts": "control_desk_contracts_20261116.json",
   "scope_limit": "No new PABX endpoint, ACK, grant, native Team corporate mapping or production operation. Native Team remains Account-scoped. No changes to global lint configuration, Rails migrations, SQL or dependency locks.",
   "validation_state": "native_and_Chrome_execution_pending",
-  "full_23_figures_complete": false
+  "full_23_figures_complete": false,
+  "continuity_20261116": {
+    "preserved_checkpoint": "15eaa800336626a3d5c5712870b43d169c64e6ad",
+    "previous_run": 43909947337,
+    "previous_result": {
+      "rails_examples": 383,
+      "vue_tests": 172,
+      "chrome_passed": 32,
+      "chrome_failed": 8
+    },
+    "chrome_failure_detail": "Dois cenários em quatro projetos aguardavam select por getByLabel exact. O snapshot contém os comboboxes e suas opções. O novo cenário usa role e nome acessível exatos, com verificação do valor selecionado e da persistência.",
+    "next_expected_chrome": 44,
+    "next_validation": "Pendente de CI nativa no novo checkpoint; não atribuir evidências do checkpoint anterior aos 11 arquivos pendentes."
+  }
 }

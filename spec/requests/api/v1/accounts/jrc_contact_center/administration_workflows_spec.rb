@@ -82,6 +82,15 @@ RSpec.describe 'Call Center administrative workflows', type: :request do
     expect(JrcCrm::UserBusinessUnit.where(account: account, user: user)).to be_empty
   end
 
+  it 'offers the native role popup only when its feature and native role permit it' do
+    account.enable_features!('custom_roles')
+    get "#{base}/administration", headers: headers
+    expect(response.parsed_body.fetch('native_links')).to include('permissions' => true, 'role_editor' => true)
+    member.update!(role: :agent)
+    get "#{base}/administration", headers: headers
+    expect(response.parsed_body.fetch('native_links')).to include('permissions' => false, 'role_editor' => false)
+  end
+
   context 'with a corporate business-unit boundary' do
     let(:company) { JrcCustomers::Company.create!(account: account, name: 'Issuer', relationship_type: 'internal', active: true) }
     let(:allowed_business_unit) { JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'A', code: 'A', active: true) }
@@ -105,6 +114,12 @@ RSpec.describe 'Call Center administrative workflows', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body.fetch('can_manage')).to be(false)
       expect(response.parsed_body).not_to have_key('agents')
+    end
+
+    it 'does not offer account-wide native role editing under a restricted corporate scope' do
+      account.enable_features!('custom_roles')
+      get "#{base}/administration", headers: headers
+      expect(response.parsed_body.fetch('native_links').fetch('role_editor')).to be(false)
     end
 
     it 'rejects queue creation and membership assignment in another business unit' do

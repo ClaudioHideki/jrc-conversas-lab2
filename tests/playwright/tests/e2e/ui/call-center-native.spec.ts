@@ -294,13 +294,18 @@ test('queue popup creates edits and reloads local data without claiming PABX app
     .getByLabel('Código', { exact: true })
     .fill(`QA-${info.project.name}`);
   await dialog
-    .getByLabel('Unidade operacional', { exact: true })
+    .getByRole('combobox', { name: 'Unidade operacional', exact: true })
     .selectOption(String(session.unit_id));
+  await expect(
+    dialog.getByRole('combobox', { name: 'Unidade operacional', exact: true })
+  ).toHaveValue(String(session.unit_id));
   await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(dialog).not.toBeVisible();
   await page.locator('[data-edit]').click();
   await dialog.getByLabel('Nome', { exact: true }).fill(`${name}-revised`);
-  await dialog.getByLabel('Status', { exact: true }).selectOption('inactive');
+  await dialog
+    .getByRole('combobox', { name: 'Status', exact: true })
+    .selectOption('inactive');
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-queue.png`,
     fullPage: true,
@@ -431,11 +436,14 @@ test('queue membership popup distinguishes supervision from participation and pe
   await page.locator('[data-create]').click();
   const dialog = page.getByRole('dialog');
   await dialog
-    .getByLabel('Fila', { exact: true })
+    .getByRole('combobox', { name: 'Fila', exact: true })
     .selectOption(String(queue.id));
   await dialog
-    .getByLabel('Usuário', { exact: true })
+    .getByRole('combobox', { name: 'Usuário', exact: true })
     .selectOption(String(session.viewer_account_user_id));
+  await expect(
+    dialog.getByRole('combobox', { name: 'Fila', exact: true })
+  ).toHaveValue(String(queue.id));
   await dialog
     .getByLabel('Participa da distribuição', { exact: true })
     .uncheck();
@@ -567,4 +575,50 @@ test('corporate boundary denies foreign units and queues for scoped configuratio
   expect(deniedScope.status()).toBe(401);
   await page.goto(`${base}/queues?queues_tab=teams`);
   await expect(page.locator('[data-create]')).toHaveCount(0);
+});
+
+test('native permission popup reuses the role editor and persists only explicitly selected capabilities', async ({
+  page,
+}, info) => {
+  const roleUrl = `http://127.0.0.1:5387/api/v1/accounts/${session.account_id}/custom_roles/${session.viewer_role_id}`;
+  const before = await page.request.get(roleUrl, {
+    headers: session.administrator,
+  });
+  expect(before.status()).toBe(200);
+  const original = await before.json();
+  await page.goto(`${base}/permissions`);
+  await page
+    .getByRole('combobox', { name: 'Perfil nativo', exact: true })
+    .selectOption(String(session.viewer_role_id));
+  await page.locator('[data-edit-native-role]').click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.locator('input[id^="jrc_contact_center_"]')).toHaveCount(
+    13
+  );
+  await dialog
+    .getByLabel('Descrição', { exact: true })
+    .fill('SYNTHETIC explicitly reviewed permissions');
+  await dialog.locator('#jrc_contact_center_configure').check();
+  await expect(dialog.locator('#jrc_contact_center_publish')).not.toBeChecked();
+  expect(
+    await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-permissions.png`,
+    fullPage: true,
+  });
+  await dialog.getByRole('button', { name: 'Atualizar', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  const after = await page.request.get(roleUrl, {
+    headers: session.administrator,
+  });
+  expect((await after.json()).permissions.sort()).toEqual([
+    'jrc_contact_center_configure',
+    'jrc_contact_center_view',
+  ]);
+  const restored = await page.request.patch(roleUrl, {
+    headers: session.administrator,
+    data: { custom_role: { permissions: original.permissions } },
+  });
+  expect(restored.status()).toBe(200);
 });

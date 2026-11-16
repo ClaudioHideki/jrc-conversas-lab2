@@ -13,3 +13,7 @@ QueueMembership mantém Participa e Supervisiona independentes. A validação na
 A conexão cadastrada e a importação CDR não provam PABX online ou recurso publicado. Comandos remotos e recursos sem contrato continuam bloqueados. A Central de Aprovações mantém suas próprias políticas; nenhum fluxo ou alçada é ativado.
 
 A matriz stages_0_2_review_20261116.json distingue funções locais, dependências externas e etapas 3–8. Resultados da CI e capturas precisam corresponder ao SHA efetivamente executado. Nenhuma existência de tela ou teste simulado fecha a homologação externa.
+
+O popup de Permissões reutiliza CustomRoleModal, CustomRoleAPI e o store customRole existentes. O acesso depende de custom_roles, papel administrativo nativo e cobertura corporativa irrestrita. A seleção continua explícita: configurar o Call Center não concede publicação, monitoria ou outras capacidades automaticamente. A origem nativa mantém sua autoridade original. O Dialog usa contenção e rolagem já existentes, sem formulário externo envolvendo o formulário nativo; o submit propagado não pode acionar o salvamento genérico do painel.
+
+A CI 43909947337 confirmou 383 exemplos Rails, 172 testes Vue e 32 de 40 cenários Chrome. Os oito timeouts ocorreram nos seletores de Unidade operacional e Fila em quatro projetos; os snapshots mostram os comboboxes e suas opções. A revisão usa papel e nome acessível exatos, verifica a seleção e mantém as asserções de persistência. Os resultados do novo checkpoint ainda precisam ser produzidos; essa correção não equivale a uma homologação já aprovada.

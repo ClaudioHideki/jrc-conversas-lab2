@@ -168,7 +168,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
-          assert stats['expected'] == 40
+          assert stats['expected'] == 44
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
           PY

@@ -3,6 +3,7 @@ import { defineComponent, reactive, ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
 import TeamsAPI from 'dashboard/api/teams';
+import CustomRoleAPI from 'dashboard/api/customRole';
 import AdministrationSection from './AdministrationSection.vue';
 import ControlDeskPage from '../views/ControlDeskPage.vue';
 
@@ -34,6 +35,7 @@ vi.mock('dashboard/api/teams', () => ({
     updateAgents: vi.fn(),
   },
 }));
+vi.mock('dashboard/api/customRole', () => ({ default: { get: vi.fn() } }));
 const Dialog = defineComponent({
   emits: ['confirm'],
   setup(_props, { expose, emit }) {
@@ -77,6 +79,65 @@ beforeEach(() => {
 });
 
 describe('administrative workflow', () => {
+  it('does not load a native role editor without the server capability', async () => {
+    const wrapper = mountSection('permissions', 'native_module');
+    await flushPromises();
+    expect(CustomRoleAPI.get).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-edit-native-role]').exists()).toBe(false);
+  });
+
+  it('loads authorized native profiles and keeps role load failures visible', async () => {
+    CustomRoleAPI.get.mockRejectedValueOnce(new Error('Unavailable'));
+    const wrapper = mount(AdministrationSection, {
+      props: {
+        accountId: '1',
+        card: { key: 'permissions', state: 'native_module' },
+        context: {
+          ...context,
+          native_links: { permissions: true, role_editor: true },
+        },
+      },
+      global: { stubs: { Dialog, RouterLink: true } },
+    });
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toBe(
+      'JRC_CONTACT_CENTER.COMMON.ERROR'
+    );
+    expect(wrapper.find('[data-edit-native-role]').exists()).toBe(false);
+  });
+
+  it('does not close the native role editor when its form submit bubbles through the dialog', async () => {
+    CustomRoleAPI.get.mockResolvedValue({
+      data: [
+        {
+          id: 9,
+          name: 'Scoped native profile',
+          permissions: ['jrc_contact_center_view'],
+        },
+      ],
+    });
+    const wrapper = mount(AdministrationSection, {
+      props: {
+        accountId: '1',
+        card: { key: 'permissions', state: 'native_module' },
+        context: {
+          ...context,
+          native_links: { permissions: true, role_editor: true },
+        },
+      },
+      global: { stubs: { Dialog, RouterLink: true, NativeRoleEditor: true } },
+    });
+    await flushPromises();
+    await wrapper.get('select').setValue(9);
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(wrapper.find('[data-dialog]').exists()).toBe(true);
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(wrapper.find('[data-dialog]').exists()).toBe(true);
+    expect(API.saveUnit).not.toHaveBeenCalled();
+  });
+
   it('preserves a failed creation draft and persists the reviewed values on retry', async () => {
     const wrapper = mountSection();
     await flushPromises();

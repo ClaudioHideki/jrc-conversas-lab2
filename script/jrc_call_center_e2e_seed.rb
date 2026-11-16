@@ -7,7 +7,7 @@ raise 'Owned database required' unless owned_database
 raise 'No external integration allowed' if ENV['SUPABASE_URL'].present? || ENV['SUPABASE_SERVICE_ROLE_KEY'].present?
 
 account = Account.create!(name: 'SYNTHETIC Call Center QA', locale: 'pt_BR')
-account.enable_features!('jrc_contact_center')
+account.enable_features!('jrc_contact_center', 'custom_roles')
 other = Account.create!(name: 'SYNTHETIC denied Account')
 admin = User.new(name: 'SYNTHETIC administrator', email: "cc-admin-#{SecureRandom.hex(6)}@example.test",
                  password: SecureRandom.base64(32), confirmed_at: Time.current)
