@@ -87,13 +87,17 @@ RSpec.describe 'Call Center administrative workflows', type: :request do
     let(:allowed_business_unit) { JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'A', code: 'A', active: true) }
     let(:denied_business_unit) { JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'B', code: 'B', active: true) }
     let(:denied_unit) do
-      JrcContactCenter::Unit.create!(account: account, code: 'DENIED', name: 'Denied', kind: 'sac',
-                                    settings: { issuer_company_id: company.id, business_unit_id: denied_business_unit.id })
+      JrcContactCenter::Unit.create!(
+        account: account, code: 'DENIED', name: 'Denied', kind: 'sac',
+        settings: { issuer_company_id: company.id, business_unit_id: denied_business_unit.id }
+      )
     end
 
     before do
-      JrcCrm::UserBusinessUnit.create!(account: account, user: user, company: company, business_unit: allowed_business_unit,
-                                     scope: 'BUSINESS_UNIT', active: true, structure_managed: true)
+      JrcCrm::UserBusinessUnit.create!(
+        account: account, user: user, company: company, business_unit: allowed_business_unit,
+        scope: 'BUSINESS_UNIT', active: true, structure_managed: true
+      )
     end
 
     it 'does not expose account-wide native team editing or its agent options' do
@@ -107,8 +111,10 @@ RSpec.describe 'Call Center administrative workflows', type: :request do
       post "#{base}/queues", params: { queue: { name: 'Denied', code: 'DENIED', unit_id: denied_unit.id } }, headers: headers, as: :json
       expect(response).to have_http_status(:not_found)
       queue = JrcContactCenter::Queue.create!(account: account, unit: denied_unit, code: 'DENIED', name: 'Denied')
-      post "#{base}/queue_memberships", params: { queue_membership: { queue_id: queue.id, account_user_id: member.id } },
-                                       headers: headers, as: :json
+      post(
+        "#{base}/queue_memberships", headers: headers, as: :json,
+        params: { queue_membership: { queue_id: queue.id, account_user_id: member.id } }
+      )
       expect(response).to have_http_status(:not_found)
       expect(queue.reload.memberships).to be_empty
     end

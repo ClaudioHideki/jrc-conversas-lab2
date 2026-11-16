@@ -45,8 +45,14 @@ restricted.save!
 restricted_role = CustomRole.create!(account: account, name: 'SYNTHETIC scoped configuration',
                                      permissions: %w[jrc_contact_center_view jrc_contact_center_configure])
 AccountUser.create!(account: account, user: restricted, role: :agent, custom_role: restricted_role)
-JrcCrm::UserBusinessUnit.create!(account: account, user: restricted, scope: 'BUSINESS_UNIT', business_unit: business_units.first,
-                               company: company, active: true, structure_managed: true)
+JrcCrm::UserBusinessUnit.create!(
+  account: account, user: restricted, scope: 'BUSINESS_UNIT', business_unit: business_units.first,
+  company: company, active: true, structure_managed: true
+)
+# Explicit synthetic organizational grants, independent from functional roles.
+[admin, limited].each do |operator|
+  JrcCrm::UserBusinessUnit.create!(account: account, user: operator, scope: 'GROUP', active: true, structure_managed: true)
+end
 session = { account_id: account.id, other_account_id: other.id, unit_id: unit.id,
             administrator: admin.create_new_auth_token, viewer: limited.create_new_auth_token,
             viewer_user_id: limited.id, viewer_role_id: viewer.id,
