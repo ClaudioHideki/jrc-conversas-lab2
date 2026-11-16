@@ -1,0 +1,35 @@
+{
+  "checkpoint": 0,
+  "base_sha": "a24adc6dd8bb660f955b76cce0172ae1638deee2",
+  "sources": ["JRC_Conversas_Call_Center_Parte_1_Especificacao_DEV_Com_Imagens.docx", "JRC_Conversas_Call_Center_Parte_1_Detalhamento_Funcional_23_Imagens.docx"],
+  "identity": {
+    "account": "Derived from authenticated native membership, never from a PABX response",
+    "logical_tenant": "Persisted expected_tenant; unchanged by diagnosis or import",
+    "accountcode": "Strict existing identity contract unless a SuperAdmin explicitly authorizes an Account-local mapping",
+    "mapping": "Server stamps Account, logical tenant, author and time; copied, stale and malformed mappings are rejected",
+    "cdr_identity": "Mapping explicitly declares whether its configured CDR field contains tenant or accountcode; never inferred",
+    "extension": "Human SIP/history extension remains distinct from technical SIP identity"
+  },
+  "capabilities": [
+    {"resource": "SIP hold/DTMF/transfer", "implementation": "native webphone", "status": "implemented_not_externally_homologated_in_this_delivery"},
+    {"resource": "dashboard/extensions/queues/DIDs/trunks", "implementation": "existing Pabx::Provider GET/search operations", "status": "implemented_read_contract_external_homologation_pending"},
+    {"resource": "CDR import", "implementation": "Pabx::Sync and native jobs", "status": "implemented_explicit_provisional_field_mapping"},
+    {"resource": "recording bytes", "implementation": "existing authorized history proxy", "status": "implemented_lookup_contract_required"},
+    {"resource": "originate/remote call commands", "implementation": "JrcContactCenter adapter", "status": "pending_contract_blocked"},
+    {"resource": "provision DID/extension/queue", "status": "pending_contract_blocked"},
+    {"resource": "publish URA/audio/calendar/DAC/recording policy", "status": "pending_contract_blocked"},
+    {"resource": "signed callbacks", "implementation": "durable ingestor/reconciler exist; real ingress/signature contract missing", "status": "pending_contract_blocked"},
+    {"resource": "configuration rollback", "status": "pending_contract_blocked"},
+    {"resource": "tests using HTTP/provider doubles", "status": "synthetic_not_provider_homologation"}
+  ],
+  "execution_rules": [
+    "No PABX endpoint invented; no provider requests executed by this delivery",
+    "accepted_by_gateway is not confirmed_by_pabx; unknown is not retried as success",
+    "Existing event idempotency is Account/provider/event plus payload digest",
+    "Existing command replay validates actor/action/target/parameters/version",
+    "Sync imports CDR transactionally with bounded pages and wall-clock budget; it is not resource publication",
+    "Critical configuration approval will use the native approval Catalog; no policy is activated here"
+  ],
+  "external_dependencies": ["Real provider capabilities and response schemas", "Signed callback verification and replay window", "Per-resource ACK and applied version", "Capacity/provisioning permissions", "Codec/TTS limits", "Authorized rollback and active-call impact"],
+  "validation": {"native_tests": "pending_disposable_GitHub_runner", "external_homologation": "not_executed"}
+}

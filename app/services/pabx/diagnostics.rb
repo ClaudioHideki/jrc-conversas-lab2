@@ -10,9 +10,10 @@ class Pabx::Diagnostics
     expected = @settings.data.fetch('expected_tenant').to_s
     returned = dashboard.fetch('accountcode').to_s
     extension = @settings.data['test_extension'].to_s
-    compatible = expected == returned
+    mapping = Pabx::ScopeMapping.new(@integration)
+    compatible = mapping.matches?(returned)
     result = { api: 'connected', authentication: 'ok', expected_tenant: expected, returned_accountcode: returned,
-               tenant_compatible: compatible, extension: extension,
+               tenant_compatible: compatible, expected_accountcode: mapping.accountcode, extension: extension,
                external_homologation: 'pending', checked_at: Time.current.iso8601,
                insecure_http: @settings.data['base_url'].to_s.start_with?('http://') }
     unless compatible

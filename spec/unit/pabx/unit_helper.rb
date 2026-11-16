@@ -15,7 +15,7 @@ end
 
 module Pabx
 end
-%w[error settings contract client provider diagnostics].each do |file|
+%w[error scope_mapping settings contract client provider diagnostics].each do |file|
   require File.expand_path("../../../app/services/pabx/#{file}", __dir__)
 end
 

@@ -37,7 +37,7 @@ class Pabx::Contract
 
   def normalize(row)
     raise Pabx::Error, 'INVALID_RESPONSE' unless row.is_a?(Hash)
-    raise Pabx::Error, 'TENANT_MISMATCH' unless read(row, 'tenant').to_s == @settings.data.fetch('expected_tenant').to_s
+    raise Pabx::Error, 'TENANT_MISMATCH' unless Pabx::ScopeMapping.new(@settings.integration).cdr_matches?(read(row, 'tenant'))
 
     unique_id = read(row, 'unique_id').to_s
     raise Pabx::Error, 'INVALID_CDR_ID' unless /\A[0-9A-Za-z_.:-]{1,255}\z/.match?(unique_id)

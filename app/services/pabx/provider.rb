@@ -19,7 +19,7 @@ class Pabx::Provider
 
   def verify_scope!
     result = dashboard
-    raise Pabx::Error, 'TENANT_MISMATCH' unless result['accountcode'].to_s == settings.data.fetch('expected_tenant').to_s
+    raise Pabx::Error, 'TENANT_MISMATCH' unless Pabx::ScopeMapping.new(@integration).matches?(result['accountcode'])
 
     result
   end
@@ -46,7 +46,7 @@ class Pabx::Provider
   end
 
   def extension_status(dashboard, extension)
-    raise Pabx::Error, 'TENANT_MISMATCH' unless dashboard.fetch('accountcode').to_s == settings.data.fetch('expected_tenant').to_s
+    raise Pabx::Error, 'TENANT_MISMATCH' unless Pabx::ScopeMapping.new(@integration).matches?(dashboard.fetch('accountcode'))
 
     technical = settings.identity(extension)
     entry = dashboard['statusMap'].is_a?(Hash) ? dashboard['statusMap'][technical] : nil

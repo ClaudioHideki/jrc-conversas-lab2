@@ -2,7 +2,7 @@ class Pabx::Settings
   PROVIDER = 'pabx_v1'.freeze
   KEYS = %w[enabled provider base_url allow_http_lab expected_tenant test_extension technical_identity timeout_seconds
             sync_enabled interval_seconds window_days overlap_seconds token_path cdr_rows_path cdr_total_path cdr_fields recording_lookup
-            cdr_extension_identity cdr_page_parameter cdr_page_size cdr_timezone].freeze
+            cdr_extension_identity cdr_page_parameter cdr_page_size cdr_timezone scope_mapping].freeze
   CDR_FIELDS = %w[unique_id tenant extension caller callee direction status started_at duration_seconds answered_seconds
                   has_recording recording_reference].freeze
 
@@ -33,6 +33,7 @@ class Pabx::Settings
     raise Pabx::Error, 'INVALID_PROVIDER' unless data.fetch('provider', PROVIDER) == PROVIDER
     validate_origin! if data['base_url'].present?
     validate_values!
+    Pabx::ScopeMapping.new(integration).validate!
     raise Pabx::Error, 'CONFIGURATION_MISSING' if enabled? && !configured?
   end
 
