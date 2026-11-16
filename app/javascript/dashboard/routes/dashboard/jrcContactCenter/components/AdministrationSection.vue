@@ -347,8 +347,8 @@ const save = async () => {
     }
     if (version !== generation) return;
     dialog.value.close();
-    await load();
     emit('changed');
+    await load();
   } catch (error) {
     if (version === generation) {
       const inactiveQueue = error.response?.data?.error === 'inactive_queue';
@@ -369,8 +369,8 @@ const save = async () => {
 const closeRoleEditor = async () => {
   if (savingRole.value) return;
   dialog.value.close();
-  await load();
   emit('changed');
+  await load();
 };
 watch(
   [

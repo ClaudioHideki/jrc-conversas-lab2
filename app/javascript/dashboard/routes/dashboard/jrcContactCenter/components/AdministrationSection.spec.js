@@ -239,6 +239,71 @@ describe('administrative workflow', () => {
     await flushPromises();
   });
 
+  it('announces a saved resource before awaiting its list reload', async () => {
+    const wrapper = mountSection();
+    await flushPromises();
+    await wrapper.get('[data-create]').trigger('click');
+    await flushPromises();
+    const inputs = wrapper.findAll('[data-dialog] input');
+    await inputs[0].setValue('Synthetic unit');
+    await inputs[1].setValue('SYNTHETIC');
+    let finish;
+    API.units.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(wrapper.find('[data-dialog]').exists()).toBe(false);
+    expect(wrapper.emitted('changed')).toHaveLength(1);
+    finish({ data: { items: [], meta: { page: 1, pages: 0, total: 0 } } });
+    await flushPromises();
+    expect(wrapper.emitted('changed')).toHaveLength(1);
+  });
+
+  it('announces a closed native role editor before awaiting its catalog reload', async () => {
+    CustomRoleAPI.get.mockResolvedValue({
+      data: [
+        {
+          id: 9,
+          name: 'Native profile',
+          permissions: ['jrc_contact_center_view'],
+        },
+      ],
+    });
+    const wrapper = mount(AdministrationSection, {
+      props: {
+        accountId: '1',
+        card: { key: 'permissions', state: 'native_module' },
+        context: {
+          ...context,
+          native_links: { permissions: true, role_editor: true },
+        },
+      },
+      global: { stubs: { Dialog, RouterLink: true, NativeRoleEditor: true } },
+    });
+    await flushPromises();
+    await wrapper.get('select').setValue(9);
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    let finish;
+    CustomRoleAPI.get.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    wrapper.findComponent({ name: 'NativeRoleEditor' }).vm.$emit('close');
+    await flushPromises();
+    expect(wrapper.find('[data-dialog]').exists()).toBe(false);
+    expect(wrapper.emitted('changed')).toHaveLength(1);
+    finish({ data: [] });
+    await flushPromises();
+    expect(wrapper.emitted('changed')).toHaveLength(1);
+  });
+
   it('discards late administrative data after switching account', async () => {
     let finish;
     API.administration

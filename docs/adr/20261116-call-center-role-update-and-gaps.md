@@ -26,3 +26,7 @@ O popup já proíbe edição global sob cobertura restrita. A API nativa passa a
 ## Elegibilidade de vínculos locais
 
 Fila inativa não aceita novos vínculos, mudança de alvo ou reativação pelo endpoint existente. Autorizações de fila/usuário continuam sendo verificadas antes da regra de estado. Desativar um vínculo já existente permanece permitido para evitar bloquear sua retirada segura. Não se apaga histórico nem se infere distribuição real: a confirmação PABX continua separada. O popup exibe o erro usando os rótulos pt_BR já existentes e mantém campos e seleções para uma nova tentativa. Os 52 cenários Chrome são preservados; o cenário de participantes é ampliado com rejeição, recuperação em fila ativa, desativação e reativação negada. Quatro exemplos Rails adicionais cobrem o contrato sem mocks de banco.
+
+## Corrida do filtro após salvar
+
+Na CI 43962051059, três projetos Chrome chegaram à busca sem units_q: a consulta da lista era aguardada antes de emitir changed. O painel começava sua recarga depois e desmontava a seção quando o usuário já digitava. A notificação passa a ocorrer imediatamente após a confirmação da persistência e o fechamento do popup; em seguida ocorre a consulta da lista. O painel mantém sua limpeza/revalidação original de dados, contas e permissões. Dois testes Vue controlam uma Promise pendente para provar a ordem em recursos e perfis. As 52 identidades Chrome e a contagem exata de uma linha filtrada permanecem, sem aumentar timeouts ou inserir retries.

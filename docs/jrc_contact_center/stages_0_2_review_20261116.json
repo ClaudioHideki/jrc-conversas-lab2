@@ -23,7 +23,8 @@
         2
       ],
       "implemented_in_0_2": [
-        "One central, account permissions, real local counts and explicit external pending status"
+        "One central, account permissions, real local counts and explicit external pending status",
+        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
       ],
       "remaining_or_external": [
         "PABX online/confirmed indicators require an actual provider response"
@@ -78,7 +79,8 @@
         2
       ],
       "implemented_in_0_2": [
-        "15 Word-named cards, statically discoverable icons, contextual return/navigation and reload"
+        "15 Word-named cards, statically discoverable icons, contextual return/navigation and reload",
+        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
       ],
       "remaining_or_external": [
         "Recent administrative before/after and external alerts belong to stages 3/8"
@@ -135,7 +137,8 @@
       ],
       "implemented_in_0_2": [
         "Native Team fields/members; local Queue CRUD; independent tab/filter/page state; explicit queue participation/supervision",
-        "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português."
+        "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português.",
+        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
       ],
       "remaining_or_external": [
         "No native Team-to-Queue/primary-supervisor model; DAC/calendar/publication need stages 3/4/6 and provider contract"
@@ -545,7 +548,8 @@
         "Atualização transacional recarrega o perfil antes do GrantGuard; trilha de capacidades CC na auditoria nativa, sem copiar descrições ou segredos.",
         "Criação e falha de autorização cobertas por oito novos casos Chrome planejados sobre dados sintéticos, sem mocks de API.",
         "Passo explícito de revisão do nome/descrição e capacidades a conceder/retirar antes de confirmar; alterar o formulário invalida a revisão.",
-        "Cobertura corporativa revalidada na API para criar, renomear, retirar capacidades e excluir perfis globais que envolvam CC. Administrador restrito a unidade não ganha autoridade global por manipular a rota. Perfis sem capacidades CC preservam a política nativa."
+        "Cobertura corporativa revalidada na API para criar, renomear, retirar capacidades e excluir perfis globais que envolvam CC. Administrador restrito a unidade não ganha autoridade global por manipular a rota. Perfis sem capacidades CC preservam a política nativa.",
+        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
       ],
       "remaining_or_external": [
         "Pendente 0–2: herança por equipe/usuário não possui contrato ou armazenamento nativo; requer decisão arquitetural, sem concessões por suposição.",
@@ -613,7 +617,8 @@
       ],
       "implemented_in_0_2": [
         "Native team fields and member editor; separate native queue member flags and deactivation",
-        "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português."
+        "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português.",
+        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
       ],
       "remaining_or_external": [
         "Native Team has no corporate scope or supervisor/queue hierarchy; no fictitious team status; richer mapping, schedules and distribution remain later",
@@ -1306,5 +1311,18 @@
     "rails": 420,
     "vue": 178,
     "chrome": 52
+  },
+  "filter_race_diagnosis": {
+    "sha": "395cdfb24a23b3bdc10c63f41ff91fcee6b29417",
+    "run": 43962051059,
+    "artifact": 14275617959,
+    "sha256": "01ade3a286518c938684e384f5a4631fe81f22b3853395744a74e91ccccf9850",
+    "chrome": {
+      "passed": 49,
+      "failed": 3,
+      "skipped": 0
+    },
+    "cause": "A consulta da lista era aguardada antes de avisar o painel; sua recarga posterior desmontava a seção e apagava o texto digitado no intervalo. Captura registra pesquisa vazia e URL sem units_q.",
+    "correction": "Emitir changed imediatamente após persistir e fechar o popup, antes de aguardar a lista. A revalidação padrão do painel e o descarte de dados antigos permanecem. Dois testes Vue com Promise suspensa fixam a ordem; a exigência Chrome de exatamente uma linha filtrada permanece."
   }
 }
