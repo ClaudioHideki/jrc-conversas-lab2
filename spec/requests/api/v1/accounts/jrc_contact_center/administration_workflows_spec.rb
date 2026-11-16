@@ -112,7 +112,9 @@ RSpec.describe 'Call Center administrative workflows', type: :request do
       expect(response).to have_http_status(:not_found)
       queue = JrcContactCenter::Queue.create!(account: account, unit: denied_unit, code: 'DENIED', name: 'Denied')
       post(
-        "#{base}/queue_memberships", headers: headers, as: :json,
+        "#{base}/queue_memberships",
+        headers: headers,
+        as: :json,
         params: { queue_membership: { queue_id: queue.id, account_user_id: member.id } }
       )
       expect(response).to have_http_status(:not_found)
