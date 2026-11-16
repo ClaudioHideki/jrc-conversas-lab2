@@ -38,3 +38,16 @@ A matriz geral43766948449 reproduziu uma falha preexistente de isolamento em spe
 Banco, ACK e checksum sintéticos não provam equivalência com todo o histórico do celular. A disponibilidade dos eventos do WhatsApp, mídias antigas e ownership efetivo da sessão exigem homologação própria. Não ativar captura produtiva, conectar números, enviar testes reais nem reprocessar UNKNOWN por inferência. KEEP deve ser preservado. Backup/dump/restore e comandos agregados que os acionem permanecem fora do escopo.
 
 A publicação, o deploy e o aceite físico são estados distintos e ainda não são declarados concluídos neste checkpoint. Atualizar as evidências do SHA final ao término.
+
+
+## Fechamento de publicação e implantação — 15/11/2026
+
+Produto testado e implantado: `5c3fb7f700d7bb685f17292f59b873df14ddf34d`. Main promovida em fast-forward normal desde55da80eb, preservando2be22e86. Imagem GHCR por digest: `ghcr.io/claudiohideki/jrc-conversas-lab2@sha256:e5b6c92bcbce98fdbd6014726afd719b1f5078771d01ac551d4ee9d169e1ca82`.
+
+CI43770789984:49/49 jobs aprovados,2513 testes frontend,build e smoke Alpine. CI dirigida43770871972:404 Rails/504 Vue. Chrome43771653630:13/13,zero skips/flaky,desktop/mobile e claro/escuro. E2E43770887292:63 Rails e dois cenários Broker c3bae632→Rails/Sidekiq→MinIO privado com identidades,bytes e ACK perdido,zero falhas. Suítes sobrepostas não constituem um total único. A origem WhatsApp é sintética.
+
+Deploy autorizado e runtime conferidos no Grupo JRC:Rails e Sidekiq retornam o mesmo git_sha;API200/filas e dados ok;336 migrations e nenhuma pendente. Somente o digest da âncora do Compose mudou. Sem mudança de ENV,recursos,credenciais,engine,sessões,retenção ou captura. Broker c3bae632 preservado,sem republicação redundante. Nenhuma migration nova.
+
+A interface autenticada carregou Respostas Prontas e Minhas caixas/Todas e histórico. O aceite operacional permanece parcial: há pendências de autoridade/legado,storage e configuração de grupos registradas no relatório privado. A validação física foi adiada pelo usuário. Não remover atribuição de bot em lote,não ignorar autoridade,não reenviar UNKNOWN nem ativar captura por inferência. Nenhuma rotina de backup/dump/restore foi executada.
+
+Evidências públicas de execução e limites:`docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md`. Pacote privado no output do workspace. Este checkpoint posterior é documental; não confundir seu commit com o SHA funcional da imagem acima.

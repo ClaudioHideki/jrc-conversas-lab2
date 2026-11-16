@@ -3,14 +3,13 @@
 
 ## Em progresso (WIP)
 
-- [ ] **QUICK-REPLIES-RELEASE-20261115:** Correções de anexo/revisão, seleção de catálogo e limite nativo implementadas e revisadas; 504 testes Vue e 15 negativas do contrato passaram. Concluir Rails/Chrome/E2E/CI/imagem e aplicação autorizada no Grupo JRC antes de marcar a release concluída. Plano e evidências: `docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md`.
-
-- [ ] **RELEASE-20261114:** Promover a consolidação de histórico/runtime/aprovações após CI e imagem do SHA exato; verificar versão, migrations e saúde no Grupo JRC. Código e testes locais registrados em CONTINUE-AQUI.md; implantação ainda não comprovada.
-- [ ] **GATES-20261114:** Confirmar na CI nativa os manifestos reconciliados e o upgrade populado de Backoffice com workflow legado. Provas locais: 15 testes Python e 52 Node; Ruby/PostgreSQL ainda dependem do runner. Nenhuma migration do produto foi modificada.
+Publicação encerrada; as pendências operacionais continuam em A fazer. Consulte os recibos e limites em CONTINUE-AQUI.md.
 
 Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em andamento permanecem nos planos/checkpoints existentes.
 
 ## A fazer (To Do)
+
+- [ ] **WHATSAPP-OPS-20261115:** Reconciliar autoridade legada por conversa,acesso ao storage e escopo dos grupos antes de novos testes físicos/replay. Não modificar permissões ou eliminar registros por suposição.
 
 - [ ] **DOC-01:** Revisar os termos de [glossary.md](docs/domain/glossary.md) com o responsável pelo domínio.
 - [ ] **DOC-02:** Conferir [system-overview.md](docs/architecture/system-overview.md) e as versões com o ambiente efetivo quando houver acesso autorizado.
@@ -18,6 +17,10 @@ Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em a
 - [ ] **OPS-02:** Manter homologação de voz, histórico e mídias distinta de teste sintético e de publicação.
 
 ## Concluído (Done)
+
+- [x] **QUICK-REPLIES-RELEASE-20261115:** Produto `5c3fb7f` corrigido, testado e implantado no Grupo JRC: CI 49/49, 404 Rails/504 Vue dirigidos, 13 Chrome e dois E2Es privados; API e Rails/Sidekiq conferidos. Aceite operacional WhatsApp/storage é parcial e a validação física foi adiada pelo usuário. Evidências: `docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md`.
+- [x] **RELEASE-20261114:** Base produtiva `55da80eb` preservada e consolidada na release `5c3fb7f`; imagem, versão, migrations e saúde verificadas em 15/11. Homologação física continua separada.
+- [x] **GATES-20261114:** Matriz nativa `43770789984` terminou com 49/49 jobs aprovados, incluindo os gates e o upgrade populado. Nenhuma migration do produto foi modificada neste incremento.
 
 - [x] **BOOTSTRAP-01:** Identidade, stack, natureza Brownfield e fontes locais registradas.
 - [x] **BOOTSTRAP-02:** Estrutura INIT, domínio, arquitetura e ADR organizados sem apagar conteúdo anterior.

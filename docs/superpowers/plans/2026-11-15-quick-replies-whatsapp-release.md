@@ -32,7 +32,7 @@ Files: teste authorityLifecycle.spec.js; harness approval_browser.spec.cjs da br
 - [x] Ler tentativa Chrome43756413162 e frontend43759971323; registrar a segunda falha sem aprovar os cenários não executados.
 - [x] Conferir RED JSDOM da CI 43759971323 e incorporar a correção publicada 2be22e86, sem mudar o Dialog de produção. Vue completo passou504/504 após as regressões adicionais.
 - [x] Preservar exatamente201 no harness seguinte e revisar isolamento de eventos por tema, mantendo a proteção contra duplicação. Chrome ainda requer nova execução integral no candidato final.
-- [ ] Executar Vue, Rails/PostgreSQL, concorrência, lint, build e Chrome desktop/mobile claro/escuro, preservando IDs, anexos e negativas.
+- [x] Executar Vue, Rails/PostgreSQL, concorrência, lint, build e Chrome desktop/mobile claro/escuro, preservando IDs, anexos e negativas.
 
 ### Task 2: Comprovar Minhas, ACK e mídias no percurso integrado
 
@@ -45,11 +45,11 @@ Files: fixtures e runners existentes labs/history-sync-lab2 nos dois produtos; s
 
 ### Task 3: Publicar e conferir
 
-- [ ] Revisar diff integral e novidades remotas, incluindo uma revisão independente da segurança/compatibilidade.
-- [ ] CI e imagem no SHA exato, sem reutilizar o verde de55/410 para o novo candidato.
-- [ ] Promover e atualizar apenas Grupo JRC quando gates aprovados; preservar Broker se não houver mudança necessária.
-- [ ] Conferir Rails/Sidekiq, migrations, saúde e interface; registrar separado qualquer teste físico que dependa de amostras reais.
-- [ ] Atualizar CONTINUE-AQUI.md, TASKS.md, evidências e relatório final.
+- [x] Revisar diff integral e novidades remotas, incluindo uma revisão independente da segurança/compatibilidade.
+- [x] CI e imagem no SHA exato, sem reutilizar o verde de55/410 para o novo candidato.
+- [x] Promover e atualizar apenas Grupo JRC quando gates aprovados; preservar Broker se não houver mudança necessária.
+- [x] Conferir Rails/Sidekiq, migrations, saúde e interface; registrar separado qualquer teste físico que dependa de amostras reais.
+- [x] Atualizar CONTINUE-AQUI.md, TASKS.md, evidências e relatório final.
 
 ## Ledger
 
@@ -60,3 +60,8 @@ Ruling: Docker local está parado; a infraestrutura descartável deve ser retoma
 Ruling: Docker retomado somente localmente; o Rails antigo recusou Ruby3.4.4 contra Gemfile3.4.12. Manter o runtime correto, sem diminuir a versão exigida para obter um passe artificial.
 Ruling: três P2 reproduzidos receberam correção e revisão independente: identidade do anexo, substituição de arquivo de catálogo e limite nativo de texto. A admissão de fontes exige lista explícita, comparação contra 2be22e86 e oito fingerprints da revisão; nunca admitir tudo encontrado por git diff.
 Ruling: corrigir somente a fixture global de Notification após RED nativo do shard5, preservando first/last e acrescentando registro externo. Não mudar ordenação do produto nem limpar dados para mascarar a falha. Revalidar a candidata nova e manter as evidências anteriores identificadas por SHA.
+
+
+## Resultado do incremento
+
+Produto5c3fb7f:CI49/49,Chrome13/13,Rails404/Vue504 dirigidos e E2E63 Rails+dois cenários privados aprovados. Imagem publicada e implantada somente no Grupo JRC;runtime/API/migrations/interface conferidos. Broker preservado emc3bae632. Aceite operacional parcial com limitações de autoridade/storage/grupos em relatório privado;validação física adiada pelo usuário. Não marcar essas pendências como corrigidas pela release. Checkpoint documental não gera nova imagem funcional.
