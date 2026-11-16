@@ -26,6 +26,8 @@ const props = defineProps({
     default: 'add',
     validator: value => ['add', 'edit'].includes(value),
   },
+  saveErrorMessage: { type: String, default: '' },
+  reviewLabels: { type: Object, default: null },
   selectedRole: {
     type: Object,
     default: () => ({}),
@@ -90,6 +92,21 @@ const visiblePermissions = computed(() => [
 const name = ref('');
 const description = ref('');
 const selectedPermissions = ref([]);
+const reviewing = ref(false);
+const permissionChanges = computed(() => {
+  const previous = props.selectedRole.permissions || [];
+  return {
+    added: selectedPermissions.value.filter(value => !previous.includes(value)),
+    removed: previous.filter(value => !selectedPermissions.value.includes(value)),
+  };
+});
+watch(
+  [name, description, selectedPermissions],
+  () => {
+    reviewing.value = false;
+  },
+  { deep: true, flush: 'sync' }
+);
 
 const nameInput = ref(null);
 
@@ -168,10 +185,18 @@ const getTranslationKey = base => {
 const modalTitle = computed(() => t(getTranslationKey('TITLE')));
 const modalDescription = computed(() => t(getTranslationKey('DESC')));
 const submitButtonText = computed(() => t(getTranslationKey('SUBMIT')));
+const primaryButtonText = computed(() => {
+  if (!props.reviewLabels) return submitButtonText.value;
+  return reviewing.value ? props.reviewLabels.confirm : props.reviewLabels.review;
+});
 
 const handleCustomRole = async () => {
   v$.value.$touch();
   if (v$.value.$invalid) return;
+  if (props.reviewLabels && !reviewing.value) {
+    reviewing.value = true;
+    return;
+  }
 
   addCustomRole.showLoading = true;
   try {
@@ -196,7 +221,9 @@ const handleCustomRole = async () => {
     emit('close');
   } catch (error) {
     const errorMessage =
-      error?.message || t(`CUSTOM_ROLE.FORM.API.ERROR_MESSAGE`);
+      props.saveErrorMessage ||
+      error?.message ||
+      t(`CUSTOM_ROLE.FORM.API.ERROR_MESSAGE`);
     useAlert(errorMessage);
   } finally {
     addCustomRole.showLoading = false;
@@ -272,6 +299,24 @@ const isSubmitDisabled = computed(
         </div>
       </div>
 
+      <section
+        v-if="reviewing && reviewLabels"
+        class="mb-4 rounded-lg border border-n-blue-6 bg-n-blue-2 p-3 text-sm text-n-slate-12"
+        data-role-review
+      >
+        <h3 class="font-semibold">{{ reviewLabels.title }}</h3>
+        <p>{{ name }}</p>
+        <p class="whitespace-pre-wrap break-words">{{ description }}</p>
+        <template v-for="kind in ['added', 'removed']" :key="kind">
+          <p class="mt-2 font-semibold">{{ reviewLabels[kind] }}</p>
+          <ul v-if="permissionChanges[kind].length" class="list-inside list-disc">
+            <li v-for="permission in permissionChanges[kind]" :key="permission">
+              {{ $t('CUSTOM_ROLE.PERMISSIONS.' + permission.toUpperCase()) }}
+            </li>
+          </ul>
+          <p v-else>{{ reviewLabels.unchanged }}</p>
+        </template>
+      </section>
       <div class="flex flex-row justify-end w-full gap-2 px-0 py-2">
         <Button
           faded
@@ -282,7 +327,7 @@ const isSubmitDisabled = computed(
         />
         <Button
           type="submit"
-          :label="submitButtonText"
+          :label="primaryButtonText"
           :disabled="isSubmitDisabled"
           :is-loading="addCustomRole.showLoading"
         />

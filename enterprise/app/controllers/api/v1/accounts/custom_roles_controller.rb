@@ -13,7 +13,8 @@ class Api::V1::Accounts::CustomRolesController < Api::V1::Accounts::EnterpriseAc
   end
 
   def update
-    @custom_role.update!(permitted_params)
+    # Reload under the native row lock before computing newly granted powers.
+    @custom_role.with_lock { @custom_role.update!(permitted_params) }
   end
 
   def destroy
@@ -32,6 +33,6 @@ class Api::V1::Accounts::CustomRolesController < Api::V1::Accounts::EnterpriseAc
   end
 
   def fetch_custom_role
-    @custom_role = Current.account.custom_roles.find_by(id: params[:id])
+    @custom_role = Current.account.custom_roles.find(params[:id])
   end
 end

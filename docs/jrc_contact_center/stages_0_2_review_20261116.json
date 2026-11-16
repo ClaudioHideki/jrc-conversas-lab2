@@ -1,5 +1,5 @@
 {
-  "base_sha": "f22a6b0b67ebebb5019b987319f4045b7358582c",
+  "base_sha": "1834971cdea7d73d98811b3e2f08ba18587100cc",
   "branch": "codex/call-center-control-desk-20261116",
   "documents": [
     {
@@ -11,7 +11,7 @@
       "sha256": "8f9300cf1940012f71be1a97903a192f7b5a18667e6da6664b9f972866e7e88b"
     }
   ],
-  "method": "Both original documents and all 23 figure references reviewed, preserving original written rules and complement caption corrections. Status is per figure; validated local functions do not imply external or later-stage completion.",
+  "method": "Revisão individual das 23 imagens e dos dois Word. Campos abaixo descrevem requisitos; implementação e lacunas são separados. Figuras 1/2 e 4/13 repetem imagens. A figura 16 corrige a legenda sem remover a exigência escrita de política de gravações.",
   "figures": [
     {
       "figure": 1,
@@ -36,7 +36,31 @@
         "document_1_figure": 1,
         "document_2_figure": 1
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Central de configuracoes - identidade e navegacao",
+      "visual_components": "Campos e dados apresentados:  Para cada card, manter nome claro, descricao curta, disponibilidade por permissao e identificacao da area. No topo, exibir situacao do PABX, ultima sincronizacao e alertas relevantes; enquanto dados carregam, exibir carregamento, vazio ou erro, sem metricas inventadas.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Cards Números, Ramais, Filas, URA, Horários, Áudios, Pausas, Encerramentos, Distribuição, Permissões, Gravações, PABX, Aprovações, Parâmetros Gerais e Integrações: navegar à listagem do assunto. Atividade Recente: filtrar registro e abrir detalhe de auditoria. Alertas e Pendências: abrir pendência em sua fonte; indicador de notificações: mostrar apenas as autorizadas.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Para cada card, manter nome claro, descricao curta, disponibilidade por permissao e identificacao da area. No topo, exibir situacao do PABX, ultima sincronizacao e alertas relevantes; enquanto dados carregam, exibir carregamento, vazio ou erro, sem metricas inventadas.",
+        "Estados de erro e excecoes:  Falha em um card ou indicador nao deve derrubar o painel. Mostrar ultima atualizacao e opcao de tentar novamente; nao usar contagens desatualizadas sem aviso."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Nao duplicar usuario, calendario, equipe, aprovacoes, tickets ou tarefas ja cadastrados no JRC Conversas. Entradas sem permissao devem permanecer indisponiveis. Alteracoes estruturais so recebem sucesso apos confirmacao do sistema responsavel e, quando necessario, do PABX.",
+      "acceptance_scenarios": [
+        "•  F02-A: cada card leva ao modulo correto e o retorno preserva empresa, filtros e contexto.",
+        "•  F02-B: uma falha no PABX aparece como alerta com estado real, sem anunciar sincronizacao bem-sucedida."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Subconjunto nativo em Chrome 1440 e 390, claro/escuro, CI da base acima. Não é aceite integral desta figura.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "GET /api/v1/accounts/:account_id/jrc_contact_center/administration"
+      ],
+      "external_dependencies": [
+        "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
+      ]
     },
     {
       "figure": 2,
@@ -61,7 +85,31 @@
         "document_1_figure": 2,
         "document_2_figure": 2
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Pagina principal do Control Desk",
+      "visual_components": "Campos e dados apresentados:  Para cada card, manter nome claro, descricao curta, disponibilidade por permissao e identificacao da area. No topo, exibir situacao do PABX, ultima sincronizacao e alertas relevantes; enquanto dados carregam, exibir carregamento, vazio ou erro, sem metricas inventadas.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Cards Números, Ramais, Filas, URA, Horários, Áudios, Pausas, Encerramentos, Distribuição, Permissões, Gravações, PABX, Aprovações, Parâmetros Gerais e Integrações: navegar à listagem do assunto. Atividade Recente: filtrar registro e abrir detalhe de auditoria. Alertas e Pendências: abrir pendência em sua fonte; indicador de notificações: mostrar apenas as autorizadas.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Para cada card, manter nome claro, descricao curta, disponibilidade por permissao e identificacao da area. No topo, exibir situacao do PABX, ultima sincronizacao e alertas relevantes; enquanto dados carregam, exibir carregamento, vazio ou erro, sem metricas inventadas.",
+        "Estados de erro e excecoes:  Falha em um card ou indicador nao deve derrubar o painel. Mostrar ultima atualizacao e opcao de tentar novamente; nao usar contagens desatualizadas sem aviso."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Nao duplicar usuario, calendario, equipe, aprovacoes, tickets ou tarefas ja cadastrados no JRC Conversas. Entradas sem permissao devem permanecer indisponiveis. Alteracoes estruturais so recebem sucesso apos confirmacao do sistema responsavel e, quando necessario, do PABX.",
+      "acceptance_scenarios": [
+        "•  F02-A: cada card leva ao modulo correto e o retorno preserva empresa, filtros e contexto.",
+        "•  F02-B: uma falha no PABX aparece como alerta com estado real, sem anunciar sincronizacao bem-sucedida."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Subconjunto nativo em Chrome 1440 e 390, claro/escuro, CI da base acima. Não é aceite integral desta figura.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "GET /api/v1/accounts/:account_id/jrc_contact_center/administration"
+      ],
+      "external_dependencies": [
+        "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
+      ]
     },
     {
       "figure": 3,
@@ -88,12 +136,38 @@
         "document_1_figure": 3,
         "document_2_figure": 3
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Equipes, filas e distribuicao",
+      "visual_components": "Campos e dados apresentados:  Equipes: nome, supervisor, quantidade de agentes, filas vinculadas e status. Filas: nome, canal, estrategia de distribuicao, quantidade de participantes e status. Indicadores do topo devem derivar de registros reais e escopados; evitar considerar supervisor como agente por padrao.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Nova Equipe e Nova Fila: abrir popups de cadastro e validar antes de salvar. Busca e paginacao: atuar separadamente nas duas tabelas. Menu de tres pontos de cada linha: abrir detalhes, editar, desativar ou vincular conforme direito do usuario. Atalhos Configurar Regras, Gerenciar Horarios e Configurar Monitoria: encaminhar aos recursos existentes.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Equipes: nome, supervisor, quantidade de agentes, filas vinculadas e status. Filas: nome, canal, estrategia de distribuicao, quantidade de participantes e status. Indicadores do topo devem derivar de registros reais e escopados; evitar considerar supervisor como agente por padrao.",
+        "Estados de erro e excecoes:  Impedir vinculo de membro inativo, inexistente ou de outra empresa. Mudanca que deixe fila sem cobertura deve advertir impacto antes da confirmacao; falha de sincronizacao permanece pendente/erro com auditoria."
+      ],
+      "popups_and_forms": "Popup nativo disponível para o subconjunto descrito em implemented_in_0_2; os campos e fluxos completos do Word continuam sujeitos às lacunas.",
+      "permissions": "Regras e permissoes:  Equipe e fila sao conceitos relacionados, nao equivalentes. Um agente pode participar de varias filas, com elegibilidade e disponibilidade independentes. DAC e transbordo devem ser configurados na Gestao de Filas e nunca recriados em atalhos. Somente publicar no PABX apos validar limite e mapeamentos.",
+      "acceptance_scenarios": [
+        "•  F03-A: criar equipe e vincular supervisor nao inclui esse usuario automaticamente na distribuicao.",
+        "•  F03-B: mudar estrategia de uma fila gera validacao tecnica e nao aparece como aplicada sem confirmacao."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Subconjunto nativo em Chrome 1440 e 390, claro/escuro, CI da base acima. Não é aceite integral desta figura.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "GET/POST/PATCH /api/v1/accounts/:account_id/jrc_contact_center/queues",
+        "GET/POST/PATCH /api/v1/accounts/:account_id/teams",
+        "GET/POST/DELETE /api/v1/accounts/:account_id/teams/:team_id/team_members"
+      ],
+      "external_dependencies": [
+        "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
+      ]
     },
     {
       "figure": 4,
       "title": "Painel técnico PABX e atalhos",
-      "status": "Implementado parcialmente",
+      "status": "Reservado às etapas 3–8",
       "stages": [
         0,
         1,
@@ -115,7 +189,31 @@
         "document_1_figure": 4,
         "document_2_figure": 4
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Painel tecnico do PABX e atalhos para URAs",
+      "visual_components": "Campos e dados apresentados:  Exibir empresa, host/porta/protocolo sem revelar segredo, recursos consultados, ultima sincronizacao, funcoes habilitadas, eventos de diagnostico e estados de servico. Validações de tenant/accountcode devem consultar o mapeamento autorizado, e nao exigir numeros iguais.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Abas Geral, Ramais, Filas, URAs, Gravações, Sincronização, Diagnóstico e Auditoria: abrir views correspondentes. Testar Conexão: validar autenticacao e comunicacao sem alterar recursos. Sincronizar ou Executar Diagnóstico: iniciar job com rastreio. Atalhos Gerenciar Ramais, Filas, URAs e Gravações: acessar listagens; a edicao da URA requer fluxo especifico de rascunho, simulacao, aprovacao e publicacao.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Exibir empresa, host/porta/protocolo sem revelar segredo, recursos consultados, ultima sincronizacao, funcoes habilitadas, eventos de diagnostico e estados de servico. Validações de tenant/accountcode devem consultar o mapeamento autorizado, e nao exigir numeros iguais.",
+        "Estados de erro e excecoes:  Apresentar erro de autenticacao, timeout, mapeamento invalido e divergencia de versao com diagnostico seguro. Permitir reprocessar somente itens seguros; jamais expor tokens, senhas ou respostas sensiveis em tela."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Somente Super Admin altera parametros de infraestrutura/credenciais. Teste de conexao nao configura a URA, nao publica e nao aprova alteracoes. O conector confirma o estado no PABX; um acionamento de botao apenas inicia verificacao ou execucao.",
+      "acceptance_scenarios": [
+        "•  F04-A: tenant 8 e accountcode 12 validos por vinculacao autorizada nao geram falso bloqueio.",
+        "•  F04-B: clicar Testar Conexao em ambiente falho informa erro sem atualizar recursos nem marcar publicacao."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
+      ]
     },
     {
       "figure": 5,
@@ -133,7 +231,31 @@
         "document_1_figure": 5,
         "document_2_figure": 5
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Popup Gerar Mensagem com Nico",
+      "visual_components": "Campos e dados apresentados:  Armazenar origem Nico, parametros de sintese, idioma se aplicavel, texto de origem, versao e duracao. Em Utilizacao, associar apenas a finalidade selecionada (URA, fila, numero ou campanha), sem publicar automaticamente o arquivo no PABX.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Abas Importar Arquivo, Gravar Mensagem e Gerar com o Nico: trocar o metodo preservando campos comuns. Nome, descricao e pasta: identificar e organizar o ativo. Texto da mensagem: editar e mostrar contador/limite. Voz, velocidade e entonacao: escolher parametros suportados. Gerar Nova Versao: pedir nova sintese; player permite ouvir antes de Salvar Audio; Cancelar descarta rascunho nao salvo.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Armazenar origem Nico, parametros de sintese, idioma se aplicavel, texto de origem, versao e duracao. Em Utilizacao, associar apenas a finalidade selecionada (URA, fila, numero ou campanha), sem publicar automaticamente o arquivo no PABX.",
+        "Estados de erro e excecoes:  Se a sintese falhar ou exceder limites, manter texto e configuracoes, exibir causa recuperavel e habilitar nova tentativa. Bloquear Salvar Audio quando nao houver arquivo final valido ou permissao para a pasta."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  A geracao por Nico depende de habilitacao do servico. O audio deve ser validado/convertido ao codec aceito antes do uso na telefonia. Uma versao ja publicada e utilizada permanece imutavel; a alteracao cria outra versao e exige nova autorizacao para a substituicao.",
+      "acceptance_scenarios": [
+        "•  F05-A: gerar, ouvir e salvar registra uma nova versao nao publicada vinculada a pasta correta.",
+        "•  F05-B: erro no Nico conserva o texto digitado e nao substitui um audio em producao."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
+      ]
     },
     {
       "figure": 6,
@@ -151,7 +273,31 @@
         "document_1_figure": 6,
         "document_2_figure": 6
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Biblioteca de audios, pastas e vinculos",
+      "visual_components": "Campos e dados apresentados:  Cada linha deve informar nome, duracao, origem, tipo de utilizacao, status, versao e pasta; popup Ver Vinculos lista URAs, filas, numeros e campanhas que utilizam o audio. Disponibilizar metadados de integridade e formato nos detalhes.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Organizar Pastas e Nova Pasta: criar ou reorganizar hierarquia autorizada. Novo Audio: abrir menu de importacao, gravacao ou Nico. Busca/filtros por pasta, tipo, status e nome: reduzir linhas sem perder contexto. Play em cada arquivo: previa. Editar: abrir popup. Mover, Duplicar, Baixar e Excluir: atuar apenas nos selecionados e apos checagem de vinculos.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Cada linha deve informar nome, duracao, origem, tipo de utilizacao, status, versao e pasta; popup Ver Vinculos lista URAs, filas, numeros e campanhas que utilizam o audio. Disponibilizar metadados de integridade e formato nos detalhes.",
+        "Estados de erro e excecoes:  Sem arquivo ou falha de codec, exibir validacao antes de persistir. Na tentativa de excluir item em uso, apresentar lista de dependencias e a acao correta para desvinculacao/versionamento."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Uma pasta nao substitui a identidade do audio. Excluir arquivo com vinculo ativo publicado e proibido. Mover/renomear nao pode quebrar referencias. A copia deve gerar identidade propria; uma mudanca no arquivo da biblioteca nao altera versao em execucao.",
+      "acceptance_scenarios": [
+        "•  F06-A: excluir audio referenciado por URA publicada e bloqueado com detalhe do vinculo.",
+        "•  F06-B: mover audio entre pastas preserva identificador, versoes, permissoes e referencias."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
+      ]
     },
     {
       "figure": 7,
@@ -171,7 +317,29 @@
         "document_1_figure": 7,
         "document_2_figure": 7
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Gestao de pausas e disponibilidade",
+      "visual_components": "Campos e dados apresentados:  Listar nome, categoria, se retira da distribuicao, tempo padrao e status. Estados exibidos: disponivel, em atendimento, em pausa e offline; indicadores de disponibilidade devem vir de eventos reais, nao de contagem fixa do mockup.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Abas Motivos de Pausa, Regras de Distribuicao, Disponibilidade da Equipe e Historico: consultar configuracoes e estados. Novo Motivo: abrir popup. Busca e edicao de linha: localizar/alterar configuracao com auditoria. A aba de equipe mostra agente, estado, tempo decorrido e eventual pausa excedida; selecao de agente abre detalhes quando permitido.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Listar nome, categoria, se retira da distribuicao, tempo padrao e status. Estados exibidos: disponivel, em atendimento, em pausa e offline; indicadores de disponibilidade devem vir de eventos reais, nao de contagem fixa do mockup.",
+        "Estados de erro e excecoes:  Se PABX e aplicacao divergirem, mostrar status pendente/nao sincronizado. Agente sem fila elegivel nao pode aparecer como disponivel para distribuicao. Falha de registro de pausa deve ser visivel ao agente e supervisor."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Pausa durante chamada ativa nao derruba a ligacao; aplica-se na transicao operacional prevista. Tempo excedido dispara aviso, mas nao encerra pausa automaticamente. O retorno a fila depende de elegibilidade, jornada e de politica explicita de retorno automatico.",
+      "acceptance_scenarios": [
+        "•  F07-A: solicitar pausa com chamada em andamento preserva a chamada e impede novas distribuicoes apos a transicao.",
+        "•  F07-B: ultrapassar duracao gera alerta, sem terminar a pausa nem redistribuir chamadas por conta propria."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": []
     },
     {
       "figure": 8,
@@ -189,7 +357,29 @@
         "document_1_figure": 8,
         "document_2_figure": 8
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Popup Cadastrar Motivo de Pausa",
+      "visual_components": "Campos e dados apresentados:  Salvar identidade, descricao, categoria, tempo em minutos internamente, limites, regra de retirada, justificativa/aprovacao/alerta quando aplicaveis, status e escopo da empresa. Diferenciar limite informativo de regra que efetivamente bloqueia cadastro.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Nome, Tipo/Categoria e Descricao: cadastrar a finalidade da pausa. Tempo Padrao, Minimo e Maximo: preencher em horas/minutos; se um desses campos nao estiver no mockup, deve ser incluido no formulario final ou em aba complementar. Retirar da distribuicao: controlar elegibilidade de chamadas novas. Disponivel para: definir perfis habilitados. Salvar Motivo e Cancelar: validar/persistir ou abandonar sem gravar.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Salvar identidade, descricao, categoria, tempo em minutos internamente, limites, regra de retirada, justificativa/aprovacao/alerta quando aplicaveis, status e escopo da empresa. Diferenciar limite informativo de regra que efetivamente bloqueia cadastro.",
+        "Estados de erro e excecoes:  Mostrar erro ao lado do campo vazio/incoerente; nao fechar o popup em rejeicao. Nao aplicar mudanca de motivo usado por agentes em ligacao sem tratar transicao e possiveis dependencias."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Entrada de horario em HH:MM, nunca exigir segundos ao usuario. Validar minimo menor ou igual ao padrao e padrao menor ou igual ao maximo quando todos forem informados. Um motivo de duracao variavel precisa de politica explicita; o formulario nao substitui regras legais ou convencionais.",
+      "acceptance_scenarios": [
+        "•  F08-A: tempos 00:15, 00:30 e 01:00 sao salvos em horas/minutos e reabertos corretamente.",
+        "•  F08-B: maximo menor que minimo impede salvar e identifica exatamente o campo incorreto."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": []
     },
     {
       "figure": 9,
@@ -214,7 +404,29 @@
         "document_1_figure": 9,
         "document_2_figure": 9
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Popup Configurar Regra de Pos-Atendimento",
+      "visual_components": "Campos e dados apresentados:  Associar motivo, versao da regra, formularios, campos, publico aplicavel e eventos operacionais. Registrar inicio/fim do ACW de modo independente do encerramento da chamada, por call_id e agente.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Motivo de Encerramento: escolher classificacao existente. Tempo de Pos-Atendimento: configurar horas/minutos. Formulario: selecionar template reutilizavel e Gerenciar Formularios na fonte. Campos Obrigatorios: marcar os dados exigidos. Comportamento do Agente: bloquear chamadas, emitir alertas ou permitir excecao conforme politica. Aplicar para: todas, filas especificas ou equipes especificas. Salvar Regra: validar impacto.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Associar motivo, versao da regra, formularios, campos, publico aplicavel e eventos operacionais. Registrar inicio/fim do ACW de modo independente do encerramento da chamada, por call_id e agente.",
+        "Estados de erro e excecoes:  A ausencia de motivo ou formulario exigido gera erro de validacao. Em falha de salvamento manter selecoes. Se o agente sair da pagina, rascunho e estado de ACW exigem recuperacao controlada."
+      ],
+      "popups_and_forms": "Popup nativo disponível para o subconjunto descrito em implemented_in_0_2; os campos e fluxos completos do Word continuam sujeitos às lacunas.",
+      "permissions": "Regras e permissoes:  Se o tempo expirar, alertar sem descartar rascunho nem concluir automaticamente. Bloqueio de novas chamadas deve refletir elegibilidade real. Formulario obrigatorio sem preenchimento nao pode ser considerado concluido. A configuracao de fila prevalece conforme regra de precedencia explicitamente validada.",
+      "acceptance_scenarios": [
+        "•  F09-A: encerrada a ligacao, o ACW permanece ativo ate conclusao do formulario obrigatorio.",
+        "•  F09-B: exceder o tempo configurado emite aviso e conserva respostas nao concluidas."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Subconjunto nativo em Chrome 1440 e 390, claro/escuro, CI da base acima. Não é aceite integral desta figura.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "GET/PATCH /api/v1/accounts/:account_id/jrc_contact_center/acw_policy"
+      ],
+      "external_dependencies": []
     },
     {
       "figure": 10,
@@ -232,7 +444,29 @@
         "document_1_figure": 10,
         "document_2_figure": 10
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Popup Configurar Automacoes e Integracoes",
+      "visual_components": "Campos e dados apresentados:  Exibir quais automacoes estao ligadas ao motivo, destinos, prioridade, condicoes, falha, pendencia e sucesso. Registrar call_id, regra/versao, request_id e vinculo do chamado/tarefa/cliente gerado ou reutilizado.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Motivo de Encerramento: definir gatilho. Ativo: habilitar/desabilitar a regra. Aplicar Automaticamente: escolher quais destinos participarão; Configurar por destino: abrir popup de parametros (tipo de acao, vinculo, condicoes, responsavel e momento de disparo). Regras de Execucao: definir automatizacao permitida ou confirmacao manual quando a acao exigir.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Exibir quais automacoes estao ligadas ao motivo, destinos, prioridade, condicoes, falha, pendencia e sucesso. Registrar call_id, regra/versao, request_id e vinculo do chamado/tarefa/cliente gerado ou reutilizado.",
+        "Estados de erro e excecoes:  Falha parcial de um destino nao desfaz automaticamente operacoes ja confirmadas em outro; registrar estado de cada integracao, disponibilizar reprocessamento seguro e evitar duplicidade. Desabilitacao nao apaga historico."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Reutilizar as APIs e os modulos existentes; nao criar cadastros paralelos. Acao automatica deve ser idempotente: o mesmo evento nao cria dois tickets nem duas tarefas. A sugestao do Nico nao executa acao sensivel fora da alçada autorizada. O momento de disparo (fim de chamada ou conclusao do ACW) precisa ser escolhido por regra.",
+      "acceptance_scenarios": [
+        "•  F10-A: receber duas vezes o mesmo evento cria no maximo um chamado/tarefa para a mesma chave de idempotencia.",
+        "•  F10-B: quando CRM conclui e Service Desk falha, historico mostra resultados independentes e permite reprocessar apenas o pendente."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": []
     },
     {
       "figure": 11,
@@ -246,10 +480,16 @@
       "implemented_in_0_2": [
         "Editor nativo de perfis em popup, com feature flag, administração nativa e cobertura corporativa irrestrita; sem novo cadastro de permissões",
         "Seleções explícitas de capacidades, validações e persistência pela API e pelo store nativos; nenhum grant automático do Call Center",
-        "Falhas de carregamento visíveis, rascunho nativo preservado em erro e fechamento bloqueado durante o salvamento"
+        "Falhas de carregamento visíveis, rascunho nativo preservado em erro e fechamento bloqueado durante o salvamento",
+        "Atualização transacional recarrega o perfil antes do GrantGuard; trilha de capacidades CC na auditoria nativa, sem copiar descrições ou segredos.",
+        "Criação e falha de autorização cobertas por oito novos casos Chrome planejados sobre dados sintéticos, sem mocks de API.",
+        "Passo explícito de revisão do nome/descrição e capacidades a conceder/retirar antes de confirmar; alterar o formulário invalida a revisão."
       ],
       "remaining_or_external": [
-        "Full multi-module/profile/team matrix from the mockup is not recreated; native editor navigation/installation restrictions remain; legacy native role access is preserved"
+        "Pendente 0–2: herança por equipe/usuário não possui contrato ou armazenamento nativo; requer decisão arquitetural, sem concessões por suposição.",
+        "Pendente 0–2: revisão esperada pelo navegador não existe no payload; bloqueio transacional impede restauração de poder revogado, mas não detecta sobrescrita de campos por dois formulários.",
+        "Exclusão de perfil com membros usa dependência nullify nativa; mudança de política exige avaliar todos os módulos.",
+        "Pendente 0–2: matriz visual completa multi-módulo da figura; as concessões existentes seguem explícitas e revisadas."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -261,7 +501,30 @@
         "document_1_figure": 11,
         "document_2_figure": 11
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Popup Configurar Perfil e Permissoes",
+      "visual_components": "Campos e dados apresentados:  Exibir permissao herdada, individual, concedida e efetiva de forma distinguivel quando houver hierarquia. Informar escopo de empresa, equipe, fila e carteira; manter trilha de quem concedeu, quando e por qual origem.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Seletores Perfil, Equipe e Usuario: escolher o escopo alvo. Abas Permissoes por Modulo, Acesso Especial, PABX JRC e Configuracoes Adicionais: trocar categoria sem perder alteracoes ainda nao salvas. Checkbox por acao: visualizar, criar, editar, excluir, exportar, aprovar e publicar, mais ouvir/baixar/monitorar onde aplicavel. Salvar Permissoes: mostrar alteracoes antes de confirmar.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Exibir permissao herdada, individual, concedida e efetiva de forma distinguivel quando houver hierarquia. Informar escopo de empresa, equipe, fila e carteira; manter trilha de quem concedeu, quando e por qual origem.",
+        "Estados de erro e excecoes:  Se o perfil alvo mudou em outra sessao, exigir revisao antes de sobrescrever. Uma acao negada pela API precisa ser negada mesmo quando checkbox ou rota estiver manipulada no navegador."
+      ],
+      "popups_and_forms": "Popup nativo disponível para o subconjunto descrito em implemented_in_0_2; os campos e fluxos completos do Word continuam sujeitos às lacunas.",
+      "permissions": "Regras e permissoes:  Nao conceder privilegio maior que a alçada do operador. Evitar Selecionar Todos irrestrito para tarefas criticas. Monitoria (escuta, sussurro, intervencao) e acesso a gravacao sao permissoes distintas. Criar usuario na plataforma nao ativa automaticamente Call Center.",
+      "acceptance_scenarios": [
+        "•  F11-A: Admin sem permissao de publicacao nao consegue conceder Publicar para outro perfil.",
+        "•  F11-B: usuario com Ouvir Gravacao e sem Baixar consegue reproduzir e recebe bloqueio de download na UI e API."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Subconjunto nativo em Chrome 1440 e 390, claro/escuro, CI da base acima. Não é aceite integral desta figura.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "GET/POST/PUT/PATCH /api/v1/accounts/:account_id/custom_roles",
+        "Armazenamento custom_roles; auditoria nativa audits, somente capacidades CC neste incremento."
+      ],
+      "external_dependencies": []
     },
     {
       "figure": 12,
@@ -287,12 +550,36 @@
         "document_1_figure": 12,
         "document_2_figure": 12
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Popup Configurar Equipe e Filas",
+      "visual_components": "Campos e dados apresentados:  Informar total de agentes, grupos/filas ativos, papeis e participacao real na distribuicao. O mesmo usuario pode aparecer como supervisor e nao participante; o estado deve ser explicito.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Geral: editar nome, descricao e status. Supervisor Principal e Supervisores Adicionais: selecionar usuarios elegiveis. Agentes: Adicionar Agente ou remover vinculo sem apagar pessoa. Filas Vinculadas: Vincular Fila e marcar separadamente Participa e Supervisiona. Horarios e Regras de Distribuicao: consultar/configurar politicas reutilizaveis. Salvar Configuracoes: validar dependencias e escopo.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Informar total de agentes, grupos/filas ativos, papeis e participacao real na distribuicao. O mesmo usuario pode aparecer como supervisor e nao participante; o estado deve ser explicito.",
+        "Estados de erro e excecoes:  Bloquear agente de outra empresa/tenant e fila desativada. Se remover o ultimo agente elegivel de fila ativa, apresentar impacto e exigir a validacao definida para a mudanca."
+      ],
+      "popups_and_forms": "Popup nativo disponível para o subconjunto descrito em implemented_in_0_2; os campos e fluxos completos do Word continuam sujeitos às lacunas.",
+      "permissions": "Regras e permissoes:  Equipe nao cria novo cadastro de usuario. Supervisao nao da automaticamente ramal, acesso a gravacoes ou inclusao em fila. Inclusao em fila de voz exige disponibilidade e capacidade do PABX, escopo compativel e direito apropriado.",
+      "acceptance_scenarios": [
+        "•  F12-A: supervisor marcado apenas como Supervisiona nao recebe chamadas da fila.",
+        "•  F12-B: salvar um novo vinculo com falha de PABX conserva estado pendente sem atribuir participacao efetiva."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Subconjunto nativo em Chrome 1440 e 390, claro/escuro, CI da base acima. Não é aceite integral desta figura.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "APIs nativas Team/TeamMember e GET/POST/PATCH /api/v1/accounts/:account_id/jrc_contact_center/queue_memberships"
+      ],
+      "external_dependencies": [
+        "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
+      ]
     },
     {
       "figure": 13,
       "title": "Conexão e sincronização PABX",
-      "status": "Implementado parcialmente",
+      "status": "Reservado às etapas 3–8",
       "stages": [
         0,
         1,
@@ -313,7 +600,31 @@
         "document_1_figure": 13,
         "document_2_figure": 13
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Configuracoes gerais e sincronizacao do PABX JRC",
+      "visual_components": "Campos e dados apresentados:  Identificar empresa, tenant, accountcode, mapeamento entre sistemas, URL/host/porta/protocolo, status operacional, ultimo sucesso, ultima tentativa, versao esperada e retorno aplicado por recurso. Segredos devem ser mascarados e nunca retornados em claro ao navegador.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Testar Conexao: verificar canal, autenticacao, permissao e resposta do servico. Opcoes de sincronizacao: ativar somente os tipos autorizados (ramais, filas, usuarios, eventos e outros expostos pela integracao real). Frequencia: escolher intervalo permitido. Executar Diagnostico: registrar execucao e abrir detalhes. Abas especificas: navegar para recursos sem presumir que foram publicados.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Identificar empresa, tenant, accountcode, mapeamento entre sistemas, URL/host/porta/protocolo, status operacional, ultimo sucesso, ultima tentativa, versao esperada e retorno aplicado por recurso. Segredos devem ser mascarados e nunca retornados em claro ao navegador.",
+        "Estados de erro e excecoes:  Em indisponibilidade, registrar timeout, falha de autenticacao ou divergencia tecnica de forma segura. Em falha parcial, apontar quais recursos foram efetivamente aplicados, quais ficaram pendentes e se podem ser reprocessados."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  A validacao do mapeamento nao depende de igualdade entre tenant e accountcode. Mudanca em credenciais/infraestrutura e restrita a Super Admin. Sincronizacao ocorre em job, com identificador e historico; nao atualizar a tela para sucesso antes da confirmacao do PABX.",
+      "acceptance_scenarios": [
+        "•  F13-A: uma sincronizacao iniciada e exibida como Em execucao ate retorno tecnico e so entao passa a Aplicado.",
+        "•  F13-B: logs e exportacoes mascaram credenciais e nao retornam dados de outra empresa."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
+      ]
     },
     {
       "figure": 14,
@@ -328,7 +639,8 @@
         "Existing scoped durable event list/reprocessing remains available only under native capabilities"
       ],
       "remaining_or_external": [
-        "Full administrative before/after, exports and per-operation histories remain stage 3"
+        "Full administrative before/after, exports and per-operation histories remain stage 3",
+        "Pendente 0–2: auditoria de alterações de unidades/filas/participantes e superfície local de consulta; este incremento cobre somente capacidades de perfis."
       ],
       "code_references": [
         "administration_controller.rb",
@@ -338,7 +650,32 @@
         "document_1_figure": 14,
         "document_2_figure": 14
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Auditoria tecnica do PABX",
+      "visual_components": "Campos e dados apresentados:  Registrar id do evento, correlation_id/request_id, ator, acao, recurso, before/after sanitizados, horario, estado pretendido e estado confirmado. Resultado deve distinguir concluido, pendente, divergente, falha e reversao.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Filtros de data, tipo, unidade/empresa e origem: refinar registros; Consultar: aplicar filtros com paginacao. Selecao de uma linha: preencher Detalhes do Evento com data/hora, usuario, operacao, objeto, tenant/accountcode, resultado e descricao. Ver Detalhes: abrir popup do evento; Exportar Relatorio: gerar arquivo dentro do escopo; Ver Historico: listar eventos correlatos.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Registrar id do evento, correlation_id/request_id, ator, acao, recurso, before/after sanitizados, horario, estado pretendido e estado confirmado. Resultado deve distinguir concluido, pendente, divergente, falha e reversao.",
+        "Estados de erro e excecoes:  Falha de consulta ou exportacao nao deve retornar lista vazia como se nao houvesse eventos. Mostrar erro e identificador rastreavel; registrar tentativas de acesso negado de acordo com as politicas existentes."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Auditoria nao e editavel pela UI. Um evento pode ter multiplas etapas e deve preservar a sequencia. Acesso a registros e exportacao exige permissao propria e filtro por empresa/tenant. Senhas, tokens, dados protegidos e payloads sensiveis nao podem aparecer.",
+      "acceptance_scenarios": [
+        "•  F14-A: filtros por empresa e tenant impedem acesso a eventos fora do escopo, inclusive via API.",
+        "•  F14-B: evento de publicacao mostra pedido, execucao, confirmacao e eventuais erros pelo mesmo identificador de correlacao."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Subconjunto nativo em Chrome 1440 e 390, claro/escuro, CI da base acima. Não é aceite integral desta figura.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "GET /api/v1/accounts/:account_id/jrc_contact_center/administration/audit: eventos externos; não é a trilha local completa.",
+        "Enterprise::AuditLog: novas mudanças de capacidades CC, leitura pela origem nativa autorizada."
+      ],
+      "external_dependencies": [
+        "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
+      ]
     },
     {
       "figure": 15,
@@ -364,7 +701,31 @@
         "document_1_figure": 15,
         "document_2_figure": 15
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Central de Aprovacoes - solicitacoes do PABX",
+      "visual_components": "Campos e dados apresentados:  Mostrar numero da solicitacao, solicitante, aprovador por alçada, empresa, objeto, data, status e referencia tecnica. Estados: pendente, aprovada, rejeitada, em execucao, falha e executada; aprovada nao equivale a aplicada.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Filtros por periodo, tipo, status e empresa: listar solicitacoes. Abas Todos, Pendentes, Solicitacoes do PABX, Aprovadas, Rejeitadas e Historico: alterar contexto. Selecao de item: exibir resumo, objeto, justificativa, impacto e comparacao antes/depois. Ver Solicitacao Completa: abrir detalhes; Aprovar/Rejeitar: executar somente para aprovador definido pela politica, com justificativa quando exigida.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Mostrar numero da solicitacao, solicitante, aprovador por alçada, empresa, objeto, data, status e referencia tecnica. Estados: pendente, aprovada, rejeitada, em execucao, falha e executada; aprovada nao equivale a aplicada.",
+        "Estados de erro e excecoes:  Se recurso, versao ou dependencias mudarem durante aprovacao, bloquear execucao e solicitar revalidacao. Antes de reverter, avaliar chamadas em andamento e outros recursos afetados; exibir orientacao para falhas."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  O aprovador e determinado pela politica, nao por livre escolha fora de regra. A autorizacao e separada da execucao tecnica. Publicacao somente apos validação, teste, aprovacao quando necessaria e confirmacao de estado no PABX. Reversao cria outra operacao auditada.",
+      "acceptance_scenarios": [
+        "•  F15-A: pedido aprovado, mas ainda sem ACK do PABX, nao aparece como Executado.",
+        "•  F15-B: usuario fora da alçada nao aprova via interface nem API; o evento de tentativa e rastreavel."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Subconjunto nativo em Chrome 1440 e 390, claro/escuro, CI da base acima. Não é aceite integral desta figura.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "RouterLink para a Central de Aprovações existente, sujeito à autorização da origem."
+      ],
+      "external_dependencies": [
+        "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
+      ]
     },
     {
       "figure": 16,
@@ -383,12 +744,36 @@
         "document_1_figure": 16,
         "document_2_figure": 16
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Gestao de audios - detalhes do arquivo (ajuste de legenda)",
+      "visual_components": "Campos e dados apresentados:  O painel mostra metadados de audio reutilizavel, nao retencao de gravacao telefonica. Versoes, formato e tamanho devem ser obtidos do arquivo armazenado; a lista de destinos vinculados deve ser real.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Lista: selecionar audio e atualizar painel lateral. Busca e filtros: localizar arquivo por nome, pasta, tipo de uso e status. Player/forma de onda: reproduzir previa. Detalhes do Audio: ver nome, pasta, duracao, formato, tamanho, status e usos. Gerenciar Vinculos: abrir popup de referencias; Gerar com Nico, Gravar e Upload: criar novos arquivos conforme permissao.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  O painel mostra metadados de audio reutilizavel, nao retencao de gravacao telefonica. Versoes, formato e tamanho devem ser obtidos do arquivo armazenado; a lista de destinos vinculados deve ser real.",
+        "Estados de erro e excecoes:  Falha de reproducao mostra motivo e preserva selecao. Ausencia de direito de download/edicao nao deve ser contornada pelo acesso direto ao objeto armazenado."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Manter as regras da biblioteca descritas nas Figuras 5 e 6. Nao usar esta imagem para homologar o cadastro de Politicas de Gravacao; a tela propria de politicas (empresa, filas, aviso ao cliente, retencao e status no PABX) segue como lacuna visual a definir com DEV/produto.",
+      "acceptance_scenarios": [
+        "•  F16-A: selecionar audio atualiza os metadados e os vinculos corretos, sem trazer gravações de chamadas.",
+        "•  F16-B: a homologacao da politica de gravacoes requer evidencia de outra tela, nao apenas esta captura."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
+      ]
     },
     {
       "figure": 17,
       "title": "Consulta de gravações e player",
-      "status": "Implementado parcialmente",
+      "status": "Reservado às etapas 3–8",
       "stages": [
         1,
         7
@@ -407,7 +792,32 @@
         "document_1_figure": 17,
         "document_2_figure": 17
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Consulta de gravacoes e player",
+      "visual_components": "Campos e dados apresentados:  Associar recording_id a call_id imutavel, cliente e agente quando conhecidos, fila, inicio, duracao, status de integridade, local seguro, politica aplicavel e retencao. Indicadores de quantidade/duracao/capacidade devem trazer periodo e unidade; valores da imagem sao exemplos.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Filtros por periodo, empresa, fila, agente, numero/cliente, protocolo e resultado: executar pesquisa; Limpar Filtros: restaurar criterios iniciais. Selecao de linha: abrir Detalhes da Gravacao com metadados. Player: reproduzir, pausar e buscar posicao com permissao. Botoes Baixar, Compartilhar e Exportar Relatorio: habilitar apenas para escopos autorizados. Ver Detalhes Completos: abrir popup com informacoes da chamada e do armazenamento.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Associar recording_id a call_id imutavel, cliente e agente quando conhecidos, fila, inicio, duracao, status de integridade, local seguro, politica aplicavel e retencao. Indicadores de quantidade/duracao/capacidade devem trazer periodo e unidade; valores da imagem sao exemplos.",
+        "Estados de erro e excecoes:  Se gravacao estiver processando, ausente, corrompida ou bloqueada, mostrar estado especifico sem gerar URL publica. Impedir download em massa que exceda escopo ou omita autorizacao por registro."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Permissoes de consultar, ouvir, baixar, compartilhar e administrar sao separadas. Cada reproducao, download e compartilhamento gera auditoria. Proteger arquivo original e impedir descarte de arquivo sob retencao obrigatoria. Politica passa a valer somente com confirmacao tecnica do PABX.",
+      "acceptance_scenarios": [
+        "•  F17-A: agente com direito de consulta, mas sem Download, ve metadados permitidos e nao obtem arquivo pela API.",
+        "•  F17-B: gravacao sob retencao ou bloqueio legal nao pode ser apagada; acesso ao player fica registrado na auditoria."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado.",
+        "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
+      ]
     },
     {
       "figure": 18,
@@ -427,12 +837,36 @@
         "document_1_figure": 18,
         "document_2_figure": 18
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Interface existente de Gravacoes e Qualidade",
+      "visual_components": "Campos e dados apresentados:  Reaproveitar identificadores, permissoes, filtros e origem de dados do modulo existente. Status e metricas da captura devem ser confirmados no codigo/ambiente autorizado; nao deduzir funcionalidades prontas apenas da aparencia.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Preservar navegacao, menu, listagem de gravacoes, indicadores e blocos de qualidade existentes. Adicionar entrada para Analise de Sentimentos no mesmo ecossistema visual, usando componente reutilizavel e fluxo de retorno consistente. Abrir analise a partir de uma gravacao ou interacao quando houver call_id elegivel.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Reaproveitar identificadores, permissoes, filtros e origem de dados do modulo existente. Status e metricas da captura devem ser confirmados no codigo/ambiente autorizado; nao deduzir funcionalidades prontas apenas da aparencia.",
+        "Estados de erro e excecoes:  Se a funcao do Nico nao estiver habilitada, ocultar ou mostrar estado indisponivel explicito, sem criar analise ficticia. Falha de consulta da area nova nao deve impedir o acesso ao modulo existente."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Evitar nova base de gravacoes, usuarios e clientes. A analise do Nico deve referenciar a chamada e o arquivo ja existentes. Alteracoes de UI nao podem alterar direitos de acesso a gravação e qualidade. O layout precisa funcionar em desktop e telas menores.",
+      "acceptance_scenarios": [
+        "•  F18-A: usuario autorizado continua acessando fluxos de Gravacoes e Qualidade anteriores apos incluir entrada do Nico.",
+        "•  F18-B: analise aberta a partir de gravacao referencia o mesmo call_id, sem duplicar registro de origem."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
+      ]
     },
     {
       "figure": 19,
       "title": "Painel de sentimentos",
-      "status": "Implementado parcialmente",
+      "status": "Reservado às etapas 3–8",
       "stages": [
         1,
         7
@@ -450,7 +884,31 @@
         "document_1_figure": 19,
         "document_2_figure": 19
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Painel principal de Analise de Sentimentos",
+      "visual_components": "Campos e dados apresentados:  Exibir total de interacoes analisadas, percentuais e quantidade por classe, nota de qualidade separada, status da analise e insights. Informar denominador e periodo usados no percentual; distinguir interacoes sem analise, erro, revisao humana e classe critica quando houver politica propria.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Filtros por periodo, cliente, agente, equipe e fila quando permitidos: recalcular indicadores e tabelas. Selecionar uma interacao: abrir popup de detalhes. Distribuicao de sentimentos: filtrar a lista pelo segmento escolhido, mantendo acesso a casos selecionados. Insight: abrir consulta contextual e evidencias da analise; Atualizar: buscar o estado mais recente.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Exibir total de interacoes analisadas, percentuais e quantidade por classe, nota de qualidade separada, status da analise e insights. Informar denominador e periodo usados no percentual; distinguir interacoes sem analise, erro, revisao humana e classe critica quando houver politica propria.",
+        "Estados de erro e excecoes:  Sem transcricao, sem audio, Nico indisponivel ou analise pendente devem aparecer como estados distintos. Uma analise sem confianca suficiente nao deve ser exibida como certeza; nao gerar insights sem evidencias."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Sentimento e estimativa, nao diagnostico factual do cliente. Negativo nao equivale automaticamente a critico. Totais devem usar apenas registros do escopo autorizado; eventos reprocessados nao podem inflar contagens. Indicadores ilustrativos do mockup nao substituem dados reais.",
+      "acceptance_scenarios": [
+        "•  F19-A: aplicar filtro de fila altera tabela e percentuais com o mesmo universo de registros.",
+        "•  F19-B: chamada ainda nao analisada nao soma indevidamente a positivo/neutro/negativo e apresenta estado correto."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
+      ]
     },
     {
       "figure": 20,
@@ -468,12 +926,36 @@
         "document_1_figure": 20,
         "document_2_figure": 20
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Detalhes - transcricao, sentimentos e audio sincronizados",
+      "visual_components": "Campos e dados apresentados:  Cada segmento traz inicio/fim, locutor identificado quando possivel, texto, classe estimada e vinculo ao call_id/recording_id. Separar indicador de qualidade do sentimento. O popup informa chamada, data, fila, agente, duracao, estado e versao da analise.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Selecionar fala na Transcricao: mover player ao timestamp correspondente e destacar ponto no grafico. Selecionar ponto do grafico: buscar trecho, tempo e emocao estimada. Controles de audio: reproduzir, pausar, buscar, controlar velocidade e volume. Corrigir Analise: abrir revisao humana quando habilitada. Criar Chamado/Registrar no Relacionamento: abrir fluxo autorizado sem concluir automaticamente.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Cada segmento traz inicio/fim, locutor identificado quando possivel, texto, classe estimada e vinculo ao call_id/recording_id. Separar indicador de qualidade do sentimento. O popup informa chamada, data, fila, agente, duracao, estado e versao da analise.",
+        "Estados de erro e excecoes:  Para trechos sem timestamp valido, mostrar limitacao sem saltar para posicao incorreta. Se arquivo nao estiver disponivel, manter transcricao autorizada e informar indisponibilidade do player."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Posicao de playback, texto e grafico devem usar a mesma base temporal; clicar nao deve reprocessar nem editar o audio original. Transcricao e metadados sensiveis seguem as permissoes de gravação. Correcao humana conserva versao original e autor da revisao.",
+      "acceptance_scenarios": [
+        "•  F20-A: clicar no trecho de 01:25 desloca player e marcador ao mesmo instante, dentro da precisao definida tecnicamente.",
+        "•  F20-B: a aba Contexto nao revela contratos/chamados fora das permissoes do visualizador."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
+      ]
     },
     {
       "figure": 21,
       "title": "Contexto do cliente",
-      "status": "Implementado parcialmente",
+      "status": "Reservado às etapas 3–8",
       "stages": [
         1,
         7
@@ -491,7 +973,31 @@
         "document_1_figure": 21,
         "document_2_figure": 21
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Detalhes - contexto de cliente e historico",
+      "visual_components": "Campos e dados apresentados:  Trazer cliente, empresa, contatos, unidade, contratos e protocolos apenas quando a identidade for validada. Exibir fonte de cada informacao, data de atualizacao e status. Indicadores contextuais devem explicitar janela temporal e criterio de calculo.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Aba Contexto: mostrar dados do cliente, linha do tempo, contratos/servicos, chamados vinculados e indicadores contextuais. Ver Cadastro: abrir registro existente na origem. Ver Historico Completo: navegar para timeline autorizada. Atalhos Criar Chamado e Registrar no Relacionamento: abrir formulários existentes com cliente e call_id previamente relacionados.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Trazer cliente, empresa, contatos, unidade, contratos e protocolos apenas quando a identidade for validada. Exibir fonte de cada informacao, data de atualizacao e status. Indicadores contextuais devem explicitar janela temporal e criterio de calculo.",
+        "Estados de erro e excecoes:  Sem cliente identificado, mostrar vinculacao pendente e permitir fluxo manual autorizado, sem atribuir automaticamente a pessoa errada. Falhas em CRM ou SD nao devem ocultar demais dados validos; indicar origem indisponivel."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Cadastro Mestre, CRM, Service Desk e Relacionamento permanecem fontes de verdade, sem replicar cliente ou empresa. A transcricao pode ajudar a sugerir contexto, mas nao prova automaticamente identidade. Aplicar escopo de conta, unidade, carteira e perfil em cada consulta.",
+      "acceptance_scenarios": [
+        "•  F21-A: chamada sem cliente identificado nao vincula contrato ou protocolo por coincidencia de telefone.",
+        "•  F21-B: usuario sem permissao ao Service Desk nao ve chamados em popup nem por link direto."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
+      ]
     },
     {
       "figure": 22,
@@ -510,7 +1016,31 @@
         "document_1_figure": 22,
         "document_2_figure": 22
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Detalhes - acoes e historico de providencias",
+      "visual_components": "Campos e dados apresentados:  Historico cronologico de eventos do Nico, intervencao humana, criacao/vinculo de tarefa, atualizacao de responsavel, notificacao e conclusao. Cada item deve ter autoria, data, origem, id de correlacao e estado consultado no modulo de origem.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Aba Acoes e Historico: listar acoes vinculadas, status, responsavel e prazo. Nova Acao: usar modulo de tarefas/projetos ja existente e salvar vinculo ao call_id. Abrir tarefa, chamado ou registro de Relacionamento: navegar ao objeto existente. Corrigir Analise: iniciar revisao; Salvar e Concluir: encerrar somente revisao da analise, sem finalizar tarefas ou chamados pendentes.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Historico cronologico de eventos do Nico, intervencao humana, criacao/vinculo de tarefa, atualizacao de responsavel, notificacao e conclusao. Cada item deve ter autoria, data, origem, id de correlacao e estado consultado no modulo de origem.",
+        "Estados de erro e excecoes:  Ao falhar criacao de chamado/tarefa, indicar falha sem mostrar numero inexistente. Ao voltar ao popup, atualizar estados sem perder historico. Nao ocultar pendencias por finalizar revisao."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Evitar tarefas duplicadas ao repetir clique ou reprocessar analise; usar idempotencia e identificar vinculo existente. Nico pode recomendar, mas nao executar providencias restritas sem permissao/fluxo de aprovacao. Status de tarefa nao e controlado apenas pelo popup.",
+      "acceptance_scenarios": [
+        "•  F22-A: repetir Nova Acao com a mesma requisicao nao gera duplicidade de tarefa.",
+        "•  F22-B: Salvar e Concluir finaliza a revisao mas preserva tarefa Pendente com seu responsavel e prazo."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
+      ]
     },
     {
       "figure": 23,
@@ -528,7 +1058,31 @@
         "document_1_figure": 23,
         "document_2_figure": 23
       },
-      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "objective": "Popup Corrigir Analise do Nico - revisao humana",
+      "visual_components": "Campos e dados apresentados:  Persistir versao original da analise, modelo, classe/score, classificacao humana, texto revisado, temas, recomendacoes, usuario, horario e motivo. Exibir origem humana na leitura posterior sem substituir de modo destrutivo a analise original.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Exibir classe original do Nico, score/confianca disponivel e resumo original em modo somente leitura. Nova Classificacao: selecionar Positivo, Neutro ou Negativo segundo regra vigente. Resumo Ajustado e Temas Ajustados: revisar texto e rotulos. Recomendacoes Sugeridas: selecionar quais propostas serao mantidas como sugestoes; nao disparar acoes sensiveis. Justificativa da Correcao: preencher obrigatoriamente. Cancelar ou Salvar Correcao: descartar ou criar revisao auditada.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Persistir versao original da analise, modelo, classe/score, classificacao humana, texto revisado, temas, recomendacoes, usuario, horario e motivo. Exibir origem humana na leitura posterior sem substituir de modo destrutivo a analise original.",
+        "Estados de erro e excecoes:  Sem justificativa ou sem nova classificacao valida, impedir salvar com mensagem especifica. Duas correcoes concorrentes exigem controle de versao para nao perder historico; erro de persistencia nao fecha popup."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Somente perfis autorizados corrigem. A classificacao da IA permanece imutavel e comparavel. Correcao nao altera audio, transcricao de origem ou dados brutos da chamada. Recomendações sao sugestoes e precisam respeitar autorizacao, consentimento e politica dos modulos de destino.",
+      "acceptance_scenarios": [
+        "•  F23-A: alterar Positivo para Negativo preserva registro original, autor, horario e justificativa da revisao.",
+        "•  F23-B: enviar sem justificativa ou sem permissao nao modifica analise e retorna erro verificavel."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [
+        "Armazenamento/provedor de áudio/IA conforme etapa; Supabase real não homologado."
+      ]
     }
   ],
   "new_acceptance": [
@@ -557,5 +1111,28 @@
     "chrome_failure_detail": "Dois cenários em quatro projetos aguardavam select por getByLabel exact. O snapshot contém os comboboxes e suas opções. O novo cenário usa role e nome acessível exatos, com verificação do valor selecionado e da persistência.",
     "next_expected_chrome": 44,
     "next_validation": "Pendente de CI nativa no novo checkpoint; não atribuir evidências do checkpoint anterior aos 11 arquivos pendentes."
+  },
+  "baseline_evidence": {
+    "sha": "1834971cdea7d73d98811b3e2f08ba18587100cc",
+    "run": 43938106822,
+    "artifact": 14261452696,
+    "sha256": "0e7fef94e126a2f59c74dc4cb32e31d38f25451a1022365a8278790e8856f3fe",
+    "rails": 386,
+    "vue": 178,
+    "chrome": 44
+  },
+  "required_decisions": [
+    "Herança por equipe: fonte, precedência, negações e revogação entre módulos, sem reutilizar TeamMember como grant.",
+    "Contrato de revisão otimista: compatibilidade de clientes, 409/428 e token de revisão atômico."
+  ],
+  "visual_review": {
+    "originals": "Todas as 23 figuras visualmente revisadas nos oito contact sheets existentes, sem criar artefatos locais.",
+    "differences": [
+      "Central usa tokens visuais reais do JRC, não reproduz sombras/gradientes de mockup como novo design global.",
+      "Listagens Equipes/Filas estão em abas com pesquisa/paginação independente; Word mostra painéis lado a lado.",
+      "Perfil nativo é lista de capacidades com escopo explícito; não é a matriz de herança da figura 11.",
+      "Indicadores online, alertas e números ilustrativos não são dados operacionais."
+    ],
+    "current_screenshots": "A revisar no artefato do novo SHA; não marcar validação visual antes da inspeção."
   }
 }

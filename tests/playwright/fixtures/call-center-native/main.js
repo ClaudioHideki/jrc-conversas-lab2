@@ -9,6 +9,7 @@ import messages from 'dashboard/i18n/locale/pt_BR';
 import english from 'dashboard/i18n/locale/en';
 import customRole from 'dashboard/store/modules/customRole';
 import ModalHeader from 'dashboard/components/ModalHeader.vue';
+import SnackbarContainer from 'dashboard/components/SnackbarContainer.vue';
 import CustomRolesHome from 'dashboard/routes/dashboard/settings/customRoles/Index.vue';
 import '../../../../app/javascript/dashboard/assets/scss/app.scss';
 
@@ -64,6 +65,7 @@ const app = createApp({
           'AMBIENTE SINTÉTICO · APIs Rails reais · Nenhum PABX conectado'
         ),
         h(RouterView),
+        h(SnackbarContainer),
       ]
     ),
 });

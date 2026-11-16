@@ -25,6 +25,7 @@
 
 class CustomRole < ApplicationRecord
   include Enterprise::Audit::ServiceDeskCustomRole
+  include Enterprise::Audit::ContactCenterCustomRole
   belongs_to :account
   has_many :account_users, dependent: :nullify
 

@@ -3,7 +3,7 @@
 
 ## Em progresso (WIP)
 
-- [ ] **CALL-CENTER-REVIEW-0-2-20261116:** Revisão funcional dos quinze cards e popups nativos, com matriz das 23 figuras em `docs/jrc_contact_center/stages_0_2_review_20261116.json`. Popup de perfis nativo e correção dos seletores Chrome em revisão; a CI 43909947337 aprovou Rails/Vue/lint, mas teve oito timeouts em 40 cenários Chrome. O próximo checkpoint exige 44 cenários, sem reaproveitar a aprovação antiga como evidência deste incremento.
+- [ ] **CALL-CENTER-REVIEW-0-2-20261116:** Revisão funcional dos quinze cards e popups nativos, com matriz das 23 figuras em `docs/jrc_contact_center/stages_0_2_review_20261116.json`. Base 1834971c aprovada na CI 43938106822: 386 Rails, 178 Vue, 44 Chrome, 15 cards e bootstrap sem erros. Em revisão: recarga transacional do perfil antes do GrantGuard, auditoria de capacidades CC e criação/negação do popup. Próximo checkpoint exige 52 Chrome, preservando os 44 existentes. Herança de equipe, revisão otimista e demais lacunas 0–2 continuam abertas em docs/adr/20261116-call-center-role-update-and-gaps.md.
 
 - [ ] **CALL-CENTER-0-2-20261116:** Implementação isolada e correção dos gates, sem operações reais do PABX. Checkpoints e resultados em `docs/jrc_contact_center/lint_correction_checkpoint_20261116.json`; homologação operacional e contratos externos continuam separados dos testes sintéticos.
 

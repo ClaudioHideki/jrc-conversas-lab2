@@ -8,7 +8,9 @@ const session = JSON.parse(
 const base = `/app/accounts/${session.account_id}/contact-center/control-desk`;
 const api = `http://127.0.0.1:5387/api/v1/accounts/${session.account_id}/jrc_contact_center`;
 test.beforeEach(async ({ page }, info) => {
-  const auth = info.title.startsWith('corporate boundary')
+  const auth = info.title.startsWith('native role denied')
+    ? session.delegated
+    : info.title.startsWith('corporate boundary')
     ? session.restricted
     : info.title.startsWith('profile change')
       ? session.viewer
@@ -607,7 +609,9 @@ test('native permission popup reuses the role editor and persists only explicitl
     path: `.codex/call-center-native-e2e/${info.project.name}-permissions.png`,
     fullPage: true,
   });
-  await dialog.getByRole('button', { name: 'Atualizar', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Revisar alterações', exact: true }).click();
+  await expect(dialog.locator('[data-role-review]')).toContainText('Capacidades a conceder');
+  await dialog.getByRole('button', { name: 'Confirmar alterações', exact: true }).click();
   await expect(dialog).not.toBeVisible();
   const after = await page.request.get(roleUrl, {
     headers: session.administrator,
@@ -621,4 +625,63 @@ test('native permission popup reuses the role editor and persists only explicitl
     data: { custom_role: { permissions: original.permissions } },
   });
   expect(restored.status()).toBe(200);
+});
+
+
+test('native role creation validates the form and persists exactly the selected capabilities', async ({ page }, info) => {
+  const name = 'SYNTHETIC created role ' + info.project.name;
+  await page.goto(base + '/permissions');
+  await page.locator('[data-new-native-role]').click();
+  const dialog = page.getByRole('dialog');
+  const submit = dialog.getByRole('button', { name: 'Revisar alterações', exact: true });
+  await expect(submit).toBeDisabled();
+  await dialog.getByLabel('Nome', { exact: true }).fill(name);
+  await dialog.getByLabel('Descrição', { exact: true }).fill('SYNTHETIC explicit role creation');
+  await expect(submit).toBeDisabled();
+  await dialog.locator('#jrc_contact_center_view').check();
+  await expect(submit).toBeEnabled();
+  await expect(dialog.locator('#jrc_contact_center_publish')).not.toBeChecked();
+  await expect(dialog.getByText('Participar de uma equipe ou fila', { exact: false })).toBeVisible();
+  expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+  await page.screenshot({ path: '.codex/call-center-native-e2e/' + info.project.name + '-role-create.png', fullPage: true });
+  await submit.click();
+  await expect(dialog.locator('[data-role-review]')).toBeVisible();
+  await dialog.getByRole('button', { name: 'Confirmar alterações', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await page.reload();
+  const list = await page.request.get('http://127.0.0.1:5387/api/v1/accounts/' + session.account_id + '/custom_roles', {
+    headers: session.administrator,
+  });
+  expect(list.status()).toBe(200);
+  const role = (await list.json()).find(row => row.name === name);
+  expect(role.permissions).toEqual(['jrc_contact_center_view']);
+  await expect(page.getByRole('combobox', { name: 'Perfil nativo', exact: true }).getByRole('option', { name, exact: true })).toHaveCount(1);
+});
+
+test('native role denied creation keeps the draft and never persists an unauthorized power', async ({ page }, info) => {
+  const name = 'SYNTHETIC denied role ' + info.project.name;
+  await page.goto(base + '/permissions');
+  await page.locator('[data-new-native-role]').click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Nome', { exact: true }).fill(name);
+  await dialog.getByLabel('Descrição', { exact: true }).fill('SYNTHETIC denied grant retained for review');
+  await dialog.locator('#jrc_contact_center_view').check();
+  await dialog.locator('#jrc_contact_center_publish').check();
+  await dialog.getByRole('button', { name: 'Revisar alterações', exact: true }).click();
+  await expect(dialog.locator('[data-role-review]')).toBeVisible();
+  const rejected = page.waitForResponse(response => response.url().endsWith('/custom_roles') && response.request().method() === 'POST');
+  await dialog.getByRole('button', { name: 'Confirmar alterações', exact: true }).click();
+  expect((await rejected).status()).toBe(401);
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('Nome', { exact: true })).toHaveValue(name);
+  await expect(dialog.locator('#jrc_contact_center_publish')).toBeChecked();
+  await expect(page.locator('[popover="manual"]')).toContainText('Não foi possível salvar. Seus dados foram preservados.');
+  await page.screenshot({ path: '.codex/call-center-native-e2e/' + info.project.name + '-role-denied.png', fullPage: true });
+  const list = await page.request.get('http://127.0.0.1:5387/api/v1/accounts/' + session.account_id + '/custom_roles', {
+    headers: session.delegated,
+  });
+  expect(list.status()).toBe(200);
+  expect((await list.json()).some(row => row.name === name)).toBe(false);
+  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
 });

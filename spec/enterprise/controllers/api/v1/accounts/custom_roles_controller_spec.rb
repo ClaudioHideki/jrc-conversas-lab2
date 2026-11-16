@@ -70,7 +70,7 @@ RSpec.describe 'Custom Roles API', type: :request do
   describe 'POST #create' do
     let(:valid_params) do
       { custom_role: { name: 'Support', description: 'Support role',
-                       permissions: CustomRole::PERMISSIONS.sample(SecureRandom.random_number(1..4)) } }
+                       permissions: %w[contact_manage report_manage] } }
     end
 
     context 'when it is an authenticated administrator' do
