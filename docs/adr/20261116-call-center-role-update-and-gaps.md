@@ -18,3 +18,7 @@ O popup reutiliza CustomRoleModal, API, store e SnackbarContainer existentes. Ap
 A matriz das 23 figuras mantém pendências 0–2 separadas de fases posteriores. Não há declaração de conclusão integral, publicação, deploy nem homologação externa. Conector PABX possui consultas/sincronização CDR e contratos mapeados; sucesso de CDR não prova publicação de inventário/URA nem ACK remoto. Guardas SQL Supabase em banco descartável não provam bucket/RLS externo.
 
 5. Elegibilidade: ModulePolicy#native_role? preserva o acesso legado de vínculos sem CustomRole. O Word exige que cadastrar usuário não ative automaticamente o Call Center. A correção depende de uma política/migração de elegibilidade que preserve acessos existentes, sem novos grants implícitos. Permanece pendente nas etapas 0–2.
+
+## Correção de escopo confirmada no contrato existente
+
+O popup já proíbe edição global sob cobertura restrita. A API nativa passa a conferir a mesma CorporateCoverage em perfis que envolvam capacidades CC, inclusive nome, retirada e exclusão, sob a transação/lock da atualização. Perfis sem CC e contas sem estrutura corporativa configurada mantêm a política nativa. Não há parâmetro de unidade concedendo acesso nem novo motor de concessões. Cinco exemplos Rails e a identidade Chrome de limite corporativo cobrem o administrador nativo limitado a uma unidade, o Group sintético explícito e a preservação de perfis de outros módulos.

@@ -575,7 +575,30 @@ test('corporate boundary denies foreign units and queues for scoped configuratio
     },
   });
   expect(deniedScope.status()).toBe(401);
-  await page.goto(`${base}/queues?queues_tab=teams`);
+  const roleUrl =
+    'http://127.0.0.1:5387/api/v1/accounts/' +
+    session.account_id +
+    '/custom_roles/' +
+    session.viewer_role_id;
+  const originalRole = await page.request.get(roleUrl, {
+    headers: session.administrator,
+  });
+  expect(originalRole.status()).toBe(200);
+  const beforeRole = await originalRole.json();
+  const deniedRole = await page.request.patch(roleUrl, {
+    headers: session.restricted,
+    data: { custom_role: { name: 'Forbidden unit takeover' } },
+  });
+  expect(deniedRole.status()).toBe(401);
+  const deniedDeletion = await page.request.delete(roleUrl, {
+    headers: session.restricted,
+  });
+  expect(deniedDeletion.status()).toBe(401);
+  const preservedRole = await page.request.get(roleUrl, {
+    headers: session.administrator,
+  });
+  expect(await preservedRole.json()).toEqual(beforeRole);
+  await page.goto(base + '/queues?queues_tab=teams');
   await expect(page.locator('[data-create]')).toHaveCount(0);
 });
 

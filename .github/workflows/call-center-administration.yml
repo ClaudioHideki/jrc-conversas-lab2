@@ -169,13 +169,38 @@ jobs:
         run: |
           node tests/playwright/node_modules/@playwright/test/cli.js test --config tests/playwright/call-center-native.config.ts
           python3 -B - <<'PY'
+          import hashlib
           import json
+          import os
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
           assert stats['expected'] == 52
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
+          source = Path('docs/jrc_contact_center/stages_0_2_review_20261116.json')
+          matrix = json.loads(source.read_text())
+          assert sorted(row['figure'] for row in matrix['figures']) == list(range(1, 24))
+          summaries = {}
+          for name in ['call-center-rspec.json', 'call-center-pabx-rspec.json']:
+              summary = json.loads(Path('/tmp', name).read_text())['summary']
+              assert summary['example_count'] > 0
+              assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0
+              summaries[name] = summary
+          vue = json.loads(Path('/tmp/call-center-vitest.json').read_text())
+          assert vue['numPassedTests'] == vue['numTotalTests'] > 0
+          assert vue['numFailedTests'] == vue['numPendingTests'] == 0
+          evidence = {
+              'sha': os.environ['GITHUB_SHA'], 'run_id': os.environ['GITHUB_RUN_ID'],
+              'branch': os.environ['GITHUB_REF_NAME'],
+              'source_matrix_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
+              'rails': summaries, 'vue': {key: vue[key] for key in ['numTotalTests', 'numPassedTests', 'numFailedTests', 'numPendingTests']},
+              'chrome': stats, 'matrix': matrix,
+              'stages_0_2_complete': False, 'external_homologation': False,
+              'screenshots': {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
+                              for path in sorted(Path('.codex/call-center-native-e2e').rglob('*.png'))},
+          }
+          Path('/tmp/call-center-acceptance.json').write_text(json.dumps(evidence, indent=2) + '\n')
           PY
       - name: Preserve source identity
         if: always()

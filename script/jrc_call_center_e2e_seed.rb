@@ -44,7 +44,7 @@ restricted.skip_confirmation_notification!
 restricted.save!
 restricted_role = CustomRole.create!(account: account, name: 'SYNTHETIC scoped configuration',
                                      permissions: %w[jrc_contact_center_view jrc_contact_center_configure])
-AccountUser.create!(account: account, user: restricted, role: :agent, custom_role: restricted_role)
+AccountUser.create!(account: account, user: restricted, role: :administrator, custom_role: restricted_role)
 JrcCrm::UserBusinessUnit.create!(
   account: account, user: restricted, scope: 'BUSINESS_UNIT', business_unit: business_units.first,
   company: company, active: true, structure_managed: true

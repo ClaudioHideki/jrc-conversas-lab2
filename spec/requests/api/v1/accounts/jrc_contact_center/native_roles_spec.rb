@@ -38,4 +38,53 @@ RSpec.describe 'Call Center native role boundaries', type: :request do
   ensure
     ActiveSupport::Notifications.unsubscribe(subscription) if subscription
   end
+
+  context 'with an administrator restricted to a corporate business unit' do
+    let(:company) { account.master_companies.create!(name: 'SYNTHETIC issuer', relationship_type: 'internal') }
+    let(:unit) { JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'SYNTHETIC unit', code: 'SYNTHETIC') }
+
+    before do
+      JrcCrm::UserBusinessUnit.create!(
+        account: account, user: actor, scope: 'BUSINESS_UNIT', business_unit: unit,
+        company: company, active: true, structure_managed: true
+      )
+    end
+
+    it 'denies metadata changes to an Account-wide Call Center role' do
+      patch url, headers: headers, params: { custom_role: { name: 'Forbidden' } }
+      expect(response).to have_http_status(:unauthorized)
+      expect(role.reload.name).not_to eq('Forbidden')
+    end
+
+    it 'denies removals and deletion without turning a restricted scope into global authority' do
+      patch url, headers: headers, params: { custom_role: { permissions: [] } }
+      expect(response).to have_http_status(:unauthorized)
+      delete url, headers: headers
+      expect(response).to have_http_status(:unauthorized)
+      expect(role.reload.permissions).to eq(['jrc_contact_center_view'])
+    end
+
+    it 'denies creation of a global Call Center role through a direct API request' do
+      expect do
+        post "/api/v1/accounts/#{account.id}/custom_roles",
+             headers: headers, params: { custom_role: { name: 'Forbidden', permissions: ['jrc_contact_center_view'] } }
+      end.not_to change(CustomRole, :count)
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'permits an explicitly configured synthetic Group authority to remove a power' do
+      JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
+      patch url, headers: headers, params: { custom_role: { permissions: [] } }
+      expect(response).to have_http_status(:success)
+      expect(role.reload.permissions).to eq([])
+    end
+
+    it 'preserves native editing of unrelated role capabilities' do
+      other_role = create(:custom_role, account: account, permissions: ['contact_manage'])
+      patch "/api/v1/accounts/#{account.id}/custom_roles/#{other_role.id}",
+            headers: headers, params: { custom_role: { name: 'Native authority preserved' } }
+      expect(response).to have_http_status(:success)
+      expect(other_role.reload.name).to eq('Native authority preserved')
+    end
+  end
 end

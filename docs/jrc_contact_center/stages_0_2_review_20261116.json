@@ -483,7 +483,8 @@
         "Falhas de carregamento visíveis, rascunho nativo preservado em erro e fechamento bloqueado durante o salvamento",
         "Atualização transacional recarrega o perfil antes do GrantGuard; trilha de capacidades CC na auditoria nativa, sem copiar descrições ou segredos.",
         "Criação e falha de autorização cobertas por oito novos casos Chrome planejados sobre dados sintéticos, sem mocks de API.",
-        "Passo explícito de revisão do nome/descrição e capacidades a conceder/retirar antes de confirmar; alterar o formulário invalida a revisão."
+        "Passo explícito de revisão do nome/descrição e capacidades a conceder/retirar antes de confirmar; alterar o formulário invalida a revisão.",
+        "Cobertura corporativa revalidada na API para criar, renomear, retirar capacidades e excluir perfis globais que envolvam CC. Administrador restrito a unidade não ganha autoridade global por manipular a rota. Perfis sem capacidades CC preservam a política nativa."
       ],
       "remaining_or_external": [
         "Pendente 0–2: herança por equipe/usuário não possui contrato ou armazenamento nativo; requer decisão arquitetural, sem concessões por suposição.",
@@ -496,7 +497,9 @@
         "AdministrationSection.vue",
         "NativeRoleEditor.vue",
         "settings/customRoles/component/CustomRoleModal.vue",
-        "administration.rb"
+        "administration.rb",
+        "enterprise/app/controllers/api/v1/accounts/custom_roles_controller.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb"
       ],
       "reference": {
         "document_1_figure": 11,
@@ -1135,5 +1138,15 @@
       "Indicadores online, alertas e números ilustrativos não são dados operacionais."
     ],
     "current_screenshots": "Capturas da base 1834971c inspecionadas em memória: desktop-light-central e mobile-dark-permissions, hash do artefato verificado. Nova revisão/negação exige capturas do novo SHA; não substitui homologação externa."
-  }
+  },
+  "prior_increment_evidence": {
+    "sha": "6f9e06aee88b65eb36b034352e964962e11ebae2",
+    "run": 43952085591,
+    "artifact": 14271960070,
+    "sha256": "0259e7067081120e3ce836ba9d39226459981d1fe5cfa3ad47a16306ddcadae1",
+    "rails": 415,
+    "vue": 178,
+    "chrome": 52
+  },
+  "final_evidence": "O artefato da CI final inclui call-center-acceptance.json com SHA, hashes da matriz/fontes/capturas e resultados reais. A criação do recibo não declara conclusão integral das etapas 0–2."
 }
