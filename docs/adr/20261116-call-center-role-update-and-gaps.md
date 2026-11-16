@@ -16,3 +16,5 @@ O popup reutiliza CustomRoleModal, API, store e SnackbarContainer existentes. Ap
 4. Team corporativo e supervisor principal não existem no modelo atual. Não inventar status, unidade, supervisão hierárquica ou vínculo Team–Queue dentro de settings sem contrato.
 
 A matriz das 23 figuras mantém pendências 0–2 separadas de fases posteriores. Não há declaração de conclusão integral, publicação, deploy nem homologação externa. Conector PABX possui consultas/sincronização CDR e contratos mapeados; sucesso de CDR não prova publicação de inventário/URA nem ACK remoto. Guardas SQL Supabase em banco descartável não provam bucket/RLS externo.
+
+5. Elegibilidade: ModulePolicy#native_role? preserva o acesso legado de vínculos sem CustomRole. O Word exige que cadastrar usuário não ative automaticamente o Call Center. A correção depende de uma política/migração de elegibilidade que preserve acessos existentes, sem novos grants implícitos. Permanece pendente nas etapas 0–2.

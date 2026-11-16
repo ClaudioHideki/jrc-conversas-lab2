@@ -489,7 +489,8 @@
         "Pendente 0–2: herança por equipe/usuário não possui contrato ou armazenamento nativo; requer decisão arquitetural, sem concessões por suposição.",
         "Pendente 0–2: revisão esperada pelo navegador não existe no payload; bloqueio transacional impede restauração de poder revogado, mas não detecta sobrescrita de campos por dois formulários.",
         "Exclusão de perfil com membros usa dependência nullify nativa; mudança de política exige avaliar todos os módulos.",
-        "Pendente 0–2: matriz visual completa multi-módulo da figura; as concessões existentes seguem explícitas e revisadas."
+        "Pendente 0–2: matriz visual completa multi-módulo da figura; as concessões existentes seguem explícitas e revisadas.",
+        "Pendente 0–2: native_role? mantém acesso legado quando custom_role_id é nulo. O requisito de não ativar novos usuários automaticamente exige política de elegibilidade/migração que preserve usuários existentes; não foi alterado por suposição."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -1133,6 +1134,6 @@
       "Perfil nativo é lista de capacidades com escopo explícito; não é a matriz de herança da figura 11.",
       "Indicadores online, alertas e números ilustrativos não são dados operacionais."
     ],
-    "current_screenshots": "A revisar no artefato do novo SHA; não marcar validação visual antes da inspeção."
+    "current_screenshots": "Capturas da base 1834971c inspecionadas em memória: desktop-light-central e mobile-dark-permissions, hash do artefato verificado. Nova revisão/negação exige capturas do novo SHA; não substitui homologação externa."
   }
 }

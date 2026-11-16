@@ -97,7 +97,9 @@ const permissionChanges = computed(() => {
   const previous = props.selectedRole.permissions || [];
   return {
     added: selectedPermissions.value.filter(value => !previous.includes(value)),
-    removed: previous.filter(value => !selectedPermissions.value.includes(value)),
+    removed: previous.filter(
+      value => !selectedPermissions.value.includes(value)
+    ),
   };
 });
 watch(
@@ -182,12 +184,17 @@ const getTranslationKey = base => {
     : `CUSTOM_ROLE.ADD.${base}`;
 };
 
+const permissionLabel = permission =>
+  t(`CUSTOM_ROLE.PERMISSIONS.${permission.toUpperCase()}`);
+
 const modalTitle = computed(() => t(getTranslationKey('TITLE')));
 const modalDescription = computed(() => t(getTranslationKey('DESC')));
 const submitButtonText = computed(() => t(getTranslationKey('SUBMIT')));
 const primaryButtonText = computed(() => {
   if (!props.reviewLabels) return submitButtonText.value;
-  return reviewing.value ? props.reviewLabels.confirm : props.reviewLabels.review;
+  return reviewing.value
+    ? props.reviewLabels.confirm
+    : props.reviewLabels.review;
 });
 
 const handleCustomRole = async () => {
@@ -293,7 +300,7 @@ const isSubmitDisabled = computed(
               class="ltr:mr-2 rtl:ml-2"
             />
             <label :for="permission" class="text-sm font-normal">
-              {{ $t(`CUSTOM_ROLE.PERMISSIONS.${permission.toUpperCase()}`) }}
+              {{ permissionLabel(permission) }}
             </label>
           </div>
         </div>
@@ -309,9 +316,12 @@ const isSubmitDisabled = computed(
         <p class="whitespace-pre-wrap break-words">{{ description }}</p>
         <template v-for="kind in ['added', 'removed']" :key="kind">
           <p class="mt-2 font-semibold">{{ reviewLabels[kind] }}</p>
-          <ul v-if="permissionChanges[kind].length" class="list-inside list-disc">
+          <ul
+            v-if="permissionChanges[kind].length"
+            class="list-inside list-disc"
+          >
             <li v-for="permission in permissionChanges[kind]" :key="permission">
-              {{ $t('CUSTOM_ROLE.PERMISSIONS.' + permission.toUpperCase()) }}
+              {{ permissionLabel(permission) }}
             </li>
           </ul>
           <p v-else>{{ reviewLabels.unchanged }}</p>
