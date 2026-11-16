@@ -3,6 +3,8 @@
 
 ## Em progresso (WIP)
 
+- [ ] **RETENTION-RELEASE-20261116:** Pedido posterior autoriza concluir testes, imagens, main e deploy Grupo JRC. Consolidou a retirada de filtros de segmento e o popup de propostas; preserva a frente Call Center em WIP fora desta release. ADR0003 protege destruição de histórico antes de efeitos, sem apagar recibos/KEEP. RED inicial:21 exemplos/16 falhas; primeira correção:22 exemplos/1 falha adicional comprovada em AccountDeletionService,21 aprovados incluindo corrida PostgreSQL. Correção final e CI em andamento. Aceite físico WhatsApp continua separado.
+
 - [ ] **WHATSAPP-RELIABILITY-20261116:** Candidata de estados outbound honestos e recibo LIVE imutável, mídia em custódia privada, reuso estrito LIVE/V2 e clocks separados para cronologia/não lidas. Desenho: [ADR0002](docs/adr/0002-recibo-live-custodia-broker.md); execução: [plano local](docs/jrc_consolidation/live_ingress_receipt_plan_20261116.md). Usuário autorizou branch de testes no GitHub Actions; CI e E2E sintético em fechamento, sem merge/imagens/deploy/envio físico. Helper e componente de publicação passaram 10/10 localmente; runtime Rails3.4.12 e build elegível devem ser verificados na CI. Lifecycle hard delete permanece gate de release; a autoridade de bots legados não foi removida por suposição.
 - [ ] **PROPOSTA-POPUP-20261116:** Detalhes comerciais em popup nativo, com X/Esc/fundo e preservação do rascunho. 46 testes locais aprovados; concluir CI e imagem. Escopo: [ADR](docs/adr/20261116-proposta-popup.md).
 

@@ -9,11 +9,12 @@ class AccountDeletionService
   end
 
   def perform
-    Rails.logger.info("Deleting account #{account.id} - #{account.name} that was marked for deletion")
-
-    soft_delete_orphaned_users
-    send_compliance_notification
-    DeleteObjectJob.perform_later(account)
+    JrcBroker::HistoryRetention.guard(account) do
+      Rails.logger.info("Deleting account #{account.id} - #{account.name} that was marked for deletion")
+      soft_delete_orphaned_users
+      send_compliance_notification
+      DeleteObjectJob.perform_later(account)
+    end
   end
 
   private
