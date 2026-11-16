@@ -17,8 +17,9 @@ RSpec.describe JrcVoiceQuality::SupabaseClient do
   end
 
   it 'rejects a foreign or unscoped response even when the transport returns success' do
-    stub_request(:get, "#{url}/vw_qualidade_pabx_dashboard").with(query: hash_including('account_id' => 'eq.11'))
-      .to_return(body: [{ account_id: 22, call_id: 'same-call' }].to_json)
+    parent = stub_request(:get, "#{url}/vw_qualidade_pabx_dashboard")
+    parent.with(query: hash_including('account_id' => 'eq.11'))
+    parent.to_return(body: [{ account_id: 22, call_id: 'same-call' }].to_json)
     expect { client.find_analysis(account_id: 11, call_id: 'same-call') }
       .to raise_error(JrcVoiceQuality::PersistenceError) { |error| expect(error.code).to eq(:scope_unverified) }
   end
@@ -32,25 +33,35 @@ RSpec.describe JrcVoiceQuality::SupabaseClient do
   end
 
   it 'preserves scope on creation and never reuses another Account call' do
-    stub_request(:get, "#{url}/chamadas_pabx").with(query: hash_including('account_id' => 'eq.11')).to_return(body: '[]')
-    request = stub_request(:post, "#{url}/chamadas_pabx").with(body: hash_including('account_id' => 11, 'call_id' => 'same-call'))
-              .to_return(body: [{ id: 'a1-b2', account_id: 11, call_id: 'same-call' }].to_json)
+    parent = stub_request(:get, "#{url}/chamadas_pabx")
+    parent.with(query: hash_including('account_id' => 'eq.11'))
+    parent.to_return(body: '[]')
+    request = stub_request(:post, "#{url}/chamadas_pabx")
+    request.with(body: hash_including('account_id' => 11, 'call_id' => 'same-call'))
+    request.to_return(body: [{ id: 'a1-b2', account_id: 11, call_id: 'same-call' }].to_json)
     expect(client.upsert_call!(account_id: 11, call_id: 'same-call')['id']).to eq('a1-b2')
     expect(request).to have_been_requested.once
   end
 
   it 'refuses a transcription for a parent outside the Account before writing' do
-    stub_request(:get, "#{url}/chamadas_pabx").with(query: hash_including('account_id' => 'eq.11', 'id' => 'eq.a1-b2')).to_return(body: '[]')
+    parent = stub_request(:get, "#{url}/chamadas_pabx")
+    parent.with(query: hash_including('account_id' => 'eq.11', 'id' => 'eq.a1-b2'))
+    parent.to_return(body: '[]')
     expect { client.save_transcription!(account_id: 11, chamada_id: 'a1-b2', text: 'synthetic', model: 'test') }
       .to raise_error(JrcVoiceQuality::PersistenceError)
     expect(a_request(:post, "#{url}/transcricoes_pabx")).not_to have_been_made
   end
 
   it 'scopes status updates and transcript writes even for UUID parent identifiers' do
-    stub_request(:get, "#{url}/chamadas_pabx").with(query: hash_including('account_id' => 'eq.11', 'id' => 'eq.a1-b2'))
-      .to_return(body: [{ id: 'a1-b2', account_id: 11 }].to_json)
-    update = stub_request(:patch, "#{url}/chamadas_pabx").with(query: { 'account_id' => 'eq.11', 'id' => 'eq.a1-b2' }).to_return(body: '')
-    transcript = stub_request(:post, "#{url}/transcricoes_pabx").with(body: hash_including('account_id' => 11, 'chamada_id' => 'a1-b2')).to_return(body: '')
+    parent = stub_request(:get, "#{url}/chamadas_pabx")
+    parent.with(query: hash_including('account_id' => 'eq.11', 'id' => 'eq.a1-b2'))
+    parent.to_return(body: [{ id: 'a1-b2', account_id: 11 }].to_json)
+    update = stub_request(:patch, "#{url}/chamadas_pabx")
+    update.with(query: { 'account_id' => 'eq.11', 'id' => 'eq.a1-b2' })
+    update.to_return(body: '')
+    transcript = stub_request(:post, "#{url}/transcricoes_pabx")
+    transcript.with(body: hash_including('account_id' => 11, 'chamada_id' => 'a1-b2'))
+    transcript.to_return(body: '')
     client.update_call_status!(account_id: 11, chamada_id: 'a1-b2', status: 'erro')
     client.save_transcription!(account_id: 11, chamada_id: 'a1-b2', text: 'synthetic', model: 'test')
     expect(update).to have_been_requested.once
@@ -58,8 +69,9 @@ RSpec.describe JrcVoiceQuality::SupabaseClient do
   end
 
   it 'preserves the approved analysis fields, nils, booleans, arrays and score bounds' do
-    stub_request(:get, "#{url}/chamadas_pabx").with(query: hash_including('account_id' => 'eq.11', 'id' => 'eq.a1-b2'))
-      .to_return(body: [{ id: 'a1-b2', account_id: 11 }].to_json)
+    parent = stub_request(:get, "#{url}/chamadas_pabx")
+    parent.with(query: hash_including('account_id' => 'eq.11', 'id' => 'eq.a1-b2'))
+    parent.to_return(body: [{ id: 'a1-b2', account_id: 11 }].to_json)
     analysis = { 'houve_empatia' => 'false', 'alerta_supervisao' => '1', 'assuntos_abordados' => 'synthetic',
                  'pontos_positivos' => ['synthetic'], 'nota_final' => 120,
                  'avaliacao_atendente' => { 'cordialidade' => 999, 'empatia' => -5, 'resolucao_problema' => 99 } }

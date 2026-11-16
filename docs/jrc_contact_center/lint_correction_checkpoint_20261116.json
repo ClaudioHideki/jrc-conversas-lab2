@@ -36,5 +36,24 @@
     "no main change",
     "no Docker build/publication",
     "no production"
-  ]
+  ],
+  "intermediate_validation": {
+    "sha": "54874f524394b6e3acf11c3b057e1a45efc94f2d",
+    "run": 43879090137,
+    "rspec": {
+      "examples": 347,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "vue": {
+      "examples": 166,
+      "failures": 0,
+      "pending": 0
+    },
+    "ruby_new_remaining_at_that_sha": 38,
+    "artifact_id": 14232510367,
+    "artifact_sha256": "e7e92ef2cedc7db80c1ab077d13ed04c1f4325d17cfcf26431df7f34409cb87e",
+    "next_changes": "Ruby layout/block forwarding corrections; exact pinned formatter output for two Vue templates; disambiguated synthetic Chrome status locator without changing assertions"
+  }
 }

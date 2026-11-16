@@ -32,12 +32,12 @@ class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::B
     @contact_center_access ||= JrcContactCenter::AccessScope.new(user_context: pundit_user)
   end
 
-  def list_payload(relation, &serializer)
+  def list_payload(relation, &)
     page = params.fetch(:page, 1).to_i.clamp(1, 1_000_000)
     per_page = params.fetch(:per_page, 20).to_i.clamp(1, 100)
     total = relation.count
     rows = params.key?(:page) ? relation.offset((page - 1) * per_page).limit(per_page) : relation
-    base_payload.merge(items: rows.map(&serializer),
+    base_payload.merge(items: rows.map(&),
                        meta: { page: page, per_page: per_page, total: total, pages: (total.to_f / per_page).ceil })
   end
 

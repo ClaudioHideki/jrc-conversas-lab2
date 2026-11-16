@@ -90,9 +90,8 @@ class JrcVoiceQuality::SupabaseClient
 
     row = Array(rows).first
     verify_row!(row, account_id) if row
-    if row && row['call_id'].to_s != call_id.to_s
-      raise JrcVoiceQuality::PersistenceError.new('Chamada fora da consulta.', code: :scope_unverified)
-    end
+    raise JrcVoiceQuality::PersistenceError.new('Chamada fora da consulta.', code: :scope_unverified) if row && row['call_id'].to_s != call_id.to_s
+
     row ? summary_payload(row) : nil
   end
 
@@ -101,15 +100,15 @@ class JrcVoiceQuality::SupabaseClient
     attributes = metadata.to_h.stringify_keys
     account_id = scope_id!(attributes.fetch('account_id'))
     call_id = resource_id!(attributes.fetch('call_id'))
-    existing = request(:get, '/chamadas_pabx', query: { select: 'id,account_id,call_id', account_id: "eq.#{account_id}",
-                                                      call_id: "eq.#{call_id}", limit: 1 }).first
+    query = { select: 'id,account_id,call_id', account_id: "eq.#{account_id}", call_id: "eq.#{call_id}", limit: 1 }
+    existing = request(:get, '/chamadas_pabx', query: query).first
     if existing
       verify_row!(existing, account_id)
       return existing
     end
 
-    row = Array(request(:post, '/chamadas_pabx', body: attributes.merge('account_id' => account_id),
-                        headers: { 'Prefer' => 'return=representation' })).first
+    response = request(:post, '/chamadas_pabx', body: attributes.merge('account_id' => account_id), headers: { 'Prefer' => 'return=representation' })
+    row = Array(response).first
     raise JrcVoiceQuality::PersistenceError.new('Chamada nao persistida.', code: :supabase_error) unless row
 
     verify_row!(row, account_id)
@@ -204,6 +203,7 @@ class JrcVoiceQuality::SupabaseClient
     unless valid && value.to_s.match?(/\A[0-9A-Za-z_.:-]{1,255}\z/)
       raise JrcVoiceQuality::PersistenceError.new('Identificador de qualidade invalido.', code: :scope_unverified)
     end
+
     value.to_s
   end
 
@@ -226,8 +226,8 @@ class JrcVoiceQuality::SupabaseClient
   end
 
   def verify_call!(account_id, chamada_id)
-    rows = request(:get, '/chamadas_pabx', query: { select: 'id,account_id', id: "eq.#{resource_id!(chamada_id)}",
-                                                  account_id: "eq.#{scope_id!(account_id)}", limit: 1 })
+    query = { select: 'id,account_id', id: "eq.#{resource_id!(chamada_id)}", account_id: "eq.#{scope_id!(account_id)}", limit: 1 }
+    rows = request(:get, '/chamadas_pabx', query: query)
     verify_row!(Array(rows).first, account_id)
   end
 

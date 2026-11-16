@@ -328,10 +328,7 @@ onBeforeUnmount(() => {
     >
       {{ label('PENDING') }}
     </p>
-    <p
-      v-if="key === 'closures'"
-      class="text-sm text-n-slate-11"
-    >
+    <p v-if="key === 'closures'" class="text-sm text-n-slate-11">
       {{ label('ACW_SCOPE') }}
     </p>
     <p
@@ -360,14 +357,16 @@ onBeforeUnmount(() => {
       v-if="key === 'permissions' && context.native_links?.permissions"
       :to="{ name: 'custom_roles_list', params: { accountId } }"
       class="inline-block text-sm text-n-blue-11"
-      >{{ label('NATIVE_PERMISSIONS') }}</RouterLink
     >
+      {{ label('NATIVE_PERMISSIONS') }}
+    </RouterLink>
     <RouterLink
       v-if="key === 'approvals' && context.native_links?.approvals"
       :to="{ name: 'jrc_approvals', params: { accountId } }"
       class="inline-block text-sm text-n-blue-11"
-      >{{ label('NATIVE_APPROVALS') }}</RouterLink
     >
+      {{ label('NATIVE_APPROVALS') }}
+    </RouterLink>
     <nav
       v-if="key === 'queues'"
       class="flex flex-wrap gap-2"
@@ -428,29 +427,16 @@ onBeforeUnmount(() => {
           {{ label('CLEAR') }}
         </button>
       </form>
-      <p
-        v-if="loading"
-        role="status"
-      >
+      <p v-if="loading" role="status">
         {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}
       </p>
-      <p
-        v-else-if="failed"
-        role="alert"
-        class="text-n-ruby-11"
-      >
+      <p v-else-if="failed" role="alert" class="text-n-ruby-11">
         {{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}
       </p>
-      <p
-        v-else-if="!items.length"
-        class="text-sm text-n-slate-11"
-      >
+      <p v-else-if="!items.length" class="text-sm text-n-slate-11">
         {{ t('JRC_CONTACT_CENTER.COMMON.EMPTY') }}
       </p>
-      <div
-        v-else
-        class="divide-y divide-n-weak"
-      >
+      <div v-else class="divide-y divide-n-weak">
         <article
           v-for="row in tableRows"
           :key="row.id || row.name"
@@ -551,10 +537,9 @@ onBeforeUnmount(() => {
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
           /></label>
           <label class="flex items-center gap-2 text-sm sm:col-span-2"
-            ><input
-              v-model="draft.voice_required"
-              type="checkbox"
-            />{{ label('VOICE_REQUIRED') }}</label
+            ><input v-model="draft.voice_required" type="checkbox" />{{
+              label('VOICE_REQUIRED')
+            }}</label
           >
         </template>
         <template v-else-if="resource === 'memberships'">
@@ -593,22 +578,19 @@ onBeforeUnmount(() => {
             </select></label
           >
           <label class="flex items-center gap-2 text-sm"
-            ><input
-              v-model="draft.participates"
-              type="checkbox"
-            />{{ label('PARTICIPATES') }}</label
+            ><input v-model="draft.participates" type="checkbox" />{{
+              label('PARTICIPATES')
+            }}</label
           >
           <label class="flex items-center gap-2 text-sm"
-            ><input
-              v-model="draft.supervises"
-              type="checkbox"
-            />{{ label('SUPERVISES') }}</label
+            ><input v-model="draft.supervises" type="checkbox" />{{
+              label('SUPERVISES')
+            }}</label
           >
           <label class="flex items-center gap-2 text-sm"
-            ><input
-              v-model="draft.active"
-              type="checkbox"
-            />{{ label('ACTIVE') }}</label
+            ><input v-model="draft.active" type="checkbox" />{{
+              label('ACTIVE')
+            }}</label
           >
         </template>
         <template v-else>
@@ -620,9 +602,8 @@ onBeforeUnmount(() => {
               maxlength="120"
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
           /></label>
-          <label
-            v-if="resource !== 'teams'"
-            class="text-sm"
+          <label v-if="resource !== 'teams'"
+class="text-sm"
             >{{ label('CODE')
             }}<input
               v-model="draft.code"
@@ -630,18 +611,16 @@ onBeforeUnmount(() => {
               maxlength="80"
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
           /></label>
-          <label
-            v-if="resource === 'teams'"
-            class="text-sm sm:col-span-2"
+          <label v-if="resource === 'teams'"
+class="text-sm sm:col-span-2"
             >{{ label('DESCRIPTION_FIELD')
             }}<textarea
               v-model="draft.description"
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
             />
           </label>
-          <label
-            v-if="resource === 'queues'"
-            class="text-sm"
+          <label v-if="resource === 'queues'"
+class="text-sm"
             >{{ label('UNIT')
             }}<select
               v-model="draft.unit_id"
@@ -718,9 +697,8 @@ onBeforeUnmount(() => {
               </select></label
             >
           </template>
-          <label
-            v-if="resource !== 'teams'"
-            class="text-sm"
+          <label v-if="resource !== 'teams'"
+class="text-sm"
             >{{ label('STATUS')
             }}<select
               v-model="draft.status"

@@ -6,6 +6,7 @@ RSpec.describe 'Call Center administration isolation', type: :request do
   let(:member) { account.account_users.find_by!(user: user) }
   let(:headers) { user.create_new_auth_token }
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center" }
+
   before { account.enable_features!('jrc_contact_center') }
 
   it 'does not grant new recording/publication/approval/audit authorities to a native administrator' do
@@ -28,8 +29,8 @@ RSpec.describe 'Call Center administration isolation', type: :request do
 
   it 'keeps publication blocked without permission or a provider contract' do
     unit = JrcContactCenter::Unit.create!(account: account, code: 'TEST', name: 'Test', kind: 'sac')
-    post "#{base}/routing_rules", params: { routing_rule: { rule_key: 'TEST', version: 1, kind: 'ddd', target_unit_id: unit.id,
-                                                          priority: 1, state: 'published' } }, headers: headers, as: :json
+    rule = { rule_key: 'TEST', version: 1, kind: 'ddd', target_unit_id: unit.id, priority: 1, state: 'published' }
+    post "#{base}/routing_rules", params: { routing_rule: rule }, headers: headers, as: :json
     expect(response).to have_http_status(:unauthorized)
     expect(JrcContactCenter::RoutingRule.where(account: account)).to be_empty
   end
@@ -53,12 +54,15 @@ RSpec.describe 'Call Center administration isolation', type: :request do
     company = JrcCustomers::Company.create!(account: account, name: 'Synthetic issuer', relationship_type: 'internal', active: true)
     first = JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'Unit A', code: 'UNIT-A', active: true)
     second = JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'Unit B', code: 'UNIT-B', active: true)
-    JrcCrm::UserBusinessUnit.create!(account: account, user: user, scope: 'BUSINESS_UNIT', business_unit: first,
-                                    company: company, active: true, structure_managed: true)
-    allowed = JrcContactCenter::Unit.create!(account: account, name: 'Allowed', code: 'ALLOWED', kind: 'sac',
-                                            settings: { issuer_company_id: company.id, business_unit_id: first.id })
-    denied = JrcContactCenter::Unit.create!(account: account, name: 'Denied', code: 'DENIED', kind: 'sac',
-                                           settings: { issuer_company_id: company.id, business_unit_id: second.id })
+    JrcCrm::UserBusinessUnit.create!(
+      account: account, user: user, scope: 'BUSINESS_UNIT', business_unit: first, company: company, active: true, structure_managed: true
+    )
+    allowed = JrcContactCenter::Unit.create!(
+      account: account, name: 'Allowed', code: 'ALLOWED', kind: 'sac', settings: { issuer_company_id: company.id, business_unit_id: first.id }
+    )
+    denied = JrcContactCenter::Unit.create!(
+      account: account, name: 'Denied', code: 'DENIED', kind: 'sac', settings: { issuer_company_id: company.id, business_unit_id: second.id }
+    )
     get "#{base}/units", headers: headers
     expect(response.parsed_body.fetch('items').pluck('id')).to eq([allowed.id])
     patch "#{base}/units/#{denied.id}", params: { unit: { name: 'Forbidden' } }, headers: headers, as: :json

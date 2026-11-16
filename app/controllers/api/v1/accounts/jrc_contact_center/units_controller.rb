@@ -25,7 +25,7 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
   def unit_params
     permitted = params.require(:unit).permit(:code, :name, :kind, :status, :timezone, :parent_unit_id, settings: {})
     contact_center_access.units.find(permitted[:parent_unit_id]) if permitted[:parent_unit_id].present?
-    settings = permitted[:settings]&.to_h || {}
+    settings = permitted[:settings].to_h
     settings = contact_center_access.units.find(params[:id]).settings.merge(settings) if action_name == 'update'
     JrcContactCenter::OrganizationalScope.new(account: Current.account, account_user: Current.account_user).authorize_links!(settings)
     permitted[:settings] = settings

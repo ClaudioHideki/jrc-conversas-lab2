@@ -39,9 +39,8 @@ RSpec.describe 'PABX persistence and HTTP isolation', :pabx, type: :request do
 
   it 'authorizes a distinct accountcode server-side and ignores forged provenance fields' do
     integration
-    patch path, params: { settings: settings, scope_mapping: { accountcode: '12', cdr_identity: 'accountcode',
-                                                              account_id: 999, authorized_by_id: 999 } },
-                headers: root.create_new_auth_token, as: :json
+    mapping = { accountcode: '12', cdr_identity: 'accountcode', account_id: 999, authorized_by_id: 999 }
+    patch path, params: { settings: settings, scope_mapping: mapping }, headers: root.create_new_auth_token, as: :json
     expect(response).to have_http_status(:ok)
     mapping = integration.reload.pabx_settings.fetch('scope_mapping')
     expect(mapping).to include('account_id' => account.id, 'tenant' => '8', 'accountcode' => '12', 'authorized_by_id' => root.id)
@@ -163,7 +162,7 @@ RSpec.describe 'PABX persistence and HTTP isolation', :pabx, type: :request do
       post "#{path}/test_connection", headers: root.create_new_auth_token
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body).to include('expected_tenant' => '8', 'returned_accountcode' => '12',
-                                             'overall' => 'blocked_scope', 'error' => 'TENANT_MISMATCH')
+                                              'overall' => 'blocked_scope', 'error' => 'TENANT_MISMATCH')
       expect(integration.reload.pabx_settings['expected_tenant']).to eq('8')
       expect(integration.pabx_sync_state['diagnostic']['overall']).to eq('blocked_scope')
       expect(a_request(:any, %r{/ramais|/relatorio-cdr|/gravacoes})).not_to have_been_made

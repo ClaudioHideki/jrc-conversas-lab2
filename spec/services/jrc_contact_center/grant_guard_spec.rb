@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe JrcContactCenter::GrantGuard do
   let(:account) { create(:account) }
   let(:actor) { create(:user, account: account, role: :administrator) }
+
   before { account.enable_features!('jrc_contact_center') }
 
   it 'does not let a native administrator manufacture a newly introduced power' do

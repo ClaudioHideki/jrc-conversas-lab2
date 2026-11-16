@@ -16,7 +16,7 @@ module Enterprise::Api::V1::Accounts::AgentsController
   private
 
   def authorize_contact_center_role_assignment!
-    return unless params[:custom_role_id].present?
+    return if params[:custom_role_id].blank?
 
     role = Current.account.custom_roles.find(params[:custom_role_id])
     previous = @agent&.account_users&.find_by(account_id: Current.account.id)&.custom_role&.permissions || []

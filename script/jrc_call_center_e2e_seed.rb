@@ -1,7 +1,7 @@
 # Executed only by the exclusive disposable runner. No provider is configured.
 raise 'Owned synthetic runner required' unless ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted'
 raise 'Owned database required' unless Rails.env.test? && ENV['POSTGRES_HOST'] == '127.0.0.1' &&
-                                     ActiveRecord::Base.connection_db_config.database == 'jrc_sd_bc_portal_concurrency_20261025_test'
+                                      ActiveRecord::Base.connection_db_config.database == 'jrc_sd_bc_portal_concurrency_20261025_test'
 raise 'No external integration allowed' if ENV['SUPABASE_URL'].present? || ENV['SUPABASE_SERVICE_ROLE_KEY'].present?
 
 account = Account.create!(name: 'SYNTHETIC Call Center QA', locale: 'pt_BR')

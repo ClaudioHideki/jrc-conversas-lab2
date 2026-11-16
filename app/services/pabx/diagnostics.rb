@@ -38,9 +38,9 @@ class Pabx::Diagnostics
     mapping = Pabx::ScopeMapping.new(@integration)
     compatible = mapping.matches?(returned)
     { api: 'connected', authentication: 'ok', expected_tenant: expected, returned_accountcode: returned,
-               tenant_compatible: compatible, expected_accountcode: mapping.accountcode, extension: extension,
-               external_homologation: 'pending', checked_at: Time.current.iso8601,
-               insecure_http: @settings.data['base_url'].to_s.start_with?('http://') }
+      tenant_compatible: compatible, expected_accountcode: mapping.accountcode, extension: extension,
+      external_homologation: 'pending', checked_at: Time.current.iso8601,
+      insecure_http: @settings.data['base_url'].to_s.start_with?('http://') }
   end
 
   def probe

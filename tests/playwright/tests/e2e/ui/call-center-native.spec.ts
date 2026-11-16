@@ -46,9 +46,9 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
     'recordings',
   ]) {
     await page.locator(`[data-card="${key}"]`).click();
-    await expect(page.getByRole('status')).toContainText(
-      'Funcionalidade pendente'
-    );
+    await expect(
+      page.locator('[data-administration-section] [role="status"]')
+    ).toContainText('Funcionalidade pendente');
     await expect(page.locator('[data-create]')).toHaveCount(0);
     await page
       .getByText('Voltar à Central Administrativa', { exact: true })

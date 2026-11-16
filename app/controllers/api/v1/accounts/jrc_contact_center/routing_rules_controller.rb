@@ -28,8 +28,8 @@ class Api::V1::Accounts::JrcContactCenter::RoutingRulesController < Api::V1::Acc
 
   def scoped_rules
     JrcContactCenter::OrganizationalScope.new(account: Current.account, account_user: Current.account_user)
-                                       .records(JrcContactCenter::RoutingRule.where(account: Current.account),
-                                                unit_column: :target_unit_id, queue_column: :target_queue_id)
+                                         .records(JrcContactCenter::RoutingRule.where(account: Current.account),
+                                                  unit_column: :target_unit_id, queue_column: :target_queue_id)
   end
 
   def routing_params
