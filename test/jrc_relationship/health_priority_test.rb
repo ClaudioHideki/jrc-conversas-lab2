@@ -3,6 +3,8 @@ require 'minitest/autorun'
 require 'date'
 module JrcRelationship; end
 require_relative '../../app/services/jrc_relationship/health_score'
+require_relative '../../app/services/jrc_relationship/priority_bands'
+require_relative '../../app/services/jrc_relationship/priority_signals'
 require_relative '../../app/services/jrc_relationship/priority'
 
 class RelationshipHealthPriorityTest < Minitest::Test

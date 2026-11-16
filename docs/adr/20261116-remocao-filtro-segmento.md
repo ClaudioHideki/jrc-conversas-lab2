@@ -16,4 +16,8 @@ Cadastros, classificações, permissões, dados persistidos, contratos de API e 
 - Vitest local não iniciou os testes porque a instalação compartilhada de dependências não contém `fake-indexeddb/auto/index.mjs`. A aprovação dos testes depende da CI com instalação pelo lockfile.
 - Gerar e conferir uma imagem Linux/amd64 no SHA exato por `build-ghcr.yml`, incluindo seus gates e smokes existentes. Registrar SHA, execução e digest na entrega.
 
+A primeira execução `43937497762` aprovou os dois jobs de regressão, mas o gate Ruby puro terminou com 11 erros de carregamento de `JrcRelationship::PrioritySignals`. Esse teste executa sem o autoload do Rails e não carregava `PrioritySignals`/`PriorityBands`, já usados pelo serviço preservado. Foram acrescentados somente os dois `require_relative` no teste existente; expectativas e fontes funcionais Ruby permanecem intactas. Repetir todos os gates no commit corrigido.
+
+Após a correção, o comando exato de testes puros de Relacionamento e Operações passou na imagem Ruby existente, sem rede e com o código montado somente para leitura: 92 testes, 483 assertions, zero falhas, erros ou skips.
+
 Publicação da nova imagem está no escopo solicitado. Implantação em ambientes existentes não foi solicitada.
