@@ -87,11 +87,13 @@ class GuardTest(unittest.TestCase):
         fake.poll.return_value = None
         with patch.object(attempt,"sample",side_effect=[{},RuntimeError("ram reserve")]), \
              patch("guard.subprocess.Popen",return_value=fake), patch("guard.os.getpgid",return_value=999), \
-             patch("guard.os.killpg") as kill, patch("guard.time.monotonic",return_value=1):
+             patch("guard.os.killpg") as kill, patch("guard.time.monotonic",return_value=1), \
+             patch("guard.check_preserved_refs") as check_refs:
             with self.assertRaises(RuntimeError):
                 attempt.command(["owned"],"resource-test")
             kill.assert_called_once_with(999,guard.signal.SIGTERM)
             fake.wait.assert_called_once_with(timeout=10)
+            check_refs.assert_called_once_with()
 
     def test_foreign_process_group_never_killed(self):
         import tempfile
@@ -103,10 +105,63 @@ class GuardTest(unittest.TestCase):
         fake.pid = 999; fake.poll.return_value = None
         with patch.object(attempt,"sample",side_effect=[{},RuntimeError("disk reserve")]), \
              patch("guard.subprocess.Popen",return_value=fake), patch("guard.os.getpgid",return_value=123), \
-             patch("guard.os.killpg") as kill, patch("guard.time.monotonic",return_value=1):
+             patch("guard.os.killpg") as kill, patch("guard.time.monotonic",return_value=1), \
+             patch("guard.check_preserved_refs") as check_refs:
             with self.assertRaises(RuntimeError):
                 attempt.command(["owned"],"foreign-test")
             kill.assert_not_called()
+            check_refs.assert_called_once_with()
+
+    def reference_responder(self, changed=None):
+        import io
+        expected={"main":guard.BASE_MAIN,
+                  "codex/quick-release-image-5c3fb7f7-20261115":guard.PRODUCT,
+                  "codex/respostas-rapidas-aprovacoes-20261115":"2be22e86baecbe75c302bb03208e78e67301c743"}
+        seen=[]
+        def response(request,timeout):
+            prefix="https://api.github.com/repos/"+guard.REPO+"/git/ref/heads/"
+            self.assertTrue(request.full_url.startswith(prefix))
+            branch=request.full_url.removeprefix(prefix)
+            self.assertIn(branch,expected)
+            self.assertEqual(request.get_header("Authorization"),"Bearer synthetic-unit-token")
+            self.assertEqual(timeout,30)
+            seen.append(branch)
+            value="0"*40 if branch==changed else expected[branch]
+            return io.BytesIO(json.dumps({"object":{"sha":value}}).encode())
+        return response,seen
+
+    def test_reference_checks_bind_all_three_authenticated_refs(self):
+        response,seen=self.reference_responder()
+        with patch("guard.REF_TOKEN","synthetic-unit-token"), patch("guard.urllib.request.urlopen",side_effect=response):
+            guard.check_preserved_refs()
+        self.assertEqual(len(seen),3)
+        self.assertEqual(len(set(seen)),3)
+
+    def test_changed_live_main_is_rejected(self):
+        response,_=self.reference_responder("main")
+        with patch("guard.REF_TOKEN","synthetic-unit-token"), patch("guard.urllib.request.urlopen",side_effect=response):
+            with self.assertRaisesRegex(RuntimeError,"Protected reference advanced: main"):
+                guard.check_preserved_refs()
+
+    def test_changed_product_alias_is_rejected(self):
+        response,_=self.reference_responder("codex/quick-release-image-5c3fb7f7-20261115")
+        with patch("guard.REF_TOKEN","synthetic-unit-token"), patch("guard.urllib.request.urlopen",side_effect=response):
+            with self.assertRaisesRegex(RuntimeError,"Protected reference advanced"):
+                guard.check_preserved_refs()
+
+    def test_changed_original_checkpoint_alias_is_rejected(self):
+        response,_=self.reference_responder("codex/respostas-rapidas-aprovacoes-20261115")
+        with patch("guard.REF_TOKEN","synthetic-unit-token"), patch("guard.urllib.request.urlopen",side_effect=response):
+            with self.assertRaisesRegex(RuntimeError,"Protected reference advanced"):
+                guard.check_preserved_refs()
+
+    def test_reference_failure_blocks_process_start(self):
+        attempt=object.__new__(guard.Attempt)
+        with patch("guard.check_preserved_refs",side_effect=RuntimeError("Protected reference advanced")), \
+             patch("guard.subprocess.Popen") as spawn:
+            with self.assertRaisesRegex(RuntimeError,"Protected reference advanced"):
+                attempt.command(["owned"],"ref-denial")
+            spawn.assert_not_called()
 
 
     def test_effective_start_requires_eight_gib(self):
@@ -188,4 +243,4 @@ if __name__ == "__main__":
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     report = {"tests":result.testsRun,"failures":len(result.failures),"errors":len(result.errors),"skipped":len(result.skipped)}
     Path(os.environ["GUARD_TEST_REPORT"]).write_text(json.dumps(report)+"\n")
-    sys.exit(0 if result.wasSuccessful() and result.testsRun==19 and not result.skipped else 1)
+    sys.exit(0 if result.wasSuccessful() and result.testsRun==24 and not result.skipped else 1)
