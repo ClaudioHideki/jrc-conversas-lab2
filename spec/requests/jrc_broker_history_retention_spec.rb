@@ -207,4 +207,65 @@ RSpec.describe 'Broker custody survives deletion requests', type: :request do
     expect(Inbox.exists?(inbox.id)).to be(false)
     expect(Conversation.exists?(unprotected_conversation.id)).to be(false)
   end
+
+  it 'rechecks a stale contact batch when CHAT custody appears before bulk deletion' do
+    candidate = create(:contact, account: account, email: nil, phone_number: nil, identifier: nil, created_at: 31.days.ago)
+    link = create(:contact_inbox, inbox: inbox, contact: candidate, created_at: 91.days.ago)
+    relation = Contact.where(id: candidate.id)
+    allow(account.contacts).to receive(:stale_without_conversations).and_return(relation)
+    retained_conversation = nil
+    proof = nil
+    allow(relation).to receive(:find_in_batches).and_wrap_original do |method, *args, **kwargs, &cleanup|
+      method.call(*args, **kwargs) do |batch|
+        retained_conversation = create(:conversation, account: account, inbox: inbox, contact: candidate, contact_inbox: link, status: :resolved)
+        proof = JrcBrokerHistoryReceipt.create!(account: account, inbox: inbox, contact: candidate, conversation: retained_conversation,
+                                                receipt_id: SecureRandom.uuid, organization_id: SecureRandom.uuid, integration_id: SecureRandom.uuid,
+                                                history_account_identity: SecureRandom.uuid, source_id: SecureRandom.uuid,
+                                                broker_conversation_id: SecureRandom.uuid, record_kind: 'CHAT', request_hash: 'a' * 64,
+                                                recipient: { 'kind' => 'INDIVIDUAL', 'jid' => '123@lid' }, created_at: Time.current)
+        cleanup.call(batch)
+      end
+    end
+
+    Internal::RemoveStaleContactsService.new(account: account).perform
+
+    aggregate_failures do
+      expect(proof).to be_present
+      expect(Contact.exists?(candidate.id)).to be(true)
+      expect(ContactInbox.exists?(link.id)).to be(true)
+      expect(Conversation.exists?(retained_conversation.id)).to be(true)
+      expect(JrcBrokerHistoryReceipt.exists?(proof.id)).to be(true)
+    end
+  end
+
+  it 'rechecks a stale contact inbox batch when CHAT custody appears before bulk deletion' do
+    candidate = create(:contact, account: account)
+    link = create(:contact_inbox, inbox: inbox, contact: candidate, created_at: 91.days.ago)
+    relation = ContactInbox.where(id: link.id)
+    service = Internal::RemoveStaleContactInboxesService.new
+    allow(service).to receive(:stale_contact_inboxes).and_return(relation)
+    retained_conversation = nil
+    proof = nil
+    allow(relation).to receive(:find_in_batches).and_wrap_original do |method, *args, **kwargs, &cleanup|
+      method.call(*args, **kwargs) do |batch|
+        retained_conversation = create(:conversation, account: account, inbox: inbox, contact: candidate, contact_inbox: link, status: :resolved)
+        proof = JrcBrokerHistoryReceipt.create!(account: account, inbox: inbox, contact: candidate, conversation: retained_conversation,
+                                                receipt_id: SecureRandom.uuid, organization_id: SecureRandom.uuid, integration_id: SecureRandom.uuid,
+                                                history_account_identity: SecureRandom.uuid, source_id: SecureRandom.uuid,
+                                                broker_conversation_id: SecureRandom.uuid, record_kind: 'CHAT', request_hash: 'b' * 64,
+                                                recipient: { 'kind' => 'INDIVIDUAL', 'jid' => '456@lid' }, created_at: Time.current)
+        cleanup.call(batch)
+      end
+    end
+
+    with_modified_env(REMOVE_STALE_CONTACT_INBOX_JOB_STATUS: 'true') { service.perform }
+
+    aggregate_failures do
+      expect(proof).to be_present
+      expect(Contact.exists?(candidate.id)).to be(true)
+      expect(ContactInbox.exists?(link.id)).to be(true)
+      expect(Conversation.exists?(retained_conversation.id)).to be(true)
+      expect(JrcBrokerHistoryReceipt.exists?(proof.id)).to be(true)
+    end
+  end
 end
