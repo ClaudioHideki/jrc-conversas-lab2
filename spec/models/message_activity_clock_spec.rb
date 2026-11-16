@@ -33,7 +33,7 @@ RSpec.describe Message do
     expect(conversation.custom_attributes).to eq('synthetic_pending' => 'retained')
     expect(conversation.will_save_change_to_custom_attributes?).to be(true)
     expect(persisted.custom_attributes).to eq({})
-    expect(message.conversation.custom_attributes).to eq({})
+    expect(message.conversation.custom_attributes).to eq('synthetic_pending' => 'retained')
     expect(message.push_event_data.dig(:conversation, :last_activity_at)).to eq(persisted.last_activity_at.to_i)
   end
 

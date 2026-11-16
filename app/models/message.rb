@@ -521,9 +521,15 @@ class Message < ApplicationRecord
                 .update_all(last_activity_at: created_at, updated_at: Time.current)
     # Dispatch payloads must use the committed database clock, not a stale
     # association or a maximum computed from an old ORM snapshot.
-    # Refresh this message's target without discarding unsaved changes on a
-    # Conversation instance shared with its caller through inverse associations.
-    association(:conversation).reload(true)
+    clocks = Conversation.uncached do
+      Conversation.where(id: conversation_id, account_id: account_id).pick(:last_activity_at, :updated_at)
+    end
+    raise ActiveRecord::RecordNotFound, "Couldn't find Conversation" unless clocks
+
+    # Keep the shared instance for first-reply/waiting callbacks and retain the
+    # caller's pending attributes. Only the committed clocks are refreshed.
+    conversation.assign_attributes(last_activity_at: clocks.first, updated_at: clocks.last)
+    conversation.clear_attribute_changes(%w[last_activity_at updated_at])
     # rubocop:enable Rails/SkipsModelValidations
   end
 
