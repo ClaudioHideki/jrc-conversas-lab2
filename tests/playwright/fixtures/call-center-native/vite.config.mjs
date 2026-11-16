@@ -22,5 +22,7 @@ export default defineConfig({
   build: {
     outDir: local('../../../../.codex/call-center-native-static'),
     emptyOutDir: false,
+    // Hidden maps are read only by the isolated diagnostic, never uploaded.
+    sourcemap: 'hidden',
   },
 });
