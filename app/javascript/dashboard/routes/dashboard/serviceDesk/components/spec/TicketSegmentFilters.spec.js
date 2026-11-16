@@ -35,7 +35,7 @@ const build = query =>
     },
   });
 
-describe('Service Desk published customer segment control', () => {
+describe('Service Desk filters without the segment control', () => {
   beforeEach(() => {
     mocks.directory = ref(true);
     mocks.session = {
@@ -52,37 +52,33 @@ describe('Service Desk published customer segment control', () => {
     };
   });
 
-  it('uses the Service Desk catalog and applies the selected segment with the existing form filters', async () => {
+  it('omits the segment picker and preserves the existing form filters', async () => {
     const wrapper = build({
       customer_segment_id: '12',
       q: 'Printer',
       phase: 'active',
     });
-    const picker = wrapper.getComponent(Picker);
-    expect(picker.props('moduleKey')).toBe('service_desk');
-    expect(picker.props('modelValue')).toBe('12');
-    picker.vm.$emit('update:modelValue', '13');
+    expect(wrapper.findComponent(Picker).exists()).toBe(false);
     await flushPromises();
     expect(wrapper.emitted('apply')).toBeUndefined();
     await wrapper.get('form').trigger('submit');
     expect(wrapper.emitted('apply').at(-1)[0]).toMatchObject({
-      customer_segment_id: '13',
+      customer_segment_id: '12',
       q: 'Printer',
       phase: 'active',
     });
     wrapper.unmount();
   });
 
-  it('can remove a segment after losing directory access without loading the protected catalog or clearing other filters', async () => {
+  it('does not expose the removed segment section after losing directory access', async () => {
     mocks.directory.value = false;
     const wrapper = build({ customer_segment_id: '12', q: 'Printer' });
     expect(wrapper.findComponent(Picker).exists()).toBe(false);
-    await wrapper
-      .findAllComponents(Button)
-      .find(button => button.props('label') === 'Limpar filtro de segmento')
-      .trigger('click');
+    expect(wrapper.text()).not.toContain('Filtrar por segmento');
+    expect(wrapper.text()).not.toContain('Limpar filtro de segmento');
+    await wrapper.get('form').trigger('submit');
     expect(wrapper.emitted('apply').at(-1)[0]).toMatchObject({
-      customer_segment_id: '',
+      customer_segment_id: '12',
       q: 'Printer',
     });
     wrapper.unmount();
@@ -98,7 +94,7 @@ describe('Service Desk published customer segment control', () => {
     await wrapper.setProps({
       query: { customer_segment_id: '19', q: 'Updated' },
     });
-    expect(wrapper.getComponent(Picker).props('modelValue')).toBe('19');
+    expect(wrapper.findComponent(Picker).exists()).toBe(false);
     await wrapper.get('form').trigger('submit');
     expect(wrapper.emitted('apply').at(-1)[0]).toMatchObject({
       customer_segment_id: '19',

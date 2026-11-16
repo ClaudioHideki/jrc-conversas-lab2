@@ -3,6 +3,8 @@
 
 ## Em progresso (WIP)
 
+- [ ] **REMOVER-FILTRO-SEGMENTO-20261116:** Retirar o painel “Filtrar por segmento” de todas as oito superfícies consumidoras, preservar os demais filtros e gerar uma imagem a partir do produto `5c3fb7f7`. Sintaxe e lint dirigidos aprovados; testes/CI/imagem pendentes. Decisão e limites: [ADR](docs/adr/20261116-remocao-filtro-segmento.md).
+
 - [ ] **QUICK-REPLIES-RELEASE-20261115:** Correções de anexo/revisão, seleção de catálogo e limite nativo implementadas e revisadas; 504 testes Vue e 15 negativas do contrato passaram. Concluir Rails/Chrome/E2E/CI/imagem e aplicação autorizada no Grupo JRC antes de marcar a release concluída. Plano e evidências: `docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md`.
 
 - [ ] **RELEASE-20261114:** Promover a consolidação de histórico/runtime/aprovações após CI e imagem do SHA exato; verificar versão, migrations e saúde no Grupo JRC. Código e testes locais registrados em CONTINUE-AQUI.md; implantação ainda não comprovada.

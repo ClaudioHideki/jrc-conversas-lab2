@@ -24,6 +24,10 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 
 Veja [TASKS.md](TASKS.md). Roadmaps e planos anteriores continuam válidos no seu escopo.
 
+### Incremento autorizado de 16/11/2026
+
+Remover o filtro visual de segmento em todos os módulos consumidores e gerar uma nova imagem candidata sobre o código da última publicação. Preservar cadastros e permissões; exigir testes e identidade do artefato no SHA alterado. Escopo e aceite: [ADR](docs/adr/20261116-remocao-filtro-segmento.md).
+
 
 ### Incremento autorizado de 15/11/2026
 

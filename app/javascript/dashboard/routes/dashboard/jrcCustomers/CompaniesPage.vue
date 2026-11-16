@@ -2,7 +2,6 @@
 import { useI18n } from 'vue-i18n';
 import CompanyEditorDialog from './components/CompanyEditorDialog.vue';
 import CompanyDetailsDialog from './components/CompanyDetailsDialog.vue';
-import SegmentFilterPicker from './components/SegmentFilterPicker.vue';
 import { useCompanyDirectory } from './useCompanyDirectory';
 import {
   T,
@@ -118,10 +117,6 @@ const {
           :class="inputClass"
         />
       </label>
-      <div class="min-w-0 text-xs">
-        <p>{{ t('CRM.CORPORATE_SEGMENTS.FILTER_LABEL') }}</p>
-        <SegmentFilterPicker v-model="filters.taxonomy_id" />
-      </div>
       <div class="flex items-end gap-2">
         <select
           v-model="filters.active"

@@ -67,12 +67,10 @@ beforeEach(() => {
   );
 });
 
-it('uses the Projects catalog and the same segment for the list, portfolio and pagination', async () => {
+it('omits the segment control and preserves existing list, portfolio and pagination parameters', async () => {
   const wrapper = render();
   await flushPromises();
-  expect(wrapper.findComponent(SegmentControl).props('moduleKey')).toBe(
-    'projects'
-  );
+  expect(wrapper.findComponent(SegmentControl).exists()).toBe(false);
   expect(mocks.request).toHaveBeenCalledWith('1', 'projects/projects', {
     params: expect.objectContaining({ customer_segment_id: '12', page: 1 }),
   });
