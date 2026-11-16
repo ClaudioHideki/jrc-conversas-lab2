@@ -7,15 +7,19 @@ class Internal::RemoveStaleContactInboxesService
 
     log_stale_contact_inboxes_deletion(contact_inboxes_to_delete, time_period)
 
-    # Since the number of records to delete is very high,
-    # delete_all would be faster than destroy_all since it operates at database level
-    # and avoid loading all the records in memory
-    # Transaction and batching is used to avoid deadlock and memory issues
-    ContactInbox.transaction do
-      contact_inboxes_to_delete
-        .find_in_batches(batch_size: 10_000) do |group|
-          ContactInbox.where(id: group.map(&:id)).delete_all
+    contact_inboxes_to_delete.find_in_batches(batch_size: 10_000) do |group|
+      accounts_by_inbox = Inbox.where(id: group.map(&:inbox_id)).pluck(:id, :account_id).to_h
+      by_account = group.group_by { |link| accounts_by_inbox[link.inbox_id] }
+      by_account.keys.compact.sort.each do |account_id|
+        Account.transaction do
+          # Serialize with LIVE/V2 admission before rechecking the selected IDs.
+          # Keep the transaction bounded to one Account and one batch.
+          Account.lock.find(account_id)
+          ContactInbox.stale_without_conversations(time_period)
+                      .where(id: by_account.fetch(account_id).map(&:id), inbox_id: Inbox.where(account_id: account_id).select(:id))
+                      .delete_all
         end
+      end
     end
   end
 
