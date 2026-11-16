@@ -1512,7 +1512,7 @@ onBeforeUnmount(() => {
                 id="proposal-dialog-title"
                 class="mt-1 text-2xl font-bold text-n-slate-12"
               >
-                {{ selectedProposal.title }}
+                {{ selectedProposal.title || 'Proposta comercial' }}
               </h3>
               <ApprovalGateBadge
                 resource-key="crm.proposal_send"
