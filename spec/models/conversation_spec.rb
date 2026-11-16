@@ -678,7 +678,8 @@ RSpec.describe Conversation do
           assignee: conversation.assigned_entity&.push_event_data,
           assignee_type: conversation.assignee_type,
           team: conversation.team&.push_event_data,
-          hmac_verified: conversation.contact_inbox.hmac_verified
+          hmac_verified: conversation.contact_inbox.hmac_verified,
+          participant_ids: []
         },
         id: conversation.display_id,
         messages: [],
@@ -852,6 +853,9 @@ RSpec.describe Conversation do
     let!(:conversation_3) { create(:conversation, created_at: DateTime.now - 5.days, last_activity_at: DateTime.now - 9.days, priority: :low) }
     let!(:conversation_2) { create(:conversation, created_at: DateTime.now - 3.days, last_activity_at: DateTime.now - 6.days, priority: :high) }
     let!(:conversation_1) { create(:conversation, created_at: DateTime.now - 4.days, last_activity_at: DateTime.now - 8.days, priority: :medium) }
+    let(:sort_scope) do
+      described_class.where(id: [conversation_1, conversation_2, conversation_3, conversation_4, conversation_5, conversation_6, conversation_7].map(&:id))
+    end
 
     describe 'sort_on_created_at' do
       let(:created_desc_order) do
@@ -862,12 +866,12 @@ RSpec.describe Conversation do
       end
 
       it 'returns the list in ascending order by default' do
-        records = described_class.sort_on_created_at
+        records = sort_scope.sort_on_created_at
         expect(records.map(&:id)).to eq created_desc_order.reverse
       end
 
       it 'returns the list in descending order if desc is passed as sort direction' do
-        records = described_class.sort_on_created_at(:desc)
+        records = sort_scope.sort_on_created_at(:desc)
         expect(records.map(&:id)).to eq created_desc_order
       end
     end
@@ -881,25 +885,25 @@ RSpec.describe Conversation do
       end
 
       it 'returns the list in descending order by default' do
-        records = described_class.sort_on_last_activity_at
+        records = sort_scope.sort_on_last_activity_at
         expect(records.map(&:id)).to eq last_activity_asc_order.reverse
       end
 
       it 'returns the list in asc order if asc is passed as sort direction' do
-        records = described_class.sort_on_last_activity_at(:asc)
+        records = sort_scope.sort_on_last_activity_at(:asc)
         expect(records.map(&:id)).to eq last_activity_asc_order
       end
     end
 
     context 'when last_activity_at updated by some actions' do
       before do
-        create(:message, conversation_id: conversation_1.id, message_type: :incoming, created_at: DateTime.now - 8.days)
-        create(:message, conversation_id: conversation_2.id, message_type: :incoming, created_at: DateTime.now - 6.days)
-        create(:message, conversation_id: conversation_3.id, message_type: :incoming, created_at: DateTime.now - 2.days)
+        create(:message, account: conversation_1.account, conversation: conversation_1, message_type: :incoming, created_at: DateTime.now - 8.days)
+        create(:message, account: conversation_2.account, conversation: conversation_2, message_type: :incoming, created_at: DateTime.now - 6.days)
+        create(:message, account: conversation_3.account, conversation: conversation_3, message_type: :incoming, created_at: DateTime.now - 2.days)
       end
 
       it 'sort conversations with latest resolved conversation at first' do
-        records = described_class.sort_on_last_activity_at
+        records = sort_scope.sort_on_last_activity_at
 
         expect(records.first.id).to eq(conversation_3.id)
 
@@ -913,14 +917,14 @@ RSpec.describe Conversation do
             content: 'Conversation was marked resolved by system due to days of inactivity'
           )
         end
-        records = described_class.sort_on_last_activity_at
+        records = sort_scope.sort_on_last_activity_at
 
         expect(records.first.id).to eq(conversation_1.id)
       end
 
       it 'Sort conversations with latest message' do
-        create(:message, conversation_id: conversation_3.id, message_type: :incoming, created_at: DateTime.now)
-        records = described_class.sort_on_last_activity_at
+        create(:message, account: conversation_3.account, conversation: conversation_3, message_type: :incoming, created_at: DateTime.now)
+        records = sort_scope.sort_on_last_activity_at
 
         expect(records.first.id).to eq(conversation_3.id)
       end
@@ -929,10 +933,10 @@ RSpec.describe Conversation do
     describe 'sort_on_priority' do
       it 'return list with the following order urgent > high > medium > low > nil by default' do
         # ensure they are not pre-sorted
-        records = described_class.sort_on_created_at
+        records = sort_scope.sort_on_created_at
         expect(records.pluck(:priority)).not_to eq(['urgent', 'urgent', 'high', 'medium', 'low', nil, nil])
 
-        records = described_class.sort_on_priority
+        records = sort_scope.sort_on_priority
         expect(records.pluck(:priority)).to eq(['urgent', 'urgent', 'high', 'medium', 'low', nil, nil])
         expect(records.pluck(:id)).to eq(
           [
@@ -944,10 +948,10 @@ RSpec.describe Conversation do
 
       it 'return list with the following order low > medium > high > urgent > nil by default' do
         # ensure they are not pre-sorted
-        records = described_class.sort_on_created_at
+        records = sort_scope.sort_on_created_at
         expect(records.pluck(:priority)).not_to eq(['urgent', 'urgent', 'high', 'medium', 'low', nil, nil])
 
-        records = described_class.sort_on_priority(:asc)
+        records = sort_scope.sort_on_priority(:asc)
         expect(records.pluck(:priority)).to eq(['low', 'medium', 'high', 'urgent', 'urgent', nil, nil])
         expect(records.pluck(:id)).to eq(
           [
@@ -958,12 +962,12 @@ RSpec.describe Conversation do
       end
 
       it 'sorts conversation with last_activity for the same priority' do
-        records = described_class.where(priority: 'urgent').sort_on_priority
+        records = sort_scope.where(priority: 'urgent').sort_on_priority
         # ensure that the conversation 4 last_activity_at is more recent than conversation 5
         expect(conversation_4.last_activity_at > conversation_5.last_activity_at).to be(true)
         expect(records.pluck(:priority, :id)).to eq([['urgent', conversation_4.id], ['urgent', conversation_5.id]])
 
-        records = described_class.where(priority: nil).sort_on_priority
+        records = sort_scope.where(priority: nil).sort_on_priority
         # ensure that the conversation 6 last_activity_at is more recent than conversation 7
         expect(conversation_6.last_activity_at > conversation_7.last_activity_at).to be(true)
         expect(records.pluck(:priority, :id)).to eq([[nil, conversation_6.id], [nil, conversation_7.id]])
@@ -972,7 +976,7 @@ RSpec.describe Conversation do
 
     describe 'sort_on_waiting_since' do
       it 'returns the list in ascending order by default' do
-        records = described_class.sort_on_waiting_since
+        records = sort_scope.sort_on_waiting_since
         expect(records.map(&:id)).to eq [
           conversation_4.id, conversation_5.id, conversation_6.id, conversation_7.id, conversation_3.id, conversation_1.id,
           conversation_2.id
@@ -980,7 +984,7 @@ RSpec.describe Conversation do
       end
 
       it 'returns the list in desc order if asc is passed as sort direction' do
-        records = described_class.sort_on_waiting_since(:desc)
+        records = sort_scope.sort_on_waiting_since(:desc)
         expect(records.map(&:id)).to eq [
           conversation_2.id, conversation_1.id, conversation_3.id, conversation_7.id, conversation_6.id, conversation_5.id,
           conversation_4.id
@@ -996,7 +1000,7 @@ RSpec.describe Conversation do
         end
 
         it 'places null waiting_since conversations at the end in ascending order' do
-          records = described_class.sort_on_waiting_since
+          records = sort_scope.sort_on_waiting_since
           expect(records.map(&:id)).to eq [
             conversation_4.id, conversation_6.id, conversation_7.id, conversation_3.id, conversation_1.id,
             conversation_5.id, conversation_2.id
@@ -1004,7 +1008,7 @@ RSpec.describe Conversation do
         end
 
         it 'places null waiting_since conversations at the end in descending order' do
-          records = described_class.sort_on_waiting_since(:desc)
+          records = sort_scope.sort_on_waiting_since(:desc)
           expect(records.map(&:id)).to eq [
             conversation_1.id, conversation_3.id, conversation_7.id, conversation_6.id, conversation_4.id,
             conversation_5.id, conversation_2.id

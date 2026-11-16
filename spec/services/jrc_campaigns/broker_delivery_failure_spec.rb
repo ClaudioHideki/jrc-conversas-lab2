@@ -223,7 +223,7 @@ RSpec.describe JrcCampaigns::BrokerDeliveryFailure do # rubocop:disable RSpec/Mu
     Webhooks::Trigger.execute(callback, message.webhook_data.merge(event: 'message_created'), :api_inbox_webhook,
                               secret: channel.secret, delivery_id: delivery_id)
     expect(message.reload).to be_failed
-    expect(message.content_attributes).not_to have_key('jrc_broker_delivery')
+    expect(message.content_attributes['jrc_broker_delivery']).to include('phase' => 'callback', 'outcome' => 'rejected')
     expect(delivery.reload).to be_sending
     expect(campaign.reload).to be_running
   end
@@ -264,9 +264,10 @@ RSpec.describe JrcCampaigns::BrokerDeliveryFailure do # rubocop:disable RSpec/Mu
     expect(execution.reload).to be_canceled
   end
 
-  it 'does not write campaign diagnostics if the campaign marker is removed before its row lock' do
+  it 'does not write diagnostics if both tracking markers are removed before its row lock' do
     allow(message).to receive(:with_lock).and_wrap_original do |original, *args, &block|
-      Message.find(message.id).update!(additional_attributes: {})
+      current = Message.find(message.id)
+      current.update!(additional_attributes: {}, content_attributes: current.content_attributes.except('jrc_broker_outbound'))
       original.call(*args, &block)
     end
     JrcBroker::WebhookDiagnostic.new(message).callback_started!

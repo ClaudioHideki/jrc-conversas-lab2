@@ -103,9 +103,7 @@ class Conversations::UnreadCounts::Refresher
     return false unless conversation.open?
 
     incoming_messages = conversation.messages.incoming.where(account_id: account.id)
-    if conversation.agent_last_seen_at
-      incoming_messages = incoming_messages.where(Message.arel_table[:created_at].gt(conversation.agent_last_seen_at))
-    end
+    incoming_messages = incoming_messages.where(Message.publication_clock_arel.gt(conversation.agent_last_seen_at)) if conversation.agent_last_seen_at
     incoming_messages.exists?
   end
 

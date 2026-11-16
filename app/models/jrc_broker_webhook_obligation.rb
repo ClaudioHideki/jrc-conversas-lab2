@@ -9,10 +9,20 @@ class JrcBrokerWebhookObligation < ApplicationRecord
     channel = message.inbox.channel
     return unless binding && channel.is_a?(Channel::Api) && channel.webhook_url.present?
 
-    create!(**campaign_identity(message), account_id: message.account_id, message_id: message.id, inbox_id: message.inbox_id, binding_id: binding.id,
-                                          integration_id: binding.integration_id, instance_id: binding.instance_id, url: channel.webhook_url,
-                                          available_at: Time.current, payload: message.webhook_data.merge(event: 'message_created'))
+    identity = campaign_identity(message).fetch(:delivery_id) { SecureRandom.uuid }
+    mark_pending!(message, binding, identity)
+    create!(delivery_id: identity, account_id: message.account_id, message_id: message.id, inbox_id: message.inbox_id, binding_id: binding.id,
+            integration_id: binding.integration_id, instance_id: binding.instance_id, url: channel.webhook_url,
+            available_at: Time.current, payload: message.webhook_data.merge(event: 'message_created'))
   end
+
+  def self.mark_pending!(message, binding, identity)
+    outbound = { 'version' => 1, 'state' => 'PENDING', 'intent_id' => identity,
+                 'integration_id' => binding.integration_id, 'inbox_id' => message.inbox_id }
+    # This runs in the message creation transaction, before message_created is dispatched.
+    message.update_columns(content_attributes: message.content_attributes.to_h.merge('jrc_broker_outbound' => outbound)) # rubocop:disable Rails/SkipsModelValidations
+  end
+  private_class_method :mark_pending!
 
   def self.campaign_identity(message)
     return {} unless message.additional_attributes['jrc_campaign_broker'] == true

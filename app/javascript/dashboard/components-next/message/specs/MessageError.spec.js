@@ -15,10 +15,45 @@ beforeEach(() => {
     attachments: ref([]),
     meta: ref({}),
     additionalAttributes: ref({}),
+    contentAttributes: ref({}),
   });
 });
 
 describe('WhatsApp failure explanation', () => {
+  it.each([
+    [null, 'WhatsApp send not confirmed'],
+    [
+      { version: 1, outcome: 'rejected', uncertain: false, accepted: false },
+      'Failed to send',
+    ],
+  ])(
+    'keeps a legacy durable reply safe from generic retry with transport proof %s',
+    (diagnostic, label) => {
+      useMessageContext().contentAttributes.value = {
+        jrcBrokerLegacyUnconfirmed: true,
+        jrcBrokerDelivery: diagnostic,
+      };
+      const wrapper = mount(MessageError, {
+        props: { error: 'JRC_BROKER_DELIVERY_UNAVAILABLE' },
+      });
+      expect(wrapper.text()).toContain(label);
+      expect(wrapper.find('button').exists()).toBe(false);
+    }
+  );
+
+  it('keeps an uncertain Broker reply unconfirmed without offering a generic retry', () => {
+    useMessageContext().contentAttributes.value = {
+      jrcBrokerOutbound: { version: 1, state: 'PENDING' },
+      jrcBrokerDelivery: { version: 1, outcome: 'unknown' },
+    };
+    const wrapper = mount(MessageError, {
+      props: { error: 'JRC_BROKER_DELIVERY_UNAVAILABLE' },
+    });
+    expect(wrapper.text()).toContain('WhatsApp send not confirmed');
+    expect(wrapper.text()).not.toContain('Failed to send');
+    expect(wrapper.find('button').exists()).toBe(false);
+  });
+
   it.each([
     ['queued', 'queued'],
     ['submitting', 'Submitting'],

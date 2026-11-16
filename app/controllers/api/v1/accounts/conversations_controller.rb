@@ -127,8 +127,11 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
   end
 
   def unread
-    last_incoming_message = @conversation.messages.incoming.last
-    last_seen_at = last_incoming_message.created_at - 1.second if last_incoming_message.present?
+    clock = Message.publication_clock_arel
+    last_incoming_message = @conversation.messages.incoming
+                                         .select(Message.arel_table[Arel.star], clock.as('unread_cursor_clock'))
+                                         .reorder(Arel.sql('unread_cursor_clock DESC'), Message.arel_table[:id].desc).first
+    last_seen_at = last_incoming_message['unread_cursor_clock'] - 1.second if last_incoming_message.present?
     update_last_seen_on_conversation(last_seen_at, true)
   end
 

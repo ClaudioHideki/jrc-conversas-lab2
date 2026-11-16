@@ -17,11 +17,12 @@ import time
 
 GIB = 1024 ** 3
 START_DISK = 3 * GIB
-START_RAM = 5 * GIB
+START_RAM = 8 * GIB
 STOP_DISK = 750_000_000
 STOP_RAM = 750 * 1024 ** 2
 BRANCH = 'refs/heads/codex/lab2-ag-consolidada-20261110'
 APPROVED_BRANCHES = {BRANCH, 'refs/heads/codex/whatsapp-history-order-20261111'}
+DELIVERY_BRANCH = 'refs/heads/codex/whatsapp-delivery-reliability-20261116'
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -30,7 +31,7 @@ def resource_reason(disk, ram, starting=False):
         if disk < START_DISK:
             return 'disk_start_below_3_GiB'
         if ram < START_RAM:
-            return 'physical_ram_start_below_5_GiB'
+            return 'physical_ram_start_below_8_GiB'
     if disk <= STOP_DISK:
         return 'disk_reserve_reached'
     if ram <= STOP_RAM:
@@ -43,7 +44,7 @@ def node_heap_mib(available_ram):
     # only from observed free RAM, keep 1 GiB for native/runner allocations,
     # and retain the existing admission/continuous physical-memory guards.
     if available_ram < START_RAM:
-        raise RuntimeError('physical_ram_start_below_5_GiB')
+        raise RuntimeError('physical_ram_start_below_8_GiB')
     return min(6144, (available_ram - GIB) // (1024 ** 2))
 
 
@@ -54,9 +55,10 @@ def vite_output_environment(output):
 
 
 def authorize(env, expected):
+    branch_event = ((env.get('GITHUB_REF') in APPROVED_BRANCHES and env.get('GITHUB_EVENT_NAME') == 'workflow_dispatch') or
+                    (env.get('GITHUB_REF') == DELIVERY_BRANCH and env.get('GITHUB_EVENT_NAME') in {'push', 'workflow_dispatch'}))
     allowed = (sys.platform == 'linux' and env.get('GITHUB_ACTIONS') == 'true' and
-               env.get('RUNNER_ENVIRONMENT') == 'github-hosted' and env.get('GITHUB_REF') in APPROVED_BRANCHES and
-               env.get('GITHUB_EVENT_NAME') == 'workflow_dispatch' and env.get('GITHUB_RUN_ATTEMPT') == '1')
+               env.get('RUNNER_ENVIRONMENT') == 'github-hosted' and branch_event and env.get('GITHUB_RUN_ATTEMPT') == '1')
     if not allowed:
         raise RuntimeError('Exclusive hosted first-attempt manual workflow required')
     if not re.fullmatch(r'[a-f0-9]{40}', expected or '') or expected != env.get('GITHUB_SHA'):

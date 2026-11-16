@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { messageTimestamp } from 'shared/helpers/timeHelper';
 
 import MessageStatus from './MessageStatus.vue';
@@ -8,6 +9,8 @@ import { useInbox } from 'dashboard/composables/useInbox';
 import { useMessageContext } from './provider.js';
 
 import { MESSAGE_STATUS, MESSAGE_TYPES } from './constants';
+
+const { t } = useI18n();
 
 const {
   isAFacebookInbox,
@@ -123,11 +126,49 @@ const isRead = computed(() => {
 });
 
 const statusToShow = computed(() => {
+  if (isAPIInbox.value && contentAttributes.value?.jrcBrokerLegacyUnconfirmed)
+    return MESSAGE_STATUS.PROGRESS;
+
+  const broker = contentAttributes.value?.jrcBrokerOutbound;
+  if (isAPIInbox.value && broker) {
+    // A durable callback ACK only admits work. The provider receipt confirms sending.
+    const confirmed =
+      broker.version === 1 &&
+      broker.canonicalMessageId &&
+      broker.providerMessageId;
+    const providerStatus = broker.state?.toLowerCase();
+    return confirmed &&
+      [
+        MESSAGE_STATUS.SENT,
+        MESSAGE_STATUS.DELIVERED,
+        MESSAGE_STATUS.READ,
+      ].includes(providerStatus)
+      ? providerStatus
+      : MESSAGE_STATUS.PROGRESS;
+  }
+
   if (isRead.value) return MESSAGE_STATUS.READ;
   if (isDelivered.value) return MESSAGE_STATUS.DELIVERED;
   if (isSent.value) return MESSAGE_STATUS.SENT;
 
   return MESSAGE_STATUS.PROGRESS;
+});
+
+const statusLabel = computed(() => {
+  if (isAPIInbox.value && contentAttributes.value?.jrcBrokerLegacyUnconfirmed)
+    return t('CHAT_LIST.BROKER_UNKNOWN');
+
+  if (
+    !isAPIInbox.value ||
+    !contentAttributes.value?.jrcBrokerOutbound ||
+    statusToShow.value !== MESSAGE_STATUS.PROGRESS
+  )
+    return '';
+
+  const outcome = contentAttributes.value?.jrcBrokerDelivery?.outcome;
+  if (outcome === 'unknown') return t('CHAT_LIST.BROKER_UNKNOWN');
+  if (outcome === 'accepted') return t('CHAT_LIST.BROKER_ACCEPTED');
+  return t('CHAT_LIST.BROKER_QUEUED');
 });
 </script>
 
@@ -137,7 +178,11 @@ const statusToShow = computed(() => {
       <time class="inline">{{ readableTime }}</time>
     </div>
     <Icon v-if="isPrivate" icon="i-lucide-lock-keyhole" class="size-3" />
-    <MessageStatus v-if="showStatusIndicator" :status="statusToShow" />
+    <MessageStatus
+      v-if="showStatusIndicator"
+      :status="statusToShow"
+      :status-label="statusLabel"
+    />
   </div>
 </template>
 `

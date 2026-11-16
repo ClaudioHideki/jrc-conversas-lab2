@@ -1,4 +1,5 @@
-# Campaign admission evidence only. Never store exception messages, bodies, URLs or credentials.
+# Callback admission evidence only; it is never a provider send receipt.
+# Never store exception messages, bodies, URLs or credentials.
 class JrcBroker::WebhookDiagnostic
   KEY = 'jrc_broker_delivery'.freeze
   PHASES = %w[validate campaign_intent callback unknown].freeze
@@ -73,16 +74,21 @@ class JrcBroker::WebhookDiagnostic
   end
 
   def update
-    return unless @message&.additional_attributes.to_h&.dig('jrc_campaign_broker') == true
+    return unless tracked?
 
     @message.with_lock do
-      next unless @message.additional_attributes.to_h['jrc_campaign_broker'] == true
+      next unless tracked?
 
       result = yield read
       # Correlation/diagnostics must not emit another message_updated callback.
       @message.update_columns(content_attributes: @message.content_attributes.to_h.merge(KEY => result)) # rubocop:disable Rails/SkipsModelValidations
       result
     end
+  end
+
+  def tracked?
+    @message && (@message.additional_attributes.to_h['jrc_campaign_broker'] == true ||
+      @message.content_attributes.to_h.dig('jrc_broker_outbound', 'version') == 1)
   end
 
   def base

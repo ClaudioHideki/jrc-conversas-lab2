@@ -4,6 +4,11 @@ whatsapp_retry_recovery_job:
   queue: scheduled_jobs
 
 # https://github.com/ondrejbartas/sidekiq-cron
+jrc_live_media_recovery_job:
+  cron: '* * * * *'
+  class: 'JrcBroker::LiveIngressMediaSchedulerJob'
+  queue: scheduled_jobs
+
 jrc_history_media_recovery_job:
   cron: '* * * * *'
   class: 'JrcBroker::HistorySyncMediaSchedulerJob'

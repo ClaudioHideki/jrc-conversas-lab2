@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_12_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_16_190000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -11134,6 +11134,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_12_120000) do
     t.string "request_hash", limit: 64, null: false
     t.jsonb "recipient", default: {}, null: false
     t.datetime "created_at", null: false
+    t.jsonb "origin_context"
     t.index ["account_id"], name: "index_jrc_broker_history_receipts_on_account_id"
     t.index ["inbox_id"], name: "index_jrc_broker_history_receipts_on_inbox_id"
     t.index ["contact_id"], name: "index_jrc_broker_history_receipts_on_contact_id"
@@ -11337,4 +11338,82 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_12_120000) do
   add_foreign_key "jrc_service_desk_report_exports", "account_users"
   add_foreign_key "jrc_service_desk_report_exports", "jrc_service_desk_units", column: "unit_id"
 
+  create_table "jrc_broker_live_receipts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "inbox_id", null: false
+    t.bigint "user_id"
+    t.bigint "access_token_id"
+    t.string "access_token_sha256", limit: 64, null: false
+    t.bigint "message_id"
+    t.bigint "blob_id"
+    t.uuid "organization_id", null: false
+    t.uuid "integration_id", null: false
+    t.uuid "instance_id", null: false
+    t.uuid "broker_message_id", null: false
+    t.bigint "destination_revision", null: false
+    t.bigint "conversation_id", null: false
+    t.jsonb "envelope", null: false
+    t.string "request_hash", limit: 64, null: false
+    t.string "state", null: false
+    t.datetime "published_at"
+    t.binary "staged_bytes"
+    t.integer "attempts", default: 0, null: false
+    t.datetime "next_attempt_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.string "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_broker_live_receipts_on_account_id"
+    t.index ["inbox_id"], name: "index_jrc_broker_live_receipts_on_inbox_id"
+    t.index ["user_id"], name: "index_jrc_broker_live_receipts_on_user_id"
+    t.index ["access_token_id"], name: "index_jrc_broker_live_receipts_on_access_token_id"
+    t.index ["message_id"], name: "index_jrc_broker_live_receipts_on_message_id"
+    t.index ["blob_id"], name: "index_jrc_broker_live_receipts_on_blob_id"
+    t.index ["account_id", "inbox_id", "organization_id", "integration_id", "instance_id", "broker_message_id"], name: "jrc_live_receive_identity", unique: true
+    t.index ["next_attempt_at"], name: "jrc_live_pending", where: "state='MEDIA_PENDING'"
+    t.index ["message_id"], name: "jrc_live_message", unique: true, where: "message_id IS NOT NULL"
+    t.check_constraint "request_hash ~ '^[a-f0-9]{64}$' AND access_token_sha256 ~ '^[a-f0-9]{64}$' AND destination_revision>0 AND conversation_id>0 AND attempts>=0", name: "jrc_live_identity_bounds"
+    t.check_constraint "(state='MEDIA_PENDING' AND message_id IS NULL AND blob_id IS NOT NULL AND staged_bytes IS NOT NULL AND published_at IS NULL AND octet_length(staged_bytes) BETWEEN 1 AND 16777216) OR (state='PERSISTED' AND message_id IS NOT NULL AND staged_bytes IS NULL)", name: "jrc_live_custody"
+  end
+  add_foreign_key "jrc_broker_live_receipts", "accounts"
+  add_foreign_key "jrc_broker_live_receipts", "inboxes"
+  add_foreign_key "jrc_broker_live_receipts", "users", on_delete: :nullify
+  add_foreign_key "jrc_broker_live_receipts", "access_tokens", on_delete: :nullify
+  add_foreign_key "jrc_broker_live_receipts", "messages"
+  add_foreign_key "jrc_broker_live_receipts", "active_storage_blobs", column: "blob_id"
+  execute <<~SQL
+      CREATE OR REPLACE FUNCTION public.jrc_live_receipt_immutable() RETURNS trigger
+        LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
+      BEGIN
+        IF ROW(NEW.id,NEW.account_id,NEW.inbox_id,NEW.organization_id,NEW.integration_id,NEW.instance_id,
+               NEW.broker_message_id,NEW.destination_revision,NEW.conversation_id,NEW.envelope,NEW.request_hash,
+               NEW.blob_id,NEW.access_token_sha256,NEW.created_at)
+           IS DISTINCT FROM
+           ROW(OLD.id,OLD.account_id,OLD.inbox_id,OLD.organization_id,OLD.integration_id,OLD.instance_id,
+               OLD.broker_message_id,OLD.destination_revision,OLD.conversation_id,OLD.envelope,OLD.request_hash,
+               OLD.blob_id,OLD.access_token_sha256,OLD.created_at)
+           OR (NEW.user_id IS DISTINCT FROM OLD.user_id AND NEW.user_id IS NOT NULL)
+           OR (NEW.access_token_id IS DISTINCT FROM OLD.access_token_id AND NEW.access_token_id IS NOT NULL)
+           OR (OLD.state='PERSISTED' AND ROW(NEW.state,NEW.message_id,NEW.staged_bytes,NEW.published_at)
+                                      IS DISTINCT FROM ROW(OLD.state,OLD.message_id,OLD.staged_bytes,OLD.published_at))
+           OR (OLD.state='MEDIA_PENDING' AND NEW.state='MEDIA_PENDING' AND NEW.staged_bytes IS DISTINCT FROM OLD.staged_bytes)
+        THEN RAISE EXCEPTION 'JRC_LIVE_RECEIPT_IMMUTABLE'; END IF;
+        RETURN NEW;
+      END;
+      $$;
+      CREATE TRIGGER jrc_live_receipt_immutable BEFORE UPDATE ON public.jrc_broker_live_receipts
+        FOR EACH ROW EXECUTE FUNCTION public.jrc_live_receipt_immutable();
+  SQL
+  execute <<~SQL
+      CREATE OR REPLACE FUNCTION public.jrc_history_origin_immutable() RETURNS trigger
+        LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
+      BEGIN
+        IF NEW.origin_context IS DISTINCT FROM OLD.origin_context THEN
+          RAISE EXCEPTION 'JRC_HISTORY_ORIGIN_IMMUTABLE';
+        END IF;
+        RETURN NEW;
+      END;
+      $$;
+      CREATE TRIGGER jrc_history_origin_immutable BEFORE UPDATE ON public.jrc_broker_history_receipts
+        FOR EACH ROW EXECUTE FUNCTION public.jrc_history_origin_immutable();
+  SQL
 end

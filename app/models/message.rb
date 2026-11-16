@@ -118,15 +118,34 @@ class Message < ApplicationRecord
   store :external_source_ids, accessors: [:slack], coder: JSON, prefix: :external_source_id
 
   scope :created_since, ->(datetime) { where('created_at > ?', datetime) }
+  scope :received_since, ->(datetime) { where(publication_clock_arel.gt(datetime)) }
   scope :chat, -> { where.not(message_type: :activity).where(private: false) }
   scope :non_activity_messages, -> { where.not(message_type: :activity).reorder('created_at desc') }
   scope :today, -> { where("date_trunc('day', created_at) = ?", Date.current) }
   scope :voice_calls, -> { where(content_type: :voice_call) }
+  scope :with_broker_delivery_display, lambda {
+    obligations = JrcBrokerWebhookObligation.arel_table
+    proof = obligations.project(Arel.sql('1')).where(obligations[:message_id].eq(arel_table[:id])).exists
+    select(arel_table[Arel.star], proof.as('jrc_broker_obligation_exists'), broker_publication_clock_arel.as('jrc_broker_published_at'))
+  }
 
   # TODO: Get rid of default scope
   # https://stackoverflow.com/a/1834250/939299
   # if you want to change order, use `reorder`
   default_scope { order(created_at: :asc) }
+
+  def self.publication_clock_arel(messages = arel_table)
+    Arel::Nodes::NamedFunction.new('COALESCE', [broker_publication_clock_arel(messages), messages[:created_at]])
+  end
+
+  def self.broker_publication_clock_arel(messages = arel_table)
+    receipts = JrcBrokerLiveReceipt.arel_table
+    publication = receipts.project(receipts[:published_at])
+                          .where(receipts[:message_id].eq(messages[:id])
+                            .and(receipts[:account_id].eq(messages[:account_id]))
+                            .and(receipts[:state].eq('PERSISTED')))
+    Arel::Nodes::Grouping.new(publication.ast)
+  end
 
   belongs_to :account
   belongs_to :inbox
@@ -149,7 +168,9 @@ class Message < ApplicationRecord
   end
 
   def push_event_data
-    data = attributes.symbolize_keys.merge(
+    data = attributes.except('jrc_broker_obligation_exists', 'jrc_broker_published_at').symbolize_keys.merge(
+      content_attributes: display_content_attributes,
+      broker_published_at: broker_published_at,
       created_at: created_at.to_i,
       message_type: message_type_before_type_cast,
       conversation_id: conversation&.display_id,
@@ -176,11 +197,39 @@ class Message < ApplicationRecord
   end
 
   def webhook_push_event_data
-    push_event_data.merge(
+    push_event_data.except(:broker_published_at).merge(
+      content_attributes: content_attributes,
       content: Messages::WebhookContentNormalizer.normalize(content),
       processed_message_content: Messages::WebhookContentNormalizer.normalize(processed_message_content)
     )
   end
+
+  def broker_published_at
+    clock = if has_attribute?('jrc_broker_published_at')
+              self['jrc_broker_published_at']
+            else
+              JrcBrokerLiveReceipt.where(message_id: id, account_id: account_id, state: 'PERSISTED').pick(:published_at)
+            end
+    clock&.to_time&.to_i
+  end
+
+  def display_content_attributes
+    attributes = content_attributes.to_h.except('jrc_broker_legacy_unconfirmed')
+    return attributes unless legacy_broker_outbound?(attributes)
+
+    obligation = if has_attribute?('jrc_broker_obligation_exists')
+                   self['jrc_broker_obligation_exists']
+                 else
+                   JrcBrokerWebhookObligation.exists?(message_id: id)
+                 end
+    obligation ? attributes.merge('jrc_broker_legacy_unconfirmed' => true) : attributes
+  end
+
+  def legacy_broker_outbound?(attributes)
+    (sent? || failed?) && JrcBrokerWebhookObligation.deliverable_message?(self) && attributes['jrc_broker_outbound'].blank? &&
+      attributes['jrc_broker_historical'] != true && attributes['jrc_broker_message_id'].blank? && attributes['external_echo'].blank?
+  end
+  private :legacy_broker_outbound?
 
   def webhook_data
     data = {
@@ -467,7 +516,12 @@ class Message < ApplicationRecord
 
   def set_conversation_activity
     # rubocop:disable Rails/SkipsModelValidations
-    conversation.update_columns(last_activity_at: created_at, updated_at: Time.current)
+    Conversation.where(id: conversation_id, account_id: account_id)
+                .where('last_activity_at IS NULL OR last_activity_at < ?', created_at)
+                .update_all(last_activity_at: created_at, updated_at: Time.current)
+    # Dispatch payloads must use the committed database clock, not a stale
+    # association or a maximum computed from an old ORM snapshot.
+    conversation.reload
     # rubocop:enable Rails/SkipsModelValidations
   end
 

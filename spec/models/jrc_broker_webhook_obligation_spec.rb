@@ -10,6 +10,37 @@ RSpec.describe 'Durable Broker message obligation', type: :model do
   end
   let(:message) { build(:message, account: account, inbox: inbox, message_type: :outgoing) }
 
+  it 'persists pending provider evidence before enqueueing the durable callback' do
+    message.save!
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    expect(message.reload.content_attributes['jrc_broker_outbound']).to eq(
+      'version' => 1, 'state' => 'PENDING', 'intent_id' => obligation.delivery_id,
+      'integration_id' => binding.integration_id, 'inbox_id' => inbox.id
+    )
+    expect(obligation.payload.dig('content_attributes', 'jrc_broker_outbound', 'state')).to eq('PENDING')
+  end
+
+  it 'allocates a new server-owned intent for each reply instead of retaining caller-supplied metadata' do
+    message.content_attributes = { 'jrc_broker_outbound' => { 'intent_id' => 'untrusted', 'state' => 'READ' } }
+    message.save!
+    another = create(:message, account: account, inbox: inbox, message_type: :outgoing)
+    first = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    second = JrcBrokerWebhookObligation.find_by!(message_id: another.id)
+    expect(message.reload.content_attributes.dig('jrc_broker_outbound', 'intent_id')).to eq(first.delivery_id)
+    expect(another.reload.content_attributes.dig('jrc_broker_outbound', 'intent_id')).to eq(second.delivery_id)
+    expect(first.delivery_id).not_to eq(second.delivery_id)
+  end
+
+  it 'keeps callback acceptance separate from provider confirmation for ordinary replies' do
+    message.save!
+    allow(SafeFetch).to receive(:fetch)
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    JrcBroker::WebhookObligationJob.perform_now(obligation.id)
+    expect(obligation.reload.state).to eq('delivered')
+    expect(message.reload.content_attributes.dig('jrc_broker_delivery', 'outcome')).to eq('accepted')
+    expect(message.content_attributes.dig('jrc_broker_outbound', 'state')).to eq('PENDING')
+  end
+
   it 'captures one durable native CSAT obligation and suppresses the duplicate listener delivery' do
     inbox.update!(csat_survey_enabled: true, csat_config: { 'message' => 'Synthetic CSAT' })
     conversation = create(:conversation, account: account, inbox: inbox, status: :resolved)

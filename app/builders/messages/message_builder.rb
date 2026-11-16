@@ -31,6 +31,9 @@ class Messages::MessageBuilder
     # When the message has no quoted content, it will just be rendered as a regular message
     # The frontend is equipped to handle this case
     process_email_content
+    # Internal receivers may supply a validated source clock before persistence.
+    # Generic API parameters still cannot assign created_at.
+    yield @message if block_given?
     @message.save!
     @message
   end

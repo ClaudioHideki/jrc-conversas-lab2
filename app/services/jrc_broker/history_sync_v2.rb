@@ -91,8 +91,12 @@ class JrcBroker::HistorySyncV2
       JrcBroker::HistorySyncMessages.advance_status(receipt.message, input.fetch('status'))
       return receipt
     end
+    create_message_receipt(scope, input, route, digest)
+  end
+
+  def create_message_receipt(scope, input, route, digest)
     conversation = scope.account.conversations.lock.find(route.conversation_id)
-    message = JrcBroker::HistorySyncMessages.new(scope: scope, conversation: conversation, input: input).call
+    message = JrcBroker::HistorySyncMessages.new(scope: scope, conversation: conversation, input: input, recipient: route.recipient).call
     if message.created_at > conversation.last_activity_at
       conversation.update_columns(last_activity_at: message.created_at) # rubocop:disable Rails/SkipsModelValidations
     end
@@ -119,6 +123,7 @@ class JrcBroker::HistorySyncV2
   end
 
   def find_receipt(scope, input, kind, source_id)
+    JrcBroker::IngressIdentity.lock!(scope, input) if kind == 'MESSAGE'
     self.class.lock_key(['jrc-history-v2', scope.account.id, scope.inbox.id, input.fetch('integration_id'),
                          input.fetch('history_account_identity'), kind, source_id].join(':'))
     receipt_scope(scope, input).lock.find_by(record_kind: kind, source_id: source_id)
@@ -131,7 +136,18 @@ class JrcBroker::HistorySyncV2
                                     receipt_id: SecureRandom.uuid, organization_id: input.fetch('organization_id'),
                                     integration_id: input.fetch('integration_id'), history_account_identity: input.fetch('history_account_identity'),
                                     source_id: source_id, broker_conversation_id: input.fetch('broker_conversation_id'),
-                                    record_kind: kind, request_hash: digest, recipient: result.fetch(:recipient), created_at: Time.current)
+                                    record_kind: kind, request_hash: digest, recipient: result.fetch(:recipient), created_at: Time.current,
+                                    origin_context: receipt_origin_context(scope, input, kind, result))
+  end
+
+  def receipt_origin_context(scope, input, kind, result)
+    return unless kind == 'MESSAGE'
+
+    native = JrcBrokerLiveReceipt.find_by(account_id: scope.account.id, inbox_id: scope.inbox.id, message_id: result.fetch(:message).id,
+                                          broker_message_id: input.fetch('broker_message_id'), state: 'PERSISTED')
+    { account_id: scope.account.id, inbox_id: scope.inbox.id, instance_id: scope.binding.instance_id,
+      destination_revision: scope.integration.destination_revision, message_id: result.fetch(:message).id,
+      conversation_id: result.fetch(:conversation).display_id, request: input, live_receipt_id: native&.id }
   end
 
   def envelope(scope, input)

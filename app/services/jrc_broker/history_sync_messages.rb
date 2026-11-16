@@ -1,17 +1,17 @@
 # Callback-free message persistence; caller holds the V2 authority transaction.
 class JrcBroker::HistorySyncMessages
-  def initialize(scope:, conversation:, input:)
+  def initialize(scope:, conversation:, input:, recipient:)
     @scope = scope
     @conversation = conversation
     @input = input
+    @recipient = recipient
   end
 
   def call
-    # Message.store(coder: JSON) produces a JSON string in this Rails base.
-    metadata = "CASE json_typeof(content_attributes) WHEN 'string' THEN (content_attributes #>> '{}')::jsonb " \
-               "WHEN 'object' THEN content_attributes::jsonb ELSE '{}'::jsonb END"
-    candidates = @scope.account.messages.where("(#{metadata})->>'jrc_broker_message_id' = ?", @input.fetch('broker_message_id'))
-                       .reorder(:id).lock.limit(2).to_a
+    native = reuse_native
+    return native if native
+
+    candidates = marker_candidates
     raise ArgumentError, 'historical_message_ambiguous' if candidates.size > 1
 
     if candidates.one?
@@ -34,6 +34,20 @@ class JrcBroker::HistorySyncMessages
   end
 
   private
+
+  def marker_candidates
+    # Message.store(coder: JSON) produces a JSON string in this Rails base.
+    metadata = "CASE json_typeof(content_attributes) WHEN 'string' THEN (content_attributes #>> '{}')::jsonb " \
+               "WHEN 'object' THEN content_attributes::jsonb ELSE '{}'::jsonb END"
+    @scope.account.messages.where("(#{metadata})->>'jrc_broker_message_id' = ?", @input.fetch('broker_message_id'))
+          .reorder(:id).lock.limit(2).to_a
+  end
+
+  def reuse_native
+    native = JrcBroker::LiveHistoryCustody.new(@scope).native_message(@conversation, @input, @recipient)
+    self.class.advance_status(native, @input.fetch('status')) if native
+    native
+  end
 
   def matching_candidate?(message)
     expected = { 'inbox_id' => @scope.inbox.id, 'conversation_id' => @conversation.id, 'private' => false,

@@ -26,7 +26,7 @@ class JrcBroker::HistorySyncMediaJob < ApplicationJob
       raise ArgumentError, 'historical_media_scope' unless message.inbox_id == scope.inbox.id && receipt.message_id == message.id &&
                                                            receipt.history_account_identity == current.history_account_identity
 
-      attach!(current, message)
+      attach!(current, message, scope)
       current.update!(state: 'READY', last_error: nil)
     end
   end
@@ -42,7 +42,7 @@ class JrcBroker::HistorySyncMediaJob < ApplicationJob
   # The attachment and blob link are written together without live callbacks.
   # Database constraints and the locked immutable intent validate this write.
   # rubocop:disable Rails/SkipsModelValidations
-  def attach!(intent, message)
+  def attach!(intent, message, scope)
     # Avoid Attachment/ActiveStorage callbacks: backfill must not emit scans,
     # analysis, notifications, bots or outbound messages.
     rows = Attachment.where(account_id: message.account_id, message_id: message.id).lock.to_a
@@ -50,7 +50,7 @@ class JrcBroker::HistorySyncMediaJob < ApplicationJob
 
     attachment = rows.first
     if attachment
-      raise ArgumentError, 'historical_media_conflict' unless attachment.file.blob&.id == intent.blob_id
+      JrcBroker::LiveHistoryCustody.new(scope).verify_reused_attachment!(intent, message) unless attachment.file.blob&.id == intent.blob_id
     else
       insert_attachment!(intent, message)
     end

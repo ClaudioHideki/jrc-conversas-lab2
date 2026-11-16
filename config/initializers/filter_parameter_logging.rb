@@ -29,3 +29,4 @@ Rails.application.config.filter_parameters += [:answer]
 
 # Approval catalog imports contain proposed people and must never become request-log payloads.
 Rails.application.config.filter_parameters += [:catalog_import]
+Rails.application.config.filter_parameters += [:envelope, :staged_bytes]

@@ -3,6 +3,8 @@
 
 ## Em progresso (WIP)
 
+- [ ] **WHATSAPP-RELIABILITY-20261116:** Candidata de estados outbound honestos e recibo LIVE imutável, mídia em custódia privada, reuso estrito LIVE/V2 e clocks separados para cronologia/não lidas. Desenho: [ADR0002](docs/adr/0002-recibo-live-custodia-broker.md); execução: [plano local](docs/jrc_consolidation/live_ingress_receipt_plan_20261116.md). Usuário autorizou branch de testes no GitHub Actions; CI e E2E sintético em fechamento, sem merge/imagens/deploy/envio físico. Helper e componente de publicação passaram 10/10 localmente; runtime Rails3.4.12 e build elegível devem ser verificados na CI. Lifecycle hard delete permanece gate de release; a autoridade de bots legados não foi removida por suposição.
+
 Publicação encerrada; as pendências operacionais continuam em A fazer. Consulte os recibos e limites em CONTINUE-AQUI.md.
 
 Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em andamento permanecem nos planos/checkpoints existentes.

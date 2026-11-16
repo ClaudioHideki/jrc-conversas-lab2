@@ -45,10 +45,24 @@ class BuildAdmissionTest(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 authorize({**candidate, 'GITHUB_SHA': 'b' * 40}, self.sha)
 
+    def test_delivery_candidate_only_accepts_first_attempt_push_or_manual_on_hosted_linux(self):
+        candidate = {**self.env, 'GITHUB_REF': 'refs/heads/codex/whatsapp-delivery-reliability-20261116'}
+        with patch('jrc_ag_guarded_frontend_build.sys.platform', 'linux'):
+            for event in ['push', 'workflow_dispatch']:
+                authorize({**candidate, 'GITHUB_EVENT_NAME': event}, self.sha)
+            for key, value in [('GITHUB_EVENT_NAME', 'pull_request'), ('GITHUB_RUN_ATTEMPT', '2'),
+                               ('GITHUB_REF', 'refs/heads/main'), ('RUNNER_ENVIRONMENT', 'self-hosted')]:
+                with self.assertRaises(RuntimeError):
+                    authorize({**candidate, key: value}, self.sha)
+
+    def test_delivery_admission_retains_eight_gib_of_available_ram(self):
+        self.assertGreaterEqual(START_RAM, 8 * 1024 ** 3)
+
     def test_heap_is_bounded_by_observed_ram_with_a_non_heap_reserve(self):
         gib = 1024 ** 3
-        self.assertEqual(node_heap_mib(5 * gib), 4096)
-        self.assertEqual(node_heap_mib(6 * gib), 5120)
+        for available in [5 * gib, 6 * gib]:
+            with self.assertRaises(RuntimeError):
+                node_heap_mib(available)
         self.assertEqual(node_heap_mib(8 * gib), 6144)
         self.assertEqual(node_heap_mib(32 * gib), 6144)
         with self.assertRaises(RuntimeError):

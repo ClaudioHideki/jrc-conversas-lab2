@@ -422,7 +422,7 @@ RSpec.describe Message do
 
     it 'updates conversation last_activity_at when created' do
       message.save!
-      expect(message.created_at).to eq message.conversation.last_activity_at
+      expect(message.conversation.last_activity_at).to be_within(1.second).of(message.created_at)
     end
 
     it 'updates contact last_activity_at when created' do

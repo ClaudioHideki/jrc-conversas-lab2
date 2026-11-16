@@ -146,6 +146,9 @@
     "SHOW_QUOTED_TEXT": "Mostrar Texto Citado",
     "MESSAGE_READ": "Lida",
     "SENDING": "Enviando",
+    "BROKER_QUEUED": "Na fila do WhatsApp",
+    "BROKER_ACCEPTED": "Aguardando confirmação do WhatsApp",
+    "BROKER_UNKNOWN": "Envio pelo WhatsApp não confirmado",
     "UNREAD_COUNT_OVERFLOW": "9+"
   }
 }

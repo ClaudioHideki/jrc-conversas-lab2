@@ -1,0 +1,222 @@
+name: Broker delivery reliability - disposable candidate
+
+on:
+  push:
+    branches: [codex/whatsapp-delivery-reliability-20261116]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: broker-delivery-reliability-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  interface:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - run: pnpm install --frozen-lockfile
+      - name: Real delivery, unread and inbox components
+        run: |
+          pnpm exec vitest run \
+            app/javascript/dashboard/components-next/message/specs/MessageMeta.spec.js \
+            app/javascript/dashboard/components-next/message/specs/MessageError.spec.js \
+            app/javascript/dashboard/helper/specs/conversationHelper.spec.js \
+            app/javascript/dashboard/components/widgets/conversation/specs/MessagesView.spec.js \
+            app/javascript/dashboard/routes/dashboard/inbox/specs/InboxList.spec.js \
+            app/javascript/dashboard/routes/dashboard/inbox/InboxList.spec.js \
+            app/javascript/dashboard/store/modules/specs/conversationPage/mutations.spec.js \
+            app/javascript/dashboard/store/modules/conversations/specs \
+            --maxWorkers=2 --minWorkers=1 --reporter=default --reporter=json --outputFile=/tmp/delivery-vitest.json
+          python3 script/jrc_delivery_evidence.py vitest /tmp/delivery-vitest.json 36
+      - name: Scoped source lint and locale parity
+        run: |
+          pnpm exec eslint app/javascript/dashboard/components-next/message/{MessageMeta,MessageStatus,MessageError}.vue \
+            app/javascript/dashboard/components-next/message/specs/{MessageMeta,MessageError}.spec.js \
+            app/javascript/dashboard/helper/{conversationHelper.js,specs/conversationHelper.spec.js} \
+            app/javascript/dashboard/components/widgets/conversation/specs/MessagesView.spec.js
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('app/javascript/dashboard/i18n/locale')
+          values = [json.loads((root / lang / 'chatlist.json').read_text()) for lang in ('en', 'pt_BR')]
+          def keys(value, prefix=''):
+              return {prefix + key for key in value} | set().union(*(keys(v, prefix + k + '.') for k,v in value.items() if isinstance(v,dict)))
+          assert keys(values[0]) == keys(values[1]), 'locale key parity'
+          PY
+      - name: Build guard regressions
+        run: |
+          python3 script/jrc_ag_guarded_frontend_build_test.py
+          python3 script/jrc_delivery_evidence_test.py
+          node --test script/jrc_vite_build.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: delivery-interface-${{ github.sha }}
+          path: /tmp/delivery-vitest.json
+          if-no-files-found: error
+      - run: git diff --exit-code && git diff --check
+
+  rails:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d postgres" --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_delivery_reliability_test
+      JRC_LIVE_CONCURRENCY: '1'
+      DB_POOL_SIZE: '10'
+      REDIS_URL: redis://127.0.0.1:6379/15
+      FRONTEND_URL: https://synthetic-lab.example.test
+      SECRET_KEY_BASE: disposable-delivery-test-only-not-production
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/delivery-schema.rb
+      TZ: UTC
+      HISTORY_PHYSICAL_STORAGE_TEST: 'true'
+      STORAGE_ENDPOINT: http://jrc-history-v2-complete-20261112-minio:9000
+      STORAGE_ACCESS_KEY_ID: disposable-delivery
+      STORAGE_SECRET_ACCESS_KEY: disposable-delivery-only
+      STORAGE_REGION: us-east-1
+      STORAGE_BUCKET_NAME: delivery-candidate
+      STORAGE_FORCE_PATH_STYLE: 'true'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Native Rails dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.12'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Fresh exact test database without mutating source schema
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_DATABASE" = jrc_delivery_reliability_test
+          ruby -e 'abort "wrong runtime" unless RUBY_VERSION == "3.4.12"'
+          cp db/schema.rb "$SCHEMA"
+          bundle exec rails db:create db:schema:load
+      - name: Private physical MinIO fixture
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/delivery-minio"
+          curl --fail --location --proto '=https' --tlsv1.2 --connect-timeout 10 --max-time 120 --retry 2 \
+            'https://github.com/minio/minio/releases/download/RELEASE.2025-09-07T16-13-09Z/minio.linux-amd64.RELEASE.2025-09-07T16-13-09Z' \
+            --output "$RUNNER_TEMP/delivery-minio/minio"
+          echo "7c5bd8512c6e966455b1d198209358b2d191c77a83ab377c4073281065fb855f  $RUNNER_TEMP/delivery-minio/minio" | sha256sum --check
+          chmod 700 "$RUNNER_TEMP/delivery-minio/minio"
+          echo '127.0.0.1 jrc-history-v2-complete-20261112-minio' | sudo tee -a /etc/hosts
+          MINIO_ROOT_USER="$STORAGE_ACCESS_KEY_ID" MINIO_ROOT_PASSWORD="$STORAGE_SECRET_ACCESS_KEY" MINIO_BROWSER=off \
+            "$RUNNER_TEMP/delivery-minio/minio" server --address 127.0.0.1:9000 --console-address 127.0.0.1:0 "$RUNNER_TEMP/delivery-minio/data" \
+            > /tmp/delivery-minio.log 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/delivery-minio/pid"
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:9000/minio/health/cluster; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:9000/minio/health/cluster
+      - name: Native receipt, history interoperability and publication clock (66 baseline)
+        run: |
+          bundle exec rspec spec/requests/jrc_broker_live_ingress_spec.rb \
+            spec/services/jrc_broker/live_history_interop_spec.rb \
+            spec/services/jrc_broker/live_ingress_concurrency_spec.rb spec/models/message_activity_clock_spec.rb \
+            --format progress --format json --out /tmp/delivery-native.json
+          python3 script/jrc_delivery_evidence.py rspec /tmp/delivery-native.json 66
+      - name: Six real unread badge and cursor regressions
+        run: |
+          bundle exec rspec spec/requests/jrc_broker_live_ingress_spec.rb --example 'with cached unread badges' \
+            --format progress --format json --out /tmp/delivery-badges.json
+          python3 script/jrc_delivery_evidence.py rspec /tmp/delivery-badges.json 6
+      - name: Twelve affected generic Rails suites
+        run: |
+          bundle exec rspec spec/models/message_spec.rb spec/models/conversation_spec.rb \
+            spec/builders/messages/message_builder_spec.rb spec/models/message_activity_clock_spec.rb \
+            spec/services/jrc_broker/live_ingress_concurrency_spec.rb spec/requests/jrc_broker_live_ingress_spec.rb \
+            spec/services/jrc_broker/live_history_interop_spec.rb \
+            spec/services/conversations/unread_counts/{builder,refresher,filtered_counter,counter}_spec.rb \
+            spec/controllers/api/v1/accounts/conversations_controller_spec.rb \
+            --format progress --format json --out /tmp/delivery-generics.json
+          python3 script/jrc_delivery_evidence.py rspec /tmp/delivery-generics.json 295
+      - name: History, media, Minhas and durable outbound regressions
+        run: |
+          bundle exec rspec spec/requests/jrc_broker_delivery_receipt_spec.rb \
+            spec/models/{jrc_broker_webhook_obligation,message_legacy_delivery_display}_spec.rb \
+            spec/services/jrc_broker/outbound_receipt_spec.rb spec/services/jrc_campaigns/broker_delivery_failure_spec.rb \
+            spec/requests/jrc_history_sync_v2_spec.rb spec/services/jrc_broker/history_sync_media_spec.rb \
+            spec/finders/{message_finder_history,conversation_finder_shared}_spec.rb \
+            spec/requests/api/v1/accounts/conversations_shared_spec.rb \
+            spec/services/conversations/{inbox_visibility_exclusive,shared_inbox_routing}_spec.rb \
+            spec/configs/schedule_spec.rb \
+            --format progress --format json --out /tmp/delivery-history-outbound.json
+          python3 script/jrc_delivery_evidence.py rspec /tmp/delivery-history-outbound.json 50
+      - name: Preserved source and no schema dump
+        run: git diff --exit-code && git diff --check
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: delivery-rails-${{ github.sha }}
+          path: |
+            /tmp/delivery-*.json
+            /tmp/delivery-minio.log
+          if-no-files-found: error
+      - name: Stop only the owned MinIO process
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/delivery-minio/pid"; then kill -TERM "$(cat "$RUNNER_TEMP/delivery-minio/pid")" || true; fi
+
+  frontend-build:
+    needs: [interface, rails]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - run: pnpm install --frozen-lockfile
+      - name: One guarded artifact build (8 GiB available admission)
+        env:
+          JRC_AG_AUTHORIZED_BUILD_SHA: ${{ github.sha }}
+        run: python3 script/jrc_ag_guarded_frontend_build.py --execute --expected-sha "$GITHUB_SHA"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: delivery-frontend-build-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/jrc-ag-build-${{ github.sha }}/build.log
+            ${{ runner.temp }}/jrc-ag-build-${{ github.sha }}/build-result.json
+          if-no-files-found: error
+      - run: git diff --exit-code && git diff --check

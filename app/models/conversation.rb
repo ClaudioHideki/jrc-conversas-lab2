@@ -183,11 +183,11 @@ class Conversation < ApplicationRecord
   end
 
   def unread_messages
-    agent_last_seen_at.present? ? messages.created_since(agent_last_seen_at) : messages
+    agent_last_seen_at.present? ? messages.received_since(agent_last_seen_at) : messages
   end
 
   def assignee_unread_messages
-    assignee_last_seen_at.present? ? messages.created_since(assignee_last_seen_at) : messages
+    assignee_last_seen_at.present? ? messages.received_since(assignee_last_seen_at) : messages
   end
 
   def unread_incoming_messages
@@ -238,7 +238,7 @@ class Conversation < ApplicationRecord
                               .and(messages[:message_type].eq(Message.message_types[:incoming]))
                               .and(
                                 conversations[:agent_last_seen_at].eq(nil)
-                                  .or(messages[:created_at].gt(conversations[:agent_last_seen_at]))
+                                  .or(Message.publication_clock_arel(messages).gt(conversations[:agent_last_seen_at]))
                               )
   end
 

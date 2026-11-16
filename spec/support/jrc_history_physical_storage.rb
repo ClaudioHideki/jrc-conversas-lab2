@@ -16,6 +16,11 @@ if ENV['HISTORY_PHYSICAL_STORAGE_TEST'] == 'true'
       rescue Aws::S3::Errors::BucketAlreadyOwnedByYou
         # The same private test bucket is deliberately retained across retries.
       end
+      if ENV['GITHUB_ACTIONS'] == 'true' && ENV['POSTGRES_DATABASE'] == 'jrc_delivery_reliability_test'
+        raise 'Physical storage CI requires the test environment' unless Rails.env.test?
+
+        ActiveStorage::Blob.service = ActiveStorage::Blob.services.fetch(:s3_compatible)
+      end
     end
   end
 end

@@ -12,6 +12,32 @@ import {
 } from './fixtures/conversationFixtures';
 
 describe('conversationHelper', () => {
+  it('uses the server publication clock only for read partitions while preserving source order and last message', () => {
+    const delayed = {
+      id: 1,
+      message_type: 0,
+      created_at: 100,
+      broker_published_at: 300,
+    };
+    const recent = { id: 2, message_type: 0, created_at: 200 };
+    const messages = [delayed, recent];
+    expect(getReadMessages(messages, 250)).toEqual([recent]);
+    expect(getUnreadMessages(messages, 250)).toEqual([delayed]);
+    expect(getUnreadMessages(messages, 300)).toEqual([]);
+    expect(getLastMessage({ messages })).toEqual(recent);
+    expect(messages).toEqual([delayed, recent]);
+  });
+
+  it('ignores editable content attributes and keeps generic and historical messages on their source clock', () => {
+    const message = {
+      id: 1,
+      created_at: 100,
+      broker_published_at: null,
+      content_attributes: { broker_published_at: 300 },
+    };
+    expect(getReadMessages([message], 250)).toEqual([message]);
+    expect(getUnreadMessages([message], 250)).toEqual([]);
+  });
   describe('#filterDuplicateSourceMessages', () => {
     it('returns messages without duplicate source_id and all messages without source_id', () => {
       const input = [

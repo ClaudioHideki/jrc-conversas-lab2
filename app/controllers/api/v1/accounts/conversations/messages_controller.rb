@@ -14,8 +14,18 @@ class Api::V1::Accounts::Conversations::MessagesController < Api::V1::Accounts::
   end
 
   def update
-    Messages::StatusUpdateService.new(message, permitted_params[:status], permitted_params[:external_error]).perform
+    if params.key?(:broker_delivery)
+      check_admin_authorization?
+      proof = params[:broker_delivery]
+      proof = proof.to_unsafe_h if proof.is_a?(ActionController::Parameters)
+      JrcBroker::OutboundReceipt.new(message, status: permitted_params[:status], proof: proof,
+                                              external_error: permitted_params[:external_error]).perform
+    else
+      Messages::StatusUpdateService.new(message, permitted_params[:status], permitted_params[:external_error]).perform
+    end
     @message = message
+  rescue JrcBroker::OutboundReceipt::Error => e
+    render json: { error: e.message }, status: :unprocessable_entity
   end
 
   def destroy
@@ -27,6 +37,10 @@ class Api::V1::Accounts::Conversations::MessagesController < Api::V1::Accounts::
 
   def retry
     return if message.blank?
+    if JrcBrokerWebhookObligation.exists?(message_id: message.id)
+      return render json: { error: 'JRC_BROKER_RETRY_REQUIRES_RECONCILIATION' }, status: :conflict
+    end
+
     return render_whatsapp_retry if @conversation.inbox.channel_type == 'Channel::Whatsapp' &&
                                            @conversation.inbox.channel.provider == 'whatsapp_cloud'
 

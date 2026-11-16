@@ -6,12 +6,13 @@ import { MESSAGE_STATUS } from './constants';
 
 import Icon from 'next/icon/Icon.vue';
 
-const { status } = defineProps({
+const { status, statusLabel } = defineProps({
   status: {
     type: String,
     required: true,
     validator: value => Object.values(MESSAGE_STATUS).includes(value),
   },
+  statusLabel: { type: String, default: '' },
 });
 
 const { t } = useI18n();
@@ -72,7 +73,7 @@ const tooltipText = computed(() => {
     [MESSAGE_STATUS.PROGRESS]: t('CHAT_LIST.SENDING'),
   };
 
-  return statusTextMap[status];
+  return statusLabel || statusTextMap[status];
 });
 </script>
 
@@ -81,12 +82,14 @@ const tooltipText = computed(() => {
     v-if="status === MESSAGE_STATUS.PROGRESS"
     v-tooltip.top-start="tooltipText"
     :icon="progessIcon"
+    :aria-label="tooltipText"
     class="text-n-slate-10"
   />
   <Icon
     v-else
     v-tooltip.top-start="tooltipText"
     :icon="statusIcon"
+    :aria-label="tooltipText"
     :class="statusColor"
     class="size-[14px]"
   />

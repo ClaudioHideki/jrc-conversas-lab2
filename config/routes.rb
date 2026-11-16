@@ -571,6 +571,9 @@ Rails.application.routes.draw do
               end
             end
           end
+          post 'jrc_broker/inboxes/:inbox_id/live-ingress/v1/capability', to: 'jrc_broker_live_ingress#capability'
+          post 'jrc_broker/inboxes/:inbox_id/live-ingress/v1/messages', to: 'jrc_broker_live_ingress#create'
+          post 'jrc_broker/inboxes/:inbox_id/live-ingress/v1/receipts/:broker_message_id', to: 'jrc_broker_live_ingress#receipt'
           get 'jrc_history_import/inboxes/:inbox_id', to: 'jrc_history_imports#capability'
           get 'jrc_history_sync/v2/inboxes/:inbox_id', to: 'jrc_history_syncs#capability'
           post 'jrc_history_sync/v2/inboxes/:inbox_id/bootstrap', to: 'jrc_history_syncs#bootstrap'

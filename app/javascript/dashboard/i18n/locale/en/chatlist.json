@@ -161,6 +161,9 @@
     "SHOW_QUOTED_TEXT": "Show Quoted Text",
     "MESSAGE_READ": "Read",
     "SENDING": "Sending",
+    "BROKER_QUEUED": "Queued for WhatsApp",
+    "BROKER_ACCEPTED": "Awaiting WhatsApp confirmation",
+    "BROKER_UNKNOWN": "WhatsApp send not confirmed",
     "UNREAD_COUNT_OVERFLOW": "9+"
   }
 }

@@ -6,9 +6,10 @@ json.conversation_id message.conversation.display_id
 json.message_type message.message_type_before_type_cast
 json.content_type message.content_type
 json.status message.status
-json.content_attributes message.content_attributes
+json.content_attributes message.display_content_attributes
 json.additional_attributes message.additional_attributes
 json.created_at message.created_at.to_i
+json.broker_published_at message.broker_published_at
 json.private message.private
 json.source_id message.source_id
 json.sender message.sender.push_event_data if message.sender

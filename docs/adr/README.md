@@ -8,3 +8,4 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 ## Decisões deste bootstrap
 
 - [0001-governanca-operacional-init](0001-governanca-operacional-init.md): adoção do INIT solicitado pelo usuário.
+- [0002-recibo-live-custodia-broker](0002-recibo-live-custodia-broker.md): custódia LIVE imutável e interoperabilidade com histórico, implementação local sem publicação.

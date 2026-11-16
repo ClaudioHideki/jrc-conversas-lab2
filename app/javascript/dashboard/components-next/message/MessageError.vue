@@ -21,6 +21,7 @@ const {
   meta,
   isWhatsappCloud,
   additionalAttributes,
+  contentAttributes,
 } = useMessageContext();
 
 const { t } = useI18n();
@@ -28,6 +29,28 @@ const errorDetails = computed(() =>
   [props.error, meta?.value?.error].filter(Boolean).join('\n')
 );
 const attempt = computed(() => additionalAttributes?.value?.whatsappRetry);
+const brokerOutbound = computed(
+  () => contentAttributes?.value?.jrcBrokerOutbound
+);
+const legacyUnconfirmed = computed(
+  () => contentAttributes?.value?.jrcBrokerLegacyUnconfirmed === true
+);
+const rejectionProven = computed(() => {
+  const proof = contentAttributes?.value?.jrcBrokerDelivery;
+  return (
+    proof?.version === 1 &&
+    proof.outcome === 'rejected' &&
+    !proof.accepted &&
+    !proof.uncertain &&
+    !proof.inFlight
+  );
+});
+const brokerUnconfirmed = computed(
+  () =>
+    (legacyUnconfirmed.value ||
+      (brokerOutbound.value && brokerOutbound.value.state !== 'FAILED')) &&
+    !rejectionProven.value
+);
 const attemptLabel = computed(() => {
   if (!attempt.value) return '';
   const values = { id: attempt.value.originalMessageId };
@@ -51,7 +74,8 @@ const policyCode = computed(() =>
 );
 
 const canRetry = computed(() => {
-  if (attempt.value) return false;
+  if (attempt.value || brokerOutbound.value || legacyUnconfirmed.value)
+    return false;
   const hasContent = content.value !== null;
   const hasAttachments = attachments.value && attachments.value.length > 0;
   const hasTemplate =
@@ -69,6 +93,9 @@ const canRetry = computed(() => {
   <div class="text-xs text-n-ruby-11 flex flex-wrap items-center gap-1.5">
     <span v-if="attempt" role="status" class="select-text">
       {{ attemptLabel }}
+    </span>
+    <span v-else-if="brokerUnconfirmed" role="status" class="select-text">
+      {{ t('CHAT_LIST.BROKER_UNKNOWN') }}
     </span>
     <span v-else>{{ t('CHAT_LIST.FAILED_TO_SEND') }}</span>
     <div v-if="errorDetails" class="relative group">
