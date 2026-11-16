@@ -3,8 +3,6 @@
 
 ## Em progresso (WIP)
 
-- [ ] **REMOVER-FILTRO-SEGMENTO-20261116:** Retirar o painel “Filtrar por segmento” de todas as oito superfícies consumidoras, preservar os demais filtros e gerar uma imagem a partir do produto `5c3fb7f7`. Sintaxe e lint dirigidos aprovados; testes/CI/imagem pendentes. Decisão e limites: [ADR](docs/adr/20261116-remocao-filtro-segmento.md).
-
 - [ ] **QUICK-REPLIES-RELEASE-20261115:** Correções de anexo/revisão, seleção de catálogo e limite nativo implementadas e revisadas; 504 testes Vue e 15 negativas do contrato passaram. Concluir Rails/Chrome/E2E/CI/imagem e aplicação autorizada no Grupo JRC antes de marcar a release concluída. Plano e evidências: `docs/jrc_consolidation/quick_replies_whatsapp_release_20261115.md`.
 
 - [ ] **RELEASE-20261114:** Promover a consolidação de histórico/runtime/aprovações após CI e imagem do SHA exato; verificar versão, migrations e saúde no Grupo JRC. Código e testes locais registrados em CONTINUE-AQUI.md; implantação ainda não comprovada.
@@ -20,6 +18,8 @@ Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em a
 - [ ] **OPS-02:** Manter homologação de voz, histórico e mídias distinta de teste sintético e de publicação.
 
 ## Concluído (Done)
+
+- [x] **REMOVER-FILTRO-SEGMENTO-20261116:** Painel retirado das oito superfícies; imagem do produto `c8efa1d68e1b5706e47cd022fa8e31df1e156e6c` publicada e verificada por digest. CI `43941168985`: três jobs aprovados, 2.752 testes Vue e 168 Rails aprovados, smokes antes/depois da publicação. Implantação não realizada. Referência e limites: [ADR](docs/adr/20261116-remocao-filtro-segmento.md).
 
 - [x] **BOOTSTRAP-01:** Identidade, stack, natureza Brownfield e fontes locais registradas.
 - [x] **BOOTSTRAP-02:** Estrutura INIT, domínio, arquitetura e ADR organizados sem apagar conteúdo anterior.
