@@ -11,8 +11,8 @@ RSpec.describe 'Call Center native role boundaries', type: :request do
 
   it 'returns not found for a foreign role without changing either Account' do
     foreign = create(:custom_role, account: create(:account), permissions: ['jrc_contact_center_view'])
-    patch "/api/v1/accounts/#{account.id}/custom_roles/#{foreign.id}", headers: headers,
-          params: { custom_role: { name: 'Forbidden' } }
+    patch "/api/v1/accounts/#{account.id}/custom_roles/#{foreign.id}",
+          headers: headers, params: { custom_role: { name: 'Forbidden' } }
     expect(response).to have_http_status(:not_found)
     expect(foreign.reload.name).not_to eq('Forbidden')
   end

@@ -100,7 +100,7 @@ jobs:
             spec/controllers/api/v1/accounts/teams_controller_spec.rb spec/controllers/api/v1/accounts/team_members_controller_spec.rb \
             spec/enterprise/controllers/api/v1/accounts/custom_roles_controller_spec.rb spec/enterprise/models/custom_role_spec.rb \
             spec/enterprise/models/contact_center_custom_role_audit_spec.rb \
-            --exclude-pattern '{spec/services/pabx/sync_concurrency_spec.rb,spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb}' \
+            --exclude-pattern '**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: PABX concurrency in its explicitly guarded disposable database
         env:

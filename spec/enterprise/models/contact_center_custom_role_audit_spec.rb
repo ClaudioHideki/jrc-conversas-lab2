@@ -1,12 +1,17 @@
 require 'rails_helper'
 
-RSpec.describe Enterprise::Audit::ContactCenterCustomRole, type: :model do
+RSpec.describe 'Call Center native capability audit', type: :model do
   let(:account) { create(:account) }
   let(:actor) { create(:user, account: account, role: :administrator) }
   let(:audits) { Enterprise::AuditLog.where(comment: 'JRC Call Center native capabilities', associated: account) }
 
   around do |example|
-    Current.set(user: actor, account: account) { example.run }
+    previous = [Current.user, Current.account]
+    Current.user = actor
+    Current.account = account
+    example.run
+  ensure
+    Current.user, Current.account = previous
   end
 
   it 'records only Call Center capabilities with actor and Account on create and update' do
