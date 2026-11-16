@@ -9,6 +9,10 @@ export default defineConfig({
   publicDir: false,
   plugins: [vue(vueOptions), yaml()],
   resolve: { alias: aliases },
+  css: {
+    postcss: local('../../../../'),
+    preprocessorOptions: { scss: { api: 'modern-compiler' } },
+  },
   preview: {
     host: '127.0.0.1',
     port: 5386,

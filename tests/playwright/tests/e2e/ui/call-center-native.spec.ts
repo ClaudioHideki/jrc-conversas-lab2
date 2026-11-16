@@ -27,6 +27,14 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
   await expect(
     page.getByRole('heading', { name: 'Central Administrativa', exact: true })
   ).toBeVisible();
+  await expect(page.locator('[data-card]').first().locator('..')).toHaveCSS(
+    'display',
+    'grid'
+  );
+  await expect(page.locator('[data-control-desk] header')).not.toHaveCSS(
+    'background-color',
+    'rgba(0, 0, 0, 0)'
+  );
   const light = await page
     .locator('[data-control-desk] header')
     .evaluate(element => getComputedStyle(element).backgroundColor);

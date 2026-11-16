@@ -1,4 +1,7 @@
 import { defineConfig } from '@playwright/test';
+import path from 'node:path';
+
+const evidence = path.resolve('.codex/call-center-native-e2e');
 export default defineConfig({
   testDir: './tests/e2e/ui',
   testMatch: 'call-center-native.spec.ts',
@@ -7,9 +10,9 @@ export default defineConfig({
   timeout: 90000,
   reporter: [
     ['line'],
-    ['json', { outputFile: '.codex/call-center-native-e2e/results.json' }],
+    ['json', { outputFile: path.join(evidence, 'results.json') }],
   ],
-  outputDir: '.codex/call-center-native-e2e/screenshots',
+  outputDir: path.join(evidence, 'screenshots'),
   use: {
     baseURL: 'http://127.0.0.1:5386',
     channel: 'chrome',

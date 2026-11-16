@@ -26,9 +26,9 @@
     "Vue source formatted and parsed"
   ],
   "pending": [
-    "native lint",
-    "Rails and Vue on this checkpoint",
-    "Chrome after lint gates pass"
+    "Chrome revalidation with production PostCSS/Tailwind and recoverable JSON",
+    "visual review of real styled captures",
+    "external PABX contract and operational acceptance, not exercised by synthetic tests"
   ],
   "restrictions": [
     "no global lint changes",
@@ -90,5 +90,26 @@
     "ruby_remaining": "one EmptyLineAfterGuardClause in synthetic seed; blank line added for next validation",
     "artifact_id": 14235115054,
     "artifact_sha256": "f051c7911e5f0d2141da2028edef257de5364d28acde8a36684ccfcdf23fc201"
+  },
+  "lint_and_chrome_validation": {
+    "sha": "7f42c891811a31fd4fda153cc476fbd2e1d9988b",
+    "run": 43885545957,
+    "artifact_id": 14235610595,
+    "artifact_sha256": "e5c806dbf2d44c9fe2164da5047f70064f447d345d9a63867d609f01858fab60",
+    "frontend_errors": 0,
+    "frontend_advisory_warnings": 40,
+    "ruby_new_or_regressed": 0,
+    "rails_examples": 347,
+    "rails_failures": 0,
+    "rails_pending": 0,
+    "vue_examples": 166,
+    "vue_failures": 0,
+    "assets_build": "passed",
+    "chrome": {
+      "passed": 12,
+      "failed": 4,
+      "cause": "Fixture did not resolve production PostCSS/Tailwind; theme assertion correctly rejected transparent headers. Relative reporter paths also escaped artifact directory."
+    },
+    "next_fix": "Only fixture CSS configuration and evidence paths; keep theme assertion and add explicit real-grid/nontransparent checks."
   }
 }
