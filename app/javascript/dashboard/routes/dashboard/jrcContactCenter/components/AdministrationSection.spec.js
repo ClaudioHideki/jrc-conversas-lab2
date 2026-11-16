@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, reactive, ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
+import TeamsAPI from 'dashboard/api/teams';
 import AdministrationSection from './AdministrationSection.vue';
 import ControlDeskPage from '../views/ControlDeskPage.vue';
 
@@ -23,6 +24,14 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
     saveQueueMembership: vi.fn(),
     acwPolicy: vi.fn(),
     updateAcwPolicy: vi.fn(),
+  },
+}));
+vi.mock('dashboard/api/teams', () => ({
+  default: {
+    create: vi.fn(),
+    update: vi.fn(),
+    getAgents: vi.fn(),
+    updateAgents: vi.fn(),
   },
 }));
 const Dialog = defineComponent({
@@ -62,6 +71,9 @@ beforeEach(() => {
   });
   API.queues.mockResolvedValue({ data: { items: [] } });
   API.saveUnit.mockResolvedValue({ data: {} });
+  API.administrativeList.mockResolvedValue({
+    data: { items: [], agents: [], can_manage: true },
+  });
 });
 
 describe('administrative workflow', () => {
@@ -193,5 +205,149 @@ describe('administrative workflow', () => {
     await flushPromises();
     expect(wrapper.find('[data-card="general"]').exists()).toBe(false);
     expect(wrapper.text()).not.toContain('999');
+  });
+
+  it('restores the selected native team tab from the URL', async () => {
+    mocks.route.query = { queues_tab: 'teams', teams_q: 'support' };
+    mountSection('queues');
+    await flushPromises();
+    expect(API.administrativeList).toHaveBeenCalledWith(
+      '1',
+      'teams',
+      expect.objectContaining({ q: 'support' })
+    );
+  });
+
+  it('preserves a non-voice queue channel while editing its name', async () => {
+    API.queues.mockResolvedValue({
+      data: {
+        items: [
+          {
+            id: 12,
+            name: 'Original',
+            code: 'CHAT',
+            unit_id: 1,
+            service_kind: 'whatsapp',
+            strategy: 'provider',
+            status: 'active',
+          },
+        ],
+      },
+    });
+    const wrapper = mountSection('queues');
+    await flushPromises();
+    await wrapper.get('[data-edit]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-dialog] input').setValue('Reviewed');
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(API.saveQueue).toHaveBeenCalledWith(
+      '1',
+      expect.objectContaining({ name: 'Reviewed', service_kind: 'whatsapp' }),
+      12
+    );
+  });
+
+  it('identifies backend-rejected fields without losing the draft', async () => {
+    const wrapper = mountSection();
+    await flushPromises();
+    await wrapper.get('[data-create]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[name="name"]').setValue('Reviewed');
+    await wrapper.get('[name="code"]').setValue('DUPLICATE');
+    API.saveUnit.mockRejectedValueOnce({
+      response: { data: { message: 'Conflict', attributes: ['code'] } },
+    });
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(wrapper.get('[name="code"]').attributes('aria-invalid')).toBe(
+      'true'
+    );
+    expect(wrapper.get('[name="name"]').element.value).toBe('Reviewed');
+  });
+
+  it('clears an incompatible business unit after changing the issuer', async () => {
+    const wrapper = mount(AdministrationSection, {
+      props: {
+        accountId: '1',
+        card: { key: 'general', state: 'available' },
+        context: {
+          ...context,
+          corporate: {
+            companies: [
+              { id: 10, name: 'A' },
+              { id: 20, name: 'B' },
+            ],
+            units: [{ id: 11, name: 'Unit A', company_id: 10 }],
+          },
+        },
+      },
+      global: { stubs: { Dialog, RouterLink: true } },
+    });
+    await flushPromises();
+    await wrapper.get('[data-create]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[name="issuer_company_id"]').setValue('10');
+    await wrapper.get('[name="business_unit_id"]').setValue('11');
+    await wrapper.get('[name="issuer_company_id"]').setValue('20');
+    expect(wrapper.get('[name="business_unit_id"]').element.value).toBe('');
+  });
+
+  it('keeps team membership writes independent from the team fields and queue assignment', async () => {
+    mocks.route.query = { queues_tab: 'teams' };
+    API.administrativeList.mockResolvedValue({
+      data: {
+        items: [{ id: 4, name: 'Native team', description: 'Original' }],
+        agents: [{ user_id: 8, name: 'Eligible member' }],
+        can_manage: true,
+      },
+    });
+    TeamsAPI.getAgents.mockResolvedValue({ data: [] });
+    TeamsAPI.updateAgents.mockResolvedValue({ data: [] });
+    const wrapper = mountSection('queues');
+    await flushPromises();
+    await wrapper.get('[data-edit]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-team-member="8"]').setValue(true);
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(TeamsAPI.update).not.toHaveBeenCalled();
+    expect(wrapper.get('[role="alert"]').text()).toBe(
+      'JRC_CONTACT_CENTER.ADMIN.TEAM_MEMBERS_UNSAVED'
+    );
+    await wrapper.get('[data-save-team-members]').trigger('click');
+    await flushPromises();
+    expect(TeamsAPI.updateAgents).toHaveBeenCalledWith({
+      teamId: 4,
+      agentsList: [8],
+    });
+    expect(TeamsAPI.update).not.toHaveBeenCalled();
+    expect(API.saveQueueMembership).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-dialog]').exists()).toBe(true);
+  });
+
+  it('keeps selected native team members on a failed write without granting queue roles', async () => {
+    mocks.route.query = { queues_tab: 'teams' };
+    API.administrativeList.mockResolvedValue({
+      data: {
+        items: [{ id: 4, name: 'Native team' }],
+        agents: [{ user_id: 8, name: 'Eligible member' }],
+        can_manage: true,
+      },
+    });
+    TeamsAPI.getAgents.mockResolvedValue({ data: [] });
+    TeamsAPI.updateAgents.mockRejectedValue({
+      response: { data: { error: 'Denied' } },
+    });
+    const wrapper = mountSection('queues');
+    await flushPromises();
+    await wrapper.get('[data-edit]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-team-member="8"]').setValue(true);
+    await wrapper.get('[data-save-team-members]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-team-member="8"]').element.checked).toBe(true);
+    expect(wrapper.get('[role="alert"]').text()).toBe('Denied');
+    expect(API.saveQueueMembership).not.toHaveBeenCalled();
   });
 });

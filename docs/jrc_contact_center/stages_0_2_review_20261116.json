@@ -1,0 +1,544 @@
+{
+  "base_sha": "f22a6b0b67ebebb5019b987319f4045b7358582c",
+  "branch": "codex/call-center-control-desk-20261116",
+  "documents": [
+    {
+      "name": "JRC_Conversas_Call_Center_Parte_1_Especificacao_DEV_Com_Imagens.docx",
+      "sha256": "5db370d9b7598a720d32f7f60eba4e22b4b61878327bd4459176ff729fe7a2c8"
+    },
+    {
+      "name": "JRC_Conversas_Call_Center_Parte_1_Detalhamento_Funcional_23_Imagens.docx",
+      "sha256": "8f9300cf1940012f71be1a97903a192f7b5a18667e6da6664b9f972866e7e88b"
+    }
+  ],
+  "method": "Both original documents and all 23 figure references reviewed, preserving original written rules and complement caption corrections. Status is per figure; validated local functions do not imply external or later-stage completion.",
+  "figures": [
+    {
+      "figure": 1,
+      "title": "Central e navegação",
+      "status": "Implementado parcialmente",
+      "stages": [
+        0,
+        1,
+        2
+      ],
+      "implemented_in_0_2": [
+        "One central, account permissions, real local counts and explicit external pending status"
+      ],
+      "remaining_or_external": [
+        "PABX online/confirmed indicators require an actual provider response"
+      ],
+      "code_references": [
+        "ControlDeskPage.vue",
+        "administration.rb"
+      ],
+      "reference": {
+        "document_1_figure": 1,
+        "document_2_figure": 1
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 2,
+      "title": "Página principal do Control Desk",
+      "status": "Implementado parcialmente",
+      "stages": [
+        0,
+        1,
+        2
+      ],
+      "implemented_in_0_2": [
+        "15 Word-named cards, statically discoverable icons, contextual return/navigation and reload"
+      ],
+      "remaining_or_external": [
+        "Recent administrative before/after and external alerts belong to stages 3/8"
+      ],
+      "code_references": [
+        "ControlDeskPage.vue",
+        "AdministrationSection.vue"
+      ],
+      "reference": {
+        "document_1_figure": 2,
+        "document_2_figure": 2
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 3,
+      "title": "Equipes, filas e distribuição",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "implemented_in_0_2": [
+        "Native Team fields/members; local Queue CRUD; independent tab/filter/page state; explicit queue participation/supervision"
+      ],
+      "remaining_or_external": [
+        "No native Team-to-Queue/primary-supervisor model; DAC/calendar/publication need stages 3/4/6 and provider contract"
+      ],
+      "code_references": [
+        "AdministrationSection.vue",
+        "administration_controller.rb",
+        "queue_memberships_controller.rb"
+      ],
+      "reference": {
+        "document_1_figure": 3,
+        "document_2_figure": 3
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 4,
+      "title": "Painel técnico PABX e atalhos",
+      "status": "Implementado parcialmente",
+      "stages": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "implemented_in_0_2": [
+        "Safe connection metadata; read-only resources; explicit authorized tenant/accountcode mapping; original infrastructure remains SuperAdmin-only"
+      ],
+      "remaining_or_external": [
+        "No fake connection test or resource publication; real diagnostics/ACK contract and URA editor remain later"
+      ],
+      "code_references": [
+        "scope_mapping.rb",
+        "administration_controller.rb"
+      ],
+      "reference": {
+        "document_1_figure": 4,
+        "document_2_figure": 4
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 5,
+      "title": "Gerar mensagem com Nico",
+      "status": "Reservado às etapas 3–8",
+      "stages": [
+        4
+      ],
+      "implemented_in_0_2": [],
+      "remaining_or_external": [
+        "Institutional TTS editor, voices, codec, limits and external authorization are stage 4"
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 5,
+        "document_2_figure": 5
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 6,
+      "title": "Biblioteca de áudios e pastas",
+      "status": "Reservado às etapas 3–8",
+      "stages": [
+        4
+      ],
+      "implemented_in_0_2": [],
+      "remaining_or_external": [
+        "Institutional audio folders/versioning/storage are stage 4; call recordings are not this catalog"
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 6,
+        "document_2_figure": 6
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 7,
+      "title": "Pausas e disponibilidade",
+      "status": "Reservado às etapas 3–8",
+      "stages": [
+        6
+      ],
+      "implemented_in_0_2": [
+        "Existing native agent state is preserved"
+      ],
+      "remaining_or_external": [
+        "Pause catalog and safe call-to-pause transition require stage 6 and operational policy"
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 7,
+        "document_2_figure": 7
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 8,
+      "title": "Cadastro de motivo de pausa",
+      "status": "Reservado às etapas 3–8",
+      "stages": [
+        6
+      ],
+      "implemented_in_0_2": [],
+      "remaining_or_external": [
+        "HH:MM minimum/default/maximum pause form belongs to stage 6; no backend catalog is invented"
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 8,
+        "document_2_figure": 8
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 9,
+      "title": "Regra de pós-atendimento",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        2,
+        6
+      ],
+      "implemented_in_0_2": [
+        "Native account/channel ACW popup in HH:MM; required voice flag, validation and persistence"
+      ],
+      "remaining_or_external": [
+        "Per-reason/queue/team templates and precedence remain stage 6; native 1..3600 second engine unchanged"
+      ],
+      "code_references": [
+        "AdministrationSection.vue",
+        "acw_policy.rb"
+      ],
+      "reference": {
+        "document_1_figure": 9,
+        "document_2_figure": 9
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 10,
+      "title": "Automações por encerramento",
+      "status": "Reservado às etapas 3–8",
+      "stages": [
+        6
+      ],
+      "implemented_in_0_2": [],
+      "remaining_or_external": [
+        "Per-reason CRM/SD/task orchestration, per-destination receipts and retries remain stage 6"
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 10,
+        "document_2_figure": 10
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 11,
+      "title": "Perfil e permissões",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        2,
+        6
+      ],
+      "implemented_in_0_2": [
+        "13 native CC permissions, separate recording rights, anti-escalation and fresh checks; native role editor is reused"
+      ],
+      "remaining_or_external": [
+        "Full multi-module/profile/team matrix from the mockup is not recreated; native editor navigation/installation restrictions remain; legacy native role access is preserved"
+      ],
+      "code_references": [
+        "module_policy.rb",
+        "grant_guard.rb",
+        "CustomRoleModal.vue"
+      ],
+      "reference": {
+        "document_1_figure": 11,
+        "document_2_figure": 11
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 12,
+      "title": "Equipe e filas em popup",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "implemented_in_0_2": [
+        "Native team fields and member editor; separate native queue member flags and deactivation"
+      ],
+      "remaining_or_external": [
+        "Native Team has no corporate scope or supervisor/queue hierarchy; no fictitious team status; richer mapping, schedules and distribution remain later"
+      ],
+      "code_references": [
+        "AdministrationSection.vue",
+        "team_members_controller.rb"
+      ],
+      "reference": {
+        "document_1_figure": 12,
+        "document_2_figure": 12
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 13,
+      "title": "Conexão e sincronização PABX",
+      "status": "Implementado parcialmente",
+      "stages": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "implemented_in_0_2": [
+        "Same PABX source as figure 4, safe local state and explicit scope contract"
+      ],
+      "remaining_or_external": [
+        "Inventory synchronization/publication/ACK is not inferred from successful CDR import; needs stage 3/provider"
+      ],
+      "code_references": [
+        "administration_controller.rb",
+        "control_desk_contracts_20261116.json"
+      ],
+      "reference": {
+        "document_1_figure": 13,
+        "document_2_figure": 13
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 14,
+      "title": "Auditoria técnica",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        2,
+        3
+      ],
+      "implemented_in_0_2": [
+        "Existing scoped durable event list/reprocessing remains available only under native capabilities"
+      ],
+      "remaining_or_external": [
+        "Full administrative before/after, exports and per-operation histories remain stage 3"
+      ],
+      "code_references": [
+        "administration_controller.rb",
+        "access_scope.rb"
+      ],
+      "reference": {
+        "document_1_figure": 14,
+        "document_2_figure": 14
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 15,
+      "title": "Aprovações PABX",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "implemented_in_0_2": [
+        "Original Central de Aprovações entry and eligibility preserved; no policy or real PABX command activated"
+      ],
+      "remaining_or_external": [
+        "PABX approval adapter, snapshots, technical execution and rollback require stages 3/5 and policy/ACK contract"
+      ],
+      "code_references": [
+        "administration.rb",
+        "module_policy.rb"
+      ],
+      "reference": {
+        "document_1_figure": 15,
+        "document_2_figure": 15
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 16,
+      "title": "Detalhes do áudio institucional",
+      "status": "Reservado às etapas 3–8",
+      "stages": [
+        4,
+        7
+      ],
+      "implemented_in_0_2": [],
+      "remaining_or_external": [
+        "Corrected Word caption: institutional audio details, not a recording policy. Library is stage 4; call recording policy has its own visual gap"
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 16,
+        "document_2_figure": 16
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 17,
+      "title": "Consulta de gravações e player",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        7
+      ],
+      "implemented_in_0_2": [
+        "Existing scoped history/recording-byte authorization and separate view/listen/download permissions preserved"
+      ],
+      "remaining_or_external": [
+        "Retention/legal hold, library search/player and access audit require stage 7 and external storage validation"
+      ],
+      "code_references": [
+        "supabase_client_scope_spec.rb",
+        "pabx_recordings_spec.rb"
+      ],
+      "reference": {
+        "document_1_figure": 17,
+        "document_2_figure": 17
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 18,
+      "title": "Gravações e Qualidade existente",
+      "status": "Reservado às etapas 3–8",
+      "stages": [
+        7
+      ],
+      "implemented_in_0_2": [
+        "Existing quality navigation is preserved; illustrative catalog must remain explicitly marked as demonstration"
+      ],
+      "remaining_or_external": [
+        "Not an operational proof; full integrated quality UI belongs to stage 7"
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 18,
+        "document_2_figure": 18
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 19,
+      "title": "Painel de sentimentos",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        7
+      ],
+      "implemented_in_0_2": [
+        "Account-scoped quality service/storage guards are preserved"
+      ],
+      "remaining_or_external": [
+        "Sentiment dashboard, denominators, error states and insights require stage 7; no illustrative metrics are promoted"
+      ],
+      "code_references": [
+        "supabase_client_scope_spec.rb"
+      ],
+      "reference": {
+        "document_1_figure": 19,
+        "document_2_figure": 19
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 20,
+      "title": "Transcrição e áudio sincronizados",
+      "status": "Reservado às etapas 3–8",
+      "stages": [
+        7
+      ],
+      "implemented_in_0_2": [],
+      "remaining_or_external": [
+        "Five-tab timed transcript/audio/graph popup requires real segments and stage 7"
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 20,
+        "document_2_figure": 20
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 21,
+      "title": "Contexto do cliente",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        7
+      ],
+      "implemented_in_0_2": [
+        "Existing context API uses native module visibility/corporate coverage"
+      ],
+      "remaining_or_external": [
+        "Full analysis context popup, linked contracts and source-specific navigation are stage 7"
+      ],
+      "code_references": [
+        "customer_context.rb"
+      ],
+      "reference": {
+        "document_1_figure": 21,
+        "document_2_figure": 21
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 22,
+      "title": "Ações e histórico",
+      "status": "Reservado às etapas 3–8",
+      "stages": [
+        6,
+        7
+      ],
+      "implemented_in_0_2": [],
+      "remaining_or_external": [
+        "Native actions/history orchestration with idempotency and separate review completion require stages 6/7"
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 22,
+        "document_2_figure": 22
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    },
+    {
+      "figure": 23,
+      "title": "Correção humana da análise",
+      "status": "Reservado às etapas 3–8",
+      "stages": [
+        7
+      ],
+      "implemented_in_0_2": [],
+      "remaining_or_external": [
+        "Append-only human review/version conflicts and explicit justification require stage 7"
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 23,
+        "document_2_figure": 23
+      },
+      "validation": "New functional/visual assertions await native CI on the next checkpoint; approved baseline f22a6b0b / run 43888126932 is retained, not relabelled as new evidence"
+    }
+  ],
+  "new_acceptance": [
+    "15 card names/routes/state labels and actual icon CSS",
+    "Native unit, queue, team fields, team members, queue membership and local ACW persistence",
+    "Non-voice queue channel preservation",
+    "Corporate options reset without silently changing stored links",
+    "Fresh permission checks and negative writes after role change",
+    "Synthetic corporate-unit and foreign Account denial",
+    "Desktop 1440/mobile 390, both themes, real Rails and PostgreSQL, no API aliases"
+  ],
+  "provider_contracts": "control_desk_contracts_20261116.json",
+  "scope_limit": "No new PABX endpoint, ACK, grant, native Team corporate mapping or production operation. Native Team remains Account-scoped. No changes to global lint configuration, Rails migrations, SQL or dependency locks.",
+  "validation_state": "native_and_Chrome_execution_pending",
+  "full_23_figures_complete": false
+}

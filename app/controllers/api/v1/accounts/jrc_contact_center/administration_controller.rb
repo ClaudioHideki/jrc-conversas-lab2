@@ -33,7 +33,12 @@ class Api::V1::Accounts::JrcContactCenter::AdministrationController < Api::V1::A
     relation = relation.where(id: TeamMember.where(user: Current.user).select(:team_id)) if organizational.restricted?
     payload = list_payload(search_records(relation, fields: ['name'])) { |team| team.as_json(only: %i[id name description updated_at]) }
     payload[:can_manage] = !organizational.restricted? && TeamPolicy.new(pundit_user, ::Team).create?
+    payload[:agents] = team_agent_options if payload[:can_manage]
     render json: payload
+  end
+
+  def team_agent_options
+    Current.account.account_users.includes(:user).order(:id).map { |member| { user_id: member.user_id, name: member.user.available_name } }
   end
 
   def administration

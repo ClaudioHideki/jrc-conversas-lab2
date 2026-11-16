@@ -59,7 +59,8 @@ class JrcContactCenter::Administration
 
   def provider_state
     integration = @account.telephony_integration
-    { state: 'pending_contract', last_sync_at: integration&.pabx_sync_state&.fetch('last_success_at', nil),
+    { state: 'pending_contract', configured: integration.present? && Pabx::Settings.new(integration).configured?,
+      last_sync_at: integration&.pabx_sync_state&.fetch('last_success_at', nil),
       last_error: integration&.pabx_sync_state&.fetch('last_error', nil).present? }
   end
 

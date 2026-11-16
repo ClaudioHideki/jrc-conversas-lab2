@@ -25,8 +25,35 @@ unit = JrcContactCenter::Unit.create!(account: account, name: 'SYNTHETIC primary
 23.times do |index|
   JrcContactCenter::Queue.create!(account: account, unit: unit, code: "QUEUE-#{index}", name: "SYNTHETIC queue #{index.to_s.rjust(2, '0')}")
 end
+company = JrcCustomers::Company.create!(account: account, name: 'SYNTHETIC issuer', relationship_type: 'internal', active: true)
+business_units = %w[A B].map do |code|
+  JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: "SYNTHETIC unit #{code}", code: "UNIT-#{code}", active: true)
+end
+scoped_units = business_units.map do |business_unit|
+  JrcContactCenter::Unit.create!(
+    account: account, code: business_unit.code, name: business_unit.name, kind: 'sac',
+    settings: { issuer_company_id: company.id, business_unit_id: business_unit.id }
+  )
+end
+scoped_queues = scoped_units.map do |scoped_unit|
+  JrcContactCenter::Queue.create!(account: account, unit: scoped_unit, code: scoped_unit.code, name: scoped_unit.name)
+end
+restricted = User.new(name: 'SYNTHETIC unit manager', email: "cc-unit-#{SecureRandom.hex(6)}@example.test",
+                      password: SecureRandom.base64(32), confirmed_at: Time.current)
+restricted.skip_confirmation_notification!
+restricted.save!
+restricted_role = CustomRole.create!(account: account, name: 'SYNTHETIC scoped configuration',
+                                     permissions: %w[jrc_contact_center_view jrc_contact_center_configure])
+AccountUser.create!(account: account, user: restricted, role: :agent, custom_role: restricted_role)
+JrcCrm::UserBusinessUnit.create!(account: account, user: restricted, scope: 'BUSINESS_UNIT', business_unit: business_units.first,
+                               company: company, active: true, structure_managed: true)
 session = { account_id: account.id, other_account_id: other.id, unit_id: unit.id,
-            administrator: admin.create_new_auth_token, viewer: limited.create_new_auth_token }
+            administrator: admin.create_new_auth_token, viewer: limited.create_new_auth_token,
+            viewer_user_id: limited.id, viewer_role_id: viewer.id,
+            viewer_account_user_id: account.account_users.find_by!(user: limited).id,
+            restricted: restricted.create_new_auth_token, allowed_unit_id: scoped_units.first.id,
+            denied_unit_id: scoped_units.last.id, denied_queue_id: scoped_queues.last.id,
+            issuer_company_id: company.id, denied_business_unit_id: business_units.last.id }
 # Auth material is ephemeral, mode 0600, excluded from uploaded evidence.
 File.write('/tmp/call-center-e2e-session.private', session.to_json, perm: 0o600)
 puts({ account_id: account.id, synthetic: true, provider_configured: false }.to_json)

@@ -16,7 +16,14 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const key = computed(() => props.card.key);
-const tab = ref('queues');
+const tab = computed({
+  get: () =>
+    ['queues', 'teams', 'memberships'].includes(route.query.queues_tab)
+      ? route.query.queues_tab
+      : 'queues',
+  set: value =>
+    router.replace({ query: { ...route.query, queues_tab: value } }),
+});
 const q = ref('');
 const status = ref('');
 const items = ref([]);
@@ -29,6 +36,12 @@ const dialog = ref(null);
 const draft = ref({});
 const editing = ref(null);
 const saving = ref(false);
+const opening = ref(false);
+const savingMembers = ref(false);
+const teamMemberIds = ref([]);
+const savedTeamMemberIds = ref([]);
+const membersSaved = ref(false);
+const invalidAttributes = ref([]);
 const formError = ref('');
 let generation = 0;
 const resource = computed(() =>
@@ -47,6 +60,7 @@ const canEdit = computed(
     (resource.value !== 'teams' || teamManage.value)
 );
 const label = name => t(`JRC_CONTACT_CENTER.ADMIN.${name}`);
+const invalid = name => invalidAttributes.value.includes(name) || undefined;
 const title = computed(() =>
   ['audit', 'events'].includes(key.value)
     ? label(key.value.toUpperCase())
@@ -71,6 +85,7 @@ const tableRows = computed(() =>
       row.code ||
       row.extension ||
       row.queue_name ||
+      row.description ||
       (row.state || row.status
         ? label(`STATES.${row.state || row.status}`)
         : ''),
@@ -97,6 +112,7 @@ const clear = () => {
 const load = async () => {
   generation += 1;
   const version = generation;
+  opening.value = false;
   items.value = [];
   meta.value = { page: page.value, pages: 0, total: 0 };
   failed.value = false;
@@ -154,8 +170,14 @@ const reprocess = async row => {
   }
 };
 const open = async row => {
+  if (opening.value || saving.value || savingMembers.value) return;
+  const version = generation;
+  opening.value = true;
   editing.value = row || null;
   formError.value = '';
+  invalidAttributes.value = [];
+  membersSaved.value = false;
+  teamMemberIds.value = [];
   draft.value = row
     ? JSON.parse(JSON.stringify(row))
     : {
@@ -165,6 +187,7 @@ const open = async row => {
         timezone: 'America/Sao_Paulo',
         status: 'active',
         strategy: 'provider',
+        service_kind: 'voice',
         unit_id: '',
         queue_id: '',
         account_user_id: '',
@@ -176,9 +199,14 @@ const open = async row => {
         participates: true,
         supervises: false,
       };
-  if (key.value === 'closures') {
-    const version = generation;
-    try {
+  try {
+    if (resource.value === 'teams' && row) {
+      const response = await TeamsAPI.getAgents({ teamId: row.id });
+      if (version !== generation) return;
+      teamMemberIds.value = response.data.map(member => member.id);
+      savedTeamMemberIds.value = [...teamMemberIds.value];
+    }
+    if (key.value === 'closures') {
       const response = await API.acwPolicy(props.accountId);
       if (version !== generation) return;
       const policy = response.data.item;
@@ -191,18 +219,52 @@ const open = async row => {
         whatsapp: format(policy.limits.whatsapp),
         voice_required: policy.voice_required,
       };
-    } catch {
-      failed.value = true;
-      return;
     }
+    await nextTick();
+    if (version === generation) dialog.value.open();
+  } catch {
+    if (version === generation) failed.value = true;
+  } finally {
+    if (version === generation) opening.value = false;
   }
-  await nextTick();
-  dialog.value.open();
+};
+const saveTeamMembers = async () => {
+  if (savingMembers.value || saving.value || !canEdit.value || !editing.value)
+    return;
+  const version = generation;
+  savingMembers.value = true;
+  formError.value = '';
+  membersSaved.value = false;
+  try {
+    await TeamsAPI.updateAgents({
+      teamId: editing.value.id,
+      agentsList: [...teamMemberIds.value],
+    });
+    if (version === generation) {
+      membersSaved.value = true;
+      savedTeamMemberIds.value = [...teamMemberIds.value];
+    }
+  } catch (error) {
+    if (version === generation)
+      formError.value = error.response?.data?.error || label('SAVE_ERROR');
+  } finally {
+    savingMembers.value = false;
+  }
 };
 const save = async () => {
-  if (saving.value) return;
+  if (saving.value || savingMembers.value) return;
+  if (
+    resource.value === 'teams' &&
+    editing.value &&
+    (teamMemberIds.value.length !== savedTeamMemberIds.value.length ||
+      teamMemberIds.value.some(id => !savedTeamMemberIds.value.includes(id)))
+  ) {
+    formError.value = label('TEAM_MEMBERS_UNSAVED');
+    return;
+  }
   saving.value = true;
   formError.value = '';
+  invalidAttributes.value = [];
   const version = generation;
   const account = props.accountId;
   try {
@@ -245,7 +307,7 @@ const save = async () => {
           unit_id: row.unit_id,
           status: row.status,
           strategy: row.strategy,
-          service_kind: 'voice',
+          service_kind: row.service_kind,
         },
         id
       );
@@ -272,12 +334,14 @@ const save = async () => {
     await load();
     emit('changed');
   } catch (error) {
-    if (version === generation)
+    if (version === generation) {
+      invalidAttributes.value = error.response?.data?.attributes || [];
       formError.value =
         error.response?.data?.message ||
         error.response?.data?.error ||
         error.message ||
         label('SAVE_ERROR');
+    }
   } finally {
     saving.value = false;
   }
@@ -298,6 +362,17 @@ watch(
   },
   { immediate: true }
 );
+watch(
+  () => draft.value.settings?.issuer_company_id,
+  company => {
+    if (resource.value !== 'units') return;
+    const unit = props.context.corporate.units.find(
+      row => String(row.id) === String(draft.value.settings.business_unit_id)
+    );
+    if (unit && String(unit.company_id) !== String(company))
+      draft.value.settings.business_unit_id = '';
+  }
+);
 onBeforeUnmount(() => {
   generation += 1;
 });
@@ -315,12 +390,16 @@ onBeforeUnmount(() => {
         type="button"
         class="rounded-lg bg-n-brand px-4 py-2 text-sm font-semibold text-white"
         data-create
+        :disabled="opening || loading || saving || savingMembers"
         @click="open()"
       >
         {{ label(key === 'closures' ? 'CONFIGURE' : 'CREATE') }}
       </button>
     </div>
     <p class="text-sm text-n-slate-11">{{ label('LOCAL_ONLY') }}</p>
+    <p v-if="opening" role="status" class="text-sm text-n-slate-11">
+      {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}
+    </p>
     <p
       v-if="pending"
       role="status"
@@ -448,6 +527,38 @@ onBeforeUnmount(() => {
               {{ row.displayName }}
             </p>
             <p class="break-words text-sm text-n-slate-11">{{ row.detail }}</p>
+            <p
+              v-if="resource === 'memberships'"
+              class="text-sm text-n-slate-11"
+            >
+              {{
+                label(row.participates ? 'PARTICIPATES' : 'NO_PARTICIPATION')
+              }}
+              <span v-if="row.supervises">
+                {{ label('SEPARATOR') }}{{ label('SUPERVISES') }}
+              </span>
+              {{ label('SEPARATOR')
+              }}{{ label(row.active ? 'ACTIVE' : 'INACTIVE') }}
+            </p>
+            <p v-if="resource === 'queues'" class="text-sm text-n-slate-11">
+              {{ row.unit_name }}{{ label('SEPARATOR') }}
+              {{
+                ['voice', 'whatsapp'].includes(row.service_kind)
+                  ? label(row.service_kind.toUpperCase())
+                  : row.service_kind
+              }}
+            </p>
+            <p v-if="resource === 'extensions'" class="text-sm text-n-slate-11">
+              {{
+                label(row.enabled ? 'EXTENSION_ENABLED' : 'EXTENSION_DISABLED')
+              }}
+              {{ label('SEPARATOR') }}
+              {{
+                label(
+                  row.configured ? 'CREDENTIAL_READY' : 'CREDENTIAL_MISSING'
+                )
+              }}
+            </p>
           </div>
           <button
             v-if="canEdit"
@@ -506,11 +617,12 @@ onBeforeUnmount(() => {
       contained
       overflow-y-auto
       :title="`${title} — ${label(editing ? 'EDIT' : 'CREATE')}`"
-      :confirm-button-label="label('SAVE')"
+      :confirm-button-label="label(resource === 'teams' ? 'SAVE_TEAM' : 'SAVE')"
       :cancel-button-label="label('CANCEL')"
-      :disable-confirm-button="saving"
+      :disable-confirm-button="saving || savingMembers"
       :is-loading="saving"
-      :dismissible="!saving"
+      :dismissible="!saving && !savingMembers"
+      :show-cancel-button="!saving && !savingMembers"
       :close-on-click-outside="false"
       width="2xl"
       @confirm="save"
@@ -531,6 +643,7 @@ onBeforeUnmount(() => {
             >{{ label(channel.toUpperCase())
             }}<input
               v-model="draft[channel]"
+              :name="channel"
               required
               pattern="[0-9]{2}:[0-5][0-9]"
               :placeholder="label('TIME_FORMAT')"
@@ -547,6 +660,8 @@ onBeforeUnmount(() => {
             >{{ label('QUEUE')
             }}<select
               v-model="draft.queue_id"
+              name="queue_id"
+              :aria-invalid="invalid('queue_id')"
               required
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
             >
@@ -564,6 +679,8 @@ onBeforeUnmount(() => {
             >{{ label('AGENT')
             }}<select
               v-model="draft.account_user_id"
+              name="account_user_id"
+              :aria-invalid="invalid('account_user_id')"
               required
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
             >
@@ -578,14 +695,18 @@ onBeforeUnmount(() => {
             </select></label
           >
           <label class="flex items-center gap-2 text-sm"
-            ><input v-model="draft.participates" type="checkbox" />{{
-              label('PARTICIPATES')
-            }}</label
+            ><input
+              v-model="draft.participates"
+              type="checkbox"
+              :required="!draft.supervises"
+            />{{ label('PARTICIPATES') }}</label
           >
           <label class="flex items-center gap-2 text-sm"
-            ><input v-model="draft.supervises" type="checkbox" />{{
-              label('SUPERVISES')
-            }}</label
+            ><input
+              v-model="draft.supervises"
+              type="checkbox"
+              :required="!draft.participates"
+            />{{ label('SUPERVISES') }}</label
           >
           <label class="flex items-center gap-2 text-sm"
             ><input v-model="draft.active" type="checkbox" />{{
@@ -598,6 +719,8 @@ onBeforeUnmount(() => {
             >{{ label('NAME')
             }}<input
               v-model="draft.name"
+              name="name"
+              :aria-invalid="invalid('name')"
               required
               maxlength="120"
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -607,6 +730,8 @@ onBeforeUnmount(() => {
               >{{ label('CODE')
               }}<input
                 v-model="draft.code"
+                name="code"
+                :aria-invalid="invalid('code')"
                 required
                 maxlength="80"
                 class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -626,6 +751,8 @@ onBeforeUnmount(() => {
               >{{ label('UNIT')
               }}<select
                 v-model="draft.unit_id"
+                name="unit_id"
+                :aria-invalid="invalid('unit_id')"
                 required
                 class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
               >
@@ -660,6 +787,8 @@ onBeforeUnmount(() => {
               >{{ label('TIMEZONE')
               }}<input
                 v-model="draft.timezone"
+                name="timezone"
+                :aria-invalid="invalid('timezone')"
                 required
                 class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
             /></label>
@@ -667,6 +796,7 @@ onBeforeUnmount(() => {
               >{{ label('COMPANY')
               }}<select
                 v-model="draft.settings.issuer_company_id"
+                name="issuer_company_id"
                 class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
               >
                 <option value="">{{ label('SELECT') }}</option>
@@ -683,6 +813,7 @@ onBeforeUnmount(() => {
               >{{ label('BUSINESS_UNIT')
               }}<select
                 v-model="draft.settings.business_unit_id"
+                name="business_unit_id"
                 class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
               >
                 <option value="">{{ label('SELECT') }}</option>
@@ -713,6 +844,52 @@ onBeforeUnmount(() => {
             >
           </template>
         </template>
+        <fieldset
+          v-if="resource === 'teams' && editing"
+          class="space-y-3 rounded-xl border border-n-weak p-3 sm:col-span-2"
+          :disabled="saving || savingMembers"
+        >
+          <legend class="px-1 text-sm font-semibold">
+            {{ label('TEAM_MEMBERS') }}
+          </legend>
+          <p class="text-sm text-n-slate-11">{{ label('TEAM_SCOPE') }}</p>
+          <div class="max-h-48 space-y-2 overflow-y-auto">
+            <label
+              v-for="agent in agents"
+              :key="agent.user_id"
+              class="flex items-center gap-2 text-sm"
+            >
+              <input
+                v-model="teamMemberIds"
+                type="checkbox"
+                :value="agent.user_id"
+                :data-team-member="agent.user_id"
+                @change="membersSaved = false"
+              />
+              {{ agent.name }}
+            </label>
+          </div>
+          <button
+            type="button"
+            class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11 disabled:opacity-40"
+            data-save-team-members
+            @click="saveTeamMembers"
+          >
+            {{ label('SAVE_TEAM_MEMBERS') }}
+          </button>
+          <p v-if="savingMembers" role="status" class="text-sm text-n-slate-11">
+            {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}
+          </p>
+          <p v-if="membersSaved" role="status" class="text-sm text-n-teal-11">
+            {{ label('TEAM_MEMBERS_SAVED') }}
+          </p>
+        </fieldset>
+        <p
+          v-else-if="resource === 'teams'"
+          class="text-sm text-n-slate-11 sm:col-span-2"
+        >
+          {{ label('TEAM_SAVE_FIRST') }}
+        </p>
       </div>
     </Dialog>
   </section>

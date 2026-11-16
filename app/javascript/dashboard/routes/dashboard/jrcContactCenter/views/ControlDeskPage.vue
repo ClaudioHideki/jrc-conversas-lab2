@@ -15,25 +15,26 @@ let generation = 0;
 const accountId = computed(() => route.params.accountId);
 const section = computed(() => route.params.section || '');
 const icons = {
-  numbers: 'phone',
-  extensions: 'grid-3x3',
-  queues: 'layers',
-  ivr: 'network',
-  hours: 'calendar',
-  audio: 'volume-2',
-  pauses: 'pause-circle',
-  closures: 'flag',
-  distribution: 'shuffle',
-  permissions: 'users',
-  recordings: 'mic',
-  pabx: 'server',
-  approvals: 'shield-check',
-  general: 'settings',
-  integrations: 'plug',
+  numbers: 'i-lucide-phone',
+  extensions: 'i-lucide-grid-3x3',
+  queues: 'i-lucide-layers',
+  ivr: 'i-lucide-network',
+  hours: 'i-lucide-calendar',
+  audio: 'i-lucide-volume-2',
+  pauses: 'i-lucide-circle-pause',
+  closures: 'i-lucide-flag',
+  distribution: 'i-lucide-shuffle',
+  permissions: 'i-lucide-users',
+  recordings: 'i-lucide-mic',
+  pabx: 'i-lucide-server',
+  approvals: 'i-lucide-shield-check',
+  general: 'i-lucide-settings',
+  integrations: 'i-lucide-plug',
 };
 const destination = key => ({
   name: 'jrc_contact_center_admin_section',
   params: { accountId: accountId.value, section: key },
+  query: route.query,
 });
 const selected = computed(() =>
   data.value?.cards.find(card => card.key === section.value)
@@ -86,6 +87,13 @@ watch(accountId, load, { immediate: true });
       <p class="mt-4 text-sm text-n-amber-11" role="status">
         {{ t('JRC_CONTACT_CENTER.ADMIN.PROVIDER_PENDING') }}
       </p>
+      <p v-if="data" class="mt-2 text-sm text-n-slate-11" data-provider-state>
+        {{
+          data.provider.configured
+            ? t('JRC_CONTACT_CENTER.ADMIN.CONNECTION_SAVED')
+            : t('JRC_CONTACT_CENTER.ADMIN.CONNECTION_MISSING')
+        }}
+      </p>
       <p
         v-if="data?.provider.last_sync_at"
         class="mt-2 break-words text-xs text-n-slate-11"
@@ -111,7 +119,11 @@ watch(accountId, load, { immediate: true });
     <template v-else-if="data">
       <RouterLink
         v-if="section"
-        :to="{ name: 'jrc_contact_center_control_desk', params: { accountId } }"
+        :to="{
+          name: 'jrc_contact_center_control_desk',
+          params: { accountId },
+          query: route.query,
+        }"
         class="inline-block text-sm text-n-blue-11"
       >
         {{ t('JRC_CONTACT_CENTER.ADMIN.BACK') }}
@@ -127,10 +139,7 @@ watch(accountId, load, { immediate: true });
           :data-card="card.key"
           class="flex min-w-0 flex-col gap-3 rounded-xl border border-n-blue-6 bg-n-solid-2 p-4 transition hover:border-n-blue-8 focus-visible:ring-2 focus-visible:ring-n-blue-7"
         >
-          <Icon
-            :icon="`i-lucide-${icons[card.key]}`"
-            class="size-7 text-n-blue-11"
-          />
+          <Icon :icon="icons[card.key]" class="size-7 text-n-blue-11" />
           <h2 class="text-base font-semibold text-n-slate-12">
             {{ t(`JRC_CONTACT_CENTER.ADMIN.CARDS.${card.key}.NAME`) }}
           </h2>
