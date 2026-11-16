@@ -107,10 +107,14 @@ describe SearchService do
         service = described_class.new(current_user: user, current_account: account, params: { q: 'Harry', page: 2 }, search_type: 'Message')
         service.extend(Enterprise::SearchService)
         loader = nil
-        allow(Message).to receive(:search) do |_query, **options|
-          expect(options).to include(page: 2, per_page: 15, order: { created_at: :desc })
-          loader = options.fetch(:scope_results)
-          :synthetic_search_result
+        # Message.search is installed conditionally by Searchkick; this isolated
+        # loader contract must not enable or contact an OpenSearch server.
+        without_partial_double_verification do
+          allow(Message).to receive(:search) do |_query, **options|
+            expect(options).to include(page: 2, per_page: 15, order: { created_at: :desc })
+            loader = options.fetch(:scope_results)
+            :synthetic_search_result
+          end
         end
         expect(service.advanced_search).to eq(:synthetic_search_result)
         rows = loader.call(Message.where(account: account, id: [message.id, message2.id])).to_a

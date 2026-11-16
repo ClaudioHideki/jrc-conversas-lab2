@@ -107,7 +107,10 @@ class SearchService
   end
 
   def message_base_query
-    query = current_account.messages.where('created_at >= ?', 3.months.ago)
+    # Keep display projections inside a derived table so pagination/count still
+    # count rows, rather than trying to count aliased scalar projections.
+    query = Message.from(current_account.messages.with_broker_delivery_display, :messages)
+                   .where('created_at >= ?', 3.months.ago)
     query = query.where(inbox_id: accessable_inbox_ids) unless should_skip_inbox_filtering?
     return query if Conversations::InboxVisibility.new(account: current_account, user: current_user).exclusive_inbox_ids.empty?
 
