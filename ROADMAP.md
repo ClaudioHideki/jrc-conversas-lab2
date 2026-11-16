@@ -24,6 +24,14 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 
 Veja [TASKS.md](TASKS.md). Roadmaps e planos anteriores continuam válidos no seu escopo.
 
+### Incremento autorizado de 16/11/2026
+
+Detalhes da proposta passam a abrir em popup sobre a lista, mantendo ações e rascunhos. Exigir testes de abertura/fechamento e preservação das permissões, além da identidade da nova imagem. [Decisão e aceite](docs/adr/20261116-proposta-popup.md).
+
+Remover o filtro visual de segmento em todos os módulos consumidores e gerar uma nova imagem candidata sobre o código da última publicação. Preservar cadastros e permissões; exigir testes e identidade do artefato no SHA alterado. Escopo e aceite: [ADR](docs/adr/20261116-remocao-filtro-segmento.md).
+
+Concluído: produto `c8efa1d6`, CI `43941168985` aprovada e imagem publicada por digest em 16/11/2026. O incremento entrega a remoção visual e o artefato; não inclui implantação no servidor.
+
 
 ### Incremento autorizado de 15/11/2026
 

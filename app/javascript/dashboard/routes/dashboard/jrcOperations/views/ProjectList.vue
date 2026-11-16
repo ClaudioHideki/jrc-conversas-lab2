@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import ModuleSegmentFilter from 'dashboard/routes/dashboard/jrcCustomers/components/ModuleSegmentFilter.vue';
 import { useProjects } from '../../jrcProjects/useProjects';
 import {
   statusTone,
@@ -295,7 +294,6 @@ async function exportProjects() {
         </button>
       </div>
     </header>
-    <ModuleSegmentFilter module-key="projects" />
     <nav
       class="flex gap-5 border-b border-n-weak"
       :aria-label="projectText('PORTFOLIO_NAVIGATION', 'Navegação de projetos')"

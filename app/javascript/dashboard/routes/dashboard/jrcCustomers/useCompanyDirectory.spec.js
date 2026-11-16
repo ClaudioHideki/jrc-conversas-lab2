@@ -77,7 +77,7 @@ beforeEach(() => {
   });
 });
 
-it('displays the selected URL segment and clears it through the existing search form without losing other filters', async () => {
+it('omits the segment selector and preserves existing URL filters through the search form', async () => {
   const wrapper = await render({
     page: '2',
     q: 'Alpha',
@@ -85,12 +85,14 @@ it('displays the selected URL segment and clears it through the existing search 
     source: 'review',
   });
   await flushPromises();
-  expect(wrapper.text()).toContain('MOCK — Segmento da URL');
+  expect(wrapper.text()).not.toContain('MOCK — Segmento da URL');
+  expect(wrapper.text()).not.toContain('Filtrar por segmento');
+  expect(button(wrapper, 'Limpar filtro de segmento')).toBeUndefined();
+  expect(mocks.taxonomy).not.toHaveBeenCalled();
   expect(mocks.companies).toHaveBeenLastCalledWith(
     expect.objectContaining({ page: 2, taxonomy_id: '7' }),
     expect.any(Object)
   );
-  await button(wrapper, 'Limpar filtro de segmento').trigger('click');
   expect(router.currentRoute.value.query.taxonomy_id).toBe('7');
   await wrapper.find('form').trigger('submit');
   await flushPromises();
@@ -99,9 +101,9 @@ it('displays the selected URL segment and clears it through the existing search 
     q: 'Alpha',
     source: 'review',
   });
-  expect(router.currentRoute.value.query.taxonomy_id).toBeUndefined();
+  expect(router.currentRoute.value.query.taxonomy_id).toBe('7');
   expect(mocks.companies).toHaveBeenLastCalledWith(
-    expect.objectContaining({ taxonomy_id: '', q: 'Alpha', page: 1 }),
+    expect.objectContaining({ taxonomy_id: '7', q: 'Alpha', page: 1 }),
     expect.any(Object)
   );
   wrapper.unmount();

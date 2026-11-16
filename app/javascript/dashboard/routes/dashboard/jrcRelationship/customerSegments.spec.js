@@ -66,14 +66,12 @@ beforeEach(() => {
   );
 });
 
-it('keeps the published segment in operational tabs and omits it from configuration', async () => {
+it('omits the segment control while preserving compatibility of existing navigation', async () => {
   const wrapper = mount(RelationshipLayout);
   await flushPromises();
-  expect(
-    wrapper
-      .findComponent({ name: 'ModuleSegmentFilter' })
-      .attributes('modulekey')
-  ).toBe('relationship');
+  expect(wrapper.findComponent({ name: 'ModuleSegmentFilter' }).exists()).toBe(
+    false
+  );
   const items = wrapper
     .findAllComponents({ name: 'ModuleTabs' })[0]
     .props('items');

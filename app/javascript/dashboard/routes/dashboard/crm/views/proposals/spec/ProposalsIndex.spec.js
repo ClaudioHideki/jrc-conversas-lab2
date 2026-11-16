@@ -50,6 +50,12 @@ const pdfButton = () =>
 
 beforeEach(() => {
   vi.useFakeTimers();
+  HTMLDialogElement.prototype.showModal = vi.fn(function showModal() {
+    this.open = true;
+  });
+  HTMLDialogElement.prototype.close = vi.fn(function closeDialog() {
+    this.open = false;
+  });
   proposal = {
     id: 1,
     version_number: 3,
@@ -81,6 +87,10 @@ afterEach(() => {
 
 it('downloads an authenticated blob without window.open or navigating the JRC renderer', async () => {
   await mountPage();
+  expect(wrapper.get('dialog').element.open).toBe(true);
+  expect(wrapper.get('dialog').attributes('aria-labelledby')).toBe(
+    wrapper.get('h3#proposal-dialog-title').attributes('id')
+  );
   await pdfButton().trigger('click');
   await flushPromises();
   expect(proposalsAPI.pdf).toHaveBeenCalledWith(1);
@@ -92,6 +102,18 @@ it('downloads an authenticated blob without window.open or navigating the JRC re
   expect(URL.revokeObjectURL).toHaveBeenCalledWith(
     'blob:https://jrc.example/pdf'
   );
+  await wrapper.get('dialog').trigger('cancel');
+  expect(wrapper.find('dialog').exists()).toBe(false);
+  expect(HTMLDialogElement.prototype.close).toHaveBeenCalled();
+  await wrapper.get('button[title="Editar"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('dialog').element.open).toBe(true);
+  await wrapper.get('dialog').trigger('click');
+  expect(wrapper.find('dialog').exists()).toBe(false);
+  await wrapper.get('button[title="Editar"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('button[aria-label="Fechar"]').trigger('click');
+  expect(wrapper.find('dialog').exists()).toBe(false);
 });
 
 it('shows the fixed monthly schedule separately from one-time installments', async () => {

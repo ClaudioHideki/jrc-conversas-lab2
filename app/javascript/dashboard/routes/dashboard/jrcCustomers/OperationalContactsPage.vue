@@ -5,7 +5,6 @@ import { useOperationalContacts } from './useOperationalContacts';
 import { useCustomerMaster } from './useCustomerMaster';
 import CompanyDetailsDialog from './components/CompanyDetailsDialog.vue';
 import ContactDetailsDialog from './components/ContactDetailsDialog.vue';
-import SegmentFilterPicker from './components/SegmentFilterPicker.vue';
 import OperationalContactActions from './components/OperationalContactActions.vue';
 import { T, inputClass, buttonClass, primaryClass } from './copy';
 
@@ -132,10 +131,6 @@ watch(identity, () => {
           :class="inputClass"
         />
       </label>
-      <div class="min-w-0 text-xs">
-        <p>{{ t('CRM.CORPORATE_SEGMENTS.FILTER_LABEL') }}</p>
-        <SegmentFilterPicker v-model="filters.taxonomy_id" />
-      </div>
       <button
         type="submit"
         :class="primaryClass"

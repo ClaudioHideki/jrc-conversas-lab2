@@ -5,7 +5,6 @@ import { backofficeRequirementsAPI } from 'dashboard/api/crm/backofficeRequireme
 import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useRoute, useRouter } from 'vue-router';
 import ModuleTabs from 'dashboard/components-next/navigation/ModuleTabs.vue';
-import ModuleSegmentFilter from 'dashboard/routes/dashboard/jrcCustomers/components/ModuleSegmentFilter.vue';
 import { crmControlClasses } from '../../crmControlClasses';
 import BackofficeOverview from './BackofficeOverview.vue';
 import BackofficeWorklist from './BackofficeWorklist.vue';
@@ -206,14 +205,6 @@ watch(
       :key="route.fullPath"
       class="min-h-0 flex-1 overflow-auto p-4"
     >
-      <ModuleSegmentFilter
-        v-if="
-          !route.params.requestId &&
-          route.name !== 'crm_backoffice_new' &&
-          !['signature', 'requirements'].includes(section)
-        "
-        module-key="backoffice"
-      />
       <BackofficeRequest360 v-if="route.params.requestId" />
       <BackofficeNewRequest v-else-if="route.name === 'crm_backoffice_new'" />
       <SignatureSettings v-else-if="section === 'signature'" />

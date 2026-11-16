@@ -86,6 +86,14 @@ const businessUnitId = ref(null);
 const showForm = ref(false);
 const saving = ref(false);
 const selectedProposal = ref(null);
+const proposalDialog = ref(null);
+watch(
+  () => Boolean(selectedProposal.value),
+  visible => {
+    if (visible) proposalDialog.value.showModal();
+  },
+  { flush: 'post' }
+);
 const loadingDetails = ref(false);
 const itemSaving = ref(false);
 const sendingChannel = ref('');
@@ -330,11 +338,13 @@ function resetEditing() {
 
 function closeProposal() {
   if (selectedProposal.value && hasUnsavedChanges.value) detailDraft.flush();
+  const dialog = proposalDialog.value;
   detailActive.value = false;
   viewGeneration += 1;
   resetWorking();
   selectedProposal.value = null;
   resetEditing();
+  dialog?.close();
 }
 
 const loadProducts = async () => {
@@ -446,7 +456,7 @@ const openProposal = async proposal => {
     return true;
   } catch {
     if (!currentContext(context)) return false;
-    selectedProposal.value = null;
+    closeProposal();
     useAlert('Não foi possível abrir a proposta.');
     return false;
   } finally {
@@ -1476,10 +1486,15 @@ onBeforeUnmount(() => {
       </form>
     </div>
 
-    <div
+    <dialog
       v-if="selectedProposal"
-      class="absolute inset-0 z-30 overflow-hidden bg-n-surface-1"
+      ref="proposalDialog"
+      aria-labelledby="proposal-dialog-title"
+      aria-modal="true"
+      class="fixed inset-0 m-auto h-[calc(100dvh-1rem)] max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-[90rem] overflow-hidden rounded-2xl border border-n-weak bg-n-surface-1 p-0 text-n-slate-12 shadow-2xl backdrop:bg-n-alpha-black1 backdrop:backdrop-blur-sm sm:h-[calc(100dvh-3rem)] sm:max-h-[calc(100dvh-3rem)] sm:w-[calc(100vw-3rem)]"
       @click.self="closeProposal"
+      @cancel.self.prevent="closeProposal"
+      @close.self="selectedProposal && closeProposal()"
     >
       <aside class="flex h-full w-full flex-col overflow-hidden bg-n-surface-1">
         <div
@@ -1493,8 +1508,11 @@ onBeforeUnmount(() => {
                 {{ selectedProposal.proposal_number || 'Proposta comercial' }} ·
                 versão {{ selectedProposal.version_number || 1 }}
               </p>
-              <h3 class="mt-1 text-2xl font-bold text-n-slate-12">
-                {{ selectedProposal.title }}
+              <h3
+                id="proposal-dialog-title"
+                class="mt-1 text-2xl font-bold text-n-slate-12"
+              >
+                {{ selectedProposal.title || 'Proposta comercial' }}
               </h3>
               <ApprovalGateBadge
                 resource-key="crm.proposal_send"
@@ -2604,7 +2622,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </aside>
-    </div>
+    </dialog>
   </div>
   <ContactCreateModal
     v-if="showForm && showContactForm"

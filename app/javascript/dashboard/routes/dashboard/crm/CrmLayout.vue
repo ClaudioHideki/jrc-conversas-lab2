@@ -4,7 +4,6 @@ import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import ModuleTabs from 'dashboard/components-next/navigation/ModuleTabs.vue';
-import ModuleSegmentFilter from '../jrcCustomers/components/ModuleSegmentFilter.vue';
 import { crmControlClasses } from './crmControlClasses';
 const route = useRoute();
 const store = useStore();
@@ -168,16 +167,6 @@ const activeKey = computed(
       crm_contract_templates: 'crm_contracts',
     })[route.name] || route.name
 );
-const supportsCustomerSegment = computed(() =>
-  [
-    'crm_leads',
-    'crm_deals',
-    'crm_activities',
-    'crm_proposals',
-    'crm_orders',
-    'crm_contracts',
-  ].includes(route.name)
-);
 </script>
 
 <template>
@@ -227,7 +216,6 @@ const supportsCustomerSegment = computed(() =>
         :active-key="activeKey"
       />
     </header>
-    <ModuleSegmentFilter v-if="supportsCustomerSegment" module-key="crm" />
     <main class="min-h-0 flex-1 overflow-auto">
       <RouterView :key="route.params.accountId" />
     </main>

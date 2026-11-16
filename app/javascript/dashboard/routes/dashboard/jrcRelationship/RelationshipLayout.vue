@@ -5,7 +5,6 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import ModuleTabs from 'dashboard/components-next/navigation/ModuleTabs.vue';
-import ModuleSegmentFilter from '../jrcCustomers/components/ModuleSegmentFilter.vue';
 import { areaForScreen, visibleAreas } from './navigation';
 import { relationshipTabClasses } from './tabClasses';
 import { message } from './definitions';
@@ -118,10 +117,6 @@ watch(
         :active-key="screen"
       />
     </header>
-    <ModuleSegmentFilter
-      v-if="metadata && supportsSegment(screen)"
-      module-key="relationship"
-    />
     <RouterView
       :key="`${route.params.accountId}:${store.getters.getCurrentUserID}:${route.name}`"
     />
