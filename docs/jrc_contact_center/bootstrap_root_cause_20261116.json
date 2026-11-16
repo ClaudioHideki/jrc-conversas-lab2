@@ -45,5 +45,12 @@
     "all 44 desktop/mobile/light/dark Chrome scenarios"
   ],
   "instrumentation": "Hidden maps remain only inside the disposable QA runner; artifacts contain stack/mapped locations, not the map or its source contents.",
-  "restrictions": "No local writes, local checkout changes, main update, permission changes, Docker publication or deploy."
+  "restrictions": "No local writes, local checkout changes, main update, permission changes, Docker publication or deploy.",
+  "async_probe_followup": {
+    "run": 43936470868,
+    "artifact_id": 14261561133,
+    "artifact_sha256": "7200102f90793880a7ee98c0893f6a75ed89e46d6768a39b61d7502c32384962",
+    "observed": "No JavaScript errors or failed HTTP requests after the import-cycle fix; the heading rendered before async cards, and the immediate count was zero.",
+    "correction": "Wait for the fifteenth real card to become visible, then retain exact cardinality 15 and all existing error checks. No mocked data, timeout relaxation or skipped validation."
+  }
 }

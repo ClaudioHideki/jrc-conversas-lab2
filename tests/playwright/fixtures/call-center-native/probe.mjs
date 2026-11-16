@@ -76,6 +76,8 @@ try {
   await page
     .getByRole('heading', { name: 'Configurações do Call Center', exact: true })
     .waitFor({ state: 'visible', timeout: 20000 });
+  // The heading is rendered before the authorized asynchronous card response.
+  await page.locator('[data-card]').nth(14).waitFor({ state: 'visible', timeout: 20000 });
   report.cards = await page.locator('[data-card]').count();
   report.passed =
     report.cards === 15 &&
