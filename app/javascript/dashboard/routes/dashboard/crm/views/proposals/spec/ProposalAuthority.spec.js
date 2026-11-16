@@ -73,6 +73,12 @@ const button = text =>
 beforeEach(() => {
   vi.resetAllMocks();
   vi.useFakeTimers();
+  HTMLDialogElement.prototype.showModal = vi.fn(function showModal() {
+    this.open = true;
+  });
+  HTMLDialogElement.prototype.close = vi.fn(function closeDialog() {
+    this.open = false;
+  });
   sessionStorage.clear();
   mocks.proposals.show.mockResolvedValue({ data: record() });
   mocks.proposals.list.mockResolvedValue({ data: [] });
