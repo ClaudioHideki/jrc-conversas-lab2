@@ -74,3 +74,11 @@ cliente real, com chaves de idempotência e releituras independentes de transiç
 chamado e ciclo. A suíte local de formulário, contratos e ligação Vue passou
 72 testes; ESLint dos dois arquivos alterados ficou sem erros, com três avisos
 preexistentes de texto sintético no spec. Integração e imagem ainda pendentes.
+
+### Publicação da correção de transporte
+
+Em 17/11/2026, integração 44151790739 e build 44154762687 aprovaram o produto
+`d564cc3799b70c95ed933964bd80b8a6e8dbcb83`, com smokes antes/depois da publicação.
+Imagem conferida diretamente no GHCR: `sha256:ce988fd810f0a8040750af825f1266f42be8e0ea90e206e391c8d906201ab017`,
+linux/amd64 e revisão exata. [Registro da correção](../jrc_consolidation/encerramento-envio-release-20261117.md).
+Sem implantação em produção ou merge em main neste incremento.
