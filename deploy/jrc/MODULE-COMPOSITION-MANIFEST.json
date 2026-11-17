@@ -29,8 +29,8 @@
     {
       "path": ".github/workflows/build-ghcr.yml",
       "baseSha256": "05b856abe74f1897c52e76910a03a77065e8c12418b7cffbc74b15d906ce9fd2",
-      "sha256": "1fd2099e2b097636e5a6345f6dab95a4b06f0e59a1b8b794c998ac3cce94dc0f",
-      "bytes": 27960
+      "sha256": "f4d6c3d8871d3f7339228fc68fc48b4cd315dfaf6e3c588f4635cb66e260442d",
+      "bytes": 28021
     },
     {
       "path": ".github/workflows/nico-broker-candidate.yml",
