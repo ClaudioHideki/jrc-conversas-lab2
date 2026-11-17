@@ -14,6 +14,7 @@ import { normalizeQuery } from '../../helpers/query';
 import { decodeLifecycle } from '../../helpers/lifecycle';
 import { ticketTypePreferenceKey } from '../../helpers/quickIntake';
 import { createServiceDeskClient } from 'dashboard/api/serviceDeskClient';
+import { createServiceDeskLifecycleClient } from 'dashboard/api/serviceDeskLifecycleClient';
 
 const mocks = vi.hoisted(() => ({
   session: null,
@@ -231,6 +232,101 @@ async function renderClosure() {
 }
 
 describe('one-confirmation official closure', () => {
+  it.each(['', 'teste'])(
+    'sends manual closure through the real HTTP client with reason %j',
+    async reason => {
+      const committed = closureTransport({ unrestricted: true });
+      const backend = Object.fromEntries(
+        ['read', 'apply', 'transition', 'ticket'].map(name => [
+          name,
+          mocks[name].getMockImplementation(),
+        ])
+      );
+      const path = '/api/v1/accounts/1/jrc_service_desk/tickets/20';
+      const http = {
+        get: vi.fn(async url => {
+          if (url === `${path}/lifecycle`)
+            return {
+              data: {
+                ...(await backend.read()),
+                measurement: {
+                  basis: 'elapsed_wall_time',
+                  started_at: '2026-09-28T10:00:00Z',
+                  result: 'unavailable',
+                  pending_reason: 'targets_and_calendar_missing',
+                  first_response: null,
+                  resolution: committed.size
+                    ? {
+                        occurred_at: '2026-09-28T12:00:00Z',
+                        elapsed_seconds: 7200,
+                      }
+                    : null,
+                  closure:
+                    committed.size === 2
+                      ? {
+                          occurred_at: '2026-09-28T12:00:00Z',
+                          elapsed_seconds: 7200,
+                        }
+                      : null,
+                },
+              },
+            };
+          if (url === path) return { data: await backend.ticket() };
+          const transition = url.match(/\/lifecycle\/transitions\/(\d+)$/);
+          if (transition)
+            return {
+              data: await backend.transition('1', '20', transition[1]),
+            };
+          throw new Error(`Unexpected fixture route: ${url}`);
+        }),
+        post: vi.fn(async (url, command, options) => {
+          expect(url).toBe(`${path}/lifecycle`);
+          return {
+            data: await backend.apply(
+              '1',
+              '20',
+              command,
+              options.headers['Idempotency-Key']
+            ),
+          };
+        }),
+      };
+      const client = createServiceDeskLifecycleClient(http);
+      ['read', 'apply', 'transition', 'ticket'].forEach(name => {
+        mocks[name].mockImplementation(client[name]);
+      });
+      await renderClosure();
+      if (reason) await wrapper.get('textarea').setValue(reason);
+      await wrapper.get('form').trigger('submit');
+      await flushPromises();
+
+      expect(http.post).toHaveBeenCalledTimes(2);
+      expect(http.post.mock.calls.map(([, body]) => body.rule_key)).toEqual([
+        'resolve',
+        'close',
+      ]);
+      expect(
+        http.post.mock.calls.every(
+          ([, body]) =>
+            body.operational_closure === true &&
+            body.closing_reason === (reason || undefined)
+        )
+      ).toBe(true);
+      expect(committed.size).toBe(2);
+      expect(wrapper.emitted('updated')[0][0].status.id).toBe('3');
+      expect(mocks.session.operations.state.revision).toBe(1);
+      expect(http.get.mock.calls.map(([url]) => url)).toEqual([
+        `${path}/lifecycle`,
+        `${path}/lifecycle/transitions/81`,
+        path,
+        `${path}/lifecycle`,
+        `${path}/lifecycle/transitions/82`,
+        path,
+        `${path}/lifecycle`,
+      ]);
+    }
+  );
+
   it('closes without a reason or SLA prerequisite using the explicitly authorized manual plan', async () => {
     const committed = closureTransport({ unrestricted: true });
     await renderClosure();

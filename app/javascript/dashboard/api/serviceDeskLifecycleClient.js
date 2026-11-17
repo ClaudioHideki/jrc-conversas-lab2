@@ -71,6 +71,7 @@ export function createServiceDeskLifecycleClient(http) {
         'rule_key',
         'expected_lock_version',
         'expected_policy_version_id',
+        'operational_closure',
         'reason_code',
         'note',
         'solution',
