@@ -130,3 +130,24 @@ Usar contained no Dialog nativo do chamador para rolagem interna e footer
 acessível. Acrescentar limites geométricos reais e preservar todos os cliques,
 cenários e timeouts; nenhum force click ou supressão. Próximo SHA deve
 comprovar o ajuste e os quatro novos cenários de elegibilidade de fila.
+
+
+## Compatibilidade corporativa do destinatário
+
+A inspeção do vínculo identificou que o ator precisava enxergar a fila, mas a
+elegibilidade do destinatário não comprovava cobertura da unidade. A alçada
+GROUP do administrador não é transferível. A gravação agora usa o
+OrganizationalScope nativo do AccountUser destinatário, dentro da segunda
+validação após os locks. Sem estrutura corporativa configurada, preserva o
+contrato nativo; com estrutura configurada, exige cobertura existente de
+unidade/empresa/GROUP, sem criar vínculos corporativos ou permissões.
+
+A desativação do mesmo vínculo permanece possível após revogação. Trocar o
+destinatário ou reativar exige novamente escopo válido; supervisão não
+contorna a regra. O popup conserva seleções e identifica os dois campos em
+português. Oito exemplos API, um caso HTTP com espera real de lock e um Vue
+adicional estão preparados. Os quatro cenários Chrome existentes ganham a
+prova de destinatário restrito, sem remoção de asserções nem comandos PABX.
+Os dados sintéticos de sucesso passam a declarar sua cobertura expressamente.
+Execução nativa deste incremento ainda pendente; não atribuir evidências do
+SHA anterior ao novo comportamento.

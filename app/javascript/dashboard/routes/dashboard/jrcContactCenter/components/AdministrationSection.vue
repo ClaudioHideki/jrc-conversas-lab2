@@ -402,6 +402,8 @@ const save = async () => {
       const inactiveQueue = error.response?.data?.error === 'inactive_queue';
       const ineligibleMember =
         error.response?.data?.error === 'ineligible_member';
+      const memberScopeMismatch =
+        error.response?.data?.error === 'member_scope_mismatch';
       invalidAttributes.value = error.response?.data?.attributes || [];
       if (inactiveQueue) {
         invalidAttributes.value = ['queue_id'];
@@ -413,6 +415,9 @@ const save = async () => {
       } else if (ineligibleMember) {
         invalidAttributes.value = ['account_user_id'];
         formError.value = t('JRC_CONTACT_CENTER.ACCESS.ENROLLMENT_BLOCKED');
+      } else if (memberScopeMismatch) {
+        invalidAttributes.value = ['account_user_id', 'queue_id'];
+        formError.value = t('JRC_CONTACT_CENTER.ACCESS.ENROLLMENT_SCOPE');
       } else {
         formError.value =
           error.response?.data?.message ||

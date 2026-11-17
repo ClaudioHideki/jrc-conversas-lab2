@@ -152,7 +152,7 @@
         "document_1_figure": 3,
         "document_2_figure": 3
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "Subconjunto administrativo validado no SHA dd8ece07: 611 Rails, 224 Vue, 92 Chrome, 100 hashes de capturas. Novo controle de cobertura corporativa do destinatário ainda exige o próximo SHA; demais lacunas desta figura permanecem.",
       "objective": "Equipes, filas e distribuicao",
       "visual_components": "Campos e dados apresentados:  Equipes: nome, supervisor, quantidade de agentes, filas vinculadas e status. Filas: nome, canal, estrategia de distribuicao, quantidade de participantes e status. Indicadores do topo devem derivar de registros reais e escopados; evitar considerar supervisor como agente por padrao.",
       "buttons_and_actions": "Acoes e resultado do clique:  Nova Equipe e Nova Fila: abrir popups de cadastro e validar antes de salvar. Busca e paginacao: atuar separadamente nas duas tabelas. Menu de tres pontos de cada linha: abrir detalhes, editar, desativar ou vincular conforme direito do usuario. Atalhos Configurar Regras, Gerenciar Horarios e Configurar Monitoria: encaminhar aos recursos existentes.",
@@ -553,12 +553,12 @@
         "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel.",
         "Revisão esperada aditiva: o editor CC exige a versão capturada, trata 409 sem perder o rascunho e exige comparação/revisão explícita antes de gravar contra a versão atual. Implementado neste incremento; aguarda CI do novo SHA.",
         "Pré-condição opcional e editor protegido para unidades/filas/vínculos em implementação; novo SHA exige validação real, sem alterar o contrato de perfis já provado.",
-        "Herança por Team nativo, configuração por AccountUser, elegibilidade explícita, bloqueios individuais prioritários e proteção de fallback implementados incrementalmente; evidências por SHA constam em continuity_20261117."
+        "Herança por Team nativo, configuração por AccountUser, elegibilidade explícita, bloqueios individuais prioritários e proteção de fallback implementados incrementalmente; evidências por SHA constam em continuity_20261117.",
+        "Herança por equipe, bloqueios individuais prioritários, elegibilidade explícita e revisão concorrente homologados no Chrome real em dd8ece07, sem concessões implícitas."
       ],
       "remaining_or_external": [
         "Matriz visual multi-módulo completa da referência ainda não equivale ao editor setorial das 13 capacidades CC; permissões dos demais módulos preservadas.",
-        "Clientes nativos anteriores sem expected_revision preservam o contrato; precondição global obrigatória depende de migração coordenada de clientes.",
-        "Homologação dos popups de herança/elegibilidade no Chrome exige aprovação dos novos cenários no SHA correspondente."
+        "Clientes nativos anteriores sem expected_revision preservam o contrato; precondição global obrigatória depende de migração coordenada de clientes."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -572,7 +572,7 @@
         "document_1_figure": 11,
         "document_2_figure": 11
       },
-      "validation": "Revisão de perfis e de unidades/filas/vínculos validada em 3c5054ac. Novo incremento protege perfis omitidos no PATCH nativo de agentes; testes próprios e regressões de agentes pendentes no novo SHA. Herança/elegibilidade ainda abertas.",
+      "validation": "Subconjunto administrativo validado no SHA dd8ece07: 611 Rails, 224 Vue, 92 Chrome, 100 hashes de capturas. Novo controle de cobertura corporativa do destinatário ainda exige o próximo SHA; demais lacunas desta figura permanecem.",
       "objective": "Popup Configurar Perfil e Permissoes",
       "visual_components": "Campos e dados apresentados:  Exibir permissao herdada, individual, concedida e efetiva de forma distinguivel quando houver hierarquia. Informar escopo de empresa, equipe, fila e carteira; manter trilha de quem concedeu, quando e por qual origem.",
       "buttons_and_actions": "Acoes e resultado do clique:  Seletores Perfil, Equipe e Usuario: escolher o escopo alvo. Abas Permissoes por Modulo, Acesso Especial, PABX JRC e Configuracoes Adicionais: trocar categoria sem perder alteracoes ainda nao salvas. Checkbox por acao: visualizar, criar, editar, excluir, exportar, aprovar e publicar, mais ouvir/baixar/monitorar onde aplicavel. Salvar Permissoes: mostrar alteracoes antes de confirmar.",
@@ -636,7 +636,7 @@
         "document_1_figure": 12,
         "document_2_figure": 12
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "Subconjunto administrativo validado no SHA dd8ece07: 611 Rails, 224 Vue, 92 Chrome, 100 hashes de capturas. Novo controle de cobertura corporativa do destinatário ainda exige o próximo SHA; demais lacunas desta figura permanecem.",
       "objective": "Popup Configurar Equipe e Filas",
       "visual_components": "Campos e dados apresentados:  Informar total de agentes, grupos/filas ativos, papeis e participacao real na distribuicao. O mesmo usuario pode aparecer como supervisor e nao participante; o estado deve ser explicito.",
       "buttons_and_actions": "Acoes e resultado do clique:  Geral: editar nome, descricao e status. Supervisor Principal e Supervisores Adicionais: selecionar usuarios elegiveis. Agentes: Adicionar Agente ou remover vinculo sem apagar pessoa. Filas Vinculadas: Vincular Fila e marcar separadamente Participa e Supervisiona. Horarios e Regras de Distribuicao: consultar/configurar politicas reutilizaveis. Salvar Configuracoes: validar dependencias e escopo.",
@@ -738,10 +738,10 @@
       "implemented_in_0_2": [
         "Existing scoped durable event list/reprocessing remains available only under native capabilities",
         "Auditoria administrativa sanitizada de unidades, filas, vínculos e perfis: backend preparado para validação nativa no novo SHA.",
-        "Consulta paginada, histórico e exportação por capacidades e cobertura atual/histórica; flag audit_logs preservada."
+        "Consulta paginada, histórico e exportação por capacidades e cobertura atual/histórica; flag audit_logs preservada.",
+        "Contraste do popup corrigido e verificado no checkpoint 3c5054ac; evidências posteriores identificadas por SHA na continuidade."
       ],
       "remaining_or_external": [
-        "Validar correção local de contraste do popup nos dois temas no novo SHA.",
         "Efeitos/ACKs PABX e trilha de publicação externa aguardam contrato e homologação real."
       ],
       "code_references": [
@@ -756,7 +756,7 @@
         "document_1_figure": 14,
         "document_2_figure": 14
       },
-      "validation": "Auditoria local e contraste validados em 3c5054ac: 493 Rails, 209 Vue, 68 Chrome; 72 hashes de capturas conferidos. Publicação/ACKs externos continuam não homologados.",
+      "validation": "Subconjunto administrativo validado no SHA dd8ece07: 611 Rails, 224 Vue, 92 Chrome, 100 hashes de capturas. Novo controle de cobertura corporativa do destinatário ainda exige o próximo SHA; demais lacunas desta figura permanecem.",
       "objective": "Auditoria tecnica do PABX",
       "visual_components": "Campos e dados apresentados:  Registrar id do evento, correlation_id/request_id, ator, acao, recurso, before/after sanitizados, horario, estado pretendido e estado confirmado. Resultado deve distinguir concluido, pendente, divergente, falha e reversao.",
       "buttons_and_actions": "Acoes e resultado do clique:  Filtros de data, tipo, unidade/empresa e origem: refinar registros; Consultar: aplicar filtros com paginacao. Selecao de uma linha: preencher Detalhes do Evento com data/hora, usuario, operacao, objeto, tenant/accountcode, resultado e descricao. Ver Detalhes: abrir popup do evento; Exportar Relatorio: gerar arquivo dentro do escopo; Ver Historico: listar eventos correlatos.",
@@ -1263,7 +1263,7 @@
     "Popup nativo de perfis com persistência explícita, feature flags reais e limites da cobertura corporativa"
   ],
   "provider_contracts": "control_desk_contracts_20261116.json",
-  "scope_limit": "No new PABX endpoint, ACK, grant, native Team corporate mapping or production operation. Native Team remains Account-scoped. No changes to global lint configuration, Rails migrations, SQL or dependency locks.",
+  "scope_limit": "No provider endpoint, ACK, automatic corporate grant or production operation. Current reviewed increment adds only pinned AccessGrant migration 20261117190000; historical migrations, SQLs, dependencies, lint rules and other modules remain preserved. Native Team remains Account-scoped; CC inheritance does not create queue participation.",
   "validation_state": "native_and_Chrome_execution_pending",
   "full_23_figures_complete": false,
   "continuity_20261116": {
@@ -1793,7 +1793,7 @@
       "rails_scenarios": 6,
       "vue_scenarios": 1,
       "chrome_scenarios": 4,
-      "validation": "pending_next_sha",
+      "validation": "native_and_real_chrome_passed_on_dd8ece07",
       "online_is_not_authorization": true,
       "existing_deactivation_preserved": true,
       "native_evidence": {
@@ -1831,6 +1831,28 @@
           "flaky": 0
         },
         "remaining": "New queue cases passed disabled option check; exact queue label included option contents. Explicit native label for/id correction prepared without changing assertions."
+      },
+      "latest_complete_evidence": {
+        "sha": "dd8ece07d34e7f17adecd8c68d5cabb1679f56bc",
+        "run": 44177839950,
+        "artifact": 14371138060,
+        "sha256": "eeb7fe79738fb9ea0d86e759b791ec9a8115884dd91e4a85febde45eeec3c07d",
+        "rails_main": 601,
+        "concurrency": 10,
+        "vue": 224,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 0,
+        "frontend_lint": "passed",
+        "chrome": {
+          "passed": 92,
+          "unexpected": 0,
+          "skipped": 0,
+          "flaky": 0
+        },
+        "screenshots_verified": 100,
+        "external_homologation": false
       }
     },
     "schema_review": {
@@ -1849,7 +1871,7 @@
       "existing_chrome_boundary_extended": true,
       "account_lock_wait_proven_by_pg_stat_activity": true,
       "unit_cannot_write_global_policy": true,
-      "validation": "pending_next_sha",
+      "validation": "native_and_real_chrome_passed_on_dd8ece07",
       "native_evidence": {
         "sha": "7b9c7ff723b68dec4114f5c476691772b1c9912b",
         "run": 44167331338,
@@ -1864,6 +1886,28 @@
         "new_ruby_offenses": 2,
         "frontend_errors": 2,
         "chrome": "not_run_due_to_lint"
+      },
+      "latest_complete_evidence": {
+        "sha": "dd8ece07d34e7f17adecd8c68d5cabb1679f56bc",
+        "run": 44177839950,
+        "artifact": 14371138060,
+        "sha256": "eeb7fe79738fb9ea0d86e759b791ec9a8115884dd91e4a85febde45eeec3c07d",
+        "rails_main": 601,
+        "concurrency": 10,
+        "vue": 224,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 0,
+        "frontend_lint": "passed",
+        "chrome": {
+          "passed": 92,
+          "unexpected": 0,
+          "skipped": 0,
+          "flaky": 0
+        },
+        "screenshots_verified": 100,
+        "external_homologation": false
       }
     },
     "line_ending_preflight": {
@@ -1895,7 +1939,7 @@
       "configuration_scope": "Existing connection and CDR history, not resource publication",
       "rails_scenarios": 2,
       "vue_router_scenarios": 2,
-      "validation": "pending_next_sha",
+      "validation": "native_and_real_chrome_passed_on_dd8ece07",
       "native_evidence": {
         "sha": "7211bf1994c1496b0d7406cb42967eb41b11814d",
         "run": 44172675890,
@@ -1919,6 +1963,28 @@
         "ordinary_administrator_denied": true,
         "provider_actions": false,
         "validation": "pending_next_sha"
+      },
+      "latest_complete_evidence": {
+        "sha": "dd8ece07d34e7f17adecd8c68d5cabb1679f56bc",
+        "run": 44177839950,
+        "artifact": 14371138060,
+        "sha256": "eeb7fe79738fb9ea0d86e759b791ec9a8115884dd91e4a85febde45eeec3c07d",
+        "rails_main": 601,
+        "concurrency": 10,
+        "vue": 224,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 0,
+        "frontend_lint": "passed",
+        "chrome": {
+          "passed": 92,
+          "unexpected": 0,
+          "skipped": 0,
+          "flaky": 0
+        },
+        "screenshots_verified": 100,
+        "external_homologation": false
       }
     },
     "option_label_correction": {
@@ -1928,7 +1994,41 @@
       "change": "Explicit label for/id associations for native membership user and queue selects. Preserve toBeDisabled, exact accessible names, all 84 existing cases and subsequent negative API / persistence / revocation checks.",
       "test_assertions_removed": false,
       "force_clicks": false,
-      "validation": "User disabled assertion passed in all four projects on 7211bf19; queue exact label correction now prepared."
+      "validation": "Both accessible labels and disabled option assertion passed in all four real Chrome projects on dd8ece07; negative writes, persistence and revocation retained."
+    },
+    "queue_recipient_coverage": {
+      "implementation": "prepared",
+      "native_scope": "JrcContactCenter::OrganizationalScope",
+      "actor_group_is_not_recipient_grant": true,
+      "new_corporate_grants": false,
+      "safe_deactivation_preserved": true,
+      "native_api_cases": 8,
+      "http_lock_wait_case": 1,
+      "additional_vue_case": 1,
+      "extended_real_chrome_cases": 4,
+      "validation": "pending_next_sha"
+    },
+    "validated_checkpoint_dd8ece07": {
+      "sha": "dd8ece07d34e7f17adecd8c68d5cabb1679f56bc",
+      "run": 44177839950,
+      "artifact": 14371138060,
+      "sha256": "eeb7fe79738fb9ea0d86e759b791ec9a8115884dd91e4a85febde45eeec3c07d",
+      "rails_main": 601,
+      "concurrency": 10,
+      "vue": 224,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0,
+      "new_ruby_offenses": 0,
+      "frontend_lint": "passed",
+      "chrome": {
+        "passed": 92,
+        "unexpected": 0,
+        "skipped": 0,
+        "flaky": 0
+      },
+      "screenshots_verified": 100,
+      "external_homologation": false
     }
   }
 }

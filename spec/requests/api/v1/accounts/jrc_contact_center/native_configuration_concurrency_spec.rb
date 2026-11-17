@@ -244,4 +244,25 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     expect(queue.reload.name).to eq('Original')
     expect(Audited.audit_class.where(auditable: queue, action: 'update')).to be_empty
   end
+
+  it 'rechecks recipient coverage after a real queue lock wait before reactivating membership' do
+    recipient = create(:user, :contact_center_eligible, account: account)
+    member = account.account_users.find_by!(user: recipient)
+    coverage = JrcCrm::UserBusinessUnit.create!(
+      account: account, user: recipient, scope: 'BUSINESS_UNIT', company: company, business_unit: business_units.first,
+      active: true, structure_managed: true
+    )
+    membership = JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: member, active: false)
+    state[:before_release] = lambda do
+      wait_for_account_lock
+      coverage.update!(business_unit: business_units.last)
+    end
+    status = race_with_queue_change(
+      change: {}, verb: :patch, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/queue_memberships/#{membership.id}",
+      payload: { queue_membership: { active: true } }
+    )
+    expect(status).to eq(422)
+    expect(membership.reload.active).to be(false)
+    expect(Audited.audit_class.where(auditable: membership, action: 'update')).to be_empty
+  end
 end

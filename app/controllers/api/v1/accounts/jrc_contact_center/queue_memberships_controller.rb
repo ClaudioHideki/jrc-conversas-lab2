@@ -95,6 +95,7 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
     membership = scoped_memberships.find(params[:id]) if action_name == 'update'
     validate_member_enrollment!(attributes, membership)
     queue ||= membership&.queue
+    validate_recipient_scope!(attributes, membership, queue)
     return if queue.nil? || queue.status == 'active'
 
     raise JrcContactCenter::OperationError, 'inactive_queue' if new_enrollment?(attributes, membership)
@@ -108,6 +109,17 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
     return if eligible
 
     raise JrcContactCenter::OperationError, 'ineligible_member'
+  end
+
+  def validate_recipient_scope!(attributes, membership, queue)
+    return if queue.nil? || deactivating_membership?(attributes, membership)
+
+    member_id = attributes[:account_user_id].presence || membership&.account_user_id
+    member = Current.account.account_users.find(member_id)
+    scope = JrcContactCenter::OrganizationalScope.new(account: Current.account, account_user: member)
+    return if scope.units.exists?(id: queue.unit_id)
+
+    raise JrcContactCenter::OperationError, 'member_scope_mismatch'
   end
 
   def deactivating_membership?(attributes, membership)

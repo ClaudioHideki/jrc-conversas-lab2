@@ -230,6 +230,36 @@ test('native queue eligibility is rechecked before saving and preserves the revi
   await expect(
     page.locator('[data-resource-row]').filter({ hasText: queue.name })
   ).toContainText(targets.enrollment_eligible.name);
+  await page.locator('[data-create]').click();
+  await dialog
+    .getByLabel('Fila', { exact: true })
+    .selectOption(String(queue.id));
+  await dialog
+    .getByLabel('Usuário', { exact: true })
+    .selectOption(String(targets.enrollment_scoped.id));
+  const scopeRejected = page.waitForResponse(
+    response =>
+      response.url().endsWith('/queue_memberships') &&
+      response.request().method() === 'POST'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  const scopeResponse = await scopeRejected;
+  expect(scopeResponse.status()).toBe(422);
+  expect((await scopeResponse.json()).error).toBe('member_scope_mismatch');
+  await expect(dialog.getByRole('alert')).toContainText('não possui cobertura');
+  await expect(dialog.getByLabel('Fila', { exact: true })).toHaveValue(
+    String(queue.id)
+  );
+  await expect(dialog.getByLabel('Usuário', { exact: true })).toHaveValue(
+    String(targets.enrollment_scoped.id)
+  );
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-queue-recipient-scope.png',
+    fullPage: true,
+  });
   const bypass = await page.request.post(api + '/queue_memberships', {
     headers: session.administrator,
     data: {

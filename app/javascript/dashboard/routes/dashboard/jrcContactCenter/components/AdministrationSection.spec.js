@@ -96,36 +96,42 @@ describe('administrative workflow', () => {
     expect(API.updateAcwPolicy).not.toHaveBeenCalled();
   });
 
-  it('identifies pending native users and preserves the queue draft if eligibility changes before saving', async () => {
-    mocks.route.query = { queues_tab: 'memberships' };
-    API.queueMemberships.mockResolvedValue({
-      data: {
-        items: [],
-        agents: [
-          { account_user_id: '8', name: 'Pending', eligible: false },
-          { account_user_id: '9', name: 'Eligible', eligible: true },
-        ],
-      },
-    });
-    API.saveQueueMembership.mockRejectedValueOnce({
-      response: { data: { error: 'ineligible_member' } },
-    });
-    const wrapper = mountSection('queues');
-    await flushPromises();
-    await wrapper.get('[data-create]').trigger('click');
-    await flushPromises();
-    expect(wrapper.get('option[value="8"]').element.disabled).toBe(true);
-    await wrapper.get('[name="account_user_id"]').setValue('9');
-    await wrapper.get('[data-dialog]').trigger('submit');
-    await flushPromises();
-    expect(wrapper.get('[role="alert"]').text()).toBe(
-      'JRC_CONTACT_CENTER.ACCESS.ENROLLMENT_BLOCKED'
-    );
-    expect(wrapper.get('[name="account_user_id"]').element.value).toBe('9');
-    expect(
-      wrapper.get('[name="account_user_id"]').attributes('aria-invalid')
-    ).toBe('true');
-  });
+  it.each([
+    ['ineligible_member', 'ENROLLMENT_BLOCKED'],
+    ['member_scope_mismatch', 'ENROLLMENT_SCOPE'],
+  ])(
+    'preserves the queue draft when enrollment is rejected: %s',
+    async (code, message) => {
+      mocks.route.query = { queues_tab: 'memberships' };
+      API.queueMemberships.mockResolvedValue({
+        data: {
+          items: [],
+          agents: [
+            { account_user_id: '8', name: 'Pending', eligible: false },
+            { account_user_id: '9', name: 'Eligible', eligible: true },
+          ],
+        },
+      });
+      API.saveQueueMembership.mockRejectedValueOnce({
+        response: { data: { error: code } },
+      });
+      const wrapper = mountSection('queues');
+      await flushPromises();
+      await wrapper.get('[data-create]').trigger('click');
+      await flushPromises();
+      expect(wrapper.get('option[value="8"]').element.disabled).toBe(true);
+      await wrapper.get('[name="account_user_id"]').setValue('9');
+      await wrapper.get('[data-dialog]').trigger('submit');
+      await flushPromises();
+      expect(wrapper.get('[role="alert"]').text()).toBe(
+        `JRC_CONTACT_CENTER.ACCESS.${message}`
+      );
+      expect(wrapper.get('[name="account_user_id"]').element.value).toBe('9');
+      expect(
+        wrapper.get('[name="account_user_id"]').attributes('aria-invalid')
+      ).toBe('true');
+    }
+  );
 
   it('does not load a native role editor without the server capability', async () => {
     const wrapper = mountSection('permissions', 'native_module');
