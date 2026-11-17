@@ -108,3 +108,5 @@ CI 44078910273/e217b41a preservada: 428 Rails, uma falha de preparação/escopo 
 - 81c91a4c / CI 44182927869: 623 Rails (612 + 11 concorrentes), 226 Vue, zero falhas/pendências/erros. Uma complexidade ABC 27,75/26 na resposta de permissões foi corrigida extraindo a parte específica do usuário, sem mudar o contrato. Chrome não executado nesse SHA; novo gate inclui a proteção da disponibilidade preparada.
 
 - 0fd871ce / CI 44185417916: 631 Rails (617 + 14 concorrentes), 226 Vue e migrations aprovados, zero falhas/pendências/erros. Corrigido um alinhamento na nova chamada do helper de corrida; nenhuma alteração funcional ou de asserção. Próximo SHA precisa concluir lint/build e os 92 Chrome, incluindo as novas provas de origem e cobertura corporativa.
+
+- 042a0fd5 / CI 44187779842: 631 Rails, 226 Vue, migrations, lints e build aprovados. Seed do Chrome falhou aleatoriamente por senha sem dígito; diagnóstico/stack preservados por hash. Helper exclusivamente sintético garante classes obrigatórias sem reduzir entropia; uma regressão usa a validação real de User e reproduz a rejeição antiga. Nova CI obrigatória, sem enfraquecer senha, fixture ou cenários.

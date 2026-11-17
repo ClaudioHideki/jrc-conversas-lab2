@@ -2097,6 +2097,26 @@
         "lint_cause": "Layout/HashAlignment in the new race helper call; move positional argument to its own line, no behavior or assertion change.",
         "chrome": "not_run_due_to_lint"
       }
+    },
+    "synthetic_password_failure": {
+      "sha": "042a0fd5f91530d0f73c15030231bd3841a46c2c",
+      "run": 44187779842,
+      "artifact": 14376525301,
+      "sha256": "7ebcd56c9e557ccb55ffa3984fd59531bc094643b5f0fd99f59071ca801c46a6",
+      "job_log_sha256": "f40c3dd36a0581db0adb686c4118d4292d3ef382f84d1d73a52e916f0fa4a211",
+      "sanitized_log_sha256": "e544ce7e303175184bf1a98932c34509993f98636d5dc70c623d7199e4b90832",
+      "rails_main": 617,
+      "concurrency": 14,
+      "vue": 226,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0,
+      "new_ruby_offenses": 0,
+      "frontend_lint": "passed",
+      "frontend_build": "passed",
+      "bootstrap": "seed failed before servers started",
+      "cause": "SecureRandom.base64 can produce a password without digits; native User validation rejected an actual synthetic recipient at seed line 104.",
+      "correction": "Add required character classes to the random synthetic password; preserve 32 random bytes, all native password rules and every UI assertion. One native regression recreates the old rejection."
     }
   }
 }
