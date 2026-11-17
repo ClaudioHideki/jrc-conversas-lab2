@@ -44,14 +44,19 @@ test('Projects validation uses each product baseline and the guarded concurrency
   assert.ok(workflow.includes("JRC_PROJECT_COMMENT_CONCURRENCY: '1'"));
 });
 
-test('consolidation exercises legacy NICO and Flow gates and keeps committed routing fixtures isolated', () => {
+test('consolidation exercises legacy NICO and Flow gates and isolates routing and LIVE fixtures', () => {
   const nico = read('.github/workflows/nico-broker-candidate.yml');
   const flow = read('.github/workflows/flow-broker-candidate.yml');
   for (const workflow of [nico, flow]) {
     assert.ok(workflow.includes('codex/consolidacao-*'));
     assert.ok(workflow.includes('refs/heads/codex/consolidacao-*'));
   }
-  assert.ok(flow.includes('--exclude-pattern spec/services/jrc_broker/routing_context_connection_spec.rb'));
+  assert.ok(flow.includes("--exclude-pattern 'spec/services/jrc_broker/{routing_context_connection,live_ingress_concurrency}_spec.rb'"));
   assert.ok(flow.includes('POSTGRES_DATABASE: jrc_durable_review_test'));
   assert.ok(flow.includes('bundle exec rspec spec/services/jrc_broker/routing_context_connection_spec.rb'));
+  const live = flow.split('- name: Concorrencia LIVE no banco descartavel exigido pela protecao')[1].split('- name: Routing HTTP')[0];
+  assert.ok(live.includes('POSTGRES_DATABASE: jrc_delivery_reliability_test'));
+  assert.ok(live.includes("JRC_LIVE_CONCURRENCY: '1'"));
+  assert.ok(live.includes('bundle exec rspec spec/services/jrc_broker/live_ingress_concurrency_spec.rb'));
+  assert.ok(live.includes("summary['failure_count'] == 0 and summary['pending_count'] == 0 and summary['example_count'] >= 4"));
 });
