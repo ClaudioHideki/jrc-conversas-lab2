@@ -51,8 +51,19 @@ class Api::V1::Accounts::CustomRolesController < Api::V1::Accounts::EnterpriseAc
       JrcContactCenter::GrantGuard.check!(
         actor: Current.user, account: Current.account, proposed: attributes[:permissions], previous: @custom_role&.permissions || []
       )
+      check_assigned_role_effect!(attributes[:permissions]) if @custom_role
     end
     attributes
+  end
+
+  def check_assigned_role_effect!(permissions)
+    proposed = @custom_role.dup
+    proposed.id = @custom_role.id
+    proposed.permissions = permissions
+    proposed.readonly!
+    @custom_role.account_users.includes(:user, :custom_role).find_each do |member|
+      JrcContactCenter::RoleFallbackGuard.check!(actor: Current.user, account: Current.account, member: member, custom_role: proposed)
+    end
   end
 
   def check_contact_center_role_scope!(proposed)

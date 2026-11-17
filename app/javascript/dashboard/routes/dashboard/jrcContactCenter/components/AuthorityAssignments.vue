@@ -288,7 +288,7 @@ onBeforeUnmount(() => {
       :is-loading="saving"
       :dismissible="!saving"
       :show-cancel-button="!saving"
-      :use-form="true"
+      use-form
       @confirm="save"
     >
       <div
@@ -349,15 +349,17 @@ onBeforeUnmount(() => {
               :data-allow="permission"
             /><span>{{ label('ALLOWED') }}</span></label
           >
-          <label
-v-if="users" class="flex items-start gap-2 text-sm"
-            ><input
-              v-model="draft.denied"
-              type="checkbox"
-              :value="permission"
-              :data-deny="permission"
-            /><span>{{ label('DENIED') }}</span></label
-          >
+          <div v-if="users">
+            <label class="flex items-start gap-2 text-sm">
+              <input
+                v-model="draft.denied"
+                type="checkbox"
+                :value="permission"
+                :data-deny="permission"
+              />
+              <span>{{ label('DENIED') }}</span>
+            </label>
+          </div>
         </fieldset>
         <p class="text-sm text-n-slate-11">{{ label('SERVER_VALIDATES') }}</p>
         <label

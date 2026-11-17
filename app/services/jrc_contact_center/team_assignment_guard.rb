@@ -8,6 +8,9 @@ class JrcContactCenter::TeamAssignmentGuard
       context = { account: account, account_user: member, user: member.user }
       previous = JrcContactCenter::ModulePolicy.new(context, :contact_center).effective_permissions
       JrcContactCenter::GrantGuard.check!(actor: actor, account: account, proposed: capabilities, previous: previous)
+      context[:cc_extra_team_permissions] = capabilities
+      proposed = JrcContactCenter::ModulePolicy.new(context, :contact_center).effective_permissions
+      JrcContactCenter::GrantGuard.check!(actor: actor, account: account, proposed: proposed, previous: previous)
     end
   end
 end

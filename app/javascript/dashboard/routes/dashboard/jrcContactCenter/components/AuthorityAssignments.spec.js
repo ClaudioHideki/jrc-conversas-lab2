@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineComponent, reactive, ref } from 'vue';
+import { computed, defineComponent, reactive, ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
 import AuthorityAssignments from './AuthorityAssignments.vue';
@@ -20,8 +20,9 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
 const Dialog = defineComponent({
   props: { disableConfirmButton: Boolean },
   emits: ['confirm'],
-  setup(_props, { expose, emit }) {
+  setup(props, { expose, emit }) {
     const visible = ref(false);
+    const disabled = computed(() => props.disableConfirmButton);
     expose({
       open: () => {
         visible.value = true;
@@ -30,10 +31,10 @@ const Dialog = defineComponent({
         visible.value = false;
       },
     });
-    return { visible, confirm: () => emit('confirm') };
+    return { visible, disabled, confirm: () => emit('confirm') };
   },
   template:
-    '<form v-if="visible" role="dialog" @submit.prevent="confirm"><slot /><button data-submit type="submit" :disabled="disableConfirmButton">SAVE</button></form>',
+    '<form v-if="visible" role="dialog" @submit.prevent="confirm"><slot /><button data-submit type="submit" :disabled="disabled">SAVE</button></form>',
 });
 enableAutoUnmount(afterEach);
 const source = overrides => ({

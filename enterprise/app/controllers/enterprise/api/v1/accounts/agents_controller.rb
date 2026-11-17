@@ -74,6 +74,7 @@ module Enterprise::Api::V1::Accounts::AgentsController
       JrcContactCenter::GrantGuard.check!(
         actor: Current.user, account: Current.account, proposed: role.permissions, previous: member.custom_role&.permissions || []
       )
+      JrcContactCenter::RoleFallbackGuard.check!(actor: Current.user, account: Current.account, member: member, custom_role: role)
     else
       values = action_name == 'create' ? new_agent_params : agent_params
       proposed_role = values[:role].nil? ? member.role : values[:role]

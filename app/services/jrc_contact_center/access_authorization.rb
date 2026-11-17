@@ -43,22 +43,36 @@ class JrcContactCenter::AccessAuthorization
       subject.reload
       grant = grant_for(subject)
       check_revision!(subject, grant, expected)
-      previous = subject.is_a?(AccountUser) ? effective(subject) : grant.allowed
+      previous = { allowed: grant.allowed.dup, effective: subject.is_a?(AccountUser) ? effective(subject) : [] }
       grant.assign_attributes(attributes)
-      proposed = subject.is_a?(AccountUser) ? effective(subject, preview: grant) : grant.allowed
-      JrcContactCenter::GrantGuard.check!(actor: @user, account: @account, proposed: proposed, previous: previous)
+      check_grant_effects!(subject, grant, previous)
       grant.save!
       grant
     end
   end
 
-  def effective(member, preview: nil)
+  def effective(member, preview: nil, team_preview: nil)
     context = { account: @account, account_user: member, user: member.user }
     context[:cc_access_preview] = preview if preview
+    context[:cc_team_access_preview] = team_preview if team_preview
     JrcContactCenter::ModulePolicy.new(context, :contact_center).effective_permissions
   end
 
   private
+
+  def check_grant_effects!(subject, grant, previous)
+    JrcContactCenter::GrantGuard.check!(actor: @user, account: @account, proposed: grant.allowed, previous: previous[:allowed])
+    if subject.is_a?(AccountUser)
+      proposed = effective(subject, preview: grant)
+      JrcContactCenter::GrantGuard.check!(actor: @user, account: @account, proposed: proposed, previous: previous[:effective])
+    else
+      subject.members.where(id: @account.users.select(:id)).find_each do |user|
+        member = @account.account_users.find_by!(user: user)
+        proposed = effective(member, team_preview: { subject.id => grant.allowed })
+        JrcContactCenter::GrantGuard.check!(actor: @user, account: @account, proposed: proposed, previous: effective(member))
+      end
+    end
+  end
 
   def check_revision!(subject, grant, expected)
     unless expected.is_a?(String) && expected.present?

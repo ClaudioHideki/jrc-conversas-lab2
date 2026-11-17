@@ -1,10 +1,12 @@
 class JrcContactCenter::PermissionSources
   UNSPECIFIED = Object.new.freeze
 
-  def initialize(account:, member:, individual: UNSPECIFIED)
+  def initialize(account:, member:, individual: UNSPECIFIED, team_overrides: {}, extra_permissions: [])
     @account = account
     @member = member
     @preview = individual
+    @team_overrides = team_overrides
+    @extra_permissions = extra_permissions
   end
 
   def individual
@@ -36,6 +38,10 @@ class JrcContactCenter::PermissionSources
   end
 
   def inherited_permissions
-    @inherited_permissions ||= JrcContactCenter::AccessGrant.where(account: @account, team_id: teams.select(:id)).pluck(:allowed).flatten.uniq
+    @inherited_permissions ||= begin
+      grants = JrcContactCenter::AccessGrant.where(account: @account, team_id: teams.select(:id)).pluck(:team_id, :allowed).to_h
+      @team_overrides.each { |id, permissions| grants[id] = permissions if teams.exists?(id: id) }
+      (grants.values.flatten + @extra_permissions).uniq
+    end
   end
 end

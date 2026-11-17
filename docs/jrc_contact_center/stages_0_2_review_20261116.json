@@ -1700,7 +1700,28 @@
       "adr": "docs/adr/20261117-call-center-final-write-authorization.md",
       "implementation": "prepared",
       "expected_concurrency_examples": 8,
-      "native_validation": "pending_new_sha"
+      "native_validation": "native_logic_passed_8850187c",
+      "evidence": {
+        "sha": "8850187c08589175e929775d1a6f6220ce361684",
+        "run": 44153428753,
+        "artifact": 14360682463,
+        "sha256": "0fb6d25ed9cc328697ca093a1ca62eafc80b7ee9fe3019da5ad549b8defd9e76",
+        "rails_main": 584,
+        "concurrency": 8,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "vue": 220,
+        "new_ruby_offenses": 0,
+        "frontend_gate": "four errors: test stub property, boolean shorthand and conflicting label markup; fixed next SHA",
+        "chrome": "not_run"
+      }
+    },
+    "latent_permission_effects": {
+      "adr": "docs/adr/20261117-call-center-latent-permission-effects.md",
+      "new_request_scenarios": 6,
+      "validation": "pending_new_sha",
+      "no_new_capabilities": true
     }
   }
 }

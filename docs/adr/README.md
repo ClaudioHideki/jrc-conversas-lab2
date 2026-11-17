@@ -22,3 +22,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Call Center: herança por equipe e elegibilidade](20261117-call-center-team-inheritance-and-eligibility.md).
 
 - [Call Center: reautorização após locks administrativos](20261117-call-center-final-write-authorization.md).
+
+- [Call Center: concessões latentes e dependências](20261117-call-center-latent-permission-effects.md).

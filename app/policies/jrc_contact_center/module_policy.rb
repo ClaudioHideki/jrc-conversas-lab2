@@ -90,6 +90,8 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
   def sources
     options = { account: account, member: account_user }
     options[:individual] = user_context[:cc_access_preview] if user_context.key?(:cc_access_preview)
+    options[:team_overrides] = user_context[:cc_team_access_preview] if user_context.key?(:cc_team_access_preview)
+    options[:extra_permissions] = user_context[:cc_extra_team_permissions] if user_context.key?(:cc_extra_team_permissions)
     @sources ||= JrcContactCenter::PermissionSources.new(**options)
   end
 end
