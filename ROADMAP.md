@@ -46,3 +46,5 @@ A revisão esperada foi validada em 80632726 (431 Rails/185 Vue/56 Chrome). Pró
 Call Center 17/11: ampliar a proteção contra concessões implícitas na retirada de perfis antes de implementar herança/elegibilidade. Preservar acesso nativo dos demais módulos e validar cada incremento em banco sintético.
 
 Call Center: proteção de retirada de perfis validada no SHA 30fbf0b1. Próximo incremento implementa elegibilidade/herança de forma explícita, com fixtures sintéticas identificadas, upgrade populado e nova execução nativa; interface e demais figuras permanecem abertas.
+
+Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os 68 cenários Chrome anteriores e ampliando para 80; revalidar backend e banco junto à interface real, antes de qualquer aceite de F11/F12.

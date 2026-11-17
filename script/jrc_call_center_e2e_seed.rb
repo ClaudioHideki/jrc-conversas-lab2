@@ -85,7 +85,32 @@ account.account_users.find_each do |member|
   JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true)
 end
 
-session = { account_id: account.id, other_account_id: other.id, unit_id: unit.id,
+# Separate synthetic targets for each browser project; no invitation or provider call.
+access_targets = %w[desktop-light desktop-dark mobile-light mobile-dark].index_with do |project|
+  recipients = %w[pending conflict peer].index_with do |kind|
+    person = User.new(name: "SYNTHETIC #{project} #{kind}", email: "cc-#{kind}-#{SecureRandom.hex(6)}@example.test",
+                      password: SecureRandom.base64(32), confirmed_at: Time.current)
+    person.skip_confirmation_notification!
+    person.save!
+    member = AccountUser.create!(account: account, user: person, role: :agent)
+    JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true) if kind == 'peer'
+    { id: member.id, name: person.name }
+  end
+  team = Team.create!(account: account, name: "SYNTHETIC #{project} inherited")
+  peer = account.account_users.find(recipients.fetch('peer').fetch(:id))
+  team.add_members([peer.user_id])
+  JrcContactCenter::AccessGrant.create!(account: account, team: team, allowed: [])
+  recipients.merge('team' => { id: team.id, name: team.name })
+end
+21.times do |index|
+  person = User.new(name: "SYNTHETIC pagination #{index.to_s.rjust(2, '0')}",
+                    email: "cc-page-#{SecureRandom.hex(6)}@example.test", password: SecureRandom.base64(32), confirmed_at: Time.current)
+  person.skip_confirmation_notification!
+  person.save!
+  AccountUser.create!(account: account, user: person, role: :agent)
+end
+
+session = { access_targets: access_targets, account_id: account.id, other_account_id: other.id, unit_id: unit.id,
             administrator: admin.create_new_auth_token, viewer: limited.create_new_auth_token,
             delegated: delegated.create_new_auth_token,
             viewer_user_id: limited.id, viewer_role_id: viewer.id,

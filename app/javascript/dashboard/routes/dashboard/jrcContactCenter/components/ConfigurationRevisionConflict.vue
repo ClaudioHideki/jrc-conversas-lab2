@@ -39,6 +39,9 @@ const labels = {
   strategy: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.STRATEGY'),
   issuer_company_id: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.COMPANY'),
   business_unit_id: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.BUSINESS_UNIT'),
+  eligible: t('JRC_CONTACT_CENTER.ACCESS.ELIGIBLE'),
+  allowed: t('JRC_CONTACT_CENTER.ACCESS.ALLOWED'),
+  denied: t('JRC_CONTACT_CENTER.ACCESS.DENIED'),
 };
 const choices = {
   provider: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.PROVIDER'),
@@ -73,6 +76,8 @@ const fields = computed(
         'participates',
         'supervises',
       ],
+      access_users: ['eligible', 'allowed', 'denied'],
+      access_teams: ['allowed'],
     })[props.resource] || []
 );
 const format = (record, field) => {
@@ -81,6 +86,14 @@ const format = (record, field) => {
     : record[field];
   if (value === undefined || value === null || value === '') return '—';
   if (typeof value === 'boolean') return value ? text.yes : text.no;
+  if (['allowed', 'denied'].includes(field))
+    return (
+      value
+        .map(permission =>
+          t(`CUSTOM_ROLE.PERMISSIONS.${permission.toUpperCase()}`)
+        )
+        .join('; ') || '—'
+    );
   if (['kind', 'status', 'service_kind', 'strategy'].includes(field))
     return choices[value] || String(value);
   return String(value);

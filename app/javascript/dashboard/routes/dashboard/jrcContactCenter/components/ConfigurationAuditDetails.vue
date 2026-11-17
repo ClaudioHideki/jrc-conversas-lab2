@@ -54,6 +54,10 @@ const fieldLabels = {
   active_from: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.START'),
   active_until: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.END'),
   permissions: t('CUSTOM_ROLE.FORM.PERMISSIONS.LABEL'),
+  team_id: t('JRC_CONTACT_CENTER.ACCESS.TEAMS'),
+  eligible: t('JRC_CONTACT_CENTER.ACCESS.ELIGIBILITY'),
+  allowed: t('JRC_CONTACT_CENTER.ACCESS.ALLOWED'),
+  denied: t('JRC_CONTACT_CENTER.ACCESS.DENIED'),
 };
 const permissionLabels = {
   jrc_contact_center_view: t('CUSTOM_ROLE.PERMISSIONS.JRC_CONTACT_CENTER_VIEW'),
@@ -120,7 +124,10 @@ const fields = computed(() => [
 const value = (entry, field = '') => {
   if (entry === null || entry === undefined) return '—';
   if (typeof entry === 'boolean') return entry ? labels.yes : labels.no;
-  if (field === 'permissions' && Array.isArray(entry))
+  if (
+    ['permissions', 'allowed', 'denied'].includes(field) &&
+    Array.isArray(entry)
+  )
     return entry.map(item => permissionLabels[item] || item).join('\n') || '—';
   if (field === 'settings')
     return (

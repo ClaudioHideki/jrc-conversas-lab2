@@ -1,7 +1,13 @@
 import { computed, onBeforeUnmount, reactive, watch } from 'vue';
 import API from 'dashboard/api/jrcContactCenter';
 
-const resources = ['units', 'queues', 'memberships'];
+const resources = [
+  'units',
+  'queues',
+  'memberships',
+  'access_users',
+  'access_teams',
+];
 const validRevision = value =>
   typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 export const useConfigurationRevision = ({ accountId, resource, draft }) => {

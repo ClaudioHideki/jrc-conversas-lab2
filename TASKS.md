@@ -72,3 +72,5 @@ CI 44078910273/e217b41a preservada: 428 Rails, uma falha de preparação/escopo 
 
 - [x] **CALL-CENTER-ROLE-FALLBACK-20261117:** Checkpoint 30fbf0b1, CI 44140644967: 546 Rails (540 + 6 concorrência), 209 Vue, 68 Chrome, zero falhas/pendências e 72 hashes de capturas conferidos. Preservado o sucesso parcial nativo de convites.
 - [ ] **CALL-CENTER-ACCESS-INHERITANCE-20261117:** Configuração CC ligada a AccountUser/Team, novos usuários pendentes, união de fontes e bloqueios individuais prioritários. Backend/API, constraints e testes preparados; execução do novo SHA e interface ainda pendentes. Migration aditiva 20261117190000, sem alteração de migrations/SQLs históricos.
+
+- [ ] **CALL-CENTER-ACCESS-UI-20261117:** Backend 548f66ac aprovou 590 Rails e 209 Vue; gate final bloqueado por duas infrações de lint, corrigidas sem supressão. Popup nativo de usuários/equipes com origens, revisão, filtros e paginação implementado; onze cenários Vue e doze Chrome adicionais preparados (80 totais). Validação do novo SHA pendente.

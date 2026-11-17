@@ -7,6 +7,7 @@ import API from 'dashboard/api/jrcContactCenter';
 import TeamsAPI from 'dashboard/api/teams';
 import CustomRoleAPI from 'dashboard/api/customRole';
 import NativeRoleEditor from './NativeRoleEditor.vue';
+import AuthorityAssignments from './AuthorityAssignments.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 
@@ -20,6 +21,22 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const key = computed(() => props.card.key);
+const permissionScope = computed({
+  get: () => {
+    const selected = route.query.permission_scope;
+    if (
+      ['users', 'teams'].includes(selected) &&
+      props.context.native_links?.access_editor
+    )
+      return selected;
+    return props.context.native_links?.access_editor &&
+      !props.context.native_links?.role_editor
+      ? 'users'
+      : 'profiles';
+  },
+  set: value =>
+    router.replace({ query: { ...route.query, permission_scope: value } }),
+});
 const tab = computed({
   get: () =>
     ['queues', 'teams', 'memberships'].includes(route.query.queues_tab)
@@ -145,7 +162,8 @@ const load = async () => {
   if (
     pending.value ||
     ['closures', 'approvals'].includes(key.value) ||
-    (key.value === 'permissions' && !canEditRoles.value)
+    (key.value === 'permissions' &&
+      (!canEditRoles.value || permissionScope.value !== 'profiles'))
   )
     return;
   loading.value = true;
@@ -401,6 +419,7 @@ watch(
   [
     () => props.accountId,
     resource,
+    permissionScope,
     page,
     () => queryValue('q'),
     () => queryValue('status'),
@@ -470,7 +489,8 @@ onBeforeUnmount(() => {
     <p
       v-if="
         ['permissions', 'approvals'].includes(key) &&
-        !context.native_links?.[key]
+        !context.native_links?.[key] &&
+        !(key === 'permissions' && context.native_links?.access_editor)
       "
       class="text-sm text-n-amber-11"
     >
@@ -497,7 +517,36 @@ onBeforeUnmount(() => {
     >
       {{ label('NATIVE_APPROVALS') }}
     </RouterLink>
-    <template v-if="canEditRoles">
+    <nav
+      v-if="key === 'permissions' && context.native_links?.access_editor"
+      class="flex flex-wrap gap-2"
+      :aria-label="t('JRC_CONTACT_CENTER.ACCESS.SUBJECT')"
+    >
+      <button
+        v-for="scope in ['profiles', 'teams', 'users']"
+        :key="scope"
+        type="button"
+        :disabled="scope === 'profiles' && !canEditRoles"
+        :aria-pressed="permissionScope === scope"
+        class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
+        :class="{ 'bg-n-blue-3': permissionScope === scope }"
+        :data-permission-scope="scope"
+        @click="permissionScope = scope"
+      >
+        {{ t(`JRC_CONTACT_CENTER.ACCESS.${scope.toUpperCase()}`) }}
+      </button>
+    </nav>
+    <AuthorityAssignments
+      v-if="
+        key === 'permissions' &&
+        context.native_links?.access_editor &&
+        permissionScope !== 'profiles'
+      "
+      :account-id="accountId"
+      :subject-type="permissionScope"
+      @changed="emit('changed')"
+    />
+    <template v-if="canEditRoles && permissionScope === 'profiles'">
       <p v-if="loading" role="status" class="text-sm text-n-slate-11">
         {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}
       </p>

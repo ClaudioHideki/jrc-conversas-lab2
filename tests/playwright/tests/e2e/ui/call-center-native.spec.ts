@@ -28,6 +28,260 @@ test.beforeEach(async ({ page }, info) => {
   );
 });
 
+test('native access user eligibility, real pagination, denial and persistence', async ({
+  page,
+}, info) => {
+  const target = session.access_targets[info.project.name].pending;
+  await page.goto(
+    base +
+      '/permissions?permission_scope=users&access_users_q=SYNTHETIC%20pagination'
+  );
+  const section = page.locator('[data-authority-assignments]');
+  await expect(section.locator('[data-edit-authority]')).toHaveCount(20);
+  await section.getByRole('button', { name: 'Próxima', exact: true }).click();
+  await expect(section.locator('[data-edit-authority]')).toHaveCount(1);
+  await section
+    .getByRole('button', { name: 'Limpar filtros', exact: true })
+    .click();
+  await section.getByRole('textbox').fill(target.name);
+  await section.getByRole('combobox').selectOption('pending');
+  await section
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  await expect(section.locator('[data-edit-authority]')).toHaveCount(1);
+  await section.locator('[data-edit-authority="' + target.id + '"]').click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.locator('[data-user-eligible]')).not.toBeChecked();
+  await dialog.locator('[data-user-eligible]').check();
+  await dialog
+    .locator('[data-allow="jrc_contact_center_recordings_view"]')
+    .check();
+  await dialog
+    .locator('[data-allow="jrc_contact_center_recordings_listen"]')
+    .check();
+  await dialog
+    .locator('[data-deny="jrc_contact_center_recordings_download"]')
+    .check();
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar permissões', exact: true })
+  ).toBeDisabled();
+  await dialog.locator('[data-review-authority]').check();
+  const persisted = page.waitForResponse(
+    response =>
+      response.url().endsWith('/access_authorizations/users/' + target.id) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Salvar permissões', exact: true })
+    .click();
+  expect((await persisted).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  await section.getByRole('combobox').selectOption('eligible');
+  await section
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  await page.reload();
+  await expect(
+    section.locator('[data-edit-authority="' + target.id + '"]')
+  ).toBeVisible();
+  await section.locator('[data-edit-authority="' + target.id + '"]').click();
+  await expect(dialog.locator('[data-user-eligible]')).toBeChecked();
+  await expect(
+    dialog.locator('[data-deny="jrc_contact_center_recordings_download"]')
+  ).toBeChecked();
+  const saved = await page.request.get(
+    api + '/access_authorizations/users/' + target.id,
+    { headers: session.administrator }
+  );
+  expect(saved.status()).toBe(200);
+  const state = (await saved.json()).item;
+  expect(state.effective).toContain('jrc_contact_center_recordings_listen');
+  expect(state.effective).not.toContain(
+    'jrc_contact_center_recordings_download'
+  );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  const foreground = await page
+    .locator('[data-administration-section] h2')
+    .evaluate(element => getComputedStyle(element).color);
+  await expect(dialog.locator('[data-authority-editor]')).toHaveCSS(
+    'color',
+    foreground
+  );
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' + info.project.name + '-access-user.png',
+    fullPage: true,
+  });
+});
+
+test('native access team grants remain separate from eligibility and queue participation', async ({
+  page,
+}, info) => {
+  const targets = session.access_targets[info.project.name];
+  await page.goto(
+    base +
+      '/permissions?permission_scope=teams&access_teams_q=' +
+      encodeURIComponent(targets.team.name)
+  );
+  const section = page.locator('[data-authority-assignments]');
+  await section
+    .locator('[data-edit-authority="' + targets.team.id + '"]')
+    .click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.locator('[data-user-eligible]')).toHaveCount(0);
+  await expect(dialog.locator('[data-deny]')).toHaveCount(0);
+  await dialog.locator('[data-allow="jrc_contact_center_monitor"]').check();
+  await dialog.locator('[data-review-authority]').check();
+  const persisted = page.waitForResponse(
+    response =>
+      response
+        .url()
+        .endsWith('/access_authorizations/teams/' + targets.team.id) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Salvar permissões', exact: true })
+    .click();
+  expect((await persisted).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  await page.reload();
+  await section
+    .locator('[data-edit-authority="' + targets.team.id + '"]')
+    .click();
+  await expect(
+    dialog.locator('[data-allow="jrc_contact_center_monitor"]')
+  ).toBeChecked();
+  const peer = await page.request.get(
+    api + '/access_authorizations/users/' + targets.peer.id,
+    { headers: session.administrator }
+  );
+  expect(peer.status()).toBe(200);
+  const state = (await peer.json()).item;
+  expect(state.inherited).toContain('jrc_contact_center_monitor');
+  expect(state.effective).toContain('jrc_contact_center_monitor');
+  const pending = await page.request.get(
+    api + '/access_authorizations/users/' + targets.conflict.id,
+    { headers: session.administrator }
+  );
+  expect((await pending.json()).item.eligible).toBe(false);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' + info.project.name + '-access-team.png',
+    fullPage: true,
+  });
+});
+
+test('native access conflict preserves draft and requires explicit comparison before overwrite', async ({
+  page,
+}, info) => {
+  const target = session.access_targets[info.project.name].conflict;
+  await page.goto(
+    base +
+      '/permissions?permission_scope=users&access_users_q=' +
+      encodeURIComponent(target.name)
+  );
+  await page.locator('[data-edit-authority="' + target.id + '"]').click();
+  const dialog = page.getByRole('dialog');
+  await dialog.locator('[data-user-eligible]').check();
+  await dialog.locator('[data-allow="jrc_contact_center_monitor"]').check();
+  const snapshot = await page.request.get(
+    api + '/access_authorizations/users/' + target.id,
+    { headers: session.administrator }
+  );
+  const old = (await snapshot.json()).item;
+  const other = await page.request.patch(
+    api + '/access_authorizations/users/' + target.id,
+    {
+      headers: session.administrator,
+      data: {
+        expected_revision: old.revision,
+        authorization: {
+          eligible: true,
+          allowed: ['jrc_contact_center_publish'],
+        },
+      },
+    }
+  );
+  expect(other.status()).toBe(200);
+  const current = (await other.json()).item;
+  await dialog.locator('[data-review-authority]').check();
+  const rejected = page.waitForResponse(
+    response =>
+      response.url().endsWith('/access_authorizations/users/' + target.id) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Salvar permissões', exact: true })
+    .click();
+  expect((await rejected).status()).toBe(409);
+  await expect(
+    dialog.locator('[data-allow="jrc_contact_center_monitor"]')
+  ).toBeChecked();
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar permissões', exact: true })
+  ).toBeDisabled();
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-access-conflict.png',
+    fullPage: true,
+  });
+  await dialog
+    .getByRole('button', {
+      name: 'Carregar versão atual para comparar',
+      exact: true,
+    })
+    .click();
+  await expect(dialog.locator('[data-configuration-latest]')).toContainText(
+    'publicar'
+  );
+  await dialog.locator('[data-configuration-review]').check();
+  await dialog.locator('[data-review-authority]').check();
+  const persisted = page.waitForResponse(
+    response =>
+      response.url().endsWith('/access_authorizations/users/' + target.id) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Salvar permissões', exact: true })
+    .click();
+  const saved = await persisted;
+  expect(saved.status()).toBe(200);
+  expect(saved.request().postDataJSON().expected_revision).toBe(
+    current.revision
+  );
+  await expect(dialog).not.toBeVisible();
+  const final = await page.request.get(
+    api + '/access_authorizations/users/' + target.id,
+    { headers: session.administrator }
+  );
+  expect((await final.json()).item.allowed).toEqual([
+    'jrc_contact_center_monitor',
+  ]);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-access-revised.png',
+    fullPage: true,
+  });
+});
+
 test('fifteen permission-bound cards, actual CSS, honest pending states and no overflow', async ({
   page,
 }, info) => {

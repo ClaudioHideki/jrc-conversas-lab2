@@ -57,7 +57,9 @@ class Api::V1::Accounts::JrcContactCenter::AccessAuthorizationsController < Api:
     return payload.merge(member_count: subject.team_members.count) unless users?
 
     sources = JrcContactCenter::PermissionSources.new(account: Current.account, member: subject)
-    payload.merge(user_id: subject.user_id, profile: sources.profile, inherited: sources.inherited_permissions, effective: authority.effective(subject))
+    payload.merge(
+      user_id: subject.user_id, profile: sources.profile, inherited: sources.inherited_permissions, effective: authority.effective(subject)
+    )
   end
 
   def access_attributes

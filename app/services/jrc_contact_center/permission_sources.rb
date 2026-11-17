@@ -36,6 +36,6 @@ class JrcContactCenter::PermissionSources
   end
 
   def inherited_permissions
-    @inherited ||= JrcContactCenter::AccessGrant.where(account: @account, team_id: teams.select(:id)).pluck(:allowed).flatten.uniq
+    @inherited_permissions ||= JrcContactCenter::AccessGrant.where(account: @account, team_id: teams.select(:id)).pluck(:allowed).flatten.uniq
   end
 end

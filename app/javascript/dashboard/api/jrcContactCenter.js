@@ -14,12 +14,29 @@ export default {
       units: 'units',
       queues: 'queues',
       memberships: 'queue_memberships',
+      access_users: 'access_authorizations/users',
+      access_teams: 'access_authorizations/teams',
     };
     if (!paths[resource] || !/^[1-9]\d*$/.test(String(id)))
       throw new Error('Invalid configuration context');
     return axios.get(`${base(accountId)}/${paths[resource]}/${Number(id)}`);
   },
   administration: accountId => axios.get(`${base(accountId)}/administration`),
+  accessAuthorizations: (accountId, type, params = {}) => {
+    if (!['users', 'teams'].includes(type))
+      throw new Error('Invalid authority context');
+    return axios.get(`${base(accountId)}/access_authorizations/${type}`, {
+      params,
+    });
+  },
+  saveAccessAuthorization: (accountId, type, id, authorization, options) => {
+    if (!['users', 'teams'].includes(type))
+      throw new Error('Invalid authority context');
+    return axios.patch(
+      `${base(accountId)}/access_authorizations/${type}/${Number(id)}`,
+      { ...options, authorization }
+    );
+  },
   administrativeList: (accountId, section, params = {}) =>
     axios.get(
       `${base(accountId)}/administration/${encodeURIComponent(section)}`,

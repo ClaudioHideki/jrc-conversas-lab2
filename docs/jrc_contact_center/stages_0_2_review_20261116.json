@@ -1665,8 +1665,23 @@
       "no_new_corporate_grants": true,
       "migration": "20261117190000",
       "migration_hash": "85fa579036a807b2d50ae3c30af64b061ba9ea6c6ffe173b4e0f33d4ad922dbe",
-      "ui": "pending",
-      "part_1_complete": false
+      "ui": "native_dialog_implementation_and_tests_prepared",
+      "part_1_complete": false,
+      "backend_logic_evidence": {
+        "sha": "548f66ac3be2746b0a6d509e35b0adb086cc70b1",
+        "run": 44147270578,
+        "artifact": 14357682308,
+        "sha256": "cae1ea8aa4fcfdebbaec272cc81af3eaeff7435e289856e8c325cd348371080c",
+        "rails": 590,
+        "vue": 209,
+        "native_failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "remaining_gate": "two Ruby formatting/naming offenses; fixed in next checkpoint",
+        "chrome": "not_run"
+      },
+      "expected_chrome": 80,
+      "previous_chrome_preserved": 68
     }
   }
 }
