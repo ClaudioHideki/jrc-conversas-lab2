@@ -4,16 +4,20 @@
 class JrcContactCenter::ConfigurationWrite
   UNSPECIFIED_REVISION = Object.new.freeze
 
-  def initialize(account:, access:)
+  def initialize(account:, access:, reauthorize: nil)
     @account = account
     @access = access
+    @reauthorize = reauthorize
   end
 
   def create!(model)
     model.transaction do
       model.uncached do
+        reauthorize!(nil)
         values = yield
-        lock_parents(model.new(values.merge(account: @account)), values)
+        proposed = model.new(values.merge(account: @account))
+        lock_parents(proposed, values)
+        reauthorize!(proposed)
         model.create!(yield.merge(account: @account))
       end
     end
@@ -25,8 +29,10 @@ class JrcContactCenter::ConfigurationWrite
         record = relation.find(id)
         record.with_lock do
           relation.find(id)
+          reauthorize!(record)
           lock_parents(record, yield)
           relation.find(id)
+          reauthorize!(record)
           JrcContactCenter::ConfigurationRevision.check!(record, expected_revision) unless expected_revision.equal?(UNSPECIFIED_REVISION)
           record.update!(yield)
         end
@@ -36,6 +42,10 @@ class JrcContactCenter::ConfigurationWrite
   end
 
   private
+
+  def reauthorize!(record)
+    @access = @reauthorize.call(record) if @reauthorize
+  end
 
   def lock_parents(record, attributes)
     queues = if record.is_a?(JrcContactCenter::QueueMembership)

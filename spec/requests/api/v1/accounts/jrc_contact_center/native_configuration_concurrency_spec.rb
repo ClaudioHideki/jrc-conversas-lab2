@@ -113,6 +113,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     Timeout.timeout(8) { entered.pop }
     dispatch_configuration_request(verb, endpoint, payload)
     Timeout.timeout(8) { read.pop }
+    state[:before_release]&.call
     release << true
     Timeout.timeout(20) { workers.each(&:join) }
     results.pop
@@ -152,5 +153,32 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     expect(queue.reload.name).to eq('Concurrent committed state')
     trail = Audited.audit_class.where(auditable: queue, action: 'update', comment: JrcContactCenter::ConfigurationAudit::COMMENT)
     expect(trail.count).to eq(1)
+  end
+
+  it 'denies a queued write when eligibility was revoked after the initial authorization' do
+    state[:before_release] = lambda do
+      member = account.account_users.find_by!(user: actor)
+      JrcContactCenter::AccessGrant.find_by!(account_user: member).update!(eligible: false)
+    end
+    status = race_with_queue_change(
+      change: {}, verb: :patch, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/queues/#{queue.id}",
+      payload: { queue: { name: 'Forbidden after eligibility revocation' } }
+    )
+    expect(status).to eq(401)
+    expect(queue.reload.name).to eq('Original')
+    expect(Audited.audit_class.where(auditable: queue, action: 'update')).to be_empty
+  end
+
+  it 'denies a queued write when its functional profile was restricted during the lock wait' do
+    state[:before_release] = lambda do
+      account.account_users.find_by!(user: actor).custom_role.update!(permissions: ['jrc_contact_center_view'])
+    end
+    status = race_with_queue_change(
+      change: {}, verb: :patch, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/queues/#{queue.id}",
+      payload: { queue: { name: 'Forbidden after profile revocation' } }
+    )
+    expect(status).to eq(401)
+    expect(queue.reload.name).to eq('Original')
+    expect(Audited.audit_class.where(auditable: queue, action: 'update')).to be_empty
   end
 end

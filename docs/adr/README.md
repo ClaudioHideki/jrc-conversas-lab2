@@ -20,3 +20,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Call Center: retirada de perfil sem aumento implícito](20261117-call-center-native-role-fallback.md).
 
 - [Call Center: herança por equipe e elegibilidade](20261117-call-center-team-inheritance-and-eligibility.md).
+
+- [Call Center: reautorização após locks administrativos](20261117-call-center-final-write-authorization.md).

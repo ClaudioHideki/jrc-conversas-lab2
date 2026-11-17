@@ -1681,7 +1681,26 @@
         "chrome": "not_run"
       },
       "expected_chrome": 80,
-      "previous_chrome_preserved": 68
+      "previous_chrome_preserved": 68,
+      "ui_first_gate": {
+        "sha": "8498ebf5070001a28255e473b910626fb7efd2cb",
+        "run": 44150407102,
+        "artifact": 14359791173,
+        "sha256": "84e490e24cca3e19e1f72eabffe7040aedfbfceeb0c9071f7215fb90786f15c2",
+        "rails": 590,
+        "vue": 220,
+        "pending": 0,
+        "failures": 0,
+        "new_ruby_offenses": 0,
+        "blocker": "frontend formatting only; CI formatter canonical content equivalence verified",
+        "chrome": "not_run"
+      }
+    },
+    "final_write_authorization": {
+      "adr": "docs/adr/20261117-call-center-final-write-authorization.md",
+      "implementation": "prepared",
+      "expected_concurrency_examples": 8,
+      "native_validation": "pending_new_sha"
     }
   }
 }

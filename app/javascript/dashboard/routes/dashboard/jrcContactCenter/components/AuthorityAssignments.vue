@@ -349,7 +349,8 @@ onBeforeUnmount(() => {
               :data-allow="permission"
             /><span>{{ label('ALLOWED') }}</span></label
           >
-          <label v-if="users" class="flex items-start gap-2 text-sm"
+          <label
+v-if="users" class="flex items-start gap-2 text-sm"
             ><input
               v-model="draft.denied"
               type="checkbox"

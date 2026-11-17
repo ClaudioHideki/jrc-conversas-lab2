@@ -42,7 +42,30 @@ class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::B
   end
 
   def configuration_write
-    @configuration_write ||= JrcContactCenter::ConfigurationWrite.new(account: Current.account, access: contact_center_access)
+    @configuration_write ||= JrcContactCenter::ConfigurationWrite.new(
+      account: Current.account, access: contact_center_access, reauthorize: method(:reauthorize_configuration_write!)
+    )
+  end
+
+  def reauthorize_configuration_write!(record)
+    Current.account.reload
+    Current.account_user.reload
+    @contact_center_access = JrcContactCenter::AccessScope.new(user_context: pundit_user)
+    raise Pundit::NotAuthorizedError unless @contact_center_access.policy.configure?
+
+    configuration_scope(record).find(record.id) if record&.persisted?
+    @contact_center_access
+  end
+
+  def configuration_scope(record)
+    case record
+    when JrcContactCenter::Unit then contact_center_access.units
+    when JrcContactCenter::Queue then contact_center_access.queues
+    when JrcContactCenter::QueueMembership
+      JrcContactCenter::QueueMembership.where(account: Current.account, queue_id: contact_center_access.queues.select(:id))
+    else
+      raise ActiveRecord::RecordNotFound
+    end
   end
 
   def contact_center_access
