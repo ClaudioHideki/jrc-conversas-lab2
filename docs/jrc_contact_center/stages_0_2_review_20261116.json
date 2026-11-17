@@ -1544,6 +1544,20 @@
         "schema_blob_unchanged_from_base": "2da124014a50e68dca9ea4c4345ab9e377e2bddf",
         "decision": "preserve_restrictive_FKs_and_prove_atomic_rollback",
         "complete_purge": "not_implemented_or_approved"
+      },
+      "native_logic_evidence": {
+        "sha": "cfcae689552c3c95e1e940f716cfd8506d7dabba",
+        "run": 44112946513,
+        "artifact": 14342351295,
+        "sha256": "a98ae71b5250974931ec782e6b94b490772d87b186f72e3e64937c8bc111377e",
+        "main_examples": 487,
+        "concurrency_examples": 6,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "vue_passed": 209,
+        "remaining_gate_failure": "one extra blank line in new rollback test",
+        "chrome_build": "not_run_due_to_lint"
       }
     }
   }

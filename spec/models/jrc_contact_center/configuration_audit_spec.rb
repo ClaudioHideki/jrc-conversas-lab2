@@ -91,7 +91,6 @@ RSpec.describe 'Call Center configuration audit transactions', type: :model do
     expect(trail.last.audited_changes.fetch('attributes').last).to include('name' => 'Second reviewed name')
   end
 
-
   it 'rolls back direct account deletion when the native restrictive Call Center foreign keys prevent it' do
     owner = create(:user, account: account)
     owner_link = account.account_users.find_by!(user: owner)

@@ -80,3 +80,13 @@ incremento e precisa de decisão específica.
 
 As correções de lint apenas removem linhas iniciais vazias, uniformizam hashes
 dinâmicos e usam it_behaves_like, mantendo todos os exemplos e verificações.
+
+## Revalidação da lógica nativa
+
+CI 44112946513, cfcae689552c3c95e1e940f716cfd8506d7dabba:
+487 exemplos Rails mais seis de concorrência, todos aprovados, com zero falhas,
+pendências ou erros fora dos exemplos; 209 Vue aprovados. Artefato 14342351295,
+SHA-256 a98ae71b5250974931ec782e6b94b490772d87b186f72e3e64937c8bc111377e.
+Gate ainda bloqueado por uma única linha em branco extra no novo teste de
+rollback. Correção exclusivamente de formatação, sem remoção/alteração de
+asserções. Build/Chrome e contraste continuam pendentes no novo SHA.
