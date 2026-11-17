@@ -122,7 +122,19 @@ access_targets = %w[desktop-light desktop-dark mobile-light mobile-dark].index_w
   peer = account.account_users.find(recipients.fetch('peer').fetch(:id))
   team.add_members([peer.user_id])
   JrcContactCenter::AccessGrant.create!(account: account, team: team, allowed: [])
-  recipients.merge('team' => { id: team.id, name: team.name })
+  # Independent viewer for the production route/layout integration; no corporate grant.
+  navigation_user = User.new(name: "SYNTHETIC #{project} navigation", email: "cc-nav-#{SecureRandom.hex(6)}@example.test",
+                             password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current)
+  navigation_user.skip_confirmation_notification!
+  navigation_user.save!
+  navigation_member = AccountUser.create!(account: account, user: navigation_user, role: :agent, custom_role: viewer)
+  JrcContactCenter::AccessGrant.create!(account: account, account_user: navigation_member, eligible: true,
+                                        denied: ['jrc_contact_center_reports'])
+  navigation_team = Team.create!(account: account, name: "SYNTHETIC #{project} navigation")
+  navigation_team.add_members([navigation_user.id])
+  JrcContactCenter::AccessGrant.create!(account: account, team: navigation_team, allowed: ['jrc_contact_center_supervise'])
+  recipients.merge('team' => { id: team.id, name: team.name },
+                   'navigation' => { team_id: navigation_team.id, auth: navigation_user.create_new_auth_token })
 end
 21.times do |index|
   person = User.new(name: "SYNTHETIC pagination #{index.to_s.rjust(2, '0')}",

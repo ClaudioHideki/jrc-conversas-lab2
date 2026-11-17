@@ -173,11 +173,7 @@ const hasContactCenterAccess = computed(() => {
     account => Number(account.id) === Number(accountId.value)
   );
   const permissions = currentAccount?.permissions || [];
-  return (
-    permissions.includes('administrator') ||
-    permissions.includes('agent') ||
-    permissions.includes('jrc_contact_center_view')
-  );
+  return permissions.includes('jrc_contact_center_view');
 });
 
 const { status: operationsStatus } = useOperations();

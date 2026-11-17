@@ -14,25 +14,19 @@ const mobileNavigationOpen = ref(false);
 const accountId = computed(() => route.params.accountId);
 const capabilities = computed(() => context.value?.capabilities || {});
 
-const canSupervise = computed(
-  () =>
-    capabilities.value.supervise === true ||
-    capabilities.value.configure === true
+const canSupervise = computed(() => capabilities.value.supervise === true);
+const canManage = computed(
+  () => canSupervise.value || capabilities.value.configure === true
 );
 const canConfigure = computed(() => capabilities.value.configure === true);
 const canAdminister = computed(
   () =>
-    canSupervise.value ||
+    canManage.value ||
     ['administer', 'audit', 'approve', 'publish', 'recordings_view'].some(
       key => capabilities.value[key] === true
     )
 );
-const canReport = computed(
-  () =>
-    capabilities.value.reports === true ||
-    capabilities.value.supervise === true ||
-    capabilities.value.configure === true
-);
+const canReport = computed(() => capabilities.value.reports === true);
 
 const navigationGroups = computed(() => [
   {
@@ -77,13 +71,13 @@ const navigationGroups = computed(() => [
         name: 'jrc_contact_center_finance',
         label: t('JRC_CONTACT_CENTER.NAV.FINANCE'),
         icon: 'i-lucide-landmark',
-        visible: canSupervise.value,
+        visible: canManage.value,
       },
       {
         name: 'jrc_contact_center_coes',
         label: t('JRC_CONTACT_CENTER.NAV.COES'),
         icon: 'i-lucide-map',
-        visible: canSupervise.value,
+        visible: canManage.value,
       },
     ],
   },
@@ -100,13 +94,13 @@ const navigationGroups = computed(() => [
         name: 'jrc_contact_center_order_lookup',
         label: t('JRC_CONTACT_CENTER.NAV.ORDER_LOOKUP'),
         icon: 'i-lucide-package-search',
-        visible: canSupervise.value,
+        visible: canManage.value,
       },
       {
         name: 'jrc_contact_center_pabx',
         label: t('JRC_CONTACT_CENTER.NAV.PABX'),
         icon: 'i-lucide-server-cog',
-        visible: canSupervise.value,
+        visible: canManage.value,
       },
       {
         name: 'jrc_contact_center_migration',
@@ -123,7 +117,7 @@ const navigationGroups = computed(() => [
         name: 'jrc_contact_center_recordings',
         label: t('JRC_CONTACT_CENTER.NAV.RECORDINGS'),
         icon: 'i-lucide-audio-waveform',
-        visible: canReport.value,
+        visible: capabilities.value.recordings_view === true,
       },
       {
         name: 'jrc_contact_center_reports',

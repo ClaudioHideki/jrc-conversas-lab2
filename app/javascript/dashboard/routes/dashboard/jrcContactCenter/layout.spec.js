@@ -121,4 +121,50 @@ describe('Contact Center account navigation', () => {
       'JRC_CONTACT_CENTER.NAV_GROUPS.SUPERVISOR'
     );
   });
+  it('does not replace explicit report/recording denial with configuration or supervision', async () => {
+    JrcContactCenterAPI.context.mockResolvedValue({
+      data: {
+        capabilities: {
+          supervise: true,
+          configure: true,
+          reports: false,
+          recordings_view: false,
+        },
+      },
+    });
+    const wrapper = mount(ContactCenterLayout, {
+      global: { stubs: { RouterLink: true, RouterView: true } },
+    });
+    await flushPromises();
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.NAV.SUPERVISOR');
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.NAV.SETTINGS');
+    expect(wrapper.text()).not.toContain('JRC_CONTACT_CENTER.NAV.REPORTS');
+    expect(wrapper.text()).not.toContain('JRC_CONTACT_CENTER.NAV.RECORDINGS');
+  });
+
+  it('does not offer the supervise-only page to a configuration-only user', async () => {
+    JrcContactCenterAPI.context.mockResolvedValue({
+      data: {
+        capabilities: { supervise: false, configure: true, reports: false },
+      },
+    });
+    const wrapper = mount(ContactCenterLayout, {
+      global: { stubs: { RouterLink: true, RouterView: true } },
+    });
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('JRC_CONTACT_CENTER.NAV.SUPERVISOR');
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.NAV.SETTINGS');
+  });
+
+  it('offers recording navigation independently from a denied report', async () => {
+    JrcContactCenterAPI.context.mockResolvedValue({
+      data: { capabilities: { recordings_view: true, reports: false } },
+    });
+    const wrapper = mount(ContactCenterLayout, {
+      global: { stubs: { RouterLink: true, RouterView: true } },
+    });
+    await flushPromises();
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.NAV.RECORDINGS');
+    expect(wrapper.text()).not.toContain('JRC_CONTACT_CENTER.NAV.REPORTS');
+  });
 });

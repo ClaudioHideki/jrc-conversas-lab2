@@ -3,35 +3,27 @@ import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 
 const baseMeta = {
   featureFlag: FEATURE_FLAGS.JRC_CONTACT_CENTER,
-  permissions: ['administrator', 'agent', 'jrc_contact_center_view'],
+  permissions: ['jrc_contact_center_view'],
 };
 
 const supervisorMeta = {
   ...baseMeta,
-  permissions: ['administrator', 'jrc_contact_center_supervise'],
+  permissions: ['jrc_contact_center_supervise'],
 };
 
 const managementMeta = {
   ...baseMeta,
-  permissions: [
-    'administrator',
-    'jrc_contact_center_supervise',
-    'jrc_contact_center_configure',
-  ],
+  permissions: ['jrc_contact_center_supervise', 'jrc_contact_center_configure'],
 };
 
 const reportsMeta = {
   ...baseMeta,
-  permissions: [
-    'administrator',
-    'jrc_contact_center_reports',
-    'jrc_contact_center_supervise',
-  ],
+  permissions: ['jrc_contact_center_reports'],
 };
 
 const configureMeta = {
   ...baseMeta,
-  permissions: ['administrator', 'jrc_contact_center_configure'],
+  permissions: ['jrc_contact_center_configure'],
 };
 
 const visualPage = screenKey => ({
@@ -128,7 +120,10 @@ export const routes = [
         path: 'gravacoes',
         name: 'jrc_contact_center_recordings',
         ...visualPage('recordings'),
-        meta: reportsMeta,
+        meta: {
+          ...baseMeta,
+          permissions: ['jrc_contact_center_recordings_view'],
+        },
       },
       {
         path: 'relatorios',

@@ -1349,7 +1349,7 @@
     ],
     "increment": "F11 revisão esperada compatível, sem migration ou concessões implícitas",
     "adr": "docs/adr/20261117-call-center-role-revision.md",
-    "expected_chrome": 84,
+    "expected_chrome": 96,
     "previous_chrome_preserved": 52,
     "native_validation": "pending_new_sha",
     "external_homologation": false,
@@ -1997,7 +1997,7 @@
       "validation": "Both accessible labels and disabled option assertion passed in all four real Chrome projects on dd8ece07; negative writes, persistence and revocation retained."
     },
     "queue_recipient_coverage": {
-      "implementation": "prepared",
+      "implementation": "implemented_and_validated_in_synthetic_environment",
       "native_scope": "JrcContactCenter::OrganizationalScope",
       "actor_group_is_not_recipient_grant": true,
       "new_corporate_grants": false,
@@ -2006,7 +2006,7 @@
       "http_lock_wait_case": 1,
       "additional_vue_case": 1,
       "extended_real_chrome_cases": 4,
-      "validation": "pending_next_sha",
+      "validation": "Native Rails, Vue, Chrome desktop/mobile light/dark and CSS passed on 7011dac7. External provider not homologated.",
       "native_evidence": {
         "sha": "f21f65ba82ac9adac3c99b3b060e2afa0be9a153",
         "run": 44181012669,
@@ -2021,6 +2021,12 @@
         "new_ruby_offenses": 1,
         "lint_cause": "Layout/HashAlignment in new recipient scope spec; smallest argument layout correction prepared.",
         "chrome": "not_run_due_to_lint"
+      },
+      "latest_complete_evidence": {
+        "sha": "7011dac7ef25c937a784142e34217dfbe5b9d388",
+        "run": 44194721033,
+        "artifact": 14380181386,
+        "sha256": "907be87f5162f01d7663ef1a1bb29c80e0c53b9653726025034652f799a7ddb5"
       }
     },
     "validated_checkpoint_dd8ece07": {
@@ -2046,7 +2052,7 @@
       "external_homologation": false
     },
     "named_permission_origins": {
-      "implementation": "prepared",
+      "implementation": "implemented_and_validated_in_synthetic_environment",
       "read_only": true,
       "detail_only": true,
       "native_team_membership_required": true,
@@ -2055,7 +2061,7 @@
       "native_scenarios": 3,
       "additional_vue_scenario": 1,
       "extended_chrome_cases": 4,
-      "validation": "pending_next_sha",
+      "validation": "Native Rails, Vue, Chrome desktop/mobile light/dark and CSS passed on 7011dac7. External provider not homologated.",
       "native_evidence": {
         "sha": "81c91a4c1018b04d71a5d762f3ff4188a60537fb",
         "run": 44182927869,
@@ -2069,10 +2075,16 @@
         "outside_errors": 0,
         "lint": "One new Metrics/AbcSize in present (27.75/26); extract user-specific payload without changing API contract.",
         "chrome": "not_run_due_to_lint"
+      },
+      "latest_complete_evidence": {
+        "sha": "7011dac7ef25c937a784142e34217dfbe5b9d388",
+        "run": 44194721033,
+        "artifact": 14380181386,
+        "sha256": "907be87f5162f01d7663ef1a1bb29c80e0c53b9653726025034652f799a7ddb5"
       }
     },
     "operator_state_fresh_authorization": {
-      "implementation": "prepared",
+      "implementation": "implemented_and_validated_in_synthetic_environment",
       "native_service_cases": 5,
       "real_http_concurrency_cases": 3,
       "rechecks_after_account_lock": true,
@@ -2081,7 +2093,7 @@
       "provider_confirmation_is_not_grant": true,
       "adapter_in_positive_test": "explicitly_simulated",
       "external_provider_calls": false,
-      "validation": "pending_next_sha",
+      "validation": "Native Rails, Vue, Chrome desktop/mobile light/dark and CSS passed on 7011dac7. External provider not homologated.",
       "native_evidence": {
         "sha": "0fd871ce1830a90a6aca004fa653eed67b34a915",
         "run": 44185417916,
@@ -2096,6 +2108,12 @@
         "new_ruby_offenses": 1,
         "lint_cause": "Layout/HashAlignment in the new race helper call; move positional argument to its own line, no behavior or assertion change.",
         "chrome": "not_run_due_to_lint"
+      },
+      "latest_complete_evidence": {
+        "sha": "7011dac7ef25c937a784142e34217dfbe5b9d388",
+        "run": 44194721033,
+        "artifact": 14380181386,
+        "sha256": "907be87f5162f01d7663ef1a1bb29c80e0c53b9653726025034652f799a7ddb5"
       }
     },
     "synthetic_password_failure": {
@@ -2130,13 +2148,61 @@
         "outside_errors": 0,
         "new_ruby_offenses": 1,
         "cause": "RSpec/SpecFilePathFormat: global helper name mismatched the native domain path; scope helper under JrcContactCenter::SyntheticPassword and preserve every assertion."
-      }
+      },
+      "resolved_in": "7011dac7ef25c937a784142e34217dfbe5b9d388"
     },
     "authenticated_permission_consumer_gap": {
       "status": "confirmed_in_code_not_yet_corrected",
       "native_serializer": "AccountUser#permissions and Enterprise::AccountUser#permissions",
       "cause": "Profile JSON contains native role/custom-role raw permissions, not effective CC team/individual sources. Native CC routes and sidebar also accept legacy role markers.",
-      "next": "Normalize only the 13 CC keys in authenticated permissions, preserve all other module keys/roles, and validate actual menu/route consumers. Do not claim the isolated component fixture proves this integration."
+      "next": "Normalize only the 13 CC keys in authenticated permissions, preserve all other module keys/roles, and validate actual menu/route consumers. Do not claim the isolated component fixture proves this integration.",
+      "implementation": "prepared_pending_native_validation",
+      "adr": "docs/adr/20261117-call-center-authenticated-permissions.md",
+      "authenticated_request_cases": 9,
+      "additional_vue_cases": 7,
+      "additional_chrome_cases": 4,
+      "expected_total_chrome": 96,
+      "shared_modules_preserved": true,
+      "no_automatic_grants": true,
+      "no_cross_session_realtime_refresh_claim": true
+    },
+    "validated_checkpoint_7011dac7": {
+      "sha": "7011dac7ef25c937a784142e34217dfbe5b9d388",
+      "run": 44194721033,
+      "artifact": 14380181386,
+      "artifact_sha256": "907be87f5162f01d7663ef1a1bb29c80e0c53b9653726025034652f799a7ddb5",
+      "rails": {
+        "call-center-rspec.json": {
+          "duration": 83.612531525,
+          "example_count": 618,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        },
+        "call-center-pabx-rspec.json": {
+          "duration": 6.087579837,
+          "example_count": 14,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "vue": {
+        "numTotalTests": 226,
+        "numPassedTests": 226,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      },
+      "chrome": {
+        "startTime": "2026-11-17T23:13:53.900Z",
+        "duration": 195562.934,
+        "expected": 92,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "screenshots_verified": 108,
+      "external_homologation": false
     }
   }
 }

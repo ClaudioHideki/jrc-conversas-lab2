@@ -27,17 +27,19 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const auth = info.title.startsWith('native infrastructure root')
-    ? session.infrastructure
-    : info.title.startsWith('configuration audit boundary')
-      ? session.auditor
-      : info.title.startsWith('native role denied')
-        ? session.delegated
-        : info.title.startsWith('corporate boundary')
-          ? session.restricted
-          : info.title.startsWith('profile change')
-            ? session.viewer
-            : session.administrator;
+  const auth = info.title.startsWith('native authenticated navigation')
+    ? session.access_targets[info.project.name].navigation.auth
+    : info.title.startsWith('native infrastructure root')
+      ? session.infrastructure
+      : info.title.startsWith('configuration audit boundary')
+        ? session.auditor
+        : info.title.startsWith('native role denied')
+          ? session.delegated
+          : info.title.startsWith('corporate boundary')
+            ? session.restricted
+            : info.title.startsWith('profile change')
+              ? session.viewer
+              : session.administrator;
   await page.addInitScript(
     ({ auth, dark }) => {
       window.__SYNTHETIC_AUTH__ = auth;
@@ -1943,4 +1945,76 @@ test('native queue stale revision preserves the draft and requires explicit fres
       '-queue-revised.png',
     fullPage: true,
   });
+});
+
+test('native authenticated navigation honors inherited supervision, denied reports and revocation', async ({
+  page,
+}, info) => {
+  const target = session.access_targets[info.project.name].navigation;
+  const loaded = page.waitForResponse(
+    response =>
+      response.url().endsWith('/jrc_contact_center/supervisor') &&
+      response.request().method() === 'GET'
+  );
+  await page.goto(
+    `/app/accounts/${session.account_id}/contact-center/supervisor?native_navigation=1`
+  );
+  expect((await loaded).status()).toBe(200);
+  const profile = await page.request.get(
+    'http://127.0.0.1:5387/api/v1/profile',
+    { headers: target.auth }
+  );
+  expect(profile.status()).toBe(200);
+  const permissions = (await profile.json()).accounts.find(
+    account => account.id === session.account_id
+  ).permissions;
+  expect(permissions).toContain('jrc_contact_center_supervise');
+  expect(permissions).not.toContain('jrc_contact_center_reports');
+  expect(permissions).not.toContain('jrc_contact_center_configure');
+  const deniedReport = await page.request.get(api + '/reports', {
+    headers: target.auth,
+  });
+  expect(deniedReport.status()).toBe(401);
+  const navigation = page.locator('aside nav');
+  if (info.project.name.startsWith('mobile')) {
+    await page.getByRole('button', { expanded: false }).click();
+  }
+  await expect(navigation.locator('a[href$="/supervisor"]')).toBeVisible();
+  await expect(navigation.locator('a[href$="/relatorios"]')).toHaveCount(0);
+  await expect(navigation.locator('a[href$="/gravacoes"]')).toHaveCount(0);
+  await expect(navigation.locator('a[href$="/configuracoes"]')).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-authenticated-navigation.png`,
+    fullPage: true,
+  });
+
+  const previous = await page.request.get(
+    api + '/access_authorizations/teams/' + target.team_id,
+    { headers: session.administrator }
+  );
+  expect(previous.status()).toBe(200);
+  const revoked = await page.request.patch(
+    api + '/access_authorizations/teams/' + target.team_id,
+    {
+      headers: session.administrator,
+      data: {
+        authorization: { allowed: [] },
+        expected_revision: (await previous.json()).item.revision,
+      },
+    }
+  );
+  expect(revoked.status()).toBe(200);
+  await page.reload();
+  await expect(page.getByRole('alert')).toHaveText(
+    'Negado pela verificação nativa de rota no ambiente sintético.'
+  );
+  const forbidden = await page.request.get(api + '/supervisor', {
+    headers: target.auth,
+  });
+  expect(forbidden.status()).toBe(401);
 });

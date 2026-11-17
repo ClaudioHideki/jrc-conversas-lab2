@@ -12,7 +12,13 @@ import ModalHeader from 'dashboard/components/ModalHeader.vue';
 import SnackbarContainer from 'dashboard/components/SnackbarContainer.vue';
 import CustomRolesHome from 'dashboard/routes/dashboard/settings/customRoles/Index.vue';
 import SipSettingsPage from 'dashboard/routes/dashboard/webphone/SipSettingsPage.vue';
+import { routes as contactCenterRoutes } from 'dashboard/routes/dashboard/jrcContactCenter/routes';
+import { validateLoggedInRoutes } from 'dashboard/helper/routeHelpers';
 import '../../../../app/javascript/dashboard/assets/scss/app.scss';
+
+const nativeNavigation = new URLSearchParams(window.location.search).has(
+  'native_navigation'
+);
 
 window.chatwootConfig = {};
 window.axios = axios;
@@ -20,21 +26,34 @@ Object.assign(axios.defaults.headers.common, window.__SYNTHETIC_AUTH__);
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    ...(nativeNavigation ? contactCenterRoutes : []),
+    {
+      path: '/synthetic-access-denied',
+      name: 'synthetic_access_denied',
+      component: {
+        template:
+          '<p role="alert">Negado pela verificação nativa de rota no ambiente sintético.</p>',
+      },
+    },
     {
       path: '/app/accounts/:accountId/ramal/configuracao',
       name: 'ramal_settings',
       component: SipSettingsPage,
     },
-    {
-      path: '/app/accounts/:accountId/contact-center/control-desk',
-      name: 'jrc_contact_center_control_desk',
-      component: ControlDeskPage,
-    },
-    {
-      path: '/app/accounts/:accountId/contact-center/control-desk/:section',
-      name: 'jrc_contact_center_admin_section',
-      component: ControlDeskPage,
-    },
+    ...(!nativeNavigation
+      ? [
+          {
+            path: '/app/accounts/:accountId/contact-center/control-desk',
+            name: 'jrc_contact_center_control_desk',
+            component: ControlDeskPage,
+          },
+          {
+            path: '/app/accounts/:accountId/contact-center/control-desk/:section',
+            name: 'jrc_contact_center_admin_section',
+            component: ControlDeskPage,
+          },
+        ]
+      : []),
     {
       path: '/app/accounts/:accountId/settings/custom-roles/list',
       name: 'custom_roles_list',
@@ -55,6 +74,13 @@ const store = createStore({
         name: user.name,
         type: user.type,
         ui_settings: user.ui_settings,
+        accounts: user.accounts.map(account => ({
+          id: account.id,
+          status: account.status,
+          role: account.role,
+          permissions: account.permissions,
+          custom_role_id: account.custom_role_id,
+        })),
       };
     },
   },
@@ -68,6 +94,21 @@ const store = createStore({
       state.nativeAccount.features[feature] === true,
   },
 });
+// Native permission consumer and production layout, backed by fresh authenticated APIs.
+if (nativeNavigation) {
+  router.beforeEach(async to => {
+    if (to.name === 'synthetic_access_denied') return true;
+    const [account, profile] = await Promise.all([
+      axios.get(`/api/v1/accounts/${to.params.accountId}`),
+      axios.get('/api/v1/profile'),
+    ]);
+    store.commit('setNativeAccount', account.data);
+    store.commit('setNativeUser', profile.data);
+    return validateLoggedInRoutes(to, store.getters.getCurrentUser)
+      ? { name: 'synthetic_access_denied' }
+      : true;
+  });
+}
 const app = createApp({
   render: () =>
     h(
@@ -86,12 +127,16 @@ const app = createApp({
 });
 app.component('woot-modal-header', ModalHeader);
 router.isReady().then(async () => {
-  const [account, profile] = await Promise.all([
-    axios.get(`/api/v1/accounts/${router.currentRoute.value.params.accountId}`),
-    axios.get('/api/v1/profile'),
-  ]);
-  store.commit('setNativeAccount', account.data);
-  store.commit('setNativeUser', profile.data);
+  if (!nativeNavigation) {
+    const [account, profile] = await Promise.all([
+      axios.get(
+        `/api/v1/accounts/${router.currentRoute.value.params.accountId}`
+      ),
+      axios.get('/api/v1/profile'),
+    ]);
+    store.commit('setNativeAccount', account.data);
+    store.commit('setNativeUser', profile.data);
+  }
   app
     .use(store)
     .use(

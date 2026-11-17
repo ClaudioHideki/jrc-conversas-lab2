@@ -62,6 +62,8 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
   end
 
   def effective_permissions
+    return [] unless access?
+
     PERMISSIONS.select do |permission|
       action = permission.delete_prefix('jrc_contact_center_')
       public_send("#{action == 'view' ? 'access' : action}?")
