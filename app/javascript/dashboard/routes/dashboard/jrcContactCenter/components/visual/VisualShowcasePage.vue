@@ -14,6 +14,7 @@ const props = defineProps({
   screen: { type: Object, required: true },
   compact: { type: Boolean, default: false },
   showDemoBadge: { type: Boolean, default: true },
+  overviewOnly: { type: Boolean, default: false },
 });
 
 const route = useRoute();
@@ -213,6 +214,7 @@ const visualBadgeLabel = computed(() =>
     </VisualSectionCard>
 
     <div
+      v-if="!overviewOnly"
       class="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(280px,.8fr)]"
     >
       <VisualSectionCard

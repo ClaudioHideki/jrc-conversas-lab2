@@ -30,30 +30,48 @@ const agentTone = state => {
 
 const supervisorScreen = computed(() => {
   const source = contactCenterScreen('supervisor', t);
-  const agents = snapshot.value?.agents || [];
-  const queueRows = snapshot.value?.queues || [];
-  const waiting = queueRows.reduce(
-    (total, queue) => total + Number(queue.waiting || 0),
-    0
-  );
-  const available = agents.filter(agent => agent.state === 'available').length;
-  const inCall = agents.filter(agent => agent.state === 'in_call').length;
-  const metrics = source.metrics.map((item, index) => {
-    const values = [
-      agents.length || item.value,
-      waiting,
-      item.value,
-      item.value,
-    ];
-    const details = [
-      `${available} disponíveis · ${inCall} em chamada`,
-      item.detail,
-      item.detail,
-      item.detail,
-    ];
-    return { ...item, value: values[index], detail: details[index] };
-  });
-  return { ...source, metrics };
+  const observed = !loading.value && !failed.value && snapshot.value;
+  const agents = observed ? snapshot.value.agents : [];
+  const waiting = observed
+    ? snapshot.value.queues.reduce(
+        (total, queue) => total + Number(queue.waiting),
+        0
+      )
+    : '—';
+  const values = [observed ? agents.length : '—', waiting, '—', '—'];
+  const details = [
+    observed
+      ? t('JRC_CONTACT_CENTER.SUPERVISOR.OBSERVED_AGENTS', {
+          available: agents.filter(agent => agent.state === 'available').length,
+          inCall: agents.filter(agent => agent.state === 'in_call').length,
+        })
+      : t('JRC_CONTACT_CENTER.SUPERVISOR.UNOBSERVED'),
+    observed
+      ? t('JRC_CONTACT_CENTER.SUPERVISOR.LOCAL_SOURCE')
+      : t('JRC_CONTACT_CENTER.SUPERVISOR.UNOBSERVED'),
+    t('JRC_CONTACT_CENTER.SUPERVISOR.SLA_PENDING'),
+    t('JRC_CONTACT_CENTER.SUPERVISOR.RATE_PENDING'),
+  ];
+  let status = {
+    label: t('JRC_CONTACT_CENTER.SUPERVISOR.LOCAL_SOURCE'),
+    tone: 'blue',
+  };
+  if (loading.value)
+    status = { label: t('JRC_CONTACT_CENTER.COMMON.LOADING'), tone: 'slate' };
+  if (failed.value)
+    status = { label: t('JRC_CONTACT_CENTER.COMMON.ERROR'), tone: 'ruby' };
+  return {
+    ...source,
+    status,
+    primary: null,
+    secondary: null,
+    metrics: source.metrics.map((item, index) => ({
+      ...item,
+      value: values[index],
+      detail: details[index],
+      trend: '',
+    })),
+  };
 });
 
 let generation = 0;
@@ -89,9 +107,15 @@ const acwPoll = setInterval(async () => {
   const version = generation;
   try {
     const response = await JrcContactCenterAPI.supervisor(accountId.value);
-    if (version === generation) snapshot.value = response.data;
+    if (version === generation) {
+      snapshot.value = response.data;
+      failed.value = false;
+    }
   } catch {
-    if (version === generation) failed.value = true;
+    if (version === generation) {
+      snapshot.value = null;
+      failed.value = true;
+    }
   }
 }, 5000);
 onBeforeUnmount(() => {
@@ -102,7 +126,12 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <VisualShowcasePage :screen="supervisorScreen" />
+    <VisualShowcasePage
+      :screen="supervisorScreen"
+      :show-demo-badge="false"
+      overview-only
+      data-supervisor-observed-metrics
+    />
 
     <section class="space-y-5 px-4 pb-6 sm:px-6">
       <div class="flex items-center justify-between gap-3">
@@ -160,11 +189,11 @@ onBeforeUnmount(() => {
               </div>
               <VisualStatusBadge
                 :label="
-                  queue.waiting > 3
-                    ? $t('JRC_CONTACT_CENTER.VISUAL.ATENCAO')
-                    : $t('JRC_CONTACT_CENTER.VISUAL.OPERACAO_NORMAL')
+                  t(
+                    `JRC_CONTACT_CENTER.ADMIN.${queue.status === 'active' ? 'ACTIVE' : 'INACTIVE'}`
+                  )
                 "
-                :tone="queue.waiting > 3 ? 'amber' : 'emerald'"
+                :tone="queue.status === 'active' ? 'blue' : 'slate'"
               />
             </div>
           </div>

@@ -3,6 +3,7 @@ import { createI18n } from 'vue-i18n';
 import { createStore } from 'vuex';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import calls from 'dashboard/i18n/locale/pt_BR/calls.json';
+import english from 'dashboard/i18n/locale/en/calls.json';
 import TelephonyIntegrationAPI from 'dashboard/api/telephonyIntegration';
 import PabxSettingsPanel from './PabxSettingsPanel.vue';
 import SipSettingsPage from './SipSettingsPage.vue';
@@ -27,7 +28,12 @@ describe('PABX configuration and extension diagnosis', () => {
     }));
   });
   const plugins = () => [
-    createI18n({ legacy: false, locale: 'pt_BR', messages: { pt_BR: calls } }),
+    createI18n({
+      legacy: false,
+      locale: 'pt_BR',
+      fallbackLocale: 'en',
+      messages: { pt_BR: calls, en: english },
+    }),
   ];
 
   it('loads configuration with both operational switches OFF and never starts an external operation automatically', async () => {
@@ -186,6 +192,196 @@ describe('PABX configuration and extension diagnosis', () => {
     await flushPromises();
     expect(wrapper.findComponent(PabxSettingsPanel).exists()).toBe(false);
     expect(TelephonyIntegrationAPI.get).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+  it('retains the complete native presentation for callers that do not opt into tabs', async () => {
+    const wrapper = mount(PabxSettingsPanel, {
+      global: { plugins: plugins() },
+    });
+    await flushPromises();
+    expect(wrapper.find('[role="tablist"]').exists()).toBe(false);
+    expect(wrapper.get('[data-pabx-panel="general"]').isVisible()).toBe(true);
+    expect(wrapper.get('[data-pabx-panel="sync"]').isVisible()).toBe(true);
+    expect(wrapper.get('[data-pabx-panel="diagnostic"]').isVisible()).toBe(
+      true
+    );
+    wrapper.unmount();
+  });
+
+  it('keeps the same draft and submits all reviewed sections together across tab changes', async () => {
+    TelephonyIntegrationAPI.save.mockImplementation(async request => ({
+      data: { settings: request.settings, configured: true, sync: {} },
+    }));
+    const wrapper = mount(PabxSettingsPanel, {
+      props: { tabbed: true },
+      global: { plugins: plugins() },
+    });
+    await flushPromises();
+    await wrapper
+      .get('[data-pabx-panel="general"] input[type="url"]')
+      .setValue('https://synthetic.example.test');
+    wrapper.vm.password = 'SYNTHETIC review';
+    await wrapper.get('[data-pabx-tab="sync"]').trigger('click');
+    await wrapper.get('textarea').setValue('{"duration":"seconds"}');
+    await wrapper.get('[data-pabx-tab="diagnostic"]').trigger('click');
+    expect(wrapper.get('[data-pabx-panel="general"]').isVisible()).toBe(false);
+    expect(TelephonyIntegrationAPI.get).toHaveBeenCalledOnce();
+    expect(TelephonyIntegrationAPI.testConnection).not.toHaveBeenCalled();
+    expect(TelephonyIntegrationAPI.synchronize).not.toHaveBeenCalled();
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(TelephonyIntegrationAPI.save).toHaveBeenCalledOnce();
+    expect(TelephonyIntegrationAPI.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        settings: expect.objectContaining({
+          base_url: 'https://synthetic.example.test',
+          cdr_fields: { duration: 'seconds' },
+        }),
+        api_password: 'SYNTHETIC review',
+      })
+    );
+    expect(wrapper.vm.password).toBe('');
+    wrapper.unmount();
+  });
+
+  it('never sends blank settings after a failed initial load and allows an explicit safe retry', async () => {
+    TelephonyIntegrationAPI.get.mockRejectedValueOnce(
+      new Error('sensitive provider detail')
+    );
+    const wrapper = mount(PabxSettingsPanel, {
+      props: { tabbed: true },
+      global: { plugins: plugins() },
+    });
+    await flushPromises();
+    expect(wrapper.get('fieldset').attributes('disabled')).toBeDefined();
+    await wrapper.find('form').trigger('submit');
+    expect(TelephonyIntegrationAPI.save).not.toHaveBeenCalled();
+    expect(wrapper.text()).not.toContain('sensitive provider detail');
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === english.SOFTPHONE.PABX.RELOAD)
+      .trigger('click');
+    await flushPromises();
+    expect(wrapper.get('fieldset').attributes('disabled')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('preserves the draft when invalid JSON prevents a save', async () => {
+    const wrapper = mount(PabxSettingsPanel, {
+      props: { tabbed: true },
+      global: { plugins: plugins() },
+    });
+    await flushPromises();
+    await wrapper.get('[data-pabx-tab="sync"]').trigger('click');
+    await wrapper.get('textarea').setValue('{ invalid');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(TelephonyIntegrationAPI.save).not.toHaveBeenCalled();
+    expect(wrapper.get('textarea').element.value).toBe('{ invalid');
+    expect(wrapper.text()).toContain(calls.SOFTPHONE.PABX.FAILED);
+    wrapper.unmount();
+  });
+
+  it('preserves credentials and reviewed fields after a failed save without showing private errors', async () => {
+    TelephonyIntegrationAPI.save.mockRejectedValueOnce(
+      new Error('private backend detail')
+    );
+    const wrapper = mount(PabxSettingsPanel, {
+      props: { tabbed: true },
+      global: { plugins: plugins() },
+    });
+    await flushPromises();
+    wrapper.vm.password = 'SYNTHETIC unsaved';
+    await wrapper
+      .get('[data-pabx-panel="general"] input[type="url"]')
+      .setValue('https://synthetic.example.test');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(wrapper.vm.password).toBe('SYNTHETIC unsaved');
+    expect(wrapper.vm.form.base_url).toBe('https://synthetic.example.test');
+    expect(wrapper.text()).not.toContain('private backend detail');
+    expect(wrapper.text()).not.toContain('SYNTHETIC unsaved');
+    wrapper.unmount();
+  });
+
+  it('blocks duplicate submissions and tab actions while a save is pending', async () => {
+    let complete;
+    TelephonyIntegrationAPI.save.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          complete = resolve;
+        })
+    );
+    const wrapper = mount(PabxSettingsPanel, {
+      props: { tabbed: true },
+      global: { plugins: plugins() },
+    });
+    await flushPromises();
+    await wrapper.find('form').trigger('submit');
+    await wrapper.find('form').trigger('submit');
+    expect(TelephonyIntegrationAPI.save).toHaveBeenCalledOnce();
+    expect(
+      wrapper.get('[data-pabx-tab="sync"]').attributes('disabled')
+    ).toBeDefined();
+    complete({ data: payload });
+    await flushPromises();
+    expect(
+      wrapper.get('[data-pabx-tab="sync"]').attributes('disabled')
+    ).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('changes focus and selection with the keyboard without issuing API commands', async () => {
+    const wrapper = mount(PabxSettingsPanel, {
+      attachTo: document.body,
+      props: { tabbed: true },
+      global: { plugins: plugins() },
+    });
+    await flushPromises();
+    await wrapper
+      .get('[data-pabx-tab="general"]')
+      .trigger('keydown', { key: 'End' });
+    expect(
+      wrapper.get('[data-pabx-tab="diagnostic"]').attributes('aria-selected')
+    ).toBe('true');
+    expect(document.activeElement).toBe(
+      wrapper.get('[data-pabx-tab="diagnostic"]').element
+    );
+    await wrapper
+      .get('[data-pabx-tab="diagnostic"]')
+      .trigger('keydown', { key: 'ArrowLeft' });
+    expect(
+      wrapper.get('[data-pabx-tab="sync"]').attributes('aria-selected')
+    ).toBe('true');
+    expect(TelephonyIntegrationAPI.save).not.toHaveBeenCalled();
+    expect(TelephonyIntegrationAPI.testConnection).not.toHaveBeenCalled();
+    expect(TelephonyIntegrationAPI.synchronize).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('discards only after explicit reload and retains the draft if that read fails', async () => {
+    const wrapper = mount(PabxSettingsPanel, {
+      props: { tabbed: true },
+      global: { plugins: plugins() },
+    });
+    await flushPromises();
+    await wrapper
+      .get('[data-pabx-panel="general"] input[type="url"]')
+      .setValue('https://synthetic.example.test');
+    const restore = wrapper
+      .findAll('button')
+      .find(button => button.text() === english.SOFTPHONE.PABX.RESTORE);
+    TelephonyIntegrationAPI.get.mockRejectedValueOnce(
+      new Error('temporary read failure')
+    );
+    await restore.trigger('click');
+    await flushPromises();
+    expect(wrapper.vm.form.base_url).toBe('https://synthetic.example.test');
+    await restore.trigger('click');
+    await flushPromises();
+    expect(wrapper.vm.form.base_url).toBe('');
+    expect(TelephonyIntegrationAPI.save).not.toHaveBeenCalled();
+    expect(TelephonyIntegrationAPI.synchronize).not.toHaveBeenCalled();
     wrapper.unmount();
   });
 });

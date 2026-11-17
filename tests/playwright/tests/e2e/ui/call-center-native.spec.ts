@@ -81,11 +81,48 @@ test('native infrastructure root navigation loads the existing settings without 
     page.getByRole('heading', { name: 'Configuração da API PABX', exact: true })
   ).toBeVisible();
   await expect(
+    page.getByRole('tab', { name: 'Geral', exact: true })
+  ).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('tab', { name: 'Diagnóstico', exact: true }).click();
+  await expect(
     page.getByRole('button', { name: 'Testar conexão', exact: true })
   ).toBeDisabled();
+  await page
+    .getByRole('tab', { name: 'Sincronização CDR', exact: true })
+    .click();
   await expect(
     page.getByRole('button', { name: 'Solicitar sincronização', exact: true })
   ).toBeDisabled();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-native-pabx-sync.png`,
+    fullPage: true,
+  });
+  await page.getByRole('tab', { name: 'Geral', exact: true }).click();
+  const apiUrl = page.locator('[data-pabx-panel="general"] input[type="url"]');
+  await apiUrl.fill('not-a-valid-url');
+  await page.getByRole('tab', { name: 'Diagnóstico', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Salvar configuração', exact: true })
+    .click();
+  await expect(
+    page.getByRole('tab', { name: 'Geral', exact: true })
+  ).toHaveAttribute('aria-selected', 'true');
+  await expect(apiUrl).toHaveValue('not-a-valid-url');
+  await expect(apiUrl).toBeFocused();
+  await page
+    .getByRole('button', {
+      name: 'Descartar alterações e recarregar',
+      exact: true,
+    })
+    .click();
+  await expect(apiUrl).toHaveValue('');
+  await page.getByRole('tab', { name: 'Diagnóstico', exact: true }).click();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-native-pabx-diagnostic.png`,
+    fullPage: true,
+  });
+  await page.getByRole('tab', { name: 'Geral', exact: true }).click();
+
   await expect(page.locator('input[type="password"]').first()).toHaveValue('');
   expect(
     await page.evaluate(
@@ -1960,6 +1997,14 @@ test('native authenticated navigation honors inherited supervision, denied repor
     `/app/accounts/${session.account_id}/contact-center/supervisor?native_navigation=1`
   );
   expect((await loaded).status()).toBe(200);
+  const metrics = page.locator(
+    '[data-supervisor-observed-metrics] article strong'
+  );
+  await expect(metrics).toHaveText(['0', '0', '—', '—']);
+  await expect(page.getByText('Demonstração', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Carla Mendes', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('91,2%', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('2,8%', { exact: true })).toHaveCount(0);
   const profile = await page.request.get(
     'http://127.0.0.1:5387/api/v1/profile',
     { headers: target.auth }
@@ -1971,7 +2016,7 @@ test('native authenticated navigation honors inherited supervision, denied repor
   expect(permissions).toContain('jrc_contact_center_supervise');
   expect(permissions).not.toContain('jrc_contact_center_reports');
   expect(permissions).not.toContain('jrc_contact_center_configure');
-  const deniedReport = await page.request.get(api + '/reports', {
+  const deniedReport = await page.request.get(api + '/reports/summary', {
     headers: target.auth,
   });
   expect(deniedReport.status()).toBe(401);

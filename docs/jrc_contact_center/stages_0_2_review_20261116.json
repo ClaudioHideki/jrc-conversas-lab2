@@ -138,7 +138,8 @@
       "implemented_in_0_2": [
         "Native Team fields/members; local Queue CRUD; independent tab/filter/page state; explicit queue participation/supervision",
         "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português.",
-        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
+        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel.",
+        "Elegibilidade e cobertura corporativa atuais do destinatário revalidadas na API e após espera de lock; desativação segura preservada. Validado na CI 44194721033, SHA 7011dac7, incluindo recarga e negativas no Chrome."
       ],
       "remaining_or_external": [
         "No native Team-to-Queue/primary-supervisor model; DAC/calendar/publication need stages 3/4/6 and provider contract"
@@ -199,10 +200,12 @@
       ],
       "implemented_in_0_2": [
         "Safe connection metadata; read-only resources; explicit authorized tenant/accountcode mapping; original infrastructure remains SuperAdmin-only",
-        "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente."
+        "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente.",
+        "Atalho nativo SuperAdmin validado em 7011dac7; agrupamento Geral/Sincronização CDR/Diagnóstico, rascunho e fronteira de contexto preparados no próximo incremento, ainda sem homologação nativa deste código."
       ],
       "remaining_or_external": [
-        "No fake connection test or resource publication; real diagnostics/ACK contract and URA editor remain later"
+        "No fake connection test or resource publication; real diagnostics/ACK contract and URA editor remain later",
+        "As três abas suportadas não equivalem às oito áreas da referência; URA, inventário/publicação, gravações e confirmações externas continuam pendentes de implementação/contrato."
       ],
       "code_references": [
         "scope_mapping.rb",
@@ -554,7 +557,8 @@
         "Revisão esperada aditiva: o editor CC exige a versão capturada, trata 409 sem perder o rascunho e exige comparação/revisão explícita antes de gravar contra a versão atual. Implementado neste incremento; aguarda CI do novo SHA.",
         "Pré-condição opcional e editor protegido para unidades/filas/vínculos em implementação; novo SHA exige validação real, sem alterar o contrato de perfis já provado.",
         "Herança por Team nativo, configuração por AccountUser, elegibilidade explícita, bloqueios individuais prioritários e proteção de fallback implementados incrementalmente; evidências por SHA constam em continuity_20261117.",
-        "Herança por equipe, bloqueios individuais prioritários, elegibilidade explícita e revisão concorrente homologados no Chrome real em dd8ece07, sem concessões implícitas."
+        "Herança por equipe, bloqueios individuais prioritários, elegibilidade explícita e revisão concorrente homologados no Chrome real em dd8ece07, sem concessões implícitas.",
+        "Origens nomeadas de perfil/equipes, negações prioritárias e tratamento de revisão validados em 7011dac7. Exportação efetiva no perfil autenticado e consumidores de rotas/menus em revalidação no checkpoint 54b1a152."
       ],
       "remaining_or_external": [
         "Matriz visual multi-módulo completa da referência ainda não equivale ao editor setorial das 13 capacidades CC; permissões dos demais módulos preservadas.",
@@ -620,11 +624,12 @@
       "implemented_in_0_2": [
         "Native team fields and member editor; separate native queue member flags and deactivation",
         "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português.",
-        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
+        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel.",
+        "Elegibilidade e cobertura corporativa atuais do destinatário revalidadas na API e após espera de lock; desativação segura preservada. Validado na CI 44194721033, SHA 7011dac7, incluindo recarga e negativas no Chrome."
       ],
       "remaining_or_external": [
         "Native Team has no corporate scope or supervisor/queue hierarchy; no fictitious team status; richer mapping, schedules and distribution remain later",
-        "Elegibilidade de usuário inativo não é inferida da presença online; regras de disponibilidade/capacidade PABX e impacto da última cobertura continuam dependentes do contrato operacional."
+        "Elegibilidade de usuário inativo não é inferida da presença online; regras de disponibilidade/capacidade PABX continuam dependentes do contrato operacional."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -681,10 +686,12 @@
       ],
       "implemented_in_0_2": [
         "Same PABX source as figure 4, safe local state and explicit scope contract",
-        "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente."
+        "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente.",
+        "Atalho nativo SuperAdmin validado em 7011dac7; agrupamento Geral/Sincronização CDR/Diagnóstico, rascunho e fronteira de contexto preparados no próximo incremento, ainda sem homologação nativa deste código."
       ],
       "remaining_or_external": [
-        "Inventory synchronization/publication/ACK is not inferred from successful CDR import; needs stage 3/provider"
+        "Inventory synchronization/publication/ACK is not inferred from successful CDR import; needs stage 3/provider",
+        "As três abas suportadas não equivalem às oito áreas da referência; URA, inventário/publicação, gravações e confirmações externas continuam pendentes de implementação/contrato."
       ],
       "code_references": [
         "administration_controller.rb",
@@ -756,7 +763,7 @@
         "document_1_figure": 14,
         "document_2_figure": 14
       },
-      "validation": "Subconjunto administrativo validado no SHA dd8ece07: 611 Rails, 224 Vue, 92 Chrome, 100 hashes de capturas. Novo controle de cobertura corporativa do destinatário ainda exige o próximo SHA; demais lacunas desta figura permanecem.",
+      "validation": "Subconjunto administrativo e cobertura atual/histórica validados em 7011dac7: 632 Rails, 226 Vue, 92 Chrome e 108 hashes de capturas. Nenhum ACK ou publicação externa homologado.",
       "objective": "Auditoria tecnica do PABX",
       "visual_components": "Campos e dados apresentados:  Registrar id do evento, correlation_id/request_id, ator, acao, recurso, before/after sanitizados, horario, estado pretendido e estado confirmado. Resultado deve distinguir concluido, pendente, divergente, falha e reversao.",
       "buttons_and_actions": "Acoes e resultado do clique:  Filtros de data, tipo, unidade/empresa e origem: refinar registros; Consultar: aplicar filtros com paginacao. Selecao de uma linha: preencher Detalhes do Evento com data/hora, usuario, operacao, objeto, tenant/accountcode, resultado e descricao. Ver Detalhes: abrir popup do evento; Exportar Relatorio: gerar arquivo dentro do escopo; Ver Historico: listar eventos correlatos.",
@@ -1264,7 +1271,7 @@
   ],
   "provider_contracts": "control_desk_contracts_20261116.json",
   "scope_limit": "No provider endpoint, ACK, automatic corporate grant or production operation. Current reviewed increment adds only pinned AccessGrant migration 20261117190000; historical migrations, SQLs, dependencies, lint rules and other modules remain preserved. Native Team remains Account-scoped; CC inheritance does not create queue participation.",
-  "validation_state": "native_and_Chrome_execution_pending",
+  "validation_state": "incremental_native_and_Chrome_validated_through_7011dac7_next_increment_pending",
   "full_23_figures_complete": false,
   "continuity_20261116": {
     "preserved_checkpoint": "15eaa800336626a3d5c5712870b43d169c64e6ad",
@@ -1289,7 +1296,10 @@
     "chrome": 44
   },
   "required_decisions": [
-    "Herança por equipe: fonte, precedência, negações e revogação entre módulos, sem reutilizar TeamMember como grant."
+    "Compatibilidade de pausas legadas: decisão de ativação explícita por conta ou migração coordenada; pergunta já enviada, sem bloquear motivos livres em silêncio.",
+    "Contrato/capacidades reais do PABX, codec e confirmação de aplicação, além do serviço de voz Nico; documentação solicitada sem pedir credenciais.",
+    "Hierarquia supervisor primário/equipe/fila e cobertura corporativa: o Team nativo é da conta; não inferir unidades ou novos grants.",
+    "Matriz visual multi-módulo: mapear ações somente a permissões nativas comprovadas; herança CC não amplia os demais módulos."
   ],
   "visual_review": {
     "originals": "Todas as 23 figuras visualmente revisadas nos oito contact sheets existentes, sem criar artefatos locais.",
@@ -1354,12 +1364,7 @@
     "native_validation": "pending_new_sha",
     "external_homologation": false,
     "part_1_complete": false,
-    "next": [
-      "Herança explícita com precedência e limites de escopo",
-      "Elegibilidade sem concessões por criação de usuário",
-      "Auditoria administrativa por conta/unidade",
-      "Etapas 3–8 conforme contratos reais"
-    ],
+    "next": "Validate corrected native reports denial, all 96 Chrome cases, native SIP route/context boundary, tabbed PABX drafts/loading and observed supervisor values on the next SHA. No provider operation or complete-23-figure claim.",
     "role_revision_evidence": {
       "sha": "806327269f896ea124cdbc17f7ceceea176124e8",
       "run": 44080303193,
@@ -2180,6 +2185,28 @@
         "new_ruby_offenses": 1,
         "cause": "The new RouterLink stub omitted its default slot; assertions are preserved and the slot will render. New synthetic navigation users expanded the existing seed block to 35/30 lines; separated into a dedicated bounded seed block.",
         "chrome": "not_run_due_to_gates"
+      },
+      "latest_native_evidence": {
+        "sha": "54b1a152d46f6d9b44eb4ef077a572b781eb40d4",
+        "run": 44200494064,
+        "artifact": 14383026480,
+        "sha256": "0eaecd35d7cf96c6d03b64b0c423f7221422348eb21d610782f41826587c9f34",
+        "rails_main": 627,
+        "concurrency": 14,
+        "vue": 233,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "lint": "no new Ruby offenses; frontend passed",
+        "build_and_bootstrap": "passed, 15 cards, zero bootstrap JS/HTTP errors",
+        "chrome": {
+          "passed": 92,
+          "failed": 4,
+          "skipped": 0,
+          "flaky": 0
+        },
+        "chrome_cause": "Only the new four native-navigation cases queried /reports instead of the existing /reports/summary (API and routes verified). Received 404, expected 401. Correct path prepared, denial assertion preserved.",
+        "full_acceptance": false
       }
     },
     "validated_checkpoint_7011dac7": {
@@ -2219,6 +2246,40 @@
       },
       "screenshots_verified": 108,
       "external_homologation": false
+    },
+    "native_pabx_tabbed_form": {
+      "implementation": "prepared_pending_native_validation",
+      "adr": "docs/adr/20261117-call-center-pabx-native-tabs.md",
+      "default_full_presentation_preserved": true,
+      "native_api_contract_unchanged": true,
+      "native_superadmin_guard_preserved": true,
+      "blank_save_after_failed_load_prevented": true,
+      "native_context_key": "account_id + authenticated user id/type",
+      "route_entry": "administrator or effective jrc_contact_center_administer; page and API still require native SuperAdmin",
+      "new_vue_cases": 11,
+      "extended_chrome_cases": 4,
+      "provider_calls_in_chrome": false,
+      "external_homologation": false,
+      "full_eight_reference_tabs_complete": false
+    },
+    "observed_supervisor": {
+      "implementation": "prepared_pending_native_validation",
+      "adr": "docs/adr/20261117-call-center-observed-supervisor.md",
+      "counts_source": "existing scoped SupervisorSnapshot API only",
+      "illustrative_actors_rates_removed_from_native_page": true,
+      "SLA_and_abandonment_rate": "pending source/operational definition; no invented formula or percentage",
+      "stale_snapshot_after_error": "discarded; fresh successful poll clears error",
+      "other_catalog_callers_preserved": true,
+      "new_vue_cases": 6,
+      "extended_chrome_cases": 4,
+      "external_PABX_truth_claim": false
     }
-  }
+  },
+  "resolved_decisions_20261117": [
+    {
+      "subject": "CC team inheritance source and precedence",
+      "resolution": "Native TeamMember proves membership in the same Account. Explicit AccessGrant team capabilities are inherited; native membership alone grants nothing; individual denials take priority; explicit individual eligibility is mandatory. Other module permissions and corporate scope are unchanged.",
+      "validated_sha": "7011dac7ef25c937a784142e34217dfbe5b9d388"
+    }
+  ]
 }

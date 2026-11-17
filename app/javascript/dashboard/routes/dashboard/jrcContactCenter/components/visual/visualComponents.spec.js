@@ -54,4 +54,17 @@ describe('localized visual experiences', () => {
     expect(wrapper.get('strong').text()).toBe('75%');
     expect(wrapper.find('[class~="w-4/5"]').exists()).toBe(true);
   });
+  it('allows the native supervisor to render its observed overview without reference actors or demonstration badge', () => {
+    const i18n = config.global.plugins[0];
+    const screen = contactCenterScreen('supervisor', i18n.global.t);
+    const wrapper = mount(VisualShowcasePage, {
+      props: { screen, overviewOnly: true, showDemoBadge: false },
+      global: { stubs: { RouterLink: { template: '<a><slot /></a>' } } },
+    });
+    expect(wrapper.get('h1').text()).toBe(screen.title);
+    expect(wrapper.text()).not.toContain('Carla Mendes');
+    expect(wrapper.text()).not.toContain('Demonstração');
+    expect(wrapper.text()).not.toContain('Visualizar agente');
+    wrapper.unmount();
+  });
 });

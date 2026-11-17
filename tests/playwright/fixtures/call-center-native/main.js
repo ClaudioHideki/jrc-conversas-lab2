@@ -11,7 +11,7 @@ import customRole from 'dashboard/store/modules/customRole';
 import ModalHeader from 'dashboard/components/ModalHeader.vue';
 import SnackbarContainer from 'dashboard/components/SnackbarContainer.vue';
 import CustomRolesHome from 'dashboard/routes/dashboard/settings/customRoles/Index.vue';
-import SipSettingsPage from 'dashboard/routes/dashboard/webphone/SipSettingsPage.vue';
+import { routes as webphoneRoutes } from 'dashboard/routes/dashboard/webphone/routes';
 import { routes as contactCenterRoutes } from 'dashboard/routes/dashboard/jrcContactCenter/routes';
 import { validateLoggedInRoutes } from 'dashboard/helper/routeHelpers';
 import '../../../../app/javascript/dashboard/assets/scss/app.scss';
@@ -35,11 +35,7 @@ const router = createRouter({
           '<p role="alert">Negado pela verificação nativa de rota no ambiente sintético.</p>',
       },
     },
-    {
-      path: '/app/accounts/:accountId/ramal/configuracao',
-      name: 'ramal_settings',
-      component: SipSettingsPage,
-    },
+    ...webphoneRoutes.filter(route => route.name === 'ramal_settings'),
     ...(!nativeNavigation
       ? [
           {
@@ -95,20 +91,19 @@ const store = createStore({
   },
 });
 // Native permission consumer and production layout, backed by fresh authenticated APIs.
-if (nativeNavigation) {
-  router.beforeEach(async to => {
-    if (to.name === 'synthetic_access_denied') return true;
-    const [account, profile] = await Promise.all([
-      axios.get(`/api/v1/accounts/${to.params.accountId}`),
-      axios.get('/api/v1/profile'),
-    ]);
-    store.commit('setNativeAccount', account.data);
-    store.commit('setNativeUser', profile.data);
-    return validateLoggedInRoutes(to, store.getters.getCurrentUser)
-      ? { name: 'synthetic_access_denied' }
-      : true;
-  });
-}
+router.beforeEach(async to => {
+  if (!nativeNavigation && to.name !== 'ramal_settings') return true;
+  if (to.name === 'synthetic_access_denied') return true;
+  const [account, profile] = await Promise.all([
+    axios.get(`/api/v1/accounts/${to.params.accountId}`),
+    axios.get('/api/v1/profile'),
+  ]);
+  store.commit('setNativeAccount', account.data);
+  store.commit('setNativeUser', profile.data);
+  return validateLoggedInRoutes(to, store.getters.getCurrentUser)
+    ? { name: 'synthetic_access_denied' }
+    : true;
+});
 const app = createApp({
   render: () =>
     h(
@@ -127,7 +122,7 @@ const app = createApp({
 });
 app.component('woot-modal-header', ModalHeader);
 router.isReady().then(async () => {
-  if (!nativeNavigation) {
+  if (!nativeNavigation && !store.state.nativeAccount) {
     const [account, profile] = await Promise.all([
       axios.get(
         `/api/v1/accounts/${router.currentRoute.value.params.accountId}`

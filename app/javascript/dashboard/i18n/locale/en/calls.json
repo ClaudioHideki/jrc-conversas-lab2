@@ -113,7 +113,15 @@
       "RECORDING_UNAVAILABLE": "Recording unavailable.",
       "RECORDING_EXPIRED": "Recording expired.",
       "HISTORY_LOADING": "Loading call history...",
-      "HISTORY_LOADING_HELP": "Call history will appear when the request finishes."
+      "HISTORY_LOADING_HELP": "Call history will appear when the request finishes.",
+      "TABS": {
+        "LABEL": "Configurações técnicas do PABX",
+        "GENERAL": "Geral",
+        "SYNC": "Sincronização CDR",
+        "DIAGNOSTIC": "Diagnóstico"
+      },
+      "RELOAD": "Recarregar configuração",
+      "RESTORE": "Descartar alterações e recarregar"
     },
     "TRANSFER": {
       "ASSISTED": "Assisted transfer",

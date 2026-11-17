@@ -6,8 +6,8 @@ export const routes = [
   {
     path: frontendURL('accounts/:accountId/ramal/configuracao'),
     name: 'ramal_settings',
-    component: () => import('./SipSettingsPage.vue'),
-    meta: { permissions: ['administrator'] },
+    component: () => import('./SipSettingsRoute.vue'),
+    meta: { permissions: ['administrator', 'jrc_contact_center_administer'] },
   },
   {
     path: frontendURL('accounts/:accountId/ramal'),

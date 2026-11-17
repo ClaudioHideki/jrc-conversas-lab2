@@ -24,3 +24,7 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Call Center: reautorização após locks administrativos](20261117-call-center-final-write-authorization.md).
 
 - [Call Center: concessões latentes e dependências](20261117-call-center-latent-permission-effects.md).
+
+- [Permissões efetivas CC no perfil autenticado](20261117-call-center-authenticated-permissions.md): reuso da política nativa nos consumidores de navegação.
+- [Painel técnico PABX nativo](20261117-call-center-pabx-native-tabs.md): agrupamento sem outro conector, fronteiras de formulário e limites externos.
+- [Supervisor e fontes observadas](20261117-call-center-observed-supervisor.md): ausência de dados não é zero nem referência visual operacional.

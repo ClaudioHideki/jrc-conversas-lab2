@@ -175,7 +175,7 @@ onMounted(() => loadData());
         {{ TEXT.restricted }}
       </div>
       <div v-else>
-        <PabxSettingsPanel />
+        <PabxSettingsPanel tabbed />
         <header class="mb-6">
           <p class="text-xs font-bold tracking-[0.14em] text-n-teal-11">
             {{ TEXT.kicker }}
