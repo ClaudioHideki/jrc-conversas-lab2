@@ -148,6 +148,10 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
 
     JrcNico::Helpdesk::Capture.call(ticket: result.ticket, trigger: trigger,
                                     origin_key: "sd:transition:#{result.id}", member: actor_membership.account_user)
+  rescue StandardError => error
+    # The native transition already committed. An optional integration must not
+    # turn a completed closure into a failed request or grant that integration access.
+    Rails.logger.error("service_desk_closure_hook_failed transition=#{result.id} class=#{error.class.name}")
   end
 
   def dispatch_survey(result)

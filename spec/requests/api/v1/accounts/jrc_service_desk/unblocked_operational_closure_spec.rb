@@ -32,6 +32,7 @@ RSpec.describe 'Manual closure without configuration blockers', type: :request d
     ticket = sd_ticket(service: service)
     role = create(:custom_role, account: sd_account, permissions: %w[jrc_service_desk_module_view jrc_service_desk_tickets_view])
     sd_account_user.update!(custom_role: role)
+    allow(JrcNico::Helpdesk::Capture).to receive(:call).and_raise(Pundit::NotAuthorizedError, 'No access to optional NICO integration')
     travel 20.minutes
     get "#{base}/tickets/#{ticket.id}/lifecycle", headers: headers
     expect(response).to have_http_status(:ok), response.body
