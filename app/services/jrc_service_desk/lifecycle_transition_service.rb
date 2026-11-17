@@ -22,7 +22,7 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
         raise Pundit::NotAuthorizedError unless manual || JrcServiceDesk::LifecycleActionPolicy.new(context.to_h, ticket).action?(prior.action)
 
         prior_rule = prior.lifecycle_policy_version.rules.rule(prior.rule_key)
-        if !execution_command && (prior.action == 'close' || prior.payload.key?('closing_reason'))
+        if !execution_command && (manual || prior.action == 'close' || prior.payload.key?('closing_reason'))
           prior_rule = JrcServiceDesk::OperationalClosure.rule(prior_rule, context, ticket, unrestricted: manual)
         end
         verify_allowed_role!(prior_rule)
