@@ -86,3 +86,5 @@ CI 44078910273/e217b41a preservada: 428 Rails, uma falha de preparação/escopo 
 - 48c2a9a4 / CI 44159560428: 598 Rails, 220 Vue, frontend e Ruby aprovados. Chrome: 68 anteriores aprovados e 12 novos com timeout por controles fora do viewport. Causa confirmada no relatório e capturas; contained aplicado no chamador, sem modificar Dialog compartilhado. Próximo SHA exige 84 Chrome completos.
 
 - f8e603ae / CI 44166469596 bloqueou antes dos testes por CRLF nas cópias temporárias enviadas pela API Git. Correção restrita a LF; auxiliar externo passa a recusar CR antes do upload. Nenhum gate suprimido. Novo SHA deve executar todas as validações previstas.
+
+- 7b9c7ff7 / CI 44167331338: 609 Rails (599 + 10 concorrentes), 222 Vue e migrations aprovados, zero falhas/pendências/erros externos. Quatro apontamentos de lint corrigidos: dois ternários, complexidade da validação de vínculo e Rails/exclude?. Chrome não executado nesse SHA; próximo gate continua exigindo 84 cenários.

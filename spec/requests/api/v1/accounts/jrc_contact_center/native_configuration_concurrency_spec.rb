@@ -124,7 +124,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     subscriptions << ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
       sql = event.payload[:sql]
       next unless Thread.current[:cc_configuration_request] && sql.start_with?('SELECT')
-      next unless sql.include?('"accounts"') && !sql.include?('FOR UPDATE')
+      next unless sql.include?('"accounts"') && sql.exclude?('FOR UPDATE')
 
       read << true
     end

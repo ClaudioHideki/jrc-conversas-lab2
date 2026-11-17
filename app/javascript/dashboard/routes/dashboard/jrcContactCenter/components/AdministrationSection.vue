@@ -402,19 +402,24 @@ const save = async () => {
       const inactiveQueue = error.response?.data?.error === 'inactive_queue';
       const ineligibleMember =
         error.response?.data?.error === 'ineligible_member';
-      invalidAttributes.value = inactiveQueue
-        ? ['queue_id']
-        : ineligibleMember
-          ? ['account_user_id']
-          : error.response?.data?.attributes || [];
-      formError.value = inactiveQueue
-        ? [label('QUEUE'), label('INACTIVE'), label('SAVE_ERROR')].join(' · ')
-        : ineligibleMember
-          ? t('JRC_CONTACT_CENTER.ACCESS.ENROLLMENT_BLOCKED')
-          : error.response?.data?.message ||
-            error.response?.data?.error ||
-            error.message ||
-            label('SAVE_ERROR');
+      invalidAttributes.value = error.response?.data?.attributes || [];
+      if (inactiveQueue) {
+        invalidAttributes.value = ['queue_id'];
+        formError.value = [
+          label('QUEUE'),
+          label('INACTIVE'),
+          label('SAVE_ERROR'),
+        ].join(' · ');
+      } else if (ineligibleMember) {
+        invalidAttributes.value = ['account_user_id'];
+        formError.value = t('JRC_CONTACT_CENTER.ACCESS.ENROLLMENT_BLOCKED');
+      } else {
+        formError.value =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message ||
+          label('SAVE_ERROR');
+      }
     }
   } finally {
     saving.value = false;

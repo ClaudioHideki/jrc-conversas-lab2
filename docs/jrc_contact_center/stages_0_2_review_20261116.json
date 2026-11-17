@@ -1793,7 +1793,22 @@
       "chrome_scenarios": 4,
       "validation": "pending_next_sha",
       "online_is_not_authorization": true,
-      "existing_deactivation_preserved": true
+      "existing_deactivation_preserved": true,
+      "native_evidence": {
+        "sha": "7b9c7ff723b68dec4114f5c476691772b1c9912b",
+        "run": 44167331338,
+        "artifact": 14367665379,
+        "sha256": "ef7838cd5b4a3b3c3eebb7c27fd4ae0373420b89b9f01b96063cec3645e70b08",
+        "rails_main": 599,
+        "concurrency": 10,
+        "vue": 222,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 2,
+        "frontend_errors": 2,
+        "chrome": "not_run_due_to_lint"
+      }
     },
     "schema_review": {
       "artifact": 14360682463,
@@ -1811,7 +1826,22 @@
       "existing_chrome_boundary_extended": true,
       "account_lock_wait_proven_by_pg_stat_activity": true,
       "unit_cannot_write_global_policy": true,
-      "validation": "pending_next_sha"
+      "validation": "pending_next_sha",
+      "native_evidence": {
+        "sha": "7b9c7ff723b68dec4114f5c476691772b1c9912b",
+        "run": 44167331338,
+        "artifact": 14367665379,
+        "sha256": "ef7838cd5b4a3b3c3eebb7c27fd4ae0373420b89b9f01b96063cec3645e70b08",
+        "rails_main": 599,
+        "concurrency": 10,
+        "vue": 222,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 2,
+        "frontend_errors": 2,
+        "chrome": "not_run_due_to_lint"
+      }
     },
     "line_ending_preflight": {
       "sha": "f8e603ae1af8e54af8562cabbd2eb538ab85e163",
@@ -1820,6 +1850,14 @@
       "cause": "Windows temporary writes produced CRLF; Git Data API does not apply checkout line-ending conversion.",
       "functional_tests_run": false,
       "correction": "Normalize only eight temporary source files to LF; add pre-upload LF assertion to external checkpoint helper. No gate removed or weakened."
+    },
+    "lint_7b9c7ff7_correction": {
+      "frontend": "Replace two nested ternaries with explicit existing error branches; focused ESLint 8.57.0 with identical config SHA-256 passed. Native gate still required.",
+      "ruby": [
+        "Extract safe-deactivation predicate without changing the enrollment conditions",
+        "Use ActiveSupport String#exclude? in the PostgreSQL wait observer"
+      ],
+      "native_ci_required": true
     }
   }
 }

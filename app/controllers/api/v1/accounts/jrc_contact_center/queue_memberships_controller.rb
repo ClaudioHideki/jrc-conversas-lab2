@@ -101,14 +101,18 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
   end
 
   def validate_member_enrollment!(attributes, membership)
+    return if deactivating_membership?(attributes, membership)
+
     member_id = attributes[:account_user_id].presence || membership&.account_user_id
     eligible = JrcContactCenter::AccessGrant.exists?(account: Current.account, account_user_id: member_id, eligible: true)
     return if eligible
 
-    deactivating = attributes.key?(:active) && !ActiveModel::Type::Boolean.new.cast(attributes[:active])
-    return if membership && deactivating && !new_enrollment?(attributes, membership)
-
     raise JrcContactCenter::OperationError, 'ineligible_member'
+  end
+
+  def deactivating_membership?(attributes, membership)
+    membership && attributes.key?(:active) && !ActiveModel::Type::Boolean.new.cast(attributes[:active]) &&
+      !new_enrollment?(attributes, membership)
   end
 
   def new_enrollment?(attributes, membership)
