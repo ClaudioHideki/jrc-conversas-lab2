@@ -239,9 +239,11 @@ describe('scoped administrative audit interface', () => {
     await flushPromises();
     await wrapper.get('[data-audit-export]').trigger('click');
     await flushPromises();
-    expect(wrapper.get('[data-audit-export-error]').text()).toContain(
-      'EXPORT_INTEGRITY'
-    );
+    await vi.waitFor(() => {
+      expect(wrapper.get('[data-audit-export-error]').text()).toContain(
+        'EXPORT_INTEGRITY'
+      );
+    });
   });
 
   it('keeps the native audit flag closed without activating it or fetching records', async () => {

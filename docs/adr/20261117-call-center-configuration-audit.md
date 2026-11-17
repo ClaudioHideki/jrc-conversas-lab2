@@ -47,3 +47,18 @@ O BaseController CC propaga request.request_id no contexto request-local do Audi
 - Interface usa filtros na URL, prévia, popup, histórico completo do recurso autorizado e CSV verificado por SHA-256 antes do download. Troca de conta descarta respostas e nomes anteriores. Eventos PABX continuam em aba separada.
 - Operadores da homologação são fixtures sintéticos explícitos com cobertura da unidade A; não recebem configurar/administrar. Nenhuma concessão em ambientes existentes.
 - Próximo gate exige 64 cenários Chrome (os 56 anteriores mais oito), onze testes Vue novos e nova execução nativa. Conclusão da Parte 1 permanece aberta.
+
+## Correção após o gate de interface
+
+CI 44095931465, produto 21aaea1376b3cf27c3c391f463adf319810b7edb:
+lint Ruby sem novas infrações e frontend lint aprovado. Vue: 194/196, duas falhas.
+Artefato 14333992696, SHA-256 732328a46c607cc72fb3f2737921de1ae2389c9dea668a7d2ed7be7cdc4ee59f.
+
+O teste de filtro revelou que v-model em input numérico produz Number: trim
+direto quebrava a aplicação do filtro de ID. O valor agora é normalizado como
+String antes de trim. O teste de integridade usa espera limitada pelo SHA-256
+real assíncrono, mantendo a exigência de rejeição do hash divergente.
+
+O leitor sintético não recebe supervise: a política nativa de supervisão
+legitimamente concede relatórios. Nenhuma política do produto foi reduzida.
+Chrome/build ficaram bloqueados pelo teste Vue e não foram declarados aprovados.

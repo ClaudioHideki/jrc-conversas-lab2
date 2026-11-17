@@ -181,7 +181,11 @@ const apply = (history = false) => {
   const query = { ...route.query };
   for (const key of filterKeys) {
     const value =
-      key === 'history' ? (history ? 'true' : '') : filters[key].trim();
+      key === 'history'
+        ? history
+          ? 'true'
+          : ''
+        : String(filters[key] ?? '').trim();
     if (value) query[prefix + key] = value;
     else delete query[prefix + key];
   }

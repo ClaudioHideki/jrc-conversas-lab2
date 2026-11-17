@@ -1420,6 +1420,21 @@
         "rails": 467,
         "vue": 185,
         "gate_failure": "15 new Ruby lint offenses; corrected without suppressions; new SHA requires native rerun"
+      },
+      "ui_gate_diagnosis": {
+        "sha": "21aaea1376b3cf27c3c391f463adf319810b7edb",
+        "run": 44095931465,
+        "artifact": 14333992696,
+        "sha256": "732328a46c607cc72fb3f2737921de1ae2389c9dea668a7d2ed7be7cdc4ee59f",
+        "vue_passed": 194,
+        "vue_failed": 2,
+        "new_ruby_offenses": 0,
+        "chrome": "not_run_due_to_failed_vue",
+        "fixes": [
+          "Normalize numeric v-model to String before trim",
+          "Bounded wait for actual asynchronous SHA-256",
+          "Synthetic reader has no supervise or reports"
+        ]
       }
     }
   }
