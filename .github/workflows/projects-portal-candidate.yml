@@ -99,6 +99,9 @@ jobs:
           spec/requests/api/v1/accounts/jrc_service_desk/unblocked_operational_closure_spec.rb
           spec/requests/api/v1/accounts/jrc_service_desk/simple_sla_closure_spec.rb
           spec/requests/api/v1/accounts/jrc_service_desk/operational_employee_closure_spec.rb
+          spec/requests/api/v1/accounts/jrc_service_desk/closure_revisions_spec.rb
+          spec/requests/api/v1/accounts/jrc_service_desk/integrated_flow_spec.rb
+          spec/requests/api/v1/accounts/jrc_service_desk/quick_intake_closure_spec.rb
       - name: RSpec Projetos, Portal, identidade, lojas e regressao de voz
         run: |
           bundle exec rspec spec/requests/api/v1/accounts/jrc_operations \

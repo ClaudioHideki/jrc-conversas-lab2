@@ -54,7 +54,7 @@ RSpec.describe 'Administrative prospective closure revisions', type: :request do
     before = ticket.attributes.except('updated_at', 'lock_version')
     definition_before = source.attributes.deep_dup
     get "#{root}/tickets/#{ticket.id}/lifecycle", headers: headers
-    expect(response.parsed_body['closure_options']).to be_empty
+    expect(response.parsed_body.fetch('closure_options').sole.fetch('steps').pluck('action')).to eq(%w[resolve close])
     approved = preview([ticket])
     expect(response).to have_http_status(:ok)
     expect(approved['eligible']).to eq(1)
@@ -249,7 +249,7 @@ RSpec.describe 'Administrative prospective closure revisions', type: :request do
     expect(apply(approved['receipt'])['results'].sole['status']).to eq('blocked')
   end
 
-  it 'revalidates a newly added contractual requirement after application instead of keeping a waiver' do
+  it 'revalidates a contractual requirement without removing the independent manual closure plan' do
     service = JrcServiceDesk::Service.create!(account: sd_account, unit: sd_unit, name: 'Serviço operacional', code: 'common', active: true)
     ticket = sd_ticket(lifecycle_policy_version: source, service: service)
     approved = preview([ticket])
@@ -257,7 +257,7 @@ RSpec.describe 'Administrative prospective closure revisions', type: :request do
     service.update!(approval_required: true)
     get "#{root}/tickets/#{ticket.id}/lifecycle", headers: headers
     expect(response.parsed_body.dig('closure_revision', 'active')).to be(false)
-    expect(response.parsed_body['closure_options']).to be_empty
+    expect(response.parsed_body.fetch('closure_options').sole.fetch('steps').pluck('action')).to eq(%w[resolve close])
   end
   it 'excludes an incomplete legacy cycle instead of applying only part of the revision' do
     ticket = sd_ticket(lifecycle_policy_version: source)

@@ -229,13 +229,14 @@ RSpec.describe 'Integrated Service Desk assignment, clocks and indicators', type
     expect(response.parsed_body.dig('closure_options', 0, 'steps', 1, 'requirements', 'note')).to be(false)
   end
 
-  it 'keeps missing historical snapshots blocked, permits explicit authorized registration and never mutates on GET' do
+  it 'offers manual closure with missing snapshots, permits authorized registration and never mutates on GET' do
     policy = JrcServiceDesk::PublishOperationalRulesService.new(user_context: sd_context)
     current = JrcServiceDesk::OperationalRuleVersion.current(account_id: sd_account.id, unit_id: sd_unit.id, kind: 'sla_selection')
     policy.call(unit_id: sd_unit.id, kind: 'sla_selection', definition: current.definition, enabled: false, expected_version: 1)
     ticket = create_and_reread
     get "#{base}/tickets/#{ticket.id}/lifecycle", headers: headers
-    expect(response.parsed_body['unavailable_reason']).to eq('calendar_snapshot_required')
+    expect(response.parsed_body['unavailable_reason']).to be_nil
+    expect(response.parsed_body.fetch('closure_options').sole.fetch('steps').pluck('action')).to eq(%w[resolve close])
     expect(ticket.sla_cycles.count).to eq(0)
     travel 30.minutes
     JrcServiceDesk::RecordSlaSnapshotService.new(user_context: sd_context).call(ticket_id: ticket.id,

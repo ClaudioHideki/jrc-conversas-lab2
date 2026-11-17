@@ -146,26 +146,28 @@ RSpec.describe 'Quick Service Desk intake and authorized closure plans', type: :
     expect(row.lifecycle_transitions.where(action: 'close')).not_to exist
   end
 
-  it 'reports the real calendar dependency and leaves the active policy unchanged' do
+  it 'offers manual closure without calendar configuration and leaves the active policy unchanged' do
     policy = lc_publish(definition: lc_definition(tracked: true))
     version = policy.current_version
     digest = version.digest
     row = sd_ticket
     get "#{base}/tickets/#{row.id}/lifecycle", headers: headers
-    expect(response.parsed_body['unavailable_reason']).to eq('calendar_snapshot_required')
-    expect(response.parsed_body.fetch('closure_options')).to be_empty
+    expect(response.parsed_body['unavailable_reason']).to be_nil
+    expect(response.parsed_body.fetch('closure_options').sole.fetch('steps').pluck('action')).to eq(%w[resolve close])
+    expect(response.parsed_body.dig('measurement', 'pending_reason')).to eq('targets_and_calendar_missing')
+    expect(row.sla_cycles).to be_empty
     expect(row.lifecycle_transitions).to be_empty
     expect(version.reload.digest).to eq(digest)
   end
 
-  it 'explains a mandatory service approval without bypassing it or recording a transition' do
+  it 'offers manual closure before approval without changing the configured service on GET' do
     service = JrcServiceDesk::Service.create!(account: sd_account, unit: sd_unit, name: 'Synthetic approval service', code: 'approval', active: true, approval_required: true)
     lc_publish(service: service)
     row = sd_ticket(service: service)
     get "#{base}/tickets/#{row.id}/lifecycle", headers: headers
     expect(response).to have_http_status(:ok)
-    expect(response.parsed_body['closure_unavailable_reason']).to eq('service_approval_required')
-    expect(response.parsed_body['closure_options']).to be_empty
+    expect(response.parsed_body['closure_unavailable_reason']).to be_nil
+    expect(response.parsed_body.fetch('closure_options').sole.fetch('steps').pluck('action')).to eq(%w[resolve close])
     expect(row.lifecycle_transitions).to be_empty
     expect(service.reload.approval_required?).to be(true)
     sd_account_user.update!(role: :agent, custom_role: create(:custom_role, account: sd_account,
@@ -175,7 +177,7 @@ RSpec.describe 'Quick Service Desk intake and authorized closure plans', type: :
     expect(response.parsed_body['closure_unavailable_reason']).to be_nil
   end
 
-  it 'does not offer closure after permission revocation and rejects unauthenticated requests' do
+  it 'allows manual closure without a separate close capability but rejects revoked membership and unauthenticated requests' do
     lc_publish
     row = sd_ticket
     sd_account_user.update!(role: :agent, custom_role: create(:custom_role, account: sd_account,
@@ -183,7 +185,10 @@ RSpec.describe 'Quick Service Desk intake and authorized closure plans', type: :
     get "#{base}/tickets/#{row.id}/lifecycle", headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('options').map { |option| option['action'] }).to include('resolve')
-    expect(response.parsed_body.fetch('closure_options')).to be_empty
+    expect(response.parsed_body.fetch('closure_options').sole.fetch('steps').pluck('action')).to eq(%w[resolve close])
+    sd_membership.update!(active: false)
+    get "#{base}/tickets/#{row.id}/lifecycle", headers: headers
+    expect(response).to have_http_status(:forbidden)
     get "#{base}/tickets/#{row.id}/lifecycle"
     expect(response).to have_http_status(:unauthorized)
     expect(row.lifecycle_transitions).to be_empty
