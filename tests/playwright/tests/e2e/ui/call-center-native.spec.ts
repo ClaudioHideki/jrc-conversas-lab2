@@ -27,15 +27,17 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const auth = info.title.startsWith('configuration audit boundary')
-    ? session.auditor
-    : info.title.startsWith('native role denied')
-      ? session.delegated
-      : info.title.startsWith('corporate boundary')
-        ? session.restricted
-        : info.title.startsWith('profile change')
-          ? session.viewer
-          : session.administrator;
+  const auth = info.title.startsWith('native infrastructure root')
+    ? session.infrastructure
+    : info.title.startsWith('configuration audit boundary')
+      ? session.auditor
+      : info.title.startsWith('native role denied')
+        ? session.delegated
+        : info.title.startsWith('corporate boundary')
+          ? session.restricted
+          : info.title.startsWith('profile change')
+            ? session.viewer
+            : session.administrator;
   await page.addInitScript(
     ({ auth, dark }) => {
       window.__SYNTHETIC_AUTH__ = auth;
@@ -45,6 +47,94 @@ test.beforeEach(async ({ page }, info) => {
     },
     { auth, dark: info.project.name.endsWith('dark') }
   );
+});
+
+test('native infrastructure root navigation loads the existing settings without provider actions', async ({
+  page,
+}, info) => {
+  const writes = [];
+  page.on('request', request => {
+    if (!['GET', 'HEAD'].includes(request.method()))
+      writes.push(request.method());
+  });
+  await page.goto(base + '/pabx');
+  const link = page.locator('[data-native-pabx-settings]');
+  await expect(link).toBeVisible();
+  const loaded = page.waitForResponse(
+    response =>
+      response.url().endsWith('/telephony_integration') &&
+      response.request().method() === 'GET'
+  );
+  await link.click();
+  await expect(page).toHaveURL(
+    new RegExp('/app/accounts/' + session.account_id + '/ramal/configuracao$')
+  );
+  const settings = await loaded;
+  expect(settings.status()).toBe(200);
+  expect((await settings.json()).configured).toBe(false);
+  await expect(
+    page.getByRole('heading', { name: 'Ramais SIP dos agentes', exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Configuração da API PABX', exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Testar conexão', exact: true })
+  ).toBeDisabled();
+  await expect(
+    page.getByRole('button', { name: 'Solicitar sincronização', exact: true })
+  ).toBeDisabled();
+  await expect(page.locator('input[type="password"]').first()).toHaveValue('');
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-native-pabx-settings.png',
+    fullPage: true,
+  });
+  await page.goBack();
+  await expect(page.locator('[data-native-pabx-settings]')).toBeVisible();
+  expect(writes).toEqual([]);
+});
+
+test('native infrastructure nonroot cannot open infrastructure controls through a forced route', async ({
+  page,
+}, info) => {
+  await page.goto(base + '/pabx');
+  await expect(page.locator('[data-native-pabx-settings]')).toHaveCount(0);
+  await page.goto(
+    '/app/accounts/' + session.account_id + '/ramal/configuracao'
+  );
+  await expect(
+    page.getByText('Esta área é exclusiva do Super Admin.', { exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Configuração da API PABX', exact: true })
+  ).toHaveCount(0);
+  const denied = await page.request.get(
+    'http://127.0.0.1:5387/api/v1/accounts/' +
+      session.account_id +
+      '/telephony_integration',
+    { headers: session.administrator }
+  );
+  expect(denied.status()).toBe(403);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-native-pabx-denied.png',
+    fullPage: true,
+  });
 });
 
 test('native queue eligibility is rechecked before saving and preserves the reviewed selection', async ({

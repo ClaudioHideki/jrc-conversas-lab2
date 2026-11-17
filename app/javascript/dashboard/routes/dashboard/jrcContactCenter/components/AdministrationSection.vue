@@ -862,9 +862,10 @@ onBeforeUnmount(() => {
           >
         </template>
         <template v-else-if="resource === 'memberships'">
-          <label class="text-sm"
-            >{{ label('QUEUE')
-            }}<select
+          <div class="text-sm">
+            <label for="cc-membership-queue">{{ label('QUEUE') }}</label>
+            <select
+              id="cc-membership-queue"
               v-model="draft.queue_id"
               name="queue_id"
               :aria-invalid="invalid('queue_id')"
@@ -879,8 +880,8 @@ onBeforeUnmount(() => {
               >
                 {{ row.name }}
               </option>
-            </select></label
-          >
+            </select>
+          </div>
           <div class="text-sm">
             <label for="cc-membership-account-user">{{ label('AGENT') }}</label>
             <select

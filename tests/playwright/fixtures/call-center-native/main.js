@@ -11,6 +11,7 @@ import customRole from 'dashboard/store/modules/customRole';
 import ModalHeader from 'dashboard/components/ModalHeader.vue';
 import SnackbarContainer from 'dashboard/components/SnackbarContainer.vue';
 import CustomRolesHome from 'dashboard/routes/dashboard/settings/customRoles/Index.vue';
+import SipSettingsPage from 'dashboard/routes/dashboard/webphone/SipSettingsPage.vue';
 import '../../../../app/javascript/dashboard/assets/scss/app.scss';
 
 window.chatwootConfig = {};
@@ -19,6 +20,11 @@ Object.assign(axios.defaults.headers.common, window.__SYNTHETIC_AUTH__);
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    {
+      path: '/app/accounts/:accountId/ramal/configuracao',
+      name: 'ramal_settings',
+      component: SipSettingsPage,
+    },
     {
       path: '/app/accounts/:accountId/contact-center/control-desk',
       name: 'jrc_contact_center_control_desk',
@@ -38,13 +44,22 @@ const router = createRouter({
 });
 const store = createStore({
   modules: { customRole },
-  state: { nativeAccount: null },
+  state: { nativeAccount: null, nativeUser: {} },
   mutations: {
     setNativeAccount: (state, account) => {
       state.nativeAccount = account;
     },
+    setNativeUser: (state, user) => {
+      state.nativeUser = {
+        id: user.id,
+        name: user.name,
+        type: user.type,
+        ui_settings: user.ui_settings,
+      };
+    },
   },
   getters: {
+    getCurrentUser: state => state.nativeUser,
     'accounts/isRTL': () => false,
     getCurrentAccountId: () =>
       Number(router.currentRoute.value.params.accountId),
@@ -71,10 +86,12 @@ const app = createApp({
 });
 app.component('woot-modal-header', ModalHeader);
 router.isReady().then(async () => {
-  const { data } = await axios.get(
-    `/api/v1/accounts/${router.currentRoute.value.params.accountId}`
-  );
-  store.commit('setNativeAccount', data);
+  const [account, profile] = await Promise.all([
+    axios.get(`/api/v1/accounts/${router.currentRoute.value.params.accountId}`),
+    axios.get('/api/v1/profile'),
+  ]);
+  store.commit('setNativeAccount', account.data);
+  store.commit('setNativeUser', profile.data);
   app
     .use(store)
     .use(

@@ -1812,13 +1812,13 @@
         "chrome": "not_run_due_to_lint"
       },
       "latest_evidence": {
-        "sha": "63a06c07fb53f7cb22d975ddb8947dd4eb05d2f5",
-        "run": 44169070593,
-        "artifact": 14367323230,
-        "sha256": "7d26b7f1daf318309b47116a40bbd2d47842c6917a2e673703147d41583b9c03",
-        "rails_main": 599,
+        "sha": "7211bf1994c1496b0d7406cb42967eb41b11814d",
+        "run": 44172675890,
+        "artifact": 14370307364,
+        "sha256": "792d78efbc211293829a3c7e4b633417b689e2c64d8480016ec8510e304fe4fc",
+        "rails_main": 601,
         "concurrency": 10,
-        "vue": 222,
+        "vue": 224,
         "native_failures": 0,
         "pending": 0,
         "outside_errors": 0,
@@ -1830,7 +1830,7 @@
           "skipped": 0,
           "flaky": 0
         },
-        "remaining": "Four new queue cases stopped at disabled option assertion; property was disabled but matcher followed enclosing label to enabled select."
+        "remaining": "New queue cases passed disabled option check; exact queue label included option contents. Explicit native label for/id correction prepared without changing assertions."
       }
     },
     "schema_review": {
@@ -1895,16 +1895,40 @@
       "configuration_scope": "Existing connection and CDR history, not resource publication",
       "rails_scenarios": 2,
       "vue_router_scenarios": 2,
-      "validation": "pending_next_sha"
+      "validation": "pending_next_sha",
+      "native_evidence": {
+        "sha": "7211bf1994c1496b0d7406cb42967eb41b11814d",
+        "run": 44172675890,
+        "artifact": 14370307364,
+        "sha256": "792d78efbc211293829a3c7e4b633417b689e2c64d8480016ec8510e304fe4fc",
+        "rails_main": 601,
+        "concurrency": 10,
+        "vue": 224,
+        "native_failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 0,
+        "frontend_lint": "passed"
+      },
+      "chrome_prepared": {
+        "additional_cases": 8,
+        "total_expected": 92,
+        "real_profile_api": true,
+        "real_settings_component": true,
+        "synthetic_superadmin_only": true,
+        "ordinary_administrator_denied": true,
+        "provider_actions": false,
+        "validation": "pending_next_sha"
+      }
     },
     "option_label_correction": {
       "locked_playwright": "1.59.1",
       "official_source": "https://github.com/microsoft/playwright/blob/v1.59.1/packages/injected/src/injectedScript.ts#L563-L581",
       "cause": "elementState follows the enclosing label to label.control; the nested option was retargeted to its enabled select.",
-      "change": "Explicit label for/id association for native membership user select. Preserve original toBeDisabled assertion, all 84 cases and subsequent negative API / persistence / revocation checks.",
+      "change": "Explicit label for/id associations for native membership user and queue selects. Preserve toBeDisabled, exact accessible names, all 84 existing cases and subsequent negative API / persistence / revocation checks.",
       "test_assertions_removed": false,
       "force_clicks": false,
-      "validation": "pending_next_sha"
+      "validation": "User disabled assertion passed in all four projects on 7211bf19; queue exact label correction now prepared."
     }
   }
 }

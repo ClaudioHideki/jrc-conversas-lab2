@@ -85,6 +85,16 @@ account.account_users.find_each do |member|
   JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true)
 end
 
+# Explicit isolated infrastructure actor; never derive this role or scope for real users.
+infrastructure = SuperAdmin.new(name: 'SYNTHETIC infrastructure administrator',
+                                email: "cc-infrastructure-#{SecureRandom.hex(6)}@example.test",
+                                password: SecureRandom.base64(32), confirmed_at: Time.current)
+infrastructure.skip_confirmation_notification!
+infrastructure.save!
+infrastructure_member = AccountUser.create!(account: account, user: infrastructure, role: :administrator, custom_role: role)
+JrcContactCenter::AccessGrant.create!(account: account, account_user: infrastructure_member, eligible: true)
+JrcCrm::UserBusinessUnit.create!(account: account, user: infrastructure, scope: 'GROUP', active: true, structure_managed: true)
+
 # Separate synthetic targets for each browser project; no invitation or provider call.
 access_targets = %w[desktop-light desktop-dark mobile-light mobile-dark].index_with do |project|
   recipients = %w[pending conflict peer enrollment enrollment_eligible].index_with do |kind|
@@ -110,7 +120,8 @@ end
   AccountUser.create!(account: account, user: person, role: :agent)
 end
 
-session = { access_targets: access_targets, account_id: account.id, other_account_id: other.id, unit_id: unit.id,
+session = { access_targets: access_targets, infrastructure: infrastructure.create_new_auth_token,
+            account_id: account.id, other_account_id: other.id, unit_id: unit.id,
             administrator: admin.create_new_auth_token, viewer: limited.create_new_auth_token,
             delegated: delegated.create_new_auth_token,
             viewer_user_id: limited.id, viewer_role_id: viewer.id,
