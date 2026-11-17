@@ -24,6 +24,8 @@ module Enterprise::Api::V1::Accounts::AgentsController
   end
 
   def associate_agent_with_custom_role
+    return unless params.key?(:custom_role_id)
+
     @agent.current_account_user.update!(custom_role_id: params[:custom_role_id])
   end
 end

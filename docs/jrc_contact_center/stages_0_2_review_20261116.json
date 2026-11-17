@@ -572,7 +572,7 @@
         "document_1_figure": 11,
         "document_2_figure": 11
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "Revisão de perfis e de unidades/filas/vínculos validada em 3c5054ac. Novo incremento protege perfis omitidos no PATCH nativo de agentes; testes próprios e regressões de agentes pendentes no novo SHA. Herança/elegibilidade ainda abertas.",
       "objective": "Popup Configurar Perfil e Permissoes",
       "visual_components": "Campos e dados apresentados:  Exibir permissao herdada, individual, concedida e efetiva de forma distinguivel quando houver hierarquia. Informar escopo de empresa, equipe, fila e carteira; manter trilha de quem concedeu, quando e por qual origem.",
       "buttons_and_actions": "Acoes e resultado do clique:  Seletores Perfil, Equipe e Usuario: escolher o escopo alvo. Abas Permissoes por Modulo, Acesso Especial, PABX JRC e Configuracoes Adicionais: trocar categoria sem perder alteracoes ainda nao salvas. Checkbox por acao: visualizar, criar, editar, excluir, exportar, aprovar e publicar, mais ouvir/baixar/monitorar onde aplicavel. Salvar Permissoes: mostrar alteracoes antes de confirmar.",
@@ -755,7 +755,7 @@
         "document_1_figure": 14,
         "document_2_figure": 14
       },
-      "validation": "Functional base 1877e145 passed 467 Rails, 197 Vue and 64 Chrome with verified receipt/hash. Manual visual review found dark value contrast issue; correction and computed-color assertion require next SHA.",
+      "validation": "Auditoria local e contraste validados em 3c5054ac: 493 Rails, 209 Vue, 68 Chrome; 72 hashes de capturas conferidos. Publicação/ACKs externos continuam não homologados.",
       "objective": "Auditoria tecnica do PABX",
       "visual_components": "Campos e dados apresentados:  Registrar id do evento, correlation_id/request_id, ator, acao, recurso, before/after sanitizados, horario, estado pretendido e estado confirmado. Resultado deve distinguir concluido, pendente, divergente, falha e reversao.",
       "buttons_and_actions": "Acoes e resultado do clique:  Filtros de data, tipo, unidade/empresa e origem: refinar registros; Consultar: aplicar filtros com paginacao. Selecao de uma linha: preencher Detalhes do Evento com data/hora, usuario, operacao, objeto, tenant/accountcode, resultado e descricao. Ver Detalhes: abrir popup do evento; Exportar Relatorio: gerar arquivo dentro do escopo; Ver Historico: listar eventos correlatos.",
@@ -1500,12 +1500,13 @@
       },
       "visual_review": {
         "screenshots_inspected": [
-          "desktop-light-audit-list",
+          "desktop-dark-queue-conflict",
           "mobile-dark-audit-details"
         ],
         "all_64_screenshot_hashes_verified": true,
         "issue": "Dark teleported dialog values inherited default black; explicit local foreground and computed-color Chrome regression added in next SHA",
-        "validation_of_correction": "pending_new_sha"
+        "validation_of_correction": "validated_3c5054ac_all_four_projects_computed_color",
+        "all_72_screenshot_hashes_verified": true
       }
     },
     "configuration_revision": {
@@ -1521,7 +1522,7 @@
       "expected_native": 493,
       "expected_vue": 209,
       "expected_chrome": 68,
-      "native_validation": "pending_new_sha",
+      "native_validation": "validated_3c5054ac",
       "migrations": "none",
       "permissions": "unchanged",
       "teams": "native revision/inheritance still pending",
@@ -1558,7 +1559,68 @@
         "vue_passed": 209,
         "remaining_gate_failure": "one extra blank line in new rollback test",
         "chrome_build": "not_run_due_to_lint"
+      },
+      "validated_evidence": {
+        "sha": "3c5054ac65210e38d5a563d9efad82f861d18596",
+        "run": 44116027063,
+        "artifact": 14344441425,
+        "artifact_sha256": "084f8a6da308d238516ded2a98c230b56e397d47f949894b4b93a9806181ad74",
+        "rails": {
+          "call-center-rspec.json": {
+            "duration": 62.972996721,
+            "example_count": 487,
+            "failure_count": 0,
+            "pending_count": 0,
+            "errors_outside_of_examples_count": 0
+          },
+          "call-center-pabx-rspec.json": {
+            "duration": 3.901218688,
+            "example_count": 6,
+            "failure_count": 0,
+            "pending_count": 0,
+            "errors_outside_of_examples_count": 0
+          }
+        },
+        "vue": {
+          "numTotalTests": 209,
+          "numPassedTests": 209,
+          "numFailedTests": 0,
+          "numPendingTests": 0
+        },
+        "chrome": {
+          "startTime": "2026-11-17T15:44:18.693Z",
+          "duration": 152462.841,
+          "expected": 68,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "screenshots": 72,
+        "bootstrap": {
+          "passed": true,
+          "pageErrors": [],
+          "pageErrorDetails": [],
+          "failedRequests": [],
+          "httpErrors": [],
+          "cards": 15
+        },
+        "matrix_sha256": "9f3b4052c1912370ccb4e6473e7e8b4d43d76cf1b0fc52fa141e62acef22d327",
+        "new_ruby_offenses": 0,
+        "external_homologation": false,
+        "stages_0_2_complete": false
       }
+    },
+    "native_profile_preservation": {
+      "adr": "docs/adr/20261117-call-center-native-profile-preservation.md",
+      "product_change": "Return without touching custom_role_id when root field is absent",
+      "new_request_scenarios": 6,
+      "native_existing_suites": [
+        "spec/controllers/api/v1/accounts/agents_controller_spec.rb",
+        "spec/enterprise/controllers/api/v1/accounts/agents_controller_spec.rb"
+      ],
+      "validation": "pending_new_sha",
+      "explicit_clear_fallback_inheritance_eligibility": "still_pending",
+      "permissions_or_migrations_added": false
     }
   }
 }

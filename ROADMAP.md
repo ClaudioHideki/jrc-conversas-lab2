@@ -40,3 +40,5 @@ A revisão esperada foi validada em 80632726 (431 Rails/185 Vue/56 Chrome). Pró
 - Auditoria administrativa: contratos e duas corridas transacionais passaram no PostgreSQL sintético; interface e correções de lint aguardam CI do novo checkpoint. Sem aceite integral F14 ou Parte 1.
 
 - Próximo checkpoint: revisão de cadastros com rascunho preservado, comparação explícita e descarte por conta; correção de contraste auditável no popup. Nova validação pendente. Sem conclusão de 0–2 ou Parte 1.
+
+- Auditoria e revisão de cadastros validadas no 3c5054ac. Próxima frente executável: impedir perda de perfil por campo omitido no atualizador nativo, preservando permissões dos demais módulos; nova CI pendente.
