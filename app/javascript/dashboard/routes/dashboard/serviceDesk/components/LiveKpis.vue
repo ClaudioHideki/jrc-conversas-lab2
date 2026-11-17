@@ -31,9 +31,14 @@ const metrics = computed(() => {
   return names.map(name => {
     let value = null;
     if (result.value.status === 'ready') {
-      value = Object.hasOwn(result.value.data.phases, name)
-        ? result.value.data.phases[name]
-        : result.value.data[name];
+      if (name === 'resolved') {
+        value =
+          result.value.data.phases.resolved + result.value.data.phases.closed;
+      } else {
+        value = Object.hasOwn(result.value.data.phases, name)
+          ? result.value.data.phases[name]
+          : result.value.data[name];
+      }
     }
     return { name, value };
   });

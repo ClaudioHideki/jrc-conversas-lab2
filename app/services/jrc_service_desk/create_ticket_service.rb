@@ -18,7 +18,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
         internal_request = true
         JrcServiceDesk::EmployeeAccess.verify_service!(context, unit.id, service_id)
       end
-      fields = internal_request ? %w[title description service_fields] : creation_fields
+      fields = internal_request ? %w[title description service_fields assignee_account_user_id] : creation_fields
       values = JrcServiceDesk::Input.attributes(attributes, fields)
       normalized = (FIELDS - CLASSIFICATION_FIELDS).index_with { |name| values[name] }
       normalized.merge!(values.slice(*CLASSIFICATION_FIELDS))
@@ -43,7 +43,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
 
       raise Pundit::NotAuthorizedError unless context.capability?(:tickets_create)
 
-      if normalized.values_at('assignee_account_user_id', 'queue_id', 'team_id').any?
+      if !internal_request && normalized.values_at('assignee_account_user_id', 'queue_id', 'team_id').any?
         raise Pundit::NotAuthorizedError unless context.capability?(:tickets_assign)
       end
       existing = JrcServiceDesk::Ticket.find_by(account_id: context.account.id, unit_id: unit.id,
@@ -68,12 +68,12 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
         priority: reference(JrcServiceDesk::Priority, normalized['priority_id'], unit),
         category: reference(JrcServiceDesk::Category, normalized['category_id'], unit), queue: queue,
         team: native_team(normalized['team_id'] || queue&.team_id),
-        assignee_membership: assignee(normalized['assignee_account_user_id'], unit),
+        assignee_membership: internal_request ? nil : assignee(normalized['assignee_account_user_id'], unit),
         created_by_membership: actor_membership, origin_channel: origin_channel, opened_at: Time.current,
         idempotency_key: key, request_fingerprint: fingerprint
       )
       if internal_request
-        JrcServiceDesk::InternalIntake.apply!(ticket)
+        JrcServiceDesk::InternalIntake.apply!(ticket, account_user_id: normalized['assignee_account_user_id'])
         ticket.assignee_membership = assignee(ticket.assignee_membership.account_user_id, unit)
         values.merge!('queue_id' => ticket.queue_id, 'team_id' => ticket.team_id,
                       'assignee_account_user_id' => ticket.assignee_membership.account_user_id)

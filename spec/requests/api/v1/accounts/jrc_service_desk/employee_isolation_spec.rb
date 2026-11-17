@@ -54,6 +54,24 @@ RSpec.describe 'Employee-only Service Desk and Portal boundary', type: :request 
     expect(JrcServiceDesk::Ticket.where(account: sd_account)).to be_empty
   end
 
+  it 'lets a restricted employee choose another eligible support recipient without granting ticket assignment' do
+    recipient_user = create(:user)
+    recipient_account_user = create(:account_user, account: sd_account, user: recipient_user, role: :agent)
+    recipient = create(:jrc_sd_membership, unit: sd_unit, account_user: recipient_account_user, manual_assignment_enabled: true)
+    TeamMember.create!(team: team, user: recipient_user)
+    settings = sd_account.internal_attributes.deep_dup
+    settings[JrcServiceDesk::InternalIntake::KEY][sd_unit.id.to_s]['support_account_user_ids'] << recipient_account_user.id
+    sd_account.update!(internal_attributes: settings)
+    context = JrcServiceDesk::OperationalContext.new(sd_context)
+    expect(context.capability?(:tickets_assign)).to be(false)
+    post "#{path}/tickets", params: opening.deep_merge(ticket: { assignee_account_user_id: recipient_account_user.id }),
+      headers: headers.merge('Idempotency-Key' => 'employee-selected-recipient'), as: :json
+    expect(response).to have_http_status(:created), response.body
+    ticket = JrcServiceDesk::Ticket.find(response.parsed_body.fetch('ticket_id'))
+    expect(ticket.assignee_membership_id).to eq(recipient.id)
+    expect(ticket.requester.email).to eq(sd_user.email)
+  end
+
   it 'does not list, count or open a customer ticket even when it was originally created by the same employee' do
     foreign = customer_ticket
     post "#{path}/tickets", params: opening, headers: headers.merge('Idempotency-Key' => 'employee-own'), as: :json

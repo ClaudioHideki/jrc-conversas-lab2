@@ -109,7 +109,7 @@ class JrcProjects::ReadProjection
       return JrcProjects::Authorization::ROLE_GRANTS.fetch(memberships[project.id], []) - ['projects.project.transfer']
     end
 
-    project.visibility == 'account' ? JrcProjects::Authorization::VIEW : EMPTY_CAPABILITIES
+    EMPTY_CAPABILITIES
   end
 
   def companies(projects)

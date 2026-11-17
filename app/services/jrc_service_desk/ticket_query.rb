@@ -70,7 +70,8 @@ class JrcServiceDesk::TicketQuery
     end
     @relation = relation.where(assignee_membership_id: nil) if parameters['assignment'] == 'unassigned'
     if parameters['phase']
-      phases = parameters['phase'] == 'active' ? %w[open waiting] : [parameters['phase']]
+      phases = { 'active' => %w[open waiting], 'finished' => %w[resolved closed],
+                 'archived' => %w[resolved closed cancelled] }.fetch(parameters['phase'], [parameters['phase']])
       @relation = relation.joins(:status).where(jrc_service_desk_ticket_statuses: { phase: phases })
     end
     @relation = relation.where(origin_channel: parameters['source']) if parameters['source']

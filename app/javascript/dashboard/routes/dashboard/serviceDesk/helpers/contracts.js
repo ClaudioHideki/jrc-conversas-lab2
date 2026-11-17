@@ -76,6 +76,9 @@ export function decodeContext(payload, identity) {
               primary: named(unit.internal_intake.primary),
               observer: named(unit.internal_intake.observer),
               queue: named(unit.internal_intake.queue),
+              assignees: (
+                unit.internal_intake.assignees || [unit.internal_intake.primary]
+              ).map(named),
             },
           }
         : {}),

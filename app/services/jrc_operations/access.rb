@@ -39,7 +39,7 @@ module JrcOperations
       return scope.none unless JrcProjects::Authorization.allowed?(account_user: account_user, capability: 'projects.project.view')
       return scope if admin?(account_user)
       member_ids = JrcProjects::ProjectMember.where(account_id: account_user.account_id, user_id: account_user.user_id).select(:project_id)
-      scope.where(owner_id: account_user.user_id).or(scope.where(id: member_ids)).or(scope.where(visibility: 'account'))
+      scope.where(owner_id: account_user.user_id).or(scope.where(id: member_ids))
     end
     def self.conversation!(account_user, display_id)
       record = account_user.account.conversations.find_by!(display_id: display_id)

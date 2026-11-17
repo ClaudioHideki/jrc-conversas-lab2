@@ -136,6 +136,7 @@ RSpec.describe 'JRC Projects Core checkpoint 3A', type: :request do
 
   it 'does not equate account visibility with permission to edit or create projects' do
     project.update!(visibility: 'account')
+    project.project_members.create!(account: account, user: colleague, role: 'viewer')
     role = create(:custom_role, account: account, permissions: ['jrc_projects_project_view'])
     account.account_users.find_by!(user: colleague).update!(custom_role_id: role.id)
     colleague_headers = colleague.create_new_auth_token

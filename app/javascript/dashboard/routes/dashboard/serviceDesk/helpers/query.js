@@ -81,6 +81,8 @@ export function normalizeQuery(query = {}, resource = null) {
           'resolved',
           'closed',
           'cancelled',
+          'finished',
+          'archived',
         ].includes(value)
       )
         throw new QueryError('Invalid phase');

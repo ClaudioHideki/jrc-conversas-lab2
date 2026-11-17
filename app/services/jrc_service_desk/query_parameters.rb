@@ -18,7 +18,7 @@ class JrcServiceDesk::QueryParameters
     @values['per_page'] = integer(@values.fetch('per_page', 20), 100)
     raise ArgumentError, 'Invalid sort' if @values['sort'] && !SORTS.include?(@values['sort'])
     raise ArgumentError, 'Invalid personal filter' if @values['mine'] && @values['mine'] != 'true'
-    if @values['phase'] && !%w[active open waiting resolved closed cancelled].include?(@values['phase'])
+    if @values['phase'] && !%w[active open waiting resolved closed cancelled finished archived].include?(@values['phase'])
       raise ArgumentError, 'Invalid phase filter'
     end
     if @values['assignment'] && @values['assignment'] != 'unassigned'

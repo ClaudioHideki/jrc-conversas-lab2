@@ -108,7 +108,7 @@ export function registerScreenExperienceCases(test, assert) {
       assert.equal(
         normalizeQuery(metricQuery({ unit_id: '10', status_id: '20' }, phase))
           .phase,
-        phase
+        phase === 'resolved' ? 'finished' : phase
       );
     });
   });

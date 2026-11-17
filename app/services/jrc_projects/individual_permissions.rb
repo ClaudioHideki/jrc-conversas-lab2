@@ -24,6 +24,6 @@ class JrcProjects::IndividualPermissions
     values = member.jrc_projects_permissions
     return values[capability] if values.key?(capability)
 
-    capability != 'projects.project.create'
+    true
   end
 end

@@ -50,7 +50,8 @@ export function metricQuery(query, metric) {
   const result = { ...normalizeQuery(query), page: 1 };
   delete result.status_id;
   delete result.phase;
-  if (metric !== 'total') result.phase = metric;
+  if (metric !== 'total')
+    result.phase = metric === 'resolved' ? 'finished' : metric;
   return result;
 }
 export function displayedScope(context, unitId) {

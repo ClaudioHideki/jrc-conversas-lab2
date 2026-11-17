@@ -48,13 +48,41 @@ RSpec.describe 'Consolidated employee intake', type: :request do
     end.not_to(change { [JrcServiceDesk::Ticket.count, JrcServiceDesk::TicketEvent.count] })
   end
 
-  it 'rejects caller-supplied requester or assignee instead of bypassing the fixed destinations' do
-    %w[requester_id assignee_account_user_id].each do |field|
+  it 'rejects caller-supplied identity, queue and team instead of bypassing the intake domain' do
+    %w[requester_id queue_id team_id].each do |field|
       expect do
         post "#{base}/tickets", headers: headers, params: input.deep_merge(ticket: { field => observer.account_user_id.to_s }), as: :json
         expect(response).to have_http_status(:unprocessable_entity)
       end.not_to change(JrcServiceDesk::Ticket, :count)
     end
+  end
+
+  it 'offers only eligible people in the unit and persists the chosen recipient with safe replay' do
+    outsider = create(:jrc_sd_membership, unit: sd_other_unit)
+    context = JrcServiceDesk::UiContextService.new(user_context: sd_context).call
+    intake = context[:units].find { |row| row[:id] == sd_unit.id.to_s }.fetch(:internal_intake)
+    expect(intake[:assignees].pluck(:id)).to contain_exactly(sd_account_user.id.to_s, observer.account_user_id.to_s)
+    chosen = input.deep_merge(ticket: { assignee_account_user_id: observer.account_user_id.to_s })
+    2.times do
+      post "#{base}/tickets", headers: headers, params: chosen, as: :json
+      expect(response).to have_http_status(:created), response.body
+    end
+    expect(JrcServiceDesk::Ticket.where(account: sd_account).sole.assignee_membership_id).to eq(observer.id)
+    post "#{base}/tickets", headers: headers, params: input, as: :json
+    expect(response).to have_http_status(:conflict)
+    post "#{base}/tickets", headers: headers.merge('Idempotency-Key' => 'foreign-recipient'),
+      params: input.deep_merge(ticket: { assignee_account_user_id: outsider.account_user_id.to_s }), as: :json
+    expect(response).to have_http_status(:not_found)
+    expect(JrcServiceDesk::Ticket.where(account: sd_account).count).to eq(1)
+  end
+
+  it 'rechecks a selected recipient eligibility before creating the ticket' do
+    observer.update!(manual_assignment_enabled: false)
+    expect do
+      post "#{base}/tickets", headers: headers,
+        params: input.deep_merge(ticket: { assignee_account_user_id: observer.account_user_id.to_s }), as: :json
+      expect(response).to have_http_status(:forbidden)
+    end.not_to change(JrcServiceDesk::Ticket, :count)
   end
 
   it 'denies another unit and another account through the same API' do

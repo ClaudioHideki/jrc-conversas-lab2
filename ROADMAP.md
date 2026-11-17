@@ -12,6 +12,8 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 
 ## Fase 2: Operação e desenvolvimento ativo
 
+- [ ] Validar e publicar o incremento de destinatários de chamados, indicadores e projetos por responsável/participante (ADR0004), preservando a imagem funcional d468beb8.
+
 - [ ] Reconciliar conversas por caixa e a política de acesso Minhas/compartilhadas/exclusivas.
 - [ ] Manter homologação de voz, histórico e mídias distinta de teste sintético e de publicação.
 - [ ] Registrar critério de aceite, teste pertinente e evidência de cada alteração funcional autorizada.

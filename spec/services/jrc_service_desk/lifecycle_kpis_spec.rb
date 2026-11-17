@@ -5,6 +5,25 @@ RSpec.describe 'Real lifecycle transitions feed the SQL dashboard', type: :servi
   include_context 'JRC Service Desk domain'
   include JrcServiceDeskLifecycleFixtures
 
+  it 'counts waiting, closing and reopening through real transitions and separates the archive' do
+    lc_publish
+    ticket = sd_ticket
+    lc_execute(ticket, 'pause', reason_code: 'customer')
+    service = JrcServiceDesk::DashboardService.new(user_context: sd_context)
+    expect(service.call[:phases]['waiting']).to eq(1)
+    expect(JrcServiceDesk::TicketQuery.new(user_context: sd_context, parameters: { phase: 'waiting' }).relation.ids).to eq([ticket.id])
+    lc_execute(ticket, 'resolve')
+    lc_execute(ticket, 'close')
+    expect(service.call[:phases]).to include('waiting' => 0, 'resolved' => 0, 'closed' => 1)
+    expect(JrcServiceDesk::TicketQuery.new(user_context: sd_context, parameters: { phase: 'active' }).relation).to be_empty
+    %w[finished archived].each do |phase|
+      expect(JrcServiceDesk::TicketQuery.new(user_context: sd_context, parameters: { phase: phase }).relation.ids).to eq([ticket.id])
+    end
+    lc_execute(ticket, 'reopen')
+    expect(JrcServiceDesk::TicketQuery.new(user_context: sd_context, parameters: { phase: 'archived' }).relation).to be_empty
+    expect(service.call[:active]).to eq(1)
+  end
+
   it 'preserves total=27 and changes phase/active counts after an actual authorized resolve' do
     lc_publish
     rows = 27.times.map { sd_ticket }

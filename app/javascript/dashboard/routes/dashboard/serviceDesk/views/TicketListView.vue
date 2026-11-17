@@ -10,6 +10,7 @@ import State from '../components/ServiceDeskState.vue';
 import ClaimNext from '../components/ClaimNext.vue';
 import TicketFilters from '../components/TicketFilters.vue';
 import TicketTable from '../components/TicketTable.vue';
+import ArchivedTicketsDialog from '../components/ArchivedTicketsDialog.vue';
 import LiveKpis from '../components/LiveKpis.vue';
 import TicketSummary from '../components/TicketSummary.vue';
 import TicketProtocol from '../components/TicketProtocol.vue';
@@ -36,7 +37,33 @@ const identity = () => [session.accountId?.value, session.userId?.value];
 const filterError = ref(false);
 const result = computed(() => session.resource(key));
 const preview = computed(() => session.resource(previewKey));
-const query = computed(() => ticketListQuery(props.screen, route.query));
+const listQuery = computed(() => ticketListQuery(props.screen, route.query));
+const archiveOpen = computed(() =>
+  ['resolved', 'closed', 'cancelled', 'finished', 'archived'].includes(
+    listQuery.value.phase
+  )
+);
+const query = computed(() => ({
+  ...listQuery.value,
+  phase: archiveOpen.value ? 'active' : listQuery.value.phase || 'active',
+  ...(archiveOpen.value ? { status_id: undefined, page: 1 } : {}),
+}));
+const kpiQuery = computed(() => {
+  const filters = { ...listQuery.value };
+  delete filters.phase;
+  delete filters.status_id;
+  delete filters.page;
+  return filters;
+});
+const closeArchive = () =>
+  router.push({
+    query: {
+      ...route.query,
+      phase: undefined,
+      status_id: undefined,
+      page: '1',
+    },
+  });
 const status = computed(() =>
   filterError.value ? 'invalid_request' : result.value.status
 );
@@ -228,12 +255,28 @@ onBeforeUnmount(() => {
     <TicketFilters :query="route.query" @apply="apply" />
     <LiveKpis
       compact
-      :query="query"
-      @metric-filter="router.push({ query: metricQuery(query, $event) })"
+      :query="kpiQuery"
+      @metric-filter="router.push({ query: metricQuery(kpiQuery, $event) })"
     />
     <div :class="selection ? 'sd-two-columns' : ''">
       <Panel :title="t('JRC_SERVICE_DESK.SCREENS.tickets')">
         <template #actions>
+          <Button
+            size="sm"
+            variant="outline"
+            icon="i-lucide-archive"
+            :label="t('JRC_SERVICE_DESK.OPS.KPI.closed')"
+            @click="
+              router.push({
+                query: {
+                  ...route.query,
+                  phase: 'archived',
+                  status_id: undefined,
+                  page: '1',
+                },
+              })
+            "
+          />
           <span v-if="result.meta" class="text-xs text-n-slate-11">{{
             t('JRC_SERVICE_DESK.REDESIGN_LIST.total_results', {
               total: result.meta.total,
@@ -327,5 +370,12 @@ onBeforeUnmount(() => {
         />
       </Panel>
     </div>
+    <ArchivedTicketsDialog
+      v-if="archiveOpen"
+      :query="listQuery"
+      @close="closeArchive"
+      @open="go('detail', $event)"
+      @page="page"
+    />
   </section>
 </template>

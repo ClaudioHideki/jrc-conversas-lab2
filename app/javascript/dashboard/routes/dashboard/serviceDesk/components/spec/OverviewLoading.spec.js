@@ -450,4 +450,56 @@ describe('Overview request sharing and independent loading', () => {
     );
     expect(mocks.report).not.toHaveBeenCalled();
   });
+
+  it('keeps closed tickets in resolved and refreshes the waiting count after transitions', async () => {
+    const first = dashboardPayload();
+    first.dashboard.phases = {
+      open: 2,
+      waiting: 3,
+      resolved: 1,
+      closed: 4,
+      cancelled: 0,
+    };
+    first.dashboard.total = 10;
+    first.dashboard.active = 5;
+    first.dashboard.by_status = Object.entries(first.dashboard.phases).map(
+      ([phase, count], index) => ({
+        id: String(index + 1),
+        name: phase,
+        phase,
+        count,
+      })
+    );
+    mocks.dashboard.mockResolvedValueOnce(first);
+    render(LiveKpis);
+    await flushPromises();
+    const card = name =>
+      wrapper
+        .findAllComponents(KpiCard)
+        .find(item => item.props('label') === keys.OPS.KPI[name]);
+    expect(card('resolved').props('value')).toBe(5);
+    expect(card('waiting').props('value')).toBe(3);
+    const next = structuredClone(first);
+    next.dashboard.phases = {
+      open: 2,
+      waiting: 2,
+      resolved: 1,
+      closed: 5,
+      cancelled: 0,
+    };
+    next.dashboard.active = 4;
+    next.dashboard.by_status = Object.entries(next.dashboard.phases).map(
+      ([phase, count], index) => ({
+        id: String(index + 1),
+        name: phase,
+        phase,
+        count,
+      })
+    );
+    mocks.dashboard.mockResolvedValueOnce(next);
+    session.operations.state.revision += 1;
+    await flushPromises();
+    expect(card('resolved').props('value')).toBe(6);
+    expect(card('waiting').props('value')).toBe(2);
+  });
 });

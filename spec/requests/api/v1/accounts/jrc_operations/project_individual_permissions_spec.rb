@@ -14,10 +14,14 @@ RSpec.describe 'Individual Projects permissions without global role changes', ty
     member.update!(jrc_projects_enabled: true)
   end
 
-  it 'allows module viewing but blocks project creation until explicitly granted' do
+  it 'allows enabled agents to create projects by default while honoring an explicit denial' do
+    post url, params: { project: { name: 'Agent project' } }, headers: agent.create_new_auth_token.merge('Idempotency-Key' => SecureRandom.uuid), as: :json
+    expect(response).to have_http_status(:created), response.body
+    expect(JrcProjects::Project.find(response.parsed_body.dig('data', 'id')).owner_id).to eq(agent.id)
+    member.update!(jrc_projects_permissions: { 'projects.project.create' => false })
     post url, params: { project: { name: 'Not authorized' } }, headers: agent.create_new_auth_token.merge('Idempotency-Key' => SecureRandom.uuid), as: :json
     expect(response).to have_http_status(:forbidden)
-    expect(JrcProjects::Project.where(account: account)).to be_empty
+    expect(JrcProjects::Project.where(account: account).count).to eq(1)
     member.update!(jrc_projects_permissions: { 'projects.project.create' => true })
     post url, params: { project: { name: 'Authorized project' } }, headers: agent.create_new_auth_token.merge('Idempotency-Key' => SecureRandom.uuid), as: :json
     expect(response).to have_http_status(:created), response.body
@@ -31,7 +35,7 @@ RSpec.describe 'Individual Projects permissions without global role changes', ty
     project.project_members.create!(account: account, user: agent, role: 'manager')
     expect(JrcProjects::Authorization.allowed?(account_user: admin_member, capability: 'projects.project.create')).to be(true)
     expect(JrcProjects::Authorization.allowed?(account_user: member, capability: 'projects.project.update', project: project)).to be(true)
-    expect(JrcProjects::Authorization.allowed?(account_user: member, capability: 'projects.project.create')).to be(false)
+    expect(JrcProjects::Authorization.allowed?(account_user: member, capability: 'projects.project.create')).to be(true)
     member.update!(jrc_projects_permissions: { 'projects.time_entry.view' => false })
     projection = JrcProjects::ReadProjection.new(account_user: member, projects: [project])
     expect(projection.capabilities(project)).not_to include('projects.time_entry.view')

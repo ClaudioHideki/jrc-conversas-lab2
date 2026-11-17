@@ -245,7 +245,8 @@ export function createOperationalSession(
         )?.internal_intake;
         if (
           !intake ||
-          confirmed.assignee?.id !== intake.primary.id ||
+          confirmed.assignee?.id !==
+            (payload.ticket.assignee_account_user_id || intake.primary.id) ||
           confirmed.queue?.id !== intake.queue.id
         )
           throw new ContractError();

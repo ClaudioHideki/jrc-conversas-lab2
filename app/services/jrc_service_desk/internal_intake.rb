@@ -16,7 +16,16 @@ class JrcServiceDesk::InternalIntake
     { requester: { name: context.user.name, email: context.user.email },
       primary: { id: primary.account_user_id.to_s, name: primary.account_user.user.name },
       observer: { id: observer.account_user_id.to_s, name: observer.account_user.user.name },
-      queue: { id: queue.id.to_s, name: queue.name } }
+      queue: { id: queue.id.to_s, name: queue.name },
+      assignees: assignees(unit, queue).map { |member| { id: member.account_user_id.to_s, name: member.account_user.user.name } } }
+  end
+
+  def self.assignees(unit, queue)
+    candidate = JrcServiceDesk::Ticket.new(account: unit.account, unit: unit, queue: queue, team_id: queue.team_id)
+    JrcServiceDesk::UnitMembership.operational.where(account_id: unit.account_id, unit_id: unit.id, active: true,
+                                                    manual_assignment_enabled: true).includes(account_user: :user)
+      .select { |member| JrcServiceDesk::AssignmentEligibility.manual_domain?(member, candidate) }
+      .sort_by { |member| [member.account_user.user.name.downcase, member.account_user_id] }
   end
 
   def self.destinations(unit)
@@ -63,10 +72,14 @@ class JrcServiceDesk::InternalIntake
     { 'requester_id' => requester.id, 'status_id' => status.id, 'priority_id' => priority.id }
   end
 
-  def self.apply!(ticket)
+  def self.apply!(ticket, account_user_id: nil)
     queue, primary, = destinations(ticket.unit)
     ticket.queue = queue
     ticket.team_id = queue.team_id
-    ticket.assignee_membership = primary
+    selected = account_user_id ? JrcServiceDesk::UnitMembership.operational.where(account_id: ticket.account_id,
+      unit_id: ticket.unit_id, active: true).find_by!(account_user_id: account_user_id) : primary
+    raise Pundit::NotAuthorizedError unless JrcServiceDesk::AssignmentEligibility.manual_domain?(selected, ticket)
+
+    ticket.assignee_membership = selected
   end
 end

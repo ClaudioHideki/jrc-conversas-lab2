@@ -66,6 +66,30 @@ RSpec.describe 'Projects native account authorization', type: :request do
     expect(account.reload.feature_enabled?('jrc_projects')).to be(false)
   end
 
+  it 'scopes lists, direct access and portfolio to ownership or participation while admins see all' do
+    account.enable_features!('jrc_projects')
+    member.update!(jrc_projects_enabled: true)
+    own = JrcProjects::Project.create!(account: account, owner: agent, name: 'Own', key: 'OWN', visibility: 'members')
+    shared = JrcProjects::Project.create!(account: account, owner: admin, name: 'Participating', key: 'TEAM', visibility: 'private')
+    hidden = JrcProjects::Project.create!(account: account, owner: admin, name: 'Other team', key: 'HIDDEN', visibility: 'account')
+    membership = shared.project_members.create!(account: account, user: agent, role: 'viewer')
+    headers = agent.create_new_auth_token
+    get url, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('data').pluck('id')).to contain_exactly(own.id, shared.id)
+    get "/api/v1/accounts/#{account.id}/projects/portfolio", headers: headers
+    expect(response.parsed_body.dig('data', 'total')).to eq(2)
+    get "#{url}/#{hidden.id}", headers: headers
+    expect(response).to have_http_status(:not_found)
+    expect(JrcProjects::Authorization).not_to be_allowed(account_user: member, capability: 'projects.project.view', project: hidden)
+    expect(JrcProjects::ReadProjection.new(account_user: member, projects: [hidden]).capabilities(hidden)).to be_empty
+    get url, headers: admin.create_new_auth_token
+    expect(response.parsed_body.fetch('data').pluck('id')).to contain_exactly(own.id, shared.id, hidden.id)
+    membership.destroy!
+    get "#{url}/#{shared.id}", headers: headers
+    expect(response).to have_http_status(:not_found)
+  end
+
   it 'requires an explicit agent grant and immediately observes revocation' do
     account.enable_features!('jrc_projects')
     get url, headers: agent.create_new_auth_token

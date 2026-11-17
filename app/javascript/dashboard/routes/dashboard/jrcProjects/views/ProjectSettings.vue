@@ -92,8 +92,12 @@ async function save() {
         >
         <label class="flex items-center gap-2"
           ><input
-            v-model="agent.permissions['projects.project.create']"
+            :checked="agent.permissions['projects.project.create'] !== false"
             type="checkbox"
+            @change="
+              agent.permissions['projects.project.create'] =
+                $event.target.checked
+            "
           />{{ projectText('CREATE_PERMISSION') }}</label
         >
         <details>

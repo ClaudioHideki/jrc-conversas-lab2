@@ -27,6 +27,16 @@ const units = computed(() =>
 );
 const unitId = ref('');
 const unit = computed(() => units.value.find(row => row.id === unitId.value));
+const operatorId = ref('');
+const operators = computed(() => [
+  ...new Map(
+    units.value.map(row => [row.operator_company.id, row.operator_company])
+  ).values(),
+]);
+const destinationUnits = computed(() =>
+  units.value.filter(row => row.operator_company.id === operatorId.value)
+);
+const assigneeId = ref('');
 const draft = reactive({
   service: '',
   title: '',
@@ -82,6 +92,8 @@ const reset = () => {
   session.operations?.dismissConfirmation(key);
   if (fileInput.value) fileInput.value.value = '';
   unitId.value = units.value.length === 1 ? units.value[0].id : '';
+  operatorId.value = operators.value.length === 1 ? operators.value[0].id : '';
+  assigneeId.value = unit.value?.internal_intake.primary.id || '';
 };
 watch(() => session.state.context, reset, { immediate: true });
 watch(
@@ -93,7 +105,12 @@ watch(
 watch(unitId, () => {
   draft.service = '';
   draft.answers = {};
+  assigneeId.value = unit.value?.internal_intake.primary.id || '';
   ready.value = !draft.service;
+});
+watch(operatorId, () => {
+  unitId.value =
+    destinationUnits.value.length === 1 ? destinationUnits.value[0].id : '';
 });
 const chooseFiles = selected => {
   if (locked.value) return;
@@ -106,6 +123,7 @@ const chooseFiles = selected => {
 const maySave = computed(
   () =>
     unit.value &&
+    assigneeId.value &&
     ready.value &&
     draft.title.trim() &&
     draft.description.trim() &&
@@ -129,6 +147,7 @@ const submit = async () => {
           title: draft.title,
           description: draft.description,
           service_fields: { ...draft.answers },
+          assignee_account_user_id: assigneeId.value,
         },
         requestKey: newRequestKey(),
         files: [...files.value],
@@ -232,7 +251,24 @@ defineExpose({ busy: locked });
           </div>
         </div>
       </dl>
-      <label v-if="units.length > 1" class="block text-sm font-semibold">
+      <label class="block text-sm font-semibold">
+        {{ t('JRC_SERVICE_DESK.FIELDS.operator_company') }}
+        <select
+          v-model="operatorId"
+          required
+          :disabled="locked || operators.length === 1"
+          class="mt-2 w-full rounded-xl border border-blue-200 bg-white p-3"
+        >
+          <option value="">{{ t('PORTAL.SELECT') }}</option>
+          <option v-for="row in operators" :key="row.id" :value="row.id">
+            {{ row.name }}
+          </option>
+        </select>
+      </label>
+      <label
+        v-if="destinationUnits.length > 1"
+        class="block text-sm font-semibold"
+      >
         {{ t('PORTAL.UNIT') }}
         <select
           v-model="unitId"
@@ -241,7 +277,25 @@ defineExpose({ busy: locked });
           class="mt-2 w-full rounded-xl border border-blue-200 bg-white p-3"
         >
           <option value="">{{ t('PORTAL.SELECT') }}</option>
-          <option v-for="row in units" :key="row.id" :value="row.id">
+          <option v-for="row in destinationUnits" :key="row.id" :value="row.id">
+            {{ row.name }}
+          </option>
+        </select>
+      </label>
+      <label class="block text-sm font-semibold">
+        {{ t('JRC_SERVICE_DESK.FIELDS.assignee') }}
+        <select
+          v-model="assigneeId"
+          required
+          :disabled="locked || !unit"
+          class="mt-2 w-full rounded-xl border border-blue-200 bg-white p-3"
+        >
+          <option value="">{{ t('PORTAL.SELECT') }}</option>
+          <option
+            v-for="row in unit?.internal_intake.assignees || []"
+            :key="row.id"
+            :value="row.id"
+          >
             {{ row.name }}
           </option>
         </select>

@@ -28,7 +28,6 @@ module JrcProjects
       end
       return true if project.owner_id == account_user.user_id && OWNER.include?(capability)
       member = project.project_members.where(account_id: account_user.account_id, project_id: project.id).find_by(user_id: account_user.user_id)
-      return VIEW.include?(capability) if !member && project.visibility == 'account'
       return false unless member && ROLE_GRANTS.fetch(member.role, []).include?(capability)
       if member.role == 'contributor' && record.is_a?(Task) && capability == 'projects.task.update'
         return record.assignee_id == account_user.user_id || record.created_by_id == account_user.user_id
