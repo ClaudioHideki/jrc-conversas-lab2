@@ -2081,7 +2081,22 @@
       "provider_confirmation_is_not_grant": true,
       "adapter_in_positive_test": "explicitly_simulated",
       "external_provider_calls": false,
-      "validation": "pending_next_sha"
+      "validation": "pending_next_sha",
+      "native_evidence": {
+        "sha": "0fd871ce1830a90a6aca004fa653eed67b34a915",
+        "run": 44185417916,
+        "artifact": 14374527575,
+        "sha256": "5447c9e6dd1651bf76c383fb0be039208149a94c940ef552f56bfb98c93b5ff8",
+        "rails_main": 617,
+        "concurrency": 14,
+        "vue": 226,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 1,
+        "lint_cause": "Layout/HashAlignment in the new race helper call; move positional argument to its own line, no behavior or assertion change.",
+        "chrome": "not_run_due_to_lint"
+      }
     }
   }
 }

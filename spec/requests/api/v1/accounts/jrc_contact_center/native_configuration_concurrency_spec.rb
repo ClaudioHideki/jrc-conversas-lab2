@@ -280,7 +280,8 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
         end
       end
       status = race_with_account_change(
-        change, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/agent_state",
+        change,
+        endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/agent_state",
         payload: { agent_state: { state: 'available', command_id: "SYNTHETIC-#{source}", expected_state_version: '0' } }
       )
       expect(status).to eq(401)
