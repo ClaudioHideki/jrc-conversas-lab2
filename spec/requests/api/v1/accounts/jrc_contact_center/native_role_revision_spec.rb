@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe 'Call Center native role revisions', type: :request do
   let(:account) { create(:account) }
   let(:actor) { create(:user, account: account, role: :administrator) }
-  let(:headers) { actor.create_new_auth_token }
+  let!(:headers) { actor.create_new_auth_token }
   let(:role) { create(:custom_role, account: account, permissions: ['jrc_contact_center_view'], description: 'Original') }
   let(:url) { "/api/v1/accounts/#{account.id}/custom_roles/#{role.id}" }
   let(:revision) { JrcContactCenter::RoleRevision.token(role) }
@@ -23,13 +23,13 @@ RSpec.describe 'Call Center native role revisions', type: :request do
   it 'rejects a stale form without changing newer data or recording a successful change' do
     token = revision
     role.update!(description: 'Newer session')
-    audits = Enterprise::AuditLog.where(associated: account).count
+    audits = Enterprise::AuditLog.where(auditable: role).count
     patch url, headers: headers, params: { expected_revision: token, custom_role: { name: 'Stale' } }, as: :json
     expect(response).to have_http_status(:conflict)
     expect(response.parsed_body).to eq('error' => 'stale_role_revision')
     expect(role.reload.description).to eq('Newer session')
     expect(role.name).not_to eq('Stale')
-    expect(Enterprise::AuditLog.where(associated: account).count).to eq(audits)
+    expect(Enterprise::AuditLog.where(auditable: role).count).to eq(audits)
   end
 
   it 'requires a nonblank version when the caller explicitly opts into preconditions' do

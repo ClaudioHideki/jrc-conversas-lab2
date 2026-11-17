@@ -29,3 +29,7 @@ Chrome mantém os 52 cenários e acrescenta o fluxo de duas sessões contra Rail
 ## Limites e continuidade
 
 Não há publicação PABX, acesso externo, concessão automática, merge, Docker ou deploy. Herança de equipe, elegibilidade de novos usuários e consulta/auditoria por unidade seguem como próximos incrementos, com precedência e contratos próprios antes da implementação. Este ADR não altera a decisão histórica de 16/11 nem marca as etapas 0–2 ou a Parte 1 como concluídas.
+
+## Primeira execução nativa do incremento
+
+Checkpoint e217b41a, CI 44078910273: 428 Rails, 427 aprovados, uma falha de asserção no contador global de auditoria, zero pendências/erros externos; lint Ruby sem novas infrações. O contador era capturado antes da avaliação lazy de headers/actor e incluía outras entidades da Account. A preparação da autenticação passa a ser explícita antes do exemplo e a asserção mede as auditorias do perfil alvo, preservando 409 e as verificações de dados não sobrescritos. Eventos legítimos de autenticação/negação não são proibições de auditoria de sucesso do perfil. Artefato 14324724573, SHA-256 77cf3fd23a5f6517f3ebc4015b6cb429b95d10f927ff3a4b506a1b19c30aeb8e. Vue/Chrome não executados nesta tentativa; não apresentar como aprovados. Novo checkpoint exige revalidação, sem alteração no produto ou redução dos gates.
