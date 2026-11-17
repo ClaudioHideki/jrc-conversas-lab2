@@ -125,15 +125,17 @@ const errorLabel = async error => {
   return labels[body?.error || error?.message] || text.error;
 };
 const restoreFilters = () => {
-  for (const key of filterKeys)
+  filterKeys.forEach(key => {
     filters[key] = String(route.query[prefix + key] || '');
+  });
 };
 const stopDetails = () => {
   detailGeneration += 1;
   loadingDetail.value = false;
 };
 const load = async () => {
-  const version = ++listGeneration;
+  listGeneration += 1;
+  const version = listGeneration;
   const account = String(props.accountId);
   loading.value = true;
   listError.value = '';
@@ -179,28 +181,27 @@ const replaceQuery = async query => {
 };
 const apply = (history = false) => {
   const query = { ...route.query };
-  for (const key of filterKeys) {
-    const value =
-      key === 'history'
-        ? history
-          ? 'true'
-          : ''
-        : String(filters[key] ?? '').trim();
+  filterKeys.forEach(key => {
+    let value = String(filters[key] ?? '').trim();
+    if (key === 'history') value = history ? 'true' : '';
     if (value) query[prefix + key] = value;
     else delete query[prefix + key];
-  }
+  });
   query[prefix + 'page'] = '1';
   return replaceQuery(query);
 };
 const clear = () => {
   const query = { ...route.query };
-  for (const key of ['page', ...filterKeys]) delete query[prefix + key];
+  ['page', ...filterKeys].forEach(key => {
+    delete query[prefix + key];
+  });
   return replaceQuery(query);
 };
 const changePage = page =>
   replaceQuery({ ...route.query, [prefix + 'page']: String(page) });
 const loadDetail = async (row, popup = false) => {
-  const version = ++detailGeneration;
+  detailGeneration += 1;
+  const version = detailGeneration;
   const account = String(props.accountId);
   selected.value = null;
   detailError.value = '';
@@ -320,25 +321,25 @@ onBeforeUnmount(() => {
       class="grid min-w-0 gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-4 sm:grid-cols-2 xl:grid-cols-4"
       @submit.prevent="apply(false)"
     >
-      <label class="text-sm"
-        >{{ text.from
-        }}<input
+      <label class="text-sm">
+        <span>{{ text.from }}</span>
+        <input
           v-model="filters.from"
           type="date"
           :disabled="loading || exporting"
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
       /></label>
-      <label class="text-sm"
-        >{{ text.to
-        }}<input
+      <label class="text-sm">
+        <span>{{ text.to }}</span>
+        <input
           v-model="filters.to"
           type="date"
           :disabled="loading || exporting"
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
       /></label>
-      <label class="text-sm"
-        >{{ text.resource
-        }}<select
+      <label class="text-sm">
+        <span>{{ text.resource }}</span>
+        <select
           v-model="filters.resource_type"
           :disabled="loading || exporting"
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -353,9 +354,9 @@ onBeforeUnmount(() => {
           </option>
         </select></label
       >
-      <label class="text-sm"
-        >{{ text.resourceId
-        }}<input
+      <label class="text-sm">
+        <span>{{ text.resourceId }}</span>
+        <input
           v-model="filters.resource_id"
           type="number"
           min="1"
@@ -363,9 +364,9 @@ onBeforeUnmount(() => {
           :disabled="loading || exporting"
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
       /></label>
-      <label class="text-sm"
-        >{{ text.operation
-        }}<select
+      <label class="text-sm">
+        <span>{{ text.operation }}</span>
+        <select
           v-model="filters.operation"
           :disabled="loading || exporting"
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -380,9 +381,9 @@ onBeforeUnmount(() => {
           </option>
         </select></label
       >
-      <label class="text-sm"
-        >{{ text.unit
-        }}<select
+      <label class="text-sm">
+        <span>{{ text.unit }}</span>
+        <select
           v-model="filters.unit_id"
           :disabled="loading || exporting"
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -397,9 +398,9 @@ onBeforeUnmount(() => {
           </option>
         </select></label
       >
-      <label class="text-sm"
-        >{{ text.actor
-        }}<select
+      <label class="text-sm">
+        <span>{{ text.actor }}</span>
+        <select
           v-model="filters.actor_id"
           :disabled="loading || exporting"
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -414,9 +415,9 @@ onBeforeUnmount(() => {
           </option>
         </select></label
       >
-      <label class="text-sm"
-        >{{ text.correlation
-        }}<input
+      <label class="text-sm">
+        <span>{{ text.correlation }}</span>
+        <input
           v-model.trim="filters.correlation_id"
           type="text"
           maxlength="100"

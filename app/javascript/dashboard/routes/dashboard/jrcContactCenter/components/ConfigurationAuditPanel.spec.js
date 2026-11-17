@@ -21,7 +21,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
   },
 }));
 const Dialog = defineComponent({
-  emits: ['confirm', 'close'],
+  emits: ['close'],
   setup(_props, { expose, emit }) {
     const visible = ref(false);
     expose({

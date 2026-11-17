@@ -62,3 +62,14 @@ real assíncrono, mantendo a exigência de rejeição do hash divergente.
 O leitor sintético não recebe supervise: a política nativa de supervisão
 legitimamente concede relatórios. Nenhuma política do produto foi reduzida.
 Chrome/build ficaram bloqueados pelo teste Vue e não foram declarados aprovados.
+
+## Lint e revalidação da correção funcional
+
+CI 44097363319: 196 testes Vue aprovados; artefato 14334134012,
+SHA-256 050b1a4c389a173780e83223ee9b29d325ecc6e2144efc232955759cd10530bb.
+Gate bloqueado por sete erros ESLint (loops, incremento, ternário aninhado e
+emit não usado no stub) e uma infração Ruby de concatenação no fixture.
+Correções locais ao novo código usam forEach, incremento explícito e push;
+preservam o descarte por geração, o contrato, as asserções e todas as regras.
+Rótulos passam a usar span dentro de label, mantendo seu nome acessível.
+Nenhuma conclusão de build ou Chrome foi atribuída a essa execução bloqueada.

@@ -70,7 +70,7 @@ audit_operators = [true, false].map do |reports|
   operator.skip_confirmation_notification!
   operator.save!
   permissions = %w[jrc_contact_center_view jrc_contact_center_audit]
-  permissions.concat(%w[jrc_contact_center_supervise jrc_contact_center_reports]) if reports
+  permissions.push('jrc_contact_center_supervise', 'jrc_contact_center_reports') if reports
   audit_role = CustomRole.create!(account: account, name: operator.name, permissions: permissions)
   AccountUser.create!(account: account, user: operator, role: :agent, custom_role: audit_role)
   JrcCrm::UserBusinessUnit.create!(
