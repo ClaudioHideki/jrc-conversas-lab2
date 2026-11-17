@@ -4,3 +4,4 @@ json.description custom_role.description
 json.permissions custom_role.permissions
 json.created_at custom_role.created_at
 json.updated_at custom_role.updated_at
+json.revision JrcContactCenter::RoleRevision.token(custom_role)

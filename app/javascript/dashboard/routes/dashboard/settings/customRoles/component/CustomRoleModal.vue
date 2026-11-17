@@ -28,6 +28,8 @@ const props = defineProps({
   },
   saveErrorMessage: { type: String, default: '' },
   reviewLabels: { type: Object, default: null },
+  revisionMessages: { type: Object, default: null },
+  loadLatestRole: { type: Function, default: null },
   selectedRole: {
     type: Object,
     default: () => ({}),
@@ -93,8 +95,19 @@ const name = ref('');
 const description = ref('');
 const selectedPermissions = ref([]);
 const reviewing = ref(false);
+const revision = ref(props.selectedRole.revision);
+const revisionConflict = ref(false);
+const latestRole = ref(null);
+const loadingLatest = ref(false);
+const revisionRequired = computed(
+  () => props.mode === 'edit' && Boolean(props.revisionMessages)
+);
+const revisionMissing = computed(
+  () => revisionRequired.value && !revision.value
+);
 const permissionChanges = computed(() => {
-  const previous = props.selectedRole.permissions || [];
+  const previous =
+    latestRole.value?.permissions || props.selectedRole.permissions || [];
   return {
     added: selectedPermissions.value.filter(value => !previous.includes(value)),
     removed: previous.filter(
@@ -197,9 +210,30 @@ const primaryButtonText = computed(() => {
     : props.reviewLabels.review;
 });
 
+const refreshRevision = async () => {
+  loadingLatest.value = true;
+  try {
+    const response = await props.loadLatestRole();
+    latestRole.value = response.data;
+    revision.value = response.data.revision;
+    revisionConflict.value = false;
+    reviewing.value = false;
+  } catch {
+    useAlert(props.revisionMessages.loadError);
+  } finally {
+    loadingLatest.value = false;
+  }
+};
+
 const handleCustomRole = async () => {
   v$.value.$touch();
-  if (v$.value.$invalid) return;
+  if (
+    v$.value.$invalid ||
+    revisionMissing.value ||
+    revisionConflict.value ||
+    loadingLatest.value
+  )
+    return;
   if (props.reviewLabels && !reviewing.value) {
     reviewing.value = true;
     return;
@@ -217,6 +251,9 @@ const handleCustomRole = async () => {
       await store.dispatch('customRole/updateCustomRole', {
         id: props.selectedRole.id,
         ...roleData,
+        ...(revisionRequired.value
+          ? { expected_revision: revision.value }
+          : {}),
       });
       useAlert(t('CUSTOM_ROLE.EDIT.API.SUCCESS_MESSAGE'));
     } else {
@@ -227,6 +264,12 @@ const handleCustomRole = async () => {
     resetForm();
     emit('close');
   } catch (error) {
+    if (props.revisionMessages && error?.message === 'stale_role_revision') {
+      revisionConflict.value = true;
+      reviewing.value = false;
+      useAlert(props.revisionMessages.conflict);
+      return;
+    }
     const errorMessage =
       props.saveErrorMessage ||
       error?.message ||
@@ -238,7 +281,12 @@ const handleCustomRole = async () => {
 };
 
 const isSubmitDisabled = computed(
-  () => v$.value.$invalid || addCustomRole.showLoading
+  () =>
+    v$.value.$invalid ||
+    addCustomRole.showLoading ||
+    revisionMissing.value ||
+    revisionConflict.value ||
+    loadingLatest.value
 );
 </script>
 
@@ -306,6 +354,45 @@ const isSubmitDisabled = computed(
         </div>
       </div>
 
+      <section
+        v-if="revisionMissing || revisionConflict"
+        class="mb-4 rounded-lg border border-n-ruby-6 bg-n-ruby-2 p-3 text-sm text-n-ruby-11"
+        role="alert"
+        data-role-conflict
+      >
+        <p>
+          {{
+            revisionMissing
+              ? revisionMessages.missing
+              : revisionMessages.conflict
+          }}
+        </p>
+        <Button
+          v-if="revisionConflict && loadLatestRole"
+          class="mt-3"
+          type="button"
+          :label="revisionMessages.reload"
+          :is-loading="loadingLatest"
+          :disabled="loadingLatest"
+          @click="refreshRevision"
+        />
+      </section>
+      <section
+        v-if="latestRole"
+        class="mb-4 rounded-lg border border-n-slate-6 p-3 text-sm text-n-slate-12"
+        data-role-latest
+      >
+        <h3 class="font-semibold">{{ revisionMessages.latest }}</h3>
+        <p class="break-words">{{ latestRole.name }}</p>
+        <p class="whitespace-pre-wrap break-words">
+          {{ latestRole.description }}
+        </p>
+        <ul class="list-inside list-disc">
+          <li v-for="permission in latestRole.permissions" :key="permission">
+            {{ permissionLabel(permission) }}
+          </li>
+        </ul>
+      </section>
       <section
         v-if="reviewing && reviewLabels"
         class="mb-4 rounded-lg border border-n-blue-6 bg-n-blue-2 p-3 text-sm text-n-slate-12"

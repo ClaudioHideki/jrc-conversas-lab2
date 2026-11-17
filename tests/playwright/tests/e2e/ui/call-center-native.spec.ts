@@ -849,3 +849,138 @@ test('native role denied creation keeps the draft and never persists an unauthor
   await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
   await expect(dialog).not.toBeVisible();
 });
+
+test('native role stale form preserves the draft and requires a fresh explicit review', async ({
+  page,
+}, info) => {
+  const rolesApi =
+    'http://127.0.0.1:5387/api/v1/accounts/' +
+    session.account_id +
+    '/custom_roles';
+  const name = 'SYNTHETIC stale role ' + info.project.name;
+  const created = await page.request.post(rolesApi, {
+    headers: session.administrator,
+    data: {
+      custom_role: {
+        name,
+        description: 'Original server version',
+        permissions: ['jrc_contact_center_view'],
+      },
+    },
+  });
+  expect(created.status()).toBe(200);
+  const original = await created.json();
+  expect(original.revision).toMatch(/^[0-9a-f]{64}$/);
+  await page.goto(base + '/permissions');
+  await page
+    .getByRole('combobox', { name: 'Perfil nativo', exact: true })
+    .selectOption(String(original.id));
+  await page.locator('[data-edit-native-role]').click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Nome', { exact: true }).fill(name + ' local');
+  await dialog
+    .getByLabel('Descrição', { exact: true })
+    .fill('SYNTHETIC retained local draft');
+  const newer = await page.request.patch(rolesApi + '/' + original.id, {
+    headers: session.administrator,
+    data: {
+      custom_role: { description: 'SYNTHETIC concurrent server version' },
+    },
+  });
+  expect(newer.status()).toBe(200);
+  const current = await newer.json();
+  expect(current.revision).not.toBe(original.revision);
+  await dialog
+    .getByRole('button', { name: 'Revisar alterações', exact: true })
+    .click();
+  const staleSave = page.waitForResponse(
+    response =>
+      response.url().endsWith('/custom_roles/' + original.id) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Confirmar alterações', exact: true })
+    .click();
+  const conflict = await staleSave;
+  expect(conflict.request().postDataJSON().expected_revision).toBe(
+    original.revision
+  );
+  expect(conflict.status()).toBe(409);
+  await expect(dialog.locator('[data-role-conflict]')).toContainText(
+    'outra sessão'
+  );
+  await expect(dialog.getByLabel('Nome', { exact: true })).toHaveValue(
+    name + ' local'
+  );
+  await expect(dialog.getByLabel('Descrição', { exact: true })).toHaveValue(
+    'SYNTHETIC retained local draft'
+  );
+  await expect(dialog.locator('[data-role-review]')).toHaveCount(0);
+  await expect(
+    dialog.getByRole('button', { name: 'Revisar alterações', exact: true })
+  ).toBeDisabled();
+  const preserved = await page.request.get(rolesApi + '/' + original.id, {
+    headers: session.administrator,
+  });
+  expect((await preserved.json()).description).toBe(
+    'SYNTHETIC concurrent server version'
+  );
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-role-conflict.png',
+    fullPage: true,
+  });
+  await dialog
+    .getByRole('button', {
+      name: 'Carregar versão atual para comparar',
+      exact: true,
+    })
+    .click();
+  await expect(dialog.locator('[data-role-latest]')).toContainText(
+    'SYNTHETIC concurrent server version'
+  );
+  await expect(dialog.getByLabel('Nome', { exact: true })).toHaveValue(
+    name + ' local'
+  );
+  await expect(
+    dialog.getByRole('button', { name: 'Revisar alterações', exact: true })
+  ).toBeEnabled();
+  await dialog
+    .getByRole('button', { name: 'Revisar alterações', exact: true })
+    .click();
+  await expect(dialog.locator('[data-role-review]')).toContainText(
+    'SYNTHETIC retained local draft'
+  );
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-role-reloaded.png',
+    fullPage: true,
+  });
+  const reviewedSave = page.waitForResponse(
+    response =>
+      response.url().endsWith('/custom_roles/' + original.id) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Confirmar alterações', exact: true })
+    .click();
+  const saved = await reviewedSave;
+  expect(saved.request().postDataJSON().expected_revision).toBe(
+    current.revision
+  );
+  expect(saved.status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  await page.reload();
+  const final = await page.request.get(rolesApi + '/' + original.id, {
+    headers: session.administrator,
+  });
+  expect(await final.json()).toMatchObject({
+    name: name + ' local',
+    description: 'SYNTHETIC retained local draft',
+    permissions: ['jrc_contact_center_view'],
+  });
+});

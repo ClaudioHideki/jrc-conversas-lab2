@@ -2,6 +2,7 @@
 import { useStore } from 'dashboard/composables/store';
 import { watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import CustomRoleAPI from 'dashboard/api/customRole';
 import CustomRoleModal from 'dashboard/routes/dashboard/settings/customRoles/component/CustomRoleModal.vue';
 
 const props = defineProps({
@@ -22,6 +23,14 @@ const reviewLabels = {
   review: t('JRC_CONTACT_CENTER.ADMIN.ROLE_REVIEW'),
   confirm: t('JRC_CONTACT_CENTER.ADMIN.ROLE_CONFIRM'),
 };
+const revisionMessages = {
+  conflict: t('JRC_CONTACT_CENTER.ADMIN.ROLE_CONFLICT'),
+  missing: t('JRC_CONTACT_CENTER.ADMIN.ROLE_REVISION_MISSING'),
+  reload: t('JRC_CONTACT_CENTER.ADMIN.ROLE_RELOAD'),
+  latest: t('JRC_CONTACT_CENTER.ADMIN.ROLE_LATEST'),
+  loadError: t('JRC_CONTACT_CENTER.ADMIN.ROLE_RELOAD_ERROR'),
+};
+const loadLatestRole = () => CustomRoleAPI.show(props.selectedRole.id);
 store.commit('customRole/SET_CUSTOM_ROLE', props.roles);
 watch(
   () => store.getters['customRole/getUIFlags'],
@@ -37,6 +46,8 @@ watch(
   <CustomRoleModal
     :mode="selectedRole ? 'edit' : 'add'"
     :review-labels="reviewLabels"
+    :revision-messages="revisionMessages"
+    :load-latest-role="loadLatestRole"
     :selected-role="selectedRole || {}"
     :save-error-message="t('JRC_CONTACT_CENTER.ADMIN.SAVE_ERROR')"
     @close="emit('close')"

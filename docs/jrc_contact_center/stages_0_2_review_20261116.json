@@ -549,14 +549,15 @@
         "Criação e falha de autorização cobertas por oito novos casos Chrome planejados sobre dados sintéticos, sem mocks de API.",
         "Passo explícito de revisão do nome/descrição e capacidades a conceder/retirar antes de confirmar; alterar o formulário invalida a revisão.",
         "Cobertura corporativa revalidada na API para criar, renomear, retirar capacidades e excluir perfis globais que envolvam CC. Administrador restrito a unidade não ganha autoridade global por manipular a rota. Perfis sem capacidades CC preservam a política nativa.",
-        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
+        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel.",
+        "Revisão esperada aditiva: o editor CC exige a versão capturada, trata 409 sem perder o rascunho e exige comparação/revisão explícita antes de gravar contra a versão atual. Implementado neste incremento; aguarda CI do novo SHA."
       ],
       "remaining_or_external": [
         "Pendente 0–2: herança por equipe/usuário não possui contrato ou armazenamento nativo; requer decisão arquitetural, sem concessões por suposição.",
-        "Pendente 0–2: revisão esperada pelo navegador não existe no payload; bloqueio transacional impede restauração de poder revogado, mas não detecta sobrescrita de campos por dois formulários.",
         "Exclusão de perfil com membros usa dependência nullify nativa; mudança de política exige avaliar todos os módulos.",
         "Pendente 0–2: matriz visual completa multi-módulo da figura; as concessões existentes seguem explícitas e revisadas.",
-        "Pendente 0–2: native_role? mantém acesso legado quando custom_role_id é nulo. O requisito de não ativar novos usuários automaticamente exige política de elegibilidade/migração que preserve usuários existentes; não foi alterado por suposição."
+        "Pendente 0–2: native_role? mantém acesso legado quando custom_role_id é nulo. O requisito de não ativar novos usuários automaticamente exige política de elegibilidade/migração que preserve usuários existentes; não foi alterado por suposição.",
+        "Clientes nativos anteriores sem expected_revision preservam o contrato; precondição global obrigatória depende de migração coordenada de clientes e não foi ativada silenciosamente."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -1324,5 +1325,33 @@
     },
     "cause": "A consulta da lista era aguardada antes de avisar o painel; sua recarga posterior desmontava a seção e apagava o texto digitado no intervalo. Captura registra pesquisa vazia e URL sem units_q.",
     "correction": "Emitir changed imediatamente após persistir e fechar o popup, antes de aguardar a lista. A revalidação padrão do painel e o descarte de dados antigos permanecem. Dois testes Vue com Promise suspensa fixam a ordem; a exigência Chrome de exatamente uma linha filtrada permanece."
+  },
+  "continuity_20261117": {
+    "base_sha": "fc0bf6ce35df3aeebc5c3297aca62be5518852d1",
+    "main_observed": "89779191b0b4be44929a426c7a924dbcad4c3690",
+    "stages_authorized": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "increment": "F11 revisão esperada compatível, sem migration ou concessões implícitas",
+    "adr": "docs/adr/20261117-call-center-role-revision.md",
+    "expected_chrome": 56,
+    "previous_chrome_preserved": 52,
+    "native_validation": "pending_new_sha",
+    "external_homologation": false,
+    "part_1_complete": false,
+    "next": [
+      "Herança explícita com precedência e limites de escopo",
+      "Elegibilidade sem concessões por criação de usuário",
+      "Auditoria administrativa por conta/unidade",
+      "Etapas 3–8 conforme contratos reais"
+    ]
   }
 }

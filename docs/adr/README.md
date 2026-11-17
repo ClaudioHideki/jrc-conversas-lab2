@@ -8,3 +8,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 ## Decisões deste bootstrap
 
 - [0001-governanca-operacional-init](0001-governanca-operacional-init.md): adoção do INIT solicitado pelo usuário.
+
+- [20261117-call-center-role-revision](20261117-call-center-role-revision.md): precondição aditiva, conflito 409, recuperação explícita do rascunho e compatibilidade dos clientes nativos.
