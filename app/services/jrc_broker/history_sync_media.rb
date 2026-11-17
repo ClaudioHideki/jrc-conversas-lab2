@@ -65,7 +65,7 @@ class JrcBroker::HistorySyncMedia
   end
 
   def verify_bytes!(bytes, descriptor)
-    mime = Marcel::MimeType.for(StringIO.new(bytes), name: descriptor.fetch('filename'))
+    mime = JrcBroker::MediaMime.detect(bytes, filename: descriptor.fetch('filename'), declared: descriptor.fetch('mime_type'))
     valid = bytes.bytesize == descriptor.fetch('byte_size') && Digest::SHA256.hexdigest(bytes) == descriptor.fetch('sha256') &&
             mime == descriptor.fetch('mime_type') && mime_allowed?(mime, descriptor.fetch('media_type'))
     raise ArgumentError, 'historical_media_integrity' unless valid

@@ -1,6 +1,8 @@
 <!-- jrc-operational-init:v1 -->
 # Backlog operacional — JRC Conversas LAB2 — Grupo JRC
 
+- [ ] **OPUS-MIME-20261117:** Alinhar Marcel/Broker em LIVE e histórico com assinatura Ogg/Opus, mantendo envelope/hash. RED44154858796:74/75 nativos; correção e GREEN pendentes. Base runtime6886261 + main89779191 preservadas. Ver ADR0006. Sem deploy ou novo envio real nesta etapa.
+
 ## Estado vigente — publicação de 16/11/2026
 
 - [x] **RETENTION-RELEASE-20261116:** Proteção de histórico/recibos, main funcionald468, imagem e deploy Grupo JRC concluídos; [evidências e digests](docs/jrc_consolidation/release-20261116-result.md).
