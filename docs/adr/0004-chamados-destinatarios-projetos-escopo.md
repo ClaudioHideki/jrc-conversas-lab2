@@ -41,3 +41,7 @@ contagens por transições reais e interação com os componentes Vue.
 O build desta branch exige o gate Projetos e Portal aprovado no mesmo SHA.
 Publicação de imagem e implantação são etapas distintas; esta tarefa não autoriza
 implantação em produção nem envio real de mensagens.
+
+Implementação e publicação concluídas no produto a5d5e1a. Os gates de integração
+e build foram aprovados no SHA exato; manifesto e revisão foram conferidos
+diretamente no GHCR. [Resultado da release](../jrc_consolidation/chamados-projetos-release-20261117.md).
