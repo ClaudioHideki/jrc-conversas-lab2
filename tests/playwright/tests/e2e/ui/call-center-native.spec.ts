@@ -1045,6 +1045,15 @@ test('configuration audit filters pagination details history and verified export
     '#' + session.unit_id
   );
   await expect(dialog).toContainText('Não comprova publicação');
+  const detailColor = await dialog
+    .locator('[data-audit-details] dd')
+    .first()
+    .evaluate(element => getComputedStyle(element).color);
+  const expectedColor = await panel
+    .locator('header h2')
+    .evaluate(element => getComputedStyle(element).color);
+  expect(detailColor).toBe(expectedColor);
+
   await page.screenshot({
     path: '.codex/call-center-native-e2e/' + suffix + '-audit-details.png',
     fullPage: true,
@@ -1234,4 +1243,127 @@ test('configuration audit boundary respects unit account export rights and live 
     });
     expect(restore.status()).toBe(200);
   }
+});
+
+test('native queue stale revision preserves the draft and requires explicit fresh confirmation', async ({
+  page,
+}, info) => {
+  const name = 'SYNTHETIC revision queue ' + info.project.name;
+  const created = await page.request.post(api + '/queues', {
+    headers: session.administrator,
+    data: {
+      queue: {
+        unit_id: session.unit_id,
+        name,
+        code: 'REVISION-' + info.project.name,
+        service_kind: 'voice',
+      },
+    },
+  });
+  expect(created.status()).toBe(201);
+  const target = (await created.json()).item;
+  expect(target.revision).toMatch(/^[a-f0-9]{64}$/);
+  await page.goto(base + '/queues?queues_q=' + encodeURIComponent(name));
+  await expect(page.locator('[data-resource-row]')).toHaveCount(1);
+  await page.locator('[data-edit]').click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Nome', { exact: true }).fill(name + ' local draft');
+  const concurrent = await page.request.patch(api + '/queues/' + target.id, {
+    headers: session.administrator,
+    data: { queue: { name: name + ' concurrent server state' } },
+  });
+  expect(concurrent.status()).toBe(200);
+  const current = (await concurrent.json()).item;
+  expect(current.revision).not.toBe(target.revision);
+  const staleResponse = page.waitForResponse(
+    response =>
+      response.url().endsWith('/queues/' + target.id) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  const rejected = await staleResponse;
+  expect(rejected.request().postDataJSON().expected_revision).toBe(
+    target.revision
+  );
+  expect(rejected.status()).toBe(409);
+  await expect(dialog.locator('[data-configuration-conflict]')).toContainText(
+    'outra sessão'
+  );
+  await expect(dialog.getByLabel('Nome', { exact: true })).toHaveValue(
+    name + ' local draft'
+  );
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeDisabled();
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-queue-conflict.png',
+    fullPage: true,
+  });
+  await dialog
+    .getByRole('button', {
+      name: 'Carregar versão atual para comparar',
+      exact: true,
+    })
+    .click();
+  await expect(dialog.locator('[data-configuration-latest]')).toContainText(
+    name + ' concurrent server state'
+  );
+  await expect(dialog.getByLabel('Nome', { exact: true })).toHaveValue(
+    name + ' local draft'
+  );
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeDisabled();
+  await dialog.locator('[data-configuration-review]').check();
+  await dialog
+    .getByLabel('Nome', { exact: true })
+    .fill(name + ' reviewed draft');
+  await expect(dialog.locator('[data-configuration-review]')).not.toBeChecked();
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeDisabled();
+  await dialog.locator('[data-configuration-review]').check();
+  const saveResponse = page.waitForResponse(
+    response =>
+      response.url().endsWith('/queues/' + target.id) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  const saved = await saveResponse;
+  expect(saved.request().postDataJSON().expected_revision).toBe(
+    current.revision
+  );
+  expect(saved.status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  const final = await page.request.get(api + '/queues/' + target.id, {
+    headers: session.administrator,
+  });
+  expect(final.status()).toBe(200);
+  expect((await final.json()).item.name).toBe(name + ' reviewed draft');
+  await page
+    .getByLabel('Pesquisar', { exact: true })
+    .fill(name + ' reviewed draft');
+  await page
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  await page.reload();
+  await expect(page.locator('[data-resource-row]')).toHaveCount(1);
+  await expect(page.locator('[data-resource-row]')).toContainText(
+    name + ' reviewed draft'
+  );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-queue-revised.png',
+    fullPage: true,
+  });
 });

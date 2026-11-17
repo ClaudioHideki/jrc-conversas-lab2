@@ -12,3 +12,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [20261117-call-center-role-revision](20261117-call-center-role-revision.md): precondição aditiva, conflito 409, recuperação explícita do rascunho e compatibilidade dos clientes nativos.
 
 - [20261117-call-center-configuration-audit](20261117-call-center-configuration-audit.md): trilha sanitizada, leitura por cobertura e revalidação transacional das escritas.
+
+- [20261117-call-center-configuration-revision](20261117-call-center-configuration-revision.md): revisão de estado opt-in, recarga autorizada e revisão explícita do rascunho.

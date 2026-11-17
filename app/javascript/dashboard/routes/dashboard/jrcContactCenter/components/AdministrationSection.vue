@@ -7,6 +7,8 @@ import API from 'dashboard/api/jrcContactCenter';
 import TeamsAPI from 'dashboard/api/teams';
 import CustomRoleAPI from 'dashboard/api/customRole';
 import NativeRoleEditor from './NativeRoleEditor.vue';
+import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
+import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -53,6 +55,23 @@ const resource = computed(() =>
     ? tab.value
     : { general: 'units' }[key.value] || key.value
 );
+const configurationRevision = useConfigurationRevision({
+  accountId: computed(() => props.accountId),
+  resource,
+  draft,
+});
+const configurationSaveAllowed = () => {
+  const expectsRecord = Boolean(
+    editing.value?.id &&
+      ['units', 'queues', 'memberships'].includes(resource.value)
+  );
+  return (
+    configurationRevision.canSave.value &&
+    (!expectsRecord ||
+      (configurationRevision.state.required &&
+        String(configurationRevision.state.id) === String(editing.value.id)))
+  );
+};
 const pending = computed(() => props.card.state === 'pending_contract');
 const local = computed(() =>
   ['units', 'queues', 'memberships', 'teams'].includes(resource.value)
@@ -214,6 +233,7 @@ const open = async row => {
         participates: true,
         supervises: false,
       };
+  configurationRevision.capture(row);
   try {
     if (resource.value === 'teams' && row) {
       const response = await TeamsAPI.getAgents({ teamId: row.id });
@@ -268,7 +288,8 @@ const saveTeamMembers = async () => {
 };
 const save = async () => {
   if (key.value === 'permissions') return;
-  if (saving.value || savingMembers.value) return;
+  if (saving.value || savingMembers.value || !configurationSaveAllowed())
+    return;
   if (
     resource.value === 'teams' &&
     editing.value &&
@@ -312,7 +333,8 @@ const save = async () => {
           status: row.status,
           settings: row.settings || {},
         },
-        id
+        id,
+        configurationRevision.options()
       );
     else if (resource.value === 'queues')
       await API.saveQueue(
@@ -325,7 +347,8 @@ const save = async () => {
           strategy: row.strategy,
           service_kind: row.service_kind,
         },
-        id
+        id,
+        configurationRevision.options()
       );
     else if (resource.value === 'memberships')
       await API.saveQueueMembership(
@@ -338,7 +361,8 @@ const save = async () => {
           active: row.active,
           priority: row.priority,
         },
-        id
+        id,
+        configurationRevision.options()
       );
     else if (resource.value === 'teams') {
       const attributes = { name: row.name, description: row.description };
@@ -351,6 +375,7 @@ const save = async () => {
     await load();
   } catch (error) {
     if (version === generation) {
+      if (configurationRevision.handleError(error)) return;
       const inactiveQueue = error.response?.data?.error === 'inactive_queue';
       invalidAttributes.value = inactiveQueue
         ? ['queue_id']
@@ -701,7 +726,9 @@ onBeforeUnmount(() => {
       :title="`${title} — ${label(editing ? 'EDIT' : 'CREATE')}`"
       :confirm-button-label="label(resource === 'teams' ? 'SAVE_TEAM' : 'SAVE')"
       :cancel-button-label="label('CANCEL')"
-      :disable-confirm-button="saving || savingMembers"
+      :disable-confirm-button="
+        saving || savingMembers || !configurationSaveAllowed()
+      "
       :is-loading="saving"
       :dismissible="!saving && !savingMembers && !savingRole"
       :show-cancel-button="key !== 'permissions' && !saving && !savingMembers"
@@ -710,6 +737,7 @@ onBeforeUnmount(() => {
       :show-confirm-button="key !== 'permissions'"
       width="2xl"
       @confirm="save"
+      @close="configurationRevision.capture(null)"
     >
       <NativeRoleEditor
         v-if="canEditRoles"
@@ -719,6 +747,14 @@ onBeforeUnmount(() => {
         @close="closeRoleEditor"
       />
       <div v-else class="grid min-w-0 gap-4 sm:grid-cols-2">
+        <ConfigurationRevisionConflict
+          :state="configurationRevision.state"
+          :draft="draft"
+          :resource="resource"
+          :reviewed="configurationRevision.reviewed()"
+          @reload="configurationRevision.reload"
+          @review="configurationRevision.review"
+        />
         <p
           v-if="formError"
           role="alert"

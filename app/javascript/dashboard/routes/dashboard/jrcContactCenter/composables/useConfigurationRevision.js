@@ -1,0 +1,117 @@
+import { computed, onBeforeUnmount, reactive, watch } from 'vue';
+import API from 'dashboard/api/jrcContactCenter';
+
+const resources = ['units', 'queues', 'memberships'];
+const validRevision = value =>
+  typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+export const useConfigurationRevision = ({ accountId, resource, draft }) => {
+  const state = reactive({
+    account: '',
+    resource: '',
+    required: false,
+    conflict: false,
+    expected: '',
+    latest: null,
+    reloading: false,
+    error: false,
+    id: null,
+    reviewedDraft: '',
+  });
+  let generation = 0;
+  const fingerprint = () => JSON.stringify(draft.value);
+  const reviewed = () =>
+    Boolean(state.latest && state.reviewedDraft === fingerprint());
+  const canSave = computed(
+    () =>
+      !state.required ||
+      (state.account === String(accountId.value) &&
+        state.resource === resource.value &&
+        !state.reloading &&
+        Boolean(state.expected) &&
+        (!state.conflict || reviewed()))
+  );
+  const capture = record => {
+    generation += 1;
+    Object.assign(state, {
+      account: String(accountId.value),
+      resource: resource.value,
+      required: Boolean(record?.id && resources.includes(resource.value)),
+      conflict: false,
+      expected: validRevision(record?.revision) ? record.revision : '',
+      latest: null,
+      reloading: false,
+      error: false,
+      id: record?.id || null,
+      reviewedDraft: '',
+    });
+    if (state.required && !state.expected) state.conflict = true;
+  };
+  const handleError = error => {
+    if (
+      !state.required ||
+      ![
+        'stale_configuration_revision',
+        'configuration_revision_required',
+      ].includes(error?.response?.data?.error)
+    )
+      return false;
+    state.conflict = true;
+    state.latest = null;
+    state.reviewedDraft = '';
+    state.error = false;
+    return true;
+  };
+  const reload = async () => {
+    if (!state.required || state.reloading) return;
+    generation += 1;
+    const version = generation;
+    const account = String(accountId.value);
+    const source = resource.value;
+    const id = state.id;
+    state.reloading = true;
+    state.error = false;
+    state.latest = null;
+    state.reviewedDraft = '';
+    try {
+      const response = await API.configurationRecord(account, source, id);
+      if (
+        version !== generation ||
+        account !== String(accountId.value) ||
+        source !== resource.value ||
+        id !== state.id
+      )
+        return;
+      const latest = response.data.item;
+      if (!validRevision(latest.revision) || String(latest.id) !== String(id))
+        throw new Error('Invalid revision response');
+      state.expected = latest.revision;
+      state.latest = latest;
+    } catch {
+      if (version === generation) state.error = true;
+    } finally {
+      if (version === generation) state.reloading = false;
+    }
+  };
+  const review = confirmed => {
+    state.reviewedDraft = confirmed ? fingerprint() : '';
+  };
+  const options = () =>
+    state.required ? { expected_revision: state.expected } : {};
+  watch(
+    () => String(accountId.value) + ':' + resource.value,
+    () => capture(null)
+  );
+  onBeforeUnmount(() => {
+    generation += 1;
+  });
+  return {
+    state,
+    canSave,
+    capture,
+    handleError,
+    reload,
+    reviewed,
+    review,
+    options,
+  };
+};

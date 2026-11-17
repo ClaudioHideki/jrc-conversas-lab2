@@ -140,4 +140,17 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     expect(JrcContactCenter::QueueMembership.where(account: account)).to be_empty
     expect(Audited.audit_class.where(associated: account, auditable_type: 'JrcContactCenter::QueueMembership')).to be_empty
   end
+
+  it 'rejects a same-scope stale revision after waiting for a concurrent configuration update' do
+    expected = JrcContactCenter::ConfigurationRevision.token(queue)
+    status = race_with_queue_change(
+      change: { name: 'Concurrent committed state' }, verb: :patch,
+      endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/queues/#{queue.id}",
+      payload: { queue: { name: 'Stale draft' }, expected_revision: expected }
+    )
+    expect(status).to eq(409)
+    expect(queue.reload.name).to eq('Concurrent committed state')
+    trail = Audited.audit_class.where(auditable: queue, action: 'update', comment: JrcContactCenter::ConfigurationAudit::COMMENT)
+    expect(trail.count).to eq(1)
+  end
 end

@@ -7,6 +7,13 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
     render json: list_payload(memberships) { |membership| serialize(membership) }.merge(agents: agent_options)
   end
 
+  def show
+    response.headers['Cache-Control'] = 'no-store'
+    authorize_contact_center!(:configure?)
+    membership = scoped_memberships.find(params[:id])
+    render json: base_payload.merge(item: serialize(membership))
+  end
+
   def create
     authorize_contact_center!(:configure?)
     membership = configuration_write.create!(JrcContactCenter::QueueMembership) { membership_params }
@@ -15,7 +22,7 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
 
   def update
     authorize_contact_center!(:configure?)
-    membership = configuration_write.update!(scoped_memberships, params[:id]) { membership_params }
+    membership = configuration_write.update!(scoped_memberships, params[:id], **configuration_revision_options) { membership_params }
     render json: base_payload.merge(item: serialize(membership.reload))
   end
 
@@ -105,7 +112,7 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
     user = membership.account_user.user
     membership.as_json(only: %i[id queue_id account_user_id role priority active starts_at ends_at settings created_at updated_at])
               .merge('queue_name' => membership.queue.name, 'user_id' => user.id, 'user_name' => user.name,
-                     'participates' => membership.role == 'agent',
+                     'revision' => JrcContactCenter::ConfigurationRevision.token(membership), 'participates' => membership.role == 'agent',
                      'supervises' => membership.role == 'supervisor' || membership.settings['supervises'] == true)
   end
 end

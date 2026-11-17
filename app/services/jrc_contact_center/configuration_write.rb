@@ -2,6 +2,8 @@
 
 # Preserve the native request contract while serializing scope-sensitive writes.
 class JrcContactCenter::ConfigurationWrite
+  UNSPECIFIED_REVISION = Object.new.freeze
+
   def initialize(account:, access:)
     @account = account
     @access = access
@@ -17,7 +19,7 @@ class JrcContactCenter::ConfigurationWrite
     end
   end
 
-  def update!(relation, id)
+  def update!(relation, id, expected_revision: UNSPECIFIED_REVISION)
     relation.klass.transaction do
       relation.klass.uncached do
         record = relation.find(id)
@@ -25,6 +27,7 @@ class JrcContactCenter::ConfigurationWrite
           relation.find(id)
           lock_parents(record, yield)
           relation.find(id)
+          JrcContactCenter::ConfigurationRevision.check!(record, expected_revision) unless expected_revision.equal?(UNSPECIFIED_REVISION)
           record.update!(yield)
         end
         record

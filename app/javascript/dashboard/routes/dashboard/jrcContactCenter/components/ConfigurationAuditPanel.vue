@@ -531,7 +531,9 @@ onBeforeUnmount(() => {
           data-audit-preview
         >
           <h3 class="font-semibold">{{ text.details }}</h3>
-          <p v-if="loadingDetail" role="status">{{ text.loading }}</p>
+          <p v-if="loadingDetail" role="status" class="text-n-slate-12">
+            {{ text.loading }}
+          </p>
           <p v-else-if="detailError" role="alert" class="text-n-ruby-11">
             {{ detailError }}
           </p>

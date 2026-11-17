@@ -1902,7 +1902,16 @@
       "VOICE": "Voz",
       "WHATSAPP": "WhatsApp",
       "EMAIL": "E-mail",
-      "CHAT": "Chat"
+      "CHAT": "Chat",
+      "PROVIDER": "Regra do provedor"
+    },
+    "CONFIGURATION_REVISION": {
+      "CONFLICT": "Este registro mudou em outra sessão ou não tem uma revisão válida. Seu rascunho foi preservado. Carregue a versão atual e compare antes de confirmar uma nova tentativa.",
+      "RELOAD": "Carregar versão atual para comparar",
+      "LOADED": "Versão atual carregada. Compare os valores abaixo com seu rascunho. Os dados digitados não foram substituídos.",
+      "SERVER": "Versão atual do servidor",
+      "DRAFT": "Seu rascunho",
+      "CONFIRM": "Revisei a versão atual e confirmo as alterações do meu rascunho."
     }
   }
 }

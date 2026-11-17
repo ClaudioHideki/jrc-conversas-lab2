@@ -9,6 +9,16 @@ const base = accountId => {
 };
 
 export default {
+  configurationRecord: (accountId, resource, id) => {
+    const paths = {
+      units: 'units',
+      queues: 'queues',
+      memberships: 'queue_memberships',
+    };
+    if (!paths[resource] || !/^[1-9]\d*$/.test(String(id)))
+      throw new Error('Invalid configuration context');
+    return axios.get(`${base(accountId)}/${paths[resource]}/${Number(id)}`);
+  },
   administration: accountId => axios.get(`${base(accountId)}/administration`),
   administrativeList: (accountId, section, params = {}) =>
     axios.get(
@@ -53,25 +63,32 @@ export default {
     axios.get(`${base(accountId)}/customer_context`, { params: { phone } }),
   units: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/units`, { params }),
-  saveUnit: (accountId, unit, id) =>
+  saveUnit: (accountId, unit, id, options = {}) =>
     id
-      ? axios.patch(`${base(accountId)}/units/${Number(id)}`, { unit })
+      ? axios.patch(`${base(accountId)}/units/${Number(id)}`, {
+          ...options,
+          unit,
+        })
       : axios.post(`${base(accountId)}/units`, { unit }),
   queues: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/queues`, { params }),
   queueMemberships: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/queue_memberships`, { params }),
-  saveQueueMembership: (accountId, queueMembership, id) =>
+  saveQueueMembership: (accountId, queueMembership, id, options = {}) =>
     id
       ? axios.patch(`${base(accountId)}/queue_memberships/${Number(id)}`, {
+          ...options,
           queue_membership: queueMembership,
         })
       : axios.post(`${base(accountId)}/queue_memberships`, {
           queue_membership: queueMembership,
         }),
-  saveQueue: (accountId, queue, id) =>
+  saveQueue: (accountId, queue, id, options = {}) =>
     id
-      ? axios.patch(`${base(accountId)}/queues/${Number(id)}`, { queue })
+      ? axios.patch(`${base(accountId)}/queues/${Number(id)}`, {
+          ...options,
+          queue,
+        })
       : axios.post(`${base(accountId)}/queues`, { queue }),
   calls: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/call_sessions`, { params, timeout: 30000 }),

@@ -13,9 +13,9 @@ namespace :api, defaults: { format: 'json' } do
         resources :events, only: [:index] do
           post :reprocess, on: :member
         end
-        resources :units, only: %i[index create update]
-        resources :queues, only: %i[index create update]
-        resources :queue_memberships, only: %i[index create update]
+        resources :units, only: %i[index show create update]
+        resources :queues, only: %i[index show create update]
+        resources :queue_memberships, only: %i[index show create update]
         resources :call_sessions, only: %i[index show] do
           patch :observations, on: :member
           get :observations, on: :member, to: 'call_observations#index'

@@ -7,6 +7,13 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
     render json: list_payload(units) { |unit| serialize(unit) }
   end
 
+  def show
+    response.headers['Cache-Control'] = 'no-store'
+    authorize_contact_center!(:access?)
+    unit = contact_center_access.units.find(params[:id])
+    render json: base_payload.merge(item: serialize(unit))
+  end
+
   def create
     authorize_contact_center!(:configure?)
     unit = configuration_write.create!(JrcContactCenter::Unit) { unit_params }
@@ -15,7 +22,7 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
 
   def update
     authorize_contact_center!(:configure?)
-    unit = configuration_write.update!(contact_center_access.units, params[:id]) { unit_params }
+    unit = configuration_write.update!(contact_center_access.units, params[:id], **configuration_revision_options) { unit_params }
     render json: base_payload.merge(item: serialize(unit))
   end
 
@@ -33,5 +40,6 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
 
   def serialize(unit)
     unit.as_json(only: %i[id code name kind status timezone parent_unit_id settings created_at updated_at]).transform_keys(&:to_s)
+        .merge('revision' => JrcContactCenter::ConfigurationRevision.token(unit))
   end
 end

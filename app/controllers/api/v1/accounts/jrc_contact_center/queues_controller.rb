@@ -8,6 +8,13 @@ class Api::V1::Accounts::JrcContactCenter::QueuesController < Api::V1::Accounts:
     render json: list_payload(queues) { |queue| serialize(queue) }
   end
 
+  def show
+    response.headers['Cache-Control'] = 'no-store'
+    authorize_contact_center!(:access?)
+    queue = contact_center_access.queues.find(params[:id])
+    render json: base_payload.merge(item: serialize(queue))
+  end
+
   def create
     authorize_contact_center!(:configure?)
     queue = configuration_write.create!(JrcContactCenter::Queue) { queue_params }
@@ -16,7 +23,7 @@ class Api::V1::Accounts::JrcContactCenter::QueuesController < Api::V1::Accounts:
 
   def update
     authorize_contact_center!(:configure?)
-    queue = configuration_write.update!(contact_center_access.queues, params[:id]) { queue_params }
+    queue = configuration_write.update!(contact_center_access.queues, params[:id], **configuration_revision_options) { queue_params }
     render json: base_payload.merge(item: serialize(queue))
   end
 
@@ -31,6 +38,6 @@ class Api::V1::Accounts::JrcContactCenter::QueuesController < Api::V1::Accounts:
 
   def serialize(queue)
     queue.as_json(only: %i[id unit_id code name external_ref service_kind strategy status max_wait_seconds active_from active_until settings])
-         .merge('unit_name' => queue.unit.name)
+         .merge('unit_name' => queue.unit.name, 'revision' => JrcContactCenter::ConfigurationRevision.token(queue))
   end
 end

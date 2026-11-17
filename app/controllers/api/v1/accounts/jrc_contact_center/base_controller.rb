@@ -37,6 +37,10 @@ class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::B
     { contract_version: 1, account_id: @contact_center_account_id.to_s }
   end
 
+  def configuration_revision_options
+    params.key?(:expected_revision) ? { expected_revision: params[:expected_revision] } : {}
+  end
+
   def configuration_write
     @configuration_write ||= JrcContactCenter::ConfigurationWrite.new(account: Current.account, access: contact_center_access)
   end

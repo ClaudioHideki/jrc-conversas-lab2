@@ -90,4 +90,24 @@ RSpec.describe 'Call Center configuration audit transactions', type: :model do
     expect(trail.last.audited_changes.fetch('attributes')).to include(a_hash_including('name' => 'First reviewed name'))
     expect(trail.last.audited_changes.fetch('attributes').last).to include('name' => 'Second reviewed name')
   end
+
+  it 'preserves other accounts and their history during the native account lifecycle' do
+    owner = create(:user, account: account)
+    queue = JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'OWNED', name: 'Owned')
+    JrcContactCenter::QueueMembership.create!(
+      account: account, queue: queue, account_user: account.account_users.find_by!(user: owner), role: 'agent'
+    )
+    protected_account = create(:account)
+    protected_unit = JrcContactCenter::Unit.create!(account: protected_account, code: 'PROTECTED', name: 'Protected', kind: 'sac')
+    protected_audit = Audited.audit_class.find_by!(auditable: protected_unit, action: 'create')
+    protected_state = protected_audit.attributes
+    owned_id = account.id
+    account.destroy!
+    expect(Account.exists?(owned_id)).to be(false)
+    expect(JrcContactCenter::Unit.where(account_id: owned_id)).to be_empty
+    expect(JrcContactCenter::Queue.where(account_id: owned_id)).to be_empty
+    expect(JrcContactCenter::QueueMembership.where(account_id: owned_id)).to be_empty
+    expect(protected_unit.reload.name).to eq('Protected')
+    expect(protected_audit.reload.attributes).to eq(protected_state)
+  end
 end

@@ -95,6 +95,7 @@ const permissionLabels = {
   ),
 };
 const enumLabels = {
+  provider: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.PROVIDER'),
   sac: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.SAC'),
   coe: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.COE'),
   finance: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.FINANCE'),
@@ -138,7 +139,7 @@ const value = (entry, field = '') => {
 </script>
 
 <template>
-  <div class="min-w-0 space-y-4 text-sm" data-audit-details>
+  <div class="min-w-0 space-y-4 text-sm text-n-slate-12" data-audit-details>
     <dl class="grid min-w-0 gap-3 sm:grid-cols-2">
       <div>
         <dt class="text-n-slate-11">{{ labels.id }}</dt>

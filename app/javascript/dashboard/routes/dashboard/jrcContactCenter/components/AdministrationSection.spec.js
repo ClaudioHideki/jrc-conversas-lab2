@@ -20,6 +20,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
     queues: vi.fn(),
     queueMemberships: vi.fn(),
     administrativeList: vi.fn(),
+    configurationRecord: vi.fn(),
     saveUnit: vi.fn(),
     saveQueue: vi.fn(),
     saveQueueMembership: vi.fn(),
@@ -158,7 +159,8 @@ describe('administrative workflow', () => {
     expect(API.saveUnit).toHaveBeenLastCalledWith(
       '1',
       expect.objectContaining({ name: 'Synthetic unit', code: 'SYNTHETIC' }),
-      undefined
+      undefined,
+      {}
     );
     expect(wrapper.find('[data-dialog]').exists()).toBe(false);
   });
@@ -166,6 +168,7 @@ describe('administrative workflow', () => {
   it('edits loaded values without changing the list object before persistence', async () => {
     const unit = {
       id: 10,
+      revision: 'a'.repeat(64),
       name: 'Original',
       code: 'ORIGINAL',
       kind: 'sac',
@@ -185,7 +188,8 @@ describe('administrative workflow', () => {
     expect(API.saveUnit).toHaveBeenCalledWith(
       '1',
       expect.objectContaining({ name: 'Revised', timezone: 'UTC' }),
-      10
+      10,
+      { expected_revision: 'a'.repeat(64) }
     );
   });
 
@@ -350,6 +354,7 @@ describe('administrative workflow', () => {
         items: [
           {
             id: 12,
+            revision: 'a'.repeat(64),
             name: 'Original',
             code: 'CHAT',
             unit_id: 1,
@@ -370,7 +375,8 @@ describe('administrative workflow', () => {
     expect(API.saveQueue).toHaveBeenCalledWith(
       '1',
       expect.objectContaining({ name: 'Reviewed', service_kind: 'whatsapp' }),
-      12
+      12,
+      { expected_revision: 'a'.repeat(64) }
     );
   });
 
@@ -475,5 +481,89 @@ describe('administrative workflow', () => {
     expect(wrapper.get('[data-team-member="8"]').element.checked).toBe(true);
     expect(wrapper.get('[role="alert"]').text()).toBe('Denied');
     expect(API.saveQueueMembership).not.toHaveBeenCalled();
+  });
+
+  it('preserves a stale native unit draft and requires an explicitly reviewed reload before retry', async () => {
+    API.units.mockResolvedValue({
+      data: {
+        items: [
+          {
+            id: 10,
+            revision: 'a'.repeat(64),
+            name: 'Original',
+            code: 'REVIEW',
+            kind: 'sac',
+            timezone: 'UTC',
+            status: 'active',
+            settings: {},
+          },
+        ],
+        meta: { page: 1, pages: 1, total: 1 },
+      },
+    });
+    API.saveUnit.mockRejectedValueOnce({
+      response: {
+        status: 409,
+        data: { error: 'stale_configuration_revision' },
+      },
+    });
+    API.configurationRecord.mockResolvedValue({
+      data: {
+        item: {
+          id: 10,
+          revision: 'b'.repeat(64),
+          name: 'Concurrent server version',
+          code: 'REVIEW',
+          settings: { private: 'DO-NOT-DISPLAY' },
+        },
+      },
+    });
+    const wrapper = mountSection();
+    await flushPromises();
+    await wrapper.get('[data-edit]').trigger('click');
+    await flushPromises();
+    await wrapper
+      .get('[data-dialog] [name=name]')
+      .setValue('Preserved reviewed draft');
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(wrapper.get('[data-configuration-conflict]').text()).toContain(
+      'CONFIGURATION_REVISION.CONFLICT'
+    );
+    expect(wrapper.get('[data-dialog] [name=name]').element.value).toBe(
+      'Preserved reviewed draft'
+    );
+    await wrapper.get('[data-dialog]').trigger('submit');
+    expect(API.saveUnit).toHaveBeenCalledTimes(1);
+    await wrapper.get('[data-configuration-conflict] button').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-configuration-latest]').text()).toContain(
+      'Concurrent server version'
+    );
+    expect(wrapper.get('[data-configuration-latest]').text()).not.toContain(
+      'DO-NOT-DISPLAY'
+    );
+    expect(wrapper.get('[data-dialog] [name=name]').element.value).toBe(
+      'Preserved reviewed draft'
+    );
+    await wrapper.get('[data-configuration-review]').setValue(true);
+    await wrapper
+      .get('[data-dialog] [name=name]')
+      .setValue('Changed after review');
+    expect(wrapper.get('[data-configuration-review]').element.checked).toBe(
+      false
+    );
+    await wrapper.get('[data-dialog]').trigger('submit');
+    expect(API.saveUnit).toHaveBeenCalledTimes(1);
+    await wrapper.get('[data-configuration-review]').setValue(true);
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(API.saveUnit).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({ name: 'Changed after review' }),
+      10,
+      { expected_revision: 'b'.repeat(64) }
+    );
+    expect(wrapper.find('[data-dialog]').exists()).toBe(false);
   });
 });

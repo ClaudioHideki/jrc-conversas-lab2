@@ -550,7 +550,8 @@
         "Passo explícito de revisão do nome/descrição e capacidades a conceder/retirar antes de confirmar; alterar o formulário invalida a revisão.",
         "Cobertura corporativa revalidada na API para criar, renomear, retirar capacidades e excluir perfis globais que envolvam CC. Administrador restrito a unidade não ganha autoridade global por manipular a rota. Perfis sem capacidades CC preservam a política nativa.",
         "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel.",
-        "Revisão esperada aditiva: o editor CC exige a versão capturada, trata 409 sem perder o rascunho e exige comparação/revisão explícita antes de gravar contra a versão atual. Implementado neste incremento; aguarda CI do novo SHA."
+        "Revisão esperada aditiva: o editor CC exige a versão capturada, trata 409 sem perder o rascunho e exige comparação/revisão explícita antes de gravar contra a versão atual. Implementado neste incremento; aguarda CI do novo SHA.",
+        "Pré-condição opcional e editor protegido para unidades/filas/vínculos em implementação; novo SHA exige validação real, sem alterar o contrato de perfis já provado."
       ],
       "remaining_or_external": [
         "Pendente 0–2: herança por equipe/usuário não possui contrato ou armazenamento nativo; requer decisão arquitetural, sem concessões por suposição.",
@@ -739,8 +740,8 @@
         "Consulta paginada, histórico e exportação por capacidades e cobertura atual/histórica; flag audit_logs preservada."
       ],
       "remaining_or_external": [
-        "Aguardar homologação da interface e revalidação nativa no novo SHA.",
-        "Eventos/ACKs e efeitos reais no PABX dependem do contrato externo; auditoria local não confirma publicação."
+        "Validar correção local de contraste do popup nos dois temas no novo SHA.",
+        "Efeitos/ACKs PABX e trilha de publicação externa aguardam contrato e homologação real."
       ],
       "code_references": [
         "administration_controller.rb",
@@ -754,7 +755,7 @@
         "document_1_figure": 14,
         "document_2_figure": 14
       },
-      "validation": "467 exemplos Rails e 185 Vue no backend 67a85761; gate interrompido em lint. Novo SHA exige todos os testes e oito novos cenários Chrome. Sem homologação externa.",
+      "validation": "Functional base 1877e145 passed 467 Rails, 197 Vue and 64 Chrome with verified receipt/hash. Manual visual review found dark value contrast issue; correction and computed-color assertion require next SHA.",
       "objective": "Auditoria tecnica do PABX",
       "visual_components": "Campos e dados apresentados:  Registrar id do evento, correlation_id/request_id, ator, acao, recurso, before/after sanitizados, horario, estado pretendido e estado confirmado. Resultado deve distinguir concluido, pendente, divergente, falha e reversao.",
       "buttons_and_actions": "Acoes e resultado do clique:  Filtros de data, tipo, unidade/empresa e origem: refinar registros; Consultar: aplicar filtros com paginacao. Selecao de uma linha: preencher Detalhes do Evento com data/hora, usuario, operacao, objeto, tenant/accountcode, resultado e descricao. Ver Detalhes: abrir popup do evento; Exportar Relatorio: gerar arquivo dentro do escopo; Ver Historico: listar eventos correlatos.",
@@ -783,8 +784,8 @@
       "acceptance_scope": {
         "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
         "complete_reference": [
-          "Aguardar homologação da interface e revalidação nativa no novo SHA.",
-          "Eventos/ACKs e efeitos reais no PABX dependem do contrato externo; auditoria local não confirma publicação."
+          "Validar correção local de contraste do popup nos dois temas no novo SHA.",
+          "Efeitos/ACKs PABX e trilha de publicação externa aguardam contrato e homologação real."
         ]
       }
     },
@@ -1347,7 +1348,7 @@
     ],
     "increment": "F11 revisão esperada compatível, sem migration ou concessões implícitas",
     "adr": "docs/adr/20261117-call-center-role-revision.md",
-    "expected_chrome": 64,
+    "expected_chrome": 68,
     "previous_chrome_preserved": 52,
     "native_validation": "pending_new_sha",
     "external_homologation": false,
@@ -1447,7 +1448,83 @@
         "new_vue_regression": true,
         "shared_dialog_unchanged": true,
         "new_sha_validation": "pending"
+      },
+      "functional_evidence": {
+        "sha": "1877e145376ce0ab3badcf84d147b4a68b378c26",
+        "run": 44101857764,
+        "artifact": 14337262277,
+        "artifact_sha256": "19ae152dd428f4cec48323dc2bd124a9f4b2aa8eecb1dafa7dd180d561454e23",
+        "rails": {
+          "call-center-rspec.json": {
+            "duration": 58.193252388,
+            "example_count": 462,
+            "failure_count": 0,
+            "pending_count": 0,
+            "errors_outside_of_examples_count": 0
+          },
+          "call-center-pabx-rspec.json": {
+            "duration": 3.845443884,
+            "example_count": 5,
+            "failure_count": 0,
+            "pending_count": 0,
+            "errors_outside_of_examples_count": 0
+          }
+        },
+        "vue": {
+          "numTotalTests": 197,
+          "numPassedTests": 197,
+          "numFailedTests": 0,
+          "numPendingTests": 0
+        },
+        "chrome": {
+          "startTime": "2026-11-17T14:29:13.857Z",
+          "duration": 138689.60299999997,
+          "expected": 64,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "screenshots": 64,
+        "bootstrap": {
+          "passed": true,
+          "pageErrors": [],
+          "pageErrorDetails": [],
+          "failedRequests": [],
+          "httpErrors": [],
+          "cards": 15
+        },
+        "matrix_sha256": "d57778026198d27d1519d43cb506ae8490e06022aae518b0f8f7f23a96baab9d",
+        "new_ruby_offenses": 0,
+        "external_homologation": false,
+        "stages_0_2_complete": false
+      },
+      "visual_review": {
+        "screenshots_inspected": [
+          "desktop-light-audit-list",
+          "mobile-dark-audit-details"
+        ],
+        "all_64_screenshot_hashes_verified": true,
+        "issue": "Dark teleported dialog values inherited default black; explicit local foreground and computed-color Chrome regression added in next SHA",
+        "validation_of_correction": "pending_new_sha"
       }
+    },
+    "configuration_revision": {
+      "adr": "docs/adr/20261117-call-center-configuration-revision.md",
+      "resources": [
+        "units",
+        "queues",
+        "queue_memberships"
+      ],
+      "root_precondition": "expected_revision optional; 428 malformed, 409 stale, authorization before comparison",
+      "new_native_examples": 26,
+      "new_vue_tests": 12,
+      "expected_native": 493,
+      "expected_vue": 209,
+      "expected_chrome": 68,
+      "native_validation": "pending_new_sha",
+      "migrations": "none",
+      "permissions": "unchanged",
+      "teams": "native revision/inheritance still pending"
     }
   }
 }
