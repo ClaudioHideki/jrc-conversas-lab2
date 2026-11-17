@@ -1,7 +1,14 @@
 <!-- jrc-operational-init:v1 -->
 # Backlog operacional — JRC Conversas LAB2 — Grupo JRC
 
-## Em progresso (WIP)
+## Estado vigente — publicação de 16/11/2026
+
+- [x] **RETENTION-RELEASE-20261116:** Proteção de histórico/recibos, main funcionald468, imagem e deploy Grupo JRC concluídos; [evidências e digests](docs/jrc_consolidation/release-20261116-result.md).
+- [x] **CLOCK-FIXTURES / RELEASE-LINT / CLOUD-REPLY-20261116:** CI final e construção aprovadas sem afrouxar escopo por conta ou assertions. Smokes da imagem por digest aprovados.
+- [x] **PROPOSTA-POPUP / SEGMENTO-20261116:** Incrementos preservados na imagem consolidada e implantada.
+- [ ] **ACCEPTANCE-20261116:** Entrega física, grupos, distribuição e mídia antiga permanecem pendentes. Capabilities200 e Minhas25→34 confirmam etapas específicas, não sincronização integral.
+
+## Registro anterior da preparação (histórico)
 
 - [ ] **CLOUD-REPLY-FIXTURE-20261116:** O build `43981129768`, job `133697571732`, SHA `1ea2f455`, encontrou RED de 1/168 exemplos no reply Cloud (`incoming_message_whatsapp_cloud_service_spec.rb:346`). A fixture criava a conversa sem conta explícita, divergindo da caixa/contato, e o clock corretamente escopado por conta recusou a mensagem recebida. Adicionada somente `account: whatsapp_channel.account` nessa conversa, preservando as assertions de conteúdo e referências da resposta e sem alterar a factory global ou o produto. Os 11 exemplos Cloud entram também no gate inicial CSAT/clock/Webhooks, elevando o mínimo de 28 para 39. Artifact RED `14282453508`; aguardar GREEN de CI e nova construção autorizada, pois o build foi interrompido antes de publicar imagem.
 
