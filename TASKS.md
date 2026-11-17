@@ -1,7 +1,14 @@
 <!-- jrc-operational-init:v1 -->
 # Backlog operacional — JRC Conversas LAB2 — Grupo JRC
 
-## Em progresso (WIP)
+## Estado vigente — publicação de 16/11/2026
+
+- [x] **RETENTION-RELEASE-20261116:** Proteção de histórico/recibos, main funcionald468, imagem e deploy Grupo JRC concluídos; [evidências e digests](docs/jrc_consolidation/release-20261116-result.md).
+- [x] **CLOCK-FIXTURES / RELEASE-LINT / CLOUD-REPLY-20261116:** CI final e construção aprovadas sem afrouxar escopo por conta ou assertions. Smokes da imagem por digest aprovados.
+- [x] **PROPOSTA-POPUP / SEGMENTO-20261116:** Incrementos preservados na imagem consolidada e implantada.
+- [ ] **ACCEPTANCE-20261116:** Entrega física, grupos, distribuição e mídia antiga permanecem pendentes. Capabilities200 e Minhas25→34 confirmam etapas específicas, não sincronização integral.
+
+## Registro anterior da preparação (histórico)
 
 - [ ] **ENCERRAMENTO-LIVRE-SLA-20261117:** Corrigir o bloqueio por metas/calendário ausentes no encerramento manual. Retirar requisitos extras para funcionários com acesso ao chamado, preservar autoria, tempo, SLA configurado e indicadores; sem inventar cumprimento de SLA sem meta. Base a5d5e1a; 29 testes Vue locais aprovados. Integração e imagem pendentes; sem implantação. [ADR0005](docs/adr/0005-encerramento-manual-sem-bloqueio-sla.md).
 

@@ -1,3 +1,11 @@
+# Publicação integrada concluída — 16/11/2026
+
+Estado vigente: [recibo de publicação e limites operacionais](docs/jrc_consolidation/release-20261116-result.md). LAB2d468 preserva retirada de segmentos e popup de propostas; Call Center WIP/no_release não foi incorporado. CI/gates/E2E e build43984768943SUCCESS; imagem21dfe92c implantada primeiro no Grupo JRC e Broker atualizado em seguida. Rails/Sidekiq conferidos, init0, saúde200, schema20261116190000 e recibos protegidos. Seis capabilities200; Minhas25→34 pela rolagem. Nenhum novo reciboLIVE na leitura pós-deploy; aceite físico e reconciliação de grupos, distribuição e mídias continuam pendentes. Sem backup/dump/restore ou replay manual.
+
+Os registros abaixo preservam a história e não substituem este estado vigente.
+
+---
+
 # Fechamento da release de respostas rápidas — 15/11/2026
 
 Produto testado e implantado: `5c3fb7f700d7bb685f17292f59b873df14ddf34d`. Main promovida em fast-forward normal desde55da80eb, preservando2be22e86. Imagem GHCR por digest: `ghcr.io/claudiohideki/jrc-conversas-lab2@sha256:e5b6c92bcbce98fdbd6014726afd719b1f5078771d01ac551d4ee9d169e1ca82`.

@@ -28,6 +28,13 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 
 Veja [TASKS.md](TASKS.md). Roadmaps e planos anteriores continuam válidos no seu escopo.
 
+## Publicação integrada — 16/11/2026
+
+- [x] LAB2d468 e Broker publicados e implantados após CI/E2E, preservando os incrementos já aprovados. Recibos de persistência e retenção conferidos no schema/runtime.
+- [ ] Aceite físico e reconciliação de grupos, distribuição e acervo antigo. Não inferir completude a partir de conexão ativa, capability ou HTTP200.
+
+[Recibo da publicação](docs/jrc_consolidation/release-20261116-result.md). Esse resultado atualiza a situação dos incrementos descritos abaixo sem apagar suas evidências intermediárias.
+
 ### Incremento autorizado de 16/11/2026
 
 Detalhes da proposta passam a abrir em popup sobre a lista, mantendo ações e rascunhos. Exigir testes de abertura/fechamento e preservação das permissões, além da identidade da nova imagem. [Decisão e aceite](docs/adr/20261116-proposta-popup.md).
