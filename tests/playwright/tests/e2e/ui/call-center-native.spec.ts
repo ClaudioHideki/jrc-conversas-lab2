@@ -28,7 +28,7 @@ const expectContainedDialog = async (page: Page) => {
 };
 test.beforeEach(async ({ page }, info) => {
   const auth = info.title.startsWith('native authenticated navigation')
-    ? session.access_targets[info.project.name].navigation.auth
+    ? session.navigation_targets[info.project.name].auth
     : info.title.startsWith('native infrastructure root')
       ? session.infrastructure
       : info.title.startsWith('configuration audit boundary')
@@ -1950,7 +1950,7 @@ test('native queue stale revision preserves the draft and requires explicit fres
 test('native authenticated navigation honors inherited supervision, denied reports and revocation', async ({
   page,
 }, info) => {
-  const target = session.access_targets[info.project.name].navigation;
+  const target = session.navigation_targets[info.project.name];
   const loaded = page.waitForResponse(
     response =>
       response.url().endsWith('/jrc_contact_center/supervisor') &&

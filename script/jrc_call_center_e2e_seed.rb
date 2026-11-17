@@ -122,7 +122,11 @@ access_targets = %w[desktop-light desktop-dark mobile-light mobile-dark].index_w
   peer = account.account_users.find(recipients.fetch('peer').fetch(:id))
   team.add_members([peer.user_id])
   JrcContactCenter::AccessGrant.create!(account: account, team: team, allowed: [])
-  # Independent viewer for the production route/layout integration; no corporate grant.
+  recipients.merge('team' => { id: team.id, name: team.name })
+end
+
+# Dedicated navigation actors, independent of the existing popup targets.
+navigation_targets = access_targets.keys.index_with do |project|
   navigation_user = User.new(name: "SYNTHETIC #{project} navigation", email: "cc-nav-#{SecureRandom.hex(6)}@example.test",
                              password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current)
   navigation_user.skip_confirmation_notification!
@@ -133,8 +137,7 @@ access_targets = %w[desktop-light desktop-dark mobile-light mobile-dark].index_w
   navigation_team = Team.create!(account: account, name: "SYNTHETIC #{project} navigation")
   navigation_team.add_members([navigation_user.id])
   JrcContactCenter::AccessGrant.create!(account: account, team: navigation_team, allowed: ['jrc_contact_center_supervise'])
-  recipients.merge('team' => { id: team.id, name: team.name },
-                   'navigation' => { team_id: navigation_team.id, auth: navigation_user.create_new_auth_token })
+  { team_id: navigation_team.id, auth: navigation_user.create_new_auth_token }
 end
 21.times do |index|
   person = User.new(name: "SYNTHETIC pagination #{index.to_s.rjust(2, '0')}",
@@ -145,7 +148,7 @@ end
   AccountUser.create!(account: account, user: person, role: :agent)
 end
 
-session = { access_targets: access_targets, infrastructure: infrastructure.create_new_auth_token,
+session = { access_targets: access_targets, navigation_targets: navigation_targets, infrastructure: infrastructure.create_new_auth_token,
             account_id: account.id, other_account_id: other.id, unit_id: unit.id,
             administrator: admin.create_new_auth_token, viewer: limited.create_new_auth_token,
             delegated: delegated.create_new_auth_token,

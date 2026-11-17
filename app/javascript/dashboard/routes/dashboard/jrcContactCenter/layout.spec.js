@@ -133,7 +133,12 @@ describe('Contact Center account navigation', () => {
       },
     });
     const wrapper = mount(ContactCenterLayout, {
-      global: { stubs: { RouterLink: true, RouterView: true } },
+      global: {
+        stubs: {
+          RouterLink: { template: '<a><slot /></a>' },
+          RouterView: true,
+        },
+      },
     });
     await flushPromises();
     expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.NAV.SUPERVISOR');
@@ -149,7 +154,12 @@ describe('Contact Center account navigation', () => {
       },
     });
     const wrapper = mount(ContactCenterLayout, {
-      global: { stubs: { RouterLink: true, RouterView: true } },
+      global: {
+        stubs: {
+          RouterLink: { template: '<a><slot /></a>' },
+          RouterView: true,
+        },
+      },
     });
     await flushPromises();
     expect(wrapper.text()).not.toContain('JRC_CONTACT_CENTER.NAV.SUPERVISOR');
@@ -161,7 +171,12 @@ describe('Contact Center account navigation', () => {
       data: { capabilities: { recordings_view: true, reports: false } },
     });
     const wrapper = mount(ContactCenterLayout, {
-      global: { stubs: { RouterLink: true, RouterView: true } },
+      global: {
+        stubs: {
+          RouterLink: { template: '<a><slot /></a>' },
+          RouterView: true,
+        },
+      },
     });
     await flushPromises();
     expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.NAV.RECORDINGS');

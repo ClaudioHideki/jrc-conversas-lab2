@@ -2164,7 +2164,23 @@
       "expected_total_chrome": 96,
       "shared_modules_preserved": true,
       "no_automatic_grants": true,
-      "no_cross_session_realtime_refresh_claim": true
+      "no_cross_session_realtime_refresh_claim": true,
+      "native_evidence": {
+        "sha": "4d2868b23f201ebaf1a6c8af908d17da2addb197",
+        "run": 44198673805,
+        "artifact": 14380967038,
+        "sha256": "9d2ed997aadc643e94ab4ea4667bbfc97b616fd990a69dc7f485646a7769a922",
+        "rails_main": 627,
+        "concurrency": 14,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "vue_passed": 230,
+        "vue_failed": 3,
+        "new_ruby_offenses": 1,
+        "cause": "The new RouterLink stub omitted its default slot; assertions are preserved and the slot will render. New synthetic navigation users expanded the existing seed block to 35/30 lines; separated into a dedicated bounded seed block.",
+        "chrome": "not_run_due_to_gates"
+      }
     },
     "validated_checkpoint_7011dac7": {
       "sha": "7011dac7ef25c937a784142e34217dfbe5b9d388",
