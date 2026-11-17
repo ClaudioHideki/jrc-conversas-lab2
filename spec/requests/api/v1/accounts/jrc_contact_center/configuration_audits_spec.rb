@@ -45,7 +45,7 @@ RSpec.describe 'Call Center configuration audit API', type: :request do
   it 'combines resource, action, actor and correlation filters on the authorized relation' do
     correlation = SecureRandom.uuid
     patch "#{base}/units/#{unit.id}", headers: headers.merge('X-Request-ID' => correlation),
-                                    params: { unit: { name: 'Reviewed unit' } }, as: :json
+                                      params: { unit: { name: 'Reviewed unit' } }, as: :json
     expect(response).to have_http_status(:ok)
     get url, headers: headers,
              params: { resource_type: 'unit', resource_id: unit.id, operation: 'update', actor_id: operator.id, correlation_id: correlation }
@@ -75,7 +75,7 @@ RSpec.describe 'Call Center configuration audit API', type: :request do
   end
 
   it 'rejects invalid and inverted dates without pretending there are no events' do
-    [['2026-02-30', '2026-03-01'], ['2026-03-02', '2026-03-01']].each do |from, to|
+    [%w[2026-02-30 2026-03-01], %w[2026-03-02 2026-03-01]].each do |from, to|
       get url, headers: headers, params: { from: from, to: to }
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response.parsed_body).to include('error' => 'invalid_audit_dates')

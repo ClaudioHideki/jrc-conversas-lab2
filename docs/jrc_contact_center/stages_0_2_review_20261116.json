@@ -739,21 +739,22 @@
         "Consulta paginada, histórico e exportação por capacidades e cobertura atual/histórica; flag audit_logs preservada."
       ],
       "remaining_or_external": [
-        "Interface de filtros/detalhes/histórico/exportação em preparação; não publicada neste checkpoint.",
-        "Eventos e ACKs de publicação PABX dependem do contrato real; trilha local não confirma efeito externo."
+        "Aguardar homologação da interface e revalidação nativa no novo SHA.",
+        "Eventos/ACKs e efeitos reais no PABX dependem do contrato externo; auditoria local não confirma publicação."
       ],
       "code_references": [
         "administration_controller.rb",
         "access_scope.rb",
         "app/services/jrc_contact_center/configuration_audit_scope.rb",
         "app/services/jrc_contact_center/configuration_write.rb",
-        "app/controllers/api/v1/accounts/jrc_contact_center/configuration_audits_controller.rb"
+        "app/controllers/api/v1/accounts/jrc_contact_center/configuration_audits_controller.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditPanel.vue"
       ],
       "reference": {
         "document_1_figure": 14,
         "document_2_figure": 14
       },
-      "validation": "Backend aguarda a CI deste checkpoint, incluindo duas corridas HTTP/PostgreSQL. Não atribuir evidências de 80632726 ao novo código.",
+      "validation": "467 exemplos Rails e 185 Vue no backend 67a85761; gate interrompido em lint. Novo SHA exige todos os testes e oito novos cenários Chrome. Sem homologação externa.",
       "objective": "Auditoria tecnica do PABX",
       "visual_components": "Campos e dados apresentados:  Registrar id do evento, correlation_id/request_id, ator, acao, recurso, before/after sanitizados, horario, estado pretendido e estado confirmado. Resultado deve distinguir concluido, pendente, divergente, falha e reversao.",
       "buttons_and_actions": "Acoes e resultado do clique:  Filtros de data, tipo, unidade/empresa e origem: refinar registros; Consultar: aplicar filtros com paginacao. Selecao de uma linha: preencher Detalhes do Evento com data/hora, usuario, operacao, objeto, tenant/accountcode, resultado e descricao. Ver Detalhes: abrir popup do evento; Exportar Relatorio: gerar arquivo dentro do escopo; Ver Historico: listar eventos correlatos.",
@@ -782,8 +783,8 @@
       "acceptance_scope": {
         "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
         "complete_reference": [
-          "Interface de filtros/detalhes/histórico/exportação em preparação; não publicada neste checkpoint.",
-          "Eventos e ACKs de publicação PABX dependem do contrato real; trilha local não confirma efeito externo."
+          "Aguardar homologação da interface e revalidação nativa no novo SHA.",
+          "Eventos/ACKs e efeitos reais no PABX dependem do contrato externo; auditoria local não confirma publicação."
         ]
       }
     },
@@ -1346,7 +1347,7 @@
     ],
     "increment": "F11 revisão esperada compatível, sem migration ou concessões implícitas",
     "adr": "docs/adr/20261117-call-center-role-revision.md",
-    "expected_chrome": 56,
+    "expected_chrome": 64,
     "previous_chrome_preserved": 52,
     "native_validation": "pending_new_sha",
     "external_homologation": false,
@@ -1401,13 +1402,25 @@
     },
     "configuration_audit": {
       "adr": "docs/adr/20261117-call-center-configuration-audit.md",
-      "implementation": "backend_checkpoint",
+      "implementation": "backend_and_native_ui",
       "native_validation": "pending_new_sha",
       "ui": "in_memory_not_in_this_checkpoint",
-      "expected_chrome": 56,
+      "expected_chrome": 64,
       "native_audit_flag_preserved": true,
       "permissions_unchanged": true,
-      "no_new_migrations": true
+      "no_new_migrations": true,
+      "interface": "filters_details_history_verified_csv",
+      "previous_chrome_preserved": 56,
+      "new_vue_cases": 11,
+      "backend_prior_evidence": {
+        "sha": "67a8576157014c4108f2a20f0109f5a52922465d",
+        "run": 44093912707,
+        "artifact": 14332293316,
+        "sha256": "fb18c185e7e39230dc9c56eb0b2ce224dbc404ce86987a13292844a7715af8c1",
+        "rails": 467,
+        "vue": 185,
+        "gate_failure": "15 new Ruby lint offenses; corrected without suppressions; new SHA requires native rerun"
+      }
     }
   }
 }

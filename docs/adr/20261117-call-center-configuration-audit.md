@@ -39,3 +39,11 @@ A consulta administrativa respeita também a feature flag nativa audit_logs. Sem
 A inspeção dos controladores mostrou que a autorização do registro e a validação de fila ativa precedem a gravação sem bloquear seus vínculos. O incremento também revalidará essas condições depois de bloquear a linha e as referências locais, em transação, para impedir edição fora do escopo após transferência concorrente ou inscrição em fila desativada durante a requisição. Usar locks locais ordenados e FOR NO KEY UPDATE nos pais para preservar compatibilidade com FKs. Parâmetros públicos não mudam. Dois testes HTTP/PostgreSQL com barreiras, sem sleeps, devem provar as corridas no banco descartável de concorrência. A proteção existente de perfis não é removida.
 
 O BaseController CC propaga request.request_id no contexto request-local do Audited e restaura o valor anterior no ensure. Isso garante correlação com a requisição sem alterar Current ou callbacks globais. A API pública de contexto está em https://github.com/collectiveidea/audited/blob/v5.4.1/lib/audited/sweeper.rb.
+
+## Evidência do primeiro checkpoint e interface
+
+- Backend 67a8576157014c4108f2a20f0109f5a52922465d, CI 44093912707: 462 exemplos Rails mais 5 de concorrência, zero falhas/pendências/erros; 185 Vue. Gate interrompido por 15 infrações novas de lint. Artefato 14332293316, SHA-256 fb18c185e7e39230dc9c56eb0b2ce224dbc404ce86987a13292844a7715af8c1. Build/Chrome não executados nesse SHA.
+- Correção mantém os contratos: helpers de snapshot e detecção SQL, yield no serviço, escopo de rotas aditivo separado e formatação dos specs. Nenhuma regra desativada.
+- Interface usa filtros na URL, prévia, popup, histórico completo do recurso autorizado e CSV verificado por SHA-256 antes do download. Troca de conta descarta respostas e nomes anteriores. Eventos PABX continuam em aba separada.
+- Operadores da homologação são fixtures sintéticos explícitos com cobertura da unidade A; não recebem configurar/administrar. Nenhuma concessão em ambientes existentes.
+- Próximo gate exige 64 cenários Chrome (os 56 anteriores mais oito), onze testes Vue novos e nova execução nativa. Conclusão da Parte 1 permanece aberta.

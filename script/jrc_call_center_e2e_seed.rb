@@ -7,7 +7,7 @@ raise 'Owned database required' unless owned_database
 raise 'No external integration allowed' if ENV['SUPABASE_URL'].present? || ENV['SUPABASE_SERVICE_ROLE_KEY'].present?
 
 account = Account.create!(name: 'SYNTHETIC Call Center QA', locale: 'pt_BR')
-account.enable_features!('jrc_contact_center', 'custom_roles')
+account.enable_features!('jrc_contact_center', 'custom_roles', 'audit_logs')
 other = Account.create!(name: 'SYNTHETIC denied Account')
 admin = User.new(name: 'SYNTHETIC administrator', email: "cc-admin-#{SecureRandom.hex(6)}@example.test",
                  password: SecureRandom.base64(32), confirmed_at: Time.current)
@@ -60,12 +60,34 @@ AccountUser.create!(account: account, user: delegated, role: :administrator, cus
 [admin, limited, delegated].each do |operator|
   JrcCrm::UserBusinessUnit.create!(account: account, user: operator, scope: 'GROUP', active: true, structure_managed: true)
 end
+
+# Explicit synthetic audit operators: no configuration/role administration grants.
+audit_operators = [true, false].map do |reports|
+  operator = User.new(
+    name: reports ? 'SYNTHETIC scoped auditor' : 'SYNTHETIC audit reader',
+    email: "cc-audit-#{SecureRandom.hex(6)}@example.test", password: SecureRandom.base64(32), confirmed_at: Time.current
+  )
+  operator.skip_confirmation_notification!
+  operator.save!
+  permissions = %w[jrc_contact_center_view jrc_contact_center_supervise jrc_contact_center_audit]
+  permissions << 'jrc_contact_center_reports' if reports
+  audit_role = CustomRole.create!(account: account, name: operator.name, permissions: permissions)
+  AccountUser.create!(account: account, user: operator, role: :agent, custom_role: audit_role)
+  JrcCrm::UserBusinessUnit.create!(
+    account: account, user: operator, scope: 'BUSINESS_UNIT', business_unit: business_units.first,
+    company: company, active: true, structure_managed: true
+  )
+  [operator, audit_role]
+end
+
 session = { account_id: account.id, other_account_id: other.id, unit_id: unit.id,
             administrator: admin.create_new_auth_token, viewer: limited.create_new_auth_token,
             delegated: delegated.create_new_auth_token,
             viewer_user_id: limited.id, viewer_role_id: viewer.id,
             viewer_account_user_id: account.account_users.find_by!(user: limited).id,
-            restricted: restricted.create_new_auth_token, allowed_unit_id: scoped_units.first.id,
+            restricted: restricted.create_new_auth_token, auditor: audit_operators.first.first.create_new_auth_token,
+            audit_reader: audit_operators.last.first.create_new_auth_token, auditor_role_id: audit_operators.first.last.id,
+            allowed_queue_id: scoped_queues.first.id, allowed_unit_id: scoped_units.first.id,
             denied_unit_id: scoped_units.last.id, denied_queue_id: scoped_queues.last.id,
             issuer_company_id: company.id, denied_business_unit_id: business_units.last.id }
 # Auth material is ephemeral, mode 0600, excluded from uploaded evidence.

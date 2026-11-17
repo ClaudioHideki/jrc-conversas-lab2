@@ -7,25 +7,25 @@ class JrcContactCenter::ConfigurationWrite
     @access = access
   end
 
-  def create!(model, &attributes)
+  def create!(model)
     model.transaction do
       model.uncached do
-        values = attributes.call
+        values = yield
         lock_parents(model.new(values.merge(account: @account)), values)
-        model.create!(attributes.call.merge(account: @account))
+        model.create!(yield.merge(account: @account))
       end
     end
   end
 
-  def update!(relation, id, &attributes)
+  def update!(relation, id)
     relation.klass.transaction do
       relation.klass.uncached do
         record = relation.find(id)
         record.with_lock do
           relation.find(id)
-          lock_parents(record, attributes.call)
+          lock_parents(record, yield)
           relation.find(id)
-          record.update!(attributes.call)
+          record.update!(yield)
         end
         record
       end

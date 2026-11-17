@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import API from 'dashboard/api/jrcContactCenter';
 import AdministrationSection from '../components/AdministrationSection.vue';
+import ConfigurationAuditPage from '../components/ConfigurationAuditPage.vue';
 
 const route = useRoute();
 const { t } = useI18n();
@@ -167,11 +168,10 @@ watch(accountId, load, { immediate: true });
         :context="data"
         @changed="load"
       />
-      <AdministrationSection
+      <ConfigurationAuditPage
         v-else-if="section === 'audit' && data.capabilities.audit"
         :key="`${accountId}:audit`"
         :account-id="accountId"
-        :card="{ key: 'audit', state: 'read_only' }"
         :context="data"
       />
       <AdministrationSection

@@ -8,13 +8,15 @@ const session = JSON.parse(
 const base = `/app/accounts/${session.account_id}/contact-center/control-desk`;
 const api = `http://127.0.0.1:5387/api/v1/accounts/${session.account_id}/jrc_contact_center`;
 test.beforeEach(async ({ page }, info) => {
-  const auth = info.title.startsWith('native role denied')
-    ? session.delegated
-    : info.title.startsWith('corporate boundary')
-      ? session.restricted
-      : info.title.startsWith('profile change')
-        ? session.viewer
-        : session.administrator;
+  const auth = info.title.startsWith('configuration audit boundary')
+    ? session.auditor
+    : info.title.startsWith('native role denied')
+      ? session.delegated
+      : info.title.startsWith('corporate boundary')
+        ? session.restricted
+        : info.title.startsWith('profile change')
+          ? session.viewer
+          : session.administrator;
   await page.addInitScript(
     ({ auth, dark }) => {
       window.__SYNTHETIC_AUTH__ = auth;
@@ -983,4 +985,252 @@ test('native role stale form preserves the draft and requires a fresh explicit r
     description: 'SYNTHETIC retained local draft',
     permissions: ['jrc_contact_center_view'],
   });
+});
+
+test('configuration audit filters pagination details history and verified export use real records', async ({
+  page,
+}, info) => {
+  const suffix = info.project.name;
+  const created = await page.request.post(api + '/queues', {
+    headers: session.administrator,
+    data: {
+      queue: {
+        unit_id: session.unit_id,
+        code: 'AUDIT-' + suffix,
+        name: 'SYNTHETIC audit ' + suffix,
+      },
+    },
+  });
+  expect(created.status()).toBe(201);
+  const queue = (await created.json()).item;
+  for (let index = 0; index < 22; index += 1) {
+    const changed = await page.request.patch(api + '/queues/' + queue.id, {
+      headers: session.administrator,
+      data: {
+        queue: { name: 'SYNTHETIC audit ' + suffix + ' version ' + index },
+      },
+    });
+    expect(changed.status()).toBe(200);
+  }
+  const query =
+    '?audit_config_resource_type=queue&audit_config_resource_id=' +
+    queue.id +
+    '&unrelated_filter=keep';
+  await page.goto(base + '/audit' + query);
+  const panel = page.locator('[data-configuration-audit]');
+  await expect(panel).toBeVisible();
+  await expect(panel.locator('[data-audit-row]')).toHaveCount(20);
+  await expect(panel).toContainText('Total 23');
+  await panel.getByRole('button', { name: 'Próxima', exact: true }).click();
+  await expect(panel.locator('[data-audit-row]')).toHaveCount(3);
+  await expect(page).toHaveURL(/audit_config_page=2/);
+  await page.reload();
+  await expect(panel.locator('[data-audit-row]')).toHaveCount(3);
+  await panel.getByRole('button', { name: 'Anterior', exact: true }).click();
+  await expect(panel.locator('[data-audit-row]')).toHaveCount(20);
+  await page.screenshot({
+    path: '.codex/call-center-native-e2e/' + suffix + '-audit-list.png',
+    fullPage: true,
+  });
+  await panel.locator('[data-audit-detail]').first().click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText(
+    'SYNTHETIC audit ' + suffix + ' version 20'
+  );
+  await expect(dialog).toContainText(
+    'SYNTHETIC audit ' + suffix + ' version 21'
+  );
+  await expect(dialog.locator('[data-audit-scopes]')).toContainText(
+    '#' + session.unit_id
+  );
+  await expect(dialog).toContainText('Não comprova publicação');
+  await page.screenshot({
+    path: '.codex/call-center-native-e2e/' + suffix + '-audit-details.png',
+    fullPage: true,
+  });
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await panel
+    .getByRole('button', { name: 'Ver histórico', exact: true })
+    .click();
+  await expect(page).toHaveURL(/audit_config_history=true/);
+  await expect(panel).toContainText('Histórico completo do recurso');
+  await expect(panel.locator('[data-audit-row]')).toHaveCount(20);
+  const downloadEvent = page.waitForEvent('download');
+  const exportResponse = page.waitForResponse(response =>
+    response.url().includes('/configuration_audits/export')
+  );
+  await panel
+    .getByRole('button', { name: 'Exportar relatório', exact: true })
+    .click();
+  const exported = await exportResponse;
+  expect(exported.status()).toBe(200);
+  const download = await downloadEvent;
+  const stream = await download.createReadStream();
+  const chunks = [];
+  for await (const chunk of stream) chunks.push(chunk);
+  const csv = Buffer.concat(chunks);
+  const { createHash } = await import('node:crypto');
+  expect(createHash('sha256').update(csv).digest('hex')).toBe(
+    exported.headers()['x-content-sha256']
+  );
+  expect(csv.toString('utf8')).toContain('SYNTHETIC audit ' + suffix);
+  expect(csv.toString('utf8')).toContain('Escopo posterior');
+  expect(csv.toString('utf8')).not.toMatch(/access-token|password|api_key/);
+  await panel.getByLabel('Data inicial', { exact: true }).fill('2026-11-18');
+  await panel.getByLabel('Data final', { exact: true }).fill('2026-11-17');
+  await panel
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  await expect(panel.locator('[data-audit-list-error]')).toHaveText(
+    'Confira as datas inicial e final.'
+  );
+  await expect(panel.locator('[data-audit-row]')).toHaveCount(0);
+  await panel
+    .getByRole('button', { name: 'Limpar filtros', exact: true })
+    .click();
+  await expect(panel.locator('[data-audit-row]').first()).toBeVisible();
+  await expect(page).toHaveURL(/unrelated_filter=keep/);
+  expect(new URL(page.url()).searchParams.has('audit_config_resource_id')).toBe(
+    false
+  );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+});
+
+test('configuration audit boundary respects unit account export rights and live revocation', async ({
+  page,
+}, info) => {
+  const changed = await page.request.patch(
+    api + '/queues/' + session.allowed_queue_id,
+    {
+      headers: session.administrator,
+      data: { queue: { name: 'SYNTHETIC allowed audit ' + info.project.name } },
+    }
+  );
+  expect(changed.status()).toBe(200);
+  const hidden = await page.request.patch(
+    api + '/queues/' + session.denied_queue_id,
+    {
+      headers: session.administrator,
+      data: { queue: { name: 'PRIVATE OTHER UNIT ' + info.project.name } },
+    }
+  );
+  expect(hidden.status()).toBe(200);
+  const historyQuery = queueId =>
+    '?history=true&resource_type=queue&resource_id=' + queueId;
+  const privateEvents = await page.request.get(
+    api + '/configuration_audits' + historyQuery(session.denied_queue_id),
+    {
+      headers: session.administrator,
+    }
+  );
+  expect(privateEvents.status()).toBe(200);
+  const privateId = (await privateEvents.json()).items[0].id;
+  const deniedDetail = await page.request.get(
+    api + '/configuration_audits/' + privateId,
+    { headers: session.auditor }
+  );
+  expect(deniedDetail.status()).toBe(404);
+  const deniedList = await page.request.get(
+    api + '/configuration_audits' + historyQuery(session.denied_queue_id),
+    {
+      headers: session.auditor,
+    }
+  );
+  expect(deniedList.status()).toBe(200);
+  expect((await deniedList.json()).items).toEqual([]);
+  const deniedExport = await page.request.get(
+    api + '/configuration_audits/export',
+    { headers: session.audit_reader }
+  );
+  expect(deniedExport.status()).toBe(401);
+  const forbiddenWrite = await page.request.patch(
+    api + '/queues/' + session.allowed_queue_id,
+    {
+      headers: session.auditor,
+      data: { queue: { name: 'Forbidden audit write' } },
+    }
+  );
+  expect(forbiddenWrite.status()).toBe(401);
+  const foreign = await page.request.get(
+    'http://127.0.0.1:5387/api/v1/accounts/' +
+      session.other_account_id +
+      '/jrc_contact_center/configuration_audits',
+    { headers: session.auditor }
+  );
+  expect(foreign.status()).toBe(401);
+  await page.goto(
+    base +
+      '/audit?audit_config_resource_type=queue&audit_config_resource_id=' +
+      session.allowed_queue_id
+  );
+  const panel = page.locator('[data-configuration-audit]');
+  await expect(panel.locator('[data-audit-row]').first()).toBeVisible();
+  await expect(panel).not.toContainText('PRIVATE OTHER UNIT');
+  await expect(
+    panel
+      .getByRole('combobox', { name: 'Unidade operacional', exact: true })
+      .locator('option')
+  ).not.toContainText(['SYNTHETIC unit B']);
+  await panel.locator('[data-audit-detail]').first().click();
+  await expect(page.getByRole('dialog')).toContainText(
+    'SYNTHETIC allowed audit ' + info.project.name
+  );
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-audit-scoped.png',
+    fullPage: true,
+  });
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Fechar', exact: true })
+    .click();
+  const roleUrl =
+    'http://127.0.0.1:5387/api/v1/accounts/' +
+    session.account_id +
+    '/custom_roles/' +
+    session.auditor_role_id;
+  try {
+    const revoke = await page.request.patch(roleUrl, {
+      headers: session.administrator,
+      data: {
+        custom_role: {
+          permissions: [
+            'jrc_contact_center_view',
+            'jrc_contact_center_supervise',
+          ],
+        },
+      },
+    });
+    expect(revoke.status()).toBe(200);
+    await page.reload();
+    await expect(page.locator('[data-configuration-audit]')).toHaveCount(0);
+    await expect(page.getByRole('alert')).toContainText('Seção indisponível');
+    const denied = await page.request.get(api + '/configuration_audits', {
+      headers: session.auditor,
+    });
+    expect(denied.status()).toBe(401);
+  } finally {
+    const restore = await page.request.patch(roleUrl, {
+      headers: session.administrator,
+      data: {
+        custom_role: {
+          permissions: [
+            'jrc_contact_center_view',
+            'jrc_contact_center_supervise',
+            'jrc_contact_center_audit',
+            'jrc_contact_center_reports',
+          ],
+        },
+      },
+    });
+    expect(restore.status()).toBe(200);
+  }
 });

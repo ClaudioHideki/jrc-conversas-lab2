@@ -30,7 +30,7 @@ RSpec.describe 'Call Center configuration audit transactions', type: :model do
 
   it 'does not create an artificial update event for an unchanged record' do
     unit
-    expect { unit.update!(name: unit.name) }.not_to change { audits.where(auditable: unit).count }
+    expect { unit.update!(name: unit.name) }.not_to(change { audits.where(auditable: unit).count })
   end
 
   it 'rolls back the mutation and its success audit together' do

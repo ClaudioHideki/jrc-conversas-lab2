@@ -68,12 +68,15 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
   def observe_queue_read(target_id)
     subscriptions << ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
       sql = event.payload[:sql]
-      next unless Thread.current[:cc_configuration_request] && sql.start_with?('SELECT') && sql.include?('"jrc_contact_center_queues"')
-      next if sql.include?('FOR UPDATE') || sql.include?('FOR NO KEY UPDATE')
+      next unless Thread.current[:cc_configuration_request] && native_queue_select?(sql)
       next unless event.payload[:binds].any? { |bind| bind.name == 'id' && bind.value_for_database == target_id }
 
       read << true
     end
+  end
+
+  def native_queue_select?(sql)
+    sql.start_with?('SELECT') && sql.include?('"jrc_contact_center_queues"') && !sql.match?(/FOR (?:NO KEY )?UPDATE/)
   end
 
   def hold_queue_change(change)
