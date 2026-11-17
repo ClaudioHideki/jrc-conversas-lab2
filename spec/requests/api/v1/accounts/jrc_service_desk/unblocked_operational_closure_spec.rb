@@ -99,7 +99,8 @@ RSpec.describe 'Manual closure without configuration blockers', type: :request d
   end
 
   it 'keeps inaccessible tickets inaccessible even with the manual flag' do
-    ticket = sd_ticket(unit: sd_other_unit, status: create(:jrc_sd_status, unit: sd_other_unit), priority: create(:jrc_sd_priority, unit: sd_other_unit))
+    ticket = sd_ticket(unit: sd_other_unit, status: create(:jrc_sd_status, unit: sd_other_unit), priority: create(:jrc_sd_priority, unit: sd_other_unit),
+      created_by_membership: create(:jrc_sd_membership, unit: sd_other_unit))
     post "#{base}/tickets/#{ticket.id}/lifecycle", headers: headers.merge('Idempotency-Key' => 'outside-unit'), as: :json,
       params: { rule_key: 'resolve', operational_closure: true, expected_lock_version: 0, expected_policy_version_id: 1 }
     expect(response).to have_http_status(:not_found)
