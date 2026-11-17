@@ -12,7 +12,7 @@ module JrcServiceDesk::SlaConfigurationState
     end
     JrcServiceDesk::SnapshotCalendar.new(timezone: snapshot.timezone, conditions: snapshot.calendar_conditions)
     nil
-  rescue JrcServiceDesk::LifecycleDependencyError
+  rescue JrcServiceDesk::LifecycleDependencyError, TZInfo::InvalidTimezoneIdentifier
     'calendar_missing'
   end
 end

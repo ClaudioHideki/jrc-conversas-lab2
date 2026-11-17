@@ -3,7 +3,7 @@
 # Each capability is additional to the native scope AND the applicable lifecycle policy.
 class JrcServiceDesk::LifecycleActionPolicy < JrcServiceDesk::TicketPolicy
   def inspect?
-    show? && capability?(:sla_view) && capability?(:history_view)
+    show? && ((capability?(:sla_view) && capability?(:history_view)) || JrcServiceDesk::OperationalClosure.allowed?(user_context, record))
   end
 
   def action?(action)
@@ -17,7 +17,15 @@ class JrcServiceDesk::LifecycleActionPolicy < JrcServiceDesk::TicketPolicy
     !protected_required || view_notes?
   end
 
+  def own_closure?(transition)
+    JrcServiceDesk::OperationalClosure.allowed?(user_context, record) &&
+      transition.ticket_id == record.id && transition.account_id == record.account_id &&
+      transition.actor_membership.account_user_id == operational_context.account_user.id &&
+      transition.payload['operational_closure'] == true && %w[resolve close].include?(transition.action)
+  end
+
   def apply?
-    inspect? && JrcServiceDesk::Capabilities::LIFECYCLE_ACTIONS.keys.any? { |action| action?(action) }
+    inspect? && (JrcServiceDesk::OperationalClosure.allowed?(user_context, record) ||
+      JrcServiceDesk::Capabilities::LIFECYCLE_ACTIONS.keys.any? { |action| action?(action) })
   end
 end

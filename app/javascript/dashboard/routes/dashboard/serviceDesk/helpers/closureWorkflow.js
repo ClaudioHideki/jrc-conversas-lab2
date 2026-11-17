@@ -31,7 +31,8 @@ export function closureCommand(rule, data, draft, requiredFields) {
     rule_key: rule.key,
     expected_lock_version: data.lock_version,
     expected_policy_version_id: data.policy.id,
-    closing_reason: draft.reason,
+    operational_closure: true,
+    ...(draft.reason.trim() ? { closing_reason: draft.reason } : {}),
     ...(rule.requirements.solution ? { solution: draft.solution } : {}),
     ...(rule.requirements.note ? { note: draft.note } : {}),
     evidence_note_ids: rule.requirements.evidence

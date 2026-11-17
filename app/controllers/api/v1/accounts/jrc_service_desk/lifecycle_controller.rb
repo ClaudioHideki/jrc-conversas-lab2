@@ -19,8 +19,9 @@ class Api::V1::Accounts::JrcServiceDesk::LifecycleController < Api::V1::Accounts
 
   def transition
     raise ArgumentError unless query_values.empty?
-    authorize strict_ticket, :view_history?
     result = strict_ticket.lifecycle_transitions.find(::JrcServiceDesk::Input.id(params[:transition_id]))
+    policy = ::JrcServiceDesk::LifecycleActionPolicy.new(pundit_user, strict_ticket)
+    authorize strict_ticket, policy.own_closure?(result) ? :inspect? : :view_history?, policy_class: ::JrcServiceDesk::LifecycleActionPolicy
     render json: base_payload.merge(transition: reader.transition(result))
   end
 

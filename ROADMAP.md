@@ -12,6 +12,8 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 
 ## Fase 2: Operação e desenvolvimento ativo
 
+- [ ] Validar e publicar o encerramento manual sem requisitos extras, com tempo e SLA reais preservados (ADR0005), sobre a imagem a5d5e1a.
+
 - [x] Validar e publicar o incremento de destinatários de chamados, indicadores e projetos por responsável/participante (ADR0004), preservando a imagem funcional d468beb8. Produto a5d5e1a, digest7fbe9fc9; [evidências](docs/jrc_consolidation/chamados-projetos-release-20261117.md). Implantação permanece separada.
 
 - [ ] Reconciliar conversas por caixa e a política de acesso Minhas/compartilhadas/exclusivas.

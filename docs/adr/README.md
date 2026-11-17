@@ -11,3 +11,4 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [0002-recibo-live-custodia-broker](0002-recibo-live-custodia-broker.md): custódia LIVE imutável e interoperabilidade com histórico, implementação local sem publicação.
 - [0003-protecao-exclusao-historico-broker](0003-protecao-exclusao-historico-broker.md): proteção de exclusão anterior aos efeitos, preservando a custódia; autorização posterior de release e seus gates.
 - [0004-chamados-destinatarios-projetos-escopo](0004-chamados-destinatarios-projetos-escopo.md): escolha de destinatário, projetos por responsável/participante e chamados encerrados em popup.
+- [0005-encerramento-manual-sem-bloqueio-sla](0005-encerramento-manual-sem-bloqueio-sla.md): encerramento manual por usuários com acesso, sem requisitos extras e com tempos/SLA reais preservados.

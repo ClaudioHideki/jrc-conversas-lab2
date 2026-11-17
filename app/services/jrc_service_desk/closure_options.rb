@@ -13,14 +13,14 @@ class JrcServiceDesk::ClosureOptions
     return [] if unavailable_reason
 
     policy = JrcServiceDesk::LifecycleActionPolicy.new(@context, @ticket)
-    return [] unless policy.action?('close') && policy.view_notes?
+    return [] unless JrcServiceDesk::OperationalClosure.allowed?(@context, @ticket) || (policy.action?('close') && policy.view_notes?)
 
     direct = @options.select { |rule| rule[:action] == 'close' }.map { |rule| plan([rule]) }
     return direct if direct.any?
 
     @options.select { |rule| rule[:action] == 'resolve' }.flat_map do |resolve|
       @version.definition.fetch('transitions').map do |rule|
-        JrcServiceDesk::OperationalClosure.rule(@revision.rule(rule), @context, @ticket)
+        JrcServiceDesk::OperationalClosure.rule(@revision.rule(rule), @context, @ticket, unrestricted: true)
       end.filter_map do |close|
         next unless close['action'] == 'close' && close['from_status_ids'].include?(resolve[:to_status_id].to_i)
         next unless policy.requirements_allowed?(close.fetch('requirements'))
@@ -36,6 +36,7 @@ class JrcServiceDesk::ClosureOptions
   end
 
   def unavailable_reason
+    return if JrcServiceDesk::OperationalClosure.allowed?(@context, @ticket)
     return unless @ticket.service&.approval_required?
 
     policy = JrcServiceDesk::LifecycleActionPolicy.new(@context, @ticket)

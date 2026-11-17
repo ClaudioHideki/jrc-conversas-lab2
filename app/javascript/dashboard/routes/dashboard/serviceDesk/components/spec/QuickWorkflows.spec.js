@@ -144,12 +144,20 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function closureTransport({ failClose = null, extra = null } = {}) {
+function closureTransport({
+  failClose = null,
+  extra = null,
+  unrestricted = false,
+} = {}) {
   let phase = 0;
   let failure = failClose;
   const committed = new Map();
   const r = resolve();
   const c = close();
+  if (unrestricted) {
+    r.requirements.fields = {};
+    c.requirements.fields = {};
+  }
   if (extra) c.requirements = extra;
   mocks.read.mockImplementation(async () => {
     const options = [[r], [c], []][phase];
@@ -223,6 +231,37 @@ async function renderClosure() {
 }
 
 describe('one-confirmation official closure', () => {
+  it('closes without a reason or SLA prerequisite using the explicitly authorized manual plan', async () => {
+    const committed = closureTransport({ unrestricted: true });
+    await renderClosure();
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(committed.size).toBe(2);
+    expect(
+      mocks.apply.mock.calls.every(row => row[2].operational_closure === true)
+    ).toBe(true);
+    expect(
+      mocks.apply.mock.calls.every(
+        row => !Object.hasOwn(row[2], 'closing_reason')
+      )
+    ).toBe(true);
+    expect(wrapper.emitted('updated')[0][0].status.id).toBe('3');
+  });
+
+  it('allows a user without private-note access to close without sending or displaying private content', async () => {
+    closureTransport({ unrestricted: true });
+    const restricted = lcTicket();
+    restricted.permissions.view_notes = false;
+    wrapper = mount(CloseTicketForm, {
+      props: { ticket: restricted },
+      global: globals(),
+    });
+    await flushPromises();
+    expect(wrapper.find('textarea').exists()).toBe(false);
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(wrapper.emitted('updated')).toHaveLength(1);
+  });
   it('unlocks cancellation and requests a fresh parent read when authorization is lost after the POST acknowledgement', async () => {
     closureTransport();
     mocks.ticket.mockRejectedValueOnce({ response: { status: 403 } });

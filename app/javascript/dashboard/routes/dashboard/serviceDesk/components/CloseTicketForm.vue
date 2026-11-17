@@ -60,8 +60,6 @@ const protectedContent = computed(
 const valid = computed(
   () =>
     !!plan.value &&
-    protectedContent.value &&
-    !!draft.reason.trim() &&
     draft.reason.length <= 4000 &&
     plan.value.steps.every(step =>
       closureFieldsValid(
@@ -293,6 +291,7 @@ onBeforeUnmount(() => {
           "
         />
         <TextArea
+          v-if="protectedContent"
           id="sd-close-reason"
           v-model="draft.reason"
           :label="t('JRC_SERVICE_DESK.SIMPLE_SLA.closing_reason')"
@@ -300,9 +299,6 @@ onBeforeUnmount(() => {
           custom-text-area-class="min-h-24"
           :disabled="saving || !!pending"
         />
-        <p class="m-0 text-sm text-n-slate-11">
-          {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.closing_help') }}
-        </p>
         <p
           v-if="
             needs('note') ||

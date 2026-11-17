@@ -179,6 +179,9 @@ const submit = async () => {
       rule_key: rule.value.key,
       expected_lock_version: state.data.lock_version,
       expected_policy_version_id: state.data.policy.id,
+      ...(['resolve', 'close'].includes(rule.value.action)
+        ? { operational_closure: true }
+        : {}),
       note: note.value,
       solution: isSolution.value
         ? [

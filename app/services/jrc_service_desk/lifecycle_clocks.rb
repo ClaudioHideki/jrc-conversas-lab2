@@ -16,7 +16,20 @@ class JrcServiceDesk::LifecycleClocks
     @ticket.sla_cycles.order(number: :desc).first || create_cycle!(@ticket.latest_sla_snapshot, @ticket.opened_at)
   end
 
-  def run!(rule:, reason:, reopening:)
+  def run!(rule:, reason:, reopening:, operational_closure: false)
+    cycle = @ticket.sla_cycles.order(number: :desc).first
+    if operational_closure && @settings['mode'] == 'calendar_snapshot'
+      kinds = (cycle&.lifecycle_policy_version || @version).rules.clock_kinds
+      pending_reason = JrcServiceDesk::SlaConfigurationState.reason(cycle&.sla_snapshot || @ticket.latest_sla_snapshot, kinds)
+      pending_reason ||= 'result_unavailable' if cycle && cycle.sla_clocks.pluck(:kind).sort != kinds.sort
+      if pending_reason
+        pause = @ticket.lifecycle_pauses.find_by(ended_at: nil)
+        close_pause!(pause) if pause
+        cycle&.sla_clocks&.where(state: %w[running paused])&.update_all(state: 'stopped', achieved_at: nil, anchor_at: @now)
+        return { 'mode' => 'calendar_snapshot', 'cycle_id' => cycle&.id, 'calculation_pending' => true,
+                 'pending_reason' => pending_reason, 'clocks' => [] }
+      end
+    end
     pause = @ticket.lifecycle_pauses.find_by(ended_at: nil)
     if rule['action'] == 'pause'
       raise ArgumentError, 'Ticket already paused' if pause
@@ -41,7 +54,7 @@ class JrcServiceDesk::LifecycleClocks
       pending_reason = JrcServiceDesk::SlaConfigurationState.reason(@ticket.latest_sla_snapshot, @version.rules.clock_kinds)
       completed_without_cycle = @ticket.lifecycle_transitions.where(action: %w[resolve close]).exists?
       pending_reason ||= 'result_unavailable' if completed_without_cycle
-      if pending_reason && @closure_rules.permits_unconfigured_closure?(rule['action'])
+      if pending_reason && (operational_closure || @closure_rules.permits_unconfigured_closure?(rule['action']))
         close_pause!(pause) if pause
         return { 'mode' => 'calendar_snapshot', 'cycle_id' => nil, 'calculation_pending' => true,
                  'pending_reason' => pending_reason, 'clocks' => [] }
