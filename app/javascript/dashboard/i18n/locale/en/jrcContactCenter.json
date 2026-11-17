@@ -1837,7 +1837,8 @@
         "external_api": "API externa",
         "event_schema": "Contrato de eventos"
       },
-      "ACW_GLOBAL_DENIED": "Esta política afeta toda a conta. Seu escopo atual não permite alterar a configuração global."
+      "ACW_GLOBAL_DENIED": "Esta política afeta toda a conta. Seu escopo atual não permite alterar a configuração global.",
+      "NATIVE_PABX_SETTINGS": "Conexão e histórico/CDR do PABX (Super Admin)"
     },
     "CONFIGURATION_AUDIT": {
       "TITLE": "Auditoria administrativa",

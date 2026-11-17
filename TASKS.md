@@ -88,3 +88,7 @@ CI 44078910273/e217b41a preservada: 428 Rails, uma falha de preparação/escopo 
 - f8e603ae / CI 44166469596 bloqueou antes dos testes por CRLF nas cópias temporárias enviadas pela API Git. Correção restrita a LF; auxiliar externo passa a recusar CR antes do upload. Nenhum gate suprimido. Novo SHA deve executar todas as validações previstas.
 
 - 7b9c7ff7 / CI 44167331338: 609 Rails (599 + 10 concorrentes), 222 Vue e migrations aprovados, zero falhas/pendências/erros externos. Quatro apontamentos de lint corrigidos: dois ternários, complexidade da validação de vínculo e Rails/exclude?. Chrome não executado nesse SHA; próximo gate continua exigindo 84 cenários.
+
+- [ ] **CALL-CENTER-NATIVE-PABX-NAV-20261117:** Reusar ramal_settings / SipSettingsPage / PabxSettingsPanel com capability derivada do Super Admin administrativo. Dois API e dois Vue Router preparados, sem endpoints novos ou chamadas ao provedor. Conexão/CDR não equivale a publicação de filas/URA; homologação externa permanece pendente.
+
+- 63a06c07 / CI 44169070593: 609 Rails, 222 Vue, migrations e ambos os lints aprovados. Chrome 80/84: os 12 casos de herança/usuário/conflito agora passaram. Quatro casos novos pararam em option disabled dentro de label. Playwright 1.59.1 segue label.control; corrigida associação acessível for/id, preservando toBeDisabled e todas as provas posteriores. Não reduzir a cobertura; próxima CI obrigatória.

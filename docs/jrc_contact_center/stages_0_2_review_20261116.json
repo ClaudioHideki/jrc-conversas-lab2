@@ -198,7 +198,8 @@
         5
       ],
       "implemented_in_0_2": [
-        "Safe connection metadata; read-only resources; explicit authorized tenant/accountcode mapping; original infrastructure remains SuperAdmin-only"
+        "Safe connection metadata; read-only resources; explicit authorized tenant/accountcode mapping; original infrastructure remains SuperAdmin-only",
+        "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente."
       ],
       "remaining_or_external": [
         "No fake connection test or resource publication; real diagnostics/ACK contract and URA editor remain later"
@@ -679,7 +680,8 @@
         3
       ],
       "implemented_in_0_2": [
-        "Same PABX source as figure 4, safe local state and explicit scope contract"
+        "Same PABX source as figure 4, safe local state and explicit scope contract",
+        "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente."
       ],
       "remaining_or_external": [
         "Inventory synchronization/publication/ACK is not inferred from successful CDR import; needs stage 3/provider"
@@ -1664,7 +1666,7 @@
       "no_new_corporate_grants": true,
       "migration": "20261117190000",
       "migration_hash": "85fa579036a807b2d50ae3c30af64b061ba9ea6c6ffe173b4e0f33d4ad922dbe",
-      "ui": "native_dialog_implementation_and_tests_prepared",
+      "ui": "12 real Chrome user/team/conflict scenarios passed across four projects; no full Part 1 completion",
       "part_1_complete": false,
       "backend_logic_evidence": {
         "sha": "548f66ac3be2746b0a6d509e35b0adb086cc70b1",
@@ -1696,25 +1698,25 @@
         "initial_assessment": "Formatting-only was the initial assessment; full diagnostics later identified four frontend errors, corrected in 48c2a9a4."
       },
       "latest_evidence": {
-        "sha": "48c2a9a46f092b3768489bbee3027c8ff1ec9b60",
-        "run": 44159560428,
-        "artifact": 14363849571,
-        "sha256": "c534b23d7057543f2e4a3de1aa8ac02bf640fe15ca9c974a068a0daa1a6781d1",
-        "rails_main": 590,
-        "concurrency": 8,
-        "vue": 220,
+        "sha": "63a06c07fb53f7cb22d975ddb8947dd4eb05d2f5",
+        "run": 44169070593,
+        "artifact": 14367323230,
+        "sha256": "7d26b7f1daf318309b47116a40bbd2d47842c6917a2e673703147d41583b9c03",
+        "rails_main": 599,
+        "concurrency": 10,
+        "vue": 222,
         "native_failures": 0,
         "pending": 0,
         "outside_errors": 0,
         "new_ruby_offenses": 0,
         "frontend_lint": "passed",
         "chrome": {
-          "passed": 68,
-          "unexpected": 12,
+          "passed": 80,
+          "unexpected": 4,
           "skipped": 0,
           "flaky": 0
         },
-        "chrome_cause": "All 12 new cases: controls outside viewport because native contained dialog mode was not enabled; no force clicks or reduced assertions."
+        "remaining": "Four new queue cases stopped at disabled option assertion; property was disabled but matcher followed enclosing label to enabled select."
       }
     },
     "final_write_authorization": {
@@ -1808,6 +1810,27 @@
         "new_ruby_offenses": 2,
         "frontend_errors": 2,
         "chrome": "not_run_due_to_lint"
+      },
+      "latest_evidence": {
+        "sha": "63a06c07fb53f7cb22d975ddb8947dd4eb05d2f5",
+        "run": 44169070593,
+        "artifact": 14367323230,
+        "sha256": "7d26b7f1daf318309b47116a40bbd2d47842c6917a2e673703147d41583b9c03",
+        "rails_main": 599,
+        "concurrency": 10,
+        "vue": 222,
+        "native_failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 0,
+        "frontend_lint": "passed",
+        "chrome": {
+          "passed": 80,
+          "unexpected": 4,
+          "skipped": 0,
+          "flaky": 0
+        },
+        "remaining": "Four new queue cases stopped at disabled option assertion; property was disabled but matcher followed enclosing label to enabled select."
       }
     },
     "schema_review": {
@@ -1858,6 +1881,30 @@
         "Use ActiveSupport String#exclude? in the PostgreSQL wait observer"
       ],
       "native_ci_required": true
+    },
+    "native_pabx_navigation": {
+      "implementation": "prepared",
+      "source_route": "ramal_settings",
+      "source_components": [
+        "SipSettingsPage.vue",
+        "PabxSettingsPanel.vue"
+      ],
+      "authorization": "CC administer plus native administrative SuperAdmin; native telephony endpoint still independently requires SuperAdmin and membership.",
+      "new_provider_endpoints": false,
+      "provider_calls_executed": false,
+      "configuration_scope": "Existing connection and CDR history, not resource publication",
+      "rails_scenarios": 2,
+      "vue_router_scenarios": 2,
+      "validation": "pending_next_sha"
+    },
+    "option_label_correction": {
+      "locked_playwright": "1.59.1",
+      "official_source": "https://github.com/microsoft/playwright/blob/v1.59.1/packages/injected/src/injectedScript.ts#L563-L581",
+      "cause": "elementState follows the enclosing label to label.control; the nested option was retargeted to its enabled select.",
+      "change": "Explicit label for/id association for native membership user select. Preserve original toBeDisabled assertion, all 84 cases and subsequent negative API / persistence / revocation checks.",
+      "test_assertions_removed": false,
+      "force_clicks": false,
+      "validation": "pending_next_sha"
     }
   }
 }

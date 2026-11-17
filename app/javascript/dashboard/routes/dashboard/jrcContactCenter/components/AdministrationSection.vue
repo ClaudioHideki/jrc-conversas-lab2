@@ -502,6 +502,14 @@ onBeforeUnmount(() => {
     >
       {{ label('ACW_GLOBAL_DENIED') }}
     </p>
+    <RouterLink
+      v-if="key === 'pabx' && context.native_links?.pabx_settings"
+      :to="{ name: 'ramal_settings', params: { accountId } }"
+      class="inline-block rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
+      data-native-pabx-settings
+    >
+      {{ label('NATIVE_PABX_SETTINGS') }}
+    </RouterLink>
     <p
       v-if="key === 'permissions' || key === 'approvals'"
       class="text-sm text-n-slate-11"
@@ -873,9 +881,10 @@ onBeforeUnmount(() => {
               </option>
             </select></label
           >
-          <label class="text-sm"
-            >{{ label('AGENT')
-            }}<select
+          <div class="text-sm">
+            <label for="cc-membership-account-user">{{ label('AGENT') }}</label>
+            <select
+              id="cc-membership-account-user"
               v-model="draft.account_user_id"
               name="account_user_id"
               :aria-invalid="invalid('account_user_id')"
@@ -900,8 +909,8 @@ onBeforeUnmount(() => {
                     : ''
                 }}
               </option>
-            </select></label
-          >
+            </select>
+          </div>
           <label class="flex items-center gap-2 text-sm"
             ><input
               v-model="draft.participates"

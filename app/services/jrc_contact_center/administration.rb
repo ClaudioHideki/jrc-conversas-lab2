@@ -60,6 +60,7 @@ class JrcContactCenter::Administration
 
   def native_links
     { permissions: native_roles_available?, role_editor: native_role_editor_available?, access_editor: native_access_editor_available?,
+      pabx_settings: @policy.administer? && @context.fetch(:user).is_a?(SuperAdmin) && @context.fetch(:account_user).administrator?,
       approvals: @account.feature_enabled?('jrc_approvals') &&
         JrcCrm::UserBusinessUnit.structure_managed.active.exists?(account: @account, user: @context.fetch(:user)) }
   end
