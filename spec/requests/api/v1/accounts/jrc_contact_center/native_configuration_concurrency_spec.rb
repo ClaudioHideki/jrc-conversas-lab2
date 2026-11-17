@@ -98,6 +98,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     workers << Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
         Thread.current[:cc_configuration_request] = true
+        state[:request_pid] = ActiveRecord::Base.connection.raw_connection.backend_pid
         session = ActionDispatch::Integration::Session.new(Rails.application)
         session.public_send(verb, endpoint, headers: headers, params: payload, as: :json)
         results << session.response.status
@@ -117,6 +118,68 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     release << true
     Timeout.timeout(20) { workers.each(&:join) }
     results.pop
+  end
+
+  def observe_account_read
+    subscriptions << ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
+      sql = event.payload[:sql]
+      next unless Thread.current[:cc_configuration_request] && sql.start_with?('SELECT')
+      next unless sql.include?('"accounts"') && !sql.include?('FOR UPDATE')
+
+      read << true
+    end
+  end
+
+  def hold_account_change(change)
+    workers << Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        Account.find(account.id).with_lock do
+          change.call
+          entered << true
+          Timeout.timeout(15) { release.pop }
+        end
+      end
+    rescue StandardError => e
+      results << e
+    end
+  end
+
+  def race_with_account_change(change)
+    observe_account_read
+    hold_account_change(change)
+    Timeout.timeout(8) { entered.pop }
+    dispatch_configuration_request(:patch, "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy",
+                                   { limits: { voice: 60, whatsapp: 120 }, voice_required: false })
+    Timeout.timeout(8) { read.pop }
+    wait_for_account_lock
+    release << true
+    Timeout.timeout(20) { workers.each(&:join) }
+    results.pop
+  end
+
+  def wait_for_account_lock
+    Timeout.timeout(8) do
+      connection = ActiveRecord::Base.connection
+      sql = "SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE pid = #{connection.quote(state.fetch(:request_pid))} AND wait_event_type = 'Lock')"
+      connection.uncached { sleep 0.02 until connection.select_value(sql) }
+    end
+  end
+
+  %w[eligibility profile].each do |source|
+    it "does not change global ACW after #{source} is revoked during the account lock wait" do
+      JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
+      previous = JrcContactCenter::AcwPolicy.new(account: account).call
+      change = lambda do
+        member = account.account_users.find_by!(user: actor)
+        if source == 'eligibility'
+          JrcContactCenter::AccessGrant.find_by!(account_user: member).update!(eligible: false)
+        else
+          member.custom_role.update!(permissions: ['jrc_contact_center_view'])
+        end
+      end
+      expect(race_with_account_change(change)).to eq(401)
+      expect(JrcContactCenter::AcwPolicy.new(account: account.reload).call).to eq(previous)
+    end
   end
 
   it 'rejects a stale write after the queue moves outside the authorized business unit' do

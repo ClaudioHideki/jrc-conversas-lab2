@@ -99,6 +99,11 @@ const canEdit = computed(
     local.value &&
     (resource.value !== 'teams' || teamManage.value)
 );
+const canConfigureAcw = computed(
+  () =>
+    key.value === 'closures' &&
+    props.context.capabilities.configuration_global === true
+);
 const canEditRoles = computed(
   () => key.value === 'permissions' && props.context.native_links?.role_editor
 );
@@ -395,15 +400,21 @@ const save = async () => {
     if (version === generation) {
       if (configurationRevision.handleError(error)) return;
       const inactiveQueue = error.response?.data?.error === 'inactive_queue';
+      const ineligibleMember =
+        error.response?.data?.error === 'ineligible_member';
       invalidAttributes.value = inactiveQueue
         ? ['queue_id']
-        : error.response?.data?.attributes || [];
+        : ineligibleMember
+          ? ['account_user_id']
+          : error.response?.data?.attributes || [];
       formError.value = inactiveQueue
         ? [label('QUEUE'), label('INACTIVE'), label('SAVE_ERROR')].join(' · ')
-        : error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          label('SAVE_ERROR');
+        : ineligibleMember
+          ? t('JRC_CONTACT_CENTER.ACCESS.ENROLLMENT_BLOCKED')
+          : error.response?.data?.message ||
+            error.response?.data?.error ||
+            error.message ||
+            label('SAVE_ERROR');
     }
   } finally {
     saving.value = false;
@@ -456,7 +467,7 @@ onBeforeUnmount(() => {
     <div class="flex flex-wrap items-center justify-between gap-3">
       <h2 class="text-xl font-semibold text-n-slate-12">{{ title }}</h2>
       <button
-        v-if="canEdit || key === 'closures'"
+        v-if="canEdit || canConfigureAcw"
         type="button"
         class="rounded-lg bg-n-brand px-4 py-2 text-sm font-semibold text-white"
         data-create
@@ -479,6 +490,12 @@ onBeforeUnmount(() => {
     </p>
     <p v-if="key === 'closures'" class="text-sm text-n-slate-11">
       {{ label('ACW_SCOPE') }}
+    </p>
+    <p
+      v-if="key === 'closures' && !canConfigureAcw"
+      class="text-sm text-n-amber-11"
+    >
+      {{ label('ACW_GLOBAL_DENIED') }}
     </p>
     <p
       v-if="key === 'permissions' || key === 'approvals'"
@@ -865,8 +882,18 @@ onBeforeUnmount(() => {
                 v-for="row in agents"
                 :key="row.account_user_id"
                 :value="row.account_user_id"
+                :disabled="
+                  row.eligible === false &&
+                  String(row.account_user_id) !==
+                    String(editing?.account_user_id)
+                "
               >
                 {{ row.name }}
+                {{
+                  row.eligible === false
+                    ? ` · ${t('JRC_CONTACT_CENTER.ACCESS.PENDING')}`
+                    : ''
+                }}
               </option>
             </select></label
           >

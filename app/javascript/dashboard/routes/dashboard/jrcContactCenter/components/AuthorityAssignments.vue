@@ -288,6 +288,7 @@ onBeforeUnmount(() => {
       :is-loading="saving"
       :dismissible="!saving"
       :show-cancel-button="!saving"
+      contained
       use-form
       @confirm="save"
     >

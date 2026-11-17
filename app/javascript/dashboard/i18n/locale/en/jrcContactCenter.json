@@ -1836,7 +1836,8 @@
         "provider_adapter": "Adaptador nativo",
         "external_api": "API externa",
         "event_schema": "Contrato de eventos"
-      }
+      },
+      "ACW_GLOBAL_DENIED": "Esta política afeta toda a conta. Seu escopo atual não permite alterar a configuração global."
     },
     "CONFIGURATION_AUDIT": {
       "TITLE": "Auditoria administrativa",
@@ -1945,7 +1946,8 @@
       "TEAM_INHERITANCE": "Concessões herdáveis; a equipe não ativa usuários.",
       "SERVER_VALIDATES": "As etiquetas mostram o estado atual. O servidor revalidará a alçada e calculará o resultado das alterações ao salvar.",
       "REVIEW": "Revisei as alterações, as origens e os bloqueios antes de confirmar.",
-      "TEAM_ALLOWED": "Concessão herdável da equipe"
+      "TEAM_ALLOWED": "Concessão herdável da equipe",
+      "ENROLLMENT_BLOCKED": "Este usuário está pendente de autorização no Call Center. O vínculo não foi salvo e os dados foram preservados."
     }
   }
 }

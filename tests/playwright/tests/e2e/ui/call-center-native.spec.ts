@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -7,6 +8,24 @@ const session = JSON.parse(
 );
 const base = `/app/accounts/${session.account_id}/contact-center/control-desk`;
 const api = `http://127.0.0.1:5387/api/v1/accounts/${session.account_id}/jrc_contact_center`;
+const expectContainedDialog = async (page: Page) => {
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect
+    .poll(async () => {
+      const box = await dialog.boundingBox();
+      const viewport = page.viewportSize();
+      return Boolean(
+        box &&
+          viewport &&
+          box.x >= 0 &&
+          box.y >= 0 &&
+          box.x + box.width <= viewport.width &&
+          box.y + box.height <= viewport.height
+      );
+    })
+    .toBe(true);
+};
 test.beforeEach(async ({ page }, info) => {
   const auth = info.title.startsWith('configuration audit boundary')
     ? session.auditor
@@ -26,6 +45,151 @@ test.beforeEach(async ({ page }, info) => {
     },
     { auth, dark: info.project.name.endsWith('dark') }
   );
+});
+
+test('native queue eligibility is rechecked before saving and preserves the reviewed selection', async ({
+  page,
+}, info) => {
+  const targets = session.access_targets[info.project.name];
+  const created = await page.request.post(api + '/queues', {
+    headers: session.administrator,
+    data: {
+      queue: {
+        unit_id: session.unit_id,
+        name: 'SYNTHETIC enrollment ' + info.project.name,
+        code: 'ELIGIBLE-' + info.project.name,
+      },
+    },
+  });
+  expect(created.status()).toBe(201);
+  const queue = (await created.json()).item;
+  await page.goto(base + '/queues?queues_tab=memberships');
+  await page.locator('[data-create]').click();
+  const dialog = page.getByRole('dialog');
+  await expect(
+    dialog.locator('option[value="' + targets.enrollment.id + '"]')
+  ).toBeDisabled();
+  await dialog
+    .getByLabel('Fila', { exact: true })
+    .selectOption(String(queue.id));
+  await dialog
+    .getByLabel('Usuário', { exact: true })
+    .selectOption(String(targets.enrollment_eligible.id));
+  let current = await page.request.get(
+    api + '/access_authorizations/users/' + targets.enrollment_eligible.id,
+    { headers: session.administrator }
+  );
+  let revoke = await page.request.patch(
+    api + '/access_authorizations/users/' + targets.enrollment_eligible.id,
+    {
+      headers: session.administrator,
+      data: {
+        authorization: { eligible: false },
+        expected_revision: (await current.json()).item.revision,
+      },
+    }
+  );
+  expect(revoke.status()).toBe(200);
+  const rejected = page.waitForResponse(
+    response =>
+      response.url().endsWith('/queue_memberships') &&
+      response.request().method() === 'POST'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await rejected).status()).toBe(422);
+  await expect(dialog.getByRole('alert')).toContainText(
+    'pendente de autorização'
+  );
+  await expect(dialog.getByLabel('Usuário', { exact: true })).toHaveValue(
+    String(targets.enrollment_eligible.id)
+  );
+  await expect(dialog.getByLabel('Fila', { exact: true })).toHaveValue(
+    String(queue.id)
+  );
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-queue-eligibility.png',
+    fullPage: true,
+  });
+  current = await page.request.get(
+    api + '/access_authorizations/users/' + targets.enrollment_eligible.id,
+    { headers: session.administrator }
+  );
+  revoke = await page.request.patch(
+    api + '/access_authorizations/users/' + targets.enrollment_eligible.id,
+    {
+      headers: session.administrator,
+      data: {
+        authorization: { eligible: true },
+        expected_revision: (await current.json()).item.revision,
+      },
+    }
+  );
+  expect(revoke.status()).toBe(200);
+  const saved = page.waitForResponse(
+    response =>
+      response.url().endsWith('/queue_memberships') &&
+      response.request().method() === 'POST'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await saved).status()).toBe(201);
+  await expect(dialog).not.toBeVisible();
+  await page.reload();
+  await expect(
+    page.locator('[data-resource-row]').filter({ hasText: queue.name })
+  ).toContainText(targets.enrollment_eligible.name);
+  const bypass = await page.request.post(api + '/queue_memberships', {
+    headers: session.administrator,
+    data: {
+      queue_membership: {
+        queue_id: queue.id,
+        account_user_id: targets.enrollment.id,
+      },
+    },
+  });
+  expect(bypass.status()).toBe(422);
+  const rows = await page.request.get(
+    api + '/queue_memberships?queue_id=' + queue.id,
+    { headers: session.administrator }
+  );
+  expect((await rows.json()).items).toHaveLength(1);
+  current = await page.request.get(
+    api + '/access_authorizations/users/' + targets.enrollment_eligible.id,
+    { headers: session.administrator }
+  );
+  const suspended = await page.request.patch(
+    api + '/access_authorizations/users/' + targets.enrollment_eligible.id,
+    {
+      headers: session.administrator,
+      data: {
+        authorization: { eligible: false },
+        expected_revision: (await current.json()).item.revision,
+      },
+    }
+  );
+  expect(suspended.status()).toBe(200);
+  await page.reload();
+  await page
+    .locator('[data-resource-row]')
+    .filter({ hasText: queue.name })
+    .locator('[data-edit]')
+    .click();
+  await dialog.getByLabel('Ativo', { exact: true }).uncheck();
+  const deactivated = page.waitForResponse(
+    response =>
+      response.url().includes('/queue_memberships/') &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await deactivated).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
 });
 
 test('native access user eligibility, real pagination, denial and persistence', async ({
@@ -51,6 +215,7 @@ test('native access user eligibility, real pagination, denial and persistence', 
   await expect(section.locator('[data-edit-authority]')).toHaveCount(1);
   await section.locator('[data-edit-authority="' + target.id + '"]').click();
   const dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
   await expect(dialog.locator('[data-user-eligible]')).not.toBeChecked();
   await dialog.locator('[data-user-eligible]').check();
   await dialog
@@ -132,6 +297,7 @@ test('native access team grants remain separate from eligibility and queue parti
     .locator('[data-edit-authority="' + targets.team.id + '"]')
     .click();
   const dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
   await expect(dialog.locator('[data-user-eligible]')).toHaveCount(0);
   await expect(dialog.locator('[data-deny]')).toHaveCount(0);
   await dialog.locator('[data-allow="jrc_contact_center_monitor"]').check();
@@ -191,6 +357,7 @@ test('native access conflict preserves draft and requires explicit comparison be
   );
   await page.locator('[data-edit-authority="' + target.id + '"]').click();
   const dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
   await dialog.locator('[data-user-eligible]').check();
   await dialog.locator('[data-allow="jrc_contact_center_monitor"]').check();
   const snapshot = await page.request.get(
@@ -925,6 +1092,16 @@ test('corporate boundary denies foreign units and queues for scoped configuratio
   expect(await preservedRole.json()).toEqual(beforeRole);
   await page.goto(base + '/queues?queues_tab=teams');
   await expect(page.locator('[data-create]')).toHaveCount(0);
+  await page.goto(base + '/closures');
+  await expect(page.locator('[data-create]')).toHaveCount(0);
+  await expect(page.locator('[data-administration-section]')).toContainText(
+    'toda a conta'
+  );
+  const deniedGlobal = await page.request.patch(api + '/acw_policy', {
+    headers: session.restricted,
+    data: { limits: { voice: 60, whatsapp: 120 }, voice_required: false },
+  });
+  expect(deniedGlobal.status()).toBe(401);
 });
 
 test('native permission popup reuses the role editor and persists only explicitly selected capabilities', async ({

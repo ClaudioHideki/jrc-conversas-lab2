@@ -99,3 +99,34 @@ migration é <<~SQL.squish: SQL e versão preservados; novo hash revisado
 85fa579036a807b2d50ae3c30af64b061ba9ea6c6ffe173b4e0f33d4ad922dbe.
 O gate continua recusando qualquer mudança histórica ou adição desconhecida.
 Nova execução do SHA corrigido é obrigatória. Interface ainda em preparação.
+
+
+## Continuação: vínculo operacional e revisão do schema
+
+A elegibilidade explícita também é conferida ao cadastrar/reativar vínculos de
+fila. Usuário pendente aparece identificado e indisponível no seletor; presença
+online não concede autorização, e estar offline não impede a configuração
+administrativa de um usuário elegível. A desativação de vínculo existente
+continua permitida após revogação. O servidor revalida após a espera por locks,
+e o popup conserva o rascunho em uma revogação concorrente. Seis casos API,
+um Vue e quatro Chrome preparados para o próximo SHA, ainda não aprovados.
+
+O schema gerado pelo PostgreSQL da CI 44153428753 possui 2.194 linhas de diff
+contra o schema versionado, incluindo tabelas históricas de outros módulos e
+representações de constraints. Não copiar esse dump integralmente nem alterar
+o gate para aceitá-lo automaticamente. Artefato/hash e decisão constam na
+matriz; a recarga do dump migrado em banco sintético separado foi executada.
+A conciliação histórica do arquivo versionado não é apresentada como concluída.
+
+
+## Evidência 48c2a9a4 e correção do popup
+
+CI 44159560428: 590 Rails principais + 8 concorrentes, 220 Vue e lints
+aprovados. Artefato 14363849571, SHA-256
+c534b23d7057543f2e4a3de1aa8ac02bf640fe15ca9c974a068a0daa1a6781d1.
+Os 68 Chrome anteriores passaram; os 12 novos esgotaram 90 segundos cada
+por controles fora do viewport. Não foi falha de PostgreSQL ou de bootstrap.
+Usar contained no Dialog nativo do chamador para rolagem interna e footer
+acessível. Acrescentar limites geométricos reais e preservar todos os cliques,
+cenários e timeouts; nenhum force click ou supressão. Próximo SHA deve
+comprovar o ajuste e os quatro novos cenários de elegibilidade de fila.

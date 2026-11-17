@@ -26,3 +26,22 @@ cenários concorrentes existentes e a homologação Chrome já aprovada.
 
 Esta decisão não afirma serialização global dos demais módulos nem altera
 o contrato das coberturas corporativas compartilhadas. Implementação e duas provas HTTP concorrentes preparadas; validação nativa pendente.
+
+
+## Política global de pós-atendimento
+
+O endpoint ACW tinha autorização anterior à espera do lock da conta. Aplicar
+a mesma AuthorityTransaction, com membro recarregado e autorização dentro
+do lock antes de persistir. Uma política que afeta a conta inteira exige
+cobertura GROUP quando a estrutura corporativa está configurada; cobertura
+de unidade não autoriza escrita global. Sem estrutura configurada, manter
+o contrato anterior de configurar CC. A leitura continua autorizada pela
+permissão nativa. Nenhum perfil, valor operacional ou cobertura é concedido.
+
+A capability configuration_global vem do servidor e controla o botão; APIs
+manipuladas continuam negadas. Três cenários API comprovam unidade/GROUP e permissão funcional,
+um Vue verifica o controle, e dois cenários HTTP concorrentes aguardam
+o bloqueio real observado em pg_stat_activity antes de liberar o lock.
+Usar somente o banco sintético explicitamente conferido; nenhuma corrida
+em produção. Ampliar o Chrome existente de limite corporativo sem remover
+as suas asserções. Todos esses casos exigem a próxima CI nativa.

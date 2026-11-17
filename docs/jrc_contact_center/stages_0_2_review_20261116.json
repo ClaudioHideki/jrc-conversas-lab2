@@ -551,14 +551,13 @@
         "Cobertura corporativa revalidada na API para criar, renomear, retirar capacidades e excluir perfis globais que envolvam CC. Administrador restrito a unidade não ganha autoridade global por manipular a rota. Perfis sem capacidades CC preservam a política nativa.",
         "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel.",
         "Revisão esperada aditiva: o editor CC exige a versão capturada, trata 409 sem perder o rascunho e exige comparação/revisão explícita antes de gravar contra a versão atual. Implementado neste incremento; aguarda CI do novo SHA.",
-        "Pré-condição opcional e editor protegido para unidades/filas/vínculos em implementação; novo SHA exige validação real, sem alterar o contrato de perfis já provado."
+        "Pré-condição opcional e editor protegido para unidades/filas/vínculos em implementação; novo SHA exige validação real, sem alterar o contrato de perfis já provado.",
+        "Herança por Team nativo, configuração por AccountUser, elegibilidade explícita, bloqueios individuais prioritários e proteção de fallback implementados incrementalmente; evidências por SHA constam em continuity_20261117."
       ],
       "remaining_or_external": [
-        "Pendente 0–2: herança por equipe/usuário não possui contrato ou armazenamento nativo; requer decisão arquitetural, sem concessões por suposição.",
-        "Exclusão de perfil com membros usa dependência nullify nativa; mudança de política exige avaliar todos os módulos.",
-        "Pendente 0–2: matriz visual completa multi-módulo da figura; as concessões existentes seguem explícitas e revisadas.",
-        "Pendente 0–2: native_role? mantém acesso legado quando custom_role_id é nulo. O requisito de não ativar novos usuários automaticamente exige política de elegibilidade/migração que preserve usuários existentes; não foi alterado por suposição.",
-        "Clientes nativos anteriores sem expected_revision preservam o contrato; precondição global obrigatória depende de migração coordenada de clientes e não foi ativada silenciosamente."
+        "Matriz visual multi-módulo completa da referência ainda não equivale ao editor setorial das 13 capacidades CC; permissões dos demais módulos preservadas.",
+        "Clientes nativos anteriores sem expected_revision preservam o contrato; precondição global obrigatória depende de migração coordenada de clientes.",
+        "Homologação dos popups de herança/elegibilidade no Chrome exige aprovação dos novos cenários no SHA correspondente."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -1348,7 +1347,7 @@
     ],
     "increment": "F11 revisão esperada compatível, sem migration ou concessões implícitas",
     "adr": "docs/adr/20261117-call-center-role-revision.md",
-    "expected_chrome": 68,
+    "expected_chrome": 84,
     "previous_chrome_preserved": 52,
     "native_validation": "pending_new_sha",
     "external_homologation": false,
@@ -1658,7 +1657,7 @@
     },
     "team_inheritance_eligibility": {
       "adr": "docs/adr/20261117-call-center-team-inheritance-and-eligibility.md",
-      "implementation": "backend_prepared_native_validation_pending",
+      "implementation": "backend_validated_ui_scroll_fix_prepared",
       "native_users_teams_reused": true,
       "new_users_pending": true,
       "individual_denial_precedence": true,
@@ -1680,7 +1679,7 @@
         "remaining_gate": "two Ruby formatting/naming offenses; fixed in next checkpoint",
         "chrome": "not_run"
       },
-      "expected_chrome": 80,
+      "expected_chrome": 84,
       "previous_chrome_preserved": 68,
       "ui_first_gate": {
         "sha": "8498ebf5070001a28255e473b910626fb7efd2cb",
@@ -1693,7 +1692,29 @@
         "failures": 0,
         "new_ruby_offenses": 0,
         "blocker": "frontend formatting only; CI formatter canonical content equivalence verified",
-        "chrome": "not_run"
+        "chrome": "not_run",
+        "initial_assessment": "Formatting-only was the initial assessment; full diagnostics later identified four frontend errors, corrected in 48c2a9a4."
+      },
+      "latest_evidence": {
+        "sha": "48c2a9a46f092b3768489bbee3027c8ff1ec9b60",
+        "run": 44159560428,
+        "artifact": 14363849571,
+        "sha256": "c534b23d7057543f2e4a3de1aa8ac02bf640fe15ca9c974a068a0daa1a6781d1",
+        "rails_main": 590,
+        "concurrency": 8,
+        "vue": 220,
+        "native_failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 0,
+        "frontend_lint": "passed",
+        "chrome": {
+          "passed": 68,
+          "unexpected": 12,
+          "skipped": 0,
+          "flaky": 0
+        },
+        "chrome_cause": "All 12 new cases: controls outside viewport because native contained dialog mode was not enabled; no force clicks or reduced assertions."
       }
     },
     "final_write_authorization": {
@@ -1715,13 +1736,82 @@
         "new_ruby_offenses": 0,
         "frontend_gate": "four errors: test stub property, boolean shorthand and conflicting label markup; fixed next SHA",
         "chrome": "not_run"
+      },
+      "latest_evidence": {
+        "sha": "48c2a9a46f092b3768489bbee3027c8ff1ec9b60",
+        "run": 44159560428,
+        "artifact": 14363849571,
+        "sha256": "c534b23d7057543f2e4a3de1aa8ac02bf640fe15ca9c974a068a0daa1a6781d1",
+        "rails_main": 590,
+        "concurrency": 8,
+        "vue": 220,
+        "native_failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 0,
+        "frontend_lint": "passed",
+        "chrome": {
+          "passed": 68,
+          "unexpected": 12,
+          "skipped": 0,
+          "flaky": 0
+        },
+        "chrome_cause": "All 12 new cases: controls outside viewport because native contained dialog mode was not enabled; no force clicks or reduced assertions."
       }
     },
     "latent_permission_effects": {
       "adr": "docs/adr/20261117-call-center-latent-permission-effects.md",
       "new_request_scenarios": 6,
-      "validation": "pending_new_sha",
-      "no_new_capabilities": true
+      "validation": "native_and_vue_passed_48c2a9a4",
+      "no_new_capabilities": true,
+      "evidence": {
+        "sha": "48c2a9a46f092b3768489bbee3027c8ff1ec9b60",
+        "run": 44159560428,
+        "artifact": 14363849571,
+        "sha256": "c534b23d7057543f2e4a3de1aa8ac02bf640fe15ca9c974a068a0daa1a6781d1",
+        "rails_main": 590,
+        "concurrency": 8,
+        "vue": 220,
+        "native_failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 0,
+        "frontend_lint": "passed",
+        "chrome": {
+          "passed": 68,
+          "unexpected": 12,
+          "skipped": 0,
+          "flaky": 0
+        },
+        "chrome_cause": "All 12 new cases: controls outside viewport because native contained dialog mode was not enabled; no force clicks or reduced assertions."
+      }
+    },
+    "queue_user_eligibility": {
+      "implementation": "prepared",
+      "rails_scenarios": 6,
+      "vue_scenarios": 1,
+      "chrome_scenarios": 4,
+      "validation": "pending_next_sha",
+      "online_is_not_authorization": true,
+      "existing_deactivation_preserved": true
+    },
+    "schema_review": {
+      "artifact": 14360682463,
+      "artifact_sha256": "0fb6d25ed9cc328697ca093a1ca62eafc80b7ee9fe3019da5ad549b8defd9e76",
+      "generated_schema_sha256": "468247061c75afc273aab70fd3586282f416b9b3a44a030c9f60d6fbf5be2204",
+      "generated_bytes": 679873,
+      "diff_lines": 2194,
+      "decision": "Do not overwrite versioned schema: generated dump includes historical tables and constraint representations outside CC increment. Preserve protected schema; migrated dump reload already tested in disposable DB. Historical reconciliation remains separately reviewable."
+    },
+    "global_acw_write": {
+      "implementation": "prepared",
+      "native_api_scenarios": 3,
+      "concurrency_scenarios": 2,
+      "vue_scenarios": 1,
+      "existing_chrome_boundary_extended": true,
+      "account_lock_wait_proven_by_pg_stat_activity": true,
+      "unit_cannot_write_global_policy": true,
+      "validation": "pending_next_sha"
     }
   }
 }

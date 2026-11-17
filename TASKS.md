@@ -78,3 +78,9 @@ CI 44078910273/e217b41a preservada: 428 Rails, uma falha de preparação/escopo 
 - [ ] **CALL-CENTER-FINAL-WRITE-AUTH-20261117:** Recarregar ator e escopo ao concluir a espera por locks de unidade/fila; duas novas provas HTTP reais de revogação, oito cenários concorrentes esperados. CI do próximo SHA obrigatória. A interface 8498ebf5 aprovou 590 Rails e 220 Vue, com lint Ruby limpo; ajustes de formatação frontend verificados por equivalência canônica, sem alterar conteúdo. Chrome 80 ainda pendente.
 
 - [ ] **CALL-CENTER-DEPENDENCY-GRANTS-20261117:** Comparar chaves concedidas e efeitos por destinatário ao trocar perfil, editar equipe ou incluir membro. Seis regressões preparadas para capacidades latentes sem Visualizar. Sem novas capacidades. Base 8850187c: 592 Rails, 220 Vue e lint Ruby limpo; frontend e Chrome exigem nova execução após correção dos quatro diagnósticos.
+
+- [ ] **CALL-CENTER-QUEUE-ELIGIBILITY-20261117:** Vínculo de fila exige elegibilidade explícita no servidor, sem confundir presença com autorização. Revogação entre abertura e salvamento conserva rascunho; desativação permanece permitida. Seis API, um Vue e quatro Chrome preparados (84 totais), validação do próximo SHA pendente. Dump migrado não substituiu schema histórico com divergências de outros módulos.
+
+- [ ] **CALL-CENTER-GLOBAL-ACW-SCOPE-20261117:** Revalidar autorização dentro do lock da conta e impedir que escopo de unidade escreva política global. Três novos API, dois HTTP concorrentes com espera PostgreSQL comprovada, um Vue e extensão dos quatro cenários Chrome corporativos preparados. Sem valores de negócio novos; aguardam o próximo SHA.
+
+- 48c2a9a4 / CI 44159560428: 598 Rails, 220 Vue, frontend e Ruby aprovados. Chrome: 68 anteriores aprovados e 12 novos com timeout por controles fora do viewport. Causa confirmada no relatório e capturas; contained aplicado no chamador, sem modificar Dialog compartilhado. Próximo SHA exige 84 Chrome completos.

@@ -40,8 +40,9 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
   end
 
   def agent_options
+    eligible_ids = JrcContactCenter::AccessGrant.where(account: Current.account, eligible: true).pluck(:account_user_id).to_set
     eligible_members.includes(:user).order(:id).map do |member|
-      { account_user_id: member.id.to_s, name: member.user.available_name }
+      { account_user_id: member.id.to_s, name: member.user.available_name, eligible: eligible_ids.include?(member.id) }
     end
   end
 
@@ -92,10 +93,22 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
 
   def validate_queue_enrollment!(attributes, queue)
     membership = scoped_memberships.find(params[:id]) if action_name == 'update'
+    validate_member_enrollment!(attributes, membership)
     queue ||= membership&.queue
     return if queue.nil? || queue.status == 'active'
 
     raise JrcContactCenter::OperationError, 'inactive_queue' if new_enrollment?(attributes, membership)
+  end
+
+  def validate_member_enrollment!(attributes, membership)
+    member_id = attributes[:account_user_id].presence || membership&.account_user_id
+    eligible = JrcContactCenter::AccessGrant.exists?(account: Current.account, account_user_id: member_id, eligible: true)
+    return if eligible
+
+    deactivating = attributes.key?(:active) && !ActiveModel::Type::Boolean.new.cast(attributes[:active])
+    return if membership && deactivating && !new_enrollment?(attributes, membership)
+
+    raise JrcContactCenter::OperationError, 'ineligible_member'
   end
 
   def new_enrollment?(attributes, membership)

@@ -87,13 +87,13 @@ end
 
 # Separate synthetic targets for each browser project; no invitation or provider call.
 access_targets = %w[desktop-light desktop-dark mobile-light mobile-dark].index_with do |project|
-  recipients = %w[pending conflict peer].index_with do |kind|
+  recipients = %w[pending conflict peer enrollment enrollment_eligible].index_with do |kind|
     person = User.new(name: "SYNTHETIC #{project} #{kind}", email: "cc-#{kind}-#{SecureRandom.hex(6)}@example.test",
                       password: SecureRandom.base64(32), confirmed_at: Time.current)
     person.skip_confirmation_notification!
     person.save!
     member = AccountUser.create!(account: account, user: person, role: :agent)
-    JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true) if kind == 'peer'
+    JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true) if %w[peer enrollment_eligible].include?(kind)
     { id: member.id, name: person.name }
   end
   team = Team.create!(account: account, name: "SYNTHETIC #{project} inherited")

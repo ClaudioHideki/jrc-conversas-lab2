@@ -56,7 +56,7 @@ const Dialog = defineComponent({
 });
 enableAutoUnmount(afterEach);
 const context = {
-  capabilities: { configure: true },
+  capabilities: { configure: true, configuration_global: true },
   units: [{ id: 1, name: 'Authorized' }],
   queues: [],
   corporate: { companies: [], units: [] },
@@ -80,6 +80,53 @@ beforeEach(() => {
 });
 
 describe('administrative workflow', () => {
+  it('does not offer a global ACW change to an operator restricted to a unit', async () => {
+    const wrapper = mountSection('closures');
+    await wrapper.setProps({
+      context: {
+        ...context,
+        capabilities: { configure: true, configuration_global: false },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-create]').exists()).toBe(false);
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.ADMIN.ACW_GLOBAL_DENIED'
+    );
+    expect(API.updateAcwPolicy).not.toHaveBeenCalled();
+  });
+
+  it('identifies pending native users and preserves the queue draft if eligibility changes before saving', async () => {
+    mocks.route.query = { queues_tab: 'memberships' };
+    API.queueMemberships.mockResolvedValue({
+      data: {
+        items: [],
+        agents: [
+          { account_user_id: '8', name: 'Pending', eligible: false },
+          { account_user_id: '9', name: 'Eligible', eligible: true },
+        ],
+      },
+    });
+    API.saveQueueMembership.mockRejectedValueOnce({
+      response: { data: { error: 'ineligible_member' } },
+    });
+    const wrapper = mountSection('queues');
+    await flushPromises();
+    await wrapper.get('[data-create]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('option[value="8"]').element.disabled).toBe(true);
+    await wrapper.get('[name="account_user_id"]').setValue('9');
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toBe(
+      'JRC_CONTACT_CENTER.ACCESS.ENROLLMENT_BLOCKED'
+    );
+    expect(wrapper.get('[name="account_user_id"]').element.value).toBe('9');
+    expect(
+      wrapper.get('[name="account_user_id"]').attributes('aria-invalid')
+    ).toBe('true');
+  });
+
   it('does not load a native role editor without the server capability', async () => {
     const wrapper = mountSection('permissions', 'native_module');
     await flushPromises();
