@@ -1916,6 +1916,8 @@
       "CONFIRM": "Revisei a versão atual e confirmo as alterações do meu rascunho."
     },
     "ACCESS": {
+      "NATIVE_PROFILE": "Papel nativo, sem perfil personalizado",
+      "INHERITED_FROM": "Herdada das equipes",
       "SUBJECT": "Configurar permissões por origem",
       "PROFILES": "Perfis",
       "TEAMS": "Equipes",

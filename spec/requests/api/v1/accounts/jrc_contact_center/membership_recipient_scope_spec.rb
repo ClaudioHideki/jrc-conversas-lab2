@@ -75,8 +75,12 @@ RSpec.describe 'Call Center queue enrollment preserves recipient corporate cover
   it 'rejects moving an assignment to an uncovered recipient even when deactivating it' do
     actor_member = account.account_users.find_by!(user: actor)
     membership = JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: actor_member)
-    patch "#{base}/#{membership.id}", headers: headers,
-                                     params: { queue_membership: { account_user_id: member.id, active: false } }, as: :json
+    patch(
+      "#{base}/#{membership.id}",
+      headers: headers,
+      params: { queue_membership: { account_user_id: member.id, active: false } },
+      as: :json
+    )
     expect(response).to have_http_status(:unprocessable_entity)
     expect(membership.reload).to have_attributes(account_user_id: actor_member.id, active: true)
   end

@@ -151,3 +151,19 @@ prova de destinatário restrito, sem remoção de asserções nem comandos PABX.
 Os dados sintéticos de sucesso passam a declarar sua cobertura expressamente.
 Execução nativa deste incremento ainda pendente; não atribuir evidências do
 SHA anterior ao novo comportamento.
+
+
+## Origem nominal da herança
+
+O detalhe autorizado de usuário informa o perfil nativo associado e as equipes
+reais que contribuem para cada capacidade. A listagem paginada conserva seu
+payload anterior; o detalhe não cria nem altera grants. A consulta continua
+restrita à conta, associação nativa e autorização administrativa/GROUP. Equipe
+externa, mesmo vinculada por registro malformado, não é fonte. Não são
+expostos dados de auditoria a quem não possui a capacidade correspondente.
+
+O popup distingue origem de equipe, concessão individual, bloqueio e direito
+efetivo. Nomes são escapados pelo Vue. Usuário pendente continua pendente;
+nenhuma inferência de elegibilidade ou participação deriva do texto exibido.
+Dois casos de serviço, um API, um Vue e extensão dos quatro casos Chrome
+existentes estão preparados; o próximo SHA exige validação nativa própria.

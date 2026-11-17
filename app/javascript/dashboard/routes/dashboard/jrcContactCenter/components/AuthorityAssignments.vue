@@ -35,6 +35,11 @@ const loading = ref(false);
 const error = ref(false);
 const dialog = ref(null);
 const selected = ref(null);
+const inheritedOrigins = permission =>
+  (selected.value?.origins?.teams || [])
+    .filter(team => team.permissions.includes(permission))
+    .map(team => team.name)
+    .join(' · ');
 const opening = ref(false);
 const saving = ref(false);
 const saveError = ref(false);
@@ -299,6 +304,14 @@ onBeforeUnmount(() => {
       >
         <h3 class="break-words text-lg font-semibold">{{ selected.name }}</h3>
         <p class="text-sm text-n-slate-11">{{ label('PRECEDENCE') }}</p>
+        <p
+          v-if="users && selected.origins"
+          class="break-words text-sm text-n-slate-11"
+          data-profile-origin
+        >
+          {{ label('PROFILE') }}:
+          {{ selected.origins.profile?.name || label('NATIVE_PROFILE') }}
+        </p>
         <p v-if="saveError" role="alert" class="text-sm text-n-ruby-11">
           {{ t('JRC_CONTACT_CENTER.ADMIN.SAVE_ERROR') }}
         </p>
@@ -342,6 +355,13 @@ onBeforeUnmount(() => {
               >{{ label('EFFECTIVE') }}</span
             >
           </div>
+          <p
+            v-if="users && inheritedOrigins(permission)"
+            class="break-words text-xs text-n-slate-11"
+            :data-inherited-origin="permission"
+          >
+            {{ label('INHERITED_FROM') }}: {{ inheritedOrigins(permission) }}
+          </p>
           <label class="flex items-start gap-2 text-sm"
             ><input
               v-model="draft.allowed"

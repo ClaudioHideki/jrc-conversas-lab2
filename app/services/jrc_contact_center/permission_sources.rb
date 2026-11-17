@@ -44,4 +44,17 @@ class JrcContactCenter::PermissionSources
       (grants.values.flatten + @extra_permissions).uniq
     end
   end
+
+  def origins
+    grants = JrcContactCenter::AccessGrant.where(account: @account, team_id: teams.select(:id)).includes(:team).order(:team_id)
+    role = @member.custom_role
+    {
+      profile: role&.account_id == @account.id ? { id: role.id, name: role.name, permissions: profile } : nil,
+      teams: grants.filter_map do |grant|
+        next if grant.allowed.empty?
+
+        { id: grant.team_id, name: grant.team.name, permissions: grant.allowed }
+      end
+    }
+  end
 end

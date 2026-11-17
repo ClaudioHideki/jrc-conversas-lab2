@@ -124,6 +124,19 @@ RSpec.describe 'Call Center explicit access authorizations', type: :request do
     expect(Audited.audit_class.where(comment: JrcContactCenter::ConfigurationAudit::AUTHORITY_COMMENT, associated: account).count).to eq(count)
   end
 
+  it 'returns named origins only in an authorized detail without activating the recipient' do
+    team = create(:team, account: account)
+    team.add_members([recipient.id])
+    JrcContactCenter::AccessGrant.create!(account: account, team: team, allowed: ['jrc_contact_center_monitor'])
+    expect { get "#{base}/users/#{member.id}", headers: headers }.not_to change(JrcContactCenter::AccessGrant, :count)
+    expect(response).to have_http_status(:ok)
+    item = response.parsed_body.fetch('item')
+    expect(item.dig('origins', 'teams')).to eq([{ 'id' => team.id, 'name' => team.name, 'permissions' => ['jrc_contact_center_monitor'] }])
+    expect(item.values_at('eligible', 'effective')).to eq([false, []])
+    get "#{base}/users", headers: headers
+    expect(response.parsed_body.fetch('items').flat_map(&:keys)).not_to include('origins')
+  end
+
   [true, 'true', 1].each do |value|
     it "rejects a malformed individual array #{value.inspect}" do
       attributes = { authorization: { allowed: value }, expected_revision: revision }

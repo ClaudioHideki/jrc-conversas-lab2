@@ -464,6 +464,32 @@ test('native access team grants remain separate from eligibility and queue parti
       '.codex/call-center-native-e2e/' + info.project.name + '-access-team.png',
     fullPage: true,
   });
+  await page.goto(
+    base +
+      '/permissions?permission_scope=users&access_users_q=' +
+      encodeURIComponent(targets.peer.name)
+  );
+  await page.locator('[data-edit-authority="' + targets.peer.id + '"]').click();
+  await expectContainedDialog(page);
+  await expect(
+    dialog.locator('[data-inherited-origin="jrc_contact_center_monitor"]')
+  ).toContainText(targets.team.name);
+  await expect(dialog.locator('[data-user-eligible]')).toBeChecked();
+  await expect(
+    dialog.locator('[data-deny="jrc_contact_center_monitor"]')
+  ).not.toBeChecked();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path:
+      '.codex/call-center-native-e2e/' +
+      info.project.name +
+      '-access-inherited-origin.png',
+    fullPage: true,
+  });
 });
 
 test('native access conflict preserves draft and requires explicit comparison before overwrite', async ({

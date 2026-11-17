@@ -2006,7 +2006,22 @@
       "http_lock_wait_case": 1,
       "additional_vue_case": 1,
       "extended_real_chrome_cases": 4,
-      "validation": "pending_next_sha"
+      "validation": "pending_next_sha",
+      "native_evidence": {
+        "sha": "f21f65ba82ac9adac3c99b3b060e2afa0be9a153",
+        "run": 44181012669,
+        "artifact": 14372712430,
+        "sha256": "9256c1b31bceb59d53012f65f531842cc54cfd9714933504409aedc9738fe024",
+        "rails_main": 609,
+        "concurrency": 11,
+        "vue": 225,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 1,
+        "lint_cause": "Layout/HashAlignment in new recipient scope spec; smallest argument layout correction prepared.",
+        "chrome": "not_run_due_to_lint"
+      }
     },
     "validated_checkpoint_dd8ece07": {
       "sha": "dd8ece07d34e7f17adecd8c68d5cabb1679f56bc",
@@ -2029,6 +2044,18 @@
       },
       "screenshots_verified": 100,
       "external_homologation": false
+    },
+    "named_permission_origins": {
+      "implementation": "prepared",
+      "read_only": true,
+      "detail_only": true,
+      "native_team_membership_required": true,
+      "foreign_origins_excluded": true,
+      "audit_authority_unchanged": true,
+      "native_scenarios": 3,
+      "additional_vue_scenario": 1,
+      "extended_chrome_cases": 4,
+      "validation": "pending_next_sha"
     }
   }
 }

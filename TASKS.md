@@ -98,3 +98,7 @@ CI 44078910273/e217b41a preservada: 428 Rails, uma falha de preparação/escopo 
 - [ ] **CALL-CENTER-RECIPIENT-SCOPE-20261117:** Revalidar cobertura corporativa do destinatário ao gravar vínculo de fila, sem transferir GROUP do ator. Oito API, um HTTP concorrente com espera de lock, um Vue e extensão dos quatro Chrome preparados. Sem novas migrations, concessões reais ou operações externas; execução do próximo SHA pendente.
 
 - [x] **CALL-CENTER-DD8ECE07-VALIDATION:** CI 44177839950 aprovada: 611 Rails, 224 Vue, 92 Chrome, zero falhas/pendências/erros e 100 hashes de capturas conferidos. Navegação SIP/PABX nativa e negação por rota forçada comprovadas sem escritas ou chamadas ao provedor. Cobertura corporativa do destinatário é incremento posterior ainda não validado. As 23 figuras permanecem parcialmente atendidas, com lacunas expressas.
+
+- [ ] **CALL-CENTER-PERMISSION-ORIGINS-20261117:** Identificar perfil/equipes reais por capacidade herdada no detalhe autorizado e popup, sem alterar listagem, grants ou elegibilidade. Três Rails, um Vue e extensão dos quatro Chrome preparados; evidência nativa do próximo SHA obrigatória.
+
+- f21f65ba / CI 44181012669: 620 Rails (609 + 11 concorrentes), 225 Vue, zero falhas/pendências/erros. Única infração nova: alinhamento de parâmetros no spec de cobertura, corrigido sem alterar asserções. Chrome bloqueado pelo lint nesse SHA; nova validação obrigatória inclui origens nominais preparadas.

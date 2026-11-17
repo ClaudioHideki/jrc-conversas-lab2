@@ -119,4 +119,24 @@ RSpec.describe JrcContactCenter::PermissionSources do
     expect(access.units).not_to include(operational)
     expect(JrcCrm::UserBusinessUnit.where(account: account, user: user)).to be_empty
   end
+
+  it 'identifies the native profile and each actual team without changing effective permissions' do
+    team.add_members([user.id])
+    JrcContactCenter::AccessGrant.create!(account: account, team: team, allowed: ['jrc_contact_center_monitor'])
+    previous = policy.effective_permissions
+    origins = described_class.new(account: account, member: member).origins
+    expect(origins[:profile]).to eq(id: role.id, name: role.name, permissions: ['jrc_contact_center_view'])
+    expect(origins[:teams]).to eq([{ id: team.id, name: team.name, permissions: ['jrc_contact_center_monitor'] }])
+    expect(JrcContactCenter::ModulePolicy.new(context, :contact_center).effective_permissions).to eq(previous)
+  end
+
+  it 'does not expose origins from a foreign native team even with a malformed membership' do
+    foreign = create(:team, account: create(:account), name: 'SYNTHETIC foreign origin')
+    foreign.add_members([user.id])
+    JrcContactCenter::AccessGrant.create!(account: foreign.account, team: foreign, allowed: ['jrc_contact_center_publish'])
+    origins = described_class.new(account: account, member: member).origins
+    expect(origins[:teams]).to eq([])
+    expect(origins.to_json).not_to include(foreign.name)
+    expect(policy.publish?).to be(false)
+  end
 end

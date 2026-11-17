@@ -65,6 +65,47 @@ beforeEach(() => {
 });
 
 describe('native subject authorizations', () => {
+  it('identifies the authorized profile and exact team origin without treating inheritance as eligibility', async () => {
+    API.configurationRecord.mockResolvedValue({
+      data: {
+        item: source({
+          inherited: ['jrc_contact_center_monitor'],
+          origins: {
+            profile: { id: 3, name: 'Reviewed native profile' },
+            teams: [
+              {
+                id: 4,
+                name: 'SYNTHETIC team <escaped>',
+                permissions: ['jrc_contact_center_monitor'],
+              },
+              {
+                id: 5,
+                name: 'Other actual team',
+                permissions: ['jrc_contact_center_publish'],
+              },
+            ],
+          },
+        }),
+      },
+    });
+    const wrapper = setup();
+    await flushPromises();
+    await wrapper.get('[data-edit-authority="9"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-profile-origin]').text()).toContain(
+      'Reviewed native profile'
+    );
+    const origin = wrapper.get(
+      '[data-inherited-origin="jrc_contact_center_monitor"]'
+    );
+    expect(origin.text()).toContain('SYNTHETIC team <escaped>');
+    expect(origin.text()).not.toContain('Other actual team');
+    expect(origin.find('escaped').exists()).toBe(false);
+    expect(wrapper.get('[data-user-eligible]').element.checked).toBe(false);
+    expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+    expect(API.saveAccessAuthorization).not.toHaveBeenCalled();
+  });
+
   it('loads only the chosen account and reads a fresh revision before opening', async () => {
     const wrapper = setup();
     await flushPromises();
