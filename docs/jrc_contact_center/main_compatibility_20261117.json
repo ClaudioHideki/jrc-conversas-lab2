@@ -138,5 +138,19 @@
     "Reconciliar TASKS/ROADMAP e diferenças compartilhadas por conteúdo; nomes iguais não comprovam conflito textual.",
     "Revalidar autenticação, autorização, callbacks de Message e integrações afetadas sobre a futura base consolidada.",
     "O incremento de revisão não altera migrations, SQLs, lockfiles nem capacidades dos módulos."
-  ]
+  ],
+  "concurrent_main_review_20261117": {
+    "previous": "89779191b0b4be44929a426c7a924dbcad4c3690",
+    "current": "d3d6623254c48fc379fb9d54c14226a2e1e9c223",
+    "commits": 19,
+    "functional_overlap_with_this_increment": false,
+    "documentation_overlap": [
+      "TASKS.md",
+      "docs/adr/README.md"
+    ],
+    "automatic_integration": false,
+    "main_modified": false,
+    "publication_ready_against_latest_main": false,
+    "required_before_future_release": "Reconcile and validate subsequent Service Desk, Projects and media changes in a separately authorized consolidated candidate; do not discard either line."
+  }
 }

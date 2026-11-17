@@ -1812,6 +1812,14 @@
       "account_lock_wait_proven_by_pg_stat_activity": true,
       "unit_cannot_write_global_policy": true,
       "validation": "pending_next_sha"
+    },
+    "line_ending_preflight": {
+      "sha": "f8e603ae1af8e54af8562cabbd2eb538ab85e163",
+      "run": 44166469596,
+      "gate": "git diff --check",
+      "cause": "Windows temporary writes produced CRLF; Git Data API does not apply checkout line-ending conversion.",
+      "functional_tests_run": false,
+      "correction": "Normalize only eight temporary source files to LF; add pre-upload LF assertion to external checkpoint helper. No gate removed or weakened."
     }
   }
 }
