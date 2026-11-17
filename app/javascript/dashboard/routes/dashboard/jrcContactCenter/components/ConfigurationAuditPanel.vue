@@ -560,8 +560,6 @@ onBeforeUnmount(() => {
       :title="text.details"
       :use-form="false"
       :show-cancel-button="false"
-      :confirm-button-label="text.close"
-      @confirm="dialog.close()"
       @close="stopDetails"
     >
       <p v-if="loadingDetail" role="status">{{ text.loading }}</p>
@@ -575,6 +573,15 @@ onBeforeUnmount(() => {
         :resource-label="resourceLabels[selected.resource_type]"
         :operation-label="operationLabels[selected.operation]"
       />
+      <template #footer>
+        <Button
+          type="button"
+          faded
+          slate
+          :label="text.close"
+          @click="dialog.close()"
+        />
+      </template>
     </Dialog>
   </section>
 </template>

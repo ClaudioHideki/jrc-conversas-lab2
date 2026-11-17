@@ -35,7 +35,8 @@ const Dialog = defineComponent({
     });
     return { visible };
   },
-  template: '<div v-if="visible" data-dialog><slot /></div>',
+  template:
+    '<div v-if="visible" data-dialog><slot /><slot name="footer" /></div>',
 });
 const event = {
   id: 7,
@@ -92,6 +93,17 @@ beforeEach(() => {
 });
 
 describe('scoped administrative audit interface', () => {
+  it('closes read-only details through an explicit footer action without a form submit', async () => {
+    const wrapper = render();
+    await flushPromises();
+    await wrapper.get('[data-audit-detail]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-dialog]').exists()).toBe(true);
+    await wrapper.get('[data-dialog] button').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-dialog]').exists()).toBe(false);
+  });
+
   it('loads the authorized page with native timezone and bounded pagination', async () => {
     const wrapper = render();
     await flushPromises();

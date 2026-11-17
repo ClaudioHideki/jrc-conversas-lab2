@@ -1192,6 +1192,7 @@ test('configuration audit boundary respects unit account export rights and live 
     .getByRole('dialog')
     .getByRole('button', { name: 'Fechar', exact: true })
     .click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
   const roleUrl =
     'http://127.0.0.1:5387/api/v1/accounts/' +
     session.account_id +

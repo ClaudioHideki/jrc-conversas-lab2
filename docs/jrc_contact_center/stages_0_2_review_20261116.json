@@ -1435,6 +1435,18 @@
           "Bounded wait for actual asynchronous SHA-256",
           "Synthetic reader has no supervise or reports"
         ]
+      },
+      "chrome_diagnosis": {
+        "sha": "2b957153d3abe2a8c63884acf0bc69d519b2fb84",
+        "run": 44098934635,
+        "artifact": 14334908811,
+        "sha256": "03351b1235576d56430d29a40eceb7b794bec60ccb9fec8dda4dd4ba3c4f00e0",
+        "passed": 60,
+        "failed": 4,
+        "cause": "Non-form native Dialog footer submit did not emit confirm; explicit close action in audit caller",
+        "new_vue_regression": true,
+        "shared_dialog_unchanged": true,
+        "new_sha_validation": "pending"
       }
     }
   }

@@ -73,3 +73,19 @@ Correções locais ao novo código usam forEach, incremento explícito e push;
 preservam o descarte por geração, o contrato, as asserções e todas as regras.
 Rótulos passam a usar span dentro de label, mantendo seu nome acessível.
 Nenhuma conclusão de build ou Chrome foi atribuída a essa execução bloqueada.
+
+## Regressão real do fechamento no Chrome
+
+CI 44098934635, 2b957153d3abe2a8c63884acf0bc69d519b2fb84:
+60 cenários aprovados e quatro falhas da mesma ação em desktop/celular,
+claro/escuro. Artefato 14334908811, SHA-256
+03351b1235576d56430d29a40eceb7b794bec60ccb9fec8dda4dd4ba3c4f00e0.
+Build protegido, lint e testes anteriores passaram. Exportação/histórico do
+cenário interrompido ainda não são aceites.
+
+A origem é o contrato do Dialog nativo: useForm=false renderiza div, enquanto
+o botão padrão é type=submit e confirma apenas por submit do formulário.
+Correção no chamador: footer explícito com Button type=button e close().
+O Dialog compartilhado permanece inalterado. Nova regressão Vue exige fechar
+pelo footer sem submit; os dois cenários Chrome mantêm/fortalecem a exigência de
+não visibilidade após Fechar. Nenhuma asserção removida.
