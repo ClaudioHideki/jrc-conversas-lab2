@@ -54,3 +54,23 @@ com linux/amd64 e label da revisão exata. Suíte principal Rails1303, frontend1
 na integração/2757 no build e24 cenários de navegador aprovados; smokes de aplicação
 e worker antes/depois da publicação aprovados. [Registro da release](../jrc_consolidation/encerramento-livre-sla-release-20261117.md).
 Não houve implantação em produção nem merge em main neste incremento.
+
+### Correção posterior do transporte da interface
+
+O usuário apresentou uma falha de confirmação após implantar a imagem 68862610.
+A revisão pública do servidor confirmou esse SHA. A interface gerava corretamente
+`operational_closure`, mas a lista de campos do cliente HTTP não o admitia. A
+exceção local interrompia o comando antes do POST; retirar requisitos somente no
+servidor não resolvia esse ponto.
+
+Dois cenários do formulário com o cliente HTTP real e transporte sintético
+reproduziram zero envios, com motivo vazio e com motivo preenchido. A correção
+admite o campo oficial no cliente, mantendo os demais campos e verificações de
+conta, autoria e confirmação. Não altera políticas, medições nem o servidor de
+produção. Novos testes, integração e imagem devem ser concluídos nesta revisão.
+
+Após admitir o campo, os dois cenários enviaram resolução e encerramento pelo
+cliente real, com chaves de idempotência e releituras independentes de transição,
+chamado e ciclo. A suíte local de formulário, contratos e ligação Vue passou
+72 testes; ESLint dos dois arquivos alterados ficou sem erros, com três avisos
+preexistentes de texto sintético no spec. Integração e imagem ainda pendentes.
