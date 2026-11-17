@@ -33,16 +33,21 @@ RSpec.describe 'CP6 lifecycle field visibility' do
     expect(row.ticket_events).to be_empty
   end
 
-  it 'denies a rule requiring protected evidence when the actor cannot inspect it' do
+  it 'offers manual resolution without protected evidence while keeping legacy requirements and note privacy intact' do
     definition = lc_definition
     definition['transitions'].find { |r| r['action'] == 'resolve' }['requirements']['note'] = true
     lc_publish(definition: definition)
     row = sd_ticket
     restricted_grants('module_view', 'tickets_view', 'history_view', 'sla_view', 'resolve')
     data = JrcServiceDesk::LifecycleReadService.new(user_context: sd_context, ticket: row).call
-    expect(data[:options].map { |r| r[:action] }).not_to include('resolve')
+    resolve = data[:options].find { |rule| rule[:action] == 'resolve' }
+    expect(resolve).to be_present
+    expect(resolve[:requirements]).to include('note' => false, 'evidence' => false, 'fields' => {})
     expect { lc_execute(row, 'resolve') }.to raise_error(Pundit::NotAuthorizedError)
     expect(row.reload.status_id).to eq(sd_status.id)
+    result = lc_execute(row, 'resolve', operational_closure: true)
+    expect(row.reload.status.phase).to eq('resolved')
+    expect(result.payload).not_to have_key('note')
   end
 
   it 'keeps creation permission separate from the configured initial status' do

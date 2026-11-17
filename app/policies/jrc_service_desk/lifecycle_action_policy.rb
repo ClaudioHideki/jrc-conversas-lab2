@@ -25,7 +25,7 @@ class JrcServiceDesk::LifecycleActionPolicy < JrcServiceDesk::TicketPolicy
   end
 
   def apply?
-    inspect? && (JrcServiceDesk::OperationalClosure.allowed?(user_context, record) ||
+    inspect? && JrcServiceDesk::LifecycleSelector.new(record).applicable.present? && (JrcServiceDesk::OperationalClosure.allowed?(user_context, record) ||
       JrcServiceDesk::Capabilities::LIFECYCLE_ACTIONS.keys.any? { |action| action?(action) })
   end
 end
