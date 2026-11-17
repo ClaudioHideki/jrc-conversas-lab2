@@ -1618,9 +1618,30 @@
         "spec/controllers/api/v1/accounts/agents_controller_spec.rb",
         "spec/enterprise/controllers/api/v1/accounts/agents_controller_spec.rb"
       ],
-      "validation": "pending_new_sha",
+      "validation": "validated_a3355707",
       "explicit_clear_fallback_inheritance_eligibility": "still_pending",
-      "permissions_or_migrations_added": false
+      "permissions_or_migrations_added": false,
+      "evidence": {
+        "sha": "a33557076e3484d8fd0d9f8a0e1d5d73d2df7ab8",
+        "run": 44121394822,
+        "artifact": 14346167691,
+        "artifact_sha256": "0e9233170d33cbaca7e39123002d95a9c489464b5e61e6c90e74af10a66dea9e",
+        "rails": 525,
+        "vue": 209,
+        "chrome": 68,
+        "screenshots_verified": 72,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0
+      }
+    },
+    "native_role_fallback": {
+      "adr": "docs/adr/20261117-call-center-native-role-fallback.md",
+      "validation": "pending_new_sha",
+      "scope": "explicit_clear_native_promotion_creation_bulk_and_assigned_role_deletion",
+      "no_migrations": true,
+      "permissions_granted": false,
+      "legacy_access_policy_preserved": true
     }
   }
 }

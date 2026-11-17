@@ -42,3 +42,5 @@ A revisão esperada foi validada em 80632726 (431 Rails/185 Vue/56 Chrome). Pró
 - Próximo checkpoint: revisão de cadastros com rascunho preservado, comparação explícita e descarte por conta; correção de contraste auditável no popup. Nova validação pendente. Sem conclusão de 0–2 ou Parte 1.
 
 - Auditoria e revisão de cadastros validadas no 3c5054ac. Próxima frente executável: impedir perda de perfil por campo omitido no atualizador nativo, preservando permissões dos demais módulos; nova CI pendente.
+
+Call Center 17/11: ampliar a proteção contra concessões implícitas na retirada de perfis antes de implementar herança/elegibilidade. Preservar acesso nativo dos demais módulos e validar cada incremento em banco sintético.

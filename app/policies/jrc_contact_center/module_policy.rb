@@ -59,6 +59,13 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
     recordings_view? && permission?('jrc_contact_center_recordings_download')
   end
 
+  def effective_permissions
+    PERMISSIONS.select do |permission|
+      action = permission.delete_prefix('jrc_contact_center_')
+      public_send("#{action == 'view' ? 'access' : action}?")
+    end
+  end
+
   private
 
   def native_role?

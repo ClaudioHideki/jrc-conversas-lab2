@@ -10,25 +10,39 @@ class Api::V1::Accounts::CustomRolesController < Api::V1::Accounts::EnterpriseAc
   def show; end
 
   def create
-    @custom_role = Current.account.custom_roles.create!(permitted_params)
+    with_contact_center_role_transaction do
+      @custom_role = Current.account.custom_roles.create!(permitted_params)
+    end
   end
 
   def update
-    # Reload under the native row lock before computing newly granted powers.
-    @custom_role.with_lock do
-      attributes = permitted_params
-      JrcContactCenter::RoleRevision.check!(@custom_role, params[:expected_revision]) if params.key?(:expected_revision)
-      @custom_role.update!(attributes)
+    with_contact_center_role_transaction do
+      @custom_role.with_lock do
+        attributes = permitted_params
+        JrcContactCenter::RoleRevision.check!(@custom_role, params[:expected_revision]) if params.key?(:expected_revision)
+        @custom_role.update!(attributes)
+      end
     end
   end
 
   def destroy
-    @custom_role.with_lock do
-      check_contact_center_role_scope!(@custom_role.permissions)
-      @custom_role.destroy!
+    with_contact_center_role_transaction do
+      @custom_role.with_lock do
+        check_contact_center_role_scope!(@custom_role.permissions)
+        JrcContactCenter::RoleFallbackGuard.check_destroy!(actor: Current.user, account: Current.account, role: @custom_role)
+        @custom_role.destroy!
+      end
     end
     head :ok
   end
+
+  def with_contact_center_role_transaction
+    JrcContactCenter::AuthorityTransaction.call(account: Current.account, member: Current.account_user) do
+      check_authorization
+      yield
+    end
+  end
+  private :with_contact_center_role_transaction
 
   def permitted_params
     attributes = params.require(:custom_role).permit(:name, :description, permissions: [])
