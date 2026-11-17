@@ -77,6 +77,7 @@ RSpec.describe JrcContactCenter::FactsProjector do
   end
 
   it 'rolls back the agent transition if its completed ACW projection fails' do
+    account.enable_features!('jrc_contact_center')
     agent = create(:user, :contact_center_eligible, account: account, role: :agent)
     member = account.account_users.find_by!(user: agent)
     manager = JrcContactCenter::AgentStateManager.new(account: account, account_user: member)

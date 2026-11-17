@@ -8,6 +8,59 @@ RSpec.describe JrcContactCenter::AgentStateManager do
   let(:member) { account.account_users.find_by!(user: user) }
   let(:manager) { described_class.new(account: account, account_user: member) }
 
+  before { account.enable_features!('jrc_contact_center') }
+
+  it 'rejects local availability after explicit eligibility revocation without changing native availability' do
+    manager
+    JrcContactCenter::AccessGrant.find_by!(account_user: member).update!(eligible: false)
+    previous = member.availability
+    expect do
+      manager.transition(state: 'available', command_id: 'revoked-eligibility', expected_state_version: '0')
+    end.to raise_error(Pundit::NotAuthorizedError)
+    expect(member.reload.availability).to eq(previous)
+    expect(JrcContactCenter::AgentStateEvent.where(account_user: member)).to be_empty
+  end
+
+  it 'rejects a cached member after its functional profile loses operate' do
+    manager
+    account.enable_features!('custom_roles')
+    role = create(:custom_role, account: account, permissions: ['jrc_contact_center_view'])
+    account.account_users.find(member.id).update!(custom_role: role)
+    expect do
+      manager.transition(state: 'available', command_id: 'revoked-operate', expected_state_version: '0')
+    end.to raise_error(Pundit::NotAuthorizedError)
+    expect(JrcContactCenter::AgentStateEvent.where(account_user: member)).to be_empty
+  end
+
+  %w[feature account].each do |source|
+    it "rejects an operator transition after its #{source} is disabled" do
+      manager
+      source == 'feature' ? account.disable_features!('jrc_contact_center') : account.update!(status: :suspended)
+      expect do
+        manager.transition(state: 'available', command_id: "revoked-#{source}", expected_state_version: '0')
+      end.to raise_error(Pundit::NotAuthorizedError)
+      expect(JrcContactCenter::AgentStateEvent.where(account_user: member)).to be_empty
+    end
+  end
+
+  it 'never treats provider confirmation as an authorization grant after eligibility is revoked' do
+    unit = JrcContactCenter::Unit.create!(account: account, code: 'SYNTHETIC', name: 'SYNTHETIC unit', kind: 'sac')
+    queue = JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'SYNTHETIC', name: 'SYNTHETIC queue')
+    JrcContactCenter::QueueMembership.create!(account: account, account_user: member, queue: queue)
+    adapter = instance_double(
+      JrcContactCenter::Providers::BaseAdapter,
+      provider_key: 'jrc_pabx',
+      capabilities: { 'agent_states' => 'available', 'acd_queues' => 'available' }
+    )
+    event = manager.record_provider_event(state: 'available', occurred_at: Time.current, external_event_id: 'SYNTHETIC-confirmed',
+                                          provider: 'jrc_pabx', queue_id: queue.id)
+    expect(JrcContactCenter::AgentStateSnapshot.new(account_user: member, adapter: adapter).call[:eligible]).to be(true)
+    JrcContactCenter::AccessGrant.find_by!(account_user: member).update!(eligible: false)
+    snapshot = JrcContactCenter::AgentStateSnapshot.new(account_user: member, adapter: adapter).call
+    expect(snapshot).to include(eligible: false, eligibility_reason: 'access_revoked', eligible_queue_ids: [], provider_confirmed: true)
+    expect(event.reload.ended_at).to be_nil
+  end
+
   it 'keeps native distribution availability aligned with an explicit operator pause and resume' do
     event = manager.transition(state: 'paused', reason_code: 'lunch', command_id: 'pause-lunch', expected_state_version: '0')
     expect(member.reload.availability).to eq('lunch_break')

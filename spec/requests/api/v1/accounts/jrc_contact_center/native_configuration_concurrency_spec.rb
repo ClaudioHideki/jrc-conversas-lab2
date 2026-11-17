@@ -144,12 +144,13 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     end
   end
 
-  def race_with_account_change(change)
+  def race_with_account_change(change, endpoint: nil, payload: nil)
+    endpoint ||= "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy"
+    payload ||= { limits: { voice: 60, whatsapp: 120 }, voice_required: false }
     observe_account_read
     hold_account_change(change)
     Timeout.timeout(8) { entered.pop }
-    dispatch_configuration_request(:patch, "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy",
-                                   { limits: { voice: 60, whatsapp: 120 }, voice_required: false })
+    dispatch_configuration_request(:patch, endpoint, payload)
     Timeout.timeout(8) { read.pop }
     wait_for_account_lock
     release << true
@@ -264,5 +265,27 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     expect(status).to eq(422)
     expect(membership.reload.active).to be(false)
     expect(Audited.audit_class.where(auditable: membership, action: 'update')).to be_empty
+  end
+
+  %w[eligibility profile feature].each do |source|
+    it "does not change operator availability after #{source} is revoked during the account lock wait" do
+      member = account.account_users.find_by!(user: actor)
+      member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_configure jrc_contact_center_operate])
+      previous = member.availability
+      change = lambda do
+        case source
+        when 'eligibility' then JrcContactCenter::AccessGrant.find_by!(account_user: member).update!(eligible: false)
+        when 'profile' then member.custom_role.update!(permissions: ['jrc_contact_center_view'])
+        when 'feature' then Account.find(account.id).disable_features!('jrc_contact_center')
+        end
+      end
+      status = race_with_account_change(
+        change, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/agent_state",
+        payload: { agent_state: { state: 'available', command_id: "SYNTHETIC-#{source}", expected_state_version: '0' } }
+      )
+      expect(status).to eq(401)
+      expect(member.reload.availability).to eq(previous)
+      expect(JrcContactCenter::AgentStateEvent.where(account: account)).to be_empty
+    end
   end
 end

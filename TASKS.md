@@ -102,3 +102,7 @@ CI 44078910273/e217b41a preservada: 428 Rails, uma falha de preparação/escopo 
 - [ ] **CALL-CENTER-PERMISSION-ORIGINS-20261117:** Identificar perfil/equipes reais por capacidade herdada no detalhe autorizado e popup, sem alterar listagem, grants ou elegibilidade. Três Rails, um Vue e extensão dos quatro Chrome preparados; evidência nativa do próximo SHA obrigatória.
 
 - f21f65ba / CI 44181012669: 620 Rails (609 + 11 concorrentes), 225 Vue, zero falhas/pendências/erros. Única infração nova: alinhamento de parâmetros no spec de cobertura, corrigido sem alterar asserções. Chrome bloqueado pelo lint nesse SHA; nova validação obrigatória inclui origens nominais preparadas.
+
+- [ ] **CALL-CENTER-OPERATOR-FRESH-AUTH-20261117:** Revalidar estado local dentro dos locks de conta/vínculo; impedir que confirmação do PABX substitua elegibilidade/autorização atual. Cinco serviços e três HTTP concorrentes preparados; preservar idempotência, ACW e eventos de origem. Sem novo comando PABX. Nova CI obrigatória, sem atribuir evidência antiga ao incremento.
+
+- 81c91a4c / CI 44182927869: 623 Rails (612 + 11 concorrentes), 226 Vue, zero falhas/pendências/erros. Uma complexidade ABC 27,75/26 na resposta de permissões foi corrigida extraindo a parte específica do usuário, sem mudar o contrato. Chrome não executado nesse SHA; novo gate inclui a proteção da disponibilidade preparada.

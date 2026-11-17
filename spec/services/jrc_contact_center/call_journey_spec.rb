@@ -78,6 +78,7 @@ RSpec.describe JrcContactCenter::CallJourney do
   end
 
   it 'releases the local ringing state after an unanswered call without claiming provider availability' do
+    account.enable_features!('jrc_contact_center')
     steps = [['call.created', 0, {}], ['call.offered', 1, { leg_id: 'missed-leg', account_user_id: member.id }], ['call.ended', 10, {}]]
     steps.each_with_index do |(type, seconds, body), index|
       event = JrcContactCenter::EventIngestor.new(account: account).call(

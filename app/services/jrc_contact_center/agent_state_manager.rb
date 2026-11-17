@@ -19,9 +19,12 @@ class JrcContactCenter::AgentStateManager
   def transition(state:, command_id:, expected_state_version:, queue_id: nil, reason_code: nil)
     attributes = { state: state, queue_id: queue_id.presence, reason_code: reason_code.presence }
     digest = Digest::SHA256.hexdigest(attributes.merge(expected_state_version: expected_state_version.to_s).to_json)
-    validate_request!(attributes, command_id)
-    @account.with_lock do
-      event = @member.with_lock { operator_event(attributes, command_id, expected_state_version, digest) }
+    JrcContactCenter::AuthorityTransaction.call(account: @account, member: @member) do
+      event = @member.with_lock do
+        authorize_operator!
+        validate_request!(attributes, command_id)
+        operator_event(attributes, command_id, expected_state_version, digest)
+      end
       project_closed_sessions
       event
     end
@@ -46,6 +49,12 @@ class JrcContactCenter::AgentStateManager
   end
 
   private
+
+  def authorize_operator!
+    context = { account: @account, account_user: @member, user: @member.user }
+    policy = JrcContactCenter::ModulePolicy.new(context, :contact_center)
+    raise Pundit::NotAuthorizedError unless policy.operate?
+  end
 
   def events
     JrcContactCenter::AgentStateEvent.where(account: @account, account_user: @member)

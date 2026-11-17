@@ -56,12 +56,16 @@ class Api::V1::Accounts::JrcContactCenter::AccessAuthorizationsController < Api:
                 revision: authority.revision(subject, grant) }
     return payload.merge(member_count: subject.team_members.count) unless users?
 
+    payload.merge(user_permissions_payload(subject))
+  end
+
+  def user_permissions_payload(subject)
     sources = JrcContactCenter::PermissionSources.new(account: Current.account, member: subject)
     details = {
       user_id: subject.user_id, profile: sources.profile, inherited: sources.inherited_permissions, effective: authority.effective(subject)
     }
     details[:origins] = sources.origins if action_name == 'show'
-    payload.merge(details)
+    details
   end
 
   def access_attributes

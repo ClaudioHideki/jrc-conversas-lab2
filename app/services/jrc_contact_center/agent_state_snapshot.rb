@@ -71,6 +71,9 @@ class JrcContactCenter::AgentStateSnapshot
   end
 
   def eligibility_reason
+    context = { account: @account, account_user: @member, user: @member.user }
+    return 'access_revoked' unless JrcContactCenter::ModulePolicy.new(context, :contact_center).operate?
+
     return 'tabulation_pending' if pending_qualifications.exists?
     return 'agent_not_available' unless current&.state == 'available'
     return 'call_active' if active_call?

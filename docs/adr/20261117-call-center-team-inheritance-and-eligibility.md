@@ -167,3 +167,21 @@ efetivo. Nomes são escapados pelo Vue. Usuário pendente continua pendente;
 nenhuma inferência de elegibilidade ou participação deriva do texto exibido.
 Dois casos de serviço, um API, um Vue e extensão dos quatro casos Chrome
 existentes estão preparados; o próximo SHA exige validação nativa própria.
+
+
+## Revalidação da disponibilidade após espera
+
+A revisão dos consumidores de elegibilidade encontrou autorização HTTP anterior
+a um lock de conta, sem nova conferência em AgentStateManager#transition. O
+serviço passa a revalidar o operador dentro de AuthorityTransaction e do lock
+do vínculo, sem cache de consultas. A validação da fila também ocorre nesse
+ponto. Mantém idempotência, revisão de estado, rollback de projeção de ACW e
+sincronização nativa. Nenhum comando ou endpoint do fornecedor é introduzido.
+
+O registro de eventos recebidos permanece independente: revogar o operador
+não apaga o histórico confirmado. AgentStateSnapshot exige autorização atual
+para elegibilidade de distribuição; confirmação do fornecedor não é grant.
+Cinco exemplos de serviço e três HTTP concorrentes reais estão preparados.
+Os cenários válidos antigos passam a declarar a feature de teste necessária;
+nenhuma asserção é removida. O adapter positivo do teste é simulado e não
+constitui homologação PABX. Nova execução nativa obrigatória.

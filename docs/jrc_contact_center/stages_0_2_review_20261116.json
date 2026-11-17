@@ -2055,6 +2055,32 @@
       "native_scenarios": 3,
       "additional_vue_scenario": 1,
       "extended_chrome_cases": 4,
+      "validation": "pending_next_sha",
+      "native_evidence": {
+        "sha": "81c91a4c1018b04d71a5d762f3ff4188a60537fb",
+        "run": 44182927869,
+        "artifact": 14374280900,
+        "sha256": "724a0b74a2a0e9c5c436d9c25c062a3c22ca50422edb77f286cb23e2e0f231ad",
+        "rails_main": 612,
+        "concurrency": 11,
+        "vue": 226,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "lint": "One new Metrics/AbcSize in present (27.75/26); extract user-specific payload without changing API contract.",
+        "chrome": "not_run_due_to_lint"
+      }
+    },
+    "operator_state_fresh_authorization": {
+      "implementation": "prepared",
+      "native_service_cases": 5,
+      "real_http_concurrency_cases": 3,
+      "rechecks_after_account_lock": true,
+      "query_cache_disabled": true,
+      "provider_history_preserved": true,
+      "provider_confirmation_is_not_grant": true,
+      "adapter_in_positive_test": "explicitly_simulated",
+      "external_provider_calls": false,
       "validation": "pending_next_sha"
     }
   }
