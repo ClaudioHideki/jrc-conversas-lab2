@@ -15,15 +15,17 @@ module Enterprise::Api::V1::Accounts::AgentsController
     end
   end
 
-  def bulk_create
-    with_native_role_transaction do
-      member = AccountUser.new(account: Current.account, role: :agent)
-      JrcContactCenter::RoleFallbackGuard.check!(actor: Current.user, account: Current.account, member: member)
-      super
-    end
-  end
-
   private
+
+  # The native bulk loop already holds the Account lock and deliberately
+  # commits successful invitations before reporting rejected ones.
+  def create_agent_from_email(email)
+    Current.account_user.reload
+    check_authorization
+    member = AccountUser.new(account: Current.account, role: :agent)
+    JrcContactCenter::RoleFallbackGuard.check!(actor: Current.user, account: Current.account, member: member)
+    super
+  end
 
   def role_change_requested?
     return true unless action_name == 'update'
@@ -58,12 +60,20 @@ module Enterprise::Api::V1::Accounts::AgentsController
     return if action_name == 'update' && !role_change_requested?
 
     member = @agent ? Current.account.account_users.find_by!(user_id: @agent.id) : AccountUser.new(account: Current.account)
-    return if action_name == 'update' && !params.key?(:custom_role_id) && member.custom_role_id.present?
+    return if preserving_contact_center_profile?(member)
 
-    role = requested_custom_role
+    check_contact_center_role_effect!(member, requested_custom_role)
+  end
+
+  def preserving_contact_center_profile?(member)
+    action_name == 'update' && !params.key?(:custom_role_id) && member.custom_role_id.present?
+  end
+
+  def check_contact_center_role_effect!(member, role)
     if role
-      JrcContactCenter::GrantGuard.check!(actor: Current.user, account: Current.account,
-                                        proposed: role.permissions, previous: member.custom_role&.permissions || [])
+      JrcContactCenter::GrantGuard.check!(
+        actor: Current.user, account: Current.account, proposed: role.permissions, previous: member.custom_role&.permissions || []
+      )
     else
       values = action_name == 'create' ? new_agent_params : agent_params
       proposed_role = values[:role].nil? ? member.role : values[:role]

@@ -20,8 +20,8 @@ RSpec.describe 'Call Center authority on native role fallback', type: :request d
 
   [nil, ''].each do |value|
     it "denies removing a restrictive own profile using #{value.inspect} without partial name changes" do
-      patch "#{agents_url}/#{actor.id}", headers: headers,
-                                          params: { agent: { name: 'Forbidden' }, custom_role_id: value }, as: :json
+      attributes = { agent: { name: 'Forbidden' }, custom_role_id: value }
+      patch "#{agents_url}/#{actor.id}", headers: headers, params: attributes, as: :json
       expect(response).to have_http_status(:unauthorized)
       expect(actor.reload.name).to eq('SYNTHETIC limited admin')
       expect(actor_link.reload.custom_role_id).to eq(actor_role.id)
@@ -119,8 +119,8 @@ RSpec.describe 'Call Center authority on native role fallback', type: :request d
 
   it 'does not resolve a profile from another account' do
     foreign = create(:custom_role, account: create(:account), permissions: ['jrc_contact_center_view'])
-    patch "#{agents_url}/#{recipient.id}", headers: headers,
-                                          params: { agent: { name: 'Forbidden' }, custom_role_id: foreign.id }, as: :json
+    attributes = { agent: { name: 'Forbidden' }, custom_role_id: foreign.id }
+    patch "#{agents_url}/#{recipient.id}", headers: headers, params: attributes, as: :json
     expect(response).to have_http_status(:not_found)
     expect(recipient_link.reload.custom_role_id).to eq(recipient_role.id)
     expect(recipient.reload.name).to eq('SYNTHETIC recipient')

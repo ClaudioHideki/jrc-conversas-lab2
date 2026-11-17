@@ -39,3 +39,16 @@ rollback e auditoria, mantendo as suites nativas já aprovadas.
 
 Os testes precisam de Rails/PostgreSQL descartáveis na CI do SHA novo. A
 decisão e o checkpoint não equivalem a teste aprovado ou aceite integral F11.
+
+## Diagnóstico nativo do primeiro incremento
+
+CI 44139147817 no SHA e354509f executou 540 exemplos, com duas falhas nos
+testes nativos de convites em lote. A transação externa acrescentada fazia
+rollback de convites já aceitos, contrariando o contrato de sucesso parcial
+existente. Correção: validar cada criação dentro do lock que o loop nativo
+já mantém, sem envolver a operação inteira em nova transação. As duas
+asserções antigas permanecem; não foram reduzidas nem excluídas.
+
+Os 21 cenários novos de fallback passaram nessa execução. Sete infrações
+novas de lint foram identificadas; separar a comparação de efeito do perfil
+e ajustar alinhamento, sem supressões. Exigir nova validação do SHA corrigido.
