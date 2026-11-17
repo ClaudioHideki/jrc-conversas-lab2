@@ -12,13 +12,13 @@ account = Account.create!(name: 'SYNTHETIC Call Center QA', locale: 'pt_BR')
 account.enable_features!('jrc_contact_center', 'custom_roles', 'audit_logs')
 other = Account.create!(name: 'SYNTHETIC denied Account')
 admin = User.new(name: 'SYNTHETIC administrator', email: "cc-admin-#{SecureRandom.hex(6)}@example.test",
-                 password: JrcCallCenterSyntheticPassword.generate, confirmed_at: Time.current)
+                 password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current)
 admin.skip_confirmation_notification!
 admin.save!
 role = CustomRole.create!(account: account, name: 'SYNTHETIC explicit QA', permissions: JrcContactCenter::ModulePolicy::PERMISSIONS)
 AccountUser.create!(account: account, user: admin, role: :administrator, custom_role: role)
 limited = User.new(name: 'SYNTHETIC read only', email: "cc-read-#{SecureRandom.hex(6)}@example.test",
-                   password: JrcCallCenterSyntheticPassword.generate, confirmed_at: Time.current)
+                   password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current)
 limited.skip_confirmation_notification!
 limited.save!
 viewer = CustomRole.create!(account: account, name: 'SYNTHETIC view only', permissions: ['jrc_contact_center_view'])
@@ -41,7 +41,7 @@ scoped_queues = scoped_units.map do |scoped_unit|
   JrcContactCenter::Queue.create!(account: account, unit: scoped_unit, code: scoped_unit.code, name: scoped_unit.name)
 end
 restricted = User.new(name: 'SYNTHETIC unit manager', email: "cc-unit-#{SecureRandom.hex(6)}@example.test",
-                      password: JrcCallCenterSyntheticPassword.generate, confirmed_at: Time.current)
+                      password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current)
 restricted.skip_confirmation_notification!
 restricted.save!
 restricted_role = CustomRole.create!(account: account, name: 'SYNTHETIC scoped configuration',
@@ -52,7 +52,7 @@ JrcCrm::UserBusinessUnit.create!(
   company: company, active: true, structure_managed: true
 )
 delegated = User.new(name: 'SYNTHETIC limited role administrator', email: "cc-role-#{SecureRandom.hex(6)}@example.test",
-                     password: JrcCallCenterSyntheticPassword.generate, confirmed_at: Time.current)
+                     password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current)
 delegated.skip_confirmation_notification!
 delegated.save!
 delegated_role = CustomRole.create!(account: account, name: 'SYNTHETIC limited role administration',
@@ -67,7 +67,7 @@ end
 audit_operators = [true, false].map do |reports|
   operator = User.new(
     name: reports ? 'SYNTHETIC scoped auditor' : 'SYNTHETIC audit reader',
-    email: "cc-audit-#{SecureRandom.hex(6)}@example.test", password: JrcCallCenterSyntheticPassword.generate, confirmed_at: Time.current
+    email: "cc-audit-#{SecureRandom.hex(6)}@example.test", password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current
   )
   operator.skip_confirmation_notification!
   operator.save!
@@ -90,7 +90,7 @@ end
 # Explicit isolated infrastructure actor; never derive this role or scope for real users.
 infrastructure = SuperAdmin.new(name: 'SYNTHETIC infrastructure administrator',
                                 email: "cc-infrastructure-#{SecureRandom.hex(6)}@example.test",
-                                password: JrcCallCenterSyntheticPassword.generate, confirmed_at: Time.current)
+                                password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current)
 infrastructure.skip_confirmation_notification!
 infrastructure.save!
 infrastructure_member = AccountUser.create!(account: account, user: infrastructure, role: :administrator, custom_role: role)
@@ -101,7 +101,7 @@ JrcCrm::UserBusinessUnit.create!(account: account, user: infrastructure, scope: 
 access_targets = %w[desktop-light desktop-dark mobile-light mobile-dark].index_with do |project|
   recipients = %w[pending conflict peer enrollment enrollment_eligible enrollment_scoped].index_with do |kind|
     person = User.new(name: "SYNTHETIC #{project} #{kind}", email: "cc-#{kind}-#{SecureRandom.hex(6)}@example.test",
-                      password: JrcCallCenterSyntheticPassword.generate, confirmed_at: Time.current)
+                      password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current)
     person.skip_confirmation_notification!
     person.save!
     member = AccountUser.create!(account: account, user: person, role: :agent)
@@ -127,7 +127,7 @@ end
 21.times do |index|
   person = User.new(name: "SYNTHETIC pagination #{index.to_s.rjust(2, '0')}",
                     email: "cc-page-#{SecureRandom.hex(6)}@example.test",
-                    password: JrcCallCenterSyntheticPassword.generate, confirmed_at: Time.current)
+                    password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current)
   person.skip_confirmation_notification!
   person.save!
   AccountUser.create!(account: account, user: person, role: :agent)

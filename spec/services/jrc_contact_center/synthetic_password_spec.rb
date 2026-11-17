@@ -1,7 +1,7 @@
 require 'rails_helper'
 require Rails.root.join('script/jrc_call_center_synthetic_password').to_s
 
-RSpec.describe JrcCallCenterSyntheticPassword do
+RSpec.describe JrcContactCenter::SyntheticPassword do
   it 'satisfies the native password policy even when the random part has no digits or lowercase letters' do
     allow(SecureRandom).to receive(:base64).and_call_original
     allow(SecureRandom).to receive(:base64).with(32).and_return('A' * 44)

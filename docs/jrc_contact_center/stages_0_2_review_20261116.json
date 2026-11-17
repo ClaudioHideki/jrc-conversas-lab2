@@ -2116,7 +2116,27 @@
       "frontend_build": "passed",
       "bootstrap": "seed failed before servers started",
       "cause": "SecureRandom.base64 can produce a password without digits; native User validation rejected an actual synthetic recipient at seed line 104.",
-      "correction": "Add required character classes to the random synthetic password; preserve 32 random bytes, all native password rules and every UI assertion. One native regression recreates the old rejection."
+      "correction": "Add required character classes to the random synthetic password; preserve 32 random bytes, all native password rules and every UI assertion. One native regression recreates the old rejection.",
+      "regression_evidence": {
+        "sha": "a7c891707cb6df7b5344552620d241242e11a188",
+        "run": 44190646298,
+        "artifact": 14377637644,
+        "sha256": "ea14eb7e6fb33bef3ca3370759911232bd1a5988148931d56882f158fb57ad64",
+        "rails_main": 618,
+        "concurrency": 14,
+        "vue": 226,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "new_ruby_offenses": 1,
+        "cause": "RSpec/SpecFilePathFormat: global helper name mismatched the native domain path; scope helper under JrcContactCenter::SyntheticPassword and preserve every assertion."
+      }
+    },
+    "authenticated_permission_consumer_gap": {
+      "status": "confirmed_in_code_not_yet_corrected",
+      "native_serializer": "AccountUser#permissions and Enterprise::AccountUser#permissions",
+      "cause": "Profile JSON contains native role/custom-role raw permissions, not effective CC team/individual sources. Native CC routes and sidebar also accept legacy role markers.",
+      "next": "Normalize only the 13 CC keys in authenticated permissions, preserve all other module keys/roles, and validate actual menu/route consumers. Do not claim the isolated component fixture proves this integration."
     }
   }
 }
