@@ -64,6 +64,7 @@ RSpec.describe 'Manual closure without configuration blockers', type: :request d
     sd_account_user.update!(custom_role: nil)
     get "#{base}/tickets/#{ticket.id}/lifecycle", headers: headers
     expect(response.parsed_body.dig('measurement', 'closure', 'elapsed_seconds')).to eq(1200)
+    sd_as_admin!
     get "#{base}/dashboard", headers: headers
     expect(response.parsed_body.dig('dashboard', 'phases', 'closed')).to eq(1)
     expect(response.parsed_body.dig('dashboard', 'supervision', 'sla_coverage', 'tickets_with_pending_result')).to eq(1)
