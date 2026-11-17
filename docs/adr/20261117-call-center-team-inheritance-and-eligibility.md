@@ -83,3 +83,19 @@ seguida de pendência, persistência/recarga, acesso negado, conflito, desktop
 
 Este documento não ativa regras de retorno de pausas, não executa PABX e não
 resolve contratos externos, limites operacionais ou figuras posteriores.
+
+## Primeiro resultado nativo e correções
+
+CI 44144695844 no SHA a55fdbe2 aprovou os gates históricos e a migration,
+carregou o schema migrado em outro banco sintético e executou 584 exemplos
+Rails (583 aprovados, uma falha, zero pendências/erros externos). O único
+cenário falho foi a gravação PABX com papel explícito, mas sem elegibilidade.
+Declarar a autorização sintética nesse teste mantém todas as verificações
+de reprodução, download e ramal. Não ativar pessoas por atribuir um perfil.
+
+As infrações de lint foram tratadas por separação de validações, nome claro
+inherited_permissions e alinhamento. A única alteração no arquivo da nova
+migration é <<~SQL.squish: SQL e versão preservados; novo hash revisado
+85fa579036a807b2d50ae3c30af64b061ba9ea6c6ffe173b4e0f33d4ad922dbe.
+O gate continua recusando qualquer mudança histórica ou adição desconhecida.
+Nova execução do SHA corrigido é obrigatória. Interface ainda em preparação.

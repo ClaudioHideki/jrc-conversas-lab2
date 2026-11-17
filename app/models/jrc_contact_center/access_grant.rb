@@ -14,6 +14,7 @@ class JrcContactCenter::AccessGrant < ApplicationRecord
   validates :account_user_id, uniqueness: true, allow_nil: true
   validates :team_id, uniqueness: true, allow_nil: true
   validate :native_subject
+  validate :team_attributes
 
   private
 
@@ -21,7 +22,12 @@ class JrcContactCenter::AccessGrant < ApplicationRecord
     one_subject = account_user_id.present? != team_id.present?
     errors.add(:base, :invalid) unless one_subject
     subject = account_user || team
-    errors.add(:account, :invalid) unless subject && subject.account_id == account_id
-    errors.add(:base, :invalid) if team_id.present? && (eligible || denied.present?)
+    errors.add(:account, :invalid) unless subject&.account_id == account_id
+  end
+
+  def team_attributes
+    return if team_id.blank?
+
+    errors.add(:base, :invalid) if eligible || denied.present?
   end
 end

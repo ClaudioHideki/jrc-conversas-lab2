@@ -86,8 +86,9 @@ RSpec.describe 'Call Center explicit access authorizations', type: :request do
   it 'does not grant corporate coverage when eligibility is activated' do
     company = account.master_companies.create!(name: 'SYNTHETIC issuer', relationship_type: 'internal')
     unit = JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'SYNTHETIC unit', code: 'SYNTHETIC')
-    JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', company: company,
-                                  business_unit: unit, active: true, structure_managed: true)
+    JrcCrm::UserBusinessUnit.create!(
+      account: account, user: actor, scope: 'BUSINESS_UNIT', company: company, business_unit: unit, active: true, structure_managed: true
+    )
     attributes = { authorization: { eligible: true }, expected_revision: revision }
     patch "#{base}/users/#{member.id}", headers: headers, params: attributes, as: :json
     expect(response).to have_http_status(:unauthorized)

@@ -53,7 +53,7 @@ class JrcContactCenter::Administration
   end
 
   def native_links
-    { permissions: native_roles_available?, role_editor: native_role_editor_available?,
+    { permissions: native_roles_available?, role_editor: native_role_editor_available?, access_editor: native_access_editor_available?,
       approvals: @account.feature_enabled?('jrc_approvals') &&
         JrcCrm::UserBusinessUnit.structure_managed.active.exists?(account: @account, user: @context.fetch(:user)) }
   end
@@ -65,6 +65,11 @@ class JrcContactCenter::Administration
   def native_role_editor_available?
     coverage = JrcCrm::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
     native_roles_available? && (!coverage.configured? || coverage.group?)
+  end
+
+  def native_access_editor_available?
+    coverage = JrcCrm::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
+    @policy.administer? && @context.fetch(:account_user).administrator? && (!coverage.configured? || coverage.group?)
   end
 
   def provider_state

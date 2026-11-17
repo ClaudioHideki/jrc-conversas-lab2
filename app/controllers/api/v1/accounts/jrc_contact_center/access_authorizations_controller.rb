@@ -4,7 +4,7 @@ class Api::V1::Accounts::JrcContactCenter::AccessAuthorizationsController < Api:
 
   def index
     params[:page] = 1 if params[:page].blank?
-    relation = subjects
+    relation = filter_status(subjects)
     if params[:q].present?
       pattern = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.first(100))}%"
       relation = users? ? relation.joins(:user).where('users.name ILIKE ?', pattern) : relation.where('teams.name ILIKE ?', pattern)
@@ -28,6 +28,16 @@ class Api::V1::Accounts::JrcContactCenter::AccessAuthorizationsController < Api:
     @authority ||= JrcContactCenter::AccessAuthorization.new(context: pundit_user)
   end
 
+  def filter_status(relation)
+    return relation unless users? && params[:status].present?
+
+    eligible = JrcContactCenter::AccessGrant.where(account: Current.account, eligible: true).select(:account_user_id)
+    return relation.where(id: eligible) if params[:status] == 'eligible'
+    return relation.where.not(id: eligible) if params[:status] == 'pending'
+
+    raise JrcContactCenter::OperationError, 'invalid_access_authorization'
+  end
+
   def users?
     params[:subject_type] == 'users'
   end
@@ -47,11 +57,13 @@ class Api::V1::Accounts::JrcContactCenter::AccessAuthorizationsController < Api:
     return payload.merge(member_count: subject.team_members.count) unless users?
 
     sources = JrcContactCenter::PermissionSources.new(account: Current.account, member: subject)
-    payload.merge(user_id: subject.user_id, profile: sources.profile, inherited: sources.inherited, effective: authority.effective(subject))
+    payload.merge(user_id: subject.user_id, profile: sources.profile, inherited: sources.inherited_permissions, effective: authority.effective(subject))
   end
 
   def access_attributes
     values = params.require(:authorization)
+    raise JrcContactCenter::OperationError, 'invalid_access_authorization' unless values.respond_to?(:permit)
+
     allowed_keys = users? ? %w[eligible allowed denied] : ['allowed']
     raise JrcContactCenter::OperationError, 'invalid_access_authorization' unless (values.keys - allowed_keys).empty?
 
@@ -60,14 +72,16 @@ class Api::V1::Accounts::JrcContactCenter::AccessAuthorizationsController < Api:
   end
 
   def validate_access_types!(values)
-    if values.key?(:eligible) && ![true, false].include?(values[:eligible])
-      raise JrcContactCenter::OperationError, 'invalid_access_authorization'
-    end
-    %i[allowed denied].each do |key|
-      next unless values.key?(key)
+    invalid = values.key?(:eligible) && [true, false].exclude?(values[:eligible])
+    raise JrcContactCenter::OperationError, 'invalid_access_authorization' if invalid
 
-      valid = values[key].is_a?(Array) && values[key].all? { |value| value.is_a?(String) }
-      raise JrcContactCenter::OperationError, 'invalid_access_authorization' unless valid
-    end
+    %i[allowed denied].each { |key| validate_permission_array!(values, key) }
+  end
+
+  def validate_permission_array!(values, key)
+    return unless values.key?(key)
+
+    valid = values[key].is_a?(Array) && values[key].all?(String)
+    raise JrcContactCenter::OperationError, 'invalid_access_authorization' unless valid
   end
 end

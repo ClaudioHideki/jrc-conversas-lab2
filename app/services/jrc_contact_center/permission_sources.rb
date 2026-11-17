@@ -23,19 +23,19 @@ class JrcContactCenter::PermissionSources
   end
 
   def granted?(permission)
-    (profile + Array(individual&.allowed) + inherited).include?(permission)
+    (profile + Array(individual&.allowed) + inherited_permissions).include?(permission)
   end
 
   def profile
     role = @member.custom_role
-    role&.account_id == @account.id ? role.permissions : []
+    role&.account_id == @account.id ? role.permissions & JrcContactCenter::ModulePolicy::PERMISSIONS : []
   end
 
   def teams
     Team.where(account: @account).joins(:team_members).where(team_members: { user_id: @member.user_id }).distinct
   end
 
-  def inherited
+  def inherited_permissions
     @inherited ||= JrcContactCenter::AccessGrant.where(account: @account, team_id: teams.select(:id)).pluck(:allowed).flatten.uniq
   end
 end

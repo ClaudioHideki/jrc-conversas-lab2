@@ -19,7 +19,9 @@ class JrcContactCenter::AccessAuthorization
     raise ActiveRecord::RecordNotFound unless subject.account_id == @account.id
 
     key = subject.is_a?(AccountUser) ? :account_user : :team
-    JrcContactCenter::AccessGrant.find_or_initialize_by(account: @account, key => subject)
+    attributes = { account: @account }
+    attributes[key] = subject
+    JrcContactCenter::AccessGrant.find_or_initialize_by(attributes)
   end
 
   def revision(subject, grant)

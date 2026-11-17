@@ -63,7 +63,7 @@ class AddContactCenterAccessGrants < ActiveRecord::Migration[7.1]
   end
 
   def preserve_existing_members
-    execute <<~SQL
+    execute <<~SQL.squish
       INSERT INTO jrc_contact_center_access_grants (account_id, account_user_id, eligible, created_at, updated_at)
       SELECT account_users.account_id, account_users.id, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
       FROM account_users INNER JOIN accounts ON accounts.id = account_users.account_id

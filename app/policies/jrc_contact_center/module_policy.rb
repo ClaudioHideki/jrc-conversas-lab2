@@ -18,8 +18,8 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
   ].freeze
 
   def access?
-    account&.active? && account_user&.account_id == account.id && account.feature_enabled?('jrc_contact_center') &&
-      account_user.user_id == user&.id && sources.eligible? && allowed?('view', native: native_role?)
+    valid_context? && account.active? && account.feature_enabled?('jrc_contact_center') &&
+      sources.eligible? && allowed?('view', native: native_role?)
   end
 
   def operate?
@@ -69,6 +69,10 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
   end
 
   private
+
+  def valid_context?
+    account.present? && account_user.present? && account_user.account_id == account.id && account_user.user_id == user&.id
+  end
 
   def native_role?
     account_user.custom_role_id.nil?

@@ -45,6 +45,8 @@ RSpec.describe 'PABX private recording requests', :pabx, type: :request do
 
   it 'separates listening from direct download and retains own-extension authorization' do
     account.enable_features!('jrc_contact_center')
+    member = account.account_users.find_by!(user: user)
+    JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true)
     permissions = %w[jrc_contact_center_view jrc_contact_center_recordings_view jrc_contact_center_recordings_listen]
     role = create(:custom_role, account: account, permissions: permissions)
     account.account_users.find_by!(user: user).update!(custom_role: role)
