@@ -378,7 +378,7 @@ RSpec.describe 'Native Broker LIVE custody', type: :request do
                                          file: Rack::Test::UploadedFile.new(Rails.root.join('spec/assets', asset), mime) }, headers: headers
     end
 
-    { 'sample.ogg' => 'audio/ogg', 'sample.pdf' => 'application/pdf' }.each do |asset, mime|
+    { 'sample.ogg' => 'audio/ogg', 'sample.pdf' => 'application/pdf', 'synthetic-opus.ogg' => 'audio/ogg' }.each do |asset, mime|
       it "verifies physical private #{mime} custody before publishing its native attachment" do
         expected = File.binread(Rails.root.join('spec/assets', asset))
         input = seal(media_input.merge('media' => { 'filename' => asset, 'mime_type' => mime, 'byte_size' => expected.bytesize,

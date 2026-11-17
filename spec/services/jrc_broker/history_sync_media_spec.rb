@@ -1,6 +1,23 @@
 require 'rails_helper'
 
 RSpec.describe JrcBroker::HistorySyncMedia do
+  it 'verifies real Ogg Opus bytes under the canonical Broker audio/ogg descriptor without rewriting the envelope' do
+    bytes = File.binread(Rails.root.join('spec/assets/synthetic-opus.ogg'))
+    descriptor = { 'filename' => 'synthetic-opus.ogg', 'mime_type' => 'audio/ogg', 'media_type' => 'AUDIO',
+                   'byte_size' => bytes.bytesize, 'sha256' => Digest::SHA256.hexdigest(bytes) }
+    original = descriptor.deep_dup
+    expect { described_class.new(nil).verify_bytes!(bytes, descriptor) }.not_to raise_error
+    expect(descriptor).to eq(original)
+  end
+
+  it 'refuses a malformed Opus identification header even when the claimed checksum matches its bytes' do
+    bytes = File.binread(Rails.root.join('spec/assets/synthetic-opus.ogg'))
+    bytes.setbyte(37, 0)
+    descriptor = { 'filename' => 'synthetic-opus.ogg', 'mime_type' => 'audio/ogg', 'media_type' => 'AUDIO',
+                   'byte_size' => bytes.bytesize, 'sha256' => Digest::SHA256.hexdigest(bytes) }
+    expect { described_class.new(nil).verify_bytes!(bytes, descriptor) }.to raise_error(ArgumentError, 'historical_media_integrity')
+  end
+
   it 'bounds the physical object stream by the immutable descriptor before accumulating more bytes' do
     media = described_class.new(nil)
     descriptor = { 'byte_size' => 4 }
