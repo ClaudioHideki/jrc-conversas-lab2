@@ -34,3 +34,5 @@ Release funcional `5c3fb7f` publicada e implantada no Grupo JRC após CI 49/49, 
 ### Parte 1 do Call Center — continuidade autorizada em 17/11/2026
 
 Concluir primeiro a revisão concorrente, herança explícita, elegibilidade e auditoria por escopo das etapas 0–2; depois seguir os contratos e dependências das etapas 3–8. A matriz das 23 figuras é o controle de aceite. A revisão esperada usa ampliação aditiva documentada em docs/adr/20261117-call-center-role-revision.md. A main concorrente e os ambientes permanecem preservados. CI, interface nativa e homologação externa continuam estados distintos.
+
+A revisão esperada foi validada em 80632726 (431 Rails/185 Vue/56 Chrome). Próximo bloco: auditoria administrativa nativa com escopo duplo e proteção de escritas concorrentes; seguir depois com herança, elegibilidade e etapas 3–8. A aprovação deste sub-bloco não encerra 0–2 nem a Parte 1.

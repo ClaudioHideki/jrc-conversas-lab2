@@ -10,3 +10,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [0001-governanca-operacional-init](0001-governanca-operacional-init.md): adoção do INIT solicitado pelo usuário.
 
 - [20261117-call-center-role-revision](20261117-call-center-role-revision.md): precondição aditiva, conflito 409, recuperação explícita do rascunho e compatibilidade dos clientes nativos.
+
+- [20261117-call-center-configuration-audit](20261117-call-center-configuration-audit.md): trilha sanitizada, leitura por cobertura e revalidação transacional das escritas.

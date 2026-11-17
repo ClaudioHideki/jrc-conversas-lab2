@@ -10,14 +10,13 @@ class Api::V1::Accounts::JrcContactCenter::QueuesController < Api::V1::Accounts:
 
   def create
     authorize_contact_center!(:configure?)
-    queue = JrcContactCenter::Queue.create!(queue_params.merge(account: Current.account))
+    queue = configuration_write.create!(JrcContactCenter::Queue) { queue_params }
     render json: base_payload.merge(item: serialize(queue)), status: :created
   end
 
   def update
     authorize_contact_center!(:configure?)
-    queue = contact_center_access.queues.find(params[:id])
-    queue.update!(queue_params)
+    queue = configuration_write.update!(contact_center_access.queues, params[:id]) { queue_params }
     render json: base_payload.merge(item: serialize(queue))
   end
 

@@ -1,0 +1,140 @@
+require 'rails_helper'
+require 'timeout'
+
+RSpec.describe 'Call Center concurrent configuration boundaries', type: :request do
+  self.use_transactional_tests = false
+
+  let(:account) { create(:account) }
+  let(:actor) { create(:user, account: account, role: :administrator) }
+  let(:headers) { actor.create_new_auth_token }
+  let(:company) { account.master_companies.create!(name: 'SYNTHETIC issuer', relationship_type: 'internal') }
+  let(:business_units) do
+    %w[A B].map do |code|
+      JrcCrm::BusinessUnit.create!(account: account, operating_company: company, code: code, name: "SYNTHETIC #{code}")
+    end
+  end
+  let(:units) do
+    business_units.map do |business_unit|
+      JrcContactCenter::Unit.create!(
+        account: account, code: business_unit.code, name: business_unit.name, kind: 'sac',
+        settings: { issuer_company_id: company.id, business_unit_id: business_unit.id }
+      )
+    end
+  end
+  let(:queue) { JrcContactCenter::Queue.create!(account: account, unit: units.first, code: 'Q', name: 'Original') }
+  let(:workers) { [] }
+  let(:entered) { Queue.new }
+  let(:read) { Queue.new }
+  let(:release) { Queue.new }
+  let(:results) { Queue.new }
+  let(:subscriptions) { [] }
+  let(:state) { {} }
+
+  before do
+    owned = Rails.env.test? && ActiveRecord::Base.connection.current_database == 'corporate_gratuity_disposable'
+    raise 'Owned synthetic database required' unless owned
+    raise 'Committed fixtures required' if ActiveRecord::Base.connection.transaction_open?
+
+    state[:ready] = true
+    account.enable_features!('jrc_contact_center', 'custom_roles', 'audit_logs')
+    headers
+    role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_configure])
+    account.account_users.find_by!(user: actor).update!(custom_role: role)
+    JrcCrm::UserBusinessUnit.create!(
+      account: account, user: actor, scope: 'BUSINESS_UNIT', business_unit: business_units.first,
+      company: company, active: true, structure_managed: true
+    )
+    queue
+  end
+
+  after do
+    if state[:ready]
+      release << true
+      workers.each { |thread| thread.join(20) }
+      raise 'Synthetic request still active' if workers.any?(&:alive?)
+
+      subscriptions.each { |subscription| ActiveSupport::Notifications.unsubscribe(subscription) }
+      JrcContactCenter::QueueMembership.where(account: account).destroy_all
+      JrcContactCenter::Queue.where(account: account).destroy_all
+      JrcContactCenter::Unit.where(account: account).destroy_all
+      JrcCrm::UserBusinessUnit.where(account: account).destroy_all
+      JrcCrm::BusinessUnit.where(account: account).destroy_all
+      account.master_companies.destroy_all
+      account.destroy!
+    end
+  end
+
+  # The same barriers coordinate both real HTTP races; no timing sleeps.
+  def observe_queue_read(target_id)
+    subscriptions << ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
+      sql = event.payload[:sql]
+      next unless Thread.current[:cc_configuration_request] && sql.start_with?('SELECT') && sql.include?('"jrc_contact_center_queues"')
+      next if sql.include?('FOR UPDATE') || sql.include?('FOR NO KEY UPDATE')
+      next unless event.payload[:binds].any? { |bind| bind.name == 'id' && bind.value_for_database == target_id }
+
+      read << true
+    end
+  end
+
+  def hold_queue_change(change)
+    workers << Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        target = JrcContactCenter::Queue.find(queue.id)
+        target.with_lock do
+          target.update!(change)
+          entered << true
+          Timeout.timeout(15) { release.pop }
+        end
+      end
+    rescue StandardError => e
+      results << e
+    end
+  end
+
+  def dispatch_configuration_request(verb, endpoint, payload)
+    workers << Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        Thread.current[:cc_configuration_request] = true
+        session = ActionDispatch::Integration::Session.new(Rails.application)
+        session.public_send(verb, endpoint, headers: headers, params: payload, as: :json)
+        results << session.response.status
+      end
+    rescue StandardError => e
+      results << e
+    end
+  end
+
+  def race_with_queue_change(change:, verb:, endpoint:, payload:)
+    observe_queue_read(queue.id)
+    hold_queue_change(change)
+    Timeout.timeout(8) { entered.pop }
+    dispatch_configuration_request(verb, endpoint, payload)
+    Timeout.timeout(8) { read.pop }
+    release << true
+    Timeout.timeout(20) { workers.each(&:join) }
+    results.pop
+  end
+
+  it 'rejects a stale write after the queue moves outside the authorized business unit' do
+    status = race_with_queue_change(
+      change: { unit_id: units.last.id }, verb: :patch,
+      endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/queues/#{queue.id}",
+      payload: { queue: { name: 'Forbidden stale edit' } }
+    )
+    expect(status).to eq(404)
+    expect(queue.reload).to have_attributes(unit_id: units.last.id, name: 'Original')
+  end
+
+  it 'does not create membership after a concurrent deactivation of its parent queue' do
+    status = race_with_queue_change(
+      change: { status: 'inactive' }, verb: :post,
+      endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/queue_memberships",
+      payload: { queue_membership: { queue_id: queue.id, account_user_id: account.account_users.find_by!(user: actor).id,
+                                     role: 'agent', active: true } }
+    )
+    expect(status).to eq(422)
+    expect(queue.reload.status).to eq('inactive')
+    expect(JrcContactCenter::QueueMembership.where(account: account)).to be_empty
+    expect(Audited.audit_class.where(associated: account, auditable_type: 'JrcContactCenter::QueueMembership')).to be_empty
+  end
+end

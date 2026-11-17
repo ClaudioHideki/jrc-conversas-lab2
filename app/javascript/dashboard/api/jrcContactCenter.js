@@ -15,6 +15,15 @@ export default {
       `${base(accountId)}/administration/${encodeURIComponent(section)}`,
       { params }
     ),
+  configurationAudits: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/configuration_audits`, { params }),
+  configurationAudit: (accountId, id) =>
+    axios.get(`${base(accountId)}/configuration_audits/${Number(id)}`),
+  exportConfigurationAudits: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/configuration_audits/export`, {
+      params,
+      responseType: 'blob',
+    }),
   acwPolicy: accountId => axios.get(`${base(accountId)}/acw_policy`),
   updateAcwPolicy: (accountId, limits, options = {}) =>
     axios.patch(`${base(accountId)}/acw_policy`, { ...options, limits }),

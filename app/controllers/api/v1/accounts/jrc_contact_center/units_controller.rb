@@ -9,14 +9,13 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
 
   def create
     authorize_contact_center!(:configure?)
-    unit = JrcContactCenter::Unit.create!(unit_params.merge(account: Current.account))
+    unit = configuration_write.create!(JrcContactCenter::Unit) { unit_params }
     render json: base_payload.merge(item: serialize(unit)), status: :created
   end
 
   def update
     authorize_contact_center!(:configure?)
-    unit = contact_center_access.units.find(params[:id])
-    unit.update!(unit_params)
+    unit = configuration_write.update!(contact_center_access.units, params[:id]) { unit_params }
     render json: base_payload.merge(item: serialize(unit))
   end
 

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class JrcContactCenter::QueueMembership < JrcContactCenter::ApplicationRecord
+  include JrcContactCenter::AdministrativeAuditable
   ROLES = %w[agent supervisor].freeze
 
   belongs_to :queue, class_name: 'JrcContactCenter::Queue'

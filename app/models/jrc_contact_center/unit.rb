@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class JrcContactCenter::Unit < JrcContactCenter::ApplicationRecord
+  include JrcContactCenter::AdministrativeAuditable
   KINDS = %w[sac finance coe administrative].freeze
   STATUSES = %w[active inactive].freeze
 

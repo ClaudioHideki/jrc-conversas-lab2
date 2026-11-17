@@ -9,14 +9,13 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
 
   def create
     authorize_contact_center!(:configure?)
-    membership = JrcContactCenter::QueueMembership.create!(membership_params.merge(account: Current.account))
+    membership = configuration_write.create!(JrcContactCenter::QueueMembership) { membership_params }
     render json: base_payload.merge(item: serialize(membership.reload)), status: :created
   end
 
   def update
     authorize_contact_center!(:configure?)
-    membership = scoped_memberships.find(params[:id])
-    membership.update!(membership_params)
+    membership = configuration_write.update!(scoped_memberships, params[:id]) { membership_params }
     render json: base_payload.merge(item: serialize(membership.reload))
   end
 

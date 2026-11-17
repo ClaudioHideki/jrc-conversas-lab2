@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class JrcContactCenter::Queue < JrcContactCenter::ApplicationRecord
+  include JrcContactCenter::AdministrativeAuditable
   STATUSES = %w[active inactive].freeze
 
   belongs_to :unit, class_name: 'JrcContactCenter::Unit'

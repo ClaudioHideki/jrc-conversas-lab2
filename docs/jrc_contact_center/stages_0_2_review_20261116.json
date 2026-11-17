@@ -734,21 +734,26 @@
         3
       ],
       "implemented_in_0_2": [
-        "Existing scoped durable event list/reprocessing remains available only under native capabilities"
+        "Existing scoped durable event list/reprocessing remains available only under native capabilities",
+        "Auditoria administrativa sanitizada de unidades, filas, vínculos e perfis: backend preparado para validação nativa no novo SHA.",
+        "Consulta paginada, histórico e exportação por capacidades e cobertura atual/histórica; flag audit_logs preservada."
       ],
       "remaining_or_external": [
-        "Full administrative before/after, exports and per-operation histories remain stage 3",
-        "Pendente 0–2: auditoria de alterações de unidades/filas/participantes e superfície local de consulta; este incremento cobre somente capacidades de perfis."
+        "Interface de filtros/detalhes/histórico/exportação em preparação; não publicada neste checkpoint.",
+        "Eventos e ACKs de publicação PABX dependem do contrato real; trilha local não confirma efeito externo."
       ],
       "code_references": [
         "administration_controller.rb",
-        "access_scope.rb"
+        "access_scope.rb",
+        "app/services/jrc_contact_center/configuration_audit_scope.rb",
+        "app/services/jrc_contact_center/configuration_write.rb",
+        "app/controllers/api/v1/accounts/jrc_contact_center/configuration_audits_controller.rb"
       ],
       "reference": {
         "document_1_figure": 14,
         "document_2_figure": 14
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "Backend aguarda a CI deste checkpoint, incluindo duas corridas HTTP/PostgreSQL. Não atribuir evidências de 80632726 ao novo código.",
       "objective": "Auditoria tecnica do PABX",
       "visual_components": "Campos e dados apresentados:  Registrar id do evento, correlation_id/request_id, ator, acao, recurso, before/after sanitizados, horario, estado pretendido e estado confirmado. Resultado deve distinguir concluido, pendente, divergente, falha e reversao.",
       "buttons_and_actions": "Acoes e resultado do clique:  Filtros de data, tipo, unidade/empresa e origem: refinar registros; Consultar: aplicar filtros com paginacao. Selecao de uma linha: preencher Detalhes do Evento com data/hora, usuario, operacao, objeto, tenant/accountcode, resultado e descricao. Ver Detalhes: abrir popup do evento; Exportar Relatorio: gerar arquivo dentro do escopo; Ver Historico: listar eventos correlatos.",
@@ -777,8 +782,8 @@
       "acceptance_scope": {
         "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
         "complete_reference": [
-          "Full administrative before/after, exports and per-operation histories remain stage 3",
-          "Pendente 0–2: auditoria de alterações de unidades/filas/participantes e superfície local de consulta; este incremento cobre somente capacidades de perfis."
+          "Interface de filtros/detalhes/histórico/exportação em preparação; não publicada neste checkpoint.",
+          "Eventos e ACKs de publicação PABX dependem do contrato real; trilha local não confirma efeito externo."
         ]
       }
     },
@@ -1281,8 +1286,7 @@
     "chrome": 44
   },
   "required_decisions": [
-    "Herança por equipe: fonte, precedência, negações e revogação entre módulos, sem reutilizar TeamMember como grant.",
-    "Contrato de revisão otimista: compatibilidade de clientes, 409/428 e token de revisão atômico."
+    "Herança por equipe: fonte, precedência, negações e revogação entre módulos, sem reutilizar TeamMember como grant."
   ],
   "visual_review": {
     "originals": "Todas as 23 figuras visualmente revisadas nos oito contact sheets existentes, sem criar artefatos locais.",
@@ -1352,6 +1356,58 @@
       "Elegibilidade sem concessões por criação de usuário",
       "Auditoria administrativa por conta/unidade",
       "Etapas 3–8 conforme contratos reais"
-    ]
+    ],
+    "role_revision_evidence": {
+      "sha": "806327269f896ea124cdbc17f7ceceea176124e8",
+      "run": 44080303193,
+      "artifact": 14328051243,
+      "artifact_sha256": "13c6e396909eb5d19b729105d9bc8f6e41d3df880415a1552f5e041c65d21854",
+      "rails": {
+        "duration": 54.058852024,
+        "example_count": 428,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "concurrency": {
+        "duration": 3.003626976,
+        "example_count": 3,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "vue_passed": 185,
+      "chrome": {
+        "startTime": "2026-11-17T12:17:19.185Z",
+        "duration": 138087.437,
+        "expected": 56,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "screenshots": 52,
+      "matrix_sha256": "ae495a68921dafff2c6a387bd5a35df36767a3de8c6099b6311b1ee315ea9193",
+      "bootstrap": {
+        "passed": true,
+        "pageErrors": [],
+        "pageErrorDetails": [],
+        "failedRequests": [],
+        "httpErrors": [],
+        "cards": 15
+      },
+      "new_ruby_offenses": 0,
+      "main_observed": "89779191b0b4be44929a426c7a924dbcad4c3690",
+      "stages_0_2_complete": false
+    },
+    "configuration_audit": {
+      "adr": "docs/adr/20261117-call-center-configuration-audit.md",
+      "implementation": "backend_checkpoint",
+      "native_validation": "pending_new_sha",
+      "ui": "in_memory_not_in_this_checkpoint",
+      "expected_chrome": 56,
+      "native_audit_flag_preserved": true,
+      "permissions_unchanged": true,
+      "no_new_migrations": true
+    }
   }
 }

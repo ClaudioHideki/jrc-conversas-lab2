@@ -19,6 +19,7 @@ class Api::V1::Accounts::AuditLogsController < Api::V1::Accounts::EnterpriseAcco
                   else
                     Current.account.associated_audits.none
                   end
+    @audit_logs = JrcContactCenter::ConfigurationAuditScope.protect_native_list(@audit_logs, pundit_user)
     return if audit_logs_enabled?
 
     Rails.logger.warn("Audit logs are disabled for account #{Current.account.id}")

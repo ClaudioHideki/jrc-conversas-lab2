@@ -3,6 +3,7 @@
 class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::BaseController
   before_action :ensure_contact_center_enabled!
   around_action :use_account_timezone
+  around_action :use_configuration_audit_context
 
   rescue_from JrcContactCenter::Providers::BaseAdapter::CapabilityUnavailable, with: :render_capability_unavailable
   rescue_from JrcContactCenter::OperationError, with: :render_operation_error
@@ -24,8 +25,20 @@ class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::B
     Time.use_zone(timezone, &)
   end
 
+  def use_configuration_audit_context
+    previous = Audited.store[:current_request_uuid]
+    Audited.store[:current_request_uuid] = request.request_id
+    yield
+  ensure
+    Audited.store[:current_request_uuid] = previous
+  end
+
   def base_payload
     { contract_version: 1, account_id: @contact_center_account_id.to_s }
+  end
+
+  def configuration_write
+    @configuration_write ||= JrcContactCenter::ConfigurationWrite.new(account: Current.account, access: contact_center_access)
   end
 
   def contact_center_access
