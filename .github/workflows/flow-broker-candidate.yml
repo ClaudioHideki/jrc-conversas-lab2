@@ -111,7 +111,7 @@ jobs:
         run: |
           read -r -a spec_args <<< "$SPEC_ARGS"
           test "${#spec_args[@]}" -gt 0
-          bundle exec rspec "${spec_args[@]}" --exclude-pattern spec/services/jrc_broker/routing_context_connection_spec.rb --format progress --format json --out /tmp/flow-broker-rspec.json
+          bundle exec rspec "${spec_args[@]}" --exclude-pattern 'spec/services/jrc_broker/{routing_context_connection,live_ingress_concurrency}_spec.rb' --format progress --format json --out /tmp/flow-broker-rspec.json
           python3 - <<'PYTHON'
           import json, os
           summary = json.load(open('/tmp/flow-broker-rspec.json'))['summary']
@@ -119,6 +119,23 @@ jobs:
           assert summary['failure_count'] == 0
           assert summary['pending_count'] == 0
           assert summary['example_count'] >= int(os.environ['MINIMUM_EXAMPLES'])
+          PYTHON
+      - name: Concorrencia LIVE no banco descartavel exigido pela protecao
+        if: matrix.suite == 'modules'
+        env:
+          POSTGRES_DATABASE: jrc_delivery_reliability_test
+          JRC_LIVE_CONCURRENCY: '1'
+          DB_POOL_SIZE: '10'
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_DATABASE" = jrc_delivery_reliability_test
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+          bundle exec rspec spec/services/jrc_broker/live_ingress_concurrency_spec.rb --format progress --format json --out /tmp/flow-live-rspec.json
+          python3 - <<'PYTHON'
+          import json
+          summary = json.load(open('/tmp/flow-live-rspec.json'))['summary']
+          assert summary['failure_count'] == 0 and summary['pending_count'] == 0 and summary['example_count'] >= 4
           PYTHON
       - name: Routing HTTP com fixtures commitadas em banco protegido separado
         if: matrix.suite == 'modules'

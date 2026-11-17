@@ -54,6 +54,8 @@ Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em a
 
 ## Como manter
 
+- **CI-LIVE-20261117:** Isolar a concorrência LIVE do glob Flow/QR e executar os quatro casos no banco descartável exigido pela proteção, mantendo suites genéricas e routing. Critério de aceite: workflow Flow/QR do SHA final com zero falhas/pendências e contagem mínima preservada. Evidência inicial e limites: [registro](docs/jrc_consolidation/ci-live-runner-20261117.md); resultado remoto nos checks do commit. Alteração exclusiva de CI, sem nova imagem funcional.
+
 Uma tarefa deve registrar problema, escopo, critério de aceite, evidência/arquivo e limite. Só mover para Concluído com a prova correspondente; não converter publicação de imagem em aceite operacional.
 
 
