@@ -132,7 +132,7 @@ class JrcServiceDesk::LifecycleClocks
   def self.verify_snapshot!(snapshot, clock_kinds: nil)
     raise JrcServiceDesk::LifecycleDependencyError, 'SLA/calendar snapshot is required' unless snapshot
     targets = snapshot.policy_conditions['clock_budgets_seconds']
-    kinds = clock_kinds || (targets.is_a?(Hash) && targets.key?('attendance') ? JrcServiceDesk::LifecycleRules::ATTENDANCE_CLOCKS : JrcServiceDesk::LifecycleRules::CLOCKS)
+    kinds = clock_kinds || ((targets.is_a?(Hash) && targets.key?('attendance')) ? JrcServiceDesk::LifecycleRules::ATTENDANCE_CLOCKS : JrcServiceDesk::LifecycleRules::CLOCKS)
     unless targets.is_a?(Hash) && targets.keys.sort == kinds.sort &&
            targets.values.all? { |n| n.is_a?(Integer) && n.positive? && n <= 2**53 - 1 }
       raise JrcServiceDesk::LifecycleDependencyError, 'Explicit budgets matching the published clock policy are required in the snapshot'
