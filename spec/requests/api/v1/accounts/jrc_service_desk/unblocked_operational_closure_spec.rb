@@ -28,7 +28,7 @@ RSpec.describe 'Manual closure without configuration blockers', type: :request d
   after { travel_back }
 
   it 'allows a ticket viewer to close despite missing SLA, approval, role and evidence requirements, without exposing private history' do
-    service = JrcServiceDesk::Service.create!(account: sd_account, unit: sd_unit, code: 'approval', name: 'Approval service', approval_required: true)
+    service = JrcServiceDesk::Service.create!(account: sd_account, unit: sd_unit, code: 'approval', name: 'Approval service', active: true, approval_required: true)
     ticket = sd_ticket(service: service)
     role = create(:custom_role, account: sd_account, permissions: %w[jrc_service_desk_module_view jrc_service_desk_tickets_view])
     sd_account_user.update!(custom_role: role)
