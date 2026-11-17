@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 # State precondition only: the token never confers access or scope.

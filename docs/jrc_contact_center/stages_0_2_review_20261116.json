@@ -1524,7 +1524,27 @@
       "native_validation": "pending_new_sha",
       "migrations": "none",
       "permissions": "unchanged",
-      "teams": "native revision/inheritance still pending"
+      "teams": "native revision/inheritance still pending",
+      "first_gate": {
+        "sha": "4e23753c54ea9d48e986209b5c59aa432d70f42a",
+        "run": 44108023316,
+        "artifact": 14340335477,
+        "sha256": "0aefc9494b99eb31ed7e619fa4b6d66078fab42003d428dff222cae37bc3793e",
+        "main_examples": 487,
+        "main_failures": 2,
+        "pending": 0,
+        "outside_errors": 0,
+        "causes": [
+          "Unsupported Numeric#microsecond in test preparation",
+          "Unfounded direct account purge assumption; existing FK restricts deletion"
+        ],
+        "vue_build_chrome": "not_validated"
+      },
+      "account_lifecycle": {
+        "schema_blob_unchanged_from_base": "2da124014a50e68dca9ea4c4345ab9e377e2bddf",
+        "decision": "preserve_restrictive_FKs_and_prove_atomic_rollback",
+        "complete_purge": "not_implemented_or_approved"
+      }
     }
   }
 }

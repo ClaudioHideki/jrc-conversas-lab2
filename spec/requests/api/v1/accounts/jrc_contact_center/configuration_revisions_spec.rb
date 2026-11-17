@@ -1,4 +1,3 @@
-
 require 'rails_helper'
 
 RSpec.describe 'Call Center native configuration revisions', type: :request do
@@ -31,7 +30,7 @@ RSpec.describe 'Call Center native configuration revisions', type: :request do
       expect(response.headers['Cache-Control']).to eq('no-store')
       captured = response.parsed_body.fetch('item').fetch('revision')
       expect(captured).to eq(current_token)
-      patch url, headers: headers, params: { parameter => change, expected_revision: captured }, as: :json
+      patch url, headers: headers, params: { parameter => change }.merge(expected_revision: captured), as: :json
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body.fetch('item').fetch('revision')).not_to eq(captured)
       expect(target.reload).to have_attributes(change)
@@ -47,7 +46,7 @@ RSpec.describe 'Call Center native configuration revisions', type: :request do
       target
       count = Audited.audit_class.where(auditable: target).count
       [nil, '', {}, ['invalid']].each do |invalid|
-        patch url, headers: headers, params: { parameter => change, expected_revision: invalid }, as: :json
+        patch url, headers: headers, params: { parameter => change }.merge(expected_revision: invalid), as: :json
         expect(response).to have_http_status(:precondition_required)
         expect(response.parsed_body.fetch('error')).to eq('configuration_revision_required')
       end
@@ -60,7 +59,7 @@ RSpec.describe 'Call Center native configuration revisions', type: :request do
       concurrent = resource == :queue_memberships ? { priority: 5 } : { name: 'Concurrent state' }
       target.update!(concurrent)
       count = Audited.audit_class.where(auditable: target).count
-      patch url, headers: headers, params: { parameter => change, expected_revision: captured }, as: :json
+      patch url, headers: headers, params: { parameter => change }.merge(expected_revision: captured), as: :json
       expect(response).to have_http_status(:conflict)
       expect(response.parsed_body.fetch('error')).to eq('stale_configuration_revision')
       expect(target.reload).to have_attributes(concurrent)
@@ -73,11 +72,10 @@ RSpec.describe 'Call Center native configuration revisions', type: :request do
       get url, headers: headers
       current = response.parsed_body.fetch('item').fetch('revision')
       expect(current).not_to eq(previous)
-      patch url, headers: headers, params: { parameter => change, expected_revision: current }, as: :json
+      patch url, headers: headers, params: { parameter => change }.merge(expected_revision: current), as: :json
       expect(response).to have_http_status(:ok)
       expect(target.reload).to have_attributes(change)
     end
-
 
     it 'denies a different business unit before comparing a valid or malformed revision' do
       target
@@ -99,7 +97,7 @@ RSpec.describe 'Call Center native configuration revisions', type: :request do
       get url, headers: headers
       expect(response).to have_http_status(:not_found)
       [current_token, nil].each do |version|
-        patch url, headers: headers, params: { parameter => change, expected_revision: version }, as: :json
+        patch url, headers: headers, params: { parameter => change }.merge(expected_revision: version), as: :json
         expect(response).to have_http_status(:not_found)
         expect(response.body).not_to include('configuration_revision_required', 'stale_configuration_revision')
       end
@@ -112,21 +110,21 @@ RSpec.describe 'Call Center native configuration revisions', type: :request do
       get url.sub("/accounts/#{account.id}/", "/accounts/#{foreign.id}/"), headers: headers
       expect(response).to have_http_status(:unauthorized)
       patch url.sub("/accounts/#{account.id}/", "/accounts/#{foreign.id}/"),
-            headers: headers, params: { parameter => change, expected_revision: nil }, as: :json
+            headers: headers, params: { parameter => change }.merge(expected_revision: nil), as: :json
       expect(response).to have_http_status(:unauthorized)
       expect(response.body).not_to include('stale_configuration_revision', 'configuration_revision_required')
     end
   end
 
   context 'with a local operational unit' do
-    include_examples 'a revision-protected native configuration', :units, :unit
+    it_behaves_like 'a revision-protected native configuration', :units, :unit
   end
 
   context 'with a local queue' do
-    include_examples 'a revision-protected native configuration', :queues, :queue
+    it_behaves_like 'a revision-protected native configuration', :queues, :queue
   end
 
   context 'with a local queue membership' do
-    include_examples 'a revision-protected native configuration', :queue_memberships, :queue_membership
+    it_behaves_like 'a revision-protected native configuration', :queue_memberships, :queue_membership
   end
 end

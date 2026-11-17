@@ -1,4 +1,3 @@
-
 require 'rails_helper'
 
 RSpec.describe JrcContactCenter::ConfigurationRevision do
@@ -18,7 +17,7 @@ RSpec.describe JrcContactCenter::ConfigurationRevision do
 
   it 'includes microsecond changes instead of truncating the persisted timestamp' do
     expected = described_class.token(unit)
-    unit.updated_at += 1.microsecond
+    unit.updated_at += Rational(1, 1_000_000)
     expect(described_class.token(unit)).not_to eq(expected)
   end
 

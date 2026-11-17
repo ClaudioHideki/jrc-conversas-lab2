@@ -53,3 +53,30 @@ o ciclo nativo de conta e a preservação de registros/histórico de outra conta
 - Contexto capturado inclui conta, tipo e ID; respostas anteriores são descartadas. Nenhuma permissão é inferida pelo token.
 - Preparados 26 novos exemplos Rails (incluindo escopo por unidade, ciclo de conta e uma corrida HTTP/PostgreSQL), 12 Vue e quatro cenários Chrome. Expectativa total: 493 Rails, 209 Vue e 68 Chrome; todos pendentes até a execução no novo SHA.
 - Herança por equipe e elegibilidade de novos usuários permanecem abertas, sem concessões automáticas. A próxima etapa não equivale à conclusão integral 0–2 ou da Parte 1.
+
+## Diagnóstico da primeira execução e preservação do ciclo de conta
+
+CI 44108023316: 487 exemplos Rails, 485 aprovados e duas falhas,
+zero pendências/erros fora dos exemplos. Artefato 14340335477,
+SHA-256 0aefc9494b99eb31ed7e619fa4b6d66078fab42003d428dff222cae37bc3793e.
+Vue/build/Chrome não foram aceitos nesse SHA.
+
+A preparação de microssegundos usava Numeric#microsecond, ausente no runtime.
+Passa a usar Rational(1, 1_000_000) na aritmética de Time, mantendo a exigência
+de distinguir o estado com precisão de microssegundos.
+
+O teste adicional de ciclo de conta assumia purga por Account.destroy!, sem
+contrato existente que a autorize. O PostgreSQL mostrou FKs restritivas do
+Call Center. Conferência da base a24adc6d e da candidata: schema blob idêntico
+2da124014a50e68dca9ea4c4345ab9e377e2bddf, incluindo as 18 referências a accounts.
+DeleteObjectJob nativo não prepara a purga de dependências Call Center.
+
+Decisão de preservação: NÃO adicionar CASCADE, remover restrições ou inventar
+retenção/purga. O cenário agora prova a rejeição nativa, rollback em savepoint,
+persistência de conta/usuário/vínculo/unidade/fila/participante e imutabilidade
+das trilhas própria e de outra conta. Não é homologação de exclusão completa.
+Uma eventual política de exclusão/retenção de conta continua fora deste
+incremento e precisa de decisão específica.
+
+As correções de lint apenas removem linhas iniciais vazias, uniformizam hashes
+dinâmicos e usam it_behaves_like, mantendo todos os exemplos e verificações.
