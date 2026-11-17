@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe JrcContactCenter::QualificationManager do
   let(:account) { create(:account) }
-  let(:agent) { create(:user, account: account, role: :agent) }
+  let(:agent) { create(:user, :contact_center_eligible, account: account, role: :agent) }
   let(:member) { account.account_users.find_by!(user: agent) }
   let(:manager) { described_class.new(account: account, member: member) }
   let(:session) do
@@ -161,7 +161,7 @@ RSpec.describe JrcContactCenter::QualificationManager do
   end
 
   it 'does not allow another agent to complete the pending qualification' do
-    other = create(:user, account: account, role: :agent)
+    other = create(:user, :contact_center_eligible, account: account, role: :agent)
     other_member = account.account_users.find_by!(user: other)
     record = manager.start!(conversation: conversation)
     expect do

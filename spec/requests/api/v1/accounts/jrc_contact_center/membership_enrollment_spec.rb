@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Call Center queue enrollment eligibility', type: :request do
   let(:account) { create(:account) }
-  let(:actor) { create(:user, account: account, role: :administrator) }
+  let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:headers) { actor.create_new_auth_token }
   let(:unit) { JrcContactCenter::Unit.create!(account: account, code: 'SYNTHETIC', name: 'SYNTHETIC unit', kind: 'sac') }
   let(:queue) { JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'SYNTHETIC', name: 'SYNTHETIC queue') }

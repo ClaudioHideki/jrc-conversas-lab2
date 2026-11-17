@@ -32,5 +32,16 @@ FactoryBot.define do
     trait :administrator do
       role { 'administrator' }
     end
+
+    # Explicit synthetic equivalent of a member preserved by the upgrade.
+    # The normal factory and native user APIs remain ineligible by default.
+    trait :contact_center_eligible do
+      after(:create) do |user, evaluator|
+        if evaluator.account
+          member = evaluator.account.account_users.find_by!(user: user)
+          JrcContactCenter::AccessGrant.create!(account: evaluator.account, account_user: member, eligible: true)
+        end
+      end
+    end
   end
 end

@@ -4,8 +4,8 @@ require 'rails_helper'
 
 RSpec.describe 'Contact Center ACW persistent API', type: :request do
   let(:account) { create(:account) }
-  let(:agent) { create(:user, account: account, role: :agent) }
-  let(:admin) { create(:user, account: account, role: :administrator) }
+  let(:agent) { create(:user, :contact_center_eligible, account: account, role: :agent) }
+  let(:admin) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:headers) { agent.create_new_auth_token }
   let(:member) { account.account_users.find_by!(user: agent) }
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center" }
@@ -86,7 +86,7 @@ RSpec.describe 'Contact Center ACW persistent API', type: :request do
 
   it 'rejects update from another Account and foreign attendance identifiers' do
     other = create(:account)
-    foreign_agent = create(:user, account: other, role: :agent)
+    foreign_agent = create(:user, :contact_center_eligible, account: other, role: :agent)
     post "#{base}/qualifications", headers: foreign_agent.create_new_auth_token, as: :json, params: { conversation_id: conversation.display_id }
     expect(response).to have_http_status(:unauthorized)
     expect(JrcContactCenter::Qualification.where(account: account)).to be_empty

@@ -4,10 +4,15 @@ class JrcContactCenter::ConfigurationAuditSnapshot
   FIELDS = {
     'JrcContactCenter::Unit' => %w[code name kind status timezone parent_unit_id],
     'JrcContactCenter::Queue' => %w[unit_id code name service_kind strategy status max_wait_seconds active_from active_until],
-    'JrcContactCenter::QueueMembership' => %w[queue_id account_user_id role priority active starts_at ends_at]
+    'JrcContactCenter::QueueMembership' => %w[queue_id account_user_id role priority active starts_at ends_at],
+    'JrcContactCenter::AccessGrant' => %w[account_user_id team_id eligible allowed denied]
   }.freeze
 
   def self.capture(record)
+    if record.is_a?(JrcContactCenter::AccessGrant)
+      return { 'attributes' => attributes_for(record), 'scope' => { 'account_id' => record.account_id.to_s } }
+    end
+
     queue = queue_for(record)
     unit = record.is_a?(JrcContactCenter::Unit) ? record : JrcContactCenter::Unit.find_by!(account_id: record.account_id, id: queue.unit_id)
     { 'attributes' => attributes_for(record), 'scope' => scope_for(record, unit, queue) }

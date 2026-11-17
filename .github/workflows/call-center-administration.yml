@@ -81,7 +81,8 @@ jobs:
         run: |
           node --test script/validate_ag_migration_identity.test.mjs script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
           node script/validate_ag_migration_identity.mjs
-          git diff --exit-code a24adc6dd8bb660f955b76cce0172ae1638deee2 HEAD -- db/migrate db/schema.rb db/sql
+          node --test script/validate_cc_access_migration.test.mjs
+          node script/validate_cc_access_migration.mjs
       - name: Disposable application schema and pending migrations
         run: |
           test "$RAILS_ENV" = test
@@ -89,6 +90,16 @@ jobs:
           test "$POSTGRES_DATABASE" = jrc_sd_bc_portal_concurrency_20261025_test
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
+      - name: Reload migrated schema in a separate disposable database
+        env:
+          POSTGRES_DATABASE: jrc_cc_access_schema_reload_synthetic
+          SCHEMA: /tmp/call-center-schema.rb
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = jrc_cc_access_schema_reload_synthetic
+          bundle exec rails db:create db:schema:load
+          bundle exec rails runner 'c=ActiveRecord::Base.connection; t=:jrc_contact_center_access_grants; abort "missing access constraints" unless c.foreign_keys(t).length == 3 && c.check_constraints(t).length == 4; abort "unexpected grants" unless JrcContactCenter::AccessGrant.count.zero?'
       - name: Rails authorization, persistence and affected regressions
         run: |
           bundle exec rspec spec/services/jrc_contact_center spec/models/jrc_contact_center \

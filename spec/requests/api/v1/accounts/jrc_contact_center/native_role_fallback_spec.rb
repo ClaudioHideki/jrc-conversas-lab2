@@ -2,11 +2,11 @@ require 'rails_helper'
 
 RSpec.describe 'Call Center authority on native role fallback', type: :request do
   let(:account) { create(:account) }
-  let(:actor) { create(:user, account: account, role: :administrator, name: 'SYNTHETIC limited admin') }
+  let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator, name: 'SYNTHETIC limited admin') }
   let!(:headers) { actor.create_new_auth_token }
   let(:actor_link) { account.account_users.find_by!(user: actor) }
   let(:actor_role) { create(:custom_role, account: account, permissions: ['jrc_contact_center_view']) }
-  let(:recipient) { create(:user, account: account, role: :agent, name: 'SYNTHETIC recipient') }
+  let(:recipient) { create(:user, :contact_center_eligible, account: account, role: :agent, name: 'SYNTHETIC recipient') }
   let(:recipient_link) { account.account_users.find_by!(user: recipient) }
   let(:recipient_role) { create(:custom_role, account: account, permissions: ['jrc_contact_center_view']) }
   let(:agents_url) { "/api/v1/accounts/#{account.id}/agents" }
@@ -58,17 +58,23 @@ RSpec.describe 'Call Center authority on native role fallback', type: :request d
     expect(policy.configure?).to be(false)
   end
 
-  it 'denies creation of an unprofiled agent when its legacy authority exceeds the actor' do
+  it 'creates an unprofiled agent pending explicit eligibility without granting legacy authority' do
     post agents_url, headers: headers,
                      params: { agent: { name: 'SYNTHETIC denied', email: 'cc-denied@example.test', role: 'agent' } }, as: :json
-    expect(response).to have_http_status(:unauthorized)
-    expect(account.users.exists?(email: 'cc-denied@example.test')).to be(false)
+    expect(response).to have_http_status(:ok)
+    created = account.users.find_by!(email: 'cc-denied@example.test')
+    link = account.account_users.find_by!(user: created)
+    expect(JrcContactCenter::AccessGrant.exists?(account_user: link)).to be(false)
+    policy = JrcContactCenter::ModulePolicy.new({ account: account, account_user: link, user: created }, :contact_center)
+    expect(policy.effective_permissions).to eq([])
   end
 
-  it 'denies bulk creation when its implicit agent authority exceeds the actor' do
+  it 'keeps a bulk-created agent pending rather than activating implicit Call Center access' do
     post "#{agents_url}/bulk_create", headers: headers, params: { emails: ['cc-bulk-denied@example.test'] }, as: :json
-    expect(response).to have_http_status(:unauthorized)
-    expect(account.users.exists?(email: 'cc-bulk-denied@example.test')).to be(false)
+    expect(response).to have_http_status(:ok)
+    created = account.users.find_by!(email: 'cc-bulk-denied@example.test')
+    link = account.account_users.find_by!(user: created)
+    expect(JrcContactCenter::AccessGrant.exists?(account_user: link)).to be(false)
   end
 
   it 'permits creating a user with an explicit role within actor authority' do

@@ -5,7 +5,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
   self.use_transactional_tests = false
 
   let(:account) { create(:account) }
-  let(:actor) { create(:user, account: account, role: :administrator) }
+  let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:headers) { actor.create_new_auth_token }
   let(:company) { account.master_companies.create!(name: 'SYNTHETIC issuer', relationship_type: 'internal') }
   let(:business_units) do

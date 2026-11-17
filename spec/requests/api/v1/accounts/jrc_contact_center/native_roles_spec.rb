@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Call Center native role boundaries', type: :request do
   let(:account) { create(:account) }
-  let(:actor) { create(:user, account: account, role: :administrator) }
+  let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:headers) { actor.create_new_auth_token }
   let(:role) { create(:custom_role, account: account, permissions: ['jrc_contact_center_view']) }
   let(:url) { "/api/v1/accounts/#{account.id}/custom_roles/#{role.id}" }

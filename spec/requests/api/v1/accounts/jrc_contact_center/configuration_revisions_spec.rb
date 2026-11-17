@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Call Center native configuration revisions', type: :request do
   let(:account) { create(:account) }
-  let(:operator) { create(:user, account: account, role: :administrator) }
+  let(:operator) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let!(:headers) { operator.create_new_auth_token }
   let(:member) { account.account_users.find_by!(user: operator) }
   let(:unit) { JrcContactCenter::Unit.create!(account: account, code: 'REVISION', name: 'Original', kind: 'sac') }

@@ -11,7 +11,7 @@ RSpec.describe 'Contact Center qualification concurrent retries', type: :service
     stub_request(:get, 'https://waba.360dialog.io/v1/configs/templates').to_return(status: 200, body: '{"waba_templates":[]}', headers: { 'Content-Type' => 'application/json' })
     account = create(:account)
     account.enable_features!('jrc_contact_center')
-    agent = create(:user, account: account, role: :agent)
+    agent = create(:user, :contact_center_eligible, account: account, role: :agent)
     member = account.account_users.find_by!(user: agent)
     inbox = create(:inbox, account: account, channel: create(:channel_whatsapp, account: account,
                                                          phone_number: "+5599#{SecureRandom.random_number(10**9).to_s.rjust(9, '0')}"))

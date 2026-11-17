@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Call Center administrative workflows', type: :request do
   let(:account) { create(:account) }
-  let(:user) { create(:user, account: account, role: :administrator) }
+  let(:user) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:member) { account.account_users.find_by!(user: user) }
   let(:headers) { user.create_new_auth_token }
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center" }
@@ -46,7 +46,7 @@ RSpec.describe 'Call Center administrative workflows', type: :request do
 
   it 'keeps native team member writes within the Account' do
     team = create(:team, account: account)
-    foreign = create(:user, account: create(:account))
+    foreign = create(:user, :contact_center_eligible, account: create(:account))
     patch "/api/v1/accounts/#{account.id}/teams/#{team.id}/team_members",
           params: { user_ids: [foreign.id] }, headers: headers, as: :json
     expect(response).to have_http_status(:unauthorized)

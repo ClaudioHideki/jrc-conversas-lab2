@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'JRC Contact Center F1 operations', type: :request do
   let(:account) { create(:account) }
-  let(:agent) { create(:user, account: account, role: :agent) }
+  let(:agent) { create(:user, :contact_center_eligible, account: account, role: :agent) }
   let(:headers) { agent.create_new_auth_token }
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center" }
 
@@ -57,7 +57,7 @@ RSpec.describe 'JRC Contact Center F1 operations', type: :request do
 
   it 'reprocesses only a verified failed event and enqueues the existing reconciler' do
     account.enable_features!('jrc_contact_center')
-    admin = create(:user, account: account, role: :administrator)
+    admin = create(:user, :contact_center_eligible, account: account, role: :administrator)
     event = JrcContactCenter::EventIngestor.new(account: account).call(
       { schema_version: '1.0', event_id: 'reprocess-1', event_type: 'call.created', occurred_at: Time.current.iso8601,
         provider: 'jrc_pabx', correlation_id: 'reprocess-call' }, signature_verified: true
@@ -75,7 +75,7 @@ RSpec.describe 'JRC Contact Center F1 operations', type: :request do
 
   it 'does not reprocess an unverified event even for an administrator' do
     account.enable_features!('jrc_contact_center')
-    admin = create(:user, account: account, role: :administrator)
+    admin = create(:user, :contact_center_eligible, account: account, role: :administrator)
     event = JrcContactCenter::EventIngestor.new(account: account).call(
       { schema_version: '1.0', event_id: 'unverified-1', event_type: 'call.created', occurred_at: Time.current.iso8601,
         provider: 'jrc_pabx', correlation_id: 'unverified-call' }
@@ -94,7 +94,7 @@ RSpec.describe 'JRC Contact Center F1 operations', type: :request do
     queue = JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'Q', name: 'Queue')
     member = account.account_users.find_by!(user: agent)
     JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: member)
-    other_agent = create(:user, account: account, role: :agent)
+    other_agent = create(:user, :contact_center_eligible, account: account, role: :agent)
     other_member = account.account_users.find_by!(user: other_agent)
     session = JrcContactCenter::CallSession.create!(account: account, correlation_id: 'peer-call', direction: 'inbound',
                                                     status: 'connected', started_at: 2.minutes.ago, answered_at: 1.minute.ago, current_queue: queue)

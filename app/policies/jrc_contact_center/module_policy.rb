@@ -18,20 +18,21 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
   ].freeze
 
   def access?
-    account&.active? && account_user && account.feature_enabled?('jrc_contact_center') &&
-      (native_role? || permission?('jrc_contact_center_view'))
+    account&.active? && account_user&.account_id == account.id && account.feature_enabled?('jrc_contact_center') &&
+      account_user.user_id == user&.id && sources.eligible? && allowed?('view', native: native_role?)
   end
 
   def operate?
-    access? && (native_role? || permission?('jrc_contact_center_operate'))
+    access? && allowed?('operate', native: native_role?)
   end
 
   def supervise?
-    access? && (administrator? || permission?('jrc_contact_center_supervise'))
+    access? && allowed?('supervise', native: administrator?)
   end
 
   def configure?
-    access? && (administrator? || permission?('jrc_contact_center_configure') || permission?('jrc_contact_center_administer'))
+    access? && !sources.denied?('jrc_contact_center_configure') &&
+      (allowed?('configure', native: administrator?) || allowed?('administer'))
   end
 
   def control?
@@ -39,24 +40,25 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
   end
 
   def reports?
-    access? && (administrator? || permission?('jrc_contact_center_reports') || permission?('jrc_contact_center_supervise'))
+    access? && !sources.denied?('jrc_contact_center_reports') &&
+      (allowed?('reports', native: administrator?) || allowed?('supervise'))
   end
 
   # These are new authorities, not aliases for administrator/configure/report.
   %w[administer monitor publish approve audit].each do |action|
-    define_method("#{action}?") { access? && permission?("jrc_contact_center_#{action}") }
+    define_method("#{action}?") { access? && allowed?(action) }
   end
 
   def recordings_view?
-    access? && permission?('jrc_contact_center_recordings_view')
+    access? && allowed?('recordings_view')
   end
 
   def recordings_listen?
-    recordings_view? && permission?('jrc_contact_center_recordings_listen')
+    recordings_view? && allowed?('recordings_listen')
   end
 
   def recordings_download?
-    recordings_view? && permission?('jrc_contact_center_recordings_download')
+    recordings_view? && allowed?('recordings_download')
   end
 
   def effective_permissions
@@ -76,7 +78,14 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
     account_user.administrator? && account_user.custom_role_id.nil?
   end
 
-  def permission?(key)
-    Array(account_user.custom_role&.permissions).include?(key)
+  def allowed?(action, native: false)
+    key = "jrc_contact_center_#{action}"
+    !sources.denied?(key) && (native || sources.granted?(key))
+  end
+
+  def sources
+    options = { account: account, member: account_user }
+    options[:individual] = user_context[:cc_access_preview] if user_context.key?(:cc_access_preview)
+    @sources ||= JrcContactCenter::PermissionSources.new(**options)
   end
 end

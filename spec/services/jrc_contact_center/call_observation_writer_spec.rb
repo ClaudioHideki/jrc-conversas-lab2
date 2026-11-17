@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe JrcContactCenter::CallObservationWriter do
   let(:account) { create(:account) }
-  let(:agent) { create(:user, account: account, role: :agent) }
+  let(:agent) { create(:user, :contact_center_eligible, account: account, role: :agent) }
   let(:member) { account.account_users.find_by!(user: agent) }
   let(:call) do
     JrcContactCenter::CallSession.create!(account: account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid,

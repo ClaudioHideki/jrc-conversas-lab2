@@ -6,7 +6,7 @@ RSpec.describe JrcContactCenter::CommandDispatcher do
   let(:account) { create(:account) }
 
   it 'tracks unavailable provider commands without calling an external endpoint' do
-    agent = create(:user, account: account, role: :agent)
+    agent = create(:user, :contact_center_eligible, account: account, role: :agent)
     member = account.account_users.find_by!(user: agent)
 
     expect do
@@ -16,7 +16,7 @@ RSpec.describe JrcContactCenter::CommandDispatcher do
   end
 
   it 'preserves all existing optional command keywords' do
-    agent = create(:user, account: account, role: :agent)
+    agent = create(:user, :contact_center_eligible, account: account, role: :agent)
     member = account.account_users.find_by!(user: agent)
     session = JrcContactCenter::CallSession.create!(account: account, correlation_id: SecureRandom.uuid, direction: 'inbound',
                                                     started_at: Time.current)

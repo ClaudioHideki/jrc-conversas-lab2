@@ -80,6 +80,11 @@ audit_operators = [true, false].map do |reports|
   [operator, audit_role]
 end
 
+# Explicit synthetic eligibility, independent of native roles and team membership.
+account.account_users.find_each do |member|
+  JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true)
+end
+
 session = { account_id: account.id, other_account_id: other.id, unit_id: unit.id,
             administrator: admin.create_new_auth_token, viewer: limited.create_new_auth_token,
             delegated: delegated.create_new_auth_token,

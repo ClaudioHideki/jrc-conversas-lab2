@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe JrcContactCenter::GrantGuard do
   let(:account) { create(:account) }
-  let(:actor) { create(:user, account: account, role: :administrator) }
+  let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
 
   before { account.enable_features!('jrc_contact_center') }
 

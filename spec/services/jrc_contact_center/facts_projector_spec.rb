@@ -59,7 +59,7 @@ RSpec.describe JrcContactCenter::FactsProjector do
   end
 
   it 'adds completed ACW only after the associated agent state closes' do
-    agent = create(:user, account: account, role: :agent)
+    agent = create(:user, :contact_center_eligible, account: account, role: :agent)
     member = account.account_users.find_by!(user: agent)
     manager = JrcContactCenter::AgentStateManager.new(account: account, account_user: member)
     manager.record_provider_event(state: 'acw', occurred_at: session.ended_at, external_event_id: 'acw-start', provider: 'jrc_pabx',
@@ -77,7 +77,7 @@ RSpec.describe JrcContactCenter::FactsProjector do
   end
 
   it 'rolls back the agent transition if its completed ACW projection fails' do
-    agent = create(:user, account: account, role: :agent)
+    agent = create(:user, :contact_center_eligible, account: account, role: :agent)
     member = account.account_users.find_by!(user: agent)
     manager = JrcContactCenter::AgentStateManager.new(account: account, account_user: member)
     acw = manager.record_provider_event(state: 'acw', occurred_at: session.ended_at, external_event_id: 'acw-start', provider: 'jrc_pabx',

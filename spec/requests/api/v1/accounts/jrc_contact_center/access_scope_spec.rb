@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'JRC Contact Center access scope', type: :request do
   let(:account) { create(:account) }
-  let(:agent) { create(:user, account: account, role: :agent) }
+  let(:agent) { create(:user, :contact_center_eligible, account: account, role: :agent) }
   let(:member) { account.account_users.find_by!(user: agent) }
   let(:headers) { agent.create_new_auth_token }
   let(:unit) { JrcContactCenter::Unit.create!(account: account, code: 'SAC', name: 'SAC', kind: 'sac') }
@@ -85,7 +85,7 @@ RSpec.describe 'JRC Contact Center access scope', type: :request do
   end
 
   it 'allows administrators to list unassigned calls separately' do
-    administrator = create(:user, account: account, role: :administrator)
+    administrator = create(:user, :contact_center_eligible, account: account, role: :administrator)
     assigned_call = JrcContactCenter::CallSession.create!(
       account: account,
       current_unit: unit,
@@ -138,7 +138,7 @@ RSpec.describe 'JRC Contact Center access scope', type: :request do
   end
 
   it 'does not expose a teammate call through unassigned filters or direct lookup' do
-    teammate = create(:user, account: account, role: :agent)
+    teammate = create(:user, :contact_center_eligible, account: account, role: :agent)
     teammate_call = JrcContactCenter::CallSession.create!(
       account: account, current_queue: allowed_queue, provider: 'jrc_pabx', correlation_id: 'teammate-call',
       direction: 'inbound', status: 'connected', started_at: Time.current

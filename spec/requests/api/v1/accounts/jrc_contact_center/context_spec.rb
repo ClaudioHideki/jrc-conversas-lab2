@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'JRC Contact Center context', type: :request do
   let(:account) { create(:account) }
-  let(:admin) { create(:user, account: account, role: :administrator) }
+  let(:admin) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:headers) { admin.create_new_auth_token }
   let(:url) { "/api/v1/accounts/#{account.id}/jrc_contact_center/context" }
 

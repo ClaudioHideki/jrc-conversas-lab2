@@ -21,7 +21,7 @@ class JrcContactCenter::ConfigurationAuditScope
 
     records = @relation.where(associated_type: 'Account', associated_id: @account.id, comment: JrcContactCenter::ConfigurationAudit::COMMENTS)
     configurations = records.where(comment: JrcContactCenter::ConfigurationAudit::COMMENT)
-    roles = records.where(comment: JrcContactCenter::ConfigurationAudit::ROLE_COMMENT)
+    roles = records.where(comment: [JrcContactCenter::ConfigurationAudit::ROLE_COMMENT, JrcContactCenter::ConfigurationAudit::AUTHORITY_COMMENT])
     roles = roles.none if @organization.restricted?
     configurations = restricted_configurations(configurations) unless @access.full_access? && !@organization.restricted?
     configurations.or(roles)

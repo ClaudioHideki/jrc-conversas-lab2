@@ -9,7 +9,7 @@ RSpec.describe JrcContactCenter::QueueMembership do
   it 'rejects a membership linking a queue to a user from another account at the database boundary' do
     unit = JrcContactCenter::Unit.create!(account: account, code: 'TEST', name: 'Test', kind: 'sac')
     queue = JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'Q', name: 'Test queue')
-    other_agent = create(:user, account: other_account, role: :agent)
+    other_agent = create(:user, :contact_center_eligible, account: other_account, role: :agent)
     other_member = other_account.account_users.find_by!(user: other_agent)
 
     expect do

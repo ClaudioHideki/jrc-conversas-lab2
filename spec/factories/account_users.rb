@@ -5,5 +5,11 @@ FactoryBot.define do
     account
     user
     role { 'agent' }
+
+    trait :contact_center_eligible do
+      after(:create) do |member|
+        JrcContactCenter::AccessGrant.create!(account: member.account, account_user: member, eligible: true)
+      end
+    end
   end
 end

@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'Contact Center call observations', type: :request do
   let(:account) { create(:account) }
-  let(:agent) { create(:user, account: account, role: :agent) }
+  let(:agent) { create(:user, :contact_center_eligible, account: account, role: :agent) }
   let(:member) { account.account_users.find_by!(user: agent) }
   let(:headers) { agent.create_new_auth_token }
   let(:call) do
@@ -81,7 +81,7 @@ RSpec.describe 'Contact Center call observations', type: :request do
   end
 
   it 'rejects an agent assigned to a different call in the same Account' do
-    other_agent = create(:user, account: account, role: :agent)
+    other_agent = create(:user, :contact_center_eligible, account: account, role: :agent)
     original = call.attributes
     patch path, params: { observations: { text: 'Negado', lock_version: call.lock_version } },
                 headers: other_agent.create_new_auth_token, as: :json
@@ -90,7 +90,7 @@ RSpec.describe 'Contact Center call observations', type: :request do
   end
 
   it 'rejects another Account and unauthenticated requests without writing' do
-    other_agent = create(:user, account: create(:account), role: :administrator)
+    other_agent = create(:user, :contact_center_eligible, account: create(:account), role: :administrator)
     original = call.attributes
     patch path, params: { observations: { text: 'Negado', lock_version: call.lock_version } },
                 headers: other_agent.create_new_auth_token, as: :json
@@ -146,8 +146,8 @@ RSpec.describe 'Contact Center call observations', type: :request do
   end
 
   it 'denies observation history to an unassigned agent and another Account' do
-    stranger = create(:user, account: account, role: :agent)
-    outsider = create(:user, account: create(:account), role: :administrator)
+    stranger = create(:user, :contact_center_eligible, account: account, role: :agent)
+    outsider = create(:user, :contact_center_eligible, account: create(:account), role: :administrator)
     [[stranger, :not_found], [outsider, :unauthorized]].each do |user, status|
       get path, headers: user.create_new_auth_token, as: :json
       expect(response).to have_http_status(status)

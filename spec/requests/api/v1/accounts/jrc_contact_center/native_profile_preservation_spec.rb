@@ -2,11 +2,11 @@ require 'rails_helper'
 
 RSpec.describe 'Call Center profile preservation through native agent updates', type: :request do
   let(:account) { create(:account) }
-  let(:actor) { create(:user, account: account, role: :administrator, name: 'SYNTHETIC profile actor') }
+  let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator, name: 'SYNTHETIC profile actor') }
   let!(:headers) { actor.create_new_auth_token }
   let(:actor_link) { account.account_users.find_by!(user: actor) }
   let(:actor_role) { create(:custom_role, account: account, permissions: ['jrc_contact_center_view']) }
-  let(:recipient) { create(:user, account: account, role: :agent, name: 'SYNTHETIC recipient') }
+  let(:recipient) { create(:user, :contact_center_eligible, account: account, role: :agent, name: 'SYNTHETIC recipient') }
   let(:recipient_link) { account.account_users.find_by!(user: recipient) }
   let(:recipient_role) do
     create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_reports])
@@ -69,7 +69,7 @@ RSpec.describe 'Call Center profile preservation through native agent updates', 
 
   it 'does not mutate a user or profile from another account' do
     foreign_account = create(:account)
-    foreign = create(:user, account: foreign_account, name: 'SYNTHETIC foreign')
+    foreign = create(:user, :contact_center_eligible, account: foreign_account, name: 'SYNTHETIC foreign')
     foreign_role = create(:custom_role, account: foreign_account, permissions: ['contact_manage'])
     foreign_link = foreign_account.account_users.find_by!(user: foreign)
     foreign_link.update!(custom_role: foreign_role)

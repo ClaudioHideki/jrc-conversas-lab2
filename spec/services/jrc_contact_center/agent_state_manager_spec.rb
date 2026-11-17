@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe JrcContactCenter::AgentStateManager do
   let(:account) { create(:account) }
-  let(:user) { create(:user, account: account, role: :agent) }
+  let(:user) { create(:user, :contact_center_eligible, account: account, role: :agent) }
   let(:member) { account.account_users.find_by!(user: user) }
   let(:manager) { described_class.new(account: account, account_user: member) }
 

@@ -53,3 +53,5 @@ class Api::V1::Accounts::TeamMembersController < Api::V1::Accounts::BaseControll
     render json: { error: 'Invalid User IDs' }, status: :unauthorized and return if invalid_ids.present?
   end
 end
+
+Api::V1::Accounts::TeamMembersController.prepend_mod_with('Api::V1::Accounts::TeamMembersController')

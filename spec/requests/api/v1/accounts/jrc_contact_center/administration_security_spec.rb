@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Call Center administration isolation', type: :request do
   let(:account) { create(:account) }
-  let(:user) { create(:user, account: account, role: :administrator) }
+  let(:user) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:member) { account.account_users.find_by!(user: user) }
   let(:headers) { user.create_new_auth_token }
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center" }
@@ -20,7 +20,7 @@ RSpec.describe 'Call Center administration isolation', type: :request do
   end
 
   it 'preserves legacy agent access without granting new administrative authorities' do
-    agent = create(:user, account: account, role: :agent)
+    agent = create(:user, :contact_center_eligible, account: account, role: :agent)
     get "#{base}/context", headers: agent.create_new_auth_token
     expect(response).to have_http_status(:ok)
     get "#{base}/administration", headers: agent.create_new_auth_token

@@ -6,7 +6,7 @@ RSpec.describe JrcContactCenter::CallJourney do
   let(:account) { create(:account) }
   let(:unit) { JrcContactCenter::Unit.create!(account: account, code: 'SAC', name: 'National SAC', kind: 'sac') }
   let(:queue) { JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'NATIONAL', name: 'National queue') }
-  let(:agent) { create(:user, account: account, role: :agent) }
+  let(:agent) { create(:user, :contact_center_eligible, account: account, role: :agent) }
   let(:member) { account.account_users.find_by!(user: agent) }
   let(:started_at) { Time.zone.parse('2026-10-15 10:00:00') }
 

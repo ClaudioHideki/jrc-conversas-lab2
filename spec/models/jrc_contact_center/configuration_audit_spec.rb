@@ -46,7 +46,7 @@ RSpec.describe 'Call Center configuration audit transactions', type: :model do
 
   it 'keeps participation and supervision as independent audited flags' do
     queue = JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'Q', name: 'Queue')
-    user = create(:user, account: account)
+    user = create(:user, :contact_center_eligible, account: account)
     member = account.account_users.find_by!(user: user)
     link = JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: member, role: 'agent')
     link.update!(settings: { 'supervises' => true, 'private' => 'OMIT-THIS' })
@@ -92,7 +92,7 @@ RSpec.describe 'Call Center configuration audit transactions', type: :model do
   end
 
   it 'rolls back direct account deletion when the native restrictive Call Center foreign keys prevent it' do
-    owner = create(:user, account: account)
+    owner = create(:user, :contact_center_eligible, account: account)
     owner_link = account.account_users.find_by!(user: owner)
     queue = JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'OWNED', name: 'Owned')
     membership = JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: owner_link, role: 'agent')

@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Call Center native capability audit', type: :model do
   let(:account) { create(:account) }
-  let(:actor) { create(:user, account: account, role: :administrator) }
+  let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:audits) { Enterprise::AuditLog.where(comment: 'JRC Call Center native capabilities', associated: account) }
 
   around do |example|

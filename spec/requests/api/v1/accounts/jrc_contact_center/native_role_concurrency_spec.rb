@@ -5,7 +5,7 @@ RSpec.describe 'Call Center native role concurrent revocation', type: :request d
   self.use_transactional_tests = false
 
   let(:account) { create(:account) }
-  let(:actor) { create(:user, account: account, role: :administrator) }
+  let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:target) { create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_publish]) }
   let(:headers) { actor.create_new_auth_token }
   let(:workers) { [] }

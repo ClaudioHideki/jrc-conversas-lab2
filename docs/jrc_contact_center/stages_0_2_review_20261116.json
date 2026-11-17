@@ -1637,11 +1637,36 @@
     },
     "native_role_fallback": {
       "adr": "docs/adr/20261117-call-center-native-role-fallback.md",
-      "validation": "pending_new_sha",
+      "validation": "validated_30fbf0b1",
       "scope": "explicit_clear_native_promotion_creation_bulk_and_assigned_role_deletion",
       "no_migrations": true,
       "permissions_granted": false,
-      "legacy_access_policy_preserved": true
+      "legacy_access_policy_preserved": true,
+      "evidence": {
+        "sha": "30fbf0b1cd8e199c5811d98de550ced287bb8862",
+        "run": 44140644967,
+        "artifact": 14354717924,
+        "sha256": "dbabe01a114268f0faa5cec5dd4b91ed8a8569e9bd389745feb45acb6e1be7aa",
+        "rails": 546,
+        "vue": 209,
+        "chrome": 68,
+        "screenshots_verified": 72,
+        "failures": 0,
+        "pending": 0,
+        "new_ruby_offenses": 0
+      }
+    },
+    "team_inheritance_eligibility": {
+      "adr": "docs/adr/20261117-call-center-team-inheritance-and-eligibility.md",
+      "implementation": "backend_prepared_native_validation_pending",
+      "native_users_teams_reused": true,
+      "new_users_pending": true,
+      "individual_denial_precedence": true,
+      "no_new_corporate_grants": true,
+      "migration": "20261117190000",
+      "migration_hash": "c12bc8165b1641be2cd0b43d4c6e01d83067332a8fa0f4ce5d0f723c67a21932",
+      "ui": "pending",
+      "part_1_complete": false
     }
   }
 }

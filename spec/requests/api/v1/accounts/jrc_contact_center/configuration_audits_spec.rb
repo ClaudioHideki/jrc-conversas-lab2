@@ -3,7 +3,7 @@ require 'csv'
 
 RSpec.describe 'Call Center configuration audit API', type: :request do
   let(:account) { create(:account) }
-  let(:operator) { create(:user, account: account, role: :administrator) }
+  let(:operator) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let!(:headers) { operator.create_new_auth_token }
   let(:member) { account.account_users.find_by!(user: operator) }
   let(:role) do

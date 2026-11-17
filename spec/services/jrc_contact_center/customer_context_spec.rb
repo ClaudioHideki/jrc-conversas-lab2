@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe JrcContactCenter::CustomerContext do
   let(:account) { create(:account) }
   let(:other_account) { create(:account) }
-  let(:user) { create(:user, account: account, role: :administrator) }
+  let(:user) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:context) { { account: account, user: user, account_user: account.account_users.find_by!(user: user) } }
   let(:phone) { '+5511999999999' }
 

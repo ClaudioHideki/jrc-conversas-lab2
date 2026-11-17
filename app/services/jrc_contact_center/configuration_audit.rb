@@ -3,7 +3,8 @@
 class JrcContactCenter::ConfigurationAudit
   COMMENT = 'jrc_contact_center_configuration_v1'
   ROLE_COMMENT = 'JRC Call Center native capabilities'
-  COMMENTS = [COMMENT, ROLE_COMMENT].freeze
+  AUTHORITY_COMMENT = 'jrc_contact_center_authority_v1'
+  COMMENTS = [COMMENT, ROLE_COMMENT, AUTHORITY_COMMENT].freeze
 
   def self.write!(record, action:, before:, after:)
     fields = JrcContactCenter::ConfigurationAuditSnapshot::FIELDS.fetch(record.class.name)
@@ -13,7 +14,7 @@ class JrcContactCenter::ConfigurationAudit
 
     Audited.audit_class.create!(
       auditable: record, associated: record.account, user: Current.user, action: action,
-      comment: COMMENT, audited_changes: {
+      comment: record.is_a?(JrcContactCenter::AccessGrant) ? AUTHORITY_COMMENT : COMMENT, audited_changes: {
         'attributes' => [before&.fetch('attributes'), after&.fetch('attributes')],
         'cc_scope' => { 'before' => before&.fetch('scope'), 'after' => after&.fetch('scope') },
         'omitted_fields' => omitted, 'schema_version' => 1
