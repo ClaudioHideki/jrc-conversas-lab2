@@ -37,3 +37,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Atividade administrativa recente](20261118-call-center-recent-administrative-activity.md): reuso da API, popup e histórico nativos na página inicial, com fronteira autenticada.
 
 - [Auditoria nativa da política global de pós-atendimento](20261118-call-center-acw-policy-native-audit.md) — figuras 9/14, incremento preparado; exige CI e não altera a política nativa.
+
+- [Contato 360º nativo por chamada vinculada](20261118-call-center-linked-customer-master.md) — figura 21 parcial, implementação preparada; exige gate nativo e 116 cenários de navegador.

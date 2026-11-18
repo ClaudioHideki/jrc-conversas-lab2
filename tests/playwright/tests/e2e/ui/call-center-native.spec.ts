@@ -32,28 +32,35 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const auth = info.title.startsWith('local IVR supervisor')
-    ? session.ivr_targets[info.project.name].observer
-    : info.title.startsWith('local IVR')
-      ? info.title.startsWith('local IVR scoped')
-        ? session.ivr_targets[info.project.name].scoped
-        : session.ivr_targets[info.project.name].administrator
-      : info.title.startsWith('native authenticated navigation')
-        ? session.navigation_targets[info.project.name].auth
-        : info.title.startsWith('native infrastructure root')
-          ? session.infrastructure
-          : info.title.startsWith('configuration audit boundary')
-            ? session.auditor
-            : info.title.startsWith('native role denied')
-              ? session.delegated
-              : info.title.startsWith('corporate boundary')
-                ? session.restricted
-                : info.title.startsWith('profile change')
-                  ? session.viewer
-                  : session.administrator;
-  if (info.title.startsWith('local IVR')) {
+  const auth = info.title.startsWith('linked Customer Master')
+    ? session.customer_master_targets[info.project.name].operator
+    : info.title.startsWith('local IVR supervisor')
+      ? session.ivr_targets[info.project.name].observer
+      : info.title.startsWith('local IVR')
+        ? info.title.startsWith('local IVR scoped')
+          ? session.ivr_targets[info.project.name].scoped
+          : session.ivr_targets[info.project.name].administrator
+        : info.title.startsWith('native authenticated navigation')
+          ? session.navigation_targets[info.project.name].auth
+          : info.title.startsWith('native infrastructure root')
+            ? session.infrastructure
+            : info.title.startsWith('configuration audit boundary')
+              ? session.auditor
+              : info.title.startsWith('native role denied')
+                ? session.delegated
+                : info.title.startsWith('corporate boundary')
+                  ? session.restricted
+                  : info.title.startsWith('profile change')
+                    ? session.viewer
+                    : session.administrator;
+  if (
+    info.title.startsWith('local IVR') ||
+    info.title.startsWith('linked Customer Master')
+  ) {
     const observations = [];
-    const prefix = `/api/v1/accounts/${session.ivr_targets[info.project.name].account_id}/jrc_contact_center/`;
+    const prefix = info.title.startsWith('linked Customer Master')
+      ? `/api/v1/accounts/${session.customer_master_targets[info.project.name].account_id}/`
+      : `/api/v1/accounts/${session.ivr_targets[info.project.name].account_id}/jrc_contact_center/`;
     nativeObservations.set(page, observations);
     page.on('response', response => {
       const address = new URL(response.url());
@@ -2875,4 +2882,162 @@ test('local IVR supervisor polling clears real scoped units after native eligibi
       ).status()
     ).toBe(200);
   }
+});
+
+test('linked Customer Master preserves native permissions, persisted values and attendance drafts', async ({
+  page,
+}, info) => {
+  const target = session.customer_master_targets[info.project.name];
+  const source = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}`;
+  const callRoute = id =>
+    `/app/accounts/${target.account_id}/contact-center/chamada/${id}?native_navigation=1`;
+  const profile = await page.request.get(
+    'http://127.0.0.1:5387/api/v1/profile',
+    { headers: target.operator }
+  );
+  expect(profile.status()).toBe(200);
+  const membership = (await profile.json()).accounts.find(
+    account => account.id === target.account_id
+  );
+  expect(membership.role).toBe('agent');
+  expect(membership.permissions).toContain('contact_manage');
+  expect(membership.permissions).not.toContain('jrc_contact_center_administer');
+  expect(membership.permissions).not.toContain('jrc_contact_center_configure');
+  await page.goto(callRoute(target.call_id));
+  await expect(page.locator('[data-open-linked-master]')).toBeVisible();
+  const draft = 'SYNTHETIC unsaved attendance ' + info.project.name;
+  await page.getByLabel('Resumo').fill(draft);
+  await page.locator('[data-open-linked-master]').click();
+  await expectContainedDialog(page);
+  const dialog = page.getByRole('dialog');
+  const surface = dialog.locator('article').first();
+  await expect(surface).toBeVisible();
+  const colors = await surface.evaluate(element => ({
+    background: getComputedStyle(element).backgroundColor,
+    foreground: getComputedStyle(element).color,
+  }));
+  const background = colors.background;
+  expect(background).not.toBe('rgba(0, 0, 0, 0)');
+  const channels = background
+    .match(/[0-9.]+/g)!
+    .slice(0, 3)
+    .map(Number);
+  expect(channels).toHaveLength(3);
+  const brightness = channels.reduce((sum, value) => sum + value, 0);
+  const foregroundBrightness = colors.foreground
+    .match(/[0-9.]+/g)!
+    .slice(0, 3)
+    .map(Number)
+    .reduce((sum, value) => sum + value, 0);
+  if (info.project.name.endsWith('-dark')) {
+    expect(brightness).toBeLessThan(300);
+    expect(foregroundBrightness).toBeGreaterThan(600);
+  } else {
+    expect(brightness).toBeGreaterThan(600);
+    expect(foregroundBrightness).toBeLessThan(300);
+  }
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-linked-master-theme.json`,
+    JSON.stringify({ ...colors, channels, viewport: page.viewportSize() })
+  );
+
+  await expect(dialog).toContainText('SYNTHETIC master contact 0');
+  const fullPage = dialog.getByRole('link', { name: 'Abrir em tela completa', exact: true });
+  await expect(fullPage).toHaveAttribute('href', `/app/accounts/${target.account_id}/contacts/${target.contact_id}`);
+  await expect(fullPage).toHaveAttribute('target', '_blank');
+  await expect(fullPage).toHaveAttribute('rel', 'noopener noreferrer');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(dialog).not.toContainText('SYNTHETIC master contact 1');
+  await dialog
+    .getByRole('button', { name: 'Empresa e Vínculos', exact: true })
+    .click();
+  const value = 'SYNTHETIC role ' + info.project.name;
+  await dialog.getByLabel('Cargo', { exact: true }).fill(value);
+  const saved = page.waitForResponse(
+    response =>
+      response.url().includes(`/customers/contacts/${target.contact_id}`) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Salvar cadastro e vínculo', exact: true })
+    .click();
+  expect((await saved).status()).toBe(200);
+  const stored = await page.request.get(
+    source + `/customers/contacts/${target.contact_id}`,
+    { headers: target.operator }
+  );
+  expect(stored.status()).toBe(200);
+  expect((await stored.json()).payload.job_title).toBe(value);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-linked-master.png`,
+    fullPage: true,
+  });
+  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByLabel('Resumo')).toHaveValue(draft);
+  await page.locator('[data-open-linked-master]').click();
+  await dialog
+    .getByRole('button', { name: 'Empresa e Vínculos', exact: true })
+    .click();
+  await expect(dialog.getByLabel('Cargo', { exact: true })).toHaveValue(value);
+  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  for (const id of [target.denied_contact_id, target.foreign_contact_id]) {
+    const denied = await page.request.get(
+      source + `/customers/contacts/${id}`,
+      { headers: target.operator }
+    );
+    expect(denied.status()).toBe(404);
+    expect(await denied.text()).not.toContain('SYNTHETIC master contact 1');
+  }
+  const foreignAccount = await page.request.get(
+    `http://127.0.0.1:5387/api/v1/accounts/${target.foreign_account_id}/customers/contacts/${target.foreign_contact_id}`,
+    { headers: target.operator }
+  );
+  expect(foreignAccount.status()).toBe(401);
+  const deniedCall = await page.request.get(
+    source + `/jrc_contact_center/call_sessions/${target.denied_call_id}`,
+    { headers: target.operator }
+  );
+  expect(deniedCall.status()).toBe(404);
+  await page.goto(callRoute(target.unlinked_call_id));
+  await expect(
+    page.getByText('SYNTHETIC master contact 0', { exact: true }).first()
+  ).toBeVisible();
+  await expect(page.locator('[data-open-linked-master]')).toHaveCount(0);
+  await page.goto(callRoute(target.call_id));
+  await page.locator('[data-open-linked-master]').click();
+  await expect(dialog).toBeVisible();
+  const roleUrl = source + `/custom_roles/${target.role_id}`;
+  const roleResponse = await page.request.get(roleUrl, {
+    headers: target.administrator,
+  });
+  expect(roleResponse.status()).toBe(200);
+  const role = await roleResponse.json();
+  expect(role.revision).toMatch(/^[a-f0-9]{64}$/);
+  const revoked = await page.request.patch(roleUrl, {
+    headers: target.administrator,
+    data: {
+      expected_revision: role.revision,
+      custom_role: {
+        permissions: ['jrc_contact_center_view', 'jrc_contact_center_operate'],
+      },
+    },
+  });
+  expect(revoked.status()).toBe(200);
+  const deniedMaster = await page.request.get(
+    source + `/customers/contacts/${target.contact_id}`,
+    { headers: target.operator }
+  );
+  expect(deniedMaster.status()).toBe(401);
+  await dialog
+    .getByRole('button', { name: 'Empresa e Vínculos', exact: true })
+    .click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.locator('[data-open-linked-master]')).toHaveCount(0);
+  const callStillAuthorized = await page.request.get(
+    source + `/jrc_contact_center/call_sessions/${target.call_id}`,
+    { headers: target.operator }
+  );
+  expect(callStillAuthorized.status()).toBe(200);
+  expect((await callStillAuthorized.json()).item.customer.directory).toBeNull();
 });

@@ -73,3 +73,10 @@ A revisão das capturas de ac85d6eb encontrou página 1 de 0 em estados sem regi
 Revisão estática subsequente encontrou também duas leituras de cor via evaluate usando o seletor antigo, depois da primeira asserção. Ambas passam a apontar para o mesmo header direto. Todas as três verificações de CSS/tema continuam presentes; 2c6971b8 ainda requer o resultado da CI e não é declarado aprovado por antecipação.
 
 CI 44272597974 confirmou 958 Rails únicos, 16 reexecuções de recarga, 317 Vue e zero novas infrações Ruby. Os mesmos quatro cenários Chrome pararam na primeira leitura evaluate, linha 711, ainda com seletor amplo; os outros 108 passaram. Artefato 14415097723, SHA-256 e8f84090258dfe6aac95dc95661746a934a22ff3b557ea58c6b7d4f72c445e73. A correção completa requer novo SHA e não usa o resultado parcial como homologação.
+
+
+## Aceite incremental comprovado em 0519ee64
+
+CI 44284092413 aprovada: 860 principais + 23 concorrentes + 85 corporativos = 968 exemplos Rails únicos; 16 reexecuções do ledger após recarga separadas; cinco casos legados isolados, 321 Vue e 112 Chrome. Zero falhas, pendências, skips, flaky ou erros externos; migrations/SQL/lints/assets/bootstrap dos 15 cards aprovados. Artefato 14421025672, SHA-256 4b752c36e8642c4b1725941ab378ff7fccae4247eba653b6172e15f14fc645c2.
+
+Conferidos os hashes das 160 capturas; oito revisadas visualmente: auditoria ACW e estado vazio após retirada de cobertura, em desktop/celular e claro/escuro. Popup contido e legível, aviso de registro somente local e valores preservados; listas/seletor sem página 1 de 0. Esses resultados dão aceite ao incremento, não à precedência/revisão global ACW, ao PABX ou às 23 figuras inteiras.

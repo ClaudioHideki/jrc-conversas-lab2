@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import CallWorkspace from './CallWorkspace.vue';
+import LinkedContactMaster from '../components/LinkedContactMaster.vue';
 
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: {
@@ -165,5 +166,113 @@ describe('CallWorkspace', () => {
     expect(delivered[0][0].call.id).toBe(20);
     expect(delivered[0][0].customer.contacts).toEqual([]);
     expect(wrapper.text()).not.toContain('Account A private context');
+  });
+});
+
+describe('native master updates inside an attendance draft', () => {
+  const customer = name => ({
+    status: 'identified',
+    ambiguous: false,
+    directory: { contact_id: '2' },
+    contacts: [{ id: '2', name }],
+  });
+  const payload = name => ({
+    data: {
+      item: {
+        id: 10,
+        contact_id: 2,
+        direction: 'inbound',
+        ani: '+5511999999999',
+        status: 'connected',
+        customer: customer(name),
+      },
+    },
+  });
+  const render = () =>
+    mount(CallWorkspace, {
+      props: {
+        accountId: '1',
+        callId: 10,
+        context: {
+          capabilities: { operate: true },
+          provider: { capabilities: {} },
+        },
+      },
+      global: { stubs: { RouterLink: true } },
+    });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    JrcContactCenterAPI.call.mockResolvedValue(payload('SYNTHETIC previous'));
+    JrcContactCenterAPI.agentState.mockResolvedValue({
+      data: { item: { account_user_id: 20 } },
+    });
+  });
+
+  it('reloads confirmed contact values without clearing the attendance draft or sending a case', async () => {
+    const wrapper = render();
+    await flushPromises();
+    await wrapper
+      .get('textarea[aria-label="JRC_CONTACT_CENTER.OCCURRENCES.SUMMARY"]')
+      .setValue('SYNTHETIC unsaved attendance');
+    JrcContactCenterAPI.call.mockResolvedValueOnce(
+      payload('SYNTHETIC updated')
+    );
+    wrapper.findComponent(LinkedContactMaster).vm.$emit('updated');
+    await flushPromises();
+    expect(wrapper.text()).toContain('SYNTHETIC updated');
+    expect(wrapper.emitted('loaded').at(-1)[0].customer.contacts[0].name).toBe(
+      'SYNTHETIC updated'
+    );
+    expect(
+      wrapper.get(
+        'textarea[aria-label="JRC_CONTACT_CENTER.OCCURRENCES.SUMMARY"]'
+      ).element.value
+    ).toBe('SYNTHETIC unsaved attendance');
+    expect(JrcContactCenterAPI.createCase).not.toHaveBeenCalled();
+  });
+
+  it('clears the old customer and shows an error when the authorized refresh fails, preserving unsaved text', async () => {
+    const wrapper = render();
+    await flushPromises();
+    await wrapper
+      .get('textarea[aria-label="JRC_CONTACT_CENTER.OCCURRENCES.SUMMARY"]')
+      .setValue('SYNTHETIC preserved');
+    JrcContactCenterAPI.call.mockRejectedValueOnce({
+      response: { status: 403 },
+    });
+    wrapper.findComponent(LinkedContactMaster).vm.$emit('updated');
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('SYNTHETIC previous');
+    expect(wrapper.emitted('loaded').at(-1)[0].customer).toBeNull();
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      'JRC_CONTACT_CENTER.COMMON.ERROR'
+    );
+    expect(
+      wrapper.get(
+        'textarea[aria-label="JRC_CONTACT_CENTER.OCCURRENCES.SUMMARY"]'
+      ).element.value
+    ).toBe('SYNTHETIC preserved');
+  });
+
+  it('ignores an old account refresh after navigation to another attendance', async () => {
+    const wrapper = render();
+    await flushPromises();
+    let resolve;
+    JrcContactCenterAPI.call.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    wrapper.findComponent(LinkedContactMaster).vm.$emit('updated');
+    JrcContactCenterAPI.call.mockResolvedValueOnce(
+      payload('SYNTHETIC current account')
+    );
+    await wrapper.setProps({ accountId: '9', callId: 11 });
+    await flushPromises();
+    resolve(payload('SYNTHETIC obsolete account'));
+    await flushPromises();
+    expect(wrapper.text()).toContain('SYNTHETIC current account');
+    expect(wrapper.text()).not.toContain('SYNTHETIC obsolete account');
   });
 });

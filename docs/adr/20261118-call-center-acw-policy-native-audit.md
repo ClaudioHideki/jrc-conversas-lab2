@@ -28,3 +28,10 @@ A revisão otimista global de ACW ainda não foi incorporada aos dois clientes l
 ## Execução nativa de 5dfa484c
 
 CI 44278344086 aprovou 968 Rails únicos (860/23/85), mais 16 reexecuções da recarga, compatibilidade isolada legada e 321 Vue. Os dez exemplos novos provaram a auditoria, autor/correlação, isolamento, sanitização, no-op e rollback. O gate identificou cinco infrações de indentação somente no spec; Chrome não foi executado. Ajustadas a apresentação do mesmo array esperado e a indentação dos mesmos argumentos, sem remover provas. Exigir novo gate antes do aceite visual. Artefato 14416927294, SHA-256 8ae636ff667c272a948006d88770cd8cf2bcd39c43ed40a8d9212362fade8fb5.
+
+
+## Aceite incremental comprovado em 0519ee64
+
+CI 44284092413 aprovada: 860 principais + 23 concorrentes + 85 corporativos = 968 exemplos Rails únicos; 16 reexecuções do ledger após recarga separadas; cinco casos legados isolados, 321 Vue e 112 Chrome. Zero falhas, pendências, skips, flaky ou erros externos; migrations/SQL/lints/assets/bootstrap dos 15 cards aprovados. Artefato 14421025672, SHA-256 4b752c36e8642c4b1725941ab378ff7fccae4247eba653b6172e15f14fc645c2.
+
+Conferidos os hashes das 160 capturas; oito revisadas visualmente: auditoria ACW e estado vazio após retirada de cobertura, em desktop/celular e claro/escuro. Popup contido e legível, aviso de registro somente local e valores preservados; listas/seletor sem página 1 de 0. Esses resultados dão aceite ao incremento, não à precedência/revisão global ACW, ao PABX ou às 23 figuras inteiras.

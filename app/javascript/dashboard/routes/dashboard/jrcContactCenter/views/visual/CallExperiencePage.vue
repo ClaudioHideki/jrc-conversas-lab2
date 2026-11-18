@@ -41,7 +41,10 @@ watch(
 
 <template>
   <div>
-    <VisualShowcasePage :screen="contactCenterScreen('call', t)" />
+    <VisualShowcasePage
+      v-if="!hasCall"
+      :screen="contactCenterScreen('call', t)"
+    />
     <section v-if="hasCall" class="px-4 pb-6 sm:px-6">
       <CallWorkspace
         :key="`${accountId}-${callId}`"

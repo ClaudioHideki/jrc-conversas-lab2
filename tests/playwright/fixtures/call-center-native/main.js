@@ -28,7 +28,10 @@ if (!localIvrRoute)
 
 window.chatwootConfig = {};
 window.axios = axios;
-Object.assign(axios.defaults.headers.common, window.__SYNTHETIC_AUTH__);
+Object.assign(
+  axios.defaults.headers.common,
+  Reflect.get(window, '__SYNTHETIC_AUTH__')
+);
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -94,6 +97,17 @@ const store = createStore({
   },
   getters: {
     getCurrentUser: state => state.nativeUser,
+    getCurrentRole: state =>
+      state.nativeUser.accounts?.find(
+        account =>
+          Number(account.id) ===
+          Number(router.currentRoute.value.params.accountId)
+      )?.role,
+    'accounts/getAccount': state => id =>
+      Number(state.nativeAccount?.id) === Number(id)
+        ? state.nativeAccount
+        : undefined,
+
     'accounts/isRTL': () => false,
     getCurrentAccountId: () =>
       Number(router.currentRoute.value.params.accountId),
@@ -147,6 +161,29 @@ router.isReady().then(async () => {
     ]);
     store.commit('setNativeAccount', account.data);
     store.commit('setNativeUser', profile.data);
+  }
+  // The popup and full-page link use the product's actual contact routes.
+  // Load that native graph only for an account whose real API enables it.
+  if (store.state.nativeAccount?.features.jrc_customer_master === true) {
+    const modules = await Promise.all([
+      import('dashboard/store/modules/contacts'),
+      import('dashboard/store/modules/inboxes'),
+      import('dashboard/store/modules/contactConversations'),
+      import('shared/store/globalConfig'),
+    ]);
+    ['contacts', 'inboxes', 'contactConversations', 'globalConfig'].forEach(
+      (name, index) => store.registerModule(name, modules[index].default)
+    );
+    const { routes } = await import(
+      'dashboard/routes/dashboard/contacts/routes'
+    );
+    if (
+      !routes.some(route =>
+        route.children?.some(child => child.name === 'contacts_edit')
+      )
+    )
+      throw new Error('Native contact route missing from fixture source');
+    routes.forEach(route => router.addRoute(route));
   }
   app
     .use(store)

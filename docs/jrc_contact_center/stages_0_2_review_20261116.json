@@ -1363,7 +1363,7 @@
   ],
   "provider_contracts": "control_desk_contracts_20261116.json",
   "scope_limit": "No provider endpoint, ACK, automatic corporate grant or production operation. Current reviewed increment adds only pinned AccessGrant migration 20261117190000; historical migrations, SQLs, dependencies, lint rules and other modules remain preserved. Native Team remains Account-scoped; CC inheritance does not create queue participation.",
-  "validation_state": "incremental_native_and_Chrome_validated_through_cf040419_all_23_figures_still_open",
+  "validation_state": "incremental_native_and_Chrome_validated_through_0519ee64_all_23_figures_still_open",
   "full_23_figures_complete": false,
   "continuity_20261116": {
     "preserved_checkpoint": "15eaa800336626a3d5c5712870b43d169c64e6ad",
@@ -2612,68 +2612,43 @@
   ],
   "continuity_20261118": {
     "validated_checkpoint": {
-      "sha": "417bb8681d715cff24f1a5d506de7e82624463f0",
-      "run": 44243460813,
-      "artifact": 14401817176,
-      "artifact_sha256": "7c94a08d69d4da3c1eb243c365afaa68c6e4969df6fa1bb09e08bb14befb6167",
-      "rails_unique": 780,
-      "schema_reload_reexecuted_examples": 16,
-      "vue": 300,
+      "sha": "0519ee6499ddbe79a3dc5994fb6a555cdadc2fc1",
+      "run": 44284092413,
+      "artifact": 14421025672,
+      "artifact_sha256": "4b752c36e8642c4b1725941ab378ff7fccae4247eba653b6172e15f14fc645c2",
+      "rails_unique": 968,
+      "vue": 321,
       "chrome": 112,
-      "screenshots_sha256_verified": 140,
+      "screenshots_sha256_verified": 160,
+      "rails_main": 860,
+      "rails_concurrency": 23,
+      "rails_affected_corporate": 85,
+      "schema_reload_reexecuted_examples": 16,
       "zero_failures_pending_skipped_flaky_outside_errors": true,
       "visual_review": {
         "reviewed_files": [
-          "desktop-dark-ivr-builder.png",
-          "desktop-light-ivr-builder.png",
-          "mobile-dark-ivr-builder.png",
-          "mobile-light-ivr-builder.png"
+          "desktop-dark-acw-audit-detail.png",
+          "desktop-dark-team-coverage-denied.png",
+          "desktop-light-acw-audit-detail.png",
+          "desktop-light-team-coverage-denied.png",
+          "mobile-dark-acw-audit-detail.png",
+          "mobile-dark-team-coverage-denied.png",
+          "mobile-light-acw-audit-detail.png",
+          "mobile-light-team-coverage-denied.png"
         ],
-        "desktop_width": 1440,
-        "mobile_width": 390,
-        "light_and_dark": true,
+        "count": 8,
+        "desktop_px": 1440,
+        "mobile_px": 390,
+        "light_dark": true,
         "findings": [
-          "native dialog footer remains visible and contained",
-          "map stacks nodes on mobile; all four captures have readable text and contrasting fields",
-          "editor uses internal scroll on small viewports",
-          "local map is not a full provider graph or PABX publication proof"
+          "Popup de auditoria contido e legível, campos antes/depois e aviso de registro somente local preservados.",
+          "Lista e seletor vazios sem Página 1 de 0, dados removidos após perda da cobertura.",
+          "Capturas completas incluem conteúdo fora do viewport; rolagem interna do popup preservada."
         ],
-        "reviewed_all_140_visually": false
+        "no_word_completion_claim": true
       },
-      "theme_colors_verified": {
-        "desktop-dark-ivr-theme.json": {
-          "synthetic": true,
-          "project": "desktop-dark",
-          "initial_color": "rgba(0, 0, 0, 0.2)",
-          "opposite_color": "rgba(0, 0, 0, 0.04)",
-          "restored_color": "rgba(0, 0, 0, 0.2)",
-          "native_transition_completed": true
-        },
-        "desktop-light-ivr-theme.json": {
-          "synthetic": true,
-          "project": "desktop-light",
-          "initial_color": "rgba(0, 0, 0, 0.04)",
-          "opposite_color": "rgba(0, 0, 0, 0.2)",
-          "restored_color": "rgba(0, 0, 0, 0.04)",
-          "native_transition_completed": true
-        },
-        "mobile-dark-ivr-theme.json": {
-          "synthetic": true,
-          "project": "mobile-dark",
-          "initial_color": "rgba(0, 0, 0, 0.2)",
-          "opposite_color": "rgba(0, 0, 0, 0.04)",
-          "restored_color": "rgba(0, 0, 0, 0.2)",
-          "native_transition_completed": true
-        },
-        "mobile-light-ivr-theme.json": {
-          "synthetic": true,
-          "project": "mobile-light",
-          "initial_color": "rgba(0, 0, 0, 0.04)",
-          "opposite_color": "rgba(0, 0, 0, 0.2)",
-          "restored_color": "rgba(0, 0, 0, 0.04)",
-          "native_transition_completed": true
-        }
-      }
+      "word_part_1_complete": false,
+      "docker_publication_or_deploy": false
     },
     "prepared_security_increment": {
       "adr": "docs/adr/20261118-call-center-current-team-corporate-sources.md",
@@ -2796,6 +2771,21 @@
       "provider_operation": false,
       "optimistic_global_revision": "Pendente nos dois clientes legados",
       "full_word_complete": false
+    },
+    "linked_customer_master_prepared": {
+      "status": "Implementado na cópia temporária; não testado nativamente neste incremento",
+      "figure": 21,
+      "adr": "docs/adr/20261118-call-center-linked-customer-master.md",
+      "native_service_cases_prepared": 5,
+      "vue_prepared": 16,
+      "additional_browser_cases_prepared": 4,
+      "existing_112_browser_cases_preserved": true,
+      "expected_browser_cases": 116,
+      "no_automatic_permission_grants": true,
+      "native_directory_and_popup_reused": true,
+      "legacy_quality_id_correlation": "Pendente de contrato; nenhuma junção por coincidência de ID",
+      "full_figure_or_word_complete": false,
+      "full_page_navigation": "Destino/target/rel preparados para prova; fluxo completo na página independente ainda não homologado"
     }
   }
 }

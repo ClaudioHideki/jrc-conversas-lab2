@@ -161,6 +161,8 @@ session = { access_targets: access_targets, navigation_targets: navigation_targe
             issuer_company_id: company.id, denied_business_unit_id: business_units.last.id }
 require_relative 'jrc_call_center_ivr_seed'
 session[:ivr_targets] = JrcContactCenter::SyntheticIvrSeed.call(projects: access_targets.keys)
+require_relative 'jrc_call_center_customer_master_seed'
+session[:customer_master_targets] = JrcContactCenter::SyntheticCustomerMasterSeed.call(projects: access_targets.keys)
 # Auth material is ephemeral, mode 0600, excluded from uploaded evidence.
 File.write('/tmp/call-center-e2e-session.private', session.to_json, perm: 0o600)
 puts({ account_id: account.id, synthetic: true, provider_configured: false }.to_json)

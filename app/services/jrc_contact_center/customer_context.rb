@@ -66,7 +66,17 @@ class JrcContactCenter::CustomerContext
     return empty_result.merge(status: 'unavailable') unless contact
 
     company = @account.master_companies.find_by(id: contact.company_id) if contact.company_id
-    { contacts: [contact_payload(contact, company)], ambiguous: false, status: 'identified' }
+    { contacts: [contact_payload(contact, company)], ambiguous: false, status: 'identified', directory: directory_link(contact) }
+  end
+
+  # Only an explicit, authorized call/contact link may open the native master.
+  # A matching telephone number never becomes a directory permission.
+  def directory_link(contact)
+    directory = JrcCustomers::ContactDirectory.new(account: @account, actor: @user_context.fetch(:user))
+    record = directory.find(contact.id)
+    { contact_id: record.id.to_s }
+  rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
+    nil
   end
 
   def identity_status(result)

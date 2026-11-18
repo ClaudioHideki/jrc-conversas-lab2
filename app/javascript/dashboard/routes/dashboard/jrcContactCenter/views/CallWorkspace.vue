@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import VisualSectionCard from '../components/visual/VisualSectionCard.vue';
+import LinkedContactMaster from '../components/LinkedContactMaster.vue';
 import VisualStatusBadge from '../components/visual/VisualStatusBadge.vue';
 import { callStateLabels } from '../../inbox/inboxPresentation';
 
@@ -151,6 +152,38 @@ const load = async () => {
     if (version === generation) failed.value = true;
   } finally {
     if (version === generation) busy.value = false;
+  }
+};
+
+let customerRefreshGeneration = 0;
+const refreshCustomer = async () => {
+  const version = generation;
+  customerRefreshGeneration += 1;
+  const refresh = customerRefreshGeneration;
+  const current = () =>
+    version === generation && refresh === customerRefreshGeneration;
+  try {
+    const response = await JrcContactCenterAPI.call(
+      props.accountId,
+      props.callId
+    );
+    if (!current()) return;
+    customer.value = response.data.item.customer;
+    customerStatus.value = customer.value?.status || 'unknown';
+  } catch {
+    if (current()) {
+      customer.value = null;
+      customerStatus.value = 'error';
+    }
+  }
+  if (current()) {
+    call.value = { ...call.value, customer: customer.value };
+    emit('loaded', {
+      call: call.value,
+      customer: customer.value,
+      customerStatus: customerStatus.value,
+      agent: agent.value,
+    });
   }
 };
 
@@ -396,6 +429,21 @@ defineExpose({
           >
             {{ t('JRC_CONTACT_CENTER.CALL.AMBIGUOUS') }}
           </p>
+          <p
+            v-if="customerStatus === 'error'"
+            role="alert"
+            class="mb-3 text-sm text-n-ruby-11"
+          >
+            {{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}
+          </p>
+          <LinkedContactMaster
+            :account-id="accountId"
+            :call="call"
+            :customer="customer"
+            :enabled="canOperate"
+            @updated="refreshCustomer"
+            @closed="refreshCustomer"
+          />
           <div
             v-for="contact in customer?.contacts || []"
             :key="contact.id"

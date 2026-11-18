@@ -57,4 +57,59 @@ RSpec.describe JrcContactCenter::CustomerContext do
     expect(result[:ambiguous]).to be(false)
     expect(result[:contacts]).to contain_exactly(include(id: contact.id.to_s, company: include(id: company.id.to_s, customer_code: 'EMP-000001')))
   end
+
+  context 'with the existing customer master directory' do
+    let(:contact) { create(:contact, account: account, phone_number: phone) }
+    let(:call) do
+      JrcContactCenter::CallSession.create!(account: account, contact: contact, ani: phone, direction: 'inbound', status: 'connected',
+                                            provider: 'synthetic', correlation_id: SecureRandom.uuid, started_at: Time.current)
+    end
+
+    before { account.enable_features!('jrc_contact_center', 'jrc_customer_master', 'custom_roles') }
+
+    it 'offers only the linked identifier authorized by the native directory' do
+      result = described_class.new(account: account, user_context: context).for_call(call)
+      expect(result[:directory]).to eq(contact_id: contact.id.to_s)
+      expect(result[:contacts]).to contain_exactly(include(id: contact.id.to_s))
+      expect(result[:status]).to eq('identified')
+    end
+
+    it 'keeps the prior call context but hides the master entry when that native module is unavailable' do
+      account.disable_features!('jrc_customer_master')
+      result = described_class.new(account: account, user_context: context).for_call(call)
+      expect(result[:status]).to eq('identified')
+      expect(result[:directory]).to be_nil
+      expect(result[:contacts]).to contain_exactly(include(id: contact.id.to_s))
+    end
+
+    it 'never promotes one telephone candidate into a confirmed master link' do
+      contact
+      unlinked = JrcContactCenter::CallSession.new(account: account, ani: phone, direction: 'inbound')
+      result = described_class.new(account: account, user_context: context).for_call(unlinked)
+      expect(result[:status]).to eq('identified')
+      expect(result[:contacts]).to contain_exactly(include(id: contact.id.to_s))
+      expect(result).not_to have_key(:directory)
+    end
+
+    it 'does not convert Call Center configure or operate rights into native contact management rights' do
+      role = create(:custom_role, account: account,
+                                  permissions: %w[jrc_contact_center_view jrc_contact_center_operate jrc_contact_center_configure])
+      context[:account_user].update!(role: :agent, custom_role: role)
+      result = described_class.new(account: account, user_context: context).for_call(call)
+      expect(result[:status]).to eq('identified')
+      expect(result[:directory]).to be_nil
+      expect(result[:contacts]).to contain_exactly(include(id: contact.id.to_s))
+    end
+
+    it 'rechecks native directory permission after a role changes without removing the call history' do
+      role = create(:custom_role, account: account,
+                                  permissions: %w[contact_manage jrc_contact_center_view jrc_contact_center_operate jrc_contact_center_configure])
+      context[:account_user].update!(role: :agent, custom_role: role)
+      service = described_class.new(account: account, user_context: context)
+      expect(service.for_call(call)[:directory]).to eq(contact_id: contact.id.to_s)
+      role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_operate jrc_contact_center_configure])
+      expect(service.for_call(call)[:directory]).to be_nil
+      expect(call.reload.contact_id).to eq(contact.id)
+    end
+  end
 end
