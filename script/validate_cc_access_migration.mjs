@@ -7,7 +7,7 @@ import { validateNewMigrationTimestamps } from './validate_migration_timestamps.
 export const migrationPath = 'db/migrate/20261117190000_add_contact_center_access_grants.rb';
 export const migrationHash = '85fa579036a807b2d50ae3c30af64b061ba9ea6c6ffe173b4e0f33d4ad922dbe';
 export const ivrMigrationPath = 'db/migrate/20261117200000_create_contact_center_ivr_drafts.rb';
-export const ivrMigrationHash = '5463324499ceb16908d3605552339cb4c7370881871ea643174976ac8252257c';
+export const ivrMigrationHash = '67424d8158f78886a716b37998026fabed35edc9cce9c30db07f37524311dc90';
 export const reviewedMigrations = Object.freeze({
   [migrationPath]: migrationHash,
   [ivrMigrationPath]: ivrMigrationHash,

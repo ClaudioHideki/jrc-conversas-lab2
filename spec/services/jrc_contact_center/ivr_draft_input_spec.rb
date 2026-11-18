@@ -8,7 +8,7 @@ RSpec.describe JrcContactCenter::IvrDraftInput do
    { request_id: nil }, { request_id: 'not-an-identity' }, { expected_revision: nil }, { expected_revision: '1' },
    { expected_revision: -1 }, { expected_revision: 1.0 }].each do |invalid|
     it "rejects invalid local revision metadata #{invalid.inspect}" do
-      expect { described_class.new(**values.merge(invalid)) }.to raise_error(JrcContactCenter::OperationError, 'invalid_ivr_revision')
+      expect { described_class.new(**values, **invalid) }.to raise_error(JrcContactCenter::OperationError, 'invalid_ivr_revision')
     end
   end
 

@@ -29,10 +29,10 @@ RSpec.describe JrcContactCenter::IvrDraft do
   it 'captures corporate scope at creation rather than trusting a client-supplied snapshot' do
     company = JrcCustomers::Company.create!(account: account, name: 'SYNTHETIC issuer', relationship_type: 'internal', active: true)
     business_unit = JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'SYNTHETIC business',
-                                                code: 'LOCAL', active: true)
+                                                 code: 'LOCAL', active: true)
     unit.update!(settings: { 'issuer_company_id' => company.id, 'business_unit_id' => business_unit.id })
     expect(draft.scope_snapshot).to include('issuer_company_id' => company.id.to_s,
-                                             'business_unit_id' => business_unit.id.to_s)
+                                            'business_unit_id' => business_unit.id.to_s)
     unit.update!(settings: {})
     expect(draft.reload.scope_snapshot).to include('issuer_company_id' => company.id.to_s, 'business_unit_id' => business_unit.id.to_s)
   end
@@ -40,7 +40,7 @@ RSpec.describe JrcContactCenter::IvrDraft do
   it 'supports a new revision without changing the original and rejects gaps' do
     first = version.attributes
     next_version = JrcContactCenter::IvrDraftVersion.create!(values.merge(ivr_draft: draft, revision: 2,
-                                                                       name: 'SYNTHETIC revised', request_id: SecureRandom.uuid))
+                                                                          name: 'SYNTHETIC revised', request_id: SecureRandom.uuid))
     expect(draft.latest_version).to eq(next_version)
     expect(version.reload.attributes).to eq(first)
     expect do
@@ -68,7 +68,7 @@ RSpec.describe JrcContactCenter::IvrDraft do
     expect do
       JrcContactCenter::IvrDraftVersion.transaction(requires_new: true) do
         JrcContactCenter::IvrDraftVersion.create!(values.merge(ivr_draft: draft, revision: 2, request_id: SecureRandom.uuid,
-                                                              actor_account_user_id: other_member.id, actor_user_id: other.id))
+                                                               actor_account_user_id: other_member.id, actor_user_id: other.id))
       end
     end.to raise_error(ActiveRecord::StatementInvalid)
     expect(draft.versions.count).to eq(1)
@@ -85,8 +85,10 @@ RSpec.describe JrcContactCenter::IvrDraft do
       version
       expect do
         described_class.transaction(requires_new: true) do
-          relation = JrcContactCenter::IvrDraftVersion.where(id: version.id)
-          operation == :update ? relation.update_all(name: 'not authorized') : relation.delete_all
+          connection = described_class.connection
+          table = JrcContactCenter::IvrDraftVersion.table_name
+          command = operation == :update ? "UPDATE #{table} SET name = 'not authorized'" : "DELETE FROM #{table}"
+          connection.execute("#{command} WHERE id = #{connection.quote(version.id)}")
         end
       end.to raise_error(ActiveRecord::StatementInvalid)
       expect(version.reload.name).to eq(values.fetch(:name))
@@ -96,8 +98,10 @@ RSpec.describe JrcContactCenter::IvrDraft do
       draft
       expect do
         described_class.transaction(requires_new: true) do
-          relation = described_class.where(id: draft.id)
-          operation == :update ? relation.update_all(scope_snapshot: {}) : relation.delete_all
+          connection = described_class.connection
+          table = described_class.table_name
+          command = operation == :update ? "UPDATE #{table} SET scope_snapshot = '{}'::jsonb" : "DELETE FROM #{table}"
+          connection.execute("#{command} WHERE id = #{connection.quote(draft.id)}")
         end
       end.to raise_error(ActiveRecord::StatementInvalid)
       expect(draft.reload.unit_id).to eq(unit.id)
@@ -122,9 +126,21 @@ RSpec.describe JrcContactCenter::IvrDraft do
     expect(draft.reload.unit_id).to eq(unit.id)
   end
 
-  it 'allows the native account lifecycle to cascade without orphaning immutable history' do
+  it 'preserves the native restriction against account deletion before its operational units' do
     version
-    account.delete
+    expect do
+      described_class.transaction(requires_new: true) { account.delete }
+    end.to raise_error(ActiveRecord::InvalidForeignKey)
+    expect(draft.reload.unit_id).to eq(unit.id)
+    expect(draft.versions.count).to eq(1)
+  end
+
+  it 'supports atomic unit-before-account retirement without orphaning immutable history' do
+    version
+    described_class.transaction do
+      JrcContactCenter::Unit.where(id: unit.id).delete_all
+      account.delete
+    end
     expect(described_class.where(account_id: account.id)).to be_empty
     expect(JrcContactCenter::IvrDraftVersion.where(account_id: account.id)).to be_empty
   end

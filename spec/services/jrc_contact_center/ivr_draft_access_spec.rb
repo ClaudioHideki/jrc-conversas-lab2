@@ -15,7 +15,7 @@ RSpec.describe JrcContactCenter::IvrDraftAccess do
   end
   let(:unit) do
     JrcContactCenter::Unit.create!(account: account, code: 'LOCAL', name: 'SYNTHETIC operational', kind: 'sac',
-                                  settings: { 'issuer_company_id' => company.id, 'business_unit_id' => business_unit.id })
+                                   settings: { 'issuer_company_id' => company.id, 'business_unit_id' => business_unit.id })
   end
   let(:definition) { { 'schema_version' => 1, 'start' => 'end', 'nodes' => [{ 'id' => 'end', 'type' => 'end' }] } }
   let(:values) { { name: 'SYNTHETIC draft', status: 'draft', definition: definition, request_id: SecureRandom.uuid, expected_revision: 0 } }
@@ -29,8 +29,8 @@ RSpec.describe JrcContactCenter::IvrDraftAccess do
 
   it 'lets an explicitly covered native administrator read a draft only in the current and historical authorized unit' do
     draft
-    JrcCrm::UserBusinessUnit.where(account: account, user: operator).update_all(scope: 'BUSINESS_UNIT', company_id: company.id,
-                                                                             business_unit_id: business_unit.id)
+    JrcCrm::UserBusinessUnit.find_by!(account: account, user: operator).update!(scope: 'BUSINESS_UNIT', company_id: company.id,
+                                                                                business_unit_id: business_unit.id)
     expect(described_class.new(context: context).find!(draft.id)).to eq(draft)
     expect(JrcContactCenter::ModulePolicy.new(context, :contact_center).administer?).to be(false)
   end
@@ -38,8 +38,8 @@ RSpec.describe JrcContactCenter::IvrDraftAccess do
   it 'does not transfer access to old artifacts when an operational unit is remapped into another issuer' do
     draft
     unit.update!(settings: { 'issuer_company_id' => other_company.id, 'business_unit_id' => other_business.id })
-    JrcCrm::UserBusinessUnit.where(account: account, user: operator).update_all(scope: 'BUSINESS_UNIT', company_id: other_company.id,
-                                                                             business_unit_id: other_business.id)
+    JrcCrm::UserBusinessUnit.find_by!(account: account, user: operator).update!(scope: 'BUSINESS_UNIT', company_id: other_company.id,
+                                                                                business_unit_id: other_business.id)
     expect do
       described_class.new(context: context).find!(draft.id)
     end.to raise_error(ActiveRecord::RecordNotFound)
@@ -47,8 +47,8 @@ RSpec.describe JrcContactCenter::IvrDraftAccess do
 
   it 'does not retain access from a historical scope after current unit access is lost' do
     draft
-    JrcCrm::UserBusinessUnit.where(account: account, user: operator).update_all(scope: 'BUSINESS_UNIT', company_id: company.id,
-                                                                             business_unit_id: business_unit.id)
+    JrcCrm::UserBusinessUnit.find_by!(account: account, user: operator).update!(scope: 'BUSINESS_UNIT', company_id: company.id,
+                                                                                business_unit_id: business_unit.id)
     unit.update!(settings: { 'issuer_company_id' => other_company.id, 'business_unit_id' => other_business.id })
     expect { described_class.new(context: context).find!(draft.id) }.to raise_error(ActiveRecord::RecordNotFound)
   end
@@ -66,7 +66,7 @@ RSpec.describe JrcContactCenter::IvrDraftAccess do
     draft
     unit.update!(settings: { 'issuer_company_id' => other_company.id, 'business_unit_id' => other_business.id })
     expect(described_class.new(context: context).find!(draft.id)).to eq(draft)
-    input = JrcContactCenter::IvrDraftInput.new(**values.merge(expected_revision: 1, request_id: SecureRandom.uuid))
+    input = JrcContactCenter::IvrDraftInput.new(**values, expected_revision: 1, request_id: SecureRandom.uuid)
     expect { writer.call(input: input, id: draft.id) }.to raise_error(JrcContactCenter::OperationError, 'ivr_scope_changed')
     expect(draft.versions.count).to eq(1)
   end
@@ -74,7 +74,7 @@ RSpec.describe JrcContactCenter::IvrDraftAccess do
   it 'allows local archival without changing the historical scope after corporate remapping' do
     before = draft.scope_snapshot
     unit.update!(settings: { 'issuer_company_id' => other_company.id, 'business_unit_id' => other_business.id })
-    archive = JrcContactCenter::IvrDraftInput.new(**values.merge(status: 'archived', expected_revision: 1, request_id: SecureRandom.uuid))
+    archive = JrcContactCenter::IvrDraftInput.new(**values, status: 'archived', expected_revision: 1, request_id: SecureRandom.uuid)
     expect(writer.call(input: archive, id: draft.id)[:version].status).to eq('archived')
     expect(draft.reload.scope_snapshot).to eq(before)
   end
@@ -83,7 +83,7 @@ RSpec.describe JrcContactCenter::IvrDraftAccess do
     draft
     unit.update!(status: 'inactive')
     expect(described_class.new(context: context).find!(draft.id)).to eq(draft)
-    input = JrcContactCenter::IvrDraftInput.new(**values.merge(expected_revision: 1, request_id: SecureRandom.uuid))
+    input = JrcContactCenter::IvrDraftInput.new(**values, expected_revision: 1, request_id: SecureRandom.uuid)
     expect { writer.call(input: input, id: draft.id) }.to raise_error(ActiveRecord::RecordNotFound)
   end
 

@@ -2379,7 +2379,7 @@
     "local_ivr_ledger_prepared": {
       "status": "implemented_pending_native_validation",
       "migration": "20261117200000",
-      "migration_sha256": "5463324499ceb16908d3605552339cb4c7370881871ea643174976ac8252257c",
+      "migration_sha256": "67424d8158f78886a716b37998026fabed35edc9cce9c30db07f37524311dc90",
       "automatic_grants": false,
       "historical_migrations_changed": false,
       "pending": [
@@ -2388,7 +2388,18 @@
         "HTTP concurrency/API/pagination",
         "editor/import/export and Chrome",
         "provider contract and publication"
-      ]
+      ],
+      "first_native_result": {
+        "sha": "207bc523a46c105748109d621291cd12faaaafaf",
+        "run": 44216984172,
+        "artifact_id": 14389685755,
+        "artifact_sha256": "82738cf728851b5622cbb18b92904da89eda5eaba3164457f72f5c66d496a788",
+        "schema_reload_examples": 15,
+        "schema_reload_failures": 1,
+        "cause": "Existing Unit account FK blocks premature Account deletion; protection preserved",
+        "lint": "failed; corrections prepared without suppression",
+        "native_service_specs": "not executed because schema gate failed"
+      }
     }
   },
   "resolved_decisions_20261117": [

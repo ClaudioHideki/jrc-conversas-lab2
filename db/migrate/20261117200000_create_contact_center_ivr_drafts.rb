@@ -29,7 +29,7 @@ class CreateContactCenterIvrDrafts < ActiveRecord::Migration[7.1]
     add_index DRAFTS, [:account_id, :unit_id, :id], name: 'cc_ivr_draft_unit_list'
     add_index :jrc_contact_center_units, [:id, :account_id], unique: true, name: 'cc_ivr_unit_account_key', if_not_exists: true
     add_foreign_key DRAFTS, :jrc_contact_center_units, column: [:unit_id, :account_id], primary_key: [:id, :account_id],
-                                                   deferrable: :deferred, name: 'cc_ivr_draft_unit_account_fk'
+                                                       deferrable: :deferred, name: 'cc_ivr_draft_unit_account_fk'
     add_check_constraint DRAFTS, "jsonb_typeof(scope_snapshot) = 'object'", name: 'cc_ivr_draft_scope_object'
   end
 
@@ -52,7 +52,7 @@ class CreateContactCenterIvrDrafts < ActiveRecord::Migration[7.1]
     add_index VERSIONS, [:account_id, :ivr_draft_id, :revision], unique: true, name: 'cc_ivr_revision_key'
     add_index VERSIONS, [:account_id, :request_id], unique: true, name: 'cc_ivr_request_key'
     add_foreign_key VERSIONS, DRAFTS, column: [:ivr_draft_id, :account_id], primary_key: [:id, :account_id],
-                                    on_delete: :cascade, name: 'cc_ivr_version_account_fk'
+                                      on_delete: :cascade, name: 'cc_ivr_version_account_fk'
     add_check_constraint VERSIONS, "revision > 0 AND btrim(name) <> '' AND status IN ('draft', 'archived')", name: 'cc_ivr_version_state'
     add_check_constraint VERSIONS, "jsonb_typeof(definition) = 'object' AND octet_length(definition::text) <= 1048576",
                          name: 'cc_ivr_definition_object'
@@ -66,7 +66,7 @@ class CreateContactCenterIvrDrafts < ActiveRecord::Migration[7.1]
   end
 
   def draft_guard_sql
-    <<~SQL
+    <<~SQL.squish
       CREATE FUNCTION cc_ivr_draft_guard() RETURNS trigger LANGUAGE plpgsql AS $guard$
       DECLARE source_unit record;
       BEGIN
@@ -85,7 +85,7 @@ class CreateContactCenterIvrDrafts < ActiveRecord::Migration[7.1]
   end
 
   def version_guard_sql
-    <<~SQL
+    <<~SQL.squish
       CREATE FUNCTION cc_ivr_version_guard() RETURNS trigger LANGUAGE plpgsql AS $guard$
       DECLARE last_revision integer;
       BEGIN
@@ -110,7 +110,7 @@ class CreateContactCenterIvrDrafts < ActiveRecord::Migration[7.1]
   end
 
   def first_version_sql
-    <<~SQL
+    <<~SQL.squish
       CREATE FUNCTION cc_ivr_first_version_guard() RETURNS trigger LANGUAGE plpgsql AS $guard$
       BEGIN
         IF EXISTS (SELECT 1 FROM jrc_contact_center_ivr_drafts WHERE id = NEW.id)

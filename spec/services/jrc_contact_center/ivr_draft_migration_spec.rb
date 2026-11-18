@@ -34,8 +34,8 @@ RSpec.describe 'Local IVR ledger populated upgrade', type: :model do
     draft = JrcContactCenter::IvrDraft.transaction do
       row = JrcContactCenter::IvrDraft.create!(account: account, unit: unit, scope_snapshot: {})
       JrcContactCenter::IvrDraftVersion.create!(account: account, ivr_draft: row, revision: 1, name: 'SYNTHETIC existing',
-                                               status: 'draft', definition: definition, request_id: SecureRandom.uuid,
-                                               actor_account_user_id: member.id, actor_user_id: operator.id)
+                                                status: 'draft', definition: definition, request_id: SecureRandom.uuid,
+                                                actor_account_user_id: member.id, actor_user_id: operator.id)
       row.reload
     end
     JrcContactCenter::AccessGrant.find_by!(account_user: member).update!(eligible: false)
@@ -48,7 +48,7 @@ RSpec.describe 'Local IVR ledger populated upgrade', type: :model do
   end
 
   it 'blocks reexecution if a required SQL guard is missing rather than silently repairing an unknown schema' do
-    ActiveRecord::Base.connection.execute(<<~SQL)
+    ActiveRecord::Base.connection.execute(<<~SQL.squish)
       ALTER TRIGGER cc_ivr_version_guard ON jrc_contact_center_ivr_draft_versions RENAME TO unexpected_guard
     SQL
     expect { migration.up }.to raise_error(ActiveRecord::MigrationError, 'Unexpected IVR ledger schema; review before reexecution')

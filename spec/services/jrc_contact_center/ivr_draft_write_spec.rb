@@ -18,6 +18,10 @@ RSpec.describe JrcContactCenter::IvrDraftWrite do
     expect(result).to include(replayed: false, latest_revision: 1)
     expect(result[:version].definition).to eq(definition)
     expect(result[:version].integrity_sha256).to match(/\A[0-9a-f]{64}\z/)
+  end
+
+  it 'records the authenticated actor and scope without private graph or name in the native audit' do
+    result = writer.call(input: input, unit_id: unit.id)
     audit = Audited.audit_class.find_by!(auditable: result[:version])
     expect(audit.user).to eq(operator)
     expect(audit.associated).to eq(account)
@@ -29,7 +33,7 @@ RSpec.describe JrcContactCenter::IvrDraftWrite do
 
   it 'appends changes while preserving the earlier revision' do
     original = writer.call(input: input, unit_id: unit.id)
-    updated = JrcContactCenter::IvrDraftInput.new(**values.merge(name: 'SYNTHETIC revised', expected_revision: 1, request_id: SecureRandom.uuid))
+    updated = JrcContactCenter::IvrDraftInput.new(**values, name: 'SYNTHETIC revised', expected_revision: 1, request_id: SecureRandom.uuid)
     result = writer.call(input: updated, id: original[:draft].id)
     expect(result[:version].revision).to eq(2)
     expect(original[:version].reload.name).to eq('SYNTHETIC local draft')
@@ -46,7 +50,7 @@ RSpec.describe JrcContactCenter::IvrDraftWrite do
 
   it 'rejects reuse of a request identity for different data' do
     original = writer.call(input: input, unit_id: unit.id)
-    changed = JrcContactCenter::IvrDraftInput.new(**values.merge(name: 'SYNTHETIC different'))
+    changed = JrcContactCenter::IvrDraftInput.new(**values, name: 'SYNTHETIC different')
     expect { writer.call(input: changed, unit_id: unit.id) }.to raise_error(JrcContactCenter::OperationError, 'stale_ivr_revision')
     expect(original[:draft].versions.count).to eq(1)
   end
@@ -62,16 +66,16 @@ RSpec.describe JrcContactCenter::IvrDraftWrite do
 
   it 'rejects an update whose revision no longer matches without overwriting the accepted version' do
     original = writer.call(input: input, unit_id: unit.id)
-    stale = JrcContactCenter::IvrDraftInput.new(**values.merge(request_id: SecureRandom.uuid))
+    stale = JrcContactCenter::IvrDraftInput.new(**values, request_id: SecureRandom.uuid)
     expect { writer.call(input: stale, id: original[:draft].id) }.to raise_error(JrcContactCenter::OperationError, 'stale_ivr_revision')
     expect(original[:draft].versions.count).to eq(1)
   end
 
   it 'distinguishes an idempotent update receipt from a newer current head' do
     original = writer.call(input: input, unit_id: unit.id)
-    second = JrcContactCenter::IvrDraftInput.new(**values.merge(expected_revision: 1, name: 'SYNTHETIC second', request_id: SecureRandom.uuid))
+    second = JrcContactCenter::IvrDraftInput.new(**values, expected_revision: 1, name: 'SYNTHETIC second', request_id: SecureRandom.uuid)
     writer.call(input: second, id: original[:draft].id)
-    third = JrcContactCenter::IvrDraftInput.new(**values.merge(expected_revision: 2, name: 'SYNTHETIC third', request_id: SecureRandom.uuid))
+    third = JrcContactCenter::IvrDraftInput.new(**values, expected_revision: 2, name: 'SYNTHETIC third', request_id: SecureRandom.uuid)
     writer.call(input: third, id: original[:draft].id)
     replay = writer.call(input: second, id: original[:draft].id)
     expect(replay).to include(replayed: true, latest_revision: 3)
@@ -128,19 +132,19 @@ RSpec.describe JrcContactCenter::IvrDraftWrite do
                             'nodes' => [{ 'id' => 'route', 'type' => 'queue', 'queue_id' => queue.id.to_s }] }
     original = writer.call(input: input, unit_id: unit.id)
     queue.update!(status: 'inactive')
-    archive = JrcContactCenter::IvrDraftInput.new(**values.merge(status: 'archived', expected_revision: 1, request_id: SecureRandom.uuid))
+    archive = JrcContactCenter::IvrDraftInput.new(**values, status: 'archived', expected_revision: 1, request_id: SecureRandom.uuid)
     result = writer.call(input: archive, id: original[:draft].id)
     expect(result[:version].status).to eq('archived')
     expect(result[:version].definition).to eq(original[:version].definition)
-    restore = JrcContactCenter::IvrDraftInput.new(**values.merge(expected_revision: 2, request_id: SecureRandom.uuid))
+    restore = JrcContactCenter::IvrDraftInput.new(**values, expected_revision: 2, request_id: SecureRandom.uuid)
     expect { writer.call(input: restore, id: original[:draft].id) }.to raise_error(JrcContactCenter::OperationError, 'ivr_unavailable_queue')
     expect(original[:draft].latest_version.status).to eq('archived')
   end
 
   it 'does not use archival to bypass definition validation or rewrite content' do
     original = writer.call(input: input, unit_id: unit.id)
-    archive = JrcContactCenter::IvrDraftInput.new(**values.merge(status: 'archived', name: 'SYNTHETIC changed',
-                                                              expected_revision: 1, request_id: SecureRandom.uuid))
+    archive = JrcContactCenter::IvrDraftInput.new(**values, status: 'archived', name: 'SYNTHETIC changed',
+                                                            expected_revision: 1, request_id: SecureRandom.uuid)
     expect do
       writer.call(input: archive, id: original[:draft].id)
     end.to raise_error(JrcContactCenter::OperationError, 'ivr_archive_requires_unchanged_definition')
