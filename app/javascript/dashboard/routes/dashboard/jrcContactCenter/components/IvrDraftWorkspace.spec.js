@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import API from 'dashboard/api/jrcContactCenter';
@@ -8,6 +8,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: { ivrDrafts: vi.fn() },
 }));
 enableAutoUnmount(afterEach);
+beforeEach(() => vi.clearAllMocks());
 
 describe('native IVR list URL history', () => {
   it('returns to the filtered first page through real router history after opening page two', async () => {
@@ -70,5 +71,39 @@ describe('native IVR list URL history', () => {
       q: 'SYNTHETIC',
       page: 1,
     });
+  });
+  it('keeps the real zero total and disables page navigation when there are no results', async () => {
+    API.ivrDrafts.mockResolvedValueOnce({
+      data: { items: [], meta: { total: 0, page: 1, pages: 0, per_page: 20 } },
+    });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        {
+          path: '/app/accounts/:accountId/contact-center/ura',
+          component: IvrDraftWorkspace,
+        },
+      ],
+    });
+    await router.push('/app/accounts/1/contact-center/ura');
+    await router.isReady();
+    const wrapper = mount(IvrDraftWorkspace, {
+      props: { accountId: '1' },
+      global: {
+        plugins: [router],
+        stubs: { IvrReferencePicker: true, IvrDraftEditor: true },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.findAll('[data-ivr-draft]')).toHaveLength(0);
+    expect(wrapper.get('[data-ivr-total]').text()).toContain('0');
+    expect(wrapper.find('[data-ivr-page-count]').exists()).toBe(false);
+    expect(
+      wrapper
+        .get('[data-ivr-pagination]')
+        .findAll('button')
+        .every(button => button.element.disabled)
+    ).toBe(true);
+    expect(API.ivrDrafts).toHaveBeenCalledOnce();
   });
 });

@@ -701,7 +701,8 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
     'display',
     'grid'
   );
-  await expect(page.locator('[data-control-desk] header')).not.toHaveCSS(
+  await expect(page.locator('[data-control-desk] > header')).toHaveCount(1);
+  await expect(page.locator('[data-control-desk] > header')).not.toHaveCSS(
     'background-color',
     'rgba(0, 0, 0, 0)'
   );
@@ -2562,6 +2563,14 @@ test('local IVR scoped records and forced URLs obey corporate coverage and fresh
       data: { user_ids: [target.scoped_user_id] },
     });
     expect(reactivation.status()).toBe(401);
+    await expect(page.locator('[data-ivr-page-count]')).toHaveCount(0);
+    await expect(page.locator('[data-ivr-reference-page-count]')).toHaveCount(
+      0
+    );
+    await expect(page.locator('[data-ivr-total]')).toContainText('Total 0');
+    await expect(page.getByText('Página 1 de 0', { exact: false })).toHaveCount(
+      0
+    );
     await page.screenshot({
       path: `.codex/call-center-native-e2e/${info.project.name}-team-coverage-denied.png`,
       fullPage: true,

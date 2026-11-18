@@ -63,3 +63,9 @@ As nove advertências novas de internacionalização foram resolvidas no compone
 com chaves estáticas e interpolação, sem desativar regras. Componente e seus
 15 testes preparados têm zero erros/avisos de lint. ControlDeskPage mantém
 os mesmos cinco avisos preexistentes da base, sem apontamentos novos.
+
+## QA subsequente — 18/11/2026
+
+O SHA 699f2c7b aprovou 958 Rails únicos, 16 reexecuções de recarga e 315 Vue. Os 112 Chrome foram executados: 108 passaram; quatro encontraram dois cabeçalhos na verificação de CSS da Central. O seletor passa a exigir o único cabeçalho filho direto, mantendo a verificação de fundo real. Não atribuir aprovação integral a esse SHA.
+
+A revisão das capturas de ac85d6eb encontrou página 1 de 0 em estados sem registros. A correção conserva o total real, omite a paginação inexistente, limpa páginas antigas ao carregar referências e diferencia vazio de erro e de unidade ainda não selecionada. Dois testes Vue novos e os quatro cenários reais de retirada de equipe verificam a ausência da página impossível; novo gate obrigatório. Nenhuma autorização ou contrato de paginação da API foi alterado.

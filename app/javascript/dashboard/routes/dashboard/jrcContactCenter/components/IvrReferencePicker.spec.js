@@ -71,6 +71,27 @@ describe('native scoped IVR references', () => {
     });
   });
 
+  it('shows a genuinely empty reference result without an impossible page count or enabled navigation', async () => {
+    API.units.mockResolvedValueOnce({
+      data: { items: [], meta: { pages: 0 } },
+    });
+    const wrapper = mountPicker();
+    await flushPromises();
+    expect(wrapper.find('[data-ivr-reference-page-count]').exists()).toBe(
+      false
+    );
+    expect(wrapper.get('[data-ivr-reference-empty]').text()).toBe(
+      messages.JRC_CONTACT_CENTER.COMMON.EMPTY
+    );
+    ['Anterior', 'Próxima'].forEach(label => {
+      expect(
+        wrapper.findAll('button').find(button => button.text() === label)
+          .element.disabled
+      ).toBe(true);
+    });
+    expect(API.units).toHaveBeenCalledOnce();
+  });
+
   it('loads an authorized selected reference outside the current page and keeps locked identity readable', async () => {
     API.ivrReference.mockResolvedValueOnce({
       data: {
@@ -164,6 +185,10 @@ describe('native scoped IVR references', () => {
     await flushPromises();
     expect(wrapper.find('option[value="7"]').exists()).toBe(false);
     expect(wrapper.get('select').element.disabled).toBe(true);
+    expect(wrapper.find('[data-ivr-reference-page-count]').exists()).toBe(
+      false
+    );
+    expect(wrapper.find('[data-ivr-reference-empty]').exists()).toBe(false);
   });
 
   it('does not retain a loading spinner or make an unscoped query when the selected queue unit is cleared', async () => {
@@ -187,5 +212,6 @@ describe('native scoped IVR references', () => {
     expect(wrapper.get('select').element.disabled).toBe(true);
     expect(API.queues).toHaveBeenCalledOnce();
     expect(wrapper.find('[role=status]').exists()).toBe(false);
+    expect(wrapper.find('[data-ivr-reference-empty]').exists()).toBe(false);
   });
 });

@@ -34,6 +34,7 @@ const load = async () => {
   loading.value = true;
   failed.value = false;
   items.value = [];
+  pages.value = 0;
   try {
     const params = {
       page: page.value,
@@ -206,12 +207,20 @@ onBeforeUnmount(() => {
       <button
         type="button"
         class="rounded-lg border border-n-weak px-2 py-1"
-        :disabled="loading || page <= 1"
+        :disabled="loading || pages < 1 || page <= 1"
         @click="move(-1)"
       >
         {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.PREVIOUS') }}
       </button>
-      <span>{{ t('JRC_CONTACT_CENTER.LOCAL_IVR.PAGE', { page, pages }) }}</span>
+      <span v-if="pages > 0" data-ivr-reference-page-count>
+        {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.PAGE', { page, pages }) }}
+      </span>
+      <span
+        v-else-if="!loading && !failed && (resource !== 'queues' || unitId)"
+        data-ivr-reference-empty
+      >
+        {{ t('JRC_CONTACT_CENTER.COMMON.EMPTY') }}
+      </span>
       <button
         type="button"
         class="rounded-lg border border-n-weak px-2 py-1"

@@ -249,13 +249,15 @@ onBeforeUnmount(() => {
         class="flex flex-wrap items-center gap-2 text-sm text-n-slate-12"
         data-ivr-pagination
       >
-        <span
-          >{{ t('JRC_CONTACT_CENTER.ADMIN.TOTAL') }} {{ meta.total }} ·
-          {{ text('PAGE', { page: meta.page, pages: meta.pages }) }}</span
+        <span data-ivr-total
+          >{{ t('JRC_CONTACT_CENTER.ADMIN.TOTAL') }} {{ meta.total }}</span
         >
+        <span v-if="meta.pages > 0" data-ivr-page-count>
+          {{ text('PAGE', { page: meta.page, pages: meta.pages }) }}
+        </span>
         <button
           type="button"
-          :disabled="listBusy || meta.page <= 1"
+          :disabled="listBusy || meta.pages < 1 || meta.page <= 1"
           class="rounded-lg border border-n-weak px-3 py-2"
           @click="page(meta.page - 1)"
         >
