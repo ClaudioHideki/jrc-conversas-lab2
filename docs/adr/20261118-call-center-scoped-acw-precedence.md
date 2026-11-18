@@ -29,3 +29,7 @@ CI44398189820 confirmou os 1.026 exemplos Rails principais e 16 recargas de sche
 ## Revisão Chrome517549ef
 
 CI44401274599 comprovou1.175 exemplos Rails distintos (1.026 principais,64 concorrentes,85 corporativos),16 recargas,415Vue e zero novas infrações Ruby. Os140 cenários Chrome anteriores passaram. Os quatro novos chegaram até o histórico, que corretamente rejeitou422 porque a URL do teste omitia resource_id. O teste passa a enviar oID da própria conta sintética, sem alterar o validador nem reduzir o aceite. As capturas efetivamente revisadas revelaram o botão de adicionar regra com texto preto no escuro; corrigida apenas sua cor semântica e acrescentada verificação da cor computada nos quatro projetos. NovaCI exige144/144 antes do aceite. Não houve publicaçãoPABX,imagem ou deploy.
+
+## Aceite incremental a16e8a49
+
+CI44409349600 aprovada:1.175 Rails distintos,16 reexecuções na recarga,415Vue,144Chrome,zero falhas/pendências/erros e zero novas infrações Ruby. Artefato14479548124 / eb514563dfeeefdc48c9a5c3231829986c8963467fe2eb488adc615876d35b3b recuperado;208 hashes de capturas verificados. DoisPNG efetivamente revisados confirmam popup contido e botão legível; as quatro provas computadas de cor registram715 no escuro e96 no claro. Este é o aceite do motor/popup descritos acima, não da figura9 integral nem de qualquer alteração posterior.

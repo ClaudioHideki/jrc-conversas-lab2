@@ -410,7 +410,7 @@
     {
       "figure": 7,
       "title": "Pausas e disponibilidade",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         6
       ],
@@ -419,16 +419,15 @@
         "Incremento posterior de etapa6: catálogo local HH:MM, revisão, escopos e ativação explícita; compatibilidade legada preservada. Backend/Vue próprios validados em c4622175; layout/Chrome ainda pendentes. Privacidade adicional está na candidata d3e2179b, ainda em CI."
       ],
       "remaining_or_external": [
-        "Regras avançadas de justificativa, aprovação e variabilidade; transição segura durante chamada e precedências operacionais ainda pendentes.",
-        "Tempos são informativos, sem encerramento automático. Nenhuma publicação ou confirmação PABX foi homologada.",
-        "Concluir os cenários Chrome136 e revisar capturas do SHA candidato; CIc4622175 não chegou aos assets/Chrome."
+        "Aprovação de pausa, variabilidade avançada, transição segura com chamada e precedências operacionais completas continuam pendentes.",
+        "Nenhum encerramento automático de pausa, retorno à distribuição ou ACK PABX foi homologado. Ativação do catálogo continua explícita por conta."
       ],
       "code_references": [],
       "reference": {
         "document_1_figure": 7,
         "document_2_figure": 7
       },
-      "validation": "2bbcab4c / CI44359221023:1093 Rails únicos,16 recargas,387Vue,136Chrome e200 capturas com hashes verificados. Catálogo básico e retirada direta com revisão do gestor validados. Figura completa permanece parcial; incremento posterior de justificativa ainda exige CI própria.",
+      "validation": "a16e8a49/CI44409349600:1175 Rails distintos,16 recargas,415Vue,144Chrome; zero falhas/pendências/erros. Os fluxos de pausa/justificativa/aviso anteriores permanecem aprovados. Não equivale às regras avançadas completas da figura.",
       "objective": "Gestao de pausas e disponibilidade",
       "visual_components": "Campos e dados apresentados:  Listar nome, categoria, se retira da distribuicao, tempo padrao e status. Estados exibidos: disponivel, em atendimento, em pausa e offline; indicadores de disponibilidade devem vir de eventos reais, nao de contagem fixa do mockup.",
       "buttons_and_actions": "Acoes e resultado do clique:  Abas Motivos de Pausa, Regras de Distribuicao, Disponibilidade da Equipe e Historico: consultar configuracoes e estados. Novo Motivo: abrir popup. Busca e edicao de linha: localizar/alterar configuracao com auditoria. A aba de equipe mostra agente, estado, tempo decorrido e eventual pausa excedida; selecao de agente abre detalhes quando permitido.",
@@ -461,7 +460,7 @@
     {
       "figure": 8,
       "title": "Cadastro de motivo de pausa",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         6
       ],
@@ -469,16 +468,15 @@
         "Incremento posterior de etapa6: catálogo local HH:MM, revisão, escopos e ativação explícita; compatibilidade legada preservada. Backend/Vue próprios validados em c4622175; layout/Chrome ainda pendentes. Privacidade adicional está na candidata d3e2179b, ainda em CI."
       ],
       "remaining_or_external": [
-        "Regras avançadas de justificativa, aprovação e variabilidade; transição segura durante chamada e precedências operacionais ainda pendentes.",
-        "Tempos são informativos, sem encerramento automático. Nenhuma publicação ou confirmação PABX foi homologada.",
-        "Concluir os cenários Chrome136 e revisar capturas do SHA candidato; CIc4622175 não chegou aos assets/Chrome."
+        "Aprovação de pausa, variabilidade avançada, transição segura com chamada e precedências operacionais completas continuam pendentes.",
+        "Nenhum encerramento automático de pausa, retorno à distribuição ou ACK PABX foi homologado. Ativação do catálogo continua explícita por conta."
       ],
       "code_references": [],
       "reference": {
         "document_1_figure": 8,
         "document_2_figure": 8
       },
-      "validation": "2bbcab4c / CI44359221023:1093 Rails únicos,16 recargas,387Vue,136Chrome e200 capturas com hashes verificados. Catálogo básico e retirada direta com revisão do gestor validados. Figura completa permanece parcial; incremento posterior de justificativa ainda exige CI própria.",
+      "validation": "a16e8a49/CI44409349600:1175 Rails distintos,16 recargas,415Vue,144Chrome; zero falhas/pendências/erros. Os fluxos de pausa/justificativa/aviso anteriores permanecem aprovados. Não equivale às regras avançadas completas da figura.",
       "objective": "Popup Cadastrar Motivo de Pausa",
       "visual_components": "Campos e dados apresentados:  Salvar identidade, descricao, categoria, tempo em minutos internamente, limites, regra de retirada, justificativa/aprovacao/alerta quando aplicaveis, status e escopo da empresa. Diferenciar limite informativo de regra que efetivamente bloqueia cadastro.",
       "buttons_and_actions": "Acoes e resultado do clique:  Nome, Tipo/Categoria e Descricao: cadastrar a finalidade da pausa. Tempo Padrao, Minimo e Maximo: preencher em horas/minutos; se um desses campos nao estiver no mockup, deve ser incluido no formulario final ou em aba complementar. Retirar da distribuicao: controlar elegibilidade de chamadas novas. Disponivel para: definir perfis habilitados. Salvar Motivo e Cancelar: validar/persistir ou abandonar sem gravar.",
@@ -521,7 +519,9 @@
         "Native account/channel ACW popup in HH:MM; required voice flag, validation and persistence"
       ],
       "remaining_or_external": [
-        "Per-reason/queue/team templates and precedence remain stage 6; native 1..3600 second engine unchanged"
+        "Seleção intermediária/persistência do motivo e prévia do relógio por motivo permanecem pendentes; a regra é aplicada na conclusão usando o snapshot de origem.",
+        "Formulários vinculados, exigências e automações por destino continuam pendentes.",
+        "Não representa publicação ou confirmação PABX."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -531,7 +531,7 @@
         "document_1_figure": 9,
         "document_2_figure": 9
       },
-      "validation": "7c4e408c / CI 44302097163: 984 Rails únicos, 350 Vue e 120 Chrome aprovados. Revisão/rascunho ACW e contato nativo persistido validados incrementalmente. Capturas revelaram overflow interno móvel e contraste do título; correções e geometria real pendentes da nova CI. Não é conclusão integral da figura.",
+      "validation": "Motor e popup de precedência fila→equipe→geral, bloqueio de conflitos, snapshots históricos, revisão, persistência e auditoria aprovados em a16e8a49/CI44409349600.415Vue e144Chrome,208 capturas com hash verificado. Não inclui as lacunas abaixo.",
       "objective": "Popup Configurar Regra de Pos-Atendimento",
       "visual_components": "Campos e dados apresentados:  Associar motivo, versao da regra, formularios, campos, publico aplicavel e eventos operacionais. Registrar inicio/fim do ACW de modo independente do encerramento da chamada, por call_id e agente.",
       "buttons_and_actions": "Acoes e resultado do clique:  Motivo de Encerramento: escolher classificacao existente. Tempo de Pos-Atendimento: configurar horas/minutos. Formulario: selecionar template reutilizavel e Gerenciar Formularios na fonte. Campos Obrigatorios: marcar os dados exigidos. Comportamento do Agente: bloquear chamadas, emitir alertas ou permitir excecao conforme politica. Aplicar para: todas, filas especificas ou equipes especificas. Salvar Regra: validar impacto.",
@@ -702,9 +702,8 @@
         "Cobertura corporativa reutiliza JrcCrm::TeamScope/UserBusinessUnit com fontes vivas, conta e destinatário validados; há evidências incrementais até 5e12db0a. A decisão de negócio sobre o último agente foi recebida, não está mais aguardando resposta."
       ],
       "remaining_or_external": [
-        "Supervisor principal, hierarquia equipe/fila e status operacional próprio continuam sem conclusão; não duplicar Team ou cobertura corporativa.",
-        "Validação definida pelo usuário: confirmação do gestor com revisão e auditoria. Caminho nativo QueueMembership está implementado em d3e2179b, aguardando testes próprios; retirada indireta via equipe continua pendente.",
-        "Disponibilidade e capacidades/ACK PABX continuam dependentes do contrato/homologação externos."
+        "Confirmação direta do último participante tem aceite98c9d617 e140Chrome; a retirada indireta por equipe, supervisor principal/hierarquia e status operacional próprio continuam pendentes.",
+        "Disponibilidade e capacidades/ACK PABX dependem do contrato externo. Nenhum vínculo de outros módulos foi removido."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -3278,5 +3277,99 @@
     "candidate_accepted": false,
     "next_sha_native_validation": "required",
     "all23_complete": false
+  },
+  "local_routing_increment_20261118": {
+    "status": "prepared in temporary overlay; not committed or natively validated",
+    "native_model": "JrcContactCenter::RoutingRule",
+    "new_registry": false,
+    "existing_card": "distribution",
+    "changes": [
+      "fresh Account-locked configure authority and native organizational scope",
+      "native revision and bounded filters/pagination/detail",
+      "atomic mandatory native audit with current and historical scope",
+      "local draft popup using native reference selectors and revision review",
+      "preserve queue-only targets and opaque conditions/windows during common edits"
+    ],
+    "acceptance_prepared": {
+      "chrome_required": 148,
+      "previous_cases_preserved": 144,
+      "new_cases": 4,
+      "projects": [
+        "desktop-light",
+        "desktop-dark",
+        "mobile-light",
+        "mobile-dark"
+      ]
+    },
+    "not_proved": [
+      "provider routing simulation/application/ACK",
+      "institutional telephone number registry",
+      "advanced conditions/windows editor",
+      "complete Word figure3 hierarchy/calendar/DAC"
+    ],
+    "image_build_deploy": false,
+    "complete_figure": false
+  },
+  "qa_a16e8a49_20261118": {
+    "sha": "a16e8a49b254826e57473d3e25b61ed0c16f2e20",
+    "run": 44409349600,
+    "artifact": 14479548124,
+    "artifact_sha256": "eb514563dfeeefdc48c9a5c3231829986c8963467fe2eb488adc615876d35b3b",
+    "rails_unique_verified": 1175,
+    "vue": {
+      "numTotalTests": 415,
+      "numPassedTests": 415,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "chrome": {
+      "startTime": "2026-11-18T22:47:33.503Z",
+      "duration": 461147.91500000004,
+      "expected": 144,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "screenshots_verified": 208,
+    "new_ruby_offenses": 0,
+    "theme_probes": [
+      {
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-acw-rule-theme.json",
+        "data": {
+          "color": "rgb(237, 238, 240)",
+          "brightness": 715
+        }
+      },
+      {
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-acw-rule-theme.json",
+        "data": {
+          "color": "rgb(28, 32, 36)",
+          "brightness": 96
+        }
+      },
+      {
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-acw-rule-theme.json",
+        "data": {
+          "color": "rgb(237, 238, 240)",
+          "brightness": 715
+        }
+      },
+      {
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-acw-rule-theme.json",
+        "data": {
+          "color": "rgb(28, 32, 36)",
+          "brightness": 96
+        }
+      }
+    ],
+    "result": "success",
+    "schema_reload_reexecutions": 16,
+    "representative_visual_review": {
+      "mobile-dark-acw-scoped-rules.png": "2c76e46bb1682d85c947b1f71a95fd3789676657f4f2db80e43957c07266ca34",
+      "desktop-light-acw-scoped-rules.png": "51ddf551790c6dc547d8a8b0ec0d89e25d1f6263ff42af79826fdc1517168d85"
+    },
+    "visual_result": "Actual mobile-dark and desktop-light ACW popup reviewed. Add-rule contrast corrected; four computed-color probes: dark715/light96. Contained dialog and persistence/conflict/denial/audit passed in all four projects.",
+    "all23_complete": false,
+    "later_routing_inherits_this_approval": false
   }
 }

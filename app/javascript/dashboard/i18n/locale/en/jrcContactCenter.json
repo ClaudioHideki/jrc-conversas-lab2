@@ -2158,6 +2158,27 @@
       "EXACT_SECONDS": "Limite preservado: {seconds} segundos. Preencha o horário apenas para alterá-lo.",
       "CONFLICT": "Há regras de ACW conflitantes no mesmo nível. Revise os motivos, filas e equipes.",
       "INVALID": "Revise os campos e os tempos das regras de ACW."
+    },
+    "ROUTING_DRAFTS": {
+      "RESOURCE": "Regra local de roteamento",
+      "RULE_KEY": "Identificador da regra",
+      "SOURCE": "Origem de roteamento",
+      "TARGET_UNIT": "Unidade de destino",
+      "TARGET_QUEUE": "Fila de destino",
+      "DDD": "DDD",
+      "CUSTOMER": "Cliente",
+      "PORTFOLIO": "Carteira",
+      "SERVICE": "Serviço",
+      "FALLBACK": "Alternativa",
+      "RETIRED": "Inativa localmente",
+      "PUBLISHED_HISTORY": "Publicada (histórico)",
+      "TITLE": "Rascunhos de roteamento",
+      "CREATE": "Novo rascunho",
+      "EDIT": "Revisar regra local",
+      "LOCAL_ONLY": "Configuração local. Salvar este rascunho não publica no PABX nem confirma alteração na distribuição de chamadas. A aplicação externa depende do contrato homologado.",
+      "NO_QUEUE": "Sem fila específica",
+      "TARGET_REQUIRED": "Selecione uma unidade ou fila de destino autorizada.",
+      "SAVE_ERROR": "Não foi possível salvar. Confira os dados e os vínculos autorizados; o rascunho foi preservado."
     }
   }
 }

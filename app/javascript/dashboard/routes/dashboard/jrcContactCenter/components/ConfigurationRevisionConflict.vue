@@ -25,6 +25,12 @@ const text = {
   no: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.NO'),
 };
 const labels = {
+  version: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REVISION'),
+  rule_key: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.RULE_KEY'),
+  source_value: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.SOURCE'),
+  state: t('JRC_CONTACT_CENTER.ADMIN.STATUS'),
+  target_unit_id: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.TARGET_UNIT'),
+  target_queue_id: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.TARGET_QUEUE'),
   voice: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.voice'),
   whatsapp: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.whatsapp'),
   voice_required: t('JRC_CONTACT_CENTER.ADMIN.VOICE_REQUIRED'),
@@ -54,6 +60,14 @@ const labels = {
   denied: t('JRC_CONTACT_CENTER.ACCESS.DENIED'),
 };
 const choices = {
+  ddd: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.DDD'),
+  customer: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.CUSTOMER'),
+  portfolio: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.PORTFOLIO'),
+  service: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.SERVICE'),
+  fallback: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.FALLBACK'),
+  draft: t('JRC_CONTACT_CENTER.LOCAL_IVR.STATES.draft'),
+  retired: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.RETIRED'),
+  published: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.PUBLISHED_HISTORY'),
   provider: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.PROVIDER'),
   active: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.ACTIVE'),
   inactive: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.INACTIVE'),
@@ -91,6 +105,16 @@ const fields = computed(
       ivr_drafts: ['name', 'revision', 'definition'],
       acw_policy: ['voice', 'whatsapp', 'voice_required', 'voice_rules'],
       pause_catalog: ['enforced', 'entries'],
+      routing_rules: [
+        'version',
+        'rule_key',
+        'kind',
+        'source_value',
+        'priority',
+        'state',
+        'target_unit_id',
+        'target_queue_id',
+      ],
     })[props.resource] || []
 );
 const format = (record, field) => {
@@ -117,7 +141,7 @@ const format = (record, field) => {
         )
         .join('; ') || '—'
     );
-  if (['kind', 'status', 'service_kind', 'strategy'].includes(field))
+  if (['kind', 'state', 'status', 'service_kind', 'strategy'].includes(field))
     return choices[value] || String(value);
   if (field === 'voice_rules') return acwRulesSummary(value, t);
   if (field === 'entries') return pauseCatalogSummary(value, t);

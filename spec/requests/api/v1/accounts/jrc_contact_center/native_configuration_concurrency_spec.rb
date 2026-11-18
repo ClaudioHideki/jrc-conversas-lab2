@@ -55,6 +55,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
 
       subscriptions.each { |subscription| ActiveSupport::Notifications.unsubscribe(subscription) }
       # Only fixtures belonging to this guarded disposable suite's Account.
+      JrcContactCenter::RoutingRule.where(account: account).destroy_all
       JrcContactCenter::Qualification.where(account: account).destroy_all
       JrcContactCenter::AgentStateEvent.where(account: account).destroy_all
       JrcContactCenter::CallLeg.where(account: account).destroy_all
@@ -563,5 +564,56 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       expect(record.reload).to have_attributes(completed_at: nil, reason_code: nil, notes: nil)
       expect(JrcContactCenter::AgentStateEvent.find_by!(account: account, external_event_id: "qualification:#{record.id}:pending").ended_at).to be_nil
     end
+  end
+
+  %w[create update].each do |operation|
+    %w[eligibility profile coverage].each do |source|
+      it "does not #{operation} native routing rules after #{source} changes during the account lock wait" do
+        member = account.account_users.find_by!(user: actor)
+        rule = if operation == 'update'
+                 JrcContactCenter::RoutingRule.create!(account: account, created_by_account_user: member, version: 1,
+                                                       rule_key: 'synthetic-existing', kind: 'ddd', source_value: '11',
+                                                       target_unit: units.first, target_queue: queue, priority: 1, state: 'draft')
+               end
+        rows = JrcContactCenter::RoutingRule.where(account: account).order(:id)
+        before = rows.pluck(:id, :source_value, :priority, :state)
+        change = lambda do
+          case source
+          when 'eligibility' then JrcContactCenter::AccessGrant.find_by!(account_user: member).update!(eligible: false)
+          when 'profile' then member.custom_role.update!(permissions: ['jrc_contact_center_view'])
+          else JrcCrm::UserBusinessUnit.find_by!(account: account, user: actor).update!(business_unit: business_units.last)
+          end
+        end
+        endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/routing_rules"
+        endpoint += "/#{rule.id}" if rule
+        payload = { routing_rule: { version: 1, rule_key: 'synthetic-new', kind: 'ddd', source_value: '21',
+                                    target_unit_id: units.first.id, target_queue_id: queue.id, priority: 2, state: 'draft' } }
+        status = race_with_account_change(change, endpoint: endpoint, payload: payload, verb: operation == 'create' ? :post : :patch)
+        expect(status).to eq(source == 'coverage' ? 404 : 401)
+        observed = ActiveRecord::Base.uncached { rows.pluck(:id, :source_value, :priority, :state) }
+        expect(observed).to eq(before)
+      end
+    end
+  end
+
+  it 'rolls back routing and its native audit together in the actual nontransactional owned HTTP boundary' do
+    headers
+    allow(Audited.audit_class).to receive(:create!).and_wrap_original do |original, *args, **kwargs|
+      values = kwargs.presence || args.first
+      if values[:auditable].is_a?(JrcContactCenter::RoutingRule)
+        state[:routing_audit_attempt] = true
+        state[:routing_persisted_before_audit] = JrcContactCenter::RoutingRule.where(account: account, id: values[:auditable].id).exists?
+        raise ActiveRecord::RecordInvalid, Audited.audit_class.new
+      end
+      original.call(*args, **kwargs)
+    end
+    post "/api/v1/accounts/#{account.id}/jrc_contact_center/routing_rules", headers: headers,
+         params: { routing_rule: { version: 1, rule_key: 'synthetic-audit-rollback', kind: 'ddd', source_value: '11',
+                                   target_unit_id: units.first.id, target_queue_id: queue.id, priority: 1, state: 'draft' } }, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(state[:routing_audit_attempt]).to be(true)
+    expect(state[:routing_persisted_before_audit]).to be(true)
+    expect(JrcContactCenter::RoutingRule.where(account: account)).to be_empty
+    expect(Audited.audit_class.where(associated: account, auditable_type: 'JrcContactCenter::RoutingRule')).to be_empty
   end
 end

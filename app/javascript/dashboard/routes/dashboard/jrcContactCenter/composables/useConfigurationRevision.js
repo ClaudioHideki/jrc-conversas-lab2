@@ -10,6 +10,7 @@ const resources = [
   'ivr_drafts',
   'acw_policy',
   'pause_catalog',
+  'routing_rules',
 ];
 const validRevision = (value, resource) =>
   resource === 'ivr_drafts'

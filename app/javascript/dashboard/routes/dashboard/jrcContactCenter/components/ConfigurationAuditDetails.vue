@@ -33,6 +33,10 @@ const labels = {
   local: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.LOCAL_ONLY'),
 };
 const fieldLabels = {
+  rule_key: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.RULE_KEY'),
+  source_value: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.SOURCE'),
+  target_unit_id: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.TARGET_UNIT'),
+  target_queue_id: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.TARGET_QUEUE'),
   enforced: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.POLICY_TITLE'),
   entries: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.ENTRIES'),
   version: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REVISION'),
@@ -44,6 +48,7 @@ const fieldLabels = {
   integrity_sha256: t('JRC_CONTACT_CENTER.LOCAL_IVR.INTEGRITY'),
   name: t('JRC_CONTACT_CENTER.ADMIN.NAME'),
   code: t('JRC_CONTACT_CENTER.ADMIN.CODE'),
+  state: t('JRC_CONTACT_CENTER.ADMIN.STATUS'),
   kind: t('JRC_CONTACT_CENTER.ADMIN.KIND'),
   status: t('JRC_CONTACT_CENTER.ADMIN.STATUS'),
   timezone: t('JRC_CONTACT_CENTER.ADMIN.TIMEZONE'),
@@ -110,6 +115,13 @@ const permissionLabels = {
   ),
 };
 const enumLabels = {
+  ddd: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.DDD'),
+  customer: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.CUSTOMER'),
+  portfolio: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.PORTFOLIO'),
+  service: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.SERVICE'),
+  fallback: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.FALLBACK'),
+  retired: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.RETIRED'),
+  published: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.PUBLISHED_HISTORY'),
   draft: t('JRC_CONTACT_CENTER.LOCAL_IVR.STATES.draft'),
   archived: t('JRC_CONTACT_CENTER.LOCAL_IVR.STATES.archived'),
   provider: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.PROVIDER'),
@@ -154,7 +166,11 @@ const value = (entry, field = '') => {
         .map(([label, item]) => label + ': #' + item)
         .join('\n') || '—'
     );
-  if (['kind', 'status', 'role', 'strategy', 'service_kind'].includes(field))
+  if (
+    ['kind', 'state', 'status', 'role', 'strategy', 'service_kind'].includes(
+      field
+    )
+  )
     return enumLabels[entry] || String(entry);
   return typeof entry === 'object' ? JSON.stringify(entry) : String(entry);
 };

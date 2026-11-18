@@ -5,10 +5,13 @@ class JrcContactCenter::ConfigurationAuditSnapshot
     'JrcContactCenter::Unit' => %w[code name kind status timezone parent_unit_id],
     'JrcContactCenter::Queue' => %w[unit_id code name service_kind strategy status max_wait_seconds active_from active_until],
     'JrcContactCenter::QueueMembership' => %w[queue_id account_user_id role priority active starts_at ends_at],
-    'JrcContactCenter::AccessGrant' => %w[account_user_id team_id eligible allowed denied]
+    'JrcContactCenter::AccessGrant' => %w[account_user_id team_id eligible allowed denied],
+    'JrcContactCenter::RoutingRule' => %w[version rule_key kind source_value target_unit_id target_queue_id priority state starts_at ends_at]
   }.freeze
 
   def self.capture(record)
+    return routing_snapshot(record) if record.is_a?(JrcContactCenter::RoutingRule)
+
     if record.is_a?(JrcContactCenter::AccessGrant)
       return { 'attributes' => attributes_for(record), 'scope' => { 'account_id' => record.account_id.to_s } }
     end
@@ -36,11 +39,17 @@ class JrcContactCenter::ConfigurationAuditSnapshot
     }
   end
 
+  def self.routing_snapshot(record)
+    queue = JrcContactCenter::Queue.find_by!(account_id: record.account_id, id: record.target_queue_id) if record.target_queue_id
+    unit = JrcContactCenter::Unit.find_by!(account_id: record.account_id, id: record.target_unit_id || queue&.unit_id)
+    { 'attributes' => attributes_for(record), 'scope' => scope_for(record, unit, queue) }
+  end
+
   def self.queue_for(record)
     return record if record.is_a?(JrcContactCenter::Queue)
     return unless record.is_a?(JrcContactCenter::QueueMembership)
 
     JrcContactCenter::Queue.find_by!(account_id: record.account_id, id: record.queue_id)
   end
-  private_class_method :queue_for, :attributes_for, :scope_for
+  private_class_method :queue_for, :attributes_for, :scope_for, :routing_snapshot
 end

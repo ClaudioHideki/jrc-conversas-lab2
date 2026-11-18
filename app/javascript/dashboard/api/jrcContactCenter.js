@@ -69,10 +69,15 @@ export default {
       access_users: 'access_authorizations/users',
       access_teams: 'access_authorizations/teams',
       ivr_drafts: 'ivr_drafts',
+      routing_rules: 'routing_rules',
     };
     if (!paths[resource] || !/^[1-9]\d*$/.test(String(id)))
       throw new Error('Invalid configuration context');
     if (resource === 'ivr_drafts') return axios.get(ivrPath(accountId, id));
+    if (resource === 'routing_rules')
+      return axios.get(
+        `${base(accountId)}/routing_rules/${recordIdentity(id)}`
+      );
     return axios.get(`${base(accountId)}/${paths[resource]}/${Number(id)}`);
   },
   pauseCatalog: accountId => axios.get(`${base(accountId)}/pause_catalog`),
@@ -192,10 +197,12 @@ export default {
     axios.post(`${base(accountId)}/callbacks`, { callback }),
   updateCallback: (accountId, id, callback) =>
     axios.patch(`${base(accountId)}/callbacks/${Number(id)}`, { callback }),
-  routingRules: accountId => axios.get(`${base(accountId)}/routing_rules`),
-  saveRoutingRule: (accountId, routingRule, id) =>
+  routingRules: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/routing_rules`, { params }),
+  saveRoutingRule: (accountId, routingRule, id, options = {}) =>
     id
-      ? axios.patch(`${base(accountId)}/routing_rules/${Number(id)}`, {
+      ? axios.patch(`${base(accountId)}/routing_rules/${recordIdentity(id)}`, {
+          ...options,
           routing_rule: routingRule,
         })
       : axios.post(`${base(accountId)}/routing_rules`, {

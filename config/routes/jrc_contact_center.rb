@@ -22,7 +22,7 @@ namespace :api, defaults: { format: 'json' } do
         end
         resources :cases, only: %i[index show create update]
         resources :callbacks, only: %i[index create update]
-        resources :routing_rules, only: %i[index create update]
+        resources :routing_rules, only: %i[index show create update]
         get 'reports/summary', to: 'reports#summary'
         get 'integrations/capabilities', to: 'integrations#capabilities'
         get 'integrations/health', to: 'integrations#health'

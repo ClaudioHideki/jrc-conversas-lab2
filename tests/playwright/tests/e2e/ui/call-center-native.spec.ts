@@ -32,17 +32,19 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('scoped ACW native')
-    ? 'acw'
-    : info.title.startsWith('last eligible queue withdrawal')
-      ? 'withdrawal'
-      : info.title.startsWith('local pause duration supervisor')
-        ? 'duration'
-        : info.title.startsWith('local pause catalog operator')
-          ? 'operations'
-          : info.title.startsWith('local pause catalog')
-            ? 'editor'
-            : null;
+  const pauseKey = info.title.startsWith('native local routing')
+    ? 'routing'
+    : info.title.startsWith('scoped ACW native')
+      ? 'acw'
+      : info.title.startsWith('last eligible queue withdrawal')
+        ? 'withdrawal'
+        : info.title.startsWith('local pause duration supervisor')
+          ? 'duration'
+          : info.title.startsWith('local pause catalog operator')
+            ? 'operations'
+            : info.title.startsWith('local pause catalog')
+              ? 'editor'
+              : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -797,6 +799,10 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
       await expect(pendingNotice).toBeVisible();
       await expect(pendingNotice).toContainText('Funcionalidade pendente');
       await expect(page.locator('[data-create]')).toHaveCount(0);
+      if (key === 'distribution') {
+        await expect(page.locator('[data-routing-create]')).toHaveCount(1);
+        await expect(page.locator('[data-publish]')).toHaveCount(0);
+      }
     }
     await page
       .getByText('Voltar às configurações do Call Center', { exact: true })
@@ -4265,4 +4271,235 @@ test('scoped ACW native popup persists queue rules blocks conflicts and keeps sc
   });
   expect(commands.status()).toBe(200);
   expect((await commands.json()).items).toEqual([]);
+});
+
+test('native local routing drafts persist paginate review conflicts and deny unauthorized targets', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].routing;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const ownBase = `/app/accounts/${target.account_id}/contact-center/control-desk/distribution`;
+  const seedIds = [];
+  for (let index = 0; index < 22; index += 1) {
+    const created = await page.request.post(ownApi + '/routing_rules', {
+      headers: target.administrator,
+      data: {
+        routing_rule: {
+          version: 1,
+          rule_key: `SYNTHETIC seeded routing ${String(index).padStart(2, '0')}`,
+          kind: 'ddd',
+          source_value: '11',
+          priority: 1,
+          state: 'draft',
+          target_unit_id: index === 21 ? target.denied_unit_id : target.unit_id,
+        },
+      },
+    });
+    expect(created.status()).toBe(201);
+    seedIds.push((await created.json()).item.id);
+  }
+  await page.goto(
+    ownBase +
+      '?audit_config_page=55&audit_config_operation=destroy&unrelated=preserved'
+  );
+  await expect(page.locator('[data-routing-workspace]')).toBeVisible();
+  await expect(page.locator('[data-routing-row]')).toHaveCount(20);
+  await expect(page.locator('[data-routing-total]')).toContainText('22');
+  await page.locator('[data-routing-next]').click();
+  await expect(page.locator('[data-routing-row]')).toHaveCount(2);
+  await expect(page).toHaveURL(/routing_page=2/);
+  await page.reload();
+  await expect(page.locator('[data-routing-row]')).toHaveCount(2);
+  await page.locator('[data-routing-create]').click();
+  const dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
+  const key = `SYNTHETIC edited routing ${info.project.name}`;
+  await dialog.locator('[data-routing-key]').fill(key);
+  await dialog.locator('[data-routing-source]').fill('11');
+  await dialog.locator('#routing-unit').selectOption(String(target.unit_id));
+  await dialog.locator('#routing-queue').selectOption(String(target.queue_id));
+  const created = page.waitForResponse(
+    response =>
+      response.url().endsWith('/routing_rules') &&
+      response.request().method() === 'POST'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  const createdResponse = await created;
+  expect(createdResponse.status()).toBe(201);
+  const record = (await createdResponse.json()).item;
+  await expect(dialog).not.toBeVisible();
+  await page.locator('[data-routing-search]').fill(key);
+  await page.locator('[data-routing-filter-kind]').selectOption('ddd');
+  await page
+    .locator('[data-routing-workspace] form')
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  await expect(page.locator('[data-routing-row]')).toHaveCount(1);
+  await page.locator('[data-routing-open]').click();
+  await expect(dialog.locator('[data-routing-source]')).toHaveValue('11');
+  await dialog.locator('[data-routing-source]').fill('21');
+  const edited = page.waitForResponse(
+    response =>
+      response.url().endsWith(`/routing_rules/${record.id}`) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await edited).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  await page.reload();
+  await expect(page.locator('[data-routing-row]')).toContainText('21');
+  await page.locator('[data-routing-open]').click();
+  const before = await page.request.get(
+    `${ownApi}/routing_rules/${record.id}`,
+    { headers: target.administrator }
+  );
+  expect(before.status()).toBe(200);
+  const concurrent = await page.request.patch(
+    `${ownApi}/routing_rules/${record.id}`,
+    {
+      headers: target.administrator,
+      data: {
+        routing_rule: { priority: 2 },
+        expected_revision: (await before.json()).item.revision,
+      },
+    }
+  );
+  expect(concurrent.status()).toBe(200);
+  await dialog.locator('[data-routing-source]').fill('31');
+  const stale = page.waitForResponse(
+    response =>
+      response.url().endsWith(`/routing_rules/${record.id}`) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await stale).status()).toBe(409);
+  await expect(dialog.locator('[data-configuration-conflict]')).toBeVisible();
+  await expect(dialog.locator('[data-routing-source]')).toHaveValue('31');
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeDisabled();
+  await dialog
+    .getByRole('button', {
+      name: 'Carregar versão atual para comparar',
+      exact: true,
+    })
+    .click();
+  await expect(dialog.locator('[data-configuration-latest]')).toBeVisible();
+  await dialog.locator('[data-configuration-review]').check();
+  const reviewed = page.waitForResponse(
+    response =>
+      response.url().endsWith(`/routing_rules/${record.id}`) &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await reviewed).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  await page.locator('[data-routing-open]').click();
+  await expect(dialog.locator('[data-routing-source]')).toHaveValue('31');
+  await expectContainedDialog(page);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page
+      .locator('html')
+      .evaluate(element => element.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  const color = await dialog
+    .locator('[data-routing-key]')
+    .evaluate(element => getComputedStyle(element).color);
+  const brightness = color
+    .match(/[\d.]+/g)
+    .slice(0, 3)
+    .map(Number)
+    .reduce((sum, item) => sum + item, 0);
+  if (info.project.name.endsWith('dark'))
+    expect(brightness).toBeGreaterThan(600);
+  else expect(brightness).toBeLessThan(300);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-routing-theme.json`,
+    JSON.stringify({ color, brightness })
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-routing-draft.png`,
+    fullPage: false,
+  });
+  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await page.locator('[data-routing-clear]').click();
+  await expect(page.locator('[data-routing-total]')).toContainText('23');
+  const scoped = await page.request.get(ownApi + '/routing_rules?page=1', {
+    headers: target.scoped,
+  });
+  expect(scoped.status()).toBe(200);
+  expect((await scoped.json()).meta.total).toBe(22);
+  const outside = await page.request.get(
+    `${ownApi}/routing_rules/${seedIds[21]}`,
+    { headers: target.scoped }
+  );
+  expect(outside.status()).toBe(404);
+  const denied = await page.request.post(ownApi + '/routing_rules', {
+    headers: target.scoped,
+    data: {
+      routing_rule: {
+        version: 1,
+        rule_key: 'SYNTHETIC denied scope',
+        kind: 'ddd',
+        priority: 1,
+        target_unit_id: target.denied_unit_id,
+        state: 'draft',
+      },
+    },
+  });
+  expect(denied.status()).toBe(404);
+  const operator = await page.request.post(ownApi + '/routing_rules', {
+    headers: target.operator,
+    data: {
+      routing_rule: {
+        version: 1,
+        rule_key: 'SYNTHETIC denied operator',
+        kind: 'ddd',
+        priority: 1,
+        target_unit_id: target.unit_id,
+        state: 'draft',
+      },
+    },
+  });
+  expect(operator.status()).toBe(401);
+  const history = await page.request.get(
+    `${ownApi}/configuration_audits?resource_type=routing_rule&resource_id=${record.id}&history=true`,
+    { headers: target.administrator }
+  );
+  expect(history.status()).toBe(200);
+  expect((await history.json()).items).toHaveLength(4);
+  const commands = await page.request.get(ownApi + '/commands', {
+    headers: target.administrator,
+  });
+  expect(commands.status()).toBe(200);
+  expect((await commands.json()).items).toEqual([]);
+  await expect(page.locator('[data-publish]')).toHaveCount(0);
+  const auditNavigation = page.waitForResponse(response => {
+    const address = new URL(response.url());
+    return (
+      address.pathname.endsWith('/configuration_audits') &&
+      address.searchParams.get('resource_id') === String(record.id)
+    );
+  });
+  await page
+    .locator(`[data-routing-row="${record.id}"] [data-routing-history]`)
+    .click();
+  expect((await auditNavigation).status()).toBe(200);
+  await expect(page.locator('[data-audit-row]')).toHaveCount(4);
+  await page.locator('[data-audit-detail]').first().click();
+  const auditSource = page
+    .getByRole('dialog')
+    .getByRole('heading', { name: 'Origem de roteamento', exact: true });
+  await expect(auditSource.locator('..')).toContainText('31');
+  await auditSource.scrollIntoViewIfNeeded();
+  await expectContainedDialog(page);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-routing-audit.png`,
+    fullPage: false,
+  });
 });

@@ -286,8 +286,8 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 ### Incremento ACW por motivo — 18/11/2026
 
 - [x] Decisão confirmada: fila → equipe → geral; bloquear conflitos.
-- [ ] Validar nativamente o motor e snapshots de voz do incremento em preparação, na branch exclusiva.
-- [ ] Validar o popup ACW com persistência, revisão, negação de escopo e auditoria em 144 cenários Chrome (140 anteriores + 4 novos).
+- [x] Motor/snapshots de voz validados em a16e8a49/CI44409349600, dentro do escopo incremental descrito no ADR.
+- [x] Popup ACW, persistência, revisão, negação e auditoria:144/144Chrome em a16e8a49, incluindo140 anteriores.
 - [ ] Concluir seleção intermediária/persistência do motivo e prévia do relógio, formulários vinculados e automações de encerramento conforme figura 9.
 - [ ] Homologação externa PABX permanece bloqueada por contrato indisponível. Nenhuma etapa ou conjunto das 23 figuras é declarado concluído.
 
@@ -298,3 +298,18 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - Chrome140/144; quatro falhas na consulta de histórico semresource_id. Corrigida aURL do teste com sua própria conta sintética; API permanece estrita. Causa confirmada nos quatro relatórios,sem excluir ou reduzir cenários.
 - Revisão real de quatroPNG identificou baixo contraste do botãoAdicionar regra no escuro. Cor semântica explícita e asserção de cor computada acrescentadas. Justificativa própria e aviso de duração agora aparecem nas capturasmobile.
 - Artefato14476916190 / ca15cf8ca34310540565ccfb1b22c1d6969031edecb9c05caa48f05e5bdb3719 recuperado e verificado. Aceite do novoSHA exige144/144; conjunto23 continua aberto. Roteamento preparado separadamente,sem validação nativa herdada.
+
+
+### Roteamento local — incremento em preparação
+
+- Reaproveitados RoutingRule, APIs e card Distribuição. Preparados lock/reautorização, revisão canônica, leitura paginada, auditoria atômica e filtro/histórico nativos. Sem cadastro paralelo, migration, grant ou publicação PABX.
+- Popup local preparado com criação/edição, pesquisa, paginação/URL, revisão explícita de conflito e referências nativas. Preserva destino legado somente por fila, condições e janelas existentes. Registros publicados não podem ser alterados. Default voiceOnly das URAs preservado; canais nativos continuam aceitos somente no novo contexto de roteamento.
+- Sete testes concorrentes/rollback adicionais e regressões HTTP/Vue preparados; quatro Chrome novos elevam o gate de144 para148, sem redução de cobertura. Ainda não executados ou homologados no novoSHA.
+- Matriz corrigida para distinguir pausas/justificativa/aviso já validados em98c9d617 das lacunas de aprovação, chamada ativa e fornecedor. Figuras7/8/9/12 permanecem parciais. ADR:docs/adr/20261118-call-center-local-routing-drafts.md.
+
+
+### Aceite ACW a16e8a49
+
+- CI44409349600:1175 Rails distintos,16 recargas,415Vue,144Chrome,zero falhas/pendências/erros/novas infrações Ruby. DoisPNG efetivamente revisados e208 hashes verificados. Artefato14479548124 / eb514563dfeeefdc48c9a5c3231829986c8963467fe2eb488adc615876d35b3b.
+- Cor real do botão:escuro715/claro96 nos quatro projetos; corrigidos contraste e consulta de histórico sem alterar o validador. Aceite restrito ao motor e popupACW. Relógio por seleção intermediária, formulários, automações e fornecedor continuam pendentes.
+- Roteamento local posterior continua sem aceite nativo herdado; próximo gate exige148Chrome. Sem imagem,merge,deploy ou produção.

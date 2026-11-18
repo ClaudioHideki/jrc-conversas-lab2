@@ -38,6 +38,7 @@ const resourceLabels = computed(() => ({
   access: t('JRC_CONTACT_CENTER.ACCESS.TITLE'),
   ivr_revision: t('JRC_CONTACT_CENTER.LOCAL_IVR.AUDIT_REVISION'),
   acw_policy: t('JRC_CONTACT_CENTER.ACW_OPERATION.POLICY_TITLE'),
+  routing_rule: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.RESOURCE'),
 }));
 const operationLabels = computed(() => ({
   create: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.CREATE'),

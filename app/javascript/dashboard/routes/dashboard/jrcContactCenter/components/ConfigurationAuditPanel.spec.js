@@ -93,6 +93,25 @@ beforeEach(() => {
 });
 
 describe('scoped administrative audit interface', () => {
+  it('filters native routing history without treating it as provider publication', async () => {
+    const wrapper = render();
+    await flushPromises();
+    const filter = wrapper
+      .findAll('select')
+      .find(select => select.find('option[value="routing_rule"]').exists());
+    await filter.setValue('routing_rule');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(API.configurationAudits).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({ resource_type: 'routing_rule' })
+    );
+    expect(mocks.route.query.audit_config_resource_type).toBe('routing_rule');
+    expect(filter.text()).toContain(
+      'JRC_CONTACT_CENTER.ROUTING_DRAFTS.RESOURCE'
+    );
+  });
+
   it('closes read-only details through an explicit footer action without a form submit', async () => {
     const wrapper = render();
     await flushPromises();

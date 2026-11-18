@@ -24,6 +24,37 @@ const render = (record = {}) =>
   });
 
 describe('native ACW audit detail', () => {
+  it('renders sanitized routing history using native target and state labels', () => {
+    const wrapper = render({
+      before: { source_value: '11', kind: 'ddd', state: 'draft' },
+      after: {
+        source_value: '21',
+        target_unit_id: 10,
+        target_queue_id: 20,
+        state: 'retired',
+      },
+      omitted_fields: ['conditions'],
+    });
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.ROUTING_DRAFTS.SOURCE'
+    );
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.ROUTING_DRAFTS.TARGET_UNIT'
+    );
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.ROUTING_DRAFTS.TARGET_QUEUE'
+    );
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.ROUTING_DRAFTS.DDD');
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.ROUTING_DRAFTS.RETIRED'
+    );
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.OMITTED'
+    );
+    expect(wrapper.text()).not.toContain('undefined');
+    wrapper.unmount();
+  });
+
   it('renders channel seconds with translated field labels and preserves an explicit false', () => {
     const wrapper = render();
     expect(wrapper.text()).toContain(

@@ -9,6 +9,7 @@ import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAcces
 import AdministrationSection from '../components/AdministrationSection.vue';
 import ConfigurationAuditPage from '../components/ConfigurationAuditPage.vue';
 import RecentConfigurationActivity from '../components/RecentConfigurationActivity.vue';
+import RoutingDraftWorkspace from '../components/RoutingDraftWorkspace.vue';
 
 const route = useRoute();
 const { t } = useI18n();
@@ -201,8 +202,14 @@ onBeforeUnmount(() => {
         :key="contextKey"
         :account-id="accountId"
       />
+      <RoutingDraftWorkspace
+        v-if="section === 'distribution' && selected"
+        :key="contextKey"
+        :account-id="accountId"
+        :context="data"
+      />
       <AdministrationSection
-        v-if="section && selected"
+        v-else-if="section && selected"
         :key="`${accountId}:${section}`"
         :account-id="accountId"
         :card="selected"

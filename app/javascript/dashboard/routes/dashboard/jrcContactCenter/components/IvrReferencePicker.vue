@@ -15,6 +15,8 @@ const props = defineProps({
   inputId: { type: String, required: true },
   disabled: { type: Boolean, default: false },
   allowClear: { type: Boolean, default: false },
+  voiceOnly: { type: Boolean, default: true },
+  emptyLabel: { type: String, default: '' },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -152,9 +154,10 @@ onBeforeUnmount(() => {
     >
       <option value="" :disabled="!allowClear">
         {{
-          allowClear
+          emptyLabel ||
+          (allowClear
             ? t('JRC_CONTACT_CENTER.ADMIN.ALL')
-            : t('JRC_CONTACT_CENTER.LOCAL_IVR.CHOOSE_REFERENCE')
+            : t('JRC_CONTACT_CENTER.LOCAL_IVR.CHOOSE_REFERENCE'))
         }}
       </option>
       <option
@@ -181,11 +184,13 @@ onBeforeUnmount(() => {
         v-for="row in items"
         :key="row.id"
         :value="String(row.id)"
-        :disabled="resource === 'queues' && row.service_kind !== 'voice'"
+        :disabled="
+          voiceOnly && resource === 'queues' && row.service_kind !== 'voice'
+        "
       >
         {{ row.name }} · {{ row.code
         }}{{
-          resource === 'queues' && row.service_kind !== 'voice'
+          voiceOnly && resource === 'queues' && row.service_kind !== 'voice'
             ? ' · ' + t('JRC_CONTACT_CENTER.LOCAL_IVR.NOT_VOICE')
             : ''
         }}

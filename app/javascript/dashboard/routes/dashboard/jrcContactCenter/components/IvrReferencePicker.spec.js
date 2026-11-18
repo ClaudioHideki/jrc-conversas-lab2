@@ -46,6 +46,36 @@ beforeEach(() => {
 });
 
 describe('native scoped IVR references', () => {
+  it('reuses the authorized lookup for routing without changing the default voice-only IVR behavior', async () => {
+    API.queues.mockResolvedValue({
+      data: {
+        items: [
+          {
+            id: 2,
+            unit_id: 7,
+            name: 'SYNTHETIC native channel',
+            code: 'CHAT',
+            service_kind: 'whatsapp',
+          },
+        ],
+        meta: { pages: 1 },
+      },
+    });
+    const wrapper = mountPicker({
+      resource: 'queues',
+      unitId: '7',
+      voiceOnly: false,
+      allowClear: true,
+      emptyLabel: 'SYNTHETIC no queue',
+    });
+    await flushPromises();
+    expect(wrapper.get('option[value="2"]').element.disabled).toBe(false);
+    expect(wrapper.get('option[value=""]').text()).toBe('SYNTHETIC no queue');
+    await wrapper.setProps({ voiceOnly: true });
+    expect(wrapper.get('option[value="2"]').element.disabled).toBe(true);
+    expect(API.queues).toHaveBeenCalledTimes(1);
+  });
+
   it('uses bounded native pagination and resets the page on an explicit search', async () => {
     const wrapper = mountPicker();
     await flushPromises();
