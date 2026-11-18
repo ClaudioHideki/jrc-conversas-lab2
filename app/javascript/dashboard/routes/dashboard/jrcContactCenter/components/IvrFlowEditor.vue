@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import IvrReferencePicker from './IvrReferencePicker.vue';
+import IvrFlowOverview from './IvrFlowOverview.vue';
 import {
   addIvrNode,
   removeIvrNode,
@@ -39,6 +40,7 @@ const typeLabel = type => t(`JRC_CONTACT_CENTER.LOCAL_IVR.TYPES.${type}`);
 
 <template>
   <fieldset :disabled="disabled" class="min-w-0 space-y-4" data-ivr-flow-editor>
+    <IvrFlowOverview :model-value="modelValue" />
     <label class="block text-sm text-n-slate-12" for="ivr-start">
       {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.START') }}
     </label>
@@ -149,11 +151,13 @@ const typeLabel = type => t(`JRC_CONTACT_CENTER.LOCAL_IVR.TYPES.${type}`);
           :key="choiceIndex"
           class="grid min-w-0 gap-2 rounded-lg border border-n-weak p-2 sm:grid-cols-3"
         >
-          <label
-            class="text-sm text-n-slate-12"
-            :for="`ivr-digit-${index}-${choiceIndex}`"
-          >
-            {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.DIGIT') }}
+          <div class="min-w-0">
+            <label
+              class="text-sm text-n-slate-12"
+              :for="`ivr-digit-${index}-${choiceIndex}`"
+            >
+              {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.DIGIT') }}
+            </label>
             <select
               :id="`ivr-digit-${index}-${choiceIndex}`"
               :value="choice.digit"
@@ -171,12 +175,14 @@ const typeLabel = type => t(`JRC_CONTACT_CENTER.LOCAL_IVR.TYPES.${type}`);
                 {{ digit }}
               </option>
             </select>
-          </label>
-          <label
-            class="text-sm text-n-slate-12"
-            :for="`ivr-target-${index}-${choiceIndex}`"
-          >
-            {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.DESTINATION') }}
+          </div>
+          <div class="min-w-0">
+            <label
+              class="text-sm text-n-slate-12"
+              :for="`ivr-target-${index}-${choiceIndex}`"
+            >
+              {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.DESTINATION') }}
+            </label>
             <select
               :id="`ivr-target-${index}-${choiceIndex}`"
               :value="choice.target"
@@ -196,7 +202,7 @@ const typeLabel = type => t(`JRC_CONTACT_CENTER.LOCAL_IVR.TYPES.${type}`);
                 {{ target.id }}
               </option>
             </select>
-          </label>
+          </div>
           <button
             type="button"
             class="self-end rounded-lg border border-n-weak px-2 py-2 text-xs text-n-ruby-11"
@@ -221,13 +227,17 @@ const typeLabel = type => t(`JRC_CONTACT_CENTER.LOCAL_IVR.TYPES.${type}`);
         >
           {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.ADD_OPTION') }}
         </button>
-        <label
+        <div
           v-for="field in ['on_timeout', 'on_invalid']"
           :key="field"
-          class="block text-sm text-n-slate-12"
-          :for="`ivr-${field}-${index}`"
+          class="min-w-0"
         >
-          {{ t(`JRC_CONTACT_CENTER.LOCAL_IVR.${field.toUpperCase()}`) }}
+          <label
+            class="mb-1 block text-sm text-n-slate-12"
+            :for="`ivr-${field}-${index}`"
+          >
+            {{ t(`JRC_CONTACT_CENTER.LOCAL_IVR.${field.toUpperCase()}`) }}
+          </label>
           <select
             :id="`ivr-${field}-${index}`"
             :value="node[field]"
@@ -245,7 +255,7 @@ const typeLabel = type => t(`JRC_CONTACT_CENTER.LOCAL_IVR.TYPES.${type}`);
               {{ target.id }}
             </option>
           </select>
-        </label>
+        </div>
       </template>
       <template v-else-if="node.type === 'queue'">
         <label

@@ -66,7 +66,7 @@ const navigate = async query => {
   if (listBusy.value) return;
   navigating.value = true;
   try {
-    await router.replace({ query });
+    await router.push({ query });
   } finally {
     navigating.value = false;
   }

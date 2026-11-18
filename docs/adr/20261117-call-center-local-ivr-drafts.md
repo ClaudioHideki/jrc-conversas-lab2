@@ -86,3 +86,21 @@ Permanecem pendentes áudio/mídia, calendários/horários, roteamento entre uni
 804413eca5cf5cad4cab4b18b4e7ad3d1d8544f2 / CI 44230570088: 762 exemplos Rails principais, 17 concorrentes (incluindo as três novas corridas HTTP reais), 16 reexecuções do ledger no schema recarregado e 290 Vue passaram, zero falhas/pendências/erros. Frontend lint aprovado. Artefato 14395428784, SHA-256 2c2a3020f962700551ca56dc8c719499240ee38dbce19169722477ac5511c45a. Os 108 Chrome não executaram: 29 infrações Ruby bloquearam o gate.
 
 Correções restritas aos diagnósticos: extração da validação da página de histórico e da simulação de revisão; separação do despacho/preparação da sessão HTTP concorrente sem alterar barreiras ou locks; where qualificado do alias SQL, alinhamentos, guard clauses, Array.new para contagens positivas, parsed_body e keywords diretas. A asserção de criação sai do let e permanece em exemplo explícito adicional; nenhuma asserção foi retirada. Nenhuma configuração de lint foi alterada. Nova CI obrigatória antes de aceitar editor/importação/exportação/Chrome.
+
+
+## Complemento de aceite local em preparação
+
+O Word complementar, seção 5, exige visualizar rascunho e diagrama (D01 distingue isso das figuras 4/13 do painel PABX). O editor ganha um mapa somente de leitura derivado do mesmo grafo editável: entrada, teclas, destinos de timeout/tentativas, fila lógica e término. Destino ainda não preenchido fica pendente; nenhum fallback é inventado. Não há modelo paralelo, comando ou publicação. Três Vue específicos e asserções nos quatro projetos Chrome devem conferir o mapa.
+
+O cenário real de arquivos é ampliado para importar JSON válido pelo input de arquivo, além da rejeição do inválido e da aplicação manual de JSON. Após arquivamento, deve executar a restauração como revisão 4 e conferir que a revisão 1 continua acessível. As 108 identidades permanecem, sem remoção de asserções; o novo SHA precisa provar essas ampliações. Não atribuir ao SHA anterior a interface e os testes ainda preparados.
+
+
+## Chrome da API/editor: causas observadas e correções
+
+4d06013ff56b51aa2b7d486bc2a91aa5921355f4 / CI 44233151968: 763 Rails principais + 17 concorrentes, 16 reexecuções no schema recarregado, 290 Vue, ambos os lints, migrations, assets e bootstrap real aprovados. Chrome 100/108: os 96 anteriores e os quatro casos novos de isolamento corporativo/URLs/elegibilidade passaram. Oito falhas restantes são os mesmos dois caminhos nos quatro projetos; não foram marcadas como aprovação. Artefato 14397725189, SHA-256 1fcd3b2a8cbfb045dcbd8c8f312846c13ce5898fa7815ffdc1c50c825da9b1af.
+
+O primeiro caso parou ao localizar o nome exato Tecla DTMF: o label continha também o select e suas opções. Separar label e select com for/id também nos destinos lógicos e de contingência preserva as regras e oferece nome acessível inequívoco. Dois Vue devem verificar a associação ao controle real, o nome e a edição.
+
+O segundo caso passou as páginas de 20/3 registros e falhou no Voltar: router.replace havia substituído a entrada da lista. A navegação de filtros/páginas passa a usar router.push; manter guarda de navegação, filtros e revisão. Novo Vue com histórico real em memória prova o retorno à primeira página filtrada. O Chrome continua exigindo o Voltar real, sem trocar a asserção por recarga.
+
+O próximo incremento também inclui mapa de destinos, importação de arquivo válido, restauração efetiva e correção separada da ordem de observações do supervisor. O gate exige 112 Chrome (108 preservados + quatro de revogação sem recarga); os dez exemplos Vue adicionais devem passar nativamente. Nenhum teste foi desligado ou substituído por simulação operacional.

@@ -135,3 +135,7 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - [ ] **CC-LOCAL-IVR-API-EDITOR-20261118:** API/editor/importação/exportação/histórico/simulação preparados, reutilizando escopos e auditoria nativos. Três corridas HTTP reais e 12 Chrome adicionais preparados; gate exigirá 108/108 preservando os 96 anteriores. Execução nativa do próximo SHA pendente. Sem publicação PABX, Docker, produção ou concessões reais. Figuras/etapas permanecem abertas onde faltam critérios.
 
 - API/editor 804413ec / CI 44230570088: 779 Rails únicos, 16 reexecuções do ledger, 290 Vue e frontend lint aprovados. Lint Ruby apontou 29 infrações; correções mínimas preparadas sem supressões e com criação validada em exemplo próprio. 108 Chrome continuam pendentes; próximo SHA exige nova validação integral do workflow setorial.
+
+- [ ] **CC-SUPERVISOR-OBSERVATION-20261118:** Serialização de polling, descarte de unidades após erro e fronteira de ator/perfil preparados; quatro Vue e quatro novos Chrome nativos, em contas sintéticas exclusivas. Gate exigirá 112 cenários sem remover os 108. Validação do novo SHA pendente; ADR registrado.
+
+- Chrome 4d06013f / CI 44233151968: 780 Rails únicos, 16 reexecuções, 290 Vue, lints/assets/bootstrap aprovados; 100/108 Chrome. Corrigidos labels DTMF/destinos e histórico substituído por replace; três Vue de regressão preparados. Mapa/importação/restauração e supervisor ampliam o próximo gate para 112 Chrome e 300 Vue esperados, ainda não aprovados.

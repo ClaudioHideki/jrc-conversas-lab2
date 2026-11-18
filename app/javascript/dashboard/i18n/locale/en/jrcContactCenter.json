@@ -2056,7 +2056,10 @@
       },
       "AUDIT_REVISION": "Revisão de URA local",
       "REFERENCE_UNAVAILABLE": "Referência indisponível no escopo atual. Revise a seleção.",
-      "RESTORE": "Salvar como nova revisão de rascunho"
+      "RESTORE": "Salvar como nova revisão de rascunho",
+      "MAP_TITLE": "Mapa local do fluxo",
+      "MAP_HINT": "Destinos do rascunho atual. Edite os nós abaixo; este mapa não representa uma versão aplicada no PABX.",
+      "MAP_PENDING": "Destino pendente"
     }
   }
 }

@@ -28,23 +28,25 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const auth = info.title.startsWith('local IVR')
-    ? info.title.startsWith('local IVR scoped')
-      ? session.ivr_targets[info.project.name].scoped
-      : session.ivr_targets[info.project.name].administrator
-    : info.title.startsWith('native authenticated navigation')
-      ? session.navigation_targets[info.project.name].auth
-      : info.title.startsWith('native infrastructure root')
-        ? session.infrastructure
-        : info.title.startsWith('configuration audit boundary')
-          ? session.auditor
-          : info.title.startsWith('native role denied')
-            ? session.delegated
-            : info.title.startsWith('corporate boundary')
-              ? session.restricted
-              : info.title.startsWith('profile change')
-                ? session.viewer
-                : session.administrator;
+  const auth = info.title.startsWith('local IVR supervisor')
+    ? session.ivr_targets[info.project.name].observer
+    : info.title.startsWith('local IVR')
+      ? info.title.startsWith('local IVR scoped')
+        ? session.ivr_targets[info.project.name].scoped
+        : session.ivr_targets[info.project.name].administrator
+      : info.title.startsWith('native authenticated navigation')
+        ? session.navigation_targets[info.project.name].auth
+        : info.title.startsWith('native infrastructure root')
+          ? session.infrastructure
+          : info.title.startsWith('configuration audit boundary')
+            ? session.auditor
+            : info.title.startsWith('native role denied')
+              ? session.delegated
+              : info.title.startsWith('corporate boundary')
+                ? session.restricted
+                : info.title.startsWith('profile change')
+                  ? session.viewer
+                  : session.administrator;
   await page.addInitScript(
     ({ auth, dark }) => {
       window.__SYNTHETIC_AUTH__ = auth;
@@ -2157,6 +2159,13 @@ test('local IVR real editor persists, simulates, imports and exports immutable r
   await dialog
     .getByLabel('Fila', { exact: true })
     .selectOption(String(target.queue_id));
+  await expect(dialog.locator('[data-ivr-map-node]')).toHaveCount(3);
+  await expect(dialog.locator('[data-ivr-map-node="node_1"]')).toContainText(
+    'node_2'
+  );
+  await expect(dialog.locator('[data-ivr-map-node="node_1"]')).toContainText(
+    'node_3'
+  );
   const originalColor = await dialog
     .locator('#ivr-name')
     .evaluate(element => getComputedStyle(element).backgroundColor);
@@ -2227,8 +2236,21 @@ test('local IVR real editor persists, simulates, imports and exports immutable r
     'O arquivo não contém uma estrutura local de URA compatível'
   );
   await expect(dialog.locator('#ivr-json')).toHaveValue(previous);
-  const changed = JSON.parse(previous);
-  changed.nodes[0].timeout_seconds = 9;
+  const imported = JSON.parse(previous);
+  imported.nodes[0].timeout_seconds = 9;
+  await dialog.locator('#ivr-import').setInputFiles({
+    name: 'synthetic-local-ivr.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(imported)),
+  });
+  await expect
+    .poll(async () =>
+      JSON.parse(await dialog.locator('#ivr-json').inputValue())
+    )
+    .toEqual(imported);
+  await expect(dialog.getByRole('alert')).toHaveCount(0);
+  const changed = JSON.parse(await dialog.locator('#ivr-json').inputValue());
+  changed.nodes[0].timeout_seconds = 10;
   await dialog.locator('#ivr-json').fill(JSON.stringify(changed, null, 2));
   await expect(dialog.locator('[data-ivr-save]')).toBeDisabled();
   await dialog
@@ -2295,6 +2317,22 @@ test('local IVR real editor persists, simulates, imports and exports immutable r
   await expect(dialog.locator('[data-ivr-save]')).toContainText(
     'Salvar como nova revisão de rascunho'
   );
+  const restored = page.waitForResponse(
+    response =>
+      response.url() === endpoint + '/' + first.id &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.locator('[data-ivr-save]').click();
+  const restoration = await restored;
+  expect(restoration.status()).toBe(200);
+  expect((await restoration.json()).item).toMatchObject({
+    status: 'draft',
+    revision: 4,
+  });
+  await expect(dialog.locator('[data-ivr-saved]')).toBeVisible();
+  await dialog.getByRole('tab', { name: 'Histórico', exact: true }).click();
+  await expect(dialog.locator('[data-ivr-history-revision="4"]')).toBeVisible();
+  await expect(dialog.locator('[data-ivr-history-revision="1"]')).toBeVisible();
   await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
   expect(
     await page.evaluate(
@@ -2503,4 +2541,76 @@ test('local IVR pagination, URL filters and stale editor preserve the reviewed d
       () => document.documentElement.scrollWidth <= innerWidth
     )
   ).toBe(true);
+});
+
+test('local IVR supervisor polling clears real scoped units after native eligibility revocation', async ({
+  page,
+}, info) => {
+  const target = session.ivr_targets[info.project.name];
+  const api = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const grant =
+    api + '/access_authorizations/users/' + target.observer_member_id;
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/supervisor?native_navigation=1`
+  );
+  const metrics = page.locator(
+    '[data-supervisor-observed-metrics] article strong'
+  );
+  await expect(metrics).toHaveText(['0', '0', '—', '—']);
+  await expect(page.locator('[data-supervisor-unit]')).toHaveCount(1);
+  await expect(page.locator('[data-supervisor-unit]')).toContainText(
+    'SYNTHETIC IVR unit A'
+  );
+  await expect(page.getByText('active', { exact: true })).toHaveCount(0);
+  const previous = await page.request.get(grant, {
+    headers: target.administrator,
+  });
+  expect(previous.status()).toBe(200);
+  const original = (await previous.json()).item;
+  try {
+    const denied = page.waitForResponse(
+      response =>
+        response.url() === api + '/supervisor' && response.status() === 401,
+      { timeout: 15000 }
+    );
+    const revoked = await page.request.patch(grant, {
+      headers: target.administrator,
+      data: {
+        expected_revision: original.revision,
+        authorization: { eligible: false },
+      },
+    });
+    expect(revoked.status()).toBe(200);
+    expect((await denied).status()).toBe(401);
+    await expect(metrics).toHaveText(['—', '—', '—', '—']);
+    await expect(page.locator('[data-supervisor-unit]')).toHaveCount(0);
+    await page.screenshot({
+      path: `.codex/call-center-native-e2e/${info.project.name}-supervisor-revoked.png`,
+      fullPage: true,
+    });
+    await page.reload();
+    await expect(page.getByRole('alert')).toHaveText(
+      'Negado pela verificação nativa de rota no ambiente sintético.'
+    );
+  } finally {
+    const current = await page.request.get(grant, {
+      headers: target.administrator,
+    });
+    expect(current.status()).toBe(200);
+    const restored = await page.request.patch(grant, {
+      headers: target.administrator,
+      data: {
+        expected_revision: (await current.json()).item.revision,
+        authorization: { eligible: original.eligible },
+      },
+    });
+    expect(restored.status()).toBe(200);
+    expect(
+      (
+        await page.request.get(api + '/supervisor', {
+          headers: target.observer,
+        })
+      ).status()
+    ).toBe(200);
+  }
 });

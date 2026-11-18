@@ -1363,7 +1363,7 @@
     ],
     "increment": "F11 revisão esperada compatível, sem migration ou concessões implícitas",
     "adr": "docs/adr/20261117-call-center-role-revision.md",
-    "expected_chrome": 108,
+    "expected_chrome": 112,
     "previous_chrome_preserved": 52,
     "native_validation": "pending_new_sha",
     "external_homologation": false,
@@ -2428,7 +2428,7 @@
       "status": "implemented_pending_native_and_browser_validation",
       "native_reference_reuse": true,
       "voice_queues_same_unit_only": true,
-      "expected_chrome": 108,
+      "expected_chrome": 112,
       "previous_chrome_preserved": 96,
       "dedicated_synthetic_accounts": 4,
       "new_http_concurrency_cases": 3,
@@ -2453,7 +2453,41 @@
         "chrome": "not executed; lint gate blocked",
         "artifact": 14395428784,
         "artifact_sha256": "2c2a3020f962700551ca56dc8c719499240ee38dbce19169722477ac5511c45a"
-      }
+      },
+      "second_native_result": {
+        "sha": "4d06013ff56b51aa2b7d486bc2a91aa5921355f4",
+        "run": 44233151968,
+        "rails_main": 763,
+        "rails_concurrent": 17,
+        "schema_reload_reexecuted_examples": 16,
+        "vue": 290,
+        "new_ruby_offenses": 0,
+        "frontend_lint": "passed",
+        "assets_bootstrap": "passed",
+        "chrome_passed": 100,
+        "chrome_failed": 8,
+        "previous_96_preserved": true,
+        "new_scope_cases_passed": 4,
+        "causes": [
+          "select content included in DTMF label",
+          "router.replace replaced filtered page history"
+        ],
+        "artifact": 14397725189,
+        "artifact_sha256": "1fcd3b2a8cbfb045dcbd8c8f312846c13ce5898fa7815ffdc1c50c825da9b1af"
+      },
+      "local_map": "prepared pending native and actual screenshots"
+    },
+    "supervisor_observation_prepared": {
+      "status": "implemented_pending_native_tests",
+      "no_business_permissions_changed": true,
+      "serial_polling": true,
+      "authenticated_actor_profile_boundary": true,
+      "clear_units_on_denial": true,
+      "native_corporate_scope_preserved": true,
+      "new_vue_cases": 4,
+      "new_chrome_projects": 4,
+      "dedicated_synthetic_observer": true,
+      "instant_websocket_revocation_claimed": false
     }
   },
   "resolved_decisions_20261117": [

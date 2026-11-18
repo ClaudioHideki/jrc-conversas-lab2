@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
+import { useMapGetter } from 'dashboard/composables/store';
 import { agentStateLabels } from '../agentStateLabels';
 import { acwLabels } from '../../inbox/acwLabels';
 import VisualShowcasePage from '../components/visual/VisualShowcasePage.vue';
@@ -21,6 +22,26 @@ const units = ref([]);
 const queues = ref([]);
 const snapshot = ref(null);
 const accountId = computed(() => route.params.accountId);
+const currentUser = useMapGetter('getCurrentUser');
+const polling = ref(false);
+const contextKey = computed(() => {
+  const account = currentUser.value?.accounts?.find(
+    row => String(row.id) === String(accountId.value)
+  );
+  return JSON.stringify([
+    accountId.value,
+    currentUser.value?.id,
+    currentUser.value?.type,
+    account?.role,
+    account?.custom_role_id,
+    account?.permissions?.slice().sort(),
+  ]);
+});
+const clearObserved = () => {
+  snapshot.value = null;
+  units.value = [];
+  queues.value = [];
+};
 
 const agentTone = state => {
   if (state === 'available') return 'emerald';
@@ -56,7 +77,7 @@ const supervisorScreen = computed(() => {
     label: t('JRC_CONTACT_CENTER.SUPERVISOR.LOCAL_SOURCE'),
     tone: 'blue',
   };
-  if (loading.value)
+  if (loading.value || polling.value)
     status = { label: t('JRC_CONTACT_CENTER.COMMON.LOADING'), tone: 'slate' };
   if (failed.value)
     status = { label: t('JRC_CONTACT_CENTER.COMMON.ERROR'), tone: 'ruby' };
@@ -80,9 +101,12 @@ const load = async () => {
   const version = generation;
   loading.value = true;
   failed.value = false;
-  snapshot.value = null;
-  units.value = [];
-  queues.value = [];
+  clearObserved();
+  if (!currentUser.value?.id) {
+    loading.value = false;
+    failed.value = true;
+    return;
+  }
   try {
     const [unitResponse, queueResponse, supervisorResponse] = await Promise.all(
       [
@@ -101,21 +125,28 @@ const load = async () => {
     if (version === generation) loading.value = false;
   }
 };
-watch(accountId, load, { immediate: true });
+watch(contextKey, load, { immediate: true });
 const acwPoll = setInterval(async () => {
-  if (loading.value) return;
+  if (loading.value || polling.value || !currentUser.value?.id) return;
   const version = generation;
+  polling.value = true;
   try {
-    const response = await JrcContactCenterAPI.supervisor(accountId.value);
+    const [unitResponse, response] = await Promise.all([
+      JrcContactCenterAPI.units(accountId.value),
+      JrcContactCenterAPI.supervisor(accountId.value),
+    ]);
     if (version === generation) {
       snapshot.value = response.data;
+      units.value = unitResponse.data.items || [];
       failed.value = false;
     }
   } catch {
     if (version === generation) {
-      snapshot.value = null;
+      clearObserved();
       failed.value = true;
     }
+  } finally {
+    polling.value = false;
   }
 }, 5000);
 onBeforeUnmount(() => {
@@ -288,6 +319,7 @@ onBeforeUnmount(() => {
           <article
             v-for="unit in units"
             :key="unit.id"
+            data-supervisor-unit
             class="rounded-2xl border border-n-weak bg-n-alpha-1 p-4"
           >
             <div class="flex items-start justify-between gap-3">
@@ -296,14 +328,25 @@ onBeforeUnmount(() => {
               >
                 <Icon icon="i-lucide-building-2" class="size-5" />
               </span>
-              <VisualStatusBadge :label="unit.status" tone="teal" />
+              <VisualStatusBadge
+                :label="
+                  t(
+                    `JRC_CONTACT_CENTER.ADMIN.${unit.status === 'active' ? 'ACTIVE' : 'INACTIVE'}`
+                  )
+                "
+                :tone="unit.status === 'active' ? 'teal' : 'slate'"
+              />
             </div>
             <h3 class="mt-4 text-sm font-semibold text-n-slate-12">
               {{ unit.name }}
             </h3>
             <p class="mt-1 text-xs text-n-slate-10">
               {{ unit.code }}{{ $t('JRC_CONTACT_CENTER.VISUAL.TEXT_1145')
-              }}{{ unit.kind }}
+              }}{{
+                t(
+                  `JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.${unit.kind.toUpperCase()}`
+                )
+              }}
             </p>
           </article>
           <p v-if="units.length === 0" class="text-sm text-n-slate-10">

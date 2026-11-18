@@ -30,3 +30,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Supervisor e fontes observadas](20261117-call-center-observed-supervisor.md): ausência de dados não é zero nem referência visual operacional.
 
 - [Rascunhos locais de URA](20261117-call-center-local-ivr-drafts.md): grafo interno versionado, simulação sem fornecedor e limites antes da persistência/API/editor.
+
+- [Ordem das observações do supervisor](20261118-call-center-supervisor-observation-order.md): polling serial, fronteira de ator/perfil e descarte de dados após recusa.

@@ -30,12 +30,18 @@ class JrcContactCenter::SyntheticIvrSeed
     units = create_units(company)
     admin = create_operator('administrator', JrcContactCenter::ModulePolicy::PERMISSIONS)
     scoped = create_operator('scoped', %w[jrc_contact_center_view jrc_contact_center_configure])
+    observer = create_operator('observer', %w[jrc_contact_center_view jrc_contact_center_supervise])
     JrcCrm::UserBusinessUnit.create!(account: @account, user: admin.user, scope: 'GROUP', active: true, structure_managed: true)
-    JrcCrm::UserBusinessUnit.create!(account: @account, user: scoped.user, scope: 'BUSINESS_UNIT', company: company,
-                                     business_unit_id: units.first.reload.settings.fetch('business_unit_id'), active: true, structure_managed: true)
+    [scoped, observer].each do |recipient|
+      JrcCrm::UserBusinessUnit.create!(
+        account: @account, user: recipient.user, scope: 'BUSINESS_UNIT', company: company,
+        business_unit_id: units.first.reload.settings.fetch('business_unit_id'), active: true, structure_managed: true
+      )
+    end
     queue = JrcContactCenter::Queue.create!(account: @account, unit: units.first, code: 'VOICE', name: 'SYNTHETIC IVR voice')
     { account_id: @account.id, allowed_unit_id: units.first.id, denied_unit_id: units.last.id, queue_id: queue.id,
-      scoped_member_id: scoped.id, administrator: admin.user.create_new_auth_token, scoped: scoped.user.create_new_auth_token }
+      scoped_member_id: scoped.id, observer_member_id: observer.id, administrator: admin.user.create_new_auth_token,
+      scoped: scoped.user.create_new_auth_token, observer: observer.user.create_new_auth_token }
   end
 
   private
