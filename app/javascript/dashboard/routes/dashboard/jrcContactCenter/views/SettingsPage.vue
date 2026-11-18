@@ -116,7 +116,9 @@ watch(accountId, load, { immediate: true });
             >
               {{ $t('JRC_CONTACT_CENTER.VISUAL.ESTRUTURA_E_GOVERNANCA') }}
             </p>
-            <h1 class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+            <h1
+              class="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl"
+            >
               {{ t('JRC_CONTACT_CENTER.SETTINGS.TITLE') }}
             </h1>
             <p class="mt-2 max-w-3xl text-sm leading-6 text-white/80">

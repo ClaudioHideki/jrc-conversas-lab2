@@ -130,6 +130,7 @@ onBeforeUnmount(() => {
         :disabled="disabled"
         :aria-label="T.searchPicker"
         :placeholder="T.searchPicker"
+        class="min-w-0 flex-1"
         :class="inputClass"
         @keydown.enter.prevent="search"
       />

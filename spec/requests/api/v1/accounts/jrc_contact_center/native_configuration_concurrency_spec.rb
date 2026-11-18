@@ -54,6 +54,10 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       raise 'Synthetic request still active' if workers.any?(&:alive?)
 
       subscriptions.each { |subscription| ActiveSupport::Notifications.unsubscribe(subscription) }
+      # Only fixtures belonging to this guarded disposable suite's Account.
+      JrcContactCenter::Callback.where(account: account).destroy_all
+      JrcContactCenter::CaseEvent.where(account: account).destroy_all
+      JrcContactCenter::Case.where(account: account).destroy_all
       JrcContactCenter::QueueMembership.where(account: account).destroy_all
       JrcContactCenter::Queue.where(account: account).destroy_all
       JrcContactCenter::Unit.where(account: account).destroy_all
@@ -144,13 +148,13 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     end
   end
 
-  def race_with_account_change(change, endpoint: nil, payload: nil)
+  def race_with_account_change(change, endpoint: nil, payload: nil, verb: :patch)
     endpoint ||= "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy"
     payload ||= { limits: { voice: 60, whatsapp: 120 }, voice_required: false }
     observe_account_read
     hold_account_change(change)
     Timeout.timeout(8) { entered.pop }
-    dispatch_configuration_request(:patch, endpoint, payload)
+    dispatch_configuration_request(verb, endpoint, payload)
     Timeout.timeout(8) { read.pop }
     wait_for_account_lock
     release << true
@@ -304,4 +308,92 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       expect(JrcContactCenter::AgentStateEvent.where(account: account)).to be_empty
     end
   end
+
+  def operating_write_payload(resource)
+    owner = account.account_users.find_by!(user: actor)
+    shared = { queue_id: queue.id, owner_account_user_id: owner.id }
+    if resource == 'cases'
+      { case: shared.merge(unit_id: units.first.id, channel: 'phone', category: 'general', summary: 'SYNTHETIC operating write') }
+    else
+      { callback: shared.merge(target_phone: '+5511999999999', scheduled_at: 1.hour.from_now.iso8601, idempotency_key: SecureRandom.uuid) }
+    end
+  end
+
+  def revoke_operating_source(source, team: nil)
+    member = account.account_users.find_by!(user: actor)
+    case source
+    when 'eligibility' then JrcContactCenter::AccessGrant.find_by!(account_user: member).update!(eligible: false)
+    when 'profile' then member.custom_role.update!(permissions: ['jrc_contact_center_view'])
+    when 'feature' then Account.find(account.id).disable_features!('jrc_contact_center')
+    when 'team' then TeamMember.find_by!(team: team, user: actor).destroy!
+    when 'corporate'
+      scope = JrcCrm::UserBusinessUnit.find_by!(account: account, user: actor, scope: 'BUSINESS_UNIT', structure_managed: true)
+      scope.update!(business_unit: business_units.last)
+    end
+  end
+
+  def fail_case_event_insert
+    allow(JrcContactCenter::CaseEvent).to receive(:new).and_wrap_original do |original, *args, **kwargs, &block|
+      event = original.call(*args, **kwargs, &block)
+      allow(event).to receive(:save!).and_raise(ActiveRecord::StatementInvalid, 'SYNTHETIC mandatory case event unavailable')
+      event
+    end
+  end
+
+  context 'with native operating writes' do
+    before do
+      member = account.account_users.find_by!(user: actor)
+      member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_configure jrc_contact_center_operate])
+    end
+
+    %w[cases callbacks].each do |resource|
+      %w[eligibility profile feature team corporate].each do |source|
+        it "denies #{resource} creation after #{source} is revoked during the Account lock wait" do
+          inherited_team = nil
+          if source == 'team'
+            member = account.account_users.find_by!(user: actor)
+            member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_configure])
+            inherited_team = create(:team, account: account)
+            create(:team_member, team: inherited_team, user: actor)
+            JrcContactCenter::AccessGrant.create!(account: account, team: inherited_team, allowed: ['jrc_contact_center_operate'])
+          end
+          context = { account: account, account_user: account.account_users.find_by!(user: actor), user: actor }
+          expect(JrcContactCenter::ModulePolicy.new(context, :contact_center).operate?).to be(true)
+          expect(JrcContactCenter::AccessScope.new(user_context: context).queues.exists?(queue.id)).to be(true)
+          change = -> { revoke_operating_source(source, team: inherited_team) }
+          endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/#{resource}"
+          result = race_with_account_change(change, endpoint: endpoint, payload: operating_write_payload(resource), verb: :post)
+          expect(result).to eq(401)
+          model = resource == 'cases' ? JrcContactCenter::Case : JrcContactCenter::Callback
+          expect(model.where(account: account)).to be_empty
+          expect(JrcContactCenter::CaseEvent.where(account: account)).to be_empty
+        end
+      end
+    end
+
+    it 'rolls back a created Case when its required native event cannot be inserted, without an outer fixture transaction' do
+      fail_case_event_insert
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/cases"
+      expect do
+        post endpoint, headers: headers, params: operating_write_payload('cases'), as: :json
+      end.to raise_error(ActiveRecord::StatementInvalid, /SYNTHETIC mandatory case event unavailable/)
+      expect(JrcContactCenter::Case.where(account: account)).to be_empty
+      expect(JrcContactCenter::CaseEvent.where(account: account)).to be_empty
+    end
+
+    it 'rolls back a Case update with its required event while preserving committed history, without an outer fixture transaction' do
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/cases"
+      post endpoint, headers: headers, params: operating_write_payload('cases'), as: :json
+      expect(response).to have_http_status(:created)
+      record = JrcContactCenter::Case.where(account: account).sole
+      previous = record.attributes
+      fail_case_event_insert
+      expect do
+        patch "#{endpoint}/#{record.id}", headers: headers, params: { case: { status: 'waiting', summary: 'SYNTHETIC rejected' } }, as: :json
+      end.to raise_error(ActiveRecord::StatementInvalid, /SYNTHETIC mandatory case event unavailable/)
+      expect(record.reload.attributes).to eq(previous)
+      expect(record.events.pluck(:event_type)).to eq(['created'])
+    end
+  end
+
 end

@@ -2994,6 +2994,43 @@ test('linked Customer Master preserves native permissions, persisted values and 
     0
   );
   await dialog.getByLabel('Cargo', { exact: true }).scrollIntoViewIfNeeded();
+  const geometry = await dialog
+    .getByLabel('Cargo', { exact: true })
+    .evaluate(element => {
+      const fieldset = element.closest('fieldset')!;
+      const section = fieldset.closest('section')!;
+      const outer = section.getBoundingClientRect();
+      const inner = fieldset.getBoundingClientRect();
+      const style = getComputedStyle(section);
+      const controls = [...fieldset.querySelectorAll('input, select, button')]
+        .filter(control => control.getClientRects().length > 0)
+        .map(control => {
+          const rect = control.getBoundingClientRect();
+          return { tag: control.tagName, left: rect.left, right: rect.right };
+        });
+      return {
+        section: { left: outer.left, right: outer.right },
+        fieldset: { left: inner.left, right: inner.right },
+        paddingLeft: parseFloat(style.paddingLeft),
+        paddingRight: parseFloat(style.paddingRight),
+        controls,
+      };
+    });
+  expect(geometry.fieldset.left).toBeGreaterThanOrEqual(
+    geometry.section.left + geometry.paddingLeft
+  );
+  expect(geometry.fieldset.right).toBeLessThanOrEqual(
+    geometry.section.right - geometry.paddingRight
+  );
+  expect(geometry.controls.length).toBeGreaterThan(4);
+  for (const control of geometry.controls) {
+    expect(control.left).toBeGreaterThanOrEqual(geometry.fieldset.left - 1);
+    expect(control.right).toBeLessThanOrEqual(geometry.fieldset.right + 1);
+  }
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-linked-master-form-geometry.json`,
+    JSON.stringify(geometry)
+  );
   await expectContainedDialog(page);
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-linked-master.png`,
@@ -3126,6 +3163,9 @@ test('global ACW revision preserves drafts across both native editors and requir
     dialog.getByRole('button', { name: 'Salvar', exact: true })
   ).toBeDisabled();
   await conflict.getByLabel(confirm, { exact: true }).check();
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeEnabled();
   await expectContainedDialog(page);
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-acw-revision-popup.png`,
@@ -3182,6 +3222,13 @@ test('global ACW revision preserves drafts across both native editors and requir
   ).toContainText('540');
   await expect(form.locator('[data-save-acw-policy]')).toBeDisabled();
   await legacyConflict.getByLabel(confirm, { exact: true }).check();
+  await expect(form.locator('[data-save-acw-policy]')).toBeEnabled();
+  await expect(
+    page.getByRole('heading', {
+      name: 'Configurações Contact Center',
+      exact: true,
+    })
+  ).toHaveCSS('color', 'rgb(255, 255, 255)');
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-acw-revision-settings.png`,
     fullPage: true,

@@ -98,5 +98,12 @@
     ],
     "change": "Offer existing protected native route from CC only; no duplicate configuration or credential store.",
     "external_homologation": false
+  },
+  "user_decision_20261118": {
+    "full_provider_contract_available": false,
+    "continue_independent_internal_development": true,
+    "external_commands_and_publication": "blocked_pending_external_homologation",
+    "invent_endpoints_capabilities_or_acks": false,
+    "real_provider_commands_executed": false
   }
 }

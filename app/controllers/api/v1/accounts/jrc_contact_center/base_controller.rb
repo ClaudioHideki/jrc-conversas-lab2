@@ -37,6 +37,19 @@ class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::B
     { contract_version: 1, account_id: @contact_center_account_id.to_s }
   end
 
+  # The same Account mutex used by eligibility, profiles and corporate sources.
+  # Each request builds fresh native scopes after waiting, before any write.
+  def with_current_operating_authority
+    JrcContactCenter::AuthorityTransaction.call(account: Current.account, member: Current.account_user) do
+      Current.user.reload
+      raise Pundit::NotAuthorizedError unless Current.user.active_for_authentication?
+
+      @contact_center_access = JrcContactCenter::AccessScope.new(user_context: pundit_user)
+      authorize_contact_center!(:operate?)
+      yield
+    end
+  end
+
   def configuration_revision_options
     params.key?(:expected_revision) ? { expected_revision: params[:expected_revision] } : {}
   end

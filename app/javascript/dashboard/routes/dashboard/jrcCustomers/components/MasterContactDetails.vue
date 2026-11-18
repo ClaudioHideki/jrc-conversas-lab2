@@ -312,7 +312,7 @@ onBeforeUnmount(() => {
         <form @submit.prevent="save">
           <fieldset
             :disabled="busy"
-            class="space-y-3"
+            class="min-w-0 space-y-3"
           >
             <CompanyPicker v-model="form.company_id" /><RouterLink
               :to="

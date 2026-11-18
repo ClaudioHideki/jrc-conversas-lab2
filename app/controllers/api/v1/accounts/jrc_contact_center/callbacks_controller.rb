@@ -9,23 +9,25 @@ class Api::V1::Accounts::JrcContactCenter::CallbacksController < Api::V1::Accoun
   end
 
   def create
-    authorize_contact_center!(:operate?)
-    attributes = callback_params
-    ensure_contact_center_assignment!(queue_id: attributes[:queue_id], owner_account_user_id: attributes[:owner_account_user_id],
-                                      require_accessible_assignment: true)
-    callback = JrcContactCenter::Callback.create!(attributes.merge(account: Current.account))
-    render json: base_payload.merge(item: serialize(callback)), status: :created
+    with_current_operating_authority do
+      attributes = callback_params
+      ensure_contact_center_assignment!(queue_id: attributes[:queue_id], owner_account_user_id: attributes[:owner_account_user_id],
+                                        require_accessible_assignment: true)
+      callback = JrcContactCenter::Callback.create!(attributes.merge(account: Current.account))
+      render json: base_payload.merge(item: serialize(callback)), status: :created
+    end
   end
 
   def update
-    authorize_contact_center!(:operate?)
-    callback = scoped_callbacks.find(params[:id])
-    attributes = callback_params
-    effective_queue = attributes.key?(:queue_id) ? attributes[:queue_id] : callback.queue_id
-    effective_owner = attributes.key?(:owner_account_user_id) ? attributes[:owner_account_user_id] : callback.owner_account_user_id
-    ensure_contact_center_assignment!(queue_id: effective_queue, owner_account_user_id: effective_owner, require_accessible_assignment: true)
-    callback.update!(attributes)
-    render json: base_payload.merge(item: serialize(callback))
+    with_current_operating_authority do
+      callback = scoped_callbacks.find(params[:id])
+      attributes = callback_params
+      effective_queue = attributes.key?(:queue_id) ? attributes[:queue_id] : callback.queue_id
+      effective_owner = attributes.key?(:owner_account_user_id) ? attributes[:owner_account_user_id] : callback.owner_account_user_id
+      ensure_contact_center_assignment!(queue_id: effective_queue, owner_account_user_id: effective_owner, require_accessible_assignment: true)
+      callback.update!(attributes)
+      render json: base_payload.merge(item: serialize(callback))
+    end
   end
 
   private
