@@ -1,5 +1,5 @@
 {
-  "status": "845 main and 23 concurrency passed on 03de3a8f; two additional corporate QA failures under correction, overall gate not approved",
+  "status": "implemented_and_validated_native_and_chrome_on_ac85d6eb",
   "observed_sha": "31d571727427bce5245486f0ef747dce7adf3d8e",
   "native_sources": [
     "app/models/jrc_crm/team_scope.rb",
@@ -63,7 +63,7 @@
     "spec/requests/api/v1/accounts/jrc_contact_center/corporate_scope_writes_spec.rb",
     "spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb",
     "spec/requests/api/v1/accounts/jrc_contact_center/team_corporate_authority_spec.rb",
-    "spec/services/jrc_contact_center/team_corporate_scope_spec.rb"
+    "spec/services/jrc_crm/current_structure_scopes_spec.rb"
   ],
   "native_suite_separation": {
     "cc_and_crm": "jrc_sd_bc_portal_concurrency_20261025_test",
@@ -177,6 +177,26 @@
     "runtime": "explicit poppler-utils and executable/version preflight in same HTTPS APT helper; no PDF text assertion removed",
     "sql": "isolate contract/request tenant FKs using real foreign native origin; require exact constraint for each; keep persisted row and original scope unchanged",
     "new_corporate_examples_expected": 85,
-    "product_or_migration_changed_for_qa": false
+    "product_or_migration_changed_for_qa": false,
+    "validated_sha": "ac85d6eb30cd2c1f038fede35650a2aa04cb79fa"
+  },
+  "native_gate_evidence": {
+    "sha": "ac85d6eb30cd2c1f038fede35650a2aa04cb79fa",
+    "run": 44260446025,
+    "artifact": 14410325587,
+    "artifact_sha256": "05357d9e829154191bce2b8c335513f1512c4e2795767ab45acfcdb93c898ca0",
+    "rails_unique": 953,
+    "rails_main": 845,
+    "rails_concurrency": 23,
+    "rails_affected_corporate": 85,
+    "schema_reload_reexecuted_examples": 16,
+    "vue": 300,
+    "chrome": 112,
+    "screenshots_sha256_verified": 144,
+    "zero_failures_pending_skipped_flaky_outside_errors": true,
+    "migration_identity_schema_reload_and_lints": "passed",
+    "word_part_1_complete": false,
+    "real_provider_operations": false,
+    "docker_publication_or_deploy": false
   }
 }

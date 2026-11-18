@@ -1680,6 +1680,50 @@ test('configuration audit filters pagination details history and verified export
     });
     expect(changed.status()).toBe(200);
   }
+  const recentRecords = await page.request.get(
+    api + '/configuration_audits?page=1&per_page=5',
+    { headers: session.administrator }
+  );
+  expect(recentRecords.status()).toBe(200);
+  const latest = (await recentRecords.json()).items;
+  expect(latest).toHaveLength(5);
+  expect(latest[0].resource_id).toBe(queue.id);
+  await page.goto(base + '?unrelated_filter=keep&audit_config_actor_id=999');
+  const recent = page.locator('[data-recent-configuration]');
+  await expect(recent.locator('[data-recent-event]')).toHaveCount(5);
+  expect(
+    await recent
+      .locator('[data-recent-event]')
+      .evaluateAll(elements =>
+        elements.map(element => element.getAttribute('data-recent-event'))
+      )
+  ).toEqual(latest.map(row => String(row.id)));
+  await recent.scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${suffix}-recent-activity.png`,
+    fullPage: true,
+  });
+  await recent.locator('[data-recent-event]').first().click();
+  const recentDialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
+  await expect(recentDialog).toContainText(
+    'SYNTHETIC audit ' + suffix + ' version 20'
+  );
+  await expect(recentDialog).toContainText(
+    'SYNTHETIC audit ' + suffix + ' version 21'
+  );
+  await expect(recentDialog).toContainText('Não comprova publicação');
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${suffix}-recent-activity-detail.png`,
+    fullPage: true,
+  });
+  await recentDialog.locator('[data-recent-history]').click();
+  await expect(page.locator('[data-configuration-audit]')).toBeVisible();
+  await expect(page).toHaveURL(/audit_config_history=true/);
+  await expect(page).toHaveURL(/unrelated_filter=keep/);
+  expect(new URL(page.url()).searchParams.has('audit_config_actor_id')).toBe(
+    false
+  );
   const query =
     '?audit_config_resource_type=queue&audit_config_resource_id=' +
     queue.id +
@@ -1841,6 +1885,13 @@ test('configuration audit boundary respects unit account export rights and live 
     { headers: session.auditor }
   );
   expect(foreign.status()).toBe(401);
+  await page.goto(base);
+  const recent = page.locator('[data-recent-configuration]');
+  await expect(recent.locator('[data-recent-event]').first()).toBeVisible();
+  await expect(recent).not.toContainText('PRIVATE OTHER UNIT');
+  await expect(
+    recent.locator(`[data-recent-event="${privateId}"]`)
+  ).toHaveCount(0);
   await page.goto(
     base +
       '/audit?audit_config_resource_type=queue&audit_config_resource_id=' +
@@ -2463,8 +2514,19 @@ test('local IVR scoped records and forced URLs obey corporate coverage and fresh
     target.denied_unit_id
   );
   await page.goto(
-    `/app/accounts/${target.account_id}/contact-center/ura?native_navigation=1`
+    `/app/accounts/${target.account_id}/contact-center/control-desk?native_navigation=1`
   );
+  await expect(page.locator('[data-card="ivr"]')).toBeVisible();
+  await page.locator('[data-card="ivr"]').click();
+  const localEditor = page.locator('[data-native-ivr-drafts]');
+  await expect(localEditor).toBeVisible();
+  await localEditor.scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-ivr-configurer-entry.png`,
+    fullPage: true,
+  });
+  await localEditor.click();
+  await expect(page).toHaveURL(/contact-center\/ura/);
   await expect(page.locator(`[data-ivr-draft="${own.id}"]`)).toBeVisible();
   await expect(page.locator(`[data-ivr-draft="${denied.id}"]`)).toHaveCount(0);
   for (const suffix of ['', '/versions', '/versions/1', '/export?revision=1']) {

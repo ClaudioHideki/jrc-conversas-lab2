@@ -7,7 +7,10 @@ import CustomRoleAPI from 'dashboard/api/customRole';
 import AdministrationSection from './AdministrationSection.vue';
 import ControlDeskPage from '../views/ControlDeskPage.vue';
 
-const mocks = vi.hoisted(() => ({ route: null, replace: vi.fn() }));
+const mocks = vi.hoisted(() => ({ route: null, replace: vi.fn(), user: null }));
+vi.mock('dashboard/composables/store', () => ({
+  useMapGetter: () => mocks.user,
+}));
 vi.mock('vue-router', () => ({
   useRoute: () => mocks.route,
   useRouter: () => ({ replace: mocks.replace }),
@@ -69,6 +72,11 @@ const mountSection = (key = 'general', state = 'available') =>
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.route = reactive({ params: { accountId: '1' }, query: {} });
+  mocks.user = ref({
+    id: 4,
+    type: 'User',
+    accounts: [{ id: 1, role: 'administrator', permissions: [] }],
+  });
   API.units.mockResolvedValue({
     data: { items: [], meta: { page: 1, pages: 0, total: 0 } },
   });

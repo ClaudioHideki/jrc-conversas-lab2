@@ -2060,6 +2060,15 @@
       "MAP_TITLE": "Mapa local do fluxo",
       "MAP_HINT": "Destinos do rascunho atual. Edite os nós abaixo; este mapa não representa uma versão aplicada no PABX.",
       "MAP_PENDING": "Destino pendente"
+    },
+    "RECENT_ACTIVITY": {
+      "TITLE": "Atividade administrativa recente",
+      "ALL": "Ver auditoria completa",
+      "PERIOD": "Período",
+      "EMPTY": "Sem alterações administrativas neste período.",
+      "WINDOW": "{period}: {from} – {to} · {timezone}",
+      "EVENT": "{operation} · {resource} #{id}",
+      "WHEN": "{date} · {actor}"
     }
   }
 }

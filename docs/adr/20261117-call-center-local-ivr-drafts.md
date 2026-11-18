@@ -140,3 +140,22 @@ de API confirmam o proxy do navegador sem guardar headers ou conteúdo.
 
 O mapa é somente local. Áudios, calendário, DAC completo e publicação/ACK do
 fornecedor permanecem critérios separados. Nenhuma imagem Docker gerada.
+
+
+## Descoberta do editor pela autoridade já existente — 18/11
+
+A API de rascunhos locais exige configure?, enquanto o card URA exigia
+somente publish?. O configurador podia usar a API/rota direta, mas não
+chegar pelo card da Central. Administração passa a descobrir/abrir a
+seção com configure OU publish. A entrada de quem já publicava é
+preservada. O link de rascunhos e todas as suas APIs continuam exigindo
+configure; a permissão publish não é criada nem deduzida da configuração.
+Os demais cards e os estados pendentes do fornecedor são preservados.
+
+Cinco exemplos Rails preparados: configurador sem publicação, publicador
+sem configuração, visualizador sem ambos, herança e retirada por equipe e
+inelegibilidade. Quatro cenários Chrome existentes passam a chegar ao
+editor pelo card com o configurador sintético restrito à unidade A, sem
+publish, mantendo as recusas de unidade B, perfil e elegibilidade. Quatro
+capturas adicionais previstas em 1440/390 px, claro/escuro. Novos resultados
+pendentes do próximo SHA; não equivalem a publicação ou ACK PABX.

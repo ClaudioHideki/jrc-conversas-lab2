@@ -1,11 +1,14 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import API from 'dashboard/api/jrcContactCenter';
+import { useMapGetter } from 'dashboard/composables/store';
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import AdministrationSection from '../components/AdministrationSection.vue';
 import ConfigurationAuditPage from '../components/ConfigurationAuditPage.vue';
+import RecentConfigurationActivity from '../components/RecentConfigurationActivity.vue';
 
 const route = useRoute();
 const { t } = useI18n();
@@ -14,6 +17,18 @@ const loading = ref(false);
 const failed = ref(false);
 let generation = 0;
 const accountId = computed(() => route.params.accountId);
+const currentUser = useMapGetter('getCurrentUser');
+const contextKey = computed(() => {
+  const account = currentUser.value?.accounts?.find(
+    row => String(row.id) === String(accountId.value)
+  );
+  return JSON.stringify([
+    accountId.value,
+    currentUser.value?.id,
+    currentUser.value?.type,
+    accountMembershipAccess(account),
+  ]);
+});
 const section = computed(() => route.params.section || '');
 const icons = {
   numbers: 'i-lucide-phone',
@@ -46,6 +61,11 @@ const load = async () => {
   loading.value = true;
   failed.value = false;
   data.value = null;
+  if (!currentUser.value?.id) {
+    failed.value = true;
+    loading.value = false;
+    return;
+  }
   try {
     const response = await API.administration(accountId.value);
     if (generation === version) data.value = response.data;
@@ -55,7 +75,11 @@ const load = async () => {
     if (generation === version) loading.value = false;
   }
 };
-watch(accountId, load, { immediate: true });
+watch(contextKey, load, { immediate: true });
+onBeforeUnmount(() => {
+  generation += 1;
+  data.value = null;
+});
 </script>
 
 <template>
@@ -172,6 +196,11 @@ watch(accountId, load, { immediate: true });
       <p v-if="!section && !data.cards.length" class="text-sm text-n-slate-11">
         {{ t('JRC_CONTACT_CENTER.ADMIN.NO_CARDS') }}
       </p>
+      <RecentConfigurationActivity
+        v-if="!section && data.capabilities.configuration_audit"
+        :key="contextKey"
+        :account-id="accountId"
+      />
       <AdministrationSection
         v-if="section && selected"
         :key="`${accountId}:${section}`"

@@ -184,3 +184,25 @@ funcional do Backoffice ou do gerador de PDF foi alterado.
 
 Vue e Chrome não rodaram nesse SHA. A atividade recente continua em
 incremento separado, sem alegar aceite integral das figuras do Word.
+
+
+## Aceite incremental de ac85d6eb
+
+CI 44260446025 aprovada: 845 principais + 23 concorrentes + 85 corporativos,
+953 exemplos Rails únicos. As 16 provas do ledger foram reexecutadas em
+outro banco de recarga e não são contadas como casos novos. 300 Vue e
+112 Chrome aprovados, sem falhas/pendências/skips/flaky/erros externos;
+bootstrap real com 15 cards, migrations/SQL, lints e assets aprovados.
+Artefato 14410325587; SHA-256
+05357d9e829154191bce2b8c335513f1512c4e2795767ab45acfcdb93c898ca0.
+Os hashes das 144 capturas foram conferidos contra o artefato. Isso não
+significa revisão visual individual de todas as capturas.
+
+Poppler real extraiu nomes/identificadores sintéticos e todas as âncoras;
+os dois cenários independentes provaram as FKs por nome exato, mantendo
+o registro original. Não houve alteração no gerador, migrations ou FKs.
+As provas de remoção/reinclusão por equipe também passaram nos quatro
+projetos Chrome. A configuração completa da equipe/supervisão/hierarquia
+e as dependências de negócio/fornecedor permanecem pendentes do Word.
+A atividade recente e a descoberta do editor local são um próximo incremento,
+ainda sem usar estas evidências como se fossem seus testes.

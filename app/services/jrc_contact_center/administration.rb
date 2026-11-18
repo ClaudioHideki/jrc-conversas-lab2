@@ -33,17 +33,22 @@ class JrcContactCenter::Administration
     permission = { 'audit' => :audit, 'teams' => :configure, 'events' => :control }.fetch(key) do
       CARDS.fetch(key) { raise ActiveRecord::RecordNotFound }.first
     end
-    raise Pundit::NotAuthorizedError unless @policy.public_send("#{permission}?")
+    raise Pundit::NotAuthorizedError unless card_allowed?(key, permission)
   end
 
   private
 
   def cards
     CARDS.filter_map do |key, (permission, state)|
-      next unless @policy.public_send("#{permission}?")
+      next unless card_allowed?(key, permission)
 
       { key: key, state: state, count: count_for(key) }
     end
+  end
+
+  # Local draft configuration is independent of provider publication authority.
+  def card_allowed?(key, permission)
+    @policy.public_send("#{permission}?") || (key == 'ivr' && @policy.configure?)
   end
 
   def capabilities

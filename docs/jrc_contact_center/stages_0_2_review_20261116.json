@@ -67,6 +67,25 @@
         "complete_reference": [
           "PABX online/confirmed indicators require an actual provider response"
         ]
+      },
+      "recent_activity_increment_20261118": {
+        "status": "implemented in temporary overlay; native Vue/Chrome validation pending on next checkpoint",
+        "source": "native configuration audit API with five authorized records and server period/timezone",
+        "details": "reuse ConfigurationAuditDetails and contained Dialog; exact resource history; read only",
+        "authorization": "native configuration_audit capability; fresh server authorization per request; account/profile changes invalidate the page",
+        "acceptance_prepared": {
+          "vue": 15,
+          "existing_chrome_cases_extended": 8,
+          "chrome_count_preserved": 112,
+          "screenshot_projects": [
+            "desktop-light",
+            "desktop-dark",
+            "mobile-light",
+            "mobile-dark"
+          ]
+        },
+        "provider_publication_proof": false,
+        "complete_figure": false
       }
     },
     {
@@ -123,6 +142,25 @@
         "complete_reference": [
           "Recent administrative before/after and external alerts belong to stages 3/8"
         ]
+      },
+      "recent_activity_increment_20261118": {
+        "status": "implemented in temporary overlay; native Vue/Chrome validation pending on next checkpoint",
+        "source": "native configuration audit API with five authorized records and server period/timezone",
+        "details": "reuse ConfigurationAuditDetails and contained Dialog; exact resource history; read only",
+        "authorization": "native configuration_audit capability; fresh server authorization per request; account/profile changes invalidate the page",
+        "acceptance_prepared": {
+          "vue": 15,
+          "existing_chrome_cases_extended": 8,
+          "chrome_count_preserved": 112,
+          "screenshot_projects": [
+            "desktop-light",
+            "desktop-dark",
+            "mobile-light",
+            "mobile-dark"
+          ]
+        },
+        "provider_publication_proof": false,
+        "complete_figure": false
       }
     },
     {
@@ -185,6 +223,31 @@
         "complete_reference": [
           "No native Team-to-Queue/primary-supervisor model; DAC/calendar/publication need stages 3/4/6 and provider contract"
         ]
+      },
+      "current_native_team_authority_evidence_20261118": {
+        "scope": "current corporate source, native membership reinclusion, explicit eligibility and write locks only",
+        "evidence": {
+          "sha": "ac85d6eb30cd2c1f038fede35650a2aa04cb79fa",
+          "run": 44260446025,
+          "artifact": 14410325587,
+          "artifact_sha256": "05357d9e829154191bce2b8c335513f1512c4e2795767ab45acfcdb93c898ca0",
+          "rails_unique": 953,
+          "rails_main": 845,
+          "rails_concurrency": 23,
+          "rails_affected_corporate": 85,
+          "schema_reload_reexecuted_examples": 16,
+          "vue": 300,
+          "chrome": 112,
+          "screenshots_sha256_verified": 144,
+          "zero_failures_pending_skipped_flaky_outside_errors": true,
+          "migration_identity_schema_reload_and_lints": "passed",
+          "word_part_1_complete": false,
+          "real_provider_operations": false,
+          "docker_publication_or_deploy": false
+        },
+        "primary_supervisor_and_queue_hierarchy_complete": false,
+        "last_agent_business_decision_resolved": false,
+        "full_figure_complete": false
       }
     },
     {
@@ -675,6 +738,31 @@
           "Native Team has no corporate scope or supervisor/queue hierarchy; no fictitious team status; richer mapping, schedules and distribution remain later",
           "Elegibilidade de usuário inativo não é inferida da presença online; regras de disponibilidade/capacidade PABX e impacto da última cobertura continuam dependentes do contrato operacional."
         ]
+      },
+      "current_native_team_authority_evidence_20261118": {
+        "scope": "current corporate source, native membership reinclusion, explicit eligibility and write locks only",
+        "evidence": {
+          "sha": "ac85d6eb30cd2c1f038fede35650a2aa04cb79fa",
+          "run": 44260446025,
+          "artifact": 14410325587,
+          "artifact_sha256": "05357d9e829154191bce2b8c335513f1512c4e2795767ab45acfcdb93c898ca0",
+          "rails_unique": 953,
+          "rails_main": 845,
+          "rails_concurrency": 23,
+          "rails_affected_corporate": 85,
+          "schema_reload_reexecuted_examples": 16,
+          "vue": 300,
+          "chrome": 112,
+          "screenshots_sha256_verified": 144,
+          "zero_failures_pending_skipped_flaky_outside_errors": true,
+          "migration_identity_schema_reload_and_lints": "passed",
+          "word_part_1_complete": false,
+          "real_provider_operations": false,
+          "docker_publication_or_deploy": false
+        },
+        "primary_supervisor_and_queue_hierarchy_complete": false,
+        "last_agent_business_decision_resolved": false,
+        "full_figure_complete": false
       }
     },
     {
@@ -2590,10 +2678,11 @@
     "prepared_security_increment": {
       "adr": "docs/adr/20261118-call-center-current-team-corporate-sources.md",
       "rails_examples": 47,
-      "native_results": "pending ConfigurationWrite Account mutex validation",
+      "native_results": "validated on ac85d6eb; 953 unique Rails plus 16 reload reexecutions, 300 Vue and 112 Chrome",
       "chrome_corporate_cases_extended": 4,
       "current_unit_issuer_validation": true,
-      "observation_write_adr": "docs/adr/20261118-call-center-observation-write-authority.md"
+      "observation_write_adr": "docs/adr/20261118-call-center-observation-write-authority.md",
+      "validated_sha": "ac85d6eb30cd2c1f038fede35650a2aa04cb79fa"
     },
     "word_part_1_complete": false,
     "full_23_figures_complete": false,
@@ -2652,6 +2741,43 @@
       "failure": "queue configuration request did not produce expected Account lock wait; ConfigurationWrite locked target/parents but lacked the Account mutex",
       "correction": "preserve transaction and native reauthorization while acquiring Account before target/parents in both create/update; preserve real lock-wait requirement and add status-only timeout diagnostics",
       "vue_and_chrome": "not executed"
+    },
+    "recent_administrative_activity": {
+      "adr": "docs/adr/20261118-call-center-recent-administrative-activity.md",
+      "status": "prepared; targeted local frontend lint passed; native tests and visual review pending",
+      "new_backend_api_or_schema": false,
+      "requires_new_sha_evidence": true,
+      "full_23_figures_complete": false,
+      "native_membership_context": "accountMembershipAccess: all authorization fields preserved; presence-only changes ignored"
+    },
+    "local_ivr_navigation_prepared": {
+      "status": "implemented_pending_native_validation",
+      "existing_authority": "configure for local drafts; publish remains independent",
+      "publisher_discovery_preserved": true,
+      "new_permissions_or_provider_operations": false,
+      "new_rails_examples": 5,
+      "existing_chrome_cases_extended": 4,
+      "screenshots_expected": 4,
+      "full_reference_complete": false
+    },
+    "latest_validated_checkpoint": {
+      "sha": "ac85d6eb30cd2c1f038fede35650a2aa04cb79fa",
+      "run": 44260446025,
+      "artifact": 14410325587,
+      "artifact_sha256": "05357d9e829154191bce2b8c335513f1512c4e2795767ab45acfcdb93c898ca0",
+      "rails_unique": 953,
+      "rails_main": 845,
+      "rails_concurrency": 23,
+      "rails_affected_corporate": 85,
+      "schema_reload_reexecuted_examples": 16,
+      "vue": 300,
+      "chrome": 112,
+      "screenshots_sha256_verified": 144,
+      "zero_failures_pending_skipped_flaky_outside_errors": true,
+      "migration_identity_schema_reload_and_lints": "passed",
+      "word_part_1_complete": false,
+      "real_provider_operations": false,
+      "docker_publication_or_deploy": false
     }
   }
 }
