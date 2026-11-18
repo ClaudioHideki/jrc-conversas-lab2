@@ -79,11 +79,11 @@ RSpec.describe JrcContactCenter::IvrSimulator do
     queue.update!(status: 'inactive')
     expect { simulator.call(input: '1') }.to raise_error(JrcContactCenter::OperationError, 'ivr_unavailable_queue')
   end
+
   %w[* #].each do |digit|
     it "supports the explicit DTMF option #{digit} without interpreting it as a command" do
       definition['nodes'][0]['options'][0]['digit'] = digit
       expect(simulator.call(input: digit)[:outcome]).to eq('queue_destination')
     end
   end
-
 end

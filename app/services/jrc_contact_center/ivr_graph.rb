@@ -53,7 +53,7 @@ class JrcContactCenter::IvrGraph
 
   def validate_unit!(units)
     valid = unit_id.match?(/\A[1-9]\d{0,18}\z/) && unit_id.to_i.bit_length <= 63
-    valid &&= units.where(id: unit_id, status: 'active').exists?
+    valid &&= units.exists?(id: unit_id, status: 'active')
     raise ActiveRecord::RecordNotFound unless valid
   end
 

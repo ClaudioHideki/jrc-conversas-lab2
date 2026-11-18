@@ -119,6 +119,7 @@ RSpec.describe JrcContactCenter::IvrGraph do
     JrcContactCenter::AccessGrant.find_by!(account_user: member).update!(eligible: false)
     expect { described_class.new(definition, access: access, unit_id: unit.id) }.to raise_error(Pundit::NotAuthorizedError)
   end
+
   ['unknown', 0, '1', 1.0].each do |version|
     it "does not reinterpret the schema identity #{version.inspect}" do
       definition['schema_version'] = version
@@ -159,5 +160,4 @@ RSpec.describe JrcContactCenter::IvrGraph do
       end.to raise_error(JrcContactCenter::OperationError, 'invalid_ivr_graph')
     end
   end
-
 end
