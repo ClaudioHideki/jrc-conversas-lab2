@@ -4,10 +4,15 @@
 # are covered separately by the Rails request/service specs, never by this fake.
 require 'minitest/autorun'
 require 'minitest/mock'
+require 'active_support/all'
 
 module JrcContactCenter
   class OperationError < StandardError; end
 end
+# Load the actual new policy dependencies, without stubbing their behavior.
+# This remains an isolated value test, never a substitute for PostgreSQL/Rails.
+require_relative '../../app/services/jrc_contact_center/acw_rule_precedence'
+require_relative '../../app/services/jrc_contact_center/acw_scoped_rules'
 require_relative '../../app/services/jrc_contact_center/acw_policy'
 require_relative '../../app/services/jrc_contact_center/acw_policy_audit'
 

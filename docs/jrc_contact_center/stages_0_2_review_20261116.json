@@ -3219,5 +3219,32 @@
     "correction": "The new ACW revision included rule Hash serialization order. JSONB reload can reorder keys, making the same effective rules appear stale. Signature now uses the fixed rule field sequence; a real authenticated two-write regression verifies the saved revision survives PostgreSQL reload. Strict CAS and legacy signatures remain unchanged. Method complexity and layout corrected without disabling cops or assertions.",
     "new_sha_validation": "pending",
     "full_23_figures_complete": false
+  },
+  "qa_20e149be_20261118": {
+    "sha": "20e149be17b201ce0b1952dd2bd06406fe5de918",
+    "run": 44398189820,
+    "artifact": 14472074520,
+    "artifact_sha256": "e8b95d645945df5079c6d68c5928382037c00eed83b80429c906c752a0dfd9c7",
+    "main_rails_examples": 1026,
+    "main_failures_pending_outside_errors": 0,
+    "schema_reload_passed": 16,
+    "ruby_new_offenses": 2,
+    "isolated_legacy": {
+      "runs": 5,
+      "assertions": 10,
+      "failures": 0,
+      "errors": 2,
+      "skips": 0,
+      "cause": "Standalone harness did not require the new real AcwScopedRules dependency called by the audit snapshot."
+    },
+    "not_run": [
+      "concurrency",
+      "corporate_regressions",
+      "Vue",
+      "assets",
+      "Chrome"
+    ],
+    "correction": "Load actual scoped-rule implementations and ActiveSupport in the standalone harness; keep its audit stub and non-native warning unchanged. Separate target lock, attendance identity and pending creation inside the original manager transaction; remove one extra blank line. No assertion or lint rule removed.",
+    "full_word_complete": false
   }
 }

@@ -20,22 +20,16 @@ class JrcContactCenter::QualificationManager
   def start!(call_session: nil, conversation: nil, started_at: nil)
     raise JrcContactCenter::OperationError, 'contact_center_disabled' unless @account.feature_enabled?('jrc_contact_center')
     @account.with_lock do
-      target = call_session || conversation
-      raise ActiveRecord::RecordNotFound unless target&.account_id == @account.id
-      target = target.class.where(account_id: @account.id).lock.find(target.id)
+      target = locked_attendance(call_session || conversation)
       call_session ? call_session = target : conversation = target
 
       leg = attendance_leg(call_session, conversation)
-      identity = { account: @account, account_user: @member, call_session: call_session, conversation: conversation,
-                   conversation_cycle: conversation ? conversation.additional_attributes.fetch('jrc_acw_cycle', 0).to_i : 0 }
+      identity = qualification_identity(call_session, conversation)
       existing = JrcContactCenter::Qualification.find_by(identity)
       return existing if existing
       raise JrcContactCenter::OperationError.new('conversation_already_resolved', status: :conflict) if conversation&.resolved?
 
-      channel = conversation ? 'whatsapp' : 'voice'
-      limit = JrcContactCenter::AcwPolicy.new(account: @account).call[:limits].fetch(channel)
-      record = JrcContactCenter::Qualification.create!(identity.merge(channel: channel, started_at: started_at || Time.current,
-                                                                      acw_limit_seconds: limit))
+      record = create_pending_qualification(identity, started_at)
       record_pending_state!(record, call_session, leg)
       record
     end
@@ -70,6 +64,23 @@ class JrcContactCenter::QualificationManager
   end
 
   private
+
+  def locked_attendance(target)
+    raise ActiveRecord::RecordNotFound unless target&.account_id == @account.id
+
+    target.class.where(account_id: @account.id).lock.find(target.id)
+  end
+
+  def qualification_identity(call_session, conversation)
+    { account: @account, account_user: @member, call_session: call_session, conversation: conversation,
+      conversation_cycle: conversation ? conversation.additional_attributes.fetch('jrc_acw_cycle', 0).to_i : 0 }
+  end
+
+  def create_pending_qualification(identity, started_at)
+    channel = identity[:conversation] ? 'whatsapp' : 'voice'
+    limit = JrcContactCenter::AcwPolicy.new(account: @account).call[:limits].fetch(channel)
+    JrcContactCenter::Qualification.create!(identity.merge(channel: channel, started_at: started_at || Time.current, acw_limit_seconds: limit))
+  end
 
   def attendance_leg(call_session, conversation)
     return owned_voice_leg(call_session) if call_session

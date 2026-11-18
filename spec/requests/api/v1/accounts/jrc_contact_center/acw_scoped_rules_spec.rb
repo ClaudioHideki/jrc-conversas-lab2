@@ -106,5 +106,4 @@ RSpec.describe 'Call Center scoped voice ACW rules', type: :request do
     expect(JrcContactCenter::AcwPolicy.new(account: Account.find(account.id)).revision).to eq(latest)
     expect(audits.count).to eq(2)
   end
-
 end
