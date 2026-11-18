@@ -184,3 +184,77 @@ describe('expected configuration revision lifecycle', () => {
     expect(revision.canSave.value).toBe(true);
   });
 });
+
+describe('local IVR immutable revision support', () => {
+  it('uses positive integer revisions only for the local IVR resource', async () => {
+    const { revision, resource } = mountRevision();
+    resource.value = 'ivr_drafts';
+    await flushPromises();
+    revision.capture({ id: '10', revision: 1 });
+    expect(revision.canSave.value).toBe(true);
+    expect(revision.options()).toEqual({ expected_revision: 1 });
+    revision.capture({ id: '10', revision: '1' });
+    expect(revision.canSave.value).toBe(false);
+    resource.value = 'queues';
+    await flushPromises();
+    revision.capture({ id: '10', revision: 1 });
+    expect(revision.canSave.value).toBe(false);
+  });
+
+  it('preserves the local graph across a stale revision and invalidates review when it is edited', async () => {
+    const { revision, resource, draft } = mountRevision();
+    resource.value = 'ivr_drafts';
+    await flushPromises();
+    draft.value.definition = {
+      schema_version: 1,
+      start: 'end',
+      nodes: [{ id: 'end', type: 'end' }],
+    };
+    revision.capture({ id: '10', revision: 1 });
+    API.configurationRecord.mockResolvedValue({
+      data: { item: { id: '10', revision: 2, name: 'SYNTHETIC concurrent' } },
+    });
+    expect(revision.handleError(conflict('stale_ivr_revision'))).toBe(true);
+    await revision.reload();
+    expect(API.configurationRecord).toHaveBeenCalledWith(
+      '1',
+      'ivr_drafts',
+      '10'
+    );
+    expect(draft.value.definition.start).toBe('end');
+    expect(revision.canSave.value).toBe(false);
+    revision.review(true);
+    expect(revision.options()).toEqual({ expected_revision: 2 });
+    expect(revision.canSave.value).toBe(true);
+    draft.value.definition.start = 'other';
+    expect(revision.canSave.value).toBe(false);
+  });
+
+  it('does not adopt configuration SHA tokens as immutable IVR revision numbers', async () => {
+    const { revision, resource } = mountRevision();
+    resource.value = 'ivr_drafts';
+    await flushPromises();
+    revision.capture({ id: '10', revision: 1 });
+    API.configurationRecord.mockResolvedValue({
+      data: { item: { id: '10', revision: refreshed } },
+    });
+    revision.handleError(conflict('stale_ivr_revision'));
+    await revision.reload();
+    revision.review(true);
+    expect(revision.canSave.value).toBe(false);
+    expect(revision.state.error).toBe(true);
+  });
+
+  it('does not treat native queue revision errors as local IVR conflicts or vice versa', async () => {
+    const { revision, resource } = mountRevision();
+    revision.capture({ id: 10, revision: original });
+    expect(revision.handleError(conflict('stale_ivr_revision'))).toBe(false);
+    resource.value = 'ivr_drafts';
+    await flushPromises();
+    revision.capture({ id: '10', revision: 1 });
+    expect(revision.handleError(conflict('stale_configuration_revision'))).toBe(
+      false
+    );
+    expect(revision.handleError(conflict('ivr_revision_required'))).toBe(true);
+  });
+});

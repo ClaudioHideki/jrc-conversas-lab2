@@ -24,6 +24,8 @@ const text = {
 };
 const labels = {
   name: t('JRC_CONTACT_CENTER.ADMIN.NAME'),
+  definition: t('JRC_CONTACT_CENTER.LOCAL_IVR.DEFINITION'),
+  revision: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REVISION'),
   code: t('JRC_CONTACT_CENTER.ADMIN.CODE'),
   kind: t('JRC_CONTACT_CENTER.ADMIN.KIND'),
   status: t('JRC_CONTACT_CENTER.ADMIN.STATUS'),
@@ -78,6 +80,7 @@ const fields = computed(
       ],
       access_users: ['eligible', 'allowed', 'denied'],
       access_teams: ['allowed'],
+      ivr_drafts: ['name', 'revision', 'definition'],
     })[props.resource] || []
 );
 const format = (record, field) => {
@@ -96,6 +99,7 @@ const format = (record, field) => {
     );
   if (['kind', 'status', 'service_kind', 'strategy'].includes(field))
     return choices[value] || String(value);
+  if (field === 'definition') return JSON.stringify(value, null, 2);
   return String(value);
 };
 </script>

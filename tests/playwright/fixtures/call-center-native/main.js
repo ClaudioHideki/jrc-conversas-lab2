@@ -20,6 +20,12 @@ const nativeNavigation = new URLSearchParams(window.location.search).has(
   'native_navigation'
 );
 
+const localIvrRoute = contactCenterRoutes[0].children.find(
+  route => route.name === 'jrc_contact_center_ivr'
+);
+if (!localIvrRoute)
+  throw new Error('Native IVR route missing from fixture source');
+
 window.chatwootConfig = {};
 window.axios = axios;
 Object.assign(axios.defaults.headers.common, window.__SYNTHETIC_AUTH__);
@@ -35,9 +41,15 @@ const router = createRouter({
           '<p role="alert">Negado pela verificação nativa de rota no ambiente sintético.</p>',
       },
     },
-    ...webphoneRoutes.filter(route => route.name === 'ramal_settings'),
+    ...(nativeNavigation
+      ? webphoneRoutes
+      : webphoneRoutes.filter(route => route.name === 'ramal_settings')),
     ...(!nativeNavigation
       ? [
+          {
+            ...localIvrRoute,
+            path: contactCenterRoutes[0].path + '/' + localIvrRoute.path,
+          },
           {
             path: '/app/accounts/:accountId/contact-center/control-desk',
             name: 'jrc_contact_center_control_desk',
@@ -92,7 +104,11 @@ const store = createStore({
 });
 // Native permission consumer and production layout, backed by fresh authenticated APIs.
 router.beforeEach(async to => {
-  if (!nativeNavigation && to.name !== 'ramal_settings') return true;
+  if (
+    !nativeNavigation &&
+    !['ramal_settings', 'jrc_contact_center_ivr'].includes(to.name)
+  )
+    return true;
   if (to.name === 'synthetic_access_denied') return true;
   const [account, profile] = await Promise.all([
     axios.get(`/api/v1/accounts/${to.params.accountId}`),

@@ -31,6 +31,8 @@ const labels = {
   local: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.LOCAL_ONLY'),
 };
 const fieldLabels = {
+  revision: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REVISION'),
+  integrity_sha256: t('JRC_CONTACT_CENTER.LOCAL_IVR.INTEGRITY'),
   name: t('JRC_CONTACT_CENTER.ADMIN.NAME'),
   code: t('JRC_CONTACT_CENTER.ADMIN.CODE'),
   kind: t('JRC_CONTACT_CENTER.ADMIN.KIND'),
@@ -99,6 +101,8 @@ const permissionLabels = {
   ),
 };
 const enumLabels = {
+  draft: t('JRC_CONTACT_CENTER.LOCAL_IVR.STATES.draft'),
+  archived: t('JRC_CONTACT_CENTER.LOCAL_IVR.STATES.archived'),
   provider: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.PROVIDER'),
   sac: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.SAC'),
   coe: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.COE'),

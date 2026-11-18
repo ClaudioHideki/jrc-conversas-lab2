@@ -1,6 +1,6 @@
 # Rascunhos locais de URA: contrato interno separado do PABX
 
-Estado: núcleo local validado em 7ab118ba; persistência transacional preparada no próximo incremento, ainda sem API/editor ou aceite de produto.
+Estado: núcleo e persistência local validados em 6a8b9c72. API/editor preparados em incremento separado; dependem dos novos testes nativos e de 108 cenários Chrome. Não há publicação PABX ou aceite integral das 23 figuras.
 
 ## Requisito e código auditado
 
@@ -64,3 +64,18 @@ A etapa auxiliar opcional de sugestões de formatter também falhou; suas sugest
 868ecad5 / CI 44219155439: 16/16 exemplos do ledger passaram no schema recarregado. Na suíte principal, 729/730 passaram; o cenário de schema adulterado gerou corretamente ActiveRecord::MigrationError, mas o matcher esperava a mensagem sem as linhas em branco que Rails acrescenta. O teste mantém a classe e o texto significativo por regex. Restavam quatro infrações de lint: separação de private, continuação de argumentos e tamanho do método SQL. O recibo e todas as asserções de bloqueio permanecem.
 
 O trecho de validação do vínculo do autor foi separado do SQL de sequência/digest, sem mudar o SQL final montado. Hash desta migration ainda não implantada: 67424d8158f78886a716b37998026fabed35edc9cce9c30db07f37524311dc90 → eaeb4147658fd8e5c9bf25272c34bf5ed3113cf603856854906620f128d92e91. Comparação dos três comandos montados normalizados confirmou igualdade; nenhuma FK, trigger ou capacidade foi removida. Revalidação do novo SHA obrigatória; os exemplos da suíte principal ainda não representam aprovação integral.
+
+
+## Persistência validada e próximo incremento de interface — 18/11/2026
+
+6a8b9c72112cd36500c4f4429203b51da1fbb0d7 / CI 44220513593: 730 exemplos Rails principais e 14 concorrentes, 250 Vue e 96/96 Chrome aprovados, zero falhas, pendências ou erros externos. Os 16 exemplos do ledger foram também reexecutados no banco separado criado pela recarga do schema; não são 16 casos únicos adicionais. Instalação, upgrade populado, reexecução, lints, assets e bootstrap passaram. Artefato 14390294705, SHA-256 90e947cc7bdfa34bf80e08460f1ad1508cd10c22f838481394e95554794d79d6; 120 capturas verificadas. Migration exata eaeb4147658fd8e5c9bf25272c34bf5ed3113cf603856854906620f128d92e91. Nenhuma execução local ou em produção.
+
+Próximo incremento preparado: API autenticada de lista/detalhe/criação/revisão/histórico/exportação/simulação, editor nativo em popup com abas, importação JSON local, filtros/paginação e navegação por rota existente. Não é outro cadastro de filas/unidades. Reutiliza as políticas, escopos, auditoria, diálogos e resolução nativa de conflitos. Filas válidas nesta versão são de voz e da mesma unidade; o servidor valida as referências, independentemente do formulário.
+
+Listagem retorna metadados autorizados, até 100 itens por página (editor usa 20). Histórico usa 20 revisões por página. Definição somente no detalhe/exportação autorizados. Parâmetros ivr_draft, ivr_preview e ivr_simulation são integralmente filtrados dos logs. Exportação identifica a revisão e seu checksum; o autor histórico é identificado pelo ID registrado, sem inventar nome ou expor e-mail. A unidade e a fotografia corporativa não podem ser reclassificadas pela API.
+
+Erro de rede após envio preserva corpo, destino e UUID originais; campos ficam bloqueados para a repetição segura. Conflito exige carregar e revisar o estado atual antes de nova gravação. Importação/JSON pendente não substitui silenciosamente o grafo. Troca de conta/ator/perfil desmonta o editor e invalida respostas atrasadas. Simulação tem resultado local explícito e nunca produz chamada ou comando externo. Arquivar/restaurar cria revisão local, sem alegar rollback PABX.
+
+Provas preparadas: APIs com banco real, permissões, filtros, paginação, revisão e repetição, três corridas HTTP reais (revisão, UUID e revogação após lock), Vue focado e 12 cenários Chrome adicionais. Quatro contas sintéticas exclusivas mantêm os dados dos 96 cenários anteriores intactos. Novo gate exige 108/108, desktop 1440/celular 390 e claro/escuro. Os resultados antigos não comprovam estes incrementos ainda não executados. Não foram alterados critérios, dependências ou permissões reais.
+
+Permanecem pendentes áudio/mídia, calendários/horários, roteamento entre unidades, DAC, capacidades efetivas do fornecedor, aprovação/publicação/ACK/rollback e homologação externa. A conclusão do editor local não representa conclusão de URA ou das etapas 0–8.

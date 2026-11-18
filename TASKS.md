@@ -129,3 +129,7 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - Persistência 207bc523 / CI 44216984172 bloqueada: 14/15 exemplos no schema recarregado; preservada a rejeição nativa de exclusão de Account antes de Unit. Teste separado de ordem atômica, correções de lint sem supressão e migration atual somente formatada com SQL normalizado idêntico. Novo hash exato 67424d81…; revalidação obrigatória. API/editor ainda em preparação isolada, sem aceite.
 
 - Persistência 868ecad5: 16/16 no schema recarregado; 729/730 principais. Corrigido somente matcher da mensagem decorada por Rails e quatro diagnósticos de lint; validação do autor extraída preservando SQL montado, novo hash exato eaeb4147658fd8e5c9bf25272c34bf5ed3113cf603856854906620f128d92e91. Próxima CI obrigatória.
+
+
+- [x] **CC-LOCAL-IVR-LEDGER-VALIDATED-20261118:** 6a8b9c72 / CI 44220513593: 744 Rails únicos (730 + 14), 16 reexecuções do ledger após schema reload, 250 Vue, 96 Chrome e 120 capturas/hash. Migrations, lints, assets e bootstrap aprovados; artefato 14390294705 / 90e947cc7bdfa34bf80e08460f1ad1508cd10c22f838481394e95554794d79d6.
+- [ ] **CC-LOCAL-IVR-API-EDITOR-20261118:** API/editor/importação/exportação/histórico/simulação preparados, reutilizando escopos e auditoria nativos. Três corridas HTTP reais e 12 Chrome adicionais preparados; gate exigirá 108/108 preservando os 96 anteriores. Execução nativa do próximo SHA pendente. Sem publicação PABX, Docker, produção ou concessões reais. Figuras/etapas permanecem abertas onde faltam critérios.

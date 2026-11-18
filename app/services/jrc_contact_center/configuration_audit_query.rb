@@ -3,7 +3,8 @@
 class JrcContactCenter::ConfigurationAuditQuery
   TYPES = {
     'unit' => 'JrcContactCenter::Unit', 'queue' => 'JrcContactCenter::Queue',
-    'membership' => 'JrcContactCenter::QueueMembership', 'role' => 'CustomRole', 'access' => 'JrcContactCenter::AccessGrant'
+    'membership' => 'JrcContactCenter::QueueMembership', 'role' => 'CustomRole', 'access' => 'JrcContactCenter::AccessGrant',
+    'ivr_revision' => 'JrcContactCenter::IvrDraftVersion'
   }.freeze
 
   FILTER_KEYS = %i[from to resource_type resource_id operation actor_id unit_id correlation_id history page per_page].freeze

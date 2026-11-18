@@ -101,7 +101,7 @@ export const routes = [
       {
         path: 'ura',
         name: 'jrc_contact_center_ivr',
-        ...visualPage('ivrBuilder'),
+        component: () => import('./views/IvrDraftsPage.vue'),
         meta: configureMeta,
       },
       {

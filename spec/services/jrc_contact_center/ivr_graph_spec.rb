@@ -160,4 +160,10 @@ RSpec.describe JrcContactCenter::IvrGraph do
       end.to raise_error(JrcContactCenter::OperationError, 'invalid_ivr_graph')
     end
   end
+  it 'does not advertise a non-voice destination as supported by a local IVR voice flow' do
+    queue.update!(service_kind: 'whatsapp')
+    expect do
+      described_class.new(definition, access: access, unit_id: unit.id)
+    end.to raise_error(JrcContactCenter::OperationError, 'ivr_unavailable_queue')
+  end
 end

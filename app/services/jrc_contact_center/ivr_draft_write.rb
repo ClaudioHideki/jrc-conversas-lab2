@@ -9,6 +9,7 @@ class JrcContactCenter::IvrDraftWrite
   def call(input:, id: nil, unit_id: nil)
     JrcContactCenter::AuthorityTransaction.call(account: @context.fetch(:account), member: @context.fetch(:account_user)) do
       @scope = JrcContactCenter::IvrDraftAccess.new(context: @context)
+      validate_creation_unit!(unit_id) unless id
       receipt = JrcContactCenter::IvrDraftVersion.find_by(account: @context.fetch(:account), request_id: input.request_id)
       next replay!(receipt, input, id, unit_id) if receipt
 
@@ -22,6 +23,12 @@ class JrcContactCenter::IvrDraftWrite
   end
 
   private
+
+  def validate_creation_unit!(value)
+    valid = value.is_a?(String) || value.is_a?(Integer)
+    valid &&= value.to_s.match?(/\A[1-9][0-9]{0,18}\z/) && value.to_i.bit_length <= 63
+    raise ActiveRecord::RecordNotFound unless valid
+  end
 
   def write!(draft, unit, input)
     previous = draft&.latest_version

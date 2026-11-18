@@ -37,6 +37,13 @@ namespace :api, defaults: { format: 'json' } do
     resources :accounts, only: [] do
       namespace :jrc_contact_center, module: 'accounts/jrc_contact_center' do
         resources :access_authorizations, path: 'access_authorizations/:subject_type', only: %i[index show update]
+        resources :ivr_drafts, only: %i[index show create update] do
+          post :preview, on: :collection
+          get :versions, on: :member
+          get 'versions/:revision', on: :member, action: :version, as: :version
+          get :export, on: :member
+          post :simulate, on: :member
+        end
         resources :configuration_audits, only: %i[index show] do
           get :export, on: :collection
         end

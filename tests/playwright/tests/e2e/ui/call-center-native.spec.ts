@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { randomUUID, createHash } from 'node:crypto';
 
 const session = JSON.parse(
   fs.readFileSync('/tmp/call-center-e2e-session.private', 'utf8')
@@ -27,19 +28,23 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const auth = info.title.startsWith('native authenticated navigation')
-    ? session.navigation_targets[info.project.name].auth
-    : info.title.startsWith('native infrastructure root')
-      ? session.infrastructure
-      : info.title.startsWith('configuration audit boundary')
-        ? session.auditor
-        : info.title.startsWith('native role denied')
-          ? session.delegated
-          : info.title.startsWith('corporate boundary')
-            ? session.restricted
-            : info.title.startsWith('profile change')
-              ? session.viewer
-              : session.administrator;
+  const auth = info.title.startsWith('local IVR')
+    ? info.title.startsWith('local IVR scoped')
+      ? session.ivr_targets[info.project.name].scoped
+      : session.ivr_targets[info.project.name].administrator
+    : info.title.startsWith('native authenticated navigation')
+      ? session.navigation_targets[info.project.name].auth
+      : info.title.startsWith('native infrastructure root')
+        ? session.infrastructure
+        : info.title.startsWith('configuration audit boundary')
+          ? session.auditor
+          : info.title.startsWith('native role denied')
+            ? session.delegated
+            : info.title.startsWith('corporate boundary')
+              ? session.restricted
+              : info.title.startsWith('profile change')
+                ? session.viewer
+                : session.administrator;
   await page.addInitScript(
     ({ auth, dark }) => {
       window.__SYNTHETIC_AUTH__ = auth;
@@ -2062,4 +2067,440 @@ test('native authenticated navigation honors inherited supervision, denied repor
     headers: target.auth,
   });
   expect(forbidden.status()).toBe(401);
+});
+
+const createSyntheticIvr = async (
+  page: Page,
+  target,
+  name: string,
+  unitId = target.allowed_unit_id,
+  auth = target.administrator
+) => {
+  const response = await page.request.post(
+    `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/ivr_drafts`,
+    {
+      headers: auth,
+      data: {
+        ivr_draft: {
+          name,
+          unit_id: String(unitId),
+          status: 'draft',
+          expected_revision: 0,
+          request_id: randomUUID(),
+          definition: {
+            schema_version: 1,
+            start: 'end',
+            nodes: [{ id: 'end', type: 'end' }],
+          },
+        },
+      },
+    }
+  );
+  expect(response.status()).toBe(201);
+  const body = await response.json();
+  expect(body.item.local_only).toBe(true);
+  expect(body.item.provider_applied).toBe(false);
+  return body.item;
+};
+
+test('local IVR real editor persists, simulates, imports and exports immutable revisions', async ({
+  page,
+}, info) => {
+  const target = session.ivr_targets[info.project.name];
+  const endpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/ivr_drafts`;
+  const location = `/app/accounts/${target.account_id}/contact-center/ura?native_navigation=1`;
+  const name = `SYNTHETIC IVR editor ${info.project.name}`;
+  const providerWrites = [];
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => {
+    if (
+      !['GET', 'HEAD'].includes(request.method()) &&
+      /\/(commands|telephony_integration|sync_calls)(?:[/?]|$)/.test(
+        request.url()
+      )
+    )
+      providerWrites.push(request.url());
+  });
+  await page.goto(location);
+  await expect(page.locator('[data-ivr-workspace]')).toBeVisible();
+  await page.locator('[data-ivr-new]').click();
+  const dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
+  await dialog.getByLabel('Nome do rascunho', { exact: true }).fill(name);
+  await dialog
+    .getByLabel('Unidade operacional', { exact: true })
+    .selectOption(String(target.allowed_unit_id));
+  await dialog.locator('[data-ivr-add="menu"]').click();
+  await dialog.locator('[data-ivr-add="queue"]').click();
+  await dialog.locator('[data-ivr-add="end"]').click();
+  await dialog.getByLabel('Nó inicial', { exact: true }).selectOption('node_1');
+  await dialog
+    .getByLabel('Espera técnica (segundos)', { exact: true })
+    .fill('8');
+  await dialog
+    .getByLabel('Tentativas de dígito inválido', { exact: true })
+    .fill('2');
+  await dialog
+    .getByRole('button', { name: 'Adicionar opção DTMF', exact: true })
+    .click();
+  await dialog.getByLabel('Tecla DTMF', { exact: true }).selectOption('1');
+  await dialog
+    .getByLabel('Destino lógico', { exact: true })
+    .selectOption('node_2');
+  await dialog
+    .getByLabel('Destino sem resposta', { exact: true })
+    .selectOption('node_3');
+  await dialog
+    .getByLabel('Destino após tentativas inválidas', { exact: true })
+    .selectOption('node_3');
+  await dialog
+    .getByLabel('Fila', { exact: true })
+    .selectOption(String(target.queue_id));
+  const originalColor = await dialog
+    .locator('#ivr-name')
+    .evaluate(element => getComputedStyle(element).backgroundColor);
+  await page.evaluate(() => document.documentElement.classList.toggle('dark'));
+  const oppositeColor = await dialog
+    .locator('#ivr-name')
+    .evaluate(element => getComputedStyle(element).backgroundColor);
+  expect(oppositeColor).not.toBe(originalColor);
+  await page.evaluate(() => document.documentElement.classList.toggle('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-ivr-builder.png`,
+    fullPage: true,
+  });
+  await dialog
+    .getByRole('tab', { name: 'Simulação local', exact: true })
+    .click();
+  await dialog
+    .getByLabel('Dígitos DTMF para simulação', { exact: true })
+    .fill('1');
+  const simulated = page.waitForResponse(
+    response =>
+      response.url() === endpoint + '/preview' &&
+      response.request().method() === 'POST'
+  );
+  await dialog
+    .getByRole('button', { name: 'Simular definição atual', exact: true })
+    .click();
+  expect((await simulated).status()).toBe(200);
+  await expect(dialog.locator('[data-ivr-simulation]')).toContainText(
+    'Destino lógico de fila encontrado'
+  );
+  await expect(dialog.locator('[data-ivr-simulation]')).toContainText(
+    '#' + target.queue_id
+  );
+  const created = page.waitForResponse(
+    response =>
+      response.url() === endpoint && response.request().method() === 'POST'
+  );
+  await dialog.locator('[data-ivr-save]').click();
+  const accepted = await created;
+  expect(accepted.status()).toBe(201);
+  const first = (await accepted.json()).item;
+  await expect(dialog.locator('[data-ivr-saved]')).toContainText(
+    'Revisão local salva e recarregada'
+  );
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await page.reload();
+  await page.locator('#ivr-search').fill(name);
+  await page
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  const card = page.locator(`[data-ivr-draft="${first.id}"]`);
+  await expect(card).toContainText(name);
+  await card
+    .getByRole('button', { name: 'Abrir rascunho', exact: true })
+    .click();
+  await expect(dialog.locator('#ivr-name')).toHaveValue(name);
+  await expect(dialog.locator('#ivr-unit')).toBeDisabled();
+  await dialog.getByRole('tab', { name: 'JSON', exact: true }).click();
+  const previous = await dialog.locator('#ivr-json').inputValue();
+  await dialog.locator('#ivr-import').setInputFiles({
+    name: 'invalid.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from('{'),
+  });
+  await expect(dialog.getByRole('alert')).toContainText(
+    'O arquivo não contém uma estrutura local de URA compatível'
+  );
+  await expect(dialog.locator('#ivr-json')).toHaveValue(previous);
+  const changed = JSON.parse(previous);
+  changed.nodes[0].timeout_seconds = 9;
+  await dialog.locator('#ivr-json').fill(JSON.stringify(changed, null, 2));
+  await expect(dialog.locator('[data-ivr-save]')).toBeDisabled();
+  await dialog
+    .getByRole('button', { name: 'Aplicar JSON ao rascunho', exact: true })
+    .click();
+  const updated = page.waitForResponse(
+    response =>
+      response.url() === endpoint + '/' + first.id &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.locator('[data-ivr-save]').click();
+  expect((await updated).status()).toBe(200);
+  await expect(dialog.locator('[data-ivr-saved]')).toContainText(
+    'Revisão local salva e recarregada'
+  );
+  await dialog.getByRole('tab', { name: 'Histórico', exact: true }).click();
+  const original = dialog.locator('[data-ivr-history-revision="1"]');
+  await expect(original).toBeVisible();
+  const downloadEvent = page.waitForEvent('download');
+  await original
+    .getByRole('button', { name: 'Exportar revisão salva', exact: true })
+    .click();
+  const download = await downloadEvent;
+  expect(download.suggestedFilename()).toBe(`ura-local-${first.id}-v1.json`);
+  const stream = await download.createReadStream();
+  expect(stream).not.toBeNull();
+  const parts = [];
+  for await (const chunk of stream) parts.push(chunk);
+  const raw = Buffer.concat(parts);
+  const exported = JSON.parse(raw.toString());
+  const persisted = await page.request.get(
+    endpoint + '/' + first.id + '/versions/1',
+    { headers: target.administrator }
+  );
+  expect(persisted.status()).toBe(200);
+  const stored = (await persisted.json()).item;
+  expect(exported).toEqual(stored.definition);
+  expect(exported.nodes[0].timeout_seconds).toBe(8);
+  expect(stored.integrity_sha256).toMatch(/^[0-9a-f]{64}$/);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-ivr-export-integrity.json`,
+    JSON.stringify({
+      synthetic: true,
+      revision: 1,
+      export_sha256: createHash('sha256').update(raw).digest('hex'),
+      revision_integrity_sha256: stored.integrity_sha256,
+      provider_applied: false,
+    })
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-ivr-history.png`,
+    fullPage: true,
+  });
+  await dialog
+    .getByRole('button', { name: 'Arquivar localmente', exact: true })
+    .click();
+  await dialog
+    .locator('[data-ivr-confirmation]')
+    .getByRole('button', { name: 'Arquivar localmente', exact: true })
+    .click();
+  await expect(dialog.locator('[data-ivr-saved]')).toContainText(
+    'Revisão local salva e recarregada'
+  );
+  await expect(dialog.locator('[data-ivr-save]')).toContainText(
+    'Salvar como nova revisão de rascunho'
+  );
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  expect(errors).toEqual([]);
+  expect(providerWrites).toEqual([]);
+});
+
+test('local IVR scoped records and forced URLs obey corporate coverage and fresh eligibility', async ({
+  page,
+}, info) => {
+  const target = session.ivr_targets[info.project.name];
+  const endpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/ivr_drafts`;
+  const own = await createSyntheticIvr(
+    page,
+    target,
+    `SYNTHETIC scoped own ${info.project.name}`,
+    target.allowed_unit_id,
+    target.scoped
+  );
+  const denied = await createSyntheticIvr(
+    page,
+    target,
+    `SYNTHETIC forbidden unit ${info.project.name}`,
+    target.denied_unit_id
+  );
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/ura?native_navigation=1`
+  );
+  await expect(page.locator(`[data-ivr-draft="${own.id}"]`)).toBeVisible();
+  await expect(page.locator(`[data-ivr-draft="${denied.id}"]`)).toHaveCount(0);
+  for (const suffix of ['', '/versions', '/versions/1', '/export?revision=1']) {
+    const result = await page.request.get(endpoint + '/' + denied.id + suffix, {
+      headers: target.scoped,
+    });
+    expect(result.status()).toBe(404);
+  }
+  const simulated = await page.request.post(
+    endpoint + '/' + denied.id + '/simulate',
+    {
+      headers: target.scoped,
+      data: { ivr_simulation: { revision: 1, dtmf: '' } },
+    }
+  );
+  expect(simulated.status()).toBe(404);
+  const accessEndpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/access_authorizations/users/${target.scoped_member_id}`;
+  const current = await page.request.get(accessEndpoint, {
+    headers: target.administrator,
+  });
+  expect(current.status()).toBe(200);
+  const initial = (await current.json()).item;
+  try {
+    const revoked = await page.request.patch(accessEndpoint, {
+      headers: target.administrator,
+      data: {
+        expected_revision: initial.revision,
+        authorization: { eligible: false },
+      },
+    });
+    expect(revoked.status()).toBe(200);
+    await page.reload();
+    await expect(page.getByRole('alert')).toContainText(
+      'Negado pela verificação nativa'
+    );
+    await expect(page.locator('[data-ivr-workspace]')).toHaveCount(0);
+    const blocked = await page.request.get(endpoint + '/' + own.id, {
+      headers: target.scoped,
+    });
+    expect(blocked.status()).toBe(401);
+    await page.screenshot({
+      path: `.codex/call-center-native-e2e/${info.project.name}-ivr-denied.png`,
+      fullPage: true,
+    });
+  } finally {
+    const fresh = await page.request.get(accessEndpoint, {
+      headers: target.administrator,
+    });
+    expect(fresh.status()).toBe(200);
+    const restored = await page.request.patch(accessEndpoint, {
+      headers: target.administrator,
+      data: {
+        expected_revision: (await fresh.json()).item.revision,
+        authorization: { eligible: initial.eligible },
+      },
+    });
+    expect(restored.status()).toBe(200);
+  }
+});
+
+test('local IVR pagination, URL filters and stale editor preserve the reviewed draft', async ({
+  page,
+}, info) => {
+  const target = session.ivr_targets[info.project.name];
+  const endpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/ivr_drafts`;
+  const prefix = `SYNTHETIC IVR pages ${info.project.name}`;
+  const rows = [];
+  for (let index = 0; index < 23; index += 1)
+    rows.push(
+      await createSyntheticIvr(
+        page,
+        target,
+        `${prefix} ${String(index).padStart(2, '0')}`
+      )
+    );
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/ura?native_navigation=1`
+  );
+  await page.locator('#ivr-search').fill(prefix);
+  await page
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  await expect(page.locator('[data-ivr-list] article')).toHaveCount(20);
+  const firstIds = await page
+    .locator('[data-ivr-list] article')
+    .evaluateAll(elements =>
+      elements.map(element => element.getAttribute('data-ivr-draft'))
+    );
+  await page
+    .locator('[data-ivr-pagination]')
+    .getByRole('button', { name: 'Próxima', exact: true })
+    .click();
+  await expect(page).toHaveURL(/ivr_page=2/);
+  await expect(page.locator('[data-ivr-list] article')).toHaveCount(3);
+  const secondIds = await page
+    .locator('[data-ivr-list] article')
+    .evaluateAll(elements =>
+      elements.map(element => element.getAttribute('data-ivr-draft'))
+    );
+  expect(firstIds.some(id => secondIds.includes(id))).toBe(false);
+  await page.goBack();
+  await expect(page.locator('[data-ivr-list] article')).toHaveCount(20);
+  const row = rows[22];
+  await page
+    .locator(`[data-ivr-draft="${row.id}"]`)
+    .getByRole('button', { name: 'Abrir rascunho', exact: true })
+    .click();
+  const dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
+  await dialog
+    .getByLabel('Nome do rascunho', { exact: true })
+    .fill(prefix + ' retained local');
+  const remote = await page.request.patch(endpoint + '/' + row.id, {
+    headers: target.administrator,
+    data: {
+      ivr_draft: {
+        name: prefix + ' accepted server',
+        unit_id: String(target.allowed_unit_id),
+        status: 'draft',
+        definition: row.definition,
+        expected_revision: 1,
+        request_id: randomUUID(),
+      },
+    },
+  });
+  expect(remote.status()).toBe(200);
+  const rejected = page.waitForResponse(
+    response =>
+      response.url() === endpoint + '/' + row.id &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.locator('[data-ivr-save]').click();
+  expect((await rejected).status()).toBe(409);
+  await expect(dialog.locator('#ivr-name')).toHaveValue(
+    prefix + ' retained local'
+  );
+  await expect(dialog.locator('[data-ivr-save]')).toBeDisabled();
+  await dialog
+    .locator('[data-configuration-conflict]')
+    .getByRole('button')
+    .click();
+  await expect(dialog.locator('[data-configuration-latest]')).toContainText(
+    prefix + ' accepted server'
+  );
+  await dialog.locator('[data-configuration-review]').check();
+  await expect(dialog.locator('[data-ivr-save]')).toBeEnabled();
+  await dialog.locator('#ivr-name').fill(prefix + ' changed after review');
+  await expect(dialog.locator('[data-ivr-save]')).toBeDisabled();
+  await dialog.locator('[data-configuration-review]').check();
+  const accepted = page.waitForResponse(
+    response =>
+      response.url() === endpoint + '/' + row.id &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.locator('[data-ivr-save]').click();
+  const response = await accepted;
+  expect(response.status()).toBe(200);
+  expect(response.request().postDataJSON().ivr_draft.expected_revision).toBe(2);
+  expect((await response.json()).item.revision).toBe(3);
+  await expect(dialog.locator('[data-ivr-saved]')).toContainText(
+    'Revisão local salva e recarregada'
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-ivr-conflict-reviewed.png`,
+    fullPage: true,
+  });
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Limpar filtros', exact: true })
+    .click();
+  await expect(page).not.toHaveURL(/ivr_q=|ivr_page=/);
+  await expect(page.locator('[data-ivr-pagination]')).toContainText('Página 1');
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
 });

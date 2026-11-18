@@ -113,7 +113,7 @@ jobs:
             spec/controllers/api/v1/accounts/agents_controller_spec.rb spec/enterprise/controllers/api/v1/accounts/agents_controller_spec.rb \
             spec/enterprise/controllers/api/v1/accounts/custom_roles_controller_spec.rb spec/enterprise/models/custom_role_spec.rb \
             spec/enterprise/models/contact_center_custom_role_audit_spec.rb spec/enterprise/controllers/api/v1/accounts/audit_logs_controller_spec.rb \
-            --exclude-pattern '**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb' \
+            --exclude-pattern '**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: PABX concurrency in its explicitly guarded disposable database
         env:
@@ -122,7 +122,7 @@ jobs:
         run: |
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
-          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
+          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
       - name: Require positive examples and zero failures, pending or outside errors
         run: >-
           ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort s.inspect unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/call-center-rspec.json /tmp/call-center-pabx-rspec.json /tmp/call-center-ivr-schema-reload-rspec.json
@@ -188,7 +188,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
-          assert stats['expected'] == 96
+          assert stats['expected'] == 108
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
           source = Path('docs/jrc_contact_center/stages_0_2_review_20261116.json')

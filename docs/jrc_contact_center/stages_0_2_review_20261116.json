@@ -1363,7 +1363,7 @@
     ],
     "increment": "F11 revisão esperada compatível, sem migration ou concessões implícitas",
     "adr": "docs/adr/20261117-call-center-role-revision.md",
-    "expected_chrome": 96,
+    "expected_chrome": 108,
     "previous_chrome_preserved": 52,
     "native_validation": "pending_new_sha",
     "external_homologation": false,
@@ -2377,16 +2377,14 @@
       "editor_available": false
     },
     "local_ivr_ledger_prepared": {
-      "status": "implemented_pending_native_validation",
+      "status": "implemented_and_natively_validated_at_6a8b9c72",
       "migration": "20261117200000",
       "migration_sha256": "eaeb4147658fd8e5c9bf25272c34bf5ed3113cf603856854906620f128d92e91",
       "automatic_grants": false,
       "historical_migrations_changed": false,
       "pending": [
-        "native PostgreSQL/RSpec and lint",
-        "schema reload behavioral proof",
-        "HTTP concurrency/API/pagination",
-        "editor/import/export and Chrome",
+        "HTTP concurrency/API/pagination in next increment",
+        "editor/import/export and dedicated Chrome",
         "provider contract and publication"
       ],
       "first_native_result": {
@@ -2412,6 +2410,37 @@
         "cause": "MigrationError decorates its message with blank lines; class and meaningful message still required",
         "lint_offenses": 4
       }
+    },
+    "local_ivr_ledger_validated": {
+      "sha": "6a8b9c72112cd36500c4f4429203b51da1fbb0d7",
+      "run": 44220513593,
+      "rails_main": 730,
+      "rails_concurrent": 14,
+      "schema_reload_reexecuted_examples": 16,
+      "vue": 250,
+      "chrome": 96,
+      "screenshots_verified": 120,
+      "artifact": 14390294705,
+      "artifact_sha256": "90e947cc7bdfa34bf80e08460f1ad1508cd10c22f838481394e95554794d79d6",
+      "local_or_production_migrations": false
+    },
+    "local_ivr_api_editor_prepared": {
+      "status": "implemented_pending_native_and_browser_validation",
+      "native_reference_reuse": true,
+      "voice_queues_same_unit_only": true,
+      "expected_chrome": 108,
+      "previous_chrome_preserved": 96,
+      "dedicated_synthetic_accounts": 4,
+      "new_http_concurrency_cases": 3,
+      "private_payload_log_filter": true,
+      "provider_calls": false,
+      "publish_or_rollback": false,
+      "remaining": [
+        "new SHA native Rails/Vue/lints/migrations/assets",
+        "108 real Chrome desktop/mobile light/dark",
+        "media/calendar/cross-unit routing/DAC",
+        "external provider contract/approval/publication/ACK/rollback"
+      ]
     }
   },
   "resolved_decisions_20261117": [

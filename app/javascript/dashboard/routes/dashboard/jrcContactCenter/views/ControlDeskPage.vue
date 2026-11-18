@@ -129,6 +129,18 @@ watch(accountId, load, { immediate: true });
       >
         {{ t('JRC_CONTACT_CENTER.ADMIN.BACK') }}
       </RouterLink>
+      <RouterLink
+        v-if="section === 'ivr' && data.capabilities.configure"
+        :to="{
+          name: 'jrc_contact_center_ivr',
+          params: { accountId },
+          query: route.query,
+        }"
+        class="inline-flex rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11"
+        data-native-ivr-drafts
+      >
+        {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.TITLE') }}
+      </RouterLink>
       <div
         v-if="!section"
         class="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"

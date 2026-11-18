@@ -7,9 +7,12 @@ const resources = [
   'memberships',
   'access_users',
   'access_teams',
+  'ivr_drafts',
 ];
-const validRevision = value =>
-  typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+const validRevision = (value, resource) =>
+  resource === 'ivr_drafts'
+    ? Number.isInteger(value) && value > 0 && value <= 2147483647
+    : typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 export const useConfigurationRevision = ({ accountId, resource, draft }) => {
   const state = reactive({
     account: '',
@@ -43,7 +46,9 @@ export const useConfigurationRevision = ({ accountId, resource, draft }) => {
       resource: resource.value,
       required: Boolean(record?.id && resources.includes(resource.value)),
       conflict: false,
-      expected: validRevision(record?.revision) ? record.revision : '',
+      expected: validRevision(record?.revision, resource.value)
+        ? record.revision
+        : '',
       latest: null,
       reloading: false,
       error: false,
@@ -53,13 +58,11 @@ export const useConfigurationRevision = ({ accountId, resource, draft }) => {
     if (state.required && !state.expected) state.conflict = true;
   };
   const handleError = error => {
-    if (
-      !state.required ||
-      ![
-        'stale_configuration_revision',
-        'configuration_revision_required',
-      ].includes(error?.response?.data?.error)
-    )
+    const codes =
+      resource.value === 'ivr_drafts'
+        ? ['stale_ivr_revision', 'ivr_revision_required']
+        : ['stale_configuration_revision', 'configuration_revision_required'];
+    if (!state.required || !codes.includes(error?.response?.data?.error))
       return false;
     state.conflict = true;
     state.latest = null;
@@ -88,7 +91,10 @@ export const useConfigurationRevision = ({ accountId, resource, draft }) => {
       )
         return;
       const latest = response.data.item;
-      if (!validRevision(latest.revision) || String(latest.id) !== String(id))
+      if (
+        !validRevision(latest.revision, source) ||
+        String(latest.id) !== String(id)
+      )
         throw new Error('Invalid revision response');
       state.expected = latest.revision;
       state.latest = latest;

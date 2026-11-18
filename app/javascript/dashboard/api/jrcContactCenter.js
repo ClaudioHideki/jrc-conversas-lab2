@@ -2,13 +2,65 @@
 
 const base = accountId => {
   const value = String(accountId);
-  if (!/^[1-9]\d*$/.test(value) || !Number.isSafeInteger(Number(value))) {
+  if (
+    !/^[1-9]\d*$/.test(value) ||
+    /[^0-9]/.test(value) ||
+    !Number.isSafeInteger(Number(value))
+  ) {
     throw new Error('Invalid account context');
   }
   return `/api/v1/accounts/${value}/jrc_contact_center`;
 };
 
+const recordIdentity = id => {
+  const value = String(id);
+  if (typeof id === 'number' && !Number.isSafeInteger(id))
+    throw new Error('Invalid local record identity');
+  if (
+    !/^[1-9]\d{0,18}$/.test(value) ||
+    /[^0-9]/.test(value) ||
+    (value.length === 19 && value > '9223372036854775807')
+  )
+    throw new Error('Invalid local record identity');
+  return value;
+};
+const ivrPath = (accountId, id) =>
+  `${base(accountId)}/ivr_drafts/${recordIdentity(id)}`;
+const ivrRevision = revision => {
+  if (!Number.isInteger(revision) || revision < 1 || revision > 2147483647)
+    throw new Error('Invalid local IVR revision');
+  return revision;
+};
+
 export default {
+  ivrReference: (accountId, resource, id) => {
+    if (!['units', 'queues'].includes(resource))
+      throw new Error('Invalid IVR reference type');
+    return axios.get(`${base(accountId)}/${resource}/${recordIdentity(id)}`);
+  },
+  ivrDrafts: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/ivr_drafts`, { params }),
+  saveIvrDraft: (accountId, id, draft) =>
+    id
+      ? axios.patch(ivrPath(accountId, id), { ivr_draft: draft })
+      : axios.post(`${base(accountId)}/ivr_drafts`, { ivr_draft: draft }),
+  ivrHistory: (accountId, id, page = 1) =>
+    axios.get(`${ivrPath(accountId, id)}/versions`, { params: { page } }),
+  ivrVersion: (accountId, id, revision) =>
+    axios.get(`${ivrPath(accountId, id)}/versions/${ivrRevision(revision)}`),
+  exportIvrDraft: (accountId, id, revision) =>
+    axios.get(`${ivrPath(accountId, id)}/export`, {
+      params: { revision: ivrRevision(revision) },
+      responseType: 'blob',
+    }),
+  previewIvrDraft: (accountId, preview) =>
+    axios.post(`${base(accountId)}/ivr_drafts/preview`, {
+      ivr_preview: preview,
+    }),
+  simulateIvrDraft: (accountId, id, revision, dtmf) =>
+    axios.post(`${ivrPath(accountId, id)}/simulate`, {
+      ivr_simulation: { revision: ivrRevision(revision), dtmf },
+    }),
   configurationRecord: (accountId, resource, id) => {
     const paths = {
       units: 'units',
@@ -16,9 +68,11 @@ export default {
       memberships: 'queue_memberships',
       access_users: 'access_authorizations/users',
       access_teams: 'access_authorizations/teams',
+      ivr_drafts: 'ivr_drafts',
     };
     if (!paths[resource] || !/^[1-9]\d*$/.test(String(id)))
       throw new Error('Invalid configuration context');
+    if (resource === 'ivr_drafts') return axios.get(ivrPath(accountId, id));
     return axios.get(`${base(accountId)}/${paths[resource]}/${Number(id)}`);
   },
   administration: accountId => axios.get(`${base(accountId)}/administration`),

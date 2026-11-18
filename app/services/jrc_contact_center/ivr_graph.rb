@@ -61,7 +61,7 @@ class JrcContactCenter::IvrGraph
     ids = nodes.values.filter_map { |node| node['queue_id'] }.uniq
     raise JrcContactCenter::OperationError, 'ivr_unavailable_queue' unless ids.all? { |id| id.to_i.bit_length <= 63 }
 
-    permitted = queues.where(unit_id: unit_id, id: ids, status: 'active').pluck(:id).map(&:to_s)
+    permitted = queues.where(unit_id: unit_id, id: ids, status: 'active', service_kind: 'voice').pluck(:id).map(&:to_s)
     raise JrcContactCenter::OperationError, 'ivr_unavailable_queue' unless (ids - permitted).empty?
   end
 end

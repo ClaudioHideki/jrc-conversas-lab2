@@ -29,3 +29,6 @@ Rails.application.config.filter_parameters += [:answer]
 
 # Approval catalog imports contain proposed people and must never become request-log payloads.
 Rails.application.config.filter_parameters += [:catalog_import]
+
+# Local IVR payloads and DTMF are never request-log content.
+Rails.application.config.filter_parameters += [:ivr_draft, :ivr_preview, :ivr_simulation]
