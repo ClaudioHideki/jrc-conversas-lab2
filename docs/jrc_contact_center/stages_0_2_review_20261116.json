@@ -201,7 +201,8 @@
       "implemented_in_0_2": [
         "Safe connection metadata; read-only resources; explicit authorized tenant/accountcode mapping; original infrastructure remains SuperAdmin-only",
         "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente.",
-        "Atalho nativo SuperAdmin validado em 7011dac7; agrupamento Geral/Sincronização CDR/Diagnóstico, rascunho e fronteira de contexto preparados no próximo incremento, ainda sem homologação nativa deste código."
+        "Atalho nativo SuperAdmin validado em 7011dac7; agrupamento Geral/Sincronização CDR/Diagnóstico, rascunho e fronteira de contexto preparados no próximo incremento, ainda sem homologação nativa deste código.",
+        "Geral/Sincronização CDR/Diagnóstico, rascunho, erro inicial bloqueado, teclado e fronteira por conta/usuário/perfil validados em cf040419; a página e a API continuam SuperAdmin-only. Três abas nativas não equivalem às oito áreas completas do Word."
       ],
       "remaining_or_external": [
         "No fake connection test or resource publication; real diagnostics/ACK contract and URA editor remain later",
@@ -558,7 +559,8 @@
         "Pré-condição opcional e editor protegido para unidades/filas/vínculos em implementação; novo SHA exige validação real, sem alterar o contrato de perfis já provado.",
         "Herança por Team nativo, configuração por AccountUser, elegibilidade explícita, bloqueios individuais prioritários e proteção de fallback implementados incrementalmente; evidências por SHA constam em continuity_20261117.",
         "Herança por equipe, bloqueios individuais prioritários, elegibilidade explícita e revisão concorrente homologados no Chrome real em dd8ece07, sem concessões implícitas.",
-        "Origens nomeadas de perfil/equipes, negações prioritárias e tratamento de revisão validados em 7011dac7. Exportação efetiva no perfil autenticado e consumidores de rotas/menus em revalidação no checkpoint 54b1a152."
+        "Origens nomeadas de perfil/equipes, negações prioritárias e tratamento de revisão validados em 7011dac7. Exportação efetiva no perfil autenticado e consumidores de rotas/menus em revalidação no checkpoint 54b1a152.",
+        "Perfil autenticado, rotas e navegação usam a política efetiva CC, incluindo herança, elegibilidade e negações; demais permissões preservadas. API e Chrome real com revogação aprovados em cf040419."
       ],
       "remaining_or_external": [
         "Matriz visual multi-módulo completa da referência ainda não equivale ao editor setorial das 13 capacidades CC; permissões dos demais módulos preservadas.",
@@ -629,7 +631,8 @@
       ],
       "remaining_or_external": [
         "Native Team has no corporate scope or supervisor/queue hierarchy; no fictitious team status; richer mapping, schedules and distribution remain later",
-        "Elegibilidade de usuário inativo não é inferida da presença online; regras de disponibilidade/capacidade PABX continuam dependentes do contrato operacional."
+        "Elegibilidade de usuário inativo não é inferida da presença online; regras de disponibilidade/capacidade PABX continuam dependentes do contrato operacional.",
+        "Retirada do último agente elegível ainda exige definição da validação obrigatória. Pergunta de negócio enviada; não confundir com a cobertura corporativa do destinatário, já validada."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -687,7 +690,8 @@
       "implemented_in_0_2": [
         "Same PABX source as figure 4, safe local state and explicit scope contract",
         "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente.",
-        "Atalho nativo SuperAdmin validado em 7011dac7; agrupamento Geral/Sincronização CDR/Diagnóstico, rascunho e fronteira de contexto preparados no próximo incremento, ainda sem homologação nativa deste código."
+        "Atalho nativo SuperAdmin validado em 7011dac7; agrupamento Geral/Sincronização CDR/Diagnóstico, rascunho e fronteira de contexto preparados no próximo incremento, ainda sem homologação nativa deste código.",
+        "Geral/Sincronização CDR/Diagnóstico, rascunho, erro inicial bloqueado, teclado e fronteira por conta/usuário/perfil validados em cf040419; a página e a API continuam SuperAdmin-only. Três abas nativas não equivalem às oito áreas completas do Word."
       ],
       "remaining_or_external": [
         "Inventory synchronization/publication/ACK is not inferred from successful CDR import; needs stage 3/provider",
@@ -1271,7 +1275,7 @@
   ],
   "provider_contracts": "control_desk_contracts_20261116.json",
   "scope_limit": "No provider endpoint, ACK, automatic corporate grant or production operation. Current reviewed increment adds only pinned AccessGrant migration 20261117190000; historical migrations, SQLs, dependencies, lint rules and other modules remain preserved. Native Team remains Account-scoped; CC inheritance does not create queue participation.",
-  "validation_state": "incremental_native_and_Chrome_validated_through_7011dac7_next_increment_pending",
+  "validation_state": "incremental_native_and_Chrome_validated_through_cf040419_all_23_figures_still_open",
   "full_23_figures_complete": false,
   "continuity_20261116": {
     "preserved_checkpoint": "15eaa800336626a3d5c5712870b43d169c64e6ad",
@@ -1364,7 +1368,7 @@
     "native_validation": "pending_new_sha",
     "external_homologation": false,
     "part_1_complete": false,
-    "next": "Validate corrected native reports denial, all 96 Chrome cases, native SIP route/context boundary, tabbed PABX drafts/loading and observed supervisor values on the next SHA. No provider operation or complete-23-figure claim.",
+    "next": "Internal-only IVR graph validation and DTMF simulation, then native draft/version persistence and interface. No PABX operation; architecture documented before implementation. Outstanding team hierarchy, pause policy and final-coverage decisions remain explicit.",
     "role_revision_evidence": {
       "sha": "806327269f896ea124cdbc17f7ceceea176124e8",
       "run": 44080303193,
@@ -2161,7 +2165,7 @@
       "native_serializer": "AccountUser#permissions and Enterprise::AccountUser#permissions",
       "cause": "Profile JSON contains native role/custom-role raw permissions, not effective CC team/individual sources. Native CC routes and sidebar also accept legacy role markers.",
       "next": "Normalize only the 13 CC keys in authenticated permissions, preserve all other module keys/roles, and validate actual menu/route consumers. Do not claim the isolated component fixture proves this integration.",
-      "implementation": "prepared_pending_native_validation",
+      "implementation": "implemented_and_validated_in_synthetic_environment",
       "adr": "docs/adr/20261117-call-center-authenticated-permissions.md",
       "authenticated_request_cases": 9,
       "additional_vue_cases": 7,
@@ -2207,6 +2211,16 @@
         },
         "chrome_cause": "Only the new four native-navigation cases queried /reports instead of the existing /reports/summary (API and routes verified). Received 404, expected 401. Correct path prepared, denial assertion preserved.",
         "full_acceptance": false
+      },
+      "latest_complete_evidence": {
+        "sha": "cf04041972e22603450612b499e1fc351ec37028",
+        "run": 44203813534,
+        "artifact": 14384625703,
+        "sha256": "f8c72e97ce7af296ed713ec5c87ccc82a52daa3302781dbdcc6e1538f82d735e",
+        "rails": 641,
+        "vue": 250,
+        "chrome": 96,
+        "screenshots_verified": 120
       }
     },
     "validated_checkpoint_7011dac7": {
@@ -2248,7 +2262,7 @@
       "external_homologation": false
     },
     "native_pabx_tabbed_form": {
-      "implementation": "prepared_pending_native_validation",
+      "implementation": "implemented_and_validated_in_synthetic_environment",
       "adr": "docs/adr/20261117-call-center-pabx-native-tabs.md",
       "default_full_presentation_preserved": true,
       "native_api_contract_unchanged": true,
@@ -2260,10 +2274,20 @@
       "extended_chrome_cases": 4,
       "provider_calls_in_chrome": false,
       "external_homologation": false,
-      "full_eight_reference_tabs_complete": false
+      "full_eight_reference_tabs_complete": false,
+      "latest_complete_evidence": {
+        "sha": "cf04041972e22603450612b499e1fc351ec37028",
+        "run": 44203813534,
+        "artifact": 14384625703,
+        "sha256": "f8c72e97ce7af296ed713ec5c87ccc82a52daa3302781dbdcc6e1538f82d735e",
+        "rails": 641,
+        "vue": 250,
+        "chrome": 96,
+        "screenshots_verified": 120
+      }
     },
     "observed_supervisor": {
-      "implementation": "prepared_pending_native_validation",
+      "implementation": "implemented_and_validated_in_synthetic_environment",
       "adr": "docs/adr/20261117-call-center-observed-supervisor.md",
       "counts_source": "existing scoped SupervisorSnapshot API only",
       "illustrative_actors_rates_removed_from_native_page": true,
@@ -2272,7 +2296,71 @@
       "other_catalog_callers_preserved": true,
       "new_vue_cases": 6,
       "extended_chrome_cases": 4,
-      "external_PABX_truth_claim": false
+      "external_PABX_truth_claim": false,
+      "latest_complete_evidence": {
+        "sha": "cf04041972e22603450612b499e1fc351ec37028",
+        "run": 44203813534,
+        "artifact": 14384625703,
+        "sha256": "f8c72e97ce7af296ed713ec5c87ccc82a52daa3302781dbdcc6e1538f82d735e",
+        "rails": 641,
+        "vue": 250,
+        "chrome": 96,
+        "screenshots_verified": 120
+      }
+    },
+    "validated_checkpoint_cf040419": {
+      "sha": "cf04041972e22603450612b499e1fc351ec37028",
+      "run": 44203813534,
+      "artifact": 14384625703,
+      "artifact_sha256": "f8c72e97ce7af296ed713ec5c87ccc82a52daa3302781dbdcc6e1538f82d735e",
+      "rails": {
+        "call-center-rspec.json": {
+          "duration": 90.057610694,
+          "example_count": 627,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        },
+        "call-center-pabx-rspec.json": {
+          "duration": 6.406826417,
+          "example_count": 14,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "vue": {
+        "numTotalTests": 250,
+        "numPassedTests": 250,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      },
+      "chrome": {
+        "startTime": "2026-11-18T00:18:54.968Z",
+        "duration": 204228.00199999998,
+        "expected": 96,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "screenshots_verified": 120,
+      "stages_0_2_complete": false,
+      "external_homologation": false
+    },
+    "local_ivr_drafts": {
+      "implementation": "engine_prepared_pending_native_tests",
+      "schema": "local JRC v1, not provider format",
+      "existing_dependency": "JSONSchemer 0.2.24",
+      "native_scope": "current ModulePolicy + AccessScope + organizational units/queues",
+      "reauthorize_on_each_simulation": true,
+      "same_unit_queue_only_initially": true,
+      "native_persistence": false,
+      "public_api": false,
+      "operator_interface": false,
+      "provider_calls": false,
+      "publish_or_rollback": false,
+      "external_homologation": false,
+      "adr": "docs/adr/20261117-call-center-local-ivr-drafts.md"
     }
   },
   "resolved_decisions_20261117": [

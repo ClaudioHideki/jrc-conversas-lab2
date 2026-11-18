@@ -1,5 +1,6 @@
 # Painel técnico PABX: navegação e reuso nativo
 
+Validação do incremento: cf040419, CI 44203813534, 641 Rails/250 Vue/96 Chrome e 120 capturas verificadas. O aceite é interno e sintético; limites externos permanecem.
 Estado: decisão registrada antes da implementação. Agrupamento preparado no overlay; validação nativa/Chrome pendente. Base 7011dac7 aprovada; incremento de permissões 4d2868b2 em validação.
 
 ## Requisito

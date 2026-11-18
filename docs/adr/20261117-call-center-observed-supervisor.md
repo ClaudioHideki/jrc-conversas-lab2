@@ -1,5 +1,6 @@
 # Supervisor: separar eventos locais de demonstrações visuais
 
+Validação do incremento: cf040419, CI 44203813534, 641 Rails/250 Vue/96 Chrome e 120 capturas verificadas. O aceite é interno e sintético; limites externos permanecem.
 Status: correção preparada; validação nativa/Chrome pendente.
 
 ## Evidência

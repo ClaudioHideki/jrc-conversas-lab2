@@ -28,3 +28,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Permissões efetivas CC no perfil autenticado](20261117-call-center-authenticated-permissions.md): reuso da política nativa nos consumidores de navegação.
 - [Painel técnico PABX nativo](20261117-call-center-pabx-native-tabs.md): agrupamento sem outro conector, fronteiras de formulário e limites externos.
 - [Supervisor e fontes observadas](20261117-call-center-observed-supervisor.md): ausência de dados não é zero nem referência visual operacional.
+
+- [Rascunhos locais de URA](20261117-call-center-local-ivr-drafts.md): grafo interno versionado, simulação sem fornecedor e limites antes da persistência/API/editor.

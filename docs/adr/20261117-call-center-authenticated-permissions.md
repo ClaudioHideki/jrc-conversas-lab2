@@ -1,5 +1,6 @@
 # Permissões efetivas do Call Center no perfil autenticado
 
+Validação do incremento: cf040419, CI 44203813534, 641 Rails/250 Vue/96 Chrome e 120 capturas verificadas. O aceite é interno e sintético; limites externos permanecem.
 Status: implementação incremental autorizada; validação nativa e visual pendentes.
 
 ## Problema e evidência
