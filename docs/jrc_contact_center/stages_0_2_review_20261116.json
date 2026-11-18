@@ -2361,6 +2361,34 @@
       "publish_or_rollback": false,
       "external_homologation": false,
       "adr": "docs/adr/20261117-call-center-local-ivr-drafts.md"
+    },
+    "local_ivr_engine_validated": {
+      "sha": "7ab118baf6e27fc393f7c4a28facab99b8bf168b",
+      "run": 44214303140,
+      "rails_main": 672,
+      "rails_concurrent": 14,
+      "engine_examples": 45,
+      "vue": 250,
+      "chrome": 96,
+      "screenshots_verified": 120,
+      "artifact": 14388776353,
+      "artifact_sha256": "f1daadbc66e328254fa2d743b487ee06982741efca2b28027159724b56515dd6",
+      "provider_applied": false,
+      "editor_available": false
+    },
+    "local_ivr_ledger_prepared": {
+      "status": "implemented_pending_native_validation",
+      "migration": "20261117200000",
+      "migration_sha256": "5463324499ceb16908d3605552339cb4c7370881871ea643174976ac8252257c",
+      "automatic_grants": false,
+      "historical_migrations_changed": false,
+      "pending": [
+        "native PostgreSQL/RSpec and lint",
+        "schema reload behavioral proof",
+        "HTTP concurrency/API/pagination",
+        "editor/import/export and Chrome",
+        "provider contract and publication"
+      ]
     }
   },
   "resolved_decisions_20261117": [

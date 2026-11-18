@@ -121,3 +121,7 @@ CI 44078910273/e217b41a preservada: 428 Rails, uma falha de preparação/escopo 
 Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome, zero falhas/pendências/erros externos aos exemplos; lint, migrations, schema reload, assets e bootstrap aprovados. 120 capturas verificadas por SHA-256. Atualiza os estados preparados acima, sem declarar conclusão das 23 figuras ou homologação PABX.
 
 - [ ] **CC-LOCAL-IVR-DRAFTS-20261117:** Núcleo local de esquema/grafo/simulação DTMF preparado, com reautorização por uso e referências nativas. Testes Rails ainda pendentes; persistência, revisões imutáveis, API e editor ainda não implementados. Proposta em docs/adr/20261117-call-center-local-ivr-drafts.md; nenhuma publicação PABX ou formato de fornecedor presumido.
+
+
+- [x] **CC-LOCAL-IVR-ENGINE-20261117:** 7ab118ba / CI 44214303140: 686 Rails (45 do núcleo local), 250 Vue e 96 Chrome aprovados; 120 capturas verificadas por SHA-256. Grafo e simulação locais não publicam no PABX e ainda não constituem editor disponível ao usuário.
+- [ ] **CC-LOCAL-IVR-LEDGER-20261117:** Preparados identidade/revisões imutáveis, migration aditiva exata, escopo histórico/atual e escrita transacional com revisão/UUID/auditoria nativa. Novos testes reais de SQL, ciclo de conta, upgrade e recarga ainda dependem da CI do próximo SHA. Sem API/editor novos; concorrência HTTP, paginação e homologação da URA permanecem pendentes. Nenhuma migration executada localmente ou em produção.

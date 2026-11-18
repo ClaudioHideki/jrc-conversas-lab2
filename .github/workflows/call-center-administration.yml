@@ -100,6 +100,7 @@ jobs:
           test "$POSTGRES_DATABASE" = jrc_cc_access_schema_reload_synthetic
           bundle exec rails db:create db:schema:load
           bundle exec rails runner 'c=ActiveRecord::Base.connection; t=:jrc_contact_center_access_grants; abort "missing access constraints" unless c.foreign_keys(t).length == 3 && c.check_constraints(t).length == 4; abort "unexpected grants" unless JrcContactCenter::AccessGrant.count.zero?'
+          bundle exec rspec spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb --format progress --format json --out /tmp/call-center-ivr-schema-reload-rspec.json
       - name: Rails authorization, persistence and affected regressions
         run: |
           bundle exec rspec spec/services/jrc_contact_center spec/models/jrc_contact_center \
@@ -124,7 +125,7 @@ jobs:
           bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
       - name: Require positive examples and zero failures, pending or outside errors
         run: >-
-          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort s.inspect unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/call-center-rspec.json /tmp/call-center-pabx-rspec.json
+          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort s.inspect unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/call-center-rspec.json /tmp/call-center-pabx-rspec.json /tmp/call-center-ivr-schema-reload-rspec.json
       - name: Supabase storage guards in a separate synthetic database
         env:
           PGPASSWORD: disposable-test-only
@@ -194,7 +195,7 @@ jobs:
           matrix = json.loads(source.read_text())
           assert sorted(row['figure'] for row in matrix['figures']) == list(range(1, 24))
           summaries = {}
-          for name in ['call-center-rspec.json', 'call-center-pabx-rspec.json']:
+          for name in ['call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json']:
               summary = json.loads(Path('/tmp', name).read_text())['summary']
               assert summary['example_count'] > 0
               assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0

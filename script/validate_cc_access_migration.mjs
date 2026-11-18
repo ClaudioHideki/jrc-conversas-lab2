@@ -6,6 +6,12 @@ import { validateNewMigrationTimestamps } from './validate_migration_timestamps.
 
 export const migrationPath = 'db/migrate/20261117190000_add_contact_center_access_grants.rb';
 export const migrationHash = '85fa579036a807b2d50ae3c30af64b061ba9ea6c6ffe173b4e0f33d4ad922dbe';
+export const ivrMigrationPath = 'db/migrate/20261117200000_create_contact_center_ivr_drafts.rb';
+export const ivrMigrationHash = '5463324499ceb16908d3605552339cb4c7370881871ea643174976ac8252257c';
+export const reviewedMigrations = Object.freeze({
+  [migrationPath]: migrationHash,
+  [ivrMigrationPath]: ivrMigrationHash,
+});
 const base = 'a24adc6dd8bb660f955b76cce0172ae1638deee2';
 
 export function verifyAccessMigration(changes, content, schema) {
@@ -19,9 +25,24 @@ export function verifyAccessMigration(changes, content, schema) {
   return validateNewMigrationTimestamps(schema, [migrationPath]);
 }
 
+// Preserve the original one-migration verifier and its negative tests above.
+// The current candidate admits exactly two reviewed forward additions, never an arbitrary extra migration.
+export function verifyReviewedMigrations(changes, readCurrent, schema) {
+  const expected = Object.keys(reviewedMigrations).sort();
+  const rows = changes.trim().split('\n').filter(Boolean).sort();
+  if (JSON.stringify(rows) !== JSON.stringify(expected.map(path => `A\t${path}`))) {
+    throw new Error('Only the two exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
+  }
+  for (const path of expected) {
+    const actual = createHash('sha256').update(readCurrent(path)).digest('hex');
+    if (actual !== reviewedMigrations[path]) throw new Error(`Reviewed migration content changed: ${path}`);
+  }
+  return validateNewMigrationTimestamps(schema, expected);
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyAccessMigration(changes, readFileSync(migrationPath), schema);
-  console.log(JSON.stringify({ protectedBase: base, migrationPath, migrationHash, ...result }));
+  const result = verifyReviewedMigrations(changes, readFileSync, schema);
+  console.log(JSON.stringify({ protectedBase: base, reviewedMigrations, ...result }));
 }
