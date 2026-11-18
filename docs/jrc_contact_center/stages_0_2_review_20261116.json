@@ -3371,5 +3371,29 @@
     "visual_result": "Actual mobile-dark and desktop-light ACW popup reviewed. Add-rule contrast corrected; four computed-color probes: dark715/light96. Contained dialog and persistence/conflict/denial/audit passed in all four projects.",
     "all23_complete": false,
     "later_routing_inherits_this_approval": false
+  },
+  "qa_adf4101b_20261118": {
+    "sha": "adf4101b5c459b65086abdc329fd52f48be1fc49",
+    "run": 44418507109,
+    "artifact": 14482776042,
+    "artifact_sha256": "42c22a2edbc5964ec399c9a9e91dddcc75d28d6019b79a4a7fcde5db857c269e",
+    "main_rails_examples": 1039,
+    "main_passed": 1038,
+    "main_failed": 1,
+    "pending_outside_errors": 0,
+    "schema_reload_passed": 16,
+    "new_ruby_offenses": 22,
+    "not_run": [
+      "concurrency",
+      "corporate_regressions",
+      "Vue",
+      "assets",
+      "Chrome"
+    ],
+    "cause": "The routing-audit test created business units then wrote using an administrator without explicit corporate coverage. Native target scope correctly rejected it. Test preparation now grants GROUP only to the synthetic actor before creating both records, verifies both201 responses, then changes that same grant to unitA. Forced unitB/audit-detail denials remain.",
+    "added_regression": "An eligible native administrator without explicit corporate coverage cannot create a draft after the structure becomes configured.",
+    "lint_correction": "Only the two specs changed: align reported hash/call arguments, name nested setup data, lift the immutable source list outside its loop, and use native exists?(conditions). No cops/assertions removed.",
+    "new_sha_validation": "required",
+    "complete_23_figures": false
   }
 }

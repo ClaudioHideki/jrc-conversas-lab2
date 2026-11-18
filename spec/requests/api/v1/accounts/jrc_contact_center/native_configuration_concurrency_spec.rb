@@ -566,8 +566,9 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     end
   end
 
+  routing_sources = %w[eligibility profile coverage]
   %w[create update].each do |operation|
-    %w[eligibility profile coverage].each do |source|
+    routing_sources.each do |source|
       it "does not #{operation} native routing rules after #{source} changes during the account lock wait" do
         member = account.account_users.find_by!(user: actor)
         rule = if operation == 'update'
@@ -602,14 +603,14 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       values = kwargs.presence || args.first
       if values[:auditable].is_a?(JrcContactCenter::RoutingRule)
         state[:routing_audit_attempt] = true
-        state[:routing_persisted_before_audit] = JrcContactCenter::RoutingRule.where(account: account, id: values[:auditable].id).exists?
+        state[:routing_persisted_before_audit] = JrcContactCenter::RoutingRule.exists?(account: account, id: values[:auditable].id)
         raise ActiveRecord::RecordInvalid, Audited.audit_class.new
       end
       original.call(*args, **kwargs)
     end
-    post "/api/v1/accounts/#{account.id}/jrc_contact_center/routing_rules", headers: headers,
-         params: { routing_rule: { version: 1, rule_key: 'synthetic-audit-rollback', kind: 'ddd', source_value: '11',
-                                   target_unit_id: units.first.id, target_queue_id: queue.id, priority: 1, state: 'draft' } }, as: :json
+    payload = { routing_rule: { version: 1, rule_key: 'synthetic-audit-rollback', kind: 'ddd', source_value: '11',
+                                target_unit_id: units.first.id, target_queue_id: queue.id, priority: 1, state: 'draft' } }
+    post "/api/v1/accounts/#{account.id}/jrc_contact_center/routing_rules", headers: headers, params: payload, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(state[:routing_audit_attempt]).to be(true)
     expect(state[:routing_persisted_before_audit]).to be(true)

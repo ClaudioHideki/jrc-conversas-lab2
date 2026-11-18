@@ -313,3 +313,10 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - CI44409349600:1175 Rails distintos,16 recargas,415Vue,144Chrome,zero falhas/pendências/erros/novas infrações Ruby. DoisPNG efetivamente revisados e208 hashes verificados. Artefato14479548124 / eb514563dfeeefdc48c9a5c3231829986c8963467fe2eb488adc615876d35b3b.
 - Cor real do botão:escuro715/claro96 nos quatro projetos; corrigidos contraste e consulta de histórico sem alterar o validador. Aceite restrito ao motor e popupACW. Relógio por seleção intermediária, formulários, automações e fornecedor continuam pendentes.
 - Roteamento local posterior continua sem aceite nativo herdado; próximo gate exige148Chrome. Sem imagem,merge,deploy ou produção.
+
+
+### Roteamento — QAadf4101b
+
+- CI44418507109:1039 Rails principais,1038 aprovados,um fixture sem coberturaGroup inicial;16 recargas aprovadas. AAPI negou corretamente. Preparação corrigida comGroup sintético explícito antes das criações201 e substituição pelaUnidadeA antes das negativasB; nenhuma permissão relaxada. Mais uma regressão impede criação por administrador sem cobertura.
+- Corrigidos22 apontamentos Ruby nos dois specs:alinhamento,setup aninhado simplificado,literal fora do loop eexists? nativo. Sem exclusões ou redução de expectativas.
+- Artefato14482776042 / 42c22a2edbc5964ec399c9a9e91dddcc75d28d6019b79a4a7fcde5db857c269e verificado. Concorrência,Vue,assets,Chrome não executados nesseSHA. Próximo gate exige148Chrome e todos os critérios anteriores.
