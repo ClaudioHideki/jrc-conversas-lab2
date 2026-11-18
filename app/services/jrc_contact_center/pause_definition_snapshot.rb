@@ -10,9 +10,19 @@ class JrcContactCenter::PauseDefinitionSnapshot
     units = native.where(id: memberships.select(:id)).joins(:queue).distinct.pluck('jrc_contact_center_queues.unit_id')
     return unless JrcContactCenter::PauseReasonDefinition.applicable?(definition, member: member, unit_ids: units)
 
-    event.metadata.fetch('pause_definition').slice(
-      'code', 'name', 'category', 'description', 'revision', 'version', *JrcContactCenter::PauseReasonDefinition::TIMES
+    private_payload(event)
+  end
+
+  def self.private_payload(event)
+    payload = event.metadata.fetch('pause_definition').slice(
+      'code', 'name', 'category', 'description', 'revision', 'version', *JrcContactCenter::PauseReasonDefinition::TIMES,
+      *JrcContactCenter::PauseReasonDefinition::OPTIONAL_FIELDS
     )
+    justification = event.metadata['pause_justification']
+    if justification.is_a?(String) && justification.length.between?(1, JrcContactCenter::AgentStateManager::JUSTIFICATION_LIMIT)
+      payload['justification'] = justification
+    end
+    payload
   end
 
   def self.authorized?(event, member)
@@ -26,7 +36,7 @@ class JrcContactCenter::PauseDefinitionSnapshot
     value = event.metadata['pause_definition']
     return unless valid_stamp?(value)
 
-    definition = value.slice(*JrcContactCenter::PauseReasonDefinition::FIELDS).merge('active' => true)
+    definition = value.slice(*JrcContactCenter::PauseReasonDefinition::ALL_FIELDS).merge('active' => true)
     validator = JrcContactCenter::PauseReasonDefinition.new(account: member.account)
     definition if validator.call(definition, verify_references: false) == definition
   rescue JrcContactCenter::PauseReasonDefinition::Invalid
@@ -43,5 +53,5 @@ class JrcContactCenter::PauseDefinitionSnapshot
       event.metadata.is_a?(Hash) && event.metadata['provider_confirmed'] == false &&
       event.metadata['request_digest'].is_a?(String) && event.metadata['request_digest'].match?(/\A[a-f0-9]{64}\z/)
   end
-  private_class_method :authorized?, :definition, :valid_stamp?, :local_operator_event?
+  private_class_method :private_payload, :authorized?, :definition, :valid_stamp?, :local_operator_event?
 end

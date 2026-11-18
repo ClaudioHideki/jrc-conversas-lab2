@@ -70,6 +70,34 @@ const pauseExceeded = computed(() => {
 const busy = ref(false);
 const failed = ref(false);
 const reason = ref('');
+const justification = ref('');
+const failureCode = ref('');
+const selectedDefinition = computed(() =>
+  state.value?.pause_catalog?.entries?.find(
+    entry =>
+      entry.code === reason.value &&
+      (!queueId.value ||
+        entry.all_queues ||
+        entry.scope_queue_ids?.includes(queueId.value))
+  )
+);
+const justificationRequired = computed(
+  () =>
+    state.value?.pause_catalog?.enforced === true &&
+    selectedDefinition.value?.justification_required === true
+);
+const hasValidJustification = computed(
+  () =>
+    justification.value.length <= 1000 &&
+    (!justificationRequired.value || justification.value.trim().length > 0)
+);
+const failureLabel = computed(() =>
+  ['pause_justification_required', 'invalid_pause_justification'].includes(
+    failureCode.value
+  )
+    ? t('JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION_ERROR')
+    : t('JRC_CONTACT_CENTER.COMMON.ERROR')
+);
 const hasValidPauseReason = computed(() =>
   pauseReasons.value.some(item => item.code === reason.value)
 );
@@ -115,6 +143,8 @@ const load = async () => {
   busy.value = true;
   reason.value = '';
   queueId.value = '';
+  justification.value = '';
+  failureCode.value = '';
   try {
     const response = await JrcContactCenterAPI.agentState(props.accountId);
     if (version === generation) {
@@ -133,10 +163,15 @@ const load = async () => {
 
 const transition = async nextState => {
   if (!props.canOperate || busy.value || !state.value) return;
-  if (nextState === 'paused' && !hasValidPauseReason.value) return;
+  if (
+    nextState === 'paused' &&
+    (!hasValidPauseReason.value || !hasValidJustification.value)
+  )
+    return;
   const version = generation;
   busy.value = true;
   failed.value = false;
+  failureCode.value = '';
   try {
     const response = await JrcContactCenterAPI.updateAgentState(
       props.accountId,
@@ -146,17 +181,31 @@ const transition = async nextState => {
         expected_state_version: state.value.state_version,
         queue_id: queueId.value || undefined,
         reason_code: reason.value.trim() || undefined,
+        ...(nextState === 'paused' &&
+        selectedDefinition.value &&
+        justification.value.trim()
+          ? { justification: justification.value.trim() }
+          : {}),
       }
     );
-    if (version === generation) state.value = response.data.item;
-  } catch {
-    if (version === generation) failed.value = true;
+    if (version === generation) {
+      state.value = response.data.item;
+      justification.value = '';
+    }
+  } catch (error) {
+    if (version === generation) {
+      failed.value = true;
+      failureCode.value = error.response?.data?.error || '';
+    }
   } finally {
     if (version === generation) busy.value = false;
   }
 };
 
-watch(() => props.accountId, load, { immediate: true });
+watch(() => [props.accountId, props.canOperate], load, { immediate: true });
+watch([reason, queueId], () => {
+  justification.value = '';
+});
 watch(state, value => emit('stateChange', value));
 onBeforeUnmount(() => {
   generation += 1;
@@ -208,7 +257,7 @@ onBeforeUnmount(() => {
         role="alert"
         class="mb-4 rounded-xl border border-n-ruby-5 bg-n-ruby-2 p-3 text-sm text-n-ruby-11"
       >
-        {{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}
+        {{ failureLabel }}
       </p>
 
       <div
@@ -240,6 +289,17 @@ onBeforeUnmount(() => {
               t('JRC_CONTACT_CENTER.COMMON.CODE_DETAIL', {
                 code: currentReasonLabel,
                 detail: pauseElapsed,
+              })
+            }}
+          </p>
+          <p
+            v-if="canOperate && state.pause_definition?.justification"
+            class="mt-2 whitespace-pre-wrap break-words text-sm text-n-slate-12"
+            data-own-pause-justification
+          >
+            {{
+              t('JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION_DETAIL', {
+                text: state.pause_definition.justification,
               })
             }}
           </p>
@@ -333,13 +393,35 @@ onBeforeUnmount(() => {
               </select>
             </label>
           </div>
+          <label
+            v-if="selectedDefinition"
+            class="block min-w-0 space-y-1.5 text-sm text-n-slate-12"
+          >
+            <span>{{
+              t('JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION')
+            }}</span>
+            <textarea
+              v-model="justification"
+              :disabled="busy"
+              :required="justificationRequired"
+              maxlength="1000"
+              :aria-label="t('JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION')"
+              :aria-invalid="!hasValidJustification || undefined"
+              class="w-full min-w-0 rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2 text-sm text-n-slate-12"
+            />
+            <span class="block text-xs text-n-slate-10">
+              {{ t('JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION_PRIVATE') }}
+            </span>
+          </label>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="item in transitions"
               :key="item.state"
               type="button"
               :disabled="
-                busy || (item.state === 'paused' && !hasValidPauseReason)
+                busy ||
+                (item.state === 'paused' &&
+                  (!hasValidPauseReason || !hasValidJustification))
               "
               class="inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
               :class="item.className"

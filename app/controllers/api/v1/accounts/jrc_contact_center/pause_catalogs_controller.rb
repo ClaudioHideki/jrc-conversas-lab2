@@ -44,7 +44,7 @@ class Api::V1::Accounts::JrcContactCenter::PauseCatalogsController < Api::V1::Ac
   end
 
   def entry_document(entry)
-    fields = JrcContactCenter::PauseReasonDefinition::FIELDS
+    fields = JrcContactCenter::PauseReasonDefinition::ALL_FIELDS
     valid = entry.is_a?(ActionController::Parameters) && (entry.keys - fields).empty?
     raise JrcContactCenter::PauseReasonDefinition::Invalid, ['entries'] unless valid
 

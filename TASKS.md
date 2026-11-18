@@ -233,3 +233,19 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - Duas falhas de procedimento, repetidas nos quatro projetos: seletor amplo de status encontrou o banner pendente e o carregamento do novo catálogo; auditoria foi consultada sem abrir o detalhe nativo. Corrigir seleção pelo texto exato esperado e abrir a única linha do vínculo/operação, conferir resposta pelo ID do evento e depois o popup. Preservar todas as136 verificações, escritas reais, recarga, negações e auditoria. Nenhuma mudança funcional.
 - Oito Chrome do catálogo passaram. Retirada do último agente comprovou409 sem gravação, confirmação literal,200/persistência e auditoriaAPI/negação antes do passo de detalhe ausente. Aceite final exige próxima CI no próprioSHA.
 - Permanecem parciais as figuras7/8/12; retirada indireta por equipe e capacidades externas não estão homologadas. SemPABX,produção,merge,imagem ou deploy.
+
+
+### Call Center — justificativa privada de pausa, próximo incremento
+
+- Preparados checkbox opcional por motivo, tipagem/limite1.000, exigência só depois da ativação explícita já aprovada, metadata nativo e projeção privada reautorizada do próprio operador. Nenhuma alteração de banco/grants/PABX.
+- Assinatura do catálogo e digest de recibos sem texto preservados; leitura não materializa o novo campo no formato histórico. Valores malformados não viram omissão permissiva.
+- Preparados29 Rails novos (19serviço,9API,1concorrência),cinco cenários de privacidade ampliados e cincoVue (incluindo resposta tardia após perda de autoridade). Os oitoChrome existentes do catálogo ganharam persistência e negação da justificativa, preservando136 cenários. Ainda não executados no candidato.
+- ADR:docs/adr/20261118-call-center-private-pause-justification.md. CI2bbcab4c em andamento não valida este incremento posterior. Exigir checkpoint e CI próprios após o resultado atual.
+
+
+### Call Center — aceite do incremento2bbcab4c
+
+- CI44359221023 aprovada no próprio SHA2bbcab4cac5c434b38c1bbea3beaaa44a1c1d738:1093 Rails únicos (948 principais,60 concorrência,85 corporativos),16 recargas de schema,387Vue e136Chrome; zero falhas,pendências,skips,flaky ou erros externos. Lint,migrations,assets/CSS reais ebootstrap15 aprovados.
+- Artefato14455379412,32.678.968bytes,SHA-256 df5cbf358d4c4aa12b18dc40ee9d7bb6629358853c31eb168a56b9f74609296f. Download e200 hashes de capturas verificados.
+- Quatro capturas do detalhe de auditoria efetivamente revisadas: desktops e celulares,claro/escuro,contidos e legíveis. O novo bloco do gestor aparece após rolagem interna; acrescentada rolagem explícita antes da captura seguinte. Sua confirmação,texto,persistência,negação eAPI passaram nesteSHA.
+- Catálogo básico e retirada direta do último agente validados; figuras7/8/12 e conjunto23 não concluídos. Justificativa posterior preparada separadamente e sem evidência nativa herdada.

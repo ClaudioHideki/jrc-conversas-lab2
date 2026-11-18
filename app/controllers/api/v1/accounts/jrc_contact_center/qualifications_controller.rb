@@ -30,6 +30,7 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
   private
 
   def operator_snapshot
+    response.headers['Cache-Control'] = 'no-store'
     JrcContactCenter::AgentStateSnapshot.new(account_user: Current.account_user).operator_payload
   end
 

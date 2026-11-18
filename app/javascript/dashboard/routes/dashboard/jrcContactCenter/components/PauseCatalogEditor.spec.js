@@ -345,4 +345,38 @@ describe('native pause catalog editor', () => {
     expect(wrapper.findAll('article')).toHaveLength(20);
     expect(mocks.route.query.pauses_q).toBeUndefined();
   });
+
+  it('saves an optional literal justification policy without enabling catalog enforcement', async () => {
+    const wrapper = render();
+    await flushPromises();
+    await button(wrapper, 'EDIT').trigger('click');
+    expect(field(wrapper, 'JUSTIFICATION_REQUIRED').element.checked).toBe(
+      false
+    );
+    await field(wrapper, 'JUSTIFICATION_REQUIRED').setValue(true);
+    await wrapper.get('[data-confirm]').trigger('click');
+    await flushPromises();
+    expect(API.updatePauseCatalog).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({
+        enforced: false,
+        entries: [expect.objectContaining({ justification_required: true })],
+      }),
+      { expected_revision: 'a'.repeat(64), activation_confirmed: false }
+    );
+  });
+
+  it('does not add the new policy to an unchanged old-format entry merely by opening and saving it', async () => {
+    const wrapper = render();
+    await flushPromises();
+    await button(wrapper, 'EDIT').trigger('click');
+    expect(field(wrapper, 'JUSTIFICATION_REQUIRED').element.checked).toBe(
+      false
+    );
+    await wrapper.get('[data-confirm]').trigger('click');
+    await flushPromises();
+    expect(
+      API.updatePauseCatalog.mock.calls.at(-1)[1].entries[0]
+    ).not.toHaveProperty('justification_required');
+  });
 });

@@ -5,6 +5,7 @@ require 'digest'
 class JrcContactCenter::AgentStateManager
   OPERATOR_STATES = %w[offline available paused].freeze
   LOCAL_SOURCE = 'jrc_conversas'
+  JUSTIFICATION_LIMIT = 1000
   NATIVE_PAUSES = {
     'lunch' => 'lunch_break', 'bathroom' => 'bathroom_break', 'meeting' => 'meeting',
     'training' => 'training', 'feedback' => 'feedback', 'end_shift' => 'end_shift'
@@ -16,8 +17,8 @@ class JrcContactCenter::AgentStateManager
     @closed_sessions = []
   end
 
-  def transition(state:, command_id:, expected_state_version:, queue_id: nil, reason_code: nil)
-    attributes = { state: state, queue_id: queue_id.presence, reason_code: reason_code.presence }
+  def transition(state:, command_id:, expected_state_version:, **options)
+    attributes = request_attributes(state, options)
     digest = Digest::SHA256.hexdigest(attributes.merge(expected_state_version: expected_state_version.to_s).to_json)
     JrcContactCenter::AuthorityTransaction.call(account: @account, member: @member) do
       event = @member.with_lock do
@@ -49,6 +50,21 @@ class JrcContactCenter::AgentStateManager
   end
 
   private
+
+  def request_attributes(state, options)
+    options.assert_valid_keys(:queue_id, :reason_code, :justification)
+    attributes = { state: state, queue_id: options[:queue_id].presence, reason_code: options[:reason_code].presence }
+    value = options[:justification]
+    valid = value.nil? || (value.is_a?(String) && value.length <= JUSTIFICATION_LIMIT)
+    raise JrcContactCenter::OperationError, 'invalid_pause_justification' unless valid
+
+    if value.present? && value.strip.present?
+      raise JrcContactCenter::OperationError, 'invalid_pause_justification' unless state == 'paused'
+
+      attributes[:justification] = value.strip
+    end
+    attributes
+  end
 
   def authorize_operator!
     context = { account: @account, account_user: @member, user: @member.user }
@@ -82,8 +98,9 @@ class JrcContactCenter::AgentStateManager
     state = snapshot
     validate_operator_state!(state, attributes, expected_version)
     previous = state.current
-    event = events.create!(attributes.merge(started_at: Time.current, source: LOCAL_SOURCE, external_event_id: event_id,
-                                            metadata: operator_metadata(attributes, digest)))
+    values = attributes.except(:justification).merge(started_at: Time.current, source: LOCAL_SOURCE, external_event_id: event_id,
+                                                     metadata: operator_metadata(attributes, digest))
+    event = events.create!(values)
     close_previous(previous, event)
     sync_native_availability(attributes)
     event
@@ -95,10 +112,19 @@ class JrcContactCenter::AgentStateManager
 
     memberships = snapshot.memberships
     memberships = memberships.where(queue_id: attributes[:queue_id]) if attributes[:queue_id]
-    definition = JrcContactCenter::PauseCatalog.new(account: @account).selection(
-      attributes[:reason_code], member: @member, memberships: memberships
-    )
+    catalog = JrcContactCenter::PauseCatalog.new(account: @account)
+    definition = catalog.selection(attributes[:reason_code], member: @member, memberships: memberships)
+    validate_pause_justification!(attributes, definition, catalog.enforced?)
+
+    metadata['pause_justification'] = attributes[:justification] if attributes[:justification]
     definition ? metadata.merge('pause_definition' => definition) : metadata
+  end
+
+  def validate_pause_justification!(attributes, definition, enforced)
+    raise JrcContactCenter::OperationError, 'pause_reason_not_allowed' if attributes[:justification] && !definition
+    return unless enforced && definition&.fetch('justification_required', false) && attributes[:justification].blank?
+
+    raise JrcContactCenter::OperationError, 'pause_justification_required'
   end
 
   def validate_operator_state!(state, attributes, expected_version)

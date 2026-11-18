@@ -15,6 +15,7 @@ export const pauseCatalogSummary = (entries, t) => {
         `${t('JRC_CONTACT_CENTER.PAUSE_CATALOG.MINIMUM_MINUTES')}: ${minuteValue(row.minimum_minutes)}`,
         `${t('JRC_CONTACT_CENTER.PAUSE_CATALOG.DEFAULT_MINUTES')}: ${minuteValue(row.default_minutes)}`,
         `${t('JRC_CONTACT_CENTER.PAUSE_CATALOG.MAXIMUM_MINUTES')}: ${minuteValue(row.maximum_minutes)}`,
+        `${t('JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION_REQUIRED')}: ${row.justification_required === true ? t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.YES') : t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.NO')}`,
         `${t('JRC_CONTACT_CENTER.PAUSE_CATALOG.UNITS')}: ${row.unit_ids?.join(', ') || t('JRC_CONTACT_CENTER.PAUSE_CATALOG.INHERITED')}`,
         `${t('JRC_CONTACT_CENTER.PAUSE_CATALOG.PROFILES')}: ${row.custom_role_ids?.join(', ') || t('JRC_CONTACT_CENTER.PAUSE_CATALOG.INHERITED')}`,
       ]

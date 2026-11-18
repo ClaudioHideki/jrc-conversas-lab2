@@ -60,6 +60,12 @@ const copy = computed(() => ({
   INVALID_TIME: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.INVALID_TIME'),
   TIME_PLACEHOLDER: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.TIME_PLACEHOLDER'),
   SAVE_FAILED: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.SAVE_FAILED'),
+  JUSTIFICATION_REQUIRED: t(
+    'JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION_REQUIRED'
+  ),
+  JUSTIFICATION_POLICY: t(
+    'JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION_POLICY'
+  ),
 }));
 const text = key => copy.value[key];
 const route = useRoute();
@@ -248,6 +254,7 @@ const open = (row = null) => {
         category: '',
         description: '',
         active: false,
+        justification_required: false,
         unit_ids: [],
         custom_role_ids: [],
       };
@@ -561,6 +568,23 @@ onBeforeUnmount(() => {
               class="mt-1 block text-xs text-n-ruby-11"
             >
               {{ text('INVALID_TIME') }}
+            </span>
+          </label>
+          <label
+            class="flex min-w-0 items-start gap-2 text-sm text-n-slate-12 sm:col-span-2"
+          >
+            <input
+              v-model="input.justification_required"
+              type="checkbox"
+              :aria-invalid="
+                invalid.includes('justification_required') || undefined
+              "
+            />
+            <span>
+              {{ text('JUSTIFICATION_REQUIRED') }}
+              <span class="mt-1 block text-xs text-n-slate-10">{{
+                text('JUSTIFICATION_POLICY')
+              }}</span>
             </span>
           </label>
           <label class="min-w-0 text-sm text-n-slate-12">

@@ -428,7 +428,7 @@
         "document_1_figure": 7,
         "document_2_figure": 7
       },
-      "validation": "d3e2179b / CI 44346971047: 1093 Rails únicos,16 recargas de schema,387 Vue aprovados. Oito infrações Ruby impediram assets/Chrome; correções preparadas sem mudar regras ou asserções. Não é homologação visual nem conclusão integral da figura.",
+      "validation": "2bbcab4c / CI44359221023:1093 Rails únicos,16 recargas,387Vue,136Chrome e200 capturas com hashes verificados. Catálogo básico e retirada direta com revisão do gestor validados. Figura completa permanece parcial; incremento posterior de justificativa ainda exige CI própria.",
       "objective": "Gestao de pausas e disponibilidade",
       "visual_components": "Campos e dados apresentados:  Listar nome, categoria, se retira da distribuicao, tempo padrao e status. Estados exibidos: disponivel, em atendimento, em pausa e offline; indicadores de disponibilidade devem vir de eventos reais, nao de contagem fixa do mockup.",
       "buttons_and_actions": "Acoes e resultado do clique:  Abas Motivos de Pausa, Regras de Distribuicao, Disponibilidade da Equipe e Historico: consultar configuracoes e estados. Novo Motivo: abrir popup. Busca e edicao de linha: localizar/alterar configuracao com auditoria. A aba de equipe mostra agente, estado, tempo decorrido e eventual pausa excedida; selecao de agente abre detalhes quando permitido.",
@@ -478,7 +478,7 @@
         "document_1_figure": 8,
         "document_2_figure": 8
       },
-      "validation": "d3e2179b / CI 44346971047: 1093 Rails únicos,16 recargas de schema,387 Vue aprovados. Oito infrações Ruby impediram assets/Chrome; correções preparadas sem mudar regras ou asserções. Não é homologação visual nem conclusão integral da figura.",
+      "validation": "2bbcab4c / CI44359221023:1093 Rails únicos,16 recargas,387Vue,136Chrome e200 capturas com hashes verificados. Catálogo básico e retirada direta com revisão do gestor validados. Figura completa permanece parcial; incremento posterior de justificativa ainda exige CI própria.",
       "objective": "Popup Cadastrar Motivo de Pausa",
       "visual_components": "Campos e dados apresentados:  Salvar identidade, descricao, categoria, tempo em minutos internamente, limites, regra de retirada, justificativa/aprovacao/alerta quando aplicaveis, status e escopo da empresa. Diferenciar limite informativo de regra que efetivamente bloqueia cadastro.",
       "buttons_and_actions": "Acoes e resultado do clique:  Nome, Tipo/Categoria e Descricao: cadastrar a finalidade da pausa. Tempo Padrao, Minimo e Maximo: preencher em horas/minutos; se um desses campos nao estiver no mockup, deve ser incluido no formulario final ou em aba complementar. Retirar da distribuicao: controlar elegibilidade de chamadas novas. Disponivel para: definir perfis habilitados. Salvar Motivo e Cancelar: validar/persistir ou abandonar sem gravar.",
@@ -715,7 +715,7 @@
         "document_1_figure": 12,
         "document_2_figure": 12
       },
-      "validation": "d3e2179b / CI 44346971047: 1093 Rails únicos,16 recargas de schema,387 Vue aprovados. Oito infrações Ruby impediram assets/Chrome; correções preparadas sem mudar regras ou asserções. Não é homologação visual nem conclusão integral da figura.",
+      "validation": "2bbcab4c / CI44359221023:1093 Rails únicos,16 recargas,387Vue,136Chrome e200 capturas com hashes verificados. Catálogo básico e retirada direta com revisão do gestor validados. Figura completa permanece parcial; incremento posterior de justificativa ainda exige CI própria.",
       "objective": "Popup Configurar Equipe e Filas",
       "visual_components": "Campos e dados apresentados:  Informar total de agentes, grupos/filas ativos, papeis e participacao real na distribuicao. O mesmo usuario pode aparecer como supervisor e nao participante; o estado deve ser explicito.",
       "buttons_and_actions": "Acoes e resultado do clique:  Geral: editar nome, descricao e status. Supervisor Principal e Supervisores Adicionais: selecionar usuarios elegiveis. Agentes: Adicionar Agente ou remover vinculo sem apagar pessoa. Filas Vinculadas: Vincular Fila e marcar separadamente Participa e Supervisiona. Horarios e Regras de Distribuicao: consultar/configurar politicas reutilizaveis. Salvar Configuracoes: validar dependencias e escopo.",
@@ -2904,7 +2904,7 @@
     }
   },
   "pause_catalog_candidate_20261118": {
-    "status": "native_vue_lint_assets_passed_266fa5f8_chrome_128_of_136_pending_qa_correction",
+    "status": "validated_native_vue_lint_assets_chrome_2bbcab4c; later justification increment requires own CI",
     "enforcement_default": false,
     "activation_confirmation_required": true,
     "legacy_history_preserved": true,
@@ -2915,10 +2915,10 @@
     "adr": "docs/adr/20261118-call-center-local-pause-catalog.md",
     "advanced_rules_and_provider_homologation": "pending",
     "word_figures_7_8_complete": false,
-    "last_eligible_withdrawal": "next increment: manager review, confirmation and mandatory audit"
+    "last_eligible_withdrawal": "Direct native membership withdrawal validated2bbcab4c; indirect team flow still pending"
   },
   "manager_queue_withdrawal_candidate_20261118": {
-    "status": "native_vue_lint_assets_passed_266fa5f8_chrome_128_of_136_pending_qa_correction",
+    "status": "validated_native_vue_lint_assets_chrome_2bbcab4c; later justification increment requires own CI",
     "decision": "Explicit manager confirmation, review and audit; no mandatory formal Central Approvals",
     "native_queue_membership_path_only": true,
     "signed_receipt_minutes": 10,
@@ -2934,7 +2934,7 @@
       "supervisor_reason": "hide opaque reason for a current queue outside the viewer scope; preserve authorized Group visibility",
       "native_api_regressions_prepared": 5,
       "translated_call_leg": "existing label reuse; API status unchanged; screenshot finding5e; Vue and four existing Chrome assertions prepared",
-      "status": "Native/Vue passed266fa5f8; catalog privacy and leg translation also passed their own Chrome assertions; full gate blocked by two QA procedures."
+      "status": "Native and own Chrome assertions passed2bbcab4c; privacy and leg translation proven on this SHA."
     },
     "native_checkpoint": {
       "sha": "d3e2179bda70b8f8c9ffd2f54626fddaecef0a23",
@@ -2957,7 +2957,7 @@
     {
       "subject": "Last eligible queue agent withdrawal",
       "resolution": "Explicit authorized-manager confirmation, review and audit; not mandatory formal Central Approvals. No PABX publication.",
-      "status": "Implemented and native-tested266fa5f8; direct withdrawal UI writes/denials/audit API passed, audit detail navigation QA pending. Indirect team removal remains pending."
+      "status": "Direct native membership flow implemented and validated2bbcab4c; indirect team withdrawal remains pending."
     }
   ],
   "qa_266fa5f8_20261118": {
@@ -3006,5 +3006,53 @@
       }
     ],
     "stages_0_2_complete": false
+  },
+  "private_pause_justification_candidate_20261118": {
+    "status": "prepared_not_natively_tested",
+    "native_examples_prepared": 29,
+    "vue_examples_prepared": 5,
+    "existing_privacy_examples_strengthened": 5,
+    "chrome_required_preserved": 136,
+    "existing_catalog_chrome_expanded": 8,
+    "mandatory_only_after_explicit_account_activation": true,
+    "old_catalog_shape_revision_and_receipts_preserved_by_design": true,
+    "private_self_projection_only": true,
+    "no_new_grants_tables_or_provider_commands": true,
+    "adr": "docs/adr/20261118-call-center-private-pause-justification.md",
+    "figures_7_8_complete": false
+  },
+  "qa_2bbcab4c_20261118": {
+    "sha": "2bbcab4cac5c434b38c1bbea3beaaa44a1c1d738",
+    "run": 44359221023,
+    "artifact": 14455379412,
+    "artifact_sha256": "df5cbf358d4c4aa12b18dc40ee9d7bb6629358853c31eb168a56b9f74609296f",
+    "rails_unique": 1093,
+    "schema_reload_reexecutions": 16,
+    "vue": 387,
+    "chrome": 136,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0,
+    "screenshot_hashes_verified": 200,
+    "audit_dialog_pngs_actually_reviewed": [
+      {
+        "file": "desktop-dark-last-eligible-audit.png",
+        "sha256": "293325571a0fc2327c300730070114037836e651e986fe1e5e7b529f27b995de"
+      },
+      {
+        "file": "desktop-light-last-eligible-audit.png",
+        "sha256": "4d3036807445ba953ad293cdfd56f9e66f9c47e179046fdaf28cf5cb755e0323"
+      },
+      {
+        "file": "mobile-dark-last-eligible-audit.png",
+        "sha256": "4ef22187e00158cd5a1dba60857bf5563f834e973311885464ce3c11c2bd8ea8"
+      },
+      {
+        "file": "mobile-light-last-eligible-audit.png",
+        "sha256": "a51f99a07600a031235562ba6236ecbe5e76bf8225f4e218e634e54b182d7a3f"
+      }
+    ],
+    "visual_finding": "Four dialog screenshots are contained/readable in both themes; manager review is below the initial scroll position. Next own Chrome run will scroll to it before capture; current DOM/text/API/confirmation/persistence tests passed.",
+    "full23_and_stages_0_2_complete": false
   }
 }

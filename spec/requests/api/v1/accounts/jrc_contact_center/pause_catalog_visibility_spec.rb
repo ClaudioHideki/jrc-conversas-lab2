@@ -36,11 +36,12 @@ RSpec.describe 'Call Center private pause options and supervisor scope', type: :
     queues
     catalog = JrcContactCenter::PauseCatalog.new(account: account)
     reason = { 'code' => 'synthetic_b', 'name' => 'SYNTHETIC PRIVATE B NAME', 'category' => 'SYNTHETIC',
-               'description' => 'SYNTHETIC PRIVATE B DESCRIPTION', 'active' => true, 'default_minutes' => 30,
+               'description' => 'SYNTHETIC PRIVATE B DESCRIPTION', 'active' => true, 'default_minutes' => 30, 'justification_required' => true,
                'unit_ids' => [units.last.id], 'custom_role_ids' => [] }
     catalog.update!({ 'enforced' => true, 'entries' => [reason] }, expected_revision: catalog.revision, activation_confirmed: true)
     JrcContactCenter::AgentStateManager.new(account: account, account_user: member).transition(
-      state: 'paused', reason_code: 'synthetic_b', queue_id: queues.last.id, command_id: SecureRandom.uuid, expected_state_version: '0'
+      state: 'paused', reason_code: 'synthetic_b', queue_id: queues.last.id, command_id: SecureRandom.uuid, expected_state_version: '0',
+      justification: 'SYNTHETIC PRIVATE B JUSTIFICATION'
     )
   end
 
@@ -48,6 +49,7 @@ RSpec.describe 'Call Center private pause options and supervisor scope', type: :
     get "#{api}/agent_state", headers: actor.create_new_auth_token
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig('item', 'pause_definition', 'name')).to eq('SYNTHETIC PRIVATE B NAME')
+    expect(response.parsed_body.dig('item', 'pause_definition', 'justification')).to eq('SYNTHETIC PRIVATE B JUSTIFICATION')
     expect(response.parsed_body.dig('item', 'pause_catalog', 'entries').sole.fetch('name')).to eq('SYNTHETIC PRIVATE B NAME')
   end
 
@@ -60,7 +62,7 @@ RSpec.describe 'Call Center private pause options and supervisor scope', type: :
     expect(data).not_to have_key('pause_catalog')
     expect(data).not_to have_key('pause_definition')
     expect(data.fetch('reason_code')).to be_nil
-    expect(response.body).not_to include('SYNTHETIC PRIVATE B NAME', 'SYNTHETIC PRIVATE B DESCRIPTION')
+    expect(response.body).not_to include('SYNTHETIC PRIVATE B NAME', 'SYNTHETIC PRIVATE B DESCRIPTION', 'SYNTHETIC PRIVATE B JUSTIFICATION')
   end
 
   it 'does not use a caller-provided member id to return another operator private catalog' do
@@ -69,7 +71,7 @@ RSpec.describe 'Call Center private pause options and supervisor scope', type: :
     expected = account.account_users.find_by!(user: observer).id.to_s
     expect(response.parsed_body.dig('item', 'account_user_id')).to eq(expected)
     expect(response.parsed_body.dig('item', 'pause_catalog')).to be_nil
-    expect(response.body).not_to include('SYNTHETIC PRIVATE B NAME', 'SYNTHETIC PRIVATE B DESCRIPTION')
+    expect(response.body).not_to include('SYNTHETIC PRIVATE B NAME', 'SYNTHETIC PRIVATE B DESCRIPTION', 'SYNTHETIC PRIVATE B JUSTIFICATION')
   end
 
   it 'removes the historical rich projection after the operator loses its Unit B corporate coverage' do
@@ -80,7 +82,7 @@ RSpec.describe 'Call Center private pause options and supervisor scope', type: :
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig('item', 'pause_definition')).to be_nil
     expect(response.parsed_body.dig('item', 'pause_catalog', 'entries')).to be_empty
-    expect(response.body).not_to include('SYNTHETIC PRIVATE B NAME', 'SYNTHETIC PRIVATE B DESCRIPTION')
+    expect(response.body).not_to include('SYNTHETIC PRIVATE B NAME', 'SYNTHETIC PRIVATE B DESCRIPTION', 'SYNTHETIC PRIVATE B JUSTIFICATION')
   end
 
   it 'preserves authorized legacy reason visibility for a supervisor whose Group scope includes the current queue' do
@@ -89,6 +91,7 @@ RSpec.describe 'Call Center private pause options and supervisor scope', type: :
     expect(response).to have_http_status(:ok)
     data = response.parsed_body.fetch('agents').sole
     expect(data.fetch('reason_code')).to eq('synthetic_b')
+    expect(response.body).not_to include('SYNTHETIC PRIVATE B JUSTIFICATION')
     expect(data).not_to have_key('pause_catalog')
     expect(data).not_to have_key('pause_definition')
   end

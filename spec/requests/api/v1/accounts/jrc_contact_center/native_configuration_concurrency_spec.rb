@@ -462,6 +462,29 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     end
   end
 
+  context 'with a newly required private pause justification' do
+    before { JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true) }
+
+    it 'checks the committed requirement after a waiting operator acquires the native Account lock' do
+      member = account.account_users.find_by!(user: actor)
+      member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_configure jrc_contact_center_operate])
+      entry = { 'code' => 'synthetic_private', 'name' => 'SYNTHETIC private pause', 'category' => 'SYNTHETIC',
+                'active' => true, 'default_minutes' => 30, 'unit_ids' => [], 'custom_role_ids' => [] }
+      catalog = JrcContactCenter::PauseCatalog.new(account: account)
+      catalog.update!({ 'enforced' => true, 'entries' => [entry] }, expected_revision: catalog.revision, activation_confirmed: true)
+      previous = member.reload.availability
+      change = lambda do
+        fresh = JrcContactCenter::PauseCatalog.new(account: Account.find(account.id))
+        fresh.update!({ 'enforced' => true, 'entries' => [entry.merge('justification_required' => true)] }, expected_revision: fresh.revision)
+      end
+      payload = { agent_state: { state: 'paused', reason_code: entry.fetch('code'), command_id: SecureRandom.uuid, expected_state_version: '0' } }
+      status = race_with_account_change(change, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/agent_state", payload: payload)
+      expect(status).to eq(422)
+      expect(JrcContactCenter::AgentStateEvent.where(account: account)).to be_empty
+      expect(member.reload.availability).to eq(previous)
+    end
+  end
+
   context 'with confirmed last eligible queue withdrawal' do
     before do
       person = create(:user, :contact_center_eligible, account: account, role: :agent)

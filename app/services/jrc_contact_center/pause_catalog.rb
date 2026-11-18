@@ -16,7 +16,7 @@ class JrcContactCenter::PauseCatalog
 
   def revision
     state = stored
-    rows = state.fetch('entries').map { |row| JrcContactCenter::PauseReasonDefinition::FIELDS.map { |field| row[field] } }
+    rows = state.fetch('entries').map { |row| revision_values(row) }
     Digest::SHA256.hexdigest([KEY, @account.id, state.fetch('version'), state.fetch('enforced'), rows].to_json)
   end
 
@@ -70,6 +70,14 @@ class JrcContactCenter::PauseCatalog
     value
   end
 
+  # Keep the original signature for rows saved before optional policies existed.
+  def revision_values(row)
+    values = JrcContactCenter::PauseReasonDefinition::FIELDS.map { |field| row[field] }
+    optional = row.slice(*JrcContactCenter::PauseReasonDefinition::OPTIONAL_FIELDS)
+    values << optional if optional.any?
+    values
+  end
+
   def valid_stored_header?(value)
     value.is_a?(Hash) && value.keys.sort == %w[enforced entries version] &&
       valid_version?(value['version']) && [true, false].include?(value['enforced']) && valid_entry_collection?(value['entries'])
@@ -82,7 +90,9 @@ class JrcContactCenter::PauseCatalog
   def valid_stored_entries?(entries)
     validator = JrcContactCenter::PauseReasonDefinition.new(account: @account)
     codes = entries.filter_map do |row|
-      return false unless row.is_a?(Hash) && row.keys.sort == JrcContactCenter::PauseReasonDefinition::FIELDS.sort
+      return false unless row.is_a?(Hash)
+      fields = row.keys - JrcContactCenter::PauseReasonDefinition::OPTIONAL_FIELDS
+      return false unless fields.sort == JrcContactCenter::PauseReasonDefinition::FIELDS.sort
       return false unless validator.call(row, verify_references: false) == row
 
       row['code']
@@ -143,6 +153,7 @@ class JrcContactCenter::PauseCatalog
   end
 
   def public_entry(entry)
-    entry.slice('code', 'name', 'category', 'description', *JrcContactCenter::PauseReasonDefinition::TIMES).deep_dup
+    entry.slice('code', 'name', 'category', 'description', *JrcContactCenter::PauseReasonDefinition::TIMES,
+                *JrcContactCenter::PauseReasonDefinition::OPTIONAL_FIELDS).deep_dup
   end
 end

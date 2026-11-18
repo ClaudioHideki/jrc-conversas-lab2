@@ -271,4 +271,183 @@ describe('AgentStatePanel', () => {
     await vi.advanceTimersByTimeAsync(2000);
     expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
   });
+
+  it('requires private text only under an enforced per-reason policy, preserves a failed draft and renders the persisted self response', async () => {
+    const configured = {
+      ...initialState,
+      pause_catalog: {
+        enforced: true,
+        entries: [
+          {
+            code: 'synthetic',
+            name: 'SYNTHETIC',
+            all_queues: true,
+            scope_queue_ids: [],
+            justification_required: true,
+          },
+        ],
+      },
+    };
+    JrcContactCenterAPI.agentState.mockResolvedValueOnce({
+      data: { item: configured },
+    });
+    const wrapper = mount(AgentStatePanel, {
+      props: { accountId: '1', canOperate: true },
+    });
+    await flushPromises();
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+      .setValue('synthetic');
+    const input = wrapper.get(
+      'textarea[aria-label="JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION"]'
+    );
+    const pause = wrapper.findAll('button')[1];
+    expect(input.attributes('maxlength')).toBe('1000');
+    expect(pause.attributes('disabled')).toBeDefined();
+    await input.setValue('  SYNTHETIC private draft  ');
+    expect(pause.attributes('disabled')).toBeUndefined();
+    JrcContactCenterAPI.updateAgentState.mockRejectedValueOnce({
+      response: { data: { error: 'pause_justification_required' } },
+    });
+    await pause.trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toBe(
+      'JRC_CONTACT_CENTER.PAUSE_CATALOG.JUSTIFICATION_ERROR'
+    );
+    expect(input.element.value).toBe('  SYNTHETIC private draft  ');
+    JrcContactCenterAPI.updateAgentState.mockResolvedValueOnce({
+      data: {
+        item: {
+          ...configured,
+          state: 'paused',
+          state_version: '1',
+          reason_code: 'synthetic',
+          pause_definition: {
+            name: 'SYNTHETIC',
+            justification: 'SYNTHETIC private draft',
+          },
+        },
+      },
+    });
+    await pause.trigger('click');
+    await flushPromises();
+    expect(JrcContactCenterAPI.updateAgentState).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({ justification: 'SYNTHETIC private draft' })
+    );
+    expect(wrapper.get('[data-own-pause-justification]').text()).toContain(
+      'SYNTHETIC private draft'
+    );
+    expect(input.element.value).toBe('');
+    await wrapper.setProps({ accountId: '2' });
+    await flushPromises();
+    expect(wrapper.find('[data-own-pause-justification]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('SYNTHETIC private draft');
+  });
+
+  it('keeps the new field optional before enforcement and clears its draft on queue or operating-authority changes', async () => {
+    JrcContactCenterAPI.agentState.mockResolvedValue({
+      data: {
+        item: {
+          ...initialState,
+          queues: [
+            { id: '1', name: 'SYNTHETIC A' },
+            { id: '2', name: 'SYNTHETIC B' },
+          ],
+          pause_catalog: {
+            enforced: false,
+            entries: [
+              {
+                code: 'synthetic',
+                name: 'SYNTHETIC',
+                all_queues: true,
+                scope_queue_ids: [],
+                justification_required: true,
+              },
+            ],
+          },
+        },
+      },
+    });
+    const wrapper = mount(AgentStatePanel, {
+      props: { accountId: '1', canOperate: true },
+    });
+    await flushPromises();
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+      .setValue('synthetic');
+    expect(wrapper.findAll('button')[1].attributes('disabled')).toBeUndefined();
+    const input = wrapper.get('textarea');
+    await input.setValue('SYNTHETIC unsaved');
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.CARDS.QUEUES"]')
+      .setValue('2');
+    expect(input.element.value).toBe('');
+    await input.setValue('SYNTHETIC revoked');
+    await wrapper.setProps({ canOperate: false });
+    expect(wrapper.find('textarea').exists()).toBe(false);
+    await wrapper.setProps({ canOperate: true });
+    await flushPromises();
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+      .setValue('synthetic');
+    expect(wrapper.get('textarea').element.value).toBe('');
+  });
+
+  it('does not restore private text from an old write response after operating authority changes', async () => {
+    const configured = {
+      ...initialState,
+      pause_catalog: {
+        enforced: false,
+        entries: [
+          {
+            code: 'synthetic',
+            name: 'SYNTHETIC',
+            all_queues: true,
+            scope_queue_ids: [],
+          },
+        ],
+      },
+    };
+    JrcContactCenterAPI.agentState.mockResolvedValue({
+      data: { item: configured },
+    });
+    let resolveWrite;
+    JrcContactCenterAPI.updateAgentState.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveWrite = resolve;
+        })
+    );
+    const wrapper = mount(AgentStatePanel, {
+      props: { accountId: '1', canOperate: true },
+    });
+    await flushPromises();
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+      .setValue('synthetic');
+    await wrapper.get('textarea').setValue('SYNTHETIC obsolete private text');
+    await wrapper.findAll('button')[1].trigger('click');
+    await wrapper.setProps({ canOperate: false });
+    await flushPromises();
+    resolveWrite({
+      data: {
+        item: {
+          ...configured,
+          state: 'paused',
+          state_version: '7',
+          pause_definition: {
+            name: 'SYNTHETIC',
+            justification: 'SYNTHETIC obsolete private text',
+          },
+        },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-own-pause-justification]').exists()).toBe(false);
+    await wrapper.setProps({ canOperate: true });
+    await flushPromises();
+    expect(wrapper.find('[data-own-pause-justification]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('SYNTHETIC obsolete private text');
+  });
 });

@@ -72,7 +72,9 @@ RSpec.describe 'Contact Center ACW persistent API', type: :request do
                                           params: { qualification: { reason_code: 'order', outcome_code: 'completed', notes: 'Persisted API note' } }
     expect(response).to have_http_status(:ok)
     expect(conversation.reload.status).to eq('resolved')
+    expect(response.headers['Cache-Control']).to include('no-store')
     get "#{base}/qualifications", headers: headers, as: :json, params: { conversation_id: conversation.display_id }
+    expect(response.headers['Cache-Control']).to include('no-store')
     expect(response.parsed_body['items'].first).to include('notes' => 'Persisted API note', 'channel' => 'whatsapp', 'account_id' => account.id)
     expect(response.parsed_body['items'].first['completed_at']).to be_present
   end

@@ -2120,7 +2120,13 @@
       "ENTRIES": "Motivos cadastrados",
       "INHERITED": "Herança das permissões existentes",
       "EXCEEDED": "O tempo máximo informado foi ultrapassado. A pausa continua ativa; nenhum retorno à distribuição foi executado.",
-      "HISTORY": "Histórico do catálogo"
+      "HISTORY": "Histórico do catálogo",
+      "JUSTIFICATION_REQUIRED": "Exigir justificativa para este motivo",
+      "JUSTIFICATION_POLICY": "Obrigatória somente após a ativação explícita do catálogo na conta. Não exige aprovação formal nem publica no PABX.",
+      "JUSTIFICATION": "Justificativa da pausa",
+      "JUSTIFICATION_PRIVATE": "Até 1.000 caracteres. Conteúdo privado do próprio operador; evite dados sensíveis.",
+      "JUSTIFICATION_ERROR": "Informe uma justificativa válida de até 1.000 caracteres. O conteúdo preenchido foi preservado.",
+      "JUSTIFICATION_DETAIL": "Justificativa da pausa: {text}"
     },
     "QUEUE_WITHDRAWAL": {
       "TITLE": "Retirada do último agente elegível",

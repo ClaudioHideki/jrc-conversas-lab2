@@ -1,6 +1,8 @@
 # A value object for the existing AgentStateManager, not a second agent registry.
 class JrcContactCenter::PauseReasonDefinition
   FIELDS = %w[code name category description active minimum_minutes default_minutes maximum_minutes unit_ids custom_role_ids].freeze
+  OPTIONAL_FIELDS = %w[justification_required].freeze
+  ALL_FIELDS = (FIELDS + OPTIONAL_FIELDS).freeze
   TIMES = %w[minimum_minutes default_minutes maximum_minutes].freeze
 
   class Invalid < JrcContactCenter::OperationError
@@ -25,7 +27,7 @@ class JrcContactCenter::PauseReasonDefinition
     raise Invalid, ['entries'] unless input.is_a?(Hash)
 
     row = input.deep_stringify_keys
-    raise Invalid, ['entries'] if (row.keys - FIELDS).any?
+    raise Invalid, ['entries'] if (row.keys - ALL_FIELDS).any?
 
     validate_text!(row)
     validate_times!(row)
@@ -33,7 +35,7 @@ class JrcContactCenter::PauseReasonDefinition
     TIMES.each { |field| row[field] = nil unless row.key?(field) }
     row['unit_ids'] = identifiers(row.fetch('unit_ids', []), JrcContactCenter::Unit.where(account: @account), 'unit_ids', verify_references)
     row['custom_role_ids'] = identifiers(row.fetch('custom_role_ids', []), CustomRole.where(account: @account), 'custom_role_ids', verify_references)
-    row.slice(*FIELDS)
+    row.slice(*ALL_FIELDS)
   end
 
   private
@@ -51,6 +53,8 @@ class JrcContactCenter::PauseReasonDefinition
   def validate_labels!(row)
     raise Invalid, ['code'] unless row['code'].match?(/\A[a-z0-9][a-z0-9_.-]{0,63}\z/)
     raise Invalid, ['active'] unless [true, false].include?(row['active'])
+
+    raise Invalid, ['justification_required'] if row.key?('justification_required') && ![true, false].include?(row['justification_required'])
 
     description = row.fetch('description', '')
     raise Invalid, ['description'] unless description.is_a?(String) && description.length <= 1000

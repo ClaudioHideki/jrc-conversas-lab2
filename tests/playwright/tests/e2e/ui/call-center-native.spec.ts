@@ -3488,6 +3488,9 @@ test('local pause catalog editor persists HH:MM, pagination, explicit policy and
   ).toHaveAttribute('aria-invalid', 'true');
   await dialog.getByLabel('Tempo máximo', { exact: true }).fill('01:00');
   await dialog.getByLabel('Ativo para novas pausas', { exact: true }).check();
+  await dialog
+    .getByRole('checkbox', { name: 'Exigir justificativa para este motivo' })
+    .check();
   await expect(
     dialog.getByRole('button', { name: 'Salvar', exact: true })
   ).toBeEnabled();
@@ -3501,6 +3504,14 @@ test('local pause catalog editor persists HH:MM, pagination, explicit policy and
   await expect(page).toHaveURL(/pauses_page=2/);
   await expect(catalog.locator('article')).toHaveCount(1);
   await expect(catalog).toContainText('SYNTHETIC created by real UI');
+  const afterCreate = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect(
+    (await afterCreate.json()).item.entries.find(
+      row => row.code === 'synthetic_created'
+    ).justification_required
+  ).toBe(true);
   await catalog
     .getByLabel('Buscar motivo', { exact: true })
     .fill('synthetic_created');
@@ -3635,6 +3646,7 @@ test('local pause catalog operator preserves legacy history and enforces only au
     {
       code: 'synthetic_a',
       name: 'SYNTHETIC allowed pause A',
+      justification_required: true,
       category: 'SYNTHETIC',
       description: '',
       active: true,
@@ -3735,6 +3747,40 @@ test('local pause catalog operator preserves legacy history and enforces only au
     .getByRole('combobox', { name: 'Filas', exact: true })
     .selectOption(String(target.queue_id));
   await reasons.selectOption('synthetic_a');
+  const justification = page.getByRole('textbox', {
+    name: 'Justificativa da pausa',
+    exact: true,
+  });
+  await expect(justification).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Em pausa', exact: true })
+  ).toBeDisabled();
+  const requiredDenied = await page.request.patch(api + '/agent_state', {
+    headers: target.operator,
+    data: {
+      agent_state: {
+        state: 'paused',
+        reason_code: 'synthetic_a',
+        queue_id: target.queue_id,
+        expected_state_version: before.state_version,
+        command_id: randomUUID(),
+      },
+    },
+  });
+  expect(requiredDenied.status()).toBe(422);
+  expect((await requiredDenied.json()).error).toBe(
+    'pause_justification_required'
+  );
+  const afterRequired = await page.request.get(api + '/agent_state', {
+    headers: target.operator,
+  });
+  expect((await afterRequired.json()).item.state_version).toBe(
+    before.state_version
+  );
+  await justification.fill('SYNTHETIC private explanation from real UI');
+  await expect(
+    page.getByRole('button', { name: 'Em pausa', exact: true })
+  ).toBeEnabled();
   await page.getByRole('button', { name: 'Em pausa', exact: true }).click();
   await expect(page.getByRole('timer')).toContainText(
     'SYNTHETIC allowed pause A'
@@ -3749,10 +3795,16 @@ test('local pause catalog operator preserves legacy history and enforces only au
     provider_confirmed: false,
     pause_definition: {
       name: 'SYNTHETIC allowed pause A',
+      justification: 'SYNTHETIC private explanation from real UI',
+      justification_required: true,
       default_minutes: 30,
       maximum_minutes: 60,
     },
   });
+  await page.reload();
+  await expect(page.locator('[data-own-pause-justification]')).toContainText(
+    'SYNTHETIC private explanation from real UI'
+  );
   expect(paused.pause_definition).not.toHaveProperty('unit_ids');
   expect(paused.pause_catalog.entries.map(row => row.code)).toEqual([
     'synthetic_a',
@@ -3920,6 +3972,11 @@ test('last eligible queue withdrawal requires actual manager review and preserve
     auditDialog.locator('[data-audited-manager-withdrawal]')
   ).toContainText('Retirada confirmada pelo gestor');
   await expect(auditDialog).toContainText('Não comprova publicação');
+  const auditedConfirmation = auditDialog.locator(
+    '[data-audited-manager-withdrawal]'
+  );
+  await auditedConfirmation.scrollIntoViewIfNeeded();
+  await expect(auditedConfirmation).toBeVisible();
   await expectContainedDialog(page);
   expect(
     await page.evaluate(
