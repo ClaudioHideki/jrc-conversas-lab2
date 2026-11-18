@@ -43,6 +43,7 @@ class JrcContactCenter::SyntheticCustomerMasterSeed
       business = JrcCrm::BusinessUnit.create!(account: @account, operating_company: company, code: code, name: "SYNTHETIC master business #{code}")
       unit = JrcContactCenter::Unit.create!(account: @account, code: code, name: "SYNTHETIC master unit #{code}", kind: 'sac',
                                             settings: { issuer_company_id: company.id, business_unit_id: business.id })
+      JrcContactCenter::Queue.create!(account: @account, unit: unit, code: "SYNTHETIC-#{code}", name: "SYNTHETIC master queue #{code}")
       { company: company, business: business, unit: unit }
     end
   end
@@ -55,11 +56,13 @@ class JrcContactCenter::SyntheticCustomerMasterSeed
   end
 
   def create_call(unit, contact, operator, phone: nil)
+    queue = JrcContactCenter::Queue.find_by!(account: @account, unit: unit)
+    JrcContactCenter::QueueMembership.find_or_create_by!(account: @account, queue: queue, account_user: operator)
     call = JrcContactCenter::CallSession.create!(
-      account: @account, contact: contact, current_unit: unit, ani: phone || contact.phone_number,
+      account: @account, contact: contact, current_unit: unit, current_queue: queue, ani: phone || contact.phone_number,
       provider: 'synthetic-local', correlation_id: SecureRandom.uuid, direction: 'inbound', status: 'connected', started_at: Time.current
     )
-    JrcContactCenter::CallLeg.create!(account: @account, call_session: call, account_user: operator,
+    JrcContactCenter::CallLeg.create!(account: @account, call_session: call, account_user: operator, queue: queue,
                                       started_at: Time.current, direction: 'inbound', status: 'connected')
     call
   end
@@ -83,6 +86,7 @@ class JrcContactCenter::SyntheticCustomerMasterSeed
   def session_payload(operator, admin, contacts, calls, unlinked)
     foreign = foreign_contact
     { account_id: @account.id, contact_id: contacts.first.id, denied_contact_id: contacts.last.id,
+      queue_id: calls.first.current_queue_id, unit_id: calls.first.current_unit_id,
       call_id: calls.first.id, denied_call_id: calls.last.id, unlinked_call_id: unlinked.id,
       company_id: contacts.first.company_id, foreign_account_id: foreign.account_id, foreign_contact_id: foreign.id,
       user_id: operator.user_id, role_id: operator.custom_role_id, operator: operator.user.create_new_auth_token,

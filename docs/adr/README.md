@@ -43,3 +43,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [2026-11-18 — Revisão esperada global ACW nos dois clientes nativos](20261118-call-center-global-acw-revision.md) — preparado; CI/Chrome próprios pendentes, compatibilidade da API explicitada.
 
 - [Autoridade atual nas escritas operacionais](20261118-call-center-operating-write-authority.md): lock nativo, histórico transacional e QA responsivo, aguardando CI própria.
+
+- [Origem operacional e visibilidade nativa](20261118-call-center-operating-origins.md): reuso de escopos sem ampliação de acesso e prova em banco descartável.

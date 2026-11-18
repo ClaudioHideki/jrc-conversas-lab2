@@ -50,6 +50,21 @@ class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::B
     end
   end
 
+  def authorize_operating_origins!(attributes)
+    contact_center_access.units.find(attributes[:unit_id]) if attributes[:unit_id].present?
+    contact_center_access.cases.find(attributes[:case_id]) if attributes[:case_id].present?
+    contact_center_access.call_sessions.find(attributes[:call_session_id]) if attributes[:call_session_id].present?
+  end
+
+  def attach_operating_call_origin!(attributes, case_record: false)
+    call = authorize_operating_origins!(attributes)
+    return attributes unless call
+
+    attributes[:queue_id] = call.current_queue_id unless attributes.key?(:queue_id)
+    attributes[:unit_id] = call.current_unit_id if case_record && !attributes.key?(:unit_id)
+    attributes
+  end
+
   def configuration_revision_options
     params.key?(:expected_revision) ? { expected_revision: params[:expected_revision] } : {}
   end

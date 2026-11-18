@@ -336,6 +336,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     allow(JrcContactCenter::CaseEvent).to receive(:new).and_wrap_original do |original, *args, **kwargs, &block|
       event = original.call(*args, **kwargs, &block)
       allow(event).to receive(:save!).and_raise(ActiveRecord::StatementInvalid, 'SYNTHETIC mandatory case event unavailable')
+      state[:mandatory_event] = event
       event
     end
   end
@@ -346,8 +347,9 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_configure jrc_contact_center_operate])
     end
 
+    operating_sources = %w[eligibility profile feature team corporate].freeze
     %w[cases callbacks].each do |resource|
-      %w[eligibility profile feature team corporate].each do |source|
+      operating_sources.each do |source|
         it "denies #{resource} creation after #{source} is revoked during the Account lock wait" do
           inherited_team = nil
           if source == 'team'
@@ -374,9 +376,9 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     it 'rolls back a created Case when its required native event cannot be inserted, without an outer fixture transaction' do
       fail_case_event_insert
       endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/cases"
-      expect do
-        post endpoint, headers: headers, params: operating_write_payload('cases'), as: :json
-      end.to raise_error(ActiveRecord::StatementInvalid, /SYNTHETIC mandatory case event unavailable/)
+      post endpoint, headers: headers, params: operating_write_payload('cases'), as: :json
+      expect(response).to have_http_status(:internal_server_error)
+      expect(state.fetch(:mandatory_event)).to have_received(:save!)
       expect(JrcContactCenter::Case.where(account: account)).to be_empty
       expect(JrcContactCenter::CaseEvent.where(account: account)).to be_empty
     end
@@ -388,12 +390,11 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       record = JrcContactCenter::Case.where(account: account).sole
       previous = record.attributes
       fail_case_event_insert
-      expect do
-        patch "#{endpoint}/#{record.id}", headers: headers, params: { case: { status: 'waiting', summary: 'SYNTHETIC rejected' } }, as: :json
-      end.to raise_error(ActiveRecord::StatementInvalid, /SYNTHETIC mandatory case event unavailable/)
+      patch "#{endpoint}/#{record.id}", headers: headers, params: { case: { status: 'waiting', summary: 'SYNTHETIC rejected' } }, as: :json
+      expect(response).to have_http_status(:internal_server_error)
+      expect(state.fetch(:mandatory_event)).to have_received(:save!)
       expect(record.reload.attributes).to eq(previous)
       expect(record.events.pluck(:event_type)).to eq(['created'])
     end
   end
-
 end

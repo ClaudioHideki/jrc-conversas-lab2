@@ -19,10 +19,11 @@ class Api::V1::Accounts::JrcContactCenter::CasesController < Api::V1::Accounts::
 
   def create
     with_current_operating_authority do
-      attributes = case_params
+      attributes = attach_operating_call_origin!(case_params, case_record: true)
       ensure_contact_center_assignment!(queue_id: attributes[:queue_id], owner_account_user_id: attributes[:owner_account_user_id],
                                         require_accessible_assignment: true)
       record = JrcContactCenter::Case.create!(attributes.merge(account: Current.account, protocol: next_protocol))
+      scoped_cases.find(record.id)
       record.events.create!(account: Current.account, actor_account_user: Current.account_user, event_type: 'created',
                             occurred_at: Time.current, data: { status: record.status })
       render json: base_payload.merge(item: serialize(record)), status: :created
@@ -33,6 +34,7 @@ class Api::V1::Accounts::JrcContactCenter::CasesController < Api::V1::Accounts::
     with_current_operating_authority do
       record = scoped_cases.find(params[:id])
       attributes = case_params
+      authorize_operating_origins!(attributes)
       authorize_case_assignment!(record, attributes)
       update_case(record, attributes)
       render json: base_payload.merge(item: serialize(record))
@@ -50,6 +52,7 @@ class Api::V1::Accounts::JrcContactCenter::CasesController < Api::V1::Accounts::
   def update_case(record, attributes)
     previous = record.slice('status', 'owner_account_user_id', 'priority')
     record.update!(attributes)
+    scoped_cases.find(record.id)
     record.events.create!(account: Current.account, actor_account_user: Current.account_user, event_type: 'updated',
                           occurred_at: Time.current, data: { before: previous, after: record.slice(*previous.keys) })
   end

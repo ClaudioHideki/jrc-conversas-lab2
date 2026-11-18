@@ -1388,7 +1388,6 @@
     "chrome": 44
   },
   "required_decisions": [
-    "Compatibilidade de pausas legadas: decisão de ativação explícita por conta ou migração coordenada; pergunta já enviada, sem bloquear motivos livres em silêncio.",
     "Contrato/capacidades reais do PABX, codec e confirmação de aplicação, além do serviço de voz Nico; documentação solicitada sem pedir credenciais.",
     "Hierarquia supervisor primário/equipe/fila e cobertura corporativa: o Team nativo é da conta; não inferir unidades ou novos grants.",
     "Matriz visual multi-módulo: mapear ações somente a permissões nativas comprovadas; herança CC não amplia os demais módulos."
@@ -2810,6 +2809,25 @@
       "expected_chrome": 120,
       "scope": "Current native authority and atomic Case history, plus responsive QA fixes. No provider actions."
     },
-    "provider_contract_user_decision": "Contrato técnico completo indisponível; desenvolvimento interno continua; publicação/comandos/ACK permanecem bloqueados para homologação externa."
+    "provider_contract_user_decision": "Contrato técnico completo indisponível; desenvolvimento interno continua; publicação/comandos/ACK permanecem bloqueados para homologação externa.",
+    "operating_write_failed_checkpoint": {
+      "sha": "4c72e8d03b8c65b2e6aee773a2838cebcf1eead0",
+      "run_id": 44309567421,
+      "main_rails_passed": 884,
+      "concurrent_passed": 34,
+      "concurrent_failed": 2,
+      "diagnosis": "show_exceptions=true exige HTTP 500 e provas nativas de rollback; duas infrações Ruby corrigidas. Gates seguintes não executados.",
+      "artifact_id": 14429268864,
+      "artifact_sha256": "e10973945769dbad2ab63e9901d405244a4394da4995ba4bf8fa6ef3e86766af"
+    },
+    "operating_origins_prepared": {
+      "new_guarded_native_examples": 17,
+      "new_chrome_examples": 4,
+      "required_chrome_total": 124,
+      "expected_rails_unique": 1022,
+      "expected_vue": 358,
+      "scope": "Derivar campos da chamada autorizada e conferir a visibilidade com as regras nativas; sem ampliar AccessScope."
+    },
+    "pause_catalog_approved_compatibility": "Aprovado pelo usuário: preservar legado, exigir catálogo apenas após ativação explícita por conta. Sem ativação em produção."
   }
 }

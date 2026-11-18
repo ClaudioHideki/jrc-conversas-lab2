@@ -3225,7 +3225,7 @@ test('global ACW revision preserves drafts across both native editors and requir
   await expect(form.locator('[data-save-acw-policy]')).toBeEnabled();
   await expect(
     page.getByRole('heading', {
-      name: 'Configurações Contact Center',
+      name: 'Configuracoes Contact Center',
       exact: true,
     })
   ).toHaveCSS('color', 'rgb(255, 255, 255)');
@@ -3280,4 +3280,111 @@ test('global ACW revision preserves drafts across both native editors and requir
     path: `.codex/call-center-native-e2e/${info.project.name}-acw-revision-scoped-settings.png`,
     fullPage: true,
   });
+});
+
+test('linked Customer Master operating records remain visible in their native scope after real UI creation', async ({
+  page,
+}, info) => {
+  const target = session.customer_master_targets[info.project.name];
+  const source = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const route = `/app/accounts/${target.account_id}/contact-center/chamada/${target.call_id}?native_navigation=1`;
+  await page.goto(route);
+  await expect(page.getByText('Falando', { exact: true })).toBeVisible();
+  const summary = 'SYNTHETIC persisted origin ' + info.project.name;
+  await page
+    .getByLabel('Motivo do atendimento', { exact: true })
+    .fill('SYNTHETIC callback follow-up');
+  await page.getByLabel('Resumo', { exact: true }).fill(summary);
+  const caseSaved = page.waitForResponse(
+    response =>
+      response.url() === source + '/cases' &&
+      response.request().method() === 'POST'
+  );
+  await page
+    .getByRole('button', { name: 'Criar ocorrencia', exact: true })
+    .click();
+  const created = await caseSaved;
+  expect(created.status()).toBe(201);
+  const occurrence = (await created.json()).item;
+  expect(occurrence.call_session_id).toBe(target.call_id);
+  expect(occurrence.unit_id).toBe(target.unit_id);
+  expect(occurrence.queue_id).toBe(target.queue_id);
+  const cases = await page.request.get(source + '/cases', {
+    headers: target.operator,
+  });
+  expect(cases.status()).toBe(200);
+  expect((await cases.json()).items).toContainEqual(
+    expect.objectContaining({ id: occurrence.id, summary })
+  );
+  await page.reload();
+  await expect(page.getByText('Falando', { exact: true })).toBeVisible();
+  await page
+    .getByLabel('Agendado para', { exact: true })
+    .fill('2026-12-01T14:30');
+  const callbackSaved = page.waitForResponse(
+    response =>
+      response.url() === source + '/callbacks' &&
+      response.request().method() === 'POST'
+  );
+  await page
+    .getByRole('button', {
+      name: 'Agendar callback na Minha Agenda',
+      exact: true,
+    })
+    .click();
+  const callbackResponse = await callbackSaved;
+  expect(callbackResponse.status()).toBe(201);
+  const callback = (await callbackResponse.json()).item;
+  expect(callback.call_session_id).toBe(target.call_id);
+  expect(callback.queue_id).toBe(target.queue_id);
+  const callbacks = await page.request.get(source + '/callbacks', {
+    headers: target.operator,
+  });
+  expect(callbacks.status()).toBe(200);
+  expect((await callbacks.json()).items).toContainEqual(
+    expect.objectContaining({ id: callback.id, queue_id: target.queue_id })
+  );
+  const caseDetails = await page.request.get(
+    source + `/cases/${occurrence.id}`,
+    { headers: target.operator }
+  );
+  expect(caseDetails.status()).toBe(200);
+  expect((await caseDetails.json()).item.events).toContainEqual(
+    expect.objectContaining({ event_type: 'created' })
+  );
+  const forbidden = await page.request.post(source + '/callbacks', {
+    headers: target.operator,
+    data: {
+      callback: {
+        ...callback,
+        id: undefined,
+        call_session_id: target.denied_call_id,
+        idempotency_key: randomUUID(),
+      },
+    },
+  });
+  expect(forbidden.status()).toBe(404);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-scoped-operating-records.png`,
+    fullPage: true,
+  });
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-scoped-operating-records.json`,
+    JSON.stringify({
+      synthetic: true,
+      sha: process.env.GITHUB_SHA,
+      account_id: target.account_id,
+      call_id: target.call_id,
+      case_id: occurrence.id,
+      callback_id: callback.id,
+      unit_id: target.unit_id,
+      queue_id: target.queue_id,
+      denied_source_status: forbidden.status(),
+    })
+  );
 });
