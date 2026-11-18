@@ -35,7 +35,7 @@ class JrcApprovals::Authorization
   end
 
   def covered?(company_id, unit_id)
-    JrcCrm::UserBusinessUnit.structure_managed.active.where(account_id: @account.id, user_id: @user.id).any? do |scope|
+    JrcCrm::CurrentStructureScopes.new(account: @account, user: @user).call.any? do |scope|
       scope.scope == 'GROUP' || (scope.scope == 'COMPANY' && company_id && scope.company_id == company_id) ||
         (scope.scope == 'BUSINESS_UNIT' && unit_id && scope.business_unit_id == unit_id)
     end

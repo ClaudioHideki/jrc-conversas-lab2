@@ -1,0 +1,75 @@
+{
+  "status": "correction prepared in isolated source; native execution pending",
+  "observed_sha": "31d571727427bce5245486f0ef747dce7adf3d8e",
+  "native_sources": [
+    "app/models/jrc_crm/team_scope.rb",
+    "app/models/jrc_crm/user_business_unit.rb",
+    "app/services/jrc_crm/corporate_coverage.rb",
+    "app/controllers/api/v1/accounts/crm/organization_structure_controller.rb",
+    "app/services/jrc_approvals/eligibility.rb",
+    "app/models/team_member.rb",
+    "enterprise/app/controllers/enterprise/api/v1/accounts/team_members_controller.rb",
+    "app/services/jrc_contact_center/team_assignment_guard.rb"
+  ],
+  "confirmed": [
+    "Corporate team coverage exists in the native CRM and is already reused by Approvals; do not add another coverage registry",
+    "UserBusinessUnit validates membership and containing team scope at save time",
+    "CorporateCoverage#scopes selects active structure-managed rows without rechecking those live source predicates",
+    "Native TeamMember removal invalidates unread counters and audits membership; no user-coverage deactivation callback or matching SQL trigger found",
+    "CC functional team grants are already based on current membership; corporate source revalidation is a separate concern"
+  ],
+  "impact_review": [
+    "Call Center operational scope and frozen IVR/audit visibility",
+    "CRM company/unit coverage",
+    "Backoffice and Approvals authorization relying on CorporateCoverage",
+    "Native team-member and organizational-scope mutation authority/locks"
+  ],
+  "proposed_increment": [
+    "Keep direct active user coverage unchanged",
+    "Select team-derived rows only while current same-account membership and active containing TeamScope remain valid",
+    "Do not create, copy, reactivate or rewrite user coverage records",
+    "Require native Group scope administration before team reinclusion can activate stored team-derived coverage, including latent grants",
+    "Keep pure removals/no-op removals permitted under their native authority",
+    "Serialize team/user corporate-scope changes under the account authority lock and reauthorize the actor after waiting",
+    "Correct the figure-12 audit wording; the missing pieces are CC integration/primary-supervisor/queue hierarchy, not absence of a corporate TeamScope model"
+  ],
+  "required_native_tests": [
+    "removal of team membership withdraws that source immediately on the next authorized read",
+    "inactive/narrowed team coverage withdraws only invalid derived scopes",
+    "direct independent coverage remains effective",
+    "joining a team alone creates no organizational grant",
+    "unrelated/foreign memberships and scopes grant nothing",
+    "non-Group actor cannot reactivate latent coverage by reinclusion; native Group admin can perform authorized changes",
+    "removal is not misclassified as an addition",
+    "revocation while a CC write waits for the real account lock denies the write",
+    "CRM organizational-model/API, Approvals core and affected native module scope regressions"
+  ],
+  "product_code_modified_for_this_finding": true,
+  "real_assignments_modified": false,
+  "historical_migrations_modified": false,
+  "business_values_invented": false,
+  "published_or_deployed": false,
+  "prepared_rails_regressions": 32,
+  "source_consumer_correction": "Approvals Authorization had a separate direct UserBusinessUnit selector; it now reuses the exact current-source relation, while preserving its existing functional authority checks.",
+  "prepared_paths": [
+    "script/jrc_call_center_ivr_seed.rb",
+    "app/controllers/api/v1/accounts/crm/organization_structure_controller.rb",
+    "app/controllers/concerns/jrc_crm/structure_scope_authority.rb",
+    "app/services/jrc_approvals/authorization.rb",
+    "app/services/jrc_crm/corporate_coverage.rb",
+    "app/services/jrc_crm/current_structure_scopes.rb",
+    "app/services/jrc_crm/team_scope_activation_guard.rb",
+    "enterprise/app/controllers/enterprise/api/v1/accounts/team_members_controller.rb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/corporate_scope_writes_spec.rb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/team_corporate_authority_spec.rb",
+    "spec/services/jrc_contact_center/team_corporate_scope_spec.rb"
+  ],
+  "native_suite_separation": {
+    "cc_and_crm": "jrc_sd_bc_portal_concurrency_20261025_test",
+    "concurrent_requests": "corporate_gratuity_disposable",
+    "approvals_and_backoffice": "jrc_rel_v2_candidate_test",
+    "ledger_reload": "jrc_cc_access_schema_reload_synthetic",
+    "all": "github-hosted disposable runner, Postgres127.0.0.1; separate processes and JSON reports; positive examples/zero failures/pending/outside errors required"
+  }
+}

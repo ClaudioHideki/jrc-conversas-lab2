@@ -32,12 +32,7 @@ class JrcContactCenter::SyntheticIvrSeed
     scoped = create_operator('scoped', %w[jrc_contact_center_view jrc_contact_center_configure])
     observer = create_operator('observer', %w[jrc_contact_center_view jrc_contact_center_supervise])
     JrcCrm::UserBusinessUnit.create!(account: @account, user: admin.user, scope: 'GROUP', active: true, structure_managed: true)
-    [scoped, observer].each do |recipient|
-      JrcCrm::UserBusinessUnit.create!(
-        account: @account, user: recipient.user, scope: 'BUSINESS_UNIT', company: company,
-        business_unit_id: units.first.reload.settings.fetch('business_unit_id'), active: true, structure_managed: true
-      )
-    end
+    create_corporate_team(company, units.first, [scoped, observer])
     queue = JrcContactCenter::Queue.create!(account: @account, unit: units.first, code: 'VOICE', name: 'SYNTHETIC IVR voice')
     session_payload(admin, scoped, observer, units, queue)
   end
@@ -46,8 +41,22 @@ class JrcContactCenter::SyntheticIvrSeed
 
   def session_payload(admin, scoped, observer, units, queue)
     { account_id: @account.id, allowed_unit_id: units.first.id, denied_unit_id: units.last.id, queue_id: queue.id,
+      scoped_team_id: @team.id, scoped_user_id: scoped.user_id,
       scoped_member_id: scoped.id, observer_member_id: observer.id, administrator: admin.user.create_new_auth_token,
       scoped: scoped.user.create_new_auth_token, observer: observer.user.create_new_auth_token }
+  end
+
+  def create_corporate_team(company, unit, recipients)
+    @team = Team.create!(account: @account, name: "SYNTHETIC IVR corporate team #{@project}")
+    @team.add_members(recipients.map(&:user_id))
+    business_id = unit.settings.fetch('business_unit_id')
+    @account.jrc_crm_team_scopes.create!(team: @team, scope: 'BUSINESS_UNIT', company: company, business_unit_id: business_id)
+    recipients.each do |recipient|
+      @account.jrc_crm_user_business_units.create!(
+        user: recipient.user, team: @team, scope: 'BUSINESS_UNIT', company: company,
+        business_unit_id: business_id, active: true, structure_managed: true
+      )
+    end
   end
 
   def create_units(company)

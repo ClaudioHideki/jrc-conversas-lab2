@@ -2481,6 +2481,42 @@ test('local IVR scoped records and forced URLs obey corporate coverage and fresh
     }
   );
   expect(simulated.status()).toBe(404);
+  const membershipEndpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/teams/${target.scoped_team_id}/team_members`;
+  try {
+    const removed = await page.request.delete(membershipEndpoint, {
+      headers: target.administrator,
+      data: { user_ids: [target.scoped_user_id] },
+    });
+    expect(removed.status()).toBe(200);
+    await page.reload();
+    await expect(page.locator('[data-ivr-workspace]')).toBeVisible();
+    await expect(page.locator(`[data-ivr-draft="${own.id}"]`)).toHaveCount(0);
+    const withheld = await page.request.get(endpoint + '/' + own.id, {
+      headers: target.scoped,
+    });
+    expect(withheld.status()).toBe(404);
+    const reactivation = await page.request.post(membershipEndpoint, {
+      headers: target.scoped,
+      data: { user_ids: [target.scoped_user_id] },
+    });
+    expect(reactivation.status()).toBe(401);
+    await page.screenshot({
+      path: `.codex/call-center-native-e2e/${info.project.name}-team-coverage-denied.png`,
+      fullPage: true,
+    });
+  } finally {
+    const rejoined = await page.request.post(membershipEndpoint, {
+      headers: target.administrator,
+      data: { user_ids: [target.scoped_user_id] },
+    });
+    expect(rejoined.status()).toBe(200);
+  }
+  const available = await page.request.get(endpoint + '/' + own.id, {
+    headers: target.scoped,
+  });
+  expect(available.status()).toBe(200);
+  await page.reload();
+  await expect(page.locator(`[data-ivr-draft="${own.id}"]`)).toBeVisible();
   const accessEndpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/access_authorizations/users/${target.scoped_member_id}`;
   const current = await page.request.get(accessEndpoint, {
     headers: target.administrator,

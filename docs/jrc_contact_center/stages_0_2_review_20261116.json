@@ -630,7 +630,7 @@
         "Elegibilidade e cobertura corporativa atuais do destinatário revalidadas na API e após espera de lock; desativação segura preservada. Validado na CI 44194721033, SHA 7011dac7, incluindo recarga e negativas no Chrome."
       ],
       "remaining_or_external": [
-        "Native Team has no corporate scope or supervisor/queue hierarchy; no fictitious team status; richer mapping, schedules and distribution remain later",
+        "Corporate coverage already exists in JrcCrm::TeamScope and UserBusinessUnit; safe CC reuse/current-source revalidation remains pending. Primary-supervisor/queue hierarchy and a native Team status are still absent; do not invent a status or duplicate coverage.",
         "Elegibilidade de usuário inativo não é inferida da presença online; regras de disponibilidade/capacidade PABX continuam dependentes do contrato operacional.",
         "Retirada do último agente elegível ainda exige definição da validação obrigatória. Pergunta de negócio enviada; não confundir com a cobertura corporativa do destinatário, já validada."
       ],
@@ -2501,6 +2501,18 @@
       "new_chrome_projects": 4,
       "dedicated_synthetic_observer": true,
       "instant_websocket_revocation_claimed": false
+    },
+    "native_team_corporate_scope_review": {
+      "status": "correction prepared; native execution pending",
+      "report": "docs/jrc_contact_center/native_team_corporate_scope_review_20261118.json",
+      "reuse_existing_coverage_model": true,
+      "no_scope_records_changed": true,
+      "adr": "docs/adr/20261118-call-center-current-team-corporate-sources.md",
+      "prepared_rails_examples": 32,
+      "chrome_existing_cases_extended": 4,
+      "grants_automatically_created": false,
+      "source_rows_automatically_rewritten": false,
+      "raw_approvals_selector_corrected": true
     }
   },
   "resolved_decisions_20261117": [
@@ -2509,5 +2521,81 @@
       "resolution": "Native TeamMember proves membership in the same Account. Explicit AccessGrant team capabilities are inherited; native membership alone grants nothing; individual denials take priority; explicit individual eligibility is mandatory. Other module permissions and corporate scope are unchanged.",
       "validated_sha": "7011dac7ef25c937a784142e34217dfbe5b9d388"
     }
-  ]
+  ],
+  "continuity_20261118": {
+    "validated_checkpoint": {
+      "sha": "417bb8681d715cff24f1a5d506de7e82624463f0",
+      "run": 44243460813,
+      "artifact": 14401817176,
+      "artifact_sha256": "7c94a08d69d4da3c1eb243c365afaa68c6e4969df6fa1bb09e08bb14befb6167",
+      "rails_unique": 780,
+      "schema_reload_reexecuted_examples": 16,
+      "vue": 300,
+      "chrome": 112,
+      "screenshots_sha256_verified": 140,
+      "zero_failures_pending_skipped_flaky_outside_errors": true,
+      "visual_review": {
+        "reviewed_files": [
+          "desktop-dark-ivr-builder.png",
+          "desktop-light-ivr-builder.png",
+          "mobile-dark-ivr-builder.png",
+          "mobile-light-ivr-builder.png"
+        ],
+        "desktop_width": 1440,
+        "mobile_width": 390,
+        "light_and_dark": true,
+        "findings": [
+          "native dialog footer remains visible and contained",
+          "map stacks nodes on mobile; all four captures have readable text and contrasting fields",
+          "editor uses internal scroll on small viewports",
+          "local map is not a full provider graph or PABX publication proof"
+        ],
+        "reviewed_all_140_visually": false
+      },
+      "theme_colors_verified": {
+        "desktop-dark-ivr-theme.json": {
+          "synthetic": true,
+          "project": "desktop-dark",
+          "initial_color": "rgba(0, 0, 0, 0.2)",
+          "opposite_color": "rgba(0, 0, 0, 0.04)",
+          "restored_color": "rgba(0, 0, 0, 0.2)",
+          "native_transition_completed": true
+        },
+        "desktop-light-ivr-theme.json": {
+          "synthetic": true,
+          "project": "desktop-light",
+          "initial_color": "rgba(0, 0, 0, 0.04)",
+          "opposite_color": "rgba(0, 0, 0, 0.2)",
+          "restored_color": "rgba(0, 0, 0, 0.04)",
+          "native_transition_completed": true
+        },
+        "mobile-dark-ivr-theme.json": {
+          "synthetic": true,
+          "project": "mobile-dark",
+          "initial_color": "rgba(0, 0, 0, 0.2)",
+          "opposite_color": "rgba(0, 0, 0, 0.04)",
+          "restored_color": "rgba(0, 0, 0, 0.2)",
+          "native_transition_completed": true
+        },
+        "mobile-light-ivr-theme.json": {
+          "synthetic": true,
+          "project": "mobile-light",
+          "initial_color": "rgba(0, 0, 0, 0.04)",
+          "opposite_color": "rgba(0, 0, 0, 0.2)",
+          "restored_color": "rgba(0, 0, 0, 0.04)",
+          "native_transition_completed": true
+        }
+      }
+    },
+    "prepared_security_increment": {
+      "adr": "docs/adr/20261118-call-center-current-team-corporate-sources.md",
+      "rails_examples": 32,
+      "native_results": "pending new checkpoint",
+      "chrome_corporate_cases_extended": 4
+    },
+    "word_part_1_complete": false,
+    "full_23_figures_complete": false,
+    "real_pabx_homologation": false,
+    "docker_publication_or_deploy": false
+  }
 }

@@ -113,7 +113,9 @@ jobs:
             spec/controllers/api/v1/accounts/agents_controller_spec.rb spec/enterprise/controllers/api/v1/accounts/agents_controller_spec.rb \
             spec/enterprise/controllers/api/v1/accounts/custom_roles_controller_spec.rb spec/enterprise/models/custom_role_spec.rb \
             spec/enterprise/models/contact_center_custom_role_audit_spec.rb spec/enterprise/controllers/api/v1/accounts/audit_logs_controller_spec.rb \
-            --exclude-pattern '**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb' \
+            spec/services/jrc_crm/corporate_coverage_spec.rb spec/models/jrc_crm/organizational_structure_spec.rb \
+            spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
+            --exclude-pattern '**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: PABX concurrency in its explicitly guarded disposable database
         env:
@@ -122,10 +124,22 @@ jobs:
         run: |
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
-          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
+          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
+      - name: Affected Approvals and Backoffice in their guarded disposable candidate database
+        env:
+          POSTGRES_DATABASE: jrc_rel_v2_candidate_test
+          SCHEMA: /tmp/call-center-corporate-schema.rb
+        run: |
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = jrc_rel_v2_candidate_test
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+          bundle exec rspec spec/services/jrc_approvals/core_spec.rb spec/services/jrc_backoffice/authority_proposals_spec.rb spec/services/jrc_backoffice/signer_rosters_spec.rb --format progress --format json --out /tmp/call-center-corporate-rspec.json
       - name: Require positive examples and zero failures, pending or outside errors
         run: >-
-          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort s.inspect unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/call-center-rspec.json /tmp/call-center-pabx-rspec.json /tmp/call-center-ivr-schema-reload-rspec.json
+          ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort s.inspect unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/call-center-rspec.json /tmp/call-center-pabx-rspec.json /tmp/call-center-ivr-schema-reload-rspec.json /tmp/call-center-corporate-rspec.json
       - name: Supabase storage guards in a separate synthetic database
         env:
           PGPASSWORD: disposable-test-only
@@ -195,7 +209,7 @@ jobs:
           matrix = json.loads(source.read_text())
           assert sorted(row['figure'] for row in matrix['figures']) == list(range(1, 24))
           summaries = {}
-          for name in ['call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json']:
+          for name in ['call-center-rspec.json', 'call-center-pabx-rspec.json', 'call-center-ivr-schema-reload-rspec.json', 'call-center-corporate-rspec.json']:
               summary = json.loads(Path('/tmp', name).read_text())['summary']
               assert summary['example_count'] > 0
               assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0

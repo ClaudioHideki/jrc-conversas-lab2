@@ -120,3 +120,23 @@ CI 44239525292: 763 Rails principais, 17 concorrentes, 16 reexecuções do ledge
 Duas causas de observação confirmadas no código e relatórios: a fixture serve a interface em 5386 e encaminha /api ao Rails 5387; os probes diretos usam 5387, mas as respostas da página têm origem 5386. Os predicados novos passam a exigir a origem real configurada do navegador, o mesmo pathname de conta/recurso e método; status, conflitos, identidade e persistência reais continuam obrigatórios. Metadados de origem/pathname/método/status são preservados por cenário, sem headers, querystrings ou payloads.
 
 O campo usa field-base com transition-colors duration-[0.25s]. A leitura imediatamente após trocar .dark capturava a cor inicial antes da transição. A prova agora aguarda as animações do próprio elemento terminarem e exige cor diferente; ao restaurar o tema exige a cor original. Registra ambas as cores e captura o mapa após a restauração. Nenhum CSS, transição, componente, API ou critério foi substituído; não usar sleep fixo ou desabilitar animações para aprovar o teste. A nova execução deve provar os 112 cenários completos.
+
+
+## Aceite incremental 417bb868
+
+CI 44243460813 concluída: 780 exemplos Rails únicos, 16 reexecuções do
+ledger no banco de schema reload, 300 Vue e 112 Chrome, sem falhas,
+pendências, ignorados, flaky ou erros externos. Lints, migrations, recarga,
+Supabase sintético, assets e bootstrap de 15 cards aprovados.
+Artefato 14401817176; SHA-256
+7c94a08d69d4da3c1eb243c365afaa68c6e4969df6fa1bb09e08bb14befb6167.
+
+Foram conferidos os 140 hashes de PNG. Quatro capturas do construtor foram
+inspecionadas: desktop 1440 e celular 390, claro/escuro, mapa empilhado no
+celular, contraste e footer contido. Não significa inspeção visual de todos
+os 140 PNG ou igualdade integral ao Word. A prova de troca de tema registra
+cores distintas somente após a transição CSS nativa terminar. Os metadados
+de API confirmam o proxy do navegador sem guardar headers ou conteúdo.
+
+O mapa é somente local. Áudios, calendário, DAC completo e publicação/ACK do
+fornecedor permanecem critérios separados. Nenhuma imagem Docker gerada.

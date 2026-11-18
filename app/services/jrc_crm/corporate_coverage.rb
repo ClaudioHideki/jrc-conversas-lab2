@@ -160,6 +160,6 @@ class JrcCrm::CorporateCoverage
   end
 
   def scopes
-    @account.jrc_crm_user_business_units.structure_managed.active.where(user_id: @user&.id)
+    JrcCrm::CurrentStructureScopes.new(account: @account, user: @user).call
   end
 end

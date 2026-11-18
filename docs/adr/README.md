@@ -32,3 +32,4 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Rascunhos locais de URA](20261117-call-center-local-ivr-drafts.md): grafo interno versionado, simulação sem fornecedor e limites antes da persistência/API/editor.
 
 - [Ordem das observações do supervisor](20261118-call-center-supervisor-observation-order.md): polling serial, fronteira de ator/perfil e descarte de dados após recusa.
+- [Fontes corporativas atuais das equipes](20261118-call-center-current-team-corporate-sources.md): revogação efetiva, reinclusão autorizada e coordenação com os locks nativos.
