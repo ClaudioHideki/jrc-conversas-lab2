@@ -4,9 +4,11 @@ class JrcContactCenter::SyntheticCustomerMasterSeed
 
   def self.call(projects:)
     config = ActiveRecord::Base.connection_db_config
-    owned = ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' && Rails.env.test?
-    owned &&= config.database == 'jrc_sd_bc_portal_concurrency_20261025_test' && config.configuration_hash[:host] == '127.0.0.1'
-    owned &&= ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15'
+    owned = [
+      ENV['GITHUB_ACTIONS'] == 'true', ENV['RUNNER_ENVIRONMENT'] == 'github-hosted', Rails.env.test?,
+      config.database == 'jrc_sd_bc_portal_concurrency_20261025_test', config.configuration_hash[:host] == '127.0.0.1',
+      ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15'
+    ].all?
     raise 'Owned synthetic customer master runner required' unless owned
 
     projects.each_with_index.to_h { |project, index| [project, new(project, index).call] }
@@ -48,7 +50,7 @@ class JrcContactCenter::SyntheticCustomerMasterSeed
   def create_contacts(units)
     units.each_with_index.map do |unit, index|
       @account.contacts.create!(name: "SYNTHETIC master contact #{index}", company_id: unit.fetch(:company).id,
-                                phone_number: "+551197770#{format('%04d', @index * 10 + index)}")
+                                phone_number: "+551197770#{format('%04d', (@index * 10) + index)}")
     end
   end
 

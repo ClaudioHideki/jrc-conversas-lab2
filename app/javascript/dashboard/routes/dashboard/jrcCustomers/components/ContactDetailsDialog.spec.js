@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent } from 'vue';
 import { enableAutoUnmount, mount, RouterLinkStub } from '@vue/test-utils';
 import ContactDetailsDialog from './ContactDetailsDialog.vue';
+import Contact360Panel from './Contact360Panel.vue';
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 vi.mock('../useCustomerMaster', () => ({
@@ -38,9 +39,7 @@ describe('native contact dialog full-page target', () => {
     });
     expect(link.attributes('target')).toBeUndefined();
     expect(link.attributes('rel')).toBeUndefined();
-    expect(wrapper.get('contact360-panel-stub').attributes('contact-id')).toBe(
-      '2'
-    );
+    expect(wrapper.getComponent(Contact360Panel).props('contactId')).toBe('2');
   });
   it('lets an attendance caller opt into an independent page without changing the native contact route', () => {
     const wrapper = render({ openFullPageInNewTab: true });
