@@ -2828,6 +2828,43 @@
       "expected_vue": 358,
       "scope": "Derivar campos da chamada autorizada e conferir a visibilidade com as regras nativas; sem ampliar AccessScope."
     },
-    "pause_catalog_approved_compatibility": "Aprovado pelo usuário: preservar legado, exigir catálogo apenas após ativação explícita por conta. Sem ativação em produção."
+    "pause_catalog_approved_compatibility": "Aprovado pelo usuário: preservar legado, exigir catálogo apenas após ativação explícita por conta. Sem ativação em produção.",
+    "operating_origin_qa_checkpoint": {
+      "sha": "d20607c131b1d684dd216c60ca4d87d0afe2bd72",
+      "run": 44312599937,
+      "artifact": 14431163646,
+      "artifact_sha256": "a5c40e360b94b2f88821f815667de221f49bdeeb19c5380a325f97b1532274a7",
+      "main_rails": {
+        "examples": 884,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "concurrency": {
+        "examples": 53,
+        "passed": 52,
+        "failures": 1,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "new_origin_examples": {
+        "passed": 17,
+        "failed": 0
+      },
+      "atomicity_fault_injection": {
+        "passed": 2,
+        "failed": 0,
+        "requires": "HTTP 500, failing save! reached, actual database rollback without fixture outer transaction"
+      },
+      "schema_reload_reexecutions": 16,
+      "not_run": [
+        "corporate RSpec",
+        "Vue",
+        "assets",
+        "Chrome"
+      ],
+      "remaining_failure": "Case creation after corporate revocation returns exact native unit-scope 404; expected 401 was obsolete after source validation. Update only this resource/source expectation, keep zero records/events.",
+      "ruby_offenses": "13 alignment diagnostics across nine physical lines in new spec; corrected without rule or assertion changes."
+    }
   }
 }

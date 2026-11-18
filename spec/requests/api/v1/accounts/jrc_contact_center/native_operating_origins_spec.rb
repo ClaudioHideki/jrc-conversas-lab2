@@ -16,7 +16,7 @@ RSpec.describe 'Call Center operating origin and native visibility', type: :requ
   let(:units) do
     business_units.map do |business_unit|
       JrcContactCenter::Unit.create!(account: account, code: business_unit.code, name: business_unit.name, kind: 'sac',
-                                    settings: { issuer_company_id: company.id, business_unit_id: business_unit.id })
+                                     settings: { issuer_company_id: company.id, business_unit_id: business_unit.id })
     end
   end
   let(:queue) { JrcContactCenter::Queue.create!(account: account, unit: units.first, code: 'SYNTHETIC', name: 'SYNTHETIC origin queue') }
@@ -39,11 +39,11 @@ RSpec.describe 'Call Center operating origin and native visibility', type: :requ
     role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_operate])
     member.update!(custom_role: role)
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', company: company,
-                                   business_unit: business_units.first, active: true, structure_managed: true)
+                                     business_unit: business_units.first, active: true, structure_managed: true)
     JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: member)
     calls.first(2).each do |call|
       JrcContactCenter::CallLeg.create!(account: account, call_session: call, account_user: member,
-                                      direction: 'inbound', status: 'connected', started_at: Time.current)
+                                        direction: 'inbound', status: 'connected', started_at: Time.current)
     end
   end
 
@@ -100,7 +100,7 @@ RSpec.describe 'Call Center operating origin and native visibility', type: :requ
         other = create(:account)
         state[:foreign_account] = other
         foreign = JrcContactCenter::CallSession.create!(account: other, provider: 'synthetic', correlation_id: SecureRandom.uuid,
-                                                       direction: 'inbound', status: 'connected', started_at: Time.current)
+                                                        direction: 'inbound', status: 'connected', started_at: Time.current)
         post endpoint, headers: headers, params: { key => payload.merge(call_session_id: foreign.id) }, as: :json
         expect(response).to have_http_status(:not_found)
         expect(model.where(account: account)).to be_empty
@@ -133,9 +133,12 @@ RSpec.describe 'Call Center operating origin and native visibility', type: :requ
   end
 
   it 'persists the Case operational unit from the authorized call without a client-provided unit' do
-    post "/api/v1/accounts/#{account.id}/jrc_contact_center/cases", headers: headers,
-         params: { case: { call_session_id: calls.first.id, owner_account_user_id: member.id,
-                           category: 'general', summary: 'SYNTHETIC unit', channel: 'phone' } }, as: :json
+    endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/cases"
+    attributes = {
+      call_session_id: calls.first.id, owner_account_user_id: member.id,
+      category: 'general', summary: 'SYNTHETIC unit', channel: 'phone'
+    }
+    post endpoint, headers: headers, params: { case: attributes }, as: :json
     expect(response).to have_http_status(:created)
     record = JrcContactCenter::Case.where(account: account).sole
     expect(record.unit_id).to eq(units.first.id)
@@ -143,20 +146,25 @@ RSpec.describe 'Call Center operating origin and native visibility', type: :requ
   end
 
   it 'rejects an explicit forbidden operational unit instead of replacing it silently with the source unit' do
-    post "/api/v1/accounts/#{account.id}/jrc_contact_center/cases", headers: headers,
-         params: { case: { call_session_id: calls.first.id, owner_account_user_id: member.id, unit_id: units.last.id,
-                           category: 'general', summary: 'SYNTHETIC forbidden unit', channel: 'phone' } }, as: :json
+    endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/cases"
+    attributes = {
+      call_session_id: calls.first.id, owner_account_user_id: member.id, unit_id: units.last.id,
+      category: 'general', summary: 'SYNTHETIC forbidden unit', channel: 'phone'
+    }
+    post endpoint, headers: headers, params: { case: attributes }, as: :json
     expect(response).to have_http_status(:not_found)
     expect(JrcContactCenter::Case.where(account: account)).to be_empty
   end
 
   it 'rejects a callback linked to a hidden Case rather than relying only on its own visible queue' do
     hidden = JrcContactCenter::Case.create!(account: account, protocol: 'SYNTHETIC-HIDDEN', unit: units.last,
-                                           channel: 'phone', category: 'general', summary: 'SYNTHETIC hidden')
-    post "/api/v1/accounts/#{account.id}/jrc_contact_center/callbacks", headers: headers,
-         params: { callback: { case_id: hidden.id, call_session_id: calls.first.id, owner_account_user_id: member.id,
-                               target_phone: '+5511999999999', scheduled_at: 1.hour.from_now.iso8601,
-                               idempotency_key: SecureRandom.uuid } }, as: :json
+                                            channel: 'phone', category: 'general', summary: 'SYNTHETIC hidden')
+    endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/callbacks"
+    attributes = {
+      case_id: hidden.id, call_session_id: calls.first.id, owner_account_user_id: member.id,
+      target_phone: '+5511999999999', scheduled_at: 1.hour.from_now.iso8601, idempotency_key: SecureRandom.uuid
+    }
+    post endpoint, headers: headers, params: { callback: attributes }, as: :json
     expect(response).to have_http_status(:not_found)
     expect(JrcContactCenter::Callback.where(account: account)).to be_empty
   end

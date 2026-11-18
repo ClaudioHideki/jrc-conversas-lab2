@@ -365,7 +365,9 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
           change = -> { revoke_operating_source(source, team: inherited_team) }
           endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/#{resource}"
           result = race_with_account_change(change, endpoint: endpoint, payload: operating_write_payload(resource), verb: :post)
-          expect(result).to eq(401)
+          # A revoked Case unit is hidden by the native record scope, not an authorization grant.
+          expected_status = resource == 'cases' && source == 'corporate' ? 404 : 401
+          expect(result).to eq(expected_status)
           model = resource == 'cases' ? JrcContactCenter::Case : JrcContactCenter::Callback
           expect(model.where(account: account)).to be_empty
           expect(JrcContactCenter::CaseEvent.where(account: account)).to be_empty
