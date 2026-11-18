@@ -47,3 +47,13 @@ não representam aceite operacional em todos os monitores.
 Imagem e verificações da publicação pendentes na abertura deste registro.
 Sem migration nova, mudança de permissões, envio real, backup, dump, restore
 ou implantação em produção neste incremento.
+
+## Ajuste necessário no runner de publicação
+
+A execução 44361164573 aprovou as duas regressões iniciais, mas a preparação
+do build atingiu oito minutos baixando pacotes de us-east-2.ec2.archive.ubuntu.com.
+A seleção de espelho saudável não era aplicada a esse hostname do runner.
+O redirecionamento de fontes apt passa a reconhecer os subdomínios oficiais de
+archive/security.ubuntu.com, incluindo EC2. Pacotes, assinaturas, verificações,
+retries e limite de tempo permanecem iguais. O produto visual não mudou.
+Uma nova revisão deve concluir a construção e a publicação.
