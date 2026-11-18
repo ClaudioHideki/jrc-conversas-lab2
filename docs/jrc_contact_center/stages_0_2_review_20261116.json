@@ -2865,6 +2865,20 @@
       ],
       "remaining_failure": "Case creation after corporate revocation returns exact native unit-scope 404; expected 401 was obsolete after source validation. Update only this resource/source expectation, keep zero records/events.",
       "ruby_offenses": "13 alignment diagnostics across nine physical lines in new spec; corrected without rule or assertion changes."
+    },
+    "operating_chrome_detector_qa": {
+      "sha": "acf837373eca5a977cab78212d910e66cfb18600",
+      "run_id": 44315748862,
+      "rails_unique": 1022,
+      "schema_reload_reexecutions": 16,
+      "vue": 358,
+      "chrome_passed": 116,
+      "chrome_failed": 8,
+      "artifact_id": 14434658740,
+      "artifact_sha256": "db45ed3393350b28b2c5d3fa2dcac54e97bba444bee965397c89748df3c12c11",
+      "cause": "Detector de heading ambíguo e resposta POST esperada na origem errada; código e traces preservados. Novo gate 124 obrigatório.",
+      "mobile_form_geometry": "Quatro projetos aprovados; dois PNGs móveis revisados e contidos.",
+      "not_complete": true
     }
   }
 }

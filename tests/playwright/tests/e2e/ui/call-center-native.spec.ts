@@ -2965,7 +2965,7 @@ test('linked Customer Master preserves native permissions, persisted values and 
   await expectContainedDialog(page);
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-linked-master-overview.png`,
-    fullPage: true,
+    fullPage: false,
   });
   await dialog
     .getByRole('button', { name: 'Empresa e Vínculos', exact: true })
@@ -3034,7 +3034,7 @@ test('linked Customer Master preserves native permissions, persisted values and 
   await expectContainedDialog(page);
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-linked-master.png`,
-    fullPage: true,
+    fullPage: false,
   });
   await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
   await expect(dialog).not.toBeVisible();
@@ -3169,7 +3169,7 @@ test('global ACW revision preserves drafts across both native editors and requir
   await expectContainedDialog(page);
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-acw-revision-popup.png`,
-    fullPage: true,
+    fullPage: false,
   });
   await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(dialog).not.toBeVisible();
@@ -3223,12 +3223,13 @@ test('global ACW revision preserves drafts across both native editors and requir
   await expect(form.locator('[data-save-acw-policy]')).toBeDisabled();
   await legacyConflict.getByLabel(confirm, { exact: true }).check();
   await expect(form.locator('[data-save-acw-policy]')).toBeEnabled();
-  await expect(
-    page.getByRole('heading', {
-      name: 'Configuracoes Contact Center',
-      exact: true,
-    })
-  ).toHaveCSS('color', 'rgb(255, 255, 255)');
+  const settingsHeading = page.getByRole('heading', {
+    level: 1,
+    name: 'Configuracoes Contact Center',
+    exact: true,
+  });
+  await expect(settingsHeading).toHaveCount(1);
+  await expect(settingsHeading).toHaveCSS('color', 'rgb(255, 255, 255)');
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-acw-revision-settings.png`,
     fullPage: true,
@@ -3289,17 +3290,23 @@ test('linked Customer Master operating records remain visible in their native sc
   const source = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
   const route = `/app/accounts/${target.account_id}/contact-center/chamada/${target.call_id}?native_navigation=1`;
   await page.goto(route);
+  const uiOrigin = new URL(page.url()).origin;
+  expect(uiOrigin).toBe('http://127.0.0.1:5386');
+  const sourcePath = new URL(source).pathname;
   await expect(page.getByText('Falando', { exact: true })).toBeVisible();
   const summary = 'SYNTHETIC persisted origin ' + info.project.name;
   await page
     .getByLabel('Motivo do atendimento', { exact: true })
     .fill('SYNTHETIC callback follow-up');
   await page.getByLabel('Resumo', { exact: true }).fill(summary);
-  const caseSaved = page.waitForResponse(
-    response =>
-      response.url() === source + '/cases' &&
+  const caseSaved = page.waitForResponse(response => {
+    const address = new URL(response.url());
+    return (
+      address.origin === uiOrigin &&
+      address.pathname === sourcePath + '/cases' &&
       response.request().method() === 'POST'
-  );
+    );
+  });
   await page
     .getByRole('button', { name: 'Criar ocorrencia', exact: true })
     .click();
@@ -3321,11 +3328,14 @@ test('linked Customer Master operating records remain visible in their native sc
   await page
     .getByLabel('Agendado para', { exact: true })
     .fill('2026-12-01T14:30');
-  const callbackSaved = page.waitForResponse(
-    response =>
-      response.url() === source + '/callbacks' &&
+  const callbackSaved = page.waitForResponse(response => {
+    const address = new URL(response.url());
+    return (
+      address.origin === uiOrigin &&
+      address.pathname === sourcePath + '/callbacks' &&
       response.request().method() === 'POST'
-  );
+    );
+  });
   await page
     .getByRole('button', {
       name: 'Agendar callback na Minha Agenda',
