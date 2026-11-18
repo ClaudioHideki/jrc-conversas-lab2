@@ -401,16 +401,13 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
   end
 
   context 'with mandatory local pause catalog auditing and fresh authority' do
-    let(:catalog_endpoint) { "/api/v1/accounts/#{account.id}/jrc_contact_center/pause_catalog" }
-    let(:catalog) { JrcContactCenter::PauseCatalog.new(account: account) }
-    let(:pause_entry) do
-      { 'code' => 'synthetic_break', 'name' => 'SYNTHETIC committed pause', 'category' => 'SYNTHETIC', 'active' => true,
-        'default_minutes' => 30, 'unit_ids' => [], 'custom_role_ids' => [] }
-    end
-    let(:catalog_payload) { { pause_catalog: { enforced: false, entries: [pause_entry] }, expected_revision: catalog.revision } }
-
     before do
       JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
+      state[:catalog_endpoint] = "/api/v1/accounts/#{account.id}/jrc_contact_center/pause_catalog"
+      state[:pause_entry] = { 'code' => 'synthetic_break', 'name' => 'SYNTHETIC committed pause', 'category' => 'SYNTHETIC',
+                              'active' => true, 'default_minutes' => 30, 'unit_ids' => [], 'custom_role_ids' => [] }
+      catalog = JrcContactCenter::PauseCatalog.new(account: account)
+      state[:catalog_payload] = { pause_catalog: { enforced: false, entries: [state.fetch(:pause_entry)] }, expected_revision: catalog.revision }
     end
 
     %w[eligibility profile corporate].each do |source|
@@ -425,7 +422,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
           when 'corporate' then JrcCrm::UserBusinessUnit.find_by!(account: account, user: actor, scope: 'GROUP').destroy!
           end
         end
-        status = race_with_account_change(change, endpoint: catalog_endpoint, payload: catalog_payload)
+        status = race_with_account_change(change, endpoint: state.fetch(:catalog_endpoint), payload: state.fetch(:catalog_payload))
         expect(status).to eq(401)
         expect(account.reload.settings).to eq(previous)
         expect(Audited.audit_class.where(associated: account, comment: JrcContactCenter::ConfigurationAudit::PAUSE_COMMENT)).to be_empty
@@ -442,7 +439,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
         end
         original.call(*args, **kwargs)
       end
-      patch catalog_endpoint, headers: headers, params: catalog_payload, as: :json
+      patch state.fetch(:catalog_endpoint), headers: headers, params: state.fetch(:catalog_payload), as: :json
       expect(response).to have_http_status(:internal_server_error)
       expect(state[:mandatory_pause_audit_reached]).to be(true)
       expect(Account.find(account.id).settings).to eq(previous)
@@ -454,13 +451,14 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_configure jrc_contact_center_operate])
       change = lambda do
         fresh = JrcContactCenter::PauseCatalog.new(account: Account.find(account.id))
-        fresh.update!({ 'enforced' => true, 'entries' => [pause_entry] }, expected_revision: fresh.revision, activation_confirmed: true)
+        fresh.update!({ 'enforced' => true, 'entries' => [state.fetch(:pause_entry)] }, expected_revision: fresh.revision, activation_confirmed: true)
       end
       payload = { agent_state: { state: 'paused', reason_code: 'legacy_free', expected_state_version: '0', command_id: SecureRandom.uuid } }
       status = race_with_account_change(change, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/agent_state", payload: payload)
       expect(status).to eq(422)
       expect(JrcContactCenter::AgentStateEvent.where(account: account)).to be_empty
-      expect(catalog.call.fetch('enforced')).to be(true)
+      fresh = JrcContactCenter::PauseCatalog.new(account: Account.find(account.id))
+      expect(fresh.call.fetch('enforced')).to be(true)
     end
   end
 end

@@ -2,7 +2,7 @@ require 'digest'
 
 # Account-local catalog for the existing native pause transition. No PABX publication.
 class JrcContactCenter::PauseCatalog
-  KEY = 'jrc_contact_center_pause_catalog'
+  KEY = 'jrc_contact_center_pause_catalog'.freeze
   MAX_ENTRIES = 100
 
   def initialize(account:)
@@ -28,7 +28,7 @@ class JrcContactCenter::PauseCatalog
       if !previous.fetch('enforced') && values.fetch('enforced') && activation_confirmed != true
         raise JrcContactCenter::OperationError, 'pause_activation_confirmation_required'
       end
-      return call if previous.slice('enforced', 'entries') == values
+      next call if previous.slice('enforced', 'entries') == values
 
       current = values.merge('version' => previous.fetch('version') + 1)
       @account.update!(settings: @account.settings.merge(KEY => current))

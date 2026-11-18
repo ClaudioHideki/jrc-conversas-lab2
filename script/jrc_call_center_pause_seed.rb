@@ -27,23 +27,35 @@ class JrcContactCenter::SyntheticPauseSeed
     admin = create_member('administrator', JrcContactCenter::ModulePolicy::PERMISSIONS, :administrator)
     scoped = create_member('scoped', JrcContactCenter::ModulePolicy::PERMISSIONS, :administrator)
     operator = create_member('operator', %w[jrc_contact_center_view jrc_contact_center_operate], :agent)
+    assign_corporate_access(company, units, admin, scoped, operator)
+    queues = create_queues(units, operator)
+    session_payload(units, queues, admin, scoped, operator)
+  end
+
+  private
+
+  def assign_corporate_access(company, units, admin, scoped, operator)
     JrcCrm::UserBusinessUnit.create!(account: @account, user: admin.user, scope: 'GROUP', active: true, structure_managed: true)
     [scoped, operator].each do |member|
       JrcCrm::UserBusinessUnit.create!(account: @account, user: member.user, company: company, scope: 'BUSINESS_UNIT',
                                        business_unit_id: units.first.settings.fetch('business_unit_id'), active: true, structure_managed: true)
     end
-    queues = units.map do |unit|
+  end
+
+  def create_queues(units, operator)
+    units.map do |unit|
       queue = JrcContactCenter::Queue.create!(account: @account, unit: unit, code: unit.code, name: "SYNTHETIC pause queue #{unit.code}")
       JrcContactCenter::QueueMembership.create!(account: @account, queue: queue, account_user: operator)
       queue
     end
+  end
+
+  def session_payload(units, queues, admin, scoped, operator)
     { account_id: @account.id, unit_id: units.first.id, denied_unit_id: units.last.id, queue_id: queues.first.id,
       denied_queue_id: queues.last.id, operator_id: operator.id, operator_role_id: operator.custom_role_id,
       administrator: admin.user.create_new_auth_token, operator: operator.user.create_new_auth_token,
       scoped: scoped.user.create_new_auth_token }
   end
-
-  private
 
   def create_units(company)
     %w[A B].map do |code|

@@ -188,6 +188,7 @@ RSpec.describe JrcContactCenter::PauseCatalog do
     result = JrcContactCenter::PauseDefinitionSnapshot.call(event: event, member: peer_member, memberships: JrcContactCenter::QueueMembership.all)
     expect(result).to be_nil
   end
+
   it 'does not apply a Unit-scoped reason to a different selected queue even when both memberships exist' do
     units = %w[A B].map do |code|
       JrcContactCenter::Unit.create!(account: account, code: code, name: "SYNTHETIC #{code}", kind: 'sac')
@@ -205,4 +206,13 @@ RSpec.describe JrcContactCenter::PauseCatalog do
     end.to raise_error(JrcContactCenter::OperationError, 'pause_reason_not_allowed')
     expect(JrcContactCenter::AgentStateEvent.where(account: account)).to be_empty
   end
+
+  it 'keeps the committed version and audit unchanged when an identical catalog is submitted again' do
+    saved = catalog.update!({ 'enforced' => false, 'entries' => [definition] }, expected_revision: catalog.revision)
+    result = catalog.update!({ 'enforced' => false, 'entries' => [definition] }, expected_revision: saved.fetch('revision'))
+    expect(result).to eq(saved)
+    expect(Audited.audit_class.where(associated: account, comment: JrcContactCenter::ConfigurationAudit::PAUSE_COMMENT).count).to eq(1)
+    expect(Account.find(account.id).settings.fetch(described_class::KEY).fetch('version')).to eq(saved.fetch('version'))
+  end
+
 end

@@ -13,7 +13,7 @@ class JrcContactCenter::PauseReasonDefinition
   end
 
   def self.applicable?(entry, member:, unit_ids:)
-    (entry.fetch('unit_ids').empty? || (entry.fetch('unit_ids') & unit_ids).any?) &&
+    (entry.fetch('unit_ids').empty? || entry.fetch('unit_ids').intersect?(unit_ids)) &&
       (entry.fetch('custom_role_ids').empty? || entry.fetch('custom_role_ids').include?(member.custom_role_id))
   end
 
@@ -61,11 +61,15 @@ class JrcContactCenter::PauseReasonDefinition
     invalid << 'default_minutes' unless row['default_minutes'].is_a?(Integer)
     raise Invalid, invalid.uniq if invalid.any?
 
-    pairs = [['minimum_minutes', 'default_minutes'], ['default_minutes', 'maximum_minutes'], ['minimum_minutes', 'maximum_minutes']]
+    pairs = [%w[minimum_minutes default_minutes], %w[default_minutes maximum_minutes], %w[minimum_minutes maximum_minutes]]
     invalid = pairs.filter_map do |left, right|
-      right if row[left] && row[right] && row[left] > row[right]
+      right if inverted_time_pair?(row, left, right)
     end
     raise Invalid, invalid.uniq if invalid.any?
+  end
+
+  def inverted_time_pair?(row, left, right)
+    row[left] && row[right] && row[left] > row[right]
   end
 
   def valid_minutes?(value)
