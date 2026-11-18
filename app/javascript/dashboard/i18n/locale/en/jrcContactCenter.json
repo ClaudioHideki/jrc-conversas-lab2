@@ -1453,6 +1453,8 @@
       "HISTORY": "Histórico",
       "TASKS": "Tarefas",
       "WORKSPACE_TABS": "Abas do atendimento",
+      "EXPAND_CONVERSATION": "Ampliar conversa",
+      "RESTORE_LAYOUT": "Restaurar painel",
       "REPLIES": "Respostas rápidas",
       "REPLIES_HINT": "Selecione uma resposta configurada. O texto será inserido no editor para revisão antes do envio.",
       "QUALIFICATIONS": "Qualificação rápida",

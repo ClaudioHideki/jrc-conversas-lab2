@@ -1,6 +1,6 @@
 <script setup>
 import { computed, inject, nextTick, onBeforeUnmount, ref, watch } from 'vue';
-import { useIntersectionObserver } from '@vueuse/core';
+import { useElementSize, useIntersectionObserver } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import {
   inbox360Labels,
@@ -96,6 +96,12 @@ const tab = ref('CONVERSATION');
 const voiceSection = ref('journey');
 const listOpen = ref(false);
 const layoutElement = ref(null);
+const { width: workspaceWidth, height: workspaceHeight } =
+  useElementSize(layoutElement);
+const compactWorkspace = computed(
+  () => workspaceHeight.value > 0 && workspaceHeight.value < 620
+);
+const conversationFocus = ref(false);
 const listElement = ref(null);
 const conversationScroll = ref(null);
 const conversationEnd = ref(null);
@@ -159,6 +165,28 @@ const isVoice = computed(
   () => Boolean(props.currentCallId) && !phoneOpen.value
 );
 const voiceView = computed(() => isVoice.value || phoneOpen.value);
+const focusConversation = computed(
+  () => conversationFocus.value && !voiceView.value
+);
+const conversationFocusLabel = computed(() =>
+  focusConversation.value
+    ? t('JRC_CONTACT_CENTER.INBOX_360.RESTORE_LAYOUT')
+    : t('JRC_CONTACT_CENTER.INBOX_360.EXPAND_CONVERSATION')
+);
+const customerColumnVisible = computed(
+  () => workspaceWidth.value >= 1120 && !focusConversation.value
+);
+const toggleConversationFocus = () => {
+  conversationFocus.value = !conversationFocus.value;
+  listOpen.value = false;
+  if (conversationFocus.value) tab.value = 'CONVERSATION';
+};
+watch(
+  () => props.accountId,
+  () => {
+    conversationFocus.value = false;
+  }
+);
 const listCalls = computed(() => {
   if (
     !props.softphoneAccess ||
@@ -779,12 +807,14 @@ onBeforeUnmount(() => {
     data-testid="hoya-inbox-workspace"
   >
     <header
-      class="flex min-h-14 shrink-0 items-center gap-2 overflow-x-auto border-b border-n-weak bg-n-solid-1 px-3 py-2"
+      class="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-n-weak bg-n-solid-1 px-3"
+      :class="compactWorkspace ? 'min-h-11 py-1' : 'min-h-14 py-2'"
       :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.OPERATIONAL_BAR')"
     >
       <button
         type="button"
-        class="grid size-8 shrink-0 place-items-center rounded-md border border-n-weak text-n-slate-11 xl:hidden"
+        class="grid size-8 shrink-0 place-items-center rounded-md border border-n-weak text-n-slate-11"
+        :class="focusConversation ? '' : 'xl:hidden'"
         :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.TOGGLE_LIST')"
         :aria-expanded="listOpen"
         @click="listOpen = !listOpen"
@@ -864,6 +894,23 @@ onBeforeUnmount(() => {
       >
         <span class="i-lucide-search size-4" />
       </RouterLink>
+      <button
+        v-if="hasSelection && !voiceView"
+        type="button"
+        data-conversation-focus
+        class="ml-auto flex h-8 shrink-0 items-center gap-2 rounded-md border border-n-weak px-2.5 text-xs font-semibold text-n-slate-12 hover:bg-n-slate-3 focus-visible:ring-2 focus-visible:ring-n-brand"
+        :aria-pressed="focusConversation"
+        :aria-label="conversationFocusLabel"
+        @click="toggleConversationFocus"
+      >
+        <span
+          :class="
+            focusConversation ? 'i-lucide-minimize-2' : 'i-lucide-maximize-2'
+          "
+          class="size-4"
+        />
+        <span class="hidden sm:inline">{{ conversationFocusLabel }}</span>
+      </button>
       <RouterLink
         v-if="isVoice"
         :to="{ name: 'ramal_index', params: { accountId } }"
@@ -884,14 +931,24 @@ onBeforeUnmount(() => {
     </p>
     <div
       ref="layoutElement"
-      class="relative flex min-h-0 min-w-0 flex-1 gap-3 bg-n-slate-2 p-3"
+      class="relative flex min-h-0 min-w-0 flex-1 bg-n-slate-2"
+      :class="
+        focusConversation
+          ? 'gap-0 p-1'
+          : compactWorkspace
+            ? 'gap-2 p-1.5'
+            : 'gap-3 p-3'
+      "
     >
       <aside
         :id="`attendance-list-${accountId}`"
         ref="listElement"
-        class="z-20 h-full min-h-0 shrink-0 flex-col overflow-hidden rounded-lg border border-n-weak bg-n-solid-1 xl:relative xl:inset-auto xl:z-auto xl:flex"
+        class="z-20 h-full min-h-0 shrink-0 flex-col overflow-hidden rounded-lg border border-n-weak bg-n-solid-1"
         :class="[
           listWidthClass,
+          focusConversation
+            ? ''
+            : 'xl:relative xl:inset-auto xl:z-auto xl:flex',
           listOpen ? 'absolute inset-y-2 left-2 flex w-72 shadow-xl' : 'hidden',
         ]"
         data-testid="inbox-list"
@@ -922,7 +979,8 @@ onBeforeUnmount(() => {
             <button
               v-if="listOpen"
               type="button"
-              class="grid size-6 shrink-0 place-items-center text-n-slate-10 xl:hidden"
+              class="grid size-6 shrink-0 place-items-center text-n-slate-10"
+              :class="focusConversation ? '' : 'xl:hidden'"
               :aria-label="t('DIALOG.BUTTONS.CANCEL')"
               @click="listOpen = false"
             >
@@ -1040,6 +1098,7 @@ onBeforeUnmount(() => {
         </div>
       </aside>
       <div
+        v-if="!focusConversation"
         role="separator"
         tabindex="0"
         aria-orientation="vertical"
@@ -1069,13 +1128,16 @@ onBeforeUnmount(() => {
         data-testid="interaction-workspace"
       >
         <header
-          class="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-3 px-4 py-2 text-white"
-          :class="
+          class="flex shrink-0 flex-wrap items-center justify-between text-white"
+          :class="[
             (
               CHANNEL_APPEARANCE[voiceView ? 'voice' : channelKey] ||
               CHANNEL_APPEARANCE.default
-            ).banner
-          "
+            ).banner,
+            compactWorkspace
+              ? 'min-h-10 gap-2 px-3 py-1'
+              : 'min-h-12 gap-3 px-4 py-2',
+          ]"
         >
           <div
             class="flex min-w-0 basis-full items-center gap-2.5 sm:basis-auto"
@@ -1159,8 +1221,9 @@ onBeforeUnmount(() => {
             {{ t('VOICE_V4.FINALIZE') }}
           </button>
           <button
+            v-if="!customerColumnVisible"
             type="button"
-            class="grid size-7 shrink-0 place-items-center rounded-md bg-white/15 text-white xl:hidden"
+            class="grid size-8 shrink-0 place-items-center rounded-md bg-white/15 text-white"
             :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.CUSTOMER')"
             @click="customerDialog.open()"
           >
@@ -1168,6 +1231,7 @@ onBeforeUnmount(() => {
           </button>
         </header>
         <div
+          v-show="!focusConversation"
           class="flex min-w-0 shrink-0 border-b border-n-blue-6 bg-n-slate-2 p-1"
         >
           <button
@@ -1180,14 +1244,15 @@ onBeforeUnmount(() => {
           </button>
           <nav
             ref="workspaceTabsElement"
-            class="flex min-h-12 min-w-0 flex-1 items-center gap-2 overflow-x-auto px-1 py-1"
+            class="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto px-1 py-1"
+            :class="compactWorkspace ? 'min-h-9' : 'min-h-12'"
             :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.WORKSPACE_TABS')"
           >
             <button
               v-for="key in workspaceTabs"
               :key="key"
               type="button"
-              class="flex shrink-0 items-center whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-n-brand disabled:cursor-not-allowed disabled:opacity-40"
+              class="flex shrink-0 items-center whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-n-brand disabled:cursor-not-allowed disabled:opacity-40"
               :class="
                 tab === key
                   ? (
@@ -1387,7 +1452,8 @@ onBeforeUnmount(() => {
             v-if="ready && originInbox"
             :inbox="originInbox"
             :now="now"
-            class="shrink-0 border-b border-n-weak bg-n-slate-2 px-4 py-2 text-n-slate-12"
+            class="shrink-0 border-b border-n-weak bg-n-slate-2 px-3 text-n-slate-12"
+            :class="compactWorkspace ? 'py-1' : 'py-2'"
           />
           <RouterView
             v-if="ready"
@@ -1402,7 +1468,8 @@ onBeforeUnmount(() => {
             :inbox="originInbox"
             :now="now"
             reply
-            class="shrink-0 border-t border-n-weak bg-n-slate-2 px-4 py-2 text-n-slate-12"
+            class="shrink-0 border-t border-n-weak bg-n-slate-2 px-3 text-n-slate-12"
+            :class="compactWorkspace ? 'py-1' : 'py-2'"
           />
         </div>
         <div
@@ -1616,7 +1683,8 @@ onBeforeUnmount(() => {
       </main>
       <aside
         ref="customerElement"
-        class="hidden h-full min-h-0 w-60 shrink-0 overflow-y-auto xl:block 2xl:w-[280px]"
+        class="h-full min-h-0 w-60 shrink-0 overflow-y-auto 2xl:w-[280px]"
+        :class="customerColumnVisible ? 'block' : 'hidden'"
         data-testid="customer-column"
       >
         <InboxCustomerPanel

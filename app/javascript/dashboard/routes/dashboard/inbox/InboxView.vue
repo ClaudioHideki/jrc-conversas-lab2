@@ -78,11 +78,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="h-full min-w-0 flex-1 bg-n-background">
+  <main class="flex min-h-0 min-w-0 flex-1 flex-col bg-n-background">
     <div v-if="showEmptyState" class="flex h-full w-full">
       <InboxEmptyState />
     </div>
-    <div v-else class="h-full" :class="embedded ? 'p-0' : 'p-0 lg:p-3 lg:pl-0'">
+    <div
+      v-else
+      class="min-h-0 flex-1"
+      :class="embedded ? 'p-0' : 'p-0 lg:p-3 lg:pl-0'"
+    >
       <div
         v-if="isConversationLoading"
         class="grid h-full place-items-center rounded-2xl border border-n-weak bg-n-solid-1"

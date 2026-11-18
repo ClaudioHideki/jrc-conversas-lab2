@@ -12,6 +12,8 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 
 ## Fase 2: Operação e desenvolvimento ativo
 
+- [ ] Validar e publicar a visualização responsiva de mensagens, com editor adaptável e botão Ampliar conversa (ADR0007).
+
 - [ ] Corrigir e publicar a passagem da intenção de encerramento manual pelo cliente HTTP real, sobre a imagem 68862610, preservando as regras da ADR0005.
 
 - [x] Validar e publicar o encerramento manual sem requisitos extras, com tempo e SLA reais preservados (ADR0005), sobre a imagem a5d5e1a. Produto 68862610, digest 53b9ebc6; [evidências](docs/jrc_consolidation/encerramento-livre-sla-release-20261117.md). Implantação permanece separada.

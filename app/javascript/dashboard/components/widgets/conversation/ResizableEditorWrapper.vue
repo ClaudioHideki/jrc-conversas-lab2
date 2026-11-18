@@ -1,6 +1,13 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, useTemplateRef } from 'vue';
-import { useEventListener } from '@vueuse/core';
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  useTemplateRef,
+  watch,
+} from 'vue';
+import { useEventListener, useResizeObserver } from '@vueuse/core';
 import { emitter } from 'shared/helpers/mitt';
 import { BUS_EVENTS } from 'shared/constants/busEvents';
 
@@ -21,15 +28,18 @@ const isResizing = ref(false);
 const startY = ref(0);
 const startHeight = ref(0);
 let resetTimeoutId = null;
+let manuallySized = false;
 
 const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
 
 // Measure height of elements surrounding the editor (top panel, email fields, bottom panel)
 const measureSurroundingHeight = () => {
   if (wrapperRef.value) {
+    const editor = wrapperRef.value.querySelector('.ProseMirror-woot-style');
     surroundingHeight.value = Math.max(
       0,
-      wrapperRef.value.offsetHeight - editorHeight.value
+      wrapperRef.value.offsetHeight -
+        (editor?.offsetHeight ?? editorHeight.value)
     );
   }
 };
@@ -39,13 +49,16 @@ const isContainerReady = computed(() => props.containerHeight > 0);
 const sizeBounds = computed(() => {
   const h = props.containerHeight;
   const s = surroundingHeight.value;
-  const max = Math.max(MIN_HEIGHT, h - MIN_MESSAGES_HEIGHT - s);
-  const expanded = clamp(Math.floor(h * EXPAND_RATIO - s / 2), MIN_HEIGHT, max);
+  const compact = h > 0 && h < 520;
+  const min = compact ? 48 : MIN_HEIGHT;
+  const initial = compact ? 64 : DEFAULT_HEIGHT;
+  const max = Math.max(min, h - MIN_MESSAGES_HEIGHT - s);
+  const expanded = clamp(Math.floor(h * EXPAND_RATIO - s / 2), min, max);
   return {
-    min: MIN_HEIGHT,
+    min,
     max: isContainerReady.value ? max : DEFAULT_HEIGHT,
     expanded,
-    default: clamp(DEFAULT_HEIGHT, MIN_HEIGHT, max),
+    default: clamp(initial, min, max),
   };
 });
 
@@ -59,6 +72,7 @@ const clearDragStyles = () => {
 const getClientY = e => (e.touches ? e.touches[0].clientY : e.clientY);
 
 const onResizeStart = event => {
+  manuallySized = true;
   editorHeight.value = clampToBounds(editorHeight.value);
   measureSurroundingHeight();
   isResizing.value = true;
@@ -86,10 +100,12 @@ const onResizeEnd = () => {
 };
 
 const resetEditorHeight = () => {
+  manuallySized = false;
   editorHeight.value = sizeBounds.value.default;
 };
 
 const toggleEditorExpand = () => {
+  manuallySized = true;
   editorHeight.value = clampToBounds(editorHeight.value);
   measureSurroundingHeight();
   const { expanded, max, default: defaultHeight } = sizeBounds.value;
@@ -123,6 +139,13 @@ useEventListener(document, 'touchmove', onResizeMove, { passive: false });
 useEventListener(document, 'touchend', onResizeEnd);
 useEventListener(document, 'touchcancel', onResizeEnd);
 useEventListener(window, 'blur', onResizeEnd);
+useResizeObserver(wrapperRef, measureSurroundingHeight);
+watch(sizeBounds, () => {
+  if (isResizing.value) return;
+  editorHeight.value = manuallySized
+    ? clampToBounds(editorHeight.value)
+    : sizeBounds.value.default;
+});
 
 defineExpose({ toggleEditorExpand, resetEditorHeight });
 </script>
