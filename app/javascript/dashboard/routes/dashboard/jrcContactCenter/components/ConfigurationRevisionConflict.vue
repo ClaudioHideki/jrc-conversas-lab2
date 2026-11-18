@@ -23,6 +23,9 @@ const text = {
   no: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.NO'),
 };
 const labels = {
+  voice: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.voice'),
+  whatsapp: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.whatsapp'),
+  voice_required: t('JRC_CONTACT_CENTER.ADMIN.VOICE_REQUIRED'),
   name: t('JRC_CONTACT_CENTER.ADMIN.NAME'),
   definition: t('JRC_CONTACT_CENTER.LOCAL_IVR.DEFINITION'),
   revision: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REVISION'),
@@ -81,12 +84,23 @@ const fields = computed(
       access_users: ['eligible', 'allowed', 'denied'],
       access_teams: ['allowed'],
       ivr_drafts: ['name', 'revision', 'definition'],
+      acw_policy: ['voice', 'whatsapp', 'voice_required'],
     })[props.resource] || []
 );
 const format = (record, field) => {
-  const value = ['issuer_company_id', 'business_unit_id'].includes(field)
+  let value = ['issuer_company_id', 'business_unit_id'].includes(field)
     ? record.settings?.[field]
     : record[field];
+  if (
+    props.resource === 'acw_policy' &&
+    ['voice', 'whatsapp'].includes(field)
+  ) {
+    value = record.limits?.[field] ?? record[field];
+    if (typeof value === 'string' && /^\d{2}:[0-5]\d$/.test(value)) {
+      const [hours, minutes] = value.split(':').map(Number);
+      value = (hours * 60 + minutes) * 60;
+    }
+  }
   if (value === undefined || value === null || value === '') return '—';
   if (typeof value === 'boolean') return value ? text.yes : text.no;
   if (['allowed', 'denied'].includes(field))

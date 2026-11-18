@@ -7,10 +7,14 @@ class JrcContactCenter::ConfigurationRevision
   end
 
   def self.check!(record, expected)
+    check_token!(token(record), expected)
+  end
+
+  def self.check_token!(actual, expected)
     unless expected.is_a?(String) && expected.present?
       raise JrcContactCenter::OperationError.new('configuration_revision_required', status: :precondition_required)
     end
-    return if ActiveSupport::SecurityUtils.secure_compare(token(record), expected)
+    return if ActiveSupport::SecurityUtils.secure_compare(actual, expected)
 
     raise JrcContactCenter::OperationError.new('stale_configuration_revision', status: :conflict)
   end

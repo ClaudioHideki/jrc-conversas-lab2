@@ -628,3 +628,73 @@ describe('administrative workflow', () => {
     expect(wrapper.find('[data-dialog]').exists()).toBe(false);
   });
 });
+
+describe('global ACW administrative popup revision', () => {
+  const policy = (revision, voice = 180) => ({
+    id: '1',
+    revision,
+    limits: { voice, whatsapp: 180 },
+    voice_required: false,
+  });
+  it('preserves HH:MM input and compares both states in seconds before an explicit retry', async () => {
+    API.acwPolicy.mockResolvedValueOnce({
+      data: { item: policy('a'.repeat(64)) },
+    });
+    API.acwPolicy.mockResolvedValueOnce({
+      data: { item: policy('b'.repeat(64), 300) },
+    });
+    API.updateAcwPolicy.mockRejectedValueOnce({
+      response: {
+        status: 409,
+        data: { error: 'stale_configuration_revision' },
+      },
+    });
+    API.updateAcwPolicy.mockResolvedValueOnce({ data: {} });
+    const wrapper = mountSection('closures');
+    await flushPromises();
+    await wrapper.get('[data-create]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[name="voice"]').setValue('00:04');
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(API.updateAcwPolicy).toHaveBeenCalledWith(
+      '1',
+      { voice: 240, whatsapp: 180 },
+      { voice_required: false, expected_revision: 'a'.repeat(64) }
+    );
+    await wrapper.get('[data-dialog]').trigger('submit');
+    expect(API.updateAcwPolicy).toHaveBeenCalledTimes(1);
+    await wrapper.get('[data-configuration-conflict] button').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[name="voice"]').element.value).toBe('00:04');
+    const compared = wrapper.get('[data-configuration-latest]').text();
+    expect(compared).toContain('300');
+    expect(compared).toContain('240');
+    expect(compared).toContain('CONFIGURATION_AUDIT.NO');
+    await wrapper.get('[data-configuration-review]').setValue(true);
+    await wrapper.get('[name="voice"]').setValue('00:05');
+    expect(wrapper.get('[data-configuration-review]').element.checked).toBe(
+      false
+    );
+    await wrapper.get('[data-dialog]').trigger('submit');
+    expect(API.updateAcwPolicy).toHaveBeenCalledTimes(1);
+    await wrapper.get('[data-configuration-review]').setValue(true);
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(API.updateAcwPolicy).toHaveBeenLastCalledWith(
+      '1',
+      { voice: 300, whatsapp: 180 },
+      { voice_required: false, expected_revision: 'b'.repeat(64) }
+    );
+  });
+  it('does not bypass a missing native policy revision', async () => {
+    API.acwPolicy.mockResolvedValueOnce({ data: { item: policy('') } });
+    const wrapper = mountSection('closures');
+    await flushPromises();
+    await wrapper.get('[data-create]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-dialog]').trigger('submit');
+    expect(API.updateAcwPolicy).not.toHaveBeenCalled();
+    expect(wrapper.get('[data-configuration-conflict]').exists()).toBe(true);
+  });
+});

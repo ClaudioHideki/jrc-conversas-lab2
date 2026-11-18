@@ -8,6 +8,7 @@ const resources = [
   'access_users',
   'access_teams',
   'ivr_drafts',
+  'acw_policy',
 ];
 const validRevision = (value, resource) =>
   resource === 'ivr_drafts'
@@ -82,7 +83,10 @@ export const useConfigurationRevision = ({ accountId, resource, draft }) => {
     state.latest = null;
     state.reviewedDraft = '';
     try {
-      const response = await API.configurationRecord(account, source, id);
+      const response =
+        source === 'acw_policy'
+          ? await API.acwPolicy(account)
+          : await API.configurationRecord(account, source, id);
       if (
         version !== generation ||
         account !== String(accountId.value) ||

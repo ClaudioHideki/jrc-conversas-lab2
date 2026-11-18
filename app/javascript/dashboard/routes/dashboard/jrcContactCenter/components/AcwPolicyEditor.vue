@@ -2,6 +2,8 @@
 import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
+import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
+import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 const props = defineProps({
   accountId: { type: [Number, String], required: true },
 });
@@ -15,6 +17,15 @@ const voiceRequired = ref(null);
 const saving = ref(false);
 const failed = ref(false);
 const saved = ref(false);
+const draft = computed(() => ({
+  ...limits.value,
+  voice_required: voiceRequired.value,
+}));
+const revision = useConfigurationRevision({
+  accountId: computed(() => props.accountId),
+  resource: computed(() => 'acw_policy'),
+  draft,
+});
 let generation = 0;
 watch(
   () => props.accountId,
@@ -25,10 +36,13 @@ watch(
     voiceRequired.value = null;
     failed.value = false;
     saved.value = false;
+    saving.value = false;
+    revision.capture(null);
     try {
       const response = await ContactCenterAPI.acwPolicy(props.accountId);
       if (version === generation) {
-        limits.value = response.data.item.limits;
+        revision.capture(response.data.item);
+        limits.value = { ...response.data.item.limits };
         voiceRequired.value =
           typeof response.data.item.voice_required === 'boolean'
             ? response.data.item.voice_required
@@ -41,6 +55,7 @@ watch(
   { immediate: true }
 );
 const save = async () => {
+  if (!limits.value || saving.value || !revision.canSave.value) return;
   const version = generation;
   saving.value = true;
   failed.value = false;
@@ -52,20 +67,25 @@ const save = async () => {
         voice: Number(limits.value.voice),
         whatsapp: Number(limits.value.whatsapp),
       },
-      typeof voiceRequired.value === 'boolean'
-        ? { voice_required: voiceRequired.value }
-        : {}
+      {
+        ...revision.options(),
+        ...(typeof voiceRequired.value === 'boolean'
+          ? { voice_required: voiceRequired.value }
+          : {}),
+      }
     );
     if (version === generation) {
-      limits.value = response.data.item.limits;
+      revision.capture(response.data.item);
+      limits.value = { ...response.data.item.limits };
       voiceRequired.value =
         typeof response.data.item.voice_required === 'boolean'
           ? response.data.item.voice_required
           : null;
       saved.value = true;
     }
-  } catch {
-    if (version === generation) failed.value = true;
+  } catch (error) {
+    if (version === generation && !revision.handleError(error))
+      failed.value = true;
   } finally {
     if (version === generation) saving.value = false;
   }
@@ -88,6 +108,14 @@ onBeforeUnmount(() => {
       class="mt-4 grid gap-4 sm:grid-cols-2"
       @submit.prevent="save"
     >
+      <ConfigurationRevisionConflict
+        :state="revision.state"
+        :draft="draft"
+        resource="acw_policy"
+        :reviewed="revision.reviewed()"
+        @reload="revision.reload"
+        @review="revision.review"
+      />
       <label
         v-if="typeof voiceRequired === 'boolean'"
         class="flex items-start gap-3 rounded-lg bg-n-alpha-2 p-3 text-sm sm:col-span-2"
@@ -122,7 +150,8 @@ onBeforeUnmount(() => {
         />
       </label>
       <button
-        :disabled="saving"
+        :disabled="saving || !revision.canSave.value"
+        data-save-acw-policy
         class="rounded-md bg-n-brand p-3 text-sm font-semibold text-white disabled:opacity-50"
         type="submit"
       >

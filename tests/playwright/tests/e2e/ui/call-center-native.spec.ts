@@ -2904,6 +2904,7 @@ test('linked Customer Master preserves native permissions, persisted values and 
   expect(membership.permissions).not.toContain('jrc_contact_center_administer');
   expect(membership.permissions).not.toContain('jrc_contact_center_configure');
   await page.goto(callRoute(target.call_id));
+  await expect(page.getByText('Falando', { exact: true })).toBeVisible();
   await expect(page.locator('[data-open-linked-master]')).toBeVisible();
   const draft = 'SYNTHETIC unsaved attendance ' + info.project.name;
   await page.getByLabel('Resumo').fill(draft);
@@ -2942,12 +2943,30 @@ test('linked Customer Master preserves native permissions, persisted values and 
   );
 
   await expect(dialog).toContainText('SYNTHETIC master contact 0');
-  const fullPage = dialog.getByRole('link', { name: 'Abrir em tela completa', exact: true });
-  await expect(fullPage).toHaveAttribute('href', `/app/accounts/${target.account_id}/contacts/${target.contact_id}`);
+  const fullPage = dialog.getByRole('link', {
+    name: 'Abrir em tela completa',
+    exact: true,
+  });
+  await expect(fullPage).toHaveAttribute(
+    'href',
+    `/app/accounts/${target.account_id}/contacts/${target.contact_id}`
+  );
   await expect(fullPage).toHaveAttribute('target', '_blank');
   await expect(fullPage).toHaveAttribute('rel', 'noopener noreferrer');
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
   await expect(dialog).not.toContainText('SYNTHETIC master contact 1');
+  await expect(dialog.getByText('Carregando...', { exact: true })).toHaveCount(
+    0
+  );
+  await expectContainedDialog(page);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-linked-master-overview.png`,
+    fullPage: true,
+  });
   await dialog
     .getByRole('button', { name: 'Empresa e Vínculos', exact: true })
     .click();
@@ -2968,6 +2987,14 @@ test('linked Customer Master preserves native permissions, persisted values and 
   );
   expect(stored.status()).toBe(200);
   expect((await stored.json()).payload.job_title).toBe(value);
+  // The native confirmed-update handler performs an authorized reload.
+  // Capture the persisted form, never the intermediate loading panel.
+  await expect(dialog.getByLabel('Cargo', { exact: true })).toHaveValue(value);
+  await expect(dialog.getByText('Carregando...', { exact: true })).toHaveCount(
+    0
+  );
+  await dialog.getByLabel('Cargo', { exact: true }).scrollIntoViewIfNeeded();
+  await expectContainedDialog(page);
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-linked-master.png`,
     fullPage: true,
@@ -3040,4 +3067,170 @@ test('linked Customer Master preserves native permissions, persisted values and 
   );
   expect(callStillAuthorized.status()).toBe(200);
   expect((await callStillAuthorized.json()).item.customer.directory).toBeNull();
+});
+
+test('global ACW revision preserves drafts across both native editors and requires reviewed retry', async ({
+  page,
+}, info) => {
+  const confirm =
+    'Revisei a versão atual e confirmo as alterações do meu rascunho.';
+  await page.goto(base + '/closures');
+  await page.locator('[data-create]').click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await dialog.getByLabel('Voz', { exact: true }).fill('00:07');
+  const initial = await page.request.get(api + '/acw_policy', {
+    headers: session.administrator,
+  });
+  expect(initial.status()).toBe(200);
+  const original = (await initial.json()).item;
+  expect(original.id).toBe(String(session.account_id));
+  expect(original.revision).toMatch(/^[a-f0-9]{64}$/);
+  const concurrentSeconds = original.limits.voice === 240 ? 300 : 240;
+  const changed = await page.request.patch(api + '/acw_policy', {
+    headers: session.administrator,
+    data: {
+      limits: { ...original.limits, voice: concurrentSeconds },
+      expected_revision: original.revision,
+    },
+  });
+  expect(changed.status()).toBe(200);
+  const rejected = page.waitForResponse(
+    response =>
+      response.url().endsWith('/acw_policy') &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await rejected).status()).toBe(409);
+  await expect(dialog.getByLabel('Voz', { exact: true })).toHaveValue('00:07');
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeDisabled();
+  const conflict = dialog.locator('[data-configuration-conflict]');
+  await conflict
+    .getByRole('button', {
+      name: 'Carregar versão atual para comparar',
+      exact: true,
+    })
+    .click();
+  await expect(conflict.locator('[data-configuration-latest]')).toContainText(
+    String(concurrentSeconds)
+  );
+  await expect(conflict.locator('[data-configuration-latest]')).toContainText(
+    '420'
+  );
+  await conflict.getByLabel(confirm, { exact: true }).check();
+  await dialog.getByLabel('Voz', { exact: true }).fill('00:08');
+  await expect(conflict.getByLabel(confirm, { exact: true })).not.toBeChecked();
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeDisabled();
+  await conflict.getByLabel(confirm, { exact: true }).check();
+  await expectContainedDialog(page);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-acw-revision-popup.png`,
+    fullPage: true,
+  });
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  const persisted = await page.request.get(api + '/acw_policy', {
+    headers: session.administrator,
+  });
+  expect((await persisted.json()).item.limits.voice).toBe(480);
+
+  await page.goto(
+    `/app/accounts/${session.account_id}/contact-center/configuracoes?native_navigation=1`
+  );
+  const form = page
+    .locator('form')
+    .filter({ has: page.locator('[data-save-acw-policy]') });
+  await expect(form).toBeVisible();
+  const numbers = form.locator('input[type="number"]');
+  await numbers.nth(0).fill('540');
+  const current = await page.request.get(api + '/acw_policy', {
+    headers: session.administrator,
+  });
+  const currentPolicy = (await current.json()).item;
+  const second = await page.request.patch(api + '/acw_policy', {
+    headers: session.administrator,
+    data: {
+      limits: { ...currentPolicy.limits, voice: 600 },
+      expected_revision: currentPolicy.revision,
+    },
+  });
+  expect(second.status()).toBe(200);
+  const legacyRejected = page.waitForResponse(
+    response =>
+      response.url().endsWith('/acw_policy') &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-save-acw-policy]').click();
+  expect((await legacyRejected).status()).toBe(409);
+  await expect(numbers.nth(0)).toHaveValue('540');
+  const legacyConflict = form.locator('[data-configuration-conflict]');
+  await legacyConflict
+    .getByRole('button', {
+      name: 'Carregar versão atual para comparar',
+      exact: true,
+    })
+    .click();
+  await expect(
+    legacyConflict.locator('[data-configuration-latest]')
+  ).toContainText('600');
+  await expect(
+    legacyConflict.locator('[data-configuration-latest]')
+  ).toContainText('540');
+  await expect(form.locator('[data-save-acw-policy]')).toBeDisabled();
+  await legacyConflict.getByLabel(confirm, { exact: true }).check();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-acw-revision-settings.png`,
+    fullPage: true,
+  });
+  const confirmed = page.waitForResponse(
+    response =>
+      response.url().endsWith('/acw_policy') &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-save-acw-policy]').click();
+  expect((await confirmed).status()).toBe(200);
+  const final = await page.request.get(api + '/acw_policy', {
+    headers: session.administrator,
+  });
+  expect((await final.json()).item.limits.voice).toBe(540);
+  const scopedMetadata = await page.request.get(api + '/administration', {
+    headers: session.restricted,
+  });
+  expect(scopedMetadata.status()).toBe(200);
+  expect((await scopedMetadata.json()).capabilities.configuration_global).toBe(
+    false
+  );
+  await page.addInitScript(
+    auth => Reflect.set(window, '__SYNTHETIC_AUTH__', auth),
+    session.restricted
+  );
+  await page.goto(
+    `/app/accounts/${session.account_id}/contact-center/configuracoes?native_navigation=1`
+  );
+  await expect(page.locator('[data-global-acw-denied]')).toBeVisible();
+  await expect(page.locator('[data-save-acw-policy]')).toHaveCount(0);
+  const currentGlobal = await page.request.get(api + '/acw_policy', {
+    headers: session.administrator,
+  });
+  const globalPolicy = (await currentGlobal.json()).item;
+  const deniedGlobal = await page.request.patch(api + '/acw_policy', {
+    headers: session.restricted,
+    data: {
+      limits: { ...globalPolicy.limits, voice: 660 },
+      expected_revision: globalPolicy.revision,
+    },
+  });
+  expect(deniedGlobal.status()).toBe(401);
+  const unchanged = await page.request.get(api + '/acw_policy', {
+    headers: session.administrator,
+  });
+  expect((await unchanged.json()).item).toEqual(globalPolicy);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-acw-revision-scoped-settings.png`,
+    fullPage: true,
+  });
 });

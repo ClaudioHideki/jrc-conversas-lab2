@@ -26,3 +26,14 @@ O Chrome deverá conferir popup, gravação/reabertura de Cargo pelo endpoint na
 Sem PABX/provedor externo, NICO, scanner ou envio real. A correlação de Qualidade legada, a identificação manual de candidatos e a integração adicional de ações CRM/Service Desk/Projetos permanecem requisitos separados; não inferir correspondência de IDs. A figura inteira e as 23 referências continuam abertas. Nenhum acesso de usuário real foi alterado.
 
 O link nativo de tela completa ganha uma opção openFullPageInNewTab, falsa por padrão e ativada somente pelo chamador de atendimento, com noopener/noreferrer. Preserva o comportamento dos outros módulos e evita substituir a página com o rascunho. Dois Vue específicos verificam os dois contratos e o gate os inclui expressamente. O navegador deste incremento verifica destino, target e rel reais; não considerar isso prova de toda a edição do módulo na página independente. Essa homologação ampliada permanece separada.
+
+
+## Resultado nativo de 65ecefbe e limite real da evidência visual
+
+CI 44295927524 aprovada: 865 principais + 23 concorrentes + 85 corporativos = 973 Rails únicos, 16 reexecuções do ledger, 337 Vue e 116 Chrome; zero falhas, pendências, skips, flaky ou erros externos. Os 15 cards no bootstrap, lints sem novas infrações, migrations/SQL/schema reload e assets foram aprovados. Artefato 14424903824, SHA-256 c65d38a4a3ead9d412fa8a3aa1987b63df1633f6cd50c0c8d16a8bd31d478c8d. Os 164 hashes de capturas foram conferidos.
+
+O navegador comprovou persistência/reabertura do Cargo, preservação do rascunho, APIs negadas por empresa/unidade/conta, candidato por telefone sem vínculo e retirada de contact_manage sem remover a autorização básica da chamada. A superfície real da visão geral teve cores computadas diferentes e legíveis nos dois temas. Isso não prova a navegação completa em uma nova aba.
+
+As quatro capturas do formulário foram efetivamente revisadas e todas mostram a recarga nativa Carregando depois do salvamento. Não dar aceite visual final com essas imagens. A próxima validação aguardará o Cargo persistido e ausência do estado de carregamento, conferirá novamente contenção e capturará visão geral e formulário. O cabeçalho também passa a reutilizar callStateLabels para não exibir connected em inglês; um Vue adicional e os quatro Chrome verificam o rótulo existente Falando. Sem nova tradução, troca de estado ou alteração de regras.
+
+O próximo checkpoint inclui esse QA necessário e o incremento de revisão ACW já preparado, ambos explicitamente identificados. Exigirá 350 Vue, 120 Chrome (os 116 anteriores preservados e quatro novos), 875 principais + 24 concorrentes + 85 corporativos esperados, mais as 16 reexecuções. Não reutilizar o aceite de 65ecefbe para o código novo.

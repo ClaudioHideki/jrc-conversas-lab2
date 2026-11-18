@@ -303,7 +303,7 @@ defineExpose({
               </h3>
               <VisualStatusBadge
                 v-if="call"
-                :label="call.status"
+                :label="callLabels[call.status] || call.status"
                 :tone="callTone"
                 dot
                 class="border-white/25 bg-white/90"

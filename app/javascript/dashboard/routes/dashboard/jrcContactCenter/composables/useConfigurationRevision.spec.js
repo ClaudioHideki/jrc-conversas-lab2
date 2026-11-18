@@ -5,7 +5,7 @@ import API from 'dashboard/api/jrcContactCenter';
 import { useConfigurationRevision } from './useConfigurationRevision';
 
 vi.mock('dashboard/api/jrcContactCenter', () => ({
-  default: { configurationRecord: vi.fn() },
+  default: { configurationRecord: vi.fn(), acwPolicy: vi.fn() },
 }));
 const original = 'a'.repeat(64);
 const refreshed = 'b'.repeat(64);
@@ -256,5 +256,48 @@ describe('local IVR immutable revision support', () => {
       false
     );
     expect(revision.handleError(conflict('ivr_revision_required'))).toBe(true);
+  });
+});
+
+describe('native global ACW snapshot', () => {
+  it('uses the real ACW endpoint and rejects an account-mismatched reload', async () => {
+    const { revision, resource } = mountRevision();
+    resource.value = 'acw_policy';
+    await flushPromises();
+    revision.capture({ id: '1', revision: original });
+    API.acwPolicy.mockResolvedValueOnce({
+      data: { item: { id: '2', revision: refreshed } },
+    });
+    revision.handleError(conflict('stale_configuration_revision'));
+    await revision.reload();
+    expect(API.acwPolicy).toHaveBeenCalledWith('1');
+    expect(revision.state.error).toBe(true);
+    expect(revision.state.latest).toBeNull();
+    expect(revision.canSave.value).toBe(false);
+  });
+  it('requires a reviewed ACW draft and never treats a revision as an authority grant', async () => {
+    const { revision, resource, draft } = mountRevision();
+    resource.value = 'acw_policy';
+    await flushPromises();
+    draft.value = { voice: 120, whatsapp: 180, voice_required: false };
+    revision.capture({ id: '1', revision: original });
+    API.acwPolicy.mockResolvedValueOnce({
+      data: {
+        item: {
+          id: '1',
+          revision: refreshed,
+          limits: { voice: 300, whatsapp: 180 },
+        },
+      },
+    });
+    revision.handleError(conflict('stale_configuration_revision'));
+    await revision.reload();
+    expect(draft.value.voice).toBe(120);
+    expect(revision.canSave.value).toBe(false);
+    revision.review(true);
+    expect(revision.options()).toEqual({ expected_revision: refreshed });
+    expect(revision.canSave.value).toBe(true);
+    draft.value.voice_required = true;
+    expect(revision.canSave.value).toBe(false);
   });
 });

@@ -183,6 +183,21 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     end
   end
 
+  it 'rejects an ACW snapshot superseded while the real HTTP request waits for Account FOR UPDATE' do
+    JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
+    expected = JrcContactCenter::AcwPolicy.new(account: account.reload).revision
+    change = lambda do
+      JrcContactCenter::AcwPolicy.new(account: Account.find(account.id)).update!({ voice: 240, whatsapp: 300 })
+    end
+    payload = { limits: { voice: 60, whatsapp: 120 }, voice_required: false, expected_revision: expected }
+    expect(race_with_account_change(change, payload: payload)).to eq(409)
+    policy = JrcContactCenter::AcwPolicy.new(account: account.reload).call
+    expect(policy.fetch(:limits)).to eq('voice' => 240, 'whatsapp' => 300)
+    expect(policy.fetch(:voice_required)).to be(true)
+    events = Audited.audit_class.where(associated: account, comment: JrcContactCenter::ConfigurationAudit::ACW_COMMENT)
+    expect(events.count).to eq(1)
+  end
+
   it 'rejects a stale write after the queue moves outside the authorized business unit' do
     status = race_with_queue_change(
       change: { unit_id: units.last.id }, verb: :patch,

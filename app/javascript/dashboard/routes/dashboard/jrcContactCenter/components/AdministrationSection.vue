@@ -70,7 +70,7 @@ let generation = 0;
 const resource = computed(() =>
   key.value === 'queues'
     ? tab.value
-    : { general: 'units' }[key.value] || key.value
+    : { general: 'units', closures: 'acw_policy' }[key.value] || key.value
 );
 const configurationRevision = useConfigurationRevision({
   accountId: computed(() => props.accountId),
@@ -82,7 +82,11 @@ const configurationSaveAllowed = () => {
     editing.value?.id &&
       ['units', 'queues', 'memberships'].includes(resource.value)
   );
+  const expectsPolicy = key.value === 'closures';
   return (
+    (!expectsPolicy ||
+      (configurationRevision.state.required &&
+        String(configurationRevision.state.id) === String(props.accountId))) &&
     configurationRevision.canSave.value &&
     (!expectsRecord ||
       (configurationRevision.state.required &&
@@ -268,6 +272,7 @@ const open = async row => {
       const response = await API.acwPolicy(props.accountId);
       if (version !== generation) return;
       const policy = response.data.item;
+      configurationRevision.capture(policy);
       const format = seconds =>
         seconds % 60
           ? ''
@@ -343,7 +348,10 @@ const save = async () => {
       await API.updateAcwPolicy(
         account,
         { voice: seconds(row.voice), whatsapp: seconds(row.whatsapp) },
-        { voice_required: row.voice_required }
+        {
+          voice_required: row.voice_required,
+          ...configurationRevision.options(),
+        }
       );
     } else if (resource.value === 'units')
       await API.saveUnit(

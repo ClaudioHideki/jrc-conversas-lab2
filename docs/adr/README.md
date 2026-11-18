@@ -39,3 +39,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Auditoria nativa da política global de pós-atendimento](20261118-call-center-acw-policy-native-audit.md) — figuras 9/14, incremento preparado; exige CI e não altera a política nativa.
 
 - [Contato 360º nativo por chamada vinculada](20261118-call-center-linked-customer-master.md) — figura 21 parcial, implementação preparada; exige gate nativo e 116 cenários de navegador.
+
+- [2026-11-18 — Revisão esperada global ACW nos dois clientes nativos](20261118-call-center-global-acw-revision.md) — preparado; CI/Chrome próprios pendentes, compatibilidade da API explicitada.

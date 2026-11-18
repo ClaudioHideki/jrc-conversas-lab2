@@ -3,6 +3,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import CallWorkspace from './CallWorkspace.vue';
 import LinkedContactMaster from '../components/LinkedContactMaster.vue';
+import VisualStatusBadge from '../components/visual/VisualStatusBadge.vue';
 
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: {
@@ -20,6 +21,16 @@ vi.mock('vue-i18n', () => ({
 enableAutoUnmount(afterEach);
 
 describe('CallWorkspace', () => {
+  it('renders the existing translated native state rather than the backend code', async () => {
+    const wrapper = mount(CallWorkspace, {
+      props: { accountId: 1, callId: 10 },
+    });
+    await flushPromises();
+    expect(wrapper.getComponent(VisualStatusBadge).props('label')).toBe(
+      'JRC_CONTACT_CENTER.INBOX_360.CALL_STATES.connected'
+    );
+  });
+
   it('keeps the authorized attendance and notes identity when customer lookup is unavailable', async () => {
     JrcContactCenterAPI.customerContext.mockRejectedValueOnce({
       response: { status: 503 },

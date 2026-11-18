@@ -1,6 +1,6 @@
 # Atividade administrativa recente na Central
 
-Estado: implementação preparada na cópia temporária, sem aceite nativo ou visual.
+Estado: atividade, detalhe e histórico nativos validados no SHA 0519ee64 / CI 44284092413, conforme recibo abaixo. Não é publicação ou aplicação no PABX.
 Complementa as figuras 1 e 2; não representa aplicação no PABX.
 
 ## Implementação

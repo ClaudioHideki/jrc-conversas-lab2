@@ -37,7 +37,7 @@
         "document_1_figure": 1,
         "document_2_figure": 1
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "Subconjuntos nativos de atividade/detalhe/histórico e auditoria global ACW validados em 0519ee64 / CI 44284092413, com 968 Rails únicos, 321 Vue e 112 Chrome; oito capturas revisadas entre 160 hashes. Não é aceite de todos os critérios desta figura; revisão global ACW posterior continua preparada sem execução própria.",
       "objective": "Central de configuracoes - identidade e navegacao",
       "visual_components": "Campos e dados apresentados:  Para cada card, manter nome claro, descricao curta, disponibilidade por permissao e identificacao da area. No topo, exibir situacao do PABX, ultima sincronizacao e alertas relevantes; enquanto dados carregam, exibir carregamento, vazio ou erro, sem metricas inventadas.",
       "buttons_and_actions": "Acoes e resultado do clique:  Cards Números, Ramais, Filas, URA, Horários, Áudios, Pausas, Encerramentos, Distribuição, Permissões, Gravações, PABX, Aprovações, Parâmetros Gerais e Integrações: navegar à listagem do assunto. Atividade Recente: filtrar registro e abrir detalhe de auditoria. Alertas e Pendências: abrir pendência em sua fonte; indicador de notificações: mostrar apenas as autorizadas.",
@@ -112,7 +112,7 @@
         "document_1_figure": 2,
         "document_2_figure": 2
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "Subconjuntos nativos de atividade/detalhe/histórico e auditoria global ACW validados em 0519ee64 / CI 44284092413, com 968 Rails únicos, 321 Vue e 112 Chrome; oito capturas revisadas entre 160 hashes. Não é aceite de todos os critérios desta figura; revisão global ACW posterior continua preparada sem execução própria.",
       "objective": "Pagina principal do Control Desk",
       "visual_components": "Campos e dados apresentados:  Para cada card, manter nome claro, descricao curta, disponibilidade por permissao e identificacao da area. No topo, exibir situacao do PABX, ultima sincronizacao e alertas relevantes; enquanto dados carregam, exibir carregamento, vazio ou erro, sem metricas inventadas.",
       "buttons_and_actions": "Acoes e resultado do clique:  Cards Números, Ramais, Filas, URA, Horários, Áudios, Pausas, Encerramentos, Distribuição, Permissões, Gravações, PABX, Aprovações, Parâmetros Gerais e Integrações: navegar à listagem do assunto. Atividade Recente: filtrar registro e abrir detalhe de auditoria. Alertas e Pendências: abrir pendência em sua fonte; indicador de notificações: mostrar apenas as autorizadas.",
@@ -524,7 +524,7 @@
         "document_1_figure": 9,
         "document_2_figure": 9
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "Subconjuntos nativos de atividade/detalhe/histórico e auditoria global ACW validados em 0519ee64 / CI 44284092413, com 968 Rails únicos, 321 Vue e 112 Chrome; oito capturas revisadas entre 160 hashes. Não é aceite de todos os critérios desta figura; revisão global ACW posterior continua preparada sem execução própria.",
       "objective": "Popup Configurar Regra de Pos-Atendimento",
       "visual_components": "Campos e dados apresentados:  Associar motivo, versao da regra, formularios, campos, publico aplicavel e eventos operacionais. Registrar inicio/fim do ACW de modo independente do encerramento da chamada, por call_id e agente.",
       "buttons_and_actions": "Acoes e resultado do clique:  Motivo de Encerramento: escolher classificacao existente. Tempo de Pos-Atendimento: configurar horas/minutos. Formulario: selecionar template reutilizavel e Gerenciar Formularios na fonte. Campos Obrigatorios: marcar os dados exigidos. Comportamento do Agente: bloquear chamadas, emitir alertas ou permitir excecao conforme politica. Aplicar para: todas, filas especificas ou equipes especificas. Salvar Regra: validar impacto.",
@@ -855,7 +855,7 @@
         "document_1_figure": 14,
         "document_2_figure": 14
       },
-      "validation": "Subconjunto administrativo e cobertura atual/histórica validados em 7011dac7: 632 Rails, 226 Vue, 92 Chrome e 108 hashes de capturas. Nenhum ACK ou publicação externa homologado.",
+      "validation": "Subconjuntos nativos de atividade/detalhe/histórico e auditoria global ACW validados em 0519ee64 / CI 44284092413, com 968 Rails únicos, 321 Vue e 112 Chrome; oito capturas revisadas entre 160 hashes. Não é aceite de todos os critérios desta figura; revisão global ACW posterior continua preparada sem execução própria.",
       "objective": "Auditoria tecnica do PABX",
       "visual_components": "Campos e dados apresentados:  Registrar id do evento, correlation_id/request_id, ator, acao, recurso, before/after sanitizados, horario, estado pretendido e estado confirmado. Resultado deve distinguir concluido, pendente, divergente, falha e reversao.",
       "buttons_and_actions": "Acoes e resultado do clique:  Filtros de data, tipo, unidade/empresa e origem: refinar registros; Consultar: aplicar filtros com paginacao. Selecao de uma linha: preencher Detalhes do Evento com data/hora, usuario, operacao, objeto, tenant/accountcode, resultado e descricao. Ver Detalhes: abrir popup do evento; Exportar Relatorio: gerar arquivo dentro do escopo; Ver Historico: listar eventos correlatos.",
@@ -1221,7 +1221,7 @@
         "document_1_figure": 21,
         "document_2_figure": 21
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "65ecefbe: 973 Rails, 337 Vue e 116 Chrome aprovados, incluindo fluxo nativo de Cargo, rascunho e negações. Revisão das quatro capturas encontrou carregamento após salvar: prova visual final ainda pendente e corrigida no próximo SHA. Figura parcial; tela independente completa e integração legada não homologadas.",
       "objective": "Detalhes - contexto de cliente e historico",
       "visual_components": "Campos e dados apresentados:  Trazer cliente, empresa, contatos, unidade, contratos e protocolos apenas quando a identidade for validada. Exibir fonte de cada informacao, data de atualizacao e status. Indicadores contextuais devem explicitar janela temporal e criterio de calculo.",
       "buttons_and_actions": "Acoes e resultado do clique:  Aba Contexto: mostrar dados do cliente, linha do tempo, contratos/servicos, chamados vinculados e indicadores contextuais. Ver Cadastro: abrir registro existente na origem. Ver Historico Completo: navegar para timeline autorizada. Atalhos Criar Chamado e Registrar no Relacionamento: abrir formulários existentes com cliente e call_id previamente relacionados.",
@@ -2736,23 +2736,21 @@
       "full_reference_complete": false
     },
     "latest_validated_checkpoint": {
-      "sha": "ac85d6eb30cd2c1f038fede35650a2aa04cb79fa",
-      "run": 44260446025,
-      "artifact": 14410325587,
-      "artifact_sha256": "05357d9e829154191bce2b8c335513f1512c4e2795767ab45acfcdb93c898ca0",
-      "rails_unique": 953,
-      "rails_main": 845,
+      "sha": "65ecefbe4fa5d835e3fbefbc175a43a04c9c8c8e",
+      "run": 44295927524,
+      "artifact": 14424903824,
+      "artifact_sha256": "c65d38a4a3ead9d412fa8a3aa1987b63df1633f6cd50c0c8d16a8bd31d478c8d",
+      "rails_unique": 973,
+      "rails_main": 865,
       "rails_concurrency": 23,
-      "rails_affected_corporate": 85,
-      "schema_reload_reexecuted_examples": 16,
-      "vue": 300,
-      "chrome": 112,
-      "screenshots_sha256_verified": 144,
-      "zero_failures_pending_skipped_flaky_outside_errors": true,
-      "migration_identity_schema_reload_and_lints": "passed",
-      "word_part_1_complete": false,
-      "real_provider_operations": false,
-      "docker_publication_or_deploy": false
+      "rails_corporate": 85,
+      "schema_reload_reexecutions": 16,
+      "vue": 337,
+      "chrome": 116,
+      "screenshots_sha256_verified": 164,
+      "zero_failures_pending_skips_flaky_outside_errors": true,
+      "visual_final_accepted": false,
+      "visual_qa_reason": "All four captures were taken during the native post-save reload and show Loading. Successful real API persistence/reopening is proved by the test, but these captures do not prove the final form layout."
     },
     "acw_policy_audit_prepared": {
       "status": "Implementado, não executado nativamente neste incremento",
@@ -2773,19 +2771,30 @@
       "full_word_complete": false
     },
     "linked_customer_master_prepared": {
-      "status": "Implementado na cópia temporária; não testado nativamente neste incremento",
-      "figure": 21,
+      "status": "native function validated65ecefbe; final form visual proof requires settled captures",
       "adr": "docs/adr/20261118-call-center-linked-customer-master.md",
-      "native_service_cases_prepared": 5,
-      "vue_prepared": 16,
-      "additional_browser_cases_prepared": 4,
-      "existing_112_browser_cases_preserved": true,
-      "expected_browser_cases": 116,
-      "no_automatic_permission_grants": true,
-      "native_directory_and_popup_reused": true,
-      "legacy_quality_id_correlation": "Pendente de contrato; nenhuma junção por coincidência de ID",
-      "full_figure_or_word_complete": false,
-      "full_page_navigation": "Destino/target/rel preparados para prova; fluxo completo na página independente ainda não homologado"
+      "full_independent_page_flow_complete": false
+    },
+    "acw_expected_revision_prepared": {
+      "status": "separate WIP, not native/Chrome validated",
+      "rails": 10,
+      "real_postgresql_lock_races": 1,
+      "vue": 12,
+      "chrome_added_fragment": 4,
+      "expected_chrome_after_integration": 120,
+      "adr": "docs/adr/20261118-call-center-global-acw-revision.md",
+      "legacy_api_omission_preserved": true,
+      "legacy_settings_uses_existing_global_metadata": true
+    },
+    "next_checkpoint_expected": {
+      "rails_unique": 984,
+      "rails_main": 875,
+      "rails_concurrency": 24,
+      "rails_corporate": 85,
+      "schema_reload_reexecutions": 16,
+      "vue": 350,
+      "chrome": 120,
+      "status": "prepared only, not executed"
     }
   }
 }

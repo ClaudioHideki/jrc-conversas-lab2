@@ -15,15 +15,23 @@ class JrcContactCenter::AcwPolicy
       limits: DEFAULTS.merge(@account.settings.fetch(KEY, {}).slice(*DEFAULTS.keys)) }
   end
 
+  # Only effective ACW state and Account identity; unrelated settings are excluded.
+  def revision
+    policy = call
+    values = DEFAULTS.keys.map { |key| policy.fetch(:limits).fetch(key) }
+    Digest::SHA256.hexdigest([KEY, @account.id, policy.fetch(:voice_required), values].to_json)
+  end
+
   def voice_required?
     @account.settings.fetch(KEY, {}).fetch('voice_required', true) != false
   end
 
-  def update!(attributes = nil, voice_required: :unchanged, **legacy_limits)
+  def update!(attributes = nil, voice_required: :unchanged, expected_revision: :legacy, **legacy_limits)
     values = validated_limits(attributes || legacy_limits)
     raise JrcContactCenter::OperationError, 'invalid_acw_policy' unless [true, false, :unchanged].include?(voice_required)
 
     @account.with_lock do
+      JrcContactCenter::ConfigurationRevision.check_token!(revision, expected_revision) unless expected_revision == :legacy
       before = JrcContactCenter::AcwPolicyAudit.capture(@account)
       current = @account.settings.fetch(KEY, {}).merge(values)
       current['voice_required'] = voice_required unless voice_required == :unchanged

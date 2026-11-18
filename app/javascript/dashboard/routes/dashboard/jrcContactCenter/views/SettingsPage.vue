@@ -74,7 +74,7 @@ const load = async () => {
       JrcContactCenterAPI.queueMemberships(accountId.value),
       JrcContactCenterAPI.routingRules(accountId.value),
       JrcContactCenterAPI.integrationCapabilities(accountId.value),
-      JrcContactCenterAPI.context(accountId.value),
+      JrcContactCenterAPI.administration(accountId.value),
     ]);
     if (version !== generation) return;
     units.value = responses[0].data.items || [];
@@ -160,9 +160,19 @@ watch(accountId, load, { immediate: true });
 
     <template v-else>
       <AcwPolicyEditor
-        v-if="context?.capabilities?.configure"
+        v-if="
+          context?.capabilities?.configure &&
+          context?.capabilities?.configuration_global
+        "
         :account-id="accountId"
       />
+      <p
+        v-else-if="context?.capabilities?.configure"
+        data-global-acw-denied
+        class="mt-5 rounded-xl border border-n-amber-6 bg-n-amber-2 p-4 text-sm text-n-amber-11"
+      >
+        {{ t('JRC_CONTACT_CENTER.ADMIN.ACW_GLOBAL_DENIED') }}
+      </p>
       <VisualSectionCard
         v-if="context?.capabilities?.configure"
         class="mt-5"

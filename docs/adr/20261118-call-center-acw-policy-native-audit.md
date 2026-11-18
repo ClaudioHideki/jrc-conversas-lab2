@@ -1,6 +1,6 @@
 # Auditoria nativa da política global de pós-atendimento
 
-Estado: implementação preparada; Rails/Vue/Chrome ainda não executados neste incremento.
+Estado: auditoria nativa validada no SHA 0519ee64 / CI 44284092413, conforme recibo abaixo. Revisão global posterior preparada separadamente, ainda sem aceite próprio.
 Complementa as figuras 9 e 14. Não implementa publicação PABX nem toda a precedência de regras do Word.
 
 ## Lacuna e solução incremental
