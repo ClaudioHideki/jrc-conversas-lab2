@@ -62,7 +62,7 @@ class JrcContactCenter::IvrDraftQuery
         ORDER BY revision DESC LIMIT 1) latest ON TRUE
     SQL
     relation = relation.where(unit_id: @params[:unit_id]) if @params[:unit_id].present?
-    relation = relation.where('latest.status = ?', @params[:status]) if @params[:status].present?
+    relation = relation.where(latest: { status: @params[:status] }) if @params[:status].present?
     query = @params[:q].to_s.strip.first(100)
     relation = relation.where('latest.name ILIKE ?', "%#{ActiveRecord::Base.sanitize_sql_like(query)}%") if query.present?
     relation

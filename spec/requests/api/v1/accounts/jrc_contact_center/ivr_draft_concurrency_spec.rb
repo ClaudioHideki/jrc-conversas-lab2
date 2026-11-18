@@ -48,21 +48,23 @@ RSpec.describe 'Local IVR real HTTP concurrency', type: :request do
   # Both requests execute the real router, token authentication, controller and PostgreSQL transaction.
   def dispatch_ivr(payload)
     endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/ivr_drafts/#{draft.id}"
-    workers << Thread.new do
-      ActiveRecord::Base.connection_pool.with_connection do
-        ready << ActiveRecord::Base.connection.raw_connection.backend_pid
-        Timeout.timeout(15) { gate.pop }
-        session = ActionDispatch::Integration::Session.new(Rails.application)
-        session.patch(endpoint, headers: headers, params: { ivr_draft: payload }, as: :json)
-        results << { status: session.response.status, body: session.response.parsed_body }
-      end
-    rescue StandardError => e
-      results << e
+    workers << Thread.new { perform_ivr_request(endpoint, payload) }
+  end
+
+  def perform_ivr_request(endpoint, payload)
+    ActiveRecord::Base.connection_pool.with_connection do
+      ready << ActiveRecord::Base.connection.raw_connection.backend_pid
+      Timeout.timeout(15) { gate.pop }
+      session = ActionDispatch::Integration::Session.new(Rails.application)
+      session.patch(endpoint, headers: headers, params: { ivr_draft: payload }, as: :json)
+      results << { status: session.response.status, body: session.response.parsed_body }
     end
+  rescue StandardError => e
+    results << e
   end
 
   def wait_for_real_locks(count)
-    ids = Timeout.timeout(8) { count.times.map { ready.pop } }
+    ids = Timeout.timeout(8) { Array.new(count) { ready.pop } }
     count.times { gate << true }
     connection = ActiveRecord::Base.connection
     quoted = ids.map { |id| connection.quote(id) }.join(',')
@@ -73,7 +75,7 @@ RSpec.describe 'Local IVR real HTTP concurrency', type: :request do
   def collected_results(count)
     rows = Timeout.timeout(20) do
       workers.each(&:join)
-      count.times.map { results.pop }
+      Array.new(count) { results.pop }
     end
     errors = rows.grep(Exception)
     raise errors.first if errors.any?

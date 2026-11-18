@@ -2440,7 +2440,20 @@
         "108 real Chrome desktop/mobile light/dark",
         "media/calendar/cross-unit routing/DAC",
         "external provider contract/approval/publication/ACK/rollback"
-      ]
+      ],
+      "first_native_result": {
+        "sha": "804413eca5cf5cad4cab4b18b4e7ad3d1d8544f2",
+        "run": 44230570088,
+        "rails_main": 762,
+        "rails_concurrent": 17,
+        "schema_reload_reexecuted_examples": 16,
+        "vue": 290,
+        "new_ruby_offenses": 29,
+        "frontend_lint": "passed",
+        "chrome": "not executed; lint gate blocked",
+        "artifact": 14395428784,
+        "artifact_sha256": "2c2a3020f962700551ca56dc8c719499240ee38dbce19169722477ac5511c45a"
+      }
     }
   },
   "resolved_decisions_20261117": [

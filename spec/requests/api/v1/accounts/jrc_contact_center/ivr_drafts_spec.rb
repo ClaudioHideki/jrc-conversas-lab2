@@ -14,11 +14,15 @@ RSpec.describe 'Call Center local IVR draft API', type: :request do
   end
   let(:initial) do
     post url, headers: headers, params: { ivr_draft: values }, as: :json
-    expect(response).to have_http_status(:created)
     response.parsed_body.fetch('item')
   end
 
   before { account.enable_features!('jrc_contact_center') }
+
+  it 'returns creation status for a new durable local identity' do
+    initial
+    expect(response).to have_http_status(:created)
+  end
 
   it 'persists a local revision and reloads it through authenticated real APIs' do
     original = initial
@@ -48,12 +52,13 @@ RSpec.describe 'Call Center local IVR draft API', type: :request do
 
   it 'keeps an accepted revision when invalid JSON or a closed cycle is submitted' do
     original = initial
-    malformed = { schema_version: 1, start: 'entry', nodes: [{ id: 'entry', type: 'menu', timeout_seconds: 5, max_attempts: 2,
-                                                          options: [{ digit: '1', target: 'entry' }], on_timeout: 'entry', on_invalid: 'entry' }] }
+    menu = { id: 'entry', type: 'menu', timeout_seconds: 5, max_attempts: 2,
+             options: [{ digit: '1', target: 'entry' }], on_timeout: 'entry', on_invalid: 'entry' }
+    malformed = { schema_version: 1, start: 'entry', nodes: [menu] }
     [nil, malformed].each do |graph|
       patch "#{url}/#{original['id']}", headers: headers,
-                                       params: { ivr_draft: values.merge(definition: graph, expected_revision: 1, request_id: SecureRandom.uuid) },
-                                       as: :json
+                                        params: { ivr_draft: values.merge(definition: graph, expected_revision: 1, request_id: SecureRandom.uuid) },
+                                        as: :json
       expect(response).to have_http_status(:unprocessable_entity)
     end
     get "#{url}/#{original['id']}", headers: headers
@@ -88,8 +93,8 @@ RSpec.describe 'Call Center local IVR draft API', type: :request do
     original = initial
     other = JrcContactCenter::Unit.create!(account: account, code: 'OTHER', name: 'SYNTHETIC other', kind: 'sac')
     patch "#{url}/#{original['id']}", headers: headers,
-                                     params: { ivr_draft: values.merge(unit_id: other.id, expected_revision: 1, request_id: SecureRandom.uuid) },
-                                     as: :json
+                                      params: { ivr_draft: values.merge(unit_id: other.id, expected_revision: 1, request_id: SecureRandom.uuid) },
+                                      as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.parsed_body).to include('error' => 'ivr_unit_is_immutable')
     expect(JrcContactCenter::IvrDraft.find(original['id']).unit_id).to eq(unit.id)
@@ -99,8 +104,8 @@ RSpec.describe 'Call Center local IVR draft API', type: :request do
     context = { account: account, account_user: member, user: operator }
     writer = JrcContactCenter::IvrDraftWrite.new(context: context)
     23.times do |index|
-      input = JrcContactCenter::IvrDraftInput.new(**values.except(:unit_id).merge(definition: JSON.parse(definition.to_json),
-                                                                              name: "SYNTHETIC page #{index}", request_id: SecureRandom.uuid))
+      input = JrcContactCenter::IvrDraftInput.new(**values.except(:unit_id), definition: JSON.parse(definition.to_json),
+                                                                             name: "SYNTHETIC page #{index}", request_id: SecureRandom.uuid)
       writer.call(input: input, unit_id: unit.id)
     end
     get url, headers: headers
@@ -135,7 +140,7 @@ RSpec.describe 'Call Center local IVR draft API', type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.headers['X-JRC-IVR-Revision']).to eq('1')
     expect(response.headers['Content-Disposition']).to include('attachment', "ura-local-#{original['id']}-v1.json")
-    expect(JSON.parse(response.body)).to eq(JSON.parse(definition.to_json))
+    expect(response.parsed_body).to eq(JSON.parse(definition.to_json))
     expect(response.body).not_to include('account_id', 'provider', 'actor', 'scope_snapshot')
   end
 
@@ -158,7 +163,7 @@ RSpec.describe 'Call Center local IVR draft API', type: :request do
     foreign_account.enable_features!('jrc_contact_center')
     foreign_unit = JrcContactCenter::Unit.create!(account: foreign_account, code: 'FOREIGN', name: 'SYNTHETIC foreign', kind: 'sac')
     foreign_context = { account: foreign_account, account_user: foreign_account.account_users.find_by!(user: foreign_actor), user: foreign_actor }
-    input = JrcContactCenter::IvrDraftInput.new(**values.except(:unit_id).merge(definition: JSON.parse(definition.to_json)))
+    input = JrcContactCenter::IvrDraftInput.new(**values.except(:unit_id), definition: JSON.parse(definition.to_json))
     foreign = JrcContactCenter::IvrDraftWrite.new(context: foreign_context).call(input: input, unit_id: foreign_unit.id).fetch(:draft)
     ["#{url}/#{foreign.id}", "#{url}/#{foreign.id}/versions", "#{url}/#{foreign.id}/export?revision=1"].each do |target|
       get target, headers: headers
@@ -179,7 +184,7 @@ RSpec.describe 'Call Center local IVR draft API', type: :request do
     post "#{url}/preview", headers: headers, params: { ivr_preview: { unit_id: unit.id, definition: definition, dtmf: '' } }, as: :json
     expect(response).to have_http_status(:unauthorized)
     patch "#{url}/#{original['id']}", headers: headers,
-                                     params: { ivr_draft: values.merge(expected_revision: 1, request_id: SecureRandom.uuid) }, as: :json
+                                      params: { ivr_draft: values.merge(expected_revision: 1, request_id: SecureRandom.uuid) }, as: :json
     expect(response).to have_http_status(:unauthorized)
     expect(JrcContactCenter::IvrDraftVersion.where(account: account).count).to eq(1)
   end
@@ -191,6 +196,7 @@ RSpec.describe 'Call Center local IVR draft API', type: :request do
     expect(filtered.values).to all(eq('[FILTERED]'))
     expect(filtered.to_json).not_to include('123#', '456*', 'SYNTHETIC draft')
   end
+
   it 'reuses the scoped native audit API with explicit revision type and no graph content' do
     account.enable_features!('audit_logs')
     role = create(:custom_role, account: account,
@@ -205,6 +211,7 @@ RSpec.describe 'Call Center local IVR draft API', type: :request do
     expect(response.parsed_body.fetch('item').fetch('after').keys).to contain_exactly('revision', 'status', 'integrity_sha256')
     expect(response.body).not_to include('SYNTHETIC draft', '"nodes"', operator.email)
   end
+
   %i[leading_zero newline float oversized missing array].each do |kind|
     it "does not reinterpret a malformed creation unit identity #{kind}" do
       identifier = { leading_zero: "0#{unit.id}", newline: "#{unit.id}\n", float: unit.id.to_f,

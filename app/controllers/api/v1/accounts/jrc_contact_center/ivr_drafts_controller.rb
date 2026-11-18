@@ -20,9 +20,7 @@ class Api::V1::Accounts::JrcContactCenter::IvrDraftsController < Api::V1::Accoun
   def update
     draft = draft_scope.find!(params[:id])
     unit = params.require(:ivr_draft)[:unit_id]
-    if unit.present? && unit.to_s != draft.unit_id.to_s
-      raise JrcContactCenter::OperationError, 'ivr_unit_is_immutable'
-    end
+    raise JrcContactCenter::OperationError, 'ivr_unit_is_immutable' if unit.present? && unit.to_s != draft.unit_id.to_s
 
     write_draft(id: draft.id)
   end
@@ -30,10 +28,7 @@ class Api::V1::Accounts::JrcContactCenter::IvrDraftsController < Api::V1::Accoun
   def versions
     draft = draft_scope.find!(params[:id])
     relation = draft.versions.where(account: Current.account).order(revision: :desc)
-    page = params.fetch(:page, '1')
-    raise JrcContactCenter::OperationError, 'invalid_ivr_filter' unless page.is_a?(String) && page.match?(/\A[0-9]+\z/)
-
-    page = page.to_i.clamp(1, 1_000_000)
+    page = history_page
     total = relation.count
     render json: base_payload.merge(items: relation.offset((page - 1) * 20).limit(20).map { |row| present(draft, row, include_definition: false) },
                                     meta: { page: page, per_page: 20, total: total, pages: (total.to_f / 20).ceil })
@@ -48,8 +43,8 @@ class Api::V1::Accounts::JrcContactCenter::IvrDraftsController < Api::V1::Accoun
     draft = draft_scope.find!(params[:id])
     row = selected_version(draft)
     response.headers['X-JRC-IVR-Revision'] = row.revision.to_s
-    send_data JSON.pretty_generate(row.definition), type: 'application/json',
-                                                  filename: "ura-local-#{draft.id}-v#{row.revision}.json", disposition: 'attachment'
+    send_data JSON.pretty_generate(row.definition),
+              type: 'application/json', filename: "ura-local-#{draft.id}-v#{row.revision}.json", disposition: 'attachment'
   end
 
   def preview
@@ -63,12 +58,24 @@ class Api::V1::Accounts::JrcContactCenter::IvrDraftsController < Api::V1::Accoun
     draft = draft_scope.find!(params[:id])
     request = params.require(:ivr_simulation).permit(:revision, :dtmf)
     row = selected_version(draft, request[:revision])
-    graph = JrcContactCenter::IvrGraph.new(row.definition, access: draft_scope.access, unit_id: draft.unit_id)
-    draft_scope.authorize_unchanged_scope!(draft, draft_scope.access.units.find(draft.unit_id))
-    render json: base_payload.merge(simulation: JrcContactCenter::IvrSimulator.new(graph: graph).call(input: request[:dtmf]), revision: row.revision)
+    result = simulate_version(draft, row, request[:dtmf])
+    render json: base_payload.merge(simulation: result, revision: row.revision)
   end
 
   private
+
+  def history_page
+    page = params.fetch(:page, '1')
+    raise JrcContactCenter::OperationError, 'invalid_ivr_filter' unless page.is_a?(String) && page.match?(/\A[0-9]+\z/)
+
+    page.to_i.clamp(1, 1_000_000)
+  end
+
+  def simulate_version(draft, row, input)
+    graph = JrcContactCenter::IvrGraph.new(row.definition, access: draft_scope.access, unit_id: draft.unit_id)
+    draft_scope.authorize_unchanged_scope!(draft, draft_scope.access.units.find(draft.unit_id))
+    JrcContactCenter::IvrSimulator.new(graph: graph).call(input: input)
+  end
 
   def base_payload
     super.merge(timezone: Time.zone.tzinfo.identifier)
@@ -93,9 +100,8 @@ class Api::V1::Accounts::JrcContactCenter::IvrDraftsController < Api::V1::Accoun
 
   def write_draft(id: nil)
     request = params.require(:ivr_draft).permit(:unit_id, :name, :status, :request_id, :expected_revision, definition: {})
-    unless request.key?(:expected_revision)
-      raise JrcContactCenter::OperationError.new('ivr_revision_required', status: :precondition_required)
-    end
+    raise JrcContactCenter::OperationError.new('ivr_revision_required', status: :precondition_required) unless request.key?(:expected_revision)
+
     input = JrcContactCenter::IvrDraftInput.new(**request.except(:unit_id).to_h.symbolize_keys)
     result = JrcContactCenter::IvrDraftWrite.new(context: pundit_user).call(input: input, id: id, unit_id: request[:unit_id])
     render json: base_payload.merge(item: present(result[:draft], result[:version]), replayed: result[:replayed],

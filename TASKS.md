@@ -133,3 +133,5 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 
 - [x] **CC-LOCAL-IVR-LEDGER-VALIDATED-20261118:** 6a8b9c72 / CI 44220513593: 744 Rails únicos (730 + 14), 16 reexecuções do ledger após schema reload, 250 Vue, 96 Chrome e 120 capturas/hash. Migrations, lints, assets e bootstrap aprovados; artefato 14390294705 / 90e947cc7bdfa34bf80e08460f1ad1508cd10c22f838481394e95554794d79d6.
 - [ ] **CC-LOCAL-IVR-API-EDITOR-20261118:** API/editor/importação/exportação/histórico/simulação preparados, reutilizando escopos e auditoria nativos. Três corridas HTTP reais e 12 Chrome adicionais preparados; gate exigirá 108/108 preservando os 96 anteriores. Execução nativa do próximo SHA pendente. Sem publicação PABX, Docker, produção ou concessões reais. Figuras/etapas permanecem abertas onde faltam critérios.
+
+- API/editor 804413ec / CI 44230570088: 779 Rails únicos, 16 reexecuções do ledger, 290 Vue e frontend lint aprovados. Lint Ruby apontou 29 infrações; correções mínimas preparadas sem supressões e com criação validada em exemplo próprio. 108 Chrome continuam pendentes; próximo SHA exige nova validação integral do workflow setorial.

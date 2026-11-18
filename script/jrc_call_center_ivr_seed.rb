@@ -43,9 +43,9 @@ class JrcContactCenter::SyntheticIvrSeed
   def create_units(company)
     %w[A B].map do |code|
       business = JrcCrm::BusinessUnit.create!(account: @account, operating_company: company,
-                                             name: "SYNTHETIC IVR business #{code}", code: code, active: true)
+                                              name: "SYNTHETIC IVR business #{code}", code: code, active: true)
       JrcContactCenter::Unit.create!(account: @account, code: code, name: "SYNTHETIC IVR unit #{code}", kind: 'sac',
-                                    settings: { issuer_company_id: company.id, business_unit_id: business.id })
+                                     settings: { issuer_company_id: company.id, business_unit_id: business.id })
     end
   end
 

@@ -79,3 +79,10 @@ Erro de rede após envio preserva corpo, destino e UUID originais; campos ficam 
 Provas preparadas: APIs com banco real, permissões, filtros, paginação, revisão e repetição, três corridas HTTP reais (revisão, UUID e revogação após lock), Vue focado e 12 cenários Chrome adicionais. Quatro contas sintéticas exclusivas mantêm os dados dos 96 cenários anteriores intactos. Novo gate exige 108/108, desktop 1440/celular 390 e claro/escuro. Os resultados antigos não comprovam estes incrementos ainda não executados. Não foram alterados critérios, dependências ou permissões reais.
 
 Permanecem pendentes áudio/mídia, calendários/horários, roteamento entre unidades, DAC, capacidades efetivas do fornecedor, aprovação/publicação/ACK/rollback e homologação externa. A conclusão do editor local não representa conclusão de URA ou das etapas 0–8.
+
+
+## Primeiro gate da API/editor e lint — 18/11/2026
+
+804413eca5cf5cad4cab4b18b4e7ad3d1d8544f2 / CI 44230570088: 762 exemplos Rails principais, 17 concorrentes (incluindo as três novas corridas HTTP reais), 16 reexecuções do ledger no schema recarregado e 290 Vue passaram, zero falhas/pendências/erros. Frontend lint aprovado. Artefato 14395428784, SHA-256 2c2a3020f962700551ca56dc8c719499240ee38dbce19169722477ac5511c45a. Os 108 Chrome não executaram: 29 infrações Ruby bloquearam o gate.
+
+Correções restritas aos diagnósticos: extração da validação da página de histórico e da simulação de revisão; separação do despacho/preparação da sessão HTTP concorrente sem alterar barreiras ou locks; where qualificado do alias SQL, alinhamentos, guard clauses, Array.new para contagens positivas, parsed_body e keywords diretas. A asserção de criação sai do let e permanece em exemplo explícito adicional; nenhuma asserção foi retirada. Nenhuma configuração de lint foi alterada. Nova CI obrigatória antes de aceitar editor/importação/exportação/Chrome.
