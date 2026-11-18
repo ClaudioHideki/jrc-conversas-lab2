@@ -281,3 +281,12 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - Quatro convenções corrigidas: classe exata sem segundo argumento descritivo indevido,described_class,prefixo nativo do arquivo e deslocamentos de relógio sempre em blocos.
 - Coletor opcional de sugestões tentouESLint sem dependências instaladas após a falhaRails. Condicionado ao pré-requisito real e registrado como não executado quando ausente. Gates obrigatórios preservados; YAML e seis combinações estáticas validadas.
 - Cockpit observado e seteVue preparados separadamente; quatroChrome existentes ampliados,140 preservados. NovaCI própria antes do aceite. Sem imagem,deploy,produção ouPABX.
+
+
+### Incremento ACW por motivo — 18/11/2026
+
+- [x] Decisão confirmada: fila → equipe → geral; bloquear conflitos.
+- [ ] Validar nativamente o motor e snapshots de voz do incremento em preparação, na branch exclusiva.
+- [ ] Validar o popup ACW com persistência, revisão, negação de escopo e auditoria em 144 cenários Chrome (140 anteriores + 4 novos).
+- [ ] Concluir seleção intermediária/persistência do motivo e prévia do relógio, formulários vinculados e automações de encerramento conforme figura 9.
+- [ ] Homologação externa PABX permanece bloqueada por contrato indisponível. Nenhuma etapa ou conjunto das 23 figuras é declarado concluído.

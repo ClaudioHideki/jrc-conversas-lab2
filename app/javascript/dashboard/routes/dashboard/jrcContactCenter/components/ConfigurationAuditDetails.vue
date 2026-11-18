@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { pauseCatalogSummary } from '../pauseCatalogPresentation';
+import { acwRulesSummary } from '../acwRulesPresentation';
 
 const props = defineProps({
   record: { type: Object, required: true },
@@ -38,6 +39,7 @@ const fieldLabels = {
   voice: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.voice'),
   whatsapp: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.whatsapp'),
   voice_required: t('JRC_CONTACT_CENTER.ADMIN.VOICE_REQUIRED'),
+  voice_rules: t('JRC_CONTACT_CENTER.ACW_RULES.TITLE'),
   revision: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REVISION'),
   integrity_sha256: t('JRC_CONTACT_CENTER.LOCAL_IVR.INTEGRITY'),
   name: t('JRC_CONTACT_CENTER.ADMIN.NAME'),
@@ -141,6 +143,7 @@ const value = (entry, field = '') => {
     Array.isArray(entry)
   )
     return entry.map(item => permissionLabels[item] || item).join('\n') || '—';
+  if (field === 'voice_rules') return acwRulesSummary(entry, t);
   if (field === 'settings')
     return (
       [

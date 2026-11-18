@@ -2141,6 +2141,23 @@
       "INVALID": "Não foi possível validar o impacto recebido. Feche e reabra o registro para uma nova conferência. Nenhuma retirada foi confirmada.",
       "AUDITED": "Retirada confirmada pelo gestor",
       "AUDIT_DETAIL": "Vínculo do gestor: {manager} · Fila: {queue} · Agentes elegíveis: {before} → {after}."
+    },
+    "ACW_RULES": {
+      "TITLE": "ACW de voz por motivo e origem",
+      "HINT": "Fila → equipe → regra geral. Conflitos no mesmo nível bloqueiam a conclusão. Somente novos atendimentos capturam estas regras. O relógio inicial usa o limite geral; o motivo selecionado define o limite na conclusão. Não publica no PABX.",
+      "REASON": "Código do motivo de encerramento",
+      "SCOPE": "Aplicar em",
+      "GENERAL": "Regra geral",
+      "TEAM": "Equipe",
+      "QUEUE": "Fila",
+      "TIME": "Tempo de ACW (HH:MM, de 00:01 até 01:00)",
+      "ADD": "Adicionar regra de ACW",
+      "REMOVE": "Remover regra",
+      "TARGET_SEARCH": "Pesquisar fila ou equipe",
+      "TARGET": "Fila ou equipe existente",
+      "EXACT_SECONDS": "Limite preservado: {seconds} segundos. Preencha o horário apenas para alterá-lo.",
+      "CONFLICT": "Há regras de ACW conflitantes no mesmo nível. Revise os motivos, filas e equipes.",
+      "INVALID": "Revise os campos e os tempos das regras de ACW."
     }
   }
 }

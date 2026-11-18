@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { pauseCatalogSummary } from '../pauseCatalogPresentation';
+import { acwRulesSummary } from '../acwRulesPresentation';
 import Button from 'dashboard/components-next/button/Button.vue';
 
 const props = defineProps({
@@ -27,6 +28,7 @@ const labels = {
   voice: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.voice'),
   whatsapp: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.whatsapp'),
   voice_required: t('JRC_CONTACT_CENTER.ADMIN.VOICE_REQUIRED'),
+  voice_rules: t('JRC_CONTACT_CENTER.ACW_RULES.TITLE'),
   enforced: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.POLICY_TITLE'),
   entries: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.ENTRIES'),
   name: t('JRC_CONTACT_CENTER.ADMIN.NAME'),
@@ -87,7 +89,7 @@ const fields = computed(
       access_users: ['eligible', 'allowed', 'denied'],
       access_teams: ['allowed'],
       ivr_drafts: ['name', 'revision', 'definition'],
-      acw_policy: ['voice', 'whatsapp', 'voice_required'],
+      acw_policy: ['voice', 'whatsapp', 'voice_required', 'voice_rules'],
       pause_catalog: ['enforced', 'entries'],
     })[props.resource] || []
 );
@@ -117,6 +119,7 @@ const format = (record, field) => {
     );
   if (['kind', 'status', 'service_kind', 'strategy'].includes(field))
     return choices[value] || String(value);
+  if (field === 'voice_rules') return acwRulesSummary(value, t);
   if (field === 'entries') return pauseCatalogSummary(value, t);
   if (field === 'definition') return JSON.stringify(value, null, 2);
   return String(value);

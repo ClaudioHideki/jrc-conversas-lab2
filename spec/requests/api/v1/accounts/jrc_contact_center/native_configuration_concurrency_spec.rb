@@ -55,6 +55,10 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
 
       subscriptions.each { |subscription| ActiveSupport::Notifications.unsubscribe(subscription) }
       # Only fixtures belonging to this guarded disposable suite's Account.
+      JrcContactCenter::Qualification.where(account: account).destroy_all
+      JrcContactCenter::AgentStateEvent.where(account: account).destroy_all
+      JrcContactCenter::CallLeg.where(account: account).destroy_all
+      JrcContactCenter::CallSession.where(account: account).destroy_all
       JrcContactCenter::Callback.where(account: account).destroy_all
       JrcContactCenter::CaseEvent.where(account: account).destroy_all
       JrcContactCenter::Case.where(account: account).destroy_all
@@ -533,4 +537,32 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       expect(Audited.audit_class.where(auditable: membership, action: 'update')).to be_empty
     end
   end
+
+  %w[eligibility profile coverage].each do |source|
+    it "does not complete native ACW after #{source} is revoked while waiting for the account lock" do
+      member = account.account_users.find_by!(user: actor)
+      member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_operate])
+      call = JrcContactCenter::CallSession.create!(account: account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid,
+                                                  direction: 'inbound', status: 'connected', started_at: 2.minutes.ago,
+                                                  answered_at: 1.minute.ago, current_unit_id: units.first.id, current_queue_id: queue.id)
+      JrcContactCenter::CallLeg.create!(account: account, call_session: call, account_user: member, queue: queue,
+                                       direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
+      call.update!(status: 'ended', ended_at: Time.current)
+      record = JrcContactCenter::Qualification.find_by!(account: account, call_session: call, account_user: member)
+      change = lambda do
+        case source
+        when 'eligibility' then JrcContactCenter::AccessGrant.find_by!(account_user: member).update!(eligible: false)
+        when 'profile' then member.custom_role.update!(permissions: ['jrc_contact_center_view'])
+        else JrcCrm::UserBusinessUnit.find_by!(account: account, user: actor).update!(business_unit: business_units.last)
+        end
+      end
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications/#{record.id}"
+      payload = { qualification: { reason_code: 'order', outcome_code: 'completed', notes: 'SYNTHETIC blocked write' } }
+      status = race_with_account_change(change, endpoint: endpoint, payload: payload)
+      expect(status).to eq(source == 'coverage' ? 404 : 401)
+      expect(record.reload).to have_attributes(completed_at: nil, reason_code: nil, notes: nil)
+      expect(JrcContactCenter::AgentStateEvent.find_by!(account: account, external_event_id: "qualification:#{record.id}:pending").ended_at).to be_nil
+    end
+  end
+
 end

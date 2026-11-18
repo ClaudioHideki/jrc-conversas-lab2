@@ -7,6 +7,8 @@ class JrcContactCenter::AcwPolicyAudit
     policy.fetch(:limits).each do |key, value|
       value.is_a?(Integer) ? attributes[key] = value : omitted << key
     end
+    rules = JrcContactCenter::AcwScopedRules.new(account: account).call
+    attributes['voice_rules'] = rules if rules.any?
     { 'attributes' => attributes, 'omitted_fields' => omitted }
   end
 

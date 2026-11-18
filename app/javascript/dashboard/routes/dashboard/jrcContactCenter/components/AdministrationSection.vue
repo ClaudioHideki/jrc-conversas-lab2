@@ -10,6 +10,7 @@ import NativeRoleEditor from './NativeRoleEditor.vue';
 import AuthorityAssignments from './AuthorityAssignments.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import PauseCatalogEditor from './PauseCatalogEditor.vue';
+import AcwRulesEditor from './AcwRulesEditor.vue';
 import QueueWithdrawalConfirmation from './QueueWithdrawalConfirmation.vue';
 import { useQueueWithdrawalReview } from '../composables/useQueueWithdrawalReview';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
@@ -292,6 +293,9 @@ const open = async row => {
         voice: format(policy.limits.voice),
         whatsapp: format(policy.limits.whatsapp),
         voice_required: policy.voice_required,
+        ...(Array.isArray(policy.voice_rules)
+          ? { voice_rules: policy.voice_rules.map(rule => ({ ...rule })) }
+          : {}),
       };
     }
     await nextTick();
@@ -361,6 +365,9 @@ const save = async () => {
         { voice: seconds(row.voice), whatsapp: seconds(row.whatsapp) },
         {
           voice_required: row.voice_required,
+          ...(Array.isArray(row.voice_rules)
+            ? { voice_rules: row.voice_rules }
+            : {}),
           ...configurationRevision.options(),
         }
       );
@@ -439,6 +446,16 @@ const save = async () => {
       } else if (memberScopeMismatch) {
         invalidAttributes.value = ['account_user_id', 'queue_id'];
         formError.value = t('JRC_CONTACT_CENTER.ACCESS.ENROLLMENT_SCOPE');
+      } else if (
+        key.value === 'closures' &&
+        error.response?.data?.error === 'conflicting_acw_rules'
+      ) {
+        formError.value = t('JRC_CONTACT_CENTER.ACW_RULES.CONFLICT');
+      } else if (
+        key.value === 'closures' &&
+        error.response?.data?.error === 'invalid_acw_rules'
+      ) {
+        formError.value = t('JRC_CONTACT_CENTER.ACW_RULES.INVALID');
       } else {
         formError.value =
           error.response?.data?.message ||
@@ -885,6 +902,12 @@ onBeforeUnmount(() => {
           {{ formError }}
         </p>
         <template v-if="key === 'closures'">
+          <AcwRulesEditor
+            v-if="Array.isArray(draft.voice_rules)"
+            v-model="draft.voice_rules"
+            :account-id="accountId"
+            :disabled="saving"
+          />
           <label
             v-for="channel in ['voice', 'whatsapp']"
             :key="channel"

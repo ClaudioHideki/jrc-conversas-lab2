@@ -13,21 +13,32 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
   end
 
   def create
-    authorize_contact_center!(:operate?)
-    target = attendance
-    record = manager.start!(**(target.is_a?(Conversation) ? { conversation: target } : { call_session: target }))
-    render json: base_payload.merge(item: record.operational_payload)
+    with_current_operating_authority do
+      target = attendance
+      record = manager.start!(**(target.is_a?(Conversation) ? { conversation: target } : { call_session: target }))
+      render json: base_payload.merge(item: record.operational_payload)
+    end
   end
 
   def update
-    authorize_contact_center!(:operate?)
-    record = scope.where(account_user: Current.account_user).find(params[:id])
-    record = manager.complete!(record, params.require(:qualification).permit(:reason_code, :outcome_code, :notes).to_h.symbolize_keys)
-    render json: base_payload.merge(item: record.operational_payload,
-                                   agent: operator_snapshot)
+    with_current_operating_authority do
+      record = scope.where(account_user: Current.account_user).find(params[:id])
+      authorize_qualification_origin!(record)
+      record = manager.complete!(record, params.require(:qualification).permit(:reason_code, :outcome_code, :notes).to_h.symbolize_keys)
+      render json: base_payload.merge(item: record.operational_payload, agent: operator_snapshot)
+    end
   end
 
   private
+
+  def authorize_qualification_origin!(record)
+    if record.call_session_id
+      contact_center_access.call_sessions.find(record.call_session_id)
+    else
+      authorize record.conversation, :show?
+      raise Pundit::NotAuthorizedError unless contact_center_access.full_access? || record.conversation.assignee_id == Current.user.id
+    end
+  end
 
   def operator_snapshot
     response.headers['Cache-Control'] = 'no-store'

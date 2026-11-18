@@ -559,7 +559,8 @@
         "complete_reference": [
           "Per-reason/queue/team templates and precedence remain stage 6; native 1..3600 second engine unchanged"
         ]
-      }
+      },
+      "scoped_acw_increment": "Motor de precedência, snapshot e editor no popup existentes preparados. Validação nativa/Chrome do novo SHA ainda pendente. Relógio intermediário por motivo, formulários e automações não concluídos."
     },
     {
       "figure": 10,
@@ -2958,6 +2959,17 @@
       "subject": "Last eligible queue agent withdrawal",
       "resolution": "Explicit authorized-manager confirmation, review and audit; not mandatory formal Central Approvals. No PABX publication.",
       "status": "Direct native membership flow implemented and validated2bbcab4c; indirect team withdrawal remains pending."
+    },
+    {
+      "decision": "acw_precedence",
+      "confirmed": true,
+      "order": [
+        "queue",
+        "team",
+        "general"
+      ],
+      "same_level_conflict": "block",
+      "legacy_snapshots": "preserve"
     }
   ],
   "qa_266fa5f8_20261118": {
@@ -3135,5 +3147,55 @@
     "lint_correction": "Removed an invalid second describe argument, used described_class, retained native filename prefix, block-scoped all clock changes instead of redundant cleanup.",
     "diagnostic_failure": "Optional formatter attempted ESLint before dependencies installation, which was skipped after Rails failure. Added explicit prerequisite guard and not-run evidence; required gates unchanged.",
     "full_word_complete": false
+  },
+  "qa_1934f5ed_20261118": {
+    "sha": "1934f5ed05b6faf7a8e9285b2d3082c7effed43c",
+    "run": 44380404131,
+    "artifact": 14464429213,
+    "artifact_sha256": "a15eca756ef3c4c07d0ab95ff169744f3fe959b8bb055d5f31d088d735a8f77f",
+    "rails_unique": 1132,
+    "schema_reload": 16,
+    "vue": 401,
+    "test_failures_pending_outside_errors": 0,
+    "new_ruby_offenses": 4,
+    "not_run": [
+      "assets",
+      "Chrome"
+    ],
+    "correction_sha": "98c9d61770378b7f127cc81d2b26ee212d0fdc80",
+    "correction": "Use native Time.zone.at for four exact threshold instants; no assertions or boundaries removed."
+  },
+  "scoped_acw_candidate_20261118": {
+    "status": "prepared_not_natively_tested",
+    "decision": "queue then team then general; block conflicts",
+    "existing_endpoint_popup_and_native_targets": true,
+    "voice_only": true,
+    "history": "new native event snapshots; no rewrite of existing qualifications/events",
+    "qualification_clock": "initial global limit until reason completion; intermediate reason draft/preview still pending",
+    "required_chrome": 144,
+    "full_figure_complete": false
+  },
+  "qa_98c9d617_20261118": {
+    "sha": "98c9d61770378b7f127cc81d2b26ee212d0fdc80",
+    "run": 44386598476,
+    "result": "success",
+    "artifact": 14467572892,
+    "artifact_sha256": "069da7387443e1afd4fb43d2ce589801f6560dd6317352a93ce3f9c5c4f6fa38",
+    "rails_unique_verified_by_example_identity": 1132,
+    "schema_reload_reexecutions": 16,
+    "vue": 401,
+    "chrome": 140,
+    "test_failures_skips_pending_flaky_outside_errors": 0,
+    "new_ruby_lint_offenses": 0,
+    "screenshots_sha256_verified": 204,
+    "representative_visual_review": [
+      "mobile-dark-last-eligible-audit.png",
+      "desktop-light-last-eligible-audit.png",
+      "mobile-light-pause-catalog-operator.png",
+      "desktop-dark-pause-catalog-popup.png"
+    ],
+    "visual_finding": "Manager review now visible and readable. Mobile operator capture showed its truthful metric/hero area; next checkpoint explicitly scrolls to the own justification and supervisor notice before their captures. No assertion is removed.",
+    "new_scoped_acw_inherits_this_approval": false,
+    "full_23_figures_complete": false
   }
 }

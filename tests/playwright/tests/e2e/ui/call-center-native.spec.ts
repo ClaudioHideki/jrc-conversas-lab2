@@ -32,15 +32,17 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('last eligible queue withdrawal')
-    ? 'withdrawal'
-    : info.title.startsWith('local pause duration supervisor')
-      ? 'duration'
-      : info.title.startsWith('local pause catalog operator')
-        ? 'operations'
-        : info.title.startsWith('local pause catalog')
-          ? 'editor'
-          : null;
+  const pauseKey = info.title.startsWith('scoped ACW native')
+    ? 'acw'
+    : info.title.startsWith('last eligible queue withdrawal')
+      ? 'withdrawal'
+      : info.title.startsWith('local pause duration supervisor')
+        ? 'duration'
+        : info.title.startsWith('local pause catalog operator')
+          ? 'operations'
+          : info.title.startsWith('local pause catalog')
+            ? 'editor'
+            : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -3830,6 +3832,8 @@ test('local pause catalog operator preserves legacy history and enforces only au
   await expect(page.locator('html')).toHaveClass(
     info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/
   );
+  await page.locator('[data-own-pause-justification]').scrollIntoViewIfNeeded();
+  await expect(page.locator('[data-own-pause-justification]')).toBeVisible();
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-pause-catalog-operator.png`,
     fullPage: false,
@@ -4088,6 +4092,8 @@ test('local pause duration supervisor shows authorized real elapsed evidence wit
   await expect(page.locator('html')).toHaveClass(
     info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/
   );
+  await notice.scrollIntoViewIfNeeded();
+  await expect(notice).toBeVisible();
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-supervisor-pause-notice.png`,
     fullPage: false,
@@ -4110,4 +4116,137 @@ test('local pause duration supervisor shows authorized real elapsed evidence wit
     eligible: false,
   });
   expect(writes).toEqual([]);
+});
+
+test('scoped ACW native popup persists queue rules blocks conflicts and keeps scoped viewers denied', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].acw;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const ownBase = `/app/accounts/${target.account_id}/contact-center/control-desk`;
+  const before = await page.request.get(ownApi + '/acw_policy', {
+    headers: target.administrator,
+  });
+  expect(before.status()).toBe(200);
+  expect((await before.json()).item.voice_rules).toEqual([]);
+  await page.goto(ownBase + '/closures');
+  await page.locator('[data-create]').click();
+  const dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
+  await dialog.locator('[data-add-acw-rule]').click();
+  let row = dialog.locator('[data-acw-rule-row]').first();
+  await expect(row.locator('[data-acw-rule-active]')).not.toBeChecked();
+  await row.locator('[data-acw-rule-reason]').selectOption('order');
+  await row.locator('[data-acw-rule-scope]').selectOption('queue');
+  await row
+    .locator('[data-acw-rule-target] select')
+    .selectOption(String(target.queue_id));
+  await row.locator('[data-acw-rule-time]').fill('00:02');
+  await row.locator('[data-acw-rule-active]').check();
+  const saved = page.waitForResponse(
+    response =>
+      response.url().endsWith('/acw_policy') &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await saved).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  const read = await page.request.get(ownApi + '/acw_policy', {
+    headers: target.administrator,
+  });
+  const policy = (await read.json()).item;
+  expect(policy.voice_rules).toHaveLength(1);
+  expect(policy.voice_rules[0]).toMatchObject({
+    reason_code: 'order',
+    scope: 'queue',
+    scope_id: String(target.queue_id),
+    active: true,
+    limit_seconds: 120,
+  });
+  await page.reload();
+  await page.locator('[data-create]').click();
+  row = dialog.locator('[data-acw-rule-row]').first();
+  await expect(row.locator('[data-acw-rule-time]')).toHaveValue('00:02');
+  await expect(row.locator('[data-acw-rule-reason]')).toHaveValue('order');
+  await dialog.locator('[data-add-acw-rule]').click();
+  const duplicate = dialog.locator('[data-acw-rule-row]').nth(1);
+  await duplicate.locator('[data-acw-rule-reason]').selectOption('order');
+  await duplicate.locator('[data-acw-rule-scope]').selectOption('queue');
+  await duplicate
+    .locator('[data-acw-rule-target] select')
+    .selectOption(String(target.queue_id));
+  await duplicate.locator('[data-acw-rule-time]').fill('00:03');
+  await duplicate.locator('[data-acw-rule-active]').check();
+  const rejected = page.waitForResponse(
+    response =>
+      response.url().endsWith('/acw_policy') &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await rejected).status()).toBe(422);
+  await expect(dialog.getByRole('alert')).toContainText(
+    'Há regras de ACW conflitantes no mesmo nível.'
+  );
+  await expect(dialog.locator('[data-acw-rule-row]')).toHaveCount(2);
+  const unchanged = await page.request.get(ownApi + '/acw_policy', {
+    headers: target.administrator,
+  });
+  expect((await unchanged.json()).item).toEqual(policy);
+  await duplicate.locator('[data-remove-acw-rule]').click();
+  await row.locator('[data-acw-rule-time]').fill('00:03');
+  await row.scrollIntoViewIfNeeded();
+  await expectContainedDialog(page);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page.locator('html').evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-acw-scoped-rules.png`,
+    fullPage: true,
+  });
+  const edited = page.waitForResponse(
+    response =>
+      response.url().endsWith('/acw_policy') &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await edited).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  const final = await page.request.get(ownApi + '/acw_policy', {
+    headers: target.administrator,
+  });
+  const latest = (await final.json()).item;
+  expect(latest.voice_rules[0].limit_seconds).toBe(180);
+  const scoped = await page.request.get(ownApi + '/acw_policy', {
+    headers: target.scoped,
+  });
+  expect(scoped.status()).toBe(200);
+  expect((await scoped.json()).item.voice_rules).toBeUndefined();
+  const denied = await page.request.patch(ownApi + '/acw_policy', {
+    headers: target.scoped,
+    data: {
+      limits: latest.limits,
+      expected_revision: latest.revision,
+      voice_rules: [],
+    },
+  });
+  expect(denied.status()).toBe(401);
+  const audit = await page.request.get(
+    ownApi + '/configuration_audits?resource_type=acw_policy&history=true',
+    { headers: target.administrator }
+  );
+  expect(audit.status()).toBe(200);
+  const history = (await audit.json()).items;
+  expect(history).toHaveLength(2);
+  expect(history[0].after.voice_rules[0].limit_seconds).toBe(180);
+  expect(history[0].before.voice_rules[0].limit_seconds).toBe(120);
+  const commands = await page.request.get(ownApi + '/commands', {
+    headers: target.administrator,
+  });
+  expect(commands.status()).toBe(200);
+  expect((await commands.json()).items).toEqual([]);
 });

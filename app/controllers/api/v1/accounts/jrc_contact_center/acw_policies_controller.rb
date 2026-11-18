@@ -8,11 +8,15 @@ class Api::V1::Accounts::JrcContactCenter::AcwPoliciesController < Api::V1::Acco
 
   def update
     JrcContactCenter::AuthorityTransaction.call(account: Current.account, member: Current.account_user) do
+      Current.user.reload
+      raise Pundit::NotAuthorizedError unless Current.user.active_for_authentication?
+
       authorize_contact_center!(:configure?)
       authorize_global_configuration!
       policy = JrcContactCenter::AcwPolicy.new(account: Current.account)
       mode = params.key?(:voice_required) ? params[:voice_required] : :unchanged
-      policy.update!(params.require(:limits).permit(:voice, :whatsapp), voice_required: mode, **configuration_revision_options)
+      policy.update!(params.require(:limits).permit(:voice, :whatsapp),
+                     voice_required: mode, **scoped_rules_options, **configuration_revision_options)
       render_policy(policy)
     end
   end
@@ -22,7 +26,21 @@ class Api::V1::Accounts::JrcContactCenter::AcwPoliciesController < Api::V1::Acco
   def render_policy(policy)
     response.headers['Cache-Control'] = 'no-store'
     item = policy.call.merge(id: Current.account.id.to_s, revision: policy.revision)
+    item[:voice_rules] = JrcContactCenter::AcwScopedRules.new(account: Current.account).call if scoped_configuration_allowed?
     render json: base_payload.merge(item: item)
+  end
+
+  def scoped_rules_options
+    return {} unless params.key?(:voice_rules)
+
+    input = params[:voice_rules]
+    rows = input.is_a?(Array) ? input.map { |row| row.respond_to?(:to_unsafe_h) ? row.to_unsafe_h : row } : input
+    { voice_rules: rows }
+  end
+
+  def scoped_configuration_allowed?
+    coverage = JrcCrm::CorporateCoverage.new(account: Current.account, user: Current.user)
+    contact_center_access.policy.configure? && (!coverage.configured? || coverage.group?)
   end
 
   def authorize_global_configuration!

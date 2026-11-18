@@ -40,11 +40,10 @@ class JrcContactCenter::QualificationManager
       raise JrcContactCenter::OperationError.new('conversation_already_resolved', status: :conflict) if conversation&.resolved?
 
       channel = conversation ? 'whatsapp' : 'voice'
+      limit = JrcContactCenter::AcwPolicy.new(account: @account).call[:limits].fetch(channel)
       record = JrcContactCenter::Qualification.create!(identity.merge(channel: channel, started_at: started_at || Time.current,
-                                                                      acw_limit_seconds: JrcContactCenter::AcwPolicy.new(account: @account).call[:limits].fetch(channel)))
-      state_manager.record_provider_event(state: 'acw', occurred_at: record.started_at, external_event_id: "qualification:#{record.id}:pending",
-                                          provider: 'jrc_conversas', derived: true, queue_id: call_session&.current_queue_id,
-                                          metadata: { 'qualification_id' => record.id, 'jrc_call_session_id' => call_session&.id })
+                                                                      acw_limit_seconds: limit))
+      record_pending_state!(record, call_session, leg)
       record
     end
   end
@@ -62,10 +61,7 @@ class JrcContactCenter::QualificationManager
       end
 
       now = Time.current
-      duration = [(now - record.started_at).to_i, 0].max
-      record.update!(attributes.slice(:reason_code, :outcome_code, :notes).merge(completed_at: now, duration_seconds: duration,
-                                                                              overdue: duration >= record.acw_limit_seconds,
-                                                                              exceeded_seconds: [duration - record.acw_limit_seconds, 0].max))
+      record.update!(completion_values(record, attributes, now))
       record.conversation&.update!(status: :resolved)
       JrcContactCenter::AgentStateEvent.where(account: @account, account_user: @member, state: 'acw', ended_at: nil)
                                       .where("metadata ->> 'qualification_id' = ?", record.id.to_s).update_all(ended_at: now, updated_at: now)
@@ -81,6 +77,22 @@ class JrcContactCenter::QualificationManager
   end
 
   private
+
+  def completion_values(record, attributes, now)
+    limit = JrcContactCenter::AcwQualificationPolicy.new(record).limit(attributes[:reason_code])
+    duration = [(now - record.started_at).to_i, 0].max
+    attributes.slice(:reason_code, :outcome_code, :notes).merge(
+      completed_at: now, duration_seconds: duration, acw_limit_seconds: limit,
+      overdue: duration >= limit, exceeded_seconds: [duration - limit, 0].max
+    )
+  end
+
+  def record_pending_state!(record, call_session, leg)
+    metadata = { 'qualification_id' => record.id, 'jrc_call_session_id' => call_session&.id }
+    metadata.merge!(JrcContactCenter::AcwQualificationPolicy.capture(record, member: @member, leg: leg))
+    state_manager.record_provider_event(state: 'acw', occurred_at: record.started_at, external_event_id: "qualification:#{record.id}:pending",
+                                        provider: 'jrc_conversas', derived: true, queue_id: call_session&.current_queue_id, metadata: metadata)
+  end
 
   def state_manager
     JrcContactCenter::AgentStateManager.new(account: @account, account_user: @member)
