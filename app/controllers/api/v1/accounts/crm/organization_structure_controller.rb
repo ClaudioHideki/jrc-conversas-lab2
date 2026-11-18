@@ -9,8 +9,6 @@ module Api
           before_action :ensure_crm_admin!, except: :index
           before_action :authorize_scope_administration!, only: %i[create_user_scope update_user_scope destroy_user_scope
                                                                    create_team_scope update_team_scope destroy_team_scope]
-          around_action :with_current_scope_authority, only: %i[create_user_scope update_user_scope destroy_user_scope
-                                                                 create_team_scope update_team_scope destroy_team_scope]
 
           rescue_from ActiveRecord::RecordInvalid, with: :render_invalid
           rescue_from ActiveRecord::RecordNotDestroyed, ActiveRecord::DeleteRestrictionError, with: :render_in_use

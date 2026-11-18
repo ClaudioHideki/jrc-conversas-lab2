@@ -29,10 +29,11 @@ class JrcCrm::CurrentStructureScopes
       (jrc_crm_team_scopes.scope = 'GROUP'
       OR (jrc_crm_team_scopes.scope = 'COMPANY'
         AND jrc_crm_user_business_units.scope IN ('COMPANY', 'BUSINESS_UNIT')
-        AND jrc_crm_team_scopes.company_id = COALESCE(jrc_crm_user_business_units.company_id,
+        AND jrc_crm_team_scopes.company_id = CASE WHEN jrc_crm_user_business_units.scope = 'BUSINESS_UNIT' THEN
           (SELECT covered_unit.company_id FROM jrc_crm_business_units covered_unit
            WHERE covered_unit.id = jrc_crm_user_business_units.business_unit_id
-             AND covered_unit.account_id = jrc_crm_user_business_units.account_id)))
+             AND covered_unit.account_id = jrc_crm_user_business_units.account_id)
+          ELSE jrc_crm_user_business_units.company_id END)
       OR (jrc_crm_team_scopes.scope = 'BUSINESS_UNIT'
         AND jrc_crm_user_business_units.scope = 'BUSINESS_UNIT'
         AND jrc_crm_team_scopes.business_unit_id = jrc_crm_user_business_units.business_unit_id))

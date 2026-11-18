@@ -1,4 +1,15 @@
 module JrcCrm::StructureScopeAuthority
+  extend ActiveSupport::Concern
+
+  SCOPE_WRITES = %i[
+    create_user_scope update_user_scope destroy_user_scope
+    create_team_scope update_team_scope destroy_team_scope
+  ].freeze
+
+  included do
+    around_action :with_current_scope_authority, only: SCOPE_WRITES
+  end
+
   private
 
   # Scope revocations serialize with native membership and Call Center writes.

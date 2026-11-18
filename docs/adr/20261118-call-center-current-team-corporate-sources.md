@@ -1,6 +1,7 @@
 # Cobertura corporativa atual das equipes nativas
 
-Estado: implementação preparada, validação nativa pendente. Escopo autorizado:
+Estado: 77be76ae executado com falhas; correções e ampliação preparadas,
+validação nativa do próximo SHA pendente. Escopo autorizado:
 continuidade do Call Center e prevenção de reativação indevida de permissões.
 
 ## Problema comprovado no código
@@ -24,9 +25,12 @@ para criar outro cadastro de equipes, usuários ou abrangências.
 - Fontes diretas sem equipe são preservadas. Não são criadas, desativadas,
   copiadas nem reativadas fontes ou permissões. Presença online, cargo e nome
   de equipe continuam sem conceder elegibilidade ou distribuição em filas.
+- Uma fonte de unidade usa a empresa atual da unidade para verificar a
+  cobertura por COMPANY da equipe. Não confiar em company_id redundante
+  que ficou guardado na fonte depois de uma transferência da unidade.
 - Reincluir um usuário com fonte corporativa de equipe ainda marcada ativa
-  exige a autoridade nativa de administrador com cobertura GROUP, quando a
-  conta tem estrutura corporativa configurada. A guarda também vale com o
+  exige a autoridade nativa de administrador com cobertura GROUP, inclusive se não há
+  unidades configuradas; uma fonte GROUP guardada não é bootstrap implícito. A guarda também vale com o
   módulo CC desabilitado; a fonte corporativa pertence ao produto principal.
   Uma fonte explicitamente inativa não é ativada por inclusão na equipe.
 - Remover membros e remover IDs ausentes não são adições. Na substituição
@@ -44,6 +48,12 @@ para criar outro cadastro de equipes, usuários ou abrangências.
 O consumidor compartilhado atende CRM, Backoffice e Call Center. A autorização
 de Aprovações possuía outro seletor direto de UserBusinessUnit e passa a
 reutilizar a mesma relação de fontes atuais, preservando suas capacidades.
+O leitor de bindings da Operadora tinha o mesmo seletor direto e recebe a
+mesma substituição de uma linha, com regressão de leitura e dos comandos
+nativos já existentes (fornecedor simulado nesses testes). Não são alterados
+contratos externos, comandos ou credenciais. O link de Aprovações da Central
+também consulta somente fontes atuais. A retirada da equipe remove a fila
+da consulta de memberships operacionais, sem apagar o vínculo guardado.
 Por isso a CI inclui as regressões nativas de CorporateCoverage, estrutura
 organizacional, autorização de empresas e motor de Aprovações, além dos
 testes existentes do CC e de equipes/agentes. Não há migration, alteração de
@@ -57,10 +67,12 @@ hierarquia equipe/fila continuam lacunas separadas das figuras 3 e 12.
 
 ## Critérios de validação preparados
 
-- Treze exemplos de fontes atuais: retirada, escopo reduzido/inativo,
+- Dezessete exemplos de fontes atuais: retirada, escopo reduzido/inativo,
   GROUP herdado, unidade válida, fonte direta independente, outra equipe e
-  outra conta, fonte explícita inativa e reinclusão sem escopo válido.
-- Onze exemplos de membership autenticado: POST/PATCH com CC ligado/desligado,
+  outra conta, fonte explícita inativa, reinclusão sem escopo válido,
+  Backoffice, decisão e link de Aprovações, Operadora, memberships e
+  transferência da unidade para fora da empresa coberta pela equipe.
+- Treze exemplos de membership autenticado: POST/PATCH com CC ligado/desligado,
   autoridade GROUP, retirada/no-op, atomicidade da substituição, fonte inativa
   e conta externa.
 - Cinco exemplos das APIs nativas de escopos, incluindo os seis verbos de
@@ -76,3 +88,25 @@ hierarquia equipe/fila continuam lacunas separadas das figuras 3 e 12.
 Os dados e concessões de teste são sintéticos, exclusivos do runner e nunca
 configuração operacional. Os resultados desta preparação ainda dependem da
 execução no novo SHA; a CI de 417bb868 não contém esta correção.
+
+## Resultado e correções de 77be76ae
+
+CI 44246410692: 820 exemplos Rails principais, sete falhas, zero pendências
+ou erros fora dos exemplos; 16 exemplos do ledger no schema recarregado
+aprovados. Concorrência, regressões corporativas adicionais, Vue e Chrome
+não foram concluídos nesse SHA. Artefato 14402447954; SHA-256
+2149b13c54c4e8bf96408d1618f37cce59491512681c14ab49a533a1daab60f2.
+
+As sete falhas ocorreram depois das respostas HTTP esperadas e usavam
+`team.team_members.empty?` depois de mutações de preparo que conservaram a
+associação em memória. Exigir consultas novas a TeamMember no banco para
+provar a remoção, sem retirar as exigências de 401/200, preservação da fonte
+e ausência de aumento de acesso. Os onze apontamentos novos de RuboCop
+foram tratados sem exclusões: callback registrado no concern para manter
+o controller dentro do limite, quatorze fixtures por grupo, enumeração fora
+do loop, classe descrita explicitamente e argumentos nomeados alinhados.
+
+O próximo gate inclui as ampliações acima e a reautorização da escrita de
+observações documentada no ADR próprio. São 47 novos exemplos preparados
+desde 417bb868, sem contar novamente as suítes nativas de regressão já
+existentes. Ainda não são resultados aprovados.

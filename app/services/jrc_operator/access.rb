@@ -22,7 +22,7 @@ class JrcOperator::Access
 
   def bindings
     authorize!('read')
-    scopes = JrcCrm::UserBusinessUnit.structure_managed.active.where(account_id: @account.id, user_id: @user.id)
+    scopes = JrcCrm::CurrentStructureScopes.new(account: @account, user: @user).call
     units = JrcCrm::BusinessUnit.active.where(account_id: @account.id)
     unless scopes.exists?(scope: 'GROUP')
       direct = scopes.where(scope: 'BUSINESS_UNIT').pluck(:business_unit_id)

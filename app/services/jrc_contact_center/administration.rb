@@ -62,7 +62,7 @@ class JrcContactCenter::Administration
     { permissions: native_roles_available?, role_editor: native_role_editor_available?, access_editor: native_access_editor_available?,
       pabx_settings: @policy.administer? && @context.fetch(:user).is_a?(SuperAdmin) && @context.fetch(:account_user).administrator?,
       approvals: @account.feature_enabled?('jrc_approvals') &&
-        JrcCrm::UserBusinessUnit.structure_managed.active.exists?(account: @account, user: @context.fetch(:user)) }
+        JrcCrm::CurrentStructureScopes.new(account: @account, user: @context.fetch(:user)).call.exists? }
   end
 
   def native_roles_available?

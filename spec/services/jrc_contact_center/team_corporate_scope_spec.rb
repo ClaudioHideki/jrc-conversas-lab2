@@ -1,10 +1,9 @@
 require 'rails_helper'
 
-RSpec.describe 'Current native team corporate coverage in Call Center' do
+RSpec.describe JrcCrm::CurrentStructureScopes do
   let(:account) { create(:account) }
   let(:operator) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:member) { account.account_users.find_by!(user: operator) }
-  let(:role) { create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_configure]) }
   let(:company) { JrcCustomers::Company.create!(account: account, name: 'SYNTHETIC issuer A', relationship_type: 'internal') }
   let(:other_company) { JrcCustomers::Company.create!(account: account, name: 'SYNTHETIC issuer B', relationship_type: 'internal') }
   let(:business_unit) { JrcCrm::BusinessUnit.create!(account: account, operating_company: company, code: 'A', name: 'SYNTHETIC business A') }
@@ -30,6 +29,7 @@ RSpec.describe 'Current native team corporate coverage in Call Center' do
 
   before do
     account.enable_features!('jrc_contact_center', 'custom_roles')
+    role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_configure])
     member.update!(custom_role: role)
     unit
     other_unit
@@ -45,12 +45,13 @@ RSpec.describe 'Current native team corporate coverage in Call Center' do
   end
 
   it 'withdraws a source after membership removal even when the stored grant is still marked active' do
+    original_role_id = member.custom_role_id
     expect(access.units.pluck(:id)).to eq([unit.id])
     team.remove_members([operator.id])
     expect(source.reload).to be_active
     expect(access.units).to be_empty
     expect(coverage.company_ids).to be_empty
-    expect(member.reload.custom_role_id).to eq(role.id)
+    expect(member.reload.custom_role_id).to eq(original_role_id)
   end
 
   it 'withdraws an inactive containing team scope without changing functional permissions' do
@@ -129,7 +130,7 @@ RSpec.describe 'Current native team corporate coverage in Call Center' do
 
   it 'withdraws inherited Group from the existing Backoffice configuration authority after team removal' do
     account.enable_features!('jrc_crm')
-    role.update!(permissions: role.permissions + ['jrc_crm'])
+    member.custom_role.update!(permissions: member.custom_role.permissions + ['jrc_crm'])
     team_scope.update!(scope: 'GROUP', company: nil)
     source.update!(scope: 'GROUP', company: nil)
     expect(JrcBackoffice::SignatureConfiguration.can_manage?(account: account, actor: operator)).to be(true)
@@ -140,7 +141,7 @@ RSpec.describe 'Current native team corporate coverage in Call Center' do
 
   it 'withdraws the same native source from approval decisions without changing the functional role' do
     account.enable_features!('jrc_approvals')
-    role.update!(permissions: role.permissions + ['jrc_approvals_decide'])
+    member.custom_role.update!(permissions: member.custom_role.permissions + ['jrc_approvals_decide'])
     authorization = JrcApprovals::Authorization.new(account: account, user: operator)
     expect do
       authorization.authorize!('decide', company_id: company.id, unit_id: business_unit.id)
@@ -149,6 +150,52 @@ RSpec.describe 'Current native team corporate coverage in Call Center' do
     expect do
       authorization.authorize!('decide', company_id: company.id, unit_id: business_unit.id)
     end.to raise_error(Pundit::NotAuthorizedError)
-    expect(role.reload.permissions).to include('jrc_approvals_decide')
+    expect(member.custom_role.reload.permissions).to include('jrc_approvals_decide')
+  end
+
+  it 'does not expose an approval navigation source after its team membership has been withdrawn' do
+    account.enable_features!('jrc_approvals')
+    context = { account: account, account_user: member, user: operator }
+    administration = JrcContactCenter::Administration.new(context: context, access: access)
+    expect(administration.call.dig(:native_links, :approvals)).to be(true)
+    team.remove_members([operator.id])
+    expect(administration.call.dig(:native_links, :approvals)).to be(false)
+  end
+
+  it 'withdraws operational memberships from the current scope without deleting the assigned queue membership' do
+    queue = JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'Q', name: 'SYNTHETIC queue')
+    membership = JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: member, role: 'agent', active: true)
+    snapshot = JrcContactCenter::AgentStateSnapshot.new(account_user: member)
+    expect(snapshot.memberships.pluck(:id)).to eq([membership.id])
+    team.remove_members([operator.id])
+    expect(snapshot.memberships).to be_empty
+    expect(membership.reload).to be_active
+  end
+
+  it 'does not leave a stale native Operator binding while preserving independently authorized bindings' do
+    account.enable_features!('jrc_operator')
+    member.custom_role.update!(permissions: member.custom_role.permissions + ['jrc_operator_read'])
+    contact = create(:contact, account: account)
+    own = JrcOperator::Binding.create!(account: account, company: company, business_unit: business_unit,
+                                       contact: contact, bemtevi_customer_id: '777', active: true)
+    direct = JrcOperator::Binding.create!(account: account, company: other_company, business_unit: other_business_unit,
+                                          contact: contact, bemtevi_customer_id: '778', active: true)
+    account.jrc_crm_user_business_units.create!(user: operator, company: other_company, scope: 'COMPANY', structure_managed: true)
+    boundary = JrcOperator::Access.new(account: account, user: operator)
+    expect(boundary.bindings.pluck(:id)).to contain_exactly(own.id, direct.id)
+    team.remove_members([operator.id])
+    expect(boundary.bindings.pluck(:id)).to eq([direct.id])
+    expect(JrcOperator::Operation.where(binding: [own, direct])).to be_empty
+    expect(source.reload).to be_active
+  end
+
+  it 'uses the current unit issuer when a linked unit moves outside its containing team company' do
+    source.update!(scope: 'BUSINESS_UNIT', business_unit: business_unit)
+    business_unit.update!(operating_company: other_company)
+    expect(source.reload.company_id).to eq(company.id)
+    expect(team_scope.reload).to have_attributes(scope: 'COMPANY', company_id: company.id)
+    expect(coverage.unit_ids).to be_empty
+    expect(access.units).to be_empty
+    expect(source).to be_active
   end
 end

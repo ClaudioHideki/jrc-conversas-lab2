@@ -33,3 +33,4 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 
 - [Ordem das observações do supervisor](20261118-call-center-supervisor-observation-order.md): polling serial, fronteira de ator/perfil e descarte de dados após recusa.
 - [Fontes corporativas atuais das equipes](20261118-call-center-current-team-corporate-sources.md): revogação efetiva, reinclusão autorizada e coordenação com os locks nativos.
+- [Observações e autoridade atual](20261118-call-center-observation-write-authority.md): reautorização após locks, atribuição e histórico transacional preservados.

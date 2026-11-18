@@ -6,7 +6,6 @@ class JrcCrm::TeamScopeActivationGuard
     return unless sources.exists?
 
     coverage = JrcCrm::CorporateCoverage.new(account: account, user: actor)
-    return unless coverage.configured?
     return if account.account_users.exists?(user_id: actor.id, role: :administrator) && coverage.group?
 
     raise Pundit::NotAuthorizedError

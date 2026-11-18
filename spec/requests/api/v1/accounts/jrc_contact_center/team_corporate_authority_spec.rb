@@ -26,14 +26,15 @@ RSpec.describe 'Native team membership and stored corporate authority', type: :r
     team.remove_members([recipient.id])
   end
 
+  enabled_states = [true, false]
   %i[post patch].each do |verb|
-    [true, false].each do |contact_center|
+    enabled_states.each do |contact_center|
       it "denies latent Group reactivation via #{verb}, with CC enabled #{contact_center}" do
         account.disable_features!('jrc_contact_center') unless contact_center
         expect(coverage).not_to be_group
         public_send(verb, endpoint, headers: headers, params: { user_ids: [recipient.id] }, as: :json)
         expect(response).to have_http_status(:unauthorized)
-        expect(team.team_members).to be_empty
+        expect(TeamMember.where(team_id: team.id)).to be_empty
         expect(source.reload).to be_active
         expect(coverage).not_to be_group
       end
@@ -55,7 +56,7 @@ RSpec.describe 'Native team membership and stored corporate authority', type: :r
     team.add_members([recipient.id])
     delete endpoint, headers: headers, params: { user_ids: [recipient.id] }, as: :json
     expect(response).to have_http_status(:ok)
-    expect(team.team_members).to be_empty
+    expect(TeamMember.where(team_id: team.id)).to be_empty
     expect(source.reload).to be_active
     expect(coverage).not_to be_group
   end
@@ -65,7 +66,7 @@ RSpec.describe 'Native team membership and stored corporate authority', type: :r
     role.update!(permissions: [])
     delete endpoint, headers: headers, params: { user_ids: [recipient.id] }, as: :json
     expect(response).to have_http_status(:ok)
-    expect(team.team_members).to be_empty
+    expect(TeamMember.where(team_id: team.id)).to be_empty
     expect(coverage).not_to be_group
   end
 
@@ -74,10 +75,10 @@ RSpec.describe 'Native team membership and stored corporate authority', type: :r
     team.add_members([existing.id])
     patch endpoint, headers: headers, params: { user_ids: [recipient.id] }, as: :json
     expect(response).to have_http_status(:unauthorized)
-    expect(team.team_members.pluck(:user_id)).to eq([existing.id])
+    expect(TeamMember.where(team_id: team.id).pluck(:user_id)).to eq([existing.id])
     patch endpoint, headers: headers, params: { user_ids: [] }, as: :json
     expect(response).to have_http_status(:ok)
-    expect(team.team_members).to be_empty
+    expect(TeamMember.where(team_id: team.id)).to be_empty
   end
 
   it 'keeps an explicitly inactive corporate source inactive after native membership creation' do
@@ -97,5 +98,23 @@ RSpec.describe 'Native team membership and stored corporate authority', type: :r
     expect(response).to have_http_status(:not_found)
     expect(foreign.team_members).to be_empty
     expect(source.reload).to be_active
+  end
+
+  it 'does not reactivate stored corporate authority through the legacy bootstrap path without business units' do
+    unit.destroy!
+    expect(JrcCrm::CorporateCoverage.new(account: account, user: actor)).not_to be_configured
+    post endpoint, headers: headers, params: { user_ids: [recipient.id] }, as: :json
+    expect(response).to have_http_status(:unauthorized)
+    expect(TeamMember.where(team_id: team.id)).to be_empty
+    expect(coverage).not_to be_group
+  end
+
+  it 'preserves explicit Group administrative reinclusion even without configured business units' do
+    account.jrc_crm_user_business_units.create!(user: actor, scope: 'GROUP', structure_managed: true)
+    unit.destroy!
+    post endpoint, headers: headers, params: { user_ids: [recipient.id] }, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(TeamMember.where(team_id: team.id, user_id: recipient.id)).to exist
+    expect(coverage).to be_group
   end
 end

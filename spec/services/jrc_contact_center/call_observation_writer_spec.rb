@@ -8,7 +8,13 @@ RSpec.describe JrcContactCenter::CallObservationWriter do
   let(:member) { account.account_users.find_by!(user: agent) }
   let(:call) do
     JrcContactCenter::CallSession.create!(account: account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid,
-                                        direction: 'inbound', status: 'connected', started_at: Time.current)
+                                          direction: 'inbound', status: 'connected', started_at: Time.current)
+  end
+
+  before do
+    account.enable_features!('jrc_contact_center')
+    JrcContactCenter::CallLeg.create!(account: account, call_session: call, account_user: member,
+                                      direction: 'inbound', status: 'connected', started_at: call.started_at)
   end
 
   it 'rolls back the latest note when storing its revision fails' do

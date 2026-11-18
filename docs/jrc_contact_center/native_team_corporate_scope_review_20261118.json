@@ -1,5 +1,5 @@
 {
-  "status": "correction prepared in isolated source; native execution pending",
+  "status": "77be76ae failed; corrective and related security increment prepared",
   "observed_sha": "31d571727427bce5245486f0ef747dce7adf3d8e",
   "native_sources": [
     "app/models/jrc_crm/team_scope.rb",
@@ -49,7 +49,7 @@
   "historical_migrations_modified": false,
   "business_values_invented": false,
   "published_or_deployed": false,
-  "prepared_rails_regressions": 32,
+  "prepared_rails_regressions": 47,
   "source_consumer_correction": "Approvals Authorization had a separate direct UserBusinessUnit selector; it now reuses the exact current-source relation, while preserving its existing functional authority checks.",
   "prepared_paths": [
     "script/jrc_call_center_ivr_seed.rb",
@@ -71,5 +71,39 @@
     "approvals_and_backoffice": "jrc_rel_v2_candidate_test",
     "ledger_reload": "jrc_cc_access_schema_reload_synthetic",
     "all": "github-hosted disposable runner, Postgres127.0.0.1; separate processes and JSON reports; positive examples/zero failures/pending/outside errors required"
-  }
+  },
+  "failed_native_checkpoint": {
+    "sha": "77be76ae781c07dce3e8afc6617c5bbc97f712e6",
+    "run": 44246410692,
+    "artifact": 14402447954,
+    "artifact_sha256": "2149b13c54c4e8bf96408d1618f37cce59491512681c14ab49a533a1daab60f2",
+    "rails_main": {
+      "examples": 820,
+      "failures": 7,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "ledger_schema_reload": {
+      "examples": 16,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "new_ruby_offenses": 11,
+    "chrome": "not executed",
+    "cause": "seven association-cache assertions after fixture/native HTTP mutation; expected HTTP statuses passed before those assertions",
+    "changes_prepared": [
+      "fresh TeamMember queries retain all authorization/record-preservation expectations",
+      "scope callback registered in concern, 14 memoized fixtures, explicit described class, kwargs alignment and boolean cases hoisted out of loop"
+    ],
+    "all_word_complete": false
+  },
+  "related_consumers": {
+    "approvals": "same current-source query; preserve native capabilities",
+    "operator": "single selector substitution plus native regression suite; no external command/contract changes",
+    "administrative_link": "only current approval coverage makes the native link available",
+    "observations": "account/call locks and fresh native operate/record visibility; history and revision contract preserved"
+  },
+  "unit_transfer_rule": "For team-company containment, read the current issuer of a BUSINESS_UNIT; never prefer redundant stored user-source company_id.",
+  "bootstrap_boundary": "Legacy unconfigured visibility is unchanged. Reactivation of an existing active corporate team source always requires explicit Group administrative authority, including accounts without configured business units."
 }

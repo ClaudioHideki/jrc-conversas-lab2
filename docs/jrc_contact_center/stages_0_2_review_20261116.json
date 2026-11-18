@@ -2589,13 +2589,41 @@
     },
     "prepared_security_increment": {
       "adr": "docs/adr/20261118-call-center-current-team-corporate-sources.md",
-      "rails_examples": 32,
-      "native_results": "pending new checkpoint",
-      "chrome_corporate_cases_extended": 4
+      "rails_examples": 47,
+      "native_results": "pending corrective checkpoint",
+      "chrome_corporate_cases_extended": 4,
+      "current_unit_issuer_validation": true,
+      "observation_write_adr": "docs/adr/20261118-call-center-observation-write-authority.md"
     },
     "word_part_1_complete": false,
     "full_23_figures_complete": false,
     "real_pabx_homologation": false,
-    "docker_publication_or_deploy": false
+    "docker_publication_or_deploy": false,
+    "failed_security_checkpoint": {
+      "sha": "77be76ae781c07dce3e8afc6617c5bbc97f712e6",
+      "run": 44246410692,
+      "artifact": 14402447954,
+      "artifact_sha256": "2149b13c54c4e8bf96408d1618f37cce59491512681c14ab49a533a1daab60f2",
+      "rails_main": {
+        "examples": 820,
+        "failures": 7,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "ledger_schema_reload": {
+        "examples": 16,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "new_ruby_offenses": 11,
+      "chrome": "not executed",
+      "cause": "seven association-cache assertions after fixture/native HTTP mutation; expected HTTP statuses passed before those assertions",
+      "changes_prepared": [
+        "fresh TeamMember queries retain all authorization/record-preservation expectations",
+        "scope callback registered in concern, 14 memoized fixtures, explicit described class, kwargs alignment and boolean cases hoisted out of loop"
+      ],
+      "all_word_complete": false
+    }
   }
 }
