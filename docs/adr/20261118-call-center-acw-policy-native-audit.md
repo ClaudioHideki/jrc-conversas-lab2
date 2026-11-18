@@ -24,3 +24,7 @@ ESLint direcionado: zero erros e zero novas advertências. Panel conserva nove a
 ## Pendências preservadas
 
 A revisão otimista global de ACW ainda não foi incorporada aos dois clientes legados; este incremento não afirma resolver conflitos de edição. Não mudam os guardas de revisão dos recursos que já os possuem. Regras por motivo, equipe/fila, precedência, automações por encerramento, decisões de pausas e contrato/ACK do PABX permanecem requisitos separados. Não declarar as 23 figuras concluídas.
+
+## Execução nativa de 5dfa484c
+
+CI 44278344086 aprovou 968 Rails únicos (860/23/85), mais 16 reexecuções da recarga, compatibilidade isolada legada e 321 Vue. Os dez exemplos novos provaram a auditoria, autor/correlação, isolamento, sanitização, no-op e rollback. O gate identificou cinco infrações de indentação somente no spec; Chrome não foi executado. Ajustadas a apresentação do mesmo array esperado e a indentação dos mesmos argumentos, sem remover provas. Exigir novo gate antes do aceite visual. Artefato 14416927294, SHA-256 8ae636ff667c272a948006d88770cd8cf2bcd39c43ed40a8d9212362fade8fb5.

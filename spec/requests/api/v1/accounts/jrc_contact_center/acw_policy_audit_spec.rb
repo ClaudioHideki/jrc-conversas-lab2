@@ -26,10 +26,11 @@ RSpec.describe 'Call Center local ACW configuration audit', type: :request do
     record = audits.sole
     expect(record.attributes).to include('auditable_type' => 'Account', 'auditable_id' => account.id, 'user_id' => operator.id)
     expect(record.request_uuid).to eq(correlation)
-    expect(record.audited_changes.fetch('attributes')).to eq([
+    expected = [
       { 'voice' => 180, 'whatsapp' => 180, 'voice_required' => true },
       { 'voice' => 120, 'whatsapp' => 240, 'voice_required' => false }
-    ])
+    ]
+    expect(record.audited_changes.fetch('attributes')).to eq(expected)
     expect(account.reload.settings.fetch(JrcContactCenter::AcwPolicy::KEY)).to include('voice_required' => false, 'voice' => 120)
   end
 
@@ -44,8 +45,8 @@ RSpec.describe 'Call Center local ACW configuration audit', type: :request do
   it 'exposes the same native event in filtered history and detail without private account settings' do
     account.update!(settings: account.settings.merge('unrelated_secret' => 'SYNTHETIC-DO-NOT-COPY'))
     patch "#{base}/acw_policy", headers: headers, params: { limits: limits }, as: :json
-    get "#{base}/configuration_audits", headers: headers,
-                                      params: { resource_type: 'acw_policy', resource_id: account.id, history: 'true' }
+    query = { resource_type: 'acw_policy', resource_id: account.id, history: 'true' }
+    get "#{base}/configuration_audits", headers: headers, params: query
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items').pluck('id')).to eq([audits.sole.id])
     get "#{base}/configuration_audits/#{audits.sole.id}", headers: headers
@@ -123,8 +124,10 @@ RSpec.describe 'Call Center local ACW configuration audit', type: :request do
     id = audits.sole.id
     company = account.master_companies.create!(name: 'SYNTHETIC issuer', relationship_type: 'internal')
     unit = JrcCrm::BusinessUnit.create!(account: account, operating_company: company, code: 'SYNTHETIC-A', name: 'SYNTHETIC A')
-    JrcCrm::UserBusinessUnit.create!(account: account, user: operator, scope: 'BUSINESS_UNIT', business_unit: unit,
-                                  company: company, active: true, structure_managed: true)
+    JrcCrm::UserBusinessUnit.create!(
+      account: account, user: operator, scope: 'BUSINESS_UNIT', business_unit: unit,
+      company: company, active: true, structure_managed: true
+    )
     get "#{base}/configuration_audits/#{id}", headers: headers
     expect(response).to have_http_status(:not_found)
     get "#{base}/configuration_audits", headers: headers, params: { resource_type: 'acw_policy' }
