@@ -26,8 +26,7 @@ class JrcContactCenter::AcwRulePrecedence
   end
 
   def call(reason_code:, queue_id:, team_ids:)
-    valid = reason_code.is_a?(String) && reason_code.strip.present? && reason_code.length <= 100 && team_ids.is_a?(Array)
-    raise JrcContactCenter::OperationError, 'invalid_acw_rule_context' unless valid
+    validate_context!(reason_code, team_ids)
 
     queue = queue_id.nil? ? nil : identifier(queue_id, 'invalid_acw_rule_context')
     teams = team_ids.map { |id| identifier(id, 'invalid_acw_rule_context') }.uniq
@@ -50,6 +49,11 @@ class JrcContactCenter::AcwRulePrecedence
     nil # Preserve the native global snapshot when no rule applies.
   end
 
+  def validate_context!(reason_code, team_ids)
+    valid = text?(reason_code, 100) && team_ids.is_a?(Array)
+    raise JrcContactCenter::OperationError, 'invalid_acw_rule_context' unless valid
+  end
+
   def validated_rule(input)
     raise JrcContactCenter::OperationError, 'invalid_acw_rules' unless input.is_a?(Hash)
 
@@ -65,13 +69,16 @@ class JrcContactCenter::AcwRulePrecedence
   end
 
   def validate_fields!(row)
-    valid = row.keys.sort == FIELDS.sort && text?(row['id'], 64) && text?(row['reason_code'], 100) &&
-            ORDER.include?(row['scope']) && [true, false].include?(row['active'])
+    valid = row.keys.sort == FIELDS.sort && ORDER.include?(row['scope']) && [true, false].include?(row['active'])
     raise JrcContactCenter::OperationError, 'invalid_acw_rules' unless valid
+    raise JrcContactCenter::OperationError, 'invalid_acw_rules' unless text?(row['id'], 64) && text?(row['reason_code'], 100)
 
-    unless row['limit_seconds'].is_a?(Integer) && row['limit_seconds'].between?(1, 3600)
-      raise JrcContactCenter::OperationError, 'invalid_acw_rules'
-    end
+    validate_limit!(row['limit_seconds'])
+  end
+
+  def validate_limit!(value)
+    valid = value.is_a?(Integer) && value.between?(1, 3600)
+    raise JrcContactCenter::OperationError, 'invalid_acw_rules' unless valid
   end
 
   def text?(value, maximum)

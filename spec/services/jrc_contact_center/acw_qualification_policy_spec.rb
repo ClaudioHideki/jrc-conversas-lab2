@@ -8,17 +8,19 @@ RSpec.describe JrcContactCenter::AcwQualificationPolicy do
   let(:queue) { JrcContactCenter::Queue.create!(account: account, unit: unit, name: 'SYNTHETIC ACW snapshot', code: 'ACW') }
   let(:team) { create(:team, account: account) }
   let(:general) { { id: 'general', reason_code: 'order', scope: 'general', scope_id: nil, active: true, limit_seconds: 180 } }
-  let(:rules) { [general, general.merge(id: 'team', scope: 'team', scope_id: team.id, limit_seconds: 120),
-                         general.merge(id: 'queue', scope: 'queue', scope_id: queue.id, limit_seconds: 60)] }
+  let(:rules) do
+    [general, general.merge(id: 'team', scope: 'team', scope_id: team.id, limit_seconds: 120),
+     general.merge(id: 'queue', scope: 'queue', scope_id: queue.id, limit_seconds: 60)]
+  end
   let(:policy) { JrcContactCenter::AcwPolicy.new(account: account.reload) }
   let(:manager) { JrcContactCenter::QualificationManager.new(account: account, member: member) }
   let(:session) do
     JrcContactCenter::CallSession.create!(account: account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid,
-                                         direction: 'inbound', status: 'connected', started_at: 2.minutes.ago, answered_at: 1.minute.ago)
+                                          direction: 'inbound', status: 'connected', started_at: 2.minutes.ago, answered_at: 1.minute.ago)
   end
   let!(:leg) do
     JrcContactCenter::CallLeg.create!(account: account, call_session: session, account_user: member, queue: queue,
-                                     direction: 'inbound', status: 'connected', started_at: session.started_at, answered_at: session.answered_at)
+                                      direction: 'inbound', status: 'connected', started_at: session.started_at, answered_at: session.answered_at)
   end
   let(:record) do
     session.update!(status: 'ended', ended_at: Time.current)

@@ -93,4 +93,18 @@ RSpec.describe 'Call Center scoped voice ACW rules', type: :request do
     expect(account.reload.settings).to eq(before)
     expect(audits).to be_empty
   end
+
+  it 'accepts a second edit using the returned revision after PostgreSQL reloads rule object keys' do
+    patch endpoint, headers: headers, params: attributes, as: :json
+    expect(response).to have_http_status(:ok)
+    saved_revision = response.parsed_body.fetch('item').fetch('revision')
+    expect(JrcContactCenter::AcwPolicy.new(account: Account.find(account.id)).revision).to eq(saved_revision)
+    next_values = attributes.merge(expected_revision: saved_revision, voice_rules: [rule.merge(limit_seconds: 120)])
+    patch endpoint, headers: headers, params: next_values, as: :json
+    expect(response).to have_http_status(:ok)
+    latest = response.parsed_body.fetch('item').fetch('revision')
+    expect(JrcContactCenter::AcwPolicy.new(account: Account.find(account.id)).revision).to eq(latest)
+    expect(audits.count).to eq(2)
+  end
+
 end

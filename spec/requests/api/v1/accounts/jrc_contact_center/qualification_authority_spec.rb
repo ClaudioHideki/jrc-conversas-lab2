@@ -19,12 +19,12 @@ RSpec.describe 'Call Center native qualification origin authority', type: :reque
   end
   let(:call) do
     JrcContactCenter::CallSession.create!(account: account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid,
-                                         direction: 'inbound', status: 'connected', started_at: 2.minutes.ago, answered_at: 1.minute.ago,
-                                         current_unit_id: units.first.id, current_queue_id: queues.first.id)
+                                          direction: 'inbound', status: 'connected', started_at: 2.minutes.ago, answered_at: 1.minute.ago,
+                                          current_unit_id: units.first.id, current_queue_id: queues.first.id)
   end
-  let!(:leg) do
+  let(:leg) do
     JrcContactCenter::CallLeg.create!(account: account, call_session: call, account_user: member, queue: queues.first,
-                                     direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
+                                      direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
   end
   let(:record) do
     call.update!(status: 'ended', ended_at: Time.current)
@@ -34,6 +34,7 @@ RSpec.describe 'Call Center native qualification origin authority', type: :reque
   let(:attributes) { { qualification: { reason_code: 'order', outcome_code: 'completed', notes: 'SYNTHETIC origin completion' } } }
 
   before do
+    leg
     account.enable_features!('jrc_contact_center')
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', company: company,
                                      business_unit: business_units.first, active: true, structure_managed: true)

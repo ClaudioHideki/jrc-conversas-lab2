@@ -34,8 +34,9 @@ class Api::V1::Accounts::JrcContactCenter::AcwPoliciesController < Api::V1::Acco
     return {} unless params.key?(:voice_rules)
 
     input = params[:voice_rules]
-    rows = input.is_a?(Array) ? input.map { |row| row.respond_to?(:to_unsafe_h) ? row.to_unsafe_h : row } : input
-    { voice_rules: rows }
+    return { voice_rules: input } unless input.is_a?(Array)
+
+    { voice_rules: input.map { |row| row.respond_to?(:to_unsafe_h) ? row.to_unsafe_h : row } }
   end
 
   def scoped_configuration_allowed?

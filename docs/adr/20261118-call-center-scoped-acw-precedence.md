@@ -19,3 +19,7 @@ Conflitos históricos não podem ser resolvidos por troca silenciosa da regra vi
 ## Evidência
 
 Os testes nativos preparados cobrem a precedência real na conclusão, conflitos, versões históricas, reenvio, conta estrangeira, revisão, auditoria e privacidade. Os testes Vue cobrem a edição e busca paginada com troca de conta. Quatro novos cenários Chrome com banco sintético e CSS real se somam aos 140 anteriores. A execução do novo SHA ainda está pendente; preparação ou teste estático não equivale à homologação.
+
+## Correção da revisão após primeira execução nativa
+
+CI44394199718 coletou 1.025 exemplos principais, com dois erros de revisão, além de 33 novas infrações de lint. A assinatura deve usar a sequência fixa dos campos de cada regra: serializar diretamente Hashes torna o token dependente da ordem das chaves normalizada pelo JSONB. A correção preserva a exigência de revisão e a assinatura antiga das contas sem regras. Um teste de API realiza dois salvamentos usando a revisão retornada, comparando-a com recarga real do PostgreSQL. Os dois testes históricos que revelaram o erro permanecem inalterados. O novo SHA precisa de sua própria validação; assets e Chrome não rodaram nesse SHA que falhou.

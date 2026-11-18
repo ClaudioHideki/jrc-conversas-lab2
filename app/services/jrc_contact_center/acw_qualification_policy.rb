@@ -57,8 +57,10 @@ class JrcContactCenter::AcwQualificationPolicy
   end
 
   def stored
-    event = JrcContactCenter::AgentStateEvent.find_by(account_id: @record.account_id, account_user_id: @record.account_user_id,
-                                                     external_event_id: "qualification:#{@record.id}:pending")
+    event = JrcContactCenter::AgentStateEvent.find_by(
+      account_id: @record.account_id, account_user_id: @record.account_user_id,
+      external_event_id: "qualification:#{@record.id}:pending"
+    )
     return unless event&.metadata&.key?(KEY)
 
     snapshot = event.metadata.fetch(KEY)

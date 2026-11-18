@@ -543,10 +543,10 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       member = account.account_users.find_by!(user: actor)
       member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_operate])
       call = JrcContactCenter::CallSession.create!(account: account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid,
-                                                  direction: 'inbound', status: 'connected', started_at: 2.minutes.ago,
-                                                  answered_at: 1.minute.ago, current_unit_id: units.first.id, current_queue_id: queue.id)
+                                                   direction: 'inbound', status: 'connected', started_at: 2.minutes.ago,
+                                                   answered_at: 1.minute.ago, current_unit_id: units.first.id, current_queue_id: queue.id)
       JrcContactCenter::CallLeg.create!(account: account, call_session: call, account_user: member, queue: queue,
-                                       direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
+                                        direction: 'inbound', status: 'connected', started_at: call.started_at, answered_at: call.answered_at)
       call.update!(status: 'ended', ended_at: Time.current)
       record = JrcContactCenter::Qualification.find_by!(account: account, call_session: call, account_user: member)
       change = lambda do
@@ -564,5 +564,4 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       expect(JrcContactCenter::AgentStateEvent.find_by!(account: account, external_event_id: "qualification:#{record.id}:pending").ended_at).to be_nil
     end
   end
-
 end

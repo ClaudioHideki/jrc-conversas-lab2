@@ -21,7 +21,7 @@ class JrcContactCenter::AcwPolicy
     values = DEFAULTS.keys.map { |key| policy.fetch(:limits).fetch(key) }
     signature = [KEY, @account.id, policy.fetch(:voice_required), values]
     scoped = JrcContactCenter::AcwScopedRules.new(account: @account).call
-    signature << scoped if scoped.any?
+    signature << scoped.map { |row| JrcContactCenter::AcwRulePrecedence::FIELDS.map { |field| row.fetch(field) } } if scoped.any?
     Digest::SHA256.hexdigest(signature.to_json)
   end
 

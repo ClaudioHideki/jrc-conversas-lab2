@@ -33,5 +33,4 @@ class JrcContactCenter::AcwScopedRules
       raise ActiveRecord::RecordNotFound unless ids.sort == found.sort
     end
   end
-
 end

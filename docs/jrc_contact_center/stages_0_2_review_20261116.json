@@ -3197,5 +3197,27 @@
     "visual_finding": "Manager review now visible and readable. Mobile operator capture showed its truthful metric/hero area; next checkpoint explicitly scrolls to the own justification and supervisor notice before their captures. No assertion is removed.",
     "new_scoped_acw_inherits_this_approval": false,
     "full_23_figures_complete": false
+  },
+  "qa_ca432cc9_20261118": {
+    "sha": "ca432cc90aa5616ba71db418e01d2ea3e65a87af",
+    "run": 44394199718,
+    "artifact": 14471150683,
+    "artifact_sha256": "efc66c181c5479bfc0fa5e1534f22549808e2051951fdeac7047800a9cad6f06",
+    "main_rails_examples": 1025,
+    "main_failed": 2,
+    "main_pending": 0,
+    "outside_errors": 0,
+    "schema_reload_passed": 16,
+    "ruby_new_offenses": 33,
+    "not_run": [
+      "concurrency",
+      "corporate_regressions",
+      "Vue",
+      "assets",
+      "Chrome"
+    ],
+    "correction": "The new ACW revision included rule Hash serialization order. JSONB reload can reorder keys, making the same effective rules appear stale. Signature now uses the fixed rule field sequence; a real authenticated two-write regression verifies the saved revision survives PostgreSQL reload. Strict CAS and legacy signatures remain unchanged. Method complexity and layout corrected without disabling cops or assertions.",
+    "new_sha_validation": "pending",
+    "full_23_figures_complete": false
   }
 }

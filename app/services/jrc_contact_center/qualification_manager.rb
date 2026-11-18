@@ -25,14 +25,7 @@ class JrcContactCenter::QualificationManager
       target = target.class.where(account_id: @account.id).lock.find(target.id)
       call_session ? call_session = target : conversation = target
 
-      if call_session
-        leg = call_session.legs.where(account_user: @member).where.not(answered_at: nil).order(:id).last
-        unless leg && (%w[ended failed].include?(call_session.status) || %w[ended failed transferred].include?(leg.status))
-          raise JrcContactCenter::OperationError.new('call_not_ended', status: :conflict)
-        end
-      elsif !(conversation.inbox.whatsapp? || conversation.inbox.twilio_whatsapp?) || conversation.assignee_id != @member.user_id
-        raise JrcContactCenter::OperationError.new('attendance_not_owned', status: :forbidden)
-      end
+      leg = attendance_leg(call_session, conversation)
       identity = { account: @account, account_user: @member, call_session: call_session, conversation: conversation,
                    conversation_cycle: conversation ? conversation.additional_attributes.fetch('jrc_acw_cycle', 0).to_i : 0 }
       existing = JrcContactCenter::Qualification.find_by(identity)
@@ -64,7 +57,7 @@ class JrcContactCenter::QualificationManager
       record.update!(completion_values(record, attributes, now))
       record.conversation&.update!(status: :resolved)
       JrcContactCenter::AgentStateEvent.where(account: @account, account_user: @member, state: 'acw', ended_at: nil)
-                                      .where("metadata ->> 'qualification_id' = ?", record.id.to_s).update_all(ended_at: now, updated_at: now)
+                                       .where("metadata ->> 'qualification_id' = ?", record.id.to_s).update_all(ended_at: now, updated_at: now)
       JrcContactCenter::FactsProjector.new(account: @account).call(record.call_session_id) if record.call_session_id
       unless JrcContactCenter::Qualification.pending.exists?(account: @account, account_user: @member)
         snapshot = JrcContactCenter::AgentStateSnapshot.new(account_user: @member)
@@ -77,6 +70,20 @@ class JrcContactCenter::QualificationManager
   end
 
   private
+
+  def attendance_leg(call_session, conversation)
+    return owned_voice_leg(call_session) if call_session
+
+    valid = (conversation.inbox.whatsapp? || conversation.inbox.twilio_whatsapp?) && conversation.assignee_id == @member.user_id
+    raise JrcContactCenter::OperationError.new('attendance_not_owned', status: :forbidden) unless valid
+  end
+
+  def owned_voice_leg(session)
+    leg = session.legs.where(account_user: @member).where.not(answered_at: nil).order(:id).last
+    return leg if leg && (%w[ended failed].include?(session.status) || %w[ended failed transferred].include?(leg.status))
+
+    raise JrcContactCenter::OperationError.new('call_not_ended', status: :conflict)
+  end
 
   def completion_values(record, attributes, now)
     limit = JrcContactCenter::AcwQualificationPolicy.new(record).limit(attributes[:reason_code])
