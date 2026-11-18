@@ -193,4 +193,82 @@ describe('AgentStatePanel', () => {
       .setValue('coffee');
     expect(wrapper.findAll('button')[1].attributes('disabled')).toBeUndefined();
   });
+
+  it('keeps legacy reasons until explicit catalog enforcement and narrows configured options by selected queue', async () => {
+    JrcContactCenterAPI.agentState.mockResolvedValue({
+      data: {
+        item: {
+          ...initialState,
+          queues: [
+            { id: '1', name: 'SYNTHETIC A' },
+            { id: '2', name: 'SYNTHETIC B' },
+          ],
+          pause_catalog: {
+            enforced: false,
+            entries: [
+              {
+                code: 'synthetic_a',
+                name: 'SYNTHETIC A reason',
+                scope_queue_ids: ['1'],
+                all_queues: false,
+              },
+            ],
+          },
+        },
+      },
+    });
+    const wrapper = mount(AgentStatePanel, {
+      props: { accountId: '1', canOperate: true },
+    });
+    await flushPromises();
+    const reasons = wrapper.get(
+      'select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]'
+    );
+    expect(reasons.find('option[value="coffee"]').exists()).toBe(true);
+    expect(reasons.find('option[value="synthetic_a"]').exists()).toBe(true);
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.CARDS.QUEUES"]')
+      .setValue('2');
+    expect(reasons.find('option[value="synthetic_a"]').exists()).toBe(false);
+    expect(reasons.find('option[value="coffee"]').exists()).toBe(true);
+  });
+
+  it('shows the immutable local reason and a maximum-time notice without automatically resuming distribution', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-18T12:10:00Z'));
+    JrcContactCenterAPI.agentState.mockResolvedValue({
+      data: {
+        item: {
+          ...initialState,
+          state: 'paused',
+          reason_code: 'synthetic_old',
+          started_at: '2026-11-18T12:00:00Z',
+          pause_catalog: { enforced: true, entries: [] },
+          pause_definition: {
+            name: 'SYNTHETIC historic reason',
+            maximum_minutes: 5,
+          },
+        },
+      },
+    });
+    const wrapper = mount(AgentStatePanel, {
+      props: { accountId: '1', canOperate: true },
+    });
+    await flushPromises();
+    expect(wrapper.get('[role="timer"]').text()).toContain(
+      'SYNTHETIC historic reason'
+    );
+    expect(wrapper.get('[data-pause-exceeded]').text()).toContain(
+      'JRC_CONTACT_CENTER.PAUSE_CATALOG.EXCEEDED'
+    );
+    expect(
+      wrapper
+        .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+        .find('option[value="coffee"]')
+        .exists()
+    ).toBe(false);
+    expect(wrapper.findAll('button')[1].attributes('disabled')).toBeDefined();
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
+  });
 });

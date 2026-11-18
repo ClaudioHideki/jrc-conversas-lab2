@@ -41,11 +41,23 @@ class JrcContactCenter::AgentStateSnapshot
       eligible: reason.nil?, eligibility_reason: reason,
       eligible_queue_ids: reason.nil? ? [current.queue_id.to_s] : [],
       queues: memberships.includes(:queue).map { |membership| { id: membership.queue_id.to_s, name: membership.queue.name } },
+      pause_catalog: pause_catalog_options, pause_definition: pause_definition,
       pending_qualifications: pending_qualifications.includes(account_user: :user).map(&:operational_payload)
     )
   end
 
   private
+
+  def pause_catalog_options
+    context = { account: @account, account_user: @member, user: @member.user }
+    return unless JrcContactCenter::ModulePolicy.new(context, :contact_center).operate?
+
+    JrcContactCenter::PauseCatalog.new(account: @account).options(member: @member, memberships: memberships)
+  end
+
+  def pause_definition
+    JrcContactCenter::PauseDefinitionSnapshot.call(event: current, member: @member, memberships: memberships)
+  end
 
   def operational_queue_ids
     units = JrcContactCenter::OrganizationalScope.new(account: @account, account_user: @member).units.select(:id)

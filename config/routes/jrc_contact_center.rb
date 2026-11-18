@@ -7,6 +7,7 @@ namespace :api, defaults: { format: 'json' } do
         get 'customer_context', to: 'customer_context#show'
         resource :agent_state, only: %i[show update], controller: 'agent_states'
         resource :acw_policy, only: %i[show update], controller: 'acw_policies'
+        resource :pause_catalog, only: %i[show update], controller: 'pause_catalogs'
         resources :qualifications, only: %i[index create update]
         get 'supervisor', to: 'supervisor#show'
         resources :commands, only: %i[index show create]

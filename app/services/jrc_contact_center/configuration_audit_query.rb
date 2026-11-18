@@ -4,8 +4,14 @@ class JrcContactCenter::ConfigurationAuditQuery
   TYPES = {
     'unit' => 'JrcContactCenter::Unit', 'queue' => 'JrcContactCenter::Queue',
     'membership' => 'JrcContactCenter::QueueMembership', 'role' => 'CustomRole', 'access' => 'JrcContactCenter::AccessGrant',
-    'ivr_revision' => 'JrcContactCenter::IvrDraftVersion', 'acw_policy' => 'Account'
+    'ivr_revision' => 'JrcContactCenter::IvrDraftVersion', 'acw_policy' => 'Account', 'pause_catalog' => 'Account'
   }.freeze
+
+  def self.resource_key(record)
+    return 'pause_catalog' if record.auditable_type == 'Account' && record.comment == JrcContactCenter::ConfigurationAudit::PAUSE_COMMENT
+
+    TYPES.key(record.auditable_type)
+  end
 
   FILTER_KEYS = %i[from to resource_type resource_id operation actor_id unit_id correlation_id history page per_page].freeze
 
@@ -64,6 +70,10 @@ class JrcContactCenter::ConfigurationAuditQuery
       raise JrcContactCenter::OperationError, 'invalid_audit_filter' unless type
 
       records = records.where(auditable_type: type)
+      if type == 'Account'
+        comment = key == 'pause_catalog' ? JrcContactCenter::ConfigurationAudit::PAUSE_COMMENT : JrcContactCenter::ConfigurationAudit::ACW_COMMENT
+        records = records.where(comment: comment)
+      end
     end
     records = records.where(auditable_id: @params[:resource_id]) if @params[:resource_id].present?
     records

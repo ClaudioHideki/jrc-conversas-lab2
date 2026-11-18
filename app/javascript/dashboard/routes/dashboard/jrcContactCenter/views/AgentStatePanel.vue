@@ -35,13 +35,41 @@ const pauseElapsed = computed(() => {
     .join(':');
 });
 const labels = computed(() => agentStateLabels(t));
-const pauseReasons = computed(() =>
-  Object.entries(pauseReasonLabels(t)).map(([code, label]) => ({ code, label }))
+const queueId = ref('');
+const legacyReasons = computed(() => pauseReasonLabels(t));
+const pauseReasons = computed(() => {
+  const catalog = state.value?.pause_catalog;
+  const entries = (catalog?.entries || []).filter(
+    entry =>
+      !queueId.value ||
+      entry.all_queues ||
+      entry.scope_queue_ids.includes(queueId.value)
+  );
+  const available = new Map(
+    catalog?.enforced === true ? [] : Object.entries(legacyReasons.value)
+  );
+  entries.forEach(entry => available.set(entry.code, entry.name));
+  return [...available].map(([code, label]) => ({ code, label }));
+});
+const currentReasonLabel = computed(
+  () =>
+    state.value?.pause_definition?.name ||
+    legacyReasons.value[state.value?.reason_code] ||
+    state.value?.reason_code ||
+    '—'
 );
+const pauseExceeded = computed(() => {
+  const maximum = state.value?.pause_definition?.maximum_minutes;
+  return (
+    state.value?.state === 'paused' &&
+    Number.isInteger(maximum) &&
+    maximum >= 0 &&
+    now.value - new Date(state.value.started_at).getTime() > maximum * 60000
+  );
+});
 const busy = ref(false);
 const failed = ref(false);
 const reason = ref('');
-const queueId = ref('');
 const hasValidPauseReason = computed(() =>
   pauseReasons.value.some(item => item.code === reason.value)
 );
@@ -210,11 +238,18 @@ onBeforeUnmount(() => {
           >
             {{
               t('JRC_CONTACT_CENTER.COMMON.CODE_DETAIL', {
-                code: pauseReasons.find(item => item.code === state.reason_code)
-                  ?.label,
+                code: currentReasonLabel,
                 detail: pauseElapsed,
               })
             }}
+          </p>
+          <p
+            v-if="pauseExceeded"
+            role="status"
+            class="mt-2 text-sm text-n-amber-11"
+            data-pause-exceeded
+          >
+            {{ t('JRC_CONTACT_CENTER.PAUSE_CATALOG.EXCEEDED') }}
           </p>
           <p class="mt-1 text-xs leading-5 text-n-slate-10">
             {{

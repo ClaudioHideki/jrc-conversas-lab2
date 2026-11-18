@@ -9,6 +9,7 @@ const resources = [
   'access_teams',
   'ivr_drafts',
   'acw_policy',
+  'pause_catalog',
 ];
 const validRevision = (value, resource) =>
   resource === 'ivr_drafts'
@@ -83,10 +84,11 @@ export const useConfigurationRevision = ({ accountId, resource, draft }) => {
     state.latest = null;
     state.reviewedDraft = '';
     try {
-      const response =
-        source === 'acw_policy'
-          ? await API.acwPolicy(account)
-          : await API.configurationRecord(account, source, id);
+      let response;
+      if (source === 'pause_catalog')
+        response = await API.pauseCatalog(account);
+      else if (source === 'acw_policy') response = await API.acwPolicy(account);
+      else response = await API.configurationRecord(account, source, id);
       if (
         version !== generation ||
         account !== String(accountId.value) ||

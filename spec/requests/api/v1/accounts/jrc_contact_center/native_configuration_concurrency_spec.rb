@@ -399,4 +399,68 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       expect(record.events.pluck(:event_type)).to eq(['created'])
     end
   end
+
+  context 'with mandatory local pause catalog auditing and fresh authority' do
+    let(:catalog_endpoint) { "/api/v1/accounts/#{account.id}/jrc_contact_center/pause_catalog" }
+    let(:catalog) { JrcContactCenter::PauseCatalog.new(account: account) }
+    let(:pause_entry) do
+      { 'code' => 'synthetic_break', 'name' => 'SYNTHETIC committed pause', 'category' => 'SYNTHETIC', 'active' => true,
+        'default_minutes' => 30, 'unit_ids' => [], 'custom_role_ids' => [] }
+    end
+    let(:catalog_payload) { { pause_catalog: { enforced: false, entries: [pause_entry] }, expected_revision: catalog.revision } }
+
+    before do
+      JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
+    end
+
+    %w[eligibility profile corporate].each do |source|
+      it "denies catalog mutation after #{source} is withdrawn while waiting for the native Account lock" do
+        previous = account.reload.settings.deep_dup
+        change = lambda do
+          case source
+          when 'eligibility'
+            member = account.account_users.find_by!(user: actor)
+            JrcContactCenter::AccessGrant.find_by!(account: account, account_user: member).update!(eligible: false)
+          when 'profile' then account.account_users.find_by!(user: actor).custom_role.update!(permissions: ['jrc_contact_center_view'])
+          when 'corporate' then JrcCrm::UserBusinessUnit.find_by!(account: account, user: actor, scope: 'GROUP').destroy!
+          end
+        end
+        status = race_with_account_change(change, endpoint: catalog_endpoint, payload: catalog_payload)
+        expect(status).to eq(401)
+        expect(account.reload.settings).to eq(previous)
+        expect(Audited.audit_class.where(associated: account, comment: JrcContactCenter::ConfigurationAudit::PAUSE_COMMENT)).to be_empty
+      end
+    end
+
+    it 'rolls back the persisted catalog if inserting the mandatory audit fails, without an outer fixture transaction' do
+      previous = account.reload.settings.deep_dup
+      allow(Audited.audit_class).to receive(:create!).and_wrap_original do |original, *args, **kwargs|
+        values = kwargs.presence || args.first
+        if values[:comment] == JrcContactCenter::ConfigurationAudit::PAUSE_COMMENT
+          state[:mandatory_pause_audit_reached] = true
+          raise ActiveRecord::StatementInvalid, 'SYNTHETIC pause audit insertion unavailable'
+        end
+        original.call(*args, **kwargs)
+      end
+      patch catalog_endpoint, headers: headers, params: catalog_payload, as: :json
+      expect(response).to have_http_status(:internal_server_error)
+      expect(state[:mandatory_pause_audit_reached]).to be(true)
+      expect(Account.find(account.id).settings).to eq(previous)
+      expect(Audited.audit_class.where(associated: account, comment: JrcContactCenter::ConfigurationAudit::PAUSE_COMMENT)).to be_empty
+    end
+
+    it 'checks newly activated enforcement after a waiting operator request acquires the Account lock' do
+      member = account.account_users.find_by!(user: actor)
+      member.custom_role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_configure jrc_contact_center_operate])
+      change = lambda do
+        fresh = JrcContactCenter::PauseCatalog.new(account: Account.find(account.id))
+        fresh.update!({ 'enforced' => true, 'entries' => [pause_entry] }, expected_revision: fresh.revision, activation_confirmed: true)
+      end
+      payload = { agent_state: { state: 'paused', reason_code: 'legacy_free', expected_state_version: '0', command_id: SecureRandom.uuid } }
+      status = race_with_account_change(change, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/agent_state", payload: payload)
+      expect(status).to eq(422)
+      expect(JrcContactCenter::AgentStateEvent.where(account: account)).to be_empty
+      expect(catalog.call.fetch('enforced')).to be(true)
+    end
+  end
 end

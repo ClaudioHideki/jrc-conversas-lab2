@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { pauseCatalogSummary } from '../pauseCatalogPresentation';
 import Button from 'dashboard/components-next/button/Button.vue';
 
 const props = defineProps({
@@ -26,6 +27,8 @@ const labels = {
   voice: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.voice'),
   whatsapp: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.whatsapp'),
   voice_required: t('JRC_CONTACT_CENTER.ADMIN.VOICE_REQUIRED'),
+  enforced: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.POLICY_TITLE'),
+  entries: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.ENTRIES'),
   name: t('JRC_CONTACT_CENTER.ADMIN.NAME'),
   definition: t('JRC_CONTACT_CENTER.LOCAL_IVR.DEFINITION'),
   revision: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REVISION'),
@@ -85,6 +88,7 @@ const fields = computed(
       access_teams: ['allowed'],
       ivr_drafts: ['name', 'revision', 'definition'],
       acw_policy: ['voice', 'whatsapp', 'voice_required'],
+      pause_catalog: ['enforced', 'entries'],
     })[props.resource] || []
 );
 const format = (record, field) => {
@@ -113,6 +117,7 @@ const format = (record, field) => {
     );
   if (['kind', 'status', 'service_kind', 'strategy'].includes(field))
     return choices[value] || String(value);
+  if (field === 'entries') return pauseCatalogSummary(value, t);
   if (field === 'definition') return JSON.stringify(value, null, 2);
   return String(value);
 };
@@ -148,13 +153,19 @@ const format = (record, field) => {
           <dl class="mt-2 grid min-w-0 gap-3 sm:grid-cols-2">
             <div class="min-w-0">
               <dt class="text-n-slate-11">{{ text.server }}</dt>
-              <dd class="break-all text-n-slate-12">
+              <dd
+                class="break-all text-n-slate-12"
+                :class="{ 'whitespace-pre-wrap': field === 'entries' }"
+              >
                 {{ format(state.latest, field) }}
               </dd>
             </div>
             <div class="min-w-0">
               <dt class="text-n-slate-11">{{ text.draft }}</dt>
-              <dd class="break-all text-n-slate-12">
+              <dd
+                class="break-all text-n-slate-12"
+                :class="{ 'whitespace-pre-wrap': field === 'entries' }"
+              >
                 {{ format(draft, field) }}
               </dd>
             </div>

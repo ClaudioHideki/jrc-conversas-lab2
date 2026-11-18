@@ -58,6 +58,7 @@ const resourceLabels = {
   access: t('JRC_CONTACT_CENTER.ACCESS.TITLE'),
   ivr_revision: t('JRC_CONTACT_CENTER.LOCAL_IVR.AUDIT_REVISION'),
   acw_policy: t('JRC_CONTACT_CENTER.ACW_OPERATION.POLICY_TITLE'),
+  pause_catalog: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.POLICY_TITLE'),
 };
 const operationLabels = {
   create: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.CREATE'),

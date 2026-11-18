@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { pauseCatalogSummary } from '../pauseCatalogPresentation';
 
 const props = defineProps({
   record: { type: Object, required: true },
@@ -31,6 +32,9 @@ const labels = {
   local: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.LOCAL_ONLY'),
 };
 const fieldLabels = {
+  enforced: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.POLICY_TITLE'),
+  entries: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.ENTRIES'),
+  version: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REVISION'),
   voice: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.voice'),
   whatsapp: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.whatsapp'),
   voice_required: t('JRC_CONTACT_CENTER.ADMIN.VOICE_REQUIRED'),
@@ -131,6 +135,7 @@ const fields = computed(() => [
 const value = (entry, field = '') => {
   if (entry === null || entry === undefined) return '—';
   if (typeof entry === 'boolean') return entry ? labels.yes : labels.no;
+  if (field === 'entries') return pauseCatalogSummary(entry, t);
   if (
     ['permissions', 'allowed', 'denied'].includes(field) &&
     Array.isArray(entry)

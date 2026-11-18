@@ -31,8 +31,9 @@ class JrcContactCenter::ConfigurationAuditScope
     return records.none if @organization.restricted?
 
     roles = records.where(comment: [JrcContactCenter::ConfigurationAudit::ROLE_COMMENT, JrcContactCenter::ConfigurationAudit::AUTHORITY_COMMENT])
-    acw = records.where(comment: JrcContactCenter::ConfigurationAudit::ACW_COMMENT, auditable_type: 'Account', auditable_id: @account.id)
-    roles.or(acw)
+    comments = [JrcContactCenter::ConfigurationAudit::ACW_COMMENT, JrcContactCenter::ConfigurationAudit::PAUSE_COMMENT]
+    policies = records.where(comment: comments, auditable_type: 'Account', auditable_id: @account.id)
+    roles.or(policies)
   end
 
   def scope_json(side)

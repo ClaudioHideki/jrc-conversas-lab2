@@ -25,7 +25,7 @@ class JrcContactCenter::Administration
       cards: cards, capabilities: capabilities, native_links: native_links, provider: provider_state,
       units: @access.units.order(:name, :id).map { |unit| { id: unit.id, name: unit.name } },
       queues: @access.queues.order(:name, :id).map { |queue| { id: queue.id, name: queue.name } },
-      corporate: corporate_options
+      corporate: corporate_options, pause_catalog: pause_catalog_metadata
     }
   end
 
@@ -99,6 +99,13 @@ class JrcContactCenter::Administration
     end
 
     nil
+  end
+
+  def pause_catalog_metadata
+    return { role_options: [] } unless global_configuration? && native_role_editor_available?
+
+    roles = CustomRole.where(account: @account).order(:name, :id).pluck(:id, :name)
+    { role_options: roles.map { |id, name| { id: id.to_s, name: name } } }
   end
 
   def corporate_options

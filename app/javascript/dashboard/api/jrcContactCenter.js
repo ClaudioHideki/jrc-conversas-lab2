@@ -75,6 +75,12 @@ export default {
     if (resource === 'ivr_drafts') return axios.get(ivrPath(accountId, id));
     return axios.get(`${base(accountId)}/${paths[resource]}/${Number(id)}`);
   },
+  pauseCatalog: accountId => axios.get(`${base(accountId)}/pause_catalog`),
+  updatePauseCatalog: (accountId, catalog, options = {}) =>
+    axios.patch(`${base(accountId)}/pause_catalog`, {
+      ...options,
+      pause_catalog: catalog,
+    }),
   administration: accountId => axios.get(`${base(accountId)}/administration`),
   accessAuthorizations: (accountId, type, params = {}) => {
     if (!['users', 'teams'].includes(type))

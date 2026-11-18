@@ -9,6 +9,7 @@ import CustomRoleAPI from 'dashboard/api/customRole';
 import NativeRoleEditor from './NativeRoleEditor.vue';
 import AuthorityAssignments from './AuthorityAssignments.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
+import PauseCatalogEditor from './PauseCatalogEditor.vue';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 
 const props = defineProps({
@@ -170,7 +171,7 @@ const load = async () => {
   failed.value = false;
   if (
     pending.value ||
-    ['closures', 'approvals'].includes(key.value) ||
+    ['closures', 'approvals', 'pauses'].includes(key.value) ||
     (key.value === 'permissions' &&
       (!canEditRoles.value || permissionScope.value !== 'profiles'))
   )
@@ -506,6 +507,12 @@ onBeforeUnmount(() => {
     >
       {{ label('PENDING') }}
     </p>
+    <PauseCatalogEditor
+      v-if="key === 'pauses'"
+      :account-id="accountId"
+      :context="context"
+      @changed="emit('changed')"
+    />
     <p v-if="key === 'closures'" class="text-sm text-n-slate-11">
       {{ label('ACW_SCOPE') }}
     </p>
@@ -663,7 +670,10 @@ onBeforeUnmount(() => {
       </button>
     </nav>
     <template
-      v-if="!pending && !['closures', 'permissions', 'approvals'].includes(key)"
+      v-if="
+        !pending &&
+        !['closures', 'permissions', 'approvals', 'pauses'].includes(key)
+      "
     >
       <form
         v-if="resource !== 'pabx'"

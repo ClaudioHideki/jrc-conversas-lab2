@@ -15,7 +15,7 @@ class JrcContactCenter::ConfigurationAuditPresenter
     actor_name = @actor_names[record.user_id] if record.user_type == 'User'
     {
       id: record.id, created_at: record.created_at, actor_id: record.user_id, actor_name: actor_name,
-      resource_type: JrcContactCenter::ConfigurationAuditQuery::TYPES.key(record.auditable_type),
+      resource_type: JrcContactCenter::ConfigurationAuditQuery.resource_key(record),
       resource_id: record.auditable_id, operation: record.action, revision: record.version,
       correlation_id: record.request_uuid, before: attributes.first, after: attributes.last,
       scopes: changes['cc_scope'], omitted_fields: changes.fetch('omitted_fields', []), result: 'recorded_locally'

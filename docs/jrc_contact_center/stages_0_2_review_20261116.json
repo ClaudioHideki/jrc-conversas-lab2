@@ -2879,6 +2879,34 @@
       "cause": "Detector de heading ambíguo e resposta POST esperada na origem errada; código e traces preservados. Novo gate 124 obrigatório.",
       "mobile_form_geometry": "Quatro projetos aprovados; dois PNGs móveis revisados e contidos.",
       "not_complete": true
+    },
+    "last_eligible_withdrawal_decision": {
+      "approved_by_user": "Confirmação do gestor, com revisão e auditoria",
+      "formal_approval_required": false,
+      "pabx_publication": false,
+      "implementation": "pending_after_current_native_qa_and_catalog_increment"
+    },
+    "pause_catalog_temporary_wip": {
+      "status": "temporary_source_only_unvalidated",
+      "enforcement_default": false,
+      "activation_requires_explicit_confirmation": true,
+      "legacy_history_preserved_by_design": true,
+      "external_publication": "blocked",
+      "advanced_pause_rules": "still_pending"
     }
+  },
+  "pause_catalog_candidate_20261118": {
+    "status": "implemented_pending_own_native_and_browser_validation",
+    "enforcement_default": false,
+    "activation_confirmation_required": true,
+    "legacy_history_preserved": true,
+    "public_dto_scope_ids_omitted": true,
+    "mandatory_chrome": 132,
+    "previous_chrome_preserved": 124,
+    "fixtures": "exclusive synthetic accounts; no PABX/channel configuration",
+    "adr": "docs/adr/20261118-call-center-local-pause-catalog.md",
+    "advanced_rules_and_provider_homologation": "pending",
+    "word_figures_7_8_complete": false,
+    "last_eligible_withdrawal": "next increment: manager review, confirmation and mandatory audit"
   }
 }

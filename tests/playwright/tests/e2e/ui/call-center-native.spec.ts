@@ -32,35 +32,49 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const auth = info.title.startsWith('linked Customer Master')
-    ? session.customer_master_targets[info.project.name].operator
-    : info.title.startsWith('local IVR supervisor')
-      ? session.ivr_targets[info.project.name].observer
-      : info.title.startsWith('local IVR')
-        ? info.title.startsWith('local IVR scoped')
-          ? session.ivr_targets[info.project.name].scoped
-          : session.ivr_targets[info.project.name].administrator
-        : info.title.startsWith('native authenticated navigation')
-          ? session.navigation_targets[info.project.name].auth
-          : info.title.startsWith('native infrastructure root')
-            ? session.infrastructure
-            : info.title.startsWith('configuration audit boundary')
-              ? session.auditor
-              : info.title.startsWith('native role denied')
-                ? session.delegated
-                : info.title.startsWith('corporate boundary')
-                  ? session.restricted
-                  : info.title.startsWith('profile change')
-                    ? session.viewer
-                    : session.administrator;
+  const pauseTarget = info.title.startsWith('local pause catalog')
+    ? session.pause_targets[info.project.name][
+        info.title.startsWith('local pause catalog operator')
+          ? 'operations'
+          : 'editor'
+      ]
+    : null;
+  const auth = pauseTarget
+    ? info.title.startsWith('local pause catalog operator')
+      ? pauseTarget.operator
+      : pauseTarget.administrator
+    : info.title.startsWith('linked Customer Master')
+      ? session.customer_master_targets[info.project.name].operator
+      : info.title.startsWith('local IVR supervisor')
+        ? session.ivr_targets[info.project.name].observer
+        : info.title.startsWith('local IVR')
+          ? info.title.startsWith('local IVR scoped')
+            ? session.ivr_targets[info.project.name].scoped
+            : session.ivr_targets[info.project.name].administrator
+          : info.title.startsWith('native authenticated navigation')
+            ? session.navigation_targets[info.project.name].auth
+            : info.title.startsWith('native infrastructure root')
+              ? session.infrastructure
+              : info.title.startsWith('configuration audit boundary')
+                ? session.auditor
+                : info.title.startsWith('native role denied')
+                  ? session.delegated
+                  : info.title.startsWith('corporate boundary')
+                    ? session.restricted
+                    : info.title.startsWith('profile change')
+                      ? session.viewer
+                      : session.administrator;
   if (
+    info.title.startsWith('local pause catalog') ||
     info.title.startsWith('local IVR') ||
     info.title.startsWith('linked Customer Master')
   ) {
     const observations = [];
-    const prefix = info.title.startsWith('linked Customer Master')
-      ? `/api/v1/accounts/${session.customer_master_targets[info.project.name].account_id}/`
-      : `/api/v1/accounts/${session.ivr_targets[info.project.name].account_id}/jrc_contact_center/`;
+    const prefix = pauseTarget
+      ? `/api/v1/accounts/${pauseTarget.account_id}/jrc_contact_center/`
+      : info.title.startsWith('linked Customer Master')
+        ? `/api/v1/accounts/${session.customer_master_targets[info.project.name].account_id}/`
+        : `/api/v1/accounts/${session.ivr_targets[info.project.name].account_id}/jrc_contact_center/`;
     nativeObservations.set(page, observations);
     page.on('response', response => {
       const address = new URL(response.url());
@@ -3397,4 +3411,348 @@ test('linked Customer Master operating records remain visible in their native sc
       denied_source_status: forbidden.status(),
     })
   );
+});
+
+test('local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].editor;
+  const endpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/pause_catalog`;
+  const initial = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect(initial.status()).toBe(200);
+  const empty = (await initial.json()).item;
+  expect(empty.enforced).toBe(false);
+  expect(empty.entries).toEqual([]);
+  const entries = Array.from({ length: 20 }, (_, index) => ({
+    code: `synthetic_${index}`,
+    name: `SYNTHETIC reason ${String(index).padStart(2, '0')}`,
+    category: 'SYNTHETIC',
+    description: '',
+    active: true,
+    minimum_minutes: 15,
+    default_minutes: 30,
+    maximum_minutes: 60,
+    unit_ids: [],
+    custom_role_ids: [],
+  }));
+  const prepared = await page.request.patch(endpoint, {
+    headers: target.administrator,
+    data: {
+      pause_catalog: { enforced: false, entries },
+      expected_revision: empty.revision,
+    },
+  });
+  expect(prepared.status()).toBe(200);
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/pauses`
+  );
+  const catalog = page.locator('[data-pause-catalog]');
+  await expect(
+    catalog.getByText('Modo legado: motivos livres continuam permitidos.', {
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(catalog.locator('article')).toHaveCount(20);
+  await expect(page.locator('html')).toHaveClass(
+    info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/
+  );
+  await catalog
+    .getByRole('button', { name: 'Novo motivo de pausa', exact: true })
+    .click();
+  await expectContainedDialog(page);
+  let dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Código', { exact: true }).fill('synthetic_created');
+  await dialog
+    .getByLabel('Nome', { exact: true })
+    .fill('SYNTHETIC created by real UI');
+  await dialog.getByLabel('Categoria', { exact: true }).fill('SYNTHETIC');
+  await dialog.getByLabel('Tempo mínimo', { exact: true }).fill('00:15');
+  await dialog.getByLabel('Tempo padrão', { exact: true }).fill('00:30');
+  await dialog.getByLabel('Tempo máximo', { exact: true }).fill('00:10');
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeDisabled();
+  await expect(
+    dialog.getByLabel('Tempo máximo', { exact: true })
+  ).toHaveAttribute('aria-invalid', 'true');
+  await dialog.getByLabel('Tempo máximo', { exact: true }).fill('01:00');
+  await dialog.getByLabel('Ativo para novas pausas', { exact: true }).check();
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeEnabled();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-pause-catalog-popup.png`,
+    fullPage: false,
+  });
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await catalog.getByRole('button', { name: 'Próxima', exact: true }).click();
+  await expect(page).toHaveURL(/pauses_page=2/);
+  await expect(catalog.locator('article')).toHaveCount(1);
+  await expect(catalog).toContainText('SYNTHETIC created by real UI');
+  await catalog
+    .getByLabel('Buscar motivo', { exact: true })
+    .fill('synthetic_created');
+  await expect(catalog.locator('article')).toHaveCount(1);
+  await expect(page).not.toHaveURL(/pauses_page=/);
+  await catalog
+    .getByRole('button', { name: 'Editar motivo de pausa', exact: true })
+    .click();
+  dialog = page.getByRole('dialog');
+  await dialog
+    .getByLabel('Nome', { exact: true })
+    .fill('SYNTHETIC reviewed draft');
+  const current = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  const currentItem = (await current.json()).item;
+  const concurrent = await page.request.patch(endpoint, {
+    headers: target.administrator,
+    data: {
+      pause_catalog: {
+        enforced: false,
+        entries: currentItem.entries.map(row =>
+          row.code === 'synthetic_created'
+            ? { ...row, name: 'SYNTHETIC concurrent server' }
+            : row
+        ),
+      },
+      expected_revision: currentItem.revision,
+    },
+  });
+  expect(concurrent.status()).toBe(200);
+  const denied = page.waitForResponse(
+    response =>
+      new URL(response.url()).origin === 'http://127.0.0.1:5386' &&
+      new URL(response.url()).pathname === new URL(endpoint).pathname &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await denied).status()).toBe(409);
+  await expect(dialog.getByLabel('Nome', { exact: true })).toHaveValue(
+    'SYNTHETIC reviewed draft'
+  );
+  await dialog
+    .getByRole('button', {
+      name: 'Carregar versão atual para comparar',
+      exact: true,
+    })
+    .click();
+  await expect(dialog.locator('[data-configuration-latest]')).toContainText(
+    'SYNTHETIC concurrent server'
+  );
+  await dialog.locator('[data-configuration-review]').check();
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeEnabled();
+  await dialog
+    .getByLabel('Nome', { exact: true })
+    .fill('SYNTHETIC final reviewed draft');
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeDisabled();
+  await dialog.locator('[data-configuration-review]').check();
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await page.reload();
+  await expect(catalog).toContainText('SYNTHETIC final reviewed draft');
+  await catalog.getByLabel('Buscar motivo', { exact: true }).fill('');
+  await expect(catalog.locator('article')).toHaveCount(20);
+  await catalog
+    .getByRole('button', {
+      name: 'Exigir catálogo para novas pausas',
+      exact: true,
+    })
+    .click();
+  dialog = page.getByRole('dialog');
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeDisabled();
+  await dialog
+    .getByLabel(
+      'Revisei os motivos e confirmo a exigência do catálogo para novas pausas nesta conta.',
+      { exact: true }
+    )
+    .check();
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await page.reload();
+  await expect(catalog).toContainText(
+    'Catálogo obrigatório para novas pausas.'
+  );
+  const persisted = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  const item = (await persisted.json()).item;
+  expect(item.enforced).toBe(true);
+  expect(item.entries).toHaveLength(21);
+  expect(
+    item.entries.find(row => row.code === 'synthetic_created')
+  ).toMatchObject({
+    name: 'SYNTHETIC final reviewed draft',
+    minimum_minutes: 15,
+    default_minutes: 30,
+    maximum_minutes: 60,
+  });
+  const audit = await page.request.get(
+    endpoint.replace(
+      '/pause_catalog',
+      `/configuration_audits?resource_type=pause_catalog&resource_id=${target.account_id}`
+    ),
+    { headers: target.administrator }
+  );
+  expect(audit.status()).toBe(200);
+  expect((await audit.json()).items.length).toBeGreaterThan(0);
+  await catalog.locator('[data-pause-catalog-history]').click();
+  await expect(page).toHaveURL(/audit_config_resource_type=pause_catalog/);
+  await expect(
+    page.getByRole('heading', { name: 'Auditoria administrativa', exact: true })
+  ).toBeVisible();
+});
+
+test('local pause catalog operator preserves legacy history and enforces only authorized new reasons', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].operations;
+  const api = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const catalogUrl = api + '/pause_catalog';
+  const initial = await page.request.get(catalogUrl, {
+    headers: target.administrator,
+  });
+  const old = (await initial.json()).item;
+  const definitions = [
+    {
+      code: 'synthetic_a',
+      name: 'SYNTHETIC allowed pause A',
+      category: 'SYNTHETIC',
+      description: '',
+      active: true,
+      minimum_minutes: 0,
+      default_minutes: 30,
+      maximum_minutes: 60,
+      unit_ids: [target.unit_id],
+      custom_role_ids: [target.operator_role_id],
+    },
+    {
+      code: 'synthetic_b',
+      name: 'SYNTHETIC denied pause B',
+      category: 'SYNTHETIC',
+      description: '',
+      active: true,
+      minimum_minutes: 0,
+      default_minutes: 30,
+      maximum_minutes: 60,
+      unit_ids: [target.denied_unit_id],
+      custom_role_ids: [],
+    },
+  ];
+  const saved = await page.request.patch(catalogUrl, {
+    headers: target.administrator,
+    data: {
+      pause_catalog: { enforced: false, entries: definitions },
+      expected_revision: old.revision,
+    },
+  });
+  expect(saved.status()).toBe(200);
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/operacao?native_navigation=1`
+  );
+  const reasons = page.getByRole('combobox', {
+    name: 'Motivo da pausa',
+    exact: true,
+  });
+  await expect(reasons.locator('option[value="coffee"]')).toHaveCount(1);
+  await expect(reasons.locator('option[value="synthetic_a"]')).toHaveCount(1);
+  await expect(reasons.locator('option[value="synthetic_b"]')).toHaveCount(0);
+  await reasons.selectOption('coffee');
+  await page.getByRole('button', { name: 'Em pausa', exact: true }).click();
+  await expect(page.getByRole('timer')).toBeVisible();
+  const legacy = await page.request.get(api + '/agent_state', {
+    headers: target.operator,
+  });
+  const legacyState = (await legacy.json()).item;
+  expect(legacyState.reason_code).toBe('coffee');
+  const activated = await page.request.patch(catalogUrl, {
+    headers: target.administrator,
+    data: {
+      pause_catalog: { enforced: true, entries: definitions },
+      expected_revision: (await saved.json()).item.revision,
+      activation_confirmed: true,
+    },
+  });
+  expect(activated.status()).toBe(200);
+  await page.reload();
+  await expect(page.getByRole('timer')).toBeVisible();
+  const stillPaused = await page.request.get(api + '/agent_state', {
+    headers: target.operator,
+  });
+  expect((await stillPaused.json()).item).toMatchObject({
+    state: 'paused',
+    state_version: legacyState.state_version,
+    reason_code: 'coffee',
+  });
+  await expect(reasons.locator('option[value="coffee"]')).toHaveCount(0);
+  await expect(reasons.locator('option[value="synthetic_b"]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Retomar', exact: true }).click();
+  await expect(page.getByRole('timer')).toHaveCount(0);
+  const ready = await page.request.get(api + '/agent_state', {
+    headers: target.operator,
+  });
+  const before = (await ready.json()).item;
+  const denied = await page.request.patch(api + '/agent_state', {
+    headers: target.operator,
+    data: {
+      agent_state: {
+        state: 'paused',
+        reason_code: 'synthetic_b',
+        queue_id: target.queue_id,
+        expected_state_version: before.state_version,
+        command_id: randomUUID(),
+      },
+    },
+  });
+  expect(denied.status()).toBe(422);
+  const deniedGlobal = await page.request.get(catalogUrl, {
+    headers: target.scoped,
+  });
+  expect(deniedGlobal.status()).toBe(401);
+  const deniedOperator = await page.request.get(catalogUrl, {
+    headers: target.operator,
+  });
+  expect(deniedOperator.status()).toBe(401);
+  await page
+    .getByRole('combobox', { name: 'Filas', exact: true })
+    .selectOption(String(target.queue_id));
+  await reasons.selectOption('synthetic_a');
+  await page.getByRole('button', { name: 'Em pausa', exact: true }).click();
+  await expect(page.getByRole('timer')).toContainText(
+    'SYNTHETIC allowed pause A'
+  );
+  const final = await page.request.get(api + '/agent_state', {
+    headers: target.operator,
+  });
+  const paused = (await final.json()).item;
+  expect(paused).toMatchObject({
+    state: 'paused',
+    reason_code: 'synthetic_a',
+    provider_confirmed: false,
+    pause_definition: {
+      name: 'SYNTHETIC allowed pause A',
+      default_minutes: 30,
+      maximum_minutes: 60,
+    },
+  });
+  expect(paused.pause_definition).not.toHaveProperty('unit_ids');
+  expect(paused.pause_catalog.entries.map(row => row.code)).toEqual([
+    'synthetic_a',
+  ]);
+  await expect(page.locator('html')).toHaveClass(
+    info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-pause-catalog-operator.png`,
+    fullPage: false,
+  });
 });

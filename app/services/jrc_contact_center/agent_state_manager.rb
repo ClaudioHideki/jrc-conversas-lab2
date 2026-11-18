@@ -53,7 +53,7 @@ class JrcContactCenter::AgentStateManager
   def authorize_operator!
     context = { account: @account, account_user: @member, user: @member.user }
     policy = JrcContactCenter::ModulePolicy.new(context, :contact_center)
-    raise Pundit::NotAuthorizedError unless policy.operate?
+    raise Pundit::NotAuthorizedError unless @member.user.reload.active_for_authentication? && policy.operate?
   end
 
   def events
@@ -65,6 +65,7 @@ class JrcContactCenter::AgentStateManager
   end
 
   def validate_request!(attributes, command_id)
+    JrcContactCenter::PauseCatalog.new(account: @account).enforced? # Validate storage before any state write or replay.
     raise JrcContactCenter::OperationError, 'invalid_agent_state' unless OPERATOR_STATES.include?(attributes[:state])
     raise JrcContactCenter::OperationError, 'command_id_required' if command_id.blank? || command_id.to_s.length > 100
     raise JrcContactCenter::OperationError, 'pause_reason_required' if attributes[:state] == 'paused' && attributes[:reason_code].blank?
@@ -82,10 +83,22 @@ class JrcContactCenter::AgentStateManager
     validate_operator_state!(state, attributes, expected_version)
     previous = state.current
     event = events.create!(attributes.merge(started_at: Time.current, source: LOCAL_SOURCE, external_event_id: event_id,
-                                            metadata: { 'request_digest' => digest, 'provider_confirmed' => false }))
+                                            metadata: operator_metadata(attributes, digest)))
     close_previous(previous, event)
     sync_native_availability(attributes)
     event
+  end
+
+  def operator_metadata(attributes, digest)
+    metadata = { 'request_digest' => digest, 'provider_confirmed' => false }
+    return metadata unless attributes[:state] == 'paused'
+
+    memberships = snapshot.memberships
+    memberships = memberships.where(queue_id: attributes[:queue_id]) if attributes[:queue_id]
+    definition = JrcContactCenter::PauseCatalog.new(account: @account).selection(
+      attributes[:reason_code], member: @member, memberships: memberships
+    )
+    definition ? metadata.merge('pause_definition' => definition) : metadata
   end
 
   def validate_operator_state!(state, attributes, expected_version)
