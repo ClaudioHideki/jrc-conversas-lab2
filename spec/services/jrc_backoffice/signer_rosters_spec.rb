@@ -1,7 +1,7 @@
 require 'rails_helper'
 require Rails.root.join('db/migrate/20261102070000_create_backoffice_signer_rosters')
 
-RSpec.describe JrcBackoffice::SignerRosters do
+RSpec.describe JrcBackoffice::SignerRosters, :authority_core do
   let(:account) { create(:account) }
   let(:actor) { create(:user, account: account, role: :administrator) }
   let(:customer) { account.master_companies.create!(name: 'TESTE SINTÉTICO — Cliente', relationship_type: 'customer') }
@@ -195,7 +195,9 @@ RSpec.describe JrcBackoffice::SignerRosters do
                                change_reason: 'TESTE SINTÉTICO — Minuta com assinantes definidos.')
     expect(version).to have_attributes(source_format_version: 2, signer_roster_id: selected.id)
     expect(version.snapshot.dig('signer_roster', 'source')).to eq(selected.snapshot)
-    extracted = version.pdf_blob.open { |file| JrcBackoffice::TextExtraction.call(file.path, 'application/pdf').fetch(:text) }
+    extraction = version.pdf_blob.open { |file| JrcBackoffice::TextExtraction.call(file.path, 'application/pdf') }
+    expect(extraction).to include(engine: 'poppler', page_limit: 5)
+    extracted = extraction.fetch(:text)
     expect(extracted).to include(customer_person.name, issuer_person.name, '11144477735', '52998224725')
     selected.snapshot.fetch('signers').each do |person|
       expect(extracted.scan(person.fetch('anchor')).length).to eq(1)
@@ -232,21 +234,28 @@ RSpec.describe JrcBackoffice::SignerRosters do
     expect(Digest::SHA256.hexdigest(versions.download!(first.id).last)).to eq(first.pdf_sha256)
   end
 
-  it 'enforces the tenant fence for the immutable proposal even through a direct SQL insert' do
-    record = roster
-    foreign = create(:account)
-    expect do
-      ApplicationRecord.transaction(requires_new: true) do
-        ApplicationRecord.connection.execute(<<~SQL.squish)
-          INSERT INTO jrc_backoffice_signer_rosters (account_id,contract_id,backoffice_request_id,created_by_id,revision,
-            customer_mode,issuer_mode,idempotency_key,source_digest,input_digest,change_reason,source_snapshot,created_at,updated_at)
-          SELECT #{foreign.id},contract_id,backoffice_request_id,created_by_id,99,customer_mode,issuer_mode,'foreign-roster-intent',
-            source_digest,input_digest,change_reason,source_snapshot,created_at,updated_at
-          FROM jrc_backoffice_signer_rosters WHERE id=#{record.id}
-        SQL
-      end
-    end.to raise_error(ActiveRecord::InvalidForeignKey, /bo_signer_roster_contract_tenant/)
-    expect(record.reload.account_id).to eq(account.id)
+  # Keep every other FK valid so each tenant fence is proved independently.
+  %w[contract request].each do |source|
+    it "enforces the exact #{source} tenant fence even through a direct SQL insert" do
+      record = roster
+      foreign = create(:account)
+      origin = authority_domain(foreign, create(:user, account: foreign, role: :administrator))
+      contract_id = source == 'contract' ? origin.fetch(:contract).id : record.contract_id
+      request_id = source == 'request' ? origin.fetch(:operation).id : record.backoffice_request_id
+      expect do
+        ApplicationRecord.transaction(requires_new: true) do
+          ApplicationRecord.connection.execute(<<~SQL.squish)
+            INSERT INTO jrc_backoffice_signer_rosters (account_id,contract_id,backoffice_request_id,created_by_id,revision,
+              customer_mode,issuer_mode,idempotency_key,source_digest,input_digest,change_reason,source_snapshot,created_at,updated_at)
+            SELECT account_id,#{contract_id},#{request_id},created_by_id,99,customer_mode,issuer_mode,'foreign-roster-intent',
+              source_digest,input_digest,change_reason,source_snapshot,created_at,updated_at
+            FROM jrc_backoffice_signer_rosters WHERE id=#{record.id}
+          SQL
+        end
+      end.to raise_error(ActiveRecord::InvalidForeignKey, /bo_signer_roster_#{source}_tenant/)
+      expect(record.reload.account_id).to eq(account.id)
+      expect(service.scope.pluck(:id)).to eq([record.id])
+    end
   end
 
   it 'refuses a destructive rollback after a roster is preserved and retains the exact version and PDF' do

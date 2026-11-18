@@ -154,3 +154,33 @@ Não remover o teste de espera, aumentar timeout ou aceitar resposta incerta.
 O diagnóstico de timeout passa a registrar somente status HTTP observado e
 o lock esperado; nenhum header, payload ou credencial. Resultado da nova
 execução pendente, incluindo regressões corporativas, Vue e 112 Chrome.
+
+
+## Resultado nativo de 03de3a8f e regressões corporativas
+
+CI 44255888203: 845/845 principais, 23/23 concorrentes e 16/16
+reexecuções do ledger aprovadas. O cenário da fila comprovou espera real em
+Account e negou a gravação após revogação da fonte; nenhuma auditoria de
+atualização foi criada. Zero novas infrações Ruby em 155 arquivos comparados.
+Artefato 14407681498, SHA-256
+41e7e059d1b26c17685b05cebb0637efe03eca4e1c33b55ac8645d1212a084cf.
+
+A suíte adicional executou 84 exemplos e teve duas falhas, sem pendências
+nem erros externos. A extração do PDF devolveu texto vazio, e o workflow
+não declarava Poppler, exigido pelo TextExtraction nativo. Declarar
+poppler-utils pelo mesmo helper HTTPS/assinaturas e verificar o executável
+antes dos testes. Exigir também engine poppler e manter todas as provas de
+nomes, identificadores sintéticos, âncoras únicas e hash do PDF. Essa
+correção de ambiente ainda precisa demonstrar o resultado no novo SHA.
+
+O INSERT do outro cenário tornava duas FKs inválidas simultaneamente. O
+PostgreSQL rejeitou pela origem da solicitação, mas o teste exigia a do
+contrato. Separar os dois cenários com origens estrangeiras criadas pelos
+serviços/fixtures nativos: só uma FK composta inválida em cada tentativa,
+exigindo seu nome exato e a preservação do registro e do escopo original.
+Não aceitar um erro genérico, remover constraints ou alterar migrations.
+São 85 exemplos corporativos esperados após essa ampliação. Nenhum código
+funcional do Backoffice ou do gerador de PDF foi alterado.
+
+Vue e Chrome não rodaram nesse SHA. A atividade recente continua em
+incremento separado, sem alegar aceite integral das figuras do Word.

@@ -1,5 +1,5 @@
 {
-  "status": "6ab822a0 main/lint approved; ConfigurationWrite Account mutex coordination prepared after one concurrency failure",
+  "status": "845 main and 23 concurrency passed on 03de3a8f; two additional corporate QA failures under correction, overall gate not approved",
   "observed_sha": "31d571727427bce5245486f0ef747dce7adf3d8e",
   "native_sources": [
     "app/models/jrc_crm/team_scope.rb",
@@ -153,5 +153,30 @@
       }
     ],
     "original_checkout_touched": false
+  },
+  "account_mutex_native_evidence": {
+    "sha": "03de3a8f39d9d7d44b34b2989a4b2b725bf50c5d",
+    "run": 44255888203,
+    "artifact": 14407681498,
+    "artifact_sha256": "41e7e059d1b26c17685b05cebb0637efe03eca4e1c33b55ac8645d1212a084cf",
+    "rails_main": 845,
+    "rails_concurrency": 23,
+    "schema_reload_reexecuted_examples": 16,
+    "corporate": {
+      "examples": 84,
+      "failures": 2,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "new_ruby_offenses": 0,
+    "vue_and_chrome": "not executed: corporate gate failed",
+    "account_mutex_revocation_test": "passed",
+    "new_attempt_required": true
+  },
+  "corporate_qa_corrections": {
+    "runtime": "explicit poppler-utils and executable/version preflight in same HTTPS APT helper; no PDF text assertion removed",
+    "sql": "isolate contract/request tenant FKs using real foreign native origin; require exact constraint for each; keep persisted row and original scope unchanged",
+    "new_corporate_examples_expected": 85,
+    "product_or_migration_changed_for_qa": false
   }
 }

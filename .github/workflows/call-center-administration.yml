@@ -64,7 +64,10 @@ jobs:
           free -h
           df -h /
       - name: Native dependencies over verified HTTPS APT
-        run: bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev fonts-dejavu-core postgresql-client
+        run: |
+          bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev fonts-dejavu-core postgresql-client poppler-utils
+          command -v pdftotext
+          pdftotext -v
       - uses: ruby/setup-ruby@v1
         id: ruby_runtime
         with:
