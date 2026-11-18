@@ -1,11 +1,11 @@
 require 'rails_helper'
 
-RSpec.describe JrcContactCenter::AgentStateManager, 'private pause justification' do
+RSpec.describe JrcContactCenter::AgentStateManager do
   let(:account) { create(:account) }
   let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:member) { account.account_users.find_by!(user: actor) }
   let(:catalog) { JrcContactCenter::PauseCatalog.new(account: account) }
-  let(:manager) { JrcContactCenter::AgentStateManager.new(account: account, account_user: member) }
+  let(:manager) { described_class.new(account: account, account_user: member) }
   let(:definition) do
     { 'code' => 'synthetic_break', 'name' => 'SYNTHETIC private pause', 'category' => 'SYNTHETIC', 'description' => '', 'active' => true,
       'minimum_minutes' => 0, 'default_minutes' => 30, 'maximum_minutes' => 60, 'unit_ids' => [], 'custom_role_ids' => [] }

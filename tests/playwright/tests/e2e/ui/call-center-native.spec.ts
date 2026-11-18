@@ -3682,6 +3682,22 @@ test('local pause catalog operator preserves legacy history and enforces only au
   await page.goto(
     `/app/accounts/${target.account_id}/contact-center/operacao?native_navigation=1`
   );
+  const observedContext = await page.request.get(api + '/context', {
+    headers: target.operator,
+  });
+  expect(observedContext.status()).toBe(200);
+  const counts = (await observedContext.json()).counts;
+  const cockpit = page.locator('[data-cockpit-observed-metrics]');
+  await expect(cockpit.locator('article strong')).toHaveText([
+    String(counts.active_calls),
+    String(counts.pending_callbacks),
+    '—',
+    String(counts.open_cases),
+  ]);
+  await expect(cockpit).toContainText('Chamadas ativas');
+  await expect(cockpit).toContainText('Retornos pendentes');
+  await expect(cockpit).toContainText('Ocorrências abertas');
+  await expect(cockpit).toContainText('Tempo médio pendente de fonte');
   const reasons = page.getByRole('combobox', {
     name: 'Motivo da pausa',
     exact: true,

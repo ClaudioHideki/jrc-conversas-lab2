@@ -264,3 +264,20 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - Artefato14461285550,SHA-256 8e777911b1547ea7a7e3a58a4a7f931a081235f8cd8205bfee6f212989f29119 recuperado e verificado.
 - Corrigidas as seis causas: espaçamento após guarda,exclude? booleano literal,alinhamento de hash,classe exata no spec e dois exemplos divididos. Todas as verificações preservadas; mais dois exemplos nativos. Spec renomeado para agent_state_manager_pause_justification_spec.rb;19 exemplos preservados,hash antigo fixado no controle de rename e checkpoint85 intacto.
 - O incremento de aviso ao supervisor foi concluído na cópia temporária com oitoRails/doisVue/quatroChrome adicionais; gate seguinte exige140 preservando136. Nenhuma mudança no PABX,ativação real,imagem ou deploy. NovaCI própria obrigatória antes do aceite.
+
+
+### Call Center — cockpit com dados observados, próximo incremento
+
+- Corrigidos na cópia temporária os rótulos das contagens nativas, ausência versus zero e referência ilustrativa do cockpit. Controles reais preservados; catálogo demonstrativo permanece nas suas rotas. TMA,satisfação e população diária não foram inventados.
+- Contexto nativo de autenticação reaproveitado do supervisor para limpar dados e rejeitar respostas tardias após conta/usuário/perfil/permissões; atualização negada limpa observações e seleção anteriores. Nenhum comando PABX.
+- SeteVue preparados e quatroChrome existentes ampliados,com comparação ao contexto real;140 obrigatórios preservados. Ainda não executados neste candidato. ADR:docs/adr/20261118-call-center-cockpit-observed-metrics.md.
+- Correção adicional de fixture do aviso de pausa preparada: ao retirar a única membership visível à UnidadeA,a API corretamente omite o agente; depois a coberturaGroup sintética permite confirmar que a membership remanescente não revela aviso da fila retirada. Nenhuma permissão real alterada. A CI66 em andamento permanece imutável.
+
+
+### Call Center — diagnóstico66fa4f9a
+
+- CI44374575657:986 principais,985 aprovados e uma falha de fixture;16 recargas aprovadas. Concorrência,corporativos,Vue,assets eChrome não executados. Artefato14463100420,SHA-256 60e22bb6e8e7f5559ab08b741007aa23aead5258d8dcac08f95abdb56e38c3e7 verificado.
+- AAPI corretamente omitiu o agente após sua última membership visível àUnidadeA ser retirada. Corrigido o teste para provar essa ausência e depois a visãoGroup sem aviso da fila sem participação atual. Mais asserções,sem aceitar resultados alternativos.
+- Quatro convenções corrigidas: classe exata sem segundo argumento descritivo indevido,described_class,prefixo nativo do arquivo e deslocamentos de relógio sempre em blocos.
+- Coletor opcional de sugestões tentouESLint sem dependências instaladas após a falhaRails. Condicionado ao pré-requisito real e registrado como não executado quando ausente. Gates obrigatórios preservados; YAML e seis combinações estáticas validadas.
+- Cockpit observado e seteVue preparados separadamente; quatroChrome existentes ampliados,140 preservados. NovaCI própria antes do aceite. Sem imagem,deploy,produção ouPABX.

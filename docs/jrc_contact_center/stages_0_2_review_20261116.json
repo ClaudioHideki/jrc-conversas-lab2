@@ -3091,5 +3091,49 @@
     ],
     "correction": "Guard spacing, strict boolean exclude?, native class/spec prefix rename, hash alignment and two examples split without dropping assertions. Adds two examples; own new CI required.",
     "later_supervisor_increment": "Eight native, two Vue and four Chrome new scenarios prepared; no prior approval inherited."
+  },
+  "cockpit_observed_candidate_20261118": {
+    "status": "temporary_prepared_not_natively_tested",
+    "native_counts_reused": [
+      "active_calls",
+      "pending_callbacks",
+      "open_cases"
+    ],
+    "average_time": "unknown_with_pending_label",
+    "satisfaction_and_today_population": "not_invented_or_presented_as_operational",
+    "demonstration_catalog_preserved_on_reference_routes": true,
+    "native_controls_preserved": true,
+    "authentication_fingerprint": "same existing account/user/profile/permission pattern as supervisor",
+    "new_vue_prepared": 7,
+    "existing_chrome_expanded": 4,
+    "required_chrome": 140,
+    "backend_query_or_permissions_changed": false,
+    "adr": "docs/adr/20261118-call-center-cockpit-observed-metrics.md",
+    "word_complete": false
+  },
+  "qa_66fa4f9a_20261118": {
+    "sha": "66fa4f9ae5d8b0264f2cd33b67efd5d7510b57f1",
+    "run": 44374575657,
+    "artifact": 14463100420,
+    "artifact_sha256": "60e22bb6e8e7f5559ab08b741007aa23aead5258d8dcac08f95abdb56e38c3e7",
+    "main_rails": {
+      "examples": 986,
+      "failed": 1,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "schema_reload_reexecutions": 16,
+    "ruby_new_offenses": 4,
+    "not_run": [
+      "concurrency",
+      "corporate_regressions",
+      "Vue",
+      "assets",
+      "Chrome"
+    ],
+    "failure": "The Unit A fixture removed its last visible membership, so the native scope returned no agent. Corrected test verifies empty Unit A response and Group visibility without current-queue notice, with all assertions retained/strengthened.",
+    "lint_correction": "Removed an invalid second describe argument, used described_class, retained native filename prefix, block-scoped all clock changes instead of redundant cleanup.",
+    "diagnostic_failure": "Optional formatter attempted ESLint before dependencies installation, which was skipped after Rails failure. Added explicit prerequisite guard and not-run evidence; required gates unchanged.",
+    "full_word_complete": false
   }
 }

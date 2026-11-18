@@ -40,7 +40,6 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
 
   before do
     Current.reset
-    travel_to(Time.current.change(usec: 0))
     account.enable_features!('jrc_contact_center', 'custom_roles', 'audit_logs')
     role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_supervise])
     account.account_users.find_by!(user: observer).update!(custom_role: role)
@@ -53,13 +52,12 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
   end
 
   after do
-    travel_back
     Current.reset
   end
 
   it 'exposes only duration and an exceeded flag without resuming availability or exposing private definition/text' do
     previous = event.attributes.deep_dup
-    travel_to(event.started_at + 61.seconds) do
+    travel_to(Time.at((event.started_at + 61.seconds).to_f.ceil)) do
       get endpoint, headers: observer.create_new_auth_token
       expect(response).to have_http_status(:ok)
       data = response.parsed_body.fetch('agents').sole
@@ -74,7 +72,7 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
 
   it 'keeps a real zero and the exact informational threshold distinct from an exceeded pause' do
     [0, 60].each do |elapsed|
-      travel_to(event.started_at + elapsed.seconds) do
+      travel_to(Time.at((event.started_at + elapsed.seconds).to_f.ceil)) do
         get endpoint, headers: observer.create_new_auth_token
         expect(response.parsed_body.fetch('agents').sole.fetch('pause_notice')).to eq('elapsed_seconds' => elapsed, 'exceeded' => false)
       end
@@ -84,7 +82,7 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
   it 'uses the immutable event limit rather than changing an existing pause when the catalog changes' do
     previous = event.attributes.deep_dup
     catalog.update!({ 'enforced' => true, 'entries' => [reason.merge('maximum_minutes' => 100)] }, expected_revision: catalog.revision)
-    travel_to(event.started_at + 61.seconds) do
+    travel_to(Time.at((event.started_at + 61.seconds).to_f.ceil)) do
       get endpoint, headers: observer.create_new_auth_token
       expect(response.parsed_body.fetch('agents').sole.dig('pause_notice', 'exceeded')).to be(true)
       expect(event.reload.attributes).to eq(previous)
@@ -100,7 +98,13 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
   it 'does not derive a duration notice after the current queue membership is withdrawn' do
     JrcContactCenter::QueueMembership.find_by!(account: account, account_user: member, queue: pause_queue).update!(active: false)
     get endpoint, headers: observer.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('agents')).to be_empty
+    JrcCrm::UserBusinessUnit.find_by!(account: account, user: observer).update!(scope: 'GROUP', company: nil, business_unit: nil)
+    get endpoint, headers: observer.create_new_auth_token
+    expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('agents').sole.fetch('pause_notice')).to be_nil
+    expect(response.body).not_to include('SYNTHETIC PRIVATE pause duration explanation')
   end
 
   it 'does not invent an informational limit for an external provider pause without a native local definition' do
@@ -124,7 +128,7 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
 
     it 'keeps private text hidden when a Group supervisor can observe the current queue duration' do
       JrcCrm::UserBusinessUnit.find_by!(account: account, user: observer).update!(scope: 'GROUP', company: nil, business_unit: nil)
-      travel_to(event.started_at + 61.seconds) do
+      travel_to(Time.at((event.started_at + 61.seconds).to_f.ceil)) do
         get endpoint, headers: observer.create_new_auth_token
         expect(response).to have_http_status(:ok)
         expect(response.parsed_body.fetch('agents').sole.dig('pause_notice', 'exceeded')).to be(true)

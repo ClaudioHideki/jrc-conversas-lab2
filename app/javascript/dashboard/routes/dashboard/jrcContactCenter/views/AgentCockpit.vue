@@ -1,9 +1,10 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
+import { useMapGetter } from 'dashboard/composables/store';
 import VisualShowcasePage from '../components/visual/VisualShowcasePage.vue';
 import VisualSectionCard from '../components/visual/VisualSectionCard.vue';
 import VisualStatusBadge from '../components/visual/VisualStatusBadge.vue';
@@ -24,20 +25,66 @@ let generation = 0;
 
 const accountId = computed(() => route.params.accountId);
 const selectedCallbackId = computed(() => String(route.query.callbackId || ''));
+const currentUser = useMapGetter('getCurrentUser');
+const contextKey = computed(() => {
+  const account = currentUser.value?.accounts?.find(
+    row => String(row.id) === String(accountId.value)
+  );
+  return JSON.stringify([
+    accountId.value,
+    currentUser.value?.id,
+    currentUser.value?.type,
+    account?.role,
+    account?.custom_role_id,
+    account?.permissions?.slice().sort(),
+  ]);
+});
+const clearObserved = () => {
+  context.value = null;
+  calls.value = [];
+  callbacks.value = [];
+  selectedCallId.value = null;
+};
 
 const cockpitScreen = computed(() => {
   const source = contactCenterScreen('cockpit', t);
-  const counts = context.value?.counts || {};
-  const metrics = source.metrics.map((item, index) => {
-    const values = [
-      counts.active_calls ?? item.value,
-      counts.pending_callbacks ?? item.value,
-      item.value,
-      counts.open_cases ?? item.value,
-    ];
-    return { ...item, value: values[index] };
-  });
-  return { ...source, metrics };
+  const counts = context.value?.counts;
+  const values = [
+    counts?.active_calls ?? '—',
+    counts?.pending_callbacks ?? '—',
+    '—',
+    counts?.open_cases ?? '—',
+  ];
+  const labels = [
+    t('JRC_CONTACT_CENTER.COCKPIT.OBSERVED_ACTIVE_CALLS'),
+    t('JRC_CONTACT_CENTER.COCKPIT.OBSERVED_CALLBACKS'),
+    source.metrics[2].label,
+    t('JRC_CONTACT_CENTER.COCKPIT.OBSERVED_CASES'),
+  ];
+  const observed = Boolean(counts);
+  const detail = observed
+    ? t('JRC_CONTACT_CENTER.SUPERVISOR.LOCAL_SOURCE')
+    : t('JRC_CONTACT_CENTER.SUPERVISOR.UNOBSERVED');
+  let status = { label: detail, tone: observed ? 'blue' : 'slate' };
+  if (loading.value)
+    status = { label: t('JRC_CONTACT_CENTER.COMMON.LOADING'), tone: 'slate' };
+  if (failed.value)
+    status = { label: t('JRC_CONTACT_CENTER.COMMON.ERROR'), tone: 'ruby' };
+  return {
+    ...source,
+    status,
+    primary: null,
+    secondary: null,
+    metrics: source.metrics.map((item, index) => ({
+      ...item,
+      value: values[index],
+      label: labels[index],
+      trend: '',
+      icon: index === 3 ? 'i-lucide-ticket' : item.icon,
+      detail:
+        index === 2 ? t('JRC_CONTACT_CENTER.COCKPIT.AVERAGE_PENDING') : detail,
+    })),
+  };
 });
 
 const activeCalls = computed(() =>
@@ -59,7 +106,10 @@ const refreshCallbacks = async () => {
       ['scheduled', 'in_progress', 'failed'].includes(item.state)
     );
   } catch {
-    if (version === generation) failed.value = true;
+    if (version === generation) {
+      clearObserved();
+      failed.value = true;
+    }
   }
 };
 
@@ -78,47 +128,54 @@ const openCall = call => {
   });
 };
 
-watch(
-  accountId,
-  async id => {
-    generation += 1;
-    const version = generation;
-    loading.value = true;
-    failed.value = false;
-    context.value = null;
-    calls.value = [];
-    callbacks.value = [];
-    selectedCallId.value = null;
-    try {
-      const [contextResponse, callsResponse, callbacksResponse] =
-        await Promise.all([
-          JrcContactCenterAPI.context(id),
-          JrcContactCenterAPI.calls(id, { limit: 20 }),
-          JrcContactCenterAPI.callbacks(id),
-        ]);
-      if (version !== generation) return;
-      context.value = contextResponse.data;
-      calls.value = callsResponse.data.items || [];
-      callbacks.value = (callbacksResponse.data.items || []).filter(item =>
-        ['scheduled', 'in_progress', 'failed'].includes(item.state)
-      );
-      const queryCallId = Number(route.query.callId);
-      if (Number.isInteger(queryCallId) && queryCallId > 0) {
-        selectedCallId.value = queryCallId;
-      }
-    } catch {
-      if (version === generation) failed.value = true;
-    } finally {
-      if (version === generation) loading.value = false;
-    }
-  },
-  { immediate: true }
-);
+const load = async () => {
+  generation += 1;
+  const version = generation;
+  const id = accountId.value;
+  loading.value = true;
+  failed.value = false;
+  clearObserved();
+  if (!currentUser.value?.id) {
+    failed.value = true;
+    loading.value = false;
+    return;
+  }
+  try {
+    const [contextResponse, callsResponse, callbacksResponse] =
+      await Promise.all([
+        JrcContactCenterAPI.context(id),
+        JrcContactCenterAPI.calls(id, { limit: 20 }),
+        JrcContactCenterAPI.callbacks(id),
+      ]);
+    if (version !== generation) return;
+    context.value = contextResponse.data;
+    calls.value = callsResponse.data.items || [];
+    callbacks.value = (callbacksResponse.data.items || []).filter(item =>
+      ['scheduled', 'in_progress', 'failed'].includes(item.state)
+    );
+    const queryCallId = Number(route.query.callId);
+    if (Number.isInteger(queryCallId) && queryCallId > 0)
+      selectedCallId.value = queryCallId;
+  } catch {
+    if (version === generation) failed.value = true;
+  } finally {
+    if (version === generation) loading.value = false;
+  }
+};
+watch(contextKey, load, { immediate: true });
+onBeforeUnmount(() => {
+  generation += 1;
+});
 </script>
 
 <template>
   <div>
-    <VisualShowcasePage :screen="cockpitScreen" />
+    <VisualShowcasePage
+      :screen="cockpitScreen"
+      overview-only
+      :show-demo-badge="false"
+      data-cockpit-observed-metrics
+    />
 
     <section class="space-y-5 px-4 pb-6 sm:px-6">
       <AgentStatePanel

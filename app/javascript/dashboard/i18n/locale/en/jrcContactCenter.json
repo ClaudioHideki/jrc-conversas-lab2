@@ -113,7 +113,11 @@
       "DESCRIPTION": "Acompanhe chamadas, registre ocorrencias e programe retornos na Minha Agenda.",
       "RECENT_CALLS": "Chamadas recentes",
       "NO_LIVE_PROVIDER": "Chamadas ao vivo, distribuicao em fila, transferencias e gravacoes aguardam a homologacao do JRC PABX.",
-      "CALLBACKS": "Callbacks programados"
+      "CALLBACKS": "Callbacks programados",
+      "OBSERVED_ACTIVE_CALLS": "Chamadas ativas",
+      "OBSERVED_CALLBACKS": "Retornos pendentes",
+      "OBSERVED_CASES": "Ocorrências abertas",
+      "AVERAGE_PENDING": "Tempo médio pendente de fonte e critérios operacionais validados."
     },
     "SUPERVISOR": {
       "tme_seconds": "TME (segundos)",

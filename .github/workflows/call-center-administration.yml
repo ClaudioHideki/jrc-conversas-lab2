@@ -154,6 +154,7 @@ jobs:
           createdb -h 127.0.0.1 -U postgres jrc_quality_storage_synthetic
           psql -h 127.0.0.1 -U postgres -d jrc_quality_storage_synthetic -f spec/sql/voice_quality_scope_test.sql | tee /tmp/call-center-storage.txt
       - name: Frozen frontend dependencies
+        id: frontend_dependencies
         run: pnpm install --frozen-lockfile
       - name: Syntax and migration timestamp protections
         run: node script/validate_changed_source.mjs a24adc6dd8bb660f955b76cce0172ae1638deee2
@@ -175,8 +176,25 @@ jobs:
         run: |
           python3 -B script/jrc_call_center_lint_test.py
           python3 -B script/jrc_call_center_lint.py
+      - name: Record unavailable formatter prerequisites
+        if: failure() && steps.frontend_dependencies.outcome != 'success' && (steps.frontend_lint.outcome == 'failure' || steps.ruby_lint.outcome == 'failure')
+        env:
+          FRONTEND_DEPENDENCIES_OUTCOME: ${{ steps.frontend_dependencies.outcome }}
+        run: |
+          python3 -B - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          evidence = {
+              'status': 'not_run', 'reason': 'frontend_dependencies_not_successful',
+              'frontend_dependencies_outcome': os.environ['FRONTEND_DEPENDENCIES_OUTCOME'],
+              'mandatory_rails_and_lint_gates_preserved': True,
+              'ruby_report': '/tmp/call-center-rubocop.json',
+          }
+          Path('/tmp/call-center-formatter-unavailable.json').write_text(json.dumps(evidence, indent=2) + '\n')
+          PY
       - name: Preserve safe formatter suggestions without changing candidate source
-        if: failure() && (steps.frontend_lint.outcome == 'failure' || steps.ruby_lint.outcome == 'failure')
+        if: failure() && steps.frontend_dependencies.outcome == 'success' && (steps.frontend_lint.outcome == 'failure' || steps.ruby_lint.outcome == 'failure')
         run: python3 -B script/jrc_call_center_lint_suggestions.py
       - name: Guarded build of real CSS and components for the isolated Chrome test
         env:
