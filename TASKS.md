@@ -290,3 +290,11 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - [ ] Validar o popup ACW com persistência, revisão, negação de escopo e auditoria em 144 cenários Chrome (140 anteriores + 4 novos).
 - [ ] Concluir seleção intermediária/persistência do motivo e prévia do relógio, formulários vinculados e automações de encerramento conforme figura 9.
 - [ ] Homologação externa PABX permanece bloqueada por contrato indisponível. Nenhuma etapa ou conjunto das 23 figuras é declarado concluído.
+
+
+### ACW — revisão nativa517549ef
+
+- CI44401274599:1.175 Rails distintos,16 recargas,415Vue,zero falhas/pendências/erros externos nesses gates e zero novas infrações Ruby. Bootstrap15 e assets novos aprovados.
+- Chrome140/144; quatro falhas na consulta de histórico semresource_id. Corrigida aURL do teste com sua própria conta sintética; API permanece estrita. Causa confirmada nos quatro relatórios,sem excluir ou reduzir cenários.
+- Revisão real de quatroPNG identificou baixo contraste do botãoAdicionar regra no escuro. Cor semântica explícita e asserção de cor computada acrescentadas. Justificativa própria e aviso de duração agora aparecem nas capturasmobile.
+- Artefato14476916190 / ca15cf8ca34310540565ccfb1b22c1d6969031edecb9c05caa48f05e5bdb3719 recuperado e verificado. Aceite do novoSHA exige144/144; conjunto23 continua aberto. Roteamento preparado separadamente,sem validação nativa herdada.

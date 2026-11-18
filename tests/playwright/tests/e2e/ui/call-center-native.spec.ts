@@ -4204,6 +4204,21 @@ test('scoped ACW native popup persists queue rules blocks conflicts and keeps sc
   expect(
     await page.locator('html').evaluate(el => el.classList.contains('dark'))
   ).toBe(info.project.name.endsWith('dark'));
+  const addRuleColor = await dialog
+    .locator('[data-add-acw-rule]')
+    .evaluate(element => getComputedStyle(element).color);
+  const brightness = addRuleColor
+    .match(/[\d.]+/g)
+    .slice(0, 3)
+    .map(Number)
+    .reduce((sum, value) => sum + value, 0);
+  if (info.project.name.endsWith('dark'))
+    expect(brightness).toBeGreaterThan(600);
+  else expect(brightness).toBeLessThan(300);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-acw-rule-theme.json`,
+    JSON.stringify({ color: addRuleColor, brightness })
+  );
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-acw-scoped-rules.png`,
     fullPage: true,
@@ -4236,7 +4251,8 @@ test('scoped ACW native popup persists queue rules blocks conflicts and keeps sc
   });
   expect(denied.status()).toBe(401);
   const audit = await page.request.get(
-    ownApi + '/configuration_audits?resource_type=acw_policy&history=true',
+    ownApi +
+      `/configuration_audits?resource_type=acw_policy&resource_id=${target.account_id}&history=true`,
     { headers: target.administrator }
   );
   expect(audit.status()).toBe(200);

@@ -64,7 +64,7 @@ const setTime = (index, value) => {
 
 <template>
   <fieldset
-    class="min-w-0 space-y-3 sm:col-span-2"
+    class="min-w-0 space-y-3 text-n-slate-12 sm:col-span-2"
     :disabled="disabled"
     data-acw-scoped-rules
   >
@@ -171,7 +171,7 @@ const setTime = (index, value) => {
     <button
       type="button"
       :disabled="disabled || modelValue.length >= 100"
-      class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+      class="rounded-md border border-n-weak px-3 py-2 text-sm text-n-slate-12 disabled:opacity-50"
       data-add-acw-rule
       @click="add"
     >

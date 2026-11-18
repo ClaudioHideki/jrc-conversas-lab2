@@ -3246,5 +3246,37 @@
     ],
     "correction": "Load actual scoped-rule implementations and ActiveSupport in the standalone harness; keep its audit stub and non-native warning unchanged. Separate target lock, attendance identity and pending creation inside the original manager transaction; remove one extra blank line. No assertion or lint rule removed.",
     "full_word_complete": false
+  },
+  "qa_517549ef_20261118": {
+    "sha": "517549ef8bb2e6d7bea9058b3739f45f52402da0",
+    "run": 44401274599,
+    "artifact": 14476916190,
+    "artifact_sha256": "ca15cf8ca34310540565ccfb1b22c1d6969031edecb9c05caa48f05e5bdb3719",
+    "main_rails": 1026,
+    "concurrent_rails": 64,
+    "corporate_rails": 85,
+    "distinct_rails_verified": 1175,
+    "schema_reload_reexecutions": 16,
+    "vue_passed": 415,
+    "native_failures_pending_outside_errors": 0,
+    "ruby_new_offenses": 0,
+    "chrome": {
+      "passed": 140,
+      "failed": 4,
+      "skipped_flaky_outside_errors": 0,
+      "cause": "New ACW audit-history test URL omitted mandatory resource_id; all four projects received the correct API 422. Server validation is preserved; test now supplies its owned synthetic Account ID. All earlier save/reload/edit/conflict/denial assertions passed."
+    },
+    "visual_review": {
+      "actual_images": [
+        "mobile-dark-acw-scoped-rules.png",
+        "desktop-light-acw-scoped-rules.png",
+        "mobile-light-pause-catalog-operator.png",
+        "mobile-dark-supervisor-pause-notice.png"
+      ],
+      "finding": "ACW add-rule button inherited black text in dark theme. Explicit native semantic text color added only to the fieldset/button. Four existing Chrome cases now verify actual computed button brightness in their theme, preserving all144 cases. Own pause justification and supervisor warning are now in their actual mobile capture view."
+    },
+    "candidate_accepted": false,
+    "next_sha_native_validation": "required",
+    "all23_complete": false
   }
 }
