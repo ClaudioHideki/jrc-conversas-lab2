@@ -6,6 +6,7 @@ import Icon from 'dashboard/components-next/icon/Icon.vue';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import { useMapGetter } from 'dashboard/composables/store';
 import { agentStateLabels } from '../agentStateLabels';
+import { formatDuration } from 'shared/helpers/timeHelper';
 import { acwLabels } from '../../inbox/acwLabels';
 import VisualShowcasePage from '../components/visual/VisualShowcasePage.vue';
 import VisualSectionCard from '../components/visual/VisualSectionCard.vue';
@@ -278,6 +279,28 @@ onBeforeUnmount(() => {
                 :tone="agentTone(agent.state)"
                 dot
               />
+              <div
+                v-if="agent.pause_notice"
+                class="w-full min-w-0 rounded-lg border border-n-weak p-3 text-sm text-n-slate-12"
+                data-supervisor-pause-notice
+              >
+                <p>
+                  {{
+                    t('JRC_CONTACT_CENTER.PAUSE_CATALOG.SUPERVISOR_DURATION', {
+                      elapsed: formatDuration(
+                        agent.pause_notice.elapsed_seconds
+                      ),
+                    })
+                  }}
+                </p>
+                <p
+                  v-if="agent.pause_notice.exceeded"
+                  role="status"
+                  class="mt-1 text-n-amber-11"
+                >
+                  {{ t('JRC_CONTACT_CENTER.PAUSE_CATALOG.EXCEEDED') }}
+                </p>
+              </div>
               <div
                 v-for="record in agent.pending_qualifications || []"
                 :key="record.id"

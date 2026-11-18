@@ -3008,7 +3008,7 @@
     "stages_0_2_complete": false
   },
   "private_pause_justification_candidate_20261118": {
-    "status": "prepared_not_natively_tested",
+    "status": "native_and_vue_passed85fca000; six lint causes corrected; assets_and_Chrome_require_own_next_CI",
     "native_examples_prepared": 29,
     "vue_examples_prepared": 5,
     "existing_privacy_examples_strengthened": 5,
@@ -3019,7 +3019,9 @@
     "private_self_projection_only": true,
     "no_new_grants_tables_or_provider_commands": true,
     "adr": "docs/adr/20261118-call-center-private-pause-justification.md",
-    "figures_7_8_complete": false
+    "figures_7_8_complete": false,
+    "native_examples_after_split": 31,
+    "spec_path": "spec/services/jrc_contact_center/agent_state_manager_pause_justification_spec.rb"
   },
   "qa_2bbcab4c_20261118": {
     "sha": "2bbcab4cac5c434b38c1bbea3beaaa44a1c1d738",
@@ -3054,5 +3056,40 @@
     ],
     "visual_finding": "Four dialog screenshots are contained/readable in both themes; manager review is below the initial scroll position. Next own Chrome run will scroll to it before capture; current DOM/text/API/confirmation/persistence tests passed.",
     "full23_and_stages_0_2_complete": false
+  },
+  "supervisor_pause_notice_candidate_20261118": {
+    "status": "temporary_prepared_not_natively_tested",
+    "parent_candidate": "85fca00051dc88d861c16eae242c3ef822112029",
+    "native_new_prepared": 8,
+    "vue_new_prepared": 2,
+    "chrome_new_prepared": 4,
+    "future_required_chrome": 140,
+    "previous136_preserved": true,
+    "public_dto_fields": [
+      "elapsed_seconds",
+      "exceeded"
+    ],
+    "private_text_and_catalog_exposed": false,
+    "native_scope_required": "current explicit queue, observer AccessScope, active target membership and live target authority",
+    "external_ack_or_auto_resume": false,
+    "adr": "docs/adr/20261118-call-center-supervisor-pause-notice.md",
+    "figures_complete": false
+  },
+  "qa_85fca000_20261118": {
+    "sha": "85fca00051dc88d861c16eae242c3ef822112029",
+    "run": 44367512137,
+    "artifact": 14461285550,
+    "artifact_sha256": "8e777911b1547ea7a7e3a58a4a7f931a081235f8cd8205bfee6f212989f29119",
+    "rails_unique": 1122,
+    "schema_reload_reexecutions": 16,
+    "vue": 392,
+    "failures_pending_outside_errors": 0,
+    "new_ruby_offenses": 6,
+    "not_run": [
+      "assets",
+      "Chrome"
+    ],
+    "correction": "Guard spacing, strict boolean exclude?, native class/spec prefix rename, hash alignment and two examples split without dropping assertions. Adds two examples; own new CI required.",
+    "later_supervisor_increment": "Eight native, two Vue and four Chrome new scenarios prepared; no prior approval inherited."
   }
 }

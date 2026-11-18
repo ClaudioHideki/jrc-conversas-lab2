@@ -37,15 +37,21 @@ RSpec.describe 'Call Center private pause justification API', type: :request do
     end
   end
 
-  it 'persists private text, reloads it through the self API and preserves exactly-once receipt behavior' do
+  it 'persists private text and reloads it through non-cacheable authenticated self responses' do
     request = payload.deep_merge(agent_state: { justification: 'SYNTHETIC API private text' })
     patch endpoint, headers: headers, params: request, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.headers['Cache-Control']).to include('no-store')
-    version = response.parsed_body.dig('item', 'state_version')
     get endpoint, headers: headers
     expect(response.headers['Cache-Control']).to include('no-store')
     expect(response.parsed_body.dig('item', 'pause_definition', 'justification')).to eq('SYNTHETIC API private text')
+  end
+
+  it 'preserves exactly-once private receipt behavior and rejects changed text' do
+    request = payload.deep_merge(agent_state: { justification: 'SYNTHETIC API private text' })
+    patch endpoint, headers: headers, params: request, as: :json
+    expect(response).to have_http_status(:ok)
+    version = response.parsed_body.dig('item', 'state_version')
     patch endpoint, headers: headers, params: request, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig('item', 'state_version')).to eq(version)
@@ -58,7 +64,8 @@ RSpec.describe 'Call Center private pause justification API', type: :request do
 
   it 'does not use account or member IDs in a request to record a pause for another account' do
     other = create(:account)
-    patch "/api/v1/accounts/#{other.id}/jrc_contact_center/agent_state", headers: headers,
+    patch "/api/v1/accounts/#{other.id}/jrc_contact_center/agent_state",
+          headers: headers,
           params: payload.deep_merge(agent_state: { justification: 'SYNTHETIC denied', account_user_id: member.id }), as: :json
     expect(response).to have_http_status(:unauthorized)
     expect(JrcContactCenter::AgentStateEvent.where(account: [account, other])).to be_empty

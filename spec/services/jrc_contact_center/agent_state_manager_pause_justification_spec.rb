@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Native private pause justification' do
+RSpec.describe JrcContactCenter::AgentStateManager, 'private pause justification' do
   let(:account) { create(:account) }
   let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:member) { account.account_users.find_by!(user: actor) }

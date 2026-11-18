@@ -34,10 +34,29 @@ class JrcContactCenter::SupervisorSnapshot
     data[:queues] = data[:queues].select { |queue| permitted.include?(queue[:id]) }
     data[:eligible_queue_ids] &= permitted
     data[:reason_code] = nil if hidden_pause_reason?(snapshot, permitted)
+    data[:pause_notice] = scoped_pause_notice(snapshot, member, data, permitted)
     data[:pending_qualifications] = data[:pending_qualifications].select do |qualification|
       qualification['call_session_id'] && @access.call_sessions.exists?(id: qualification['call_session_id'])
     end
     data
+  end
+
+  # Derive a bounded operational signal; never copy private operator metadata into this response.
+  def scoped_pause_notice(snapshot, member, data, permitted)
+    event = snapshot.current
+    return unless visible_current_pause?(data, event, permitted)
+    return unless snapshot.memberships.exists?(queue_id: event.queue_id)
+
+    definition = JrcContactCenter::PauseDefinitionSnapshot.call(event: event, member: member, memberships: snapshot.memberships)
+    maximum = definition&.fetch('maximum_minutes', nil)
+    return unless maximum.is_a?(Integer)
+
+    elapsed = [Time.current - event.started_at, 0].max.floor
+    { elapsed_seconds: elapsed, exceeded: elapsed > maximum * 60 }
+  end
+
+  def visible_current_pause?(data, event, permitted)
+    data[:state] == 'paused' && event&.queue_id && permitted.include?(event.queue_id.to_s)
   end
 
   def hidden_pause_reason?(snapshot, permitted)

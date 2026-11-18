@@ -249,3 +249,18 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - Artefato14455379412,32.678.968bytes,SHA-256 df5cbf358d4c4aa12b18dc40ee9d7bb6629358853c31eb168a56b9f74609296f. Download e200 hashes de capturas verificados.
 - Quatro capturas do detalhe de auditoria efetivamente revisadas: desktops e celulares,claro/escuro,contidos e legíveis. O novo bloco do gestor aparece após rolagem interna; acrescentada rolagem explícita antes da captura seguinte. Sua confirmação,texto,persistência,negação eAPI passaram nesteSHA.
 - Catálogo básico e retirada direta do último agente validados; figuras7/8/12 e conjunto23 não concluídos. Justificativa posterior preparada separadamente e sem evidência nativa herdada.
+
+
+### Call Center — aviso de duração para o supervisor, próximo incremento
+
+- Preparados sinal derivado do evento autorizado, duração formatada pelo helper nativo e aviso de limite excedido. Nenhum texto privado, catálogo, retorno automático ou ACK PABX. Definição histórica preservada; sem evidência retorna ausência.
+- Oito Rails/API,doisVue e quatroChrome novos preparados, com contas próprias adicionais. Gate futuro exige140,preservando136 anteriores. Não executados nem aprovados no candidato.
+- ADR:docs/adr/20261118-call-center-supervisor-pause-notice.md. Incremento independente preparado após85fca000; a CI desteSHA não o contém.
+
+
+### Call Center — QA85fca000 e correção integral do lint
+
+- CI44367512137:1122 Rails únicos (976 principais,61 concorrência,85 corporativos),16 recargas e392Vue aprovados,sem falhas/pendências/erros externos. Assets/Chrome não executados por seis apontamentos Ruby; não homologado integralmente.
+- Artefato14461285550,SHA-256 8e777911b1547ea7a7e3a58a4a7f931a081235f8cd8205bfee6f212989f29119 recuperado e verificado.
+- Corrigidas as seis causas: espaçamento após guarda,exclude? booleano literal,alinhamento de hash,classe exata no spec e dois exemplos divididos. Todas as verificações preservadas; mais dois exemplos nativos. Spec renomeado para agent_state_manager_pause_justification_spec.rb;19 exemplos preservados,hash antigo fixado no controle de rename e checkpoint85 intacto.
+- O incremento de aviso ao supervisor foi concluído na cópia temporária com oitoRails/doisVue/quatroChrome adicionais; gate seguinte exige140 preservando136. Nenhuma mudança no PABX,ativação real,imagem ou deploy. NovaCI própria obrigatória antes do aceite.

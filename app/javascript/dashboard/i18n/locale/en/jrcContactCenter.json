@@ -2126,7 +2126,8 @@
       "JUSTIFICATION": "Justificativa da pausa",
       "JUSTIFICATION_PRIVATE": "Até 1.000 caracteres. Conteúdo privado do próprio operador; evite dados sensíveis.",
       "JUSTIFICATION_ERROR": "Informe uma justificativa válida de até 1.000 caracteres. O conteúdo preenchido foi preservado.",
-      "JUSTIFICATION_DETAIL": "Justificativa da pausa: {text}"
+      "JUSTIFICATION_DETAIL": "Justificativa da pausa: {text}",
+      "SUPERVISOR_DURATION": "Tempo em pausa: {elapsed}"
     },
     "QUEUE_WITHDRAWAL": {
       "TITLE": "Retirada do último agente elegível",

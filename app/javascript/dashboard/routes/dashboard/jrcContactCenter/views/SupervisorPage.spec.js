@@ -273,4 +273,74 @@ describe('native supervisor observed data', () => {
     ).toBe('—');
     expect(JrcContactCenterAPI.supervisor.mock.calls.length).toBe(count);
   });
+
+  it('shows the authorized observed pause duration and exceeded notice without exposing operator metadata', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: {
+        agents: [
+          {
+            account_user_id: '42',
+            name: 'SYNTHETIC operator',
+            state: 'paused',
+            eligible: false,
+            pause_notice: { elapsed_seconds: 61, exceeded: true },
+          },
+        ],
+        queues: [],
+      },
+    });
+    wrapper = shallowMount(SupervisorPage, {
+      global: {
+        stubs: {
+          VisualSectionCard: { template: '<section><slot /></section>' },
+        },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.get('[data-supervisor-pause-notice]').text()).toContain(
+      'Tempo em pausa: 01:01'
+    );
+    expect(
+      wrapper.get('[data-supervisor-pause-notice] [role="status"]').text()
+    ).toContain('A pausa continua ativa');
+    expect(wrapper.find('[data-own-pause-justification]').exists()).toBe(false);
+  });
+
+  it('keeps real zero without an exceeded alert and hides absent or unscoped duration evidence', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: {
+        agents: [
+          {
+            account_user_id: '42',
+            name: 'SYNTHETIC operator',
+            state: 'paused',
+            eligible: false,
+            pause_notice: { elapsed_seconds: 0, exceeded: false },
+          },
+          {
+            account_user_id: '43',
+            name: 'SYNTHETIC without evidence',
+            state: 'paused',
+            pause_notice: null,
+          },
+        ],
+        queues: [],
+      },
+    });
+    wrapper = shallowMount(SupervisorPage, {
+      global: {
+        stubs: {
+          VisualSectionCard: { template: '<section><slot /></section>' },
+        },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.findAll('[data-supervisor-pause-notice]')).toHaveLength(1);
+    expect(wrapper.get('[data-supervisor-pause-notice]').text()).toContain(
+      'Tempo em pausa: 00:00'
+    );
+    expect(
+      wrapper.find('[data-supervisor-pause-notice] [role="status"]').exists()
+    ).toBe(false);
+  });
 });

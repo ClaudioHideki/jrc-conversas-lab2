@@ -54,7 +54,7 @@ class JrcContactCenter::PauseReasonDefinition
     raise Invalid, ['code'] unless row['code'].match?(/\A[a-z0-9][a-z0-9_.-]{0,63}\z/)
     raise Invalid, ['active'] unless [true, false].include?(row['active'])
 
-    raise Invalid, ['justification_required'] if row.key?('justification_required') && ![true, false].include?(row['justification_required'])
+    raise Invalid, ['justification_required'] if row.key?('justification_required') && [true, false].exclude?(row['justification_required'])
 
     description = row.fetch('description', '')
     raise Invalid, ['description'] unless description.is_a?(String) && description.length <= 1000

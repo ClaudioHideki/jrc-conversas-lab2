@@ -91,6 +91,7 @@ class JrcContactCenter::PauseCatalog
     validator = JrcContactCenter::PauseReasonDefinition.new(account: @account)
     codes = entries.filter_map do |row|
       return false unless row.is_a?(Hash)
+
       fields = row.keys - JrcContactCenter::PauseReasonDefinition::OPTIONAL_FIELDS
       return false unless fields.sort == JrcContactCenter::PauseReasonDefinition::FIELDS.sort
       return false unless validator.call(row, verify_references: false) == row

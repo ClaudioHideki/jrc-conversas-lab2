@@ -34,11 +34,13 @@ const expectContainedDialog = async (page: Page) => {
 test.beforeEach(async ({ page }, info) => {
   const pauseKey = info.title.startsWith('last eligible queue withdrawal')
     ? 'withdrawal'
-    : info.title.startsWith('local pause catalog operator')
-      ? 'operations'
-      : info.title.startsWith('local pause catalog')
-        ? 'editor'
-        : null;
+    : info.title.startsWith('local pause duration supervisor')
+      ? 'duration'
+      : info.title.startsWith('local pause catalog operator')
+        ? 'operations'
+        : info.title.startsWith('local pause catalog')
+          ? 'editor'
+          : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -3986,6 +3988,110 @@ test('last eligible queue withdrawal requires actual manager review and preserve
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-last-eligible-audit.png`,
     fullPage: false,
+  });
+  expect(writes).toEqual([]);
+});
+
+test('local pause duration supervisor shows authorized real elapsed evidence without private text or automatic resumption', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].duration;
+  const api = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const previous = await page.request.get(api + '/pause_catalog', {
+    headers: target.administrator,
+  });
+  expect(previous.status()).toBe(200);
+  const saved = await page.request.patch(api + '/pause_catalog', {
+    headers: target.administrator,
+    data: {
+      pause_catalog: {
+        enforced: true,
+        entries: [
+          {
+            code: 'synthetic_duration',
+            name: 'SYNTHETIC duration notice',
+            category: 'SYNTHETIC',
+            active: true,
+            minimum_minutes: 0,
+            default_minutes: 0,
+            maximum_minutes: 0,
+            unit_ids: [target.unit_id],
+            custom_role_ids: [target.operator_role_id],
+            justification_required: true,
+          },
+        ],
+      },
+      expected_revision: (await previous.json()).item.revision,
+      activation_confirmed: true,
+    },
+  });
+  expect(saved.status()).toBe(200);
+  const paused = await page.request.patch(api + '/agent_state', {
+    headers: target.operator,
+    data: {
+      agent_state: {
+        state: 'paused',
+        reason_code: 'synthetic_duration',
+        queue_id: target.queue_id,
+        command_id: randomUUID(),
+        expected_state_version: '0',
+        justification: 'SYNTHETIC PRIVATE duration text',
+      },
+    },
+  });
+  expect(paused.status()).toBe(200);
+  const version = (await paused.json()).item.state_version;
+  const writes = [];
+  page.on('request', request => {
+    const pathname = new URL(request.url()).pathname;
+    const operational =
+      pathname.startsWith(
+        `/api/v1/accounts/${target.account_id}/jrc_contact_center/`
+      ) ||
+      /\/(commands|sync_calls|telephony_integration)(?:[/?]|$)/.test(pathname);
+    if (operational && !['GET', 'HEAD'].includes(request.method()))
+      writes.push(pathname);
+  });
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/supervisor?native_navigation=1`
+  );
+  const notice = page.locator('[data-supervisor-pause-notice]');
+  await expect(notice).toHaveCount(1);
+  await expect(notice).toContainText('Tempo em pausa:');
+  await expect(notice.getByRole('status')).toContainText(
+    'A pausa continua ativa',
+    { timeout: 15000 }
+  );
+  await notice.scrollIntoViewIfNeeded();
+  await expect(notice).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await expect(page.locator('html')).toHaveClass(
+    info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-supervisor-pause-notice.png`,
+    fullPage: false,
+  });
+  const observed = await page.request.get(api + '/supervisor', {
+    headers: target.administrator,
+  });
+  expect(observed.status()).toBe(200);
+  const body = await observed.json();
+  expect(body.agents).toHaveLength(1);
+  expect(body.agents[0].pause_notice.exceeded).toBe(true);
+  expect(JSON.stringify(body)).not.toContain('SYNTHETIC PRIVATE duration text');
+  const unchanged = await page.request.get(api + '/agent_state', {
+    headers: target.operator,
+  });
+  expect((await unchanged.json()).item).toMatchObject({
+    state: 'paused',
+    state_version: version,
+    provider_confirmed: false,
+    eligible: false,
   });
   expect(writes).toEqual([]);
 });
