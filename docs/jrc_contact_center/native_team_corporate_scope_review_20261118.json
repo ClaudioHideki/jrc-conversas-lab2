@@ -1,5 +1,5 @@
 {
-  "status": "77be76ae failed; corrective and related security increment prepared",
+  "status": "6c728416 failed; immutable-issuer fixture and two spec paths corrected, native rerun pending",
   "observed_sha": "31d571727427bce5245486f0ef747dce7adf3d8e",
   "native_sources": [
     "app/models/jrc_crm/team_scope.rb",
@@ -104,6 +104,49 @@
     "administrative_link": "only current approval coverage makes the native link available",
     "observations": "account/call locks and fresh native operate/record visibility; history and revision contract preserved"
   },
-  "unit_transfer_rule": "For team-company containment, read the current issuer of a BUSINESS_UNIT; never prefer redundant stored user-source company_id.",
-  "bootstrap_boundary": "Legacy unconfigured visibility is unchanged. Reactivation of an existing active corporate team source always requires explicit Group administrative authority, including accounts without configured business units."
+  "unit_transfer_rule": "Existing BusinessUnit issuer replacement is rejected natively and remains rejected; the regression proves unchanged valid inherited coverage.",
+  "bootstrap_boundary": "Legacy unconfigured visibility is unchanged. Reactivation of an existing active corporate team source always requires explicit Group administrative authority, including accounts without configured business units.",
+  "latest_failed_native_checkpoint": {
+    "sha": "6c728416b5fe5e4af877a1c8efee3e01b87a282d",
+    "run": 44250259196,
+    "artifact": 14403833585,
+    "artifact_sha256": "a993987a9271d2ee83c68a116ba6489da10187b03e91960c1a43809b0a2790e7",
+    "rails_main": {
+      "examples": 845,
+      "failures": 1,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "ledger_schema_reload": {
+      "examples": 16,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "new_ruby_offenses": 2,
+    "cause": "new spec attempted a corporate issuer replacement forbidden by the native BusinessUnit model; two RSpec path/class mismatches",
+    "corrections": "preserve immutable issuer rejection and valid coverage; rename only the two task-owned specs; native suite explicitly includes new CRM path",
+    "all_other_844_main_examples_passed": true,
+    "chrome": "not executed"
+  },
+  "reviewed_spec_renames": {
+    "parent": "6c728416b5fe5e4af877a1c8efee3e01b87a282d",
+    "renames": [
+      {
+        "old": "spec/services/jrc_contact_center/team_corporate_scope_spec.rb",
+        "new": "spec/services/jrc_crm/current_structure_scopes_spec.rb",
+        "parent_source_sha256": "ee592e035851abecbe489ad74b518eb4095a54aa85637522b01540b44f277a7b",
+        "preserved_bytes_sha256": "0bab8fe75094315aa24b361ca25ca587ff0abb31730119e694f71f7f913f9498",
+        "only_new_task_owned_spec": true
+      },
+      {
+        "old": "spec/services/jrc_contact_center/call_observation_authority_spec.rb",
+        "new": "spec/services/jrc_contact_center/call_observation_writer_authority_spec.rb",
+        "parent_source_sha256": "5a886f9053c1902914ea778123b21e18548e40df0c08bd59c18051261cc96ea9",
+        "preserved_bytes_sha256": "5a886f9053c1902914ea778123b21e18548e40df0c08bd59c18051261cc96ea9",
+        "only_new_task_owned_spec": true
+      }
+    ],
+    "original_checkout_touched": false
+  }
 }

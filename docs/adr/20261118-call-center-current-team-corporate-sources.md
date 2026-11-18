@@ -27,7 +27,8 @@ para criar outro cadastro de equipes, usuários ou abrangências.
   de equipe continuam sem conceder elegibilidade ou distribuição em filas.
 - Uma fonte de unidade usa a empresa atual da unidade para verificar a
   cobertura por COMPANY da equipe. Não confiar em company_id redundante
-  que ficou guardado na fonte depois de uma transferência da unidade.
+  redundante na fonte. O modelo nativo proíbe substituir uma empresa já
+  estabelecida da unidade; essa proteção permanece inalterada.
 - Reincluir um usuário com fonte corporativa de equipe ainda marcada ativa
   exige a autoridade nativa de administrador com cobertura GROUP, inclusive se não há
   unidades configuradas; uma fonte GROUP guardada não é bootstrap implícito. A guarda também vale com o
@@ -71,7 +72,7 @@ hierarquia equipe/fila continuam lacunas separadas das figuras 3 e 12.
   GROUP herdado, unidade válida, fonte direta independente, outra equipe e
   outra conta, fonte explícita inativa, reinclusão sem escopo válido,
   Backoffice, decisão e link de Aprovações, Operadora, memberships e
-  transferência da unidade para fora da empresa coberta pela equipe.
+  preservação da imutabilidade nativa da empresa da unidade.
 - Treze exemplos de membership autenticado: POST/PATCH com CC ligado/desligado,
   autoridade GROUP, retirada/no-op, atomicidade da substituição, fonte inativa
   e conta externa.
@@ -110,3 +111,27 @@ O próximo gate inclui as ampliações acima e a reautorização da escrita de
 observações documentada no ADR próprio. São 47 novos exemplos preparados
 desde 417bb868, sem contar novamente as suítes nativas de regressão já
 existentes. Ainda não são resultados aprovados.
+
+
+## Correção da preparação e caminhos após 6c728416
+
+CI 44250259196: 845 exemplos Rails principais, uma falha, zero pendências
+ou erros externos; 16 do ledger após recarga aprovados. Artefato 14403833585,
+SHA-256 a993987a9271d2ee83c68a116ba6489da10187b03e91960c1a43809b0a2790e7.
+A preparação do novo cenário tentou trocar uma empresa que BusinessUnit
+já preserva por validação. O cenário agora exige essa rejeição e a manutenção
+da cobertura válida; não alterar o modelo nem permitir a transferência.
+
+Os dois apontamentos de lint exigem caminhos correspondentes às classes:
+team_corporate_scope_spec.rb passa a spec/services/jrc_crm/current_structure_scopes_spec.rb;
+call_observation_authority_spec.rb passa a call_observation_writer_authority_spec.rb
+no mesmo domínio CC. Os mesmos exemplos são preservados uma única vez.
+O workflow inclui explicitamente o novo caminho CRM. O auxiliar de checkpoint
+só admite essas duas renomeações de testes criados nesta tarefa, verifica os
+hashes históricos, recusa destinos existentes e exige as duas metades juntas.
+Oito testes puros do auxiliar foram aprovados; não são testes Rails.
+A remoção do caminho antigo na árvore segue o [contrato da API Git Trees](https://docs.github.com/en/rest/git/trees#create-a-tree),
+com base_tree preservado; isso não autoriza remoções genéricas ou limpeza.
+
+Nova validação nativa obrigatória. A atividade recente da Central é outro
+incremento ainda em preparação e não integra este checkpoint corretivo.

@@ -2590,7 +2590,7 @@
     "prepared_security_increment": {
       "adr": "docs/adr/20261118-call-center-current-team-corporate-sources.md",
       "rails_examples": 47,
-      "native_results": "pending corrective checkpoint",
+      "native_results": "pending corrective checkpoint after 6c728416",
       "chrome_corporate_cases_extended": 4,
       "current_unit_issuer_validation": true,
       "observation_write_adr": "docs/adr/20261118-call-center-observation-write-authority.md"
@@ -2624,6 +2624,29 @@
         "scope callback registered in concern, 14 memoized fixtures, explicit described class, kwargs alignment and boolean cases hoisted out of loop"
       ],
       "all_word_complete": false
+    },
+    "latest_failed_security_checkpoint": {
+      "sha": "6c728416b5fe5e4af877a1c8efee3e01b87a282d",
+      "run": 44250259196,
+      "artifact": 14403833585,
+      "artifact_sha256": "a993987a9271d2ee83c68a116ba6489da10187b03e91960c1a43809b0a2790e7",
+      "rails_main": {
+        "examples": 845,
+        "failures": 1,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "ledger_schema_reload": {
+        "examples": 16,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "new_ruby_offenses": 2,
+      "cause": "new spec attempted a corporate issuer replacement forbidden by the native BusinessUnit model; two RSpec path/class mismatches",
+      "corrections": "preserve immutable issuer rejection and valid coverage; rename only the two task-owned specs; native suite explicitly includes new CRM path",
+      "all_other_844_main_examples_passed": true,
+      "chrome": "not executed"
     }
   }
 }

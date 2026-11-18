@@ -189,13 +189,16 @@ RSpec.describe JrcCrm::CurrentStructureScopes do
     expect(source.reload).to be_active
   end
 
-  it 'uses the current unit issuer when a linked unit moves outside its containing team company' do
+  it 'preserves the native prohibition on moving an established unit issuer while retaining valid inherited coverage' do
     source.update!(scope: 'BUSINESS_UNIT', business_unit: business_unit)
-    business_unit.update!(operating_company: other_company)
+    expect do
+      business_unit.update!(operating_company: other_company)
+    end.to raise_error(ActiveRecord::RecordInvalid, /cannot replace an established corporate issuer/)
+    expect(business_unit.reload.company_id).to eq(company.id)
     expect(source.reload.company_id).to eq(company.id)
     expect(team_scope.reload).to have_attributes(scope: 'COMPANY', company_id: company.id)
-    expect(coverage.unit_ids).to be_empty
-    expect(access.units).to be_empty
+    expect(coverage.unit_ids.pluck(:id)).to eq([business_unit.id])
+    expect(access.units.pluck(:id)).to eq([unit.id])
     expect(source).to be_active
   end
 end

@@ -114,6 +114,7 @@ jobs:
             spec/enterprise/controllers/api/v1/accounts/custom_roles_controller_spec.rb spec/enterprise/models/custom_role_spec.rb \
             spec/enterprise/models/contact_center_custom_role_audit_spec.rb spec/enterprise/controllers/api/v1/accounts/audit_logs_controller_spec.rb \
             spec/services/jrc_crm/corporate_coverage_spec.rb spec/models/jrc_crm/organizational_structure_spec.rb \
+            spec/services/jrc_crm/current_structure_scopes_spec.rb \
             spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
             spec/services/jrc_operator/commands_spec.rb \
             --exclude-pattern '**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb' \
