@@ -57,7 +57,7 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
 
   it 'exposes only duration and an exceeded flag without resuming availability or exposing private definition/text' do
     previous = event.attributes.deep_dup
-    travel_to(Time.at((event.started_at + 61.seconds).to_f.ceil)) do
+    travel_to(Time.zone.at((event.started_at + 61.seconds).to_f.ceil)) do
       get endpoint, headers: observer.create_new_auth_token
       expect(response).to have_http_status(:ok)
       data = response.parsed_body.fetch('agents').sole
@@ -72,7 +72,7 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
 
   it 'keeps a real zero and the exact informational threshold distinct from an exceeded pause' do
     [0, 60].each do |elapsed|
-      travel_to(Time.at((event.started_at + elapsed.seconds).to_f.ceil)) do
+      travel_to(Time.zone.at((event.started_at + elapsed.seconds).to_f.ceil)) do
         get endpoint, headers: observer.create_new_auth_token
         expect(response.parsed_body.fetch('agents').sole.fetch('pause_notice')).to eq('elapsed_seconds' => elapsed, 'exceeded' => false)
       end
@@ -82,7 +82,7 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
   it 'uses the immutable event limit rather than changing an existing pause when the catalog changes' do
     previous = event.attributes.deep_dup
     catalog.update!({ 'enforced' => true, 'entries' => [reason.merge('maximum_minutes' => 100)] }, expected_revision: catalog.revision)
-    travel_to(Time.at((event.started_at + 61.seconds).to_f.ceil)) do
+    travel_to(Time.zone.at((event.started_at + 61.seconds).to_f.ceil)) do
       get endpoint, headers: observer.create_new_auth_token
       expect(response.parsed_body.fetch('agents').sole.dig('pause_notice', 'exceeded')).to be(true)
       expect(event.reload.attributes).to eq(previous)
@@ -128,7 +128,7 @@ RSpec.describe 'Call Center authorized supervisor pause duration notice', type: 
 
     it 'keeps private text hidden when a Group supervisor can observe the current queue duration' do
       JrcCrm::UserBusinessUnit.find_by!(account: account, user: observer).update!(scope: 'GROUP', company: nil, business_unit: nil)
-      travel_to(Time.at((event.started_at + 61.seconds).to_f.ceil)) do
+      travel_to(Time.zone.at((event.started_at + 61.seconds).to_f.ceil)) do
         get endpoint, headers: observer.create_new_auth_token
         expect(response).to have_http_status(:ok)
         expect(response.parsed_body.fetch('agents').sole.dig('pause_notice', 'exceeded')).to be(true)
