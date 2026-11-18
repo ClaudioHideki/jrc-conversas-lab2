@@ -17,7 +17,11 @@
       "figure": 1,
       "title": "Central e navegação",
       "status": "Implementado parcialmente",
-      "stages": [0, 1, 2],
+      "stages": [
+        0,
+        1,
+        2
+      ],
       "implemented_in_0_2": [
         "One central, account permissions, real local counts and explicit external pending status",
         "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
@@ -25,12 +29,15 @@
       "remaining_or_external": [
         "PABX online/confirmed indicators require an actual provider response"
       ],
-      "code_references": ["ControlDeskPage.vue", "administration.rb"],
+      "code_references": [
+        "ControlDeskPage.vue",
+        "administration.rb"
+      ],
       "reference": {
         "document_1_figure": 1,
         "document_2_figure": 1
       },
-      "validation": "7c4e408c / CI 44302097163: 984 Rails únicos, 350 Vue e 120 Chrome aprovados. Revisão/rascunho ACW e contato nativo persistido validados incrementalmente. Capturas revelaram overflow interno móvel e contraste do título; correções e geometria real pendentes da nova CI. Não é conclusão integral da figura.",
+      "validation": "5e12db0a / CI44326127674:1022 Rails únicos,16 recargas de schema,358Vue,124Chrome e184 capturas com hashes verificados. Seleção de capturas revisada; geometria móvel corrigida. Isto não homologa automaticamente alterações posteriores nem a figura completa.",
       "objective": "Central de configuracoes - identidade e navegacao",
       "visual_components": "Campos e dados apresentados:  Para cada card, manter nome claro, descricao curta, disponibilidade por permissao e identificacao da area. No topo, exibir situacao do PABX, ultima sincronizacao e alertas relevantes; enquanto dados carregam, exibir carregamento, vazio ou erro, sem metricas inventadas.",
       "buttons_and_actions": "Acoes e resultado do clique:  Cards Números, Ramais, Filas, URA, Horários, Áudios, Pausas, Encerramentos, Distribuição, Permissões, Gravações, PABX, Aprovações, Parâmetros Gerais e Integrações: navegar à listagem do assunto. Atividade Recente: filtrar registro e abrir detalhe de auditoria. Alertas e Pendências: abrir pendência em sua fonte; indicador de notificações: mostrar apenas as autorizadas.",
@@ -85,20 +92,27 @@
       "figure": 2,
       "title": "Página principal do Control Desk",
       "status": "Implementado parcialmente",
-      "stages": [0, 1, 2],
+      "stages": [
+        0,
+        1,
+        2
+      ],
       "implemented_in_0_2": [
         "15 Word-named cards, statically discoverable icons, contextual return/navigation and reload",
         "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
       ],
       "remaining_or_external": [
-        "Recent administrative before/after and external alerts belong to stages 3/8"
+        "Atividade recente e antes/depois administrativos locais têm evidência5e12db0a. Alertas, publicação e confirmações externas continuam dependentes do PABX."
       ],
-      "code_references": ["ControlDeskPage.vue", "AdministrationSection.vue"],
+      "code_references": [
+        "ControlDeskPage.vue",
+        "AdministrationSection.vue"
+      ],
       "reference": {
         "document_1_figure": 2,
         "document_2_figure": 2
       },
-      "validation": "Subconjuntos nativos de atividade/detalhe/histórico e auditoria global ACW validados em 0519ee64 / CI 44284092413, com 968 Rails únicos, 321 Vue e 112 Chrome; oito capturas revisadas entre 160 hashes. Não é aceite de todos os critérios desta figura; revisão global ACW posterior continua preparada sem execução própria.",
+      "validation": "5e12db0a / CI44326127674:1022 Rails únicos,16 recargas de schema,358Vue,124Chrome e184 capturas com hashes verificados. Seleção de capturas revisada; geometria móvel corrigida. Isto não homologa automaticamente alterações posteriores nem a figura completa.",
       "objective": "Pagina principal do Control Desk",
       "visual_components": "Campos e dados apresentados:  Para cada card, manter nome claro, descricao curta, disponibilidade por permissao e identificacao da area. No topo, exibir situacao do PABX, ultima sincronizacao e alertas relevantes; enquanto dados carregam, exibir carregamento, vazio ou erro, sem metricas inventadas.",
       "buttons_and_actions": "Acoes e resultado do clique:  Cards Números, Ramais, Filas, URA, Horários, Áudios, Pausas, Encerramentos, Distribuição, Permissões, Gravações, PABX, Aprovações, Parâmetros Gerais e Integrações: navegar à listagem do assunto. Atividade Recente: filtrar registro e abrir detalhe de auditoria. Alertas e Pendências: abrir pendência em sua fonte; indicador de notificações: mostrar apenas as autorizadas.",
@@ -130,7 +144,7 @@
         ]
       },
       "recent_activity_increment_20261118": {
-        "status": "implemented in temporary overlay; native Vue/Chrome validation pending on next checkpoint",
+        "status": "implemented and incrementally validated at5e12db0a; external publication remains unproved",
         "source": "native configuration audit API with five authorized records and server period/timezone",
         "details": "reuse ConfigurationAuditDetails and contained Dialog; exact resource history; read only",
         "authorization": "native configuration_audit capability; fresh server authorization per request; account/profile changes invalidate the page",
@@ -153,7 +167,12 @@
       "figure": 3,
       "title": "Equipes, filas e distribuição",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 3, 6],
+      "stages": [
+        1,
+        2,
+        3,
+        6
+      ],
       "implemented_in_0_2": [
         "Native Team fields/members; local Queue CRUD; independent tab/filter/page state; explicit queue participation/supervision",
         "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português.",
@@ -235,7 +254,13 @@
       "figure": 4,
       "title": "Painel técnico PABX e atalhos",
       "status": "Implementado parcialmente",
-      "stages": [0, 1, 2, 3, 5],
+      "stages": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
       "implemented_in_0_2": [
         "Safe connection metadata; read-only resources; explicit authorized tenant/accountcode mapping; original infrastructure remains SuperAdmin-only",
         "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente.",
@@ -246,7 +271,10 @@
         "No fake connection test or resource publication; real diagnostics/ACK contract and URA editor remain later",
         "As três abas suportadas não equivalem às oito áreas da referência; URA, inventário/publicação, gravações e confirmações externas continuam pendentes de implementação/contrato."
       ],
-      "code_references": ["scope_mapping.rb", "administration_controller.rb"],
+      "code_references": [
+        "scope_mapping.rb",
+        "administration_controller.rb"
+      ],
       "reference": {
         "document_1_figure": 4,
         "document_2_figure": 4
@@ -287,7 +315,9 @@
       "figure": 5,
       "title": "Gerar mensagem com Nico",
       "status": "Reservado às etapas 3–8",
-      "stages": [4],
+      "stages": [
+        4
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Institutional TTS editor, voices, codec, limits and external authorization are stage 4"
@@ -333,7 +363,9 @@
       "figure": 6,
       "title": "Biblioteca de áudios e pastas",
       "status": "Reservado às etapas 3–8",
-      "stages": [4],
+      "stages": [
+        4
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Institutional audio folders/versioning/storage are stage 4; call recordings are not this catalog"
@@ -379,17 +411,24 @@
       "figure": 7,
       "title": "Pausas e disponibilidade",
       "status": "Reservado às etapas 3–8",
-      "stages": [6],
-      "implemented_in_0_2": ["Existing native agent state is preserved"],
+      "stages": [
+        6
+      ],
+      "implemented_in_0_2": [
+        "Existing native agent state is preserved",
+        "Incremento posterior de etapa6: catálogo local HH:MM, revisão, escopos e ativação explícita; compatibilidade legada preservada. Backend/Vue próprios validados em c4622175; layout/Chrome ainda pendentes. Privacidade adicional está na candidata d3e2179b, ainda em CI."
+      ],
       "remaining_or_external": [
-        "Pause catalog and safe call-to-pause transition require stage 6 and operational policy"
+        "Regras avançadas de justificativa, aprovação e variabilidade; transição segura durante chamada e precedências operacionais ainda pendentes.",
+        "Tempos são informativos, sem encerramento automático. Nenhuma publicação ou confirmação PABX foi homologada.",
+        "Concluir os cenários Chrome136 e revisar capturas do SHA candidato; CIc4622175 não chegou aos assets/Chrome."
       ],
       "code_references": [],
       "reference": {
         "document_1_figure": 7,
         "document_2_figure": 7
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "d3e2179b / CI 44346971047: 1093 Rails únicos,16 recargas de schema,387 Vue aprovados. Oito infrações Ruby impediram assets/Chrome; correções preparadas sem mudar regras ou asserções. Não é homologação visual nem conclusão integral da figura.",
       "objective": "Gestao de pausas e disponibilidade",
       "visual_components": "Campos e dados apresentados:  Listar nome, categoria, se retira da distribuicao, tempo padrao e status. Estados exibidos: disponivel, em atendimento, em pausa e offline; indicadores de disponibilidade devem vir de eventos reais, nao de contagem fixa do mockup.",
       "buttons_and_actions": "Acoes e resultado do clique:  Abas Motivos de Pausa, Regras de Distribuicao, Disponibilidade da Equipe e Historico: consultar configuracoes e estados. Novo Motivo: abrir popup. Busca e edicao de linha: localizar/alterar configuracao com auditoria. A aba de equipe mostra agente, estado, tempo decorrido e eventual pausa excedida; selecao de agente abre detalhes quando permitido.",
@@ -423,17 +462,23 @@
       "figure": 8,
       "title": "Cadastro de motivo de pausa",
       "status": "Reservado às etapas 3–8",
-      "stages": [6],
-      "implemented_in_0_2": [],
+      "stages": [
+        6
+      ],
+      "implemented_in_0_2": [
+        "Incremento posterior de etapa6: catálogo local HH:MM, revisão, escopos e ativação explícita; compatibilidade legada preservada. Backend/Vue próprios validados em c4622175; layout/Chrome ainda pendentes. Privacidade adicional está na candidata d3e2179b, ainda em CI."
+      ],
       "remaining_or_external": [
-        "HH:MM minimum/default/maximum pause form belongs to stage 6; no backend catalog is invented"
+        "Regras avançadas de justificativa, aprovação e variabilidade; transição segura durante chamada e precedências operacionais ainda pendentes.",
+        "Tempos são informativos, sem encerramento automático. Nenhuma publicação ou confirmação PABX foi homologada.",
+        "Concluir os cenários Chrome136 e revisar capturas do SHA candidato; CIc4622175 não chegou aos assets/Chrome."
       ],
       "code_references": [],
       "reference": {
         "document_1_figure": 8,
         "document_2_figure": 8
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "d3e2179b / CI 44346971047: 1093 Rails únicos,16 recargas de schema,387 Vue aprovados. Oito infrações Ruby impediram assets/Chrome; correções preparadas sem mudar regras ou asserções. Não é homologação visual nem conclusão integral da figura.",
       "objective": "Popup Cadastrar Motivo de Pausa",
       "visual_components": "Campos e dados apresentados:  Salvar identidade, descricao, categoria, tempo em minutos internamente, limites, regra de retirada, justificativa/aprovacao/alerta quando aplicaveis, status e escopo da empresa. Diferenciar limite informativo de regra que efetivamente bloqueia cadastro.",
       "buttons_and_actions": "Acoes e resultado do clique:  Nome, Tipo/Categoria e Descricao: cadastrar a finalidade da pausa. Tempo Padrao, Minimo e Maximo: preencher em horas/minutos; se um desses campos nao estiver no mockup, deve ser incluido no formulario final ou em aba complementar. Retirar da distribuicao: controlar elegibilidade de chamadas novas. Disponivel para: definir perfis habilitados. Salvar Motivo e Cancelar: validar/persistir ou abandonar sem gravar.",
@@ -467,14 +512,21 @@
       "figure": 9,
       "title": "Regra de pós-atendimento",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 6],
+      "stages": [
+        1,
+        2,
+        6
+      ],
       "implemented_in_0_2": [
         "Native account/channel ACW popup in HH:MM; required voice flag, validation and persistence"
       ],
       "remaining_or_external": [
         "Per-reason/queue/team templates and precedence remain stage 6; native 1..3600 second engine unchanged"
       ],
-      "code_references": ["AdministrationSection.vue", "acw_policy.rb"],
+      "code_references": [
+        "AdministrationSection.vue",
+        "acw_policy.rb"
+      ],
       "reference": {
         "document_1_figure": 9,
         "document_2_figure": 9
@@ -513,7 +565,9 @@
       "figure": 10,
       "title": "Automações por encerramento",
       "status": "Reservado às etapas 3–8",
-      "stages": [6],
+      "stages": [
+        6
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Per-reason CRM/SD/task orchestration, per-destination receipts and retries remain stage 6"
@@ -557,7 +611,11 @@
       "figure": 11,
       "title": "Perfil e permissões",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 6],
+      "stages": [
+        1,
+        2,
+        6
+      ],
       "implemented_in_0_2": [
         "Editor nativo de perfis em popup, com feature flag, administração nativa e cobertura corporativa irrestrita; sem novo cadastro de permissões",
         "Seleções explícitas de capacidades, validações e persistência pela API e pelo store nativos; nenhum grant automático do Call Center",
@@ -629,17 +687,23 @@
       "figure": 12,
       "title": "Equipe e filas em popup",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 3, 6],
+      "stages": [
+        1,
+        2,
+        3,
+        6
+      ],
       "implemented_in_0_2": [
         "Native team fields and member editor; separate native queue member flags and deactivation",
         "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português.",
         "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel.",
-        "Elegibilidade e cobertura corporativa atuais do destinatário revalidadas na API e após espera de lock; desativação segura preservada. Validado na CI 44194721033, SHA 7011dac7, incluindo recarga e negativas no Chrome."
+        "Elegibilidade e cobertura corporativa atuais do destinatário revalidadas na API e após espera de lock; desativação segura preservada. Validado na CI 44194721033, SHA 7011dac7, incluindo recarga e negativas no Chrome.",
+        "Cobertura corporativa reutiliza JrcCrm::TeamScope/UserBusinessUnit com fontes vivas, conta e destinatário validados; há evidências incrementais até 5e12db0a. A decisão de negócio sobre o último agente foi recebida, não está mais aguardando resposta."
       ],
       "remaining_or_external": [
-        "Corporate coverage already exists in JrcCrm::TeamScope and UserBusinessUnit; safe CC reuse/current-source revalidation remains pending. Primary-supervisor/queue hierarchy and a native Team status are still absent; do not invent a status or duplicate coverage.",
-        "Elegibilidade de usuário inativo não é inferida da presença online; regras de disponibilidade/capacidade PABX continuam dependentes do contrato operacional.",
-        "Retirada do último agente elegível ainda exige definição da validação obrigatória. Pergunta de negócio enviada; não confundir com a cobertura corporativa do destinatário, já validada."
+        "Supervisor principal, hierarquia equipe/fila e status operacional próprio continuam sem conclusão; não duplicar Team ou cobertura corporativa.",
+        "Validação definida pelo usuário: confirmação do gestor com revisão e auditoria. Caminho nativo QueueMembership está implementado em d3e2179b, aguardando testes próprios; retirada indireta via equipe continua pendente.",
+        "Disponibilidade e capacidades/ACK PABX continuam dependentes do contrato/homologação externos."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -651,7 +715,7 @@
         "document_1_figure": 12,
         "document_2_figure": 12
       },
-      "validation": "Subconjunto administrativo validado no SHA dd8ece07: 611 Rails, 224 Vue, 92 Chrome, 100 hashes de capturas. Novo controle de cobertura corporativa do destinatário ainda exige o próximo SHA; demais lacunas desta figura permanecem.",
+      "validation": "d3e2179b / CI 44346971047: 1093 Rails únicos,16 recargas de schema,387 Vue aprovados. Oito infrações Ruby impediram assets/Chrome; correções preparadas sem mudar regras ou asserções. Não é homologação visual nem conclusão integral da figura.",
       "objective": "Popup Configurar Equipe e Filas",
       "visual_components": "Campos e dados apresentados:  Informar total de agentes, grupos/filas ativos, papeis e participacao real na distribuicao. O mesmo usuario pode aparecer como supervisor e nao participante; o estado deve ser explicito.",
       "buttons_and_actions": "Acoes e resultado do clique:  Geral: editar nome, descricao e status. Supervisor Principal e Supervisores Adicionais: selecionar usuarios elegiveis. Agentes: Adicionar Agente ou remover vinculo sem apagar pessoa. Filas Vinculadas: Vincular Fila e marcar separadamente Participa e Supervisiona. Horarios e Regras de Distribuicao: consultar/configurar politicas reutilizaveis. Salvar Configuracoes: validar dependencias e escopo.",
@@ -713,7 +777,12 @@
       "figure": 13,
       "title": "Conexão e sincronização PABX",
       "status": "Implementado parcialmente",
-      "stages": [0, 1, 2, 3],
+      "stages": [
+        0,
+        1,
+        2,
+        3
+      ],
       "implemented_in_0_2": [
         "Same PABX source as figure 4, safe local state and explicit scope contract",
         "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente.",
@@ -768,7 +837,11 @@
       "figure": 14,
       "title": "Auditoria técnica",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 3],
+      "stages": [
+        1,
+        2,
+        3
+      ],
       "implemented_in_0_2": [
         "Existing scoped durable event list/reprocessing remains available only under native capabilities",
         "Auditoria administrativa sanitizada de unidades, filas, vínculos e perfis: backend preparado para validação nativa no novo SHA.",
@@ -828,14 +901,22 @@
       "figure": 15,
       "title": "Aprovações PABX",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 3, 5],
+      "stages": [
+        1,
+        2,
+        3,
+        5
+      ],
       "implemented_in_0_2": [
         "Original Central de Aprovações entry and eligibility preserved; no policy or real PABX command activated"
       ],
       "remaining_or_external": [
         "PABX approval adapter, snapshots, technical execution and rollback require stages 3/5 and policy/ACK contract"
       ],
-      "code_references": ["administration.rb", "module_policy.rb"],
+      "code_references": [
+        "administration.rb",
+        "module_policy.rb"
+      ],
       "reference": {
         "document_1_figure": 15,
         "document_2_figure": 15
@@ -876,7 +957,10 @@
       "figure": 16,
       "title": "Detalhes do áudio institucional",
       "status": "Reservado às etapas 3–8",
-      "stages": [4, 7],
+      "stages": [
+        4,
+        7
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Corrected Word caption: institutional audio details, not a recording policy. Library is stage 4; call recording policy has its own visual gap"
@@ -922,7 +1006,10 @@
       "figure": 17,
       "title": "Consulta de gravações e player",
       "status": "Implementado parcialmente",
-      "stages": [1, 7],
+      "stages": [
+        1,
+        7
+      ],
       "implemented_in_0_2": [
         "Existing scoped history/recording-byte authorization and separate view/listen/download permissions preserved"
       ],
@@ -974,7 +1061,9 @@
       "figure": 18,
       "title": "Gravações e Qualidade existente",
       "status": "Implementado parcialmente",
-      "stages": [7],
+      "stages": [
+        7
+      ],
       "implemented_in_0_2": [
         "Existing quality navigation is preserved; illustrative catalog must remain explicitly marked as demonstration"
       ],
@@ -1022,14 +1111,19 @@
       "figure": 19,
       "title": "Painel de sentimentos",
       "status": "Implementado parcialmente",
-      "stages": [1, 7],
+      "stages": [
+        1,
+        7
+      ],
       "implemented_in_0_2": [
         "Account-scoped quality service/storage guards are preserved"
       ],
       "remaining_or_external": [
         "Sentiment dashboard, denominators, error states and insights require stage 7; no illustrative metrics are promoted"
       ],
-      "code_references": ["supabase_client_scope_spec.rb"],
+      "code_references": [
+        "supabase_client_scope_spec.rb"
+      ],
       "reference": {
         "document_1_figure": 19,
         "document_2_figure": 19
@@ -1070,7 +1164,9 @@
       "figure": 20,
       "title": "Transcrição e áudio sincronizados",
       "status": "Reservado às etapas 3–8",
-      "stages": [7],
+      "stages": [
+        7
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Five-tab timed transcript/audio/graph popup requires real segments and stage 7"
@@ -1116,14 +1212,19 @@
       "figure": 21,
       "title": "Contexto do cliente",
       "status": "Implementado parcialmente",
-      "stages": [1, 7],
+      "stages": [
+        1,
+        7
+      ],
       "implemented_in_0_2": [
         "Existing context API uses native module visibility/corporate coverage"
       ],
       "remaining_or_external": [
         "Full analysis context popup, linked contracts and source-specific navigation are stage 7"
       ],
-      "code_references": ["customer_context.rb"],
+      "code_references": [
+        "customer_context.rb"
+      ],
       "reference": {
         "document_1_figure": 21,
         "document_2_figure": 21
@@ -1164,7 +1265,10 @@
       "figure": 22,
       "title": "Ações e histórico",
       "status": "Reservado às etapas 3–8",
-      "stages": [6, 7],
+      "stages": [
+        6,
+        7
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Native actions/history orchestration with idempotency and separate review completion require stages 6/7"
@@ -1210,7 +1314,9 @@
       "figure": 23,
       "title": "Correção humana da análise",
       "status": "Reservado às etapas 3–8",
-      "stages": [7],
+      "stages": [
+        7
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Append-only human review/version conflicts and explicit justification require stage 7"
@@ -1291,7 +1397,7 @@
   },
   "required_decisions": [
     "Contrato/capacidades reais do PABX, codec e confirmação de aplicação, além do serviço de voz Nico; documentação solicitada sem pedir credenciais.",
-    "Hierarquia supervisor primário/equipe/fila e cobertura corporativa: o Team nativo é da conta; não inferir unidades ou novos grants.",
+    "Supervisor principal/hierarquia e regras operacionais não presentes no Team nativo ainda precisam de conclusão. A cobertura corporativa já foi localizada, reutilizada e validada; não inferir novos grants.",
     "Matriz visual multi-módulo: mapear ações somente a permissões nativas comprovadas; herança CC não amplia os demais módulos."
   ],
   "visual_review": {
@@ -1339,7 +1445,17 @@
   "continuity_20261117": {
     "base_sha": "fc0bf6ce35df3aeebc5c3297aca62be5518852d1",
     "main_observed": "89779191b0b4be44929a426c7a924dbcad4c3690",
-    "stages_authorized": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "stages_authorized": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
     "increment": "F11 revisão esperada compatível, sem migration ou concessões implícitas",
     "adr": "docs/adr/20261117-call-center-role-revision.md",
     "expected_chrome": 112,
@@ -1500,7 +1616,11 @@
     },
     "configuration_revision": {
       "adr": "docs/adr/20261117-call-center-configuration-revision.md",
-      "resources": ["units", "queues", "queue_memberships"],
+      "resources": [
+        "units",
+        "queues",
+        "queue_memberships"
+      ],
       "root_precondition": "expected_revision optional; 428 malformed, 409 stale, authorization before comparison",
       "new_native_examples": 26,
       "new_vue_tests": 12,
@@ -1913,7 +2033,10 @@
     "native_pabx_navigation": {
       "implementation": "prepared",
       "source_route": "ramal_settings",
-      "source_components": ["SipSettingsPage.vue", "PabxSettingsPanel.vue"],
+      "source_components": [
+        "SipSettingsPage.vue",
+        "PabxSettingsPanel.vue"
+      ],
       "authorization": "CC administer plus native administrative SuperAdmin; native telephony endpoint still independently requires SuperAdmin and membership.",
       "new_provider_endpoints": false,
       "provider_calls_executed": false,
@@ -2643,7 +2766,10 @@
     },
     "acw_policy_audit_prepared": {
       "status": "Implementado, não executado nativamente neste incremento",
-      "figures": [9, 14],
+      "figures": [
+        9,
+        14
+      ],
       "adr": "docs/adr/20261118-call-center-acw-policy-native-audit.md",
       "native_request_examples_prepared": 10,
       "new_vue_prepared": 4,
@@ -2739,7 +2865,12 @@
         "requires": "HTTP 500, failing save! reached, actual database rollback without fixture outer transaction"
       },
       "schema_reload_reexecutions": 16,
-      "not_run": ["corporate RSpec", "Vue", "assets", "Chrome"],
+      "not_run": [
+        "corporate RSpec",
+        "Vue",
+        "assets",
+        "Chrome"
+      ],
       "remaining_failure": "Case creation after corporate revocation returns exact native unit-scope 404; expected 401 was obsolete after source validation. Update only this resource/source expectation, keep zero records/events.",
       "ruby_offenses": "13 alignment diagnostics across nine physical lines in new spec; corrected without rule or assertion changes."
     },
@@ -2773,7 +2904,7 @@
     }
   },
   "pause_catalog_candidate_20261118": {
-    "status": "implemented_pending_own_native_and_browser_validation",
+    "status": "native_and_vue_passed_d3e2179b_chrome_pending",
     "enforcement_default": false,
     "activation_confirmation_required": true,
     "legacy_history_preserved": true,
@@ -2787,7 +2918,7 @@
     "last_eligible_withdrawal": "next increment: manager review, confirmation and mandatory audit"
   },
   "manager_queue_withdrawal_candidate_20261118": {
-    "status": "implemented_pending_own_native_and_chrome",
+    "status": "native_and_vue_passed_d3e2179b_chrome_pending_lint_fix",
     "decision": "Explicit manager confirmation, review and audit; no mandatory formal Central Approvals",
     "native_queue_membership_path_only": true,
     "signed_receipt_minutes": 10,
@@ -2804,6 +2935,29 @@
       "native_api_regressions_prepared": 5,
       "translated_call_leg": "existing label reuse; API status unchanged; screenshot finding5e; Vue and four existing Chrome assertions prepared",
       "status": "not_yet_natively_tested"
+    },
+    "native_checkpoint": {
+      "sha": "d3e2179bda70b8f8c9ffd2f54626fddaecef0a23",
+      "run": 44346971047,
+      "artifact": 14447323510,
+      "artifact_sha256": "f42b0fee0a8f1eedb1f57257984d14c20d1aca93ec572ce3be8ba29d9dbbec1d",
+      "rails_unique": 1093,
+      "schema_reload_reexecutions": 16,
+      "vue": 387,
+      "zero_failures_pending_and_outside_errors": true,
+      "ruby_new_offenses": 8,
+      "not_run": [
+        "assets",
+        "Chrome"
+      ],
+      "remaining": "Scope predicate extracted without behavior change and two argument/key alignment lines corrected; next own CI required."
     }
-  }
+  },
+  "resolved_decisions_20261118": [
+    {
+      "subject": "Last eligible queue agent withdrawal",
+      "resolution": "Explicit authorized-manager confirmation, review and audit; not mandatory formal Central Approvals. No PABX publication.",
+      "status": "implemented in candidate d3e2179b, awaiting native/UI evidence; indirect team removal remains pending"
+    }
+  ]
 }

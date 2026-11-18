@@ -28,7 +28,7 @@ RSpec.describe 'Call Center last configured eligible agent withdrawal', type: :r
     expect(response).to have_http_status(:conflict)
     expect(response.headers['Cache-Control']).to include('no-store')
     expect(response.parsed_body.fetch('review')).to include('account_id' => account.id.to_s, 'queue_id' => queue.id.to_s,
-                                                          'previous_count' => 1, 'remaining_count' => 0)
+                                                            'previous_count' => 1, 'remaining_count' => 0)
     expect(membership.reload.active).to be(true)
     expect(audits).to be_empty
   end
@@ -201,7 +201,7 @@ RSpec.describe 'Call Center last configured eligible agent withdrawal', type: :r
     token = response.parsed_body.fetch('review').fetch('review_token')
     context = { account: account, account_user: member, user: actor }
     review = JrcContactCenter::QueueWithdrawalReview.new(account: account, member: member,
-                                                        confirmation: { confirmed: true, review_token: token })
+                                                         confirmation: { confirmed: true, review_token: token })
     writer = JrcContactCenter::ConfigurationWrite.new(account: account, access: JrcContactCenter::AccessScope.new(user_context: context))
     Current.user = actor
     row = writer.update!(JrcContactCenter::QueueMembership.where(account: account), membership.id,

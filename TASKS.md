@@ -216,3 +216,11 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 
 - Revisão de consumidores do estado: novos dados de pausa são exclusivos da resposta autenticada do operador; não serão copiados para outro usuário no painel do supervisor. Preparados cinco cenários nativos de privacidade A/B, cobertura Group e perda de unidade.
 - QA visual identificado em captura real5e: detalhe de perna connected agora preparado para usar o tradutor nativo existente, com estado da API preservado. Testes próprios ainda pendentes.
+
+
+### Call Center — QA nativo d3e2179b
+
+- CI44346971047:1093 Rails únicos (948 principais,60 concorrência,85 corporativos),16 recargas de schema e387Vue aprovados, sem falhas/pendências/erros externos.
+- Artefato14447323510: SHA-256 f42b0fee0a8f1eedb1f57257984d14c20d1aca93ec572ce3be8ba29d9dbbec1d.
+- Gates de assets/Chrome não executados: oito infrações Ruby restantes (complexidade/predicado de escopo e duas linhas físicas de alinhamento). Corrigidas no candidato seguinte, preservando comportamento e asserções; nova validação exigida.
+- Matriz por figura reconciliada: catálogo básico, cobertura corporativa e decisão do gestor não permanecem descritos como ausentes/indefinidos. Funcionalidades avançadas e contrato externo continuam pendentes.
