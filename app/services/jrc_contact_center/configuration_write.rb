@@ -11,7 +11,7 @@ class JrcContactCenter::ConfigurationWrite
   end
 
   def create!(model)
-    model.transaction do
+    @account.with_lock do
       model.uncached do
         reauthorize!(nil)
         values = yield
@@ -24,7 +24,7 @@ class JrcContactCenter::ConfigurationWrite
   end
 
   def update!(relation, id, expected_revision: UNSPECIFIED_REVISION)
-    relation.klass.transaction do
+    @account.with_lock do
       relation.klass.uncached do
         record = relation.find(id)
         record.with_lock do

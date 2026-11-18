@@ -78,7 +78,8 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
         state[:request_pid] = ActiveRecord::Base.connection.raw_connection.backend_pid
         session = ActionDispatch::Integration::Session.new(Rails.application)
         session.public_send(verb, endpoint, headers: headers, params: payload, as: :json)
-        results << session.response.status
+        state[:request_status] = session.response.status
+        results << state[:request_status]
       end
     rescue StandardError => e
       results << e
@@ -97,6 +98,9 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
         sleep 0.02
       end
     end
+  rescue Timeout::Error
+    details = { completed_http_status: state[:request_status], expected_lock: 'Account FOR UPDATE', owned_synthetic_database: true }
+    raise "Request did not reach the required account lock: #{details.to_json}"
   end
 
   def race_with_scope_change(change:, verb:, endpoint:, payload:)

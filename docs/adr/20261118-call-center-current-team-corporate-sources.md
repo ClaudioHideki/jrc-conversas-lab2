@@ -135,3 +135,22 @@ com base_tree preservado; isso não autoriza remoções genéricas ou limpeza.
 
 Nova validação nativa obrigatória. A atividade recente da Central é outro
 incremento ainda em preparação e não integra este checkpoint corretivo.
+
+
+## Coordenação das escritas de configuração — 6ab822a0
+
+CI 44253568507: 845/845 Rails principais e lint sem novas infrações;
+22/23 concorrentes e 16/16 reexecuções do ledger no schema recarregado.
+Artefato 14406300059; SHA-256
+abf28821f6246e1fe97527541768b5913b61625142846bff5b1902a1f082a16d.
+
+O cenário da fila não encontrou espera em Account. A inspeção confirmou que
+ConfigurationWrite só abria transação/locks do registro e seus pais. Para
+coordenar essas escritas com revogações corporativas e de perfil, create! e
+update! usam agora Account.with_lock como transação externa, mantendo a
+mesma ordem Account → registro/fila → unidades, os checks e a revisão
+existentes. FactsProjector e EventReconciler já usam Account antes da chamada.
+Não remover o teste de espera, aumentar timeout ou aceitar resposta incerta.
+O diagnóstico de timeout passa a registrar somente status HTTP observado e
+o lock esperado; nenhum header, payload ou credencial. Resultado da nova
+execução pendente, incluindo regressões corporativas, Vue e 112 Chrome.

@@ -1,5 +1,5 @@
 {
-  "status": "6c728416 failed; immutable-issuer fixture and two spec paths corrected, native rerun pending",
+  "status": "6ab822a0 main/lint approved; ConfigurationWrite Account mutex coordination prepared after one concurrency failure",
   "observed_sha": "31d571727427bce5245486f0ef747dce7adf3d8e",
   "native_sources": [
     "app/models/jrc_crm/team_scope.rb",
@@ -107,12 +107,18 @@
   "unit_transfer_rule": "Existing BusinessUnit issuer replacement is rejected natively and remains rejected; the regression proves unchanged valid inherited coverage.",
   "bootstrap_boundary": "Legacy unconfigured visibility is unchanged. Reactivation of an existing active corporate team source always requires explicit Group administrative authority, including accounts without configured business units.",
   "latest_failed_native_checkpoint": {
-    "sha": "6c728416b5fe5e4af877a1c8efee3e01b87a282d",
-    "run": 44250259196,
-    "artifact": 14403833585,
-    "artifact_sha256": "a993987a9271d2ee83c68a116ba6489da10187b03e91960c1a43809b0a2790e7",
+    "sha": "6ab822a08bc712f39c78500a755d47a0e35dada7",
+    "run": 44253568507,
+    "artifact": 14406300059,
+    "artifact_sha256": "abf28821f6246e1fe97527541768b5913b61625142846bff5b1902a1f082a16d",
     "rails_main": {
       "examples": 845,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "concurrency": {
+      "examples": 23,
       "failures": 1,
       "pending": 0,
       "outside_errors": 0
@@ -123,11 +129,10 @@
       "pending": 0,
       "outside_errors": 0
     },
-    "new_ruby_offenses": 2,
-    "cause": "new spec attempted a corporate issuer replacement forbidden by the native BusinessUnit model; two RSpec path/class mismatches",
-    "corrections": "preserve immutable issuer rejection and valid coverage; rename only the two task-owned specs; native suite explicitly includes new CRM path",
-    "all_other_844_main_examples_passed": true,
-    "chrome": "not executed"
+    "new_ruby_offenses": 0,
+    "failure": "queue configuration request did not produce expected Account lock wait; ConfigurationWrite locked target/parents but lacked the Account mutex",
+    "correction": "preserve transaction and native reauthorization while acquiring Account before target/parents in both create/update; preserve real lock-wait requirement and add status-only timeout diagnostics",
+    "vue_and_chrome": "not executed"
   },
   "reviewed_spec_renames": {
     "parent": "6c728416b5fe5e4af877a1c8efee3e01b87a282d",
