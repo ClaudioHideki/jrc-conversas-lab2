@@ -93,10 +93,7 @@ class CreateContactCenterIvrDrafts < ActiveRecord::Migration[7.1]
         IF TG_OP <> 'INSERT' THEN RAISE EXCEPTION 'IVR revisions are immutable'; END IF;
         PERFORM 1 FROM jrc_contact_center_ivr_drafts WHERE id = NEW.ivr_draft_id AND account_id = NEW.account_id FOR UPDATE;
         IF NOT FOUND THEN RAISE EXCEPTION 'IVR draft unavailable'; END IF;
-        IF NOT EXISTS (SELECT 1 FROM account_users WHERE id = NEW.actor_account_user_id
-            AND account_id = NEW.account_id AND user_id = NEW.actor_user_id) THEN
-          RAISE EXCEPTION 'IVR revision actor unavailable';
-        END IF;
+        #{version_actor_sql}
         SELECT COALESCE(MAX(revision), 0) INTO last_revision FROM jrc_contact_center_ivr_draft_versions
           WHERE ivr_draft_id = NEW.ivr_draft_id AND account_id = NEW.account_id;
         IF NEW.revision <> last_revision + 1 THEN RAISE EXCEPTION 'IVR revision sequence conflict'; END IF;
@@ -106,6 +103,15 @@ class CreateContactCenterIvrDrafts < ActiveRecord::Migration[7.1]
       END $guard$;
       CREATE TRIGGER cc_ivr_version_guard BEFORE INSERT OR UPDATE OR DELETE ON jrc_contact_center_ivr_draft_versions
         FOR EACH ROW EXECUTE FUNCTION cc_ivr_version_guard();
+    SQL
+  end
+
+  def version_actor_sql
+    <<~SQL.squish
+      IF NOT EXISTS (SELECT 1 FROM account_users WHERE id = NEW.actor_account_user_id
+          AND account_id = NEW.account_id AND user_id = NEW.actor_user_id) THEN
+        RAISE EXCEPTION 'IVR revision actor unavailable';
+      END IF;
     SQL
   end
 

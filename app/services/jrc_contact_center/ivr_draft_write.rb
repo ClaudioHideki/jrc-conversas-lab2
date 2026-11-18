@@ -29,9 +29,8 @@ class JrcContactCenter::IvrDraftWrite
     validate_definition!(draft, unit, input, previous)
     draft ||= JrcContactCenter::IvrDraft.create!(account: @context.fetch(:account), unit: unit, scope_snapshot: {}).reload
     actor = { actor_account_user_id: @context.fetch(:account_user).id, actor_user_id: @context.fetch(:user).id }
-    version = JrcContactCenter::IvrDraftVersion.create!(input.attributes.merge(actor).merge(
-        account: @context.fetch(:account), ivr_draft: draft, revision: input.expected_revision + 1
-    )).reload
+    attributes = input.attributes.merge(actor).merge(account: @context.fetch(:account), ivr_draft: draft, revision: input.expected_revision + 1)
+    version = JrcContactCenter::IvrDraftVersion.create!(attributes).reload
     JrcContactCenter::IvrDraftAudit.write!(draft, version, @scope.context)
     { draft: draft, version: version, latest_revision: version.revision, replayed: false }
   end

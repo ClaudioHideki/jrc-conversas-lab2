@@ -2379,7 +2379,7 @@
     "local_ivr_ledger_prepared": {
       "status": "implemented_pending_native_validation",
       "migration": "20261117200000",
-      "migration_sha256": "67424d8158f78886a716b37998026fabed35edc9cce9c30db07f37524311dc90",
+      "migration_sha256": "eaeb4147658fd8e5c9bf25272c34bf5ed3113cf603856854906620f128d92e91",
       "automatic_grants": false,
       "historical_migrations_changed": false,
       "pending": [
@@ -2399,6 +2399,18 @@
         "cause": "Existing Unit account FK blocks premature Account deletion; protection preserved",
         "lint": "failed; corrections prepared without suppression",
         "native_service_specs": "not executed because schema gate failed"
+      },
+      "second_native_result": {
+        "sha": "868ecad55ac8fdf38272a08eacb909c604299178",
+        "run": 44219155439,
+        "artifact_id": 14389314249,
+        "artifact_sha256": "8df644fcc1b0e84ca4cc19660d2d4a0426db23df832fbcf6b4334b75c4577b0f",
+        "schema_reload_examples": 16,
+        "schema_reload_failures": 0,
+        "main_examples": 730,
+        "main_failures": 1,
+        "cause": "MigrationError decorates its message with blank lines; class and meaningful message still required",
+        "lint_offenses": 4
       }
     }
   },

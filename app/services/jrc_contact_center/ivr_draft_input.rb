@@ -22,6 +22,7 @@ class JrcContactCenter::IvrDraftInput
   def attributes
     { name: name, status: status, definition: definition, request_id: request_id }
   end
+
   private
 
   def valid_content?(name, status)

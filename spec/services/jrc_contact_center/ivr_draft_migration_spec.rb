@@ -51,6 +51,6 @@ RSpec.describe 'Local IVR ledger populated upgrade', type: :model do
     ActiveRecord::Base.connection.execute(<<~SQL.squish)
       ALTER TRIGGER cc_ivr_version_guard ON jrc_contact_center_ivr_draft_versions RENAME TO unexpected_guard
     SQL
-    expect { migration.up }.to raise_error(ActiveRecord::MigrationError, 'Unexpected IVR ledger schema; review before reexecution')
+    expect { migration.up }.to raise_error(ActiveRecord::MigrationError, /Unexpected IVR ledger schema; review before reexecution/)
   end
 end

@@ -57,3 +57,10 @@ O lint identificou complexidade no validador de entrada, atribuições paralelas
 A migration desta candidata, ainda não implantada, recebeu somente alinhamento e .squish nos três heredocs. Hash anterior 5463324499ceb16908d3605552339cb4c7370881871ea643174976ac8252257c; hash atual 67424d8158f78886a716b37998026fabed35edc9cce9c30db07f37524311dc90. Os três blocos SQL normalizados foram comparados e permanecem idênticos. O gate e o transporte continuam aceitando apenas os caminhos/hashes exatos revisados. Migration histórica de elegibilidade e demais SQLs/schema não foram alterados.
 
 A etapa auxiliar opcional de sugestões de formatter também falhou; suas sugestões não foram usadas nem declaradas aprovadas. O próximo SHA deve passar lint e todos os testes nativos novamente. Não atribuir os resultados do núcleo ou do schema parcial à persistência completa.
+
+
+## Segundo gate da persistência
+
+868ecad5 / CI 44219155439: 16/16 exemplos do ledger passaram no schema recarregado. Na suíte principal, 729/730 passaram; o cenário de schema adulterado gerou corretamente ActiveRecord::MigrationError, mas o matcher esperava a mensagem sem as linhas em branco que Rails acrescenta. O teste mantém a classe e o texto significativo por regex. Restavam quatro infrações de lint: separação de private, continuação de argumentos e tamanho do método SQL. O recibo e todas as asserções de bloqueio permanecem.
+
+O trecho de validação do vínculo do autor foi separado do SQL de sequência/digest, sem mudar o SQL final montado. Hash desta migration ainda não implantada: 67424d8158f78886a716b37998026fabed35edc9cce9c30db07f37524311dc90 → eaeb4147658fd8e5c9bf25272c34bf5ed3113cf603856854906620f128d92e91. Comparação dos três comandos montados normalizados confirmou igualdade; nenhuma FK, trigger ou capacidade foi removida. Revalidação do novo SHA obrigatória; os exemplos da suíte principal ainda não representam aprovação integral.
