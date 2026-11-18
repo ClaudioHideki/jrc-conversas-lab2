@@ -2200,6 +2200,14 @@ test('local IVR real editor persists, simulates, imports and exports immutable r
   await expect(dialog.locator('[data-ivr-simulation]')).toContainText(
     '#' + target.queue_id
   );
+  await dialog
+    .getByLabel('Dígitos DTMF para simulação', { exact: true })
+    .fill('2');
+  await expect(dialog.locator('[data-ivr-simulation]')).toHaveCount(0);
+  await dialog
+    .getByLabel('Dígitos DTMF para simulação', { exact: true })
+    .fill('1');
+  await expect(dialog.locator('[data-ivr-simulation]')).toHaveCount(0);
   const created = page.waitForResponse(
     response =>
       response.url() === endpoint && response.request().method() === 'POST'

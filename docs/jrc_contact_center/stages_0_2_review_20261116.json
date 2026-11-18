@@ -2475,7 +2475,20 @@
         "artifact": 14397725189,
         "artifact_sha256": "1fcd3b2a8cbfb045dcbd8c8f312846c13ce5898fa7815ffdc1c50c825da9b1af"
       },
-      "local_map": "prepared pending native and actual screenshots"
+      "local_map": "prepared pending native and actual screenshots",
+      "third_native_result": {
+        "sha": "31d571727427bce5245486f0ef747dce7adf3d8e",
+        "run": 44236825274,
+        "rails_main": 763,
+        "rails_concurrent": 17,
+        "schema_reload_reexecuted_examples": 16,
+        "vue": 300,
+        "frontend_lint": "passed",
+        "new_ruby_offenses": 3,
+        "chrome": "not executed; Ruby lint gate blocked",
+        "artifact": 14398792040,
+        "artifact_sha256": "24bcc9150ab20a6188253dce05546eb97e6f644adb644efe169d811dcb859c07"
+      }
     },
     "supervisor_observation_prepared": {
       "status": "implemented_pending_native_tests",

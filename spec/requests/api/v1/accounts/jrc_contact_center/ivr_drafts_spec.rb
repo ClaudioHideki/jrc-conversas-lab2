@@ -104,10 +104,11 @@ RSpec.describe 'Call Center local IVR draft API', type: :request do
     context = { account: account, account_user: member, user: operator }
     writer = JrcContactCenter::IvrDraftWrite.new(context: context)
     23.times do |index|
-      input = JrcContactCenter::IvrDraftInput.new(
-        **values.except(:unit_id), definition: JSON.parse(definition.to_json),
+      attributes = values.except(:unit_id).merge(
+        definition: JSON.parse(definition.to_json),
         name: "SYNTHETIC page #{index}", request_id: SecureRandom.uuid
       )
+      input = JrcContactCenter::IvrDraftInput.new(**attributes)
       writer.call(input: input, unit_id: unit.id)
     end
     get url, headers: headers

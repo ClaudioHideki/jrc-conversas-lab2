@@ -36,10 +36,11 @@ const history = reactive({
 });
 const locked = computed(() => editor.locked.value || secondaryBusy.value);
 const canSave = computed(() => editor.canSave.value && !secondaryBusy.value);
-const graphFingerprint = () =>
-  JSON.stringify([draft.value.unit_id, draft.value.definition]);
+const simulationFingerprint = () =>
+  JSON.stringify([draft.value.unit_id, draft.value.definition, dtmf.value]);
 const currentSimulation = computed(() =>
-  !jsonPending.value && simulation.value?.fingerprint === graphFingerprint()
+  !jsonPending.value &&
+  simulation.value?.fingerprint === simulationFingerprint()
     ? simulation.value.data
     : null
 );
@@ -108,7 +109,7 @@ const save = async (status = 'draft', retry = false) => {
 };
 const preview = async () => {
   if (locked.value || jsonPending.value) return;
-  const fingerprint = graphFingerprint();
+  const fingerprint = simulationFingerprint();
   secondaryBusy.value = true;
   notice.value = '';
   simulation.value = null;
@@ -118,7 +119,7 @@ const preview = async () => {
       definition: draft.value.definition,
       dtmf: dtmf.value,
     });
-    if (alive && fingerprint === graphFingerprint())
+    if (alive && fingerprint === simulationFingerprint())
       simulation.value = { fingerprint, data: response.data.simulation };
   } catch (error) {
     if (alive) notice.value = error?.response?.data?.error || 'SAVE_FAILED';
@@ -373,6 +374,7 @@ onBeforeUnmount(() => {
           <input
             id="ivr-dtmf"
             v-model="dtmf"
+            @input="simulation = null"
             type="text"
             maxlength="128"
             :disabled="locked"

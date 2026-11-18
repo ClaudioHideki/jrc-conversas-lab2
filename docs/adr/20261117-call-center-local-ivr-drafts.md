@@ -104,3 +104,10 @@ O primeiro caso parou ao localizar o nome exato Tecla DTMF: o label continha tam
 O segundo caso passou as páginas de 20/3 registros e falhou no Voltar: router.replace havia substituído a entrada da lista. A navegação de filtros/páginas passa a usar router.push; manter guarda de navegação, filtros e revisão. Novo Vue com histórico real em memória prova o retorno à primeira página filtrada. O Chrome continua exigindo o Voltar real, sem trocar a asserção por recarga.
 
 O próximo incremento também inclui mapa de destinos, importação de arquivo válido, restauração efetiva e correção separada da ordem de observações do supervisor. O gate exige 112 Chrome (108 preservados + quatro de revogação sem recarga); os dez exemplos Vue adicionais devem passar nativamente. Nenhum teste foi desligado ou substituído por simulação operacional.
+
+
+## Gate de 31d57172 e identidade da simulação
+
+31d571727427bce5245486f0ef747dce7adf3d8e / CI 44236825274: 763 Rails principais, 17 concorrentes, 16 reexecuções no schema recarregado e 300 Vue aprovados, zero falhas/pendências/erros. Os dez novos Vue passaram, incluindo reprodução da navegação/labels e ordem das observações. Frontend lint aprovado. Chrome 112 não executou porque restaram três infrações Ruby: ABC no seed sintético ampliado e alinhamentos no exemplo de paginação. Separar o pacote de sessão do seed e construir os atributos do exemplo antes do construtor; manter valores e asserções. Artefato 14398792040, SHA-256 24bcc9150ab20a6188253dce05546eb97e6f644adb644efe169d811dcb859c07.
+
+Revisão adicional do editor identificou que editar somente o DTMF podia manter o resultado anterior visível. O fingerprint passa a incluir os dígitos, e editar o campo descarta a simulação anterior, inclusive ao voltar ao valor original. Os quatro cenários reais de URA devem comprovar esse descarte sem trocar as provas de simulação, gravação, importação ou exportação. Cada nova simulação continua reautorizada pelo servidor.

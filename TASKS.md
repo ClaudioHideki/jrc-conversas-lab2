@@ -139,3 +139,5 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - [ ] **CC-SUPERVISOR-OBSERVATION-20261118:** Serialização de polling, descarte de unidades após erro e fronteira de ator/perfil preparados; quatro Vue e quatro novos Chrome nativos, em contas sintéticas exclusivas. Gate exigirá 112 cenários sem remover os 108. Validação do novo SHA pendente; ADR registrado.
 
 - Chrome 4d06013f / CI 44233151968: 780 Rails únicos, 16 reexecuções, 290 Vue, lints/assets/bootstrap aprovados; 100/108 Chrome. Corrigidos labels DTMF/destinos e histórico substituído por replace; três Vue de regressão preparados. Mapa/importação/restauração e supervisor ampliam o próximo gate para 112 Chrome e 300 Vue esperados, ainda não aprovados.
+
+- 31d57172 / CI 44236825274: 780 Rails únicos, 16 reexecuções e 300 Vue aprovados; três infrações Ruby remanescentes corrigidas sem supressão. Novo gate deve validar 112 Chrome, também descartando simulação quando o DTMF muda.

@@ -39,12 +39,16 @@ class JrcContactCenter::SyntheticIvrSeed
       )
     end
     queue = JrcContactCenter::Queue.create!(account: @account, unit: units.first, code: 'VOICE', name: 'SYNTHETIC IVR voice')
+    session_payload(admin, scoped, observer, units, queue)
+  end
+
+  private
+
+  def session_payload(admin, scoped, observer, units, queue)
     { account_id: @account.id, allowed_unit_id: units.first.id, denied_unit_id: units.last.id, queue_id: queue.id,
       scoped_member_id: scoped.id, observer_member_id: observer.id, administrator: admin.user.create_new_auth_token,
       scoped: scoped.user.create_new_auth_token, observer: observer.user.create_new_auth_token }
   end
-
-  private
 
   def create_units(company)
     %w[A B].map do |code|
