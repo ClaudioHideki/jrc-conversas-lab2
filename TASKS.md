@@ -1,7 +1,7 @@
 <!-- jrc-operational-init:v1 -->
 # Backlog operacional — JRC Conversas LAB2 — Grupo JRC
 
-- [ ] **INBOX-RESPONSIVO-20261118:** Melhorar a leitura em monitores com pouca área útil. Compactar cabeçalhos/editor, abrir contexto do cliente em popup e oferecer Ampliar conversa sem perder rascunho. Base e6bd4cc9, produto d3d66232 preservado. 200 testes locais e ensaio Chrome em quatro resoluções aprovados; verificar imagem e publicação. [ADR0007](docs/adr/0007-visualizacao-responsiva-da-conversa.md).
+- [x] **INBOX-RESPONSIVO-20261118:** Publicado o produto f494fd38 sobre a base e6bd4cc9, preservando o runtime d3d66232. Layout compacto, contexto em popup e Ampliar conversa com rascunho preservado. 200 testes locais, quatro resoluções Chrome e build44363528959 aprovados; 2759 testes frontend, 168 Rails e smokes antes/depois da publicação. Digest e1502e54 confirmado diretamente no GHCR, linux/amd64 e revisão exata. Corrigido o hostname do espelho Ubuntu que havia interrompido o primeiro build, sem remover gates. Sem implantação. [Evidências e imagem](docs/jrc_consolidation/inbox-responsive-release-20261118.md); [ADR0007](docs/adr/0007-visualizacao-responsiva-da-conversa.md).
 
 - [ ] **OPUS-MIME-20261117:** Alinhar Marcel/Broker em LIVE e histórico com assinatura Ogg/Opus, mantendo envelope/hash. RED44154858796:74/75 nativos; correção e GREEN pendentes. Base runtime6886261 + main89779191 preservadas. Ver ADR0006. Sem deploy ou novo envio real nesta etapa.
 

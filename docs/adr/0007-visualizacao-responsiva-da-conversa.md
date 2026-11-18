@@ -57,3 +57,13 @@ O redirecionamento de fontes apt passa a reconhecer os subdomínios oficiais de
 archive/security.ubuntu.com, incluindo EC2. Pacotes, assinaturas, verificações,
 retries e limite de tempo permanecem iguais. O produto visual não mudou.
 Uma nova revisão deve concluir a construção e a publicação.
+
+## Fechamento da publicação
+
+Em 18/11/2026, o build 44363528959 aprovou a revisão
+`f494fd38dd62929303279d39b4591372ac72e607`, com 296 arquivos/2759 testes
+frontend, 168 exemplos Rails e smokes de aplicação/worker antes e depois
+da publicação. Digest `sha256:e1502e545cb9b4dc6c96eab2fd9068c5052ccc8fe0c02960b50ae7d3d3fb61dc`,
+linux/amd64 e revisão exata conferidos diretamente no GHCR.
+[Registro e referência da imagem](../jrc_consolidation/inbox-responsive-release-20261118.md).
+Sem implantação em produção ou merge em main neste incremento.
