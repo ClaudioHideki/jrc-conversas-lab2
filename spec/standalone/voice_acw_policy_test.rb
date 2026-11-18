@@ -3,11 +3,13 @@
 # Executes the real policy without Rails/DB. ActiveRecord locking and callbacks
 # are covered separately by the Rails request/service specs, never by this fake.
 require 'minitest/autorun'
+require 'minitest/mock'
 
 module JrcContactCenter
   class OperationError < StandardError; end
 end
 require_relative '../../app/services/jrc_contact_center/acw_policy'
+require_relative '../../app/services/jrc_contact_center/acw_policy_audit'
 
 class VoiceAcwPolicyTest < Minitest::Test
   class Account
@@ -46,18 +48,26 @@ class VoiceAcwPolicyTest < Minitest::Test
   def test_legacy_duration_update_preserves_mode_and_unrelated_settings
     account = Account.new('other' => 'preserve', 'jrc_contact_center_acw' => { 'voice_required' => false })
     policy = JrcContactCenter::AcwPolicy.new(account: account)
-    result = policy.update!({ voice: 30, whatsapp: 45 })
-    assert_equal false, result[:voice_required]
-    assert_equal({ 'voice' => 30, 'whatsapp' => 45 }, result[:limits])
-    assert_equal 'preserve', account.settings['other']
-    assert_equal false, policy.update!(voice: 40, whatsapp: 50)[:voice_required]
+    with_audit_capture do |events|
+      result = policy.update!({ voice: 30, whatsapp: 45 })
+      assert_equal false, result[:voice_required]
+      assert_equal({ 'voice' => 30, 'whatsapp' => 45 }, result[:limits])
+      assert_equal 'preserve', account.settings['other']
+      assert_equal false, policy.update!(voice: 40, whatsapp: 50)[:voice_required]
+      assert_equal 2, events.size
+      assert_equal false, events.last.fetch(:after).fetch('attributes').fetch('voice_required')
+    end
   end
 
   def test_boolean_policy_is_scoped_to_one_company
     first = JrcContactCenter::AcwPolicy.new(account: Account.new)
     second = JrcContactCenter::AcwPolicy.new(account: Account.new)
-    assert_equal false, first.update!({ voice: 30, whatsapp: 45 }, voice_required: false)[:voice_required]
-    assert_equal true, second.call[:voice_required]
+    with_audit_capture do |events|
+      assert_equal false, first.update!({ voice: 30, whatsapp: 45 }, voice_required: false)[:voice_required]
+      assert_equal true, second.call[:voice_required]
+      assert_equal true, events.fetch(0).fetch(:before).fetch('attributes').fetch('voice_required')
+      assert_equal false, events.fetch(0).fetch(:after).fetch('attributes').fetch('voice_required')
+    end
   end
 
   def test_rejects_non_boolean_modes_without_writing_settings
@@ -67,5 +77,14 @@ class VoiceAcwPolicyTest < Minitest::Test
       assert_raises(JrcContactCenter::OperationError) { policy.update!({ voice: 30, whatsapp: 45 }, voice_required: mode) }
     end
     assert_empty account.settings
+  end
+
+  private
+
+  # Only the audit boundary is substituted here. PostgreSQL rollback, actor,
+  # account/unit permissions and native audit persistence use the request specs.
+  def with_audit_capture
+    events = []
+    JrcContactCenter::AcwPolicyAudit.stub(:write!, ->(**attributes) { events << attributes }) { yield events }
   end
 end

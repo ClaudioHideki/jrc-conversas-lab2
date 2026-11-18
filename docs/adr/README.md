@@ -35,3 +35,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Fontes corporativas atuais das equipes](20261118-call-center-current-team-corporate-sources.md): revogação efetiva, reinclusão autorizada e coordenação com os locks nativos.
 - [Observações e autoridade atual](20261118-call-center-observation-write-authority.md): reautorização após locks, atribuição e histórico transacional preservados.
 - [Atividade administrativa recente](20261118-call-center-recent-administrative-activity.md): reuso da API, popup e histórico nativos na página inicial, com fronteira autenticada.
+
+- [Auditoria nativa da política global de pós-atendimento](20261118-call-center-acw-policy-native-audit.md) — figuras 9/14, incremento preparado; exige CI e não altera a política nativa.

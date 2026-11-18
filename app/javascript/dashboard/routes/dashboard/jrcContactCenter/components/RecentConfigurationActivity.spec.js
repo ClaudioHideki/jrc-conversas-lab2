@@ -113,6 +113,20 @@ beforeEach(() => {
 });
 
 describe('recent native configuration activity', () => {
+  it('uses the native ACW policy label and history identity without treating it as a queue', async () => {
+    API.configurationAudits.mockResolvedValue(
+      response([{ ...event, resource_type: 'acw_policy', resource_id: 1 }])
+    );
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.get('[data-recent-event]').text()).toContain(
+      'JRC_CONTACT_CENTER.ACW_OPERATION.POLICY_TITLE'
+    );
+    expect(wrapper.text()).not.toContain(
+      'JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.QUEUE'
+    );
+  });
+
   it('requests five authorized records and shows the real window, timezone and actor', async () => {
     const wrapper = render();
     await flushPromises();

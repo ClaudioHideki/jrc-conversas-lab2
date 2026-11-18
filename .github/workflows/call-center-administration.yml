@@ -122,6 +122,8 @@ jobs:
             spec/services/jrc_operator/commands_spec.rb \
             --exclude-pattern '**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
+      - name: Legacy isolated ACW value compatibility (not a persistence proof)
+        run: bundle exec ruby spec/standalone/voice_acw_policy_test.rb
       - name: PABX concurrency in its explicitly guarded disposable database
         env:
           POSTGRES_DATABASE: corporate_gratuity_disposable

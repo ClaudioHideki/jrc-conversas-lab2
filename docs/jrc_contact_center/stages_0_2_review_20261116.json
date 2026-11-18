@@ -2778,6 +2778,24 @@
       "word_part_1_complete": false,
       "real_provider_operations": false,
       "docker_publication_or_deploy": false
+    },
+    "acw_policy_audit_prepared": {
+      "status": "Implementado, não executado nativamente neste incremento",
+      "figures": [
+        9,
+        14
+      ],
+      "adr": "docs/adr/20261118-call-center-acw-policy-native-audit.md",
+      "native_request_examples_prepared": 10,
+      "new_vue_prepared": 4,
+      "existing_standalone_cases_preserved": 5,
+      "chrome_case_count_preserved": 112,
+      "native_audited_storage_reused": true,
+      "account_transaction_and_scope_preserved": true,
+      "new_migrations": false,
+      "provider_operation": false,
+      "optimistic_global_revision": "Pendente nos dois clientes legados",
+      "full_word_complete": false
     }
   }
 }

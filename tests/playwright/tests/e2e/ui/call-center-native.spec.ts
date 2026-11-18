@@ -707,11 +707,11 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
     'rgba(0, 0, 0, 0)'
   );
   const light = await page
-    .locator('[data-control-desk] header')
+    .locator('[data-control-desk] > header')
     .evaluate(element => getComputedStyle(element).backgroundColor);
   await page.evaluate(() => document.documentElement.classList.toggle('dark'));
   const opposite = await page
-    .locator('[data-control-desk] header')
+    .locator('[data-control-desk] > header')
     .evaluate(element => getComputedStyle(element).backgroundColor);
   expect(opposite).not.toBe(light);
   await page.evaluate(() => document.documentElement.classList.toggle('dark'));
@@ -1251,6 +1251,51 @@ test('local ACW popup validates HH:MM preserves failed values and reloads the na
     headers: session.administrator,
   });
   expect((await read.json()).item.limits.voice).toBe(minutes * 60);
+  const auditQuery =
+    '?resource_type=acw_policy&resource_id=' +
+    session.account_id +
+    '&history=true';
+  const history = await page.request.get(
+    api + '/configuration_audits' + auditQuery,
+    {
+      headers: session.administrator,
+    }
+  );
+  expect(history.status()).toBe(200);
+  const event = (await history.json()).items[0];
+  expect(event.resource_type).toBe('acw_policy');
+  expect(event.resource_id).toBe(session.account_id);
+  expect(event.after.voice).toBe(minutes * 60);
+  expect(event.before.voice).toBe(policy.limits.voice);
+  expect(event.before.voice_required).toBe(policy.voice_required);
+  expect(event.after.voice_required).toBe(policy.voice_required);
+  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await page.goto(
+    base +
+      '/audit?audit_source=configuration&audit_config_resource_type=acw_policy' +
+      '&audit_config_resource_id=' +
+      session.account_id +
+      '&audit_config_history=true'
+  );
+  const panel = page.locator('[data-configuration-audit]');
+  await expect(panel.locator('[data-audit-row]').first()).toContainText(
+    'Pós-atendimento / Tabulação'
+  );
+  await panel.locator('[data-audit-detail]').first().click();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('[data-audit-details]')).toContainText(
+    'Tempo máximo de tabulação — Voz (segundos)'
+  );
+  await expect(dialog.locator('[data-audit-details]')).toContainText(
+    'Exigir finalização na voz'
+  );
+  await expect(dialog).toContainText('Registro local confirmado no JRC.');
+  const bounds = await dialog.boundingBox();
+  expect(bounds!.width).toBeLessThanOrEqual(info.project.use.viewport!.width);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-acw-audit-detail.png`,
+    fullPage: true,
+  });
 });
 
 test('corporate boundary denies foreign units and queues for scoped configuration and writes', async ({

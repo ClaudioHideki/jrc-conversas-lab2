@@ -24,9 +24,11 @@ class JrcContactCenter::AcwPolicy
     raise JrcContactCenter::OperationError, 'invalid_acw_policy' unless [true, false, :unchanged].include?(voice_required)
 
     @account.with_lock do
+      before = JrcContactCenter::AcwPolicyAudit.capture(@account)
       current = @account.settings.fetch(KEY, {}).merge(values)
       current['voice_required'] = voice_required unless voice_required == :unchanged
       @account.update!(settings: @account.settings.merge(KEY => current))
+      JrcContactCenter::AcwPolicyAudit.write!(account: @account, before: before, after: JrcContactCenter::AcwPolicyAudit.capture(@account))
     end
     call
   end
