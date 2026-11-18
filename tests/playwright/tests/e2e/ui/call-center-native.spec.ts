@@ -7,6 +7,10 @@ import { randomUUID, createHash } from 'node:crypto';
 const session = JSON.parse(
   fs.readFileSync('/tmp/call-center-e2e-session.private', 'utf8')
 );
+const nativeObservations = new WeakMap<
+  Page,
+  { origin: string; pathname: string; method: string; status: number }[]
+>();
 const base = `/app/accounts/${session.account_id}/contact-center/control-desk`;
 const api = `http://127.0.0.1:5387/api/v1/accounts/${session.account_id}/jrc_contact_center`;
 const expectContainedDialog = async (page: Page) => {
@@ -47,6 +51,21 @@ test.beforeEach(async ({ page }, info) => {
                 : info.title.startsWith('profile change')
                   ? session.viewer
                   : session.administrator;
+  if (info.title.startsWith('local IVR')) {
+    const observations = [];
+    const prefix = `/api/v1/accounts/${session.ivr_targets[info.project.name].account_id}/jrc_contact_center/`;
+    nativeObservations.set(page, observations);
+    page.on('response', response => {
+      const address = new URL(response.url());
+      if (address.pathname.startsWith(prefix))
+        observations.push({
+          origin: address.origin,
+          pathname: address.pathname,
+          method: response.request().method(),
+          status: response.status(),
+        });
+    });
+  }
   await page.addInitScript(
     ({ auth, dark }) => {
       window.__SYNTHETIC_AUTH__ = auth;
@@ -56,6 +75,32 @@ test.beforeEach(async ({ page }, info) => {
     },
     { auth, dark: info.project.name.endsWith('dark') }
   );
+});
+
+test.afterEach(async ({ page }, info) => {
+  const observations = nativeObservations.get(page);
+  if (!observations) return;
+  const evidence = '.codex/call-center-native-e2e';
+  fs.mkdirSync(evidence, { recursive: true });
+  const identity = createHash('sha256')
+    .update(info.title)
+    .digest('hex')
+    .slice(0, 12);
+  fs.writeFileSync(
+    path.join(evidence, `${info.project.name}-${identity}-api-origins.json`),
+    JSON.stringify(
+      {
+        synthetic: true,
+        sha: process.env.GITHUB_SHA,
+        project: info.project.name,
+        test: info.title,
+        observations,
+      },
+      null,
+      2
+    )
+  );
+  nativeObservations.delete(page);
 });
 
 test('native infrastructure root navigation loads the existing settings without provider actions', async ({
@@ -2110,6 +2155,11 @@ test('local IVR real editor persists, simulates, imports and exports immutable r
 }, info) => {
   const target = session.ivr_targets[info.project.name];
   const endpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/ivr_drafts`;
+  expect(info.project.use.baseURL).toBe('http://127.0.0.1:5386');
+  const observedEndpoint = new URL(
+    new URL(endpoint).pathname,
+    info.project.use.baseURL
+  ).href;
   const location = `/app/accounts/${target.account_id}/contact-center/ura?native_navigation=1`;
   const name = `SYNTHETIC IVR editor ${info.project.name}`;
   const providerWrites = [];
@@ -2170,11 +2220,44 @@ test('local IVR real editor persists, simulates, imports and exports immutable r
     .locator('#ivr-name')
     .evaluate(element => getComputedStyle(element).backgroundColor);
   await page.evaluate(() => document.documentElement.classList.toggle('dark'));
+  await expect
+    .poll(() =>
+      dialog
+        .locator('#ivr-name')
+        .evaluate(
+          (element, initial) =>
+            !element
+              .getAnimations()
+              .some(animation => animation.playState === 'running') &&
+            getComputedStyle(element).backgroundColor !== initial,
+          originalColor
+        )
+    )
+    .toBe(true);
   const oppositeColor = await dialog
     .locator('#ivr-name')
     .evaluate(element => getComputedStyle(element).backgroundColor);
   expect(oppositeColor).not.toBe(originalColor);
   await page.evaluate(() => document.documentElement.classList.toggle('dark'));
+  await expect
+    .poll(() =>
+      dialog
+        .locator('#ivr-name')
+        .evaluate(element => getComputedStyle(element).backgroundColor)
+    )
+    .toBe(originalColor);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-ivr-theme.json`,
+    JSON.stringify({
+      synthetic: true,
+      project: info.project.name,
+      initial_color: originalColor,
+      opposite_color: oppositeColor,
+      restored_color: originalColor,
+      native_transition_completed: true,
+    })
+  );
+  await dialog.locator('[data-ivr-map]').scrollIntoViewIfNeeded();
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-ivr-builder.png`,
     fullPage: true,
@@ -2187,13 +2270,20 @@ test('local IVR real editor persists, simulates, imports and exports immutable r
     .fill('1');
   const simulated = page.waitForResponse(
     response =>
-      response.url() === endpoint + '/preview' &&
+      response.url() === observedEndpoint + '/preview' &&
       response.request().method() === 'POST'
   );
   await dialog
     .getByRole('button', { name: 'Simular definição atual', exact: true })
     .click();
-  expect((await simulated).status()).toBe(200);
+  const simulatedResponse = await simulated;
+  expect(simulatedResponse.status()).toBe(200);
+  const simulationPayload = await simulatedResponse.json();
+  expect(simulationPayload.account_id).toBe(String(target.account_id));
+  expect(simulationPayload.simulation).toMatchObject({
+    local_only: true,
+    provider_applied: false,
+  });
   await expect(dialog.locator('[data-ivr-simulation]')).toContainText(
     'Destino lógico de fila encontrado'
   );
@@ -2210,12 +2300,15 @@ test('local IVR real editor persists, simulates, imports and exports immutable r
   await expect(dialog.locator('[data-ivr-simulation]')).toHaveCount(0);
   const created = page.waitForResponse(
     response =>
-      response.url() === endpoint && response.request().method() === 'POST'
+      response.url() === observedEndpoint &&
+      response.request().method() === 'POST'
   );
   await dialog.locator('[data-ivr-save]').click();
   const accepted = await created;
   expect(accepted.status()).toBe(201);
-  const first = (await accepted.json()).item;
+  const acceptedPayload = await accepted.json();
+  expect(acceptedPayload.account_id).toBe(String(target.account_id));
+  const first = acceptedPayload.item;
   await expect(dialog.locator('[data-ivr-saved]')).toContainText(
     'Revisão local salva e recarregada'
   );
@@ -2266,7 +2359,7 @@ test('local IVR real editor persists, simulates, imports and exports immutable r
     .click();
   const updated = page.waitForResponse(
     response =>
-      response.url() === endpoint + '/' + first.id &&
+      response.url() === observedEndpoint + '/' + first.id &&
       response.request().method() === 'PATCH'
   );
   await dialog.locator('[data-ivr-save]').click();
@@ -2327,7 +2420,7 @@ test('local IVR real editor persists, simulates, imports and exports immutable r
   );
   const restored = page.waitForResponse(
     response =>
-      response.url() === endpoint + '/' + first.id &&
+      response.url() === observedEndpoint + '/' + first.id &&
       response.request().method() === 'PATCH'
   );
   await dialog.locator('[data-ivr-save]').click();
@@ -2437,6 +2530,11 @@ test('local IVR pagination, URL filters and stale editor preserve the reviewed d
 }, info) => {
   const target = session.ivr_targets[info.project.name];
   const endpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/ivr_drafts`;
+  expect(info.project.use.baseURL).toBe('http://127.0.0.1:5386');
+  const observedEndpoint = new URL(
+    new URL(endpoint).pathname,
+    info.project.use.baseURL
+  ).href;
   const prefix = `SYNTHETIC IVR pages ${info.project.name}`;
   const rows = [];
   for (let index = 0; index < 23; index += 1)
@@ -2500,7 +2598,7 @@ test('local IVR pagination, URL filters and stale editor preserve the reviewed d
   expect(remote.status()).toBe(200);
   const rejected = page.waitForResponse(
     response =>
-      response.url() === endpoint + '/' + row.id &&
+      response.url() === observedEndpoint + '/' + row.id &&
       response.request().method() === 'PATCH'
   );
   await dialog.locator('[data-ivr-save]').click();
@@ -2523,7 +2621,7 @@ test('local IVR pagination, URL filters and stale editor preserve the reviewed d
   await dialog.locator('[data-configuration-review]').check();
   const accepted = page.waitForResponse(
     response =>
-      response.url() === endpoint + '/' + row.id &&
+      response.url() === observedEndpoint + '/' + row.id &&
       response.request().method() === 'PATCH'
   );
   await dialog.locator('[data-ivr-save]').click();
@@ -2556,6 +2654,9 @@ test('local IVR supervisor polling clears real scoped units after native eligibi
 }, info) => {
   const target = session.ivr_targets[info.project.name];
   const api = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  expect(info.project.use.baseURL).toBe('http://127.0.0.1:5386');
+  const observedApi = new URL(new URL(api).pathname, info.project.use.baseURL)
+    .href;
   const grant =
     api + '/access_authorizations/users/' + target.observer_member_id;
   await page.goto(
@@ -2578,7 +2679,8 @@ test('local IVR supervisor polling clears real scoped units after native eligibi
   try {
     const denied = page.waitForResponse(
       response =>
-        response.url() === api + '/supervisor' && response.status() === 401,
+        response.url() === observedApi + '/supervisor' &&
+        response.status() === 401,
       { timeout: 15000 }
     );
     const revoked = await page.request.patch(grant, {

@@ -141,3 +141,5 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - Chrome 4d06013f / CI 44233151968: 780 Rails únicos, 16 reexecuções, 290 Vue, lints/assets/bootstrap aprovados; 100/108 Chrome. Corrigidos labels DTMF/destinos e histórico substituído por replace; três Vue de regressão preparados. Mapa/importação/restauração e supervisor ampliam o próximo gate para 112 Chrome e 300 Vue esperados, ainda não aprovados.
 
 - 31d57172 / CI 44236825274: 780 Rails únicos, 16 reexecuções e 300 Vue aprovados; três infrações Ruby remanescentes corrigidas sem supressão. Novo gate deve validar 112 Chrome, também descartando simulação quando o DTMF muda.
+
+- 71841f76 / CI 44239525292: 780 Rails únicos, 16 reexecuções, 300 Vue e ambos os lints aprovados; Chrome 100/112. Corrigir observação da origem 5386/proxy5387 e esperar a transição CSS nativa de 250 ms, preservando critérios e registrando metadados sem conteúdo. Correção corporativa por equipe segue separada e não deve entrar neste checkpoint de QA.
