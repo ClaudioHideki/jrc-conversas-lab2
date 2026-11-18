@@ -461,4 +461,53 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       expect(fresh.call.fetch('enforced')).to be(true)
     end
   end
+
+  context 'with confirmed last eligible queue withdrawal' do
+    before do
+      person = create(:user, :contact_center_eligible, account: account, role: :agent)
+      member = account.account_users.find_by!(user: person)
+      JrcCrm::UserBusinessUnit.create!(account: account, user: person, scope: 'BUSINESS_UNIT', company: company,
+                                       business_unit: business_units.first, active: true, structure_managed: true)
+      state[:withdrawal_member] = member
+      state[:withdrawal_membership] = JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: member)
+    end
+
+    it 'detects loss of the other eligible agent while the requested withdrawal waits for the Account lock' do
+      person = create(:user, :contact_center_eligible, account: account, role: :agent)
+      peer = account.account_users.find_by!(user: person)
+      JrcCrm::UserBusinessUnit.create!(account: account, user: person, scope: 'BUSINESS_UNIT', company: company,
+                                       business_unit: business_units.first, active: true, structure_managed: true)
+      JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: peer)
+      membership = state.fetch(:withdrawal_membership)
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/queue_memberships/#{membership.id}"
+      payload = { queue_membership: { active: false }, expected_revision: JrcContactCenter::ConfigurationRevision.token(membership) }
+      change = -> { JrcContactCenter::AccessGrant.find_by!(account: account, account_user: peer).update!(eligible: false) }
+      expect(race_with_account_change(change, endpoint: endpoint, payload: payload)).to eq(409)
+      expect(membership.reload.active).to be(true)
+      expect(Audited.audit_class.where(auditable: membership, action: 'update')).to be_empty
+    end
+
+    it 'rolls back a confirmed withdrawal when its mandatory native audit insert fails' do
+      membership = state.fetch(:withdrawal_membership)
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/queue_memberships/#{membership.id}"
+      payload = { queue_membership: { active: false }, expected_revision: JrcContactCenter::ConfigurationRevision.token(membership) }
+      patch endpoint, headers: headers, params: payload, as: :json
+      expect(response).to have_http_status(:conflict)
+      receipt = response.parsed_body.fetch('review').fetch('review_token')
+      allow(Audited.audit_class).to receive(:create!).and_wrap_original do |original, *args, **kwargs|
+        values = kwargs.presence || args.first
+        if values[:auditable] == membership && values[:action] == 'update'
+          state[:mandatory_withdrawal_audit] = true
+          raise ActiveRecord::StatementInvalid, 'SYNTHETIC withdrawal audit insertion unavailable'
+        end
+        original.call(*args, **kwargs)
+      end
+      confirmed = payload.merge(manager_confirmation: { confirmed: true, review_token: receipt })
+      patch endpoint, headers: headers, params: confirmed, as: :json
+      expect(response).to have_http_status(:internal_server_error)
+      expect(state[:mandatory_withdrawal_audit]).to be(true)
+      expect(JrcContactCenter::QueueMembership.find(membership.id).active).to be(true)
+      expect(Audited.audit_class.where(auditable: membership, action: 'update')).to be_empty
+    end
+  end
 end

@@ -19,6 +19,6 @@ class Api::V1::Accounts::JrcContactCenter::AgentStatesController < Api::V1::Acco
 
   def render_state
     snapshot = JrcContactCenter::AgentStateSnapshot.new(account_user: Current.account_user)
-    render json: base_payload.merge(item: snapshot.call)
+    render json: base_payload.merge(item: snapshot.operator_payload)
   end
 end

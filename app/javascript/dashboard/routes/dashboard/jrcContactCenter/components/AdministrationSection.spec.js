@@ -697,4 +697,77 @@ describe('global ACW administrative popup revision', () => {
     expect(API.updateAcwPolicy).not.toHaveBeenCalled();
     expect(wrapper.get('[data-configuration-conflict]').exists()).toBe(true);
   });
+
+  it('passes only an explicitly confirmed review with the unchanged native membership draft', async () => {
+    mocks.route.query = { queues_tab: 'memberships' };
+    const row = {
+      id: '2',
+      queue_id: '3',
+      queue_name: 'SYNTHETIC last queue',
+      account_user_id: '4',
+      user_name: 'SYNTHETIC operator',
+      participates: true,
+      supervises: false,
+      active: true,
+      priority: 10,
+      revision: 'a'.repeat(64),
+    };
+    API.queueMemberships.mockResolvedValue({
+      data: {
+        items: [row],
+        meta: { total: 1, page: 1, pages: 1 },
+        agents: [
+          { account_user_id: '4', name: 'SYNTHETIC operator', eligible: true },
+        ],
+      },
+    });
+    API.configurationRecord.mockResolvedValue({ data: { item: row } });
+    API.saveQueueMembership.mockRejectedValueOnce({
+      response: {
+        data: {
+          error: 'last_eligible_confirmation_required',
+          review: {
+            account_id: '1',
+            membership_id: '2',
+            queue_id: '3',
+            queue_name: row.queue_name,
+            previous_count: 1,
+            remaining_count: 0,
+            review_token: 'synthetic-client-only-receipt',
+          },
+        },
+      },
+    });
+    API.saveQueueMembership.mockResolvedValueOnce({ data: {} });
+    const wrapper = mountSection('queues');
+    await flushPromises();
+    await wrapper.get('[data-edit]').trigger('click');
+    await flushPromises();
+    const active = wrapper
+      .findAll('label')
+      .find(node => node.text() === 'JRC_CONTACT_CENTER.ADMIN.ACTIVE')
+      .find('input');
+    await active.setValue(false);
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(wrapper.get('[data-queue-withdrawal-review]').exists()).toBe(true);
+    expect(API.saveQueueMembership).toHaveBeenCalledTimes(1);
+    await wrapper.get('[data-dialog]').trigger('submit');
+    expect(API.saveQueueMembership).toHaveBeenCalledTimes(1);
+    await wrapper.get('[data-manager-withdrawal-confirm]').setValue(true);
+    await wrapper.get('[data-dialog]').trigger('submit');
+    await flushPromises();
+    expect(API.saveQueueMembership).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({ active: false }),
+      '2',
+      {
+        expected_revision: 'a'.repeat(64),
+        manager_confirmation: {
+          confirmed: true,
+          review_token: 'synthetic-client-only-receipt',
+        },
+      }
+    );
+  });
 });

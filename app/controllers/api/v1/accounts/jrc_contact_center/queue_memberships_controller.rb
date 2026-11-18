@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1::Accounts::JrcContactCenter::BaseController
+  rescue_from JrcContactCenter::QueueWithdrawalReview::Required, with: :render_withdrawal_review
+
   def index
     authorize_contact_center!(:configure?)
     memberships = filtered_memberships
@@ -22,11 +24,19 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
 
   def update
     authorize_contact_center!(:configure?)
-    membership = configuration_write.update!(scoped_memberships, params[:id], **configuration_revision_options) { membership_params }
+    review = JrcContactCenter::QueueWithdrawalReview.new(
+      account: Current.account, member: Current.account_user, confirmation: params[:manager_confirmation]
+    )
+    membership = configuration_write.update!(scoped_memberships, params[:id], review: review, **configuration_revision_options) { membership_params }
     render json: base_payload.merge(item: serialize(membership.reload))
   end
 
   private
+
+  def render_withdrawal_review(error)
+    response.headers['Cache-Control'] = 'no-store'
+    render json: base_payload.merge(error: error.code, review: error.review), status: error.status
+  end
 
   def filtered_memberships
     memberships = scoped_memberships.includes(:queue, account_user: :user).order(:queue_id, :priority, :id)

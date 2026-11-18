@@ -23,7 +23,7 @@ class JrcContactCenter::ConfigurationWrite
     end
   end
 
-  def update!(relation, id, expected_revision: UNSPECIFIED_REVISION)
+  def update!(relation, id, expected_revision: UNSPECIFIED_REVISION, review: nil)
     @account.with_lock do
       relation.klass.uncached do
         record = relation.find(id)
@@ -34,7 +34,7 @@ class JrcContactCenter::ConfigurationWrite
           relation.find(id)
           reauthorize!(record)
           JrcContactCenter::ConfigurationRevision.check!(record, expected_revision) unless expected_revision.equal?(UNSPECIFIED_REVISION)
-          record.update!(yield)
+          apply_update!(record, yield, review)
         end
         record
       end
@@ -42,6 +42,11 @@ class JrcContactCenter::ConfigurationWrite
   end
 
   private
+
+  def apply_update!(record, attributes, review)
+    review&.check!(record, attributes)
+    record.update!(attributes)
+  end
 
   def reauthorize!(record)
     @access = @reauthorize.call(record) if @reauthorize

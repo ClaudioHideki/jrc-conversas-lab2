@@ -10,7 +10,7 @@ class JrcContactCenter::SyntheticPauseSeed
     raise 'Owned synthetic pause runner required' unless owned
 
     projects.index_with do |project|
-      %w[editor operations].index_with { |kind| new("#{project}-#{kind}").call }
+      %w[editor operations withdrawal].index_with { |kind| new("#{project}-#{kind}").call }
     end
   end
   private_class_method :new

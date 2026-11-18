@@ -10,6 +10,8 @@ import NativeRoleEditor from './NativeRoleEditor.vue';
 import AuthorityAssignments from './AuthorityAssignments.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import PauseCatalogEditor from './PauseCatalogEditor.vue';
+import QueueWithdrawalConfirmation from './QueueWithdrawalConfirmation.vue';
+import { useQueueWithdrawalReview } from '../composables/useQueueWithdrawalReview';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 
 const props = defineProps({
@@ -78,6 +80,13 @@ const configurationRevision = useConfigurationRevision({
   resource,
   draft,
 });
+const withdrawal = useQueueWithdrawalReview({
+  accountId: computed(() => props.accountId),
+  resource,
+  record: editing,
+  draft,
+  allowed: computed(() => props.context.capabilities.configure),
+});
 const configurationSaveAllowed = () => {
   const expectsRecord = Boolean(
     editing.value?.id &&
@@ -89,6 +98,7 @@ const configurationSaveAllowed = () => {
       (configurationRevision.state.required &&
         String(configurationRevision.state.id) === String(props.accountId))) &&
     configurationRevision.canSave.value &&
+    withdrawal.canSave.value &&
     (!expectsRecord ||
       (configurationRevision.state.required &&
         String(configurationRevision.state.id) === String(editing.value.id)))
@@ -394,7 +404,7 @@ const save = async () => {
           priority: row.priority,
         },
         id,
-        configurationRevision.options()
+        { ...configurationRevision.options(), ...withdrawal.options() }
       );
     else if (resource.value === 'teams') {
       const attributes = { name: row.name, description: row.description };
@@ -407,6 +417,8 @@ const save = async () => {
     await load();
   } catch (error) {
     if (version === generation) {
+      if (withdrawal.handleError(error)) return;
+      withdrawal.clear();
       if (configurationRevision.handleError(error)) return;
       const inactiveQueue = error.response?.data?.error === 'inactive_queue';
       const ineligibleMember =
@@ -839,7 +851,10 @@ onBeforeUnmount(() => {
       :show-confirm-button="key !== 'permissions'"
       width="2xl"
       @confirm="save"
-      @close="configurationRevision.capture(null)"
+      @close="
+        configurationRevision.capture(null);
+        withdrawal.clear();
+      "
     >
       <NativeRoleEditor
         v-if="canEditRoles"
@@ -856,6 +871,11 @@ onBeforeUnmount(() => {
           :reviewed="configurationRevision.reviewed()"
           @reload="configurationRevision.reload"
           @review="configurationRevision.review"
+        />
+        <QueueWithdrawalConfirmation
+          v-if="withdrawal.state.review || withdrawal.state.error"
+          :state="withdrawal.state"
+          @confirm="withdrawal.state.confirmed = $event"
         />
         <p
           v-if="formError"

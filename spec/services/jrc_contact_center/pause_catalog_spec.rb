@@ -214,5 +214,4 @@ RSpec.describe JrcContactCenter::PauseCatalog do
     expect(Audited.audit_class.where(associated: account, comment: JrcContactCenter::ConfigurationAudit::PAUSE_COMMENT).count).to eq(1)
     expect(Account.find(account.id).settings.fetch(described_class::KEY).fetch('version')).to eq(saved.fetch('version'))
   end
-
 end

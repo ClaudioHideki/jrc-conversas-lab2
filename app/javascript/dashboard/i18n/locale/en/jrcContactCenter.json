@@ -2121,6 +2121,15 @@
       "INHERITED": "Herança das permissões existentes",
       "EXCEEDED": "O tempo máximo informado foi ultrapassado. A pausa continua ativa; nenhum retorno à distribuição foi executado.",
       "HISTORY": "Histórico do catálogo"
+    },
+    "QUEUE_WITHDRAWAL": {
+      "TITLE": "Retirada do último agente elegível",
+      "IMPACT": "A fila ativa {queue} passará de {before} para {after} agentes configurados elegíveis no JRC. Revise o impacto antes de confirmar.",
+      "LOCAL_ONLY": "A conferência usa permissões, escopos e vínculos locais. Não representa disponibilidade online nem confirmação ou publicação no PABX.",
+      "CONFIRM": "Como gestor autorizado, revisei o impacto e confirmo a retirada do último agente elegível desta fila.",
+      "INVALID": "Não foi possível validar o impacto recebido. Feche e reabra o registro para uma nova conferência. Nenhuma retirada foi confirmada.",
+      "AUDITED": "Retirada confirmada pelo gestor",
+      "AUDIT_DETAIL": "Vínculo do gestor: {manager} · Fila: {queue} · Agentes elegíveis: {before} → {after}."
     }
   }
 }

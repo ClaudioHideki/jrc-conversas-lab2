@@ -31,6 +31,30 @@ describe('CallWorkspace', () => {
     );
   });
 
+  it('translates the non-compact native call-leg status while preserving the queue and backend state', async () => {
+    JrcContactCenterAPI.call.mockResolvedValueOnce({
+      data: {
+        item: {
+          id: 10,
+          status: 'connected',
+          journey: { legs: [{ id: 7, status: 'connected', queue_id: 44 }] },
+        },
+      },
+    });
+    const wrapper = mount(CallWorkspace, {
+      props: { accountId: 1, callId: 10 },
+    });
+    await flushPromises();
+    const detail = wrapper
+      .findAll('p')
+      .map(node => node.text())
+      .find(text => text.includes('JRC_CONTACT_CENTER.ADMIN.QUEUE 44'));
+    expect(detail).toBe(
+      'JRC_CONTACT_CENTER.INBOX_360.CALL_STATES.connected · JRC_CONTACT_CENTER.ADMIN.QUEUE 44'
+    );
+    expect(wrapper.emitted('loaded').at(-1)[0].call.status).toBe('connected');
+  });
+
   it('keeps the authorized attendance and notes identity when customer lookup is unavailable', async () => {
     JrcContactCenterAPI.customerContext.mockRejectedValueOnce({
       response: { status: 503 },

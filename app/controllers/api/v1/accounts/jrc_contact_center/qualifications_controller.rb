@@ -9,7 +9,7 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
     render json: base_payload.merge(items: records.order(created_at: :desc).includes(account_user: :user).map(&:operational_payload),
                                    policy: JrcContactCenter::AcwPolicy.new(account: Current.account).call,
                                    attendance: target.as_json(only: %i[id status ended_at]),
-                                   agent: JrcContactCenter::AgentStateSnapshot.new(account_user: Current.account_user).call)
+                                   agent: operator_snapshot)
   end
 
   def create
@@ -24,10 +24,14 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
     record = scope.where(account_user: Current.account_user).find(params[:id])
     record = manager.complete!(record, params.require(:qualification).permit(:reason_code, :outcome_code, :notes).to_h.symbolize_keys)
     render json: base_payload.merge(item: record.operational_payload,
-                                   agent: JrcContactCenter::AgentStateSnapshot.new(account_user: Current.account_user).call)
+                                   agent: operator_snapshot)
   end
 
   private
+
+  def operator_snapshot
+    JrcContactCenter::AgentStateSnapshot.new(account_user: Current.account_user).operator_payload
+  end
 
   def scope
     records = JrcContactCenter::Qualification.where(account: Current.account)

@@ -20,7 +20,16 @@ class JrcContactCenter::ConfigurationAudit
         'attributes' => [before&.fetch('attributes'), after&.fetch('attributes')],
         'cc_scope' => { 'before' => before&.fetch('scope'), 'after' => after&.fetch('scope') },
         'omitted_fields' => omitted, 'schema_version' => 1
-      }
+      }.merge(manager_review(record))
     )
   end
+
+  def self.manager_review(record)
+    return {} unless record.is_a?(JrcContactCenter::QueueMembership) && record.cc_withdrawal_review
+
+    values = record.cc_withdrawal_review.slice(*JrcContactCenter::QueueWithdrawalReview::AUDIT_FIELDS).deep_dup
+    record.cc_withdrawal_review = nil
+    { 'manager_review' => values }
+  end
+  private_class_method :manager_review
 end

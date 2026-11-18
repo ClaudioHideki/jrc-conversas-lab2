@@ -204,3 +204,15 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - Preparados testes nativos/Vue/Chrome próprios (132 Chrome obrigatórios, mantendo os 124 anteriores). Não aprovados antes da execução sobre o novo SHA.
 - ADR: docs/adr/20261118-call-center-local-pause-catalog.md. Figuras 7/8 continuam parciais; regras avançadas e integração externa são pendências explícitas.
 - Próximo incremento: último agente elegível — confirmação explícita do gestor, revisão vinculada ao estado e auditoria, sem aprovação formal obrigatória, conforme decisão do usuário.
+
+
+### Call Center — revisão do último agente elegível, 18/11
+
+- Decisão do usuário: confirmação do gestor com revisão e auditoria; sem aprovação formal obrigatória.
+- Incremento temporário implementa proteção no endpoint nativo de participantes, recibo assinado e contextual, confirmação literal, auditoria atômica e popup com impacto. Não testado nativamente ainda.
+- Preparados testes Rails/Vue e quatro Chrome adicionais (136 obrigatórios, mantendo os 132 anteriores). Não reusar a aprovação de 5e12db0a como aprovação deste código.
+- ADR: docs/adr/20261118-call-center-manager-queue-withdrawal.md. Figura 12 permanece parcial, inclusive retirada indireta via equipe.
+- Base anterior validada 5e12db0a: CI44326127674,1022 Rails únicos+16 recargas de schema,358Vue,124Chrome;184 capturas com hash verificado, seleção visual revisada. Catálogo4175aa7b ainda em diagnóstico nativo; não concluído.
+
+- Revisão de consumidores do estado: novos dados de pausa são exclusivos da resposta autenticada do operador; não serão copiados para outro usuário no painel do supervisor. Preparados cinco cenários nativos de privacidade A/B, cobertura Group e perda de unidade.
+- QA visual identificado em captura real5e: detalhe de perna connected agora preparado para usar o tradutor nativo existente, com estado da API preservado. Testes próprios ainda pendentes.

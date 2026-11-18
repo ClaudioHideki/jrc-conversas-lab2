@@ -13,13 +13,17 @@ class JrcContactCenter::ConfigurationAuditPresenter
     changes = record.audited_changes
     attributes = changes['attributes'] || role_attributes(changes)
     actor_name = @actor_names[record.user_id] if record.user_type == 'User'
-    {
+    payload = {
       id: record.id, created_at: record.created_at, actor_id: record.user_id, actor_name: actor_name,
       resource_type: JrcContactCenter::ConfigurationAuditQuery.resource_key(record),
       resource_id: record.auditable_id, operation: record.action, revision: record.version,
       correlation_id: record.request_uuid, before: attributes.first, after: attributes.last,
       scopes: changes['cc_scope'], omitted_fields: changes.fetch('omitted_fields', []), result: 'recorded_locally'
     }
+    if changes['manager_review'].is_a?(Hash)
+      payload[:manager_review] = changes['manager_review'].slice(*JrcContactCenter::QueueWithdrawalReview::AUDIT_FIELDS)
+    end
+    payload
   end
 
   private

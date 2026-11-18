@@ -28,10 +28,14 @@ class JrcContactCenter::SupervisorSnapshot
   end
 
   def scoped_agent_data(member)
-    data = JrcContactCenter::AgentStateSnapshot.new(account_user: member).call
+    snapshot = JrcContactCenter::AgentStateSnapshot.new(account_user: member)
+    data = snapshot.call
     permitted = @access.queues.pluck(:id).map(&:to_s)
     data[:queues] = data[:queues].select { |queue| permitted.include?(queue[:id]) }
     data[:eligible_queue_ids] &= permitted
+    if snapshot.current&.queue_id && !permitted.include?(snapshot.current.queue_id.to_s)
+      data[:reason_code] = nil
+    end
     data[:pending_qualifications] = data[:pending_qualifications].select do |qualification|
       qualification['call_session_id'] && @access.call_sessions.exists?(id: qualification['call_session_id'])
     end

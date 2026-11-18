@@ -41,9 +41,14 @@ class JrcContactCenter::AgentStateSnapshot
       eligible: reason.nil?, eligibility_reason: reason,
       eligible_queue_ids: reason.nil? ? [current.queue_id.to_s] : [],
       queues: memberships.includes(:queue).map { |membership| { id: membership.queue_id.to_s, name: membership.queue.name } },
-      pause_catalog: pause_catalog_options, pause_definition: pause_definition,
       pending_qualifications: pending_qualifications.includes(account_user: :user).map(&:operational_payload)
     )
+  end
+
+  # Private operator configuration belongs only in authenticated self responses.
+  # SupervisorSnapshot reuses #call and must not inherit another member's catalog.
+  def operator_payload
+    call.merge(pause_catalog: pause_catalog_options, pause_definition: pause_definition)
   end
 
   private

@@ -32,12 +32,15 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseTarget = info.title.startsWith('local pause catalog')
-    ? session.pause_targets[info.project.name][
-        info.title.startsWith('local pause catalog operator')
-          ? 'operations'
-          : 'editor'
-      ]
+  const pauseKey = info.title.startsWith('last eligible queue withdrawal')
+    ? 'withdrawal'
+    : info.title.startsWith('local pause catalog operator')
+      ? 'operations'
+      : info.title.startsWith('local pause catalog')
+        ? 'editor'
+        : null;
+  const pauseTarget = pauseKey
+    ? session.pause_targets[info.project.name][pauseKey]
     : null;
   const auth = pauseTarget
     ? info.title.startsWith('local pause catalog operator')
@@ -65,7 +68,7 @@ test.beforeEach(async ({ page }, info) => {
                       ? session.viewer
                       : session.administrator;
   if (
-    info.title.startsWith('local pause catalog') ||
+    Boolean(pauseTarget) ||
     info.title.startsWith('local IVR') ||
     info.title.startsWith('linked Customer Master')
   ) {
@@ -3308,6 +3311,9 @@ test('linked Customer Master operating records remain visible in their native sc
   expect(uiOrigin).toBe('http://127.0.0.1:5386');
   const sourcePath = new URL(source).pathname;
   await expect(page.getByText('Falando', { exact: true })).toBeVisible();
+  await expect(
+    page.getByText('Falando · Fila ' + target.queue_id, { exact: true })
+  ).toBeVisible();
   const summary = 'SYNTHETIC persisted origin ' + info.project.name;
   await page
     .getByLabel('Motivo do atendimento', { exact: true })
@@ -3755,4 +3761,148 @@ test('local pause catalog operator preserves legacy history and enforces only au
     path: `.codex/call-center-native-e2e/${info.project.name}-pause-catalog-operator.png`,
     fullPage: false,
   });
+});
+
+test('last eligible queue withdrawal requires actual manager review and preserves native audit and scope', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].withdrawal;
+  const api = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const read = await page.request.get(
+    `${api}/queue_memberships?queue_id=${target.queue_id}&page=1`,
+    { headers: target.administrator }
+  );
+  expect(read.status()).toBe(200);
+  const rows = (await read.json()).items;
+  expect(rows).toHaveLength(1);
+  const membership = rows[0];
+  expect(membership.active).toBe(true);
+  const endpoint = `${api}/queue_memberships/${membership.id}`;
+  const writes = [];
+  page.on('request', request => {
+    if (
+      /\/(commands|sync_calls|telephony_integration)(?:[/?]|$)/.test(
+        request.url()
+      ) &&
+      !['GET', 'HEAD'].includes(request.method())
+    )
+      writes.push(request.url());
+  });
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/queues?queues_tab=memberships`
+  );
+  const row = page
+    .locator('[data-resource-row]')
+    .filter({ hasText: membership.queue_name });
+  await expect(row).toHaveCount(1);
+  await row.locator('[data-edit]').click();
+  await expectContainedDialog(page);
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Ativo', { exact: true }).uncheck();
+  const uiPath = new URL(endpoint).pathname;
+  const first = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === uiPath &&
+      new URL(response.url()).origin === 'http://127.0.0.1:5386' &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  const rejected = await first;
+  expect(rejected.status()).toBe(409);
+  const review = (await rejected.json()).review;
+  expect(review).toMatchObject({
+    account_id: String(target.account_id),
+    membership_id: String(membership.id),
+    previous_count: 1,
+    remaining_count: 0,
+  });
+  await expect(dialog.locator('[data-queue-withdrawal-review]')).toContainText(
+    membership.queue_name
+  );
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeDisabled();
+  const intact = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect((await intact.json()).item.active).toBe(true);
+  const unconfirmed = await page.request.patch(endpoint, {
+    headers: target.administrator,
+    data: {
+      queue_membership: { active: false },
+      expected_revision: membership.revision,
+      manager_confirmation: {
+        confirmed: 'true',
+        review_token: review.review_token,
+      },
+    },
+  });
+  expect(unconfirmed.status()).toBe(409);
+  await dialog.locator('[data-manager-withdrawal-confirm]').check();
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar', exact: true })
+  ).toBeEnabled();
+  await expect(page.locator('html')).toHaveClass(
+    info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-last-eligible-manager-review.png`,
+    fullPage: false,
+  });
+  const saved = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === uiPath &&
+      new URL(response.url()).origin === 'http://127.0.0.1:5386' &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await saved).status()).toBe(200);
+  await expect(dialog).toBeHidden();
+  await page.reload();
+  const persisted = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect((await persisted.json()).item.active).toBe(false);
+  const history = await page.request.get(
+    `${api}/configuration_audits?resource_type=membership&resource_id=${membership.id}&history=true`,
+    { headers: target.administrator }
+  );
+  expect(history.status()).toBe(200);
+  const events = (await history.json()).items.filter(
+    event => event.operation === 'update'
+  );
+  expect(events).toHaveLength(1);
+  expect(events[0].manager_review).toMatchObject({
+    kind: 'jrc_cc_last_eligible_withdrawal_v1',
+    membership_id: String(membership.id),
+    queue_id: String(target.queue_id),
+    previous_count: 1,
+    remaining_count: 0,
+  });
+  expect(events[0].manager_review.receipt_sha256).toMatch(/^[a-f0-9]{64}$/);
+  expect(events[0].manager_review).not.toHaveProperty('review_token');
+  const denied = await page.request.patch(endpoint, {
+    headers: target.operator,
+    data: { queue_membership: { active: true } },
+  });
+  expect(denied.status()).toBe(401);
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audit?audit_source=configuration&audit_config_resource_type=membership&audit_config_resource_id=${membership.id}&audit_config_history=true`
+  );
+  await expect(page.locator('[data-audited-manager-withdrawal]')).toHaveCount(
+    1
+  );
+  await expect(page.locator('[data-audited-manager-withdrawal]')).toContainText(
+    'Retirada confirmada pelo gestor'
+  );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-last-eligible-audit.png`,
+    fullPage: false,
+  });
+  expect(writes).toEqual([]);
 });

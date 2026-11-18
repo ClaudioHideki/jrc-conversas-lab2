@@ -258,5 +258,27 @@ const value = (entry, field = '') => {
         </div>
       </section>
     </div>
+    <section
+      v-if="record.manager_review"
+      class="min-w-0 rounded-lg border border-n-amber-6 p-3 text-sm text-n-slate-12"
+      data-audited-manager-withdrawal
+    >
+      <h4 class="font-medium">
+        {{ t('JRC_CONTACT_CENTER.QUEUE_WITHDRAWAL.AUDITED') }}
+      </h4>
+      <p>
+        {{
+          t('JRC_CONTACT_CENTER.QUEUE_WITHDRAWAL.AUDIT_DETAIL', {
+            manager: record.manager_review.account_user_id,
+            queue: record.manager_review.queue_id,
+            before: record.manager_review.previous_count,
+            after: record.manager_review.remaining_count,
+          })
+        }}
+      </p>
+      <p class="text-n-slate-11">
+        {{ t('JRC_CONTACT_CENTER.QUEUE_WITHDRAWAL.LOCAL_ONLY') }}
+      </p>
+    </section>
   </div>
 </template>

@@ -4,6 +4,8 @@ class JrcContactCenter::QueueMembership < JrcContactCenter::ApplicationRecord
   include JrcContactCenter::AdministrativeAuditable
   ROLES = %w[agent supervisor].freeze
 
+  attr_accessor :cc_withdrawal_review
+
   belongs_to :queue, class_name: 'JrcContactCenter::Queue'
   belongs_to :account_user
 

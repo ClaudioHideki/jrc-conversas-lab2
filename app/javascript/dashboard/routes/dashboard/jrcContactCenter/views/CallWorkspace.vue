@@ -92,7 +92,7 @@ const journeyEvents = computed(() => [
       : `Perna ${leg.id}`,
     detail: props.compact
       ? callLabels.value[leg.status]
-      : `${leg.status} · Fila ${leg.queue_id || '-'}`,
+      : `${callLabels.value[leg.status] || leg.status} · ${t('JRC_CONTACT_CENTER.ADMIN.QUEUE')} ${leg.queue_id || '-'}`,
     time: journeyTime(leg.started_at || leg.created_at),
   })),
 ]);
