@@ -224,3 +224,12 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - Artefato14447323510: SHA-256 f42b0fee0a8f1eedb1f57257984d14c20d1aca93ec572ce3be8ba29d9dbbec1d.
 - Gates de assets/Chrome não executados: oito infrações Ruby restantes (complexidade/predicado de escopo e duas linhas físicas de alinhamento). Corrigidas no candidato seguinte, preservando comportamento e asserções; nova validação exigida.
 - Matriz por figura reconciliada: catálogo básico, cobertura corporativa e decisão do gestor não permanecem descritos como ausentes/indefinidos. Funcionalidades avançadas e contrato externo continuam pendentes.
+
+
+### Call Center — QA Chrome266fa5f8 e correção do procedimento
+
+- CI44351000161:1093 Rails únicos,16 recargas,387Vue,lint sem novas infrações,assets/CSS reais ebootstrap15 aprovados. Chrome128/136; zero skips/flaky/erros externos. Não homologado integralmente.
+- Artefato14453461748:SHA-256 d3d68fe95587a8c51cc8cbd90e4ab5dce912b0979098518523f42d2ec177e9f5,recuperado e verificado. Quatro capturas efetivamente revisadas: popup de pausas móvel escuro, revisão do gestor móvel clara e desktop escura, operador desktop claro. Hashes na matriz; não representam revisão manual de todas as capturas.
+- Duas falhas de procedimento, repetidas nos quatro projetos: seletor amplo de status encontrou o banner pendente e o carregamento do novo catálogo; auditoria foi consultada sem abrir o detalhe nativo. Corrigir seleção pelo texto exato esperado e abrir a única linha do vínculo/operação, conferir resposta pelo ID do evento e depois o popup. Preservar todas as136 verificações, escritas reais, recarga, negações e auditoria. Nenhuma mudança funcional.
+- Oito Chrome do catálogo passaram. Retirada do último agente comprovou409 sem gravação, confirmação literal,200/persistência e auditoriaAPI/negação antes do passo de detalhe ausente. Aceite final exige próxima CI no próprioSHA.
+- Permanecem parciais as figuras7/8/12; retirada indireta por equipe e capacidades externas não estão homologadas. SemPABX,produção,merge,imagem ou deploy.

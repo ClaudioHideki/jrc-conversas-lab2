@@ -2904,7 +2904,7 @@
     }
   },
   "pause_catalog_candidate_20261118": {
-    "status": "native_and_vue_passed_d3e2179b_chrome_pending",
+    "status": "native_vue_lint_assets_passed_266fa5f8_chrome_128_of_136_pending_qa_correction",
     "enforcement_default": false,
     "activation_confirmation_required": true,
     "legacy_history_preserved": true,
@@ -2918,7 +2918,7 @@
     "last_eligible_withdrawal": "next increment: manager review, confirmation and mandatory audit"
   },
   "manager_queue_withdrawal_candidate_20261118": {
-    "status": "native_and_vue_passed_d3e2179b_chrome_pending_lint_fix",
+    "status": "native_vue_lint_assets_passed_266fa5f8_chrome_128_of_136_pending_qa_correction",
     "decision": "Explicit manager confirmation, review and audit; no mandatory formal Central Approvals",
     "native_queue_membership_path_only": true,
     "signed_receipt_minutes": 10,
@@ -2934,7 +2934,7 @@
       "supervisor_reason": "hide opaque reason for a current queue outside the viewer scope; preserve authorized Group visibility",
       "native_api_regressions_prepared": 5,
       "translated_call_leg": "existing label reuse; API status unchanged; screenshot finding5e; Vue and four existing Chrome assertions prepared",
-      "status": "not_yet_natively_tested"
+      "status": "Native/Vue passed266fa5f8; catalog privacy and leg translation also passed their own Chrome assertions; full gate blocked by two QA procedures."
     },
     "native_checkpoint": {
       "sha": "d3e2179bda70b8f8c9ffd2f54626fddaecef0a23",
@@ -2957,7 +2957,54 @@
     {
       "subject": "Last eligible queue agent withdrawal",
       "resolution": "Explicit authorized-manager confirmation, review and audit; not mandatory formal Central Approvals. No PABX publication.",
-      "status": "implemented in candidate d3e2179b, awaiting native/UI evidence; indirect team removal remains pending"
+      "status": "Implemented and native-tested266fa5f8; direct withdrawal UI writes/denials/audit API passed, audit detail navigation QA pending. Indirect team removal remains pending."
     }
-  ]
+  ],
+  "qa_266fa5f8_20261118": {
+    "sha": "266fa5f8d5fd59aacd0f7a16c78d03652d4c0fcb",
+    "run": 44351000161,
+    "artifact": 14453461748,
+    "artifact_sha256": "d3d68fe95587a8c51cc8cbd90e4ab5dce912b0979098518523f42d2ec177e9f5",
+    "rails_unique": 1093,
+    "schema_reload_reexecutions": 16,
+    "vue": 387,
+    "new_ruby_offenses": 0,
+    "frontend_lint": "passed",
+    "assets_real_css": "passed",
+    "bootstrap_cards": 15,
+    "chrome": {
+      "passed": 128,
+      "failed": 8,
+      "skipped": 0,
+      "flaky": 0,
+      "outside_errors": 0,
+      "required": 136
+    },
+    "failures": "Two QA navigation/selectors repeated in four projects: pending banner collides with nested catalog loading status; audit detail was not opened before checking manager review. Preserve 136 tests and all write/denial/assertions; next candidate waits for its own CI.",
+    "pause_catalog_chrome": "All eight catalog scenarios passed; own synthetic PostgreSQL, admin/operator, four projects.",
+    "manager_chrome": "Four scenarios verified 409 unchanged state, literal confirmation, 200 persist/reload, audit metadata and operator denial before the unperformed detail navigation. Not fully passed.",
+    "visual_review": [
+      {
+        "file": "desktop-dark-last-eligible-manager-review.png",
+        "sha256": "23172702abab2c5e1c142ce00f88c4f3316ecdaa11d6b2882b97a8ab16b3e1b0",
+        "review": "Actually viewed; fields readable, native contained dialogs; informational PABX pending text visible. This selection does not prove all 23 figures complete."
+      },
+      {
+        "file": "desktop-light-pause-catalog-operator.png",
+        "sha256": "fd0b74ff7efddccdd4e9d4b0a5c036aa6b546c633842c126391c8c369169446c",
+        "review": "Actually viewed; fields readable, native contained dialogs; informational PABX pending text visible. This selection does not prove all 23 figures complete."
+      },
+      {
+        "file": "mobile-dark-pause-catalog-popup.png",
+        "sha256": "5469afd2d9f0b99aa9d573eb216e75b785cb23ad86cb14664c31774a1cffa55e",
+        "review": "Actually viewed; fields readable, native contained dialogs; informational PABX pending text visible. This selection does not prove all 23 figures complete."
+      },
+      {
+        "file": "mobile-light-last-eligible-manager-review.png",
+        "sha256": "19acbc1a5639121be3ff8432782415a3f3d577f8b746ac15e2e9c1e9fa7ac2cd",
+        "review": "Actually viewed; fields readable, native contained dialogs; informational PABX pending text visible. This selection does not prove all 23 figures complete."
+      }
+    ],
+    "stages_0_2_complete": false
+  }
 }

@@ -786,9 +786,12 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
       name
     );
     if (pending.includes(key)) {
-      await expect(
-        page.locator('[data-administration-section] [role="status"]')
-      ).toContainText('Funcionalidade pendente');
+      const pendingNotice = page
+        .locator('[data-administration-section] [role="status"]')
+        .filter({ hasText: 'Funcionalidade pendente' });
+      await expect(pendingNotice).toHaveCount(1);
+      await expect(pendingNotice).toBeVisible();
+      await expect(pendingNotice).toContainText('Funcionalidade pendente');
       await expect(page.locator('[data-create]')).toHaveCount(0);
     }
     await page
@@ -3889,12 +3892,35 @@ test('last eligible queue withdrawal requires actual manager review and preserve
   await page.goto(
     `/app/accounts/${target.account_id}/contact-center/control-desk/audit?audit_source=configuration&audit_config_resource_type=membership&audit_config_resource_id=${membership.id}&audit_config_history=true`
   );
-  await expect(page.locator('[data-audited-manager-withdrawal]')).toHaveCount(
-    1
-  );
-  await expect(page.locator('[data-audited-manager-withdrawal]')).toContainText(
-    'Retirada confirmada pelo gestor'
-  );
+  const auditPanel = page.locator('[data-configuration-audit]');
+  await expect(auditPanel).toBeVisible();
+  const withdrawalRow = auditPanel.locator('[data-audit-row]').filter({
+    hasText: `Vínculo de agente #${membership.id} · Alteração`,
+  });
+  await expect(withdrawalRow).toHaveCount(1);
+  const detailResponse = page.waitForResponse(response => {
+    const url = new URL(response.url());
+    return (
+      url.origin === 'http://127.0.0.1:5386' &&
+      url.pathname ===
+        `/api/v1/accounts/${target.account_id}/jrc_contact_center/configuration_audits/${events[0].id}` &&
+      response.request().method() === 'GET'
+    );
+  });
+  await withdrawalRow.locator('[data-audit-detail]').click();
+  const loadedDetail = await detailResponse;
+  expect(loadedDetail.status()).toBe(200);
+  expect((await loadedDetail.json()).item.id).toBe(events[0].id);
+  const auditDialog = page.getByRole('dialog');
+  await expect(auditDialog).toBeVisible();
+  await expect(
+    auditDialog.locator('[data-audited-manager-withdrawal]')
+  ).toHaveCount(1);
+  await expect(
+    auditDialog.locator('[data-audited-manager-withdrawal]')
+  ).toContainText('Retirada confirmada pelo gestor');
+  await expect(auditDialog).toContainText('Não comprova publicação');
+  await expectContainedDialog(page);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth
