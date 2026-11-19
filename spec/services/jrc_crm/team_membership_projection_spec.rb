@@ -52,7 +52,7 @@ RSpec.describe JrcCrm::TeamMembershipProjection do
     proposed = described_class.new(account: account, team: team, user_ids: [operator.id])
     preview = JrcCrm::CorporateCoverage.new(account: account, user: operator, team_membership_projection: proposed)
     expect(preview).not_to be_group
-    expect(account.jrc_crm_user_business_units).to be_empty
+    expect(account.jrc_crm_user_business_units.reload).to be_empty
   end
 
   it 'retains the native requirement for an active containing team scope' do

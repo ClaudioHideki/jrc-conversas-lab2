@@ -32,6 +32,24 @@ RSpec.describe 'Native team removal and last configured eligible queue agent', t
 
   after { Current.reset }
 
+  it 'preserves a string-ID no-op roster using the same canonical IDs as the withdrawal review' do
+    original = team.team_members.sole.id
+    patch endpoint, headers: headers, params: { user_ids: [operator.id.to_s] }, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(team.team_members.reload.pluck(:id)).to eq([original])
+    expect(membership.reload).to be_active
+    expect(audits).to be_empty
+  end
+
+  it 'does not remove an existing agent when the proposed roster mixes string and numeric IDs for the same user' do
+    original = team.team_members.sole.id
+    patch endpoint, headers: headers, params: { user_ids: [operator.id.to_s, operator.id] }, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(team.team_members.reload.pluck(:id)).to eq([original])
+    expect(membership.reload).to be_active
+    expect(audits).to be_empty
+  end
+
   %i[patch delete].each do |verb|
     it "blocks unreviewed #{verb} without changing membership, stored grants, queue, audit or cache" do
       original = team.team_members.sole.id

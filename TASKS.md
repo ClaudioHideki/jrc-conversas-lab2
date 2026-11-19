@@ -375,3 +375,10 @@ CI 44435975247: 1205 exemplos Rails distintos aprovados (1046 principais, 74 de 
 ### Retirada indireta de equipe — em preparação
 
 Prévia pura de composição de membros, serviço único de elegibilidade configurada, recibo explícito vinculado ao gestor e auditoria nativa por fila; reutilização nos três editores existentes. Quatorze arquivos frontend passaram lint dirigido sem erros/avisos novos. Rails/Vue/152Chrome (148 preservados +4novos) ainda precisam executar no novo SHA. Exclusão da entidade Team inteira e hierarquia não são declaradas cobertas. Escopo, testes e limites: docs/adr/20261118-call-center-indirect-team-withdrawal.md.
+
+
+### ACW — proteção contra leitura antiga do relógio [preparado]
+
+Atualização condicional do relógio sobre a linha ainda pendente e no mesmo escopo; preservar conclusão já gravada, limite atual, identidade e conteúdo manual. Sete cenários PostgreSQL preparados; aguardam execução própria. Não equivale à seleção intermediária do motivo, formulários ou automações por destino. Decisão aprovada de precedência preservada. Detalhes: docs/adr/20261119-call-center-acw-clock-stale-read.md.
+
+- [ ] Call Center 19/11: revalidar CI apos cinco infracoes Ruby, recarga da associacao no teste de projecao e normalizacao de IDs do roster (dois cenarios HTTP). Preservar os 152 cenarios Chrome e validar separadamente a correcao do relogio ACW (sete cenarios nativos). Nenhum aceite integral ou operacao PABX inferida.

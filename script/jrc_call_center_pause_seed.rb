@@ -40,8 +40,10 @@ class JrcContactCenter::SyntheticPauseSeed
     team = Team.create!(account: @account, name: "SYNTHETIC #{@project} operational team")
     team.add_members([operator.user_id])
     source = JrcCrm::UserBusinessUnit.find_by!(account: @account, user: operator.user)
-    JrcCrm::TeamScope.create!(account: @account, team: team, scope: 'BUSINESS_UNIT',
-                             company_id: source.company_id, business_unit_id: source.business_unit_id)
+    JrcCrm::TeamScope.create!(
+      account: @account, team: team, scope: 'BUSINESS_UNIT',
+      company_id: source.company_id, business_unit_id: source.business_unit_id
+    )
     source.update!(team: team)
     operator.custom_role.update!(permissions: [])
     JrcContactCenter::AccessGrant.create!(account: @account, team: team, allowed: %w[jrc_contact_center_view jrc_contact_center_operate])

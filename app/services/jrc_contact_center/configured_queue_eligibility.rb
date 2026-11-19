@@ -10,8 +10,7 @@ class JrcContactCenter::ConfiguredQueueEligibility
 
   def call(membership)
     at = @at || Time.current
-    return false unless membership.account_id == @account.id && membership.active? && membership.role == 'agent'
-    return false unless active_membership_window?(membership, at)
+    return false unless active_agent_membership?(membership, at)
 
     member = @account.account_users.includes(:user).find(membership.account_user_id)
     return false unless authorized_operator?(member)
@@ -24,6 +23,10 @@ class JrcContactCenter::ConfiguredQueueEligibility
   end
 
   private
+
+  def active_agent_membership?(membership, at)
+    membership.account_id == @account.id && membership.active? && membership.role == 'agent' && active_membership_window?(membership, at)
+  end
 
   def authorized_operator?(member)
     member.user.active_for_authentication? && JrcContactCenter::ModulePolicy.new(context(member), :contact_center).operate?

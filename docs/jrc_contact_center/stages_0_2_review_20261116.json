@@ -17,7 +17,11 @@
       "figure": 1,
       "title": "Central e navegação",
       "status": "Implementado parcialmente",
-      "stages": [0, 1, 2],
+      "stages": [
+        0,
+        1,
+        2
+      ],
       "implemented_in_0_2": [
         "One central, account permissions, real local counts and explicit external pending status",
         "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
@@ -25,7 +29,10 @@
       "remaining_or_external": [
         "PABX online/confirmed indicators require an actual provider response"
       ],
-      "code_references": ["ControlDeskPage.vue", "administration.rb"],
+      "code_references": [
+        "ControlDeskPage.vue",
+        "administration.rb"
+      ],
       "reference": {
         "document_1_figure": 1,
         "document_2_figure": 1
@@ -85,7 +92,11 @@
       "figure": 2,
       "title": "Página principal do Control Desk",
       "status": "Implementado parcialmente",
-      "stages": [0, 1, 2],
+      "stages": [
+        0,
+        1,
+        2
+      ],
       "implemented_in_0_2": [
         "15 Word-named cards, statically discoverable icons, contextual return/navigation and reload",
         "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel."
@@ -93,7 +104,10 @@
       "remaining_or_external": [
         "Atividade recente e antes/depois administrativos locais têm evidência5e12db0a. Alertas, publicação e confirmações externas continuam dependentes do PABX."
       ],
-      "code_references": ["ControlDeskPage.vue", "AdministrationSection.vue"],
+      "code_references": [
+        "ControlDeskPage.vue",
+        "AdministrationSection.vue"
+      ],
       "reference": {
         "document_1_figure": 2,
         "document_2_figure": 2
@@ -153,7 +167,12 @@
       "figure": 3,
       "title": "Equipes, filas e distribuição",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 3, 6],
+      "stages": [
+        1,
+        2,
+        3,
+        6
+      ],
       "implemented_in_0_2": [
         "Native Team fields/members; local Queue CRUD; independent tab/filter/page state; explicit queue participation/supervision",
         "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português.",
@@ -235,7 +254,13 @@
       "figure": 4,
       "title": "Painel técnico PABX e atalhos",
       "status": "Implementado parcialmente",
-      "stages": [0, 1, 2, 3, 5],
+      "stages": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
       "implemented_in_0_2": [
         "Safe connection metadata; read-only resources; explicit authorized tenant/accountcode mapping; original infrastructure remains SuperAdmin-only",
         "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente.",
@@ -246,7 +271,10 @@
         "No fake connection test or resource publication; real diagnostics/ACK contract and URA editor remain later",
         "As três abas suportadas não equivalem às oito áreas da referência; URA, inventário/publicação, gravações e confirmações externas continuam pendentes de implementação/contrato."
       ],
-      "code_references": ["scope_mapping.rb", "administration_controller.rb"],
+      "code_references": [
+        "scope_mapping.rb",
+        "administration_controller.rb"
+      ],
       "reference": {
         "document_1_figure": 4,
         "document_2_figure": 4
@@ -287,7 +315,9 @@
       "figure": 5,
       "title": "Gerar mensagem com Nico",
       "status": "Reservado às etapas 3–8",
-      "stages": [4],
+      "stages": [
+        4
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Institutional TTS editor, voices, codec, limits and external authorization are stage 4"
@@ -333,7 +363,9 @@
       "figure": 6,
       "title": "Biblioteca de áudios e pastas",
       "status": "Reservado às etapas 3–8",
-      "stages": [4],
+      "stages": [
+        4
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Institutional audio folders/versioning/storage are stage 4; call recordings are not this catalog"
@@ -379,7 +411,9 @@
       "figure": 7,
       "title": "Pausas e disponibilidade",
       "status": "Implementado parcialmente",
-      "stages": [6],
+      "stages": [
+        6
+      ],
       "implemented_in_0_2": [
         "Existing native agent state is preserved",
         "Incremento posterior de etapa6: catálogo local HH:MM, revisão, escopos e ativação explícita; compatibilidade legada preservada. Backend/Vue próprios validados em c4622175; layout/Chrome ainda pendentes. Privacidade adicional está na candidata d3e2179b, ainda em CI."
@@ -427,7 +461,9 @@
       "figure": 8,
       "title": "Cadastro de motivo de pausa",
       "status": "Implementado parcialmente",
-      "stages": [6],
+      "stages": [
+        6
+      ],
       "implemented_in_0_2": [
         "Incremento posterior de etapa6: catálogo local HH:MM, revisão, escopos e ativação explícita; compatibilidade legada preservada. Backend/Vue próprios validados em c4622175; layout/Chrome ainda pendentes. Privacidade adicional está na candidata d3e2179b, ainda em CI."
       ],
@@ -474,7 +510,11 @@
       "figure": 9,
       "title": "Regra de pós-atendimento",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 6],
+      "stages": [
+        1,
+        2,
+        6
+      ],
       "implemented_in_0_2": [
         "Native account/channel ACW popup in HH:MM; required voice flag, validation and persistence"
       ],
@@ -483,7 +523,10 @@
         "Formulários vinculados, exigências e automações por destino continuam pendentes.",
         "Não representa publicação ou confirmação PABX."
       ],
-      "code_references": ["AdministrationSection.vue", "acw_policy.rb"],
+      "code_references": [
+        "AdministrationSection.vue",
+        "acw_policy.rb"
+      ],
       "reference": {
         "document_1_figure": 9,
         "document_2_figure": 9
@@ -533,7 +576,9 @@
       "figure": 10,
       "title": "Automações por encerramento",
       "status": "Reservado às etapas 3–8",
-      "stages": [6],
+      "stages": [
+        6
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Per-reason CRM/SD/task orchestration, per-destination receipts and retries remain stage 6"
@@ -577,7 +622,11 @@
       "figure": 11,
       "title": "Perfil e permissões",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 6],
+      "stages": [
+        1,
+        2,
+        6
+      ],
       "implemented_in_0_2": [
         "Editor nativo de perfis em popup, com feature flag, administração nativa e cobertura corporativa irrestrita; sem novo cadastro de permissões",
         "Seleções explícitas de capacidades, validações e persistência pela API e pelo store nativos; nenhum grant automático do Call Center",
@@ -649,7 +698,12 @@
       "figure": 12,
       "title": "Equipe e filas em popup",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 3, 6],
+      "stages": [
+        1,
+        2,
+        3,
+        6
+      ],
       "implemented_in_0_2": [
         "Native team fields and member editor; separate native queue member flags and deactivation",
         "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português.",
@@ -734,7 +788,12 @@
       "figure": 13,
       "title": "Conexão e sincronização PABX",
       "status": "Implementado parcialmente",
-      "stages": [0, 1, 2, 3],
+      "stages": [
+        0,
+        1,
+        2,
+        3
+      ],
       "implemented_in_0_2": [
         "Same PABX source as figure 4, safe local state and explicit scope contract",
         "Atalho preparado para a configuração nativa de conexão/CDR na rota ramal_settings, apenas para Super Admin administrativo autorizado; sem nova tela, API de provedor ou sincronização automática. Validação no próximo SHA pendente.",
@@ -789,7 +848,11 @@
       "figure": 14,
       "title": "Auditoria técnica",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 3],
+      "stages": [
+        1,
+        2,
+        3
+      ],
       "implemented_in_0_2": [
         "Existing scoped durable event list/reprocessing remains available only under native capabilities",
         "Auditoria administrativa sanitizada de unidades, filas, vínculos e perfis: backend preparado para validação nativa no novo SHA.",
@@ -849,14 +912,22 @@
       "figure": 15,
       "title": "Aprovações PABX",
       "status": "Implementado parcialmente",
-      "stages": [1, 2, 3, 5],
+      "stages": [
+        1,
+        2,
+        3,
+        5
+      ],
       "implemented_in_0_2": [
         "Original Central de Aprovações entry and eligibility preserved; no policy or real PABX command activated"
       ],
       "remaining_or_external": [
         "PABX approval adapter, snapshots, technical execution and rollback require stages 3/5 and policy/ACK contract"
       ],
-      "code_references": ["administration.rb", "module_policy.rb"],
+      "code_references": [
+        "administration.rb",
+        "module_policy.rb"
+      ],
       "reference": {
         "document_1_figure": 15,
         "document_2_figure": 15
@@ -897,7 +968,10 @@
       "figure": 16,
       "title": "Detalhes do áudio institucional",
       "status": "Reservado às etapas 3–8",
-      "stages": [4, 7],
+      "stages": [
+        4,
+        7
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Corrected Word caption: institutional audio details, not a recording policy. Library is stage 4; call recording policy has its own visual gap"
@@ -943,7 +1017,10 @@
       "figure": 17,
       "title": "Consulta de gravações e player",
       "status": "Implementado parcialmente",
-      "stages": [1, 7],
+      "stages": [
+        1,
+        7
+      ],
       "implemented_in_0_2": [
         "Existing scoped history/recording-byte authorization and separate view/listen/download permissions preserved"
       ],
@@ -995,7 +1072,9 @@
       "figure": 18,
       "title": "Gravações e Qualidade existente",
       "status": "Implementado parcialmente",
-      "stages": [7],
+      "stages": [
+        7
+      ],
       "implemented_in_0_2": [
         "Existing quality navigation is preserved; illustrative catalog must remain explicitly marked as demonstration"
       ],
@@ -1043,14 +1122,19 @@
       "figure": 19,
       "title": "Painel de sentimentos",
       "status": "Implementado parcialmente",
-      "stages": [1, 7],
+      "stages": [
+        1,
+        7
+      ],
       "implemented_in_0_2": [
         "Account-scoped quality service/storage guards are preserved"
       ],
       "remaining_or_external": [
         "Sentiment dashboard, denominators, error states and insights require stage 7; no illustrative metrics are promoted"
       ],
-      "code_references": ["supabase_client_scope_spec.rb"],
+      "code_references": [
+        "supabase_client_scope_spec.rb"
+      ],
       "reference": {
         "document_1_figure": 19,
         "document_2_figure": 19
@@ -1091,7 +1175,9 @@
       "figure": 20,
       "title": "Transcrição e áudio sincronizados",
       "status": "Reservado às etapas 3–8",
-      "stages": [7],
+      "stages": [
+        7
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Five-tab timed transcript/audio/graph popup requires real segments and stage 7"
@@ -1137,14 +1223,19 @@
       "figure": 21,
       "title": "Contexto do cliente",
       "status": "Implementado parcialmente",
-      "stages": [1, 7],
+      "stages": [
+        1,
+        7
+      ],
       "implemented_in_0_2": [
         "Existing context API uses native module visibility/corporate coverage"
       ],
       "remaining_or_external": [
         "Full analysis context popup, linked contracts and source-specific navigation are stage 7"
       ],
-      "code_references": ["customer_context.rb"],
+      "code_references": [
+        "customer_context.rb"
+      ],
       "reference": {
         "document_1_figure": 21,
         "document_2_figure": 21
@@ -1185,7 +1276,10 @@
       "figure": 22,
       "title": "Ações e histórico",
       "status": "Reservado às etapas 3–8",
-      "stages": [6, 7],
+      "stages": [
+        6,
+        7
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Native actions/history orchestration with idempotency and separate review completion require stages 6/7"
@@ -1231,7 +1325,9 @@
       "figure": 23,
       "title": "Correção humana da análise",
       "status": "Reservado às etapas 3–8",
-      "stages": [7],
+      "stages": [
+        7
+      ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
         "Append-only human review/version conflicts and explicit justification require stage 7"
@@ -1360,7 +1456,17 @@
   "continuity_20261117": {
     "base_sha": "fc0bf6ce35df3aeebc5c3297aca62be5518852d1",
     "main_observed": "89779191b0b4be44929a426c7a924dbcad4c3690",
-    "stages_authorized": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "stages_authorized": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
     "increment": "F11 revisão esperada compatível, sem migration ou concessões implícitas",
     "adr": "docs/adr/20261117-call-center-role-revision.md",
     "expected_chrome": 112,
@@ -1521,7 +1627,11 @@
     },
     "configuration_revision": {
       "adr": "docs/adr/20261117-call-center-configuration-revision.md",
-      "resources": ["units", "queues", "queue_memberships"],
+      "resources": [
+        "units",
+        "queues",
+        "queue_memberships"
+      ],
       "root_precondition": "expected_revision optional; 428 malformed, 409 stale, authorization before comparison",
       "new_native_examples": 26,
       "new_vue_tests": 12,
@@ -1934,7 +2044,10 @@
     "native_pabx_navigation": {
       "implementation": "prepared",
       "source_route": "ramal_settings",
-      "source_components": ["SipSettingsPage.vue", "PabxSettingsPanel.vue"],
+      "source_components": [
+        "SipSettingsPage.vue",
+        "PabxSettingsPanel.vue"
+      ],
       "authorization": "CC administer plus native administrative SuperAdmin; native telephony endpoint still independently requires SuperAdmin and membership.",
       "new_provider_endpoints": false,
       "provider_calls_executed": false,
@@ -2664,7 +2777,10 @@
     },
     "acw_policy_audit_prepared": {
       "status": "Implementado, não executado nativamente neste incremento",
-      "figures": [9, 14],
+      "figures": [
+        9,
+        14
+      ],
       "adr": "docs/adr/20261118-call-center-acw-policy-native-audit.md",
       "native_request_examples_prepared": 10,
       "new_vue_prepared": 4,
@@ -2760,7 +2876,12 @@
         "requires": "HTTP 500, failing save! reached, actual database rollback without fixture outer transaction"
       },
       "schema_reload_reexecutions": 16,
-      "not_run": ["corporate RSpec", "Vue", "assets", "Chrome"],
+      "not_run": [
+        "corporate RSpec",
+        "Vue",
+        "assets",
+        "Chrome"
+      ],
       "remaining_failure": "Case creation after corporate revocation returns exact native unit-scope 404; expected 401 was obsolete after source validation. Update only this resource/source expectation, keep zero records/events.",
       "ruby_offenses": "13 alignment diagnostics across nine physical lines in new spec; corrected without rule or assertion changes."
     },
@@ -2836,7 +2957,10 @@
       "vue": 387,
       "zero_failures_pending_and_outside_errors": true,
       "ruby_new_offenses": 8,
-      "not_run": ["assets", "Chrome"],
+      "not_run": [
+        "assets",
+        "Chrome"
+      ],
       "remaining": "Scope predicate extracted without behavior change and two argument/key alignment lines corrected; next own CI required."
     }
   },
@@ -2849,7 +2973,11 @@
     {
       "decision": "acw_precedence",
       "confirmed": true,
-      "order": ["queue", "team", "general"],
+      "order": [
+        "queue",
+        "team",
+        "general"
+      ],
       "same_level_conflict": "block",
       "legacy_snapshots": "preserve"
     }
@@ -2959,7 +3087,10 @@
     "chrome_new_prepared": 4,
     "future_required_chrome": 140,
     "previous136_preserved": true,
-    "public_dto_fields": ["elapsed_seconds", "exceeded"],
+    "public_dto_fields": [
+      "elapsed_seconds",
+      "exceeded"
+    ],
     "private_text_and_catalog_exposed": false,
     "native_scope_required": "current explicit queue, observer AccessScope, active target membership and live target authority",
     "external_ack_or_auto_resume": false,
@@ -2976,13 +3107,20 @@
     "vue": 392,
     "failures_pending_outside_errors": 0,
     "new_ruby_offenses": 6,
-    "not_run": ["assets", "Chrome"],
+    "not_run": [
+      "assets",
+      "Chrome"
+    ],
     "correction": "Guard spacing, strict boolean exclude?, native class/spec prefix rename, hash alignment and two examples split without dropping assertions. Adds two examples; own new CI required.",
     "later_supervisor_increment": "Eight native, two Vue and four Chrome new scenarios prepared; no prior approval inherited."
   },
   "cockpit_observed_candidate_20261118": {
     "status": "temporary_prepared_not_natively_tested",
-    "native_counts_reused": ["active_calls", "pending_callbacks", "open_cases"],
+    "native_counts_reused": [
+      "active_calls",
+      "pending_callbacks",
+      "open_cases"
+    ],
     "average_time": "unknown_with_pending_label",
     "satisfaction_and_today_population": "not_invented_or_presented_as_operational",
     "demonstration_catalog_preserved_on_reference_routes": true,
@@ -3030,7 +3168,10 @@
     "vue": 401,
     "test_failures_pending_outside_errors": 0,
     "new_ruby_offenses": 4,
-    "not_run": ["assets", "Chrome"],
+    "not_run": [
+      "assets",
+      "Chrome"
+    ],
     "correction_sha": "98c9d61770378b7f127cc81d2b26ee212d0fdc80",
     "correction": "Use native Time.zone.at for four exact threshold instants; no assertions or boundaries removed."
   },
@@ -3327,5 +3468,46 @@
     ],
     "full_chrome_acceptance": false,
     "new_team_roster_review": "pending its own native execution"
+  },
+  "acw_clock_stale_read_prepared_20261119": {
+    "reference_parent": "2c8b10f0f85a3c0833b8565e9af90fe337bb4289",
+    "status": "prepared;native tests not yet executed",
+    "scope": "conditional overdue refresh; reject ownership/account drift before serialization",
+    "prepared_native_cases": 7,
+    "rules_snapshot_changed": false,
+    "started_at_reset": false,
+    "reason_selection_ui_complete": false,
+    "precedence": "queue,team,general;block conflicts",
+    "migrations_changed": false,
+    "provider_operations": false
+  },
+  "team_roster_first_native_gate_20261119": {
+    "sha": "2c8b10f0f85a3c0833b8565e9af90fe337bb4289",
+    "run": 44448633679,
+    "artifact": 14495282680,
+    "artifact_sha256": "b99bd9066ff71b045df01394d6c4edbc60c03e849f51516337996de494e4319d",
+    "schema_reload": {
+      "examples": 16,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "main": {
+      "examples": 1100,
+      "failures": 1,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "failure": "Unreloaded ActiveRecord association after destroying its source; coverage-not-inferred assertion passed. Reload explicit, expectation unchanged.",
+    "new_ruby_offenses": 5,
+    "corrections_prepared": [
+      "unchanged eligibility predicate extracted without removing checks",
+      "two multiline hash alignments",
+      "canonical IDs inside native TeamMember guarded transaction",
+      "two new no-op HTTP regression scenarios"
+    ],
+    "chrome_expected": 152,
+    "subsequent_gates": "not executed due previous failure",
+    "status": "corrections prepared; not yet natively validated"
   }
 }

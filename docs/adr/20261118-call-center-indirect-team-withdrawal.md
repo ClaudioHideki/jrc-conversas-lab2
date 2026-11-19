@@ -42,3 +42,9 @@ O lint local dirigido passou em quatorze arquivos, zero erros/avisos novos; avis
 ## Pendências preservadas
 
 A exclusão da entidade Team inteira exige auditoria separada de dependências/FKs e não é apresentada como coberta por esta revisão de TeamMember. Hierarquia de supervisores, estado operacional próprio da equipe e disponibilidade/ACK externos continuam pendentes. As 23 figuras e as etapas 0–2 não estão concluídas. Nenhum comando PABX, imagem, merge, publicação ou deploy foi autorizado por esta implementação.
+
+## Revisão de IDs e primeiro gate nativo — 19/11/2026
+
+O SHA 2c8b10f0 foi executado na CI 44448633679. A recarga do schema passou (16 exemplos); o bloco principal executou 1.100 exemplos com uma falha: após destruir a fonte, a associação já carregada do Account não foi recarregada antes da expectativa de vazio. A checagem de ausência de cobertura passou. O teste agora recarrega essa associação para consultar o estado persistido, mantendo a expectativa de nenhuma fonte criada. Cinco infrações Ruby novas foram corrigidas sem exclusões ou mudanças globais de lint. As etapas subsequentes ficaram bloqueadas; o incremento não está homologado.
+
+Na revisão do caminho nativo encontrou-se diferença entre a prévia (IDs canônicos) e a subtração de arrays no controller de equipes (parâmetros brutos). Um PATCH com o mesmo usuário em formato texto podia parecer uma operação sem mudança para a prévia, mas remover o vínculo na ação nativa. O overlay Enterprise agora normaliza os IDs já validados como pertencentes à conta, dentro da transação e antes dos guardas e da ação nativa. Dois testes HTTP preservam o mesmo ID do vínculo para a operação sem mudança em texto e para a mistura texto/número. Não se concede acesso nem se altera o contrato de retirada real. Nova CI necessária para provar o resultado.

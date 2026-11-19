@@ -27,6 +27,7 @@ module Enterprise::Api::V1::Accounts::TeamMembersController
       validate_member_id_params
       next if performed?
 
+      params[:user_ids] = params[:user_ids].map(&:to_i)
       validate_membership_activation unless action_name == 'destroy'
       review = team_withdrawal_review
       review.check!

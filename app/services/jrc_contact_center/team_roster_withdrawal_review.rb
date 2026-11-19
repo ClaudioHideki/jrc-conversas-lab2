@@ -40,8 +40,10 @@ class JrcContactCenter::TeamRosterWithdrawalReview
     return unless @review
 
     @impacts.each do |impact|
-      review = @review.merge('queue_id' => impact.fetch(:queue).id.to_s,
-                            'previous_count' => impact.fetch(:before_ids).length, 'remaining_count' => impact.fetch(:after_ids).length)
+      review = @review.merge(
+        'queue_id' => impact.fetch(:queue).id.to_s,
+        'previous_count' => impact.fetch(:before_ids).length, 'remaining_count' => impact.fetch(:after_ids).length
+      )
       JrcContactCenter::ConfigurationAudit.write_team_withdrawal!(impact.fetch(:queue), review: review)
     end
     @review = nil

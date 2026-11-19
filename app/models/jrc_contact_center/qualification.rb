@@ -19,9 +19,18 @@ class JrcContactCenter::Qualification < JrcContactCenter::ApplicationRecord
   end
 
   def refresh_overdue!
-    return self if completed_at || !started_at || elapsed_seconds < acw_limit_seconds
+    return self if completed_at || !started_at
 
-    update_columns(overdue: true, exceeded_seconds: [elapsed_seconds - acw_limit_seconds, 0].max, updated_at: Time.current)
+    elapsed = elapsed_seconds
+    return self if elapsed < acw_limit_seconds
+
+    scope_keys = [account_id, account_user_id]
+    self.class.pending.where(id: id, account_id: account_id, account_user_id: account_user_id, started_at: started_at,
+                             acw_limit_seconds: acw_limit_seconds, duration_seconds: duration_seconds)
+        .update_all(overdue: true, exceeded_seconds: [elapsed - acw_limit_seconds, 0].max, updated_at: Time.current)
+    reload
+    raise ActiveRecord::RecordNotFound unless scope_keys == [account_id, account_user_id]
+
     self
   end
 
