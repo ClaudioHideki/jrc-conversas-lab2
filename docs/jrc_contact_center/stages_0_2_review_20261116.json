@@ -4009,7 +4009,7 @@
     "chrome_passed": 172,
     "chrome_unexpected": 4,
     "chrome_skipped_flaky_outside_errors": 0,
-    "cause": "Strict response observer compared the Rails direct API origin5387 against browser requests via Vite proxy origin5388. Four actual screenshots/DOM show saved revision. Native creation completed, but the remainder of that scenario is not yet validated.",
+    "cause": "Strict response observer compared the Rails direct API origin5387 against browser requests via Vite proxy origin5386. Four actual screenshots/DOM show saved revision. Native creation completed, but the remainder of that scenario is not yet validated.",
     "minimal_correction": "derive exact browser API URL from current page origin, retaining exact authorized account path and POST/PATCH method. Direct API reads still use explicit Rails origin and own native headers.20assertions and2waiters preserved, fixture and timeout unchanged.",
     "reviewed_failure_screenshots": [
       "desktop-light",
@@ -4018,6 +4018,33 @@
       "mobile-dark"
     ],
     "new_candidate_requires": 176,
+    "separate_pause_increment_not_included": true,
+    "all23_complete": false,
+    "port_annotation_erratum": {
+      "previous_prose_in_91174bbb": "5388 was a mistaken annotation",
+      "confirmed_by_four_hashed_api_origin_reports": "POST201 at http://127.0.0.1:5386; Rails direct origin5387",
+      "correction_code": "Uses actual page origin, never a fixed5388"
+    }
+  },
+  "acw_library_validation_global_budget_91174bbb": {
+    "sha": "91174bbb5fc51802876efdfb8b65db18b85f0834",
+    "run": 44536336065,
+    "job": 135602630767,
+    "status": "cancelled_global_time_limit_not_approved",
+    "confirmed_annotation": "The job has exceeded the maximum execution time of 45m0s",
+    "artifact": 14539179428,
+    "artifact_sha256": "b98328216d8d1c750fc311c07e6a128c4547adaba250fe988087b4f1263c99d4",
+    "rails_distinct": 1493,
+    "schema_reload_separate": 40,
+    "vue": 753,
+    "native_fail_pending_outside": 0,
+    "lint_assets_bootstrap": "passed",
+    "ruby_lint_duration_seconds": 730,
+    "assets_duration_seconds": 65,
+    "chrome_start_after_job_seconds": 2205,
+    "chrome_final_report_available": false,
+    "chrome_approved_count": "not_counted_without_final_report",
+    "correction": "Only global job time45to65minutes; all individual bounds/resources/tests/176Chrome and assertions unchanged. No paid resources or billing changes.",
     "separate_pause_increment_not_included": true,
     "all23_complete": false
   }

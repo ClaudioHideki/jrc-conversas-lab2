@@ -460,3 +460,12 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [x] Ajuste mínimo preparado: comparar a URL exata na origem do navegador, preservando método, caminho,20assertivas e duas esperas. Nenhuma alteração no fixture, API, timeout ou produto.
 - [ ] Reexecutar os176casos completos e conferir todas as capturas/assertivas de histórico, persistência e escopo antes de homologar a biblioteca.
 - [ ] O incremento independente de pausa adiada permanece fora deste checkpoint, sem validação nativa.
+
+Correção da anotação de origem: os quatro arquivos api-origins do artefato882ccce6 comprovam POST201 em127.0.0.1:5386, com Rails direto em5387. A menção anterior a5388 era um erro de anotação, não uma porta usada pelo teste corrigido. A correção91174bbb deriva a origem da página e não contém essa porta fixa.
+
+### Call Center — orçamento global da validação nativa
+
+- [x] CI44536336065/91174bbb preservada:1493Rails distintos+40schema,753Vue,lint,assets e bootstrap15cards aprovados. Artefato14539179428 hashb98328216d8d1c750fc311c07e6a128c4547adaba250fe988087b4f1263c99d4.
+- [x] Anotação do GitHub confirma o prazo global45m. Lint Ruby12m10s,assets1m05s;Chrome começou36m45s após o início. O log avançou nos projetos desktop; não há relatórioChrome final. Não contabilizar aprovação dos176casos.
+- [x] Correção limitada do prazo global para65m para acomodar quatro projetos completos e variabilidade medida. Preservados os timeouts individuais, guardas de memória/disco, todas as verificações e os176casos. Nenhuma infraestrutura paga ou limite de cobrança alterado.
+- [ ] Revalidar a candidata completa; etapas0–2 e23figuras continuam abertas. Pausa adiada é incremento independente, ainda fora deste checkpoint.
