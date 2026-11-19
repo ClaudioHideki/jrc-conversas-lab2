@@ -300,7 +300,12 @@ const value = (entry, field = '') => {
         }}
       </p>
       <p
-        v-if="record.manager_review.kind === 'jrc_cc_team_roster_withdrawal_v1'"
+        v-if="
+          [
+            'jrc_cc_team_roster_withdrawal_v1',
+            'jrc_cc_team_deletion_v1',
+          ].includes(record.manager_review.kind)
+        "
         class="break-words"
       >
         {{

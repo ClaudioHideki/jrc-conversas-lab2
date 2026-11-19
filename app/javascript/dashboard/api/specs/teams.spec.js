@@ -30,6 +30,28 @@ describe('#TeamsAPI', () => {
       window.axios = originalAxios;
     });
 
+    it('pins a reviewed deletion to its captured account and preserves the supplied manager receipt', () => {
+      const managerConfirmation = {
+        confirmed: true,
+        review_token: 'SYNTHETIC deletion receipt',
+      };
+      teamsAPI.deleteWithReview({ id: 2, accountId: '3', managerConfirmation });
+      expect(axiosMock.delete).toHaveBeenCalledWith(
+        '/api/v1/accounts/3/teams/2',
+        {
+          data: { manager_confirmation: managerConfirmation },
+        }
+      );
+    });
+
+    it('requests a native initial deletion review without fabricating confirmation', () => {
+      teamsAPI.deleteWithReview({ id: 2, accountId: '3' });
+      expect(axiosMock.delete).toHaveBeenCalledWith(
+        '/api/v1/accounts/3/teams/2',
+        { data: {} }
+      );
+    });
+
     it('#getAgents', () => {
       teamsAPI.getAgents({ teamId: 1 });
       expect(axiosMock.get).toHaveBeenCalledWith(

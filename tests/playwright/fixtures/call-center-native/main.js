@@ -8,6 +8,11 @@ import ControlDeskPage from 'dashboard/routes/dashboard/jrcContactCenter/views/C
 import messages from 'dashboard/i18n/locale/pt_BR';
 import english from 'dashboard/i18n/locale/en';
 import customRole from 'dashboard/store/modules/customRole';
+import teams from 'dashboard/store/modules/teams';
+import teamRoutes from 'dashboard/routes/dashboard/settings/teams/teams.routes';
+import ConfirmDeleteModal from 'dashboard/components/widgets/modal/ConfirmDeleteModal.vue';
+import WootInput from 'dashboard/components/widgets/forms/Input.vue';
+import LoadingState from 'dashboard/components/widgets/LoadingState.vue';
 import ModalHeader from 'dashboard/components/ModalHeader.vue';
 import SnackbarContainer from 'dashboard/components/SnackbarContainer.vue';
 import CustomRolesHome from 'dashboard/routes/dashboard/settings/customRoles/Index.vue';
@@ -36,6 +41,11 @@ Object.assign(
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    ...teamRoutes.routes.flatMap(parent =>
+      parent.children
+        .filter(child => child.path)
+        .map(child => ({ ...child, path: `${parent.path}/${child.path}` }))
+    ),
     {
       path: '/app/accounts/:accountId/synthetic-pending-acw/:callId',
       name: 'synthetic_pending_acw',
@@ -79,7 +89,7 @@ const router = createRouter({
   ],
 });
 const store = createStore({
-  modules: { customRole },
+  modules: { customRole, teams },
   state: { nativeAccount: null, nativeUser: {} },
   mutations: {
     setNativeAccount: (state, account) => {
@@ -115,6 +125,7 @@ const store = createStore({
         : undefined,
 
     'accounts/isRTL': () => false,
+    'globalConfig/isACustomBrandedInstance': () => false,
     getCurrentAccountId: () =>
       Number(router.currentRoute.value.params.accountId),
     'accounts/isFeatureEnabledonAccount': state => (id, feature) =>
@@ -126,7 +137,8 @@ const store = createStore({
 router.beforeEach(async to => {
   if (
     !nativeNavigation &&
-    !['ramal_settings', 'jrc_contact_center_ivr'].includes(to.name)
+    !['ramal_settings', 'jrc_contact_center_ivr'].includes(to.name) &&
+    !String(to.name).startsWith('settings_teams_')
   )
     return true;
   if (to.name === 'synthetic_access_denied') return true;
@@ -136,6 +148,7 @@ router.beforeEach(async to => {
   ]);
   store.commit('setNativeAccount', account.data);
   store.commit('setNativeUser', profile.data);
+  if (to.name === 'settings_teams_list') await store.dispatch('teams/get');
   return validateLoggedInRoutes(to, store.getters.getCurrentUser)
     ? { name: 'synthetic_access_denied' }
     : true;
@@ -157,6 +170,9 @@ const app = createApp({
     ),
 });
 app.component('woot-modal-header', ModalHeader);
+app.component('woot-confirm-delete-modal', ConfirmDeleteModal);
+app.component('woot-input', WootInput);
+app.component('woot-loading-state', LoadingState);
 router.isReady().then(async () => {
   if (!nativeNavigation && !store.state.nativeAccount) {
     const [account, profile] = await Promise.all([

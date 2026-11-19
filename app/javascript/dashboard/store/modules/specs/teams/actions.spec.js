@@ -94,6 +94,29 @@ describe('#actions', () => {
   });
 
   describe('#delete', () => {
+    it('preserves the exact native review error and does not remove the team before manager confirmation', async () => {
+      const error = {
+        response: {
+          status: 409,
+          data: { error: 'team_deletion_confirmation_required' },
+        },
+      };
+      axios.delete.mockRejectedValue(error);
+      await expect(
+        actions.delete({ commit }, { id: 2, accountId: '3' })
+      ).rejects.toBe(error);
+      expect(commit).not.toHaveBeenCalledWith(DELETE_TEAM, 2);
+    });
+
+    it('does not commit an old-account deletion into the current-account team list', async () => {
+      axios.delete.mockResolvedValue();
+      await actions.delete({ commit }, { id: 2, accountId: '3' });
+      expect(axios.delete).toHaveBeenCalledWith('/api/v1/accounts/3/teams/2', {
+        data: {},
+      });
+      expect(commit).not.toHaveBeenCalledWith(DELETE_TEAM, 2);
+    });
+
     it('sends correct actions if API is success', async () => {
       axios.delete.mockResolvedValue();
       await actions.delete({ commit }, 1);

@@ -32,27 +32,29 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('pending ACW native navigation')
-    ? 'acw_navigation'
-    : info.title.startsWith('pending ACW native draft')
-      ? 'acw_draft'
-      : info.title.startsWith('pending ACW native review')
-        ? 'acw_review'
-        : info.title.startsWith('team roster last eligible')
-          ? 'team_withdrawal'
-          : info.title.startsWith('native local routing')
-            ? 'routing'
-            : info.title.startsWith('scoped ACW native')
-              ? 'acw'
-              : info.title.startsWith('last eligible queue withdrawal')
-                ? 'withdrawal'
-                : info.title.startsWith('local pause duration supervisor')
-                  ? 'duration'
-                  : info.title.startsWith('local pause catalog operator')
-                    ? 'operations'
-                    : info.title.startsWith('local pause catalog')
-                      ? 'editor'
-                      : null;
+  const pauseKey = info.title.startsWith('whole native team deletion')
+    ? 'team_deletion'
+    : info.title.startsWith('pending ACW native navigation')
+      ? 'acw_navigation'
+      : info.title.startsWith('pending ACW native draft')
+        ? 'acw_draft'
+        : info.title.startsWith('pending ACW native review')
+          ? 'acw_review'
+          : info.title.startsWith('team roster last eligible')
+            ? 'team_withdrawal'
+            : info.title.startsWith('native local routing')
+              ? 'routing'
+              : info.title.startsWith('scoped ACW native')
+                ? 'acw'
+                : info.title.startsWith('last eligible queue withdrawal')
+                  ? 'withdrawal'
+                  : info.title.startsWith('local pause duration supervisor')
+                    ? 'duration'
+                    : info.title.startsWith('local pause catalog operator')
+                      ? 'operations'
+                      : info.title.startsWith('local pause catalog')
+                        ? 'editor'
+                        : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -88,11 +90,14 @@ test.beforeEach(async ({ page }, info) => {
     info.title.startsWith('linked Customer Master')
   ) {
     const observations = [];
-    const prefix = pauseTarget
-      ? `/api/v1/accounts/${pauseTarget.account_id}/jrc_contact_center/`
-      : info.title.startsWith('linked Customer Master')
-        ? `/api/v1/accounts/${session.customer_master_targets[info.project.name].account_id}/`
-        : `/api/v1/accounts/${session.ivr_targets[info.project.name].account_id}/jrc_contact_center/`;
+    const prefix =
+      pauseKey === 'team_deletion'
+        ? `/api/v1/accounts/${pauseTarget.account_id}/`
+        : pauseTarget
+          ? `/api/v1/accounts/${pauseTarget.account_id}/jrc_contact_center/`
+          : info.title.startsWith('linked Customer Master')
+            ? `/api/v1/accounts/${session.customer_master_targets[info.project.name].account_id}/`
+            : `/api/v1/accounts/${session.ivr_targets[info.project.name].account_id}/jrc_contact_center/`;
     nativeObservations.set(page, observations);
     page.on('response', response => {
       const address = new URL(response.url());
@@ -5141,4 +5146,108 @@ test('native local routing drafts persist paginate review conflicts and deny una
     path: `.codex/call-center-native-e2e/${info.project.name}-routing-audit.png`,
     fullPage: false,
   });
+});
+
+test('whole native team deletion preserves generic confirmation requires scoped manager review and records real audit', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].team_deletion;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}`;
+  await page.goto(
+    `/app/accounts/${target.account_id}/settings/teams/list?native_navigation=1`
+  );
+  const remove = page.locator(`[data-team-delete="${target.team_id}"]`);
+  await expect(remove).toBeVisible();
+  await remove.click();
+  const generic = page
+    .locator('form')
+    .filter({ has: page.locator('input[type="text"]') });
+  await expect(generic).toBeVisible();
+  const genericBox = await generic.boundingBox();
+  const viewport = page.viewportSize();
+  expect(genericBox.x).toBeGreaterThanOrEqual(0);
+  expect(genericBox.x + genericBox.width).toBeLessThanOrEqual(viewport.width);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-whole-team-native-name-confirmation.png`,
+    fullPage: true,
+  });
+  await expect(generic.locator('button[type="submit"]')).toBeDisabled();
+  await generic.locator('input[type="text"]').fill(target.team_name);
+  const requested = page.waitForResponse(
+    response =>
+      response.url().endsWith(`/teams/${target.team_id}`) &&
+      response.request().method() === 'DELETE'
+  );
+  await generic.locator('button[type="submit"]').click();
+  expect((await requested).status()).toBe(409);
+  const review = page.locator('[data-team-roster-withdrawal-review]');
+  await expect(review).toBeVisible();
+  await expect(review).toContainText(target.team_name);
+  await expectContainedDialog(page);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page
+      .locator('html')
+      .evaluate(element => element.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await expect(review.locator('[data-apply-team-withdrawal]')).toBeDisabled();
+  const stillPresent = await page.request.get(
+    `${ownApi}/teams/${target.team_id}`,
+    { headers: target.administrator }
+  );
+  expect(stillPresent.status()).toBe(200);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-whole-team-deletion-review.png`,
+    fullPage: true,
+  });
+  await review.locator('[data-team-manager-withdrawal-confirm]').check();
+  const deleted = page.waitForResponse(
+    response =>
+      response.url().endsWith(`/teams/${target.team_id}`) &&
+      response.request().method() === 'DELETE'
+  );
+  await review.locator('[data-apply-team-withdrawal]').click();
+  expect((await deleted).status()).toBe(200);
+  await expect(review).not.toBeVisible();
+  await expect(remove).not.toBeVisible();
+  await page.reload();
+  await expect(remove).not.toBeVisible();
+  const missing = await page.request.get(`${ownApi}/teams/${target.team_id}`, {
+    headers: target.administrator,
+  });
+  expect(missing.status()).toBe(404);
+  const history = await page.request.get(
+    `${ownApi}/jrc_contact_center/configuration_audits?resource_type=queue&resource_id=${target.queue_id}&history=true`,
+    { headers: target.administrator }
+  );
+  expect(history.status()).toBe(200);
+  const event = (await history.json()).items.find(
+    row => row.manager_review?.kind === 'jrc_cc_team_deletion_v1'
+  );
+  expect(event.manager_review.team_id).toBe(String(target.team_id));
+  expect(event.manager_review.previous_count).toBe(1);
+  expect(event.manager_review.remaining_count).toBe(0);
+  expect(JSON.stringify(event)).not.toContain('review_token');
+  const deny = await page.request.delete(`${ownApi}/teams/${target.team_id}`, {
+    headers: session.administrator,
+  });
+  expect([401, 403, 404]).toContain(deny.status());
+  expect(
+    nativeObservations
+      .get(page)
+      .filter(
+        row =>
+          row.method === 'DELETE' &&
+          row.pathname.endsWith(`/teams/${target.team_id}`)
+      )
+  ).toHaveLength(2);
 });

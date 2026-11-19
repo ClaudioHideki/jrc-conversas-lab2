@@ -22,6 +22,14 @@ export class TeamsAPI extends CacheEnabledApiClient {
     return { data: dataToParse };
   }
 
+  deleteWithReview({ id, accountId, managerConfirmation }) {
+    return axios.delete(`${this.urlForAccount(accountId)}/${id}`, {
+      data: managerConfirmation
+        ? { manager_confirmation: managerConfirmation }
+        : {},
+    });
+  }
+
   getAgents({ teamId }) {
     return axios.get(`${this.url}/${teamId}/team_members`);
   }

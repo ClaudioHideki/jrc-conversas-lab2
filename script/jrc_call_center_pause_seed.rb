@@ -10,7 +10,10 @@ class JrcContactCenter::SyntheticPauseSeed
     raise 'Owned synthetic pause runner required' unless owned
 
     projects.index_with do |project|
-      %w[editor operations withdrawal duration acw routing team_withdrawal acw_draft acw_review acw_navigation].index_with do |kind|
+      %w[
+        editor operations withdrawal duration acw routing
+        team_withdrawal acw_draft acw_review acw_navigation team_deletion
+      ].index_with do |kind|
         new("#{project}-#{kind}").call
       end
     end
@@ -21,18 +24,25 @@ class JrcContactCenter::SyntheticPauseSeed
     @project = project
     @account = Account.create!(name: "SYNTHETIC pause #{project}", locale: 'pt_BR')
     @account.enable_features!('jrc_contact_center', 'custom_roles', 'audit_logs')
+    @account.enable_features!('team_management') if @project.end_with?('-team_deletion')
   end
 
   def call
     company = @account.master_companies.create!(name: 'SYNTHETIC pause issuer', relationship_type: 'internal')
     units = create_units(company)
-    admin = create_member('administrator', JrcContactCenter::ModulePolicy::PERMISSIONS, :administrator)
+    admin = create_member(
+      'administrator', JrcContactCenter::ModulePolicy::PERMISSIONS, :administrator, custom: !@project.end_with?('-team_deletion')
+    )
     scoped = create_member('scoped', JrcContactCenter::ModulePolicy::PERMISSIONS, :administrator)
     operator = create_member('operator', %w[jrc_contact_center_view jrc_contact_center_operate], :agent)
     assign_corporate_access(company, units, admin, scoped, operator)
     queues = create_queues(units, operator)
     payload = session_payload(units, queues, admin, scoped, operator)
     payload.merge!(team_source(operator)) if @project.end_with?('-team_withdrawal')
+    if @project.end_with?('-team_deletion')
+      JrcContactCenter::AccessGrant.find_by!(account: @account, account_user: admin).update!(allowed: ['jrc_contact_center_audit'])
+      payload.merge!(team_source(operator, corporate: false))
+    end
     payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?('-acw_draft', '-acw_review', '-acw_navigation')
     payload
   end
@@ -54,15 +64,17 @@ class JrcContactCenter::SyntheticPauseSeed
     { call_session_id: session.id, qualification_id: record.id, qualification_started_at: record.started_at.iso8601(6) }
   end
 
-  def team_source(operator)
+  def team_source(operator, corporate: true)
     team = Team.create!(account: @account, name: "SYNTHETIC #{@project} operational team")
     team.add_members([operator.user_id])
-    source = JrcCrm::UserBusinessUnit.find_by!(account: @account, user: operator.user)
-    JrcCrm::TeamScope.create!(
-      account: @account, team: team, scope: 'BUSINESS_UNIT',
-      company_id: source.company_id, business_unit_id: source.business_unit_id
-    )
-    source.update!(team: team)
+    if corporate
+      source = JrcCrm::UserBusinessUnit.find_by!(account: @account, user: operator.user)
+      JrcCrm::TeamScope.create!(
+        account: @account, team: team, scope: 'BUSINESS_UNIT',
+        company_id: source.company_id, business_unit_id: source.business_unit_id
+      )
+      source.update!(team: team)
+    end
     operator.custom_role.update!(permissions: [])
     JrcContactCenter::AccessGrant.create!(account: @account, team: team, allowed: %w[jrc_contact_center_view jrc_contact_center_operate])
     { team_id: team.id, team_name: team.name, operator_user_id: operator.user_id }
@@ -99,12 +111,12 @@ class JrcContactCenter::SyntheticPauseSeed
     end
   end
 
-  def create_member(kind, permissions, native_role)
+  def create_member(kind, permissions, native_role, custom: true)
     user = User.new(name: "SYNTHETIC #{@project} #{kind}", email: "cc-pause-#{SecureRandom.hex(8)}@example.test",
                     password: JrcContactCenter::SyntheticPassword.generate, confirmed_at: Time.current)
     user.skip_confirmation_notification!
     user.save!
-    role = CustomRole.create!(account: @account, name: "SYNTHETIC pause #{kind}", permissions: permissions)
+    role = CustomRole.create!(account: @account, name: "SYNTHETIC pause #{kind}", permissions: permissions) if custom
     member = AccountUser.create!(account: @account, user: user, custom_role: role, role: native_role)
     JrcContactCenter::AccessGrant.create!(account: @account, account_user: member, eligible: true)
     member

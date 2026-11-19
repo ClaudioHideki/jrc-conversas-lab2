@@ -201,3 +201,29 @@ describe('manager review for a native team roster withdrawal', () => {
     expect(teamRosterReviewAuthority(user, '1')).not.toEqual(initial);
   });
 });
+
+describe('separate whole-team deletion receipt purpose in the existing manager review', () => {
+  it('accepts the native deletion review only for the explicit delete_team operation', () => {
+    const wrapper = render({ ...parameters(), operation: 'delete_team' });
+    const response = reply({ operation: 'delete_team' });
+    response.response.data.error = 'team_deletion_confirmation_required';
+    wrapper.vm.handleError(response, wrapper.vm.fingerprint());
+    expect(wrapper.vm.canSave).toBe(false);
+    wrapper.vm.state.confirmed = true;
+    expect(wrapper.vm.options().managerConfirmation.confirmed).toBe(true);
+    expect(wrapper.vm.state.review.operation).toBe('delete_team');
+  });
+
+  it('never uses a roster review to approve deletion or vice versa', () => {
+    const wrapper = render({ ...parameters(), operation: 'delete_team' });
+    expect(wrapper.vm.handleError(reply(), wrapper.vm.fingerprint())).toBe(
+      false
+    );
+    expect(wrapper.vm.options()).toEqual({});
+    const response = reply({ operation: 'destroy' });
+    response.response.data.error = 'team_deletion_confirmation_required';
+    wrapper.vm.handleError(response, wrapper.vm.fingerprint());
+    expect(wrapper.vm.state.error).toBe(true);
+    expect(wrapper.vm.options()).toEqual({});
+  });
+});

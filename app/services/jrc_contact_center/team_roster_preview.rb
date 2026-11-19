@@ -2,7 +2,7 @@
 
 # One pure, current/proposed roster comparison. It never calls Team.add/remove_members.
 class JrcContactCenter::TeamRosterPreview
-  OPERATIONS = %w[create update destroy].freeze
+  OPERATIONS = %w[create update destroy delete_team].freeze
   attr_reader :before_ids, :after_ids, :team, :operation
 
   def initialize(account:, actor:, team:, user_ids:, operation:)
@@ -42,6 +42,7 @@ class JrcContactCenter::TeamRosterPreview
     when 'create' then (@before_ids + selected).uniq
     when 'update' then selected
     when 'destroy' then @before_ids - selected
+    when 'delete_team' then []
     end
   end
 
@@ -51,7 +52,8 @@ class JrcContactCenter::TeamRosterPreview
     raise Pundit::NotAuthorizedError unless @actor.account_id == @account.id && @account.active? && @actor.user.reload.active_for_authentication?
 
     context = { account: @account, account_user: @actor, user: @actor.user }
-    raise Pundit::NotAuthorizedError unless TeamPolicy.new(context, @team).public_send("#{@operation}?")
+    permission = @operation == 'delete_team' ? 'destroy' : @operation
+    raise Pundit::NotAuthorizedError unless TeamPolicy.new(context, @team).public_send("#{permission}?")
   end
 
   def affected_queues

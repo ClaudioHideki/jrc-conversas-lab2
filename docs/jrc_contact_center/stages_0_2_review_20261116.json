@@ -517,10 +517,11 @@
       ],
       "implemented_in_0_2": [
         "Native account/channel ACW popup in HH:MM; required voice flag, validation and persistence",
-        "Gravação explícita de rascunho privado na qualificação nativa, limite por motivo pelo snapshot original sem reiniciar relógio, revisão manual de conflito e conclusão somente explícita. Validado emee689703 com APIs/banco reais; workspace Hoya completo no Chrome não incluído."
+        "Gravação explícita de rascunho privado na qualificação nativa, limite por motivo pelo snapshot original sem reiniciar relógio, revisão manual de conflito e conclusão somente explícita. Validado emee689703 com APIs/banco reais; workspace Hoya completo no Chrome não incluído.",
+        "Proteção de saída do rascunho com Dialog/Router nativos e aviso beforeunload: permanecer conserva edição, saída explícita não altera a última gravação ou o ACW, e conteúdo salvo volta após recarga. CIa8c6c78d validou164Chrome em1440/390 eclaro/escuro. Rótulos de conflito conhecidos reutilizam acwLabels."
       ],
       "remaining_or_external": [
-        "Rascunho explícito e aplicação intermediária do motivo validados emee689703. Aviso de saída com edição não salva está preparado para próximo SHA; homologação do workspace Hoya inteiro no Chrome ainda pendente.",
+        "Rascunho explícito e aplicação intermediária do motivo validados emee689703. Aviso de saída validado em a8c6c78d; homologação do workspace Hoya inteiro no Chrome ainda pendente.",
         "Formulários vinculados, exigências e automações por destino continuam pendentes.",
         "Não representa publicação ou confirmação PABX."
       ],
@@ -536,7 +537,7 @@
         "document_1_figure": 9,
         "document_2_figure": 9
       },
-      "validation": "ee689703/CI44470340154:1310Rails distintos+16schema separados,619Vue,160Chrome nos4projetos e240capturas com hashes verificados. Controles reais do Hoya em harness autenticado; APIs Rails e PostgreSQL sintéticos reais. Não é aceite integral da figura ou do workspace completo.",
+      "validation": "a8c6c78d/CI44478139924:1310Rails distintos+16schema separados,631Vue,164Chrome nos4projetos e244capturas com hashes verificados. Revisão visual do diálogo nos4projetos e dos rótulos de conflito. Harness de controles reais; não é o workspace Hoya completo nem aceite integral da figura.",
       "objective": "Popup Configurar Regra de Pos-Atendimento",
       "visual_components": "Campos e dados apresentados:  Associar motivo, versao da regra, formularios, campos, publico aplicavel e eventos operacionais. Registrar inicio/fim do ACW de modo independente do encerramento da chamada, por call_id e agente.",
       "buttons_and_actions": "Acoes e resultado do clique:  Motivo de Encerramento: escolher classificacao existente. Tempo de Pos-Atendimento: configurar horas/minutos. Formulario: selecionar template reutilizavel e Gerenciar Formularios na fonte. Campos Obrigatorios: marcar os dados exigidos. Comportamento do Agente: bloquear chamadas, emitir alertas ou permitir excecao conforme politica. Aplicar para: todas, filas especificas ou equipes especificas. Salvar Regra: validar impacto.",
@@ -720,7 +721,8 @@
       ],
       "remaining_or_external": [
         "Retirada direta e retirada indireta de membros pela equipe têm aceite nativo/Chrome, incluindo3b9aa6db. Exclusão da entidade equipe, supervisor principal/hierarquia e status operacional próprio continuam pendentes.",
-        "Disponibilidade e capacidades/ACK PABX dependem do contrato externo. Nenhum vínculo de outros módulos foi removido."
+        "Disponibilidade e capacidades/ACK PABX dependem do contrato externo. Nenhum vínculo de outros módulos foi removido.",
+        "Exclusão da entidade Team: correção incremental preparada sobrea8c6c78d, com confirmação nativa e revisão do gestor, sem resultado nativo ou Chrome ainda. Não substitui as evidências anteriores."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -728,7 +730,10 @@
         "app/controllers/api/v1/accounts/jrc_contact_center/queue_memberships_controller.rb",
         "spec/requests/api/v1/accounts/jrc_contact_center/membership_enrollment_spec.rb",
         "app/services/jrc_contact_center/team_roster_withdrawal_review.rb",
-        "app/services/jrc_contact_center/configured_queue_eligibility.rb"
+        "app/services/jrc_contact_center/configured_queue_eligibility.rb",
+        "app/services/jrc_contact_center/team_deletion_review.rb",
+        "enterprise/app/controllers/enterprise/api/v1/accounts/teams_controller.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_deletion_review_spec.rb"
       ],
       "reference": {
         "document_1_figure": 12,
@@ -3417,36 +3422,44 @@
     "complete_23_figures": false
   },
   "latest_verified_increment": {
-    "sha": "ee68970353e4f3a71b9c35f220ff03ba70668645",
-    "run": 44470340154,
-    "job": 135377969079,
-    "artifact": 14505548543,
-    "artifact_sha256": "dc114469f7607a8de6c4c8c4d0cd14daebd7c9c55f2e74be788eaf160c2ca721",
+    "sha": "a8c6c78df86712879876fd02ebc18fed42a10bdb",
+    "run": 44478139924,
+    "job": 135403565966,
+    "artifact": 14508877245,
+    "artifact_sha256": "2a9053f743b87677aefbc1229d764ea110981d1f54ddb6acf0af6d3a1fb9d786",
     "rails_distinct": 1310,
     "schema_reload_separate": 16,
-    "vue": 619,
-    "chrome": 160,
+    "vue": 631,
+    "chrome": 164,
     "projects": {
-      "desktop-light": 40,
-      "desktop-dark": 40,
-      "mobile-light": 40,
-      "mobile-dark": 40
+      "desktop-light": 41,
+      "desktop-dark": 41,
+      "mobile-light": 41,
+      "mobile-dark": 41
     },
     "failures": 0,
     "pending": 0,
     "outside_errors": 0,
     "new_ruby_offenses": 0,
-    "screenshots_verified": 240,
-    "fresh_build": "passed",
-    "bootstrap": "15cards,zero page/http errors",
+    "screenshots_verified": 244,
     "visual_reviewed": [
-      "desktop-light-pending-acw-draft.png",
-      "mobile-dark-pending-acw-draft.png",
-      "desktop-light-pending-acw-review.png",
+      "desktop-light-pending-acw-navigation-review.png",
+      "desktop-dark-pending-acw-navigation-review.png",
+      "mobile-light-pending-acw-navigation-review.png",
+      "mobile-dark-pending-acw-navigation-review.png",
       "mobile-dark-pending-acw-review.png"
     ],
-    "limitation": "Chrome harness uses actual Hoya controls and composable, real scoped Rails APIs and disposable PostgreSQL, not full Hoya application shell or SIP/PABX. Full Hoya component has Vue tests with mocked APIs/SIP.",
-    "visual_issue_next": "Known reason/result machine codes in conflict display reuse existing acwLabels helper in next checkpoint; legacy values preserved.",
+    "behavior": [
+      "Cancel keeps edits without writes",
+      "Explicit discard leaves native saved version/ACW pending",
+      "Real browser beforeunload dismissal keeps edits",
+      "Explicit save survives navigation and reload with one native write",
+      "Known reason labels translated; unknown legacy values escaped and preserved"
+    ],
+    "limitations": [
+      "Harness with actual controls/router/Rails APIs and PostgreSQL; not full Hoya shell or SIP/PABX",
+      "Dynamic forms and destination automation remain partial"
+    ],
     "all23_complete": false
   },
   "team_roster_indirect_review_prepared_20261118": {
@@ -3690,7 +3703,7 @@
     "scope": "team roster removal review, canonical IDs, seven stale-clock cases and all retained38logicalChrome scenarios; no new draft code proof"
   },
   "pending_acw_navigation_prepared_20261119": {
-    "status": "prepared only, not committed or executed",
+    "status": "Validated native subset in a8c6c78d/CI44478139924:1310Rails+16schema,631Vue,164Chrome,244verifiedcaptures. Full Hoya shell remains unproven.",
     "parent": "34f58253ee87240df542aacf61afed9cd9987d14",
     "product": "Native Dialog and Vue Router guards in Hoya; pending changes reviewed explicitly; last server version and pending state untouched",
     "scope": [
@@ -3746,6 +3759,79 @@
     ],
     "limitation": "Chrome harness uses actual Hoya controls and composable, real scoped Rails APIs and disposable PostgreSQL, not full Hoya application shell or SIP/PABX. Full Hoya component has Vue tests with mocked APIs/SIP.",
     "visual_issue_next": "Known reason/result machine codes in conflict display reuse existing acwLabels helper in next checkpoint; legacy values preserved.",
+    "all23_complete": false
+  },
+  "whole_team_deletion_prepared_20261119": {
+    "status": "Prepared in temporary overlay aftera8c6c78d; native tests andChrome not run",
+    "decision": "Explicit manager review with current revisions and atomic audit; not Approvals or provider publication",
+    "reuse": [
+      "TeamPolicy",
+      "AuthorityTransaction",
+      "TeamRosterPreview",
+      "TeamRosterWithdrawalReview protocol with separate purpose",
+      "native Teams deletion page, name confirmation and Vuex",
+      "native audit and queue authority"
+    ],
+    "no_database_or_provider_changes": true,
+    "required_chrome": 168,
+    "previous_chrome_preserved": 164,
+    "negative_coverage": [
+      "account",
+      "unit",
+      "native administrator",
+      "invalid/expired/member-removal receipt",
+      "new team/queue/unit revision",
+      "SQL lock wait",
+      "foreign-key rollback",
+      "audit rollback",
+      "independent direct or other-team authority"
+    ],
+    "limitations": [
+      "No full product shell browser proof",
+      "No external PABX commands or ACK",
+      "No corporate hierarchy cleanup",
+      "Figure12 supervision/status still partial"
+    ]
+  },
+  "pending_acw_navigation_final_gate_a8c6c78d_20261119": {
+    "sha": "a8c6c78df86712879876fd02ebc18fed42a10bdb",
+    "run": 44478139924,
+    "job": 135403565966,
+    "artifact": 14508877245,
+    "artifact_sha256": "2a9053f743b87677aefbc1229d764ea110981d1f54ddb6acf0af6d3a1fb9d786",
+    "rails_distinct": 1310,
+    "schema_reload_separate": 16,
+    "vue": 631,
+    "chrome": 164,
+    "projects": {
+      "desktop-light": 41,
+      "desktop-dark": 41,
+      "mobile-light": 41,
+      "mobile-dark": 41
+    },
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0,
+    "new_ruby_offenses": 0,
+    "screenshots_verified": 244,
+    "visual_reviewed": [
+      "desktop-light-pending-acw-navigation-review.png",
+      "desktop-dark-pending-acw-navigation-review.png",
+      "mobile-light-pending-acw-navigation-review.png",
+      "mobile-dark-pending-acw-navigation-review.png",
+      "mobile-dark-pending-acw-review.png"
+    ],
+    "behavior": [
+      "Cancel keeps edits without writes",
+      "Explicit discard leaves native saved version/ACW pending",
+      "Real browser beforeunload dismissal keeps edits",
+      "Explicit save survives navigation and reload with one native write",
+      "Known reason labels translated; unknown legacy values escaped and preserved"
+    ],
+    "limitations": [
+      "Harness with actual controls/router/Rails APIs and PostgreSQL; not full Hoya shell or SIP/PABX",
+      "Dynamic forms and destination automation remain partial"
+    ],
     "all23_complete": false
   }
 }

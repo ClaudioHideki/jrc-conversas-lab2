@@ -19,6 +19,7 @@ export const useTeamRosterWithdrawalReview = ({
   teamId,
   agentsList,
   authority,
+  operation = 'update',
 }) => {
   const state = reactive({ review: null, confirmed: false, error: false });
   let reviewedKey = '';
@@ -29,6 +30,7 @@ export const useTeamRosterWithdrawalReview = ({
       String(teamId.value || ''),
       [...agentsList.value].map(String).sort(),
       authority.value,
+      operation,
     ]);
   const fingerprint = () => JSON.stringify([generation, binding()]);
   const reset = () => {
@@ -47,7 +49,11 @@ export const useTeamRosterWithdrawalReview = ({
   );
   const handleError = (error, requestKey) => {
     if (requestKey !== fingerprint()) return true;
-    if (error?.response?.data?.error !== 'team_roster_confirmation_required') {
+    const errorCode =
+      operation === 'delete_team'
+        ? 'team_deletion_confirmation_required'
+        : 'team_roster_confirmation_required';
+    if (error?.response?.data?.error !== errorCode) {
       if ([401, 403, 404].includes(error?.response?.status)) clear();
       return false;
     }
@@ -57,7 +63,7 @@ export const useTeamRosterWithdrawalReview = ({
       review &&
       String(review.account_id) === String(accountId.value) &&
       String(review.team_id) === String(teamId.value) &&
-      review.operation === 'update' &&
+      review.operation === operation &&
       typeof review.team_name === 'string' &&
       Array.isArray(review.queues) &&
       review.queues.length > 0 &&

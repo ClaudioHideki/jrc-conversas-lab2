@@ -84,6 +84,7 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
         session = ActionDispatch::Integration::Session.new(Rails.application)
         session.public_send(verb, endpoint, headers: headers, params: payload, as: :json)
         state[:request_status] = session.response.status
+        state[:request_body] = session.response.parsed_body
         results << state[:request_status]
       end
     rescue StandardError => e
@@ -311,5 +312,82 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
     expect(voice.reload.attributes).to eq(original)
     expect(JrcContactCenter::CallObservation.where(call_session: voice)).to be_empty
     expect(source.reload).to be_active
+  end
+
+  context 'when a whole native team deletion waits for current authority' do
+    before do
+      peer = account.account_users.find_by!(user: recipient)
+      peer.update!(custom_role: create(:custom_role, account: account, permissions: []))
+      team.add_members([recipient.id])
+      JrcContactCenter::AccessGrant.create!(account: account, account_user: peer, eligible: true)
+      JrcContactCenter::AccessGrant.create!(account: account, team: team, allowed: %w[jrc_contact_center_view jrc_contact_center_operate])
+      account.jrc_crm_user_business_units.create!(user: recipient, scope: 'GROUP', structure_managed: true)
+      JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: peer)
+    end
+
+    it 'denies a previously reviewed delete after the actor loses authentication during a real SQL wait' do
+      endpoint = "/api/v1/accounts/#{account.id}/teams/#{team.id}"
+      delete endpoint, headers: headers, as: :json
+      token = response.parsed_body.fetch('review').fetch('review_token')
+      status = race_with_scope_change(
+        change: -> { actor.update!(confirmed_at: nil) }, verb: :delete, endpoint: endpoint,
+        payload: { manager_confirmation: { confirmed: true, review_token: token } }, defer: true
+      )
+      expect(status).to eq(401)
+      expect(account.teams.exists?(team.id)).to be(true)
+      expect(team.members).to include(recipient)
+    end
+
+    it 'rejects an old-team revision only after acquiring the native Account SQL lock' do
+      endpoint = "/api/v1/accounts/#{account.id}/teams/#{team.id}"
+      delete endpoint, headers: headers, as: :json
+      token = response.parsed_body.fetch('review').fetch('review_token')
+      status = race_with_scope_change(
+        change: -> { team.update!(name: 'SYNTHETIC changed during wait') }, verb: :delete, endpoint: endpoint,
+        payload: { manager_confirmation: { confirmed: true, review_token: token } }, defer: true
+      )
+      expect(status).to eq(409)
+      expect(team.reload.name).to eq('SYNTHETIC changed during wait')
+      expect(team.members).to include(recipient)
+    end
+
+    it 'waits for the native Team row before comparing its revision with the manager receipt' do
+      endpoint = "/api/v1/accounts/#{account.id}/teams/#{team.id}"
+      delete endpoint, headers: headers, as: :json
+      token = response.parsed_body.fetch('review').fetch('review_token')
+      workers << Thread.new do
+        ActiveRecord::Base.connection_pool.with_connection do
+          row = Team.find(team.id)
+          row.with_lock do
+            state.fetch(:entered) << true
+            Timeout.timeout(15) { state.fetch(:release).pop }
+            row.update!(name: 'SYNTHETIC changed under Team row lock')
+          end
+        end
+      rescue StandardError => e
+        results << e
+      end
+      Timeout.timeout(8) { state.fetch(:entered).pop }
+      payload = { manager_confirmation: { confirmed: true, review_token: token } }
+      dispatch_request(:delete, endpoint, payload)
+      Timeout.timeout(8) do
+        connection = ActiveRecord::Base.connection
+        loop do
+          pid = connection.quote(state[:request_pid])
+          sql = "SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE pid = #{pid} AND wait_event_type = 'Lock' " \
+                "AND query LIKE '%teams%' AND query LIKE '%FOR UPDATE%')"
+          break if connection.uncached { connection.select_value(sql) }
+
+          sleep 0.02
+        end
+      end
+      state.fetch(:release) << true
+      Timeout.timeout(20) { workers.each(&:join) }
+      expect(results.size).to eq(1)
+      expect(results.pop).to eq(409)
+      expect(state.fetch(:request_body).fetch('error')).to eq('team_deletion_confirmation_required')
+      expect(team.reload.name).to eq('SYNTHETIC changed under Team row lock')
+      expect(team.members).to include(recipient)
+    end
   end
 end

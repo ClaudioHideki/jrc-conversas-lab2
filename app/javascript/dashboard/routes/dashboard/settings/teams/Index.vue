@@ -3,7 +3,13 @@ import { useAlert } from 'dashboard/composables';
 import { useAdmin } from 'dashboard/composables/useAdmin';
 import BaseSettingsHeader from '../components/BaseSettingsHeader.vue';
 import SettingsLayout from '../SettingsLayout.vue';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import {
+  teamRosterReviewAuthority,
+  useTeamRosterWithdrawalReview,
+} from 'dashboard/routes/dashboard/jrcContactCenter/composables/useTeamRosterWithdrawalReview';
+import TeamRosterWithdrawalDialog from 'dashboard/routes/dashboard/jrcContactCenter/components/TeamRosterWithdrawalDialog.vue';
 import { picoSearch } from '@scmmishra/pico-search';
 import { useMapGetter } from 'dashboard/composables/store.js';
 import { useStoreGetters, useStore } from 'dashboard/composables/store';
@@ -31,35 +37,69 @@ const filteredTeamsList = computed(() => {
 
 const uiFlags = computed(() => getters['teams/getUIFlags'].value);
 
-const deleteTeam = async ({ id }) => {
+const route = useRoute();
+const showDeletePopup = ref(false);
+const selectedTeam = ref({});
+const currentUser = useMapGetter('getCurrentUser');
+const accountId = computed(() => route.params.accountId);
+const review = useTeamRosterWithdrawalReview({
+  accountId,
+  teamId: computed(() => selectedTeam.value.id),
+  agentsList: computed(() => []),
+  authority: computed(() =>
+    teamRosterReviewAuthority(currentUser.value, accountId.value)
+  ),
+  operation: 'delete_team',
+});
+const busy = computed(() => Object.values(loading.value).some(Boolean));
+const closeDelete = () => {
+  if (busy.value) return;
+  showDeletePopup.value = false;
+  review.clear();
+  selectedTeam.value = {};
+};
+const openDelete = team => {
+  if (busy.value) return;
+  review.clear();
+  selectedTeam.value = team;
+  showDeletePopup.value = true;
+};
+const deleteTeam = async () => {
+  const { id } = selectedTeam.value;
+  if (!id || busy.value || !review.canSave.value) return;
+  const requestKey = review.fingerprint();
+  loading.value[id] = true;
   try {
-    loading.value[id] = true;
-    await store.dispatch('teams/delete', id);
+    await store.dispatch('teams/delete', {
+      id,
+      accountId: accountId.value,
+      ...review.options(),
+    });
+    if (requestKey !== review.fingerprint()) return;
     useAlert(t('TEAMS_SETTINGS.DELETE.API.SUCCESS_MESSAGE'));
+    review.clear();
+    selectedTeam.value = {};
   } catch (error) {
-    useAlert(t('TEAMS_SETTINGS.DELETE.API.ERROR_MESSAGE'));
+    if (!review.handleError(error, requestKey)) {
+      if (error?.response?.data?.error === 'team_in_use') {
+        useAlert(t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.DELETE_IN_USE'));
+      } else useAlert(t('TEAMS_SETTINGS.DELETE.API.ERROR_MESSAGE'));
+    }
   } finally {
     loading.value[id] = false;
   }
 };
-
-const showDeletePopup = ref(false);
-const selectedTeam = ref({});
-
-const openDelete = team => {
-  showDeletePopup.value = true;
-  selectedTeam.value = team;
-};
-
-const closeDelete = () => {
-  showDeletePopup.value = false;
-  selectedTeam.value = {};
-};
-
 const confirmDeletion = () => {
-  deleteTeam(selectedTeam.value);
-  closeDelete();
+  showDeletePopup.value = false;
+  deleteTeam();
 };
+watch(
+  () => review.fingerprint(),
+  () => {
+    if (!review.state.review) showDeletePopup.value = false;
+  },
+  { flush: 'sync' }
+);
 
 const deleteConfirmText = computed(
   () => `${t('TEAMS_SETTINGS.DELETE.CONFIRM.YES')} ${selectedTeam.value.name}`
@@ -170,13 +210,22 @@ const confirmPlaceHolderText = computed(() =>
               slate
               sm
               class="hover:enabled:text-n-ruby-11 hover:enabled:bg-n-ruby-2"
+              :data-team-delete="team.id"
               :is-loading="loading[team.id]"
+              :disabled="busy"
               @click="openDelete(team)"
             />
           </div>
         </div>
       </div>
     </template>
+    <TeamRosterWithdrawalDialog
+      :state="review.state"
+      :busy="busy"
+      @confirm="review.state.confirmed = $event"
+      @submit="deleteTeam"
+      @cancel="closeDelete"
+    />
     <woot-confirm-delete-modal
       v-if="showDeletePopup"
       v-model:show="showDeletePopup"

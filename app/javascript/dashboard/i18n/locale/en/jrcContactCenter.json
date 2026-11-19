@@ -2204,7 +2204,11 @@
       "APPLY": "Aplicar retirada revisada",
       "AUDIT_DETAIL": "A retirada pela equipe #{team} foi confirmada pelo gestor. A atribuição da fila foi preservada; a elegibilidade atual foi recalculada.",
       "CONFIRM": "Como gestor autorizado, revisei as filas afetadas e confirmo a retirada de membros desta equipe.",
-      "MODAL_TITLE": "Revisar impacto nas filas"
+      "MODAL_TITLE": "Revisar impacto nas filas",
+      "DELETE_TITLE": "Excluir a equipe {team} deixará filas sem agentes elegíveis configurados.",
+      "DELETE_CONFIRM": "Revisei a perda de elegibilidade nas filas e confirmo a exclusão da equipe. Os demais efeitos da exclusão continuam sujeitos às regras nativas.",
+      "DELETE_APPLY": "Confirmar exclusão da equipe",
+      "DELETE_IN_USE": "A exclusão foi bloqueada pelas regras ou vínculos existentes. Revise a equipe nos módulos de origem. Nenhum vínculo foi removido automaticamente."
     }
   }
 }

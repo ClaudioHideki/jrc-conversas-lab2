@@ -78,9 +78,15 @@ export const actions = {
   delete: async ({ commit }, teamId) => {
     commit(SET_TEAM_UI_FLAG, { isDeleting: true });
     try {
-      await TeamsAPI.delete(teamId);
-      commit(DELETE_TEAM, teamId);
+      const reviewed = typeof teamId === 'object' && teamId !== null;
+      if (reviewed) {
+        await TeamsAPI.deleteWithReview(teamId);
+        if (String(TeamsAPI.accountIdFromRoute) !== String(teamId.accountId))
+          return;
+      } else await TeamsAPI.delete(teamId);
+      commit(DELETE_TEAM, reviewed ? teamId.id : teamId);
     } catch (error) {
+      if (typeof teamId === 'object' && teamId !== null) throw error;
       throw new Error(error);
     } finally {
       commit(SET_TEAM_UI_FLAG, { isDeleting: false });

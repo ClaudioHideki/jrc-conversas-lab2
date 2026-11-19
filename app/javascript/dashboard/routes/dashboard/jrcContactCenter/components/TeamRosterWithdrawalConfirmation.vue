@@ -1,13 +1,29 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
 
-defineProps({
+const props = defineProps({
   state: { type: Object, required: true },
   busy: { type: Boolean, default: false },
   showSubmit: { type: Boolean, default: false },
 });
 const emit = defineEmits(['confirm', 'submit', 'cancel']);
 const { t } = useI18n();
+const text = computed(() => {
+  const values = { team: props.state.review?.team_name };
+  if (props.state.review?.operation === 'delete_team') {
+    return {
+      title: t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.DELETE_TITLE', values),
+      confirm: t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.DELETE_CONFIRM'),
+      apply: t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.DELETE_APPLY'),
+    };
+  }
+  return {
+    title: t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.TITLE', values),
+    confirm: t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.CONFIRM'),
+    apply: t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.APPLY'),
+  };
+});
 </script>
 
 <template>
@@ -30,13 +46,7 @@ const { t } = useI18n();
       </button>
     </template>
     <template v-else-if="state.review">
-      <h3 class="break-words font-semibold">
-        {{
-          t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.TITLE', {
-            team: state.review.team_name,
-          })
-        }}
-      </h3>
+      <h3 class="break-words font-semibold">{{ text.title }}</h3>
       <ul class="space-y-2">
         <li
           v-for="queue in state.review.queues"
@@ -64,7 +74,7 @@ const { t } = useI18n();
           data-team-manager-withdrawal-confirm
           @change="emit('confirm', $event.target.checked)"
         />
-        <span>{{ t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.CONFIRM') }}</span>
+        <span>{{ text.confirm }}</span>
       </label>
       <div v-if="showSubmit" class="flex flex-wrap gap-2">
         <button
@@ -74,7 +84,7 @@ const { t } = useI18n();
           data-apply-team-withdrawal
           @click="emit('submit')"
         >
-          {{ t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.APPLY') }}
+          {{ text.apply }}
         </button>
         <button
           type="button"

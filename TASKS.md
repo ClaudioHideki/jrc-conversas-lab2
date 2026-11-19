@@ -396,3 +396,7 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [ ] 2026-11-19: validar protecao de navegacao do rascunho ACW com Dialog/Router nativos, nove casos unitarios e quatro Chrome (164 totais). Preparado apos34f58253; a CI atual nao inclui este incremento.
 
 - [x] 2026-11-19: rascunhos ACW ee689703 validados com1310Rails+16schema,619Vue,160Chrome e240capturas verificadas. Não encerra workspace Hoya completo, templates dinâmicos, automações ou PABX.
+
+- [ ] 2026-11-19: proteger exclusão da entidade Team com revisão assinada própria, autoridade atual/lock, auditoria e FKs preservadas; página nativa mantém confirmação por nome. Preparados HTTP/SQLwait/Vue e168Chrome (164anteriores+4novos), sem aceite nativo ainda. Ver ADR de exclusão da equipe.
+
+- [x] 2026-11-19: a8c6c78d validou navegação ACW e rótulos de conflito:1310Rails+16schema,631Vue,164Chrome,244capturas verificadas; diálogo conferido nos4projetos. Não equivale ao Hoya completo ou às23figuras.

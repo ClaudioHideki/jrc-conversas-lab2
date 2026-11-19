@@ -51,3 +51,10 @@ CI44466663154 aprovou1310Rails distintos (1146principais,79concorrência,85corpo
 CI44470340154 e job135377969079 concluíram com sucesso. 1310Rails distintos,16schema separados,619Vue e160Chrome (40em cada viewport/tema), sem falhas, pendências, erros externos ou novas infrações Ruby. Artefato14505548543, SHA-256dc114469f7607a8de6c4c8c4d0cd14daebd7c9c55f2e74be788eaf160c2ca721,240capturas verificadas. Amostras do rascunho e conflito revisadas visualmente em1440/claro e390/escuro; nota longa não transborda horizontalmente. A prova Chrome usa controles/composable reais e APIs/banco reais em harness, não o shell Hoya inteiro ou SIP.
 
 A revisão visual encontrou o código conhecido order exibido sem tradução. O próximo incremento reutiliza acwLabels já utilizado no histórico, sem alterar códigos do servidor. Há três regressões Vue preparadas para tradução, códigos desconhecidos e chaves herdadas; a asserção Chrome existente é reforçada em português. O helper de rótulos permanece intocado.
+
+
+## Aceite da navegação e rótulos — SHAa8c6c78d
+
+CI44478139924/job135403565966 aprovou1310Rails distintos,16schema separados,631Vue e164Chrome (41em cada projeto), sem falhas, pendências, erros externos ou novas infrações Ruby. Artefato14508877245, SHA-2562a9053f743b87677aefbc1229d764ea110981d1f54ddb6acf0af6d3a1fb9d786;244capturas verificadas. Build fresco e bootstrap15cards/zeroerros aprovados.
+
+Foram revisados os PNGs do diálogo em1440e390, claro eescuro: texto e botões legíveis e contidos. A revisão de conflito no celular/escuro exibe Consulta de pedido em português, mantendo o valor canônico order. Cancelar a navegação/aviso do navegador preserva o texto; descarte é explícito; navegação após salvar e recarga recuperam a versão no banco. Não há autosave, comando externo ou conclusão automática. Esta prova usa o harness e APIs/banco reais; não demonstra o shell Hoya completo ou encerra templates/formulários/automações.
