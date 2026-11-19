@@ -43,7 +43,7 @@ RSpec.describe 'Native team roster identity and inherited authority', type: :req
     original = team.team_members.find_by!(user: recipient).id
     patch endpoint, headers: headers, params: { user_ids: [recipient.id.to_s, added.id.to_s] }, as: :json
     expect(response).to have_http_status(:ok)
-    expect(team.team_members.reload.pluck(:user_id)).to match_array([recipient.id, added.id])
+    expect(team.team_members.reload.pluck(:user_id)).to contain_exactly(recipient.id, added.id)
     expect(team.team_members.find_by!(user: recipient).id).to eq(original)
     expect(JrcContactCenter::ModulePolicy.new(context, :contact_center)).to be_operate
     expect(coverage).to be_group

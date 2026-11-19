@@ -23,3 +23,8 @@ Preparada extensão dos quatroChrome existentes de escopoURA: ler participantes 
 A extensão Enterprise já revalida AccountUser, alçada de equipe e fontes após o mutex Account, mas ainda usava o User autenticado antes da espera. Preparada a mesma recarga/verificação active_for_authentication? já usada nas escritas operacionais CC, antes de qualquer mutação de participantes.
 
 Três novos casos concorrentes POST/PATCH/DELETE preparados no banco descartável protegido existente. A desconfirmação só ocorre depois de a requisição autenticar e pg_stat_activity comprovar espera real por Account FOR UPDATE; assim não se aceita um401 anterior ao lock como falsa prova. O coordenador anterior mantém seu padrão, e somente esses casos usam alteração diferida. Nenhum usuário real ou sessão externa é alterado. Exige CI nativa do próprioSHA.
+
+
+### Gate d14f975a — correção dirigida
+
+CI 44435975247: 1205 exemplos Rails distintos aprovados (1046 principais, 74 de concorrência e 85 corporativos), 16 recargas de schema separadas e 534/534 Vue. Um único novo RSpec/MatchArray bloqueou lint Ruby; assets/probe/148 Chrome não executaram. A correção usa contain_exactly com os mesmos dois IDs esperados, sem alterar a asserção funcional ou desativar regras. Nova CI deve comprovar o SHA corrigido. A prévia indireta de retirada por equipe permanece em preparação separada, sem uso nas APIs.

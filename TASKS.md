@@ -365,3 +365,8 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - CI44427479081 aprovada:1196Rails distintos,16recargas,528Vue,148Chrome,zero falhas/pendências/erros externos/novas infraçõesRuby. Bootstrap15 eCSS novos aprovados. Artefato14486734653/e1204b106d64441b3be63d7a6ea7f6bd5b1f03ed8efc6efd3fe93ee766831df5 recuperado e216 capturas verificadas porhash; quatroPNG efetivamente revisados.
 - Escopo aceito: roteamento local com criação/edição,consulta,paginação,CAS,revisão,auditoria e negações; ACW atual com regressõesVue do workspace. Não é homologação visual do Hoya completo nemPABX.
 - Revisão visual real preparou correção de Critério de roteamento sem mudar Tipo de unidade nas telas nativas, rótuloCC neutro Versão e espera por nomes reais da unidade/fila antes de capturar. QuatroVue adicionais e fortalecimento dos mesmos148Chrome,sem reduzir verificações anteriores. As correções de equipe e projeção auxiliar posteriores continuam exigindoCI própria.
+
+
+### Gate d14f975a — correção dirigida
+
+CI 44435975247: 1205 exemplos Rails distintos aprovados (1046 principais, 74 de concorrência e 85 corporativos), 16 recargas de schema separadas e 534/534 Vue. Um único novo RSpec/MatchArray bloqueou lint Ruby; assets/probe/148 Chrome não executaram. A correção usa contain_exactly com os mesmos dois IDs esperados, sem alterar a asserção funcional ou desativar regras. Nova CI deve comprovar o SHA corrigido. A prévia indireta de retirada por equipe permanece em preparação separada, sem uso nas APIs.
