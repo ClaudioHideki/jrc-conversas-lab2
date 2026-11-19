@@ -191,7 +191,12 @@ const separator = ' · ';
         "
       />
     </label>
-    <p v-if="saved" role="status" class="mt-3 text-xs text-n-teal-11">
+    <p
+      v-if="saved"
+      role="status"
+      data-qualification-draft-saved
+      class="mt-3 text-xs text-n-teal-11"
+    >
       {{ t('JRC_CONTACT_CENTER.ACW_OPERATION.DRAFT_SAVED') }}
     </p>
     <button

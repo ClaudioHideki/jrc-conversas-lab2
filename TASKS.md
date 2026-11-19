@@ -538,3 +538,11 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - Quinta migration 203000 revisada e pinada; quatro anteriores preservadas.
 - Testes Rails/PG, concorrência, Vue e 192 Chrome preparados; ainda não registrar como aprovados.
 - Legado e pausa após chamada + conclusão explícita preservados. Contrato PABX, automações e aceite integral das 23 figuras continuam abertos.
+
+### 19/11 — Formulários operacionais: backend aprovado, correção de apresentação
+
+- CI44607985893/SHA35a8fff3:1686Rails distintos (1509core,92concorrência,85corporativo),66reexecuções de recarga do schema e817Vue; zero falhas/pendências/erros externos. Compatibilidade legada,guards de storage/migrations e lint Ruby sem novas infrações aprovados.
+- Artefato14572449611 verificado por SHA-256:90bbc255fd9362bb581d4a1d62cb7e18e5fba105b83115f4937565268fd44cd8. Esse resultado não comprova assets ou Chrome: o lint frontend interrompeu a execução antes dessas etapas.
+- Correção pontual: checkbox com rótulo associado explicitamente e formatação válida; nenhuma regra desativada. Checagem estática somente leitura:18arquivos,zero erros.
+- Corrigido indicador de rascunho salvo que tratava objeto vazio como conteúdo. Cinco cenários novos distinguem ausência de conteúdo de respostas persistidas false/zero;192Chrome mantidos, com conferência do indicador antes/depois de salvar.
+- Pendente: validar o novo SHA,compilar assets e homologar192Chrome nos quatro projetos. Formulários operacionais e23figuras ainda não declarados concluídos. Sem produção,PABX,imagem,merge ou deploy.

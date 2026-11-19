@@ -197,11 +197,13 @@ onBeforeUnmount(() => {
       <p v-if="detail" class="break-words text-sm font-medium">
         {{ detail.name }}
       </p>
-      <label
+      <div
         v-for="field in fields"
         :key="field.key"
         class="flex min-w-0 gap-2 text-sm"
-        ><input
+      >
+        <input
+          :id="`acw-required-${accountId}-${ruleId}-${field.key}`"
           type="checkbox"
           :checked="
             field.required || modelValue?.required_fields.includes(field.key)
@@ -209,7 +211,14 @@ onBeforeUnmount(() => {
           :disabled="disabled || loading || field.required"
           :data-required-form-field="field.key"
           @change="toggle(field, $event.target.checked)"
-        /><span class="break-words">{{ field.label }}</span></label>
+        />
+        <label
+          :for="`acw-required-${accountId}-${ruleId}-${field.key}`"
+          class="break-words"
+        >
+          {{ field.label }}
+        </label>
+      </div>
     </div>
   </section>
 </template>

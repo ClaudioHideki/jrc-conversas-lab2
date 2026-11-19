@@ -96,3 +96,36 @@ describe('Private native ACW answers in the existing manual revision', () => {
     expect(f.formAnswers.value).toEqual({});
   });
 });
+
+describe('Draft confirmation reflects actual persisted content', () => {
+  it.each([{}, { rule: {} }, { rule: { verified: null, detail: '' } }])(
+    'does not announce a saved draft for a new attendance with no persisted manual content %j',
+    answers => {
+      const f = fixture();
+      f.draft.observe({
+        ...record('new', answers),
+        reason_code: '',
+        outcome_code: '',
+        notes: '',
+      });
+      expect(f.draft.dirty.value).toBe(false);
+      expect(f.draft.canSave.value).toBe(false);
+      expect(f.draft.saved.value).toBe(false);
+    }
+  );
+  it.each([{ rule: { verified: false } }, { rule: { quantity: 0 } }])(
+    'keeps real persisted false/zero answers as saved content %j',
+    answers => {
+      const f = fixture();
+      f.draft.observe({
+        ...record('persisted', answers),
+        reason_code: '',
+        outcome_code: '',
+        notes: '',
+      });
+      expect(f.draft.saved.value).toBe(true);
+      expect(f.formAnswers.value).toEqual(answers);
+      expect(f.draft.canSave.value).toBe(false);
+    }
+  );
+});

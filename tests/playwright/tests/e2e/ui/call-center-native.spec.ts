@@ -5698,6 +5698,7 @@ test('operational form native preserves typed private drafts and blocks pause un
   );
   const form = page.locator('[data-pending-qualification-form]');
   await expect(form).toBeVisible();
+  await expect(form.locator('[data-qualification-draft-saved]')).toHaveCount(0);
   const browserApi = new URL(new URL(ownApi).pathname, page.url()).href;
   await form
     .locator('[data-qualification-field="reason"]')
@@ -5762,6 +5763,7 @@ test('operational form native preserves typed private drafts and blocks pause un
     'false'
   );
   await expect(fields.locator('[data-acw-answer="quantity"]')).toHaveValue('0');
+  await expect(form.locator('[data-qualification-draft-saved]')).toBeVisible();
   await expect(page.locator('[data-acw-limit]')).toHaveText('60');
   await expect(widget.locator('[data-deferred-pause-pending]')).toBeVisible();
   await expect(form.locator('[data-complete-qualification]')).toBeEnabled();

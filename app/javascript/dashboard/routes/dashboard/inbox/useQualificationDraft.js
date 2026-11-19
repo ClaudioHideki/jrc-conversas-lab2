@@ -75,7 +75,15 @@ export const useQualificationDraft = ({
     if (formAnswers)
       formAnswers.value = clone(record.acw_form_context?.answers || {});
     conflict.value = false;
-    savedOnce.value = values(record).some(Boolean);
+    const manual = values(record).slice(0, 3).some(Boolean);
+    const persistedAnswers = Object.values(
+      record.acw_form_context?.answers || {}
+    ).some(fields =>
+      Object.values(fields).some(
+        value => ![null, undefined, ''].includes(value)
+      )
+    );
+    savedOnce.value = manual || Boolean(formAnswers && persistedAnswers);
   };
   const reset = () => {
     baseline.value = null;
