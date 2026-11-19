@@ -62,7 +62,7 @@ RSpec.describe JrcContactCenter::AcwFormAnswers do
   end
 
   { text_object: ['detail', {}], long_text: ['detail', 'x' * 4001], float: ['count', 1.5],
-    unsafe_integer: ['count', 2**53], boolean_string: ['confirmed', 'false'], unknown_option: ['result', 'not-an-option'] }.each do |kind, pair|
+    unsafe_integer: ['count', 2**53], boolean_string: %w[confirmed false], unknown_option: %w[result not-an-option] }.each do |kind, pair|
     it "preserves the native #{kind} rejection even in drafts" do
       answers[pair.first] = pair.last
       expect { described_class.new(definition: definition, answers: answers).call(complete: false) }.to raise_error do |error|

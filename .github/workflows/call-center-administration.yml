@@ -94,6 +94,7 @@ jobs:
           test "$POSTGRES_DATABASE" = jrc_sd_bc_portal_concurrency_20261025_test
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_acw_form_schema_probe"); JrcContactCenter::SyntheticAcwFormSchemaProbe.record("fresh")'
       - name: Reload migrated schema in a separate disposable database
         env:
           POSTGRES_DATABASE: jrc_cc_access_schema_reload_synthetic
@@ -104,7 +105,8 @@ jobs:
           test "$POSTGRES_DATABASE" = jrc_cc_access_schema_reload_synthetic
           bundle exec rails db:create db:schema:load
           bundle exec rails runner 'c=ActiveRecord::Base.connection; t=:jrc_contact_center_access_grants; abort "missing access constraints" unless c.foreign_keys(t).length == 3 && c.check_constraints(t).length == 4; abort "unexpected grants" unless JrcContactCenter::AccessGrant.count.zero?'
-          bundle exec rspec spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb spec/models/jrc_contact_center/acw_form_ledger_spec.rb --format progress --format json --out /tmp/call-center-ivr-schema-reload-rspec.json
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_acw_form_schema_probe"); JrcContactCenter::SyntheticAcwFormSchemaProbe.record("reload")'
+          bundle exec rspec spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb spec/models/jrc_contact_center/acw_form_template_ledger_spec.rb --format progress --format json --out /tmp/call-center-ivr-schema-reload-rspec.json
       - name: Rails authorization, persistence and affected regressions
         run: |
           bundle exec rspec spec/services/jrc_contact_center spec/models/jrc_contact_center \

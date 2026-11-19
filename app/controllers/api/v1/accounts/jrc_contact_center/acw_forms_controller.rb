@@ -65,6 +65,12 @@ class Api::V1::Accounts::JrcContactCenter::AcwFormsController < Api::V1::Account
   end
 
   def write_form(id: nil)
+    result = JrcContactCenter::AcwFormWrite.new(context: pundit_user).call(input: form_input, id: id)
+    render json: base_payload.merge(item: present(result[:form], result[:version]), replayed: result[:replayed],
+                                    latest_revision: result[:latest_revision]), status: (id || result[:replayed] ? :ok : :created)
+  end
+
+  def form_input
     request = params.require(:acw_form)
     keys = %w[name description status request_id expected_revision definition]
     valid = request.is_a?(ActionController::Parameters) && (request.keys - keys).empty?
@@ -72,10 +78,7 @@ class Api::V1::Accounts::JrcContactCenter::AcwFormsController < Api::V1::Account
     raise JrcContactCenter::OperationError.new('acw_form_revision_required', status: :precondition_required) unless request.key?(:expected_revision)
 
     attributes = request.permit(:name, :description, :status, :request_id, :expected_revision, definition: {}).to_h.symbolize_keys
-    input = JrcContactCenter::AcwFormInput.new(**attributes)
-    result = JrcContactCenter::AcwFormWrite.new(context: pundit_user).call(input: input, id: id)
-    render json: base_payload.merge(item: present(result[:form], result[:version]), replayed: result[:replayed],
-                                    latest_revision: result[:latest_revision]), status: (id || result[:replayed] ? :ok : :created)
+    JrcContactCenter::AcwFormInput.new(**attributes)
   end
 
   def present(form, row, include_definition: true)

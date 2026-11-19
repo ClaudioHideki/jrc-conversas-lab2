@@ -38,7 +38,7 @@ RSpec.describe JrcContactCenter::AcwFormDefinition do
     end
   end
 
-  ['__proto__', 'constructor', 'prototype'].each do |key|
+  %w[__proto__ constructor prototype].each do |key|
     it "preserves the native reserved-key rejection for #{key}" do
       fields.first['key'] = key
       expect { described_class.new(definition).call }.to raise_error do |error|
@@ -83,7 +83,7 @@ RSpec.describe JrcContactCenter::AcwFormDefinition do
     end
   end
 
-  { duplicate: ['first', 'first'], blank: ['first', ' '], excessive: Array.new(101) { |i| "option-#{i}" } }.each do |kind, options|
+  { duplicate: %w[first first], blank: ['first', ' '], excessive: Array.new(101) { |i| "option-#{i}" } }.each do |kind, options|
     it "rejects #{kind} choice options" do
       fields.last['options'] = options
       expect { described_class.new(definition).call }.to raise_error do |error|

@@ -22,7 +22,7 @@ class JrcContactCenter::AcwFormAnswers
 
     fields = complete ? @fields : @fields.map { |field| field.merge('required' => false) }
     JrcServiceDesk::CatalogueAnswers.new(fields).validate!(@answers)
-    raise Invalid if @answers.values.any? { |value| value.is_a?(String) && value.include?("\0") }
+    validate_strings!
     validate_required_text! if complete
     @answers.deep_dup
   rescue ArgumentError
@@ -30,6 +30,11 @@ class JrcContactCenter::AcwFormAnswers
   end
 
   private
+
+  def validate_strings!
+    invalid = @answers.values.any? { |value| value.is_a?(String) && value.include?("\0") }
+    raise Invalid if invalid
+  end
 
   def validate_required_text!
     missing = @fields.any? do |field|

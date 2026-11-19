@@ -22,6 +22,15 @@ RSpec.describe JrcContactCenter::AcwFormTemplate do
                                   request_id: SecureRandom.uuid, created_at: Time.current, integrity_sha256: '')
   end
 
+  # Bypass ActiveRecord callbacks explicitly to prove the SQL constraints themselves.
+  def insert_raw_version(values)
+    connection = described_class.connection
+    table = JrcContactCenter::AcwFormVersion
+    columns = values.keys.map { |key| connection.quote_column_name(key) }.join(', ')
+    serialized = values.map { |key, value| connection.quote(table.type_for_attribute(key.to_s).serialize(value)) }.join(', ')
+    connection.execute("INSERT INTO #{connection.quote_table_name(table.table_name)} (#{columns}) VALUES (#{serialized})")
+  end
+
   it 'computes the account scope and immutable definition digest without trusting a submitted scope' do
     expect(form.scope_snapshot).to eq('account_id' => account.id.to_s)
     expect(version.integrity_sha256).to match(/\A[0-9a-f]{64}\z/)
@@ -31,7 +40,7 @@ RSpec.describe JrcContactCenter::AcwFormTemplate do
   it 'appends a contiguous new version without rewriting the original definition' do
     original = version.attributes
     changed = JrcContactCenter::AcwFormVersion.create!(values.merge(acw_form_template: form, revision: 2,
-                                                                 name: 'SYNTHETIC next', request_id: SecureRandom.uuid))
+                                                                    name: 'SYNTHETIC next', request_id: SecureRandom.uuid))
     expect(form.latest_version).to eq(changed)
     expect(version.reload.attributes).to eq(original)
     expect(form.versions.count).to eq(2)
@@ -57,7 +66,7 @@ RSpec.describe JrcContactCenter::AcwFormTemplate do
     payload = { 'fields' => Array.new(50) { |i| { 'key' => "field-#{i}", 'label' => 'x' * 6000 } } }
     row = bulk_values.merge(definition: payload)
     expect do
-      described_class.transaction(requires_new: true) { JrcContactCenter::AcwFormVersion.insert_all!([row]) }
+      described_class.transaction(requires_new: true) { insert_raw_version(row) }
     end.to raise_error(ActiveRecord::StatementInvalid) { |error| expect(error.message).to include('cc_acw_form_definition_object') }
     expect(form.versions.count).to eq(1)
   end
@@ -67,7 +76,7 @@ RSpec.describe JrcContactCenter::AcwFormTemplate do
       version
       expect do
         described_class.transaction(requires_new: true) do
-          JrcContactCenter::AcwFormVersion.insert_all!([bulk_values.merge(definition: definition)])
+          insert_raw_version(bulk_values.merge(definition: definition))
         end
       end.to raise_error(ActiveRecord::StatementInvalid)
       expect(form.versions.count).to eq(1)
@@ -101,7 +110,7 @@ RSpec.describe JrcContactCenter::AcwFormTemplate do
     expect do
       described_class.transaction(requires_new: true) do
         JrcContactCenter::AcwFormVersion.create!(values.merge(acw_form_template: form, revision: 2, request_id: SecureRandom.uuid,
-                                                           actor_account_user_id: other_member.id, actor_user_id: other.id))
+                                                              actor_account_user_id: other_member.id, actor_user_id: other.id))
       end
     end.to raise_error(ActiveRecord::StatementInvalid)
     expect(form.versions.count).to eq(1)
@@ -114,8 +123,8 @@ RSpec.describe JrcContactCenter::AcwFormTemplate do
     expect do
       described_class.transaction(requires_new: true) do
         JrcContactCenter::AcwFormVersion.create!(values.merge(account_id: other_member.account_id, acw_form_template: form,
-                                                           actor_account_user_id: other_member.id, actor_user_id: other.id,
-                                                           revision: 2, request_id: SecureRandom.uuid))
+                                                              actor_account_user_id: other_member.id, actor_user_id: other.id,
+                                                              revision: 2, request_id: SecureRandom.uuid))
       end
     end.to raise_error(ActiveRecord::StatementInvalid)
     expect(form.versions.count).to eq(1)
@@ -176,10 +185,13 @@ RSpec.describe JrcContactCenter::AcwFormTemplate do
     expect(described_class.where(account_id: account.id)).to be_empty
     expect(JrcContactCenter::AcwFormVersion.where(account_id: account.id)).to be_empty
   end
+
   it 'accepts exact native migration reexecution without changing the version history' do
     require Rails.root.join('db/migrate/20261119190000_create_contact_center_acw_forms')
     version
-    expect { CreateContactCenterAcwForms.new.up }.not_to change { form.versions.count }
+    require Rails.root.join('script/jrc_call_center_acw_form_schema_probe')
+    JrcContactCenter::SyntheticAcwFormSchemaProbe.record('rspec')
+    expect { CreateContactCenterAcwForms.new.up }.not_to(change { form.versions.count })
   end
 
   it 'rejects an existing ledger whose required unique index was removed' do
@@ -193,5 +205,4 @@ RSpec.describe JrcContactCenter::AcwFormTemplate do
     end.to raise_error(ActiveRecord::MigrationError, /Unexpected ACW form ledger schema/)
     expect(form.versions.count).to eq(1)
   end
-
 end

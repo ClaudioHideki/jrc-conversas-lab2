@@ -3916,5 +3916,22 @@
     "pending": "Native migration/fresh/reload/concurrency/Vue/Chrome; form-rule bindings and owned private operational answers are a separate later increment. No provider publication.",
     "migration": "20261119190000_create_contact_center_acw_forms.rb",
     "production_changed": false
+  },
+  "acw_form_first_native_gate_93ffea06": {
+    "run": 44514041346,
+    "status": "failed_not_homologated",
+    "artifact": 14525352789,
+    "artifact_sha256": "274a0fbe17d69081ed12dfc15c9192d1fa725bc39ca0ddefddfae9c06454e9e3",
+    "schema_reload": {
+      "examples": 39,
+      "passed": 38,
+      "failed": 1,
+      "pending": 0,
+      "outside_errors": 0,
+      "failed_case": "Exact new-migration reexecution after schema reload rejects its own structure receipt. Precise metadata divergence still under investigation."
+    },
+    "new_ruby_offenses": 48,
+    "main_rails_vue_build_chrome": "not_run_due_to_failed_prerequisite",
+    "actions": "Validator responsibilities split without removing validation; explicit SQL boundary assertions retained instead of insert_all; native spec renamed to match model with old source hash pinned; metadata-only fresh/reload/RSpec probe added. Strict receipt check still mandatory, not claimed corrected."
   }
 }

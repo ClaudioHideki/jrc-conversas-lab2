@@ -123,7 +123,7 @@ RSpec.describe JrcContactCenter::AcwFormWrite do
   it 'does not use archival to bypass definition validation or rewrite content' do
     original = writer.call(input: input)
     archive = JrcContactCenter::AcwFormInput.new(**values, status: 'archived', name: 'SYNTHETIC changed',
-                                                            expected_revision: 1, request_id: SecureRandom.uuid)
+                                                           expected_revision: 1, request_id: SecureRandom.uuid)
     expect do
       writer.call(input: archive, id: original[:form].id)
     end.to raise_error(JrcContactCenter::OperationError, 'acw_form_archive_requires_unchanged_definition')
@@ -158,7 +158,7 @@ RSpec.describe JrcContactCenter::AcwFormWrite do
     company = account.master_companies.create!(name: 'SYNTHETIC issuer', relationship_type: 'internal')
     unit = JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'SYNTHETIC unit', code: 'SYNTHETIC')
     JrcCrm::UserBusinessUnit.create!(account: account, user: operator, scope: 'BUSINESS_UNIT', company: company,
-                                   business_unit: unit, active: true, structure_managed: true)
+                                     business_unit: unit, active: true, structure_managed: true)
     expect { writer.call(input: input) }.to raise_error(Pundit::NotAuthorizedError)
     expect(JrcContactCenter::AcwFormTemplate.where(account: account)).to be_empty
   end
@@ -171,5 +171,13 @@ RSpec.describe JrcContactCenter::AcwFormWrite do
     coverage.update!(scope: 'BUSINESS_UNIT', company: company, business_unit: unit)
     expect { writer.call(input: input) }.to raise_error(Pundit::NotAuthorizedError)
     expect(original[:form].versions.count).to eq(1)
+  end
+
+  it 'preserves the exact native policy signature and settings when adding a reusable form' do
+    before = JrcContactCenter::AcwPolicy.new(account: account).revision
+    settings = account.settings.deep_dup
+    writer.call(input: input)
+    expect(JrcContactCenter::AcwPolicy.new(account: account.reload).revision).to eq(before)
+    expect(account.settings).to eq(settings)
   end
 end

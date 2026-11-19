@@ -171,7 +171,8 @@ session[:acw_form_targets].each_value do |target|
   owned_context = { account: owned_account, account_user: owned_member, user: owned_member.user }
   definition = { 'fields' => [{ 'key' => 'detail', 'label' => 'SYNTHETIC question', 'type' => 'text', 'required' => true }] }
   21.times do |index|
-    values = { name: "SYNTHETIC page #{index.to_s.rjust(2, '0')}", status: 'active', definition: definition, request_id: SecureRandom.uuid, expected_revision: 0 }
+    values = { name: "SYNTHETIC page #{index.to_s.rjust(2, '0')}", status: 'active', definition: definition,
+               request_id: SecureRandom.uuid, expected_revision: 0 }
     JrcContactCenter::AcwFormWrite.new(context: owned_context).call(input: JrcContactCenter::AcwFormInput.new(**values))
   end
 end

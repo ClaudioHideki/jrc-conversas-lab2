@@ -62,4 +62,8 @@ RSpec.describe JrcContactCenter::AcwFormInput do
       expect(error.class.name).to eq('JrcContactCenter::AcwFormDefinition::Invalid')
     end
   end
+
+  it 'rejects authority-looking unknown keys instead of accepting them through the keyword envelope' do
+    expect { described_class.new(**values, account_id: 99) }.to raise_error(JrcContactCenter::OperationError, 'invalid_acw_form_revision')
+  end
 end

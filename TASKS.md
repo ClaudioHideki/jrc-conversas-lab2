@@ -429,3 +429,9 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [ ] Biblioteca interna de formulários ACW preparada com popup, versões, campos nativos, CAS, idempotência, histórico/auditoria e autorização global. Não declarar homologada antes da nova CI.
 - [ ] Vínculo imutável regra→versão e respostas operacionais privadas ainda pendentes; nenhuma regra antiga ou snapshot é alterado por cadastrar um formulário.
 - [ ] Contrato/ACK/publicação PABX externo pendente.23figuras e etapas0–2não concluídas.
+
+### Biblioteca ACW — primeira execução nativa93ffea06
+
+- [x] CI44514041346 preservada: migration inicial aplicada;38/39exemplos de recarga passaram,1falha de recibo na reexecução;48novas infrações Ruby registradas, sem exclusões de regras.
+- [ ] Corrigir as infrações e comparar metadados fresh/reload/RSpec para localizar a divergência do recibo. A verificação permanece obrigatória.
+- [ ] Rails principal, concorrência nova, Vue, assets e176Chrome ainda não executados nesta candidata;7d55fe76continua a última homologação integral.

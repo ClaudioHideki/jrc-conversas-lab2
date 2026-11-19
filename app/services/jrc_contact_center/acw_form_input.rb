@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 class JrcContactCenter::AcwFormInput
+  ATTRIBUTES = %i[name description status definition request_id expected_revision].freeze
   attr_reader :name, :description, :status, :definition, :request_id, :expected_revision
 
-  def initialize(name: nil, description: '', status: nil, definition: nil, request_id: nil, expected_revision: nil)
+  def initialize(**attributes)
+    raise JrcContactCenter::OperationError, 'invalid_acw_form_revision' unless (attributes.keys - ATTRIBUTES).empty?
+
+    name, description, status, definition, request_id, expected_revision = attributes.reverse_merge(description: '').values_at(*ATTRIBUTES)
     valid = valid_content?(name, description, status) && valid_precondition?(request_id, expected_revision)
     raise JrcContactCenter::OperationError, 'invalid_acw_form_revision' unless valid
 
@@ -27,8 +31,11 @@ class JrcContactCenter::AcwFormInput
   private
 
   def valid_content?(name, description, status)
-    name.is_a?(String) && name.strip.present? && name.length <= 160 && !name.include?("\0") &&
-      description.is_a?(String) && description.length <= 1000 && !description.include?("\0") && %w[active archived].include?(status)
+    valid_text?(name, 160, required: true) && valid_text?(description, 1000) && %w[active archived].include?(status)
+  end
+
+  def valid_text?(value, maximum, required: false)
+    value.is_a?(String) && value.length <= maximum && value.exclude?("\0") && (!required || value.strip.present?)
   end
 
   def valid_precondition?(request_id, revision)

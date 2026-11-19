@@ -26,11 +26,12 @@ class JrcContactCenter::AcwFormQuery
     valid &&= [nil, '', 'active', 'archived'].include?(@params[:status])
     raise JrcContactCenter::OperationError, 'invalid_acw_form_filter' unless valid
 
-    pages = %i[page per_page].all? do |key|
-      value = @params[key]
-      value.nil? || ((value.is_a?(String) || value.is_a?(Integer)) && value.to_s.match?(/\A[0-9]+\z/))
-    end
+    pages = %i[page per_page].all? { |key| page_value?(@params[key]) }
     raise JrcContactCenter::OperationError, 'invalid_acw_form_filter' unless pages
+  end
+
+  def page_value?(value)
+    value.nil? || ((value.is_a?(String) || value.is_a?(Integer)) && value.to_s.match?(/\A[0-9]+\z/))
   end
 
   def filtered

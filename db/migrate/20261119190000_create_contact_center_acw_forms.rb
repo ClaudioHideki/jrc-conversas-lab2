@@ -55,10 +55,10 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
                                          on_delete: :cascade, name: 'cc_acw_form_version_account_fk'
     add_check_constraint VERSIONS, "revision > 0 AND btrim(name) <> '' AND status IN ('active', 'archived')", name: 'cc_acw_form_version_state'
     add_check_constraint VERSIONS, "jsonb_typeof(definition) = 'object' AND octet_length(definition::text) <= #{DEFINITION_BYTES} " \
-                                  "AND definition ? 'fields' " \
-                                  "AND jsonb_typeof(definition -> 'fields') = 'array' " \
-                                  "AND jsonb_array_length(definition -> 'fields') BETWEEN 1 AND 50 " \
-                                  "AND definition - 'fields' = '{}'::jsonb", name: 'cc_acw_form_definition_object'
+                                   "AND definition ? 'fields' " \
+                                   "AND jsonb_typeof(definition -> 'fields') = 'array' " \
+                                   "AND jsonb_array_length(definition -> 'fields') BETWEEN 1 AND 50 " \
+                                   "AND definition - 'fields' = '{}'::jsonb", name: 'cc_acw_form_definition_object'
     add_check_constraint VERSIONS, "integrity_sha256 ~ '^[0-9a-f]{64}$'", name: 'cc_acw_form_version_digest'
   end
 
@@ -96,13 +96,19 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
         SELECT COALESCE(MAX(revision), 0) INTO last_revision FROM jrc_contact_center_acw_form_versions
           WHERE acw_form_template_id = NEW.acw_form_template_id AND account_id = NEW.account_id;
         IF NEW.revision <> last_revision + 1 THEN RAISE EXCEPTION 'ACW form revision sequence conflict'; END IF;
-        NEW.integrity_sha256 = encode(sha256(convert_to(jsonb_build_object(
-          'name', NEW.name, 'description', NEW.description, 'status', NEW.status,
-          'definition', NEW.definition)::text, 'UTF8')), 'hex');
+        #{version_digest_sql}
         RETURN NEW;
       END $guard$;
       CREATE TRIGGER cc_acw_form_version_guard BEFORE INSERT OR UPDATE OR DELETE ON jrc_contact_center_acw_form_versions
         FOR EACH ROW EXECUTE FUNCTION cc_acw_form_version_guard();
+    SQL
+  end
+
+  def version_digest_sql
+    <<~SQL.squish
+      NEW.integrity_sha256 = encode(sha256(convert_to(jsonb_build_object(
+        'name', NEW.name, 'description', NEW.description, 'status', NEW.status,
+        'definition', NEW.definition)::text, 'UTF8')), 'hex');
     SQL
   end
 
@@ -137,29 +143,19 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
                   definition integrity_sha256 created_at]
     valid = schema_matches?(TEMPLATES, templates, %w[cc_acw_form_scope_object], 1)
     valid &&= schema_matches?(VERSIONS, versions,
-                             %w[cc_acw_form_definition_object cc_acw_form_version_state cc_acw_form_version_digest], 2)
+                              %w[cc_acw_form_definition_object cc_acw_form_version_state cc_acw_form_version_digest], 2)
     guards = connection.select_values("SELECT tgname FROM pg_trigger WHERE NOT tgisinternal AND tgname LIKE 'cc_acw_form_%'").sort
     valid &&= guards == %w[cc_acw_form_first_version_guard cc_acw_form_template_guard cc_acw_form_version_guard]
     valid &&= connection.table_comment(TEMPLATES) == schema_receipt
     raise ActiveRecord::MigrationError, 'Unexpected ACW form ledger schema; review before reexecution' unless valid
   end
 
-  # The receipt contains no OIDs, database names or actors and survives native schema reload.
-  # A partial/altered pre-existing ledger must not be accepted from table names alone.
   def schema_receipt
-    tables = [TEMPLATES, VERSIONS].map { |name| connection.quote(name.to_s) + '::regclass' }.join(',')
-    columns = [TEMPLATES, VERSIONS].map do |table|
-      [table, connection.columns(table).map { |column| [column.name, column.sql_type, column.null, column.default] }]
-    end
-    constraints = connection.select_rows("SELECT c.relname, x.conname, pg_get_constraintdef(x.oid, true) FROM pg_constraint x " \
-                                         "JOIN pg_class c ON c.oid = x.conrelid WHERE c.oid IN (#{tables}) ORDER BY c.relname, x.conname")
-    triggers = connection.select_rows("SELECT tgname, pg_get_triggerdef(oid, true) FROM pg_trigger " \
-                                      "WHERE NOT tgisinternal AND tgrelid IN (#{tables}) ORDER BY tgname")
-    functions = connection.select_rows("SELECT proname, pg_get_functiondef(oid) FROM pg_proc " \
-                                       "WHERE oid IN (SELECT tgfoid FROM pg_trigger WHERE NOT tgisinternal AND tgrelid IN (#{tables})) " \
-                                       "ORDER BY proname")
-    indexes = [TEMPLATES, VERSIONS].map { |table| [table, connection.indexes(table).map { |index| [index.name, index.columns, index.unique] }.sort] }
-    'jrc_cc_acw_forms_v1:' + Digest::SHA256.hexdigest([columns, constraints, triggers, functions, indexes].to_json)
+    ContactCenterAcwFormSchemaReceipt.new(connection).call
+  end
+
+  def schema_receipt_components
+    ContactCenterAcwFormSchemaReceipt.new(connection).components
   end
 
   def schema_matches?(table, columns, checks, foreign_keys)
@@ -167,5 +163,53 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
 
     connection.columns(table).map(&:name).sort == columns.sort && connection.foreign_keys(table).length == foreign_keys &&
       connection.check_constraints(table).map(&:name).sort == checks.sort
+  end
+end
+
+# Structure only: no OIDs, database names, rows or actors enter the receipt.
+class ContactCenterAcwFormSchemaReceipt
+  TABLES = [CreateContactCenterAcwForms::TEMPLATES, CreateContactCenterAcwForms::VERSIONS].freeze
+
+  def initialize(connection)
+    @connection = connection
+    @tables = TABLES.map { |name| "#{@connection.quote(name.to_s)}::regclass" }.join(',')
+  end
+
+  def call
+    "jrc_cc_acw_forms_v1:#{Digest::SHA256.hexdigest(components.values.to_json)}"
+  end
+
+  def components
+    { columns: columns, constraints: constraints, triggers: triggers, functions: functions, indexes: indexes }
+  end
+
+  private
+
+  def columns
+    TABLES.map do |table|
+      [table, @connection.columns(table).map { |column| [column.name, column.sql_type, column.null, column.default] }]
+    end
+  end
+
+  def constraints
+    @connection.select_rows('SELECT c.relname, x.conname, pg_get_constraintdef(x.oid, true) FROM pg_constraint x ' \
+                            "JOIN pg_class c ON c.oid = x.conrelid WHERE c.oid IN (#{@tables}) ORDER BY c.relname, x.conname")
+  end
+
+  def triggers
+    @connection.select_rows('SELECT tgname, pg_get_triggerdef(oid, true) FROM pg_trigger ' \
+                            "WHERE NOT tgisinternal AND tgrelid IN (#{@tables}) ORDER BY tgname")
+  end
+
+  def functions
+    @connection.select_rows('SELECT proname, pg_get_functiondef(oid) FROM pg_proc ' \
+                            "WHERE oid IN (SELECT tgfoid FROM pg_trigger WHERE NOT tgisinternal AND tgrelid IN (#{@tables})) " \
+                            'ORDER BY proname')
+  end
+
+  def indexes
+    TABLES.map do |table|
+      [table, @connection.indexes(table).map { |index| [index.name, index.columns, index.unique] }.sort]
+    end
   end
 end

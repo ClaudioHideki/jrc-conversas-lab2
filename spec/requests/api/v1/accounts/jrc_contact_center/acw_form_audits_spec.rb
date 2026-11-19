@@ -39,7 +39,7 @@ RSpec.describe 'Call Center form revisions in native configuration audit', type:
 
   it 'filters the exact native revision without mixing accounts or unrelated configuration types' do
     get "#{base}/configuration_audits", headers: headers,
-                                          params: { resource_type: 'acw_form_revision', resource_id: entry[:version].id, history: true }
+                                        params: { resource_type: 'acw_form_revision', resource_id: entry[:version].id, history: true }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items').pluck('id')).to eq([audit.id])
     expect(response.parsed_body.fetch('items').pluck('resource_type')).to eq(['acw_form_revision'])
@@ -71,11 +71,11 @@ RSpec.describe 'Call Center form revisions in native configuration audit', type:
     company = account.master_companies.create!(name: 'SYNTHETIC issuer', relationship_type: 'internal')
     unit = JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'SYNTHETIC unit', code: 'SYNTHETIC')
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', company: company,
-                                   business_unit: unit, active: true, structure_managed: true)
+                                     business_unit: unit, active: true, structure_managed: true)
     get "#{base}/configuration_audits/#{audit.id}", headers: headers
     expect(response).to have_http_status(:not_found)
     get "#{base}/configuration_audits", headers: headers,
-                                          params: { resource_type: 'acw_form_revision', resource_id: entry[:version].id, history: true }
+                                        params: { resource_type: 'acw_form_revision', resource_id: entry[:version].id, history: true }
     expect(response.parsed_body.fetch('items')).to be_empty
   end
 

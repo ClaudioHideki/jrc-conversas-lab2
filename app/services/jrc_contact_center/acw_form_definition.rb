@@ -22,15 +22,19 @@ class JrcContactCenter::AcwFormDefinition
     valid = @value.is_a?(Hash) && @value.keys == ['fields'] && @value.to_json.bytesize <= MAX_BYTES
     raise Invalid unless valid
 
-    fields = @value.fetch('fields')
-    schema = JrcServiceDesk::CatalogueFields.new(fields)
-    raise Invalid, ['fields'] unless schema.valid? && !schema.duplicate_keys? && fields.any?
-
-    fields.each_with_index { |field, index| validate_field!(field, index) }
+    validated_fields.each_with_index { |field, index| validate_field!(field, index) }
     @value.deep_dup
   end
 
   private
+
+  def validated_fields
+    fields = @value.fetch('fields')
+    schema = JrcServiceDesk::CatalogueFields.new(fields)
+    raise Invalid, ['fields'] unless schema.valid? && !schema.duplicate_keys? && fields.any?
+
+    fields
+  end
 
   def validate_field!(field, index)
     label = field.fetch('label')
