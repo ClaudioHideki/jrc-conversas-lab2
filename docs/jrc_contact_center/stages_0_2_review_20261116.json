@@ -3422,45 +3422,26 @@
     "complete_23_figures": false
   },
   "latest_verified_increment": {
-    "sha": "a8c6c78df86712879876fd02ebc18fed42a10bdb",
-    "run": 44478139924,
-    "job": 135403565966,
-    "artifact": 14508877245,
-    "artifact_sha256": "2a9053f743b87677aefbc1229d764ea110981d1f54ddb6acf0af6d3a1fb9d786",
-    "rails_distinct": 1310,
-    "schema_reload_separate": 16,
-    "vue": 631,
-    "chrome": 164,
-    "projects": {
-      "desktop-light": 41,
-      "desktop-dark": 41,
-      "mobile-light": 41,
-      "mobile-dark": 41
-    },
-    "failures": 0,
-    "pending": 0,
-    "outside_errors": 0,
-    "new_ruby_offenses": 0,
-    "screenshots_verified": 244,
-    "visual_reviewed": [
-      "desktop-light-pending-acw-navigation-review.png",
-      "desktop-dark-pending-acw-navigation-review.png",
-      "mobile-light-pending-acw-navigation-review.png",
-      "mobile-dark-pending-acw-navigation-review.png",
-      "mobile-dark-pending-acw-review.png"
+    "status": "implemented_and_validated_in_synthetic_native_harness",
+    "sha": "7d55fe7612879fd8c28f6c8fc64e2f1118f7ce7e",
+    "run": 44505104067,
+    "rails_distinct": 1335,
+    "schema_reload_reexecutions": 16,
+    "vue": 662,
+    "chrome": 168,
+    "chrome_per_project": 42,
+    "screenshots_sha256_verified": 252,
+    "artifact": 14521587209,
+    "artifact_sha256": "ff47e4f3faa98c0cbb2eabd09a7f4b81e3c65f652970426b904a6e265a564d1b",
+    "failures_pending_outside_skips_flaky": 0,
+    "manual_visual_review": [
+      "desktop-light",
+      "desktop-dark",
+      "mobile-light",
+      "mobile-dark"
     ],
-    "behavior": [
-      "Cancel keeps edits without writes",
-      "Explicit discard leaves native saved version/ACW pending",
-      "Real browser beforeunload dismissal keeps edits",
-      "Explicit save survives navigation and reload with one native write",
-      "Known reason labels translated; unknown legacy values escaped and preserved"
-    ],
-    "limitations": [
-      "Harness with actual controls/router/Rails APIs and PostgreSQL; not full Hoya shell or SIP/PABX",
-      "Dynamic forms and destination automation remain partial"
-    ],
-    "all23_complete": false
+    "apt_actual": "archive.ubuntu.com HTTPS4suites,24source tests,mandatory APTsignature checks retained",
+    "limits": "Native Teams routes/components, real CSS, authenticated APIs and disposable PostgreSQL. Not full Hoya shell, SIP/PABX or production proof. All23figures/stages0–2remain open."
   },
   "team_roster_indirect_review_prepared_20261118": {
     "reference_parent": "3f8f2bc80348841bcf32e5dfa0600606e12b778f",
@@ -3905,5 +3886,35 @@
     "workflow_timeout45_preserved": true,
     "last_full_green": "a8c6c78df86712879876fd02ebc18fed42a10bdb",
     "all23_complete": false
+  },
+  "whole_team_final_native_gate_7d55fe76_20261119": {
+    "status": "implemented_and_validated_in_synthetic_native_harness",
+    "sha": "7d55fe7612879fd8c28f6c8fc64e2f1118f7ce7e",
+    "run": 44505104067,
+    "rails_distinct": 1335,
+    "schema_reload_reexecutions": 16,
+    "vue": 662,
+    "chrome": 168,
+    "chrome_per_project": 42,
+    "screenshots_sha256_verified": 252,
+    "artifact": 14521587209,
+    "artifact_sha256": "ff47e4f3faa98c0cbb2eabd09a7f4b81e3c65f652970426b904a6e265a564d1b",
+    "failures_pending_outside_skips_flaky": 0,
+    "manual_visual_review": [
+      "desktop-light",
+      "desktop-dark",
+      "mobile-light",
+      "mobile-dark"
+    ],
+    "apt_actual": "archive.ubuntu.com HTTPS4suites,24source tests,mandatory APTsignature checks retained",
+    "limits": "Native Teams routes/components, real CSS, authenticated APIs and disposable PostgreSQL. Not full Hoya shell, SIP/PABX or production proof. All23figures/stages0–2remain open."
+  },
+  "acw_form_library_prepared_20261119": {
+    "status": "implementation_prepared_not_yet_natively_validated",
+    "figure": 9,
+    "scope": "Account-owned versioned manager library and popup; fields reuse pure native CatalogueFields/Answers. No Service Desk authorization or record model reused. Module configure and native GROUP/global coverage required; audit separately authorized. No auto grants.",
+    "pending": "Native migration/fresh/reload/concurrency/Vue/Chrome; form-rule bindings and owned private operational answers are a separate later increment. No provider publication.",
+    "migration": "20261119190000_create_contact_center_acw_forms.rb",
+    "production_changed": false
   }
 }

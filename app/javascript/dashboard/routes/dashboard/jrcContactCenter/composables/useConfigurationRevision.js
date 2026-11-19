@@ -8,12 +8,13 @@ const resources = [
   'access_users',
   'access_teams',
   'ivr_drafts',
+  'acw_forms',
   'acw_policy',
   'pause_catalog',
   'routing_rules',
 ];
 const validRevision = (value, resource) =>
-  resource === 'ivr_drafts'
+  ['ivr_drafts', 'acw_forms'].includes(resource)
     ? Number.isInteger(value) && value > 0 && value <= 2147483647
     : typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 export const useConfigurationRevision = ({ accountId, resource, draft }) => {
@@ -61,10 +62,14 @@ export const useConfigurationRevision = ({ accountId, resource, draft }) => {
     if (state.required && !state.expected) state.conflict = true;
   };
   const handleError = error => {
-    const codes =
-      resource.value === 'ivr_drafts'
-        ? ['stale_ivr_revision', 'ivr_revision_required']
-        : ['stale_configuration_revision', 'configuration_revision_required'];
+    const revisionCodes = {
+      ivr_drafts: ['stale_ivr_revision', 'ivr_revision_required'],
+      acw_forms: ['stale_acw_form_revision', 'acw_form_revision_required'],
+    };
+    const codes = revisionCodes[resource.value] || [
+      'stale_configuration_revision',
+      'configuration_revision_required',
+    ];
     if (!state.required || !codes.includes(error?.response?.data?.error))
       return false;
     state.conflict = true;

@@ -3,6 +3,7 @@ import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
+import AcwFormLibrary from './AcwFormLibrary.vue';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 const props = defineProps({
   accountId: { type: [Number, String], required: true },
@@ -12,6 +13,7 @@ const channelLabels = computed(() => ({
   voice: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.voice'),
   whatsapp: t('JRC_CONTACT_CENTER.ACW_OPERATION.LIMIT_LABELS.whatsapp'),
 }));
+const formsOpen = ref(false);
 const limits = ref(null);
 const voiceRequired = ref(null);
 const saving = ref(false);
@@ -32,6 +34,7 @@ watch(
   async () => {
     generation += 1;
     const version = generation;
+    formsOpen.value = false;
     limits.value = null;
     voiceRequired.value = null;
     failed.value = false;
@@ -103,6 +106,22 @@ onBeforeUnmount(() => {
     <p class="mt-2 text-sm text-n-slate-11">
       {{ t('VOICE_V4.TABULATION_POLICY_HINT') }}
     </p>
+    <button
+      v-if="limits"
+      type="button"
+      :disabled="saving"
+      class="mt-3 rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11"
+      data-manage-acw-forms
+      @click="formsOpen = true"
+    >
+      {{ t('JRC_CONTACT_CENTER.ACW_FORMS.MANAGE') }}
+    </button>
+    <AcwFormLibrary
+      v-if="formsOpen && limits"
+      :key="String(accountId)"
+      :account-id="accountId"
+      @close="formsOpen = false"
+    />
     <form
       v-if="limits"
       class="mt-4 grid gap-4 sm:grid-cols-2"

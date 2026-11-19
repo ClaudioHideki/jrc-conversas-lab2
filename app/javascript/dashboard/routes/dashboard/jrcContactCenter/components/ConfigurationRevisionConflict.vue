@@ -38,6 +38,7 @@ const labels = {
   enforced: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.POLICY_TITLE'),
   entries: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.ENTRIES'),
   name: t('JRC_CONTACT_CENTER.ADMIN.NAME'),
+  description: t('JRC_CONTACT_CENTER.ACW_FORMS.DESCRIPTION'),
   definition: t('JRC_CONTACT_CENTER.LOCAL_IVR.DEFINITION'),
   revision: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REVISION'),
   code: t('JRC_CONTACT_CENTER.ADMIN.CODE'),
@@ -70,6 +71,7 @@ const choices = {
   published: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.PUBLISHED_HISTORY'),
   provider: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.PROVIDER'),
   active: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.ACTIVE'),
+  archived: t('JRC_CONTACT_CENTER.ACW_FORMS.ARCHIVED'),
   inactive: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.INACTIVE'),
   voice: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.VOICE'),
   whatsapp: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.WHATSAPP'),
@@ -107,6 +109,7 @@ const fields = computed(
       access_users: ['eligible', 'allowed', 'denied'],
       access_teams: ['allowed'],
       ivr_drafts: ['name', 'revision', 'definition'],
+      acw_forms: ['name', 'description', 'status', 'revision', 'definition'],
       acw_policy: ['voice', 'whatsapp', 'voice_required', 'voice_rules'],
       pause_catalog: ['enforced', 'entries'],
       routing_rules: [

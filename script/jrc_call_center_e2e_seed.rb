@@ -161,6 +161,20 @@ session = { access_targets: access_targets, navigation_targets: navigation_targe
             issuer_company_id: company.id, denied_business_unit_id: business_units.last.id }
 require_relative 'jrc_call_center_ivr_seed'
 session[:ivr_targets] = JrcContactCenter::SyntheticIvrSeed.call(projects: access_targets.keys)
+# Independent account graph: never share mutable roles/forms with the existing IVR cases.
+session[:acw_form_targets] = JrcContactCenter::SyntheticIvrSeed.call(projects: access_targets.keys)
+session[:acw_form_targets].each_value do |target|
+  owned_account = Account.find(target.fetch(:account_id))
+  email = target.fetch(:administrator).fetch('uid')
+  owned_user = owned_account.users.find_by!(email: email)
+  owned_member = owned_account.account_users.find_by!(user: owned_user)
+  owned_context = { account: owned_account, account_user: owned_member, user: owned_member.user }
+  definition = { 'fields' => [{ 'key' => 'detail', 'label' => 'SYNTHETIC question', 'type' => 'text', 'required' => true }] }
+  21.times do |index|
+    values = { name: "SYNTHETIC page #{index.to_s.rjust(2, '0')}", status: 'active', definition: definition, request_id: SecureRandom.uuid, expected_revision: 0 }
+    JrcContactCenter::AcwFormWrite.new(context: owned_context).call(input: JrcContactCenter::AcwFormInput.new(**values))
+  end
+end
 require_relative 'jrc_call_center_customer_master_seed'
 session[:customer_master_targets] = JrcContactCenter::SyntheticCustomerMasterSeed.call(projects: access_targets.keys)
 require_relative 'jrc_call_center_pause_seed'

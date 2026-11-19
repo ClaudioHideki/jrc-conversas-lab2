@@ -48,6 +48,10 @@ namespace :api, defaults: { format: 'json' } do
           get :export, on: :member
           post :simulate, on: :member
         end
+        resources :acw_forms, only: %i[index show create update] do
+          get :versions, on: :member
+          get 'versions/:revision', on: :member, action: :version, as: :version
+        end
         resources :configuration_audits, only: %i[index show] do
           get :export, on: :collection
         end

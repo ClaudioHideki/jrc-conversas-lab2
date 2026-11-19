@@ -33,6 +33,22 @@ const ivrRevision = revision => {
 };
 
 export default {
+  acwForms: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/acw_forms`, { params }),
+  saveAcwForm: (accountId, id, form) =>
+    id
+      ? axios.patch(`${base(accountId)}/acw_forms/${recordIdentity(id)}`, {
+          acw_form: form,
+        })
+      : axios.post(`${base(accountId)}/acw_forms`, { acw_form: form }),
+  acwFormHistory: (accountId, id, page = 1) =>
+    axios.get(`${base(accountId)}/acw_forms/${recordIdentity(id)}/versions`, {
+      params: { page },
+    }),
+  acwFormVersion: (accountId, id, revision) =>
+    axios.get(
+      `${base(accountId)}/acw_forms/${recordIdentity(id)}/versions/${ivrRevision(revision)}`
+    ),
   ivrReference: (accountId, resource, id) => {
     if (!['units', 'queues'].includes(resource))
       throw new Error('Invalid IVR reference type');
@@ -69,11 +85,14 @@ export default {
       access_users: 'access_authorizations/users',
       access_teams: 'access_authorizations/teams',
       ivr_drafts: 'ivr_drafts',
+      acw_forms: 'acw_forms',
       routing_rules: 'routing_rules',
     };
     if (!paths[resource] || !/^[1-9]\d*$/.test(String(id)))
       throw new Error('Invalid configuration context');
     if (resource === 'ivr_drafts') return axios.get(ivrPath(accountId, id));
+    if (resource === 'acw_forms')
+      return axios.get(`${base(accountId)}/acw_forms/${recordIdentity(id)}`);
     if (resource === 'routing_rules')
       return axios.get(
         `${base(accountId)}/routing_rules/${recordIdentity(id)}`

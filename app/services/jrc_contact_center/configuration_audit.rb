@@ -6,7 +6,8 @@ class JrcContactCenter::ConfigurationAudit
   AUTHORITY_COMMENT = 'jrc_contact_center_authority_v1'
   ACW_COMMENT = 'jrc_contact_center_acw_policy_v1'
   PAUSE_COMMENT = 'jrc_contact_center_pause_catalog_v1'
-  COMMENTS = [COMMENT, ROLE_COMMENT, AUTHORITY_COMMENT, ACW_COMMENT, PAUSE_COMMENT].freeze
+  ACW_FORM_COMMENT = 'jrc_contact_center_acw_form_v1'
+  COMMENTS = [COMMENT, ROLE_COMMENT, AUTHORITY_COMMENT, ACW_COMMENT, PAUSE_COMMENT, ACW_FORM_COMMENT].freeze
 
   def self.write!(record, action:, before:, after:)
     fields = JrcContactCenter::ConfigurationAuditSnapshot::FIELDS.fetch(record.class.name)

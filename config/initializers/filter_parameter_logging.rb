@@ -32,3 +32,6 @@ Rails.application.config.filter_parameters += [:catalog_import]
 
 # Local IVR payloads and DTMF are never request-log content.
 Rails.application.config.filter_parameters += [:ivr_draft, :ivr_preview, :ivr_simulation]
+
+# ACW library schemas may contain private labels and choices.
+Rails.application.config.filter_parameters += [:acw_form]

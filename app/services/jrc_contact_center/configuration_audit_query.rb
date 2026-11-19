@@ -5,7 +5,7 @@ class JrcContactCenter::ConfigurationAuditQuery
     'unit' => 'JrcContactCenter::Unit', 'queue' => 'JrcContactCenter::Queue',
     'membership' => 'JrcContactCenter::QueueMembership', 'role' => 'CustomRole', 'access' => 'JrcContactCenter::AccessGrant',
     'ivr_revision' => 'JrcContactCenter::IvrDraftVersion', 'acw_policy' => 'Account', 'pause_catalog' => 'Account',
-    'routing_rule' => 'JrcContactCenter::RoutingRule'
+    'routing_rule' => 'JrcContactCenter::RoutingRule', 'acw_form_revision' => 'JrcContactCenter::AcwFormVersion'
   }.freeze
 
   def self.resource_key(record)

@@ -419,3 +419,13 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [x]24testes leves de fontes e Bash -n aprovados; normalizador exige mirror HTTPS efetivo nas quatro suites antes de gravar. Demais workflows e limite45m preservados.
 - [ ] Provar a correção no Linux e todos os gates/168Chrome antes de homologar exclusão da equipe. Última homologação integral continua a8c6c78d.
 - [ ]23arquivos de formulários ACW preparados, sem migração/rotas admitidas; revisão de tamanho JSONB, persistência/UI/bindings e respostas privadas ainda pendentes.
+
+
+### Call Center — 19/11 — equipe inteira homologada e biblioteca ACW
+
+- [x]7d55fe76/CI44505104067:1335Rails distintos+16recarga do schema,662Vue,168Chrome,0falhas/pendências/erros externos/flaky/skips.252capturas verificadas porSHA-256; quatro capturas novas inspecionadas.
+- [x] Exclusão nativa de equipe: confirmação por nome,409/revisão explícita do gestor, exclusão200/reload404 e auditoria; permissões e escopos revalidados.
+- [x] Corrigido o ciclo de imports das rotas Teams sem trocar componentes/metadados; bootstrap real15cards/0erros. Ubuntu HTTPS efetivo nas quatro suites,24testes e assinaturas APT preservados.
+- [ ] Biblioteca interna de formulários ACW preparada com popup, versões, campos nativos, CAS, idempotência, histórico/auditoria e autorização global. Não declarar homologada antes da nova CI.
+- [ ] Vínculo imutável regra→versão e respostas operacionais privadas ainda pendentes; nenhuma regra antiga ou snapshot é alterado por cadastrar um formulário.
+- [ ] Contrato/ACK/publicação PABX externo pendente.23figuras e etapas0–2não concluídas.

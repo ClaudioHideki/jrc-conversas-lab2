@@ -33,7 +33,8 @@ class JrcContactCenter::ConfigurationAuditScope
     roles = records.where(comment: [JrcContactCenter::ConfigurationAudit::ROLE_COMMENT, JrcContactCenter::ConfigurationAudit::AUTHORITY_COMMENT])
     comments = [JrcContactCenter::ConfigurationAudit::ACW_COMMENT, JrcContactCenter::ConfigurationAudit::PAUSE_COMMENT]
     policies = records.where(comment: comments, auditable_type: 'Account', auditable_id: @account.id)
-    roles.or(policies)
+    forms = records.where(comment: JrcContactCenter::ConfigurationAudit::ACW_FORM_COMMENT, auditable_type: 'JrcContactCenter::AcwFormVersion')
+    roles.or(policies).or(forms)
   end
 
   def scope_json(side)

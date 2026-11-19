@@ -12,6 +12,7 @@ import AuthorityAssignments from './AuthorityAssignments.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import PauseCatalogEditor from './PauseCatalogEditor.vue';
 import AcwRulesEditor from './AcwRulesEditor.vue';
+import AcwFormLibrary from './AcwFormLibrary.vue';
 import QueueWithdrawalConfirmation from './QueueWithdrawalConfirmation.vue';
 import TeamRosterWithdrawalConfirmation from './TeamRosterWithdrawalConfirmation.vue';
 import { useQueueWithdrawalReview } from '../composables/useQueueWithdrawalReview';
@@ -136,6 +137,10 @@ const canConfigureAcw = computed(
     key.value === 'closures' &&
     props.context.capabilities.configuration_global === true
 );
+const formsOpen = ref(false);
+watch([key, () => props.accountId, canConfigureAcw], () => {
+  formsOpen.value = false;
+});
 const canEditRoles = computed(
   () => key.value === 'permissions' && props.context.native_links?.role_editor
 );
@@ -731,6 +736,21 @@ onBeforeUnmount(() => {
         {{ label(`RESOURCES.${name}`) }}
       </button>
     </nav>
+    <button
+      v-if="canConfigureAcw"
+      type="button"
+      class="rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11"
+      data-manage-acw-forms
+      @click="formsOpen = true"
+    >
+      {{ t('JRC_CONTACT_CENTER.ACW_FORMS.MANAGE') }}
+    </button>
+    <AcwFormLibrary
+      v-if="canConfigureAcw && formsOpen"
+      :key="String(accountId)"
+      :account-id="accountId"
+      @close="formsOpen = false"
+    />
     <template
       v-if="
         !pending &&

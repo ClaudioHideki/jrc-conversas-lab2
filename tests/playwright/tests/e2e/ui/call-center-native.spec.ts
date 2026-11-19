@@ -58,40 +58,44 @@ test.beforeEach(async ({ page }, info) => {
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
-  const auth = pauseTarget
-    ? info.title.startsWith('local pause catalog operator') ||
-      info.title.startsWith('pending ACW native')
-      ? pauseTarget.operator
-      : pauseTarget.administrator
-    : info.title.startsWith('linked Customer Master')
-      ? session.customer_master_targets[info.project.name].operator
-      : info.title.startsWith('local IVR supervisor')
-        ? session.ivr_targets[info.project.name].observer
-        : info.title.startsWith('local IVR')
-          ? info.title.startsWith('local IVR scoped')
-            ? session.ivr_targets[info.project.name].scoped
-            : session.ivr_targets[info.project.name].administrator
-          : info.title.startsWith('native authenticated navigation')
-            ? session.navigation_targets[info.project.name].auth
-            : info.title.startsWith('native infrastructure root')
-              ? session.infrastructure
-              : info.title.startsWith('configuration audit boundary')
-                ? session.auditor
-                : info.title.startsWith('native role denied')
-                  ? session.delegated
-                  : info.title.startsWith('corporate boundary')
-                    ? session.restricted
-                    : info.title.startsWith('profile change')
-                      ? session.viewer
-                      : session.administrator;
+  const auth = info.title.startsWith('ACW form library')
+    ? session.acw_form_targets[info.project.name].administrator
+    : pauseTarget
+      ? info.title.startsWith('local pause catalog operator') ||
+        info.title.startsWith('pending ACW native')
+        ? pauseTarget.operator
+        : pauseTarget.administrator
+      : info.title.startsWith('linked Customer Master')
+        ? session.customer_master_targets[info.project.name].operator
+        : info.title.startsWith('local IVR supervisor')
+          ? session.ivr_targets[info.project.name].observer
+          : info.title.startsWith('local IVR')
+            ? info.title.startsWith('local IVR scoped')
+              ? session.ivr_targets[info.project.name].scoped
+              : session.ivr_targets[info.project.name].administrator
+            : info.title.startsWith('native authenticated navigation')
+              ? session.navigation_targets[info.project.name].auth
+              : info.title.startsWith('native infrastructure root')
+                ? session.infrastructure
+                : info.title.startsWith('configuration audit boundary')
+                  ? session.auditor
+                  : info.title.startsWith('native role denied')
+                    ? session.delegated
+                    : info.title.startsWith('corporate boundary')
+                      ? session.restricted
+                      : info.title.startsWith('profile change')
+                        ? session.viewer
+                        : session.administrator;
   if (
+    info.title.startsWith('ACW form library') ||
     Boolean(pauseTarget) ||
     info.title.startsWith('local IVR') ||
     info.title.startsWith('linked Customer Master')
   ) {
     const observations = [];
-    const prefix =
-      pauseKey === 'team_deletion'
+    const prefix = info.title.startsWith('ACW form library')
+      ? `/api/v1/accounts/${session.acw_form_targets[info.project.name].account_id}/jrc_contact_center/`
+      : pauseKey === 'team_deletion'
         ? `/api/v1/accounts/${pauseTarget.account_id}/`
         : pauseTarget
           ? `/api/v1/accounts/${pauseTarget.account_id}/jrc_contact_center/`
@@ -5250,4 +5254,157 @@ test('whole native team deletion preserves generic confirmation requires scoped 
           row.pathname.endsWith(`/teams/${target.team_id}`)
       )
   ).toHaveLength(2);
+});
+
+test('ACW form library persists native schema revisions and preserves immutable history without operational activation', async ({
+  page,
+}, info) => {
+  const target = session.acw_form_targets[info.project.name];
+  const endpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/acw_forms`;
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/closures`
+  );
+  await page.locator('[data-manage-acw-forms]').click();
+  const library = page.locator('[data-acw-form-library]');
+  await expect(library).toBeVisible();
+  await expectContainedDialog(page);
+  await page.locator('[data-acw-form-new]').click();
+  await page
+    .locator('[data-acw-form-name]')
+    .fill(`SYNTHETIC created ${info.project.name}`);
+  await expect(page.locator('[data-acw-form-save]')).toBeDisabled();
+  await page.locator('[data-add-acw-form-field]').click();
+  await page
+    .locator('[data-acw-schema-label]')
+    .fill('SYNTHETIC required feedback');
+  await page.locator('[data-acw-schema-required]').check();
+  const created = page.waitForResponse(
+    response =>
+      response.url() === endpoint && response.request().method() === 'POST'
+  );
+  await page.locator('[data-acw-form-save]').click();
+  const saved = await created;
+  expect(saved.status()).toBe(201);
+  const first = (await saved.json()).item;
+  expect(first.revision).toBe(1);
+  expect(first.provider_applied).toBe(false);
+  await expect(page.locator('[data-acw-form-saved]')).toBeVisible();
+  await page
+    .locator('[data-acw-form-name]')
+    .fill(`SYNTHETIC revised ${info.project.name}`);
+  const updated = page.waitForResponse(
+    response =>
+      response.url() === `${endpoint}/${first.id}` &&
+      response.request().method() === 'PATCH'
+  );
+  await page.locator('[data-acw-form-save]').click();
+  expect((await updated).status()).toBe(200);
+  await expect(page.locator('[data-acw-form-saved]')).toBeVisible();
+  await page.locator('[data-acw-form-preview]').click();
+  await page
+    .locator(`[data-acw-answer="${first.definition.fields[0].key}"]`)
+    .fill('SYNTHETIC preview only');
+  await expectContainedDialog(page);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page
+      .locator('html')
+      .evaluate(element => element.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-acw-form-preview.png`,
+    fullPage: true,
+  });
+  const persisted = await page.request.get(`${endpoint}/${first.id}`, {
+    headers: target.administrator,
+  });
+  expect(persisted.status()).toBe(200);
+  expect((await persisted.json()).item).toMatchObject({
+    name: `SYNTHETIC revised ${info.project.name}`,
+    revision: 2,
+  });
+  expect(JSON.stringify(await persisted.json())).not.toContain(
+    'SYNTHETIC preview only'
+  );
+  await page.locator('[data-acw-form-history]').click();
+  await expect(library).toContainText(`SYNTHETIC created ${info.project.name}`);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-acw-form-history.png`,
+    fullPage: true,
+  });
+  const original = await page.request.get(
+    `${endpoint}/${first.id}/versions/1`,
+    { headers: target.administrator }
+  );
+  expect(original.status()).toBe(200);
+  expect((await original.json()).item.name).toBe(
+    `SYNTHETIC created ${info.project.name}`
+  );
+  const audits = await page.request.get(
+    endpoint.replace('/acw_forms', '/configuration_audits') +
+      `?resource_type=acw_form_revision&resource_id=${first.version_id}`,
+    { headers: target.administrator }
+  );
+  expect(audits.status()).toBe(200);
+  const evidence = await audits.json();
+  expect(evidence.items.length).toBeGreaterThan(0);
+  expect(JSON.stringify(evidence)).not.toContain('SYNTHETIC required feedback');
+  const denied = await page.request.get(`${endpoint}/${first.id}`, {
+    headers: target.scoped,
+  });
+  expect([401, 403, 404]).toContain(denied.status());
+});
+
+test('ACW form library native pagination filters clearing reload and account denials stay scoped', async ({
+  page,
+}, info) => {
+  const target = session.acw_form_targets[info.project.name];
+  const endpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/acw_forms`;
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/closures`
+  );
+  await page.locator('[data-manage-acw-forms]').click();
+  const library = page.locator('[data-acw-form-library]');
+  await page.locator('[data-acw-form-search]').fill('SYNTHETIC page');
+  const filtered = page.waitForResponse(
+    response =>
+      response.url().includes('/acw_forms?') &&
+      new URL(response.url()).searchParams.get('q') === 'SYNTHETIC page'
+  );
+  await library
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  expect((await filtered).status()).toBe(200);
+  await expect(library.locator('[data-acw-form-row]')).toHaveCount(20);
+  await library.getByRole('button', { name: 'Próxima', exact: true }).click();
+  await expect(library.locator('[data-acw-form-row]')).toHaveCount(1);
+  await expect(library).toContainText('Página 2 de 2');
+  await library.getByRole('button', { name: 'Anterior', exact: true }).click();
+  await expect(library.locator('[data-acw-form-row]')).toHaveCount(20);
+  await library
+    .getByRole('button', { name: 'Limpar filtros', exact: true })
+    .click();
+  await expect(page.locator('[data-acw-form-search]')).toHaveValue('');
+  await expect(page.locator('[data-acw-form-status]')).toHaveValue('');
+  await expectContainedDialog(page);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-acw-form-library.png`,
+    fullPage: true,
+  });
+  const foreign = await page.request.get(endpoint, {
+    headers: session.administrator,
+  });
+  expect([401, 403, 404]).toContain(foreign.status());
+  const observer = await page.request.get(endpoint, {
+    headers: target.observer,
+  });
+  expect([401, 403, 404]).toContain(observer.status());
+  await page.reload();
+  await expect(page.locator('[data-acw-form-library]')).not.toBeVisible();
+  await page.locator('[data-manage-acw-forms]').click();
+  await expect(page.locator('[data-acw-form-row]')).toHaveCount(20);
 });
