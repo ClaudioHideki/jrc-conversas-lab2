@@ -17,8 +17,7 @@ class JrcContactCenter::AcwFormAnswers
   end
 
   def call(complete:)
-    valid = [true, false].include?(complete) && @answers.is_a?(Hash) && @answers.to_json.bytesize <= MAX_BYTES
-    raise Invalid unless valid
+    validate_envelope!(complete)
 
     fields = complete ? @fields : @fields.map { |field| field.merge('required' => false) }
     JrcServiceDesk::CatalogueAnswers.new(fields).validate!(@answers)
@@ -30,6 +29,11 @@ class JrcContactCenter::AcwFormAnswers
   end
 
   private
+
+  def validate_envelope!(complete)
+    valid = [true, false].include?(complete) && @answers.is_a?(Hash) && @answers.to_json.bytesize <= MAX_BYTES
+    raise Invalid unless valid
+  end
 
   def validate_strings!
     invalid = @answers.values.any? { |value| value.is_a?(String) && value.include?("\0") }

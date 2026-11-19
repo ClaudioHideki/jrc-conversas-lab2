@@ -3933,5 +3933,27 @@
     "new_ruby_offenses": 48,
     "main_rails_vue_build_chrome": "not_run_due_to_failed_prerequisite",
     "actions": "Validator responsibilities split without removing validation; explicit SQL boundary assertions retained instead of insert_all; native spec renamed to match model with old source hash pinned; metadata-only fresh/reload/RSpec probe added. Strict receipt check still mandatory, not claimed corrected."
+  },
+  "acw_form_schema_receipt_root_cause_315ab97a": {
+    "run": 44518350072,
+    "artifact": 14527207589,
+    "sha256": "ae5f24a1f954451366a020d2c119969fa562014f9b5cf93d9f6f03891c472cd8",
+    "schema_examples": 39,
+    "passed": 38,
+    "failed": 1,
+    "new_ruby_offenses": 3,
+    "cause_confirmed": "Only CHECK status array coercion representation changes between fresh and reload; all other structural components match, reload and RSpec match.",
+    "correction_in_candidate": "Explicit text casts, no constraint exclusion/normalization; nested migration-owned receipt class; metadata diagnostics separated from native RSpec with9tool-only regression checks. New actual-status-constraint mutation negative remains required.",
+    "native_revalidation": "not_yet_run"
+  },
+  "resolved_decisions_20261119": {
+    "pause_during_call": "User approved: pause only after call ended AND ACW completed; no call interruption, data discard or timeout completion."
+  },
+  "pause_after_acw_guard_prepared_20261119": {
+    "status": "implemented_in_candidate_not_yet_natively_tested",
+    "scope": "Reject new paused transitions while any own ACW remains pending; preserve active-call guard, transaction, current eligibility and historical state.",
+    "native_tests_prepared": 5,
+    "deferred_queue_and_UI": "pending, not represented as implemented",
+    "provider_commands": false
   }
 }

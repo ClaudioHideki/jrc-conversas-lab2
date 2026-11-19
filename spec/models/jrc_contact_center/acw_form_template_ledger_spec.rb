@@ -205,4 +205,20 @@ RSpec.describe JrcContactCenter::AcwFormTemplate do
     end.to raise_error(ActiveRecord::MigrationError, /Unexpected ACW form ledger schema/)
     expect(form.versions.count).to eq(1)
   end
+
+  it 'still rejects a changed status constraint even when its name and table columns were preserved' do
+    require Rails.root.join('db/migrate/20261119190000_create_contact_center_acw_forms')
+    version
+    expect do
+      described_class.transaction(requires_new: true) do
+        connection = described_class.connection
+        connection.execute('ALTER TABLE jrc_contact_center_acw_form_versions DROP CONSTRAINT cc_acw_form_version_state')
+        connection.execute("ALTER TABLE jrc_contact_center_acw_form_versions ADD CONSTRAINT cc_acw_form_version_state " \
+                           "CHECK (revision > 0 AND btrim(name) <> '' AND status::text IN ('active'::text, 'archived'::text, 'published'::text))")
+        CreateContactCenterAcwForms.new.up
+      end
+    end.to raise_error(ActiveRecord::MigrationError, /Unexpected ACW form ledger schema/)
+    expect(form.versions.count).to eq(1)
+  end
+
 end

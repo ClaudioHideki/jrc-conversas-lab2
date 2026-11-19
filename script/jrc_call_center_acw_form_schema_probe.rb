@@ -6,7 +6,8 @@ module JrcContactCenter::SyntheticAcwFormSchemaProbe
     raise 'Owned synthetic ACW schema diagnostics required' unless owned? && %w[fresh reload rspec].include?(stage)
 
     require Rails.root.join('db/migrate/20261119190000_create_contact_center_acw_forms')
-    File.write("/tmp/call-center-acw-form-schema-#{stage}.json", JSON.pretty_generate(report(stage)))
+    suffix = stage == 'rspec' ? 'rspec-context' : stage
+    File.write("/tmp/call-center-acw-form-schema-#{suffix}.json", JSON.pretty_generate(report(stage)))
   end
 
   def self.owned?
@@ -17,7 +18,7 @@ module JrcContactCenter::SyntheticAcwFormSchemaProbe
 
   def self.report(stage)
     migration = CreateContactCenterAcwForms.new
-    components = migration.send(:schema_receipt_components)
+    components = CreateContactCenterAcwForms::SchemaReceipt.new(ActiveRecord::Base.connection).components
     { stage: stage, structure: structure, stored: ActiveRecord::Base.connection.table_comment(:jrc_contact_center_acw_form_templates),
       calculated: migration.send(:schema_receipt), escape_html: ActiveSupport.escape_html_entities_in_json, components: components,
       component_hashes: components.transform_values { |value| Digest::SHA256.hexdigest(JSON.generate(value)) } }
@@ -25,9 +26,9 @@ module JrcContactCenter::SyntheticAcwFormSchemaProbe
 
   def self.structure
     connection = ActiveRecord::Base.connection
-    ContactCenterAcwFormSchemaReceipt::TABLES.to_h do |table|
-      [table, { columns: connection.columns(table).map(&:name).sort, checks: connection.check_constraints(table).map(&:name).sort,
-                foreign_keys: connection.foreign_keys(table).length }]
+    CreateContactCenterAcwForms::SchemaReceipt::TABLES.index_with do |table|
+      { columns: connection.columns(table).map(&:name).sort, checks: connection.check_constraints(table).map(&:name).sort,
+        foreign_keys: connection.foreign_keys(table).length }
     end
   end
 end

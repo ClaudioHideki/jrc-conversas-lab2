@@ -435,3 +435,11 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [x] CI44514041346 preservada: migration inicial aplicada;38/39exemplos de recarga passaram,1falha de recibo na reexecução;48novas infrações Ruby registradas, sem exclusões de regras.
 - [ ] Corrigir as infrações e comparar metadados fresh/reload/RSpec para localizar a divergência do recibo. A verificação permanece obrigatória.
 - [ ] Rails principal, concorrência nova, Vue, assets e176Chrome ainda não executados nesta candidata;7d55fe76continua a última homologação integral.
+
+### Call Center — tipos explícitos do CHECK e decisão de pausa
+
+- [x]315ab97a/CI44518350072 isolou a divergência: somente casts do CHECKde status mudam após recarga;38/39exemplos,3infrações Ruby restantes. Artefato14527207589verificado.
+- [x] Correção mínima preparada: tipos text explícitos; recibo completo continua obrigatório e teste de alteração real do CHECKfoi adicionado. Metadados não são RSpec;9testes do leitor externo passaram.
+- [ ] Provar novamente a instalação/recarga/reexecução, todos os gates e176Chrome na candidata corrigida.
+- [x] Decisão de negócio registrada: pausa começa somente após fim da chamada e conclusão do ACW.
+- [ ] Proteção nativa adicional e5regressões preparadas; fila persistente de intenção e interface de pausa adiada ainda pendentes. Nenhum comando externo.

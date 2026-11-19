@@ -130,7 +130,8 @@ class JrcContactCenter::AgentStateManager
   def validate_operator_state!(state, attributes, expected_version)
     raise JrcContactCenter::OperationError.new('state_conflict', status: :conflict) unless state.version == expected_version.to_s
 
-    raise JrcContactCenter::OperationError.new('tabulation_pending', status: :conflict) if attributes[:state] == 'available' && pending_qualification?
+    blocked_by_acw = %w[available paused].include?(attributes[:state]) && pending_qualification?
+    raise JrcContactCenter::OperationError.new('tabulation_pending', status: :conflict) if blocked_by_acw
 
     blocked = state.active_call? || %w[busy ringing in_call].include?(state.current&.state)
     raise JrcContactCenter::OperationError.new('call_active', status: :conflict) if blocked

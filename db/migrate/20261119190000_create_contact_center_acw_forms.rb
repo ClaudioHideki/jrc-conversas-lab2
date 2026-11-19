@@ -12,7 +12,9 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
 
     create_templates
     create_versions
-    install_guards
+    execute template_guard_sql
+    execute version_guard_sql
+    execute first_version_sql
     change_table_comment TEMPLATES, schema_receipt
   end
 
@@ -53,19 +55,14 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
     add_index VERSIONS, [:account_id, :request_id], unique: true, name: 'cc_acw_form_request_key'
     add_foreign_key VERSIONS, TEMPLATES, column: [:acw_form_template_id, :account_id], primary_key: [:id, :account_id],
                                          on_delete: :cascade, name: 'cc_acw_form_version_account_fk'
-    add_check_constraint VERSIONS, "revision > 0 AND btrim(name) <> '' AND status IN ('active', 'archived')", name: 'cc_acw_form_version_state'
+    add_check_constraint VERSIONS, "revision > 0 AND btrim(name) <> '' AND " \
+                                  "status::text IN ('active'::text, 'archived'::text)", name: 'cc_acw_form_version_state'
     add_check_constraint VERSIONS, "jsonb_typeof(definition) = 'object' AND octet_length(definition::text) <= #{DEFINITION_BYTES} " \
                                    "AND definition ? 'fields' " \
                                    "AND jsonb_typeof(definition -> 'fields') = 'array' " \
                                    "AND jsonb_array_length(definition -> 'fields') BETWEEN 1 AND 50 " \
                                    "AND definition - 'fields' = '{}'::jsonb", name: 'cc_acw_form_definition_object'
     add_check_constraint VERSIONS, "integrity_sha256 ~ '^[0-9a-f]{64}$'", name: 'cc_acw_form_version_digest'
-  end
-
-  def install_guards
-    execute template_guard_sql
-    execute version_guard_sql
-    execute first_version_sql
   end
 
   def template_guard_sql
@@ -151,11 +148,7 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
   end
 
   def schema_receipt
-    ContactCenterAcwFormSchemaReceipt.new(connection).call
-  end
-
-  def schema_receipt_components
-    ContactCenterAcwFormSchemaReceipt.new(connection).components
+    SchemaReceipt.new(connection).call
   end
 
   def schema_matches?(table, columns, checks, foreign_keys)
@@ -164,52 +157,52 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
     connection.columns(table).map(&:name).sort == columns.sort && connection.foreign_keys(table).length == foreign_keys &&
       connection.check_constraints(table).map(&:name).sort == checks.sort
   end
-end
 
-# Structure only: no OIDs, database names, rows or actors enter the receipt.
-class ContactCenterAcwFormSchemaReceipt
-  TABLES = [CreateContactCenterAcwForms::TEMPLATES, CreateContactCenterAcwForms::VERSIONS].freeze
+  # Structure only: no OIDs, database names, rows or actors enter the receipt.
+  class SchemaReceipt
+    TABLES = [CreateContactCenterAcwForms::TEMPLATES, CreateContactCenterAcwForms::VERSIONS].freeze
 
-  def initialize(connection)
-    @connection = connection
-    @tables = TABLES.map { |name| "#{@connection.quote(name.to_s)}::regclass" }.join(',')
-  end
-
-  def call
-    "jrc_cc_acw_forms_v1:#{Digest::SHA256.hexdigest(components.values.to_json)}"
-  end
-
-  def components
-    { columns: columns, constraints: constraints, triggers: triggers, functions: functions, indexes: indexes }
-  end
-
-  private
-
-  def columns
-    TABLES.map do |table|
-      [table, @connection.columns(table).map { |column| [column.name, column.sql_type, column.null, column.default] }]
+    def initialize(connection)
+      @connection = connection
+      @tables = TABLES.map { |name| "#{@connection.quote(name.to_s)}::regclass" }.join(',')
     end
-  end
 
-  def constraints
-    @connection.select_rows('SELECT c.relname, x.conname, pg_get_constraintdef(x.oid, true) FROM pg_constraint x ' \
-                            "JOIN pg_class c ON c.oid = x.conrelid WHERE c.oid IN (#{@tables}) ORDER BY c.relname, x.conname")
-  end
+    def call
+      "jrc_cc_acw_forms_v1:#{Digest::SHA256.hexdigest(components.values.to_json)}"
+    end
 
-  def triggers
-    @connection.select_rows('SELECT tgname, pg_get_triggerdef(oid, true) FROM pg_trigger ' \
-                            "WHERE NOT tgisinternal AND tgrelid IN (#{@tables}) ORDER BY tgname")
-  end
+    def components
+      { columns: columns, constraints: constraints, triggers: triggers, functions: functions, indexes: indexes }
+    end
 
-  def functions
-    @connection.select_rows('SELECT proname, pg_get_functiondef(oid) FROM pg_proc ' \
-                            "WHERE oid IN (SELECT tgfoid FROM pg_trigger WHERE NOT tgisinternal AND tgrelid IN (#{@tables})) " \
-                            'ORDER BY proname')
-  end
+    private
 
-  def indexes
-    TABLES.map do |table|
-      [table, @connection.indexes(table).map { |index| [index.name, index.columns, index.unique] }.sort]
+    def columns
+      TABLES.map do |table|
+        [table, @connection.columns(table).map { |column| [column.name, column.sql_type, column.null, column.default] }]
+      end
+    end
+
+    def constraints
+      @connection.select_rows('SELECT c.relname, x.conname, pg_get_constraintdef(x.oid, true) FROM pg_constraint x ' \
+                              "JOIN pg_class c ON c.oid = x.conrelid WHERE c.oid IN (#{@tables}) ORDER BY c.relname, x.conname")
+    end
+
+    def triggers
+      @connection.select_rows('SELECT tgname, pg_get_triggerdef(oid, true) FROM pg_trigger ' \
+                              "WHERE NOT tgisinternal AND tgrelid IN (#{@tables}) ORDER BY tgname")
+    end
+
+    def functions
+      @connection.select_rows('SELECT proname, pg_get_functiondef(oid) FROM pg_proc ' \
+                              "WHERE oid IN (SELECT tgfoid FROM pg_trigger WHERE NOT tgisinternal AND tgrelid IN (#{@tables})) " \
+                              'ORDER BY proname')
+    end
+
+    def indexes
+      TABLES.map do |table|
+        [table, @connection.indexes(table).map { |index| [index.name, index.columns, index.unique] }.sort]
+      end
     end
   end
 end
