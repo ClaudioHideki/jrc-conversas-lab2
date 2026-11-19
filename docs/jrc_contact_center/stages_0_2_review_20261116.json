@@ -3995,5 +3995,30 @@
     "minimal_lint_correction": "Whitespace only Vue; one Ruby continuation indent, literal and blank line; metadata query helper named according to existing project-owned nested Query convention, no queries or rules removed. Exact new migration hash updated; two previous migrations unchanged.",
     "current_local_checks": "18frontend files:0errors, warnings retained;23migration gate cases passed; new native verification pending.",
     "full23_complete": false
+  },
+  "acw_library_browser_origin_correction_882ccce6": {
+    "sha": "882ccce646a83d0c8d45c4b88edf72f55069c301",
+    "run": 44528134759,
+    "artifact": 14533939230,
+    "artifact_sha256": "07291599f361026ed7096ab78fddb3d9cc8d7a5f85616ce7a304b94f13ea919e",
+    "rails_distinct": 1493,
+    "schema_reload_separate": 40,
+    "vue": 753,
+    "lint": "passed",
+    "bootstrap": "passed15cards0errors",
+    "chrome_passed": 172,
+    "chrome_unexpected": 4,
+    "chrome_skipped_flaky_outside_errors": 0,
+    "cause": "Strict response observer compared the Rails direct API origin5387 against browser requests via Vite proxy origin5388. Four actual screenshots/DOM show saved revision. Native creation completed, but the remainder of that scenario is not yet validated.",
+    "minimal_correction": "derive exact browser API URL from current page origin, retaining exact authorized account path and POST/PATCH method. Direct API reads still use explicit Rails origin and own native headers.20assertions and2waiters preserved, fixture and timeout unchanged.",
+    "reviewed_failure_screenshots": [
+      "desktop-light",
+      "desktop-dark",
+      "mobile-light",
+      "mobile-dark"
+    ],
+    "new_candidate_requires": 176,
+    "separate_pause_increment_not_included": true,
+    "all23_complete": false
   }
 }

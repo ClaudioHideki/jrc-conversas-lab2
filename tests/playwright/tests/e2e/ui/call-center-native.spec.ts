@@ -5264,6 +5264,7 @@ test('ACW form library persists native schema revisions and preserves immutable 
   await page.goto(
     `/app/accounts/${target.account_id}/contact-center/control-desk/closures`
   );
+  const browserEndpoint = new URL(new URL(endpoint).pathname, page.url()).href;
   await page.locator('[data-manage-acw-forms]').click();
   const library = page.locator('[data-acw-form-library]');
   await expect(library).toBeVisible();
@@ -5280,7 +5281,8 @@ test('ACW form library persists native schema revisions and preserves immutable 
   await page.locator('[data-acw-schema-required]').check();
   const created = page.waitForResponse(
     response =>
-      response.url() === endpoint && response.request().method() === 'POST'
+      response.url() === browserEndpoint &&
+      response.request().method() === 'POST'
   );
   await page.locator('[data-acw-form-save]').click();
   const saved = await created;
@@ -5294,7 +5296,7 @@ test('ACW form library persists native schema revisions and preserves immutable 
     .fill(`SYNTHETIC revised ${info.project.name}`);
   const updated = page.waitForResponse(
     response =>
-      response.url() === `${endpoint}/${first.id}` &&
+      response.url() === `${browserEndpoint}/${first.id}` &&
       response.request().method() === 'PATCH'
   );
   await page.locator('[data-acw-form-save]').click();

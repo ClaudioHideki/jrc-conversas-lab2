@@ -452,3 +452,11 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [x] Conferência local direcionada: 18 arquivos frontend sem erros de lint (avisos permanecem); 23 testes da proteção de migrations aprovados. Não equivalem à execução nativa da nova candidata.
 - [ ] Revalidar os gates e executar os 176 cenários Chrome; nenhum foi executado em304612a4 por falha de lint.
 - [ ] Intenção persistente/interface de pausa adiada e vínculo regra→formulário/respostas privadas continuam pendentes. Etapas0–2 e23figuras permanecem abertas.
+
+### Call Center — observação HTTP da biblioteca no Chrome
+
+- [x] CI44528134759/882ccce6: 1493 Rails distintos +40 de schema,753Vue, lint Ruby/frontend e bootstrap15cards aprovados. Chrome:172casos aprovados,4timeouts do mesmo cenário, zero skips/flaky/erros externos. Artefato14533939230 verificado porSHA-256.
+- [x] Causa comprovada no teste: aguardava POST/PATCH na origem Rails5387, mas o navegador chama o proxy Vite5388. As quatro capturas e snapshots mostram a versão salva/recarregada; os cenários pararam na observação HTTP.
+- [x] Ajuste mínimo preparado: comparar a URL exata na origem do navegador, preservando método, caminho,20assertivas e duas esperas. Nenhuma alteração no fixture, API, timeout ou produto.
+- [ ] Reexecutar os176casos completos e conferir todas as capturas/assertivas de histórico, persistência e escopo antes de homologar a biblioteca.
+- [ ] O incremento independente de pausa adiada permanece fora deste checkpoint, sem validação nativa.
