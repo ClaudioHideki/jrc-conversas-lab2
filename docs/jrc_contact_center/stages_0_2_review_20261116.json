@@ -3883,5 +3883,27 @@
     "artifact_sha256": "ab8cfcf37bee4e21e9a852cdf32d2c8a5832d42850f85f1b94e3d97c05dbb933",
     "last_full_green": "a8c6c78df86712879876fd02ebc18fed42a10bdb",
     "all23_complete": false
+  },
+  "whole_team_79ef66b0_timeout_and_regional_apt": {
+    "sha": "79ef66b0d421685be2dfbf30e867036ba2ff0859",
+    "run": 44493933103,
+    "job": 135456219598,
+    "result": "cancelled45min",
+    "rails_distinct": 1335,
+    "schema_reload_separate": 16,
+    "vue": 662,
+    "frontend_lint": "passed",
+    "ruby_lint": "passed",
+    "assets": "cancelled",
+    "bootstrap": "skipped",
+    "chrome_executed": 0,
+    "chrome_required": 168,
+    "artifact": 14517850671,
+    "artifact_sha256": "f1db7a5bea28eea6020605e4d033255e513f04ef2932e5d6df172d18f4dc1e23",
+    "confirmed_cause": "Regional EC2 mirror+file source was not normalized; actual HTTP Ubuntu package downloads took24m34,31.4kB/s despite HTTPS probe and signed metadata update.",
+    "prepared_correction": "Fail-closed active Ubuntu sources audit and normalization to approved HTTPS mirror; preserve four suites, keyrings, signatures, limits and all gates.24source fixture tests and Bash syntax passed; Linux run pending.",
+    "workflow_timeout45_preserved": true,
+    "last_full_green": "a8c6c78df86712879876fd02ebc18fed42a10bdb",
+    "all23_complete": false
   }
 }

@@ -65,6 +65,7 @@ jobs:
           df -h /
       - name: Native dependencies over verified HTTPS APT
         run: |
+          bash -n .github/scripts/jrc_ci_apt_setup.sh
           bash .github/scripts/jrc_ci_apt_setup.sh libpq-dev libvips libvips-dev fonts-dejavu-core postgresql-client poppler-utils
           command -v pdftotext
           pdftotext -v

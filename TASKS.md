@@ -410,3 +410,12 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [x] Causa pelo source map: ciclo teams.routes → quatro formulários com router global → settings.routes:66.
 - [ ] Validar a correção mínima de imports de rota assíncronos, o teste de inicialização e os168Chrome preservados. A homologação integral permanece em a8c6c78d/164Chrome até nova prova.
 - [ ] Formulários ACW: seis arquivos de fundação e rascunho SQL separados, sem rotas expostas/migration executada; não incluídos no checkpoint desta correção.
+
+
+### Call Center — 19/11 — fontes Ubuntu regionais efetivas
+
+- [x] Preservada CI44493933103/79ef66b0:1335Rails+16schema/662Vue, lint aprovado; assets cancelados por45m,0Chrome executados. Artefato14517850671 verificado, sem homologação integral.
+- [x] Causa comprovada: mirror+file regional EC2 escapou do normalizador e baixou porHTTP a31,4kB/s; metadata manteve assinaturas. Não afirmar HTTPS efetivo nessa execução.
+- [x]24testes leves de fontes e Bash -n aprovados; normalizador exige mirror HTTPS efetivo nas quatro suites antes de gravar. Demais workflows e limite45m preservados.
+- [ ] Provar a correção no Linux e todos os gates/168Chrome antes de homologar exclusão da equipe. Última homologação integral continua a8c6c78d.
+- [ ]23arquivos de formulários ACW preparados, sem migração/rotas admitidas; revisão de tamanho JSONB, persistência/UI/bindings e respostas privadas ainda pendentes.
