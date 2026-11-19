@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'digest'
+
 class JrcContactCenter::DeferredPauseSelection
   def initialize(account:, member:)
     @account = account
@@ -15,10 +17,15 @@ class JrcContactCenter::DeferredPauseSelection
     catalog = JrcContactCenter::PauseCatalog.new(account: @account)
     definition = catalog.selection(values.fetch(:reason_code), member: @member, memberships: memberships)
     validate_justification!(values, definition, catalog)
-    { catalog_revision: catalog.revision, reason_label: definition ? definition.fetch('name') : values.fetch(:reason_code) }
+    { catalog_revision: selection_revision(catalog, definition), reason_label: definition ? definition.fetch('name') : values.fetch(:reason_code) }
   end
 
   private
+
+  # A scoped catalog reason cannot silently become a free legacy reason, or the reverse.
+  def selection_revision(catalog, definition)
+    Digest::SHA256.hexdigest(['jrc_cc_deferred_pause_selection_v1', catalog.revision, definition.present?].to_json)
+  end
 
   def validate_justification!(values, definition, catalog)
     justification = values.fetch(:justification)

@@ -100,6 +100,63 @@ RSpec.describe 'Deferred pause current unit and private projection', type: :requ
     expect(audit.audited_changes).not_to have_key('justification')
   end
 
+  context 'with a compatible legacy catalog and no explicit queue' do
+    let(:values) { super().merge(queue_id: nil, justification: '') }
+
+    before do
+      catalog.update!({ 'enforced' => false, 'entries' => catalog.call.fetch('entries') }, expected_revision: catalog.revision)
+    end
+
+    it 'redacts the captured catalog selection after unit loss even without a catalog configuration change' do
+      record
+      previous = record.attributes
+      revision = catalog.revision
+      JrcCrm::UserBusinessUnit.where(account: account, user: actor).sole.update!(business_unit: business_units.second)
+      payload = projection.call(record)
+      expect(catalog.revision).to eq(revision)
+      expect(payload).to include('request_id' => record.request_id, 'private_details_available' => false)
+      expect(payload.keys).not_to include('reason_code', 'reason_label', 'queue_id', 'justification')
+      expect(record.reload.attributes).to eq(previous)
+    end
+
+    it 'does not downgrade a scoped catalog selection to a free legacy reason when ACW completes' do
+      record
+      JrcCrm::UserBusinessUnit.where(account: account, user: actor).sole.update!(business_unit: business_units.second)
+      JrcContactCenter::QualificationManager.new(account: account, member: member).complete!(
+        pending_pause_qualification, { reason_code: 'order', outcome_code: 'completed', notes: 'SYNTHETIC source completion' }
+      )
+      expect(record.reload).to have_attributes(state: 'blocked', failure_code: 'pause_catalog_changed')
+      expect(JrcContactCenter::AgentStateEvent.where(account: account, state: 'paused')).to be_empty
+      expect(projection.call(record)).to include('private_details_available' => false)
+    end
+
+    it 'does not upgrade a captured free reason into a newly applicable catalog policy without review' do
+      scope = JrcCrm::UserBusinessUnit.where(account: account, user: actor).sole
+      scope.update!(business_unit: business_units.second)
+      record
+      expect(record.reason_label).to eq(values[:reason_code])
+      scope.update!(business_unit: business_units.first)
+      expect(projection.call(record)).to include('private_details_available' => false)
+      JrcContactCenter::QualificationManager.new(account: account, member: member).complete!(
+        pending_pause_qualification, { reason_code: 'order', outcome_code: 'completed', notes: 'SYNTHETIC source completion' }
+      )
+      expect(record.reload).to have_attributes(state: 'blocked', failure_code: 'pause_catalog_changed')
+      expect(JrcContactCenter::AgentStateEvent.where(account: account, state: 'paused')).to be_empty
+    end
+
+    it 'keeps a free legacy reason valid across unit changes when no catalog policy becomes applicable' do
+      free_values = values.merge(reason_code: 'synthetic_legacy_unconfigured')
+      receipt = manager.request!(free_values)
+      JrcCrm::UserBusinessUnit.where(account: account, user: actor).sole.update!(business_unit: business_units.second)
+      expect(projection.call(receipt)).to include('private_details_available' => true, 'reason_label' => free_values[:reason_code])
+      JrcContactCenter::QualificationManager.new(account: account, member: member).complete!(
+        pending_pause_qualification, { reason_code: 'order', outcome_code: 'completed', notes: 'SYNTHETIC source completion' }
+      )
+      expect(receipt.reload.state).to eq('applied')
+      expect(JrcContactCenter::AgentStateEvent.where(account: account, state: 'paused').sole.reason_code).to eq(free_values[:reason_code])
+    end
+  end
+
   context 'with an independently authorized supervisor' do
     let(:observer) { create(:user, :contact_center_eligible, account: account, role: :agent) }
 

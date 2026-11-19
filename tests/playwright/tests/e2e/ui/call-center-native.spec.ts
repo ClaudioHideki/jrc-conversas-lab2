@@ -5375,6 +5375,7 @@ test('ACW form library native pagination filters clearing reload and account den
     `/app/accounts/${target.account_id}/contact-center/control-desk/closures`
   );
   await page.locator('[data-manage-acw-forms]').click();
+  const browserEndpoint = new URL(new URL(endpoint).pathname, page.url()).href;
   const library = page.locator('[data-acw-form-library]');
   await page.locator('[data-acw-form-search]').fill('SYNTHETIC page');
   const filtered = page.waitForResponse(

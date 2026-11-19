@@ -511,3 +511,12 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - [x] Teste de recuperação reforçado: após falha de observação, apenas clique explícito atualiza o estado; alerta não contém botão; nenhuma escrita/repetição automática. Lint local dos2arquivos frontend passou sem erros/avisos.
 - [ ] Revalidar o SHA com a correção visual e executar184Chrome/inspeção de capturas reais. O backend aprovado não equivale à homologação visual ou à conclusão das23figuras.
 - [ ] Próximo vínculo operacional de formulários em preparação separada, sem ativação/API publicada; não integra este checkpoint de mensagem.
+
+### Call Center — pausa no Chrome e revisão de escopo no modo legado
+
+- [x] CI44567268084/0c57e345:1592Rails distintos+49schema,781Vue,lint,assets e bootstrap15cards aprovados;0falhas/pendências/erros externos nesses relatórios. Artefato14555426924,hashfef33069ef2f668304c4a28fdb0529278b96a825c2ad695103b90f60dc2d42ea verificado.
+- [x] Chrome:180/184aprovados; os8percursos de pausa (aplicar somente apósACW e resposta perdida/repetição/retirada) passaram nos quatro projetos. Quatro falhas do mesmo teste de Limpar filtros: browserEndpoint não declarado nessa função. Correção mantém URL exata,GET200,20linhas,carregamento ausente e todos os184cenários. Diagnóstico TypeScript limitado reproduziu a variável ausente e aprovou a declaração corrigida; não substitui Chrome.
+- [x] Quatro capturas reais da pausa inspecionadas: desktop claro/escuro,390px claro/escuro, incluindo confirmação incerta e retirada. API/PG sintéticos reais; nenhuma confirmaçãoPABX fictícia. A lista mobile carregada continua pendente da nova captura.
+- [x] Revisão identificou risco adicional: catálogo compatível não obrigatório,sem fila/justificativa, mudança de unidade podia degradar motivo restrito para legado livre sem mudar a revisão global. Preparada impressão interna que vincula revisão e tipo de seleção, usada pela projeção privada e aplicação; não altera os hashes nativos nem SQL/história.
+- [ ] Executar quatro novas regressões nativas: perda e ganho de motivo restrito, bloqueio ao completarACW e preservação do motivo livre realmente legado. Revalidar todos os gates e184Chrome no novoSHA. Não declarar aceite integral enquanto isso.
+- [ ] Cinco arquivos de vínculo operacional de formulário permanecem em preparação separada, fora deste checkpoint e sem teste nativo/ativação. Histórico operacional detalhado, automações e dependênciasPABX continuam registrados.

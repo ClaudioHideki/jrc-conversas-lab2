@@ -4231,5 +4231,96 @@
     "assets_and_chrome_not_run": true,
     "new_sha_validation_required": true,
     "all23_complete": false
+  },
+  "deferred_pause_chrome_0c57e345_20261119": {
+    "sha": "0c57e34535893ab4e35e7d7abb847c9c3c859430",
+    "run": 44567268084,
+    "job": 135712324301,
+    "artifact": 14555426924,
+    "artifact_sha256": "fef33069ef2f668304c4a28fdb0529278b96a825c2ad695103b90f60dc2d42ea",
+    "native_rails_distinct": 1592,
+    "schema_reload": 49,
+    "vue": 781,
+    "native_vue_fail_pending_outside": 0,
+    "new_ruby_offenses": 0,
+    "assets_bootstrap": "passed,15cards,0pageErrors/httpErrors",
+    "chrome": {
+      "total": 184,
+      "passed": 180,
+      "failed": 4,
+      "skipped": 0,
+      "flaky": 0,
+      "outside_errors": 0,
+      "all_eight_pause_cases_passed": [
+        {
+          "title": "deferred pause native waits through ACW and starts only after explicit completion without administrative access",
+          "project": "desktop-light",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pause native uncertain response reuses one durable receipt and explicit cancellation preserves ACW",
+          "project": "desktop-light",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pause native waits through ACW and starts only after explicit completion without administrative access",
+          "project": "desktop-dark",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pause native uncertain response reuses one durable receipt and explicit cancellation preserves ACW",
+          "project": "desktop-dark",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pause native waits through ACW and starts only after explicit completion without administrative access",
+          "project": "mobile-light",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pause native uncertain response reuses one durable receipt and explicit cancellation preserves ACW",
+          "project": "mobile-light",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pause native waits through ACW and starts only after explicit completion without administrative access",
+          "project": "mobile-dark",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pause native uncertain response reuses one durable receipt and explicit cancellation preserves ACW",
+          "project": "mobile-dark",
+          "status": "passed"
+        }
+      ]
+    },
+    "root_cause": "QA: browserEndpoint undefined in clear-filter response waiter; exact failure repeated in all four projects. Scope-local declaration added; all original checks retained.",
+    "local_static_reproduction": "Bounded TypeScript compiler diagnostic reproduces missing binding when declaration is removed; corrected exact binding and syntax pass. Initial diagnostic host attempts did not load modified in-memory file on Windows; corrected canonical paths and required single source file before accepting result. Formatter passes; this is not a browser test.",
+    "security_review": "Additional unenforced-catalog selection-kind gap found by code inspection. Versioned internal fingerprint prevents scoped-catalog/legacy downgrades or upgrades after unit change without config revision. Four new native tests prepared, not yet executed. No public catalogue revision, native state/ACW/body hashes, migration or SQL change.",
+    "screenshots_inspected": [
+      {
+        "name": "desktop-light-deferred-pause-applied.png",
+        "sha256": "49a4e9eec2112bd1f565575f8336b750c0638890a78b4520e61d5404586749f8",
+        "bytes": 70842
+      },
+      {
+        "name": "mobile-dark-deferred-pause-applied.png",
+        "sha256": "9764fd2099b1548cbebbe6f8b8541faa0ffb7ef0884be06998301d27a40c72c2",
+        "bytes": 66847
+      },
+      {
+        "name": "mobile-light-deferred-pause-uncertain.png",
+        "sha256": "c8d56b527dff2209fec1f1b9d64cf6a4dd0e4da884c7c93df46059dc6c23b2c9",
+        "bytes": 102244
+      },
+      {
+        "name": "desktop-dark-deferred-pause-withdrawn.png",
+        "sha256": "4d7699be5d7a9d1a749298746817148252cd663f0755c6c1242e18d055182b21",
+        "bytes": 81323
+      }
+    ],
+    "all23_complete": false,
+    "new_sha_validation_required": true,
+    "visual_observation": "Four extracted captures inspected: pause applied desktop-light/mobile-dark, uncertain reply mobile-light, withdrawal desktop-dark. Dialog contained at390px, native theme present, no claimedPABXconfirmation; stable loaded mobile library capture still requires corrected QA/newCI."
   }
 }
