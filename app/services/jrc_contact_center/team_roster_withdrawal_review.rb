@@ -21,6 +21,7 @@ class JrcContactCenter::TeamRosterWithdrawalReview
     @actor = actor
     @preview = preview
     @confirmation = confirmation
+    @purpose = self.class::PURPOSE
   end
 
   def check!
@@ -31,7 +32,7 @@ class JrcContactCenter::TeamRosterWithdrawalReview
     raise self.class::Required, details(payload) unless confirmed_receipt&.except('issued_at') == payload
 
     @review = payload.slice('account_user_id', 'team_id', 'operation', 'roster_sha256').merge(
-      'kind' => self.class::PURPOSE, 'reviewed_at' => Time.current.iso8601(6),
+      'kind' => @purpose, 'reviewed_at' => Time.current.iso8601(6),
       'receipt_sha256' => Digest::SHA256.hexdigest(@confirmation[:review_token])
     )
   end
@@ -68,7 +69,7 @@ class JrcContactCenter::TeamRosterWithdrawalReview
     valid = @confirmation.respond_to?(:keys) && @confirmation[:confirmed] == true && @confirmation[:review_token].is_a?(String)
     return unless valid && @confirmation[:review_token].bytesize <= 4096
 
-    verifier.verified(@confirmation[:review_token], purpose: self.class::PURPOSE)
+    verifier.verified(@confirmation[:review_token], purpose: @purpose)
   end
 
   def details(payload)
@@ -79,10 +80,10 @@ class JrcContactCenter::TeamRosterWithdrawalReview
     end
     { account_id: @account.id.to_s, team_id: @preview.team.id.to_s, team_name: @preview.team.name,
       operation: @preview.operation, queues: queues,
-      review_token: verifier.generate(payload.merge('issued_at' => Time.current.iso8601(6)), expires_in: 10.minutes, purpose: self.class::PURPOSE) }
+      review_token: verifier.generate(payload.merge('issued_at' => Time.current.iso8601(6)), expires_in: 10.minutes, purpose: @purpose) }
   end
 
   def verifier
-    Rails.application.message_verifier(self.class::PURPOSE)
+    Rails.application.message_verifier(@purpose)
   end
 end

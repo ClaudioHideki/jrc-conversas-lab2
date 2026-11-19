@@ -12,7 +12,7 @@ RSpec.describe 'Native whole-team deletion manager review', type: :request do
   let(:business) { account.jrc_crm_business_units.create!(operating_company: company, code: 'DELETE', name: 'SYNTHETIC business') }
   let(:unit) do
     JrcContactCenter::Unit.create!(account: account, code: 'DELETE', name: 'SYNTHETIC unit', kind: 'sac',
-                                 settings: { issuer_company_id: company.id, business_unit_id: business.id })
+                                   settings: { issuer_company_id: company.id, business_unit_id: business.id })
   end
   let(:queue) { JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'DELETE', name: 'SYNTHETIC last-agent queue') }
   let!(:membership) { JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: member) }
@@ -194,6 +194,7 @@ RSpec.describe 'Native whole-team deletion manager review', type: :request do
     expect(account.teams.exists?(team.id)).to be(false)
     expect(audits).to be_empty
   end
+
   it 'retains eligibility provided by a separate existing team without requesting an unnecessary deletion receipt' do
     other = create(:team, account: account)
     other.add_members([operator.id])

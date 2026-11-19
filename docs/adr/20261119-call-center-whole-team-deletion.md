@@ -25,3 +25,12 @@ Há testes HTTP de confirmação, validade, propósitos, alteração de roster/v
 Um cenário Chrome em quatro projetos (1440/390, claro/escuro) usa a página de Equipes e as rotas/componentes reais num harness, com confirmação nativa, APIs, cache e banco sintéticos reais. O fixture habilita team_management somente na conta exclusiva deste cenário e cria desde o início seu administrador nativo com elegibilidade e capacidade de auditoria explicitamente sintéticas. A permissão de rota administrador é preservada, sem remover perfis restritivos nem transformar um custom role em administrador. Nenhum dado ou permissão real é alterado. Os 164 cenários anteriores permanecem exigidos; o novo total será 168. Esse incremento ainda não tem resultado executado.
 
 O harness não monta todo o shell do produto. As demais lacunas da figura12 (supervisores/hierarquia/status) e os contratos/capacidades/ACKs externos permanecem abertos. Nenhum comando PABX, build Docker, publicação ou deploy é autorizado por este documento.
+
+
+## Primeira execução nativa — e0b0feac
+
+CI44484176155/job135423415249 aprovou1168Rails principais, incluindo os22casos HTTP novos, e16schema separados. A suíte de concorrência executou82casos:80passaram e2falharam ao comparar nomes esperados em maiúsculas com a normalização minúscula nativa de Team. As esperas SQL reais e as asserções HTTP409 anteriores a esses pontos passaram; as asserções posteriores ao primeiro erro de cada exemplo ainda exigem reexecução. Nenhum desses dois exemplos é declarado aprovado.
+
+O gate Ruby apontou5infrações novas: ABC26.19no montador de revisão, ABC28.46na coleta de resposta da fixture, dois alinhamentos e uma linha vazia de separação. A correção preserva entradas em maiúsculas e exige nomes normalizados exatos; guarda o propósito confiável da classe ao inicializar o revisor; separa a coleta repetida de status/body da execução HTTP; e corrige só os espaços/linha vazia. Nenhuma regra foi desativada e nenhum assert foi removido.
+
+Artefato14510134218, SHA-25600ac5378bc2ffaefba37c259f522430af85d5647f9a4dd3c38ff460045c3b9b8. Approvals/Backoffice, Vue, frontend e168Chrome não executaram nesse SHA por causa da falha de concorrência. A última prova integral permanece a8c6c78d (1310Rails+16schema,631Vue,164Chrome), que não valida a exclusão de equipe preparada.

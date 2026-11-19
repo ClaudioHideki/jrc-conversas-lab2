@@ -83,13 +83,18 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
         state[:request_pid] = ActiveRecord::Base.connection.raw_connection.backend_pid
         session = ActionDispatch::Integration::Session.new(Rails.application)
         session.public_send(verb, endpoint, headers: headers, params: payload, as: :json)
-        state[:request_status] = session.response.status
-        state[:request_body] = session.response.parsed_body
-        results << state[:request_status]
+        record_request_response(session.response)
       end
     rescue StandardError => e
       results << e
     end
+  end
+
+  # Preserve one HTTP result for both lock diagnostics and status/body assertions.
+  def record_request_response(response)
+    state[:request_status] = response.status
+    state[:request_body] = response.parsed_body
+    results << state[:request_status]
   end
 
   def wait_for_account_lock
@@ -347,7 +352,7 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
         payload: { manager_confirmation: { confirmed: true, review_token: token } }, defer: true
       )
       expect(status).to eq(409)
-      expect(team.reload.name).to eq('SYNTHETIC changed during wait')
+      expect(team.reload.name).to eq('synthetic changed during wait')
       expect(team.members).to include(recipient)
     end
 
@@ -386,7 +391,7 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
       expect(results.size).to eq(1)
       expect(results.pop).to eq(409)
       expect(state.fetch(:request_body).fetch('error')).to eq('team_deletion_confirmation_required')
-      expect(team.reload.name).to eq('SYNTHETIC changed under Team row lock')
+      expect(team.reload.name).to eq('synthetic changed under team row lock')
       expect(team.members).to include(recipient)
     end
   end

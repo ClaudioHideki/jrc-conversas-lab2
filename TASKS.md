@@ -400,3 +400,5 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [ ] 2026-11-19: proteger exclusão da entidade Team com revisão assinada própria, autoridade atual/lock, auditoria e FKs preservadas; página nativa mantém confirmação por nome. Preparados HTTP/SQLwait/Vue e168Chrome (164anteriores+4novos), sem aceite nativo ainda. Ver ADR de exclusão da equipe.
 
 - [x] 2026-11-19: a8c6c78d validou navegação ACW e rótulos de conflito:1310Rails+16schema,631Vue,164Chrome,244capturas verificadas; diálogo conferido nos4projetos. Não equivale ao Hoya completo ou às23figuras.
+
+- [ ] 2026-11-19: revalidar exclusão Team após e0b0feac:1168Rails+16schema aprovados;80/82concorrência (duas expectativas de normalização nativa corrigidas) e5infrações Ruby corrigidas sem alterar gates. Vue/Chrome168 ainda pendentes; artefato14510134218 preservado.

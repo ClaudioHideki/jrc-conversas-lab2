@@ -416,7 +416,7 @@
       ],
       "implemented_in_0_2": [
         "Existing native agent state is preserved",
-        "Incremento posterior de etapa6: catálogo local HH:MM, revisão, escopos e ativação explícita; compatibilidade legada preservada. Backend/Vue próprios validados em c4622175; layout/Chrome ainda pendentes. Privacidade adicional está na candidata d3e2179b, ainda em CI."
+        "Catálogo local HH:MM, limites, revisão, paginação, ativação explícita por conta e motivos autorizados; compatibilidade legada e justificativa privada preservadas. Duração real e aviso ao supervisor sem retomada automática. Subconjunto revalidado em a8c6c78d, incluindo12Chrome (3fluxos nos4projetos); não inclui aprovação de pausa ou início após chamada."
       ],
       "remaining_or_external": [
         "Aprovação de pausa, variabilidade avançada, transição segura com chamada e precedências operacionais completas continuam pendentes.",
@@ -427,7 +427,7 @@
         "document_1_figure": 7,
         "document_2_figure": 7
       },
-      "validation": "a16e8a49/CI44409349600:1175 Rails distintos,16 recargas,415Vue,144Chrome; zero falhas/pendências/erros. Os fluxos de pausa/justificativa/aviso anteriores permanecem aprovados. Não equivale às regras avançadas completas da figura.",
+      "validation": "CI44478139924/a8c6c78d:1310Rails distintos+16schema,631Vue,164Chrome globais aprovados. Foram conferidos no relatório bruto os três fluxos de catálogo/editor, operador e supervisor nos4projetos. Não são12testes adicionais aos164. Artefato14508877245, SHA-2562a9053f743b87677aefbc1229d764ea110981d1f54ddb6acf0af6d3a1fb9d786.",
       "objective": "Gestao de pausas e disponibilidade",
       "visual_components": "Campos e dados apresentados:  Listar nome, categoria, se retira da distribuicao, tempo padrao e status. Estados exibidos: disponivel, em atendimento, em pausa e offline; indicadores de disponibilidade devem vir de eventos reais, nao de contagem fixa do mockup.",
       "buttons_and_actions": "Acoes e resultado do clique:  Abas Motivos de Pausa, Regras de Distribuicao, Disponibilidade da Equipe e Historico: consultar configuracoes e estados. Novo Motivo: abrir popup. Busca e edicao de linha: localizar/alterar configuracao com auditoria. A aba de equipe mostra agente, estado, tempo decorrido e eventual pausa excedida; selecao de agente abre detalhes quando permitido.",
@@ -465,7 +465,7 @@
         6
       ],
       "implemented_in_0_2": [
-        "Incremento posterior de etapa6: catálogo local HH:MM, revisão, escopos e ativação explícita; compatibilidade legada preservada. Backend/Vue próprios validados em c4622175; layout/Chrome ainda pendentes. Privacidade adicional está na candidata d3e2179b, ainda em CI."
+        "Catálogo local HH:MM, limites, revisão, paginação, ativação explícita por conta e motivos autorizados; compatibilidade legada e justificativa privada preservadas. Duração real e aviso ao supervisor sem retomada automática. Subconjunto revalidado em a8c6c78d, incluindo12Chrome (3fluxos nos4projetos); não inclui aprovação de pausa ou início após chamada."
       ],
       "remaining_or_external": [
         "Aprovação de pausa, variabilidade avançada, transição segura com chamada e precedências operacionais completas continuam pendentes.",
@@ -476,7 +476,7 @@
         "document_1_figure": 8,
         "document_2_figure": 8
       },
-      "validation": "a16e8a49/CI44409349600:1175 Rails distintos,16 recargas,415Vue,144Chrome; zero falhas/pendências/erros. Os fluxos de pausa/justificativa/aviso anteriores permanecem aprovados. Não equivale às regras avançadas completas da figura.",
+      "validation": "CI44478139924/a8c6c78d:1310Rails distintos+16schema,631Vue,164Chrome globais aprovados. Foram conferidos no relatório bruto os três fluxos de catálogo/editor, operador e supervisor nos4projetos. Não são12testes adicionais aos164. Artefato14508877245, SHA-2562a9053f743b87677aefbc1229d764ea110981d1f54ddb6acf0af6d3a1fb9d786.",
       "objective": "Popup Cadastrar Motivo de Pausa",
       "visual_components": "Campos e dados apresentados:  Salvar identidade, descricao, categoria, tempo em minutos internamente, limites, regra de retirada, justificativa/aprovacao/alerta quando aplicaveis, status e escopo da empresa. Diferenciar limite informativo de regra que efetivamente bloqueia cadastro.",
       "buttons_and_actions": "Acoes e resultado do clique:  Nome, Tipo/Categoria e Descricao: cadastrar a finalidade da pausa. Tempo Padrao, Minimo e Maximo: preencher em horas/minutos; se um desses campos nao estiver no mockup, deve ser incluido no formulario final ou em aba complementar. Retirar da distribuicao: controlar elegibilidade de chamadas novas. Disponivel para: definir perfis habilitados. Salvar Motivo e Cancelar: validar/persistir ou abandonar sem gravar.",
@@ -3833,5 +3833,40 @@
       "Dynamic forms and destination automation remain partial"
     ],
     "all23_complete": false
+  },
+  "pause_current_evidence_reconciliation_20261119": {
+    "status": "Corrected outdated figure7/8 statement that Chrome was still pending",
+    "proof": "12 existing native Chrome cases in a8c6c78d artifact; subset of164, no new execution",
+    "remaining": [
+      "pause approval",
+      "queued pause timing relative to ACW - business question pending",
+      "advanced availability and external PABX homologation"
+    ]
+  },
+  "whole_team_first_native_gate_e0b0feac_20261119": {
+    "failed_sha": "e0b0feac6f9eaf3dcb558e3bba385ae5dae4c761",
+    "run": 44484176155,
+    "artifact": 14510134218,
+    "artifact_sha256": "00ac5378bc2ffaefba37c259f522430af85d5647f9a4dd3c38ff460045c3b9b8",
+    "main_examples_passed": 1168,
+    "schema_reload_passed": 16,
+    "concurrency_examples": 82,
+    "concurrency_failures": 2,
+    "exact_cause": "Two newly prepared fixture expectations retained uppercase SYNTHETIC while native Team validation downcases persisted names. Real Account and Team FOR UPDATE waits and HTTP409 assertions passed before the mismatched name expectations.",
+    "ruby_new_offenses": 5,
+    "fixes": [
+      "Keep uppercase inputs and assert exact native lowercase names; no assertion removed",
+      "Capture trusted class purpose once at review initialization; all receipts/verifier/kinds unchanged",
+      "Extract existing shared thread-response bookkeeping into record_request_response; preserve status/parsed body/error propagation",
+      "Align Unit.create! keyword fields and restore blank line between examples"
+    ],
+    "not_executed": [
+      "Vue",
+      "Chrome",
+      "assets/bootstrap",
+      "new corrected SHA native tests"
+    ],
+    "no_gate_or_configuration_changes": true,
+    "no_database_changes": true
   }
 }
