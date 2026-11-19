@@ -11,6 +11,7 @@ import customRole from 'dashboard/store/modules/customRole';
 import ModalHeader from 'dashboard/components/ModalHeader.vue';
 import SnackbarContainer from 'dashboard/components/SnackbarContainer.vue';
 import CustomRolesHome from 'dashboard/routes/dashboard/settings/customRoles/Index.vue';
+import PendingAcwFixture from './PendingAcwFixture.vue';
 import { routes as webphoneRoutes } from 'dashboard/routes/dashboard/webphone/routes';
 import { routes as contactCenterRoutes } from 'dashboard/routes/dashboard/jrcContactCenter/routes';
 import { validateLoggedInRoutes } from 'dashboard/helper/routeHelpers';
@@ -35,6 +36,11 @@ Object.assign(
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    {
+      path: '/app/accounts/:accountId/synthetic-pending-acw/:callId',
+      name: 'synthetic_pending_acw',
+      component: PendingAcwFixture,
+    },
     ...(nativeNavigation ? contactCenterRoutes : []),
     {
       path: '/synthetic-access-denied',

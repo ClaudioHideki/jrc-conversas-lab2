@@ -1,0 +1,124 @@
+<script setup>
+// Test harness only: production controls and hook, real scoped Rails APIs, no SIP/provider.
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
+import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
+import PendingQualificationForm from 'dashboard/routes/dashboard/inbox/PendingQualificationForm.vue';
+import QualificationDraftReview from 'dashboard/routes/dashboard/inbox/QualificationDraftReview.vue';
+import { useAttendanceClosing } from 'dashboard/routes/dashboard/inbox/useAttendanceClosing';
+
+const route = useRoute();
+const store = useStore();
+const { t } = useI18n();
+const context = ref(null);
+const contextError = ref(false);
+const now = ref(Date.now());
+const props = reactive({
+  accountId: route.params.accountId,
+  currentCallId: route.params.callId,
+  currentConversationId: null,
+  ready: true,
+});
+const authorityKey = computed(() =>
+  JSON.stringify([store.getters.getCurrentUser, context.value])
+);
+const canOperate = computed(() => context.value?.capabilities.operate === true);
+const closing = useAttendanceClosing({
+  props,
+  authorityKey,
+  enabled: computed(() => Boolean(context.value)),
+  supportsClosing: computed(() => true),
+  isVoice: computed(() => true),
+  now,
+  showClosing: () => {},
+  restoreSelection: () => {},
+});
+const {
+  pending,
+  records,
+  elapsed,
+  limit,
+  overdue,
+  reason,
+  result,
+  note,
+  draft,
+  loading,
+  saving,
+  error,
+  load,
+  saveDraft,
+  complete,
+} = closing;
+const { conflict, remote, canUseRemote, canReapply, canSave, saved } = draft;
+const timer = setInterval(() => {
+  now.value = Date.now();
+}, 1000);
+onBeforeUnmount(() => clearInterval(timer));
+onMounted(async () => {
+  try {
+    context.value = (await ContactCenterAPI.context(props.accountId)).data;
+  } catch {
+    contextError.value = true;
+  }
+});
+</script>
+
+<template>
+  <section class="mx-auto w-full min-w-0 max-w-3xl p-4" data-native-pending-acw>
+    <h1 class="text-xl font-semibold text-n-slate-12">
+      {{ t('JRC_CONTACT_CENTER.INBOX_360.FINISH_TABULATION') }}
+    </h1>
+    <p v-if="contextError || error" role="alert" data-qualification-error>
+      {{ t('JRC_CONTACT_CENTER.ACW_OPERATION.DRAFT_RELOAD') }}
+    </p>
+    <div
+      v-if="pending"
+      class="my-4 rounded-xl border border-n-weak bg-n-solid-1 p-4"
+    >
+      <p
+        class="text-sm text-n-slate-12"
+        data-qualification-clock
+        :data-overdue="overdue"
+      >
+        <span>{{ t('JRC_CONTACT_CENTER.ACW_OPERATION.DURATION') }}</span>
+        <span class="mx-2" data-acw-elapsed>{{ elapsed }}</span>
+        <span>{{
+          t('JRC_CONTACT_CENTER.ACW_OPERATION.APPLIED_LIMIT', { time: '' })
+        }}</span>
+        <span class="mx-2" data-acw-limit>{{ limit }}</span>
+      </p>
+    </div>
+    <QualificationDraftReview
+      v-if="conflict"
+      :current="remote"
+      :busy="saving || loading"
+      :can-use-remote="canUseRemote"
+      :can-reapply="canReapply"
+      @reload="load"
+      @use-remote="draft.useRemote"
+      @reapply="draft.reapply"
+    />
+    <PendingQualificationForm
+      v-if="pending || conflict"
+      v-model:reason="reason"
+      v-model:result="result"
+      v-model:note="note"
+      :disabled="!canOperate || saving || !pending"
+      :conflict="conflict"
+      :can-save="canSave"
+      :saved="saved"
+      @save="saveDraft"
+      @complete="complete"
+    />
+    <p
+      v-if="!pending && records.some(record => record.completed_at)"
+      role="status"
+      data-qualification-completed
+    >
+      {{ t('JRC_CONTACT_CENTER.INBOX_360.FINISH_TABULATION') }}
+    </p>
+  </section>
+</template>

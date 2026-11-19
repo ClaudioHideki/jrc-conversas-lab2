@@ -32,26 +32,31 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('team roster last eligible')
-    ? 'team_withdrawal'
-    : info.title.startsWith('native local routing')
-      ? 'routing'
-      : info.title.startsWith('scoped ACW native')
-        ? 'acw'
-        : info.title.startsWith('last eligible queue withdrawal')
-          ? 'withdrawal'
-          : info.title.startsWith('local pause duration supervisor')
-            ? 'duration'
-            : info.title.startsWith('local pause catalog operator')
-              ? 'operations'
-              : info.title.startsWith('local pause catalog')
-                ? 'editor'
-                : null;
+  const pauseKey = info.title.startsWith('pending ACW native draft')
+    ? 'acw_draft'
+    : info.title.startsWith('pending ACW native review')
+      ? 'acw_review'
+      : info.title.startsWith('team roster last eligible')
+        ? 'team_withdrawal'
+        : info.title.startsWith('native local routing')
+          ? 'routing'
+          : info.title.startsWith('scoped ACW native')
+            ? 'acw'
+            : info.title.startsWith('last eligible queue withdrawal')
+              ? 'withdrawal'
+              : info.title.startsWith('local pause duration supervisor')
+                ? 'duration'
+                : info.title.startsWith('local pause catalog operator')
+                  ? 'operations'
+                  : info.title.startsWith('local pause catalog')
+                    ? 'editor'
+                    : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
   const auth = pauseTarget
-    ? info.title.startsWith('local pause catalog operator')
+    ? info.title.startsWith('local pause catalog operator') ||
+      info.title.startsWith('pending ACW native')
       ? pauseTarget.operator
       : pauseTarget.administrator
     : info.title.startsWith('linked Customer Master')
@@ -4364,6 +4369,241 @@ test('local pause duration supervisor shows authorized real elapsed evidence wit
     eligible: false,
   });
   expect(writes).toEqual([]);
+});
+
+test('pending ACW native draft persists incomplete answers and completes only after explicit tabulation', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].acw_draft;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const endpoint = ownApi + `/qualifications/${target.qualification_id}`;
+  const previewEndpoint = endpoint.replace(':5387/', ':5386/');
+  await page.goto(
+    `/app/accounts/${target.account_id}/synthetic-pending-acw/${target.call_session_id}`
+  );
+  const form = page.locator('[data-pending-qualification-form]');
+  await expect(form).toBeVisible();
+  await form
+    .locator('[data-qualification-field="reason"]')
+    .selectOption('order');
+  await form
+    .locator('[data-qualification-field="note"]')
+    .fill('SYNTHETIC unfinished answer');
+  await expect(form.locator('[data-complete-qualification]')).toBeDisabled();
+  const saved = page.waitForResponse(
+    response =>
+      response.url() === previewEndpoint + '/draft' &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-save-qualification-draft]').click();
+  const response = await saved;
+  expect(response.status()).toBe(200);
+  expect(response.headers()['cache-control']).toContain('no-store');
+  const body = await response.json();
+  expect(body.item).toMatchObject({
+    reason_code: 'order',
+    outcome_code: '',
+    notes: 'SYNTHETIC unfinished answer',
+    completed_at: null,
+    acw_limit_seconds: 60,
+    overdue: true,
+  });
+  expect(Date.parse(body.item.started_at)).toBe(
+    Date.parse(target.qualification_started_at)
+  );
+  expect(
+    body.agent.pending_qualifications.some(
+      record => record.id === target.qualification_id
+    )
+  ).toBe(true);
+  expect(JSON.stringify(body.agent)).not.toContain(
+    'SYNTHETIC unfinished answer'
+  );
+  await page.reload();
+  await expect(form.locator('[data-qualification-field="note"]')).toHaveValue(
+    'SYNTHETIC unfinished answer'
+  );
+  await expect(form.locator('[data-qualification-field="reason"]')).toHaveValue(
+    'order'
+  );
+  await expect(page.locator('[data-acw-limit]')).toHaveText('60');
+  await expect(page.locator('[data-qualification-clock]')).toHaveAttribute(
+    'data-overdue',
+    'true'
+  );
+  const before = Number(await page.locator('[data-acw-elapsed]').textContent());
+  await expect
+    .poll(async () =>
+      Number(await page.locator('[data-acw-elapsed]').textContent())
+    )
+    .toBeGreaterThan(before);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page
+      .locator('html')
+      .evaluate(element => element.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  const color = await form
+    .locator('[data-save-qualification-draft]')
+    .evaluate(element => getComputedStyle(element).backgroundColor);
+  expect(color).not.toBe('rgba(0, 0, 0, 0)');
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-pending-acw-draft.png`,
+    fullPage: true,
+  });
+  await form
+    .locator('[data-qualification-field="result"]')
+    .selectOption('completed');
+  const completed = page.waitForResponse(
+    result =>
+      result.url() === previewEndpoint && result.request().method() === 'PATCH'
+  );
+  await form.locator('[data-complete-qualification]').click();
+  expect((await completed).status()).toBe(200);
+  await expect(page.locator('[data-qualification-completed]')).toBeVisible();
+  await page.reload();
+  await expect(page.locator('[data-qualification-completed]')).toBeVisible();
+  await expect(form).toHaveCount(0);
+  const history = await page.request.get(
+    ownApi + `/qualifications?call_session_id=${target.call_session_id}`,
+    { headers: target.operator }
+  );
+  expect(history.status()).toBe(200);
+  const rows = (await history.json()).items;
+  expect(
+    rows.filter(record => record.id === target.qualification_id)
+  ).toHaveLength(1);
+  expect(rows[0].completed_at).toBeTruthy();
+  expect(rows[0].notes).toBe('SYNTHETIC unfinished answer');
+  expect(
+    nativeObservations
+      .get(page)
+      .filter(record => record.method !== 'GET')
+      .map(record => record.pathname)
+  ).toEqual([
+    new URL(endpoint + '/draft').pathname,
+    new URL(endpoint).pathname,
+  ]);
+});
+
+test('pending ACW native review preserves local answers blocks stale writes and requires explicit reconciliation', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].acw_review;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const endpoint = ownApi + `/qualifications/${target.qualification_id}/draft`;
+  const previewEndpoint = endpoint.replace(':5387/', ':5386/');
+  const serverAnswer =
+    'SYNTHETIC competing saved answer ' + 'wrapped-answer-'.repeat(30);
+  await page.goto(
+    `/app/accounts/${target.account_id}/synthetic-pending-acw/${target.call_session_id}`
+  );
+  const form = page.locator('[data-pending-qualification-form]');
+  await expect(form).toBeVisible();
+  await form
+    .locator('[data-qualification-field="reason"]')
+    .selectOption('order');
+  await form
+    .locator('[data-qualification-field="note"]')
+    .fill('SYNTHETIC local uncommitted answer');
+  const read = await page.request.get(
+    ownApi + `/qualifications?call_session_id=${target.call_session_id}`,
+    { headers: target.operator }
+  );
+  expect(read.status()).toBe(200);
+  const original = (await read.json()).items.find(
+    record => record.id === target.qualification_id
+  );
+  const competing = await page.request.patch(endpoint, {
+    headers: target.operator,
+    data: {
+      expected_draft_revision: original.draft_revision,
+      qualification: {
+        reason_code: 'order',
+        notes: serverAnswer,
+      },
+    },
+  });
+  expect(competing.status()).toBe(200);
+  const stale = await page.request.patch(endpoint, {
+    headers: target.operator,
+    data: {
+      expected_draft_revision: original.draft_revision,
+      qualification: { notes: 'SYNTHETIC stale request' },
+    },
+  });
+  expect(stale.status()).toBe(409);
+  const remote = page.locator('[data-qualification-remote-field="notes"]');
+  // Observe the real five-second polling cycle plus its scoped Rails read.
+  await expect(remote).toContainText(serverAnswer, { timeout: 10000 });
+  await expect(form.locator('[data-qualification-field="note"]')).toHaveValue(
+    'SYNTHETIC local uncommitted answer'
+  );
+  await expect(form.locator('[data-save-qualification-draft]')).toBeDisabled();
+  await expect(form.locator('[data-complete-qualification]')).toBeDisabled();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-pending-acw-review.png`,
+    fullPage: true,
+  });
+  await page.locator('[data-qualification-review="reapply"]').click();
+  await expect(remote).toHaveCount(0);
+  await expect(form.locator('[data-qualification-field="note"]')).toHaveValue(
+    'SYNTHETIC local uncommitted answer'
+  );
+  const saved = page.waitForResponse(
+    response =>
+      response.url() === previewEndpoint &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-save-qualification-draft]').click();
+  const savedResponse = await saved;
+  expect(savedResponse.status()).toBe(200);
+  const latest = (await savedResponse.json()).item;
+  expect(latest.notes).toBe('SYNTHETIC local uncommitted answer');
+  expect(latest.completed_at).toBeNull();
+  const denied = await page.request.patch(endpoint, {
+    headers: target.scoped,
+    data: {
+      expected_draft_revision: latest.draft_revision,
+      qualification: { notes: 'SYNTHETIC other user overwrite' },
+    },
+  });
+  expect(denied.status()).toBe(404);
+  const foreign = session.pause_targets[info.project.name].acw_draft;
+  const crossAccount = await page.request.patch(endpoint, {
+    headers: foreign.operator,
+    data: {
+      expected_draft_revision: latest.draft_revision,
+      qualification: { notes: 'SYNTHETIC foreign account' },
+    },
+  });
+  expect(crossAccount.status()).toBe(401);
+  await page.reload();
+  await expect(form.locator('[data-qualification-field="note"]')).toHaveValue(
+    'SYNTHETIC local uncommitted answer'
+  );
+  const unchanged = await page.request.get(
+    ownApi + `/qualifications?call_session_id=${target.call_session_id}`,
+    { headers: target.operator }
+  );
+  expect((await unchanged.json()).items[0].draft_revision).toBe(
+    latest.draft_revision
+  );
+  expect(
+    nativeObservations
+      .get(page)
+      .filter(record => record.method !== 'GET')
+      .map(record => record.pathname)
+  ).toEqual([new URL(endpoint).pathname]);
 });
 
 test('scoped ACW native popup persists queue rules blocks conflicts and keeps scoped viewers denied', async ({

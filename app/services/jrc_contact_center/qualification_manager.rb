@@ -35,6 +35,10 @@ class JrcContactCenter::QualificationManager
     end
   end
 
+  def save_draft!(record, attributes, expected_revision:)
+    JrcContactCenter::QualificationDraft.new(account: @account, member: @member).save!(record, attributes, expected_revision: expected_revision)
+  end
+
   def complete!(record, attributes)
     @account.with_lock do
       record = JrcContactCenter::Qualification.where(account: @account, account_user: @member).lock.find(record.id)

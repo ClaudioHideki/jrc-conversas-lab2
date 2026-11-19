@@ -48,6 +48,9 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
       account.jrc_crm_user_business_units.destroy_all
       account.jrc_crm_team_scopes.destroy_all
       account.teams.destroy_all
+      JrcContactCenter::Qualification.where(account: account).destroy_all
+      JrcContactCenter::AgentStateEvent.where(account: account).destroy_all
+      JrcContactCenter::DailyFact.where(account: account).destroy_all
       JrcContactCenter::CallSession.where(account: account).destroy_all
       JrcContactCenter::QueueMembership.where(account: account).destroy_all
       JrcContactCenter::Queue.where(account: account).destroy_all
@@ -166,6 +169,63 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
       expect(team.members).to include(recipient)
       events = Audited.audit_class.where(auditable: queue, action: 'update')
       expect(events.filter_map { |event| event.audited_changes['manager_review'] }).to be_empty
+    end
+  end
+
+  context 'when an owned pending qualification request is already waiting on the account mutex' do
+    before do
+      voice = JrcContactCenter::CallSession.create!(account: account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid,
+                                                    current_unit: unit, current_queue: queue, direction: 'inbound', status: 'ended',
+                                                    started_at: 2.minutes.ago, answered_at: 90.seconds.ago, ended_at: 1.minute.ago)
+      state[:qualification] = JrcContactCenter::Qualification.create!(
+        account: account, account_user: account.account_users.find_by!(user: actor), call_session: voice,
+        channel: 'voice', started_at: voice.ended_at, acw_limit_seconds: 180
+      )
+    end
+
+    it 'denies a draft after operating permission is revoked during its verified SQL lock wait' do
+      record = state.fetch(:qualification)
+      status = race_with_scope_change(
+        change: -> { account.account_users.find_by!(user: actor).custom_role.update!(permissions: ['jrc_contact_center_view']) },
+        verb: :patch, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications/#{record.id}/draft", defer: true,
+        payload: { expected_draft_revision: JrcContactCenter::QualificationDraftRevision.token(record),
+                   qualification: { notes: 'SYNTHETIC forbidden late answer' } }
+      )
+      expect(status).to eq(401)
+      expect(record.reload).to have_attributes(notes: nil, completed_at: nil)
+      expect(Audited.audit_class.where(auditable: record, comment: JrcContactCenter::QualificationDraft::AUDIT_COMMENT)).to be_empty
+    end
+
+    it 'does not let a waiting draft replace the result completed while it was blocked' do
+      record = state.fetch(:qualification)
+      member = account.account_users.find_by!(user: actor)
+      manager = JrcContactCenter::QualificationManager.new(account: account, member: member)
+      change = -> { manager.complete!(record, reason_code: 'order', outcome_code: 'completed', notes: 'SYNTHETIC final') }
+      status = race_with_scope_change(
+        change: change, verb: :patch, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications/#{record.id}/draft", defer: true,
+        payload: { expected_draft_revision: JrcContactCenter::QualificationDraftRevision.token(record),
+                   qualification: { notes: 'SYNTHETIC obsolete draft' } }
+      )
+      expect(status).to eq(409)
+      expect(record.reload.notes).to eq('SYNTHETIC final')
+      expect(record.completed_at).to be_present
+      expect(Audited.audit_class.where(auditable: record, comment: JrcContactCenter::QualificationDraft::AUDIT_COMMENT)).to be_empty
+    end
+
+    it 'rejects a waiting completion after a newer manual draft is committed during the actual SQL lock wait' do
+      record = state.fetch(:qualification)
+      member = account.account_users.find_by!(user: actor)
+      token = JrcContactCenter::QualificationDraftRevision.token(record)
+      service = JrcContactCenter::QualificationDraft.new(account: account, member: member)
+      change = -> { service.save!(record, { notes: 'SYNTHETIC current answer' }, expected_revision: token) }
+      status = race_with_scope_change(
+        change: change, verb: :patch, endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications/#{record.id}", defer: true,
+        payload: { expected_draft_revision: token,
+                   qualification: { reason_code: 'order', outcome_code: 'completed', notes: 'SYNTHETIC obsolete completion' } }
+      )
+      expect(status).to eq(409)
+      expect(record.reload).to have_attributes(notes: 'SYNTHETIC current answer', completed_at: nil, duration_seconds: nil)
+      expect(Audited.audit_class.where(auditable: record, comment: JrcContactCenter::QualificationDraft::AUDIT_COMMENT).count).to eq(1)
     end
   end
 

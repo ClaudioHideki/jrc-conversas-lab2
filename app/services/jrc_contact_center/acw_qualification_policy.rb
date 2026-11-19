@@ -38,6 +38,13 @@ class JrcContactCenter::AcwQualificationPolicy
     selected ? selected.fetch('limit_seconds') : snapshot.fetch('default_limit_seconds')
   end
 
+  def draft_limit(reason)
+    return limit(reason) if reason.present?
+
+    snapshot = stored
+    snapshot ? snapshot.fetch('default_limit_seconds') : @record.acw_limit_seconds
+  end
+
   private
 
   def native_context(member, leg)

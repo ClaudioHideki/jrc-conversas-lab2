@@ -388,3 +388,7 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [ ] Call Center 19/11: relogio validado nativamente em 490cd3a8 (sete casos;1.270 Rails distintos+16schema). Gate global ainda bloqueado: ajustar alinhamento da fixture e instalar Vuex sintetico em dois testes de navegacao PABX. Preservar verificacoes originais e exigir 152 Chrome antes de aceite visual.
 
 - [ ] Call Center 19/11: c0e20792 aprovou 1.270 Rails distintos+16schema+573Vue, lint e build/bootstrap frescos. Chrome148/152: quatro falhas no seletor global do comprovante presente na previa e no dialogo. Restringir ao dialogo acessivel exato, exigir unicidade e visibilidade apos scroll; revalidar152 sem alterar produto ou timeouts.
+
+- [ ] 2026-11-19: validar rascunhos ACW nativos, revisao manual, privacidade e dois novos fluxos Chrome (160 casos totais); overlay preparado, sem resultados atribuidos ao novo codigo. Ver ADR 20261119-call-center-pending-acw-draft.
+
+- [x] 2026-11-19: checkpoint3b9aa6db com 1270Rails distintos +16schema,573Vue,152Chrome,232 capturas verificadas. Auditoria responsiva da retirada pela equipe e relógio comprovados; isto não fecha as23figuras.

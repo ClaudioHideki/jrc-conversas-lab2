@@ -1,6 +1,6 @@
 # Relógio de pós-atendimento e leituras antigas
 
-Status: correção de relógio validada nos sete cenários nativos em 490cd3a8; gate global ainda bloqueado por preparação de dois testes Vue e alinhamento Ruby. Nova execução exigida após essas correções.
+Status: sete cenários do relógio e gate completo aprovados em 3b9aa6db/CI44461118646; figuras e etapas completas continuam abertas.
 
 ## Problema comprovado pela leitura do código
 
@@ -29,3 +29,7 @@ O lint encontrou duas infrações novas: atualização sem validações e travel
 A CI 44453345207 executou e aprovou os sete cenários de qualification_clock_refresh_spec.rb sobre PostgreSQL real descartável. Foram aprovados 1.270 exemplos Rails distintos (1.109 principais, 76 de concorrência, 85 corporativos), mais 16 de recarga do schema; todos com zero falhas, pendências e erros externos. Artefato 14496678489, SHA-256 9e62486f1026e1811ecdab327684a144b3517e72b57396e0ed82dd4113fa61f6.
 
 A execução global permaneceu reprovada: uma infração de alinhamento no e-mail sintético e dois testes Vue de navegação PABX que não instalavam o Vuex exigido pelo componente. Os outros 571 exemplos Vue passaram. Corrige-se a preparação desses dois testes com uma store sintética explícita e preservam-se as mesmas verificações de visibilidade e rota. Não se adiciona fallback no componente nem se remove checagem de autoridade. Build e Chrome ficaram bloqueados e não são declarados aprovados.
+
+## Gate completo confirmado — SHA 3b9aa6db
+
+CI 44461118646: 1.270 exemplos Rails distintos (1.109 principais, 76 de concorrência, 85 corporativos), mais 16 de recarga do schema; 573 Vue e 152 Chrome. Zero falhas, pendências, erros externos ou novas infrações Ruby. Build fresco e bootstrap de 15 cards aprovados. Artefato 14502095624, SHA-256 4ff1398791353af4ff02304c16806256936f55efc9b6d437cace63121be45622, com 232 capturas verificadas. Amostras de auditoria da equipe e regras ACW revisadas em desktop/claro e celular/escuro. Não valida o próximo incremento de rascunhos nem PABX externo.

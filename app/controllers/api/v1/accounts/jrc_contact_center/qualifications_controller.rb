@@ -6,7 +6,8 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
     target = attendance
     JrcContactCenter::QualificationManager.ensure_voice!(target) if target.is_a?(JrcContactCenter::CallSession)
     records = scope.where(target.is_a?(Conversation) ? { conversation_id: target.id } : { call_session_id: target.id })
-    render json: base_payload.merge(items: records.order(created_at: :desc).includes(account_user: :user).map(&:operational_payload),
+    items = records.order(created_at: :desc).includes(account_user: :user).map { |record| qualification_payload(record) }
+    render json: base_payload.merge(items: items,
                                    policy: JrcContactCenter::AcwPolicy.new(account: Current.account).call,
                                    attendance: target.as_json(only: %i[id status ended_at]),
                                    agent: operator_snapshot)
@@ -16,7 +17,7 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
     with_current_operating_authority do
       target = attendance
       record = manager.start!(**(target.is_a?(Conversation) ? { conversation: target } : { call_session: target }))
-      render json: base_payload.merge(item: record.operational_payload)
+      render json: base_payload.merge(item: qualification_payload(record))
     end
   end
 
@@ -24,12 +25,45 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
     with_current_operating_authority do
       record = scope.where(account_user: Current.account_user).find(params[:id])
       authorize_qualification_origin!(record)
-      record = manager.complete!(record, params.require(:qualification).permit(:reason_code, :outcome_code, :notes).to_h.symbolize_keys)
-      render json: base_payload.merge(item: record.operational_payload, agent: operator_snapshot)
+      if params.key?(:expected_draft_revision) && !record.completed_at
+        JrcContactCenter::QualificationDraftRevision.check!(record, params[:expected_draft_revision])
+      end
+      record = manager.complete!(record, qualification_attributes)
+      render json: base_payload.merge(item: qualification_payload(record), agent: operator_snapshot)
+    end
+  end
+
+  def draft
+    with_current_operating_authority do
+      record = scope.where(account_user: Current.account_user).find(params[:id])
+      authorize_qualification_origin!(record)
+      record = manager.save_draft!(record, draft_attributes, expected_revision: params[:expected_draft_revision])
+      render json: base_payload.merge(item: qualification_payload(record), agent: operator_snapshot)
     end
   end
 
   private
+
+  def qualification_payload(record)
+    payload = record.operational_payload
+    payload.merge('draft_revision' => JrcContactCenter::QualificationDraftRevision.token(record))
+  end
+
+  def qualification_attributes
+    params.require(:qualification).permit(:reason_code, :outcome_code, :notes).to_h.symbolize_keys
+  end
+
+  def draft_attributes
+    document = params.require(:qualification)
+    raise JrcContactCenter::OperationError, 'invalid_qualification_draft' unless document.is_a?(ActionController::Parameters)
+
+    valid = JrcContactCenter::QualificationDraft::FIELDS.all? do |field|
+      !document.key?(field) || document[field].nil? || document[field].is_a?(String)
+    end
+    raise JrcContactCenter::OperationError, 'invalid_qualification_draft' unless valid
+
+    qualification_attributes
+  end
 
   def authorize_qualification_origin!(record)
     if record.call_session_id

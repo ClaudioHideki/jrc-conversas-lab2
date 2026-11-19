@@ -48,4 +48,6 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 
 - [Retirada indireta pela composição da equipe](20261118-call-center-indirect-team-withdrawal.md): prévia sem escrita, revisão explícita do gestor e auditoria transacional; implementação preparada, aguardando CI própria.
 
-- [Relógio ACW e leituras antigas](20261119-call-center-acw-clock-stale-read.md): lock e recarga da linha preservam conclusão, limite atual e proprietário; sete testes nativos preparados, validação pendente.
+- [Relógio ACW e leituras antigas](20261119-call-center-acw-clock-stale-read.md): lock e recarga da linha preservam conclusão, limite atual e proprietário; sete testes nativos aprovados e gate completo confirmado em 3b9aa6db; aceite integral do Word ainda aberto.
+
+- [Rascunho privado do pós-atendimento](20261119-call-center-pending-acw-draft.md): gravação explícita sem conclusão, revisão de conflitos, snapshot original e controles reutilizados no Hoya; exige execução nativa e dos novos cenários Chrome.

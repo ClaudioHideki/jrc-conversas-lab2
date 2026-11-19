@@ -10,7 +10,9 @@ class JrcContactCenter::SyntheticPauseSeed
     raise 'Owned synthetic pause runner required' unless owned
 
     projects.index_with do |project|
-      %w[editor operations withdrawal duration acw routing team_withdrawal].index_with { |kind| new("#{project}-#{kind}").call }
+      %w[editor operations withdrawal duration acw routing team_withdrawal acw_draft acw_review].index_with do |kind|
+        new("#{project}-#{kind}").call
+      end
     end
   end
   private_class_method :new
@@ -31,10 +33,26 @@ class JrcContactCenter::SyntheticPauseSeed
     queues = create_queues(units, operator)
     payload = session_payload(units, queues, admin, scoped, operator)
     payload.merge!(team_source(operator)) if @project.end_with?('-team_withdrawal')
+    payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?('-acw_draft', '-acw_review')
     payload
   end
 
   private
+
+  def pending_qualification(queue, operator)
+    policy = JrcContactCenter::AcwPolicy.new(account: @account)
+    rules = [{ id: 'synthetic-order', reason_code: 'order', scope: 'queue', scope_id: queue.id, active: true, limit_seconds: 60 }]
+    policy.update!({ voice: 180, whatsapp: 180 }, voice_rules: rules, expected_revision: policy.revision)
+    session = JrcContactCenter::CallSession.create!(
+      account: @account, provider: 'jrc_pabx', correlation_id: SecureRandom.uuid, direction: 'inbound', status: 'connected',
+      current_unit_id: queue.unit_id, current_queue_id: queue.id, started_at: 8.minutes.ago, answered_at: 7.minutes.ago
+    )
+    JrcContactCenter::CallLeg.create!(account: @account, call_session: session, account_user: operator, queue: queue,
+                                      direction: 'inbound', status: 'connected', started_at: session.started_at, answered_at: session.answered_at)
+    session.update!(status: 'ended', ended_at: 6.minutes.ago)
+    record = JrcContactCenter::Qualification.find_by!(account: @account, account_user: operator, call_session: session)
+    { call_session_id: session.id, qualification_id: record.id, qualification_started_at: record.started_at.iso8601(6) }
+  end
 
   def team_source(operator)
     team = Team.create!(account: @account, name: "SYNTHETIC #{@project} operational team")

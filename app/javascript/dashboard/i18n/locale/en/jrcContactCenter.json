@@ -1649,7 +1649,19 @@
         "pending": "Pendente",
         "callback": "Agendado retorno",
         "forwarded": "Encaminhado"
-      }
+      },
+      "DRAFT_CONFLICT": "As respostas deste pós-atendimento mudaram. Sua edição foi preservada.",
+      "DRAFT_REVIEW_HINT": "Confira as respostas atuais do servidor. Escolha qual versão deseja revisar antes de salvar ou concluir.",
+      "DRAFT_REMOTE_NOTE": "Observação atual no servidor",
+      "DRAFT_EMPTY": "Não informado",
+      "DRAFT_NO_PENDING": "Não há pós-atendimento pendente nesta seleção.",
+      "DRAFT_RELOAD": "Consultar versão atual",
+      "DRAFT_USE_REMOTE": "Usar respostas do servidor",
+      "DRAFT_REAPPLY": "Revisar minha edição sobre a versão atual",
+      "DRAFT_SAVED": "Rascunho salvo. O pós-atendimento permanece pendente.",
+      "DRAFT_SAVE": "Salvar rascunho e aplicar motivo",
+      "DRAFT_RULE_CONFLICT": "Há regras de pós-atendimento conflitantes para este motivo. Solicite a revisão do gestor. Suas respostas foram preservadas.",
+      "DRAFT_CYCLE_CONFLICT": "Este atendimento mudou de ciclo. Consulte o estado atual antes de continuar. Suas respostas foram preservadas."
     },
     "ADMIN": {
       "TITLE": "Configurações do Call Center",
@@ -2145,7 +2157,7 @@
     "ACW_RULES": {
       "CONFIGURATION_TITLE": "Configurar regras de pós-atendimento",
       "TITLE": "ACW de voz por motivo e origem",
-      "HINT": "Fila → equipe → regra geral. Conflitos no mesmo nível bloqueiam a conclusão. Somente novos atendimentos capturam estas regras. O relógio inicial usa o limite geral; o motivo selecionado define o limite na conclusão. Não publica no PABX.",
+      "HINT": "Fila → equipe → regra geral. Conflitos no mesmo nível bloqueiam a conclusão. Somente novos atendimentos capturam estas regras. O relógio inicial usa o limite geral. Salvar o rascunho aplica o limite do motivo sem reiniciar o relógio; concluir valida os campos obrigatórios. Não publica no PABX.",
       "REASON": "Código do motivo de encerramento",
       "SCOPE": "Aplicar em",
       "GENERAL": "Regra geral",

@@ -35,6 +35,8 @@ import {
 } from 'dashboard/routes/dashboard/jrcContactCenter/agentStateLabels';
 import { useInboxCustomer360 } from './useInboxCustomer360';
 import { useAttendanceClosing } from './useAttendanceClosing';
+import PendingQualificationForm from './PendingQualificationForm.vue';
+import QualificationDraftReview from './QualificationDraftReview.vue';
 import QualificationHistory from './QualificationHistory.vue';
 import InboxVoicePanel from './InboxVoicePanel.vue';
 import InboxConversationTools from './InboxConversationTools.vue';
@@ -536,10 +538,26 @@ const {
   error: closingError,
   saving: closingSaving,
   blocked: closingBlocked,
+  writeFailure: closingWriteFailure,
   overdue: acwOverdue,
   limit: acwLimitSeconds,
   elapsed: acwElapsedSeconds,
 } = closing;
+const {
+  conflict: closingDraftConflict,
+  saved: closingDraftSaved,
+  canSave: closingCanSaveDraft,
+  canReapply: closingCanReapplyDraft,
+  canUseRemote: closingCanUseRemoteDraft,
+  remote: closingRemoteDraft,
+} = closing.draft;
+const closingWriteErrorMessage = computed(() => {
+  if (closingWriteFailure.value === 'conflicting_acw_rules')
+    return t('JRC_CONTACT_CENTER.ACW_OPERATION.DRAFT_RULE_CONFLICT');
+  if (closingWriteFailure.value === 'attendance_cycle_conflict')
+    return t('JRC_CONTACT_CENTER.ACW_OPERATION.DRAFT_CYCLE_CONFLICT');
+  return t('JRC_CONTACT_CENTER.ACW_OPERATION.SAVE_ERROR');
+});
 const displayAgent = computed(() =>
   closing.unverified.value ? null : closing.agent.value || agent.value
 );
@@ -1452,15 +1470,26 @@ onBeforeUnmount(() => {
             {{
               closingBlocked
                 ? t('JRC_CONTACT_CENTER.ACW_OPERATION.SELECTION_BLOCKED')
-                : t('JRC_CONTACT_CENTER.ACW_OPERATION.SAVE_ERROR')
+                : closingWriteErrorMessage
             }}
           </div>
+          <QualificationDraftReview
+            v-if="closingDraftConflict"
+            :current="closingRemoteDraft"
+            :busy="closingSaving || closing.loading.value"
+            :can-use-remote="closingCanUseRemoteDraft"
+            :can-reapply="closingCanReapplyDraft"
+            @reload="closing.load()"
+            @use-remote="closing.draft.useRemote()"
+            @reapply="closing.draft.reapply()"
+          />
           <div class="flex min-w-0 flex-col gap-4">
             <section
-              v-if="closingPending"
+              v-if="closingPending || closingDraftConflict"
               class="rounded-xl border border-n-weak bg-n-solid-1 p-4"
             >
               <div
+                v-if="closingPending"
                 :class="
                   acwOverdue
                     ? 'bg-n-ruby-2 text-n-ruby-11'
@@ -1493,84 +1522,17 @@ onBeforeUnmount(() => {
               <p class="mt-1 text-xs text-n-slate-10">
                 {{ t('JRC_CONTACT_CENTER.INBOX_360.CLOSING_HISTORY') }}
               </p>
-              <div class="mt-4 grid min-w-0 grid-cols-1 gap-3">
-                <label class="text-xs font-medium text-n-slate-11">
-                  {{ t('JRC_CONTACT_CENTER.ACW_OPERATION.REASON_REQUIRED') }}
-                  <select
-                    v-model="closingReason"
-                    class="mt-1 h-9 w-full rounded-md border border-n-weak bg-n-solid-1 px-2 text-xs"
-                  >
-                    <option value="">
-                      {{
-                        t(
-                          'JRC_CONTACT_CENTER.INBOX_360.CLOSING_REASON_PLACEHOLDER'
-                        )
-                      }}
-                    </option>
-                    <option value="resolved">
-                      {{ t('JRC_CONTACT_CENTER.INBOX_360.REASON_RESOLVED') }}
-                    </option>
-                    <option value="information">
-                      {{ t('JRC_CONTACT_CENTER.INBOX_360.REASON_INFORMATION') }}
-                    </option>
-                    <option value="order">
-                      {{ t('JRC_CONTACT_CENTER.INBOX_360.REASON_ORDER') }}
-                    </option>
-                    <option value="callback">
-                      {{ t('JRC_CONTACT_CENTER.INBOX_360.REASON_CALLBACK') }}
-                    </option>
-                    <option value="transfer">
-                      {{ t('JRC_CONTACT_CENTER.INBOX_360.REASON_TRANSFER') }}
-                    </option>
-                  </select>
-                </label>
-                <label class="text-xs font-medium text-n-slate-11">
-                  {{ t('JRC_CONTACT_CENTER.ACW_OPERATION.RESULT_REQUIRED') }}
-                  <select
-                    v-model="closingResult"
-                    class="mt-1 h-9 w-full rounded-md border border-n-weak bg-n-solid-1 px-2 text-xs"
-                  >
-                    <option value="">
-                      {{
-                        t(
-                          'JRC_CONTACT_CENTER.INBOX_360.CLOSING_RESULT_PLACEHOLDER'
-                        )
-                      }}
-                    </option>
-                    <option value="completed">
-                      {{ t('JRC_CONTACT_CENTER.INBOX_360.RESULT_COMPLETED') }}
-                    </option>
-                    <option value="pending">
-                      {{ t('JRC_CONTACT_CENTER.INBOX_360.RESULT_PENDING') }}
-                    </option>
-                    <option value="callback">
-                      {{ t('JRC_CONTACT_CENTER.INBOX_360.RESULT_CALLBACK') }}
-                    </option>
-                    <option value="forwarded">
-                      {{ t('JRC_CONTACT_CENTER.INBOX_360.RESULT_FORWARDED') }}
-                    </option>
-                  </select>
-                </label>
-              </div>
-              <label class="mt-3 block text-xs font-medium text-n-slate-11">
-                {{ t('JRC_CONTACT_CENTER.INBOX_360.CLOSING_NOTE') }}
-                <textarea
-                  v-model="closingNote"
-                  rows="5"
-                  class="mt-1 w-full resize-none rounded-md border border-n-weak bg-n-solid-1 p-3 text-xs"
-                  :placeholder="
-                    t('JRC_CONTACT_CENTER.INBOX_360.CLOSING_NOTE_PLACEHOLDER')
-                  "
-                />
-              </label>
-              <button
-                type="button"
-                :disabled="closingSaving || !closingReason || !closingResult"
-                class="mt-4 w-full rounded-md bg-n-brand px-4 py-2 text-xs font-semibold text-white disabled:opacity-40"
-                @click="finishClosing"
-              >
-                {{ t('JRC_CONTACT_CENTER.INBOX_360.FINISH_TABULATION') }}
-              </button>
+              <PendingQualificationForm
+                v-model:reason="closingReason"
+                v-model:result="closingResult"
+                v-model:note="closingNote"
+                :disabled="closingSaving || !canOperate || !closingPending"
+                :conflict="closingDraftConflict"
+                :can-save="closingCanSaveDraft"
+                :saved="closingDraftSaved && Boolean(closingPending)"
+                @save="closing.saveDraft()"
+                @complete="finishClosing"
+              />
             </section>
             <p
               v-else-if="!closingRecords.some(record => record.completed_at)"

@@ -41,7 +41,7 @@ class JrcContactCenter::AgentStateSnapshot
       eligible: reason.nil?, eligibility_reason: reason,
       eligible_queue_ids: reason.nil? ? [current.queue_id.to_s] : [],
       queues: memberships.includes(:queue).map { |membership| { id: membership.queue_id.to_s, name: membership.queue.name } },
-      pending_qualifications: pending_qualifications.includes(account_user: :user).map(&:operational_payload)
+      pending_qualifications: pending_qualification_states
     )
   end
 
@@ -52,6 +52,13 @@ class JrcContactCenter::AgentStateSnapshot
   end
 
   private
+
+  # Manual answers are recovered only through the currently authorized attendance API.
+  def pending_qualification_states
+    pending_qualifications.includes(account_user: :user).map do |record|
+      record.operational_payload.merge('reason_code' => nil, 'outcome_code' => nil, 'notes' => nil)
+    end
+  end
 
   def pause_catalog_options
     context = { account: @account, account_user: @member, user: @member.user }

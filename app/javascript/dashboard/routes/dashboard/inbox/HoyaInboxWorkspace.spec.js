@@ -37,6 +37,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
     agentState: vi.fn(),
     qualifications: vi.fn(),
     startQualification: vi.fn(),
+    saveQualificationDraft: vi.fn(),
     completeQualification: vi.fn(),
   },
 }));
@@ -566,6 +567,81 @@ describe('inbox native SIP action guards', () => {
     expect(sip.answer).not.toHaveBeenCalled();
     expect(wrapper.find('progress').exists()).toBe(true);
   });
+  it('saves an incomplete draft from the reused Hoya controls without completion or a SIP operation', async () => {
+    const pending = {
+      ...pendingResponse.data.items[0],
+      draft_revision: 'native-manual-revision',
+    };
+    CCAPI.qualifications.mockResolvedValue({
+      data: { ...pendingResponse.data, items: [pending] },
+    });
+    const saved = {
+      ...pending,
+      reason_code: 'order',
+      notes: 'SYNTHETIC Hoya draft',
+      outcome_code: '',
+      draft_revision: 'new-manual-revision',
+    };
+    CCAPI.saveQualificationDraft.mockResolvedValue({
+      data: { item: saved, agent: pendingResponse.data.agent },
+    });
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    await flushPromises();
+    await wrapper.get('[data-qualification-field="reason"]').setValue('order');
+    await wrapper
+      .get('[data-qualification-field="note"]')
+      .setValue('SYNTHETIC Hoya draft');
+    await wrapper.get('[data-save-qualification-draft]').trigger('click');
+    await flushPromises();
+    expect(CCAPI.saveQualificationDraft).toHaveBeenCalledWith(
+      1,
+      11,
+      { reason_code: 'order', outcome_code: '', notes: 'SYNTHETIC Hoya draft' },
+      'native-manual-revision'
+    );
+    expect(wrapper.get('[data-qualification-field="note"]').element.value).toBe(
+      'SYNTHETIC Hoya draft'
+    );
+    expect(wrapper.get('[data-complete-qualification]').element.disabled).toBe(
+      true
+    );
+    expect(wrapper.find('progress').exists()).toBe(true);
+    expect(CCAPI.completeQualification).not.toHaveBeenCalled();
+    expect(sip.hangup).not.toHaveBeenCalled();
+    expect(sip.answer).not.toHaveBeenCalled();
+  });
+
+  it('keeps the Hoya draft form read-only when the actual workspace context lacks operating authority', async () => {
+    const pending = {
+      ...pendingResponse.data.items[0],
+      draft_revision: 'native-read-only-revision',
+      notes: 'SYNTHETIC readable own draft',
+    };
+    CCAPI.qualifications.mockResolvedValue({
+      data: { ...pendingResponse.data, items: [pending] },
+    });
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props: {
+        ...props,
+        context: { ...props.context, capabilities: { operate: false } },
+      },
+      global,
+    });
+    await flushPromises();
+    const form = wrapper.get('[data-pending-qualification-form]');
+    expect(form.get('[data-qualification-field="note"]').element.value).toBe(
+      'SYNTHETIC readable own draft'
+    );
+    expect(
+      form
+        .findAll('select, textarea, button')
+        .every(control => control.element.disabled)
+    ).toBe(true);
+    await form.get('[data-save-qualification-draft]').trigger('click');
+    expect(CCAPI.saveQualificationDraft).not.toHaveBeenCalled();
+    expect(CCAPI.completeQualification).not.toHaveBeenCalled();
+  });
+
   it('restores required tabulation when reopening an ended voice interaction', async () => {
     CCAPI.qualifications.mockResolvedValue(pendingResponse);
     const wrapper = mount(HoyaInboxWorkspace, { props, global });

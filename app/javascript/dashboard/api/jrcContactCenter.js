@@ -123,8 +123,17 @@ export default {
     axios.get(`${base(accountId)}/qualifications`, { params }),
   startQualification: (accountId, params) =>
     axios.post(`${base(accountId)}/qualifications`, params),
-  completeQualification: (accountId, id, qualification) =>
-    axios.patch(`${base(accountId)}/qualifications/${Number(id)}`, {
+  saveQualificationDraft: (accountId, id, qualification, expectedRevision) =>
+    axios.patch(
+      `${base(accountId)}/qualifications/${recordIdentity(id)}/draft`,
+      {
+        qualification,
+        expected_draft_revision: expectedRevision,
+      }
+    ),
+  completeQualification: (accountId, id, qualification, options = {}) =>
+    axios.patch(`${base(accountId)}/qualifications/${recordIdentity(id)}`, {
+      ...options,
       qualification,
     }),
   agentState: accountId => axios.get(`${base(accountId)}/agent_state`),

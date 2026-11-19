@@ -3408,21 +3408,28 @@
     "complete_23_figures": false
   },
   "latest_verified_increment": {
-    "sha": "090a1dac765039ab4314bd45d85a9409e9329135",
-    "run": 44427479081,
-    "artifact": 14486734653,
-    "artifact_sha256": "e1204b106d64441b3be63d7a6ea7f6bd5b1f03ed8efc6efd3fe93ee766831df5",
-    "rails_distinct": 1196,
-    "schema_reload_reexecutions": 16,
-    "vue": 528,
-    "chrome": 148,
-    "screenshot_hashes_verified": 216,
-    "png_really_reviewed": 4,
-    "scope": "Roteamento local nativo e proteçãoACW validada porVue; não equivale ao Hoya completo/PABX ou versões posteriores.",
-    "visual_followup_pending": "Capturas do editor com referências ainda carregando; nomes exatos e rótulos em QAposterior.",
-    "all23_complete": false,
-    "stages_0_2_complete": false,
-    "external_homologation": false
+    "sha": "3b9aa6db4428842a6a89edb05b141b92eac9c3c0",
+    "run": 44461118646,
+    "artifact": 14502095624,
+    "artifact_sha256": "4ff1398791353af4ff02304c16806256936f55efc9b6d437cace63121be45622",
+    "native_unique_examples": 1270,
+    "schema_reload_separate": 16,
+    "vue": 573,
+    "chrome": 152,
+    "screenshots_hashes_verified": 232,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0,
+    "new_ruby_offenses": 0,
+    "fresh_build_and_bootstrap": "passed",
+    "visual_samples_reviewed": [
+      "desktop-light-team-last-agent-audit.png",
+      "mobile-dark-team-last-agent-audit.png",
+      "desktop-light-acw-scoped-rules.png",
+      "mobile-dark-acw-scoped-rules.png"
+    ],
+    "stages_complete": false,
+    "scope": "team roster removal review, canonical IDs, seven stale-clock cases and all retained38logicalChrome scenarios; no new draft code proof"
   },
   "team_roster_indirect_review_prepared_20261118": {
     "reference_parent": "3f8f2bc80348841bcf32e5dfa0600606e12b778f",
@@ -3603,5 +3610,65 @@
       "mobile-dark"
     ],
     "status": "QA fix prepared; new full gate required; all23/stages not complete"
+  },
+  "pending_acw_draft_prepared_20261119": {
+    "status": "implemented locally in reviewed overlay; native/Vue/Chrome execution pending",
+    "parent": "3b9aa6db4428842a6a89edb05b141b92eac9c3c0",
+    "rules": "queue > team > general; block same-level conflicts; trusted immutable snapshot retained",
+    "implementation": [
+      "explicit PATCH draft on native owned qualification",
+      "manual revision with atomic audit and no plaintext notes",
+      "same pending clock and distribution blocker",
+      "current operating/origin authorization and account mutex",
+      "explicit UI conflict review and no automatic retries",
+      "private answers omitted from shared state without dropping pending blocker"
+    ],
+    "native_tests_prepared": {
+      "service_examples": 17,
+      "sql_lock_wait_cases": 3,
+      "http": "authorization, malformed documents/fields, stale state, privacy and WhatsApp native lifecycle"
+    },
+    "chrome_prepared": {
+      "logical_scenarios_added": 2,
+      "projects": 4,
+      "required_total": 160,
+      "previous_152_retained": true,
+      "real_controls": "PendingQualificationForm, QualificationDraftReview, useAttendanceClosing",
+      "actual_synthetic_resources": "Rails API, native qualification and scoped account data in disposable PostgreSQL",
+      "limitation": "Harness does not mount full Hoya workspace or connect SIP/PABX"
+    },
+    "remaining": [
+      "dynamic forms/templates",
+      "destination automations",
+      "whole-team removal hierarchy/status cases",
+      "external PABX contract and homologation",
+      "review/warning for leaving with edits not explicitly saved; no autosave or browser storage claimed"
+    ],
+    "word_all23_complete": false,
+    "vue_full_workspace_prepared": 2
+  },
+  "team_and_clock_final_native_gate_3b9aa6db_20261119": {
+    "sha": "3b9aa6db4428842a6a89edb05b141b92eac9c3c0",
+    "run": 44461118646,
+    "artifact": 14502095624,
+    "artifact_sha256": "4ff1398791353af4ff02304c16806256936f55efc9b6d437cace63121be45622",
+    "native_unique_examples": 1270,
+    "schema_reload_separate": 16,
+    "vue": 573,
+    "chrome": 152,
+    "screenshots_hashes_verified": 232,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0,
+    "new_ruby_offenses": 0,
+    "fresh_build_and_bootstrap": "passed",
+    "visual_samples_reviewed": [
+      "desktop-light-team-last-agent-audit.png",
+      "mobile-dark-team-last-agent-audit.png",
+      "desktop-light-acw-scoped-rules.png",
+      "mobile-dark-acw-scoped-rules.png"
+    ],
+    "stages_complete": false,
+    "scope": "team roster removal review, canonical IDs, seven stale-clock cases and all retained38logicalChrome scenarios; no new draft code proof"
   }
 }

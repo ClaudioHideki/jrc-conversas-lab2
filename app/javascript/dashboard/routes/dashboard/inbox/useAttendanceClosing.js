@@ -1,5 +1,6 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
+import { useQualificationDraft } from './useQualificationDraft';
 
 export const useAttendanceClosing = ({
   props,
@@ -16,12 +17,14 @@ export const useAttendanceClosing = ({
   const agent = ref(null);
   const policy = ref(null);
   const error = ref(false);
+  const writeFailure = ref('');
   const saving = ref(false);
   const loading = ref(false);
   const blocked = ref(false);
   const reason = ref('');
   const result = ref('');
   const note = ref('');
+  const draft = useQualificationDraft({ reason, result, note });
   let generation = 0;
   let request = 0;
   let disposed = false;
@@ -83,6 +86,8 @@ export const useAttendanceClosing = ({
     reason.value = '';
     result.value = '';
     note.value = '';
+    draft.reset();
+    writeFailure.value = '';
   };
   const rejectUnauthorized = failure => {
     if ([401, 403, 404].includes(failure?.response?.status)) {
@@ -116,6 +121,7 @@ export const useAttendanceClosing = ({
         agent.value = response.data.agent;
         records.value = response.data.items;
         policy.value = response.data.policy;
+        draft.observe(pending.value);
       } else {
         clearObserved();
         agent.value = response.data.item;
@@ -143,6 +149,8 @@ export const useAttendanceClosing = ({
       return;
     const version = generation;
     const key = identity();
+    request += 1;
+    loading.value = false;
     saving.value = true;
     error.value = false;
     try {
@@ -155,10 +163,84 @@ export const useAttendanceClosing = ({
         response.data.item,
         ...records.value.filter(record => record.id !== response.data.item.id),
       ];
+      draft.observe(response.data.item);
       showClosing();
       await load();
     } catch (failure) {
       if (current(version, key)) rejectUnauthorized(failure);
+    } finally {
+      if (current(version, key)) saving.value = false;
+    }
+  };
+
+  const rejectWrite = async failure => {
+    rejectUnauthorized(failure);
+    if (failure?.response?.status !== 409) return;
+    const code = failure.response.data?.error;
+    if (['conflicting_acw_rules', 'attendance_cycle_conflict'].includes(code)) {
+      writeFailure.value = code;
+      return;
+    }
+    if (
+      [
+        'stale_configuration_revision',
+        'qualification_already_completed',
+      ].includes(code)
+    ) {
+      draft.markConflict();
+      await load();
+    }
+  };
+
+  const saveDraft = async () => {
+    if (
+      saving.value ||
+      !enabled.value ||
+      !supportsClosing.value ||
+      unverified.value ||
+      !pending.value ||
+      !draft.canSave.value
+    )
+      return false;
+    const version = generation;
+    const key = identity();
+    const record = pending.value;
+    const submitted = draft.localValues();
+    request += 1;
+    loading.value = false;
+    saving.value = true;
+    error.value = false;
+    writeFailure.value = '';
+    try {
+      const response = await ContactCenterAPI.saveQualificationDraft(
+        props.accountId,
+        record.id,
+        {
+          reason_code: submitted[0],
+          outcome_code: submitted[1],
+          notes: submitted[2],
+        },
+        draft.revision.value
+      );
+      if (!current(version, key)) return false;
+      const updated = response.data.item;
+      if (
+        String(updated?.account_id) !== String(props.accountId) ||
+        String(updated?.account_user_id) !== String(record.account_user_id)
+      )
+        throw new Error('Invalid native qualification context');
+      draft.accept(updated, submitted);
+      records.value = [
+        updated,
+        ...records.value.filter(item => item.id !== updated.id),
+      ];
+      agent.value = response.data.agent;
+      return true;
+    } catch (failure) {
+      if (current(version, key)) {
+        await rejectWrite(failure);
+      }
+      return false;
     } finally {
       if (current(version, key)) saving.value = false;
     }
@@ -169,6 +251,7 @@ export const useAttendanceClosing = ({
       saving.value ||
       !enabled.value ||
       !supportsClosing.value ||
+      draft.conflict.value ||
       !pending.value ||
       !reason.value.trim() ||
       !result.value.trim()
@@ -176,8 +259,14 @@ export const useAttendanceClosing = ({
       return false;
     const version = generation;
     const key = identity();
+    const options = draft.revision.value
+      ? [{ expected_draft_revision: draft.revision.value }]
+      : [];
+    request += 1;
+    loading.value = false;
     saving.value = true;
     error.value = false;
+    writeFailure.value = '';
     try {
       const response = await ContactCenterAPI.completeQualification(
         props.accountId,
@@ -186,7 +275,8 @@ export const useAttendanceClosing = ({
           reason_code: reason.value,
           outcome_code: result.value,
           notes: note.value,
-        }
+        },
+        ...options
       );
       if (!current(version, key)) return false;
       records.value = [
@@ -194,13 +284,13 @@ export const useAttendanceClosing = ({
         ...records.value.filter(record => record.id !== response.data.item.id),
       ];
       agent.value = response.data.agent;
-      reason.value = '';
-      result.value = '';
-      note.value = '';
+      clearDraft();
       blocked.value = false;
       return true;
     } catch (failure) {
-      if (current(version, key)) rejectUnauthorized(failure);
+      if (current(version, key)) {
+        await rejectWrite(failure);
+      }
       return false;
     } finally {
       if (current(version, key)) saving.value = false;
@@ -265,8 +355,11 @@ export const useAttendanceClosing = ({
     saving,
     loading,
     blocked,
+    writeFailure,
+    draft,
     load,
     start,
+    saveDraft,
     complete,
     allowSelection,
   };

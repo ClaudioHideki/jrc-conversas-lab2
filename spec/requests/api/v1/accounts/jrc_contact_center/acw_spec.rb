@@ -77,6 +77,28 @@ RSpec.describe 'Contact Center ACW persistent API', type: :request do
     expect(response.parsed_body['items'].first['completed_at']).to be_present
   end
 
+  it 'persists a WhatsApp draft without bypassing tabulation or prematurely resolving the conversation' do
+    post "#{base}/qualifications", headers: headers, as: :json, params: { conversation_id: conversation.display_id }
+    item = response.parsed_body.fetch('item')
+    patch "#{base}/qualifications/#{item.fetch('id')}/draft", headers: headers, as: :json,
+                                                          params: { expected_draft_revision: item.fetch('draft_revision'),
+                                                                    qualification: { reason_code: 'order', outcome_code: 'completed',
+                                                                                     notes: 'SYNTHETIC WhatsApp draft' } }
+    expect(response).to have_http_status(:ok)
+    revision = response.parsed_body.fetch('item').fetch('draft_revision')
+    expect(conversation.reload.status).to eq('open')
+    expect(JrcContactCenter::Qualification.find(item.fetch('id')).completed_at).to be_nil
+    post "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}/toggle_status", headers: headers, as: :json,
+                                                                                             params: { status: 'resolved' }
+    expect(response).to have_http_status(:unprocessable_entity)
+    patch "#{base}/qualifications/#{item.fetch('id')}", headers: headers, as: :json,
+                                                     params: { expected_draft_revision: revision,
+                                                               qualification: { reason_code: 'order', outcome_code: 'completed',
+                                                                                notes: 'SYNTHETIC WhatsApp draft' } }
+    expect(response).to have_http_status(:ok)
+    expect(conversation.reload.status).to eq('resolved')
+  end
+
   it 'prevents caching the private operator projection in both completion and list responses' do
     post "#{base}/qualifications", headers: headers, as: :json, params: { conversation_id: conversation.display_id }
     expect(response).to have_http_status(:ok)
