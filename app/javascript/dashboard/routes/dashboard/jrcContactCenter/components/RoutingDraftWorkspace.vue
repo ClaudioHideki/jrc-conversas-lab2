@@ -194,7 +194,7 @@ onBeforeUnmount(() => {
         </select>
       </label>
       <label class="min-w-0 text-sm">
-        <span class="block">{{ t('JRC_CONTACT_CENTER.ADMIN.KIND') }}</span>
+        <span class="block">{{ text('KIND') }}</span>
         <select
           v-model="kind"
           data-routing-filter-kind

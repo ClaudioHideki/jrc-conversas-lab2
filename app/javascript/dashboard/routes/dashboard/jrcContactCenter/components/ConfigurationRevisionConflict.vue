@@ -79,6 +79,10 @@ const choices = {
   finance: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.FINANCE'),
   administrative: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.ADMINISTRATIVE'),
 };
+const fieldTitle = field =>
+  field === 'kind' && props.resource === 'routing_rules'
+    ? t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.KIND')
+    : labels[field];
 const fields = computed(
   () =>
     ({
@@ -176,7 +180,7 @@ const format = (record, field) => {
           :key="field"
           class="min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-3"
         >
-          <h4 class="font-medium text-n-slate-12">{{ labels[field] }}</h4>
+          <h4 class="font-medium text-n-slate-12">{{ fieldTitle(field) }}</h4>
           <dl class="mt-2 grid min-w-0 gap-3 sm:grid-cols-2">
             <div class="min-w-0">
               <dt class="text-n-slate-11">{{ text.server }}</dt>

@@ -15,6 +15,9 @@ module Enterprise::Api::V1::Accounts::TeamMembersController
 
   def with_membership_authority_guard
     JrcContactCenter::AuthorityTransaction.call(account: Current.account, member: Current.account_user) do
+      Current.user.reload
+      raise Pundit::NotAuthorizedError unless Current.user.active_for_authentication?
+
       @team.reload
       check_authorization
       validate_member_id_params

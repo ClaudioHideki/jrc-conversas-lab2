@@ -333,3 +333,35 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 
 - CI44423463990:1196Rails distintos e16recargas aprovados;Rubylint sem novos apontamentos. Vue436/440; quatro falhas do stubDialog semclose. Corrigido para refletir open/close expostos pelo componente nativo e acrescentada asserção de fechamento por revogação. Nenhuma mudança na autorização nem no fluxo de produção.
 - Artefato14483643068 / 93047f2b4d881c6bd2d6c2a89c0eb1455ee981f505845168864d6cc78ce2d29d verificado. Assets eChrome não executados; novo aceite ainda depende daCI do próximoSHA. Incremento ACW de privacidade preparado e identificado separadamente, sem reaproveitar evidência como se já estivesse testado.
+
+
+### Equipe nativa — identidade de participantes, próximo incremento
+
+- Preparada a mesma conversão de IDs já usada na validação nativa nas duas diferenças de conjuntos de inclusão/remoção. Impede que strings numéricas removam um participante que continua selecionado, preservando seu vínculo e as fontes herdadas. Guards Enterprise e regras de elegibilidade permanecem intactos.
+- Seis regressões HTTP preparadas, incluindo herança atual, substituição mista, negação entre contas, CC desabilitado e remoção explícita. Ainda não executadas no candidato; não são prova de conclusão da retirada indireta do último agente.
+- ADR:docs/adr/20261118-call-center-native-team-roster-identity.md. A CI090a1dac ativa não contém este incremento posterior. Sem alteração no cadastro de usuário,grants,migrations,PABX ou produção.
+
+
+### Conferência visual da figura9 — título do popup
+
+- A imagem8 do segundoWord usa configuração de pós-atendimento. A captura validada a16e8a49 ainda dizia Encerramentos—Novo registro, embora edite política existente. Preparado título específico Configurar regras de pós-atendimento, sem alterar campos/ações dos demais recursos ou criar registros paralelos.
+- Uma regressãoVue e asserção do cabeçalho nos quatroChromeACW existentes preparadas; conjunto148 preservado. Formulários/obrigatoriedades/automações doWord continuam pendentes, sem controles decorativos anunciados como funcionais.
+
+
+### Equipe — autenticação atual após espera por mutex
+
+- Preparada recarga do User e verificação nativa de autenticação no guard Enterprise de participantes, após Accountlock e antes de qualquer gravação. Políticas nativas, guard de ativação e isolamento existentes preservados.
+- Três testes concorrentes adicionais preparados, mudando confirmed_at apenas depois da autenticação/espera SQL real. O helper conserva seu comportamento anterior por padrão. Ainda não executados; exigem banco descartável explicitamente protegido e novoSHA.
+
+
+### ACW — projeção auxiliar do operador, acompanhamento preparado
+
+- Preparado descarte de AgentState auxiliar que chegue depois da consultaACW negada e ocultação desse fallback sem revalidação. UmVue adicional preparado; não usa dados privados do fetch anterior para reapresentar estado ou catálogo.
+- Continuação posterior a090a1dac; não é aceite herdado nem homologação do workspace completo. Sem alterações no fluxo SIP externo.
+
+
+### Aceite090a1dac e QA visual posterior
+
+- CI44427479081 aprovada:1196Rails distintos,16recargas,528Vue,148Chrome,zero falhas/pendências/erros externos/novas infraçõesRuby. Bootstrap15 eCSS novos aprovados. Artefato14486734653/e1204b106d64441b3be63d7a6ea7f6bd5b1f03ed8efc6efd3fe93ee766831df5 recuperado e216 capturas verificadas porhash; quatroPNG efetivamente revisados.
+- Escopo aceito: roteamento local com criação/edição,consulta,paginação,CAS,revisão,auditoria e negações; ACW atual com regressõesVue do workspace. Não é homologação visual do Hoya completo nemPABX.
+- Revisão visual real preparou correção de Critério de roteamento sem mudar Tipo de unidade nas telas nativas, rótuloCC neutro Versão e espera por nomes reais da unidade/fila antes de capturar. QuatroVue adicionais e fortalecimento dos mesmos148Chrome,sem reduzir verificações anteriores. As correções de equipe e projeção auxiliar posteriores continuam exigindoCI própria.

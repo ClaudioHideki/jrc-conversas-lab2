@@ -636,6 +636,19 @@ describe('global ACW administrative popup revision', () => {
     limits: { voice, whatsapp: 180 },
     voice_required: false,
   });
+  it('identifies ACW as policy configuration instead of a new native record', async () => {
+    API.acwPolicy.mockResolvedValueOnce({
+      data: { item: policy('a'.repeat(64)) },
+    });
+    const wrapper = mountSection('closures');
+    await flushPromises();
+    await wrapper.get('[data-create]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-dialog]').attributes('title')).toBe(
+      'JRC_CONTACT_CENTER.ACW_RULES.CONFIGURATION_TITLE'
+    );
+    expect(API.updateAcwPolicy).not.toHaveBeenCalled();
+  });
   it('preserves HH:MM input and compares both states in seconds before an explicit retry', async () => {
     API.acwPolicy.mockResolvedValueOnce({
       data: { item: policy('a'.repeat(64)) },

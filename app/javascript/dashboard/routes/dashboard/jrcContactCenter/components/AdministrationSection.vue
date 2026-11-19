@@ -130,6 +130,11 @@ const title = computed(() =>
     ? label(key.value.toUpperCase())
     : t(`JRC_CONTACT_CENTER.ADMIN.CARDS.${key.value}.NAME`)
 );
+const configurationTitle = computed(() =>
+  key.value === 'closures'
+    ? t('JRC_CONTACT_CENTER.ACW_RULES.CONFIGURATION_TITLE')
+    : `${title.value} — ${label(editing.value ? 'EDIT' : 'CREATE')}`
+);
 const queryValue = suffix => route.query[`${resource.value}_${suffix}`];
 const page = computed(() => {
   const value = Number(queryValue('page') || 1);
@@ -854,7 +859,7 @@ onBeforeUnmount(() => {
       ref="dialog"
       contained
       overflow-y-auto
-      :title="`${title} — ${label(editing ? 'EDIT' : 'CREATE')}`"
+      :title="configurationTitle"
       :confirm-button-label="label(resource === 'teams' ? 'SAVE_TEAM' : 'SAVE')"
       :cancel-button-label="label('CANCEL')"
       :disable-confirm-button="

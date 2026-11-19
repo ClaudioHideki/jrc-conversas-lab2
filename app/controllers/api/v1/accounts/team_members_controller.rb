@@ -32,11 +32,11 @@ class Api::V1::Accounts::TeamMembersController < Api::V1::Accounts::BaseControll
   private
 
   def members_to_be_added_ids
-    params[:user_ids] - current_members_ids
+    params[:user_ids].map(&:to_i) - current_members_ids
   end
 
   def members_to_be_removed_ids
-    current_members_ids - params[:user_ids]
+    current_members_ids - params[:user_ids].map(&:to_i)
   end
 
   def current_members_ids

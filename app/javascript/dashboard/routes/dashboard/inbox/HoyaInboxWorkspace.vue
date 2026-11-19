@@ -540,7 +540,18 @@ const {
   limit: acwLimitSeconds,
   elapsed: acwElapsedSeconds,
 } = closing;
-const displayAgent = computed(() => closing.agent.value || agent.value);
+const displayAgent = computed(() =>
+  closing.unverified.value ? null : closing.agent.value || agent.value
+);
+watch(
+  () => closing.unverified.value && closing.error.value,
+  unverified => {
+    if (!unverified) return;
+    agentGeneration += 1;
+    agent.value = null;
+  },
+  { flush: 'sync' }
+);
 const pausedElapsed = computed(() => {
   const seconds =
     Math.max(
@@ -688,7 +699,7 @@ const loaded = value => {
     value = { ...value, call: { ...value.call, ...closing.attendance.value } };
   }
   callDetails.value = value;
-  if (value?.agent) agent.value = value.agent;
+  if (value?.agent && !closing.unverified.value) agent.value = value.agent;
 };
 const updateCall = record => {
   if (record.id === props.currentCallId && callDetails.value)

@@ -58,13 +58,14 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
   end
 
   # These helpers coordinate the real requests without replacing policies or locks.
-  def hold_account_change(change)
+  def hold_account_change(change, defer: false)
     workers << Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
         Account.find(account.id).with_lock do
-          change.call
+          change.call unless defer
           state.fetch(:entered) << true
           Timeout.timeout(15) { state.fetch(:release).pop }
+          change.call if defer
         end
       end
     rescue StandardError => e
@@ -103,8 +104,8 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
     raise "Request did not reach the required account lock: #{details.to_json}"
   end
 
-  def race_with_scope_change(change:, verb:, endpoint:, payload:)
-    hold_account_change(change)
+  def race_with_scope_change(change:, verb:, endpoint:, payload:, defer: false)
+    hold_account_change(change, defer: defer)
     Timeout.timeout(8) { state.fetch(:entered).pop }
     dispatch_request(verb, endpoint, payload)
     wait_for_account_lock
@@ -112,6 +113,21 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
     Timeout.timeout(20) { workers.each(&:join) }
     expect(results.size).to eq(1)
     results.pop
+  end
+
+  %i[post patch delete].each do |verb|
+    it "denies #{verb} after native user confirmation is revoked only once the real request is waiting" do
+      team.add_members([recipient.id]) if verb == :delete
+      original = team.team_members.pluck(:user_id)
+      status = race_with_scope_change(
+        change: -> { actor.update!(confirmed_at: nil) }, verb: verb,
+        endpoint: "/api/v1/accounts/#{account.id}/teams/#{team.id}/team_members",
+        payload: { user_ids: [recipient.id] }, defer: true
+      )
+      expect(actor.reload).not_to be_active_for_authentication
+      expect(status).to eq(401)
+      expect(team.team_members.reload.pluck(:user_id)).to eq(original)
+    end
   end
 
   it 'does not reinclude a user after the actor loses Group during the membership lock wait' do

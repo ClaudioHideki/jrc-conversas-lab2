@@ -565,6 +565,11 @@
         "scope": "ACW estado privado por autoridade atual; sem alteração do motor/snapshot já validado",
         "status": "Preparado; exige CI do próprio SHA. Fixture atual não comprova o workspace completo no Chrome.",
         "adr": "docs/adr/20261118-call-center-acw-current-authority.md"
+      },
+      "visual_follow_up_prepared": {
+        "reference": "SegundoWord,image8.png/figura9; captura reala16e8a49.desktop-light",
+        "difference": "Popup existente dizia Novo registro para política já existente; título específico preparado. Não completa formulário/regras avançadas do mockup.",
+        "validation": "Uma regressãoVue e asserção nos quatroChrome existentes preparadas; exigem CI do próprioSHA."
       }
     },
     {
@@ -3400,5 +3405,22 @@
     "lint_correction": "Only the two specs changed: align reported hash/call arguments, name nested setup data, lift the immutable source list outside its loop, and use native exists?(conditions). No cops/assertions removed.",
     "new_sha_validation": "required",
     "complete_23_figures": false
+  },
+  "latest_verified_increment": {
+    "sha": "090a1dac765039ab4314bd45d85a9409e9329135",
+    "run": 44427479081,
+    "artifact": 14486734653,
+    "artifact_sha256": "e1204b106d64441b3be63d7a6ea7f6bd5b1f03ed8efc6efd3fe93ee766831df5",
+    "rails_distinct": 1196,
+    "schema_reload_reexecutions": 16,
+    "vue": 528,
+    "chrome": 148,
+    "screenshot_hashes_verified": 216,
+    "png_really_reviewed": 4,
+    "scope": "Roteamento local nativo e proteçãoACW validada porVue; não equivale ao Hoya completo/PABX ou versões posteriores.",
+    "visual_followup_pending": "Capturas do editor com referências ainda carregando; nomes exatos e rótulos em QAposterior.",
+    "all23_complete": false,
+    "stages_0_2_complete": false,
+    "external_homologation": false
   }
 }

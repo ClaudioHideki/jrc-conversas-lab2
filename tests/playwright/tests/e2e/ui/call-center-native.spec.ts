@@ -2627,6 +2627,53 @@ test('local IVR scoped records and forced URLs obey corporate coverage and fresh
   );
   expect(simulated.status()).toBe(404);
   const membershipEndpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/teams/${target.scoped_team_id}/team_members`;
+  const initialRoster = await page.request.get(membershipEndpoint, {
+    headers: target.administrator,
+  });
+  expect(initialRoster.status()).toBe(200);
+  const selectedIds = (await initialRoster.json()).map(
+    (member: { id: number | string }) => String(member.id)
+  );
+  expect(selectedIds).toContain(String(target.scoped_user_id));
+  const unchangedRoster = await page.request.patch(membershipEndpoint, {
+    headers: target.administrator,
+    data: { user_ids: selectedIds },
+  });
+  expect(unchangedRoster.status()).toBe(200);
+  const persistedRoster = await page.request.get(membershipEndpoint, {
+    headers: target.administrator,
+  });
+  expect(persistedRoster.status()).toBe(200);
+  const persistedIds = (await persistedRoster.json()).map(
+    (member: { id: number | string }) => String(member.id)
+  );
+  expect(persistedIds).toEqual(expect.arrayContaining(selectedIds));
+  expect(persistedIds).toHaveLength(selectedIds.length);
+  await page.reload();
+  await expect(page.locator(`[data-ivr-draft="${own.id}"]`)).toBeVisible();
+  await expect(page.locator(`[data-ivr-draft="${denied.id}"]`)).toHaveCount(0);
+  const preservedOrigin = await page.request.get(endpoint + '/' + own.id, {
+    headers: target.scoped,
+  });
+  expect(preservedOrigin.status()).toBe(200);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-team-roster-identity.json`,
+    JSON.stringify({
+      synthetic: true,
+      sha: process.env.GITHUB_SHA,
+      account_id: target.account_id,
+      team_id: target.scoped_team_id,
+      selected_ids: selectedIds,
+      persisted_ids: persistedIds,
+      preserved_origin_id: own.id,
+      denied_origin_id: denied.id,
+      canonical_string_ids: true,
+    })
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-team-roster-preserved.png`,
+    fullPage: false,
+  });
   try {
     const removed = await page.request.delete(membershipEndpoint, {
       headers: target.administrator,
@@ -4138,6 +4185,12 @@ test('scoped ACW native popup persists queue rules blocks conflicts and keeps sc
   await page.goto(ownBase + '/closures');
   await page.locator('[data-create]').click();
   const dialog = page.getByRole('dialog');
+  await expect(
+    dialog.getByRole('heading', {
+      name: 'Configurar regras de pós-atendimento',
+      exact: true,
+    })
+  ).toBeVisible();
   await expectContainedDialog(page);
   await dialog.locator('[data-add-acw-rule]').click();
   let row = dialog.locator('[data-acw-rule-row]').first();
@@ -4396,6 +4449,35 @@ test('native local routing drafts persist paginate review conflicts and deny una
   await expect(dialog).not.toBeVisible();
   await page.locator('[data-routing-open]').click();
   await expect(dialog.locator('[data-routing-source]')).toHaveValue('31');
+  const unitDetail = await page.request.get(
+    `${ownApi}/units/${target.unit_id}`,
+    { headers: target.administrator }
+  );
+  const queueDetail = await page.request.get(
+    `${ownApi}/queues/${target.queue_id}`,
+    { headers: target.administrator }
+  );
+  expect(unitDetail.status()).toBe(200);
+  expect(queueDetail.status()).toBe(200);
+  const currentUnit = (await unitDetail.json()).item;
+  const currentQueue = (await queueDetail.json()).item;
+  expect(String(currentUnit.id)).toBe(String(target.unit_id));
+  expect(String(currentQueue.id)).toBe(String(target.queue_id));
+  await expect(dialog.locator('#routing-unit')).toBeEnabled();
+  await expect(dialog.locator('#routing-queue')).toBeEnabled();
+  await expect(dialog.locator('#routing-unit option:checked')).toContainText(
+    currentUnit.name
+  );
+  await expect(dialog.locator('#routing-queue option:checked')).toContainText(
+    currentQueue.name
+  );
+  await expect(
+    dialog.getByText('Critério de roteamento', { exact: true })
+  ).toBeVisible();
+  await expect(
+    dialog.getByText('Tipo de unidade', { exact: true })
+  ).toHaveCount(0);
+  await expect(dialog.getByText('Versão', { exact: true })).toBeVisible();
   await expectContainedDialog(page);
   expect(
     await page.evaluate(
@@ -4424,6 +4506,15 @@ test('native local routing drafts persist paginate review conflicts and deny una
   );
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-routing-draft.png`,
+    fullPage: false,
+  });
+  await dialog.locator('#routing-queue').scrollIntoViewIfNeeded();
+  await expect(dialog.locator('#routing-queue option:checked')).toContainText(
+    currentQueue.name
+  );
+  await expectContainedDialog(page);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-routing-targets.png`,
     fullPage: false,
   });
   await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
@@ -4492,6 +4583,11 @@ test('native local routing drafts persist paginate review conflicts and deny una
   expect((await auditNavigation).status()).toBe(200);
   await expect(page.locator('[data-audit-row]')).toHaveCount(4);
   await page.locator('[data-audit-detail]').first().click();
+  await expect(
+    page
+      .getByRole('dialog')
+      .getByRole('heading', { name: 'Critério de roteamento', exact: true })
+  ).toHaveCount(1);
   const auditSource = page
     .getByRole('dialog')
     .getByRole('heading', { name: 'Origem de roteamento', exact: true });

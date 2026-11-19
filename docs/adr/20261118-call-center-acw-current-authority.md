@@ -21,3 +21,8 @@ ESLint estático: comparar os seis arquivos à base e preservar avisos preexiste
 ## Limites
 
 Seleção intermediária persistida, relógio por motivo, formulários e automações de encerramento seguem pendentes. Os snapshots e as regras ACW anteriores não são alterados. Não é conclusão da figura 9, das etapas 0–2 nem das 23 referências. Nenhuma operação de produção, build de imagem, publicação, deploy ou PABX.
+
+
+## Projeção auxiliar do operador — acompanhamento preparado
+
+O workspace também mantém um fetch auxiliar de AgentState. Preparados descarte da resposta auxiliar após falha de revalidaçãoACW e ocultação desse fallback enquanto a situação atual está sem validação. O evento de detalhe da chamada não o repovoa nessa condição. Uma regressãoVue adicional resolve o fetch antigo somente depois do403 da consulta de qualificação. Não altera permissões de voz ou fontes nativas e ainda exige CI do próximoSHA.

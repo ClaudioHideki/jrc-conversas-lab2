@@ -21,6 +21,15 @@ const render = fields =>
   });
 
 describe('native routing draft fields', () => {
+  it('labels a routing criterion independently of the operational unit kind', () => {
+    const wrapper = render();
+    expect(
+      wrapper.get('[data-routing-kind]').element.closest('label').textContent
+    ).toContain('JRC_CONTACT_CENTER.ROUTING_DRAFTS.KIND');
+    expect(wrapper.text()).not.toContain('JRC_CONTACT_CENTER.ADMIN.KIND');
+    wrapper.unmount();
+  });
+
   it('uses authorized native reference pickers and resets a queue only when its unit is explicitly changed', () => {
     const wrapper = render();
     const [unit, queue] = wrapper.findAllComponents(IvrReferencePicker);

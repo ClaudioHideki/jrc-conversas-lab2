@@ -24,6 +24,29 @@ const render = (record = {}) =>
   });
 
 describe('native ACW audit detail', () => {
+  it('uses routing-specific headings only for the native routing resource', async () => {
+    const wrapper = render({
+      resource_type: 'routing_rule',
+      before: { kind: 'ddd' },
+      after: { kind: 'service' },
+    });
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.ROUTING_DRAFTS.KIND');
+    expect(wrapper.text()).not.toContain('JRC_CONTACT_CENTER.ADMIN.KIND');
+    await wrapper.setProps({
+      record: {
+        id: 8,
+        resource_type: 'unit',
+        before: { kind: 'sac' },
+        after: { kind: 'cobranca' },
+      },
+    });
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.ADMIN.KIND');
+    expect(wrapper.text()).not.toContain(
+      'JRC_CONTACT_CENTER.ROUTING_DRAFTS.KIND'
+    );
+    wrapper.unmount();
+  });
+
   it('renders sanitized routing history using native target and state labels', () => {
     const wrapper = render({
       before: { source_value: '11', kind: 'ddd', state: 'draft' },

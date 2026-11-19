@@ -696,4 +696,34 @@ describe('inbox native SIP action guards', () => {
     expect(CCAPI.qualifications).not.toHaveBeenCalled();
     expect(wrapper.find('progress').exists()).toBe(true);
   });
+
+  it('discards the independent operator fallback if its read arrives after qualification authorization is denied', async () => {
+    let resolve;
+    CCAPI.agentState.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    CCAPI.qualifications.mockRejectedValueOnce({ response: { status: 403 } });
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    await flushPromises();
+    resolve({
+      data: {
+        item: {
+          account_user_id: 9,
+          state: 'paused',
+          pause_catalog: {
+            enabled: true,
+            reasons: [{ code: 'PRIVATE old source' }],
+          },
+        },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.vm.agent).toBeNull();
+    expect(wrapper.vm.displayAgent).toBeNull();
+    expect(wrapper.find('progress').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('PRIVATE old source');
+  });
 });

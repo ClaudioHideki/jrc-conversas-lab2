@@ -59,7 +59,7 @@ const kinds = ['ddd', 'customer', 'portfolio', 'service', 'fallback'];
       />
     </label>
     <label class="min-w-0 text-sm">
-      {{ t('JRC_CONTACT_CENTER.ADMIN.KIND') }}
+      {{ text('KIND') }}
       <select
         :value="modelValue.kind"
         data-routing-kind

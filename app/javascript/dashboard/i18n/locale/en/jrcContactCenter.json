@@ -1879,7 +1879,7 @@
       "DESTROY": "Remoção",
       "ID": "ID do evento",
       "DATE": "Data e hora",
-      "REVISION": "Versão do evento",
+      "REVISION": "Versão",
       "BEFORE": "Antes",
       "AFTER": "Depois",
       "OMITTED": "Conteúdo privado foi omitido desta alteração. As configurações completas e os segredos não são exibidos.",
@@ -2143,6 +2143,7 @@
       "AUDIT_DETAIL": "Vínculo do gestor: {manager} · Fila: {queue} · Agentes elegíveis: {before} → {after}."
     },
     "ACW_RULES": {
+      "CONFIGURATION_TITLE": "Configurar regras de pós-atendimento",
       "TITLE": "ACW de voz por motivo e origem",
       "HINT": "Fila → equipe → regra geral. Conflitos no mesmo nível bloqueiam a conclusão. Somente novos atendimentos capturam estas regras. O relógio inicial usa o limite geral; o motivo selecionado define o limite na conclusão. Não publica no PABX.",
       "REASON": "Código do motivo de encerramento",
@@ -2160,6 +2161,7 @@
       "INVALID": "Revise os campos e os tempos das regras de ACW."
     },
     "ROUTING_DRAFTS": {
+      "KIND": "Critério de roteamento",
       "RESOURCE": "Regra local de roteamento",
       "RULE_KEY": "Identificador da regra",
       "SOURCE": "Origem de roteamento",

@@ -32,3 +32,12 @@ CI44423463990:1.196 Rails distintos (1.040 principais,71 concorrentes,85 corpora
 O Dialog real do próprio SHA expõe open/close (defineExpose na linha132); o stub booleano do spec não os implementava. Corrigido o substituto para expor esse mesmo contrato e acrescentada a verificação de fechamento ao revogar configure. Preservadas as seis verificações funcionais, filtros, paginação e negações; nenhum fallback foi adicionado ao produto para ocultar o erro de fixture.
 
 Próximo checkpoint também contém o incremento ACW de autoridade atual, preparado separadamente e descrito em seu ADR. Ambos exigem os gates do próprioSHA; não há aceite Chrome herdado.
+
+
+## Aceite incremental090a1dac e revisão visual real
+
+CI44427479081 aprovada no SHA090a1dac765039ab4314bd45d85a9409e9329135:1.196 Rails distintos (1.040 principais,71concorrentes,85corporativos),16recargas,528Vue e148Chrome; zero falhas,pendências,erros externos,skips,flaky e novas infraçõesRuby. Bootstrap15 eCSS novos aprovados. Artefato14486734653,35.578.540bytes,SHA-256 e1204b106d64441b3be63d7a6ea7f6bd5b1f03ed8efc6efd3fe93ee766831df5, recuperado e216 hashes de capturas verificados.
+
+Quatro PNG realmente revisados: editor e auditoria,desktopclaro/celularescuro. Contenção e cores reais corretas (715escuro/96claro nos quatro projetos). A captura do editor ocorreu durante carregamento de referências, portanto ainda não comprova seus nomes estabilizados. Preparadas verificações dos nomes retornados pelos endpoints nativos de detalhe e nova captura da região de destinos depois do carregamento, sem substituir a API por fixture.
+
+Rótulos revisados: kind da regra é Critério de roteamento, preservando Tipo de unidade em auditoria/comparação de unidades. O rótulo compartilhado CC de revisão passa de Versão do evento para Versão, correto também para regras/políticas. QuatroVue adicionais e verificaçõesChrome preparados; não são evidência nativa do próximoSHA. Sem alteração em ordem,permissões,contrato de versões ou publicaçãoPABX. A comparação mantém o rascunho completo após revisão explícita; não foi acrescentado paginador especulativo ao histórico.

@@ -75,6 +75,10 @@ const fieldLabels = {
   allowed: t('JRC_CONTACT_CENTER.ACCESS.ALLOWED'),
   denied: t('JRC_CONTACT_CENTER.ACCESS.DENIED'),
 };
+const fieldTitle = field =>
+  field === 'kind' && props.record.resource_type === 'routing_rule'
+    ? t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.KIND')
+    : fieldLabels[field] || field;
 const permissionLabels = {
   jrc_contact_center_view: t('CUSTOM_ROLE.PERMISSIONS.JRC_CONTACT_CENTER_VIEW'),
   jrc_contact_center_operate: t(
@@ -260,7 +264,7 @@ const value = (entry, field = '') => {
         :key="field"
         class="rounded-lg border border-n-weak p-3"
       >
-        <h4 class="font-semibold">{{ fieldLabels[field] || field }}</h4>
+        <h4 class="font-semibold">{{ fieldTitle(field) }}</h4>
         <div class="mt-2 grid min-w-0 gap-3 sm:grid-cols-2">
           <div class="min-w-0">
             <p class="text-n-ruby-11">{{ labels.before }}</p>
