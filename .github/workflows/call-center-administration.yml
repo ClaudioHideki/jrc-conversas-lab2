@@ -117,7 +117,7 @@ jobs:
             spec/enterprise/controllers/api/v1/accounts/custom_roles_controller_spec.rb spec/enterprise/models/custom_role_spec.rb \
             spec/enterprise/models/contact_center_custom_role_audit_spec.rb spec/enterprise/controllers/api/v1/accounts/audit_logs_controller_spec.rb \
             spec/services/jrc_crm/corporate_coverage_spec.rb spec/models/jrc_crm/organizational_structure_spec.rb \
-            spec/services/jrc_crm/current_structure_scopes_spec.rb \
+            spec/services/jrc_crm/current_structure_scopes_spec.rb spec/services/jrc_crm/team_membership_projection_spec.rb \
             spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
             spec/services/jrc_operator/commands_spec.rb \
             --exclude-pattern '**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb' \
@@ -163,6 +163,7 @@ jobs:
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContactDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/components/MasterContactDetails.spec.js \
             app/javascript/dashboard/routes/dashboard/webphone app/javascript/dashboard/routes/dashboard/settings/customRoles \
             app/javascript/dashboard/components/widgets/BackButton.spec.js \
+            app/javascript/dashboard/api/specs/teams.spec.js app/javascript/dashboard/store/modules/specs/teamMembers \
             app/javascript/dashboard/routes/dashboard/inbox/useAttendanceClosing.spec.js app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.spec.js app/javascript/dashboard/routes/dashboard/inbox/InboxVoicePanel.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/call-center-vitest.json
@@ -228,7 +229,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
-          assert stats['expected'] == 148
+          assert stats['expected'] == 152
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
           source = Path('docs/jrc_contact_center/stages_0_2_review_20261116.json')

@@ -31,5 +31,18 @@ class JrcContactCenter::ConfigurationAudit
     record.cc_withdrawal_review = nil
     { 'manager_review' => values }
   end
+
+  def self.write_team_withdrawal!(queue, review:)
+    snapshot = JrcContactCenter::ConfigurationAuditSnapshot.capture(queue)
+    Audited.audit_class.create!(
+      auditable: queue, associated: queue.account, user: Current.user, action: 'update', comment: COMMENT,
+      audited_changes: {
+        'attributes' => [snapshot.fetch('attributes'), snapshot.fetch('attributes')],
+        'cc_scope' => { 'before' => snapshot.fetch('scope'), 'after' => snapshot.fetch('scope') },
+        'omitted_fields' => [], 'schema_version' => 1,
+        'manager_review' => review.slice(*JrcContactCenter::TeamRosterWithdrawalReview::AUDIT_FIELDS)
+      }
+    )
+  end
   private_class_method :manager_review
 end

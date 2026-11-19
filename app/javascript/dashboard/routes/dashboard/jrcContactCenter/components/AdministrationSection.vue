@@ -6,13 +6,19 @@ import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import API from 'dashboard/api/jrcContactCenter';
 import TeamsAPI from 'dashboard/api/teams';
 import CustomRoleAPI from 'dashboard/api/customRole';
+import { useMapGetter } from 'dashboard/composables/store';
 import NativeRoleEditor from './NativeRoleEditor.vue';
 import AuthorityAssignments from './AuthorityAssignments.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import PauseCatalogEditor from './PauseCatalogEditor.vue';
 import AcwRulesEditor from './AcwRulesEditor.vue';
 import QueueWithdrawalConfirmation from './QueueWithdrawalConfirmation.vue';
+import TeamRosterWithdrawalConfirmation from './TeamRosterWithdrawalConfirmation.vue';
 import { useQueueWithdrawalReview } from '../composables/useQueueWithdrawalReview';
+import {
+  teamRosterReviewAuthority,
+  useTeamRosterWithdrawalReview,
+} from '../composables/useTeamRosterWithdrawalReview';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 
 const props = defineProps({
@@ -24,6 +30,7 @@ const emit = defineEmits(['changed']);
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const currentUser = useMapGetter('getCurrentUser');
 const key = computed(() => props.card.key);
 const permissionScope = computed({
   get: () => {
@@ -87,6 +94,15 @@ const withdrawal = useQueueWithdrawalReview({
   record: editing,
   draft,
   allowed: computed(() => props.context.capabilities.configure),
+});
+const teamWithdrawal = useTeamRosterWithdrawalReview({
+  accountId: computed(() => props.accountId),
+  teamId: computed(() => editing.value?.id),
+  agentsList: teamMemberIds,
+  authority: computed(() => ({
+    ...teamRosterReviewAuthority(currentUser.value, props.accountId),
+    capabilities: props.context.capabilities,
+  })),
 });
 const configurationSaveAllowed = () => {
   const expectsRecord = Boolean(
@@ -312,9 +328,16 @@ const open = async row => {
   }
 };
 const saveTeamMembers = async () => {
-  if (savingMembers.value || saving.value || !canEdit.value || !editing.value)
+  if (
+    savingMembers.value ||
+    saving.value ||
+    !canEdit.value ||
+    !editing.value ||
+    !teamWithdrawal.canSave.value
+  )
     return;
   const version = generation;
+  const requestKey = teamWithdrawal.fingerprint();
   savingMembers.value = true;
   formError.value = '';
   membersSaved.value = false;
@@ -322,13 +345,18 @@ const saveTeamMembers = async () => {
     await TeamsAPI.updateAgents({
       teamId: editing.value.id,
       agentsList: [...teamMemberIds.value],
+      ...teamWithdrawal.options(),
     });
-    if (version === generation) {
+    if (version === generation && requestKey === teamWithdrawal.fingerprint()) {
       membersSaved.value = true;
       savedTeamMemberIds.value = [...teamMemberIds.value];
+      teamWithdrawal.clear();
     }
   } catch (error) {
-    if (version === generation)
+    if (
+      version === generation &&
+      !teamWithdrawal.handleError(error, requestKey)
+    )
       formError.value = error.response?.data?.error || label('SAVE_ERROR');
   } finally {
     savingMembers.value = false;
@@ -876,6 +904,7 @@ onBeforeUnmount(() => {
       @close="
         configurationRevision.capture(null);
         withdrawal.clear();
+        teamWithdrawal.clear();
       "
     >
       <NativeRoleEditor
@@ -1160,12 +1189,19 @@ onBeforeUnmount(() => {
           </div>
           <button
             type="button"
+            :disabled="!teamWithdrawal.canSave.value"
             class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11 disabled:opacity-40"
             data-save-team-members
             @click="saveTeamMembers"
           >
             {{ label('SAVE_TEAM_MEMBERS') }}
           </button>
+          <TeamRosterWithdrawalConfirmation
+            v-if="teamWithdrawal.state.review || teamWithdrawal.state.error"
+            :state="teamWithdrawal.state"
+            :busy="savingMembers"
+            @confirm="teamWithdrawal.state.confirmed = $event"
+          />
           <p v-if="savingMembers" role="status" class="text-sm text-n-slate-11">
             {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}
           </p>

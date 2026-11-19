@@ -49,6 +49,7 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
       account.jrc_crm_team_scopes.destroy_all
       account.teams.destroy_all
       JrcContactCenter::CallSession.where(account: account).destroy_all
+      JrcContactCenter::QueueMembership.where(account: account).destroy_all
       JrcContactCenter::Queue.where(account: account).destroy_all
       JrcContactCenter::Unit.where(account: account).destroy_all
       account.jrc_crm_business_units.destroy_all
@@ -127,6 +128,44 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
       expect(actor.reload).not_to be_active_for_authentication
       expect(status).to eq(401)
       expect(team.team_members.reload.pluck(:user_id)).to eq(original)
+    end
+  end
+
+  context 'when the last configured agent depends on native team membership' do
+    before do
+      peer = account.account_users.find_by!(user: recipient)
+      peer.update!(custom_role: create(:custom_role, account: account, permissions: []))
+      JrcContactCenter::AccessGrant.create!(account: account, account_user: peer, eligible: true)
+      team.add_members([recipient.id])
+      account.jrc_crm_user_business_units.create!(user: recipient, team: team, scope: 'GROUP', structure_managed: true)
+      JrcContactCenter::AccessGrant.create!(account: account, team: team, allowed: %w[jrc_contact_center_view jrc_contact_center_operate])
+      JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: peer)
+    end
+
+    it 'rechecks configuration authority after the real native roster request waits on the account mutex' do
+      change = -> { account.account_users.find_by!(user: actor).custom_role.update!(permissions: ['jrc_contact_center_view']) }
+      status = race_with_scope_change(
+        change: change, verb: :delete, endpoint: "/api/v1/accounts/#{account.id}/teams/#{team.id}/team_members",
+        payload: { user_ids: [recipient.id] }, defer: true
+      )
+      expect(status).to eq(401)
+      expect(team.members).to include(recipient)
+      expect(Audited.audit_class.where(auditable: queue, action: 'update')).to be_empty
+    end
+
+    it 'refuses a reviewed receipt after its queue revision changes during the actual SQL lock wait' do
+      endpoint = "/api/v1/accounts/#{account.id}/teams/#{team.id}/team_members"
+      delete endpoint, headers: headers, params: { user_ids: [recipient.id] }, as: :json
+      expect(response).to have_http_status(:conflict)
+      token = response.parsed_body.fetch('review').fetch('review_token')
+      status = race_with_scope_change(
+        change: -> { queue.update!(name: 'SYNTHETIC concurrent reviewed queue') }, verb: :delete, endpoint: endpoint,
+        payload: { user_ids: [recipient.id], manager_confirmation: { confirmed: true, review_token: token } }, defer: true
+      )
+      expect(status).to eq(409)
+      expect(team.members).to include(recipient)
+      events = Audited.audit_class.where(auditable: queue, action: 'update')
+      expect(events.filter_map { |event| event.audited_changes['manager_review'] }).to be_empty
     end
   end
 

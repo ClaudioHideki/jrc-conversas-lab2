@@ -11,9 +11,10 @@ class JrcCrm::CorporateCoverage
     ::TeamMember.where(team_id: team_ids).select(:user_id)
   end
 
-  def initialize(account:, user:)
+  def initialize(account:, user:, team_membership_projection: nil)
     @account = account
     @user = user
+    @team_membership_projection = team_membership_projection
   end
 
   def group?
@@ -160,6 +161,6 @@ class JrcCrm::CorporateCoverage
   end
 
   def scopes
-    JrcCrm::CurrentStructureScopes.new(account: @account, user: @user).call
+    JrcCrm::CurrentStructureScopes.new(account: @account, user: @user, team_membership_projection: @team_membership_projection).call
   end
 end

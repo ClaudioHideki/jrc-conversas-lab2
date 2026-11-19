@@ -544,6 +544,68 @@ describe('administrative workflow', () => {
     expect(API.saveQueueMembership).not.toHaveBeenCalled();
   });
 
+  it('requires explicit manager review before retrying a team removal and never sends a queue reassignment', async () => {
+    mocks.route.query = { queues_tab: 'teams' };
+    API.administrativeList.mockResolvedValue({
+      data: {
+        items: [{ id: 4, name: 'Native team' }],
+        agents: [{ user_id: 8, name: 'Eligible member' }],
+        can_manage: true,
+      },
+    });
+    TeamsAPI.getAgents.mockResolvedValue({ data: [{ id: 8 }] });
+    TeamsAPI.updateAgents
+      .mockRejectedValueOnce({
+        response: {
+          status: 409,
+          data: {
+            error: 'team_roster_confirmation_required',
+            review: {
+              account_id: '1',
+              team_id: '4',
+              team_name: 'Native team',
+              operation: 'update',
+              queues: [
+                {
+                  queue_id: '2',
+                  unit_id: '1',
+                  queue_name: 'SYNTHETIC affected queue',
+                  previous_count: 1,
+                  remaining_count: 0,
+                },
+              ],
+              review_token: 'synthetic-client-only-receipt',
+            },
+          },
+        },
+      })
+      .mockResolvedValueOnce({ data: [] });
+    const wrapper = mountSection('queues');
+    await flushPromises();
+    await wrapper.get('[data-edit]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-team-member="8"]').setValue(false);
+    await wrapper.get('[data-save-team-members]').trigger('click');
+    await flushPromises();
+    expect(TeamsAPI.updateAgents).toHaveBeenCalledTimes(1);
+    expect(wrapper.get('[data-save-team-members]').element.disabled).toBe(true);
+    await wrapper.get('[data-team-manager-withdrawal-confirm]').setValue(true);
+    await wrapper.get('[data-save-team-members]').trigger('click');
+    await flushPromises();
+    expect(TeamsAPI.updateAgents).toHaveBeenLastCalledWith({
+      teamId: 4,
+      agentsList: [],
+      managerConfirmation: {
+        confirmed: true,
+        review_token: 'synthetic-client-only-receipt',
+      },
+    });
+    expect(wrapper.find('[data-team-roster-withdrawal-review]').exists()).toBe(
+      false
+    );
+    expect(API.saveQueueMembership).not.toHaveBeenCalled();
+  });
+
   it('preserves a stale native unit draft and requires an explicitly reviewed reload before retry', async () => {
     API.units.mockResolvedValue({
       data: {

@@ -62,30 +62,8 @@ class JrcContactCenter::QueueWithdrawalReview
   end
 
   def configured_eligible?(membership)
-    return false unless membership.active? && membership.role == 'agent' && active_window?(membership)
-
-    member = @account.account_users.find(membership.account_user_id)
-    return false unless authorized_operator?(member)
-
-    queue = JrcContactCenter::Queue.find_by!(account: @account, id: membership.queue_id)
-    scope = JrcContactCenter::OrganizationalScope.new(account: @account, account_user: member)
-    operational_queue?(queue) && scope.units.exists?(queue.unit_id)
-  end
-
-  def authorized_operator?(member)
-    context = { account: @account, account_user: member, user: member.user }
-    member.user.active_for_authentication? && JrcContactCenter::ModulePolicy.new(context, :contact_center).operate?
-  end
-
-  def operational_queue?(queue)
-    now = Time.current
-    queue.status == 'active' && queue.unit.status == 'active' &&
-      (!queue.active_from || queue.active_from <= now) && (!queue.active_until || queue.active_until > now)
-  end
-
-  def active_window?(membership)
-    now = Time.current
-    (!membership.starts_at || membership.starts_at <= now) && (!membership.ends_at || membership.ends_at > now)
+    @eligibility ||= JrcContactCenter::ConfiguredQueueEligibility.new(account: @account)
+    @eligibility.call(membership)
   end
 
   def review_identity(record, attributes)

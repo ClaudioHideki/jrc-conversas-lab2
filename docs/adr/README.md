@@ -45,3 +45,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Autoridade atual nas escritas operacionais](20261118-call-center-operating-write-authority.md): lock nativo, histórico transacional e QA responsivo, aguardando CI própria.
 
 - [Origem operacional e visibilidade nativa](20261118-call-center-operating-origins.md): reuso de escopos sem ampliação de acesso e prova em banco descartável.
+
+- [Retirada indireta pela composição da equipe](20261118-call-center-indirect-team-withdrawal.md): prévia sem escrita, revisão explícita do gestor e auditoria transacional; implementação preparada, aguardando CI própria.

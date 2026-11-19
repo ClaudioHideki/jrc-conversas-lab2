@@ -32,19 +32,21 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('native local routing')
-    ? 'routing'
-    : info.title.startsWith('scoped ACW native')
-      ? 'acw'
-      : info.title.startsWith('last eligible queue withdrawal')
-        ? 'withdrawal'
-        : info.title.startsWith('local pause duration supervisor')
-          ? 'duration'
-          : info.title.startsWith('local pause catalog operator')
-            ? 'operations'
-            : info.title.startsWith('local pause catalog')
-              ? 'editor'
-              : null;
+  const pauseKey = info.title.startsWith('team roster last eligible')
+    ? 'team_withdrawal'
+    : info.title.startsWith('native local routing')
+      ? 'routing'
+      : info.title.startsWith('scoped ACW native')
+        ? 'acw'
+        : info.title.startsWith('last eligible queue withdrawal')
+          ? 'withdrawal'
+          : info.title.startsWith('local pause duration supervisor')
+            ? 'duration'
+            : info.title.startsWith('local pause catalog operator')
+              ? 'operations'
+              : info.title.startsWith('local pause catalog')
+                ? 'editor'
+                : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -3893,6 +3895,190 @@ test('local pause catalog operator preserves legacy history and enforces only au
   });
 });
 
+test('team roster last eligible withdrawal uses real native review, persistence and scoped audit', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].team_withdrawal;
+  const nativeBase = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}`;
+  const rosterEndpoint = `${nativeBase}/teams/${target.team_id}/team_members`;
+  const rosterPath = new URL(rosterEndpoint).pathname;
+  const queueEndpoint = `${nativeBase}/jrc_contact_center/queue_memberships?queue_id=${target.queue_id}`;
+  const initial = await page.request.get(queueEndpoint, {
+    headers: target.administrator,
+  });
+  expect(initial.status()).toBe(200);
+  const originalMembership = (await initial.json()).items[0];
+  const nativeWrites = [];
+  page.on('request', request => {
+    if (
+      /\/(commands|sync_calls|telephony_integration)(?:[/?]|$)/.test(
+        request.url()
+      ) &&
+      !['GET', 'HEAD'].includes(request.method())
+    )
+      nativeWrites.push(request.url());
+  });
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/queues?queues_tab=teams`
+  );
+  const teamRow = page
+    .locator('[data-resource-row]')
+    .filter({ hasText: target.team_name });
+  await expect(teamRow).toHaveCount(1);
+  await teamRow.locator('[data-edit]').click();
+  await expectContainedDialog(page);
+  const dialog = page.getByRole('dialog');
+  const selection = dialog.locator(
+    `[data-team-member="${target.operator_user_id}"]`
+  );
+  await expect(selection).toBeChecked();
+  await selection.uncheck();
+  const first = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === rosterPath &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.locator('[data-save-team-members]').click();
+  const blocked = await first;
+  expect(new URL(blocked.url()).origin).toBe('http://127.0.0.1:5386');
+  expect(blocked.status()).toBe(409);
+  const review = (await blocked.json()).review;
+  expect(review).toMatchObject({
+    account_id: String(target.account_id),
+    team_id: String(target.team_id),
+    operation: 'update',
+  });
+  expect(review.queues).toEqual([
+    expect.objectContaining({
+      queue_id: String(target.queue_id),
+      previous_count: 1,
+      remaining_count: 0,
+    }),
+  ]);
+  const impact = dialog.locator('[data-team-roster-withdrawal-review]');
+  await expect(impact).toBeVisible();
+  await expect(impact).toContainText(review.queues[0].queue_name);
+  await expect(dialog.locator('[data-save-team-members]')).toBeDisabled();
+  const intact = await page.request.get(rosterEndpoint, {
+    headers: target.administrator,
+  });
+  expect((await intact.json()).map(member => member.id)).toContain(
+    target.operator_user_id
+  );
+  const denied = await page.request.patch(rosterEndpoint, {
+    headers: target.operator,
+    data: { user_ids: [] },
+  });
+  expect(denied.status()).toBe(401);
+  const forged = await page.request.patch(rosterEndpoint, {
+    headers: target.administrator,
+    data: {
+      user_ids: [],
+      manager_confirmation: {
+        confirmed: 'true',
+        review_token: review.review_token,
+      },
+    },
+  });
+  expect(forged.status()).toBe(409);
+  await selection.check();
+  await expect(impact).toHaveCount(0);
+  await selection.uncheck();
+  const next = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === rosterPath &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.locator('[data-save-team-members]').click();
+  expect((await next).status()).toBe(409);
+  await dialog.locator('[data-team-manager-withdrawal-confirm]').check();
+  await expect(dialog.locator('[data-save-team-members]')).toBeEnabled();
+  await impact.scrollIntoViewIfNeeded();
+  await expectContainedDialog(page);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  const reviewColor = await impact.evaluate(
+    element => getComputedStyle(element).color
+  );
+  const reviewBrightness = reviewColor
+    .match(/[\d.]+/g)
+    .slice(0, 3)
+    .map(Number)
+    .reduce((sum, value) => sum + value, 0);
+  if (info.project.name.endsWith('dark'))
+    expect(reviewBrightness).toBeGreaterThan(600);
+  else expect(reviewBrightness).toBeLessThan(300);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-team-last-agent-theme.json`,
+    JSON.stringify({ color: reviewColor, brightness: reviewBrightness })
+  );
+  await expect(page.locator('html')).toHaveClass(
+    info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-team-last-agent-manager-review.png`,
+    fullPage: false,
+  });
+  const save = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === rosterPath &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.locator('[data-save-team-members]').click();
+  expect((await save).status()).toBe(200);
+  await expect(impact).toHaveCount(0);
+  await page.reload();
+  const persisted = await page.request.get(rosterEndpoint, {
+    headers: target.administrator,
+  });
+  expect(await persisted.json()).toEqual([]);
+  const assignments = await page.request.get(queueEndpoint, {
+    headers: target.administrator,
+  });
+  expect((await assignments.json()).items[0]).toMatchObject({
+    id: originalMembership.id,
+    active: true,
+  });
+  const historyUrl = `${nativeBase}/jrc_contact_center/configuration_audits?resource_type=queue&resource_id=${target.queue_id}&history=true`;
+  const history = await page.request.get(historyUrl, {
+    headers: target.administrator,
+  });
+  expect(history.status()).toBe(200);
+  const reviews = (await history.json()).items.filter(
+    row => row.manager_review?.kind === 'jrc_cc_team_roster_withdrawal_v1'
+  );
+  expect(reviews).toHaveLength(1);
+  expect(reviews[0].manager_review).toMatchObject({
+    team_id: String(target.team_id),
+    queue_id: String(target.queue_id),
+    previous_count: 1,
+    remaining_count: 0,
+  });
+  expect(reviews[0].manager_review.receipt_sha256).toMatch(/^[a-f0-9]{64}$/);
+  expect(reviews[0].manager_review).not.toHaveProperty('review_token');
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audit?audit_source=configuration&audit_config_resource_type=queue&audit_config_resource_id=${target.queue_id}&audit_config_history=true`
+  );
+  const auditPanel = page.locator('[data-configuration-audit]');
+  await expect(auditPanel).toBeVisible();
+  await auditPanel
+    .locator('[data-audit-row]')
+    .filter({ hasText: `Fila #${target.queue_id} · Alteração` })
+    .locator('[data-audit-detail]')
+    .click();
+  await expect(page.locator('[data-audited-manager-withdrawal]')).toContainText(
+    `equipe #${target.team_id}`
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-team-last-agent-audit.png`,
+    fullPage: false,
+  });
+  expect(nativeWrites).toEqual([]);
+});
+
 test('last eligible queue withdrawal requires actual manager review and preserves native audit and scope', async ({
   page,
 }, info) => {
@@ -4472,8 +4658,17 @@ test('native local routing drafts persist paginate review conflicts and deny una
     currentQueue.name
   );
   await expect(
-    dialog.getByText('Critério de roteamento', { exact: true })
+    dialog.getByRole('combobox', {
+      name: 'Critério de roteamento',
+      exact: true,
+    })
   ).toBeVisible();
+  await expect(
+    dialog.getByRole('combobox', {
+      name: 'Critério de roteamento',
+      exact: true,
+    })
+  ).toHaveValue('ddd');
   await expect(
     dialog.getByText('Tipo de unidade', { exact: true })
   ).toHaveCount(0);

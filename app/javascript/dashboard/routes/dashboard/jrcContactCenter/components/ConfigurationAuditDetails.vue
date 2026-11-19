@@ -299,6 +299,16 @@ const value = (entry, field = '') => {
           })
         }}
       </p>
+      <p
+        v-if="record.manager_review.kind === 'jrc_cc_team_roster_withdrawal_v1'"
+        class="break-words"
+      >
+        {{
+          t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.AUDIT_DETAIL', {
+            team: record.manager_review.team_id,
+          })
+        }}
+      </p>
       <p class="text-n-slate-11">
         {{ t('JRC_CONTACT_CENTER.QUEUE_WITHDRAWAL.LOCAL_ONLY') }}
       </p>

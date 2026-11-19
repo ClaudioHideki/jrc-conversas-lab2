@@ -64,19 +64,46 @@ describe('#actions', () => {
 
       expect(commit.mock.calls).toEqual([
         [SET_TEAM_MEMBERS_UI_FLAG, { isUpdating: true }],
-        [ADD_AGENTS_TO_TEAM, { data: teamMembers }],
+        [ADD_AGENTS_TO_TEAM, { data: teamMembers, teamId: 1 }],
         [SET_TEAM_MEMBERS_UI_FLAG, { isUpdating: false }],
       ]);
     });
     it('sends correct actions if API is error', async () => {
-      axios.patch.mockRejectedValue({ message: 'Incorrect header' });
+      const error = {
+        message: 'Incorrect header',
+        response: {
+          status: 409,
+          data: { error: 'team_roster_confirmation_required' },
+        },
+      };
+      axios.patch.mockRejectedValue(error);
       await expect(
         actions.update({ commit }, { agentsList: teamMembers, teamId: 1 })
-      ).rejects.toThrow(Error);
+      ).rejects.toBe(error);
       expect(commit.mock.calls).toEqual([
         [SET_TEAM_MEMBERS_UI_FLAG, { isUpdating: true }],
         [SET_TEAM_MEMBERS_UI_FLAG, { isUpdating: false }],
       ]);
+    });
+
+    it('preserves an explicitly confirmed receipt and the native team identity on retry', async () => {
+      const managerConfirmation = {
+        confirmed: true,
+        review_token: 'SYNTHETIC receipt',
+      };
+      axios.patch.mockResolvedValue({ data: teamMembers });
+      await actions.update(
+        { commit },
+        { agentsList: [1], teamId: 2, managerConfirmation }
+      );
+      expect(axios.patch).toHaveBeenCalledWith('/api/v1/teams/2/team_members', {
+        user_ids: [1],
+        manager_confirmation: managerConfirmation,
+      });
+      expect(commit).toHaveBeenCalledWith(ADD_AGENTS_TO_TEAM, {
+        data: teamMembers,
+        teamId: 2,
+      });
     });
   });
 });

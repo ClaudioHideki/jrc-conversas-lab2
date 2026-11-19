@@ -1,8 +1,9 @@
 # Current sources of an explicit corporate grant; joining a team creates no grant.
 class JrcCrm::CurrentStructureScopes
-  def initialize(account:, user:)
+  def initialize(account:, user:, team_membership_projection: nil)
     @account = account
     @user = user
+    @team_membership_projection = team_membership_projection
   end
 
   def call
@@ -15,8 +16,11 @@ class JrcCrm::CurrentStructureScopes
   private
 
   def current_team_ids
-    Team.where(account_id: @account.id).joins(:team_members)
-        .where(team_members: { user_id: @user&.id }).select(:id)
+    current = Team.where(account_id: @account.id).joins(:team_members)
+                  .where(team_members: { user_id: @user&.id }).select(:id)
+    return current unless @team_membership_projection
+
+    @team_membership_projection.team_ids(account: @account, user: @user, current: current)
   end
 
   def containing_team_scope

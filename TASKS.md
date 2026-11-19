@@ -370,3 +370,8 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 ### Gate d14f975a — correção dirigida
 
 CI 44435975247: 1205 exemplos Rails distintos aprovados (1046 principais, 74 de concorrência e 85 corporativos), 16 recargas de schema separadas e 534/534 Vue. Um único novo RSpec/MatchArray bloqueou lint Ruby; assets/probe/148 Chrome não executaram. A correção usa contain_exactly com os mesmos dois IDs esperados, sem alterar a asserção funcional ou desativar regras. Nova CI deve comprovar o SHA corrigido. A prévia indireta de retirada por equipe permanece em preparação separada, sem uso nas APIs.
+
+
+### Retirada indireta de equipe — em preparação
+
+Prévia pura de composição de membros, serviço único de elegibilidade configurada, recibo explícito vinculado ao gestor e auditoria nativa por fila; reutilização nos três editores existentes. Quatorze arquivos frontend passaram lint dirigido sem erros/avisos novos. Rails/Vue/152Chrome (148 preservados +4novos) ainda precisam executar no novo SHA. Exclusão da entidade Team inteira e hierarquia não são declaradas cobertas. Escopo, testes e limites: docs/adr/20261118-call-center-indirect-team-withdrawal.md.

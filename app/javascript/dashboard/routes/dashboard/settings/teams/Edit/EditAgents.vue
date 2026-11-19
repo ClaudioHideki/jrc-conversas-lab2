@@ -1,5 +1,7 @@
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, useStore } from 'vuex';
+import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import router from '../../../../index';
 import { useAlert } from 'dashboard/composables';
 import { useVuelidate } from '@vuelidate/core';
@@ -7,12 +9,18 @@ import { useVuelidate } from '@vuelidate/core';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
 import PageHeader from '../../SettingsSubPageHeader.vue';
 import AgentSelector from '../AgentSelector.vue';
+import TeamRosterWithdrawalDialog from 'dashboard/routes/dashboard/jrcContactCenter/components/TeamRosterWithdrawalDialog.vue';
+import {
+  teamRosterReviewAuthority,
+  useTeamRosterWithdrawalReview,
+} from 'dashboard/routes/dashboard/jrcContactCenter/composables/useTeamRosterWithdrawalReview';
 
 export default {
   components: {
     Spinner,
     PageHeader,
     AgentSelector,
+    TeamRosterWithdrawalDialog,
   },
   validations: {
     selectedAgents: {
@@ -22,11 +30,24 @@ export default {
     },
   },
   setup() {
-    return { v$: useVuelidate() };
+    const store = useStore();
+    const route = useRoute();
+    const selectedAgents = ref([]);
+    const teamWithdrawal = useTeamRosterWithdrawalReview({
+      accountId: computed(() => route.params.accountId),
+      teamId: computed(() => route.params.teamId),
+      agentsList: selectedAgents,
+      authority: computed(() =>
+        teamRosterReviewAuthority(
+          store.getters.getCurrentUser,
+          route.params.accountId
+        )
+      ),
+    });
+    return { v$: useVuelidate(), selectedAgents, teamWithdrawal };
   },
   data() {
     return {
-      selectedAgents: [],
       isCreating: false,
     };
   },
@@ -77,14 +98,19 @@ export default {
       this.selectedAgents = [...newAgentList];
     },
     async addAgents() {
+      if (this.isCreating || !this.teamWithdrawal.canSave.value) return;
       this.isCreating = true;
+      const requestKey = this.teamWithdrawal.fingerprint();
       const { teamId, selectedAgents } = this;
 
       try {
         await this.$store.dispatch('teamMembers/update', {
           teamId,
           agentsList: selectedAgents,
+          ...this.teamWithdrawal.options(),
         });
+        if (requestKey !== this.teamWithdrawal.fingerprint()) return;
+        this.teamWithdrawal.clear();
         router.replace({
           name: 'settings_teams_edit_finish',
           params: {
@@ -94,9 +120,11 @@ export default {
         });
         this.$store.dispatch('teams/get');
       } catch (error) {
-        useAlert(error.message);
+        if (!this.teamWithdrawal.handleError(error, requestKey))
+          useAlert(error.message);
+      } finally {
+        this.isCreating = false;
       }
-      this.isCreating = false;
     },
   },
 };
@@ -129,6 +157,13 @@ export default {
         <div v-else class="flex items-center justify-center py-6">
           <Spinner class="text-n-blue-11" />
         </div>
+        <TeamRosterWithdrawalDialog
+          :state="teamWithdrawal.state"
+          :busy="isCreating"
+          @confirm="teamWithdrawal.state.confirmed = $event"
+          @submit="addAgents"
+          @cancel="teamWithdrawal.clear"
+        />
       </div>
     </form>
   </div>

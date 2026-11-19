@@ -2181,6 +2181,13 @@
       "NO_QUEUE": "Sem fila específica",
       "TARGET_REQUIRED": "Selecione uma unidade ou fila de destino autorizada.",
       "SAVE_ERROR": "Não foi possível salvar. Confira os dados e os vínculos autorizados; o rascunho foi preservado."
+    },
+    "TEAM_WITHDRAWAL": {
+      "TITLE": "Revisar retirada da equipe {team}",
+      "APPLY": "Aplicar retirada revisada",
+      "AUDIT_DETAIL": "A retirada pela equipe #{team} foi confirmada pelo gestor. A atribuição da fila foi preservada; a elegibilidade atual foi recalculada.",
+      "CONFIRM": "Como gestor autorizado, revisei as filas afetadas e confirmo a retirada de membros desta equipe.",
+      "MODAL_TITLE": "Revisar impacto nas filas"
     }
   }
 }

@@ -10,7 +10,7 @@ class JrcContactCenter::SyntheticPauseSeed
     raise 'Owned synthetic pause runner required' unless owned
 
     projects.index_with do |project|
-      %w[editor operations withdrawal duration acw routing].index_with { |kind| new("#{project}-#{kind}").call }
+      %w[editor operations withdrawal duration acw routing team_withdrawal].index_with { |kind| new("#{project}-#{kind}").call }
     end
   end
   private_class_method :new
@@ -29,10 +29,24 @@ class JrcContactCenter::SyntheticPauseSeed
     operator = create_member('operator', %w[jrc_contact_center_view jrc_contact_center_operate], :agent)
     assign_corporate_access(company, units, admin, scoped, operator)
     queues = create_queues(units, operator)
-    session_payload(units, queues, admin, scoped, operator)
+    payload = session_payload(units, queues, admin, scoped, operator)
+    payload.merge!(team_source(operator)) if @project.end_with?('-team_withdrawal')
+    payload
   end
 
   private
+
+  def team_source(operator)
+    team = Team.create!(account: @account, name: "SYNTHETIC #{@project} operational team")
+    team.add_members([operator.user_id])
+    source = JrcCrm::UserBusinessUnit.find_by!(account: @account, user: operator.user)
+    JrcCrm::TeamScope.create!(account: @account, team: team, scope: 'BUSINESS_UNIT',
+                             company_id: source.company_id, business_unit_id: source.business_unit_id)
+    source.update!(team: team)
+    operator.custom_role.update!(permissions: [])
+    JrcContactCenter::AccessGrant.create!(account: @account, team: team, allowed: %w[jrc_contact_center_view jrc_contact_center_operate])
+    { team_id: team.id, team_name: team.name, operator_user_id: operator.user_id }
+  end
 
   def assign_corporate_access(company, units, admin, scoped, operator)
     JrcCrm::UserBusinessUnit.create!(account: @account, user: admin.user, scope: 'GROUP', active: true, structure_managed: true)

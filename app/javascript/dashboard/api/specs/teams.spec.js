@@ -60,5 +60,24 @@ describe('#TeamsAPI', () => {
         }
       );
     });
+
+    it('sends an explicitly supplied manager receipt without changing the native team endpoint', () => {
+      const managerConfirmation = {
+        confirmed: true,
+        review_token: 'SYNTHETIC receipt',
+      };
+      teamsAPI.updateAgents({
+        teamId: 1,
+        agentsList: [2],
+        managerConfirmation,
+      });
+      expect(axiosMock.patch).toHaveBeenCalledWith(
+        '/api/v1/teams/1/team_members',
+        {
+          user_ids: [2],
+          manager_confirmation: managerConfirmation,
+        }
+      );
+    });
   });
 });

@@ -1,11 +1,21 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
+import Icon from 'dashboard/components-next/icon/Icon.vue';
 import { organizationStructureAPI } from 'dashboard/api/crm';
 import teamsAPI from 'dashboard/api/teams';
 import CorporateProfileFields from './CorporateProfileFields.vue';
+import TeamRosterWithdrawalDialog from 'dashboard/routes/dashboard/jrcContactCenter/components/TeamRosterWithdrawalDialog.vue';
+import {
+  teamRosterReviewAuthority,
+  useTeamRosterWithdrawalReview,
+} from 'dashboard/routes/dashboard/jrcContactCenter/composables/useTeamRosterWithdrawalReview';
 
 const { t } = useI18n();
+const store = useStore();
+const route = useRoute();
 const data = ref({
   group: {},
   operating_companies: [],
@@ -69,6 +79,18 @@ const userScopeForm = reactive({
   active: true,
 });
 const memberSelection = reactive({});
+const pendingWithdrawal = ref(null);
+const teamWithdrawal = useTeamRosterWithdrawalReview({
+  accountId: computed(() => route.params.accountId),
+  teamId: computed(() => pendingWithdrawal.value?.teamId),
+  agentsList: computed(() => pendingWithdrawal.value?.ids || []),
+  authority: computed(() =>
+    teamRosterReviewAuthority(
+      store.getters.getCurrentUser,
+      route.params.accountId
+    )
+  ),
+});
 
 const companies = computed(() => data.value.operating_companies || []);
 const units = computed(() => data.value.business_units || []);
@@ -239,6 +261,9 @@ const createTeam = async () => {
 };
 
 const addMember = async team => {
+  if (saving.value) return;
+  teamWithdrawal.clear();
+  pendingWithdrawal.value = null;
   const userId = Number(memberSelection[team.id]);
   if (!userId) return;
   const ids = [
@@ -259,20 +284,42 @@ const addMember = async team => {
 };
 
 const removeMember = async (team, member) => {
+  if (saving.value) return;
   const ids = team.members
     .map(item => Number(item.id))
     .filter(id => id !== Number(member.id));
+  pendingWithdrawal.value = { teamId: team.id, memberId: member.id, ids };
+  if (!teamWithdrawal.canSave.value) return;
+  const requestKey = teamWithdrawal.fingerprint();
   saving.value = true;
   error.value = '';
   try {
-    await teamsAPI.updateAgents({ teamId: team.id, agentsList: ids });
+    await teamsAPI.updateAgents({
+      teamId: team.id,
+      agentsList: ids,
+      ...teamWithdrawal.options(),
+    });
+    if (requestKey !== teamWithdrawal.fingerprint()) return;
+    teamWithdrawal.clear();
+    pendingWithdrawal.value = null;
     await load();
     notice.value = t('CRM.ORGANIZATION.SAVED');
   } catch (e) {
-    error.value = message(e);
+    if (!teamWithdrawal.handleError(e, requestKey)) error.value = message(e);
   } finally {
     saving.value = false;
   }
+};
+
+const applyTeamWithdrawal = () => {
+  const team = teams.value.find(
+    row => row.id === pendingWithdrawal.value?.teamId
+  );
+  const member = team?.members.find(
+    row => row.id === pendingWithdrawal.value?.memberId
+  );
+  if (team && member) removeMember(team, member);
+  else teamWithdrawal.clear();
 };
 
 const normalizeScopeForm = form => {
@@ -737,9 +784,8 @@ onMounted(load);
                   :aria-label="t('CRM.ORGANIZATION.REMOVE_MEMBER')"
                   @click="removeMember(team, member)"
                 >
-                  ×
-                </button></span
-              >
+                  <Icon icon="i-lucide-x" aria-hidden="true" /></button
+              ></span>
             </div>
             <div class="mt-3 flex gap-2">
               <select
@@ -1000,5 +1046,12 @@ onMounted(load);
         </p>
       </section>
     </template>
+    <TeamRosterWithdrawalDialog
+      :state="teamWithdrawal.state"
+      :busy="saving"
+      @confirm="teamWithdrawal.state.confirmed = $event"
+      @submit="applyTeamWithdrawal"
+      @cancel="teamWithdrawal.clear"
+    />
   </div>
 </template>

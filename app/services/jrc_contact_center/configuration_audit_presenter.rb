@@ -21,7 +21,7 @@ class JrcContactCenter::ConfigurationAuditPresenter
       scopes: changes['cc_scope'], omitted_fields: changes.fetch('omitted_fields', []), result: 'recorded_locally'
     }
     if changes['manager_review'].is_a?(Hash)
-      payload[:manager_review] = changes['manager_review'].slice(*JrcContactCenter::QueueWithdrawalReview::AUDIT_FIELDS)
+      payload[:manager_review] = changes['manager_review'].slice(*JrcContactCenter::TeamRosterWithdrawalReview::AUDIT_FIELDS)
     end
     payload
   end
