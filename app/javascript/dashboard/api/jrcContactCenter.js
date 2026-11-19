@@ -169,6 +169,8 @@ export default {
       qualification,
     }),
   agentState: accountId => axios.get(`${base(accountId)}/agent_state`),
+  agentStateHistory: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/agent_state_histories`, { params }),
   updateAgentState: (accountId, agentState) =>
     axios.patch(`${base(accountId)}/agent_state`, { agent_state: agentState }),
   supervisor: accountId => axios.get(`${base(accountId)}/supervisor`),

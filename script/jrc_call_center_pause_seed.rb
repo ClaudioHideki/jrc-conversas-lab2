@@ -1,4 +1,5 @@
 require_relative 'jrc_call_center_operational_form_seed'
+require_relative 'jrc_call_center_state_history_seed'
 
 # Exclusive synthetic accounts; no channels, inboxes or PABX configuration.
 class JrcContactCenter::SyntheticPauseSeed
@@ -15,7 +16,7 @@ class JrcContactCenter::SyntheticPauseSeed
 
     projects.index_with do |project|
       %w[
-        editor operations withdrawal duration acw routing
+        editor operations withdrawal duration acw routing state_history
         team_withdrawal acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry operational_forms form_bindings
       ].index_with do |kind|
         new("#{project}-#{kind}").call
@@ -42,6 +43,9 @@ class JrcContactCenter::SyntheticPauseSeed
     assign_corporate_access(company, units, admin, scoped, operator)
     queues = create_queues(units, operator)
     payload = session_payload(units, queues, admin, scoped, operator)
+    if @project.end_with?('-state_history')
+      payload.merge!(JrcContactCenter::SyntheticStateHistorySeed.call(account: @account, member: operator, queues: queues))
+    end
     prepare_special_sources(payload, queues.first, admin, operator)
     payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?(*PENDING_ACW_PROJECTS)
     payload

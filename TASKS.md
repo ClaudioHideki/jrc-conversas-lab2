@@ -546,3 +546,19 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - Correção pontual: checkbox com rótulo associado explicitamente e formatação válida; nenhuma regra desativada. Checagem estática somente leitura:18arquivos,zero erros.
 - Corrigido indicador de rascunho salvo que tratava objeto vazio como conteúdo. Cinco cenários novos distinguem ausência de conteúdo de respostas persistidas false/zero;192Chrome mantidos, com conferência do indicador antes/depois de salvar.
 - Pendente: validar o novo SHA,compilar assets e homologar192Chrome nos quatro projetos. Formulários operacionais e23figuras ainda não declarados concluídos. Sem produção,PABX,imagem,merge ou deploy.
+
+### 19/11 — Vínculo operacional de formulários aprovado2a0cde0c
+
+- CI44614231287/SHA2a0cde0c9ee012cd807b1cbca6cffd508898e47a:1686Rails distintos,66reexecuções schema,822Vue,192Chrome(48em cada projeto),zero falhas,pendências,skips ouflaky. Lints,assets e bootstrap15cards aprovados.
+- Artefato14575213612:41800945bytes,SHA-2565bae1770a1aec3823ef586b9a7a7f49d2f8fe68c94ad7c4357d6a136f0ca53a3.284capturas verificadas por hash;8novas inspecionadas individualmente: vínculo/obrigatoriedade e formulário/rascunho,desktop1440 ecelular390,claro/escuro.
+- Comprovados versão exata imutável,precedência nativa,false/zero,persistência,negação por conta/unidade/autoridade,conflitos e pausa aguardando conclusão explícita. Metadados privados não expostos aos demais agentes/gestores. Nenhum comando ou confirmaçãoPABX inventado.
+- Etapas/23figuras permanecem abertas. Próximo incremento:histórico operacional de estados/pausas com consulta nativa e escopo atual,sem duplicar auditoria de configuração.
+
+### 19/11 — Histórico operacional de estados e pausas (em validação)
+
+- Consulta nova somente leitura reutiliza AgentStateEvent,AccessScope,OrganizationalScope e autoridade control? nativa revalidada em transação;sem cadastro paralelo ou grants.
+- Popup no catálogo existente,em português,com período de até31dias,fuso da conta,nome do agente,estado,fila,paginação20/100 e remoção de filtros. Histórico de configuração permanece separado e preservado.
+- Projeção mínima sem razões livres,justificativas,formulários,comandos,identificadores externos ou metadados brutos. Eventos sem fila são negados à cobertura corporativa restrita;vínculos de outra conta são excluídos. Não inventa unidade histórica ausente nem confirmação atualPABX.
+- Escopo de filas é o atual;datas/nome do usuário não constituem um cadastro histórico de unidade ou nome. Estado em aberto usa a observação da consulta para duração e não é encerrado por ela.
+- Testes nativos de filtros,paginação,timezone,negação e isolamento preparados;Vue inclui trocas de conta/perfil,respostas tardias,erro e tentativa explícita. Um percurso Chrome completo acrescentado aos192anteriores:196esperados.
+- Checagem estática dos7arquivos frontend:zero erros/avisos. Aprovação Rails/Vue/Chrome ainda pendente;nenhuma figura integral ou homologação externa declarada.

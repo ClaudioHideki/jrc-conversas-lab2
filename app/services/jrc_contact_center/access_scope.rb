@@ -99,6 +99,13 @@ class JrcContactCenter::AccessScope
     SQL
   end
 
+  def agent_state_events
+    relation = JrcContactCenter::AgentStateEvent.where(account: account, account_user_id: account.account_users.select(:id))
+    relation = relation.where(queue_id: nil).or(relation.where(queue_id: queues.select(:id)))
+    relation = organizational.records(relation, unit_column: nil, queue_column: :queue_id)
+    full_access? ? relation : relation.where(account_user: account_user)
+  end
+
   private
 
   def organizational

@@ -1,0 +1,31 @@
+{
+  "base_verified_sha": "2a0cde0c9ee012cd807b1cbca6cffd508898e47a",
+  "figure": 7,
+  "state": "implemented_pending_native_validation",
+  "reuse": [
+    "AgentStateEvent",
+    "AccessScope",
+    "OrganizationalScope",
+    "ModulePolicy.control?",
+    "AuthorityTransaction",
+    "Dialog",
+    "agentStateLabels"
+  ],
+  "endpoint": "GET /api/v1/accounts/:account_id/jrc_contact_center/agent_state_histories",
+  "write_operations": false,
+  "migrations": [],
+  "private_fields_omitted": [
+    "reason_code",
+    "metadata",
+    "pause_justification",
+    "pause_definition",
+    "external_event_id",
+    "acw_form_answers"
+  ],
+  "scope": "Current account, current native control authority and current organizational queue coverage. Historical unit/name snapshots are unavailable and not invented. Unmapped events fail closed for restricted coverage.",
+  "pagination": "Default20,max100; bounded31day windows in account timezone; descending start/id.",
+  "frontend_lint": "7files,0errors,0warnings",
+  "chrome_expected": 196,
+  "external_pabx_homologated": false,
+  "all_23_complete": false
+}

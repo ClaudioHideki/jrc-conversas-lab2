@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import API from 'dashboard/api/jrcContactCenter';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
+import AgentStateHistory from './AgentStateHistory.vue';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 
 const props = defineProps({
@@ -318,6 +319,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="min-w-0 space-y-4" data-pause-catalog>
+    <AgentStateHistory :account-id="accountId" :context="context" />
     <RouterLink
       v-if="context.capabilities.configuration_audit"
       :to="{

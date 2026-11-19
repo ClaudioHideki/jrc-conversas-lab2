@@ -32,43 +32,45 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('operational form native')
-    ? 'operational_forms'
-    : info.title.startsWith('form bindings native')
-      ? 'form_bindings'
-      : info.title.startsWith('deferred pause native uncertain')
-        ? 'deferred_pause_retry'
-        : info.title.startsWith('deferred pause native')
-          ? 'deferred_pause'
-          : info.title.startsWith('whole native team deletion')
-            ? 'team_deletion'
-            : info.title.startsWith('pending ACW native navigation')
-              ? 'acw_navigation'
-              : info.title.startsWith('pending ACW native draft')
-                ? 'acw_draft'
-                : info.title.startsWith('pending ACW native review')
-                  ? 'acw_review'
-                  : info.title.startsWith('team roster last eligible')
-                    ? 'team_withdrawal'
-                    : info.title.startsWith('native local routing')
-                      ? 'routing'
-                      : info.title.startsWith('scoped ACW native')
-                        ? 'acw'
-                        : info.title.startsWith(
-                              'last eligible queue withdrawal'
-                            )
-                          ? 'withdrawal'
+  const pauseKey = info.title.startsWith('state history native')
+    ? 'state_history'
+    : info.title.startsWith('operational form native')
+      ? 'operational_forms'
+      : info.title.startsWith('form bindings native')
+        ? 'form_bindings'
+        : info.title.startsWith('deferred pause native uncertain')
+          ? 'deferred_pause_retry'
+          : info.title.startsWith('deferred pause native')
+            ? 'deferred_pause'
+            : info.title.startsWith('whole native team deletion')
+              ? 'team_deletion'
+              : info.title.startsWith('pending ACW native navigation')
+                ? 'acw_navigation'
+                : info.title.startsWith('pending ACW native draft')
+                  ? 'acw_draft'
+                  : info.title.startsWith('pending ACW native review')
+                    ? 'acw_review'
+                    : info.title.startsWith('team roster last eligible')
+                      ? 'team_withdrawal'
+                      : info.title.startsWith('native local routing')
+                        ? 'routing'
+                        : info.title.startsWith('scoped ACW native')
+                          ? 'acw'
                           : info.title.startsWith(
-                                'local pause duration supervisor'
+                                'last eligible queue withdrawal'
                               )
-                            ? 'duration'
+                            ? 'withdrawal'
                             : info.title.startsWith(
-                                  'local pause catalog operator'
+                                  'local pause duration supervisor'
                                 )
-                              ? 'operations'
-                              : info.title.startsWith('local pause catalog')
-                                ? 'editor'
-                                : null;
+                              ? 'duration'
+                              : info.title.startsWith(
+                                    'local pause catalog operator'
+                                  )
+                                ? 'operations'
+                                : info.title.startsWith('local pause catalog')
+                                  ? 'editor'
+                                  : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -5940,4 +5942,103 @@ test('form bindings native persists exact latest version while existing attendan
     path: `.codex/call-center-native-e2e/${info.project.name}-operational-form-binding.png`,
     fullPage: true,
   });
+});
+
+test('state history native preserves scope, filters, pagination and private event data without writes', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].state_history;
+  const endpoint = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center/agent_state_histories`;
+  const location = `/app/accounts/${target.account_id}/contact-center/control-desk/pauses`;
+  const writes = [];
+  page.on('request', request => {
+    if (
+      new URL(request.url()).pathname.includes('/jrc_contact_center/') &&
+      !['GET', 'HEAD'].includes(request.method())
+    )
+      writes.push(request.method());
+  });
+  await page.goto(location);
+  const opener = page.locator('[data-open-state-history]');
+  await expect(opener).toBeVisible();
+  await opener.click();
+  await expectContainedDialog(page);
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.locator('[data-history-row]')).toHaveCount(20);
+  await expect(dialog).toContainText('Total 27');
+  await expect(dialog).not.toContainText('SYNTHETIC_PRIVATE_HISTORY');
+  await expect(dialog).toContainText(
+    'Sem confirmação do provedor neste evento'
+  );
+  await dialog.locator('[data-history-next]').click();
+  await expect(dialog.locator('[data-history-row]')).toHaveCount(7);
+  await dialog.locator('[data-history-filter="state"]').selectOption('paused');
+  await dialog
+    .locator('[data-history-filter="queue_id"]')
+    .selectOption(String(target.queue_id));
+  await dialog.locator('[data-history-apply]').click();
+  await expect(dialog).toContainText('Total 25');
+  await expect(dialog.locator('[data-history-row]')).toHaveCount(20);
+  await dialog
+    .locator('[data-history-filter="q"]')
+    .fill('SYNTHETIC no matching agent');
+  await dialog.locator('[data-history-apply]').click();
+  await expect(dialog.locator('[data-history-empty]')).toBeVisible();
+  await dialog.locator('[data-history-clear]').click();
+  await expect(dialog).toContainText('Total 27');
+  await expect(dialog.locator('[data-history-row]')).toHaveCount(20);
+  await expect(page.locator('html')).toHaveClass(
+    info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/
+  );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-state-history.png`,
+    fullPage: false,
+  });
+  const direct = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect(direct.status()).toBe(200);
+  expect(direct.headers()['cache-control']).toContain('no-store');
+  expect((await direct.json()).meta.total).toBe(27);
+  expect(await direct.text()).not.toContain('SYNTHETIC_PRIVATE_HISTORY');
+  const scoped = await page.request.get(endpoint, { headers: target.scoped });
+  expect(scoped.status()).toBe(200);
+  expect((await scoped.json()).meta.total).toBe(25);
+  expect(
+    (await scoped.json()).items.every(row =>
+      target.history_visible_ids.includes(row.id)
+    )
+  ).toBe(true);
+  const denied = await page.request.get(
+    endpoint + `?queue_id=${target.denied_queue_id}`,
+    { headers: target.scoped }
+  );
+  expect(denied.status()).toBe(404);
+  const operator = await page.request.get(endpoint, {
+    headers: target.operator,
+  });
+  expect(operator.status()).toBe(403);
+  const operatorPage = await page.context().newPage();
+  await operatorPage.addInitScript(
+    auth => Reflect.set(window, '__SYNTHETIC_AUTH__', auth),
+    target.operator
+  );
+  const noAdministration = operatorPage.waitForResponse(
+    response =>
+      response.url().endsWith('/administration') && response.status() === 403
+  );
+  await operatorPage.goto(location);
+  await noAdministration;
+  await expect(operatorPage.getByRole('alert')).toBeVisible();
+  await expect(operatorPage.locator('[data-open-state-history]')).toHaveCount(
+    0
+  );
+  await expect(operatorPage.locator('[data-history-row]')).toHaveCount(0);
+  await operatorPage.close();
+  expect(writes).toEqual([]);
 });
