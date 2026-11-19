@@ -109,8 +109,10 @@ RSpec.describe JrcContactCenter::DeferredPauseManager do
     it "does not silently replace the pending intent with a manual #{state} transition or a forged internal command ID" do
       request = manager.request!(values)
       expect do
-        state_manager.transition(state: state, reason_code: 'lunch', command_id: "deferred-pause:#{request.request_id}",
-                                   expected_state_version: JrcContactCenter::AgentStateSnapshot.new(account_user: member).version)
+        state_manager.transition(
+          state: state, reason_code: 'lunch', command_id: "deferred-pause:#{request.request_id}",
+          expected_state_version: JrcContactCenter::AgentStateSnapshot.new(account_user: member).version
+        )
       end.to raise_error(JrcContactCenter::OperationError, 'pause_request_exists')
       expect(request.reload.state).to eq('pending')
       expect(pauses).to be_empty

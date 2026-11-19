@@ -486,3 +486,11 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - [x] Revisão visual: lista desktop claro/escuro, histórico desktop e prévia mobile escura legíveis. Duas capturas mobile da lista mostram carregamento após Limpar filtros; não são prova da lista carregada. Mantidas como evidência real.
 - [ ] Correção de QA preparada para aguardar GET200,20registros e ausência do carregamento antes da captura; preserva as176combinações e asserções anteriores. Conferir novamente no próximo SHA.
 - [ ] Pausa adiada persistente e supervisor delimitado por fila preparados, ainda sem execução nativa. Vínculo regra→versão/respostas privadas e automações permanecem pendentes.23figuras e etapas completas não são declaradas concluídas.
+
+### Call Center — primeira CI da pausa adiada56bf0670
+
+- [x] CI44554654749 preservada:48exemplos de recarga,47aprovados e1falha;0pendências/erros externos. Artefato14545627143,hashbc2a2f4fb2aeaa9a3e3437e8da65e3f2937b0e94de6d6c2db6a43c6f2a691e50. Instalação inicial e proteção de migrations passaram. Core/Vue/Chrome não executados por esse bloqueio.
+- [x] Causa exata: a fixture de ciclo de conta ainda continha AgentStateEvents; a FK nativa impede excluí-la. A correção preserva e testa esse bloqueio específico, além de um caso separado de cascade do novo ledger em identidade sintética sem histórico. Limpeza dos fixtures de concorrência atua somente nos próprios eventos do banco CI exclusivo.
+- [x]21infrações Ruby identificadas. Correções preparadas de alinhamento, nome de contexto e métodos pequenos para a precedência de pendências, filtro de origem e SQL; nenhuma regra/validação suprimida.
+- [x] Guarda SQL executada permanece idêntica após separar os trechos para lint:hash349b86d7bcf55f8c0490ab558da96771de033c7b91ce0fcb8c6f025f97a964fb. Novo hash de fonte da migration não publicada:d1c6f59eb20a060c7720c9c9ca1e9654090ac111d23789c0a5ca9a8baa4ff3a4. Migrations históricas, schema-base e SQLs anteriores intactos;28testes da proteção passaram novamente.
+- [ ] Reexecutar no novo SHA: recarga/ciclo, Rails, concorrência, Vue, lint, assets e184Chrome. Nenhuma aprovação nativa da pausa persistente foi presumida.

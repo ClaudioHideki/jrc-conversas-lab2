@@ -36,16 +36,20 @@ class JrcContactCenter::SupervisorSnapshot
     data[:reason_code] = nil if hidden_pause_reason?(snapshot, permitted)
     data[:pause_notice] = scoped_pause_notice(snapshot, member, data, permitted)
     data[:deferred_pause_notice] = scoped_deferred_pause_notice(member, permitted)
-    data[:pending_qualifications] = data[:pending_qualifications].select do |qualification|
+    data[:pending_qualifications] = scoped_pending_qualifications(data[:pending_qualifications])
+    data
+  end
+
+  def scoped_pending_qualifications(records)
+    records.select do |qualification|
       qualification['call_session_id'] && @access.call_sessions.exists?(id: qualification['call_session_id'])
     end
-    data
   end
 
   # Only an operational state for a currently supervised queue; never the private request body or UUID.
   def scoped_deferred_pause_notice(member, permitted)
     queues = JrcContactCenter::QueueMembership.where(account: @account, account_user: member, active: true,
-                                                    queue_id: permitted).select(:queue_id)
+                                                  queue_id: permitted).select(:queue_id)
     record = JrcContactCenter::DeferredPauseRequest.active.find_by(account: @account, account_user: member, queue_id: queues)
     { state: record.state } if record
   end

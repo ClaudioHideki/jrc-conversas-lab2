@@ -37,7 +37,7 @@ class JrcContactCenter::DeferredPauseInput
   end
 
   def bounded_string(value, maximum, empty: false)
-    valid = value.is_a?(String) && value.length <= maximum && !value.include?("\0") && (empty || value.strip.present?)
+    valid = value.is_a?(String) && value.length <= maximum && value.exclude?("\0") && (empty || value.strip.present?)
     raise JrcContactCenter::OperationError, 'invalid_deferred_pause' unless valid
 
     value.strip

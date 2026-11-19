@@ -4149,5 +4149,25 @@
     "runtime_form_bindings_private_answers_complete": false,
     "persistent_deferred_pause_in_this_sha": false,
     "all23_complete": false
+  },
+  "deferred_pause_first_native_gate_56bf0670_20261119": {
+    "sha": "56bf0670ef272045671de1f6ea2f39e4e67cfd36",
+    "run": 44554654749,
+    "artifact": 14545627143,
+    "artifact_sha256": "bc2a2f4fb2aeaa9a3e3437e8da65e3f2937b0e94de6d6c2db6a43c6f2a691e50",
+    "schema_examples": 48,
+    "schema_passed": 47,
+    "schema_failed": 1,
+    "pending": 0,
+    "outside_errors": 0,
+    "new_ruby_offenses": 21,
+    "root_cause": "Fixture de retirada de Account com eventos nativos: FK jrc_contact_center_agent_state_events corretamente bloqueia. Não mudar essa regra.",
+    "correction_prepared": "Teste exige bloqueio nativo específico e preservação; caso separado de cascade sem histórico. Somente fixtures sintéticos de concorrência limpam seus próprios eventos após workers concluírem. Separações mínimas/alinhamento Ruby sem supressões.",
+    "guard_sql_identical_sha256": "349b86d7bcf55f8c0490ab558da96771de033c7b91ce0fcb8c6f025f97a964fb",
+    "unreleased_migration_source_hash": "d1c6f59eb20a060c7720c9c9ca1e9654090ac111d23789c0a5ca9a8baa4ff3a4",
+    "migration_guard_local_tests": 28,
+    "core_vue_chrome_not_run": true,
+    "next_native_validation_required": true,
+    "all23_complete": false
   }
 }

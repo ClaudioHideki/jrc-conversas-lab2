@@ -1,5 +1,5 @@
 # Real synthetic model callbacks, shared only by the deferred-pause native tests.
-RSpec.shared_context 'a native pending voice ACW for deferred pause' do
+RSpec.shared_context 'with a native pending voice ACW for deferred pause' do
   let(:pending_pause_qualification) do
     JrcContactCenter::Qualification.pending.where(account: account, account_user: member).order(:id).last!
   end

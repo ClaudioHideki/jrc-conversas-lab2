@@ -51,8 +51,9 @@ RSpec.describe JrcContactCenter::DeferredPauseInput do
 
   [nil, 0, [], 'x', '1x'].each do |value|
     it "rejects malformed state version #{value.inspect}" do
-      expect { described_class.call(attributes.merge(expected_state_version: value)) }.to raise_error(JrcContactCenter::OperationError,
-                                                                                                     'invalid_deferred_pause')
+      expect do
+        described_class.call(attributes.merge(expected_state_version: value))
+      end.to raise_error(JrcContactCenter::OperationError, 'invalid_deferred_pause')
     end
   end
 

@@ -58,6 +58,7 @@ class JrcContactCenter::DeferredPauseManager
     snapshot = JrcContactCenter::AgentStateSnapshot.new(account_user: @member)
     raise JrcContactCenter::OperationError.new('state_conflict', status: :conflict) unless snapshot.version == values[:expected_state_version]
     raise JrcContactCenter::OperationError.new('pause_request_exists', status: :conflict) if records.active.exists?
+
     JrcContactCenter::DeferredPauseRevision.check!(account: @account, member: @member, expected: values[:expected_request_revision])
     validate_pending_context!(snapshot)
 
@@ -73,9 +74,10 @@ class JrcContactCenter::DeferredPauseManager
 
   def create_request!(values, digest)
     selection = JrcContactCenter::DeferredPauseSelection.new(account: @account, member: @member).call(values)
-    record = records.create!(values.slice(:reason_code, :queue_id, :justification).merge(selection).merge(
+    attributes = values.slice(:reason_code, :queue_id, :justification).merge(selection).merge(
       request_id: values[:command_id], request_digest: digest, actor_user_id: @member.user_id, state: 'pending'
-    ))
+    )
+    record = records.create!(attributes)
     JrcContactCenter::DeferredPauseAudit.write!(record, before: nil)
     record
   end

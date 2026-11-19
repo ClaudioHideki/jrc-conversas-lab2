@@ -43,7 +43,7 @@ RSpec.describe 'Deferred pause current unit and private projection', type: :requ
     catalog.update!({ 'enforced' => true, 'entries' => [definition] }, expected_revision: catalog.revision, activation_confirmed: true)
   end
 
-  include_context 'a native pending voice ACW for deferred pause'
+  include_context 'with a native pending voice ACW for deferred pause'
 
   it 'uses current corporate scope even when a physical membership exists in another unit' do
     expect do

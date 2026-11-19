@@ -15,7 +15,7 @@ RSpec.describe 'Deferred operator pause API', type: :request do
 
   before { account.enable_features!('jrc_contact_center') }
 
-  include_context 'a native pending voice ACW for deferred pause'
+  include_context 'with a native pending voice ACW for deferred pause'
 
   it 'persists and recovers one own pending request without fabricating a paused state or provider ACK' do
     post endpoint, headers: headers, params: { deferred_pause_request: values }, as: :json
@@ -66,8 +66,8 @@ RSpec.describe 'Deferred operator pause API', type: :request do
     other_account = create(:account)
     other_account.enable_features!('jrc_contact_center')
     other = create(:user, :contact_center_eligible, account: other_account, role: :agent)
-    delete "/api/v1/accounts/#{other_account.id}/jrc_contact_center/deferred_pause_request", headers: other.create_new_auth_token,
-                                                                                       params: { request_id: request_record.request_id }, as: :json
+    foreign_endpoint = "/api/v1/accounts/#{other_account.id}/jrc_contact_center/deferred_pause_request"
+    delete foreign_endpoint, headers: other.create_new_auth_token, params: { request_id: request_record.request_id }, as: :json
     expect(response).to have_http_status(:not_found)
     expect(request_record.reload.state).to eq('pending')
   end

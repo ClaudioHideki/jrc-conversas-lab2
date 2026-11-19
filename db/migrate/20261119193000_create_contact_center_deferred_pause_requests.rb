@@ -33,25 +33,37 @@ class CreateContactCenterDeferredPauseRequests < ActiveRecord::Migration[7.1]
 
   def constrain_requests
     add_foreign_key TABLE, :account_users, column: [:account_user_id, :account_id], primary_key: [:id, :account_id],
-                                         on_delete: :cascade, name: 'cc_deferred_pause_member_account_fk'
+                                           on_delete: :cascade, name: 'cc_deferred_pause_member_account_fk'
     add_index TABLE, [:account_id, :request_id], unique: true, name: 'cc_deferred_pause_request_key'
     add_index TABLE, [:account_id, :account_user_id, :id], name: 'cc_deferred_pause_member_key'
     add_index TABLE, [:account_id, :account_user_id], unique: true,
-                                                    where: "state::text IN ('pending'::text, 'blocked'::text)", name: 'cc_deferred_pause_active_key'
+                                                      where: "state::text IN ('pending'::text, 'blocked'::text)", name: 'cc_deferred_pause_active_key'
     add_check_constraint TABLE, "state::text IN ('pending'::text, 'blocked'::text, 'applied'::text, 'cancelled'::text)",
                          name: 'cc_deferred_pause_state'
     add_check_constraint TABLE, "request_digest ~ '^[0-9a-f]{64}$' AND catalog_revision ~ '^[0-9a-f]{64}$' " \
-                               "AND btrim(reason_code) <> '' AND btrim(reason_label) <> ''", name: 'cc_deferred_pause_identity'
+                                "AND btrim(reason_code) <> '' AND btrim(reason_label) <> ''", name: 'cc_deferred_pause_identity'
     add_check_constraint TABLE, "(state::text IN ('pending'::text, 'blocked'::text)) = (finished_at IS NULL) " \
-                               "AND ((state::text = 'blocked'::text) = (failure_code IS NOT NULL))", name: 'cc_deferred_pause_terminal'
+                                "AND ((state::text = 'blocked'::text) = (failure_code IS NOT NULL))", name: 'cc_deferred_pause_terminal'
     add_check_constraint TABLE, "failure_code IS NULL OR failure_code::text IN ('access_revoked'::text, 'pause_catalog_changed'::text, " \
-                               "'queue_membership_missing'::text, 'pause_request_review_required'::text)", name: 'cc_deferred_pause_failure'
+                                "'queue_membership_missing'::text, 'pause_request_review_required'::text)", name: 'cc_deferred_pause_failure'
   end
 
   def immutable_request_sql
     <<~SQL.squish
       CREATE FUNCTION cc_deferred_pause_request_guard() RETURNS trigger LANGUAGE plpgsql AS $guard$
       BEGIN
+        #{delete_request_sql}
+        #{insert_request_sql}
+        #{update_request_sql}
+        RETURN NEW;
+      END $guard$;
+      CREATE TRIGGER cc_deferred_pause_request_guard BEFORE INSERT OR UPDATE OR DELETE ON jrc_contact_center_deferred_pause_requests
+        FOR EACH ROW EXECUTE FUNCTION cc_deferred_pause_request_guard();
+    SQL
+  end
+
+  def delete_request_sql
+    <<~SQL
         IF TG_OP = 'DELETE' THEN
           IF NOT EXISTS (SELECT 1 FROM accounts WHERE id = OLD.account_id)
             OR NOT EXISTS (SELECT 1 FROM account_users WHERE id = OLD.account_user_id AND account_id = OLD.account_id) THEN
@@ -59,6 +71,11 @@ class CreateContactCenterDeferredPauseRequests < ActiveRecord::Migration[7.1]
           END IF;
           RAISE EXCEPTION 'Deferred pause history is immutable';
         END IF;
+    SQL
+  end
+
+  def insert_request_sql
+    <<~SQL
         IF TG_OP = 'INSERT' THEN
           IF NEW.state <> 'pending' OR NOT EXISTS (SELECT 1 FROM account_users WHERE id = NEW.account_user_id
               AND account_id = NEW.account_id AND user_id = NEW.actor_user_id) THEN
@@ -70,6 +87,11 @@ class CreateContactCenterDeferredPauseRequests < ActiveRecord::Migration[7.1]
           END IF;
           RETURN NEW;
         END IF;
+    SQL
+  end
+
+  def update_request_sql
+    <<~SQL
         IF to_jsonb(NEW) - ARRAY['state','failure_code','finished_at','updated_at']
             IS DISTINCT FROM to_jsonb(OLD) - ARRAY['state','failure_code','finished_at','updated_at']
           OR NOT ((OLD.state = 'pending' AND NEW.state IN ('applied', 'blocked', 'cancelled'))
@@ -83,10 +105,6 @@ class CreateContactCenterDeferredPauseRequests < ActiveRecord::Migration[7.1]
               AND metadata -> 'provider_confirmed' = 'false'::jsonb) THEN
           RAISE EXCEPTION 'Deferred pause native event required';
         END IF;
-        RETURN NEW;
-      END $guard$;
-      CREATE TRIGGER cc_deferred_pause_request_guard BEFORE INSERT OR UPDATE OR DELETE ON jrc_contact_center_deferred_pause_requests
-        FOR EACH ROW EXECUTE FUNCTION cc_deferred_pause_request_guard();
     SQL
   end
 

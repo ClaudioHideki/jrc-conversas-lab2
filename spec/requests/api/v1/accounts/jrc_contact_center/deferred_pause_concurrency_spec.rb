@@ -29,7 +29,7 @@ RSpec.describe 'Deferred pause real HTTP concurrency', type: :request do
     headers
   end
 
-  include_context 'a native pending voice ACW for deferred pause'
+  include_context 'with a native pending voice ACW for deferred pause'
 
   after do
     if state[:ready]
@@ -40,6 +40,7 @@ RSpec.describe 'Deferred pause real HTTP concurrency', type: :request do
       JrcContactCenter::Qualification.where(account: account).destroy_all
       JrcContactCenter::CallLeg.where(account: account).destroy_all
       JrcContactCenter::CallSession.where(account: account).destroy_all
+      JrcContactCenter::AgentStateEvent.where(account: account).destroy_all
       account.destroy!
     end
   end

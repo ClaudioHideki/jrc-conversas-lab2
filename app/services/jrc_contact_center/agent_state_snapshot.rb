@@ -110,13 +110,19 @@ class JrcContactCenter::AgentStateSnapshot
     context = { account: @account, account_user: @member, user: @member.user }
     return 'access_revoked' unless JrcContactCenter::ModulePolicy.new(context, :contact_center).operate?
 
-    return 'tabulation_pending' if pending_qualifications.exists?
-    return 'pause_pending' if deferred_pause_request
+    waiting = pending_work_reason
+    return waiting if waiting
     return 'agent_not_available' unless current&.state == 'available'
     return 'call_active' if active_call?
     return 'queue_membership_missing' unless memberships.exists?
 
     provider_eligibility_reason
+  end
+
+  def pending_work_reason
+    return 'tabulation_pending' if pending_qualifications.exists?
+
+    'pause_pending' if deferred_pause_request
   end
 
   def provider_eligibility_reason
