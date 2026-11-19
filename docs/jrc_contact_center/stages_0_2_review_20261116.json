@@ -4193,5 +4193,43 @@
     "concurrency_vue_chrome_not_run": true,
     "new_sha_full_validation_required": true,
     "all23_complete": false
+  },
+  "deferred_pause_backend_native_65079ad9_20261119": {
+    "sha": "65079ad963889803074cab7cb035c8c168bfb7b6",
+    "run": 44561456418,
+    "job": 135691557377,
+    "artifact": 14549573982,
+    "artifact_sha256": "9c8d5aec19e249c9a0a5eabe61dbc20226f15c13df12061b8ba78573208dd404",
+    "native_rails_distinct": 1592,
+    "schema_reload": 49,
+    "new_pause_examples_included": 99,
+    "new_pause_by_file": {
+      "./spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb": 5,
+      "./spec/services/jrc_contact_center/deferred_pause_input_spec.rb": 46,
+      "./spec/services/jrc_contact_center/deferred_pause_manager_spec.rb": 18,
+      "./spec/services/jrc_contact_center/deferred_pause_revision_spec.rb": 3,
+      "./spec/models/jrc_contact_center/deferred_pause_request_spec.rb": 9,
+      "./spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_requests_spec.rb": 10,
+      "./spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_scope_spec.rb": 8
+    },
+    "failures_pending_outside_errors": 0,
+    "new_ruby_offenses": 0,
+    "vue": {
+      "total": 781,
+      "passed": 780,
+      "failed": 1,
+      "pending": 0
+    },
+    "root_cause": "Mensagem do role=alert continha também o botão COMMON.REFRESH. Log confirma expected JUSTIFICATION_ERROR; received JUSTIFICATION_ERROR COMMON.REFRESH.",
+    "sanitized_log_sha256": "2c5b7dffba390c2d074d6bef4f1248b18c76e7dd9a326a60cce679d91c15b65f",
+    "prepared_fix": "Mensagem mantém role=alert e assertiva antiga exata; botãoAtualizar torna-se irmão. Teste adicional de recuperação manual e nenhuma escrita automática.",
+    "local_frontend_lint": {
+      "files": 2,
+      "errors": 0,
+      "warnings": 0
+    },
+    "assets_and_chrome_not_run": true,
+    "new_sha_validation_required": true,
+    "all23_complete": false
   }
 }

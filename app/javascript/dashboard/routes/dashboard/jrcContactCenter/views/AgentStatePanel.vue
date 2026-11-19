@@ -454,21 +454,21 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="relative border-t border-n-weak p-4 sm:p-5">
-      <p
+      <div
         v-if="failed"
-        role="alert"
         class="mb-4 rounded-xl border border-n-ruby-5 bg-n-ruby-2 p-3 text-sm text-n-ruby-11"
       >
-        {{ failureLabel }}
+        <p role="alert">{{ failureLabel }}</p>
         <button
           type="button"
           :disabled="busy"
-          class="ml-2 underline"
+          class="mt-2 underline"
+          data-agent-state-refresh
           @click="load"
         >
           {{ t('JRC_CONTACT_CENTER.COMMON.REFRESH') }}
         </button>
-      </p>
+      </div>
 
       <div
         v-if="state"

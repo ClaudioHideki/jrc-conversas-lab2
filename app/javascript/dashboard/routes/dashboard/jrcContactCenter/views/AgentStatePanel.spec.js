@@ -657,7 +657,8 @@ describe('deferred pause state observation (mocked read-only presentation)', () 
   it('stops observation on failure until an explicit refresh and never retries writes', async () => {
     JrcContactCenterAPI.agentState
       .mockResolvedValueOnce({ data: { account_id: '1', item: pendingState } })
-      .mockRejectedValueOnce(new Error('SYNTHETIC read failure'));
+      .mockRejectedValueOnce(new Error('SYNTHETIC read failure'))
+      .mockResolvedValueOnce({ data: { account_id: '1', item: pendingState } });
     const wrapper = deferredPanel();
     await flushPromises();
     await vi.advanceTimersByTimeAsync(15000);
@@ -666,6 +667,16 @@ describe('deferred pause state observation (mocked read-only presentation)', () 
     expect(
       wrapper.get('[data-deferred-pause-cancel]').attributes('disabled')
     ).toBeDefined();
+    expect(wrapper.get('[role="alert"]').text()).toBe(
+      'JRC_CONTACT_CENTER.COMMON.ERROR'
+    );
+    expect(wrapper.get('[role="alert"]').find('button').exists()).toBe(false);
+    await wrapper.get('[data-agent-state-refresh]').trigger('click');
+    await flushPromises();
+    expect(JrcContactCenterAPI.agentState).toHaveBeenCalledTimes(3);
+    expect(
+      wrapper.get('[data-deferred-pause-cancel]').attributes('disabled')
+    ).toBeUndefined();
     expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
   });
 

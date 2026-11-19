@@ -502,3 +502,12 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - [x] Restantes8infrações de formatação corrigidas em preparação: chamada Ruby, heredocs SQL com squish e recuo. SQL executado continua idêntico (349b86d7...); fonte da migration não publicada6dff254f8838085a16cd2eb6b4e516d477b8d15c6cba09873e7020ae792c9db2.28testes da proteção passaram.
 - [x] Leitura do schema confirmou também a FK nativa de DailyFact. Acrescentada limpeza somente dos indicadores da própria fixture no banco de concorrência exclusivo; não é código de retenção/exclusão do produto.
 - [ ] Revalidar no próprio SHA: todos os gates e184Chrome. Pausa persistente, formulário operacional e23figuras não declarados concluídos.
+
+### Call Center — backend da pausa aprovado; mensagem de erro65079ad9
+
+- [x] CI44561456418/65079ad9:1592Rails distintos+49schema,0falhas/pendências/erros externos;90exemplos de concorrência incluídos no total.99cenários novos de pausa comprovados em7arquivos, não adicionais aos1592. Nenhuma nova infração Ruby.
+- [x] Artefato14549573982 verificado,hash9c8d5aec19e249c9a0a5eabe61dbc20226f15c13df12061b8ba78573208dd404. Vue:780/781,1falha;0pendências. Assets e184Chrome não executados.
+- [x] Causa confirmada nos logs: alerta recebido JUSTIFICATION_ERROR mais COMMON.REFRESH; esperado somente JUSTIFICATION_ERROR. Correção mantém a assertiva antiga exata e move a ação de atualização para fora do role=alert. Mensagem e botão continuam disponíveis sem alterar permissões ou envios.
+- [x] Teste de recuperação reforçado: após falha de observação, apenas clique explícito atualiza o estado; alerta não contém botão; nenhuma escrita/repetição automática. Lint local dos2arquivos frontend passou sem erros/avisos.
+- [ ] Revalidar o SHA com a correção visual e executar184Chrome/inspeção de capturas reais. O backend aprovado não equivale à homologação visual ou à conclusão das23figuras.
+- [ ] Próximo vínculo operacional de formulários em preparação separada, sem ativação/API publicada; não integra este checkpoint de mensagem.
