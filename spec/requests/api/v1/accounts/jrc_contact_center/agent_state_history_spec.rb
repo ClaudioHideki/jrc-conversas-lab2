@@ -10,11 +10,13 @@ RSpec.describe 'Call Center scoped operational state history', type: :request do
   let(:queue) { JrcContactCenter::Queue.create!(account: account, unit: unit, name: 'SYNTHETIC history queue', code: 'SYNTHETIC_HISTORY') }
   let(:endpoint) { "/api/v1/accounts/#{account.id}/jrc_contact_center/agent_state_histories" }
   let(:event) do
-    JrcContactCenter::AgentStateEvent.create!(account: account, account_user: member, queue: queue, state: 'paused',
-                                             started_at: 2.minutes.ago, ended_at: 1.minute.ago, source: 'jrc_conversas',
-                                             reason_code: 'SYNTHETIC_PRIVATE_REASON', external_event_id: 'SYNTHETIC_PRIVATE_COMMAND',
-                                             metadata: { pause_justification: 'SYNTHETIC_PRIVATE_TEXT', provider_confirmed: false,
-                                                         pause_definition: { name: 'SYNTHETIC_PRIVATE_DEFINITION' } })
+    JrcContactCenter::AgentStateEvent.create!(
+      account: account, account_user: member, queue: queue, state: 'paused',
+      started_at: 2.minutes.ago, ended_at: 1.minute.ago, source: 'jrc_conversas',
+      reason_code: 'SYNTHETIC_PRIVATE_REASON', external_event_id: 'SYNTHETIC_PRIVATE_COMMAND',
+      metadata: { pause_justification: 'SYNTHETIC_PRIVATE_TEXT', provider_confirmed: false,
+                  pause_definition: { name: 'SYNTHETIC_PRIVATE_DEFINITION' } }
+    )
   end
 
   before do
@@ -44,17 +46,17 @@ RSpec.describe 'Call Center scoped operational state history', type: :request do
   it 'requires current supervisory or configuration authority rather than view or operate alone' do
     role.update!(permissions: %w[jrc_contact_center_view jrc_contact_center_operate])
     get endpoint, headers: observer.create_new_auth_token
-    expect(response).to have_http_status(:forbidden)
+    expect(response).to have_http_status(:unauthorized)
     expect(response.body).not_to include(event.id.to_s.inspect, 'SYNTHETIC_PRIVATE')
   end
 
   it 'rechecks eligibility and the feature on each request' do
     JrcContactCenter::AccessGrant.find_by!(account: account, account_user: account.account_users.find_by!(user: observer)).update!(eligible: false)
     get endpoint, headers: observer.create_new_auth_token
-    expect(response).to have_http_status(:forbidden)
+    expect(response).to have_http_status(:unauthorized)
     account.disable_features!('jrc_contact_center')
     get endpoint, headers: observer.create_new_auth_token
-    expect(response).to have_http_status(:forbidden)
+    expect(response).to have_http_status(:unauthorized)
   end
 
   it 'does not grant authority from account or user parameters' do
@@ -65,27 +67,36 @@ RSpec.describe 'Call Center scoped operational state history', type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items')).to be_empty
     get "/api/v1/accounts/#{foreign.id}/jrc_contact_center/agent_state_histories", headers: observer.create_new_auth_token
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:unauthorized)
   end
 
-  it 'excludes events with an inconsistent foreign account member or queue even for Group observers' do
+  it 'preserves native composite foreign keys against cross-account event members and queues' do
     foreign = create(:account)
     foreign_user = create(:user, account: foreign)
-    event.update_columns(account_user_id: foreign.account_users.find_by!(user: foreign_user).id)
-    get endpoint, headers: observer.create_new_auth_token
-    expect(response.parsed_body.fetch('items')).to be_empty
-    event.update_columns(account_user_id: member.id, queue_id: nil)
+    foreign_member = foreign.account_users.find_by!(user: foreign_user)
+    expect do
+      JrcContactCenter::AgentStateEvent.transaction(requires_new: true) { event.update!(account_user_id: foreign_member.id) }
+    end.to raise_error(ActiveRecord::InvalidForeignKey)
+    event.reload
     foreign_unit = JrcContactCenter::Unit.create!(account: foreign, name: 'SYNTHETIC foreign', code: 'FOREIGN', kind: 'sac')
     foreign_queue = JrcContactCenter::Queue.create!(account: foreign, unit: foreign_unit, name: 'SYNTHETIC foreign', code: 'FOREIGN')
-    event.update_columns(queue_id: foreign_queue.id)
+    expect do
+      JrcContactCenter::AgentStateEvent.transaction(requires_new: true) { event.update!(queue_id: foreign_queue.id) }
+    end.to raise_error(ActiveRecord::InvalidForeignKey)
+    event.reload
     get endpoint, headers: observer.create_new_auth_token
-    expect(response.parsed_body.fetch('items')).to be_empty
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items').pluck('id')).to eq([event.id.to_s])
+    expect(event.account_user_id).to eq(member.id)
+    expect(event.queue_id).to eq(queue.id)
   end
 
   it 'always paginates by default and orders equal timestamps deterministically' do
     21.times do
-      JrcContactCenter::AgentStateEvent.create!(account: account, account_user: member, queue: queue, state: 'available',
-                                               started_at: event.started_at, source: 'jrc_conversas')
+      JrcContactCenter::AgentStateEvent.create!(
+        account: account, account_user: member, queue: queue, state: 'available',
+        started_at: event.started_at, source: 'jrc_conversas'
+      )
     end
     get endpoint, headers: observer.create_new_auth_token
     data = response.parsed_body
@@ -129,7 +140,6 @@ RSpec.describe 'Call Center scoped operational state history', type: :request do
     end
   end
 
-
   it 'searches the current authorized agent name with literal wildcard characters' do
     get endpoint, params: { q: actor.name }, headers: observer.create_new_auth_token
     expect(response.parsed_body.fetch('items').pluck('id')).to eq([event.id.to_s])
@@ -139,7 +149,7 @@ RSpec.describe 'Call Center scoped operational state history', type: :request do
 
   it 'computes an open duration from observation time without closing the real event or confirming the provider' do
     event.update!(ended_at: nil)
-    travel_to(event.started_at + 61.seconds) do
+    travel_to(Time.zone.at((event.started_at + 61.seconds).to_f.ceil)) do
       get endpoint, headers: observer.create_new_auth_token
       row = response.parsed_body.fetch('items').sole
       expect(row).to include('duration_seconds' => 61, 'ended_at' => nil, 'provider_confirmed' => false)
@@ -158,8 +168,9 @@ RSpec.describe 'Call Center scoped operational state history', type: :request do
     end
 
     it 'returns only currently authorized queue events and excludes unmapped state events' do
-      unbound = JrcContactCenter::AgentStateEvent.create!(account: account, account_user: member, state: 'offline',
-                                                         started_at: Time.current, source: 'jrc_conversas')
+      unbound = JrcContactCenter::AgentStateEvent.create!(
+        account: account, account_user: member, state: 'offline', started_at: Time.current, source: 'jrc_conversas'
+      )
       get endpoint, headers: observer.create_new_auth_token
       expect(response.parsed_body.fetch('items').pluck('id')).to eq([event.id.to_s])
       expect(response.body).not_to include(unbound.id.to_s.inspect)

@@ -27,5 +27,32 @@
   "frontend_lint": "7files,0errors,0warnings",
   "chrome_expected": 196,
   "external_pabx_homologated": false,
-  "all_23_complete": false
+  "all_23_complete": false,
+  "first_native_gate": {
+    "sha": "c81911c76365c3a1d38478b372653b24d0104294",
+    "run": 44630413378,
+    "core_examples": 1530,
+    "core_failures": 5,
+    "pending": 0,
+    "outside_errors": 0,
+    "schema_reload": 66,
+    "ruby_new_offenses": 16,
+    "artifact": 14581358183,
+    "artifact_sha256": "052a5e51581da80e8ac5d9c47ae75fa63d10937df5f361f1ce151d7256788c2f",
+    "confirmed_causes": [
+      "Native Pundit/membership denial contract is401 (three test expectations)",
+      "Composite account/member FK rejects intentionally invalid test data",
+      "travel_to truncates fractional seconds; use existing ceil setup pattern"
+    ],
+    "corrections": [
+      "Exact401 expectations, preserve denial/privacy assertions",
+      "Test native composite FK rejection with savepoints and model validations",
+      "Use correct subsecond travel setup",
+      "Add readonly route in independent bounded block",
+      "Preserve all196 Chrome tests and exact denial contract",
+      "Ruby layout and Array.new; no lint rule suppressed"
+    ],
+    "frontend_and_chrome": "not_run",
+    "product_permission_behavior_changed": false
+  }
 }

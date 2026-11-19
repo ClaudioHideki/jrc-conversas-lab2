@@ -6022,7 +6022,7 @@ test('state history native preserves scope, filters, pagination and private even
   const operator = await page.request.get(endpoint, {
     headers: target.operator,
   });
-  expect(operator.status()).toBe(403);
+  expect(operator.status()).toBe(401);
   const operatorPage = await page.context().newPage();
   await operatorPage.addInitScript(
     auth => Reflect.set(window, '__SYNTHETIC_AUTH__', auth),
@@ -6030,7 +6030,7 @@ test('state history native preserves scope, filters, pagination and private even
   );
   const noAdministration = operatorPage.waitForResponse(
     response =>
-      response.url().endsWith('/administration') && response.status() === 403
+      response.url().endsWith('/administration') && response.status() === 401
   );
   await operatorPage.goto(location);
   await noAdministration;

@@ -2,7 +2,7 @@
 class JrcContactCenter::SyntheticStateHistorySeed
   def self.call(account:, member:, queues:)
     now = Time.current
-    visible = 25.times.map do |index|
+    visible = Array.new(25) do |index|
       JrcContactCenter::AgentStateEvent.create!(
         account: account, account_user: member, queue: queues.first, state: 'paused', source: 'jrc_conversas',
         started_at: now - (index + 2).minutes, ended_at: now - (index + 1).minutes,

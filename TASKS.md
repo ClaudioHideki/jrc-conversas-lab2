@@ -562,3 +562,11 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - Escopo de filas é o atual;datas/nome do usuário não constituem um cadastro histórico de unidade ou nome. Estado em aberto usa a observação da consulta para duração e não é encerrado por ela.
 - Testes nativos de filtros,paginação,timezone,negação e isolamento preparados;Vue inclui trocas de conta/perfil,respostas tardias,erro e tentativa explícita. Um percurso Chrome completo acrescentado aos192anteriores:196esperados.
 - Checagem estática dos7arquivos frontend:zero erros/avisos. Aprovação Rails/Vue/Chrome ainda pendente;nenhuma figura integral ou homologação externa declarada.
+
+### 19/11 — Histórico: correção dos contratos reais da primeira rodada
+
+- CI44630413378/c81911c7:1530exemplos core,1525aprovados e5falhas;66/66schema;sem pendências/erros externos.16infraçõesRuby novas. Artefato14581358183/SHA-256052a5e51581da80e8ac5d9c47ae75fa63d10937df5f361f1ce151d7256788c2f verificado.
+- Causas confirmadas:3expectativas de negação devem respeitar401nativo;FKcomposta rejeita vínculo estrangeiro criado pelo teste;travel_to remove microssegundos e altera floor da duração. Correções mantêm assertivas exatas,usam savepoints para provar ambas asFKs e repetem o padrão ceil já utilizado nos testes nativos de estado.
+- Route nova movida a escopo aditivo pequeno,sem expandir bloco existente além do limite;Array.new e alinhamentoRuby corrigidos. Nenhuma exclusão de lint,SQL ou permissão alterada.
+- Matriz reconciliada com evidência2a0cde0c para figuras7/8/9/12,preservando os campos anteriores em snapshot histórico. Integração completa das23figuras segue aberta.
+- Próximo gate precisa aprovar backend,Vue,lint,assets e196Chrome;sem reuso de resultados anteriores como homologação do histórico.

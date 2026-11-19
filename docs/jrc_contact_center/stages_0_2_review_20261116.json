@@ -416,18 +416,19 @@
       ],
       "implemented_in_0_2": [
         "Existing native agent state is preserved",
-        "Catálogo local HH:MM, limites, revisão, paginação, ativação explícita por conta e motivos autorizados; compatibilidade legada e justificativa privada preservadas. Duração real e aviso ao supervisor sem retomada automática. Subconjunto revalidado em a8c6c78d, incluindo12Chrome (3fluxos nos4projetos); não inclui aprovação de pausa ou início após chamada."
+        "Catálogo local HH:MM, limites, revisão, paginação, ativação explícita por conta e motivos autorizados; compatibilidade legada e justificativa privada preservadas. Duração real e aviso ao supervisor sem retomada automática. Subconjunto revalidado em a8c6c78d, incluindo12Chrome (3fluxos nos4projetos); não inclui aprovação de pausa ou início após chamada.",
+        "Pausa adiada persistente:aplica somente após chamada encerrada e conclusão explícita de todos osACW. Tempo/rascunho não concluem;conflitos,autoria,escopo e compatibilidadelegada revalidados em0ddd5a4b e2a0cde0c."
       ],
       "remaining_or_external": [
-        "Aprovação de pausa, variabilidade avançada, transição segura com chamada e precedências operacionais completas continuam pendentes.",
-        "Nenhum encerramento automático de pausa, retorno à distribuição ou ACK PABX foi homologado. Ativação do catálogo continua explícita por conta."
+        "Aprovação de pausa e variabilidade avançada continuam pendentes.",
+        "Nenhum retorno automático à distribuição ou ACKPABX homologado. Catálogo ativado somente por decisão explícita por conta."
       ],
       "code_references": [],
       "reference": {
         "document_1_figure": 7,
         "document_2_figure": 7
       },
-      "validation": "CI44478139924/a8c6c78d:1310Rails distintos+16schema,631Vue,164Chrome globais aprovados. Foram conferidos no relatório bruto os três fluxos de catálogo/editor, operador e supervisor nos4projetos. Não são12testes adicionais aos164. Artefato14508877245, SHA-2562a9053f743b87677aefbc1229d764ea110981d1f54ddb6acf0af6d3a1fb9d786.",
+      "validation": "CI44614231287/2a0cde0c:1686Rails distintos+66schema,822Vue,192Chrome,zero falhas/pendências;subconjuntos de pausa incluídos,não somados. Histórico operacional novo preparado emc81911c7,pending próprio gate.",
       "objective": "Gestao de pausas e disponibilidade",
       "visual_components": "Campos e dados apresentados:  Listar nome, categoria, se retira da distribuicao, tempo padrao e status. Estados exibidos: disponivel, em atendimento, em pausa e offline; indicadores de disponibilidade devem vir de eventos reais, nao de contagem fixa do mockup.",
       "buttons_and_actions": "Acoes e resultado do clique:  Abas Motivos de Pausa, Regras de Distribuicao, Disponibilidade da Equipe e Historico: consultar configuracoes e estados. Novo Motivo: abrir popup. Busca e edicao de linha: localizar/alterar configuracao com auditoria. A aba de equipe mostra agente, estado, tempo decorrido e eventual pausa excedida; selecao de agente abre detalhes quando permitido.",
@@ -443,7 +444,7 @@
       ],
       "desktop_and_mobile": {
         "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
-        "tested": "Interface específica não homologada nesta etapa.",
+        "tested": "Catálogo e pausa adiada exercitados nos quatro projetos Chrome,com CSS real e dados sintéticos;capturas inspecionadas. Não é aceite integral da referência.",
         "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
       },
       "apis_and_persistence": [
@@ -453,7 +454,7 @@
       "acceptance_scope": {
         "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
         "complete_reference": [
-          "Pause catalog and safe call-to-pause transition require stage 6 and operational policy"
+          "Aprovação,variabilidade e publicação/ACKs externos permanecem abertos. Histórico operacional de eventos em validação separada."
         ]
       }
     },
@@ -465,18 +466,19 @@
         6
       ],
       "implemented_in_0_2": [
-        "Catálogo local HH:MM, limites, revisão, paginação, ativação explícita por conta e motivos autorizados; compatibilidade legada e justificativa privada preservadas. Duração real e aviso ao supervisor sem retomada automática. Subconjunto revalidado em a8c6c78d, incluindo12Chrome (3fluxos nos4projetos); não inclui aprovação de pausa ou início após chamada."
+        "Catálogo local HH:MM, limites, revisão, paginação, ativação explícita por conta e motivos autorizados; compatibilidade legada e justificativa privada preservadas. Duração real e aviso ao supervisor sem retomada automática. Subconjunto revalidado em a8c6c78d, incluindo12Chrome (3fluxos nos4projetos); não inclui aprovação de pausa ou início após chamada.",
+        "Pausa adiada persistente:aplica somente após chamada encerrada e conclusão explícita de todos osACW. Tempo/rascunho não concluem;conflitos,autoria,escopo e compatibilidadelegada revalidados em0ddd5a4b e2a0cde0c."
       ],
       "remaining_or_external": [
-        "Aprovação de pausa, variabilidade avançada, transição segura com chamada e precedências operacionais completas continuam pendentes.",
-        "Nenhum encerramento automático de pausa, retorno à distribuição ou ACK PABX foi homologado. Ativação do catálogo continua explícita por conta."
+        "Aprovação de pausa e variabilidade avançada continuam pendentes.",
+        "Nenhum retorno automático à distribuição ou ACKPABX homologado. Catálogo ativado somente por decisão explícita por conta."
       ],
       "code_references": [],
       "reference": {
         "document_1_figure": 8,
         "document_2_figure": 8
       },
-      "validation": "CI44478139924/a8c6c78d:1310Rails distintos+16schema,631Vue,164Chrome globais aprovados. Foram conferidos no relatório bruto os três fluxos de catálogo/editor, operador e supervisor nos4projetos. Não são12testes adicionais aos164. Artefato14508877245, SHA-2562a9053f743b87677aefbc1229d764ea110981d1f54ddb6acf0af6d3a1fb9d786.",
+      "validation": "CI44614231287/2a0cde0c:1686Rails distintos+66schema,822Vue,192Chrome,zero falhas/pendências;subconjuntos de pausa incluídos,não somados. Histórico operacional novo preparado emc81911c7,pending próprio gate.",
       "objective": "Popup Cadastrar Motivo de Pausa",
       "visual_components": "Campos e dados apresentados:  Salvar identidade, descricao, categoria, tempo em minutos internamente, limites, regra de retirada, justificativa/aprovacao/alerta quando aplicaveis, status e escopo da empresa. Diferenciar limite informativo de regra que efetivamente bloqueia cadastro.",
       "buttons_and_actions": "Acoes e resultado do clique:  Nome, Tipo/Categoria e Descricao: cadastrar a finalidade da pausa. Tempo Padrao, Minimo e Maximo: preencher em horas/minutos; se um desses campos nao estiver no mockup, deve ser incluido no formulario final ou em aba complementar. Retirar da distribuicao: controlar elegibilidade de chamadas novas. Disponivel para: definir perfis habilitados. Salvar Motivo e Cancelar: validar/persistir ou abandonar sem gravar.",
@@ -492,7 +494,7 @@
       ],
       "desktop_and_mobile": {
         "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
-        "tested": "Interface específica não homologada nesta etapa.",
+        "tested": "Catálogo e pausa adiada exercitados nos quatro projetos Chrome,com CSS real e dados sintéticos;capturas inspecionadas. Não é aceite integral da referência.",
         "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
       },
       "apis_and_persistence": [
@@ -502,7 +504,7 @@
       "acceptance_scope": {
         "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
         "complete_reference": [
-          "HH:MM minimum/default/maximum pause form belongs to stage 6; no backend catalog is invented"
+          "Aprovação,variabilidade e publicação/ACKs externos permanecem abertos. Histórico operacional de eventos em validação separada."
         ]
       }
     },
@@ -519,12 +521,12 @@
         "Native account/channel ACW popup in HH:MM; required voice flag, validation and persistence",
         "Gravação explícita de rascunho privado na qualificação nativa, limite por motivo pelo snapshot original sem reiniciar relógio, revisão manual de conflito e conclusão somente explícita. Validado emee689703 com APIs/banco reais; workspace Hoya completo no Chrome não incluído.",
         "Proteção de saída do rascunho com Dialog/Router nativos e aviso beforeunload: permanecer conserva edição, saída explícita não altera a última gravação ou o ACW, e conteúdo salvo volta após recarga. CIa8c6c78d validou164Chrome em1440/390 eclaro/escuro. Rótulos de conflito conhecidos reutilizam acwLabels.",
-        "Biblioteca nativa versionada com criação/edição, prévia, histórico e filtros/paginação em2caaec5d/176Chrome. Vínculo operacional e respostas privadas continuam pendentes; captura da lista mobile após recarga será refeita por QA."
+        "Biblioteca versionada e vínculo regra→versão exata,campos obrigatórios adicionais,respostas privadas tipadas,rascunho e conclusão obrigatória validados em2a0cde0c. Capturas de vínculo e respostas inspecionadas nos4projetos."
       ],
       "remaining_or_external": [
-        "Rascunho explícito e aplicação intermediária do motivo validados emee689703. Aviso de saída validado em a8c6c78d; homologação do workspace Hoya inteiro no Chrome ainda pendente.",
-        "Formulários vinculados, exigências e automações por destino continuam pendentes.",
-        "Não representa publicação ou confirmação PABX."
+        "Workspace Hoya inteiro ainda não homologado em Chrome;controles reais reutilizados tiveram homologação no harness nativo.",
+        "Catálogo completo de encerramentos e automações por destino continuam pendentes.",
+        "Nenhuma confirmação ou publicaçãoPABX homologada."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -538,7 +540,7 @@
         "document_1_figure": 9,
         "document_2_figure": 9
       },
-      "validation": "a8c6c78d/CI44478139924:1310Rails distintos+16schema separados,631Vue,164Chrome nos4projetos e244capturas com hashes verificados. Revisão visual do diálogo nos4projetos e dos rótulos de conflito. Harness de controles reais; não é o workspace Hoya completo nem aceite integral da figura.",
+      "validation": "CI44614231287/2a0cde0c:1686Rails distintos,66schema,822Vue,192Chrome;artefato14575213612/SHA-2565bae1770a1aec3823ef586b9a7a7f49d2f8fe68c94ad7c4357d6a136f0ca53a3.8capturas novas inspecionadas.",
       "objective": "Popup Configurar Regra de Pos-Atendimento",
       "visual_components": "Campos e dados apresentados:  Associar motivo, versao da regra, formularios, campos, publico aplicavel e eventos operacionais. Registrar inicio/fim do ACW de modo independente do encerramento da chamada, por call_id e agente.",
       "buttons_and_actions": "Acoes e resultado do clique:  Motivo de Encerramento: escolher classificacao existente. Tempo de Pos-Atendimento: configurar horas/minutos. Formulario: selecionar template reutilizavel e Gerenciar Formularios na fonte. Campos Obrigatorios: marcar os dados exigidos. Comportamento do Agente: bloquear chamadas, emitir alertas ou permitir excecao conforme politica. Aplicar para: todas, filas especificas ou equipes especificas. Salvar Regra: validar impacto.",
@@ -565,10 +567,10 @@
       "acceptance_scope": {
         "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
         "complete_reference": [
-          "Per-reason/queue/team templates and precedence remain stage 6; native 1..3600 second engine unchanged"
+          "Catálogo completo de encerramentos,orquestração por destino e homologaçãoPABX/Hoya integral permanecem pendentes."
         ]
       },
-      "scoped_acw_increment": "Motor de precedência, snapshot e editor no popup existentes preparados. Validação nativa/Chrome do novo SHA ainda pendente. Relógio intermediário por motivo, formulários e automações não concluídos.",
+      "scoped_acw_increment": "Precedência fila→equipe→geral,snapshot imutável,relógio intermediário,vínculo de versão e exigências validados no SHA2a0cde0c. Automações por destino continuam pendentes.",
       "next_increment_prepared": {
         "scope": "ACW estado privado por autoridade atual; sem alteração do motor/snapshot já validado",
         "status": "Preparado; exige CI do próprio SHA. Fixture atual não comprova o workspace completo no Chrome.",
@@ -721,9 +723,9 @@
         "Remoção/edição de membros da equipe exige revisão explícita assinada do gestor e auditoria transacional quando retira o último agente configurado elegível; escopos atuais e IDs canônicos revalidados. CI44461118646/3b9aa6db,1270Rails+16schema,573Vue,152Chrome,232capturas. Não inclui excluir a entidade Team ou comandos PABX."
       ],
       "remaining_or_external": [
-        "Retirada direta e retirada indireta de membros pela equipe têm aceite nativo/Chrome, incluindo3b9aa6db. Exclusão da entidade equipe, supervisor principal/hierarquia e status operacional próprio continuam pendentes.",
-        "Disponibilidade e capacidades/ACK PABX dependem do contrato externo. Nenhum vínculo de outros módulos foi removido.",
-        "Exclusão da entidade Team: correção incremental preparada sobrea8c6c78d, com confirmação nativa e revisão do gestor, sem resultado nativo ou Chrome ainda. Não substitui as evidências anteriores."
+        "Supervisor principal,hierarquia e estado operacional próprio da equipe permanecem pendentes.",
+        "Disponibilidade/capacidades/ACKsPABX aguardam contrato externo.",
+        "Retirada de membro e exclusão da entidadeTeam possuem revisão nativa de último agente,confirmação do gestor e auditoria;aceite preservado em7d55fe76 e reexecutado em2a0cde0c. Não altera vínculos independentes."
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -3424,16 +3426,16 @@
   },
   "latest_verified_increment": {
     "status": "implemented_and_validated_in_synthetic_native_harness",
-    "sha": "7d55fe7612879fd8c28f6c8fc64e2f1118f7ce7e",
-    "run": 44505104067,
-    "rails_distinct": 1335,
-    "schema_reload_reexecutions": 16,
-    "vue": 662,
-    "chrome": 168,
-    "chrome_per_project": 42,
-    "screenshots_sha256_verified": 252,
-    "artifact": 14521587209,
-    "artifact_sha256": "ff47e4f3faa98c0cbb2eabd09a7f4b81e3c65f652970426b904a6e265a564d1b",
+    "sha": "2a0cde0c9ee012cd807b1cbca6cffd508898e47a",
+    "run": 44614231287,
+    "rails_distinct": 1686,
+    "schema_reload_reexecutions": 66,
+    "vue": 822,
+    "chrome": 192,
+    "chrome_per_project": 48,
+    "screenshots_sha256_verified": 284,
+    "artifact": 14575213612,
+    "artifact_sha256": "5bae1770a1aec3823ef586b9a7a7f49d2f8fe68c94ad7c4357d6a136f0ca53a3",
     "failures_pending_outside_skips_flaky": 0,
     "manual_visual_review": [
       "desktop-light",
@@ -3441,8 +3443,7 @@
       "mobile-light",
       "mobile-dark"
     ],
-    "apt_actual": "archive.ubuntu.com HTTPS4suites,24source tests,mandatory APTsignature checks retained",
-    "limits": "Native Teams routes/components, real CSS, authenticated APIs and disposable PostgreSQL. Not full Hoya shell, SIP/PABX or production proof. All23figures/stages0–2remain open."
+    "limits": "Actual reused product controls and CSS, authenticated Rails APIs and disposable PostgreSQL; synthetic provider events only. Does not homologate the entire Hoya shell, external PABX, production or all23figures."
   },
   "team_roster_indirect_review_prepared_20261118": {
     "reference_parent": "3f8f2bc80348841bcf32e5dfa0600606e12b778f",
@@ -4399,7 +4400,7 @@
     "all23_complete": false
   },
   "operational_form_bindings_increment": {
-    "status": "implemented_pending_native_execution",
+    "status": "implemented_and_validated_on_2a0cde0c",
     "migration": "20261119203000",
     "legacy_four_migrations_unchanged": true,
     "chrome_planned": 192,
@@ -4419,6 +4420,355 @@
       "artifact_sha256": "adfe39ae85028f8a3f7c9f6a776544f514301a2b58c8fadbcbaa244f43f20342",
       "cause": "Test supplied malformed empty bindings, identity guard correctly rejected it before immutability. Preserve that negative case and add structurally valid immutability case. No DB guard weakened.",
       "remaining_native_validation": "All other native suites, lint and Chrome pending new checkpoint"
+    },
+    "final_evidence": {
+      "status": "implemented_and_validated_in_synthetic_native_harness",
+      "sha": "2a0cde0c9ee012cd807b1cbca6cffd508898e47a",
+      "run": 44614231287,
+      "rails_distinct": 1686,
+      "schema_reload_reexecutions": 66,
+      "vue": 822,
+      "chrome": 192,
+      "chrome_per_project": 48,
+      "screenshots_sha256_verified": 284,
+      "artifact": 14575213612,
+      "artifact_sha256": "5bae1770a1aec3823ef586b9a7a7f49d2f8fe68c94ad7c4357d6a136f0ca53a3",
+      "failures_pending_outside_skips_flaky": 0,
+      "manual_visual_review": [
+        "desktop-light",
+        "desktop-dark",
+        "mobile-light",
+        "mobile-dark"
+      ],
+      "limits": "Actual reused product controls and CSS, authenticated Rails APIs and disposable PostgreSQL; synthetic provider events only. Does not homologate the entire Hoya shell, external PABX, production or all23figures."
+    }
+  },
+  "operational_forms_final_gate_2a0cde0c_20261119": {
+    "status": "implemented_and_validated_in_synthetic_native_harness",
+    "sha": "2a0cde0c9ee012cd807b1cbca6cffd508898e47a",
+    "run": 44614231287,
+    "rails_distinct": 1686,
+    "schema_reload_reexecutions": 66,
+    "vue": 822,
+    "chrome": 192,
+    "chrome_per_project": 48,
+    "screenshots_sha256_verified": 284,
+    "artifact": 14575213612,
+    "artifact_sha256": "5bae1770a1aec3823ef586b9a7a7f49d2f8fe68c94ad7c4357d6a136f0ca53a3",
+    "failures_pending_outside_skips_flaky": 0,
+    "manual_visual_review": [
+      "desktop-light",
+      "desktop-dark",
+      "mobile-light",
+      "mobile-dark"
+    ],
+    "limits": "Actual reused product controls and CSS, authenticated Rails APIs and disposable PostgreSQL; synthetic provider events only. Does not homologate the entire Hoya shell, external PABX, production or all23figures."
+  },
+  "figure_status_before_operational_forms_20261119": {
+    "7": {
+      "figure": 7,
+      "title": "Pausas e disponibilidade",
+      "status": "Implementado parcialmente",
+      "stages": [
+        6
+      ],
+      "implemented_in_0_2": [
+        "Existing native agent state is preserved",
+        "Catálogo local HH:MM, limites, revisão, paginação, ativação explícita por conta e motivos autorizados; compatibilidade legada e justificativa privada preservadas. Duração real e aviso ao supervisor sem retomada automática. Subconjunto revalidado em a8c6c78d, incluindo12Chrome (3fluxos nos4projetos); não inclui aprovação de pausa ou início após chamada."
+      ],
+      "remaining_or_external": [
+        "Aprovação de pausa, variabilidade avançada, transição segura com chamada e precedências operacionais completas continuam pendentes.",
+        "Nenhum encerramento automático de pausa, retorno à distribuição ou ACK PABX foi homologado. Ativação do catálogo continua explícita por conta."
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 7,
+        "document_2_figure": 7
+      },
+      "validation": "CI44478139924/a8c6c78d:1310Rails distintos+16schema,631Vue,164Chrome globais aprovados. Foram conferidos no relatório bruto os três fluxos de catálogo/editor, operador e supervisor nos4projetos. Não são12testes adicionais aos164. Artefato14508877245, SHA-2562a9053f743b87677aefbc1229d764ea110981d1f54ddb6acf0af6d3a1fb9d786.",
+      "objective": "Gestao de pausas e disponibilidade",
+      "visual_components": "Campos e dados apresentados:  Listar nome, categoria, se retira da distribuicao, tempo padrao e status. Estados exibidos: disponivel, em atendimento, em pausa e offline; indicadores de disponibilidade devem vir de eventos reais, nao de contagem fixa do mockup.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Abas Motivos de Pausa, Regras de Distribuicao, Disponibilidade da Equipe e Historico: consultar configuracoes e estados. Novo Motivo: abrir popup. Busca e edicao de linha: localizar/alterar configuracao com auditoria. A aba de equipe mostra agente, estado, tempo decorrido e eventual pausa excedida; selecao de agente abre detalhes quando permitido.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Listar nome, categoria, se retira da distribuicao, tempo padrao e status. Estados exibidos: disponivel, em atendimento, em pausa e offline; indicadores de disponibilidade devem vir de eventos reais, nao de contagem fixa do mockup.",
+        "Estados de erro e excecoes:  Se PABX e aplicacao divergirem, mostrar status pendente/nao sincronizado. Agente sem fila elegivel nao pode aparecer como disponivel para distribuicao. Falha de registro de pausa deve ser visivel ao agente e supervisor."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Pausa durante chamada ativa nao derruba a ligacao; aplica-se na transicao operacional prevista. Tempo excedido dispara aviso, mas nao encerra pausa automaticamente. O retorno a fila depende de elegibilidade, jornada e de politica explicita de retorno automatico.",
+      "acceptance_scenarios": [
+        "•  F07-A: solicitar pausa com chamada em andamento preserva a chamada e impede novas distribuicoes apos a transicao.",
+        "•  F07-B: ultrapassar duracao gera alerta, sem terminar a pausa nem redistribuir chamadas por conta propria."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Pause catalog and safe call-to-pause transition require stage 6 and operational policy"
+        ]
+      }
+    },
+    "8": {
+      "figure": 8,
+      "title": "Cadastro de motivo de pausa",
+      "status": "Implementado parcialmente",
+      "stages": [
+        6
+      ],
+      "implemented_in_0_2": [
+        "Catálogo local HH:MM, limites, revisão, paginação, ativação explícita por conta e motivos autorizados; compatibilidade legada e justificativa privada preservadas. Duração real e aviso ao supervisor sem retomada automática. Subconjunto revalidado em a8c6c78d, incluindo12Chrome (3fluxos nos4projetos); não inclui aprovação de pausa ou início após chamada."
+      ],
+      "remaining_or_external": [
+        "Aprovação de pausa, variabilidade avançada, transição segura com chamada e precedências operacionais completas continuam pendentes.",
+        "Nenhum encerramento automático de pausa, retorno à distribuição ou ACK PABX foi homologado. Ativação do catálogo continua explícita por conta."
+      ],
+      "code_references": [],
+      "reference": {
+        "document_1_figure": 8,
+        "document_2_figure": 8
+      },
+      "validation": "CI44478139924/a8c6c78d:1310Rails distintos+16schema,631Vue,164Chrome globais aprovados. Foram conferidos no relatório bruto os três fluxos de catálogo/editor, operador e supervisor nos4projetos. Não são12testes adicionais aos164. Artefato14508877245, SHA-2562a9053f743b87677aefbc1229d764ea110981d1f54ddb6acf0af6d3a1fb9d786.",
+      "objective": "Popup Cadastrar Motivo de Pausa",
+      "visual_components": "Campos e dados apresentados:  Salvar identidade, descricao, categoria, tempo em minutos internamente, limites, regra de retirada, justificativa/aprovacao/alerta quando aplicaveis, status e escopo da empresa. Diferenciar limite informativo de regra que efetivamente bloqueia cadastro.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Nome, Tipo/Categoria e Descricao: cadastrar a finalidade da pausa. Tempo Padrao, Minimo e Maximo: preencher em horas/minutos; se um desses campos nao estiver no mockup, deve ser incluido no formulario final ou em aba complementar. Retirar da distribuicao: controlar elegibilidade de chamadas novas. Disponivel para: definir perfis habilitados. Salvar Motivo e Cancelar: validar/persistir ou abandonar sem gravar.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Salvar identidade, descricao, categoria, tempo em minutos internamente, limites, regra de retirada, justificativa/aprovacao/alerta quando aplicaveis, status e escopo da empresa. Diferenciar limite informativo de regra que efetivamente bloqueia cadastro.",
+        "Estados de erro e excecoes:  Mostrar erro ao lado do campo vazio/incoerente; nao fechar o popup em rejeicao. Nao aplicar mudanca de motivo usado por agentes em ligacao sem tratar transicao e possiveis dependencias."
+      ],
+      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "permissions": "Regras e permissoes:  Entrada de horario em HH:MM, nunca exigir segundos ao usuario. Validar minimo menor ou igual ao padrao e padrao menor ou igual ao maximo quando todos forem informados. Um motivo de duracao variavel precisa de politica explicita; o formulario nao substitui regras legais ou convencionais.",
+      "acceptance_scenarios": [
+        "•  F08-A: tempos 00:15, 00:30 e 01:00 sao salvos em horas/minutos e reabertos corretamente.",
+        "•  F08-B: maximo menor que minimo impede salvar e identifica exatamente o campo incorreto."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Interface específica não homologada nesta etapa.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "Nenhum novo endpoint específico inventado; os serviços nativos listados em code_references não provam o fluxo completo da referência."
+      ],
+      "external_dependencies": [],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "HH:MM minimum/default/maximum pause form belongs to stage 6; no backend catalog is invented"
+        ]
+      }
+    },
+    "9": {
+      "figure": 9,
+      "title": "Regra de pós-atendimento",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        2,
+        6
+      ],
+      "implemented_in_0_2": [
+        "Native account/channel ACW popup in HH:MM; required voice flag, validation and persistence",
+        "Gravação explícita de rascunho privado na qualificação nativa, limite por motivo pelo snapshot original sem reiniciar relógio, revisão manual de conflito e conclusão somente explícita. Validado emee689703 com APIs/banco reais; workspace Hoya completo no Chrome não incluído.",
+        "Proteção de saída do rascunho com Dialog/Router nativos e aviso beforeunload: permanecer conserva edição, saída explícita não altera a última gravação ou o ACW, e conteúdo salvo volta após recarga. CIa8c6c78d validou164Chrome em1440/390 eclaro/escuro. Rótulos de conflito conhecidos reutilizam acwLabels.",
+        "Biblioteca nativa versionada com criação/edição, prévia, histórico e filtros/paginação em2caaec5d/176Chrome. Vínculo operacional e respostas privadas continuam pendentes; captura da lista mobile após recarga será refeita por QA."
+      ],
+      "remaining_or_external": [
+        "Rascunho explícito e aplicação intermediária do motivo validados emee689703. Aviso de saída validado em a8c6c78d; homologação do workspace Hoya inteiro no Chrome ainda pendente.",
+        "Formulários vinculados, exigências e automações por destino continuam pendentes.",
+        "Não representa publicação ou confirmação PABX."
+      ],
+      "code_references": [
+        "AdministrationSection.vue",
+        "acw_policy.rb",
+        "app/services/jrc_contact_center/qualification_draft.rb",
+        "app/services/jrc_contact_center/qualification_draft_revision.rb",
+        "app/javascript/dashboard/routes/dashboard/inbox/PendingQualificationForm.vue",
+        "app/javascript/dashboard/routes/dashboard/inbox/QualificationDraftReview.vue"
+      ],
+      "reference": {
+        "document_1_figure": 9,
+        "document_2_figure": 9
+      },
+      "validation": "a8c6c78d/CI44478139924:1310Rails distintos+16schema separados,631Vue,164Chrome nos4projetos e244capturas com hashes verificados. Revisão visual do diálogo nos4projetos e dos rótulos de conflito. Harness de controles reais; não é o workspace Hoya completo nem aceite integral da figura.",
+      "objective": "Popup Configurar Regra de Pos-Atendimento",
+      "visual_components": "Campos e dados apresentados:  Associar motivo, versao da regra, formularios, campos, publico aplicavel e eventos operacionais. Registrar inicio/fim do ACW de modo independente do encerramento da chamada, por call_id e agente.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Motivo de Encerramento: escolher classificacao existente. Tempo de Pos-Atendimento: configurar horas/minutos. Formulario: selecionar template reutilizavel e Gerenciar Formularios na fonte. Campos Obrigatorios: marcar os dados exigidos. Comportamento do Agente: bloquear chamadas, emitir alertas ou permitir excecao conforme politica. Aplicar para: todas, filas especificas ou equipes especificas. Salvar Regra: validar impacto.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Associar motivo, versao da regra, formularios, campos, publico aplicavel e eventos operacionais. Registrar inicio/fim do ACW de modo independente do encerramento da chamada, por call_id e agente.",
+        "Estados de erro e excecoes:  A ausencia de motivo ou formulario exigido gera erro de validacao. Em falha de salvamento manter selecoes. Se o agente sair da pagina, rascunho e estado de ACW exigem recuperacao controlada."
+      ],
+      "popups_and_forms": "Popup nativo disponível para o subconjunto descrito em implemented_in_0_2; os campos e fluxos completos do Word continuam sujeitos às lacunas.",
+      "permissions": "Regras e permissoes:  Se o tempo expirar, alertar sem descartar rascunho nem concluir automaticamente. Bloqueio de novas chamadas deve refletir elegibilidade real. Formulario obrigatorio sem preenchimento nao pode ser considerado concluido. A configuracao de fila prevalece conforme regra de precedencia explicitamente validada.",
+      "acceptance_scenarios": [
+        "•  F09-A: encerrada a ligacao, o ACW permanece ativo ate conclusao do formulario obrigatorio.",
+        "•  F09-B: exceder o tempo configurado emite aviso e conserva respostas nao concluidas."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Subconjunto nativo em Chrome 1440 e 390, claro/escuro, CI da base acima. Não é aceite integral desta figura.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "GET/PATCH /api/v1/accounts/:account_id/jrc_contact_center/acw_policy",
+        "PATCH /api/v1/accounts/:account_id/jrc_contact_center/qualifications/:id/draft (revisão manual obrigatória, autoria e origem atuais, sem conclusão)"
+      ],
+      "external_dependencies": [],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Per-reason/queue/team templates and precedence remain stage 6; native 1..3600 second engine unchanged"
+        ]
+      },
+      "scoped_acw_increment": "Motor de precedência, snapshot e editor no popup existentes preparados. Validação nativa/Chrome do novo SHA ainda pendente. Relógio intermediário por motivo, formulários e automações não concluídos.",
+      "next_increment_prepared": {
+        "scope": "ACW estado privado por autoridade atual; sem alteração do motor/snapshot já validado",
+        "status": "Preparado; exige CI do próprio SHA. Fixture atual não comprova o workspace completo no Chrome.",
+        "adr": "docs/adr/20261118-call-center-acw-current-authority.md"
+      },
+      "visual_follow_up_prepared": {
+        "reference": "SegundoWord,image8.png/figura9; captura reala16e8a49.desktop-light",
+        "difference": "Popup existente dizia Novo registro para política já existente; título específico preparado. Não completa formulário/regras avançadas do mockup.",
+        "validation": "Uma regressãoVue e asserção nos quatroChrome existentes preparadas; exigem CI do próprioSHA."
+      }
+    },
+    "12": {
+      "figure": 12,
+      "title": "Equipe e filas em popup",
+      "status": "Implementado parcialmente",
+      "stages": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "implemented_in_0_2": [
+        "Native team fields and member editor; separate native queue member flags and deactivation",
+        "A API bloqueia inscrição, transferência e reativação em fila inativa, preservando a desativação e a manutenção de vínculos existentes. O popup conserva as seleções e identifica a fila inativa em português.",
+        "A recarga após salvar/fechar o editor é iniciada antes da consulta complementar à lista, evitando perda do filtro digitado e preservando a revalidação de autoridade do painel.",
+        "Elegibilidade e cobertura corporativa atuais do destinatário revalidadas na API e após espera de lock; desativação segura preservada. Validado na CI 44194721033, SHA 7011dac7, incluindo recarga e negativas no Chrome.",
+        "Cobertura corporativa reutiliza JrcCrm::TeamScope/UserBusinessUnit com fontes vivas, conta e destinatário validados; há evidências incrementais até 5e12db0a. A decisão de negócio sobre o último agente foi recebida, não está mais aguardando resposta.",
+        "Remoção/edição de membros da equipe exige revisão explícita assinada do gestor e auditoria transacional quando retira o último agente configurado elegível; escopos atuais e IDs canônicos revalidados. CI44461118646/3b9aa6db,1270Rails+16schema,573Vue,152Chrome,232capturas. Não inclui excluir a entidade Team ou comandos PABX."
+      ],
+      "remaining_or_external": [
+        "Retirada direta e retirada indireta de membros pela equipe têm aceite nativo/Chrome, incluindo3b9aa6db. Exclusão da entidade equipe, supervisor principal/hierarquia e status operacional próprio continuam pendentes.",
+        "Disponibilidade e capacidades/ACK PABX dependem do contrato externo. Nenhum vínculo de outros módulos foi removido.",
+        "Exclusão da entidade Team: correção incremental preparada sobrea8c6c78d, com confirmação nativa e revisão do gestor, sem resultado nativo ou Chrome ainda. Não substitui as evidências anteriores."
+      ],
+      "code_references": [
+        "AdministrationSection.vue",
+        "team_members_controller.rb",
+        "app/controllers/api/v1/accounts/jrc_contact_center/queue_memberships_controller.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/membership_enrollment_spec.rb",
+        "app/services/jrc_contact_center/team_roster_withdrawal_review.rb",
+        "app/services/jrc_contact_center/configured_queue_eligibility.rb",
+        "app/services/jrc_contact_center/team_deletion_review.rb",
+        "enterprise/app/controllers/enterprise/api/v1/accounts/teams_controller.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_deletion_review_spec.rb"
+      ],
+      "reference": {
+        "document_1_figure": 12,
+        "document_2_figure": 12
+      },
+      "validation": "Aceite incremental3b9aa6db/CI44461118646:1270Rails distintos,16schema separados,573Vue,152Chrome,232capturas verificadas. Amostras reais desktop/claro e celular/escuro da auditoria/gestor revisadas. Figura integral ainda parcial; novas alterações exigem próprio gate.",
+      "objective": "Popup Configurar Equipe e Filas",
+      "visual_components": "Campos e dados apresentados:  Informar total de agentes, grupos/filas ativos, papeis e participacao real na distribuicao. O mesmo usuario pode aparecer como supervisor e nao participante; o estado deve ser explicito.",
+      "buttons_and_actions": "Acoes e resultado do clique:  Geral: editar nome, descricao e status. Supervisor Principal e Supervisores Adicionais: selecionar usuarios elegiveis. Agentes: Adicionar Agente ou remover vinculo sem apagar pessoa. Filas Vinculadas: Vincular Fila e marcar separadamente Participa e Supervisiona. Horarios e Regras de Distribuicao: consultar/configurar politicas reutilizaveis. Salvar Configuracoes: validar dependencias e escopo.",
+      "fields_and_validation": [
+        "Campos e dados apresentados:  Informar total de agentes, grupos/filas ativos, papeis e participacao real na distribuicao. O mesmo usuario pode aparecer como supervisor e nao participante; o estado deve ser explicito.",
+        "Estados de erro e excecoes:  Bloquear agente de outra empresa/tenant e fila desativada. Se remover o ultimo agente elegivel de fila ativa, apresentar impacto e exigir a validacao definida para a mudanca."
+      ],
+      "popups_and_forms": "Popup nativo disponível para o subconjunto descrito em implemented_in_0_2; os campos e fluxos completos do Word continuam sujeitos às lacunas.",
+      "permissions": "Regras e permissoes:  Equipe nao cria novo cadastro de usuario. Supervisao nao da automaticamente ramal, acesso a gravacoes ou inclusao em fila. Inclusao em fila de voz exige disponibilidade e capacidade do PABX, escopo compativel e direito apropriado.",
+      "acceptance_scenarios": [
+        "•  F12-A: supervisor marcado apenas como Supervisiona nao recebe chamadas da fila.",
+        "•  F12-B: salvar um novo vinculo com falha de PABX conserva estado pendente sem atribuir participacao efetiva."
+      ],
+      "desktop_and_mobile": {
+        "reference": "Word apresenta desktop; celular adapta a composição sem ocultar ações.",
+        "tested": "Subconjunto nativo em Chrome 1440 e 390, claro/escuro, CI da base acima. Não é aceite integral desta figura.",
+        "remaining": "Preservar rolagem interna de formulários e negar controles sem autoridade."
+      },
+      "apis_and_persistence": [
+        "APIs nativas Team/TeamMember e GET/POST/PATCH /api/v1/accounts/:account_id/jrc_contact_center/queue_memberships"
+      ],
+      "external_dependencies": [
+        "Contrato PABX e homologação externa de capacidades/ACK ainda não comprovados; nenhum comando real executado."
+      ],
+      "acceptance_scope": {
+        "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
+        "complete_reference": [
+          "Native Team has no corporate scope or supervisor/queue hierarchy; no fictitious team status; richer mapping, schedules and distribution remain later",
+          "Elegibilidade de usuário inativo não é inferida da presença online; regras de disponibilidade/capacidade PABX e impacto da última cobertura continuam dependentes do contrato operacional."
+        ]
+      },
+      "current_native_team_authority_evidence_20261118": {
+        "scope": "current corporate source, native membership reinclusion, explicit eligibility and write locks only",
+        "evidence": {
+          "sha": "ac85d6eb30cd2c1f038fede35650a2aa04cb79fa",
+          "run": 44260446025,
+          "artifact": 14410325587,
+          "artifact_sha256": "05357d9e829154191bce2b8c335513f1512c4e2795767ab45acfcdb93c898ca0",
+          "rails_unique": 953,
+          "rails_main": 845,
+          "rails_concurrency": 23,
+          "rails_affected_corporate": 85,
+          "schema_reload_reexecuted_examples": 16,
+          "vue": 300,
+          "chrome": 112,
+          "screenshots_sha256_verified": 144,
+          "zero_failures_pending_skipped_flaky_outside_errors": true,
+          "migration_identity_schema_reload_and_lints": "passed",
+          "word_part_1_complete": false,
+          "real_provider_operations": false,
+          "docker_publication_or_deploy": false
+        },
+        "primary_supervisor_and_queue_hierarchy_complete": false,
+        "last_agent_business_decision_resolved": false,
+        "full_figure_complete": false
+      },
+      "indirect_roster_review_prepared": "Implementação de retirada indireta por TeamMember preparada; aguarda Rails/Vue/152Chrome no novo SHA. Não inclui exclusão da entidade Team nem hierarquia/PABX."
+    }
+  },
+  "state_history_prepared_20261119": {
+    "sha": "c81911c76365c3a1d38478b372653b24d0104294",
+    "run": 44630413378,
+    "status": "pending_native_validation",
+    "chrome_expected": 196,
+    "new_migrations": false,
+    "scopes": "Current corporate queue coverage, no invented historical unit. No private metadata.",
+    "first_native_gate": {
+      "sha": "c81911c76365c3a1d38478b372653b24d0104294",
+      "run": 44630413378,
+      "core_examples": 1530,
+      "core_failures": 5,
+      "pending": 0,
+      "outside_errors": 0,
+      "schema_reload": 66,
+      "ruby_new_offenses": 16,
+      "artifact": 14581358183,
+      "artifact_sha256": "052a5e51581da80e8ac5d9c47ae75fa63d10937df5f361f1ce151d7256788c2f",
+      "confirmed_causes": [
+        "Native Pundit/membership denial contract is401 (three test expectations)",
+        "Composite account/member FK rejects intentionally invalid test data",
+        "travel_to truncates fractional seconds; use existing ceil setup pattern"
+      ],
+      "corrections": [
+        "Exact401 expectations, preserve denial/privacy assertions",
+        "Test native composite FK rejection with savepoints and model validations",
+        "Use correct subsecond travel setup",
+        "Add readonly route in independent bounded block",
+        "Preserve all196 Chrome tests and exact denial contract",
+        "Ruby layout and Array.new; no lint rule suppressed"
+      ],
+      "frontend_and_chrome": "not_run",
+      "product_permission_behavior_changed": false
     }
   }
 }
