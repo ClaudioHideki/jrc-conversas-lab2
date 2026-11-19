@@ -33,7 +33,8 @@ RSpec.describe 'Native ACW immutable form binding configuration', type: :request
     expect(pin).to include('form_id' => form.id.to_s, 'revision' => 1, 'required_fields' => ['verified'])
     expect(pin['integrity_sha256']).to eq(form.latest_version.integrity_sha256)
     expect(audits.sole.audited_changes.dig('attributes', 1, 'voice_form_bindings')).to eq([pin])
-    expect(response.parsed_body.dig('item', 'revision')).to eq(policy.revision)
+    persisted_revision = JrcContactCenter::AcwPolicy.new(account: account.reload).revision
+    expect(response.parsed_body.dig('item', 'revision')).to eq(persisted_revision)
     expect(JrcContactCenter::AgentStateEvent.where(account: account)).to be_empty
   end
 

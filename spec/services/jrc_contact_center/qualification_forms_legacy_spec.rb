@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe JrcContactCenter::QualificationForms, 'native historical compatibility' do
+RSpec.describe JrcContactCenter::QualificationForms do
   let(:account) { create(:account) }
   let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:member) { account.account_users.find_by!(user: actor) }

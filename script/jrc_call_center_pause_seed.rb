@@ -55,9 +55,9 @@ class JrcContactCenter::SyntheticPauseSeed
       JrcContactCenter::AccessGrant.find_by!(account: @account, account_user: admin).update!(allowed: ['jrc_contact_center_audit'])
       payload.merge!(team_source(operator, corporate: false))
     end
-    if @project.end_with?('-operational_forms', '-form_bindings')
-      payload.merge!(JrcContactCenter::SyntheticOperationalFormSeed.new(account: @account, admin: admin, queue: queue).call)
-    end
+    return unless @project.end_with?('-operational_forms', '-form_bindings')
+
+    payload.merge!(JrcContactCenter::SyntheticOperationalFormSeed.new(account: @account, admin: admin, queue: queue).call)
   end
 
   def pending_qualification(queue, operator)

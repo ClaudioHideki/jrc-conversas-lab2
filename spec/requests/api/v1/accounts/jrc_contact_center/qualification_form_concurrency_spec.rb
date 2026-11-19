@@ -20,13 +20,17 @@ RSpec.describe 'Private operational ACW responses with real HTTP contenders', ty
       ActiveRecord::Base.connection_pool.with_connection do
         state[:ready] << ActiveRecord::Base.connection.raw_connection.backend_pid
         Timeout.timeout(15) { state[:gate].pop }
-        session = ActionDispatch::Integration::Session.new(Rails.application)
-        session.patch(endpoint, headers: token, params: values, as: :json)
-        state[:results] << { status: session.response.status, body: session.response.parsed_body }
+        state[:results] << perform_private_draft(endpoint, token, values)
       end
     rescue StandardError => e
       state[:results] << e
     end
+  end
+
+  def perform_private_draft(endpoint, token, values)
+    session = ActionDispatch::Integration::Session.new(Rails.application)
+    session.patch(endpoint, headers: token, params: values, as: :json)
+    { status: session.response.status, body: session.response.parsed_body }
   end
 
   def wait_for_form_contenders(state, count)

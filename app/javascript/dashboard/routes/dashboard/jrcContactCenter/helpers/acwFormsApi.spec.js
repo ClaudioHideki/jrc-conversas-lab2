@@ -40,3 +40,22 @@ describe('ACW form library native API paths', () => {
     }
   );
 });
+
+describe('Owned operational ACW form read uses the actual shared API', () => {
+  it('preserves the exact attendance identity and reason in a read-only request', () => {
+    API.qualificationFormContext('1', '9223372036854775807', 'order');
+    expect(global.axios.get).toHaveBeenCalledWith(
+      '/api/v1/accounts/1/jrc_contact_center/qualifications/9223372036854775807/form_context',
+      { params: { reason_code: 'order' } }
+    );
+    expect(global.axios.post).not.toHaveBeenCalled();
+    expect(global.axios.patch).not.toHaveBeenCalled();
+  });
+  it.each(['1/../../other', '0', '9223372036854775808', '19\n'])(
+    'rejects unsafe operational attendance identity %s before HTTP',
+    id => {
+      expect(() => API.qualificationFormContext(1, id, 'order')).toThrow();
+      expect(global.axios.get).not.toHaveBeenCalled();
+    }
+  );
+});

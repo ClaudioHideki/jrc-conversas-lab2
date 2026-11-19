@@ -7,7 +7,6 @@ vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: {
     acwForms: vi.fn(),
-    acwForm: vi.fn(),
     configurationRecord: vi.fn(),
     saveAcwForm: vi.fn(),
     acwFormHistory: vi.fn(),
@@ -50,7 +49,6 @@ const list = (page = 1) => ({
 beforeEach(() => {
   vi.clearAllMocks();
   API.acwForms.mockResolvedValue(list());
-  API.acwForm.mockResolvedValue({ data: { item: structuredClone(record) } });
   API.configurationRecord.mockResolvedValue({
     data: { item: structuredClone(record) },
   });
@@ -176,7 +174,7 @@ describe('Existing library exact operational version selection', () => {
     const wrapper = library();
     await flushPromises();
     expect(wrapper.find('[data-acw-form-select]').exists()).toBe(false);
-    expect(API.acwForm).not.toHaveBeenCalled();
+    expect(API.configurationRecord).not.toHaveBeenCalled();
   });
   it('resolves the selected latest version and emits only the operational definition', async () => {
     const wrapper = mount(AcwFormLibrary, {
@@ -185,7 +183,11 @@ describe('Existing library exact operational version selection', () => {
     await flushPromises();
     await wrapper.get('[data-acw-form-select]').trigger('click');
     await flushPromises();
-    expect(API.acwForm).toHaveBeenCalledWith('1', '19');
+    expect(API.configurationRecord).toHaveBeenCalledWith(
+      '1',
+      'acw_forms',
+      '19'
+    );
     expect(wrapper.emitted('select')[0]).toEqual([
       {
         id: record.id,
@@ -197,7 +199,7 @@ describe('Existing library exact operational version selection', () => {
     expect(API.saveAcwForm).not.toHaveBeenCalled();
   });
   it('rejects a catalogue revision changed between list and selection without silently choosing the new version', async () => {
-    API.acwForm.mockResolvedValueOnce({
+    API.configurationRecord.mockResolvedValueOnce({
       data: { item: { ...record, revision: 2 } },
     });
     const wrapper = mount(AcwFormLibrary, {
@@ -222,6 +224,6 @@ describe('Existing library exact operational version selection', () => {
     });
     await flushPromises();
     expect(wrapper.find('[data-acw-form-select]').exists()).toBe(false);
-    expect(API.acwForm).not.toHaveBeenCalled();
+    expect(API.configurationRecord).not.toHaveBeenCalled();
   });
 });

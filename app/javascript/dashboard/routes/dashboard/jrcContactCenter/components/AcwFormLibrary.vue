@@ -123,7 +123,11 @@ const select = async row => {
   secondaryBusy.value = true;
   list.failed = false;
   try {
-    const response = await API.acwForm(props.accountId, row.id);
+    const response = await API.configurationRecord(
+      props.accountId,
+      'acw_forms',
+      row.id
+    );
     if (!alive || current !== generation) return;
     const item = response.data.item;
     if (

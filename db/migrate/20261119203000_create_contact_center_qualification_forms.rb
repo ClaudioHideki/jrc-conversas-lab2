@@ -58,11 +58,7 @@ class CreateContactCenterQualificationForms < ActiveRecord::Migration[7.1]
   end
 
   def verify_existing!
-    columns = %w[id account_id qualification_id unit_id queue_id snapshot answers created_at updated_at]
-    checks = %w[jrc_cc_qualification_forms_bounds jrc_cc_qualification_forms_objects]
-    valid = connection.columns(TABLE).map(&:name).sort == columns.sort && connection.foreign_keys(TABLE).length == 2 &&
-            connection.check_constraints(TABLE).map(&:name).sort == checks && connection.table_comment(TABLE) == schema_receipt
-    raise ActiveRecord::MigrationError, 'Unexpected private qualification form schema; review before reexecution' unless valid
+    SchemaReceiptQuery.new(connection).verify!
   end
 
   def response_guard
@@ -216,6 +212,15 @@ class CreateContactCenterQualificationForms::SchemaReceiptQuery
 
   def call
     "jrc_cc_qualification_forms_v1:#{Digest::SHA256.hexdigest(JSON.generate(components))}"
+  end
+
+  def verify!
+    table = CreateContactCenterQualificationForms::TABLE
+    columns = %w[id account_id qualification_id unit_id queue_id snapshot answers created_at updated_at]
+    checks = %w[jrc_cc_qualification_forms_bounds jrc_cc_qualification_forms_objects]
+    valid = @connection.columns(table).map(&:name).sort == columns.sort && @connection.foreign_keys(table).length == 2 &&
+            @connection.check_constraints(table).map(&:name).sort == checks && @connection.table_comment(table) == call
+    raise ActiveRecord::MigrationError, 'Unexpected private qualification form schema; review before reexecution' unless valid
   end
 
   private

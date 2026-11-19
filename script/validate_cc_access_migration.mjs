@@ -13,7 +13,7 @@ export const acwFormMigrationHash = 'e900938e5ba82f3eb0481773c41f64b5e4d264ee70c
 export const deferredPauseMigrationPath = 'db/migrate/20261119193000_create_contact_center_deferred_pause_requests.rb';
 export const deferredPauseMigrationHash = '6dff254f8838085a16cd2eb6b4e516d477b8d15c6cba09873e7020ae792c9db2';
 export const qualificationFormMigrationPath = 'db/migrate/20261119203000_create_contact_center_qualification_forms.rb';
-export const qualificationFormMigrationHash = '42bace4a29bd31743911bf597aba13bf695b37ae3d4f0fd706b051de6dd54d50';
+export const qualificationFormMigrationHash = '6c9c9d3fd89691f7168a493d53e7d0124b72f95908d93cc8d7d96a5fd19eed26';
 export const reviewedMigrations = Object.freeze({
   [migrationPath]: migrationHash,
   [ivrMigrationPath]: ivrMigrationHash,

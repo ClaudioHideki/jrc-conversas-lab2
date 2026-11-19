@@ -60,7 +60,7 @@ RSpec.describe JrcContactCenter::AcwFormBindings do
     end.to raise_error(JrcContactCenter::OperationError, 'invalid_acw_form_bindings')
   end
 
-  [nil, false, %w[unknown], ['feedback', 'feedback']].each do |value|
+  [nil, false, %w[unknown], %w[feedback feedback]].each do |value|
     it "rejects invalid required-field selection #{value.inspect}" do
       expect do
         service.validate!([binding.merge('required_fields' => value)], rules: [rule])
@@ -145,5 +145,4 @@ RSpec.describe JrcContactCenter::AcwFormBindings do
     expect(JrcContactCenter::AcwFormBindingPolicy.new(account: account).call).to eq([pin])
     expect(JrcContactCenter::AcwScopedRules.new(account: account).call).to eq([rule])
   end
-
 end
