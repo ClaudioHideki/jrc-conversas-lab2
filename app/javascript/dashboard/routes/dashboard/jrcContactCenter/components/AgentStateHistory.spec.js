@@ -7,7 +7,11 @@ import AgentStateHistory from './AgentStateHistory.vue';
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: { agentStateHistory: vi.fn() },
 }));
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, values = {}) => [key, ...Object.values(values)].join(' '),
+  }),
+}));
 enableAutoUnmount(afterEach);
 const Dialog = {
   props: ['title'],

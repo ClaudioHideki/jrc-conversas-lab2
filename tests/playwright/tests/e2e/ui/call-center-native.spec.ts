@@ -32,52 +32,55 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('state history native')
-    ? 'state_history'
-    : info.title.startsWith('operational form native')
-      ? 'operational_forms'
-      : info.title.startsWith('form bindings native')
-        ? 'form_bindings'
-        : info.title.startsWith('deferred pause native uncertain')
-          ? 'deferred_pause_retry'
-          : info.title.startsWith('deferred pause native')
-            ? 'deferred_pause'
-            : info.title.startsWith('whole native team deletion')
-              ? 'team_deletion'
-              : info.title.startsWith('pending ACW native navigation')
-                ? 'acw_navigation'
-                : info.title.startsWith('pending ACW native draft')
-                  ? 'acw_draft'
-                  : info.title.startsWith('pending ACW native review')
-                    ? 'acw_review'
-                    : info.title.startsWith('team roster last eligible')
-                      ? 'team_withdrawal'
-                      : info.title.startsWith('native local routing')
-                        ? 'routing'
-                        : info.title.startsWith('scoped ACW native')
-                          ? 'acw'
-                          : info.title.startsWith(
-                                'last eligible queue withdrawal'
-                              )
-                            ? 'withdrawal'
+  const pauseKey = info.title.startsWith('Hoya workspace native')
+    ? 'hoya_forms'
+    : info.title.startsWith('state history native')
+      ? 'state_history'
+      : info.title.startsWith('operational form native')
+        ? 'operational_forms'
+        : info.title.startsWith('form bindings native')
+          ? 'form_bindings'
+          : info.title.startsWith('deferred pause native uncertain')
+            ? 'deferred_pause_retry'
+            : info.title.startsWith('deferred pause native')
+              ? 'deferred_pause'
+              : info.title.startsWith('whole native team deletion')
+                ? 'team_deletion'
+                : info.title.startsWith('pending ACW native navigation')
+                  ? 'acw_navigation'
+                  : info.title.startsWith('pending ACW native draft')
+                    ? 'acw_draft'
+                    : info.title.startsWith('pending ACW native review')
+                      ? 'acw_review'
+                      : info.title.startsWith('team roster last eligible')
+                        ? 'team_withdrawal'
+                        : info.title.startsWith('native local routing')
+                          ? 'routing'
+                          : info.title.startsWith('scoped ACW native')
+                            ? 'acw'
                             : info.title.startsWith(
-                                  'local pause duration supervisor'
+                                  'last eligible queue withdrawal'
                                 )
-                              ? 'duration'
+                              ? 'withdrawal'
                               : info.title.startsWith(
-                                    'local pause catalog operator'
+                                    'local pause duration supervisor'
                                   )
-                                ? 'operations'
-                                : info.title.startsWith('local pause catalog')
-                                  ? 'editor'
-                                  : null;
+                                ? 'duration'
+                                : info.title.startsWith(
+                                      'local pause catalog operator'
+                                    )
+                                  ? 'operations'
+                                  : info.title.startsWith('local pause catalog')
+                                    ? 'editor'
+                                    : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
   const auth = info.title.startsWith('ACW form library')
     ? session.acw_form_targets[info.project.name].administrator
     : pauseTarget
-      ? info.title.startsWith('local pause catalog operator') ||
+      ? info.title.startsWith('Hoya workspace native') ||
+        info.title.startsWith('local pause catalog operator') ||
         info.title.startsWith('pending ACW native') ||
         info.title.startsWith('operational form native') ||
         info.title.startsWith('deferred pause native')
@@ -6041,4 +6044,117 @@ test('state history native preserves scope, filters, pagination and private even
   await expect(operatorPage.locator('[data-history-row]')).toHaveCount(0);
   await operatorPage.close();
   expect(writes).toEqual([]);
+});
+
+test('Hoya workspace native restores and persists versioned ACW answers in the actual voice workspace', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].hoya_forms;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const endpoint = ownApi + `/qualifications/${target.qualification_id}`;
+  const browserApi = endpoint.replace(':5387/', ':5386/');
+  const errors = [];
+  const external = [];
+  const commands = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.route('**/*', route => {
+    const url = new URL(route.request().url());
+    if (
+      ['http:', 'https:'].includes(url.protocol) &&
+      url.hostname !== '127.0.0.1'
+    ) {
+      external.push(url.origin + url.pathname);
+      return route.abort('blockedbyclient');
+    }
+    return route.continue();
+  });
+  page.on('request', request => {
+    const url = new URL(request.url());
+    if (
+      ['http:', 'https:'].includes(url.protocol) &&
+      url.hostname !== '127.0.0.1'
+    )
+      external.push(url.origin + url.pathname);
+    if (
+      /\/(commands|sync_calls|telephony_integration)(?:[/?]|$)/.test(
+        url.pathname
+      ) &&
+      !['GET', 'HEAD'].includes(request.method())
+    )
+      commands.push(url.pathname);
+  });
+  await page.goto(
+    `/app/accounts/${target.account_id}/synthetic-hoya-acw/${target.call_session_id}`
+  );
+  const workspace = page.getByTestId('hoya-inbox-workspace');
+  await expect(workspace).toBeVisible();
+  const form = workspace.locator('[data-pending-qualification-form]');
+  await expect(form).toBeVisible();
+  await form
+    .locator('[data-qualification-field="reason"]')
+    .selectOption('order');
+  await form
+    .locator('[data-qualification-field="result"]')
+    .selectOption('completed');
+  const fields = form.locator('[data-acw-form-fields]');
+  await expect(fields.locator('[data-acw-answer]')).toHaveCount(3);
+  await expect(form.locator('[data-complete-qualification]')).toBeDisabled();
+  await fields
+    .locator('[data-acw-answer="feedback"]')
+    .fill('SYNTHETIC Hoya actual workspace private answer');
+  await fields.locator('[data-acw-answer="verified"]').selectOption('false');
+  await fields.locator('[data-acw-answer="quantity"]').fill('0');
+  const saved = page.waitForResponse(
+    response =>
+      response.url() === browserApi + '/draft' &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-save-qualification-draft]').click();
+  const receipt = await saved;
+  expect(receipt.status()).toBe(200);
+  expect((await receipt.json()).item.completed_at).toBeNull();
+  await page.reload();
+  await expect(fields.locator('[data-acw-answer="feedback"]')).toHaveValue(
+    'SYNTHETIC Hoya actual workspace private answer'
+  );
+  await expect(fields.locator('[data-acw-answer="verified"]')).toHaveValue(
+    'false'
+  );
+  await expect(fields.locator('[data-acw-answer="quantity"]')).toHaveValue('0');
+  await expect(form.locator('[data-qualification-draft-saved]')).toBeVisible();
+  await expect(
+    workspace.getByText('Limite aplicado: 01:00', { exact: true })
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page.locator('html').evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await fields.scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-hoya-operational-form.png`,
+    fullPage: false,
+  });
+  const completed = page.waitForResponse(
+    response =>
+      response.url() === browserApi && response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-complete-qualification]').click();
+  const final = await completed;
+  expect(final.status()).toBe(200);
+  expect((await final.json()).item.completed_at).not.toBeNull();
+  const state = await page.request.get(ownApi + '/qualifications', {
+    headers: target.operator,
+  });
+  expect(state.status()).toBe(200);
+  const original = (await state.json()).items.find(
+    row => String(row.id) === String(target.qualification_id)
+  );
+  expect(original.completed_at).not.toBeNull();
+  expect(errors).toEqual([]);
+  expect(external).toEqual([]);
+  expect(commands).toEqual([]);
 });

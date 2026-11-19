@@ -1,6 +1,7 @@
 // Real components, production CSS and real authenticated Rails APIs. No API aliases.
 import { createApp, h } from 'vue';
 import { createStore } from 'vuex';
+import { createPinia } from 'pinia';
 import { createRouter, createWebHistory, RouterView } from 'vue-router';
 import { createI18n } from 'vue-i18n';
 import axios from 'axios';
@@ -50,6 +51,11 @@ const router = createRouter({
       path: '/app/accounts/:accountId/synthetic-pending-acw/:callId',
       name: 'synthetic_pending_acw',
       component: PendingAcwFixture,
+    },
+    {
+      path: '/app/accounts/:accountId/synthetic-hoya-acw/:callId',
+      name: 'synthetic_hoya_acw',
+      component: () => import('./HoyaAcwFixture.vue'),
     },
     ...(nativeNavigation ? contactCenterRoutes : []),
     {
@@ -113,6 +119,8 @@ const store = createStore({
   },
   getters: {
     getCurrentUser: state => state.nativeUser,
+    getCurrentUserID: state => state.nativeUser.id,
+    getSelectedChat: () => null,
     getCurrentRole: state =>
       state.nativeUser.accounts?.find(
         account =>
@@ -219,4 +227,5 @@ router.isReady().then(async () => {
     )
     .mount('#app');
 });
+app.use(createPinia());
 app.use(router);

@@ -570,3 +570,11 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - Route nova movida a escopo aditivo pequeno,sem expandir bloco existente além do limite;Array.new e alinhamentoRuby corrigidos. Nenhuma exclusão de lint,SQL ou permissão alterada.
 - Matriz reconciliada com evidência2a0cde0c para figuras7/8/9/12,preservando os campos anteriores em snapshot histórico. Integração completa das23figuras segue aberta.
 - Próximo gate precisa aprovar backend,Vue,lint,assets e196Chrome;sem reuso de resultados anteriores como homologação do histórico.
+
+### 19/11 — Histórico:backend1707aprovado;teste de tradução e Hoya
+
+- CI44632748080/33fb5eaf:1707Rails distintos(1530core,92concorrência,85corporativo),66reexecuções schema e nenhuma nova infraçãoRuby;zero falhas/pendências/erros externos no backend. Artefato14584991222/SHA-256ab6ab9d3464177927434d289c5a02480e99658280fd5501f39c1878d51fee088 verificado.
+- Vue835/836:uma falha confirmada no stub de tradução do teste novo,que omitira parâmetros de interpolação. Correção mantém chave e valores,sem remover assertivas de agente/estado/fuso. Produto não alterado por essa correção;Chrome eassets ainda não executados nessa rodada.
+- Novo percurso preparado com o componente HoyaInboxWorkspace inteiro,Pinia/Vuex com identidade nativa e APIsRails locais reais:formulário versionado,obrigatoriedade,false/zero,salvar,recarregar,concluir e confirmar persistência. Softphone não inicializado,HTTP externo bloqueado antes da rede,nenhum comando aoPABX.
+- Quatro percursos novos(um por projeto)acrescentados aos196anteriores:200Chrome obrigatórios. Não equivale à aplicação implantada inteira,conversaWhatsApp real ou homologaçãoSIP/PABX. A nova compilação permanece exclusiva no runner isolado.
+- Lint estático dos quatro arquivos frontend preparados:zero erros/avisos. Aguardar o próximo SHA nativo antes de declarar o histórico ou o Hoya homologados.23figuras seguem abertas.

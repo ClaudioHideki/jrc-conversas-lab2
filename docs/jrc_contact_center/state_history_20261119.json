@@ -54,5 +54,29 @@
     ],
     "frontend_and_chrome": "not_run",
     "product_permission_behavior_changed": false
-  }
+  },
+  "backend_verified_native_sha": {
+    "sha": "33fb5eaf23f3b0e0fa9a401256c96c47a181e089",
+    "run": 44632748080,
+    "native_distinct": 1707,
+    "core": 1530,
+    "concurrency": 92,
+    "corporate": 85,
+    "schema_reexecutions": 66,
+    "native_failures_pending_outside_errors": 0,
+    "new_ruby_offenses": 0,
+    "vue": {
+      "total": 836,
+      "passed": 835,
+      "failed": 1,
+      "pending": 0
+    },
+    "cause": "Unit-only i18n stub discards actor/state interpolation arguments; native product template passes both to the existing i18n API.",
+    "prepared_correction": "Keep key AND interpolation values in the unit stub; preserve all actor/state/timezone assertions. Actual translations remain mandatory in Chrome.",
+    "artifact": 14584991222,
+    "artifact_sha256": "ab6ab9d3464177927434d289c5a02480e99658280fd5501f39c1878d51fee088",
+    "assets": "not_run",
+    "chrome": "not_run"
+  },
+  "status": "backend_verified_frontend_homologation_pending"
 }

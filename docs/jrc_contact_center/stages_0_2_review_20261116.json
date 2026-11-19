@@ -4770,5 +4770,50 @@
       "frontend_and_chrome": "not_run",
       "product_permission_behavior_changed": false
     }
+  },
+  "state_history_native_33fb5eaf_20261119": {
+    "sha": "33fb5eaf23f3b0e0fa9a401256c96c47a181e089",
+    "run": 44632748080,
+    "native_distinct": 1707,
+    "core": 1530,
+    "concurrency": 92,
+    "corporate": 85,
+    "schema_reexecutions": 66,
+    "native_failures_pending_outside_errors": 0,
+    "new_ruby_offenses": 0,
+    "vue": {
+      "total": 836,
+      "passed": 835,
+      "failed": 1,
+      "pending": 0
+    },
+    "cause": "Unit-only i18n stub discards actor/state interpolation arguments; native product template passes both to the existing i18n API.",
+    "prepared_correction": "Keep key AND interpolation values in the unit stub; preserve all actor/state/timezone assertions. Actual translations remain mandatory in Chrome.",
+    "artifact": 14584991222,
+    "artifact_sha256": "ab6ab9d3464177927434d289c5a02480e99658280fd5501f39c1878d51fee088",
+    "assets": "not_run",
+    "chrome": "not_run"
+  },
+  "hoya_full_workspace_prepared_20261119": {
+    "base": "33fb5eaf23f3b0e0fa9a401256c96c47a181e089",
+    "active_run_preserved": 44632748080,
+    "status": "prepared_not_run",
+    "new_test_scope": "Full existing HoyaInboxWorkspace component in an isolated synthetic voice/post-call fixture. Real local Rails APIs, native typed forms, persistence and compiled product CSS. Not full deployed application shell or real SIP/PABX.",
+    "reused": [
+      "HoyaInboxWorkspace",
+      "native CallSessions API",
+      "useAttendanceClosing",
+      "PendingQualificationForm",
+      "Pinia",
+      "Vuex native identity projection",
+      "synthetic guarded seed accounts"
+    ],
+    "no_api_mocks": true,
+    "external_http": "blocked before network and causes failed assertion",
+    "softphone_initialization": false,
+    "new_chrome_cases": 4,
+    "preserved_chrome_cases": 196,
+    "required_total": 200,
+    "windows_build": false
   }
 }
