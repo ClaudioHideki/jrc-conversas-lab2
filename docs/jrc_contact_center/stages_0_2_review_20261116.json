@@ -3955,5 +3955,45 @@
     "native_tests_prepared": 5,
     "deferred_queue_and_UI": "pending, not represented as implemented",
     "provider_commands": false
+  },
+  "acw_form_native_304612a4_20261119": {
+    "sha": "304612a45d381fa05f8871fc643054b9b68cae85",
+    "run": 44523670408,
+    "artifact": 14532535424,
+    "artifact_sha256": "645764929c9b5b73ae996616affcf046231e97c1a4fbeec9a4f5ec0bd8753530",
+    "status": "lint_failed_not_homologated",
+    "rails_distinct": 1493,
+    "schema_reload_separate": 40,
+    "vue_passed": 753,
+    "all_native_fail_pending_outside": 0,
+    "approved_pause_guard_cases": [
+      {
+        "description": "JrcContactCenter::AgentStateManager does not interrupt a real connected leg to start an operator pause",
+        "status": "passed"
+      },
+      {
+        "description": "JrcContactCenter::AgentStateManager keeps a terminated call in ACW and preserves its draft and native availability instead of starting the pause",
+        "status": "passed"
+      },
+      {
+        "description": "JrcContactCenter::AgentStateManager continues blocking a pause after the ACW clock expires without completing or deleting answers",
+        "status": "passed"
+      },
+      {
+        "description": "JrcContactCenter::AgentStateManager allows an explicit native pause only after terminal call and successful ACW completion without provider confirmation",
+        "status": "passed"
+      },
+      {
+        "description": "Native operator pause while ACW is pending rejects a direct authenticated pause request without altering the pending qualification or state",
+        "status": "passed"
+      }
+    ],
+    "frontend_lint_errors": 10,
+    "ruby_new_offenses": 4,
+    "chrome_executed": 0,
+    "chrome_required": 176,
+    "minimal_lint_correction": "Whitespace only Vue; one Ruby continuation indent, literal and blank line; metadata query helper named according to existing project-owned nested Query convention, no queries or rules removed. Exact new migration hash updated; two previous migrations unchanged.",
+    "current_local_checks": "18frontend files:0errors, warnings retained;23migration gate cases passed; new native verification pending.",
+    "full23_complete": false
   }
 }

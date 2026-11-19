@@ -265,7 +265,9 @@ onBeforeUnmount(() => {
           class="grid min-w-0 gap-3 sm:grid-cols-2"
           @submit.prevent="load(1)"
         >
-          <label class="block min-w-0 text-sm"><span class="block">{{ labels.name }}</span><input
+          <label class="block min-w-0 text-sm"
+            ><span class="block">{{ labels.name }}</span
+            ><input
               v-model="filters.q"
               type="search"
               maxlength="100"
@@ -273,7 +275,9 @@ onBeforeUnmount(() => {
               class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
               data-acw-form-search
           /></label>
-          <label class="block min-w-0 text-sm"><span class="block">{{ labels.status }}</span><select
+          <label class="block min-w-0 text-sm"
+            ><span class="block">{{ labels.status }}</span
+            ><select
               v-model="filters.status"
               :disabled="list.loading"
               class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -282,7 +286,8 @@ onBeforeUnmount(() => {
               <option value="active">{{ labels.active }}</option>
               <option value="archived">{{ labels.archived }}</option>
               <option value="">{{ t('JRC_CONTACT_CENTER.ADMIN.ALL') }}</option>
-            </select></label>
+            </select></label
+          >
           <div class="flex flex-wrap gap-2 sm:col-span-2">
             <Button
               type="submit"
@@ -335,7 +340,8 @@ onBeforeUnmount(() => {
               <p class="break-words font-medium">{{ row.name }}</p>
               <p class="text-sm text-n-slate-11">
                 {{ row.status === 'active' ? labels.active : labels.archived
-                }}<span aria-hidden="true">{{ separator }}</span>{{ labels.revision }}<span> {{ row.revision }}</span>
+                }}<span aria-hidden="true">{{ separator }}</span
+                >{{ labels.revision }}<span> {{ row.revision }}</span>
               </p>
             </div>
             <Button
@@ -362,7 +368,8 @@ onBeforeUnmount(() => {
               page: list.page,
               pages: list.pages,
             })
-          }}</span><Button
+          }}</span
+          ><Button
             type="button"
             :label="labels.next"
             :disabled="list.loading || list.page >= list.pages"
@@ -419,14 +426,18 @@ onBeforeUnmount(() => {
           :disabled="locked || secondaryBusy"
           class="min-w-0 space-y-4"
         >
-          <label class="block min-w-0 text-sm"><span class="block">{{ labels.name }}</span><input
+          <label class="block min-w-0 text-sm"
+            ><span class="block">{{ labels.name }}</span
+            ><input
               v-model="draft.name"
               maxlength="160"
               required
               class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
               data-acw-form-name
           /></label>
-          <label class="block min-w-0 text-sm"><span class="block">{{ labels.description }}</span><textarea
+          <label class="block min-w-0 text-sm"
+            ><span class="block">{{ labels.description }}</span
+            ><textarea
               v-model="draft.description"
               maxlength="1000"
               rows="3"
@@ -453,8 +464,11 @@ onBeforeUnmount(() => {
               :key="row.revision"
               class="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-lg border border-n-weak p-3"
             >
-              <span class="break-words">{{ labels.revision }} {{ row.revision
-                }}<span aria-hidden="true">{{ separator }}</span>{{ row.name }}</span><Button
+              <span class="break-words"
+                >{{ labels.revision }} {{ row.revision
+                }}<span aria-hidden="true">{{ separator }}</span
+                >{{ row.name }}</span
+              ><Button
                 type="button"
                 :label="labels.open"
                 size="sm"
@@ -494,7 +508,9 @@ onBeforeUnmount(() => {
             class="min-w-0 rounded-lg border border-n-weak p-3"
           >
             <h3 class="mb-3 break-words font-medium">
-              {{ selectedVersion.name }}<span aria-hidden="true">{{ separator }}</span>{{ labels.revision }} {{ selectedVersion.revision }}
+              {{ selectedVersion.name
+              }}<span aria-hidden="true">{{ separator }}</span
+              >{{ labels.revision }} {{ selectedVersion.revision }}
             </h3>
             <AcwFormFields
               v-model="preview"

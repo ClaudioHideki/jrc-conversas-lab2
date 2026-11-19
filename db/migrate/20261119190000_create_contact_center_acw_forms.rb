@@ -56,7 +56,7 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
     add_foreign_key VERSIONS, TEMPLATES, column: [:acw_form_template_id, :account_id], primary_key: [:id, :account_id],
                                          on_delete: :cascade, name: 'cc_acw_form_version_account_fk'
     add_check_constraint VERSIONS, "revision > 0 AND btrim(name) <> '' AND " \
-                                  "status::text IN ('active'::text, 'archived'::text)", name: 'cc_acw_form_version_state'
+                                   "status::text IN ('active'::text, 'archived'::text)", name: 'cc_acw_form_version_state'
     add_check_constraint VERSIONS, "jsonb_typeof(definition) = 'object' AND octet_length(definition::text) <= #{DEFINITION_BYTES} " \
                                    "AND definition ? 'fields' " \
                                    "AND jsonb_typeof(definition -> 'fields') = 'array' " \
@@ -148,7 +148,7 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
   end
 
   def schema_receipt
-    SchemaReceipt.new(connection).call
+    SchemaReceiptQuery.new(connection).call
   end
 
   def schema_matches?(table, columns, checks, foreign_keys)
@@ -159,7 +159,7 @@ class CreateContactCenterAcwForms < ActiveRecord::Migration[7.1]
   end
 
   # Structure only: no OIDs, database names, rows or actors enter the receipt.
-  class SchemaReceipt
+  class SchemaReceiptQuery
     TABLES = [CreateContactCenterAcwForms::TEMPLATES, CreateContactCenterAcwForms::VERSIONS].freeze
 
     def initialize(connection)

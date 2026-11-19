@@ -443,3 +443,12 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [ ] Provar novamente a instalação/recarga/reexecução, todos os gates e176Chrome na candidata corrigida.
 - [x] Decisão de negócio registrada: pausa começa somente após fim da chamada e conclusão do ACW.
 - [ ] Proteção nativa adicional e5regressões preparadas; fila persistente de intenção e interface de pausa adiada ainda pendentes. Nenhum comando externo.
+
+### Call Center — biblioteca ACW, correção final de lint
+
+- [x] CI44523670408/304612a4: 1493 exemplos Rails distintos, mais 40 de recarga, e 753 Vue aprovados; zero falhas, pendências e erros externos nos relatórios. As cinco regressões da pausa após ACW passaram.
+- [x] Instalação, schema reload e reexecução agora preservam o recibo completo; alteração real do CHECK continua sendo rejeitada.
+- [x] Identificadas dez infrações de formatação Vue e quatro Ruby. Correções preservam SQL, verificações e comportamento: espaços/quebras, literal, linha vazia e nome explícito do leitor de metadados conforme a regra própria do projeto. Nenhuma configuração de lint alterada.
+- [x] Conferência local direcionada: 18 arquivos frontend sem erros de lint (avisos permanecem); 23 testes da proteção de migrations aprovados. Não equivalem à execução nativa da nova candidata.
+- [ ] Revalidar os gates e executar os 176 cenários Chrome; nenhum foi executado em304612a4 por falha de lint.
+- [ ] Intenção persistente/interface de pausa adiada e vínculo regra→formulário/respostas privadas continuam pendentes. Etapas0–2 e23figuras permanecem abertas.

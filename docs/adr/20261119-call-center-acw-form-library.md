@@ -27,3 +27,11 @@ A diferença é exclusivamente a definição textual do CHECKde status: PostgreS
 O auxiliar do recibo permanece autocontido na migration, como classe aninhada; a regra[Style/OneClassPerFile](https://docs.rubocop.org/rubocop/latest/cops_style.html#styleoneclassperfile)permite esse escopo. Nenhuma exclusão de lint foi adicionada.
 
 Os metadados de diagnóstico são classificados separadamente de RSpec. A colisão do sufixo schema-rspec.jsonno leitor externo foi reproduzida por testes; metadados não contam como exemplos nem suprem relatórios obrigatórios ausentes. O resultado315ab97acontinua reprovado. A correção precisa de nova prova nativa, não de reaproveitamento da aprovação7d55fe76.
+
+## Correção da referência de lint e prova nativa
+
+A referência anterior ao cop upstream não descreve a regra efetivamente carregada por este projeto: `rubocop/one_class_per_file.rb` implementa uma regra própria que permite classes aninhadas de consulta com sufixo Query, entre outros papéis explícitos. O auxiliar realiza somente consultas de metadados PostgreSQL; passou a se chamar `SchemaReceiptQuery`, mantendo cada consulta, componente e hash calculado. O probe acompanha o nome. Não há mudança no cop, em sua configuração ou em exclusões.
+
+A CI44523670408 provou instalação, recarga e reexecução: 1493 exemplos Rails distintos, 40 exemplos adicionais de schema e753Vue, sem falhas ou pendências. O caso que altera realmente o CHECK de status continua negado. A execução ainda falhou por dez erros de formatação Vue e quatro infrações Ruby; não executou Chrome e não homologa a biblioteca. O próximo checkpoint corrige somente esse lint e exige nova validação.
+
+A relação pausa/ACW deixou de ser pendente: o usuário aprovou começar a pausa após terminar a chamada e concluir o ACW. As cinco regressões nativas da proteção passaram nesta CI; a intenção persistente e sua interface ainda não foram implementadas.

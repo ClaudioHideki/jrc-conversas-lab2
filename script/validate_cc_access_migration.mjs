@@ -9,7 +9,7 @@ export const migrationHash = '85fa579036a807b2d50ae3c30af64b061ba9ea6c6ffe173b4e
 export const ivrMigrationPath = 'db/migrate/20261117200000_create_contact_center_ivr_drafts.rb';
 export const ivrMigrationHash = 'eaeb4147658fd8e5c9bf25272c34bf5ed3113cf603856854906620f128d92e91';
 export const acwFormMigrationPath = 'db/migrate/20261119190000_create_contact_center_acw_forms.rb';
-export const acwFormMigrationHash = 'b5ab44afbc74e155e289fb8b49a9ed4b6bb393196503ad73e8ccd706fcc7becd';
+export const acwFormMigrationHash = 'e900938e5ba82f3eb0481773c41f64b5e4d264ee70c110fb8b20c69506200053';
 export const reviewedMigrations = Object.freeze({
   [migrationPath]: migrationHash,
   [ivrMigrationPath]: ivrMigrationHash,

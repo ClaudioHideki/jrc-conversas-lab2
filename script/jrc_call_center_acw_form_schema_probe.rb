@@ -18,7 +18,7 @@ module JrcContactCenter::SyntheticAcwFormSchemaProbe
 
   def self.report(stage)
     migration = CreateContactCenterAcwForms.new
-    components = CreateContactCenterAcwForms::SchemaReceipt.new(ActiveRecord::Base.connection).components
+    components = CreateContactCenterAcwForms::SchemaReceiptQuery.new(ActiveRecord::Base.connection).components
     { stage: stage, structure: structure, stored: ActiveRecord::Base.connection.table_comment(:jrc_contact_center_acw_form_templates),
       calculated: migration.send(:schema_receipt), escape_html: ActiveSupport.escape_html_entities_in_json, components: components,
       component_hashes: components.transform_values { |value| Digest::SHA256.hexdigest(JSON.generate(value)) } }
@@ -26,7 +26,7 @@ module JrcContactCenter::SyntheticAcwFormSchemaProbe
 
   def self.structure
     connection = ActiveRecord::Base.connection
-    CreateContactCenterAcwForms::SchemaReceipt::TABLES.index_with do |table|
+    CreateContactCenterAcwForms::SchemaReceiptQuery::TABLES.index_with do |table|
       { columns: connection.columns(table).map(&:name).sort, checks: connection.check_constraints(table).map(&:name).sort,
         foreign_keys: connection.foreign_keys(table).length }
     end
