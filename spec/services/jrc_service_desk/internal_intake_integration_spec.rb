@@ -151,7 +151,7 @@ RSpec.describe 'Consolidated employee intake', type: :request do
     expect do
       post "#{base}/tickets", headers: headers,
         params: input.deep_merge(ticket: { assignee_account_user_id: observer.account_user_id.to_s }), as: :json
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:not_found)
     end.not_to change(JrcServiceDesk::Ticket, :count)
   end
 
