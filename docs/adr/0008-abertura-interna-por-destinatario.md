@@ -25,6 +25,10 @@ mesmo ao navegar para outra ação recém-autorizada pelo guard.
 - A escolha explícita dispensa a configuração de destinatário/observador legado.
   Continua exigindo identidade autenticada, status inicial e prioridade normal.
   O fluxo sem escolha explícita conserva as validações dos padrões anteriores.
+- O solicitante interno é exclusivamente o contato da própria conta com o e-mail
+  da identidade autenticada, classificado como pessoa. Não depende de acesso ao
+  cadastro comercial da empresa desse contato. O diretório e a abertura em nome
+  de terceiros conservam as políticas existentes; a lista comercial não é ampliada.
 - A leitura do contexto não autoriza a execução nem exige que o destinatário
   padrão esteja disponível. Criação/replay mantêm validação e fingerprint.
 - O observador legado só é registrado se puder ver o chamado no destino final;

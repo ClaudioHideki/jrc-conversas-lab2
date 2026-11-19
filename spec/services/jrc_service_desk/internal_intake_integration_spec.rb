@@ -119,6 +119,19 @@ RSpec.describe 'Consolidated employee intake', type: :request do
     expect(ticket.requester.email).to eq(sd_user.email)
   end
 
+  it 'uses the authenticated employee identity without requiring commercial access to their own internal company contact' do
+    company = sd_account.master_companies.create!(name: 'Synthetic employer', relationship_type: 'internal')
+    contact = create(:contact, account: sd_account, email: sd_user.email, company_id: company.id,
+      additional_attributes: { entity_type: 'person' })
+    context = JrcServiceDesk::OperationalContext.new(sd_context)
+    expect(JrcServiceDesk::RequesterDirectory.new(context).visible_contacts).not_to include(contact)
+    post "#{base}/tickets", headers: headers,
+      params: input.deep_merge(ticket: { assignee_account_user_id: observer.account_user_id.to_s }), as: :json
+    expect(response).to have_http_status(:created), response.body
+    expect(JrcServiceDesk::Ticket.find_by!(account: sd_account, idempotency_key: 'synthetic-internal-intake').requester_id).to eq(contact.id)
+    expect(JrcServiceDesk::RequesterDirectory.new(context).visible_contacts).not_to include(contact)
+  end
+
   it 'keeps the module and explicit recipient available when the configured primary cannot receive assignments' do
     sd_membership.update!(manual_assignment_enabled: false)
     get "#{base}/ui_context", headers: headers

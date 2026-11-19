@@ -73,12 +73,22 @@ class JrcServiceDesk::InternalIntake
     contact = context.account.contacts.where('LOWER(email) = ?', context.user.email.downcase).first
     contact ||= context.account.contacts.create!(name: context.user.name, email: context.user.email,
                                                 identifier: "internal-user:#{context.user.id}", additional_attributes: { entity_type: 'person' })
+    validate_identity!(context, contact)
+    contact
+  end
+
+  def self.validate_identity!(context, contact)
+    unless contact.account_id == context.account.id && contact.email.to_s.casecmp?(context.user.email)
+      raise Pundit::NotAuthorizedError
+    end
     if JrcServiceDesk::EmployeeAccess.restricted?(context) && contact.company_id.present?
       allowed = JrcServiceDesk::EmployeeAccess.configurations(context).values.map { |row| row['internal_company_id'] }.compact
       raise Pundit::NotAuthorizedError unless allowed.include?(contact.company_id)
     end
-    JrcServiceDesk::RequesterDirectory.new(context).validate!(contact)
-    contact
+    reason = JrcCustomers::RequesterIdentity.reason(contact)
+    if reason
+      raise JrcServiceDesk::RequestValidationError, reason == 'organization' ? 'requester_is_company' : 'requester_review_required'
+    end
   end
 
   def self.defaults!(unit, context, assignee_account_user_id: nil)

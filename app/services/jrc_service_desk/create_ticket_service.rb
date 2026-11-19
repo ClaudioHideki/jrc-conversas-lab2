@@ -61,8 +61,12 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       end
 
       requester = Contact.where(account_id: context.account.id).find(JrcServiceDesk::Input.id(normalized['requester_id']))
-      authorize!(requester, :show?)
-      JrcServiceDesk::RequesterDirectory.new(context).validate!(requester, company_id: normalized['company_id'])
+      if internal_request
+        JrcServiceDesk::InternalIntake.validate_identity!(context, requester)
+      else
+        authorize!(requester, :show?)
+        JrcServiceDesk::RequesterDirectory.new(context).validate!(requester, company_id: normalized['company_id'])
+      end
       apply_company_route!(unit, requester, values, normalized) if origin_channel == 'manual' && !internal_request
       service, queue = catalogue_references(service_id, normalized, unit, internal_request: internal_request)
       ticket = JrcServiceDesk::Ticket.new(
