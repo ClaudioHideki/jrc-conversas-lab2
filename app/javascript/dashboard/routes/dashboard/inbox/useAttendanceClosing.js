@@ -4,6 +4,7 @@ import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
 export const useAttendanceClosing = ({
   props,
   supportsClosing,
+  authorityKey = computed(() => ''),
   enabled = computed(() => true),
   isVoice,
   now,
@@ -25,9 +26,14 @@ export const useAttendanceClosing = ({
   let request = 0;
   let disposed = false;
   const identity = () =>
-    [props.accountId, props.currentCallId, props.currentConversationId].join(
-      ':'
-    );
+    JSON.stringify([
+      props.accountId,
+      props.currentCallId,
+      props.currentConversationId,
+      authorityKey.value,
+      enabled.value,
+      supportsClosing.value,
+    ]);
   const current = (version, key) =>
     !disposed && version === generation && key === identity();
   const target = () =>
@@ -40,6 +46,9 @@ export const useAttendanceClosing = ({
         !record.completed_at &&
         String(record.account_user_id) === String(agent.value?.account_user_id)
     )
+  );
+  const unverified = computed(
+    () => enabled.value && !agent.value && (loading.value || error.value)
   );
   const pendingAttendance = computed(
     () => agent.value?.pending_qualifications?.[0]
@@ -63,6 +72,30 @@ export const useAttendanceClosing = ({
     )
   );
 
+  const clearObserved = () => {
+    records.value = [];
+    attendance.value = null;
+    agent.value = null;
+    policy.value = null;
+    blocked.value = false;
+  };
+  const clearDraft = () => {
+    reason.value = '';
+    result.value = '';
+    note.value = '';
+  };
+  const rejectUnauthorized = failure => {
+    if ([401, 403, 404].includes(failure?.response?.status)) {
+      generation += 1;
+      request += 1;
+      clearObserved();
+      clearDraft();
+      loading.value = false;
+      saving.value = false;
+    }
+    error.value = true;
+  };
+
   const load = async () => {
     if (!enabled.value) return;
     const version = generation;
@@ -84,19 +117,30 @@ export const useAttendanceClosing = ({
         records.value = response.data.items;
         policy.value = response.data.policy;
       } else {
+        clearObserved();
         agent.value = response.data.item;
       }
       if (pending.value) showClosing();
       const awaiting = pendingAttendance.value;
       if (awaiting && !pending.value) restoreSelection(awaiting);
-    } catch {
-      if (current(version, key) && requestId === request) error.value = true;
+    } catch (failure) {
+      if (current(version, key) && requestId === request) {
+        clearObserved();
+        rejectUnauthorized(failure);
+      }
     } finally {
       if (current(version, key) && requestId === request) loading.value = false;
     }
   };
 
   const start = async () => {
+    if (
+      saving.value ||
+      !enabled.value ||
+      !supportsClosing.value ||
+      unverified.value
+    )
+      return;
     const version = generation;
     const key = identity();
     saving.value = true;
@@ -113,8 +157,8 @@ export const useAttendanceClosing = ({
       ];
       showClosing();
       await load();
-    } catch {
-      if (current(version, key)) error.value = true;
+    } catch (failure) {
+      if (current(version, key)) rejectUnauthorized(failure);
     } finally {
       if (current(version, key)) saving.value = false;
     }
@@ -123,6 +167,8 @@ export const useAttendanceClosing = ({
   const complete = async () => {
     if (
       saving.value ||
+      !enabled.value ||
+      !supportsClosing.value ||
       !pending.value ||
       !reason.value.trim() ||
       !result.value.trim()
@@ -153,8 +199,8 @@ export const useAttendanceClosing = ({
       note.value = '';
       blocked.value = false;
       return true;
-    } catch {
-      if (current(version, key)) error.value = true;
+    } catch (failure) {
+      if (current(version, key)) rejectUnauthorized(failure);
       return false;
     } finally {
       if (current(version, key)) saving.value = false;
@@ -162,6 +208,13 @@ export const useAttendanceClosing = ({
   };
 
   const allowSelection = (kind, id) => {
+    const selected =
+      kind === 'voice' ? props.currentCallId : props.currentConversationId;
+    if (unverified.value && String(selected) !== String(id)) {
+      blocked.value = true;
+      showClosing();
+      return false;
+    }
     const waiting = pendingAttendance.value || pending.value;
     if (!waiting) return true;
     const same =
@@ -174,25 +227,18 @@ export const useAttendanceClosing = ({
     return false;
   };
   watch(
-    () => [props.accountId, props.currentCallId, props.currentConversationId],
+    identity,
     () => {
       generation += 1;
-      records.value = [];
-      attendance.value = null;
-      agent.value = null;
-      policy.value = null;
-      reason.value = '';
-      result.value = '';
-      note.value = '';
+      clearObserved();
+      clearDraft();
       saving.value = false;
-      blocked.value = false;
+      loading.value = false;
       error.value = false;
       load();
     },
     { immediate: true }
   );
-  watch(supportsClosing, load);
-  watch(enabled, load);
   const poll = setInterval(() => {
     if (!saving.value && !loading.value && props.ready) load();
   }, 5000);
@@ -208,6 +254,7 @@ export const useAttendanceClosing = ({
     policy,
     pending,
     pendingAttendance,
+    unverified,
     elapsed,
     limit,
     overdue,

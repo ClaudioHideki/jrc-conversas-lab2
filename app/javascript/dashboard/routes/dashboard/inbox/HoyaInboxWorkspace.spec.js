@@ -77,9 +77,20 @@ const props = {
     },
   },
 };
+const workspaceUser = ref({
+  id: 9,
+  accounts: [{ id: 1, role: 'agent', permissions: [] }],
+});
+beforeEach(() => {
+  workspaceUser.value = {
+    id: 9,
+    accounts: [{ id: 1, role: 'agent', permissions: [] }],
+  };
+});
 const store = createStore({
   getters: {
     getSelectedChat: () => ({}),
+    getCurrentUser: () => workspaceUser.value,
     'accounts/isFeatureEnabledonAccount': () => () => false,
   },
 });
@@ -254,6 +265,7 @@ describe('inbox native SIP action guards', () => {
   });
   beforeEach(() => {
     localStorage.clear();
+    vi.clearAllMocks();
     scopedUser.value = 9;
     scopedConversation.value = {
       id: 21,
@@ -630,5 +642,58 @@ describe('inbox native SIP action guards', () => {
     expect(wrapper.text()).not.toContain(
       'JRC_CONTACT_CENTER.INBOX_360.CLOSING'
     );
+  });
+
+  it('does not restore private tabulation from an old actor in the same account', async () => {
+    let resolve;
+    CCAPI.qualifications.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    workspaceUser.value = {
+      id: 10,
+      accounts: [{ id: 1, role: 'agent', custom_role_id: 44 }],
+    };
+    await flushPromises();
+    resolve(pendingResponse);
+    await flushPromises();
+    expect(wrapper.find('progress').exists()).toBe(false);
+    expect(CCAPI.qualifications).toHaveBeenCalledTimes(2);
+  });
+  it('clears the tabulation when the same account membership changes while the new read is pending', async () => {
+    CCAPI.qualifications.mockResolvedValueOnce(pendingResponse);
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    await flushPromises();
+    expect(wrapper.find('progress').exists()).toBe(true);
+    let resolve;
+    CCAPI.qualifications.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    workspaceUser.value = {
+      id: 9,
+      accounts: [{ id: 1, role: 'agent', permissions: ['restricted'] }],
+    };
+    await flushPromises();
+    expect(wrapper.find('progress').exists()).toBe(false);
+    resolve({ data: { ...pendingResponse.data, items: [] } });
+    await flushPromises();
+    expect(wrapper.find('progress').exists()).toBe(false);
+  });
+  it('does not discard current tabulation on a native presence-only refresh', async () => {
+    CCAPI.qualifications.mockResolvedValue(pendingResponse);
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    await flushPromises();
+    CCAPI.qualifications.mockClear();
+    workspaceUser.value.accounts[0].availability = 'busy';
+    workspaceUser.value.accounts[0].active_at = 99;
+    await flushPromises();
+    expect(CCAPI.qualifications).not.toHaveBeenCalled();
+    expect(wrapper.find('progress').exists()).toBe(true);
   });
 });

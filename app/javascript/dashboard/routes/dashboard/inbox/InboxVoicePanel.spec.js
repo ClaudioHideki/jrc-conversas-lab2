@@ -542,4 +542,50 @@ describe('voice list composition', () => {
     await group.get('[aria-pressed=true]').trigger('click');
     expect(wrapper.emitted('selectCall')[0][0]).toEqual(record);
   });
+
+  it('blocks new outgoing calls while qualification is unverified and permits a verified retry', async () => {
+    state.sip.destination.value = '1411';
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...props, qualificationUnverified: true },
+    });
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.COMMON.ERROR');
+    expect(wrapper.text()).not.toContain(
+      'SOFTPHONE.INBOX.QUALIFICATION_PENDING'
+    );
+    await wrapper.get('[data-central-dialer]').trigger('submit');
+    expect(state.sip.call).not.toHaveBeenCalled();
+    await wrapper.setProps({ qualificationUnverified: false });
+    await wrapper.get('[data-central-dialer]').trigger('submit');
+    expect(state.sip.call).toHaveBeenCalledOnce();
+  });
+  it('blocks answering but still permits rejecting an incoming call while qualification is unverified', async () => {
+    state.sip.hasCall.value = true;
+    state.sip.incoming.value = true;
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...props, qualificationUnverified: true },
+    });
+    const answer = wrapper.get(
+      '[aria-label="JRC_CONTACT_CENTER.INBOX_360.ANSWER"]'
+    );
+    expect(answer.attributes('disabled')).toBeDefined();
+    await answer.trigger('click');
+    expect(state.sip.answer).not.toHaveBeenCalled();
+    const reject = wrapper
+      .findAll('button')
+      .find(item => item.text() === 'SOFTPHONE.CENTRAL.REJECT');
+    expect(reject.attributes('disabled')).toBeUndefined();
+    await reject.trigger('click');
+    expect(state.sip.reject).toHaveBeenCalledOnce();
+    expect(state.sip.hangup).not.toHaveBeenCalled();
+  });
+  it('preserves ending an established call while qualification cannot be revalidated', async () => {
+    state.sip.hasCall.value = true;
+    state.sip.established.value = true;
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...props, qualificationUnverified: true },
+    });
+    await wrapper.vm.endCall();
+    expect(state.sip.hangup).toHaveBeenCalledOnce();
+    expect(state.sip.answer).not.toHaveBeenCalled();
+  });
 });

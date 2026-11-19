@@ -560,7 +560,12 @@
           "Per-reason/queue/team templates and precedence remain stage 6; native 1..3600 second engine unchanged"
         ]
       },
-      "scoped_acw_increment": "Motor de precedência, snapshot e editor no popup existentes preparados. Validação nativa/Chrome do novo SHA ainda pendente. Relógio intermediário por motivo, formulários e automações não concluídos."
+      "scoped_acw_increment": "Motor de precedência, snapshot e editor no popup existentes preparados. Validação nativa/Chrome do novo SHA ainda pendente. Relógio intermediário por motivo, formulários e automações não concluídos.",
+      "next_increment_prepared": {
+        "scope": "ACW estado privado por autoridade atual; sem alteração do motor/snapshot já validado",
+        "status": "Preparado; exige CI do próprio SHA. Fixture atual não comprova o workspace completo no Chrome.",
+        "adr": "docs/adr/20261118-call-center-acw-current-authority.md"
+      }
     },
     {
       "figure": 10,

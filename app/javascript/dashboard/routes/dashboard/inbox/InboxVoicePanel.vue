@@ -25,6 +25,7 @@ const props = defineProps({
   allowed: { type: Boolean, default: false },
   capabilities: { type: Object, default: () => ({}) },
   qualificationPending: { type: Boolean, default: false },
+  qualificationUnverified: { type: Boolean, default: false },
   nativeCallId: { type: Number, default: null },
   callRecord: { type: Object, default: null },
   customer: { type: Object, default: null },
@@ -82,6 +83,9 @@ const matches = computed(
         Boolean(props.callRecord?.external_session_id) &&
         props.callRecord.external_session_id === sip.callId.value))
 );
+const qualificationBlocked = computed(
+  () => props.qualificationPending || props.qualificationUnverified
+);
 const otherBusy = computed(
   () => calls.hasActiveCall || calls.hasIncomingCall || isInitiating.value
 );
@@ -94,7 +98,7 @@ const canAnswer = computed(
     !pending.value &&
     sip.incoming.value &&
     !otherBusy.value &&
-    !props.qualificationPending
+    !qualificationBlocked.value
 );
 const canControl = computed(
   () =>
@@ -111,7 +115,7 @@ const canDial = computed(
     props.sessionView &&
     !sip.hasCall.value &&
     !otherBusy.value &&
-    !props.qualificationPending &&
+    !qualificationBlocked.value &&
     sip.registered.value &&
     !pending.value &&
     Boolean(normalizeSipDialNumber(sip.destination.value))
@@ -129,7 +133,7 @@ const dialDestination = computed({
       available.value &&
       !sip.hasCall.value &&
       !otherBusy.value &&
-      !props.qualificationPending
+      !qualificationBlocked.value
     )
       sip.destination.value = value;
   },
@@ -329,7 +333,7 @@ const key = tone => {
   if (!available.value || pending.value || otherBusy.value) return;
   if (sip.hasCall.value) {
     if (canControl.value) sip.pressKey(tone);
-  } else if (props.sessionView && !props.qualificationPending)
+  } else if (props.sessionView && !qualificationBlocked.value)
     sip.destination.value += tone;
 };
 const transfer = () =>
@@ -489,7 +493,7 @@ const open = async numberToDial => {
     available.value &&
     !sip.hasCall.value &&
     !otherBusy.value &&
-    !props.qualificationPending &&
+    !qualificationBlocked.value &&
     numberToDial
   )
     sip.destination.value = normalizeSipDialNumber(numberToDial);
@@ -562,11 +566,15 @@ defineExpose({ endCall, canEnd, duration });
       </button>
     </div>
     <p
-      v-if="qualificationPending"
+      v-if="qualificationBlocked"
       role="status"
       class="rounded-lg bg-n-amber-2 p-3 text-sm text-n-amber-11"
     >
-      {{ t('SOFTPHONE.INBOX.QUALIFICATION_PENDING') }}
+      {{
+        qualificationUnverified
+          ? t('JRC_CONTACT_CENTER.COMMON.ERROR')
+          : t('SOFTPHONE.INBOX.QUALIFICATION_PENDING')
+      }}
     </p>
     <p
       v-if="actionError || (matches && sip.errorMessage.value)"
@@ -788,7 +796,7 @@ defineExpose({ endCall, canEnd, duration });
           v-model="dialDestination"
           type="tel"
           autocomplete="off"
-          :disabled="!available || otherBusy || qualificationPending"
+          :disabled="!available || otherBusy || qualificationBlocked"
           class="mt-2 w-full rounded-lg border border-n-weak bg-n-solid-1 px-4 py-3 text-xl disabled:opacity-40"
       /></label>
       <div class="grid grid-cols-3 gap-2">
@@ -796,7 +804,7 @@ defineExpose({ endCall, canEnd, duration });
           v-for="tone in tones"
           :key="tone"
           type="button"
-          :disabled="!available || otherBusy || qualificationPending"
+          :disabled="!available || otherBusy || qualificationBlocked"
           class="min-h-12 rounded-lg bg-n-alpha-2 text-lg text-n-slate-12 hover:bg-n-blue-3 disabled:opacity-40"
           @click="key(tone)"
         >

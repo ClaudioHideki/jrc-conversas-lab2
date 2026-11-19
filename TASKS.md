@@ -320,3 +320,16 @@ Aceite incremental **cf040419 / CI 44203813534**: 641 Rails, 250 Vue, 96 Chrome,
 - CI44418507109:1039 Rails principais,1038 aprovados,um fixture sem coberturaGroup inicial;16 recargas aprovadas. AAPI negou corretamente. Preparação corrigida comGroup sintético explícito antes das criações201 e substituição pelaUnidadeA antes das negativasB; nenhuma permissão relaxada. Mais uma regressão impede criação por administrador sem cobertura.
 - Corrigidos22 apontamentos Ruby nos dois specs:alinhamento,setup aninhado simplificado,literal fora do loop eexists? nativo. Sem exclusões ou redução de expectativas.
 - Artefato14482776042 / 42c22a2edbc5964ec399c9a9e91dddcc75d28d6019b79a4a7fcde5db857c269e verificado. Concorrência,Vue,assets,Chrome não executados nesseSHA. Próximo gate exige148Chrome e todos os critérios anteriores.
+
+
+### ACW — contexto atual do atendimento, preparação incremental
+
+- Preparados fingerprint nativo de usuário/vínculo/capacidades, descarte de respostas tardias, limpeza de projeção privada após falha de leitura/negação e proteção de início duplicado. Falha ordinária de gravação preserva rascunho; presença não invalida contexto.
+- Dezesseis casos novos do hook, três do workspace e três do painel de voz, além dos existentes, preparados. Seus três arquivos passaram a constar explicitamente no gate Vue; nenhum caminho anterior retirado. Seis arquivos sob lint estático por diferença; avisos preexistentes permanecem sem supressão. Situação não verificada bloqueia novas chamadas, preservando rejeição e encerramento existentes.
+- ADR:docs/adr/20261118-call-center-acw-current-authority.md. Preparação posterior àCI44423463990; não herda seu aceite. Relógio, persistência intermediária, formulários, automações e homologação visual do workspace completo permanecem pendentes.
+
+
+### Roteamento — diagnóstico db20cf5c e menor correção
+
+- CI44423463990:1196Rails distintos e16recargas aprovados;Rubylint sem novos apontamentos. Vue436/440; quatro falhas do stubDialog semclose. Corrigido para refletir open/close expostos pelo componente nativo e acrescentada asserção de fechamento por revogação. Nenhuma mudança na autorização nem no fluxo de produção.
+- Artefato14483643068 / 93047f2b4d881c6bd2d6c2a89c0eb1455ee981f505845168864d6cc78ce2d29d verificado. Assets eChrome não executados; novo aceite ainda depende daCI do próximoSHA. Incremento ACW de privacidade preparado e identificado separadamente, sem reaproveitar evidência como se já estivesse testado.

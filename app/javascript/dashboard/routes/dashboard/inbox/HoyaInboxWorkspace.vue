@@ -8,6 +8,7 @@ import {
   conversationStateLabels,
 } from './inboxPresentation';
 import { useMapGetter, useStore } from 'dashboard/composables/store';
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import {
   getInboxChannelKey,
@@ -87,6 +88,19 @@ const agentLabels = computed(() => agentStateLabels(t));
 const pauseLabels = computed(() => pauseReasonLabels(t));
 const selectedChat = useMapGetter('getSelectedChat');
 const currentUserId = useMapGetter('getCurrentUserID');
+const currentUser = useMapGetter('getCurrentUser');
+const closingAuthorityKey = computed(() =>
+  JSON.stringify([
+    currentUser.value?.id ?? currentUserId.value,
+    currentUser.value?.type,
+    accountMembershipAccess(
+      currentUser.value?.accounts?.find(
+        row => String(row.id) === String(props.accountId)
+      )
+    ),
+    props.context?.capabilities,
+  ])
+);
 const featureEnabled = useMapGetter('accounts/isFeatureEnabledonAccount');
 const sip = useSipWebphone();
 const globalVoiceShell = inject(GLOBAL_VOICE_SHELL, false);
@@ -490,6 +504,7 @@ const runAction = async action => {
 };
 const closing = useAttendanceClosing({
   props,
+  authorityKey: closingAuthorityKey,
   enabled: computed(() => Boolean(props.context)),
   supportsClosing,
   isVoice,
@@ -687,7 +702,11 @@ const pendingIncoming = computed(
     props.softphoneAccess &&
     Number(sip.accountId.value) === props.accountId &&
     sip.incoming.value &&
-    Boolean(closing.pending.value || closing.pendingAttendance.value)
+    Boolean(
+      closing.pending.value ||
+        closing.pendingAttendance.value ||
+        closing.unverified.value
+    )
 );
 const rejectPendingIncoming = () => {
   if (pendingIncoming.value) sip.reject();
@@ -751,7 +770,7 @@ watch(
   }
 );
 watch(
-  () => [props.accountId, Boolean(props.context)],
+  () => [props.accountId, closingAuthorityKey.value, Boolean(props.context)],
   async () => {
     agentGeneration += 1;
     const version = agentGeneration;
@@ -1270,7 +1289,11 @@ onBeforeUnmount(() => {
           <span class="min-w-0 flex-1">
             {{ t('SOFTPHONE.CENTRAL.STATES.incoming') }} ·
             {{ sip.remoteNumber.value }}.
-            {{ t('SOFTPHONE.INBOX.QUALIFICATION_PENDING') }}
+            {{
+              closing.unverified.value
+                ? t('JRC_CONTACT_CENTER.COMMON.ERROR')
+                : t('SOFTPHONE.INBOX.QUALIFICATION_PENDING')
+            }}
           </span>
           <button
             type="button"
@@ -1318,6 +1341,7 @@ onBeforeUnmount(() => {
             :qualification-pending="
               Boolean(closing.pending.value || closing.pendingAttendance.value)
             "
+            :qualification-unverified="closing.unverified.value"
             :native-call-id="isVoice ? currentCallId : null"
             :call-record="isVoice ? call || null : null"
             :customer="

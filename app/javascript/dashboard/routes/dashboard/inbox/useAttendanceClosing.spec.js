@@ -40,6 +40,9 @@ let closing;
 let now;
 let showClosing;
 let restore;
+let enabled;
+let authority;
+let supports;
 const Harness = defineComponent({
   props: {
     accountId: { type: Number, required: true },
@@ -64,8 +67,10 @@ const Harness = defineComponent({
         },
       },
       now,
+      enabled,
+      authorityKey: authority,
       isVoice: computed(() => Boolean(props.currentCallId)),
-      supportsClosing: computed(() => true),
+      supportsClosing: supports,
       showClosing,
       restoreSelection: restore,
     });
@@ -80,6 +85,9 @@ const props = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  enabled = ref(true);
+  supports = ref(true);
+  authority = ref('actor9:roleA');
   now = ref(Date.parse('2026-10-16T12:00:02Z'));
   showClosing = vi.fn();
   restore = vi.fn();
@@ -230,5 +238,246 @@ describe('persisted attendance tabulation', () => {
     await flushPromises();
     expect(closing.records.value).toEqual([]);
     expect(closing.agent.value.account_user_id).toBe(10);
+  });
+
+  it.each([401, 403, 404])(
+    'clears private snapshots and draft after denied refresh %s',
+    async status => {
+      mount(Harness, { props });
+      await flushPromises();
+      closing.reason.value = 'order';
+      closing.result.value = 'completed';
+      closing.note.value = 'SYNTHETIC private draft';
+      API.qualifications.mockRejectedValue({ response: { status } });
+      await closing.load();
+      expect(closing.records.value).toEqual([]);
+      expect(closing.agent.value).toBeNull();
+      expect(closing.policy.value).toBeNull();
+      expect(closing.note.value).toBe('');
+      expect(closing.pendingAttendance.value).toBeUndefined();
+      expect(closing.error.value).toBe(true);
+      expect(closing.loading.value).toBe(false);
+    }
+  );
+  it('invalidates a same-account late read after an authority change', async () => {
+    let resolve;
+    API.qualifications.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    mount(Harness, { props });
+    API.qualifications.mockResolvedValue({
+      data: { ...response.data, items: [], agent: { account_user_id: 10 } },
+    });
+    authority.value = 'actor10:roleB';
+    await flushPromises();
+    resolve(response);
+    await flushPromises();
+    expect(closing.records.value).toEqual([]);
+    expect(closing.agent.value.account_user_id).toBe(10);
+    expect(showClosing).not.toHaveBeenCalled();
+  });
+  it('does not apply an old completion after the same actor changes profile', async () => {
+    mount(Harness, { props });
+    await flushPromises();
+    closing.reason.value = 'order';
+    closing.result.value = 'completed';
+    let resolve;
+    API.completeQualification.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    const completing = closing.complete();
+    API.qualifications.mockResolvedValue({
+      data: { ...response.data, items: [], agent: { account_user_id: 9 } },
+    });
+    authority.value = 'actor9:restricted';
+    await flushPromises();
+    resolve({
+      data: {
+        item: { ...pending, completed_at: '2026-10-16T12:00:02Z' },
+        agent,
+      },
+    });
+    expect(await completing).toBe(false);
+    expect(closing.records.value).toEqual([]);
+    expect(closing.reason.value).toBe('');
+    expect(closing.saving.value).toBe(false);
+  });
+  it('clears data on disabling and ignores a late response without another request', async () => {
+    let resolve;
+    API.qualifications.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    mount(Harness, { props });
+    enabled.value = false;
+    await flushPromises();
+    resolve(response);
+    await flushPromises();
+    await closing.start();
+    expect(await closing.complete()).toBe(false);
+    expect(closing.records.value).toEqual([]);
+    expect(closing.agent.value).toBeNull();
+    expect(API.qualifications).toHaveBeenCalledTimes(1);
+    expect(API.startQualification).not.toHaveBeenCalled();
+    expect(API.completeQualification).not.toHaveBeenCalled();
+  });
+  it('prevents duplicate start requests while one is pending', async () => {
+    mount(Harness, { props });
+    await flushPromises();
+    let resolve;
+    API.startQualification.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    const first = closing.start();
+    await closing.start();
+    expect(API.startQualification).toHaveBeenCalledTimes(1);
+    resolve({ data: { item: pending } });
+    await first;
+    expect(closing.saving.value).toBe(false);
+    expect(closing.pending.value.id).toBe(11);
+  });
+  it('ignores a late start after current authority is revoked', async () => {
+    mount(Harness, { props });
+    await flushPromises();
+    let resolve;
+    API.startQualification.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    const starting = closing.start();
+    enabled.value = false;
+    await flushPromises();
+    showClosing.mockClear();
+    resolve({ data: { item: pending } });
+    await starting;
+    expect(closing.records.value).toEqual([]);
+    expect(showClosing).not.toHaveBeenCalled();
+    expect(closing.saving.value).toBe(false);
+  });
+  it.each([401, 403, 404])(
+    'clears private draft after completion is denied %s',
+    async status => {
+      mount(Harness, { props });
+      await flushPromises();
+      closing.reason.value = 'order';
+      closing.result.value = 'completed';
+      closing.note.value = 'SYNTHETIC private';
+      API.completeQualification.mockRejectedValue({ response: { status } });
+      expect(await closing.complete()).toBe(false);
+      expect(closing.records.value).toEqual([]);
+      expect(closing.agent.value).toBeNull();
+      expect(closing.note.value).toBe('');
+      expect(closing.error.value).toBe(true);
+    }
+  );
+  it('keeps a valid draft on an ordinary validation failure', async () => {
+    mount(Harness, { props });
+    await flushPromises();
+    closing.reason.value = 'order';
+    closing.result.value = 'completed';
+    closing.note.value = 'SYNTHETIC retry';
+    API.completeQualification.mockRejectedValue({ response: { status: 422 } });
+    expect(await closing.complete()).toBe(false);
+    expect(closing.pending.value.id).toBe(11);
+    expect(closing.note.value).toBe('SYNTHETIC retry');
+  });
+  it('drops target history when closing support changes and uses the native agent endpoint', async () => {
+    mount(Harness, { props });
+    await flushPromises();
+    supports.value = false;
+    await flushPromises();
+    await closing.start();
+    expect(closing.records.value).toEqual([]);
+    expect(closing.pending.value).toBeUndefined();
+    expect(API.agentState).toHaveBeenCalledWith(1);
+    expect(API.startQualification).not.toHaveBeenCalled();
+  });
+
+  it('hides stale observations on read failure but restores the same-context draft after reauthorization', async () => {
+    mount(Harness, { props });
+    await flushPromises();
+    closing.reason.value = 'order';
+    closing.note.value = 'SYNTHETIC retained offline draft';
+    API.qualifications.mockRejectedValueOnce(
+      new Error('temporary network failure')
+    );
+    await closing.load();
+    expect(closing.records.value).toEqual([]);
+    expect(closing.pending.value).toBeUndefined();
+    expect(closing.note.value).toBe('SYNTHETIC retained offline draft');
+    expect(closing.unverified.value).toBe(true);
+    expect(closing.allowSelection('voice', 99)).toBe(false);
+    expect(closing.allowSelection('whatsapp', 21)).toBe(true);
+    await closing.start();
+    expect(API.startQualification).not.toHaveBeenCalled();
+    await closing.load();
+    expect(closing.pending.value.id).toBe(11);
+    expect(closing.reason.value).toBe('order');
+    expect(closing.note.value).toBe('SYNTHETIC retained offline draft');
+    expect(closing.error.value).toBe(false);
+    expect(closing.unverified.value).toBe(false);
+  });
+
+  it('invalidates an in-flight completion after an authoritative denial without a profile refresh', async () => {
+    mount(Harness, { props });
+    await flushPromises();
+    closing.reason.value = 'order';
+    closing.result.value = 'completed';
+    let resolve;
+    API.completeQualification.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    const completing = closing.complete();
+    API.qualifications.mockRejectedValueOnce({ response: { status: 403 } });
+    await closing.load();
+    resolve({
+      data: {
+        item: { ...pending, completed_at: '2026-10-16T12:00:02Z' },
+        agent,
+      },
+    });
+    expect(await completing).toBe(false);
+    expect(closing.records.value).toEqual([]);
+    expect(closing.agent.value).toBeNull();
+    expect(closing.saving.value).toBe(false);
+    expect(closing.loading.value).toBe(false);
+    expect(closing.unverified.value).toBe(true);
+  });
+  it('does not restore an in-flight start after a denied current read', async () => {
+    mount(Harness, { props });
+    await flushPromises();
+    let resolve;
+    API.startQualification.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    const starting = closing.start();
+    API.qualifications.mockRejectedValueOnce({ response: { status: 401 } });
+    await closing.load();
+    showClosing.mockClear();
+    resolve({ data: { item: pending } });
+    await starting;
+    expect(closing.records.value).toEqual([]);
+    expect(showClosing).not.toHaveBeenCalled();
+    expect(closing.saving.value).toBe(false);
+    expect(closing.loading.value).toBe(false);
   });
 });

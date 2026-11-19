@@ -43,10 +43,18 @@ const Link = defineComponent({
     () =>
       h('a', { href: props.to.name }, slots.default?.()),
 });
+const openDialog = vi.fn();
+const closeDialog = vi.fn();
+const DialogStub = {
+  setup(_props, { expose }) {
+    expose({ open: openDialog, close: closeDialog });
+    return () => h('div');
+  },
+};
 const render = () =>
   mount(RoutingDraftWorkspace, {
     props: { accountId: '1', context },
-    global: { stubs: { Dialog: true, RouterLink: Link } },
+    global: { stubs: { Dialog: DialogStub, RouterLink: Link } },
   });
 enableAutoUnmount(afterEach);
 beforeEach(() => {
@@ -161,6 +169,7 @@ describe('native routing draft workspace', () => {
     await flushPromises();
     expect(wrapper.find('[data-routing-row]').exists()).toBe(false);
     expect(wrapper.find('[data-routing-create]').exists()).toBe(false);
+    expect(closeDialog).toHaveBeenCalled();
     expect(API.routingRules).toHaveBeenCalledTimes(1);
     expect(wrapper.get('[role=alert]').text()).toContain('COMMON.ERROR');
   });

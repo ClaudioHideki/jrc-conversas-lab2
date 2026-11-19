@@ -163,6 +163,7 @@ jobs:
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcContactCenter app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ContactDetailsDialog.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/components/MasterContactDetails.spec.js \
             app/javascript/dashboard/routes/dashboard/webphone app/javascript/dashboard/routes/dashboard/settings/customRoles \
             app/javascript/dashboard/components/widgets/BackButton.spec.js \
+            app/javascript/dashboard/routes/dashboard/inbox/useAttendanceClosing.spec.js app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.spec.js app/javascript/dashboard/routes/dashboard/inbox/InboxVoicePanel.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/call-center-vitest.json
       - name: Frontend lint of changed sources
