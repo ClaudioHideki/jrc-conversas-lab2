@@ -4069,9 +4069,18 @@ test('team roster last eligible withdrawal uses real native review, persistence 
     .filter({ hasText: `Fila #${target.queue_id} · Alteração` })
     .locator('[data-audit-detail]')
     .click();
-  await expect(page.locator('[data-audited-manager-withdrawal]')).toContainText(
-    `equipe #${target.team_id}`
+  const auditDialog = page.getByRole('dialog', {
+    name: 'Detalhes do evento',
+    exact: true,
+  });
+  await expect(auditDialog).toBeVisible();
+  const managerReview = auditDialog.locator(
+    '[data-audited-manager-withdrawal]'
   );
+  await expect(managerReview).toHaveCount(1);
+  await managerReview.scrollIntoViewIfNeeded();
+  await expect(managerReview).toBeVisible();
+  await expect(managerReview).toContainText(`equipe #${target.team_id}`);
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-team-last-agent-audit.png`,
     fullPage: false,

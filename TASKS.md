@@ -386,3 +386,5 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [ ] Call Center 19/11: revalidar o relogio ACW apos falha da fixture (email derivado de display_name com espacos) e trocar update_all por with_lock/reload/update! sem remover validacoes. Preservar 1.102 exemplos principais aprovados, os 16 de schema e toda a cobertura futura de Vue/Chrome ainda bloqueada.
 
 - [ ] Call Center 19/11: relogio validado nativamente em 490cd3a8 (sete casos;1.270 Rails distintos+16schema). Gate global ainda bloqueado: ajustar alinhamento da fixture e instalar Vuex sintetico em dois testes de navegacao PABX. Preservar verificacoes originais e exigir 152 Chrome antes de aceite visual.
+
+- [ ] Call Center 19/11: c0e20792 aprovou 1.270 Rails distintos+16schema+573Vue, lint e build/bootstrap frescos. Chrome148/152: quatro falhas no seletor global do comprovante presente na previa e no dialogo. Restringir ao dialogo acessivel exato, exigir unicidade e visibilidade apos scroll; revalidar152 sem alterar produto ou timeouts.

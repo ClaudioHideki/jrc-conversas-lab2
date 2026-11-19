@@ -3565,5 +3565,43 @@
     "ruby_cause": "Keyword alignment in synthetic clock-user email fixture.",
     "chrome": "not run; mandatory152 preserved",
     "word_all23_complete": false
+  },
+  "team_roster_chrome_c0e20792_20261119": {
+    "sha": "c0e207925a55c7fddbbf281bf6e1e4ed8852ac6b",
+    "run": 44455878332,
+    "artifact": 14499601646,
+    "artifact_sha256": "421fc1273f9de3ec3a28473935c25adb84f8dca4edfc9b010941df42e0af5e20",
+    "native_distinct": 1270,
+    "schema_reload_separate": 16,
+    "vue": {
+      "total": 573,
+      "passed": 573,
+      "failed": 0,
+      "pending": 0
+    },
+    "ruby_new_offenses": 0,
+    "frontend_lint": "passed",
+    "fresh_build": "passed",
+    "chrome_bootstrap": {
+      "passed": true,
+      "cards": 15,
+      "page_errors": 0,
+      "http_errors": 0
+    },
+    "chrome": {
+      "passed": 148,
+      "failed": 4,
+      "skipped": 0,
+      "flaky": 0,
+      "outside_errors": 0
+    },
+    "cause": "Global manager-review locator matches preview and open native dialog; final assertion ambiguous in all four projects.",
+    "correction": "Scope exact accessible dialog, require count1, scroll panel, require visible and identical team ID. Preserve all other assertions and timeouts.",
+    "acceptance_json": false,
+    "screenshots_reviewed": [
+      "desktop-light",
+      "mobile-dark"
+    ],
+    "status": "QA fix prepared; new full gate required; all23/stages not complete"
   }
 }
