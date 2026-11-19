@@ -128,6 +128,33 @@ RSpec.describe 'Consolidated employee intake', type: :request do
     expect(response).to have_http_status(:created), response.body
   end
 
+  it 'does not expose the intake directory to a custom role without creation permission' do
+    role = create(:custom_role, account: sd_account, permissions: %w[jrc_service_desk_module_view jrc_service_desk_tickets_view])
+    sd_account_user.update!(custom_role_id: role.id)
+    context = JrcServiceDesk::UiContextService.new(user_context: sd_context).call
+    unit = context[:units].find { |row| row[:id] == sd_unit.id.to_s }
+    expect(unit[:permissions][:create_ticket]).to be(false)
+    expect(unit[:internal_intake]).to be_nil
+    expect do
+      post "#{base}/tickets", headers: headers,
+        params: input.deep_merge(ticket: { assignee_account_user_id: observer.account_user_id.to_s }), as: :json
+      expect(response).to have_http_status(:forbidden)
+    end.not_to change(JrcServiceDesk::Ticket, :count)
+  end
+
+  it 'rejects the selected recipient when their explicitly configured queue has been deactivated' do
+    department = create(:team, account: sd_account)
+    target_queue = create(:jrc_sd_queue, unit: sd_unit, team: department)
+    recipient = create(:jrc_sd_membership, unit: sd_unit, manual_assignment_enabled: true, team: department, queue: target_queue)
+    create(:team_member, team: department, user: recipient.account_user.user)
+    target_queue.update!(active: false)
+    expect do
+      post "#{base}/tickets", headers: headers,
+        params: input.deep_merge(ticket: { assignee_account_user_id: recipient.account_user_id.to_s }), as: :json
+      expect(response).to have_http_status(:forbidden)
+    end.not_to change(JrcServiceDesk::Ticket, :count)
+  end
+
   it 'denies another unit and another account through the same API' do
     [sd_other_unit, sd_foreign_unit].each do |unit|
       expect do
