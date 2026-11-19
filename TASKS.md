@@ -402,3 +402,11 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [x] 2026-11-19: a8c6c78d validou navegação ACW e rótulos de conflito:1310Rails+16schema,631Vue,164Chrome,244capturas verificadas; diálogo conferido nos4projetos. Não equivale ao Hoya completo ou às23figuras.
 
 - [ ] 2026-11-19: revalidar exclusão Team após e0b0feac:1168Rails+16schema aprovados;80/82concorrência (duas expectativas de normalização nativa corrigidas) e5infrações Ruby corrigidas sem alterar gates. Vue/Chrome168 ainda pendentes; artefato14510134218 preservado.
+
+
+### Call Center — 19/11 — bootstrap de Equipes
+
+- [x] acc72d8e:1335Rails distintos+16schema/661Vue, lint e assets novos aprovados; evidência14513102816 verificada.
+- [x] Causa pelo source map: ciclo teams.routes → quatro formulários com router global → settings.routes:66.
+- [ ] Validar a correção mínima de imports de rota assíncronos, o teste de inicialização e os168Chrome preservados. A homologação integral permanece em a8c6c78d/164Chrome até nova prova.
+- [ ] Formulários ACW: seis arquivos de fundação e rascunho SQL separados, sem rotas expostas/migration executada; não incluídos no checkpoint desta correção.

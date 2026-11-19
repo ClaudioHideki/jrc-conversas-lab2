@@ -3868,5 +3868,20 @@
     ],
     "no_gate_or_configuration_changes": true,
     "no_database_changes": true
+  },
+  "whole_team_bootstrap_acc72d8e": {
+    "sha": "acc72d8e96d172e2d3b4a6481ce560104daf1038",
+    "run": 44487797310,
+    "native_distinct": 1335,
+    "schema_reload_separate": 16,
+    "vue": 661,
+    "chrome_executed": 0,
+    "expected_chrome": 168,
+    "status": "bootstrap_failed",
+    "cause": "source map settings.routes.js:66; eager native Team form imports reach the global router and re-enter teams.routes before initialization",
+    "correction": "Only four form route imports become lazy. Native metadata, controls, API and 168 browser tests unchanged; new focused initialization regression awaits CI.",
+    "artifact_sha256": "ab8cfcf37bee4e21e9a852cdf32d2c8a5832d42850f85f1b94e3d97c05dbb933",
+    "last_full_green": "a8c6c78df86712879876fd02ebc18fed42a10bdb",
+    "all23_complete": false
   }
 }

@@ -4,13 +4,15 @@ import { FEATURE_FLAGS } from '../../../../featureFlags';
 import TeamsIndex from './Index.vue';
 import CreateStepWrap from './Create/Index.vue';
 import EditStepWrap from './Edit/Index.vue';
-import CreateTeam from './Create/CreateTeam.vue';
-import EditTeam from './Edit/EditTeam.vue';
-import AddAgents from './Create/AddAgents.vue';
-import EditAgents from './Edit/EditAgents.vue';
 import FinishSetup from './FinishSetup.vue';
 import SettingsContent from '../Wrapper.vue';
 import SettingsWrapper from '../SettingsWrapper.vue';
+
+// These forms import the application router; load them after route initialization.
+const CreateTeam = () => import('./Create/CreateTeam.vue');
+const EditTeam = () => import('./Edit/EditTeam.vue');
+const AddAgents = () => import('./Create/AddAgents.vue');
+const EditAgents = () => import('./Edit/EditAgents.vue');
 
 export default {
   routes: [
