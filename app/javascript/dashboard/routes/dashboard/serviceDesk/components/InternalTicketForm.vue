@@ -229,7 +229,9 @@ defineExpose({ busy: locked });
         class="grid min-w-0 grid-cols-1 gap-5 rounded-2xl bg-blue-50 p-5 md:grid-cols-2"
       >
         <div class="flex min-w-0 gap-3">
-          <span class="self-start rounded-xl bg-blue-100 p-3 text-blue-700"><PortalIcon name="user"/></span>
+          <span class="self-start rounded-xl bg-blue-100 p-3 text-blue-700"
+            ><PortalIcon name="user"
+          /></span>
           <div class="min-w-0">
             <dt class="text-xs text-slate-600">{{ t('PORTAL.NAME') }}</dt>
             <dd class="mt-1 break-words font-bold">
@@ -238,7 +240,9 @@ defineExpose({ busy: locked });
           </div>
         </div>
         <div class="flex min-w-0 gap-3">
-          <span class="self-start rounded-xl bg-blue-100 p-3 text-blue-700"><PortalIcon name="mail"/></span>
+          <span class="self-start rounded-xl bg-blue-100 p-3 text-blue-700"
+            ><PortalIcon name="mail"
+          /></span>
           <div class="min-w-0">
             <dt class="text-xs text-slate-600">{{ t('PORTAL.EMAIL') }}</dt>
             <dd class="mt-1 break-all font-bold">
@@ -308,7 +312,8 @@ defineExpose({ busy: locked });
           :disabled="locked"
         />
       </div>
-      <label class="block text-sm font-semibold">{{ t('PORTAL.SUBJECT') }}
+      <label class="block text-sm font-semibold"
+        >{{ t('PORTAL.SUBJECT') }}
         <input
           v-model="draft.title"
           required
@@ -318,7 +323,8 @@ defineExpose({ busy: locked });
           class="mt-2 w-full rounded-xl border border-blue-200 bg-white p-3 focus:ring-2 focus:ring-blue-200"
         />
       </label>
-      <label class="block text-sm font-semibold">{{ t('PORTAL.DESCRIPTION') }}
+      <label class="block text-sm font-semibold"
+        >{{ t('PORTAL.DESCRIPTION') }}
         <textarea
           v-model="draft.description"
           required
@@ -345,7 +351,8 @@ defineExpose({ busy: locked });
         <label
           for="internal-ticket-files"
           class="block text-sm font-semibold"
-          >{{ t('JRC_SERVICE_DESK.TICKET.tabs.files') }}</label>
+          >{{ t('JRC_SERVICE_DESK.TICKET.tabs.files') }}</label
+        >
         <input
           id="internal-ticket-files"
           ref="fileInput"
