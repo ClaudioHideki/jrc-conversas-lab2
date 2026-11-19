@@ -19,18 +19,16 @@ class JrcContactCenter::Qualification < JrcContactCenter::ApplicationRecord
   end
 
   def refresh_overdue!
-    return self if completed_at || !started_at
-
-    elapsed = elapsed_seconds
-    return self if elapsed < acw_limit_seconds
+    return self unless pending_clock?
 
     scope_keys = [account_id, account_user_id]
-    self.class.pending.where(id: id, account_id: account_id, account_user_id: account_user_id, started_at: started_at,
-                             acw_limit_seconds: acw_limit_seconds, duration_seconds: duration_seconds)
-        .update_all(overdue: true, exceeded_seconds: [elapsed - acw_limit_seconds, 0].max, updated_at: Time.current)
-    reload
-    raise ActiveRecord::RecordNotFound unless scope_keys == [account_id, account_user_id]
+    with_lock do
+      raise ActiveRecord::RecordNotFound unless scope_keys == [account_id, account_user_id]
+      next unless pending_clock?
 
+      elapsed = elapsed_seconds
+      update!(overdue: true, exceeded_seconds: [elapsed - acw_limit_seconds, 0].max) if elapsed >= acw_limit_seconds
+    end
     self
   end
 
@@ -44,6 +42,10 @@ class JrcContactCenter::Qualification < JrcContactCenter::ApplicationRecord
   end
 
   private
+
+  def pending_clock?
+    started_at && !completed_at
+  end
 
   def account_and_target_match
     target = channel == 'voice' ? call_session : conversation

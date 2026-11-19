@@ -48,4 +48,4 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 
 - [Retirada indireta pela composição da equipe](20261118-call-center-indirect-team-withdrawal.md): prévia sem escrita, revisão explícita do gestor e auditoria transacional; implementação preparada, aguardando CI própria.
 
-- [Relógio ACW e leituras antigas](20261119-call-center-acw-clock-stale-read.md): atualização condicional no banco preserva conclusão, limite atual e proprietário; sete testes nativos preparados, validação pendente.
+- [Relógio ACW e leituras antigas](20261119-call-center-acw-clock-stale-read.md): lock e recarga da linha preservam conclusão, limite atual e proprietário; sete testes nativos preparados, validação pendente.

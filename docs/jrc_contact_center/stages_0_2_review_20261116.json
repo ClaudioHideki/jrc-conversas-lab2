@@ -3509,5 +3509,33 @@
     "chrome_expected": 152,
     "subsequent_gates": "not executed due previous failure",
     "status": "corrections prepared; not yet natively validated"
+  },
+  "acw_clock_first_native_gate_20261119": {
+    "sha": "d9f977e502fc42d9542a01927db6a89ca068a157",
+    "run": 44451366097,
+    "artifact": 14496535942,
+    "artifact_sha256": "5fc43663529caeaa037b6f173bf8fc094ef1e4cc09a4e8910966e2f648fb0161",
+    "main": {
+      "examples": 1109,
+      "passed": 1102,
+      "failures": 7,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "schema_reload": {
+      "examples": 16,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "failure": "All seven new clock cases failed in user fixture email validation before clock code; explicit synthetic email prepared.",
+    "lint_new": 2,
+    "corrections": [
+      "row lock/reload and native update! instead of bypassing validations",
+      "explicit unique synthetic email",
+      "freeze_time block restores time without redundant travel_back"
+    ],
+    "team_roster": "Main Rails tests passed, including canonical no-op IDs; full concurrency/Vue/Chrome not yet run at this SHA.",
+    "status": "corrections prepared; next CI required"
   }
 }

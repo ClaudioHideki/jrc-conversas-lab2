@@ -382,3 +382,5 @@ Prévia pura de composição de membros, serviço único de elegibilidade config
 Atualização condicional do relógio sobre a linha ainda pendente e no mesmo escopo; preservar conclusão já gravada, limite atual, identidade e conteúdo manual. Sete cenários PostgreSQL preparados; aguardam execução própria. Não equivale à seleção intermediária do motivo, formulários ou automações por destino. Decisão aprovada de precedência preservada. Detalhes: docs/adr/20261119-call-center-acw-clock-stale-read.md.
 
 - [ ] Call Center 19/11: revalidar CI apos cinco infracoes Ruby, recarga da associacao no teste de projecao e normalizacao de IDs do roster (dois cenarios HTTP). Preservar os 152 cenarios Chrome e validar separadamente a correcao do relogio ACW (sete cenarios nativos). Nenhum aceite integral ou operacao PABX inferida.
+
+- [ ] Call Center 19/11: revalidar o relogio ACW apos falha da fixture (email derivado de display_name com espacos) e trocar update_all por with_lock/reload/update! sem remover validacoes. Preservar 1.102 exemplos principais aprovados, os 16 de schema e toda a cobertura futura de Vue/Chrome ainda bloqueada.
