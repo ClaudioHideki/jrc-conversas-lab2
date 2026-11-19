@@ -181,19 +181,20 @@ const blocked = computed(() =>
           v-if="session.operations.state.notice"
           :status="session.operations.state.notice"
         />
-        <ServiceDeskState
-          v-if="blocked"
-          :status="state.status"
-          retry
-          @retry="session.retry()"
-        />
-        <Button
-          v-if="blocked && activeScreen !== 'new'"
-          class="mx-auto mt-4"
-          :label="t('JRC_SERVICE_DESK.SCREENS.new')"
-          icon="i-lucide-plus"
-          @click="router.push(to('new'))"
-        />
+        <template v-if="blocked">
+          <ServiceDeskState
+            :status="state.status"
+            retry
+            @retry="session.retry()"
+          />
+          <Button
+            v-if="activeScreen !== 'new'"
+            class="mx-auto mt-4"
+            :label="t('JRC_SERVICE_DESK.SCREENS.new')"
+            icon="i-lucide-plus"
+            @click="router.push(to('new'))"
+          />
+        </template>
         <ServiceDeskState
           v-else-if="state.status !== 'ready'"
           :status="state.status"
