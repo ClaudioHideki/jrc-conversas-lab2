@@ -12,11 +12,14 @@ export const acwFormMigrationPath = 'db/migrate/20261119190000_create_contact_ce
 export const acwFormMigrationHash = 'e900938e5ba82f3eb0481773c41f64b5e4d264ee70c110fb8b20c69506200053';
 export const deferredPauseMigrationPath = 'db/migrate/20261119193000_create_contact_center_deferred_pause_requests.rb';
 export const deferredPauseMigrationHash = '6dff254f8838085a16cd2eb6b4e516d477b8d15c6cba09873e7020ae792c9db2';
+export const qualificationFormMigrationPath = 'db/migrate/20261119203000_create_contact_center_qualification_forms.rb';
+export const qualificationFormMigrationHash = 'a75c194cbb487724efae2ddfc358021d0f11edaf231ea94b855be37adac0ee93';
 export const reviewedMigrations = Object.freeze({
   [migrationPath]: migrationHash,
   [ivrMigrationPath]: ivrMigrationHash,
   [acwFormMigrationPath]: acwFormMigrationHash,
   [deferredPauseMigrationPath]: deferredPauseMigrationHash,
+  [qualificationFormMigrationPath]: qualificationFormMigrationHash,
 });
 const base = 'a24adc6dd8bb660f955b76cce0172ae1638deee2';
 
@@ -32,12 +35,12 @@ export function verifyAccessMigration(changes, content, schema) {
 }
 
 // Preserve the original one-migration verifier and its negative tests above.
-// The current candidate admits exactly four reviewed forward additions, never an arbitrary extra migration.
+// The current candidate admits exactly five reviewed forward additions, never an arbitrary extra migration.
 export function verifyReviewedMigrations(changes, readCurrent, schema) {
   const expected = Object.keys(reviewedMigrations).sort();
   const rows = changes.trim().split('\n').filter(Boolean).sort();
   if (JSON.stringify(rows) !== JSON.stringify(expected.map(path => `A\t${path}`))) {
-    throw new Error('Only the four exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
+    throw new Error('Only the five exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
   }
   for (const path of expected) {
     const actual = createHash('sha256').update(readCurrent(path)).digest('hex');

@@ -1,6 +1,8 @@
+require_relative 'jrc_call_center_operational_form_seed'
+
 # Exclusive synthetic accounts; no channels, inboxes or PABX configuration.
 class JrcContactCenter::SyntheticPauseSeed
-  PENDING_ACW_PROJECTS = %w[-acw_draft -acw_review -acw_navigation -deferred_pause -deferred_pause_retry].freeze
+  PENDING_ACW_PROJECTS = %w[-acw_draft -acw_review -acw_navigation -deferred_pause -deferred_pause_retry -operational_forms -form_bindings].freeze
 
   def self.call(projects:)
     config = ActiveRecord::Base.connection_db_config
@@ -14,7 +16,7 @@ class JrcContactCenter::SyntheticPauseSeed
     projects.index_with do |project|
       %w[
         editor operations withdrawal duration acw routing
-        team_withdrawal acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
+        team_withdrawal acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry operational_forms form_bindings
       ].index_with do |kind|
         new("#{project}-#{kind}").call
       end
@@ -44,6 +46,9 @@ class JrcContactCenter::SyntheticPauseSeed
     if @project.end_with?('-team_deletion')
       JrcContactCenter::AccessGrant.find_by!(account: @account, account_user: admin).update!(allowed: ['jrc_contact_center_audit'])
       payload.merge!(team_source(operator, corporate: false))
+    end
+    if @project.end_with?('-operational_forms', '-form_bindings')
+      payload.merge!(JrcContactCenter::SyntheticOperationalFormSeed.new(account: @account, admin: admin, queue: queues.first).call)
     end
     payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?(*PENDING_ACW_PROJECTS)
     payload

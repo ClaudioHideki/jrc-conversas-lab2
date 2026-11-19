@@ -1,0 +1,98 @@
+import { ref } from 'vue';
+import { useQualificationDraft } from './useQualificationDraft';
+
+const fixture = () => {
+  const reason = ref('');
+  const result = ref('');
+  const note = ref('');
+  const formAnswers = ref({});
+  return {
+    reason,
+    result,
+    note,
+    formAnswers,
+    draft: useQualificationDraft({ reason, result, note, formAnswers }),
+  };
+};
+const record = (
+  revision = 'synthetic-first',
+  answers = { rule: { verified: false, quantity: 0 } }
+) => ({
+  id: 12,
+  reason_code: 'order',
+  outcome_code: '',
+  notes: '',
+  draft_revision: revision,
+  acw_form_context: { selected: null, answers },
+});
+
+describe('Private native ACW answers in the existing manual revision', () => {
+  it('hydrates typed values and ignores JSON key order when computing dirty state', () => {
+    const f = fixture();
+    f.draft.observe(record());
+    expect(f.formAnswers.value).toEqual({
+      rule: { verified: false, quantity: 0 },
+    });
+    f.formAnswers.value = { rule: { quantity: 0, verified: false } };
+    expect(f.draft.dirty.value).toBe(false);
+    f.formAnswers.value = { rule: { quantity: 1, verified: false } };
+    expect(f.draft.dirty.value).toBe(true);
+    expect(f.draft.canSave.value).toBe(true);
+  });
+
+  it('does not overwrite local responses on an unchanged clock observation', () => {
+    const f = fixture();
+    f.draft.observe(record());
+    f.formAnswers.value.rule.quantity = 2;
+    f.draft.observe({ ...record(), overdue: true, elapsed_seconds: 999 });
+    expect(f.formAnswers.value.rule.quantity).toBe(2);
+    expect(f.draft.conflict.value).toBe(false);
+  });
+
+  it('preserves local responses on conflicts until an explicit reviewed choice is made', () => {
+    const f = fixture();
+    f.draft.observe(record());
+    f.formAnswers.value.rule.quantity = 2;
+    f.draft.observe(
+      record('synthetic-second', { rule: { quantity: 3, verified: true } })
+    );
+    expect(f.draft.conflict.value).toBe(true);
+    expect(f.formAnswers.value.rule.quantity).toBe(2);
+    expect(f.draft.reapply()).toBe(true);
+    expect(f.draft.revision.value).toBe('synthetic-second');
+    expect(f.formAnswers.value.rule.quantity).toBe(2);
+    expect(f.draft.dirty.value).toBe(true);
+  });
+
+  it('loads the remote responses only after an explicit choice and does not mutate the received record', () => {
+    const f = fixture();
+    f.draft.observe(record());
+    f.formAnswers.value.rule.quantity = 2;
+    const remote = record('synthetic-second');
+    f.draft.observe(remote);
+    expect(f.draft.useRemote()).toBe(true);
+    f.formAnswers.value.rule.quantity = 5;
+    expect(remote.acw_form_context.answers.rule.quantity).toBe(0);
+  });
+
+  it('does not accept a pending draft receipt that lost its previously captured private form context', () => {
+    const f = fixture();
+    f.draft.observe(record());
+    const submitted = f.draft.localValues();
+    const withoutContext = { ...record('synthetic-second') };
+    delete withoutContext.acw_form_context;
+    expect(() => f.draft.accept(withoutContext, submitted)).toThrow(
+      'Invalid native pending draft response'
+    );
+    expect(f.formAnswers.value.rule.verified).toBe(false);
+  });
+
+  it('keeps legacy manual arrays at three values and clears private responses on reset', () => {
+    const f = fixture();
+    f.draft.observe({ id: 12, reason_code: 'order', draft_revision: 'legacy' });
+    expect(f.draft.localValues()).toEqual(['order', '', '']);
+    f.draft.observe(record('new'));
+    f.draft.reset();
+    expect(f.formAnswers.value).toEqual({});
+  });
+});

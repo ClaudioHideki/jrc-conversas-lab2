@@ -148,6 +148,11 @@ export default {
     axios.patch(`${base(accountId)}/acw_policy`, { ...options, limits }),
   qualifications: (accountId, params) =>
     axios.get(`${base(accountId)}/qualifications`, { params }),
+  qualificationFormContext: (accountId, id, reasonCode) =>
+    axios.get(
+      `${base(accountId)}/qualifications/${recordIdentity(id)}/form_context`,
+      { params: { reason_code: reasonCode } }
+    ),
   startQualification: (accountId, params) =>
     axios.post(`${base(accountId)}/qualifications`, params),
   saveQualificationDraft: (accountId, id, qualification, expectedRevision) =>

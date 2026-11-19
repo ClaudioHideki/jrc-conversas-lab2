@@ -520,3 +520,21 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - [x] Revisão identificou risco adicional: catálogo compatível não obrigatório,sem fila/justificativa, mudança de unidade podia degradar motivo restrito para legado livre sem mudar a revisão global. Preparada impressão interna que vincula revisão e tipo de seleção, usada pela projeção privada e aplicação; não altera os hashes nativos nem SQL/história.
 - [ ] Executar quatro novas regressões nativas: perda e ganho de motivo restrito, bloqueio ao completarACW e preservação do motivo livre realmente legado. Revalidar todos os gates e184Chrome no novoSHA. Não declarar aceite integral enquanto isso.
 - [ ] Cinco arquivos de vínculo operacional de formulário permanecem em preparação separada, fora deste checkpoint e sem teste nativo/ativação. Histórico operacional detalhado, automações e dependênciasPABX continuam registrados.
+
+### Call Center — pausa adiada com evidência completa0ddd5a4b
+
+- [x] CI44576255569/0ddd5a4bb8702537dfdec2c6b7c34e554f491007:1596Rails distintos+49schema,781Vue,184Chrome(46porprojeto),0falhas/pendências/erros externos/skips/flaky. Lint,assets e bootstrap15cards aprovados. Os103casos da intenção persistente estão incluídos nos1596, não são uma soma adicional.
+- [x] Artefato14561440082:40850127bytes,hash149bb9b20d40c6891c69159411c991e465d3deb2a6486614c4bbd0f52b8382ec.276capturas conferidas pelo manifesto nativo. Primeira transferência falhou no hash; uma nova leitura do mesmo arquivo conferiu tamanho,digest eCRC. Verificador original passou sem alterações; nenhum job repetido.
+- [x] Seis capturas inspecionadas: biblioteca mobile claro/escuro agora carregada, pausa aplicada desktop escuro/mobile claro, confirmação incerta mobile escura e retirada desktop claro. Toda a regra de pausa aguarda chamada encerrada e conclusão explícita doACW; rascunho/tempo vencido não iniciam pausa.
+- [x] Perda/ganho de seleção no catálogo compatível sem fila/justificativa agora exige revisão e redige os detalhes privados; motivo realmente legado permanece compatível. As quatro regressões adicionais passaram no backend nativo.
+- [x] Checkoutb77ffe55 e os três hashes pendentes conferidos e preservados. Sem imagemDocker,GHCR,merge,deploy ou comandoPABX.0ddd5a4b é o checkpoint funcional validado.
+- [ ] Continuidade iniciada em preparação separada: vínculo de formulário, versões e respostas privadas nativas. Ainda sem execução nativa/ativação; nova migration preparada fora dos arquivos admitidos exige revisão, testes e gate próprios. História operacional detalhada e demais requisitosWord continuam abertos;23figuras não concluídas.
+
+
+### 19/11 — Formulários operacionais de ACW (preparado, validação pendente)
+
+- Biblioteca existente vinculada por regra/versão exata; campos obrigatórios adicionais e configuração atômica.
+- Estado privado subordinado à qualificação, origem histórica, rascunho tipado, HMAC e bloqueio de conclusão incompleta.
+- Quinta migration 203000 revisada e pinada; quatro anteriores preservadas.
+- Testes Rails/PG, concorrência, Vue e 192 Chrome preparados; ainda não registrar como aprovados.
+- Legado e pausa após chamada + conclusão explícita preservados. Contrato PABX, automações e aceite integral das 23 figuras continuam abertos.

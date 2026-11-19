@@ -19,6 +19,7 @@ class JrcContactCenter::QualificationDraft
       lock_current_conversation!(record)
       JrcContactCenter::QualificationDraftRevision.check!(record, expected_revision)
       previous = JrcContactCenter::QualificationDraftRevision.token(record)
+      JrcContactCenter::QualificationForms.new(record).save!(attributes, complete: false)
       record.update!(draft_values(record, attributes))
       audit!(record, previous)
       record

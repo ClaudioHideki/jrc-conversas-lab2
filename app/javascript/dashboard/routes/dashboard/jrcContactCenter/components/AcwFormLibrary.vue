@@ -11,8 +11,9 @@ import { useAcwFormEditor } from '../composables/useAcwFormEditor';
 
 const props = defineProps({
   accountId: { type: [Number, String], required: true },
+  allowSelection: { type: Boolean, default: false },
 });
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'select']);
 const { t } = useI18n();
 const separator = ' · ';
 const dialog = ref(null);
@@ -113,6 +114,36 @@ const load = async (page = 1) => {
     if (current === generation && alive) list.failed = true;
   } finally {
     if (current === generation && alive) list.loading = false;
+  }
+};
+const select = async row => {
+  if (!props.allowSelection || controlsLocked.value || row.status !== 'active')
+    return;
+  const current = generation;
+  secondaryBusy.value = true;
+  list.failed = false;
+  try {
+    const response = await API.acwForm(props.accountId, row.id);
+    if (!alive || current !== generation) return;
+    const item = response.data.item;
+    if (
+      String(item?.id) !== String(row.id) ||
+      item.revision !== row.revision ||
+      item.status !== 'active'
+    )
+      throw new TypeError(
+        'The selected immutable form revision changed; review the library'
+      );
+    emit('select', {
+      id: item.id,
+      revision: item.revision,
+      name: item.name,
+      definition: item.definition,
+    });
+  } catch {
+    if (alive && current === generation) list.failed = true;
+  } finally {
+    if (alive && current === generation) secondaryBusy.value = false;
   }
 };
 const close = () => {
@@ -344,6 +375,15 @@ onBeforeUnmount(() => {
                 >{{ labels.revision }}<span> {{ row.revision }}</span>
               </p>
             </div>
+            <Button
+              v-if="allowSelection && row.status === 'active'"
+              type="button"
+              :label="t('JRC_CONTACT_CENTER.ACW_FORMS.SELECT_VERSION')"
+              :disabled="controlsLocked"
+              size="sm"
+              data-acw-form-select
+              @click="select(row)"
+            />
             <Button
               type="button"
               :label="labels.open"

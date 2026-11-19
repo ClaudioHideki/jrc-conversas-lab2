@@ -1,6 +1,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import { useQualificationDraft } from './useQualificationDraft';
+import { useQualificationForms } from './useQualificationForms';
 
 export const useAttendanceClosing = ({
   props,
@@ -24,7 +25,8 @@ export const useAttendanceClosing = ({
   const reason = ref('');
   const result = ref('');
   const note = ref('');
-  const draft = useQualificationDraft({ reason, result, note });
+  const formAnswers = ref({});
+  const draft = useQualificationDraft({ reason, result, note, formAnswers });
   let generation = 0;
   let request = 0;
   let disposed = false;
@@ -101,6 +103,15 @@ export const useAttendanceClosing = ({
     error.value = true;
   };
 
+  const forms = useQualificationForms({
+    pending,
+    reason,
+    answers: formAnswers,
+    accountId: computed(() => props.accountId),
+    authorityKey: computed(identity),
+    onDenied: failure => rejectUnauthorized(failure),
+  });
+
   const load = async () => {
     if (!enabled.value) return;
     const version = generation;
@@ -117,6 +128,14 @@ export const useAttendanceClosing = ({
       if (!current(version, key) || requestId !== request) return;
       error.value = false;
       if (response.data.agent) {
+        if (
+          response.data.items.some(
+            record => record.acw_form_context_unavailable
+          )
+        ) {
+          rejectUnauthorized({ response: { status: 403 } });
+          return;
+        }
         attendance.value = response.data.attendance;
         agent.value = response.data.agent;
         records.value = response.data.items;
@@ -199,6 +218,8 @@ export const useAttendanceClosing = ({
       !supportsClosing.value ||
       unverified.value ||
       !pending.value ||
+      forms.loading.value ||
+      forms.error.value ||
       !draft.canSave.value
     )
       return false;
@@ -219,6 +240,7 @@ export const useAttendanceClosing = ({
           reason_code: submitted[0],
           outcome_code: submitted[1],
           notes: submitted[2],
+          ...(submitted.length === 4 ? { acw_form_answers: submitted[3] } : {}),
         },
         draft.revision.value
       );
@@ -253,6 +275,7 @@ export const useAttendanceClosing = ({
       !supportsClosing.value ||
       draft.conflict.value ||
       !pending.value ||
+      !forms.ready.value ||
       !reason.value.trim() ||
       !result.value.trim()
     )
@@ -275,6 +298,11 @@ export const useAttendanceClosing = ({
           reason_code: reason.value,
           outcome_code: result.value,
           notes: note.value,
+          ...(forms.present.value
+            ? {
+                acw_form_answers: JSON.parse(JSON.stringify(formAnswers.value)),
+              }
+            : {}),
         },
         ...options
       );
@@ -357,6 +385,7 @@ export const useAttendanceClosing = ({
     blocked,
     writeFailure,
     draft,
+    forms,
     load,
     start,
     saveDraft,

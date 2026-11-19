@@ -1,18 +1,45 @@
 import { computed, ref } from 'vue';
 
 // Memory belongs to the caller's authenticated attendance context. No browser storage or automatic overwrite.
-export const useQualificationDraft = ({ reason, result, note }) => {
+const canonical = value => {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (value && typeof value === 'object')
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map(key => [key, canonical(value[key])])
+    );
+  return value;
+};
+const clone = value => JSON.parse(JSON.stringify(value));
+
+export const useQualificationDraft = ({
+  reason,
+  result,
+  note,
+  formAnswers = null,
+}) => {
   const baseline = ref(null);
   const remote = ref(null);
   const revision = ref(null);
   const conflict = ref(false);
   const reviewLoaded = ref(false);
   const savedOnce = ref(false);
-  const localValues = () => [reason.value, result.value, note.value];
+  const localValues = () => [
+    reason.value,
+    result.value,
+    note.value,
+    ...(formAnswers && baseline.value?.forms
+      ? [canonical(formAnswers.value)]
+      : []),
+  ];
   const values = record => [
     record?.reason_code ?? '',
     record?.outcome_code ?? '',
     record?.notes ?? '',
+    ...(formAnswers && record?.acw_form_context
+      ? [canonical(record.acw_form_context.answers)]
+      : []),
   ];
   const same = (left, right) => JSON.stringify(left) === JSON.stringify(right);
   const dirty = computed(
@@ -32,7 +59,11 @@ export const useQualificationDraft = ({ reason, result, note }) => {
       String(remote.value?.id) === String(baseline.value?.id)
   );
   const setBaseline = record => {
-    baseline.value = { id: record.id, values: values(record) };
+    baseline.value = {
+      id: record.id,
+      values: values(record),
+      forms: Boolean(record.acw_form_context),
+    };
     revision.value =
       typeof record.draft_revision === 'string' ? record.draft_revision : null;
     remote.value = record;
@@ -41,11 +72,14 @@ export const useQualificationDraft = ({ reason, result, note }) => {
   const hydrate = record => {
     setBaseline(record);
     [reason.value, result.value, note.value] = values(record);
+    if (formAnswers)
+      formAnswers.value = clone(record.acw_form_context?.answers || {});
     conflict.value = false;
     savedOnce.value = values(record).some(Boolean);
   };
   const reset = () => {
     baseline.value = null;
+    if (formAnswers) formAnswers.value = {};
     remote.value = null;
     revision.value = null;
     conflict.value = false;
@@ -90,7 +124,8 @@ export const useQualificationDraft = ({ reason, result, note }) => {
       String(record?.id) !== String(baseline.value?.id) ||
       typeof record?.draft_revision !== 'string' ||
       !record.draft_revision ||
-      record.completed_at
+      record.completed_at ||
+      Boolean(record.acw_form_context) !== baseline.value?.forms
     )
       throw new Error('Invalid native pending draft response');
     const unchanged = same(localValues(), submitted);

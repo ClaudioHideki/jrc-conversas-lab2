@@ -22,14 +22,15 @@ class JrcContactCenter::AcwPolicy
     signature = [KEY, @account.id, policy.fetch(:voice_required), values]
     scoped = JrcContactCenter::AcwScopedRules.new(account: @account).call
     signature << scoped.map { |row| JrcContactCenter::AcwRulePrecedence::FIELDS.map { |field| row.fetch(field) } } if scoped.any?
-    Digest::SHA256.hexdigest(signature.to_json)
+    Digest::SHA256.hexdigest(JrcContactCenter::AcwFormBindingPolicy.new(account: @account).signature(signature).to_json)
   end
 
   def voice_required?
     @account.settings.fetch(KEY, {}).fetch('voice_required', true) != false
   end
 
-  def update!(attributes = nil, voice_required: :unchanged, expected_revision: :legacy, voice_rules: :unchanged, **legacy_limits)
+  def update!(attributes = nil, voice_required: :unchanged, expected_revision: :legacy, voice_rules: :unchanged,
+              voice_form_bindings: :unchanged, **legacy_limits)
     values = validated_limits(attributes || legacy_limits)
     raise JrcContactCenter::OperationError, 'invalid_acw_policy' unless [true, false, :unchanged].include?(voice_required)
 
@@ -37,6 +38,7 @@ class JrcContactCenter::AcwPolicy
       JrcContactCenter::ConfigurationRevision.check_token!(revision, expected_revision) unless expected_revision == :legacy
       before = JrcContactCenter::AcwPolicyAudit.capture(@account)
       current = updated_settings(values, voice_required, voice_rules, expected_revision)
+      current = form_settings(current, voice_form_bindings, expected_revision)
       @account.update!(settings: @account.settings.merge(KEY => current))
       JrcContactCenter::AcwPolicyAudit.write!(account: @account, before: before, after: JrcContactCenter::AcwPolicyAudit.capture(@account))
     end
@@ -44,6 +46,12 @@ class JrcContactCenter::AcwPolicy
   end
 
   private
+
+  def form_settings(settings, bindings, expected_revision)
+    JrcContactCenter::ConfigurationRevision.check_token!(revision, expected_revision) unless bindings == :unchanged
+    rules = settings.fetch(JrcContactCenter::AcwScopedRules::KEY, [])
+    JrcContactCenter::AcwFormBindingPolicy.new(account: @account).propose(settings: settings, bindings: bindings, rules: rules)
+  end
 
   def updated_settings(values, voice_required, voice_rules, expected_revision)
     current = @account.settings.fetch(KEY, {}).merge(values)

@@ -51,3 +51,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Relógio ACW e leituras antigas](20261119-call-center-acw-clock-stale-read.md): lock e recarga da linha preservam conclusão, limite atual e proprietário; sete testes nativos aprovados e gate completo confirmado em 3b9aa6db; aceite integral do Word ainda aberto.
 
 - [Rascunho privado do pós-atendimento](20261119-call-center-pending-acw-draft.md): gravação explícita sem conclusão, revisão de conflitos, snapshot original e controles reutilizados no Hoya; exige execução nativa e dos novos cenários Chrome.
+
+- [Formulários operacionais versionados do ACW](20261119-call-center-operational-form-bindings.md): vínculo atômico, respostas privadas, origem imutável e validação obrigatória; execução nativa pendente.

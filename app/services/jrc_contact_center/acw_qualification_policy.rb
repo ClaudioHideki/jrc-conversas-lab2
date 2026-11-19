@@ -45,6 +45,11 @@ class JrcContactCenter::AcwQualificationPolicy
     snapshot ? snapshot.fetch('default_limit_seconds') : @record.acw_limit_seconds
   end
 
+  # A defensive copy for private native response capture; never a public catalogue grant.
+  def snapshot
+    stored&.deep_dup
+  end
+
   private
 
   def native_context(member, leg)

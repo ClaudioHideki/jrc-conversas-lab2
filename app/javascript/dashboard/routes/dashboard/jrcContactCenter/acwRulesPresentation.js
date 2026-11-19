@@ -23,3 +23,23 @@ export const acwRulesSummary = (rows, t) => {
     )
     .join('\n');
 };
+
+export const acwFormBindingsSummary = (rows, t) => {
+  if (!Array.isArray(rows) || rows.length === 0) return '—';
+  return rows
+    .map(row =>
+      [
+        t('JRC_CONTACT_CENTER.ACW_FORMS.PINNED_VERSION', {
+          id: row.form_id,
+          version: row.revision,
+        }),
+        t('JRC_CONTACT_CENTER.ACW_FORMS.RULE_REFERENCE', { id: row.rule_id }),
+        t('JRC_CONTACT_CENTER.ACW_FORMS.REQUIRED_COUNT', {
+          count: Array.isArray(row.required_fields)
+            ? row.required_fields.length
+            : 0,
+        }),
+      ].join(' · ')
+    )
+    .join('\n');
+};

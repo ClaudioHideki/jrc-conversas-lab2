@@ -13,6 +13,7 @@ class JrcContactCenter::Qualification < JrcContactCenter::ApplicationRecord
   validates :account_user_id, uniqueness: { scope: %i[account_id call_session_id] }, if: :call_session_id?
   validates :account_user_id, uniqueness: { scope: %i[account_id conversation_id conversation_cycle] }, if: :conversation_id?
   validate :account_and_target_match
+  validate :required_form_answers, if: -> { completed_at.present? && will_save_change_to_completed_at? }
 
   def elapsed_seconds
     duration_seconds || [(Time.current - started_at).to_i, 0].max
@@ -42,6 +43,12 @@ class JrcContactCenter::Qualification < JrcContactCenter::ApplicationRecord
   end
 
   private
+
+  def required_form_answers
+    JrcContactCenter::QualificationForms.new(self).validate_completion!
+  rescue JrcContactCenter::AcwFormAnswers::Invalid
+    errors.add(:base, 'invalid_acw_form_answers')
+  end
 
   def pending_clock?
     started_at && !completed_at

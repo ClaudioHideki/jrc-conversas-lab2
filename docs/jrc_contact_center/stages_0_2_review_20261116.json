@@ -4322,5 +4322,91 @@
     "all23_complete": false,
     "new_sha_validation_required": true,
     "visual_observation": "Four extracted captures inspected: pause applied desktop-light/mobile-dark, uncertain reply mobile-light, withdrawal desktop-dark. Dialog contained at390px, native theme present, no claimedPABXconfirmation; stable loaded mobile library capture still requires corrected QA/newCI."
+  },
+  "deferred_pause_final_native_gate_0ddd5a4b_20261119": {
+    "sha": "0ddd5a4bb8702537dfdec2c6b7c34e554f491007",
+    "run": 44576255569,
+    "job": 135744431719,
+    "native_rails_distinct": 1596,
+    "schema_reload_reexecutions": 49,
+    "vue": 781,
+    "chrome": 184,
+    "chrome_per_project": 46,
+    "failures_pending_outside_skips_flaky": 0,
+    "pause_persistence_native_cases_included": 103,
+    "screenshot_hashes_verified": 276,
+    "artifact": 14561440082,
+    "artifact_sha256": "149bb9b20d40c6891c69159411c991e465d3deb2a6486614c4bbd0f52b8382ec",
+    "visual_review": [
+      {
+        "name": "mobile-light-acw-form-library.png",
+        "sha256": "5506590166bb865ad4f674e58d28de6ed3bc4d9f319bb3860677e53fe90b1287",
+        "bytes": 47912,
+        "matches_native_acceptance": true,
+        "inspected": true,
+        "observation": "Loaded list visible, no loading placeholder, contained390px, native theme"
+      },
+      {
+        "name": "mobile-dark-acw-form-library.png",
+        "sha256": "3c22e0eb47032b2e5a6651606d8f937dade34bae98bd5c2d3746b552ce53e2e4",
+        "bytes": 49439,
+        "matches_native_acceptance": true,
+        "inspected": true,
+        "observation": "Loaded list visible, no loading placeholder, contained390px, native theme"
+      },
+      {
+        "name": "desktop-dark-deferred-pause-applied.png",
+        "sha256": "892537148df200f9b57a2d9f37d6f3c5e4b9c8c4b949ff0c52ea9b3e6eb6e64a",
+        "bytes": 82015,
+        "matches_native_acceptance": true,
+        "inspected": true,
+        "observation": "Native pause/explicit retry/withdrawal visible and contained; no claimedPABXconfirmation"
+      },
+      {
+        "name": "mobile-dark-deferred-pause-uncertain.png",
+        "sha256": "a15082f92a05e1638e43c57a339ad23bc505e0a32a398e977a349e46975bdac5",
+        "bytes": 101984,
+        "matches_native_acceptance": true,
+        "inspected": true,
+        "observation": "Native pause/explicit retry/withdrawal visible and contained; no claimedPABXconfirmation"
+      },
+      {
+        "name": "desktop-light-deferred-pause-withdrawn.png",
+        "sha256": "ce959fdd19fab4cf5f7f6f748fa6ec8bc87aebd3ffa06a93e393cafe2b1994d2",
+        "bytes": 69786,
+        "matches_native_acceptance": true,
+        "inspected": true,
+        "observation": "Native pause/explicit retry/withdrawal visible and contained; no claimedPABXconfirmation"
+      },
+      {
+        "name": "mobile-light-deferred-pause-applied.png",
+        "sha256": "beb24fd8c8947becc5732014043332056a17b763158fac2ae5647ace22cb1691",
+        "bytes": 62382,
+        "matches_native_acceptance": true,
+        "inspected": true,
+        "observation": "Native pause/explicit retry/withdrawal visible and contained; no claimedPABXconfirmation"
+      }
+    ],
+    "transport_recovery": "First transfer failed hash assertion, root cause unproven and failure log preserved. One fresh HTTPS read recovered40850127bytes with same metadata/ETag; SHA149bb9b2... and CRC matched. Original evidence verifier then passed unchanged; no CI rerun.",
+    "original_head_preserved": "b77ffe55c9d7bc93a904f9cabb88453b6eb1eb5f",
+    "original_three_hashes_preserved": true,
+    "remaining": [
+      "Detailed private operational history and approval-dependent pauses",
+      "Operational form bindings and private native responses remain uncommitted preparation/not native-tested",
+      "Automations per destination",
+      "PABX contract/ACK/publish and full voice workspace external proof"
+    ],
+    "all23_complete": false
+  },
+  "operational_form_bindings_increment": {
+    "status": "implemented_pending_native_execution",
+    "migration": "20261119203000",
+    "legacy_four_migrations_unchanged": true,
+    "chrome_planned": 192,
+    "retained_previous_chrome": 184,
+    "private_source_scope": "current origin AND frozen original unit/queue",
+    "pause_rule": "after call ended AND explicit completion of all pending ACW",
+    "not_external_homologation": true,
+    "adr": "docs/adr/20261119-call-center-operational-form-bindings.md"
   }
 }

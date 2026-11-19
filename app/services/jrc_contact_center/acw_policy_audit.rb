@@ -9,6 +9,8 @@ class JrcContactCenter::AcwPolicyAudit
     end
     rules = JrcContactCenter::AcwScopedRules.new(account: account).call
     attributes['voice_rules'] = rules if rules.any?
+    bindings = JrcContactCenter::AcwFormBindingPolicy.new(account: account).call
+    attributes['voice_form_bindings'] = bindings if bindings.any?
     { 'attributes' => attributes, 'omitted_fields' => omitted }
   end
 

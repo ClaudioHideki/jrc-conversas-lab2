@@ -7,6 +7,7 @@ vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: {
     acwForms: vi.fn(),
+    acwForm: vi.fn(),
     configurationRecord: vi.fn(),
     saveAcwForm: vi.fn(),
     acwFormHistory: vi.fn(),
@@ -49,6 +50,7 @@ const list = (page = 1) => ({
 beforeEach(() => {
   vi.clearAllMocks();
   API.acwForms.mockResolvedValue(list());
+  API.acwForm.mockResolvedValue({ data: { item: structuredClone(record) } });
   API.configurationRecord.mockResolvedValue({
     data: { item: structuredClone(record) },
   });
@@ -166,5 +168,60 @@ describe('native ACW form management dialog', () => {
     ).toBeDefined();
     expect(API.acwForms).toHaveBeenCalledTimes(1);
     expect(API.saveAcwForm).not.toHaveBeenCalled();
+  });
+});
+
+describe('Existing library exact operational version selection', () => {
+  it('does not expose selection in the original manager-only mode', async () => {
+    const wrapper = library();
+    await flushPromises();
+    expect(wrapper.find('[data-acw-form-select]').exists()).toBe(false);
+    expect(API.acwForm).not.toHaveBeenCalled();
+  });
+  it('resolves the selected latest version and emits only the operational definition', async () => {
+    const wrapper = mount(AcwFormLibrary, {
+      props: { accountId: '1', allowSelection: true },
+    });
+    await flushPromises();
+    await wrapper.get('[data-acw-form-select]').trigger('click');
+    await flushPromises();
+    expect(API.acwForm).toHaveBeenCalledWith('1', '19');
+    expect(wrapper.emitted('select')[0]).toEqual([
+      {
+        id: record.id,
+        revision: record.revision,
+        name: record.name,
+        definition: record.definition,
+      },
+    ]);
+    expect(API.saveAcwForm).not.toHaveBeenCalled();
+  });
+  it('rejects a catalogue revision changed between list and selection without silently choosing the new version', async () => {
+    API.acwForm.mockResolvedValueOnce({
+      data: { item: { ...record, revision: 2 } },
+    });
+    const wrapper = mount(AcwFormLibrary, {
+      props: { accountId: '1', allowSelection: true },
+    });
+    await flushPromises();
+    await wrapper.get('[data-acw-form-select]').trigger('click');
+    await flushPromises();
+    expect(wrapper.emitted('select')).toBeUndefined();
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+    expect(API.saveAcwForm).not.toHaveBeenCalled();
+  });
+  it('does not offer archived rows as new bindings', async () => {
+    API.acwForms.mockResolvedValueOnce({
+      data: {
+        items: [{ ...record, status: 'archived' }],
+        meta: { page: 1, pages: 1, total: 1 },
+      },
+    });
+    const wrapper = mount(AcwFormLibrary, {
+      props: { accountId: '1', allowSelection: true },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-acw-form-select]').exists()).toBe(false);
+    expect(API.acwForm).not.toHaveBeenCalled();
   });
 });

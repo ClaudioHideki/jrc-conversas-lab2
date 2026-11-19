@@ -32,33 +32,43 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('deferred pause native uncertain')
-    ? 'deferred_pause_retry'
-    : info.title.startsWith('deferred pause native')
-      ? 'deferred_pause'
-      : info.title.startsWith('whole native team deletion')
-        ? 'team_deletion'
-        : info.title.startsWith('pending ACW native navigation')
-          ? 'acw_navigation'
-          : info.title.startsWith('pending ACW native draft')
-            ? 'acw_draft'
-            : info.title.startsWith('pending ACW native review')
-              ? 'acw_review'
-              : info.title.startsWith('team roster last eligible')
-                ? 'team_withdrawal'
-                : info.title.startsWith('native local routing')
-                  ? 'routing'
-                  : info.title.startsWith('scoped ACW native')
-                    ? 'acw'
-                    : info.title.startsWith('last eligible queue withdrawal')
-                      ? 'withdrawal'
-                      : info.title.startsWith('local pause duration supervisor')
-                        ? 'duration'
-                        : info.title.startsWith('local pause catalog operator')
-                          ? 'operations'
-                          : info.title.startsWith('local pause catalog')
-                            ? 'editor'
-                            : null;
+  const pauseKey = info.title.startsWith('operational form native')
+    ? 'operational_forms'
+    : info.title.startsWith('form bindings native')
+      ? 'form_bindings'
+      : info.title.startsWith('deferred pause native uncertain')
+        ? 'deferred_pause_retry'
+        : info.title.startsWith('deferred pause native')
+          ? 'deferred_pause'
+          : info.title.startsWith('whole native team deletion')
+            ? 'team_deletion'
+            : info.title.startsWith('pending ACW native navigation')
+              ? 'acw_navigation'
+              : info.title.startsWith('pending ACW native draft')
+                ? 'acw_draft'
+                : info.title.startsWith('pending ACW native review')
+                  ? 'acw_review'
+                  : info.title.startsWith('team roster last eligible')
+                    ? 'team_withdrawal'
+                    : info.title.startsWith('native local routing')
+                      ? 'routing'
+                      : info.title.startsWith('scoped ACW native')
+                        ? 'acw'
+                        : info.title.startsWith(
+                              'last eligible queue withdrawal'
+                            )
+                          ? 'withdrawal'
+                          : info.title.startsWith(
+                                'local pause duration supervisor'
+                              )
+                            ? 'duration'
+                            : info.title.startsWith(
+                                  'local pause catalog operator'
+                                )
+                              ? 'operations'
+                              : info.title.startsWith('local pause catalog')
+                                ? 'editor'
+                                : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -67,6 +77,7 @@ test.beforeEach(async ({ page }, info) => {
     : pauseTarget
       ? info.title.startsWith('local pause catalog operator') ||
         info.title.startsWith('pending ACW native') ||
+        info.title.startsWith('operational form native') ||
         info.title.startsWith('deferred pause native')
         ? pauseTarget.operator
         : pauseTarget.administrator
@@ -5672,6 +5683,243 @@ test('deferred pause native uncertain response reuses one durable receipt and ex
   ).toBe(info.project.name.endsWith('dark'));
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-deferred-pause-withdrawn.png`,
+    fullPage: true,
+  });
+});
+
+test('operational form native preserves typed private drafts and blocks pause until required explicit completion', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].operational_forms;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const endpoint = ownApi + `/qualifications/${target.qualification_id}`;
+  await page.goto(
+    `/app/accounts/${target.account_id}/synthetic-pending-acw/${target.call_session_id}?with_pause=1`
+  );
+  const form = page.locator('[data-pending-qualification-form]');
+  await expect(form).toBeVisible();
+  const browserApi = new URL(new URL(ownApi).pathname, page.url()).href;
+  await form
+    .locator('[data-qualification-field="reason"]')
+    .selectOption('order');
+  await form
+    .locator('[data-qualification-field="result"]')
+    .selectOption('completed');
+  const fields = form.locator('[data-acw-form-fields]');
+  await expect(fields).toBeVisible();
+  await expect(fields.locator('[data-acw-answer]')).toHaveCount(3);
+  await expect(form.locator('[data-complete-qualification]')).toBeDisabled();
+  const denied = await page.request.get(ownApi + '/acw_forms', {
+    headers: target.operator,
+  });
+  expect([401, 403, 404]).toContain(denied.status());
+  const incomplete = await page.request.patch(endpoint, {
+    headers: target.operator,
+    data: {
+      qualification: { reason_code: 'order', outcome_code: 'completed' },
+    },
+  });
+  expect(incomplete.status()).toBe(422);
+  const widget = page.locator('[data-native-deferred-pause]');
+  await widget.locator('select').first().selectOption(String(target.queue_id));
+  await widget.locator('select').nth(1).selectOption('lunch');
+  await widget
+    .getByRole('button', { name: 'Solicitar pausa após ACW', exact: true })
+    .click();
+  await expectContainedDialog(page);
+  await page.locator('[data-deferred-pause-confirm]').click();
+  await expect(widget.locator('[data-deferred-pause-pending]')).toBeVisible();
+  await fields
+    .locator('[data-acw-answer="feedback"]')
+    .fill('SYNTHETIC browser private response');
+  await fields.locator('[data-acw-answer="verified"]').selectOption('false');
+  await fields.locator('[data-acw-answer="quantity"]').fill('0');
+  const saved = page.waitForResponse(
+    response =>
+      response.url() ===
+        browserApi + `/qualifications/${target.qualification_id}/draft` &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-save-qualification-draft]').click();
+  const savedResponse = await saved;
+  expect(savedResponse.status()).toBe(200);
+  const savedBody = await savedResponse.json();
+  expect(savedBody.item.completed_at).toBeNull();
+  expect(savedBody.item.acw_form_context.answers[target.form_rule_id]).toEqual({
+    feedback: 'SYNTHETIC browser private response',
+    verified: false,
+    quantity: 0,
+  });
+  expect(JSON.stringify(savedBody.agent)).not.toContain(
+    'SYNTHETIC browser private response'
+  );
+  await expect(widget.locator('[role="timer"]')).toHaveCount(0);
+  await page.reload();
+  await expect(fields.locator('[data-acw-answer="feedback"]')).toHaveValue(
+    'SYNTHETIC browser private response'
+  );
+  await expect(fields.locator('[data-acw-answer="verified"]')).toHaveValue(
+    'false'
+  );
+  await expect(fields.locator('[data-acw-answer="quantity"]')).toHaveValue('0');
+  await expect(page.locator('[data-acw-limit]')).toHaveText('60');
+  await expect(widget.locator('[data-deferred-pause-pending]')).toBeVisible();
+  await expect(form.locator('[data-complete-qualification]')).toBeEnabled();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page.locator('html').evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  const background = await fields
+    .locator('textarea')
+    .evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(background).not.toBe('rgba(0, 0, 0, 0)');
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-operational-form-draft.png`,
+    fullPage: true,
+  });
+  const completed = page.waitForResponse(
+    response =>
+      response.url() ===
+        browserApi + `/qualifications/${target.qualification_id}` &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-complete-qualification]').click();
+  expect((await completed).status()).toBe(200);
+  await expect(page.locator('[data-qualification-completed]')).toBeVisible();
+  await expect(widget).toHaveAttribute('data-agent-state', 'paused', {
+    timeout: 15000,
+  });
+  const state = await page.request.get(ownApi + '/agent_state', {
+    headers: target.operator,
+  });
+  expect((await state.json()).item).toMatchObject({
+    state: 'paused',
+    provider_confirmed: false,
+  });
+  const lateDraft = await page.request.patch(endpoint + '/draft', {
+    headers: target.operator,
+    data: {
+      expected_draft_revision: savedBody.item.draft_revision,
+      qualification: { reason_code: 'order', notes: 'must not overwrite' },
+    },
+  });
+  expect(lateDraft.status()).toBe(409);
+  const recovered = await page.request.get(
+    ownApi + `/qualifications?call_session_id=${target.call_session_id}`,
+    { headers: target.operator }
+  );
+  expect(
+    (await recovered.json()).items[0].acw_form_context.answers[
+      target.form_rule_id
+    ]
+  ).toEqual(savedBody.item.acw_form_context.answers[target.form_rule_id]);
+});
+
+test('form bindings native persists exact latest version while existing attendance retains its original form and clock', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].form_bindings;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/closures`
+  );
+  await page.locator('[data-create]').click();
+  let dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
+  let row = dialog.locator('[data-acw-rule-row]').first();
+  await expect(row.locator('[data-acw-rule-time]')).toHaveValue('00:01');
+  await expect(row.locator('[data-remove-acw-rule]')).toBeDisabled();
+  await row.locator('[data-pick-rule-form]').click();
+  const libraryRow = page
+    .locator('[data-acw-form-row]')
+    .filter({ hasText: 'SYNTHETIC operational version 2' });
+  await expect(libraryRow).toBeVisible();
+  await libraryRow.locator('[data-acw-form-select]').click();
+  await expect(
+    row.locator('[data-required-form-field="new_note"]')
+  ).toBeVisible();
+  await row.locator('[data-required-form-field="feedback"]').check();
+  await row.locator('[data-required-form-field="new_note"]').check();
+  await expect(
+    row.locator('[data-required-form-field="verified"]')
+  ).toBeChecked();
+  await expect(
+    row.locator('[data-required-form-field="verified"]')
+  ).toBeDisabled();
+  await row.locator('[data-acw-rule-time]').fill('00:02');
+  const saved = page.waitForResponse(
+    response =>
+      response.url().endsWith('/acw_policy') &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await saved).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  const configured = await page.request.get(ownApi + '/acw_policy', {
+    headers: target.administrator,
+  });
+  expect(configured.status()).toBe(200);
+  const policy = (await configured.json()).item;
+  expect(policy.voice_rules[0].limit_seconds).toBe(120);
+  expect(policy.voice_form_bindings[0]).toMatchObject({
+    rule_id: target.form_rule_id,
+    form_id: target.form_id,
+    revision: 2,
+    required_fields: ['feedback', 'new_note', 'quantity', 'verified'],
+  });
+  const ownContext = await page.request.get(
+    ownApi +
+      `/qualifications/${target.qualification_id}/form_context?reason_code=order`,
+    { headers: target.operator }
+  );
+  expect(ownContext.status()).toBe(200);
+  const captured = (await ownContext.json()).item;
+  expect(captured.acw_form_context.selected.revision).toBe(1);
+  expect(captured.acw_form_context.selected.definition.fields).toHaveLength(3);
+  const capturedList = await page.request.get(
+    ownApi + `/qualifications?call_session_id=${target.call_session_id}`,
+    { headers: target.operator }
+  );
+  expect(capturedList.status()).toBe(200);
+  expect((await capturedList.json()).items[0].acw_limit_seconds).toBe(60);
+  const catalogueDenied = await page.request.get(ownApi + '/acw_forms', {
+    headers: target.operator,
+  });
+  expect([401, 403, 404]).toContain(catalogueDenied.status());
+  const originalDenied = await page.request.get(
+    ownApi +
+      `/qualifications/${target.qualification_id}/form_context?reason_code=order`,
+    { headers: target.administrator }
+  );
+  expect(originalDenied.status()).toBe(404);
+  await page.reload();
+  await page.locator('[data-create]').click();
+  dialog = page.getByRole('dialog');
+  row = dialog.locator('[data-acw-rule-row]').first();
+  await expect(row.locator('[data-acw-rule-time]')).toHaveValue('00:02');
+  await row.locator('[data-review-rule-form]').click();
+  await expect(
+    row.locator('[data-required-form-field="new_note"]')
+  ).toBeChecked();
+  await expect(
+    row.locator('[data-required-form-field="feedback"]')
+  ).toBeChecked();
+  await row.scrollIntoViewIfNeeded();
+  await expectContainedDialog(page);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page.locator('html').evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-operational-form-binding.png`,
     fullPage: true,
   });
 });

@@ -33,6 +33,21 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
     end
   end
 
+  def form_context
+    with_current_operating_authority do
+      record = scope.where(account_user: Current.account_user).find(params[:id])
+      authorize_qualification_origin!(record)
+      reason = params[:reason_code]
+      valid = reason.is_a?(String) && reason.length <= 100 && reason.exclude?("\0")
+      raise JrcContactCenter::OperationError, 'invalid_qualification_form_context' unless valid
+
+      response.headers['Cache-Control'] = 'no-store'
+      item = { id: record.id, account_id: record.account_id, account_user_id: record.account_user_id, reason_code: reason }
+      item.merge!(JrcContactCenter::QualificationForms.new(record).private_payload(reason: reason))
+      render json: base_payload.merge(item: item)
+    end
+  end
+
   def draft
     with_current_operating_authority do
       record = scope.where(account_user: Current.account_user).find(params[:id])
@@ -45,12 +60,17 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
   private
 
   def qualification_payload(record)
-    payload = record.operational_payload
-    payload.merge('draft_revision' => JrcContactCenter::QualificationDraftRevision.token(record))
+    response.headers['Cache-Control'] = 'no-store'
+    JrcContactCenter::QualificationProjection.new(account: Current.account, member: Current.account_user).call(record)
   end
 
   def qualification_attributes
-    params.require(:qualification).permit(:reason_code, :outcome_code, :notes).to_h.symbolize_keys
+    document = params.require(:qualification)
+    values = document.permit(:reason_code, :outcome_code, :notes).to_h.symbolize_keys
+    return values unless document.key?(JrcContactCenter::QualificationForms::KEY)
+
+    input = document[JrcContactCenter::QualificationForms::KEY]
+    values.merge(JrcContactCenter::QualificationForms::KEY => input.respond_to?(:to_unsafe_h) ? input.to_unsafe_h : input)
   end
 
   def draft_attributes

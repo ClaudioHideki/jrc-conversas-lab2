@@ -322,6 +322,18 @@ const open = async row => {
         ...(Array.isArray(policy.voice_rules)
           ? { voice_rules: policy.voice_rules.map(rule => ({ ...rule })) }
           : {}),
+        ...(Array.isArray(policy.voice_form_bindings)
+          ? {
+              voice_form_bindings: policy.voice_form_bindings.map(
+                bindingRow => ({
+                  rule_id: bindingRow.rule_id,
+                  form_id: bindingRow.form_id,
+                  revision: bindingRow.revision,
+                  required_fields: [...bindingRow.required_fields],
+                })
+              ),
+            }
+          : {}),
       };
     }
     await nextTick();
@@ -405,6 +417,9 @@ const save = async () => {
           voice_required: row.voice_required,
           ...(Array.isArray(row.voice_rules)
             ? { voice_rules: row.voice_rules }
+            : {}),
+          ...(Array.isArray(row.voice_form_bindings)
+            ? { voice_form_bindings: row.voice_form_bindings }
             : {}),
           ...configurationRevision.options(),
         }
@@ -959,6 +974,7 @@ onBeforeUnmount(() => {
           <AcwRulesEditor
             v-if="Array.isArray(draft.voice_rules)"
             v-model="draft.voice_rules"
+            v-model:bindings="draft.voice_form_bindings"
             :account-id="accountId"
             :disabled="saving"
           />

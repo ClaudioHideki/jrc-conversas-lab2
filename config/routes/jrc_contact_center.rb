@@ -40,6 +40,7 @@ namespace :api, defaults: { format: 'json' } do
         resource :deferred_pause_request, only: %i[create destroy], controller: 'deferred_pause_requests'
         resources :qualifications, only: [] do
           patch :draft, on: :member
+          get :form_context, on: :member
         end
         resources :access_authorizations, path: 'access_authorizations/:subject_type', only: %i[index show update]
         resources :ivr_drafts, only: %i[index show create update] do

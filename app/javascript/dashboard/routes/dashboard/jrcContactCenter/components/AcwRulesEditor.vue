@@ -1,6 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import AcwRuleTarget from './AcwRuleTarget.vue';
+import AcwRuleFormBinding from './AcwRuleFormBinding.vue';
 import { acwLabels } from '../../inbox/acwLabels';
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -8,6 +9,16 @@ const props = defineProps({
   disabled: { type: Boolean, default: false },
 });
 const emit = defineEmits(['update:modelValue']);
+const bindings = defineModel('bindings', { type: Array, default: () => [] });
+const bindingFor = ruleId =>
+  bindings.value.find(row => row.rule_id === ruleId) || null;
+const setBinding = (ruleId, value) => {
+  if (props.disabled) return;
+  bindings.value = [
+    ...bindings.value.filter(row => row.rule_id !== ruleId),
+    ...(value ? [value] : []),
+  ];
+};
 const { t } = useI18n();
 const reasons = acwLabels(t).reasons;
 const labels = {
@@ -43,11 +54,13 @@ const add = () => {
     },
   ]);
 };
-const remove = index =>
+const remove = index => {
+  if (props.disabled || bindingFor(props.modelValue[index].id)) return;
   emit(
     'update:modelValue',
     props.modelValue.filter((_, i) => i !== index)
   );
+};
 const time = seconds =>
   Number.isInteger(seconds) && seconds % 60 === 0
     ? `${String(Math.floor(seconds / 3600)).padStart(2, '0')}:${String((seconds / 60) % 60).padStart(2, '0')}`
@@ -148,6 +161,16 @@ const setTime = (index, value) => {
           </span>
         </label>
       </div>
+      <AcwRuleFormBinding
+        :account-id="accountId"
+        :rule-id="rule.id"
+        :model-value="bindingFor(rule.id)"
+        :disabled="disabled"
+        @update:model-value="setBinding(rule.id, $event)"
+      />
+      <p v-if="bindingFor(rule.id)" class="text-xs text-n-slate-11">
+        {{ t('JRC_CONTACT_CENTER.ACW_FORMS.UNLINK_BEFORE_REMOVE') }}
+      </p>
       <div class="flex flex-wrap items-center justify-between gap-3">
         <label class="flex gap-2 text-sm">
           <input
@@ -161,6 +184,7 @@ const setTime = (index, value) => {
         <button
           type="button"
           class="rounded-md border border-n-weak px-3 py-2 text-sm text-n-ruby-11"
+          :disabled="disabled || Boolean(bindingFor(rule.id))"
           data-remove-acw-rule
           @click="remove(index)"
         >

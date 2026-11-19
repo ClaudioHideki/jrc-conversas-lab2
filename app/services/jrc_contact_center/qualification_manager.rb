@@ -31,6 +31,7 @@ class JrcContactCenter::QualificationManager
 
       record = create_pending_qualification(identity, started_at)
       record_pending_state!(record, call_session, leg)
+      JrcContactCenter::QualificationFormSnapshot.capture!(record)
       record
     end
   end
@@ -52,6 +53,7 @@ class JrcContactCenter::QualificationManager
       end
 
       now = Time.current
+      JrcContactCenter::QualificationForms.new(record).save!(attributes, complete: true)
       record.update!(completion_values(record, attributes, now))
       record.conversation&.update!(status: :resolved)
       JrcContactCenter::AgentStateEvent.where(account: @account, account_user: @member, state: 'acw', ended_at: nil)
