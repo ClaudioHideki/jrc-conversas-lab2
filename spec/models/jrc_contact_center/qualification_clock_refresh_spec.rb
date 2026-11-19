@@ -4,8 +4,11 @@ RSpec.describe 'Native qualification clock refresh against a stale persisted row
   include ActiveSupport::Testing::TimeHelpers
   let(:account) { create(:account, name: 'SYNTHETIC clock account') }
   let(:operator) do
-    create(:user, :contact_center_eligible, account: account, name: 'SYNTHETIC clock operator', display_name: 'SYNTHETIC clock operator',
-                                          email: "synthetic-clock-#{SecureRandom.uuid}@example.test")
+    create(
+      :user, :contact_center_eligible,
+      account: account, name: 'SYNTHETIC clock operator', display_name: 'SYNTHETIC clock operator',
+      email: "synthetic-clock-#{SecureRandom.uuid}@example.test"
+    )
   end
   let(:member) { account.account_users.find_by!(user: operator) }
   let(:call) do

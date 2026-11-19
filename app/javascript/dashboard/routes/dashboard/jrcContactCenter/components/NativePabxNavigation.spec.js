@@ -2,6 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { defineComponent } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createMemoryHistory, createRouter } from 'vue-router';
+import { createStore } from 'vuex';
 import AdministrationSection from './AdministrationSection.vue';
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
@@ -28,13 +29,22 @@ const prepare = async permitted => {
   });
   await router.push('/control-desk');
   await router.isReady();
+  const store = createStore({
+    getters: {
+      getCurrentUser: () => ({
+        id: 4,
+        type: 'User',
+        accounts: [{ id: 1, role: 'administrator', permissions: [] }],
+      }),
+    },
+  });
   const wrapper = mount(AdministrationSection, {
     props: {
       accountId: '1',
       card: { key: 'pabx', state: 'read_only' },
       context: { capabilities: {}, native_links: { pabx_settings: permitted } },
     },
-    global: { plugins: [router], stubs: { Dialog: true } },
+    global: { plugins: [router, store], stubs: { Dialog: true } },
   });
   await flushPromises();
   return { wrapper, router };

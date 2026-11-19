@@ -3537,5 +3537,33 @@
     ],
     "team_roster": "Main Rails tests passed, including canonical no-op IDs; full concurrency/Vue/Chrome not yet run at this SHA.",
     "status": "corrections prepared; next CI required"
+  },
+  "team_and_clock_native_gate_490cd3a8_20261119": {
+    "sha": "490cd3a834203440cc48c473766e6d5bf48e23ce",
+    "run": 44453345207,
+    "artifact": 14496678489,
+    "artifact_sha256": "9e62486f1026e1811ecdab327684a144b3517e72b57396e0ed82dd4113fa61f6",
+    "native_unique_examples": 1270,
+    "native_groups": {
+      "main": 1109,
+      "concurrency": 76,
+      "corporate": 85
+    },
+    "schema_reload_examples_separate": 16,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0,
+    "clock_cases_verified": 7,
+    "vue": {
+      "total": 573,
+      "passed": 571,
+      "failed": 2,
+      "pending": 0
+    },
+    "vue_cause": "NativePabxNavigation fixture lacks Vuex plugin now required for authenticated authority binding; install explicit synthetic store, no product fallback.",
+    "ruby_new_offenses": 1,
+    "ruby_cause": "Keyword alignment in synthetic clock-user email fixture.",
+    "chrome": "not run; mandatory152 preserved",
+    "word_all23_complete": false
   }
 }

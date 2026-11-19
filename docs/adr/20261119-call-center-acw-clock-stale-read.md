@@ -1,6 +1,6 @@
 # Relógio de pós-atendimento e leituras antigas
 
-Status: correção preparada, sete cenários nativos preparados; ainda não executados.
+Status: correção de relógio validada nos sete cenários nativos em 490cd3a8; gate global ainda bloqueado por preparação de dois testes Vue e alinhamento Ruby. Nova execução exigida após essas correções.
 
 ## Problema comprovado pela leitura do código
 
@@ -23,3 +23,9 @@ São testes do modelo com dados sintéticos. Não representam uma ligação PABX
 A CI 44451366097 do SHA d9f977e5 executou 1.109 exemplos principais, com sete erros restritos à criação do usuário dos sete cenários novos: a factory deriva email de display_name, que continha espaços. Os outros 1.102 exemplos passaram, incluindo a revisão de equipes e os dois casos de IDs canônicos. A recarga do schema passou com 16 exemplos. As sete falhas não exercitaram ainda a lógica do relógio e não foram registradas como aprovadas. A fixture passa a usar email único explicitamente sintético em example.test. O controle de tempo usa bloco freeze_time, que restaura o relógio mesmo em exceção.
 
 O lint encontrou duas infrações novas: atualização sem validações e travel_back redundante. A solução inicial condicional é substituída pelo lock/reload/update! descrito acima; o bloco de tempo dispensa a limpeza redundante. Todas as validações e expectativas permanecem. Exigir nova CI no checkpoint corrigido e não reutilizar o gate incompleto como homologação.
+
+## Execução nativa do relógio — SHA 490cd3a8
+
+A CI 44453345207 executou e aprovou os sete cenários de qualification_clock_refresh_spec.rb sobre PostgreSQL real descartável. Foram aprovados 1.270 exemplos Rails distintos (1.109 principais, 76 de concorrência, 85 corporativos), mais 16 de recarga do schema; todos com zero falhas, pendências e erros externos. Artefato 14496678489, SHA-256 9e62486f1026e1811ecdab327684a144b3517e72b57396e0ed82dd4113fa61f6.
+
+A execução global permaneceu reprovada: uma infração de alinhamento no e-mail sintético e dois testes Vue de navegação PABX que não instalavam o Vuex exigido pelo componente. Os outros 571 exemplos Vue passaram. Corrige-se a preparação desses dois testes com uma store sintética explícita e preservam-se as mesmas verificações de visibilidade e rota. Não se adiciona fallback no componente nem se remove checagem de autoridade. Build e Chrome ficaram bloqueados e não são declarados aprovados.
