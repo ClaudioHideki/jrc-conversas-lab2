@@ -15,7 +15,7 @@ class JrcContactCenter::QualificationProjection
 
     JrcContactCenter::AuthorityTransaction.call(account: @account, member: @member) do
       context = { account: @account, account_user: @member, user: @member.user }
-      allowed = @member.user.reload.active_for_authentication? && JrcContactCenter::ModulePolicy.new(context, :contact_center).view?
+      allowed = @member.user.reload.active_for_authentication? && JrcContactCenter::ModulePolicy.new(context, :contact_center).access?
       raise Pundit::NotAuthorizedError unless allowed
 
       record.with_lock { scoped_payload(record, forms) }

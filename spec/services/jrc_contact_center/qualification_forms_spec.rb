@@ -107,6 +107,7 @@ RSpec.describe JrcContactCenter::QualificationForms do
     end.to raise_error(JrcContactCenter::AcwFormAnswers::Invalid)
     expect(service.state.answers).to eq(answers)
   end
+
   it 'projects the actual owned form through the native read transaction without exposing another actor catalogue' do
     payload = JrcContactCenter::QualificationProjection.new(account: account, member: member).call(record)
     expect(payload.fetch('id')).to eq(record.id)

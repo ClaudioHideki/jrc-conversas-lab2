@@ -53,12 +53,6 @@ RSpec.describe 'Owned native qualification form context and original corporate s
     policy.update!({ voice: 180, whatsapp: 180 }, voice_rules: [rule], voice_form_bindings: [binding], expected_revision: policy.revision)
   end
 
-  # Keep the actual router and exception middleware. Surface its original exception instead of an opaque HTML500 assertion.
-  def raise_rendered_exception!
-    exception = response.request.env['action_dispatch.exception']
-    raise exception if exception
-  end
-
   it 'provides the owned exact runtime form while denying the manager catalogue to the same operator' do
     get "#{endpoint}/form_context", headers: actor.create_new_auth_token, params: { reason_code: 'order' }
     expect(response).to have_http_status(:ok)
@@ -76,14 +70,12 @@ RSpec.describe 'Owned native qualification form context and original corporate s
     patch "#{endpoint}/draft",
           headers: actor.create_new_auth_token,
           params: { qualification: values, expected_draft_revision: previous }, as: :json
-    raise_rendered_exception!
     expect(response).to have_http_status(:ok)
     saved = response.parsed_body.fetch('item').fetch('draft_revision')
     expect(saved).not_to eq(previous)
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications",
         headers: actor.create_new_auth_token,
         params: { call_session_id: record.call_session_id }
-    raise_rendered_exception!
     expect(response).to have_http_status(:ok)
     item = response.parsed_body.fetch('items').sole
     expect(item.fetch('draft_revision')).to eq(saved)
@@ -140,7 +132,6 @@ RSpec.describe 'Owned native qualification form context and original corporate s
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications",
         headers: actor.create_new_auth_token,
         params: { call_session_id: record.call_session_id }
-    raise_rendered_exception!
     expect(response).to have_http_status(:ok)
     item = response.parsed_body.fetch('items').sole
     expect(item).to include('acw_form_context_unavailable' => true)
