@@ -7,6 +7,7 @@ import { useI18n } from 'vue-i18n';
 import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import PendingQualificationForm from 'dashboard/routes/dashboard/inbox/PendingQualificationForm.vue';
 import QualificationDraftReview from 'dashboard/routes/dashboard/inbox/QualificationDraftReview.vue';
+import QualificationDraftNavigation from 'dashboard/routes/dashboard/inbox/QualificationDraftNavigation.vue';
 import { useAttendanceClosing } from 'dashboard/routes/dashboard/inbox/useAttendanceClosing';
 
 const route = useRoute();
@@ -68,6 +69,23 @@ onMounted(async () => {
 
 <template>
   <section class="mx-auto w-full min-w-0 max-w-3xl p-4" data-native-pending-acw>
+    <QualificationDraftNavigation
+      :enabled="Boolean(context)"
+      :dirty="draft.dirty.value"
+      :conflict="conflict"
+      :saving="saving"
+      :authority-key="authorityKey"
+    />
+    <RouterLink
+      :to="{
+        name: 'jrc_contact_center_control_desk',
+        params: { accountId: props.accountId },
+      }"
+      class="mb-4 inline-flex rounded-md border border-n-weak bg-n-solid-1 px-3 py-2 text-sm text-n-slate-12"
+      data-qualification-leave-link
+    >
+      {{ t('JRC_CONTACT_CENTER.ACW_OPERATION.DRAFT_LEAVE_BACK') }}
+    </RouterLink>
     <h1 class="text-xl font-semibold text-n-slate-12">
       {{ t('JRC_CONTACT_CENTER.INBOX_360.FINISH_TABULATION') }}
     </h1>
@@ -118,7 +136,7 @@ onMounted(async () => {
       role="status"
       data-qualification-completed
     >
-      {{ t('JRC_CONTACT_CENTER.INBOX_360.FINISH_TABULATION') }}
+      {{ t('JRC_CONTACT_CENTER.ACW_OPERATION.COMPLETED') }}
     </p>
   </section>
 </template>

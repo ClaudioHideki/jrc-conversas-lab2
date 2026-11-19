@@ -110,6 +110,56 @@ describe('reused native pending qualification form', () => {
 });
 
 describe('explicit native qualification conflict review', () => {
+  it('uses the existing native reason and result labels instead of exposing machine codes as interface text', () => {
+    const wrapper = mount(QualificationDraftReview, {
+      props: {
+        current: { reason_code: 'order', outcome_code: 'pending' },
+        canUseRemote: true,
+      },
+    });
+    expect(
+      wrapper.get('[data-qualification-remote-field="reason_code"] dd').text()
+    ).toBe('JRC_CONTACT_CENTER.ACW_OPERATION.REASONS.order');
+    expect(
+      wrapper.get('[data-qualification-remote-field="outcome_code"] dd').text()
+    ).toBe('JRC_CONTACT_CENTER.ACW_OPERATION.RESULTS.pending');
+    expect(wrapper.props('current')).toMatchObject({
+      reason_code: 'order',
+      outcome_code: 'pending',
+    });
+  });
+
+  it('does not treat inherited object properties as translated legacy classifications', () => {
+    const wrapper = mount(QualificationDraftReview, {
+      props: {
+        current: { reason_code: '__proto__', outcome_code: 'toString' },
+        canUseRemote: true,
+      },
+    });
+    expect(
+      wrapper.get('[data-qualification-remote-field="reason_code"] dd').text()
+    ).toBe('__proto__');
+    expect(
+      wrapper.get('[data-qualification-remote-field="outcome_code"] dd').text()
+    ).toBe('toString');
+  });
+
+  it('preserves unknown legacy codes as escaped data instead of inventing a translated classification', () => {
+    const wrapper = mount(QualificationDraftReview, {
+      props: {
+        current: { reason_code: 'legacy-reason', outcome_code: '<img src=x>' },
+        canUseRemote: true,
+      },
+    });
+    expect(
+      wrapper.get('[data-qualification-remote-field="reason_code"] dd').text()
+    ).toBe('legacy-reason');
+    expect(
+      wrapper.get('[data-qualification-remote-field="outcome_code"] dd').text()
+    ).toBe('<img src=x>');
+    expect(wrapper.find('img').exists()).toBe(false);
+  });
+
   it('shows current server answers without applying or saving them automatically', () => {
     const wrapper = mount(QualificationDraftReview, {
       props: {

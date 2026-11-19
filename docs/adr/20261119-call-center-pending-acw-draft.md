@@ -1,6 +1,6 @@
 # Respostas e motivo ainda pendentes no pós-atendimento
 
-Status: backend, interface integrada ao Hoya e testes preparados; não commitados, não executados nativamente e sem homologação Chrome ainda.
+Status: rascunhos validados emee689703/CI44470340154 com1310Rails distintos+16schema,619Vue,160Chrome e240capturas verificadas. Aviso de navegação e rótulos traduzidos na revisão estão preparados em incremento separado; aceite integral do Word continua aberto.
 
 ## Contexto e referência
 
@@ -35,3 +35,19 @@ A proteção de notes já existe no inicializador nativo filter_parameter_loggin
 O fixture Chrome acrescenta dois fluxos em quatro projetos (desktop 1440 px e celular 390 px, claro/escuro), mantendo os 152 casos anteriores e exigindo 160 no gate. Usa PendingQualificationForm e QualificationDraftReview extraídos do Hoya, o composable operacional e APIs Rails autenticadas com PostgreSQL descartável. Não monta o workspace Hoya inteiro nem conecta SIP/PABX. Os cenários ainda estão preparados, sem resultado executado. Motivo/respostas privados não são copiados para a projeção compartilhada de agente/supervisor; os identificadores e o bloqueio pendente continuam presentes.
 
 A persistência é explícita: respostas gravadas são recuperadas na API; texto digitado depois da última gravação permanece só na memória do atendimento. Não há autosave, armazenamento local ou garantia de recuperação de texto não salvo após fechar/recarregar a página. Revisão/aviso para navegação fora do atendimento e formulários dinâmicos são critérios separados ainda abertos. Perda de autoridade elimina o estado privado da interface.
+
+## Proteção de navegação — próximo incremento preparado
+
+QualificationDraftNavigation reutiliza o Dialog nativo e os guards Vue Router. Permanecer cancela a navegação e conserva a edição; Sair sem salvar exige confirmação e só descarta a memória local ao desmontar o atendimento. O servidor, a última gravação e o ACW pendente não são alterados. Alteração de parâmetros nativos é revisada; mudanças somente de query não são bloqueadas. Gravação em andamento impede saída; beforeunload usa o aviso do navegador sem notas privadas e sem substituir os listeners de telefonia. Troca de autoridade invalida uma revisão aberta. Não há autosave ou comando PABX.
+
+Nove testes unitários do controle, um cenário Chrome por viewport/tema e integração no Hoya/fixture estão preparados para o próximo SHA (164 casos Chrome, preservando os160). Não pertencem à CI 44466663154 do SHA34f58253, que ainda valida o incremento de gravação. A homologação do workspace Hoya inteiro e formulários dinâmicos continuam separadas.
+
+## Primeira execução dos rascunhos — SHA34f58253
+
+CI44466663154 aprovou1310Rails distintos (1146principais,79concorrência,85corporativos), mais16schema separados, e619Vue. Os17casos de QualificationDraft,22da API de autoridade,12de ACW/WhatsApp e14da suíte de locks de equipe passaram; as contagens desses arquivos são subconjuntos dos1310, não casos adicionais. Zero falhas, pendências ou erros fora dos exemplos. O gate parou em12infrações novas Ruby (alinhamento e bloco de rotas); build e160Chrome não foram executados. Evidência em acw_draft_lint_20261119.json. Correção mínima ee689703 não inclui a navegação preparada.
+
+## Aceite funcional dos rascunhos — SHAee689703
+
+CI44470340154 e job135377969079 concluíram com sucesso. 1310Rails distintos,16schema separados,619Vue e160Chrome (40em cada viewport/tema), sem falhas, pendências, erros externos ou novas infrações Ruby. Artefato14505548543, SHA-256dc114469f7607a8de6c4c8c4d0cd14daebd7c9c55f2e74be788eaf160c2ca721,240capturas verificadas. Amostras do rascunho e conflito revisadas visualmente em1440/claro e390/escuro; nota longa não transborda horizontalmente. A prova Chrome usa controles/composable reais e APIs/banco reais em harness, não o shell Hoya inteiro ou SIP.
+
+A revisão visual encontrou o código conhecido order exibido sem tradução. O próximo incremento reutiliza acwLabels já utilizado no histórico, sem alterar códigos do servidor. Há três regressões Vue preparadas para tradução, códigos desconhecidos e chaves herdadas; a asserção Chrome existente é reforçada em português. O helper de rótulos permanece intocado.

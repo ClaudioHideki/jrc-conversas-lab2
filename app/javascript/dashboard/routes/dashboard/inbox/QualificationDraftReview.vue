@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { acwLabels } from './acwLabels';
 
 const props = defineProps({
   current: { type: Object, default: null },
@@ -10,16 +11,19 @@ const props = defineProps({
 });
 const emit = defineEmits(['reload', 'useRemote', 'reapply']);
 const { t } = useI18n();
+const labels = computed(() => acwLabels(t));
+const labelFor = (group, value) =>
+  Object.hasOwn(group, value) ? group[value] : value;
 const remoteFields = computed(() => [
   {
     key: 'reason_code',
     label: t('JRC_CONTACT_CENTER.INBOX_360.CLOSING_REASON'),
-    value: props.current?.reason_code,
+    value: labelFor(labels.value.reasons, props.current?.reason_code),
   },
   {
     key: 'outcome_code',
     label: t('JRC_CONTACT_CENTER.INBOX_360.CLOSING_RESULT'),
-    value: props.current?.outcome_code,
+    value: labelFor(labels.value.results, props.current?.outcome_code),
   },
   {
     key: 'notes',

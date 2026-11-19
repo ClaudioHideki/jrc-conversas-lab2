@@ -1661,7 +1661,12 @@
       "DRAFT_SAVED": "Rascunho salvo. O pós-atendimento permanece pendente.",
       "DRAFT_SAVE": "Salvar rascunho e aplicar motivo",
       "DRAFT_RULE_CONFLICT": "Há regras de pós-atendimento conflitantes para este motivo. Solicite a revisão do gestor. Suas respostas foram preservadas.",
-      "DRAFT_CYCLE_CONFLICT": "Este atendimento mudou de ciclo. Consulte o estado atual antes de continuar. Suas respostas foram preservadas."
+      "DRAFT_CYCLE_CONFLICT": "Este atendimento mudou de ciclo. Consulte o estado atual antes de continuar. Suas respostas foram preservadas.",
+      "DRAFT_LEAVE_TITLE": "Alterações do pós-atendimento não salvas",
+      "DRAFT_LEAVE_DESCRIPTION": "Há respostas ainda não salvas ou uma revisão pendente. Para salvar, permaneça no atendimento e use Salvar rascunho. Sair sem salvar descarta somente a edição local; a última versão gravada e o estado do atendimento no servidor serão preservados.",
+      "DRAFT_LEAVE_STAY": "Permanecer",
+      "DRAFT_LEAVE_DISCARD": "Sair sem salvar",
+      "DRAFT_LEAVE_BACK": "Voltar à central"
     },
     "ADMIN": {
       "TITLE": "Configurações do Call Center",

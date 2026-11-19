@@ -37,6 +37,7 @@ import { useInboxCustomer360 } from './useInboxCustomer360';
 import { useAttendanceClosing } from './useAttendanceClosing';
 import PendingQualificationForm from './PendingQualificationForm.vue';
 import QualificationDraftReview from './QualificationDraftReview.vue';
+import QualificationDraftNavigation from './QualificationDraftNavigation.vue';
 import QualificationHistory from './QualificationHistory.vue';
 import InboxVoicePanel from './InboxVoicePanel.vue';
 import InboxConversationTools from './InboxConversationTools.vue';
@@ -826,6 +827,13 @@ onBeforeUnmount(() => {
     class="relative flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden bg-n-background"
     data-testid="hoya-inbox-workspace"
   >
+    <QualificationDraftNavigation
+      :enabled="Boolean(context) && supportsClosing"
+      :dirty="closing.draft.dirty.value"
+      :conflict="closingDraftConflict"
+      :saving="closingSaving"
+      :authority-key="closingAuthorityKey"
+    />
     <header
       class="flex min-h-14 shrink-0 items-center gap-2 overflow-x-auto border-b border-n-weak bg-n-solid-1 px-3 py-2"
       :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.OPERATIONAL_BAR')"

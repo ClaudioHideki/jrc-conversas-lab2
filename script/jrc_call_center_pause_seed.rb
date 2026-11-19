@@ -10,7 +10,7 @@ class JrcContactCenter::SyntheticPauseSeed
     raise 'Owned synthetic pause runner required' unless owned
 
     projects.index_with do |project|
-      %w[editor operations withdrawal duration acw routing team_withdrawal acw_draft acw_review].index_with do |kind|
+      %w[editor operations withdrawal duration acw routing team_withdrawal acw_draft acw_review acw_navigation].index_with do |kind|
         new("#{project}-#{kind}").call
       end
     end
@@ -33,7 +33,7 @@ class JrcContactCenter::SyntheticPauseSeed
     queues = create_queues(units, operator)
     payload = session_payload(units, queues, admin, scoped, operator)
     payload.merge!(team_source(operator)) if @project.end_with?('-team_withdrawal')
-    payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?('-acw_draft', '-acw_review')
+    payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?('-acw_draft', '-acw_review', '-acw_navigation')
     payload
   end
 

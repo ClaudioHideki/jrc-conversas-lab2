@@ -28,6 +28,8 @@ vi.mock('dashboard/composables/useWhatsappCallSession', () => ({
 vi.mock('vue-router', async importOriginal => ({
   ...(await importOriginal()),
   useRoute: () => ({ query: {} }),
+  onBeforeRouteLeave: vi.fn(),
+  onBeforeRouteUpdate: vi.fn(),
 }));
 vi.mock('dashboard/routes/dashboard/webphone/useSipWebphone', () => ({
   useSipWebphone: vi.fn(),

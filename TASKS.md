@@ -392,3 +392,7 @@ Atualização condicional do relógio sobre a linha ainda pendente e no mesmo es
 - [ ] 2026-11-19: validar rascunhos ACW nativos, revisao manual, privacidade e dois novos fluxos Chrome (160 casos totais); overlay preparado, sem resultados atribuidos ao novo codigo. Ver ADR 20261119-call-center-pending-acw-draft.
 
 - [x] 2026-11-19: checkpoint3b9aa6db com 1270Rails distintos +16schema,573Vue,152Chrome,232 capturas verificadas. Auditoria responsiva da retirada pela equipe e relógio comprovados; isto não fecha as23figuras.
+
+- [ ] 2026-11-19: validar protecao de navegacao do rascunho ACW com Dialog/Router nativos, nove casos unitarios e quatro Chrome (164 totais). Preparado apos34f58253; a CI atual nao inclui este incremento.
+
+- [x] 2026-11-19: rascunhos ACW ee689703 validados com1310Rails+16schema,619Vue,160Chrome e240capturas verificadas. Não encerra workspace Hoya completo, templates dinâmicos, automações ou PABX.

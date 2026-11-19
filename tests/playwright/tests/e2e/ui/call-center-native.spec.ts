@@ -32,25 +32,27 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('pending ACW native draft')
-    ? 'acw_draft'
-    : info.title.startsWith('pending ACW native review')
-      ? 'acw_review'
-      : info.title.startsWith('team roster last eligible')
-        ? 'team_withdrawal'
-        : info.title.startsWith('native local routing')
-          ? 'routing'
-          : info.title.startsWith('scoped ACW native')
-            ? 'acw'
-            : info.title.startsWith('last eligible queue withdrawal')
-              ? 'withdrawal'
-              : info.title.startsWith('local pause duration supervisor')
-                ? 'duration'
-                : info.title.startsWith('local pause catalog operator')
-                  ? 'operations'
-                  : info.title.startsWith('local pause catalog')
-                    ? 'editor'
-                    : null;
+  const pauseKey = info.title.startsWith('pending ACW native navigation')
+    ? 'acw_navigation'
+    : info.title.startsWith('pending ACW native draft')
+      ? 'acw_draft'
+      : info.title.startsWith('pending ACW native review')
+        ? 'acw_review'
+        : info.title.startsWith('team roster last eligible')
+          ? 'team_withdrawal'
+          : info.title.startsWith('native local routing')
+            ? 'routing'
+            : info.title.startsWith('scoped ACW native')
+              ? 'acw'
+              : info.title.startsWith('last eligible queue withdrawal')
+                ? 'withdrawal'
+                : info.title.startsWith('local pause duration supervisor')
+                  ? 'duration'
+                  : info.title.startsWith('local pause catalog operator')
+                    ? 'operations'
+                    : info.title.startsWith('local pause catalog')
+                      ? 'editor'
+                      : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -4540,6 +4542,9 @@ test('pending ACW native review preserves local answers blocks stale writes and 
   const remote = page.locator('[data-qualification-remote-field="notes"]');
   // Observe the real five-second polling cycle plus its scoped Rails read.
   await expect(remote).toContainText(serverAnswer, { timeout: 10000 });
+  await expect(
+    page.locator('[data-qualification-remote-field="reason_code"] dd')
+  ).toHaveText('Consulta de pedido');
   await expect(form.locator('[data-qualification-field="note"]')).toHaveValue(
     'SYNTHETIC local uncommitted answer'
   );
@@ -4604,6 +4609,100 @@ test('pending ACW native review preserves local answers blocks stale writes and 
       .filter(record => record.method !== 'GET')
       .map(record => record.pathname)
   ).toEqual([new URL(endpoint).pathname]);
+});
+
+test('pending ACW native navigation reviews unsaved edits preserves saved state and leaves other modules untouched', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].acw_navigation;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const fixture = `/app/accounts/${target.account_id}/synthetic-pending-acw/${target.call_session_id}`;
+  const baseUrl = new RegExp(
+    `/app/accounts/${target.account_id}/contact-center/control-desk$`
+  );
+  await page.goto(fixture);
+  const form = page.locator('[data-pending-qualification-form]');
+  const note = form.locator('[data-qualification-field="note"]');
+  await expect(note).toBeVisible();
+  await note.fill('SYNTHETIC unsaved navigation answer');
+  await page.locator('[data-qualification-leave-link]').click();
+  const review = page.getByRole('dialog', {
+    name: 'Alterações do pós-atendimento não salvas',
+    exact: true,
+  });
+  await expect(review).toBeVisible();
+  await expectContainedDialog(page);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page
+      .locator('html')
+      .evaluate(element => element.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-pending-acw-navigation-review.png`,
+    fullPage: true,
+  });
+  await review.getByRole('button', { name: 'Permanecer', exact: true }).click();
+  await expect(review).not.toBeVisible();
+  await expect(note).toHaveValue('SYNTHETIC unsaved navigation answer');
+  await expect(page).toHaveURL(new RegExp(fixture + '$'));
+  const browserPrompt = page.waitForEvent('dialog').then(async dialog => {
+    expect(dialog.type()).toBe('beforeunload');
+    await dialog.dismiss();
+  });
+  await Promise.all([
+    browserPrompt,
+    page.evaluate(() => window.location.reload()),
+  ]);
+  await expect(note).toHaveValue('SYNTHETIC unsaved navigation answer');
+  expect(
+    nativeObservations.get(page).filter(record => record.method !== 'GET')
+  ).toEqual([]);
+  await page.locator('[data-qualification-leave-link]').click();
+  await review
+    .getByRole('button', { name: 'Sair sem salvar', exact: true })
+    .click();
+  await expect(page).toHaveURL(baseUrl);
+  const afterDiscard = await page.request.get(
+    ownApi + `/qualifications?call_session_id=${target.call_session_id}`,
+    { headers: target.operator }
+  );
+  expect(afterDiscard.status()).toBe(200);
+  const pending = (await afterDiscard.json()).items.find(
+    record => record.id === target.qualification_id
+  );
+  expect(pending.notes).toBeNull();
+  expect(pending.completed_at).toBeNull();
+  expect(Date.parse(pending.started_at)).toBe(
+    Date.parse(target.qualification_started_at)
+  );
+  await page.goto(fixture);
+  await expect(note).toHaveValue('');
+  await note.fill('SYNTHETIC explicitly saved before navigation');
+  const saved = page.waitForResponse(
+    response =>
+      response
+        .url()
+        .endsWith(`/qualifications/${target.qualification_id}/draft`) &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-save-qualification-draft]').click();
+  expect((await saved).status()).toBe(200);
+  await expect(form.locator('[data-save-qualification-draft]')).toBeDisabled();
+  await page.locator('[data-qualification-leave-link]').click();
+  await expect(page).toHaveURL(baseUrl);
+  await page.goto(fixture);
+  await expect(note).toHaveValue(
+    'SYNTHETIC explicitly saved before navigation'
+  );
+  await expect(page.locator('[data-qualification-clock]')).toBeVisible();
+  expect(
+    nativeObservations.get(page).filter(record => record.method !== 'GET')
+  ).toHaveLength(1);
 });
 
 test('scoped ACW native popup persists queue rules blocks conflicts and keeps scoped viewers denied', async ({
