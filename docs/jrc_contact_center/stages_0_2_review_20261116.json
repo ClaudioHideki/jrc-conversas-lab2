@@ -4169,5 +4169,29 @@
     "core_vue_chrome_not_run": true,
     "next_native_validation_required": true,
     "all23_complete": false
+  },
+  "deferred_pause_native_contract_4defb4f2_20261119": {
+    "sha": "4defb4f29935afe2b4695380f1c8d9df72287bb1",
+    "run": 44558193422,
+    "artifact": 14545689996,
+    "artifact_sha256": "b99241b144d94571ae6f99bfd2b0c43465ca59b8caf8aba6e2f87479363c69c5",
+    "schema_examples": 49,
+    "schema_failures": 0,
+    "core_examples": 1417,
+    "core_failures": 2,
+    "core_pending": 0,
+    "core_outside_errors": 0,
+    "ruby_offenses_remaining_in_run": 8,
+    "root_cause": "Dois testes esperavam400; rejeição nativa usa OperationError422. Mantido produto; assertivas verificam422/código exato/ausência de pedido e auditoria.",
+    "prepared_corrections": [
+      "8formatações sem supressões; SQL executado inalterado",
+      "Limpeza de DailyFact somente dos próprios fixtures no DBconcorrência exclusivo, FK nativa restritiva preservada"
+    ],
+    "new_unreleased_migration_hash": "6dff254f8838085a16cd2eb6b4e516d477b8d15c6cba09873e7020ae792c9db2",
+    "canonical_sql_hash": "349b86d7bcf55f8c0490ab558da96771de033c7b91ce0fcb8c6f025f97a964fb",
+    "migration_guard_local_tests": 28,
+    "concurrency_vue_chrome_not_run": true,
+    "new_sha_full_validation_required": true,
+    "all23_complete": false
   }
 }

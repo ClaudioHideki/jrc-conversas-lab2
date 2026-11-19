@@ -63,48 +63,48 @@ class CreateContactCenterDeferredPauseRequests < ActiveRecord::Migration[7.1]
   end
 
   def delete_request_sql
-    <<~SQL
-        IF TG_OP = 'DELETE' THEN
-          IF NOT EXISTS (SELECT 1 FROM accounts WHERE id = OLD.account_id)
-            OR NOT EXISTS (SELECT 1 FROM account_users WHERE id = OLD.account_user_id AND account_id = OLD.account_id) THEN
-            RETURN OLD;
-          END IF;
-          RAISE EXCEPTION 'Deferred pause history is immutable';
+    <<~SQL.squish
+      IF TG_OP = 'DELETE' THEN
+        IF NOT EXISTS (SELECT 1 FROM accounts WHERE id = OLD.account_id)
+          OR NOT EXISTS (SELECT 1 FROM account_users WHERE id = OLD.account_user_id AND account_id = OLD.account_id) THEN
+          RETURN OLD;
         END IF;
+        RAISE EXCEPTION 'Deferred pause history is immutable';
+      END IF;
     SQL
   end
 
   def insert_request_sql
-    <<~SQL
-        IF TG_OP = 'INSERT' THEN
-          IF NEW.state <> 'pending' OR NOT EXISTS (SELECT 1 FROM account_users WHERE id = NEW.account_user_id
-              AND account_id = NEW.account_id AND user_id = NEW.actor_user_id) THEN
-            RAISE EXCEPTION 'Deferred pause actor unavailable';
-          END IF;
-          IF NEW.queue_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM jrc_contact_center_queues
-              WHERE id = NEW.queue_id AND account_id = NEW.account_id) THEN
-            RAISE EXCEPTION 'Deferred pause queue unavailable';
-          END IF;
-          RETURN NEW;
+    <<~SQL.squish
+      IF TG_OP = 'INSERT' THEN
+        IF NEW.state <> 'pending' OR NOT EXISTS (SELECT 1 FROM account_users WHERE id = NEW.account_user_id
+            AND account_id = NEW.account_id AND user_id = NEW.actor_user_id) THEN
+          RAISE EXCEPTION 'Deferred pause actor unavailable';
         END IF;
+        IF NEW.queue_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM jrc_contact_center_queues
+            WHERE id = NEW.queue_id AND account_id = NEW.account_id) THEN
+          RAISE EXCEPTION 'Deferred pause queue unavailable';
+        END IF;
+        RETURN NEW;
+      END IF;
     SQL
   end
 
   def update_request_sql
-    <<~SQL
-        IF to_jsonb(NEW) - ARRAY['state','failure_code','finished_at','updated_at']
-            IS DISTINCT FROM to_jsonb(OLD) - ARRAY['state','failure_code','finished_at','updated_at']
-          OR NOT ((OLD.state = 'pending' AND NEW.state IN ('applied', 'blocked', 'cancelled'))
-            OR (OLD.state = 'blocked' AND NEW.state = 'cancelled')) THEN
-          RAISE EXCEPTION 'Deferred pause request is immutable';
-        END IF;
-        IF NEW.state = 'applied' AND NOT EXISTS (SELECT 1 FROM jrc_contact_center_agent_state_events
-            WHERE account_id = NEW.account_id AND account_user_id = NEW.account_user_id AND state = 'paused'
-              AND source = 'jrc_conversas' AND reason_code = NEW.reason_code
-              AND external_event_id = 'operator:deferred-pause:' || NEW.request_id::text
-              AND metadata -> 'provider_confirmed' = 'false'::jsonb) THEN
-          RAISE EXCEPTION 'Deferred pause native event required';
-        END IF;
+    <<~SQL.squish
+      IF to_jsonb(NEW) - ARRAY['state','failure_code','finished_at','updated_at']
+          IS DISTINCT FROM to_jsonb(OLD) - ARRAY['state','failure_code','finished_at','updated_at']
+        OR NOT ((OLD.state = 'pending' AND NEW.state IN ('applied', 'blocked', 'cancelled'))
+          OR (OLD.state = 'blocked' AND NEW.state = 'cancelled')) THEN
+        RAISE EXCEPTION 'Deferred pause request is immutable';
+      END IF;
+      IF NEW.state = 'applied' AND NOT EXISTS (SELECT 1 FROM jrc_contact_center_agent_state_events
+          WHERE account_id = NEW.account_id AND account_user_id = NEW.account_user_id AND state = 'paused'
+            AND source = 'jrc_conversas' AND reason_code = NEW.reason_code
+            AND external_event_id = 'operator:deferred-pause:' || NEW.request_id::text
+            AND metadata -> 'provider_confirmed' = 'false'::jsonb) THEN
+        RAISE EXCEPTION 'Deferred pause native event required';
+      END IF;
     SQL
   end
 

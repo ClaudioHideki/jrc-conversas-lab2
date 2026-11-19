@@ -41,6 +41,7 @@ RSpec.describe 'Deferred pause real HTTP concurrency', type: :request do
       JrcContactCenter::CallLeg.where(account: account).destroy_all
       JrcContactCenter::CallSession.where(account: account).destroy_all
       JrcContactCenter::AgentStateEvent.where(account: account).destroy_all
+      JrcContactCenter::DailyFact.where(account: account).destroy_all
       account.destroy!
     end
   end

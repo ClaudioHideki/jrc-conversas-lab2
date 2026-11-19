@@ -494,3 +494,11 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - [x]21infrações Ruby identificadas. Correções preparadas de alinhamento, nome de contexto e métodos pequenos para a precedência de pendências, filtro de origem e SQL; nenhuma regra/validação suprimida.
 - [x] Guarda SQL executada permanece idêntica após separar os trechos para lint:hash349b86d7bcf55f8c0490ab558da96771de033c7b91ce0fcb8c6f025f97a964fb. Novo hash de fonte da migration não publicada:d1c6f59eb20a060c7720c9c9ca1e9654090ac111d23789c0a5ca9a8baa4ff3a4. Migrations históricas, schema-base e SQLs anteriores intactos;28testes da proteção passaram novamente.
 - [ ] Reexecutar no novo SHA: recarga/ciclo, Rails, concorrência, Vue, lint, assets e184Chrome. Nenhuma aprovação nativa da pausa persistente foi presumida.
+
+### Call Center — recarga aprovada e contrato HTTP nativo4defb4f2
+
+- [x] CI44558193422 preservada:49/49na recarga do schema,1417exemplos no core (1415aprovados e2falhas de expectativa),0pendências/erros externos. Artefato14545689996,hashb99241b144d94571ae6f99bfd2b0c43465ca59b8caf8aba6e2f87479363c69c5. Concorrência/Vue/Chrome não executados.
+- [x] Causa confirmada das duas falhas: testes novos esperavam400,mas OperationError define422como contrato nativo. Produto não alterado; expectativas corrigidas para422 com código invalid_deferred_pause, ausência de pedidos e de auditorias de criação. Não aceitar erro genérico ou gravação parcial.
+- [x] Restantes8infrações de formatação corrigidas em preparação: chamada Ruby, heredocs SQL com squish e recuo. SQL executado continua idêntico (349b86d7...); fonte da migration não publicada6dff254f8838085a16cd2eb6b4e516d477b8d15c6cba09873e7020ae792c9db2.28testes da proteção passaram.
+- [x] Leitura do schema confirmou também a FK nativa de DailyFact. Acrescentada limpeza somente dos indicadores da própria fixture no banco de concorrência exclusivo; não é código de retenção/exclusão do produto.
+- [ ] Revalidar no próprio SHA: todos os gates e184Chrome. Pausa persistente, formulário operacional e23figuras não declarados concluídos.

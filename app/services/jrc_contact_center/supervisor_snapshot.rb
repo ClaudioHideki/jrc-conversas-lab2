@@ -48,8 +48,9 @@ class JrcContactCenter::SupervisorSnapshot
 
   # Only an operational state for a currently supervised queue; never the private request body or UUID.
   def scoped_deferred_pause_notice(member, permitted)
-    queues = JrcContactCenter::QueueMembership.where(account: @account, account_user: member, active: true,
-                                                  queue_id: permitted).select(:queue_id)
+    queues = JrcContactCenter::QueueMembership.where(
+      account: @account, account_user: member, active: true, queue_id: permitted
+    ).select(:queue_id)
     record = JrcContactCenter::DeferredPauseRequest.active.find_by(account: @account, account_user: member, queue_id: queues)
     { state: record.state } if record
   end

@@ -11,7 +11,7 @@ export const ivrMigrationHash = 'eaeb4147658fd8e5c9bf25272c34bf5ed3113cf60385685
 export const acwFormMigrationPath = 'db/migrate/20261119190000_create_contact_center_acw_forms.rb';
 export const acwFormMigrationHash = 'e900938e5ba82f3eb0481773c41f64b5e4d264ee70c110fb8b20c69506200053';
 export const deferredPauseMigrationPath = 'db/migrate/20261119193000_create_contact_center_deferred_pause_requests.rb';
-export const deferredPauseMigrationHash = 'd1c6f59eb20a060c7720c9c9ca1e9654090ac111d23789c0a5ca9a8baa4ff3a4';
+export const deferredPauseMigrationHash = '6dff254f8838085a16cd2eb6b4e516d477b8d15c6cba09873e7020ae792c9db2';
 export const reviewedMigrations = Object.freeze({
   [migrationPath]: migrationHash,
   [ivrMigrationPath]: ivrMigrationHash,

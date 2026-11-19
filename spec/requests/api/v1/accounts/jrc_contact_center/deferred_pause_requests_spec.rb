@@ -31,15 +31,18 @@ RSpec.describe 'Deferred operator pause API', type: :request do
 
   it 'does not accept account, member, actor or unit authority from the request body' do
     post endpoint, headers: headers, params: { deferred_pause_request: values.merge(unit_id: 999) }, as: :json
-    expect(response).to have_http_status(:bad_request)
+    expect(response).to have_http_status(:unprocessable_entity)
     expect(response.parsed_body.fetch('error')).to eq('invalid_deferred_pause')
     expect(JrcContactCenter::DeferredPauseRequest.where(account: account)).to be_empty
+    expect(Audited::Audit.where(associated: account, comment: JrcContactCenter::DeferredPauseAudit::COMMENT)).to be_empty
   end
 
   it 'rejects explicit malformed private values rather than dropping them through strong parameters' do
     post endpoint, headers: headers, params: { deferred_pause_request: values.merge(justification: []) }, as: :json
-    expect(response).to have_http_status(:bad_request)
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.fetch('error')).to eq('invalid_deferred_pause')
     expect(JrcContactCenter::DeferredPauseRequest.where(account: account)).to be_empty
+    expect(Audited::Audit.where(associated: account, comment: JrcContactCenter::DeferredPauseAudit::COMMENT)).to be_empty
   end
 
   it 'rejects a stale state revision before writing the intent or audit' do
