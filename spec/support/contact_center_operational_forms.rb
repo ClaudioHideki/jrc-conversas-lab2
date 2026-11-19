@@ -35,5 +35,4 @@ RSpec.shared_context 'with an owned immutable operational ACW form' do
   end
 
   include_context 'with a native pending voice ACW for deferred pause'
-
 end

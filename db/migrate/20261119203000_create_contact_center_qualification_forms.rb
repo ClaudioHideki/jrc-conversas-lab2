@@ -205,45 +205,45 @@ class CreateContactCenterQualificationForms < ActiveRecord::Migration[7.1]
       $guard$;
     SQL
   end
+end
 
-  # Self-contained read-only structural receipt, including the owned trigger on the native parent table.
-  class SchemaReceiptQuery
-    def initialize(connection)
-      @connection = connection
-      @table = "#{connection.quote(CreateContactCenterQualificationForms::TABLE.to_s)}::regclass"
-    end
+# Self-contained read-only structural receipt, including the owned trigger on the native parent table.
+class CreateContactCenterQualificationForms::SchemaReceiptQuery
+  def initialize(connection)
+    @connection = connection
+    @table = "#{connection.quote(CreateContactCenterQualificationForms::TABLE.to_s)}::regclass"
+  end
 
-    def call
-      "jrc_cc_qualification_forms_v1:#{Digest::SHA256.hexdigest(JSON.generate(components))}"
-    end
+  def call
+    "jrc_cc_qualification_forms_v1:#{Digest::SHA256.hexdigest(JSON.generate(components))}"
+  end
 
-    private
+  private
 
-    def components
-      table = CreateContactCenterQualificationForms::TABLE
-      columns = @connection.columns(table).map { |column| [column.name, column.sql_type, column.null, column.default] }
-      indexes = @connection.indexes(table).map { |index| [index.name, index.columns, index.unique, index.where] }.sort
-      [columns, constraints, triggers, functions, indexes]
-    end
+  def components
+    table = CreateContactCenterQualificationForms::TABLE
+    columns = @connection.columns(table).map { |column| [column.name, column.sql_type, column.null, column.default] }
+    indexes = @connection.indexes(table).map { |index| [index.name, index.columns, index.unique, index.where] }.sort
+    [columns, constraints, triggers, functions, indexes]
+  end
 
-    def constraints
-      @connection.select_rows('SELECT conname, pg_get_constraintdef(oid, true) FROM pg_constraint ' \
-                              "WHERE conrelid = #{@table} ORDER BY conname")
-    end
+  def constraints
+    @connection.select_rows('SELECT conname, pg_get_constraintdef(oid, true) FROM pg_constraint ' \
+                            "WHERE conrelid = #{@table} ORDER BY conname")
+  end
 
-    def trigger_scope
-      "(tgrelid = #{@table} OR (tgrelid = 'jrc_contact_center_qualifications'::regclass " \
-        "AND tgname = 'jrc_cc_qualification_forms_source'))"
-    end
+  def trigger_scope
+    "(tgrelid = #{@table} OR (tgrelid = 'jrc_contact_center_qualifications'::regclass " \
+      "AND tgname = 'jrc_cc_qualification_forms_source'))"
+  end
 
-    def triggers
-      @connection.select_rows('SELECT tgname, pg_get_triggerdef(oid, true) FROM pg_trigger ' \
-                              "WHERE NOT tgisinternal AND #{trigger_scope} ORDER BY tgname")
-    end
+  def triggers
+    @connection.select_rows('SELECT tgname, pg_get_triggerdef(oid, true) FROM pg_trigger ' \
+                            "WHERE NOT tgisinternal AND #{trigger_scope} ORDER BY tgname")
+  end
 
-    def functions
-      @connection.select_rows('SELECT proname, pg_get_functiondef(oid) FROM pg_proc WHERE oid IN ' \
-                              "(SELECT tgfoid FROM pg_trigger WHERE NOT tgisinternal AND #{trigger_scope}) ORDER BY proname")
-    end
+  def functions
+    @connection.select_rows('SELECT proname, pg_get_functiondef(oid) FROM pg_proc WHERE oid IN ' \
+                            "(SELECT tgfoid FROM pg_trigger WHERE NOT tgisinternal AND #{trigger_scope}) ORDER BY proname")
   end
 end

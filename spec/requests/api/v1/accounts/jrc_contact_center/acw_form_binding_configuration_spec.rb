@@ -62,7 +62,8 @@ RSpec.describe 'Native ACW immutable form binding configuration', type: :request
   end
 
   it 'requires a current native revision even when the only change is an explicit empty form binding collection' do
-    patch endpoint, headers: actor.create_new_auth_token,
+    patch endpoint,
+          headers: actor.create_new_auth_token,
           params: { limits: { voice: 180, whatsapp: 180 }, voice_form_bindings: [] }, as: :json
     expect(response).to have_http_status(:precondition_required)
     expect(account.reload.settings).not_to have_key(JrcContactCenter::AcwPolicy::KEY)

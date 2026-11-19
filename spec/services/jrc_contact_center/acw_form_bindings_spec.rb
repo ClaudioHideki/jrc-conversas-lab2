@@ -60,7 +60,7 @@ RSpec.describe JrcContactCenter::AcwFormBindings do
     end.to raise_error(JrcContactCenter::OperationError, 'invalid_acw_form_bindings')
   end
 
-  [nil, false, ['unknown'], ['feedback', 'feedback']].each do |value|
+  [nil, false, %w[unknown], ['feedback', 'feedback']].each do |value|
     it "rejects invalid required-field selection #{value.inspect}" do
       expect do
         service.validate!([binding.merge('required_fields' => value)], rules: [rule])
@@ -104,7 +104,7 @@ RSpec.describe JrcContactCenter::AcwFormBindings do
 
   it 'verifies many owned references with one bounded metadata read without loading full definitions on call-end capture' do
     first = pin
-    repeated = 100.times.map { |i| first.merge('rule_id' => "synthetic_#{i}") }
+    repeated = Array.new(100) { |i| first.merge('rule_id' => "synthetic_#{i}") }
     queries = []
     subscriber = ActiveSupport::Notifications.subscribe('sql.active_record') do |*, payload|
       queries << payload[:sql] if payload[:sql].start_with?('SELECT') && payload[:sql].include?('jrc_contact_center_acw_form_versions')
@@ -139,4 +139,11 @@ RSpec.describe JrcContactCenter::AcwFormBindings do
       end.to raise_error(JrcContactCenter::OperationError, 'invalid_acw_form_bindings')
     end
   end
+  it 'keeps the legacy limits keyword call while accepting explicit form bindings in the same native transaction' do
+    policy = JrcContactCenter::AcwPolicy.new(account: account)
+    policy.update!(voice: 180, whatsapp: 180, voice_rules: [rule], voice_form_bindings: [binding], expected_revision: policy.revision)
+    expect(JrcContactCenter::AcwFormBindingPolicy.new(account: account).call).to eq([pin])
+    expect(JrcContactCenter::AcwScopedRules.new(account: account).call).to eq([rule])
+  end
+
 end

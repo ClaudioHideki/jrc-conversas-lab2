@@ -67,12 +67,14 @@ RSpec.describe 'Owned native qualification form context and original corporate s
   it 'persists private typed responses through the authenticated native draft API and recovers them after reload' do
     previous = JrcContactCenter::QualificationDraftRevision.token(record)
     values = { reason_code: 'order', acw_form_answers: { rule[:id] => { 'private_note' => 'SYNTHETIC retained private response' } } }
-    patch "#{endpoint}/draft", headers: actor.create_new_auth_token,
+    patch "#{endpoint}/draft",
+          headers: actor.create_new_auth_token,
           params: { qualification: values, expected_draft_revision: previous }, as: :json
     expect(response).to have_http_status(:ok)
     saved = response.parsed_body.fetch('item').fetch('draft_revision')
     expect(saved).not_to eq(previous)
-    get "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications", headers: actor.create_new_auth_token,
+    get "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications",
+        headers: actor.create_new_auth_token,
         params: { call_session_id: record.call_session_id }
     expect(response).to have_http_status(:ok)
     item = response.parsed_body.fetch('items').sole
@@ -82,7 +84,8 @@ RSpec.describe 'Owned native qualification form context and original corporate s
   end
 
   it 'blocks missing required answers through the actual completion API with no partial completion' do
-    patch endpoint, headers: actor.create_new_auth_token,
+    patch endpoint,
+          headers: actor.create_new_auth_token,
           params: { qualification: { reason_code: 'order', outcome_code: 'completed' } }, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.parsed_body.fetch('error')).to eq('invalid_acw_form_answers')
@@ -114,7 +117,8 @@ RSpec.describe 'Owned native qualification form context and original corporate s
     revision = JrcContactCenter::QualificationDraftRevision.token(record)
     record.call_session.update!(current_unit_id: units.second.id, current_queue_id: queues.second.id)
     JrcCrm::UserBusinessUnit.where(account: account, user: actor).sole.update!(business_unit: business_units.second)
-    patch "#{endpoint}/draft", headers: actor.create_new_auth_token,
+    patch "#{endpoint}/draft",
+          headers: actor.create_new_auth_token,
           params: { expected_draft_revision: revision, qualification: { reason_code: 'order', notes: 'SYNTHETIC must not persist' } }, as: :json
     expect(response).to have_http_status(:not_found)
     expect(record.reload.notes).to be_nil
@@ -125,7 +129,8 @@ RSpec.describe 'Owned native qualification form context and original corporate s
     record
     viewer = create(:custom_role, account: account, permissions: ['jrc_contact_center_view'])
     member.update!(custom_role: viewer)
-    get "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications", headers: actor.create_new_auth_token,
+    get "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications",
+        headers: actor.create_new_auth_token,
         params: { call_session_id: record.call_session_id }
     expect(response).to have_http_status(:ok)
     item = response.parsed_body.fetch('items').sole

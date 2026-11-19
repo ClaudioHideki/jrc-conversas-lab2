@@ -1,12 +1,13 @@
 require 'rails_helper'
 
-RSpec.describe 'Operational forms preserve native historical qualifications' do
+RSpec.describe JrcContactCenter::QualificationForms, 'native historical compatibility' do
   let(:account) { create(:account) }
   let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:member) { account.account_users.find_by!(user: actor) }
   let(:manager) { JrcContactCenter::QualificationManager.new(account: account, member: member) }
 
   before { account.enable_features!('jrc_contact_center') }
+
   include_context 'with a native pending voice ACW for deferred pause'
 
   it 'does not backfill a form or change a legacy manual token when policy bindings are introduced later' do
@@ -19,7 +20,8 @@ RSpec.describe 'Operational forms preserve native historical qualifications' do
     form = JrcContactCenter::AcwFormTemplate.create!(account: account)
     definition = { 'fields' => [{ 'key' => 'verified', 'label' => 'SYNTHETIC future required field', 'type' => 'boolean', 'required' => true }] }
     JrcContactCenter::AcwFormVersion.create!(
-      account: account, acw_form_template: form, revision: 1, name: 'SYNTHETIC future form', description: '', status: 'active', definition: definition,
+      account: account, acw_form_template: form, revision: 1, name: 'SYNTHETIC future form', description: '', status: 'active',
+      definition: definition,
       actor_account_user_id: member.id, actor_user_id: actor.id, request_id: SecureRandom.uuid
     )
     policy = JrcContactCenter::AcwPolicy.new(account: account)

@@ -4407,6 +4407,18 @@
     "private_source_scope": "current origin AND frozen original unit/queue",
     "pause_rule": "after call ended AND explicit completion of all pending ACW",
     "not_external_homologation": true,
-    "adr": "docs/adr/20261119-call-center-operational-form-bindings.md"
+    "adr": "docs/adr/20261119-call-center-operational-form-bindings.md",
+    "initial_native_red": {
+      "run": 44596383913,
+      "sha": "a2dd8a00309be1adef286a0c57247fc412c3e1c1",
+      "schema_examples": 65,
+      "schema_passed": 64,
+      "schema_failed": 1,
+      "ruby_new_offenses": 44,
+      "artifact": 14566307662,
+      "artifact_sha256": "adfe39ae85028f8a3f7c9f6a776544f514301a2b58c8fadbcbaa244f43f20342",
+      "cause": "Test supplied malformed empty bindings, identity guard correctly rejected it before immutability. Preserve that negative case and add structurally valid immutability case. No DB guard weakened.",
+      "remaining_native_validation": "All other native suites, lint and Chrome pending new checkpoint"
+    }
   }
 }

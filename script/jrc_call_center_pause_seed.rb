@@ -42,19 +42,23 @@ class JrcContactCenter::SyntheticPauseSeed
     assign_corporate_access(company, units, admin, scoped, operator)
     queues = create_queues(units, operator)
     payload = session_payload(units, queues, admin, scoped, operator)
+    prepare_special_sources(payload, queues.first, admin, operator)
+    payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?(*PENDING_ACW_PROJECTS)
+    payload
+  end
+
+  private
+
+  def prepare_special_sources(payload, queue, admin, operator)
     payload.merge!(team_source(operator)) if @project.end_with?('-team_withdrawal')
     if @project.end_with?('-team_deletion')
       JrcContactCenter::AccessGrant.find_by!(account: @account, account_user: admin).update!(allowed: ['jrc_contact_center_audit'])
       payload.merge!(team_source(operator, corporate: false))
     end
     if @project.end_with?('-operational_forms', '-form_bindings')
-      payload.merge!(JrcContactCenter::SyntheticOperationalFormSeed.new(account: @account, admin: admin, queue: queues.first).call)
+      payload.merge!(JrcContactCenter::SyntheticOperationalFormSeed.new(account: @account, admin: admin, queue: queue).call)
     end
-    payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?(*PENDING_ACW_PROJECTS)
-    payload
   end
-
-  private
 
   def pending_qualification(queue, operator)
     policy = JrcContactCenter::AcwPolicy.new(account: @account)

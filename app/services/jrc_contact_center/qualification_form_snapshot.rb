@@ -28,6 +28,10 @@ class JrcContactCenter::QualificationFormSnapshot
     validator = JrcContactCenter::AcwFormBindings.new(account: @record.account)
     pins = validator.references!(applicable, rules: origin.fetch('rules'))
     validator.verify_metadata!(pins)
+    create_state!(origin, pins)
+  end
+
+  def create_state!(origin, pins)
     reasons = (LEGACY_REASON_CODES_V1 + origin.fetch('rules').pluck('reason_code')).uniq.sort
     JrcContactCenter::QualificationForm.create!(
       account: @record.account, qualification: @record, **original_scope(origin),
@@ -54,6 +58,7 @@ class JrcContactCenter::QualificationFormSnapshot
     bindings = JrcContactCenter::AcwFormBindings.new(account: @record.account).references!(snapshot['bindings'], rules: origin.fetch('rules'))
     snapshot.merge('bindings' => bindings).deep_dup
   end
+
   private
 
   def validate_snapshot!(snapshot)
@@ -64,13 +69,11 @@ class JrcContactCenter::QualificationFormSnapshot
     raise JrcContactCenter::OperationError, 'invalid_qualification_form_context' unless valid
 
     validate_reason_codes!(snapshot, origin)
-
   end
+
   def validate_reason_codes!(snapshot, origin)
     expected_reasons = (LEGACY_REASON_CODES_V1 + origin.fetch('rules').pluck('reason_code')).uniq.sort
     valid = snapshot['reason_codes'].is_a?(Array) && snapshot['reason_codes'].all? { |code| code.is_a?(String) && code.length <= 100 }
     raise JrcContactCenter::OperationError, 'invalid_qualification_form_context' unless valid && snapshot['reason_codes'] == expected_reasons
-
   end
-
 end

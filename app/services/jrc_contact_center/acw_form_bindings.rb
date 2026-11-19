@@ -63,7 +63,7 @@ class JrcContactCenter::AcwFormBindings
     table = JrcContactCenter::AcwFormVersion.arel_table
     pairs = rows.map { |row| table[:acw_form_template_id].eq(row.fetch('form_id')).and(table[:revision].eq(row.fetch('revision'))) }
     metadata = JrcContactCenter::AcwFormVersion.where(account: @account).where(pairs.reduce(&:or))
-                                             .pluck(:acw_form_template_id, :revision, :status, :integrity_sha256)
+                                               .pluck(:acw_form_template_id, :revision, :status, :integrity_sha256)
     metadata.index_by { |row| [row[0].to_s, row[1]] }
   end
 
@@ -143,7 +143,7 @@ class JrcContactCenter::AcwFormBindings
 
   def find_version!(row)
     JrcContactCenter::AcwFormVersion.where(account: @account, acw_form_template_id: row.fetch('form_id'))
-                                  .find_by!(revision: row.fetch('revision'))
+                                    .find_by!(revision: row.fetch('revision'))
   end
 
   def required_fields(row, version)

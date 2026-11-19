@@ -106,7 +106,7 @@ jobs:
           bundle exec rails db:create db:schema:load
           bundle exec rails runner 'c=ActiveRecord::Base.connection; t=:jrc_contact_center_access_grants; abort "missing access constraints" unless c.foreign_keys(t).length == 3 && c.check_constraints(t).length == 4; abort "unexpected grants" unless JrcContactCenter::AccessGrant.count.zero?'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_acw_form_schema_probe"); JrcContactCenter::SyntheticAcwFormSchemaProbe.record("reload")'
-          bundle exec rspec spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb spec/models/jrc_contact_center/acw_form_template_ledger_spec.rb spec/models/jrc_contact_center/deferred_pause_request_spec.rb spec/models/jrc_contact_center/qualification_form_spec.rb spec/services/jrc_contact_center/qualification_form_migration_spec.rb --format progress --format json --out /tmp/call-center-ivr-schema-reload-rspec.json
+          bundle exec rspec spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb spec/models/jrc_contact_center/acw_form_template_ledger_spec.rb spec/models/jrc_contact_center/deferred_pause_request_spec.rb spec/models/jrc_contact_center/qualification_form_spec.rb spec/services/jrc_contact_center/create_contact_center_qualification_forms_spec.rb --format progress --format json --out /tmp/call-center-ivr-schema-reload-rspec.json
       - name: Rails authorization, persistence and affected regressions
         run: |
           bundle exec rspec spec/services/jrc_contact_center spec/models/jrc_contact_center \

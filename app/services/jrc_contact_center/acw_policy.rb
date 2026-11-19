@@ -29,8 +29,8 @@ class JrcContactCenter::AcwPolicy
     @account.settings.fetch(KEY, {}).fetch('voice_required', true) != false
   end
 
-  def update!(attributes = nil, voice_required: :unchanged, expected_revision: :legacy, voice_rules: :unchanged,
-              voice_form_bindings: :unchanged, **legacy_limits)
+  def update!(attributes = nil, voice_required: :unchanged, expected_revision: :legacy, voice_rules: :unchanged, **legacy_limits)
+    voice_form_bindings = legacy_limits.delete(:voice_form_bindings) { :unchanged }
     values = validated_limits(attributes || legacy_limits)
     raise JrcContactCenter::OperationError, 'invalid_acw_policy' unless [true, false, :unchanged].include?(voice_required)
 

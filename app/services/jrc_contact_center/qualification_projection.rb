@@ -9,6 +9,7 @@ class JrcContactCenter::QualificationProjection
 
   def call(record)
     raise ActiveRecord::RecordNotFound unless record.account_id == @account.id
+
     forms = JrcContactCenter::QualificationForms.new(record)
     return legacy_payload(record) if record.account_user_id != @member.id && !forms.state
 

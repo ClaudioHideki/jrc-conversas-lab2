@@ -15,17 +15,17 @@ RSpec.describe 'Private operational ACW responses with real HTTP contenders', ty
 
   # Each contender authenticates normally, uses a different PG connection and waits on the real native Account lock.
   def draft_contender(state, token, values)
+    endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications/#{record.id}/draft"
     Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
         state[:ready] << ActiveRecord::Base.connection.raw_connection.backend_pid
         Timeout.timeout(15) { state[:gate].pop }
         session = ActionDispatch::Integration::Session.new(Rails.application)
-        endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications/#{record.id}/draft"
         session.patch(endpoint, headers: token, params: values, as: :json)
         state[:results] << { status: session.response.status, body: session.response.parsed_body }
       end
-    rescue StandardError => error
-      state[:results] << error
+    rescue StandardError => e
+      state[:results] << e
     end
   end
 
@@ -51,17 +51,25 @@ RSpec.describe 'Private operational ACW responses with real HTTP contenders', ty
       wait_for_form_contenders(state, values.length)
       yield if block_given?
     end
+    collect_form_results(state, values.length)
+  ensure
+    join_form_contenders(state) if state
+  end
+
+  def collect_form_results(state, count)
     rows = Timeout.timeout(20) do
       state[:workers].each(&:join)
-      Array.new(values.length) { state[:results].pop }
+      Array.new(count) { state[:results].pop }
     end
     raise rows.grep(Exception).first if rows.any?(Exception)
 
     rows
-  ensure
-    state&.fetch(:workers)&.length&.times { state[:gate] << true }
-    state&.fetch(:workers)&.each { |worker| worker.join(20) }
-    raise 'Synthetic qualification request still active' if state&.fetch(:workers)&.any?(&:alive?)
+  end
+
+  def join_form_contenders(state)
+    state.fetch(:workers).length.times { state[:gate] << true }
+    state.fetch(:workers).each { |worker| worker.join(20) }
+    raise 'Synthetic qualification request still active' if state.fetch(:workers).any?(&:alive?)
   end
 
   it 'accepts exactly one private draft when different actual HTTP requests expect the same manual revision' do

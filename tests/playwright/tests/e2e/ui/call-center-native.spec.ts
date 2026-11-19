@@ -5885,7 +5885,23 @@ test('form bindings native persists exact latest version while existing attendan
     { headers: target.operator }
   );
   expect(capturedList.status()).toBe(200);
-  expect((await capturedList.json()).items[0].acw_limit_seconds).toBe(60);
+  const originalAttendance = (await capturedList.json()).items[0];
+  expect(originalAttendance.acw_limit_seconds).toBe(180);
+  const classifiedDraft = await page.request.patch(
+    ownApi + `/qualifications/${target.qualification_id}/draft`,
+    {
+      headers: target.operator,
+      data: {
+        expected_draft_revision: originalAttendance.draft_revision,
+        qualification: { reason_code: 'order' },
+      },
+    }
+  );
+  expect(classifiedDraft.status()).toBe(200);
+  expect((await classifiedDraft.json()).item).toMatchObject({
+    completed_at: null,
+    acw_limit_seconds: 60,
+  });
   const catalogueDenied = await page.request.get(ownApi + '/acw_forms', {
     headers: target.operator,
   });
