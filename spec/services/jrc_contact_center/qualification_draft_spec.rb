@@ -38,7 +38,7 @@ RSpec.describe JrcContactCenter::QualificationDraft do
     events = JrcContactCenter::AgentStateEvent.where(account: account).pluck(:id, :state, :ended_at, :metadata)
     service.save!(record, { reason_code: 'order', notes: 'SYNTHETIC unfinished answers' }, expected_revision: revision)
     expect(record.reload).to have_attributes(reason_code: 'order', notes: 'SYNTHETIC unfinished answers', outcome_code: nil,
-                                              completed_at: nil, duration_seconds: nil, started_at: started)
+                                             completed_at: nil, duration_seconds: nil, started_at: started)
     expect(JrcContactCenter::AgentStateEvent.where(account: account).pluck(:id, :state, :ended_at, :metadata)).to eq(events)
     expect(audits.count).to eq(1)
     expect(audits.sole.audited_changes.to_json).not_to include('SYNTHETIC unfinished answers')
@@ -113,7 +113,7 @@ RSpec.describe JrcContactCenter::QualificationDraft do
     saved = service.save!(record, { reason_code: 'order' }, expected_revision: revision)
     snapshot = event.metadata.deep_dup
     saved = service.save!(saved, { reason_code: '', notes: 'SYNTHETIC answers still incomplete' },
-                         expected_revision: JrcContactCenter::QualificationDraftRevision.token(saved))
+                          expected_revision: JrcContactCenter::QualificationDraftRevision.token(saved))
     expect(saved).to have_attributes(reason_code: '', acw_limit_seconds: 180, completed_at: nil)
     expect(event.reload.metadata).to eq(snapshot)
     manager = JrcContactCenter::QualificationManager.new(account: account, member: member)
@@ -168,7 +168,7 @@ RSpec.describe JrcContactCenter::QualificationDraft do
   it 'does not allow a late draft to alter a completed native result' do
     previous = revision
     JrcContactCenter::QualificationManager.new(account: account, member: member)
-                                        .complete!(record, reason_code: 'order', outcome_code: 'completed', notes: 'SYNTHETIC final answer')
+                                          .complete!(record, reason_code: 'order', outcome_code: 'completed', notes: 'SYNTHETIC final answer')
     completed = record.reload.attributes
     expect { service.save!(record, { notes: 'SYNTHETIC late draft' }, expected_revision: previous) }
       .to raise_error(JrcContactCenter::OperationError, 'qualification_already_completed')

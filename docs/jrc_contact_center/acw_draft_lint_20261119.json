@@ -1,0 +1,53 @@
+{
+  "base_sha": "34f58253ee87240df542aacf61afed9cd9987d14",
+  "run": 44466663154,
+  "artifact": 14503631625,
+  "artifact_sha256": "81182057892538316f9db7ed76fcee3d1e8326eb6544c9908fab6745103cc5d3",
+  "native": {
+    "distinct_examples": 1310,
+    "main": 1146,
+    "sql_concurrency": 79,
+    "corporate": 85,
+    "schema_reload_separate": 16,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0,
+    "focused_reports": {
+      "./spec/services/jrc_contact_center/qualification_draft_spec.rb": {
+        "examples": 17,
+        "all_passed": true
+      },
+      "./spec/requests/api/v1/accounts/jrc_contact_center/acw_spec.rb": {
+        "examples": 12,
+        "all_passed": true
+      },
+      "./spec/requests/api/v1/accounts/jrc_contact_center/qualification_authority_spec.rb": {
+        "examples": 22,
+        "all_passed": true
+      },
+      "./spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb": {
+        "examples": 14,
+        "all_passed": true
+      }
+    }
+  },
+  "vue": {
+    "examples": 619,
+    "passed": 619,
+    "failures": 0,
+    "pending": 0,
+    "proof_kind": "Vue component/composable tests; API/SIP fixtures do not replace Rails or Chrome"
+  },
+  "frontend_lint": "passed",
+  "ruby_lint": {
+    "new_offenses": 12,
+    "route_block_length": 1,
+    "whitespace_alignment": 11,
+    "configuration_or_exclusions_changed": false,
+    "correction": "Restore native qualification CRUD declaration in original scope; add member-only draft declaration in existing additive namespace. Same namespace/path/helper and single draft endpoint. Fix only leading whitespace in three specs; expectations untouched."
+  },
+  "build_and_chrome": "not executed; mandatory160 remain required",
+  "navigation_increment": "Separate local preparation remains uncommitted and excluded from this correction",
+  "word_all23_complete": false,
+  "next": "Run mandatory native pipeline at correction SHA; no Docker or publication"
+}

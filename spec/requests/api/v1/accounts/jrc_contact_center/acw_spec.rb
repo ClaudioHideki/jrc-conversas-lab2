@@ -81,20 +81,20 @@ RSpec.describe 'Contact Center ACW persistent API', type: :request do
     post "#{base}/qualifications", headers: headers, as: :json, params: { conversation_id: conversation.display_id }
     item = response.parsed_body.fetch('item')
     patch "#{base}/qualifications/#{item.fetch('id')}/draft", headers: headers, as: :json,
-                                                          params: { expected_draft_revision: item.fetch('draft_revision'),
-                                                                    qualification: { reason_code: 'order', outcome_code: 'completed',
-                                                                                     notes: 'SYNTHETIC WhatsApp draft' } }
+                                                              params: { expected_draft_revision: item.fetch('draft_revision'),
+                                                                        qualification: { reason_code: 'order', outcome_code: 'completed',
+                                                                                         notes: 'SYNTHETIC WhatsApp draft' } }
     expect(response).to have_http_status(:ok)
     revision = response.parsed_body.fetch('item').fetch('draft_revision')
     expect(conversation.reload.status).to eq('open')
     expect(JrcContactCenter::Qualification.find(item.fetch('id')).completed_at).to be_nil
     post "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}/toggle_status", headers: headers, as: :json,
-                                                                                             params: { status: 'resolved' }
+                                                                                                  params: { status: 'resolved' }
     expect(response).to have_http_status(:unprocessable_entity)
     patch "#{base}/qualifications/#{item.fetch('id')}", headers: headers, as: :json,
-                                                     params: { expected_draft_revision: revision,
-                                                               qualification: { reason_code: 'order', outcome_code: 'completed',
-                                                                                notes: 'SYNTHETIC WhatsApp draft' } }
+                                                        params: { expected_draft_revision: revision,
+                                                                  qualification: { reason_code: 'order', outcome_code: 'completed',
+                                                                                   notes: 'SYNTHETIC WhatsApp draft' } }
     expect(response).to have_http_status(:ok)
     expect(conversation.reload.status).to eq('resolved')
   end
@@ -114,7 +114,7 @@ RSpec.describe 'Contact Center ACW persistent API', type: :request do
 
   it 'rejects direct native API resolution before tabulation' do
     post "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}/toggle_status", headers: headers, as: :json,
-                                                                                             params: { status: 'resolved' }
+                                                                                                  params: { status: 'resolved' }
     expect(response).to have_http_status(:unprocessable_entity)
     expect(conversation.reload.status).to eq('open')
   end

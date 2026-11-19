@@ -7,9 +7,7 @@ namespace :api, defaults: { format: 'json' } do
         get 'customer_context', to: 'customer_context#show'
         resource :agent_state, only: %i[show update], controller: 'agent_states'
         resource :acw_policy, only: %i[show update], controller: 'acw_policies'
-        resources :qualifications, only: %i[index create update] do
-          patch :draft, on: :member
-        end
+        resources :qualifications, only: %i[index create update]
         get 'supervisor', to: 'supervisor#show'
         resources :commands, only: %i[index show create]
         resources :events, only: [:index] do
@@ -39,6 +37,9 @@ namespace :api, defaults: { format: 'json' } do
     resources :accounts, only: [] do
       namespace :jrc_contact_center, module: 'accounts/jrc_contact_center' do
         resource :pause_catalog, only: %i[show update], controller: 'pause_catalogs'
+        resources :qualifications, only: [] do
+          patch :draft, on: :member
+        end
         resources :access_authorizations, path: 'access_authorizations/:subject_type', only: %i[index show update]
         resources :ivr_drafts, only: %i[index show create update] do
           post :preview, on: :collection

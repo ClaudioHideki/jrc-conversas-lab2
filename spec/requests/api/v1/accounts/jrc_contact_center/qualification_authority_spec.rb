@@ -83,7 +83,7 @@ RSpec.describe 'Call Center native qualification origin authority', type: :reque
     expect(record.reload).to have_attributes(reason_code: 'order', notes: 'SYNTHETIC draft answer', started_at: started, completed_at: nil)
     expect(response.parsed_body.fetch('item').fetch('draft_revision')).to eq(JrcContactCenter::QualificationDraftRevision.token(record))
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications", headers: actor.create_new_auth_token,
-                                                                        params: { call_session_id: call.id }, as: :json
+                                                                            params: { call_session_id: call.id }, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items').find { |row| row['id'] == record.id }).to include('notes' => 'SYNTHETIC draft answer')
   end
@@ -161,7 +161,7 @@ RSpec.describe 'Call Center native qualification origin authority', type: :reque
     patch draft_endpoint, headers: actor.create_new_auth_token, params: data, as: :json
     expect(response).to have_http_status(:ok)
     expect(record.reload).to have_attributes(account_id: account.id, account_user_id: member.id, started_at: started,
-                                              completed_at: nil, duration_seconds: nil, acw_limit_seconds: 180)
+                                             completed_at: nil, duration_seconds: nil, acw_limit_seconds: 180)
   end
 
   it 'denies a draft after native operating eligibility is revoked' do
@@ -209,7 +209,7 @@ RSpec.describe 'Call Center native qualification origin authority', type: :reque
     expect(pending).to include('notes' => nil, 'reason_code' => nil, 'outcome_code' => nil)
     expect(response.body).not_to include('SYNTHETIC draft answer')
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications", headers: actor.create_new_auth_token,
-                                                                        params: { call_session_id: call.id }, as: :json
+                                                                            params: { call_session_id: call.id }, as: :json
     expect(response).to have_http_status(:not_found)
     expect(record.reload.notes).to eq('SYNTHETIC draft answer')
   end
