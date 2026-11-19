@@ -1,5 +1,7 @@
 # Exclusive synthetic accounts; no channels, inboxes or PABX configuration.
 class JrcContactCenter::SyntheticPauseSeed
+  PENDING_ACW_PROJECTS = %w[-acw_draft -acw_review -acw_navigation -deferred_pause -deferred_pause_retry].freeze
+
   def self.call(projects:)
     config = ActiveRecord::Base.connection_db_config
     owned = [
@@ -12,7 +14,7 @@ class JrcContactCenter::SyntheticPauseSeed
     projects.index_with do |project|
       %w[
         editor operations withdrawal duration acw routing
-        team_withdrawal acw_draft acw_review acw_navigation team_deletion
+        team_withdrawal acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
       ].index_with do |kind|
         new("#{project}-#{kind}").call
       end
@@ -43,7 +45,7 @@ class JrcContactCenter::SyntheticPauseSeed
       JrcContactCenter::AccessGrant.find_by!(account: @account, account_user: admin).update!(allowed: ['jrc_contact_center_audit'])
       payload.merge!(team_source(operator, corporate: false))
     end
-    payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?('-acw_draft', '-acw_review', '-acw_navigation')
+    payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?(*PENDING_ACW_PROJECTS)
     payload
   end
 

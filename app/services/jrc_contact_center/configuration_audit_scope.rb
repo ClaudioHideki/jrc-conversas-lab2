@@ -2,7 +2,10 @@
 
 class JrcContactCenter::ConfigurationAuditScope
   def self.protect_native_list(relation, context)
-    ordinary = relation.where.not(comment: JrcContactCenter::ConfigurationAudit::COMMENTS).or(relation.where(comment: nil))
+    # Operator requests are not global configuration records. Retain their native audit,
+    # but do not expose another unit's employee metadata through the ordinary account list.
+    comments = JrcContactCenter::ConfigurationAudit::COMMENTS + [JrcContactCenter::DeferredPauseAudit::COMMENT]
+    ordinary = relation.where.not(comment: comments).or(relation.where(comment: nil))
     ordinary.or(new(context: context, relation: relation).call)
   end
 

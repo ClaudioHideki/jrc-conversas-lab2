@@ -22,6 +22,38 @@ const initialState = {
   queues: [],
 };
 
+const deferredDialogStub = {
+  name: 'DeferredPauseDialog',
+  props: [
+    'accountId',
+    'memberId',
+    'contextKey',
+    'mode',
+    'stateVersion',
+    'requestRevision',
+    'reasonCode',
+    'reasonLabel',
+    'queueId',
+    'justification',
+    'requestId',
+  ],
+  emits: ['updated', 'close', 'refresh', 'denied'],
+  template: '<div data-deferred-dialog-stub />',
+};
+const deferredState = {
+  ...initialState,
+  account_user_id: '2',
+  state: 'acw',
+  state_version: '7',
+  can_defer_pause: true,
+  pause_request_revision: 'a'.repeat(64),
+};
+const deferredPanel = () =>
+  mount(AgentStatePanel, {
+    props: { accountId: '1', canOperate: true },
+    global: { stubs: { DeferredPauseDialog: deferredDialogStub } },
+  });
+
 describe('AgentStatePanel', () => {
   beforeEach(() => {
     JrcContactCenterAPI.agentState.mockResolvedValue({
@@ -449,5 +481,232 @@ describe('AgentStatePanel', () => {
     await flushPromises();
     expect(wrapper.find('[data-own-pause-justification]').exists()).toBe(false);
     expect(wrapper.text()).not.toContain('SYNTHETIC obsolete private text');
+  });
+});
+
+describe('deferred pause native panel wiring (mocked presentation only)', () => {
+  beforeEach(() => {
+    JrcContactCenterAPI.agentState
+      .mockReset()
+      .mockResolvedValue({ data: { item: { ...deferredState } } });
+    JrcContactCenterAPI.updateAgentState.mockReset();
+  });
+
+  it('opens a review with the current member, state revision and selection without requesting a premature pause', async () => {
+    const wrapper = deferredPanel();
+    await flushPromises();
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+      .setValue('coffee');
+    await wrapper.findAll('button')[1].trigger('click');
+    const dialog = wrapper.findComponent(deferredDialogStub);
+    expect(dialog.exists()).toBe(true);
+    expect(dialog.props()).toMatchObject({
+      accountId: '1',
+      memberId: '2',
+      mode: 'request',
+      stateVersion: '7',
+      reasonCode: 'coffee',
+    });
+    expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
+  });
+
+  it('shows the own durable pending request while keeping manual availability changes disabled', async () => {
+    const wrapper = deferredPanel();
+    await flushPromises();
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+      .setValue('coffee');
+    await wrapper.findAll('button')[1].trigger('click');
+    const dialog = wrapper.findComponent(deferredDialogStub);
+    const token = dialog.props('contextKey');
+    dialog.vm.$emit(
+      'updated',
+      {
+        ...deferredState,
+        deferred_pause_request: {
+          request_id: 'SYNTHETIC request',
+          state: 'pending',
+          reason_label: 'SYNTHETIC private reason',
+        },
+      },
+      token
+    );
+    dialog.vm.$emit('close', token);
+    await flushPromises();
+    expect(wrapper.get('[data-deferred-pause-pending]').text()).toContain(
+      'SYNTHETIC private reason'
+    );
+    expect(
+      wrapper
+        .findAll('button')
+        .slice(-3)
+        .every(button => button.attributes('disabled') !== undefined)
+    ).toBe(true);
+    await wrapper.get('[data-deferred-pause-cancel]').trigger('click');
+    expect(wrapper.findComponent(deferredDialogStub).props()).toMatchObject({
+      mode: 'cancel',
+      requestId: 'SYNTHETIC request',
+    });
+    expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
+  });
+
+  it('ignores old dialog updates and close events after switching account and opening a new review', async () => {
+    JrcContactCenterAPI.agentState
+      .mockResolvedValueOnce({ data: { item: { ...deferredState } } })
+      .mockResolvedValueOnce({
+        data: { item: { ...deferredState, account_user_id: '3' } },
+      });
+    const wrapper = deferredPanel();
+    await flushPromises();
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+      .setValue('coffee');
+    await wrapper.findAll('button')[1].trigger('click');
+    const previous = wrapper.findComponent(deferredDialogStub);
+    const token = previous.props('contextKey');
+    await wrapper.setProps({ accountId: '2' });
+    await flushPromises();
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+      .setValue('coffee');
+    await wrapper.findAll('button')[1].trigger('click');
+    previous.vm.$emit('updated', { ...deferredState, state: 'paused' }, token);
+    previous.vm.$emit('denied', token);
+    previous.vm.$emit('close', token);
+    await flushPromises();
+    expect(wrapper.findComponent(deferredDialogStub).props()).toMatchObject({
+      accountId: '2',
+      memberId: '3',
+    });
+    expect(wrapper.emitted('stateChange').at(-1)[0].account_user_id).toBe('3');
+    expect(wrapper.text()).not.toContain(
+      'JRC_CONTACT_CENTER.DEFERRED_PAUSE.DENIED'
+    );
+  });
+
+  it('clears sensitive selection after a current operating-authority denial', async () => {
+    const wrapper = deferredPanel();
+    await flushPromises();
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+      .setValue('coffee');
+    await wrapper.findAll('button')[1].trigger('click');
+    const dialog = wrapper.findComponent(deferredDialogStub);
+    dialog.vm.$emit('denied', dialog.props('contextKey'));
+    await flushPromises();
+    expect(wrapper.findComponent(deferredDialogStub).exists()).toBe(false);
+    expect(wrapper.find('select').exists()).toBe(false);
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.DEFERRED_PAUSE.DENIED'
+    );
+    expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
+  });
+});
+
+describe('deferred pause state observation (mocked read-only presentation)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    JrcContactCenterAPI.agentState.mockReset();
+    JrcContactCenterAPI.updateAgentState.mockReset();
+  });
+  const pendingState = {
+    ...deferredState,
+    deferred_pause_request: {
+      request_id: 'SYNTHETIC pending observation',
+      state: 'pending',
+      reason_label: 'SYNTHETIC private observation',
+    },
+  };
+
+  it('observes the eventual native paused state without issuing a transition or clearing unrelated manual input', async () => {
+    JrcContactCenterAPI.agentState
+      .mockResolvedValueOnce({ data: { account_id: '1', item: pendingState } })
+      .mockResolvedValueOnce({
+        data: {
+          account_id: '1',
+          item: {
+            ...deferredState,
+            state: 'paused',
+            can_defer_pause: false,
+            state_version: '9',
+            reason_code: 'lunch',
+            started_at: '2026-11-19T12:00:00Z',
+          },
+        },
+      });
+    const wrapper = deferredPanel();
+    await flushPromises();
+    expect(wrapper.find('[data-deferred-pause-pending]').exists()).toBe(true);
+    await wrapper
+      .get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+      .setValue('coffee');
+    await vi.advanceTimersByTimeAsync(5000);
+    await flushPromises();
+    expect(wrapper.find('[data-deferred-pause-pending]').exists()).toBe(false);
+    expect(wrapper.find('[role="timer"]').exists()).toBe(true);
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.AGENT.STATES.paused');
+    expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
+    expect(JrcContactCenterAPI.agentState).toHaveBeenCalledTimes(2);
+    expect(
+      wrapper.get('select[aria-label="JRC_CONTACT_CENTER.AGENT.REASON"]')
+        .element.value
+    ).toBe('coffee');
+  });
+
+  it('stops observation on failure until an explicit refresh and never retries writes', async () => {
+    JrcContactCenterAPI.agentState
+      .mockResolvedValueOnce({ data: { account_id: '1', item: pendingState } })
+      .mockRejectedValueOnce(new Error('SYNTHETIC read failure'));
+    const wrapper = deferredPanel();
+    await flushPromises();
+    await vi.advanceTimersByTimeAsync(15000);
+    await flushPromises();
+    expect(JrcContactCenterAPI.agentState).toHaveBeenCalledTimes(2);
+    expect(
+      wrapper.get('[data-deferred-pause-cancel]').attributes('disabled')
+    ).toBeDefined();
+    expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
+  });
+
+  it('clears previous private state when the authenticated member changes within the same account', async () => {
+    JrcContactCenterAPI.agentState
+      .mockResolvedValueOnce({ data: { account_id: '1', item: pendingState } })
+      .mockResolvedValueOnce({
+        data: {
+          account_id: '1',
+          item: { ...deferredState, account_user_id: '99' },
+        },
+      });
+    const wrapper = deferredPanel();
+    await flushPromises();
+    await vi.advanceTimersByTimeAsync(5000);
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('SYNTHETIC private observation');
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.DEFERRED_PAUSE.CONTEXT_CHANGED'
+    );
+    expect(wrapper.find('select').exists()).toBe(false);
+    expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
+  });
+
+  it('clears the pending private projection when the server reports view-only authority', async () => {
+    JrcContactCenterAPI.agentState
+      .mockResolvedValueOnce({ data: { account_id: '1', item: pendingState } })
+      .mockResolvedValueOnce({
+        data: {
+          account_id: '1',
+          item: { ...deferredState, pause_catalog: null },
+        },
+      });
+    const wrapper = deferredPanel();
+    await flushPromises();
+    await vi.advanceTimersByTimeAsync(5000);
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('SYNTHETIC private observation');
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.DEFERRED_PAUSE.DENIED'
+    );
+    expect(wrapper.find('select').exists()).toBe(false);
   });
 });

@@ -343,4 +343,45 @@ describe('native supervisor observed data', () => {
       wrapper.find('[data-supervisor-pause-notice] [role="status"]').exists()
     ).toBe(false);
   });
+
+  it('shows only the scoped pending or blocked deferred-pause signal without private request details', async () => {
+    JrcContactCenterAPI.supervisor.mockResolvedValueOnce({
+      data: {
+        agents: [
+          {
+            account_user_id: '42',
+            name: 'SYNTHETIC waiting',
+            state: 'acw',
+            deferred_pause_notice: { state: 'pending' },
+          },
+          {
+            account_user_id: '43',
+            name: 'SYNTHETIC review',
+            state: 'available',
+            deferred_pause_notice: { state: 'blocked' },
+          },
+          {
+            account_user_id: '44',
+            name: 'SYNTHETIC unscoped',
+            state: 'acw',
+            deferred_pause_notice: null,
+          },
+        ],
+        queues: [],
+      },
+    });
+    wrapper = shallowMount(SupervisorPage, {
+      global: {
+        stubs: {
+          VisualSectionCard: { template: '<section><slot /></section>' },
+        },
+      },
+    });
+    await flushPromises();
+    const notices = wrapper.findAll('[data-supervisor-deferred-pause-notice]');
+    expect(notices).toHaveLength(2);
+    expect(notices[0].text()).toContain('aguardando');
+    expect(notices[1].text()).toContain('revisão');
+    expect(wrapper.find('[data-own-pause-justification]').exists()).toBe(false);
+  });
 });

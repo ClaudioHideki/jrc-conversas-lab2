@@ -10,10 +10,13 @@ export const ivrMigrationPath = 'db/migrate/20261117200000_create_contact_center
 export const ivrMigrationHash = 'eaeb4147658fd8e5c9bf25272c34bf5ed3113cf603856854906620f128d92e91';
 export const acwFormMigrationPath = 'db/migrate/20261119190000_create_contact_center_acw_forms.rb';
 export const acwFormMigrationHash = 'e900938e5ba82f3eb0481773c41f64b5e4d264ee70c110fb8b20c69506200053';
+export const deferredPauseMigrationPath = 'db/migrate/20261119193000_create_contact_center_deferred_pause_requests.rb';
+export const deferredPauseMigrationHash = '725b1ea47ccec49874081013987998eb5472ab10424d8ceb70441b087430b29e';
 export const reviewedMigrations = Object.freeze({
   [migrationPath]: migrationHash,
   [ivrMigrationPath]: ivrMigrationHash,
   [acwFormMigrationPath]: acwFormMigrationHash,
+  [deferredPauseMigrationPath]: deferredPauseMigrationHash,
 });
 const base = 'a24adc6dd8bb660f955b76cce0172ae1638deee2';
 
@@ -29,12 +32,12 @@ export function verifyAccessMigration(changes, content, schema) {
 }
 
 // Preserve the original one-migration verifier and its negative tests above.
-// The current candidate admits exactly three reviewed forward additions, never an arbitrary extra migration.
+// The current candidate admits exactly four reviewed forward additions, never an arbitrary extra migration.
 export function verifyReviewedMigrations(changes, readCurrent, schema) {
   const expected = Object.keys(reviewedMigrations).sort();
   const rows = changes.trim().split('\n').filter(Boolean).sort();
   if (JSON.stringify(rows) !== JSON.stringify(expected.map(path => `A\t${path}`))) {
-    throw new Error('Only the three exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
+    throw new Error('Only the four exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
   }
   for (const path of expected) {
     const actual = createHash('sha256').update(readCurrent(path)).digest('hex');

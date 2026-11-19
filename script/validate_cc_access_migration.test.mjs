@@ -29,10 +29,17 @@ test('keeps the timestamp protection against a newer base schema', () => {
 const reviewedChanges = Object.keys(reviewedMigrations).map(path => `A\t${path}`).join('\n');
 const readReviewed = path => readFileSync(new URL('../' + path, import.meta.url));
 
-test('current candidate admits all three exact hash-pinned additions regardless of Git output order', () => {
+test('current candidate admits all four exact hash-pinned additions regardless of Git output order', () => {
   const reversed = reviewedChanges.split('\n').reverse().join('\n');
-  assert.equal(verifyReviewedMigrations(reversed, readReviewed, schema).migrationCount, 3);
+  assert.equal(verifyReviewedMigrations(reversed, readReviewed, schema).migrationCount, 4);
 });
+
+for (const omitted of Object.keys(reviewedMigrations)) {
+  test(`rejects an incomplete current migration set missing ${omitted}`, () => {
+    const incomplete = Object.keys(reviewedMigrations).filter(path => path !== omitted).map(path => `A\t${path}`).join('\n');
+    assert.throws(() => verifyReviewedMigrations(incomplete, readReviewed, schema));
+  });
+}
 
 for (const change of ['', addition, `A\t${ivrMigrationPath}`, reviewedChanges + `\nM\tdb/schema.rb`,
   reviewedChanges + `\nM\tdb/sql/historical.sql`, reviewedChanges + `\nD\tdb/migrate/20260101000000_original.rb`,

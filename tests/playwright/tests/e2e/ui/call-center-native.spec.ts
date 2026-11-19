@@ -32,29 +32,33 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('whole native team deletion')
-    ? 'team_deletion'
-    : info.title.startsWith('pending ACW native navigation')
-      ? 'acw_navigation'
-      : info.title.startsWith('pending ACW native draft')
-        ? 'acw_draft'
-        : info.title.startsWith('pending ACW native review')
-          ? 'acw_review'
-          : info.title.startsWith('team roster last eligible')
-            ? 'team_withdrawal'
-            : info.title.startsWith('native local routing')
-              ? 'routing'
-              : info.title.startsWith('scoped ACW native')
-                ? 'acw'
-                : info.title.startsWith('last eligible queue withdrawal')
-                  ? 'withdrawal'
-                  : info.title.startsWith('local pause duration supervisor')
-                    ? 'duration'
-                    : info.title.startsWith('local pause catalog operator')
-                      ? 'operations'
-                      : info.title.startsWith('local pause catalog')
-                        ? 'editor'
-                        : null;
+  const pauseKey = info.title.startsWith('deferred pause native uncertain')
+    ? 'deferred_pause_retry'
+    : info.title.startsWith('deferred pause native')
+      ? 'deferred_pause'
+      : info.title.startsWith('whole native team deletion')
+        ? 'team_deletion'
+        : info.title.startsWith('pending ACW native navigation')
+          ? 'acw_navigation'
+          : info.title.startsWith('pending ACW native draft')
+            ? 'acw_draft'
+            : info.title.startsWith('pending ACW native review')
+              ? 'acw_review'
+              : info.title.startsWith('team roster last eligible')
+                ? 'team_withdrawal'
+                : info.title.startsWith('native local routing')
+                  ? 'routing'
+                  : info.title.startsWith('scoped ACW native')
+                    ? 'acw'
+                    : info.title.startsWith('last eligible queue withdrawal')
+                      ? 'withdrawal'
+                      : info.title.startsWith('local pause duration supervisor')
+                        ? 'duration'
+                        : info.title.startsWith('local pause catalog operator')
+                          ? 'operations'
+                          : info.title.startsWith('local pause catalog')
+                            ? 'editor'
+                            : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -62,7 +66,8 @@ test.beforeEach(async ({ page }, info) => {
     ? session.acw_form_targets[info.project.name].administrator
     : pauseTarget
       ? info.title.startsWith('local pause catalog operator') ||
-        info.title.startsWith('pending ACW native')
+        info.title.startsWith('pending ACW native') ||
+        info.title.startsWith('deferred pause native')
         ? pauseTarget.operator
         : pauseTarget.administrator
       : info.title.startsWith('linked Customer Master')
@@ -5387,11 +5392,24 @@ test('ACW form library native pagination filters clearing reload and account den
   await expect(library).toContainText('Página 2 de 2');
   await library.getByRole('button', { name: 'Anterior', exact: true }).click();
   await expect(library.locator('[data-acw-form-row]')).toHaveCount(20);
+  const cleared = page.waitForResponse(
+    response =>
+      new URL(response.url()).origin + new URL(response.url()).pathname ===
+        browserEndpoint &&
+      response.request().method() === 'GET' &&
+      new URL(response.url()).searchParams.get('q') === '' &&
+      new URL(response.url()).searchParams.get('status') === ''
+  );
   await library
     .getByRole('button', { name: 'Limpar filtros', exact: true })
     .click();
+  expect((await cleared).status()).toBe(200);
   await expect(page.locator('[data-acw-form-search]')).toHaveValue('');
   await expect(page.locator('[data-acw-form-status]')).toHaveValue('');
+  await expect(library.locator('[data-acw-form-row]')).toHaveCount(20);
+  await expect(
+    library.getByText('Carregando Contact Center...', { exact: true })
+  ).toHaveCount(0);
   await expectContainedDialog(page);
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-acw-form-library.png`,
@@ -5409,4 +5427,250 @@ test('ACW form library native pagination filters clearing reload and account den
   await expect(page.locator('[data-acw-form-library]')).not.toBeVisible();
   await page.locator('[data-manage-acw-forms]').click();
   await expect(page.locator('[data-acw-form-row]')).toHaveCount(20);
+});
+
+test('deferred pause native waits through ACW and starts only after explicit completion without administrative access', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].deferred_pause;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  await page.goto(
+    `/app/accounts/${target.account_id}/synthetic-pending-acw/${target.call_session_id}?with_pause=1`
+  );
+  const widget = page.locator('[data-native-deferred-pause]');
+  const form = page.locator('[data-pending-qualification-form]');
+  await expect(widget).toBeVisible();
+  await expect(form).toBeVisible();
+  const browserApi = new URL(new URL(ownApi).pathname, page.url()).href;
+  const denied = await page.request.get(ownApi + '/acw_forms', {
+    headers: target.operator,
+  });
+  expect([401, 403, 404]).toContain(denied.status());
+  await widget.locator('select').first().selectOption(String(target.queue_id));
+  await widget.locator('select').nth(1).selectOption('lunch');
+  await widget
+    .getByRole('button', { name: 'Solicitar pausa após ACW', exact: true })
+    .click();
+  await expect(page.locator('[data-deferred-pause-dialog]')).toBeVisible();
+  await expectContainedDialog(page);
+  const submitted = page.waitForResponse(
+    response =>
+      response.url() === browserApi + '/deferred_pause_request' &&
+      response.request().method() === 'POST'
+  );
+  await page.locator('[data-deferred-pause-confirm]').click();
+  const accepted = await submitted;
+  expect(accepted.status()).toBe(200);
+  const first = await accepted.json();
+  expect(first.receipt.state).toBe('pending');
+  expect(first.item.state).toBe('acw');
+  expect(first.item.provider_confirmed).toBe(false);
+  const supervision = await page.request.get(ownApi + '/supervisor', {
+    headers: target.administrator,
+  });
+  expect(supervision.status()).toBe(200);
+  const supervised = (await supervision.json()).agents.find(
+    agent => agent.account_user_id === String(target.operator_id)
+  );
+  expect(supervised.deferred_pause_notice).toEqual({ state: 'pending' });
+  expect(JSON.stringify(supervised)).not.toContain(first.receipt.request_id);
+  await expect(widget.locator('[data-deferred-pause-pending]')).toBeVisible();
+  await page.reload();
+  await expect(widget.locator('[data-deferred-pause-pending]')).toBeVisible();
+  const ownState = await page.request.get(ownApi + '/agent_state', {
+    headers: target.operator,
+  });
+  expect(ownState.status()).toBe(200);
+  expect((await ownState.json()).item.deferred_pause_request.request_id).toBe(
+    first.receipt.request_id
+  );
+  await form
+    .locator('[data-qualification-field="reason"]')
+    .selectOption('order');
+  await form
+    .locator('[data-qualification-field="note"]')
+    .fill('SYNTHETIC deferred pause private draft');
+  const saved = page.waitForResponse(
+    response =>
+      response.url() ===
+        browserApi + `/qualifications/${target.qualification_id}/draft` &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-save-qualification-draft]').click();
+  const savedResponse = await saved;
+  expect(savedResponse.status()).toBe(200);
+  expect((await savedResponse.json()).item).toMatchObject({
+    completed_at: null,
+    notes: 'SYNTHETIC deferred pause private draft',
+    overdue: true,
+  });
+  await expect(widget.locator('[role="timer"]')).toHaveCount(0);
+  await form
+    .locator('[data-qualification-field="result"]')
+    .selectOption('completed');
+  const completed = page.waitForResponse(
+    response =>
+      response.url() ===
+        browserApi + `/qualifications/${target.qualification_id}` &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-complete-qualification]').click();
+  expect((await completed).status()).toBe(200);
+  await expect(page.locator('[data-qualification-completed]')).toBeVisible();
+  await expect(widget.locator('[role="timer"]')).toBeVisible({
+    timeout: 15000,
+  });
+  await expect(widget).toHaveAttribute('data-agent-state', 'paused');
+  await expect(widget.locator('[data-deferred-pause-pending]')).toHaveCount(0);
+  const paused = await page.request.get(ownApi + '/agent_state', {
+    headers: target.operator,
+  });
+  expect(paused.status()).toBe(200);
+  expect((await paused.json()).item).toMatchObject({
+    state: 'paused',
+    reason_code: 'lunch',
+    eligible: false,
+    provider_confirmed: false,
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page
+      .locator('html')
+      .evaluate(element => element.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-deferred-pause-applied.png`,
+    fullPage: true,
+  });
+  await page.reload();
+  await expect(widget.locator('[role="timer"]')).toBeVisible();
+});
+
+test('deferred pause native uncertain response reuses one durable receipt and explicit cancellation preserves ACW', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].deferred_pause_retry;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  await page.goto(
+    `/app/accounts/${target.account_id}/synthetic-pending-acw/${target.call_session_id}?with_pause=1`
+  );
+  const widget = page.locator('[data-native-deferred-pause]');
+  const form = page.locator('[data-pending-qualification-form]');
+  await expect(widget).toBeVisible();
+  const browserApi = new URL(new URL(ownApi).pathname, page.url()).href;
+  const bodies = [];
+  let firstReceipt;
+  await page.route(browserApi + '/deferred_pause_request', async route => {
+    if (route.request().method() !== 'POST') {
+      await route.continue();
+      return;
+    }
+    bodies.push(route.request().postDataJSON());
+    if (bodies.length === 1) {
+      const response = await route.fetch();
+      expect(response.status()).toBe(200);
+      firstReceipt = (await response.json()).receipt;
+      // The native request and PostgreSQL commit actually happen; only its browser reply is lost.
+      await route.abort('failed');
+    } else await route.continue();
+  });
+  await widget.locator('select').first().selectOption(String(target.queue_id));
+  await widget.locator('select').nth(1).selectOption('lunch');
+  await widget
+    .getByRole('button', { name: 'Solicitar pausa após ACW', exact: true })
+    .click();
+  await page.locator('[data-deferred-pause-confirm]').click();
+  await expect(page.locator('[data-deferred-pause-uncertain]')).toBeVisible();
+  expect(bodies).toHaveLength(1);
+  const stored = await page.request.get(ownApi + '/agent_state', {
+    headers: target.operator,
+  });
+  expect(stored.status()).toBe(200);
+  expect((await stored.json()).item.deferred_pause_request.request_id).toBe(
+    firstReceipt.request_id
+  );
+  await expectContainedDialog(page);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-deferred-pause-uncertain.png`,
+    fullPage: true,
+  });
+  const retried = page.waitForResponse(
+    response =>
+      response.url() === browserApi + '/deferred_pause_request' &&
+      response.request().method() === 'POST'
+  );
+  await page.locator('[data-deferred-pause-confirm]').click();
+  const replay = await retried;
+  expect(replay.status()).toBe(200);
+  expect((await replay.json()).receipt.request_id).toBe(
+    firstReceipt.request_id
+  );
+  expect(bodies).toHaveLength(2);
+  expect(bodies[1]).toEqual(bodies[0]);
+  await expect(widget.locator('[data-deferred-pause-pending]')).toBeVisible();
+  await widget.locator('[data-deferred-pause-cancel]').click();
+  await expect(page.locator('[data-deferred-pause-dialog]')).toBeVisible();
+  const cancelled = page.waitForResponse(
+    response =>
+      response.url() === browserApi + '/deferred_pause_request' &&
+      response.request().method() === 'DELETE'
+  );
+  await page.locator('[data-deferred-pause-confirm]').click();
+  const cancellation = await cancelled;
+  expect(cancellation.status()).toBe(200);
+  expect((await cancellation.json()).receipt).toMatchObject({
+    request_id: firstReceipt.request_id,
+    state: 'cancelled',
+  });
+  await expect(widget.locator('[data-deferred-pause-pending]')).toHaveCount(0);
+  await expect(form).toBeVisible();
+  await form
+    .locator('[data-qualification-field="reason"]')
+    .selectOption('order');
+  await form
+    .locator('[data-qualification-field="result"]')
+    .selectOption('completed');
+  await form
+    .locator('[data-qualification-field="note"]')
+    .fill('SYNTHETIC completed after withdrawal');
+  const completed = page.waitForResponse(
+    response =>
+      response.url() ===
+        browserApi + `/qualifications/${target.qualification_id}` &&
+      response.request().method() === 'PATCH'
+  );
+  await form.locator('[data-complete-qualification]').click();
+  expect((await completed).status()).toBe(200);
+  await expect(page.locator('[data-qualification-completed]')).toBeVisible();
+  await expect
+    .poll(async () => {
+      const response = await page.request.get(ownApi + '/agent_state', {
+        headers: target.operator,
+      });
+      expect(response.status()).toBe(200);
+      return (await response.json()).item.state;
+    })
+    .toBe('available');
+  await expect(widget).toHaveAttribute('data-agent-state', 'available', {
+    timeout: 15000,
+  });
+  await expect(widget.locator('[role="timer"]')).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page
+      .locator('html')
+      .evaluate(element => element.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-deferred-pause-withdrawn.png`,
+    fullPage: true,
+  });
 });

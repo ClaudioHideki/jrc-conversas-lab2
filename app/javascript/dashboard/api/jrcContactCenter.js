@@ -100,6 +100,14 @@ export default {
     return axios.get(`${base(accountId)}/${paths[resource]}/${Number(id)}`);
   },
   pauseCatalog: accountId => axios.get(`${base(accountId)}/pause_catalog`),
+  requestDeferredPause: (accountId, values) =>
+    axios.post(`${base(accountId)}/deferred_pause_request`, {
+      deferred_pause_request: values,
+    }),
+  cancelDeferredPause: (accountId, requestId) =>
+    axios.delete(`${base(accountId)}/deferred_pause_request`, {
+      data: { request_id: requestId },
+    }),
   updatePauseCatalog: (accountId, catalog, options = {}) =>
     axios.patch(`${base(accountId)}/pause_catalog`, {
       ...options,

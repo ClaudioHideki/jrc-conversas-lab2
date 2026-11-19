@@ -35,3 +35,6 @@ Rails.application.config.filter_parameters += [:ivr_draft, :ivr_preview, :ivr_si
 
 # ACW library schemas may contain private labels and choices.
 Rails.application.config.filter_parameters += [:acw_form]
+
+# Deferred pause requests contain private operator justification and scope.
+Rails.application.config.filter_parameters += [:deferred_pause_request]

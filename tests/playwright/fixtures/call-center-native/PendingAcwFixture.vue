@@ -9,6 +9,7 @@ import PendingQualificationForm from 'dashboard/routes/dashboard/inbox/PendingQu
 import QualificationDraftReview from 'dashboard/routes/dashboard/inbox/QualificationDraftReview.vue';
 import QualificationDraftNavigation from 'dashboard/routes/dashboard/inbox/QualificationDraftNavigation.vue';
 import { useAttendanceClosing } from 'dashboard/routes/dashboard/inbox/useAttendanceClosing';
+import AgentStatePanel from 'dashboard/routes/dashboard/jrcContactCenter/views/AgentStatePanel.vue';
 
 const route = useRoute();
 const store = useStore();
@@ -69,6 +70,13 @@ onMounted(async () => {
 
 <template>
   <section class="mx-auto w-full min-w-0 max-w-3xl p-4" data-native-pending-acw>
+    <AgentStatePanel
+      v-if="route.query.with_pause === '1' && context"
+      :account-id="props.accountId"
+      :can-operate="canOperate"
+      compact
+      data-native-deferred-pause
+    />
     <QualificationDraftNavigation
       :enabled="Boolean(context)"
       :dirty="draft.dirty.value"

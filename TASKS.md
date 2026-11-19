@@ -469,3 +469,20 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - [x] Anotação do GitHub confirma o prazo global45m. Lint Ruby12m10s,assets1m05s;Chrome começou36m45s após o início. O log avançou nos projetos desktop; não há relatórioChrome final. Não contabilizar aprovação dos176casos.
 - [x] Correção limitada do prazo global para65m para acomodar quatro projetos completos e variabilidade medida. Preservados os timeouts individuais, guardas de memória/disco, todas as verificações e os176casos. Nenhuma infraestrutura paga ou limite de cobrança alterado.
 - [ ] Revalidar a candidata completa; etapas0–2 e23figuras continuam abertas. Pausa adiada é incremento independente, ainda fora deste checkpoint.
+
+### Call Center — intenção privada de pausa após chamada e ACW
+
+- [x] Regra aprovada registrada: preservar a chamada e aguardar a conclusão explícita de todo ACW; vencimento e rascunho não liberam pausa.
+- [x] Incremento preparado: intenção própria persistente/imutável, revisão específica, confirmação e retirada explícitas, recibo idempotente, aplicação pelo gerenciador nativo e revalidação de permissões/fila/catálogo. Sem publicação/comando PABX ou ACK fictício.
+- [x] Regressões preparadas para pedido atrasado após retirada, concorrência real, revogação, unidades/contas distintas, privacidade, integridade e recarga do schema. Respostas privadas não entram no payload do supervisor nem na lista genérica de auditoria.
+- [x] Conferência local leve: dez arquivos frontend (incluindo o TypeScript do Chrome) formatados, nove arquivos JS/Vue sem erros de ESLint; três avisos de chaves dinâmicas preexistentes no Supervisor foram conferidos na base2caaec5d;28 testes da proteção de migrations passaram. Timestamp193000 não colide com os341 arquivos do SHA2caaec5d.
+- [ ] Executar a própria CI da intenção persistente: Rails, concorrência, schema, Vue, lint, assets e184Chrome (os176 anteriores mais dois percursos em quatro projetos). Não tratar testes preparados como aprovados.
+- [ ] Histórico operacional detalhado, vínculo regra→versão de formulário/respostas privadas e automações por destino continuam pendentes. Nenhuma etapa/figura integral ou integração PABX foi declarada concluída.
+
+### Call Center — biblioteca ACW com evidência nativa2caaec5d
+
+- [x] CI44546602975/2caaec5d:1493Rails distintos+40recarga do schema,753Vue e176Chrome (44por projeto),0falhas/pendências/erros externos/skips/flaky. Lint e assets novos passaram;bootstrap15cards. Artefato14542154788,hashdfe9409d5391eccd330ac4e388a246630b4c3cf49baa7dbaabf587d1c1a56141;264capturas verificadas.
+- [x] Biblioteca: criação, edição, versões imutáveis, prévia não persistida, histórico, filtros/paginação/remoção de filtros e negações foram exercitados em APIs/PostgreSQL/Chrome reais. Nenhuma ativação operacional ou publicação PABX.
+- [x] Revisão visual: lista desktop claro/escuro, histórico desktop e prévia mobile escura legíveis. Duas capturas mobile da lista mostram carregamento após Limpar filtros; não são prova da lista carregada. Mantidas como evidência real.
+- [ ] Correção de QA preparada para aguardar GET200,20registros e ausência do carregamento antes da captura; preserva as176combinações e asserções anteriores. Conferir novamente no próximo SHA.
+- [ ] Pausa adiada persistente e supervisor delimitado por fila preparados, ainda sem execução nativa. Vínculo regra→versão/respostas privadas e automações permanecem pendentes.23figuras e etapas completas não são declaradas concluídas.

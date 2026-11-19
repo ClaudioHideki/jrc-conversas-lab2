@@ -301,6 +301,18 @@ onBeforeUnmount(() => {
                   {{ t('JRC_CONTACT_CENTER.PAUSE_CATALOG.EXCEEDED') }}
                 </p>
               </div>
+              <p
+                v-if="agent.deferred_pause_notice"
+                role="status"
+                class="w-full min-w-0 rounded-lg border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
+                data-supervisor-deferred-pause-notice
+              >
+                {{
+                  agent.deferred_pause_notice.state === 'blocked'
+                    ? t('JRC_CONTACT_CENTER.DEFERRED_PAUSE.SUPERVISOR_BLOCKED')
+                    : t('JRC_CONTACT_CENTER.DEFERRED_PAUSE.SUPERVISOR_PENDING')
+                }}
+              </p>
               <div
                 v-for="record in agent.pending_qualifications || []"
                 :key="record.id"

@@ -518,7 +518,8 @@
       "implemented_in_0_2": [
         "Native account/channel ACW popup in HH:MM; required voice flag, validation and persistence",
         "Gravação explícita de rascunho privado na qualificação nativa, limite por motivo pelo snapshot original sem reiniciar relógio, revisão manual de conflito e conclusão somente explícita. Validado emee689703 com APIs/banco reais; workspace Hoya completo no Chrome não incluído.",
-        "Proteção de saída do rascunho com Dialog/Router nativos e aviso beforeunload: permanecer conserva edição, saída explícita não altera a última gravação ou o ACW, e conteúdo salvo volta após recarga. CIa8c6c78d validou164Chrome em1440/390 eclaro/escuro. Rótulos de conflito conhecidos reutilizam acwLabels."
+        "Proteção de saída do rascunho com Dialog/Router nativos e aviso beforeunload: permanecer conserva edição, saída explícita não altera a última gravação ou o ACW, e conteúdo salvo volta após recarga. CIa8c6c78d validou164Chrome em1440/390 eclaro/escuro. Rótulos de conflito conhecidos reutilizam acwLabels.",
+        "Biblioteca nativa versionada com criação/edição, prévia, histórico e filtros/paginação em2caaec5d/176Chrome. Vínculo operacional e respostas privadas continuam pendentes; captura da lista mobile após recarga será refeita por QA."
       ],
       "remaining_or_external": [
         "Rascunho explícito e aplicação intermediária do motivo validados emee689703. Aviso de saída validado em a8c6c78d; homologação do workspace Hoya inteiro no Chrome ainda pendente.",
@@ -4046,6 +4047,107 @@
     "chrome_approved_count": "not_counted_without_final_report",
     "correction": "Only global job time45to65minutes; all individual bounds/resources/tests/176Chrome and assertions unchanged. No paid resources or billing changes.",
     "separate_pause_increment_not_included": true,
+    "all23_complete": false
+  },
+  "deferred_pause_after_call_and_acw_prepared_20261119": {
+    "status": "Implementado em incremento isolado; testes nativos e Chrome do próprio SHA pendentes",
+    "decision": "Pausa após encerramento da chamada e conclusão explícita de todo ACW; relógio vencido não conclui",
+    "scope": [
+      "Intenção própria Account/AccountUser; estado/revisão própria e UUID/corpo imutável",
+      "Criação somente com chamada ativa ou ACW pendente; confirmação e retirada explícitas",
+      "Account mutex, elegibilidade/ator/catálogo/fila/cobertura revalidados na aplicação nativa",
+      "Negação de pedido atrasado após retirada; replay do mesmo UUID conserva recibo terminal",
+      "GET privado condicional; nenhum POST automático; revisão explícita de resultado incerto",
+      "Privacidade de justificativa, logs filtrados e metadados fora da lista genérica de configuração",
+      "Supervisor: somente estado pending/blocked em fila autorizada e vínculo ativo, sem UUID/motivo/rótulo/justificativa; sem autoridade de retirada de outro agente"
+    ],
+    "migration": {
+      "path": "db/migrate/20261119193000_create_contact_center_deferred_pause_requests.rb",
+      "sha256": "725b1ea47ccec49874081013987998eb5472ab10424d8ceb70441b087430b29e",
+      "timestamp_collision_check": "Nenhuma colisão no SHA2caaec5d;341 arquivos lidos pela API; sem execução local/produção"
+    },
+    "local_static": {
+      "migration_gate_tests": 28,
+      "failures": 0,
+      "frontend_js_vue_files": 9,
+      "frontend_lint_errors": 0,
+      "frontend_lint_warnings": 3,
+      "typescript_formatted": 1,
+      "not_native_homologation": true,
+      "frontend_lint_warnings_preexisting_confirmed_in": "2caaec5d"
+    },
+    "native_prepared": [
+      "entrada tipada e limites",
+      "serviço com chamada/ACW e replay/retirada",
+      "API autenticada, contas/unidades e privacidade",
+      "schema, triggers e recarga/reexecução",
+      "concorrência PostgreSQL em banco exclusivo",
+      "Vue de apresentação e API wrappers",
+      "184Chrome totais:176 preservados mais2fluxosx4projetos",
+      "API de supervisão: sinal delimitado por fila/unidade e revogação, sem corpo privado"
+    ],
+    "remaining": [
+      "Histórico operacional detalhado/pausas sujeitas a aprovação",
+      "Vínculo imutável de formulário e respostas privadas da qualificação",
+      "Automações por destino",
+      "Contrato/ACK/publicação PABX e workspace Hoya completo"
+    ],
+    "adr": "docs/adr/20261119-call-center-pause-after-acw.md",
+    "all23_complete": false
+  },
+  "acw_form_library_final_native_gate_2caaec5d_20261119": {
+    "sha": "2caaec5d269970b63b0351a9523f75f11bf35ad2",
+    "run": 44546602975,
+    "job": 135638716633,
+    "status": "Gates completos aprovados; revisão visual da lista mobile requer captura estável após recarga",
+    "native_rails_distinct": 1493,
+    "schema_reload_reexecutions": 40,
+    "vue": 753,
+    "chrome": 176,
+    "chrome_per_project": 44,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0,
+    "skips": 0,
+    "flaky": 0,
+    "artifact": 14542154788,
+    "artifact_sha256": "dfe9409d5391eccd330ac4e388a246630b4c3cf49baa7dbaabf587d1c1a56141",
+    "screenshot_hashes_verified": 264,
+    "visual_review": [
+      {
+        "name": "desktop-light-acw-form-library.png",
+        "sha256": "a33e546b0544381763f0a3a2b285a526e08b4b2a0ba499b59733f3f1b8f1744c",
+        "observation": "Inspecionada; tema/controles legíveis e composição dentro da área disponível"
+      },
+      {
+        "name": "desktop-dark-acw-form-library.png",
+        "sha256": "ec2c3d40663e032e4d2550e8a4a97e750feed53f3359f68826314f79fd5e95c9",
+        "observation": "Inspecionada; tema/controles legíveis e composição dentro da área disponível"
+      },
+      {
+        "name": "mobile-light-acw-form-library.png",
+        "sha256": "1d3fd685a0112af671629ef924c821360f92e01a0053701c486376d1c22d03e4",
+        "observation": "Captura durante carregamento após Limpar filtros; não comprova lista carregada"
+      },
+      {
+        "name": "mobile-dark-acw-form-library.png",
+        "sha256": "e979e676e781478d0116e6e7d6cfcbcf3d86243b6d7907fac5f853516a9599f6",
+        "observation": "Captura durante carregamento após Limpar filtros; não comprova lista carregada"
+      },
+      {
+        "name": "desktop-light-acw-form-history.png",
+        "sha256": "6669b9bdd4c84b5dd68691d1f6b8132e10b8c7163f30084f4b159df90d49c8b3",
+        "observation": "Inspecionada; tema/controles legíveis e composição dentro da área disponível"
+      },
+      {
+        "name": "mobile-dark-acw-form-preview.png",
+        "sha256": "1ada05e320d298dbb87e9e354c88a401d6d07572ac8e3055dce73ef6f99a02f7",
+        "observation": "Inspecionada; tema/controles legíveis e composição dentro da área disponível"
+      }
+    ],
+    "qa_follow_up": "Aguardar GET200 sem filtros,20registros e ausência do indicador de carregamento; manter critérios anteriores. Não alterar produto para mascarar captura.",
+    "runtime_form_bindings_private_answers_complete": false,
+    "persistent_deferred_pause_in_this_sha": false,
     "all23_complete": false
   }
 }

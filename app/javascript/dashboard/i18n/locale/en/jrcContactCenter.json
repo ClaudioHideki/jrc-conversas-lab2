@@ -2254,6 +2254,32 @@
       "SAVE_FAILED": "Não foi possível salvar. Revise os campos; o conteúdo foi preservado.",
       "UNCERTAIN": "O resultado do salvamento não foi confirmado. Revise o estado antes de sair ou repita explicitamente a mesma solicitação. O conteúdo e a identificação foram preservados.",
       "OPEN": "Abrir formulário"
+    },
+    "DEFERRED_PAUSE": {
+      "TITLE": "Solicitar pausa após o pós-atendimento",
+      "HINT": "A chamada será preservada. A pausa local só começa após o fim das chamadas e a conclusão dos pós-atendimentos pendentes. A confirmação do PABX continua independente.",
+      "CANCEL_TITLE": "Retirar pedido de pausa",
+      "CANCEL_HINT": "Esta ação retira somente o pedido pendente. Uma pausa já iniciada deve ser encerrada pelo controle de disponibilidade.",
+      "CONFIRM": "Confirmar pedido",
+      "CONFIRM_CANCEL": "Retirar pedido",
+      "UNCERTAIN": "A resposta não foi confirmada. O pedido pode ter sido registrado. Repita somente esta mesma operação ou confira o estado antes de continuar.",
+      "RETRY": "Repetir a mesma operação",
+      "FAILED": "Não foi possível confirmar a operação. Atualize o estado e revise os dados; seu texto será mantido quando o contexto ainda estiver autorizado.",
+      "ALREADY_APPLIED": "A pausa já começou. O pedido não pode mais ser retirado. Atualize o estado para usar o controle de disponibilidade.",
+      "CLOSE_REVIEW": "O resultado continua incerto. Ao confirmar o fechamento, o estado será consultado antes de outro pedido. Nenhum novo pedido será enviado automaticamente.",
+      "CONFIRM_CLOSE": "Fechar e conferir estado",
+      "REQUEST_BUTTON": "Solicitar pausa após ACW",
+      "PENDING": "Pedido registrado. Aguardando o fim da chamada e a conclusão do ACW.",
+      "BLOCKED": "Pedido bloqueado para revisão. Retire-o e revise o motivo antes de solicitar novamente.",
+      "SUPERVISOR_PENDING": "Pausa solicitada: aguardando o fim da chamada e a conclusão do ACW.",
+      "SUPERVISOR_BLOCKED": "Pedido de pausa bloqueado para revisão pelo operador.",
+      "CANCEL": "Retirar pedido",
+      "CANCELLED": "Este pedido já foi retirado. Atualize o estado e revise antes de criar outro.",
+      "CALL_ACTIVE": "A chamada está em andamento. Para pausar depois dela e do ACW, use Solicitar pausa após ACW.",
+      "ACW_PENDING": "Conclua o pós-atendimento antes da pausa ou registre um pedido de pausa após ACW.",
+      "EXISTS": "Há um pedido pendente. Retire-o antes de alterar sua disponibilidade.",
+      "CONTEXT_CHANGED": "O contexto ou as permissões mudaram. Revise a fila e o motivo; os dados anteriores não foram reaplicados.",
+      "DENIED": "Você não tem mais permissão para operar neste contexto. Recarregue os dados após revisar o acesso."
     }
   }
 }

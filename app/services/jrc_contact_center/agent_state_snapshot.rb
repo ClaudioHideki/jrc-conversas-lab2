@@ -48,10 +48,22 @@ class JrcContactCenter::AgentStateSnapshot
   # Private operator configuration belongs only in authenticated self responses.
   # SupervisorSnapshot reuses #call and must not inherit another member's catalog.
   def operator_payload
-    call.merge(pause_catalog: pause_catalog_options, pause_definition: pause_definition)
+    catalog = pause_catalog_options
+    payload = call.merge(pause_catalog: catalog, pause_definition: pause_definition)
+    if catalog
+      payload[:can_defer_pause] = active_call? || pending_qualifications.exists?
+      payload[:pause_request_revision] = JrcContactCenter::DeferredPauseRevision.token(account: @account, member: @member)
+      request = JrcContactCenter::DeferredPauseProjection.new(account: @account, member: @member).call(deferred_pause_request)
+      payload[:deferred_pause_request] = request if request
+    end
+    payload
   end
 
   private
+
+  def deferred_pause_request
+    @deferred_pause_request ||= JrcContactCenter::DeferredPauseRequest.active.find_by(account: @account, account_user: @member)
+  end
 
   # Manual answers are recovered only through the currently authorized attendance API.
   def pending_qualification_states
@@ -99,6 +111,7 @@ class JrcContactCenter::AgentStateSnapshot
     return 'access_revoked' unless JrcContactCenter::ModulePolicy.new(context, :contact_center).operate?
 
     return 'tabulation_pending' if pending_qualifications.exists?
+    return 'pause_pending' if deferred_pause_request
     return 'agent_not_available' unless current&.state == 'available'
     return 'call_active' if active_call?
     return 'queue_membership_missing' unless memberships.exists?
