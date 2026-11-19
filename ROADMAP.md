@@ -12,6 +12,8 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 
 ## Fase 2: Operação e desenvolvimento ativo
 
+- [ ] Validar e publicar a abertura interna por destinatário de outros departamentos da unidade e recuperação da rota de criação (ADR0008), preservando a imagem responsiva f494fd38.
+
 - [x] Validar e publicar a visualização responsiva de mensagens, com editor adaptável e botão Ampliar conversa (ADR0007). Produto f494fd38; [evidências](docs/jrc_consolidation/inbox-responsive-release-20261118.md). Implantação permanece separada.
 
 - [ ] Corrigir e publicar a passagem da intenção de encerramento manual pelo cliente HTTP real, sobre a imagem 68862610, preservando as regras da ADR0005.

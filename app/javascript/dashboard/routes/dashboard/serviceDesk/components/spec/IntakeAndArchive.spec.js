@@ -91,6 +91,28 @@ beforeEach(() => {
 afterEach(() => wrapper?.unmount());
 
 describe('Employee recipient and closed-ticket journeys', () => {
+  it('requires a chosen recipient when legacy triage has no default', async () => {
+    const destination = unit('10', '3', '7');
+    destination.internal_intake.primary = null;
+    session.state.context.units = [destination];
+    render(InternalTicketForm);
+    await flushPromises();
+    expect(wrapper.findAll('select')[1].element.value).toBe('');
+    await wrapper.findAll('select')[1].setValue('71');
+    await wrapper.get('input[maxlength="255"]').setValue('Synthetic request');
+    await wrapper.get('textarea').setValue('Synthetic description');
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(session.operations.write).toHaveBeenCalledWith(
+      'ticket:internal:write',
+      'create',
+      expect.objectContaining({
+        unit_id: '10',
+        ticket: expect.objectContaining({ assignee_account_user_id: '71' }),
+      })
+    );
+  });
+
   it('clears the recipient when switching companies and submits the selected person', async () => {
     render(InternalTicketForm);
     await wrapper.findAll('select')[0].setValue('3');

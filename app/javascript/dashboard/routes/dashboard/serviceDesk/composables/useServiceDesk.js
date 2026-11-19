@@ -56,6 +56,9 @@ export function provideServiceDesk() {
     () => {
       refreshGeneration += 1;
       pendingRefresh = null;
+      // A denied list/report is not a permanent denial of a fresh, authorized
+      // route. The router and server recheck the new action independently.
+      if (!['ready', 'loading', 'idle'].includes(state.status)) session.retry();
     },
     { flush: 'sync' }
   );

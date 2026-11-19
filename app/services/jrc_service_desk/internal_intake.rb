@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Internal requests use the authenticated employee, never a caller-supplied identity.
-# Routing is configured per account/unit and uses the existing shared team scope.
+# Explicit recipients use their own unit/team domain; legacy defaults remain
+# available for callers that do not select a recipient.
 class JrcServiceDesk::InternalIntake
   KEY = 'jrc_service_desk_internal_intake'
 
@@ -10,22 +11,39 @@ class JrcServiceDesk::InternalIntake
   end
 
   def self.presentation(unit, context)
-    return unless configuration(unit)
-
-    queue, primary, observer = destinations(unit)
+    values = configuration(unit) || {}
+    queue = default_queue(unit)
+    members = assignees(unit, queue)
+    primary = members.find { |member| member.account_user_id.to_s == values['assignee_account_user_id'].to_s }
+    observer = members.find { |member| member.account_user_id.to_s == values['observer_account_user_id'].to_s }
     { requester: { name: context.user.name, email: context.user.email },
-      primary: { id: primary.account_user_id.to_s, name: primary.account_user.user.name },
-      observer: { id: observer.account_user_id.to_s, name: observer.account_user.user.name },
-      queue: { id: queue.id.to_s, name: queue.name },
-      assignees: assignees(unit, queue).map { |member| { id: member.account_user_id.to_s, name: member.account_user.user.name } } }
+      primary: primary && { id: primary.account_user_id.to_s, name: primary.account_user.user.name },
+      observer: observer && { id: observer.account_user_id.to_s, name: observer.account_user.user.name },
+      queue: queue && { id: queue.id.to_s, name: queue.name },
+      assignees: members.map { |member| { id: member.account_user_id.to_s, name: member.account_user.user.name } } }
   end
 
   def self.assignees(unit, queue)
-    candidate = JrcServiceDesk::Ticket.new(account: unit.account, unit: unit, queue: queue, team_id: queue.team_id)
     JrcServiceDesk::UnitMembership.operational.where(account_id: unit.account_id, unit_id: unit.id, active: true,
-                                                    manual_assignment_enabled: true).includes(account_user: :user)
-      .select { |member| JrcServiceDesk::AssignmentEligibility.manual_domain?(member, candidate) }
+                                                    manual_assignment_enabled: true).includes(:queue, :team, account_user: :user)
+      .select { |member| recipient_allowed?(member, destination(unit, member, queue)) }
       .sort_by { |member| [member.account_user.user.name.downcase, member.account_user_id] }
+  end
+
+  def self.default_queue(unit)
+    values = configuration(unit) || {}
+    JrcServiceDesk::Queue.find_by(account_id: unit.account_id, unit_id: unit.id, active: true, id: values['queue_id'])
+  end
+
+  def self.destination(unit, member, queue)
+    candidate = JrcServiceDesk::Ticket.new(account: unit.account, unit: unit, queue: queue, team_id: queue&.team_id)
+    return candidate if recipient_allowed?(member, candidate)
+
+    JrcServiceDesk::Ticket.new(account: unit.account, unit: unit, queue: member.queue, team: member.queue&.team || member.team)
+  end
+
+  def self.recipient_allowed?(member, ticket)
+    (!ticket.queue || ticket.queue.active?) && JrcServiceDesk::AssignmentEligibility.manual_domain?(member, ticket)
   end
 
   def self.destinations(unit)
@@ -63,8 +81,8 @@ class JrcServiceDesk::InternalIntake
     contact
   end
 
-  def self.defaults!(unit, context)
-    destinations(unit)
+  def self.defaults!(unit, context, assignee_account_user_id: nil)
+    destinations(unit) unless assignee_account_user_id
     requester = identity!(context)
     status = JrcServiceDesk::TicketStatus.where(account_id: unit.account_id, unit_id: unit.id).find_by!(active: true, initial: true, phase: 'open')
     priority = JrcServiceDesk::Priority.where(account_id: unit.account_id, unit_id: unit.id, active: true)
@@ -73,13 +91,31 @@ class JrcServiceDesk::InternalIntake
   end
 
   def self.apply!(ticket, account_user_id: nil)
-    queue, primary, = destinations(ticket.unit)
-    ticket.queue = queue
-    ticket.team_id = queue.team_id
-    selected = account_user_id ? JrcServiceDesk::UnitMembership.operational.where(account_id: ticket.account_id,
-      unit_id: ticket.unit_id, active: true).find_by!(account_user_id: account_user_id) : primary
-    raise Pundit::NotAuthorizedError unless JrcServiceDesk::AssignmentEligibility.manual_domain?(selected, ticket)
+    if account_user_id
+      selected = JrcServiceDesk::UnitMembership.operational.where(account_id: ticket.account_id,
+        unit_id: ticket.unit_id, active: true).find_by!(account_user_id: account_user_id)
+      target = destination(ticket.unit, selected, default_queue(ticket.unit))
+      ticket.queue = target.queue
+      ticket.team = target.team
+    else
+      queue, selected, = destinations(ticket.unit)
+      ticket.queue = queue
+      ticket.team_id = queue.team_id
+    end
+    raise Pundit::NotAuthorizedError unless recipient_allowed?(selected, ticket)
 
     ticket.assignee_membership = selected
+  end
+
+  def self.observer_for(ticket)
+    id = configuration(ticket.unit)&.fetch('observer_account_user_id', nil)
+    return unless id
+
+    member = JrcServiceDesk::UnitMembership.operational.find_by(account_id: ticket.account_id, unit_id: ticket.unit_id,
+      active: true, account_user_id: id)
+    return unless member
+
+    target = JrcServiceDesk::OperationalContext.new(account: ticket.account, user: member.account_user.user, account_user: member.account_user)
+    member if Pundit.policy!(target.to_h, ticket).show?
   end
 end

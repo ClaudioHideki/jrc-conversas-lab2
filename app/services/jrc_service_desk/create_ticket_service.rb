@@ -22,7 +22,10 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       values = JrcServiceDesk::Input.attributes(attributes, fields)
       normalized = (FIELDS - CLASSIFICATION_FIELDS).index_with { |name| values[name] }
       normalized.merge!(values.slice(*CLASSIFICATION_FIELDS))
-      normalized.merge!(JrcServiceDesk::InternalIntake.defaults!(unit, context)) if internal_request
+      if internal_request
+        normalized.merge!(JrcServiceDesk::InternalIntake.defaults!(unit, context,
+          assignee_account_user_id: values['assignee_account_user_id']))
+      end
       normalized['title'] = text(normalized['title'])
       normalized['description'] = text(normalized['description'], nullable: true)
       IDS.each { |name| normalized[name] = JrcServiceDesk::Input.id(normalized[name]) unless normalized[name].nil? }
@@ -91,10 +94,10 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       authorize!(ticket, :create?)
       ticket.save!
       if internal_request
-        _, _, observer = JrcServiceDesk::InternalIntake.destinations(unit)
-        observer_context = JrcServiceDesk::OperationalContext.new(account: unit.account, user: observer.account_user.user, account_user: observer.account_user)
-        Pundit.authorize(observer_context.to_h, ticket, :show?)
-        append_event!(ticket, 'resource_updated', 'internal_request' => true, 'observer_account_user_id' => observer.account_user_id)
+        observer = JrcServiceDesk::InternalIntake.observer_for(ticket)
+        data = { 'internal_request' => true }
+        data['observer_account_user_id'] = observer.account_user_id if observer
+        append_event!(ticket, 'resource_updated', data)
       end
       intake.record_actions!
       intake.record_sla!

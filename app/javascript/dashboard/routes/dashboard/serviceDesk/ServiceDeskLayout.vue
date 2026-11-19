@@ -187,6 +187,13 @@ const blocked = computed(() =>
           retry
           @retry="session.retry()"
         />
+        <Button
+          v-if="blocked && activeScreen !== 'new'"
+          class="mx-auto mt-4"
+          :label="t('JRC_SERVICE_DESK.SCREENS.new')"
+          icon="i-lucide-plus"
+          @click="router.push(to('new'))"
+        />
         <ServiceDeskState
           v-else-if="state.status !== 'ready'"
           :status="state.status"

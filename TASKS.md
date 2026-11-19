@@ -1,6 +1,8 @@
 <!-- jrc-operational-init:v1 -->
 # Backlog operacional — JRC Conversas LAB2 — Grupo JRC
 
+- [ ] **ABERTURA-AGENTES-20261119:** Corrigir abertura interna para agente comum e escolha de destinatário de outros departamentos da unidade, sem depender da triagem legada. Recuperar uma rota recém-autorizada após negação de outra consulta. Vínculo e permissões do Ronald conferidos na interface; causa exata da recusa da sessão dele não observada. 39 testes Vue locais aprovados; concluir Rails/CI e imagem sobre f494fd38. Sem alteração de permissões produtivas ou implantação. [ADR0008](docs/adr/0008-abertura-interna-por-destinatario.md).
+
 - [x] **INBOX-RESPONSIVO-20261118:** Publicado o produto f494fd38 sobre a base e6bd4cc9, preservando o runtime d3d66232. Layout compacto, contexto em popup e Ampliar conversa com rascunho preservado. 200 testes locais, quatro resoluções Chrome e build44363528959 aprovados; 2759 testes frontend, 168 Rails e smokes antes/depois da publicação. Digest e1502e54 confirmado diretamente no GHCR, linux/amd64 e revisão exata. Corrigido o hostname do espelho Ubuntu que havia interrompido o primeiro build, sem remover gates. Sem implantação. [Evidências e imagem](docs/jrc_consolidation/inbox-responsive-release-20261118.md); [ADR0007](docs/adr/0007-visualizacao-responsiva-da-conversa.md).
 
 - [ ] **OPUS-MIME-20261117:** Alinhar Marcel/Broker em LIVE e histórico com assinatura Ogg/Opus, mantendo envelope/hash. RED44154858796:74/75 nativos; correção e GREEN pendentes. Base runtime6886261 + main89779191 preservadas. Ver ADR0006. Sem deploy ou novo envio real nesta etapa.

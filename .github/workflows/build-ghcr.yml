@@ -81,7 +81,7 @@ jobs:
         run: test "$BACKOFFICE_CANDIDATE" = true
 
       - name: Exigir integracao de Projetos e Portal no SHA exato
-        if: (startsWith(github.ref_name, 'codex/projetos-portal-') || startsWith(github.ref_name, 'codex/chamados-projetos-')) && inputs.component == 'app'
+        if: (startsWith(github.ref_name, 'codex/projetos-portal-') || startsWith(github.ref_name, 'codex/chamados-projetos-') || startsWith(github.ref_name, 'codex/abertura-chamados-')) && inputs.component == 'app'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATION_RUN_ID: ${{ inputs.validation_run_id }}

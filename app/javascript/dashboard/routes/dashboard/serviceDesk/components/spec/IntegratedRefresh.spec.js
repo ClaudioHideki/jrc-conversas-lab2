@@ -51,6 +51,30 @@ afterEach(() => {
 });
 
 describe('Integrated read refresh and server SLA presentation', () => {
+  it('rechecks a fresh creation route after a previous screen denied access', async () => {
+    wrapper = mount(Root);
+    await flushPromises();
+    session.dispose();
+    session.state.status = 'denied';
+    mocks.route.name = 'jrc_service_desk_new';
+    await flushPromises();
+    expect(mocks.context).toHaveBeenCalledTimes(2);
+    expect(session.state.status).toBe('ready');
+    expect(session.state.context.units[0].permissions.create_ticket).toBe(true);
+  });
+
+  it('preserves an actual server denial when retrying the creation route', async () => {
+    wrapper = mount(Root);
+    await flushPromises();
+    session.dispose();
+    session.state.status = 'denied';
+    mocks.context.mockRejectedValueOnce({ response: { status: 403 } });
+    mocks.route.name = 'jrc_service_desk_new';
+    await flushPromises();
+    expect(session.state.status).toBe('denied');
+    expect(session.state.context).toBeNull();
+  });
+
   it('refreshes personal lists and indicators on focus even if authorization is unchanged', async () => {
     wrapper = mount(Root);
     await flushPromises();
