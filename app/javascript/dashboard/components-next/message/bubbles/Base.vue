@@ -10,7 +10,13 @@ import { useI18n } from 'vue-i18n';
 
 import MessageFormatter from 'shared/helpers/MessageFormatter.js';
 import { BUS_EVENTS } from 'shared/constants/busEvents';
-import { MESSAGE_VARIANTS, ORIENTATION, SENDER_TYPES } from '../constants';
+import { useInbox } from 'dashboard/composables/useInbox';
+import {
+  MESSAGE_TYPES,
+  MESSAGE_VARIANTS,
+  ORIENTATION,
+  SENDER_TYPES,
+} from '../constants';
 
 const props = defineProps({
   hideMeta: { type: Boolean, default: false },
@@ -24,8 +30,11 @@ const {
   id,
   sender,
   senderType,
+  messageType,
+  isPrivate,
 } = useMessageContext();
 const { t } = useI18n();
+const { isAWhatsAppCloudChannel } = useInbox();
 
 const isCaptainMessage = computed(
   () =>
@@ -92,10 +101,17 @@ const scrollToMessage = () => {
   });
 };
 
+const showMetaWithinGroup = computed(
+  () =>
+    isAWhatsAppCloudChannel.value &&
+    !isPrivate.value &&
+    [MESSAGE_TYPES.OUTGOING, MESSAGE_TYPES.TEMPLATE].includes(messageType.value)
+);
+
 const shouldShowMeta = computed(
   () =>
     !props.hideMeta &&
-    !shouldGroupWithNext.value &&
+    (!shouldGroupWithNext.value || showMetaWithinGroup.value) &&
     variant.value !== MESSAGE_VARIANTS.ACTIVITY
 );
 
