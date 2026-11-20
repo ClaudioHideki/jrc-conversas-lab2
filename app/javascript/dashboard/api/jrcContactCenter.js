@@ -33,6 +33,29 @@ const ivrRevision = revision => {
 };
 
 export default {
+  audioAssets: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/audio_assets`, { params }),
+  audioAsset: (accountId, id) =>
+    axios.get(`${base(accountId)}/audio_assets/${recordIdentity(id)}`),
+  receiveAudioAsset: (accountId, body) =>
+    axios.post(`${base(accountId)}/audio_assets`, body),
+  updateAudioAsset: (accountId, id, asset, options = {}) =>
+    axios.patch(`${base(accountId)}/audio_assets/${recordIdentity(id)}`, {
+      asset,
+      ...options,
+    }),
+  audioVersions: (accountId, id, params = {}) =>
+    axios.get(
+      `${base(accountId)}/audio_assets/${recordIdentity(id)}/versions`,
+      {
+        params,
+      }
+    ),
+  receiveAudioVersion: (accountId, id, body) =>
+    axios.post(
+      `${base(accountId)}/audio_assets/${recordIdentity(id)}/versions`,
+      body
+    ),
   audioFolders: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/audio_folders`, { params }),
   audioFolder: (accountId, id) =>
@@ -99,6 +122,7 @@ export default {
       acw_forms: 'acw_forms',
       routing_rules: 'routing_rules',
       audio_folders: 'audio_folders',
+      audio_assets: 'audio_assets',
     };
     if (!paths[resource] || !/^[1-9]\d*$/.test(String(id)))
       throw new Error('Invalid configuration context');
@@ -107,6 +131,8 @@ export default {
       return axios.get(
         `${base(accountId)}/audio_folders/${recordIdentity(id)}`
       );
+    if (resource === 'audio_assets')
+      return axios.get(`${base(accountId)}/audio_assets/${recordIdentity(id)}`);
     if (resource === 'acw_forms')
       return axios.get(`${base(accountId)}/acw_forms/${recordIdentity(id)}`);
     if (resource === 'routing_rules')

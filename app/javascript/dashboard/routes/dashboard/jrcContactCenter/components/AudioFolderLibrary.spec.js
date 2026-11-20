@@ -61,7 +61,7 @@ const record = (values = {}) => ({
 const setup = () =>
   mount(AudioFolderLibrary, {
     props: { accountId: '1', context },
-    global: { stubs: { Dialog } },
+    global: { stubs: { Dialog, AudioAssetLibrary: true } },
   });
 enableAutoUnmount(afterEach);
 beforeEach(() => {
@@ -88,6 +88,22 @@ beforeEach(() => {
 });
 
 describe('unit scoped institutional folder UI', () => {
+  it('returns to the last real folder page after reorganization without leaving an inaccessible empty second page', async () => {
+    mocks.route.query = {
+      audio_page: '2',
+      audio_parent: '8',
+      audio_q: 'SYNTHETIC',
+    };
+    API.audioFolders.mockResolvedValueOnce({
+      data: { items: [], meta: { page: 2, pages: 1, total: 1 } },
+    });
+    setup();
+    await flushPromises();
+    expect(mocks.replace).toHaveBeenCalledWith({
+      query: { ...mocks.route.query, audio_page: 1 },
+    });
+    expect(API.audioFolder).not.toHaveBeenCalled();
+  });
   it('navigates an authorized ancestor without editing folder identity or its unit', async () => {
     mocks.route.query.audio_parent = '9';
     API.audioFolder.mockResolvedValueOnce({
@@ -112,7 +128,13 @@ describe('unit scoped institutional folder UI', () => {
     );
     await wrapper.get('[data-audio-folder-path="7"]').trigger('click');
     expect(mocks.replace).toHaveBeenCalledWith({
-      query: { audio_parent: '7', audio_page: 1, audio_q: undefined },
+      query: {
+        audio_parent: '7',
+        audio_page: 1,
+        audio_q: undefined,
+        audio_file_page: 1,
+        audio_file_q: undefined,
+      },
     });
     expect(API.saveAudioFolder).not.toHaveBeenCalled();
   });

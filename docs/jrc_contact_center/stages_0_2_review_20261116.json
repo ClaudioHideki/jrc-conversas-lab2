@@ -414,14 +414,14 @@
       ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
-        "Pastas por unidade validadas em fa43cbf7. Arquivos privados, versões, scanner, metadados, player, vínculos reais e Nico continuam pendentes; a figura completa não está concluída."
+        "Pastas por unidade e navegação validadas em7dfccc8f. Recebimento privado/versões em preparação separada; scanner, metadados de mídia, reprodução, vínculos reais e Nico ainda não homologados. A figura completa não está concluída."
       ],
       "code_references": [],
       "reference": {
         "document_1_figure": 6,
         "document_2_figure": 6
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "Pastas e caminhos completos validados em7dfccc8f/CI44738873504:1890Rails distintos,101recargas,918Vue,220Chrome; nomes longos e acesso negado após abrir o popup nos4projetos. A figura completa e os arquivos/player permanecem parciais.",
       "objective": "Biblioteca de audios, pastas e vinculos",
       "visual_components": "Campos e dados apresentados:  Cada linha deve informar nome, duracao, origem, tipo de utilizacao, status, versao e pasta; popup Ver Vinculos lista URAs, filas, numeros e campanhas que utilizam o audio. Disponibilizar metadados de integridade e formato nos detalhes.",
       "buttons_and_actions": "Acoes e resultado do clique:  Organizar Pastas e Nova Pasta: criar ou reorganizar hierarquia autorizada. Novo Audio: abrir menu de importacao, gravacao ou Nico. Busca/filtros por pasta, tipo, status e nome: reduzir linhas sem perder contexto. Play em cada arquivo: previa. Editar: abrir popup. Mover, Duplicar, Baixar e Excluir: atuar apenas nos selecionados e apos checagem de vinculos.",
@@ -1173,15 +1173,14 @@
       ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
-        "Corrected Word caption: institutional audio details, not a recording policy. Library is stage 4; call recording policy has its own visual gap",
-        "Pastas por unidade validadas em fa43cbf7. Arquivos privados, versões, scanner, metadados, player, vínculos reais e Nico continuam pendentes; a figura completa não está concluída."
+        "Pastas por unidade e navegação validadas em7dfccc8f. Recebimento privado/versões em preparação separada; scanner, metadados de mídia, reprodução, vínculos reais e Nico ainda não homologados. A figura completa não está concluída."
       ],
       "code_references": [],
       "reference": {
         "document_1_figure": 16,
         "document_2_figure": 16
       },
-      "validation": "Evidência base pertence somente a 1834971c. Incremento de perfis/auditoria requer a próxima execução nativa; o artefato registra SHA, resultados e capturas.",
+      "validation": "Pastas e caminhos completos validados em7dfccc8f/CI44738873504:1890Rails distintos,101recargas,918Vue,220Chrome; nomes longos e acesso negado após abrir o popup nos4projetos. A figura completa e os arquivos/player permanecem parciais.",
       "objective": "Gestao de audios - detalhes do arquivo (ajuste de legenda)",
       "visual_components": "Campos e dados apresentados:  O painel mostra metadados de audio reutilizavel, nao retencao de gravacao telefonica. Versoes, formato e tamanho devem ser obtidos do arquivo armazenado; a lista de destinos vinculados deve ser real.",
       "buttons_and_actions": "Acoes e resultado do clique:  Lista: selecionar audio e atualizar painel lateral. Busca e filtros: localizar arquivo por nome, pasta, tipo de uso e status. Player/forma de onda: reproduzir previa. Detalhes do Audio: ver nome, pasta, duracao, formato, tamanho, status e usos. Gerenciar Vinculos: abrir popup de referencias; Gerar com Nico, Gravar e Upload: criar novos arquivos conforme permissao.",
@@ -1637,7 +1636,7 @@
     "Popup nativo de perfis com persistência explícita, feature flags reais e limites da cobertura corporativa"
   ],
   "provider_contracts": "control_desk_contracts_20261116.json",
-  "scope_limit": "No real provider commands, ACK, automatic corporate grant or production operation. Exactly eight forward Call Center migrations and two hash-pinned ending-reason SQL sources are under the native gate; all previously published additions remain byte-preserved. Native Team remains Account-scoped; its Call Center origin and permissions never create queue participation.",
+  "scope_limit": "No real provider commands, ACK, automatic corporate grant or production operation. Exactly nine forward Call Center migrations and five hash-pinned SQL/receipt sources (the two historical ending-reason sources plus three new private-audio sources) are under the native gate; all previously published additions remain byte-preserved. Native Team remains Account-scoped; its Call Center origin and permissions never create queue participation.",
   "validation_state": "native_and_Chrome_verified_through_fa43cbf7_folder_foundation_23_figures_still_partial",
   "full_23_figures_complete": false,
   "continuity_20261116": {
@@ -5541,5 +5540,24 @@
     "full_23_figures_complete": false,
     "production_unchanged": true,
     "report": "audio_folder_verified_20261120.json"
+  },
+  "institutional_audio_path_verified_7dfccc8f": {
+    "sha": "7dfccc8f5b2e2c0cdfd1a55972715635586f8838",
+    "run": 44738873504,
+    "artifact": 14632969101,
+    "artifact_sha256": "9a322d5bc205f8abe913eca93a56a06bc21cc4061045023af2628b2d090e59c3",
+    "native_distinct_examples": 1890,
+    "schema_reload_examples_separate": 101,
+    "vue": 918,
+    "chrome": 220,
+    "screenshot_hashes_verified": 340,
+    "full_23_figures_complete": false
+  },
+  "institutional_audio_receipts_candidate_20261120": {
+    "status": "implemented_candidate_not_natively_validated",
+    "parent": "7dfccc8f5b2e2c0cdfd1a55972715635586f8838",
+    "required_chrome": 224,
+    "details": "docs/jrc_contact_center/audio_file_receipt_prepared_20261120.json",
+    "not_full_figure_acceptance": true
   }
 }

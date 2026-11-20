@@ -10,7 +10,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
 const original = 'a'.repeat(64);
 const refreshed = 'b'.repeat(64);
 const conflict = code => ({ response: { data: { error: code } } });
-const mountRevision = () => {
+const mountRevision = (onDenied = undefined) => {
   const accountId = ref('1');
   const resource = ref('queues');
   const draft = ref({ name: 'Preserved local draft' });
@@ -18,7 +18,12 @@ const mountRevision = () => {
   const wrapper = mount(
     defineComponent({
       setup() {
-        revision = useConfigurationRevision({ accountId, resource, draft });
+        revision = useConfigurationRevision({
+          accountId,
+          resource,
+          draft,
+          onDenied,
+        });
         return () => h('div');
       },
     })
@@ -34,6 +39,26 @@ beforeEach(() => {
 });
 
 describe('expected configuration revision lifecycle', () => {
+  it.each([401, 403, 404])(
+    'invokes private context cleanup on an explicit%i during native audio revision reload',
+    async status => {
+      const denied = vi.fn();
+      const { revision, resource } = mountRevision(denied);
+      resource.value = 'audio_assets';
+      await flushPromises();
+      revision.capture({ id: '44', revision: original });
+      revision.handleError(conflict('stale_configuration_revision'));
+      API.configurationRecord.mockRejectedValueOnce({ response: { status } });
+      await revision.reload();
+      expect(denied).toHaveBeenCalledOnce();
+      expect(revision.state.latest).toBeNull();
+      expect(API.configurationRecord).toHaveBeenCalledWith(
+        '1',
+        'audio_assets',
+        '44'
+      );
+    }
+  );
   it('requires the exact native revision for institutional folder edits and conflict reloads', async () => {
     const { revision, resource } = mountRevision();
     resource.value = 'audio_folders';

@@ -20,6 +20,13 @@ export const teamStateMigrationPath = 'db/migrate/20261120070000_create_contact_
 export const teamStateMigrationHash = '7466db5b4b1823d9d5a7296fd40bcfe405f0f3c78ff6ef902b94cb69228c0d1b';
 export const audioFolderMigrationPath = 'db/migrate/20261120090000_create_contact_center_audio_folders.rb';
 export const audioFolderMigrationHash = 'ba0f119179aa59ca0b2df5cb9cd9425b2e31f707e8355b6931f495303bb4a8d7';
+export const audioFileMigrationPath = 'db/migrate/20261120120000_create_contact_center_audio_files.rb';
+export const audioFileMigrationHash = '99b509f4b8677a9d4f10c88d213fc4efb42781e00a13b4ee3231e10e0d95ade5';
+export const audioFileSqlSources = Object.freeze({
+  "lib/jrc_contact_center/audio_file_storage_sql.rb": "78cd8c6013eb8d7378d49c128b87061e442f282f982c13760cc97baebf4558db",
+  "lib/jrc_contact_center/audio_file_origin_sql.rb": "19aa49167a6748d7c01af16399456d498ecb16b40600e45b151bcb91c1da5001",
+  "lib/jrc_contact_center/audio_file_schema_receipt.rb": "a5c7f4861a22d8b76c40922e04a87e1bdabe7b51b3d425170dcc5b8cd63b17af"
+});
 export const endingReasonSqlPath = 'lib/jrc_contact_center/ending_reason_origin_sql.rb';
 export const endingReasonSqlHash = 'c0dca8b84c8c4b02d78ed07be4e23bb253f0d64994dccc232ba879941ef35bf8';
 export const endingReasonCatalogSqlPath = 'lib/jrc_contact_center/ending_reason_catalog_sql.rb';
@@ -33,6 +40,7 @@ export const reviewedMigrations = Object.freeze({
   [endingReasonMigrationPath]: endingReasonMigrationHash,
   [teamStateMigrationPath]: teamStateMigrationHash,
   [audioFolderMigrationPath]: audioFolderMigrationHash,
+  [audioFileMigrationPath]: audioFileMigrationHash,
 });
 const base = 'a24adc6dd8bb660f955b76cce0172ae1638deee2';
 
@@ -48,12 +56,12 @@ export function verifyAccessMigration(changes, content, schema) {
 }
 
 // Preserve the original one-migration verifier and its negative tests above.
-// The current candidate admits exactly eight reviewed forward additions, never an arbitrary extra migration.
+// The current candidate admits exactly nine reviewed forward additions, never an arbitrary extra migration.
 export function verifyReviewedMigrations(changes, readCurrent, schema) {
   const expected = Object.keys(reviewedMigrations).sort();
   const rows = changes.trim().split('\n').filter(Boolean).sort();
   if (JSON.stringify(rows) !== JSON.stringify(expected.map(path => `A\t${path}`))) {
-    throw new Error('Only the eight exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
+    throw new Error('Only the nine exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
   }
   for (const path of expected) {
     const actual = createHash('sha256').update(readCurrent(path)).digest('hex');
@@ -62,6 +70,10 @@ export function verifyReviewedMigrations(changes, readCurrent, schema) {
   for (const [path, expectedHash] of [[endingReasonSqlPath, endingReasonSqlHash], [endingReasonCatalogSqlPath, endingReasonCatalogSqlHash]]) {
     const sourceHash = createHash('sha256').update(readCurrent(path)).digest('hex');
     if (sourceHash !== expectedHash) throw new Error(`Reviewed ending reason SQL source changed: ${path}`);
+  }
+  for (const [path, expectedHash] of Object.entries(audioFileSqlSources)) {
+    if (createHash('sha256').update(readCurrent(path)).digest('hex') !== expectedHash)
+      throw new Error(`Reviewed private audio SQL/receipt source changed: ${path}`);
   }
   return validateNewMigrationTimestamps(schema, expected);
 }

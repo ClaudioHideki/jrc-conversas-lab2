@@ -69,6 +69,9 @@ namespace :api, defaults: { format: 'json' } do
       namespace :jrc_contact_center, module: 'accounts/jrc_contact_center' do
         resources :agent_state_histories, only: [:index]
         resources :audio_folders, only: %i[index show create update]
+        resources :audio_assets, only: %i[index show create update] do
+          resources :versions, only: %i[index create], controller: 'audio_versions'
+        end
       end
     end
   end

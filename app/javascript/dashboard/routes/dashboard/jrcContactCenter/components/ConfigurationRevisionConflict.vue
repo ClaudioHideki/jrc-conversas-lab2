@@ -51,6 +51,8 @@ const labels = {
   timezone: t('JRC_CONTACT_CENTER.ADMIN.TIMEZONE'),
   unit_id: t('JRC_CONTACT_CENTER.ADMIN.UNIT'),
   parent_id: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.PARENT'),
+  folder_id: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.PARENT'),
+  purpose: t('JRC_CONTACT_CENTER.AUDIO_FILES.PURPOSE'),
   queue_id: t('JRC_CONTACT_CENTER.ADMIN.QUEUE'),
   account_user_id: t('JRC_CONTACT_CENTER.ADMIN.AGENT'),
   priority: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.PRIORITY'),
@@ -114,6 +116,7 @@ const fields = computed(
       access_users: ['eligible', 'allowed', 'denied'],
       access_teams: ['allowed', 'active'],
       audio_folders: ['name', 'description', 'parent_id'],
+      audio_assets: ['name', 'description', 'purpose', 'folder_id'],
       ivr_drafts: ['name', 'revision', 'definition'],
       acw_forms: ['name', 'description', 'status', 'revision', 'definition'],
       acw_policy: [

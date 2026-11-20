@@ -6,6 +6,7 @@ import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import API from 'dashboard/api/jrcContactCenter';
 import { useMapGetter } from 'dashboard/composables/store';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
+import AudioAssetLibrary from './AudioAssetLibrary.vue';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 
 const props = defineProps({
@@ -99,10 +100,12 @@ let parentGeneration = 0;
 const fingerprint = () =>
   JSON.stringify([props.accountId, unitId.value, draft.value]);
 const reviewed = computed(() => reviewedDraft.value === fingerprint());
+let clearDeniedContext;
 const revision = useConfigurationRevision({
   accountId: computed(() => props.accountId),
   resource: computed(() => 'audio_folders'),
   draft,
+  onDenied: () => clearDeniedContext(),
 });
 const canManage = computed(
   () => props.context.capabilities?.configure === true && unitAllowed.value
@@ -123,7 +126,13 @@ const canSave = computed(
 const query = values =>
   router.replace({ query: { ...route.query, ...values } });
 const navigate = id =>
-  query({ audio_parent: id || undefined, audio_q: undefined, audio_page: 1 });
+  query({
+    audio_parent: id || undefined,
+    audio_q: undefined,
+    audio_page: 1,
+    audio_file_page: 1,
+    audio_file_q: undefined,
+  });
 const search = () => query({ audio_q: q.value || undefined, audio_page: 1 });
 const closeEditor = () => {
   editorOpen.value = false;
@@ -139,7 +148,7 @@ const forgetPrivateRecords = () => {
   currentFolder.value = null;
   meta.value = { page: page.value, pages: 0, total: 0 };
 };
-const clearDeniedContext = () => {
+clearDeniedContext = () => {
   generation += 1;
   dialog.value.close();
   closeEditor();
@@ -167,6 +176,11 @@ const load = async () => {
       per_page: 20,
     });
     if (version !== generation) return;
+    const lastPage = Math.max(1, response.data.meta.pages);
+    if (page.value > lastPage) {
+      await router.replace({ query: { ...route.query, audio_page: lastPage } });
+      return;
+    }
     const parent = parentId.value
       ? await API.audioFolder(props.accountId, parentId.value)
       : null;
@@ -355,6 +369,8 @@ onBeforeUnmount(() => {
               audio_parent: undefined,
               audio_page: 1,
               audio_q: undefined,
+              audio_file_page: 1,
+              audio_file_q: undefined,
             })
           "
         >
@@ -609,5 +625,13 @@ onBeforeUnmount(() => {
         </label>
       </div>
     </Dialog>
+    <AudioAssetLibrary
+      v-if="canManage && !error && !loading"
+      :account-id="accountId"
+      :context="context"
+      :unit-id="unitId"
+      :folder-id="parentId"
+      @denied="clearDeniedContext"
+    />
   </section>
 </template>

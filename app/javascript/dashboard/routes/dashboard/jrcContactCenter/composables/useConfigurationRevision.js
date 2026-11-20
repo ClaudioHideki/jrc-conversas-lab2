@@ -13,12 +13,18 @@ const resources = [
   'pause_catalog',
   'routing_rules',
   'audio_folders',
+  'audio_assets',
 ];
 const validRevision = (value, resource) =>
   ['ivr_drafts', 'acw_forms'].includes(resource)
     ? Number.isInteger(value) && value > 0 && value <= 2147483647
     : typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
-export const useConfigurationRevision = ({ accountId, resource, draft }) => {
+export const useConfigurationRevision = ({
+  accountId,
+  resource,
+  draft,
+  onDenied,
+}) => {
   const state = reactive({
     account: '',
     resource: '',
@@ -111,8 +117,12 @@ export const useConfigurationRevision = ({ accountId, resource, draft }) => {
         throw new Error('Invalid revision response');
       state.expected = latest.revision;
       state.latest = latest;
-    } catch {
-      if (version === generation) state.error = true;
+    } catch (failure) {
+      if (version === generation) {
+        if ([401, 403, 404].includes(failure?.response?.status) && onDenied)
+          onDenied();
+        else state.error = true;
+      }
     } finally {
       if (version === generation) state.reloading = false;
     }

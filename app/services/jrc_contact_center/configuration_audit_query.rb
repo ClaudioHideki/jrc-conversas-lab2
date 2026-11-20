@@ -6,7 +6,8 @@ class JrcContactCenter::ConfigurationAuditQuery
     'membership' => 'JrcContactCenter::QueueMembership', 'role' => 'CustomRole', 'access' => 'JrcContactCenter::AccessGrant',
     'ivr_revision' => 'JrcContactCenter::IvrDraftVersion', 'acw_policy' => 'Account', 'pause_catalog' => 'Account',
     'routing_rule' => 'JrcContactCenter::RoutingRule', 'acw_form_revision' => 'JrcContactCenter::AcwFormVersion',
-    'team_source' => 'JrcContactCenter::TeamState', 'audio_folder' => 'JrcContactCenter::AudioFolder'
+    'team_source' => 'JrcContactCenter::TeamState', 'audio_folder' => 'JrcContactCenter::AudioFolder',
+    'audio_asset' => 'JrcContactCenter::AudioAsset', 'audio_version' => 'JrcContactCenter::AudioVersion'
   }.freeze
 
   def self.resource_key(record)

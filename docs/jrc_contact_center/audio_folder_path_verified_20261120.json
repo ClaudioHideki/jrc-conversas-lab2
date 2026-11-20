@@ -1,0 +1,155 @@
+{
+  "status": "implemented_and_natively_validated_folder_path_subset",
+  "branch": "codex/call-center-control-desk-20261116",
+  "sha": "7dfccc8f5b2e2c0cdfd1a55972715635586f8838",
+  "run": 44738873504,
+  "job": 136297114147,
+  "artifact": 14632969101,
+  "artifact_sha256": "9a322d5bc205f8abe913eca93a56a06bc21cc4061045023af2628b2d090e59c3",
+  "native_distinct_examples": 1890,
+  "schema_reload_examples_separate": 101,
+  "vue": 918,
+  "chrome": 220,
+  "projects": {
+    "desktop-light": 55,
+    "desktop-dark": 55,
+    "mobile-light": 55,
+    "mobile-dark": 55
+  },
+  "failures": 0,
+  "pending": 0,
+  "outside_errors": 0,
+  "chrome_skipped": 0,
+  "chrome_flaky": 0,
+  "screenshot_hashes_verified": 340,
+  "actual_images_reviewed": [
+    {
+      "name": "desktop-dark-audio-folder-denied-after-open.png",
+      "sha256": "6681810577782c6cd47ca0bd7b7e4dc41cdb197b275612b3da2607d33fdd2dab",
+      "visually_reviewed": true
+    },
+    {
+      "name": "desktop-dark-audio-folder-native-library.png",
+      "sha256": "368cb3168e415451175c545856e42d84e388978a3c7fbd09e78d09711873f40e",
+      "visually_reviewed": true
+    },
+    {
+      "name": "desktop-light-audio-folder-denied-after-open.png",
+      "sha256": "c5483ced53f96cb3ec92460fb70f6934e7c1d7834ed468f466c945c04042b760",
+      "visually_reviewed": true
+    },
+    {
+      "name": "desktop-light-audio-folder-native-library.png",
+      "sha256": "0fb2f88627a6a610fd5f6e0321ee13684573018cb3b1aa5b7bc794e863a924c1",
+      "visually_reviewed": true
+    },
+    {
+      "name": "mobile-dark-audio-folder-denied-after-open.png",
+      "sha256": "2d0f2a6b8d9f55a7860a3ce609307a12ad5cef66180e6fa827326336f83dc360",
+      "visually_reviewed": true
+    },
+    {
+      "name": "mobile-dark-audio-folder-native-library.png",
+      "sha256": "a147144cd01c2cd51f3b044669beba9b15e372f656bc7cf334f3364d1cab0f65",
+      "visually_reviewed": true
+    },
+    {
+      "name": "mobile-light-audio-folder-denied-after-open.png",
+      "sha256": "a2b19e8e33261647b51ed4925bd80a4acf3e7f12513550ab1447e0f24ce29fe2",
+      "visually_reviewed": true
+    },
+    {
+      "name": "mobile-light-audio-folder-native-library.png",
+      "sha256": "491130820b68660be7d320ac7fc1eec730a853005b72b6c68a40a33271cf477e",
+      "visually_reviewed": true
+    }
+  ],
+  "native_folder_json": [
+    {
+      "name": "desktop-dark-audio-folder-native-evidence.json",
+      "sha256": "2a01468b18875bb32fbf09baeba3138423ff3a777041a525a59c204e14d9025a",
+      "native": {
+        "synthetic": true,
+        "sha": "7dfccc8f5b2e2c0cdfd1a55972715635586f8838",
+        "unit": "803",
+        "folder": "79",
+        "nested": "149",
+        "color": "rgb(237, 238, 240)",
+        "brightness": 715,
+        "stale": 409,
+        "denied": 404,
+        "denied_after_open": 401,
+        "long_folder_name_length": 120,
+        "authorized_path_depth": 2
+      }
+    },
+    {
+      "name": "desktop-light-audio-folder-native-evidence.json",
+      "sha256": "a3314d37ce2a65f564c4ebde9947afe68fd486d7e377767d11aa399ee5cd478b",
+      "native": {
+        "synthetic": true,
+        "sha": "7dfccc8f5b2e2c0cdfd1a55972715635586f8838",
+        "unit": "761",
+        "folder": "56",
+        "nested": "148",
+        "color": "rgb(28, 32, 36)",
+        "brightness": 96,
+        "stale": 409,
+        "denied": 404,
+        "denied_after_open": 401,
+        "long_folder_name_length": 120,
+        "authorized_path_depth": 2
+      }
+    },
+    {
+      "name": "mobile-dark-audio-folder-native-evidence.json",
+      "sha256": "1405ef0e81a71aaf541aaf05a1cd5e9cdcfdaffc527bbf98367ae11d04d83702",
+      "native": {
+        "synthetic": true,
+        "sha": "7dfccc8f5b2e2c0cdfd1a55972715635586f8838",
+        "unit": "887",
+        "folder": "125",
+        "nested": "151",
+        "color": "rgb(237, 238, 240)",
+        "brightness": 715,
+        "stale": 409,
+        "denied": 404,
+        "denied_after_open": 401,
+        "long_folder_name_length": 120,
+        "authorized_path_depth": 2
+      }
+    },
+    {
+      "name": "mobile-light-audio-folder-native-evidence.json",
+      "sha256": "e856ff730ea3a57fae7e3e2d0a164a41bb950dcb60a7a83d086b468e3e78a023",
+      "native": {
+        "synthetic": true,
+        "sha": "7dfccc8f5b2e2c0cdfd1a55972715635586f8838",
+        "unit": "845",
+        "folder": "102",
+        "nested": "150",
+        "color": "rgb(28, 32, 36)",
+        "brightness": 96,
+        "stale": 409,
+        "denied": 404,
+        "denied_after_open": 401,
+        "long_folder_name_length": 120,
+        "authorized_path_depth": 2
+      }
+    }
+  ],
+  "verified_behavior": [
+    "authorized complete ancestor path from one recursive native SQL query",
+    "cycles and hidden ancestors rejected without leaking partial path",
+    "120-character unbroken current name contained at390px",
+    "current ancestor disabled and persistent native navigation after reload",
+    "real401 after modal opening clears private draft/path/list and does not create a row",
+    "fresh account/unit scopes and native CAS retained"
+  ],
+  "limits": [
+    "Private file reception/versioning is subsequent unvalidated work, absent from7dfccc8f",
+    "No audio playback, scanner, Nico, provider publication or full figure6/16 acceptance",
+    "No main,original checkout,5379,Docker,PABX or production changes"
+  ],
+  "full_23_figures_complete": false
+}

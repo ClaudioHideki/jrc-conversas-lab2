@@ -7,6 +7,8 @@ raise 'Owned database required' unless owned_database
 raise 'No external integration allowed' if ENV['SUPABASE_URL'].present? || ENV['SUPABASE_SERVICE_ROLE_KEY'].present?
 
 require_relative 'jrc_call_center_synthetic_password'
+require_relative 'jrc_call_center_audio_storage_guard'
+JrcContactCenter::SyntheticAudioStorageGuard.call
 
 account = Account.create!(name: 'SYNTHETIC Call Center QA', locale: 'pt_BR')
 account.enable_features!('jrc_contact_center', 'custom_roles', 'audit_logs')

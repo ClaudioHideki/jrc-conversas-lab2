@@ -940,7 +940,7 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
       await expect(limits).toHaveCount(1);
       await expect(limits).toBeVisible();
       await expect(limits).toHaveText(
-        'Organização local por unidade. Importação de arquivos, gravação, Nico e publicação de áudios ainda estão em implementação. Esta biblioteca não contém gravações de chamadas.'
+        'Biblioteca local por unidade, separada das gravações de chamadas. Arquivos recebidos permanecem privados e sem reprodução até a verificação de segurança. Gravação, Nico e publicação no PABX ainda estão em implementação.'
       );
       await expect(library.locator('[data-new-audio-folder]')).toHaveCount(1);
       await expect(page.locator('[data-create], [data-publish]')).toHaveCount(
@@ -7318,4 +7318,306 @@ test('inactive membership native denies enrollment despite a retained grant and 
   expect(errors).toEqual([]);
   expect(external).toEqual([]);
   expect(commands).toEqual([]);
+});
+
+test('institutional audio folders native private receipt, revisions and permissions persist without publishing bytes', async ({
+  page,
+}, info) => {
+  test.setTimeout(180000);
+  const target = session.pause_targets[info.project.name].audio_folders;
+  const own = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const url = `/app/accounts/${target.account_id}/contact-center/control-desk/audio`;
+  const prefix = `/api/v1/accounts/${target.account_id}/jrc_contact_center/audio_assets`;
+  const folderLibrary = page.locator('[data-audio-folder-library]');
+  const library = page.locator('[data-audio-asset-library]');
+  const dialog = page.getByRole('dialog');
+  const name = `SYNTHETIC receipt ${info.project.name}`;
+  const header = Buffer.alloc(44);
+  header.write('RIFF', 0);
+  header.writeUInt32LE(52, 4);
+  header.write('WAVEfmt ', 8);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(1, 22);
+  header.writeUInt32LE(8000, 24);
+  header.writeUInt32LE(16000, 28);
+  header.writeUInt16LE(2, 32);
+  header.writeUInt16LE(16, 34);
+  header.write('data', 36);
+  header.writeUInt32LE(16, 40);
+  const bytes = Buffer.concat([header, Buffer.alloc(16)]);
+  const sha256 = createHash('sha256').update(bytes).digest('hex');
+  const forbiddenWrites: string[] = [];
+  page.on('request', request => {
+    if (
+      /\/(commands|sync_calls|telephony_integration|call_recordings)(?:[/?]|$)/.test(
+        request.url()
+      ) &&
+      !['GET', 'HEAD'].includes(request.method())
+    )
+      forbiddenWrites.push(new URL(request.url()).pathname);
+  });
+  await page.goto(`${url}?audio_unit=${target.unit_id}`);
+  await expect(library).toBeVisible();
+  await library.locator('[data-new-audio-asset]').click();
+  await expectContainedDialog(page);
+  await dialog.locator('[data-audio-asset-name]').fill(name);
+  await dialog
+    .locator('[data-audio-asset-folder-search]')
+    .fill(target.audio_destination_name);
+  await expect(
+    dialog.locator(
+      `[data-audio-asset-folder] option[value="${target.audio_destination_id}"]`
+    )
+  ).toHaveCount(1);
+  await dialog
+    .locator('[data-audio-asset-folder]')
+    .selectOption(target.audio_destination_id);
+  await dialog.locator('[data-audio-asset-file]').setInputFiles({
+    name: 'SYNTHETIC.wav',
+    mimeType: 'audio/wav',
+    buffer: Buffer.from('%PDF-1.7 SYNTHETIC invalid audio'),
+  });
+  await dialog.locator('[data-review-audio-asset]').check();
+  let received = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === prefix &&
+      response.request().method() === 'POST'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  const rejected = await received;
+  expect(rejected.status()).toBe(422);
+  expect((await rejected.json()).error).toBe(
+    'unsupported_institutional_audio_file'
+  );
+  await expect(dialog.locator('[data-audio-asset-name]')).toHaveValue(name);
+  await expect(dialog.locator('[data-audio-asset-file]')).toBeEnabled();
+  await dialog.locator('[data-audio-asset-file]').setInputFiles({
+    name: 'SYNTHETIC.wav',
+    mimeType: 'audio/wav',
+    buffer: bytes,
+  });
+  await dialog.locator('[data-review-audio-asset]').check();
+  received = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === prefix &&
+      response.request().method() === 'POST'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  const accepted = await received;
+  expect(accepted.status()).toBe(201);
+  const original = (await accepted.json()).item;
+  expect(original.latest_version).toMatchObject({
+    number: 1,
+    sha256,
+    byte_size: bytes.length,
+    ready: false,
+    security_state: 'not_verified',
+  });
+  expect(original.unit_id).toBe(String(target.unit_id));
+  expect(original.folder_id).toBe(target.audio_destination_id);
+  expect(JSON.stringify(original)).not.toMatch(
+    /blob_id|signed_id|service_url|idempotency_key|input_digest/
+  );
+  await expect(dialog).not.toBeVisible();
+  for (let index = 0; index < 5; index += 1) {
+    const extra = await page.request.post(`${own}/audio_assets`, {
+      headers: target.administrator,
+      multipart: {
+        unit_id: String(target.unit_id),
+        'asset[name]': `SYNTHETIC extra ${index}`,
+        'asset[folder_id]': target.audio_destination_id,
+        idempotency_key: randomUUID(),
+        file: {
+          name: 'SYNTHETIC-extra.wav',
+          mimeType: 'audio/wav',
+          buffer: bytes,
+        },
+      },
+    });
+    expect(extra.status()).toBe(201);
+  }
+  await page.goto(
+    `${url}?audio_unit=${target.unit_id}&audio_parent=${target.audio_destination_id}`
+  );
+  await expect(library.locator('[data-audio-asset]')).toHaveCount(6);
+  await library.locator('[data-audio-file-size]').selectOption('5');
+  await expect(library.locator('[data-audio-asset]')).toHaveCount(5);
+  await expect(library.locator('[data-audio-file-total]')).toContainText('6');
+  await library.getByRole('button', { name: 'Próxima', exact: true }).click();
+  await expect(library.locator('[data-audio-asset]')).toHaveCount(1);
+  await expect(
+    library.locator(`[data-audio-asset="${original.id}"]`)
+  ).toContainText(name);
+  await page.reload();
+  await expect(
+    library.locator(`[data-audio-asset="${original.id}"]`)
+  ).toBeVisible();
+  await library.locator(`[data-edit-audio-asset="${original.id}"]`).click();
+  await expectContainedDialog(page);
+  const renamed = 'SYNTHETIC_' + 'Y'.repeat(110);
+  await dialog.locator('[data-audio-asset-name]').fill(renamed);
+  await dialog.locator('[data-audio-asset-folder]').selectOption('');
+  await dialog.locator('[data-review-audio-asset]').check();
+  const edited = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === `${prefix}/${original.id}` &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await edited).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  const stale = await page.request.patch(`${own}/audio_assets/${original.id}`, {
+    headers: target.administrator,
+    data: {
+      asset: { name: 'SYNTHETIC stale' },
+      expected_revision: original.revision,
+    },
+  });
+  expect(stale.status()).toBe(409);
+  await folderLibrary
+    .getByRole('button', { name: 'Pasta raiz', exact: true })
+    .click();
+  await expect(page).toHaveURL(/audio_file_page=1/);
+  await expect(
+    library.locator(`[data-audio-asset="${original.id}"]`)
+  ).toContainText(renamed);
+  await library
+    .locator('[data-audio-file-search]')
+    .fill('SYNTHETIC impossible match');
+  await library
+    .getByRole('button', { name: 'Filtrar áudios', exact: true })
+    .click();
+  await expect(library.locator('[data-audio-asset]')).toHaveCount(0);
+  await library
+    .getByRole('button', { name: 'Limpar busca de áudios', exact: true })
+    .click();
+  await expect(
+    library.locator(`[data-audio-asset="${original.id}"]`)
+  ).toBeVisible();
+  await library.locator(`[data-replace-audio-asset="${original.id}"]`).click();
+  await expectContainedDialog(page);
+  const nextBytes = Buffer.concat([header, Buffer.alloc(16, 1)]);
+  const nextSha = createHash('sha256').update(nextBytes).digest('hex');
+  await dialog.locator('[data-audio-asset-file]').setInputFiles({
+    name: 'SYNTHETIC-v2.wav',
+    mimeType: 'audio/wav',
+    buffer: nextBytes,
+  });
+  await dialog.locator('[data-review-audio-asset]').check();
+  const replaced = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname ===
+        `${prefix}/${original.id}/versions` &&
+      response.request().method() === 'POST'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  const replacement = await replaced;
+  expect(replacement.status()).toBe(201);
+  expect((await replacement.json()).received_version).toMatchObject({
+    number: 2,
+    sha256: nextSha,
+    ready: false,
+  });
+  await expect(dialog).not.toBeVisible();
+  await library.locator(`[data-audio-asset-history="${original.id}"]`).click();
+  await expectContainedDialog(page);
+  await expect(dialog.locator('[data-audio-version]')).toHaveCount(2);
+  await expect(dialog.locator('[data-audio-version="1"]')).toContainText(
+    sha256
+  );
+  await expect(dialog.locator('[data-audio-version="2"]')).toContainText(
+    nextSha
+  );
+  await expect(dialog.locator('audio, video, a[download]')).toHaveCount(0);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-private-version-history.png`,
+    fullPage: true,
+  });
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+  const deniedList = await page.request.get(
+    `${own}/audio_assets?unit_id=${target.denied_unit_id}`,
+    { headers: target.scoped }
+  );
+  expect(deniedList.status()).toBe(404);
+  const operator = await page.request.get(
+    `${own}/audio_assets/${original.id}`,
+    { headers: target.operator }
+  );
+  expect(operator.status()).toBe(401);
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > window.innerWidth
+  );
+  expect(overflow).toBe(false);
+  const color = await library
+    .getByRole('heading')
+    .evaluate(element => getComputedStyle(element).color);
+  const channels = (color.match(/\d+(?:\.\d+)?/g) || [])
+    .slice(0, 3)
+    .map(Number);
+  expect(channels).toHaveLength(3);
+  const brightness = channels.reduce((sum, channel) => sum + channel, 0) / 3;
+  if (info.project.name.endsWith('dark'))
+    expect(brightness).toBeGreaterThan(200);
+  else expect(brightness).toBeLessThan(180);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-private-library.png`,
+    fullPage: true,
+  });
+  await library.locator(`[data-edit-audio-asset="${original.id}"]`).click();
+  await expectContainedDialog(page);
+  await dialog
+    .locator('[data-audio-asset-name]')
+    .fill('SYNTHETIC unauthorized rewrite');
+  await dialog.locator('[data-review-audio-asset]').check();
+  await page.evaluate(auth => {
+    Object.assign(Reflect.get(window, 'axios').defaults.headers.common, auth);
+  }, target.operator);
+  const withdrawn = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === `${prefix}/${original.id}` &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await withdrawn).status()).toBe(401);
+  await expect(dialog).not.toBeVisible();
+  await expect(
+    folderLibrary.locator(
+      '[data-audio-asset], [data-audio-folder-path], [data-audio-folder]'
+    )
+  ).toHaveCount(0);
+  const persisted = await page.request.get(
+    `${own}/audio_assets/${original.id}`,
+    { headers: target.administrator }
+  );
+  expect(persisted.status()).toBe(200);
+  expect((await persisted.json()).item).toMatchObject({
+    name: renamed,
+    latest_version: { number: 2, sha256: nextSha },
+  });
+  expect(forbiddenWrites).toEqual([]);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-private-receipt.json`,
+    JSON.stringify({
+      synthetic: true,
+      sha: process.env.GITHUB_SHA,
+      unit: String(target.unit_id),
+      asset: original.id,
+      rejected_format: rejected.status(),
+      accepted: accepted.status(),
+      stale: stale.status(),
+      denied_unit: deniedList.status(),
+      denied_role: operator.status(),
+      denied_after_open: 401,
+      versions: 2,
+      first_sha256: sha256,
+      latest_sha256: nextSha,
+      private_ready: false,
+      total_before_move: 6,
+      native_page_size: 5,
+      horizontal_overflow: overflow,
+      color,
+      brightness,
+    })
+  );
 });

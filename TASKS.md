@@ -697,5 +697,11 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 ### 20/11 — Aceite da fundação de pastas por unidade
 
 - [x] fa43cbf7/CI44729757403:1883Rails distintos,101recargas,911Vue e220Chrome(55por projeto) aprovados;336capturas com hashes verificados e8amostras efetivamente abertas(1440/390,claro/escuro). Artefato14630025679/SHA-2562688543b2412ae6dbaa7c1203a2c1a7b50b24d5d165206538bb56e1770e18eb2. Cadastro/revisão/movimentação de pastas, filtros/paginação e isolamento nativos validados. Nenhum arquivo de áudio/versão/player foi aceito como concluído.
-- [ ] Próximo incremento preparado: caminho completo de ancestrais, nome de120caracteres em390px e limpeza/invalidação de respostas após acesso negado. Seis testes de serviço,umAPI,seteVue preparados; preservar220Chrome. Exigir execução no novoSHA, sem atribuir os resultados de fa43cbf7 ao código posterior.
+- [x] Caminho completo de ancestrais, nome de120caracteres em390px e limpeza após401 validados em7dfccc8f/CI44738873504:1890Rails distintos,101recargas,918Vue e220Chrome;340hashes de capturas e8imagens realmente revisadas. Artefato14632969101/SHA-2569a322d5bc205f8abe913eca93a56a06bc21cc4061045023af2628b2d090e59c3. Recebimento de arquivos/versões permanece incremento posterior, sem aceite nativo ainda.
 - [ ] Arquivos/versões permanecem preparação separada e incompleta, fora deste checkpoint de navegação; sem nova migration, API ou dependência publicada para esses arquivos.
+
+### 20/11 — Recebimento privado e versões de áudios (candidata ainda não homologada)
+
+- [ ] APIs/UI de recebimento privado, edição/movimentação e histórico preparados; CAS/idempotência e guards de bytes/attachments. Migration20261120120000 aditiva, sem alterar as oito anteriores; schema/SQL fixados por hashes e upgrade/reload/tamper cases preparados. Exigir nova CI nativa no próprio SHA.
+- [ ] Quatro Chrome novos, mantendo os220 anteriores: arquivo inválido/válido,6registros reais/página5, persistência/versões, acesso negado e temas390/1440. Stubs Vue e48checks leves do gate não substituem esta prova.
+- [ ] Codec/scanner/metadados/player, gravação, Nico, vínculos e layout completo ainda pendentes. Todos os novos recibos são privados e não verificados; não aceitar as figuras6/16 nem todas23 como concluídas.
