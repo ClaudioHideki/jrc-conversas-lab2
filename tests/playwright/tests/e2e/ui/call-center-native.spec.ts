@@ -658,6 +658,89 @@ test('native access team grants remain separate from eligibility and queue parti
       '-access-inherited-origin.png',
     fullPage: true,
   });
+  // Real module-local source changes, never shared team membership or individual eligibility changes.
+  await page.goto(
+    base +
+      '/permissions?permission_scope=teams&access_teams_q=' +
+      encodeURIComponent(targets.team.name)
+  );
+  await section
+    .locator('[data-edit-authority="' + targets.team.id + '"]')
+    .click();
+  await expectContainedDialog(page);
+  await dialog.locator('[data-team-source-active]').uncheck();
+  await dialog.locator('[data-review-authority]').check();
+  const suspended = page.waitForResponse(
+    r =>
+      r.url().endsWith('/access_authorizations/teams/' + targets.team.id) &&
+      r.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Salvar permissões', exact: true })
+    .click();
+  expect((await suspended).status()).toBe(200);
+  await page.reload();
+  await expect(section).toContainText('Equipe inativa no Call Center');
+  const inactiveResponse = await page.request.get(
+    api + '/access_authorizations/users/' + targets.peer.id,
+    { headers: session.administrator }
+  );
+  expect(inactiveResponse.status()).toBe(200);
+  const inactive = (await inactiveResponse.json()).item;
+  expect(inactive.eligible).toBe(true);
+  expect(inactive.inherited).not.toContain('jrc_contact_center_monitor');
+  expect(inactive.origins.teams).toContainEqual(
+    expect.objectContaining({
+      id: targets.team.id,
+      active: false,
+      configured_permissions: ['jrc_contact_center_monitor'],
+    })
+  );
+  const roster = await page.request.get(
+    `http://127.0.0.1:5387/api/v1/accounts/${session.account_id}/teams/${targets.team.id}/team_members`,
+    { headers: session.administrator }
+  );
+  expect(roster.status()).toBe(200);
+  expect(
+    (await roster.json()).map((person: { id: number }) => person.id)
+  ).toContain(state.user_id);
+  expect(
+    await page.locator('html').evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-team-source-inactive.png`,
+    fullPage: true,
+  });
+  await section
+    .locator('[data-edit-authority="' + targets.team.id + '"]')
+    .click();
+  await expect(dialog.locator('[data-team-source-active]')).not.toBeChecked();
+  await expect(
+    dialog.locator('[data-allow="jrc_contact_center_monitor"]')
+  ).toBeChecked();
+  await dialog.locator('[data-team-source-active]').check();
+  await dialog.locator('[data-review-authority]').check();
+  const restored = page.waitForResponse(
+    r =>
+      r.url().endsWith('/access_authorizations/teams/' + targets.team.id) &&
+      r.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Salvar permissões', exact: true })
+    .click();
+  expect((await restored).status()).toBe(200);
+  const activeAgain = await page.request.get(
+    api + '/access_authorizations/users/' + targets.peer.id,
+    { headers: session.administrator }
+  );
+  expect((await activeAgain.json()).item.effective).toContain(
+    'jrc_contact_center_monitor'
+  );
 });
 
 test('native access conflict preserves draft and requires explicit comparison before overwrite', async ({
@@ -6597,8 +6680,28 @@ test('registered ending native preserves the call catalogue while managers revis
       max: element.max,
     })
   );
+  // Inspect pixels of the actual browser paint: accent-color can be red while the bar remains green.
+  const progressPng = await deadlineProgress.screenshot();
+  const paintedChannels = await operatorPage.evaluate(async encoded => {
+    const image = new Image();
+    image.src = `data:image/png;base64,${encoded}`;
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d')!;
+    context.drawImage(image, 0, 0);
+    return Array.from(
+      context.getImageData(1, Math.floor(image.height / 2), 1, 1).data
+    ).slice(0, 3);
+  }, progressPng.toString('base64'));
+  Object.assign(deadlinePaint, { paintedChannels });
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-acw-deadline-bar.png`,
+    progressPng
+  );
   expect(deadlinePaint.accent).toMatch(/^rgb\(/);
-  const deadlineChannels = deadlinePaint.accent.match(/[\d.]+/g)!.map(Number);
+  const deadlineChannels = paintedChannels;
   expect(deadlineChannels).toHaveLength(3);
   if (deadlinePaint.value >= deadlinePaint.max) {
     expect(deadlineChannels[0]).toBeGreaterThan(deadlineChannels[1]);

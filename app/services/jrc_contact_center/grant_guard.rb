@@ -4,7 +4,7 @@ class JrcContactCenter::GrantGuard
     return if added.empty? || actor.is_a?(SuperAdmin)
 
     member = account.account_users.find_by!(user_id: actor.id)
-    coverage = JrcCrm::CorporateCoverage.new(account: account, user: actor)
+    coverage = JrcContactCenter::CorporateCoverage.new(account: account, user: actor)
     raise Pundit::NotAuthorizedError if coverage.configured? && !coverage.group?
 
     policy = JrcContactCenter::ModulePolicy.new({ account: account, account_user: member, user: actor }, :contact_center)

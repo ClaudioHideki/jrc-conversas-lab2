@@ -17,13 +17,18 @@ class JrcContactCenter::ConfigurationAudit
 
     Audited.audit_class.create!(
       auditable: record, associated: record.account, user: Current.user, action: action,
-      comment: record.is_a?(JrcContactCenter::AccessGrant) ? AUTHORITY_COMMENT : COMMENT, audited_changes: {
+      comment: authority_record?(record) ? AUTHORITY_COMMENT : COMMENT, audited_changes: {
         'attributes' => [before&.fetch('attributes'), after&.fetch('attributes')],
         'cc_scope' => { 'before' => before&.fetch('scope'), 'after' => after&.fetch('scope') },
         'omitted_fields' => omitted, 'schema_version' => 1
       }.merge(manager_review(record))
     )
   end
+
+  def self.authority_record?(record)
+    record.is_a?(JrcContactCenter::AccessGrant) || record.is_a?(JrcContactCenter::TeamState)
+  end
+  private_class_method :authority_record?
 
   def self.manager_review(record)
     return {} unless record.is_a?(JrcContactCenter::QueueMembership) && record.cc_withdrawal_review

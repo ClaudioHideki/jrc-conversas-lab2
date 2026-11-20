@@ -9,7 +9,7 @@ class JrcContactCenter::IvrDraftAccess
     @access = JrcContactCenter::AccessScope.new(user_context: @context)
     raise Pundit::NotAuthorizedError unless access.policy.configure?
 
-    @coverage = JrcCrm::CorporateCoverage.new(account: @context.fetch(:account), user: @context.fetch(:user))
+    @coverage = JrcContactCenter::CorporateCoverage.new(account: @context.fetch(:account), user: @context.fetch(:user))
   end
 
   def relation

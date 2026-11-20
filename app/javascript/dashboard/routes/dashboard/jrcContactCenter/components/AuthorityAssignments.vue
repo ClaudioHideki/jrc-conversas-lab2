@@ -4,6 +4,12 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import API from 'dashboard/api/jrcContactCenter';
+import { useMapGetter } from 'dashboard/composables/store';
+import TeamRosterWithdrawalConfirmation from './TeamRosterWithdrawalConfirmation.vue';
+import {
+  teamRosterReviewAuthority,
+  useTeamRosterWithdrawalReview,
+} from '../composables/useTeamRosterWithdrawalReview';
 import { CONTACT_CENTER_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/contactCenterPermissions';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
@@ -18,6 +24,7 @@ const props = defineProps({
 });
 const emit = defineEmits(['changed']);
 const { t } = useI18n();
+const currentUser = useMapGetter('getCurrentUser');
 const route = useRoute();
 const router = useRouter();
 const label = key => t(`JRC_CONTACT_CENTER.ACCESS.${key}`);
@@ -46,6 +53,16 @@ const saveError = ref(false);
 const draft = ref({ eligible: false, allowed: [], denied: [] });
 const reviewedDraft = ref('');
 const fingerprint = () => JSON.stringify(draft.value);
+const teamWithdrawal = useTeamRosterWithdrawalReview({
+  accountId: computed(() => props.accountId),
+  teamId: computed(() => (users.value ? null : selected.value?.id)),
+  agentsList: computed(() => []),
+  authority: computed(() => ({
+    ...teamRosterReviewAuthority(currentUser.value, props.accountId),
+    draft: fingerprint(),
+  })),
+  operation: 'deactivate_source',
+});
 const reviewed = computed(() => reviewedDraft.value === fingerprint());
 const revision = useConfigurationRevision({
   accountId: computed(() => props.accountId),
@@ -59,6 +76,7 @@ const canSave = computed(
     String(revision.state.id) === String(selected.value.id) &&
     revision.canSave.value &&
     reviewed.value &&
+    teamWithdrawal.canSave.value &&
     !saving.value
 );
 let generation = 0;
@@ -122,9 +140,10 @@ const open = async row => {
       allowed: [...source.allowed],
       ...(users.value
         ? { eligible: source.eligible, denied: [...source.denied] }
-        : {}),
+        : { active: source.active !== false }),
     };
     reviewedDraft.value = '';
+    teamWithdrawal.clear();
     revision.capture(source);
     dialog.value.open();
   } catch {
@@ -136,6 +155,7 @@ const open = async row => {
 const save = async () => {
   if (!canSave.value) return;
   const version = generation;
+  const requestKey = teamWithdrawal.fingerprint();
   saving.value = true;
   saveError.value = false;
   try {
@@ -144,7 +164,7 @@ const save = async () => {
       props.subjectType,
       selected.value.id,
       draft.value,
-      revision.options()
+      { ...revision.options(), ...teamWithdrawal.options() }
     );
     if (version !== generation) return;
     dialog.value.close();
@@ -154,7 +174,10 @@ const save = async () => {
     await load();
   } catch (failure) {
     if (version !== generation) return;
-    saveError.value = !revision.handleError(failure);
+    saveError.value = !(
+      teamWithdrawal.handleError(failure, requestKey) ||
+      revision.handleError(failure)
+    );
     reviewedDraft.value = '';
   } finally {
     if (version === generation || !selected.value) saving.value = false;
@@ -163,6 +186,10 @@ const save = async () => {
 watch(
   [
     () => props.accountId,
+    () =>
+      JSON.stringify(
+        teamRosterReviewAuthority(currentUser.value, props.accountId)
+      ),
     resource,
     page,
     () => query('q'),
@@ -175,6 +202,7 @@ watch(
     saving.value = false;
     q.value = query('q') || '';
     status.value = query('status') || '';
+    teamWithdrawal.clear();
     revision.capture(null);
     load();
   },
@@ -198,15 +226,21 @@ onBeforeUnmount(() => {
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
         />
       </label>
-      <label v-if="users" class="text-sm text-n-slate-12">
-        {{ label('ELIGIBILITY') }}
+      <label class="text-sm text-n-slate-12">
+        {{ label(users ? 'ELIGIBILITY' : 'TEAM_STATUS') }}
         <select
           v-model="status"
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
         >
           <option value="">{{ label('ALL') }}</option>
-          <option value="eligible">{{ label('ELIGIBLE') }}</option>
-          <option value="pending">{{ label('PENDING') }}</option>
+          <template v-if="users">
+            <option value="eligible">{{ label('ELIGIBLE') }}</option>
+            <option value="pending">{{ label('PENDING') }}</option>
+          </template>
+          <template v-else>
+            <option value="active">{{ label('TEAM_ACTIVE') }}</option>
+            <option value="inactive">{{ label('TEAM_INACTIVE') }}</option>
+          </template>
         </select>
       </label>
       <button
@@ -241,7 +275,7 @@ onBeforeUnmount(() => {
             {{
               users
                 ? label(row.eligible ? 'ELIGIBLE' : 'PENDING')
-                : label('TEAM_INHERITANCE')
+                : label(row.active === false ? 'TEAM_INACTIVE' : 'TEAM_ACTIVE')
             }}
           </p>
         </div>
@@ -330,6 +364,44 @@ onBeforeUnmount(() => {
           <input v-model="draft.eligible" type="checkbox" data-user-eligible />
           <span>{{ label('ACTIVATE') }}</span>
         </label>
+        <template v-if="!users">
+          <p class="text-sm text-n-slate-11">
+            {{ label('TEAM_LOCAL_STATUS') }}
+          </p>
+          <label
+            class="flex items-start gap-2 rounded-lg bg-n-amber-2 p-3 text-sm text-n-amber-11"
+          >
+            <input
+              v-model="draft.active"
+              type="checkbox"
+              data-team-source-active
+            />
+            <span>{{ label('TEAM_ACTIVE') }}</span>
+          </label>
+          <TeamRosterWithdrawalConfirmation
+            v-if="teamWithdrawal.state.review || teamWithdrawal.state.error"
+            :state="teamWithdrawal.state"
+            :busy="saving"
+            @confirm="teamWithdrawal.state.confirmed = $event"
+          />
+        </template>
+        <p
+          v-if="
+            users &&
+            selected.origins?.teams?.some(team => team.active === false)
+          "
+          class="text-sm text-n-amber-11"
+          data-inactive-team-origins
+        >
+          {{
+            t('JRC_CONTACT_CENTER.ACCESS.INACTIVE_ORIGINS', {
+              teams: selected.origins.teams
+                .filter(team => team.active === false)
+                .map(team => team.name)
+                .join(' · '),
+            })
+          }}
+        </p>
         <fieldset
           v-for="permission in CONTACT_CENTER_CUSTOM_ROLE_PERMISSIONS"
           :key="permission"

@@ -2,10 +2,11 @@
 
 # Configured local eligibility, not presence or a provider-confirmed distribution result.
 class JrcContactCenter::ConfiguredQueueEligibility
-  def initialize(account:, team_membership_projection: nil, at: nil)
+  def initialize(account:, team_membership_projection: nil, at: nil, team_activity_preview: {})
     @account = account
     @projection = team_membership_projection
     @at = at
+    @activity = team_activity_preview
   end
 
   def call(membership)
@@ -17,7 +18,7 @@ class JrcContactCenter::ConfiguredQueueEligibility
 
     queue = JrcContactCenter::Queue.includes(:unit).find_by!(account: @account, id: membership.queue_id)
     organization = JrcContactCenter::OrganizationalScope.new(
-      account: @account, account_user: member, team_membership_projection: @projection
+      account: @account, account_user: member, team_membership_projection: @projection, team_activity_preview: @activity
     )
     active_queue?(queue, at) && organization.units.exists?(queue.unit_id)
   end
@@ -33,10 +34,11 @@ class JrcContactCenter::ConfiguredQueueEligibility
   end
 
   def context(member)
-    values = { account: @account, account_user: member, user: member.user }
+    values = { account: @account, account_user: member, user: member.user, cc_team_activity_preview: @activity }
     return values unless @projection
 
-    if @projection.includes?(member.user_id)
+    active = JrcContactCenter::TeamState.source_active?(account: @account, team_id: @projection.team_id, preview: @activity)
+    if @projection.includes?(member.user_id) && active
       grant = JrcContactCenter::AccessGrant.find_by(account: @account, team_id: @projection.team_id)
       values[:cc_extra_team_permissions] = Array(grant&.allowed)
     else

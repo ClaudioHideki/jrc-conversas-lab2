@@ -1,5 +1,7 @@
 class JrcContactCenter::TeamAssignmentGuard
   def self.check!(account:, actor:, team:, user_ids:)
+    return unless JrcContactCenter::TeamState.source_active?(account: account, team_id: team.id)
+
     capabilities = JrcContactCenter::AccessGrant.find_by(account: account, team: team)&.allowed || []
     return if capabilities.empty?
 

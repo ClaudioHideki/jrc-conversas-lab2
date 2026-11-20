@@ -124,9 +124,16 @@ export default {
   saveAccessAuthorization: (accountId, type, id, authorization, options) => {
     if (!['users', 'teams'].includes(type))
       throw new Error('Invalid authority context');
+    const { managerConfirmation, ...revision } = options || {};
     return axios.patch(
-      `${base(accountId)}/access_authorizations/${type}/${Number(id)}`,
-      { ...options, authorization }
+      `${base(accountId)}/access_authorizations/${type}/${recordIdentity(id)}`,
+      {
+        ...revision,
+        authorization,
+        ...(managerConfirmation
+          ? { manager_confirmation: managerConfirmation }
+          : {}),
+      }
     );
   },
   administrativeList: (accountId, section, params = {}) =>

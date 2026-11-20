@@ -6,13 +6,14 @@ class JrcContactCenter::ConfigurationAuditSnapshot
     'JrcContactCenter::Queue' => %w[unit_id code name service_kind strategy status max_wait_seconds active_from active_until],
     'JrcContactCenter::QueueMembership' => %w[queue_id account_user_id role priority active starts_at ends_at],
     'JrcContactCenter::AccessGrant' => %w[account_user_id team_id eligible allowed denied],
+    'JrcContactCenter::TeamState' => %w[team_id active lock_version],
     'JrcContactCenter::RoutingRule' => %w[version rule_key kind source_value target_unit_id target_queue_id priority state starts_at ends_at]
   }.freeze
 
   def self.capture(record)
     return routing_snapshot(record) if record.is_a?(JrcContactCenter::RoutingRule)
 
-    if record.is_a?(JrcContactCenter::AccessGrant)
+    if record.is_a?(JrcContactCenter::AccessGrant) || record.is_a?(JrcContactCenter::TeamState)
       return { 'attributes' => attributes_for(record), 'scope' => { 'account_id' => record.account_id.to_s } }
     end
 

@@ -11,7 +11,7 @@ class JrcContactCenter::AcwFormAccess
     valid = @context.fetch(:user).active_for_authentication? && access.policy.configure?
     raise Pundit::NotAuthorizedError unless valid
 
-    coverage = JrcCrm::CorporateCoverage.new(account: @context.fetch(:account), user: @context.fetch(:user))
+    coverage = JrcContactCenter::CorporateCoverage.new(account: @context.fetch(:account), user: @context.fetch(:user))
     raise Pundit::NotAuthorizedError if coverage.configured? && !coverage.group?
   end
 

@@ -1,9 +1,11 @@
 # Intersects operational queues/units with the existing corporate coverage.
 # An unmapped operational unit is not a business-unit grant.
 class JrcContactCenter::OrganizationalScope
-  def initialize(account:, account_user:, team_membership_projection: nil)
+  def initialize(account:, account_user:, team_membership_projection: nil, team_activity_preview: {})
     @account = account
-    @coverage = JrcCrm::CorporateCoverage.new(account: account, user: account_user.user, team_membership_projection: team_membership_projection)
+    @coverage = JrcContactCenter::CorporateCoverage.new(
+      account: account, user: account_user.user, team_membership_projection: team_membership_projection, team_activity_preview: team_activity_preview
+    )
   end
 
   def restricted?

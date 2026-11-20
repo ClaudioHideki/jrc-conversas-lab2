@@ -5400,5 +5400,19 @@
       "Current queue-label/progress-color follow-up prepared after this SHA",
       "Real PABX,Supabase and other external homologations"
     ]
-  }
+  },
+  "incremental_reviews": [
+    {
+      "date": "2026-11-20",
+      "parent": "17d6536a",
+      "status": "prepared_pending_native_validation",
+      "figures": [
+        3,
+        12
+      ],
+      "approved": "Module-local team source inactivation, preserving shared membership/individual eligibility/other teams/modules; audio by unit approved, still pending implementation.",
+      "evidence": "docs/jrc_contact_center/team_source_activity_prepared_20261120.json",
+      "visual_residual": "17d6536a actual ACW bar remained green despite computed red. Explicit paint correction and screenshot pixel regression prepared."
+    }
+  ]
 }

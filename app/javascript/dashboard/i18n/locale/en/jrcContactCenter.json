@@ -1978,7 +1978,12 @@
       "TEAM_ALLOWED": "Concessão herdável da equipe",
       "ENROLLMENT_BLOCKED": "Este usuário não está elegível para novas atribuições no Call Center. Verifique a ativação do acesso e a situação do usuário. O vínculo não foi salvo e os dados foram preservados.",
       "ENROLLMENT_SCOPE": "O usuário não possui cobertura para a unidade desta fila. Revise os vínculos corporativos existentes. O vínculo não foi salvo e os dados foram preservados.",
-      "ENROLLMENT_UNAVAILABLE": "Indisponível para novas atribuições"
+      "ENROLLMENT_UNAVAILABLE": "Indisponível para novas atribuições",
+      "TEAM_STATUS": "Situação no Call Center",
+      "TEAM_ACTIVE": "Equipe ativa no Call Center",
+      "TEAM_INACTIVE": "Equipe inativa no Call Center",
+      "TEAM_LOCAL_STATUS": "A inativação suspende somente as permissões e a cobertura herdadas desta equipe no Call Center. Preserva os vínculos, a elegibilidade individual, outras equipes e os demais módulos.",
+      "INACTIVE_ORIGINS": "Origens de equipe suspensas no Call Center: {teams}"
     },
     "LOCAL_IVR": {
       "TITLE": "URAs locais",
@@ -2210,7 +2215,10 @@
       "DELETE_TITLE": "Excluir a equipe {team} deixará filas sem agentes elegíveis configurados.",
       "DELETE_CONFIRM": "Revisei a perda de elegibilidade nas filas e confirmo a exclusão da equipe. Os demais efeitos da exclusão continuam sujeitos às regras nativas.",
       "DELETE_APPLY": "Confirmar exclusão da equipe",
-      "DELETE_IN_USE": "A exclusão foi bloqueada pelas regras ou vínculos existentes. Revise a equipe nos módulos de origem. Nenhum vínculo foi removido automaticamente."
+      "DELETE_IN_USE": "A exclusão foi bloqueada pelas regras ou vínculos existentes. Revise a equipe nos módulos de origem. Nenhum vínculo foi removido automaticamente.",
+      "DEACTIVATE_TITLE": "Revisar inativação da equipe {team} no Call Center",
+      "DEACTIVATE_CONFIRM": "Revisei as filas sem agentes elegíveis e confirmo a inativação desta origem no Call Center.",
+      "DEACTIVATE_APPLY": "Confirmar inativação no Call Center"
     },
     "ACW_FORMS": {
       "INVALID_DEFINITION": "O formulário desta versão está inválido. Preserve o rascunho e solicite revisão da configuração.",

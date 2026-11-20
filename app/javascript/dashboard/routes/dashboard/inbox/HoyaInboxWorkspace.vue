@@ -1530,8 +1530,12 @@ onBeforeUnmount(() => {
                   })
                 }}</span>
                 <progress
-                  class="h-2 w-full"
-                  :class="acwOverdue ? 'accent-n-ruby-9' : 'accent-n-blue-9'"
+                  class="h-2 w-full appearance-none [&::-webkit-progress-bar]:bg-n-slate-5"
+                  :class="
+                    acwOverdue
+                      ? 'accent-n-ruby-9 [&::-webkit-progress-value]:bg-n-ruby-9 [&::-moz-progress-bar]:bg-n-ruby-9'
+                      : 'accent-n-blue-9 [&::-webkit-progress-value]:bg-n-blue-9 [&::-moz-progress-bar]:bg-n-blue-9'
+                  "
                   data-acw-deadline-progress
                   :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.ACW')"
                   :value="Math.min(acwElapsedSeconds, acwLimitSeconds)"

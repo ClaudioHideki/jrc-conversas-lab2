@@ -111,7 +111,7 @@ const fields = computed(
         'supervises',
       ],
       access_users: ['eligible', 'allowed', 'denied'],
-      access_teams: ['allowed'],
+      access_teams: ['allowed', 'active'],
       ivr_drafts: ['name', 'revision', 'definition'],
       acw_forms: ['name', 'description', 'status', 'revision', 'definition'],
       acw_policy: [

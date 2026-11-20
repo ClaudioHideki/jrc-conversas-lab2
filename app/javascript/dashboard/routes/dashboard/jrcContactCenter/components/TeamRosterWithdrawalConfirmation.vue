@@ -11,6 +11,13 @@ const emit = defineEmits(['confirm', 'submit', 'cancel']);
 const { t } = useI18n();
 const text = computed(() => {
   const values = { team: props.state.review?.team_name };
+  if (props.state.review?.operation === 'deactivate_source') {
+    return {
+      title: t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.DEACTIVATE_TITLE', values),
+      confirm: t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.DEACTIVATE_CONFIRM'),
+      apply: t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.DEACTIVATE_APPLY'),
+    };
+  }
   if (props.state.review?.operation === 'delete_team') {
     return {
       title: t('JRC_CONTACT_CENTER.TEAM_WITHDRAWAL.DELETE_TITLE', values),

@@ -81,12 +81,12 @@ class Api::V1::Accounts::JrcContactCenter::AcwPoliciesController < Api::V1::Acco
   end
 
   def scoped_configuration_allowed?
-    coverage = JrcCrm::CorporateCoverage.new(account: Current.account, user: Current.user)
+    coverage = JrcContactCenter::CorporateCoverage.new(account: Current.account, user: Current.user)
     contact_center_access.policy.configure? && (!coverage.configured? || coverage.group?)
   end
 
   def authorize_global_configuration!
-    coverage = JrcCrm::CorporateCoverage.new(account: Current.account, user: Current.user)
+    coverage = JrcContactCenter::CorporateCoverage.new(account: Current.account, user: Current.user)
     raise Pundit::NotAuthorizedError if coverage.configured? && !coverage.group?
   end
 end

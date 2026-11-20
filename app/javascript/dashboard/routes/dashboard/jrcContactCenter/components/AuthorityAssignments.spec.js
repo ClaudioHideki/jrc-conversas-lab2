@@ -5,6 +5,10 @@ import API from 'dashboard/api/jrcContactCenter';
 import AuthorityAssignments from './AuthorityAssignments.vue';
 
 const mocks = vi.hoisted(() => ({ route: null, replace: vi.fn() }));
+vi.mock('dashboard/composables/store', () => ({
+  useMapGetter: () =>
+    ref({ id: 7, accounts: [{ id: 1, role: 'administrator' }] }),
+}));
 vi.mock('vue-router', () => ({
   useRoute: () => mocks.route,
   useRouter: () => ({ replace: mocks.replace }),
@@ -182,7 +186,7 @@ describe('native subject authorizations', () => {
       '1',
       'teams',
       9,
-      { allowed: ['jrc_contact_center_monitor'] },
+      { allowed: ['jrc_contact_center_monitor'], active: true },
     ]);
   });
 
@@ -297,5 +301,101 @@ describe('native subject authorizations', () => {
     await wrapper.get('[data-edit-authority="9"]').trigger('click');
     await flushPromises();
     expect(wrapper.find('[data-authority-editor]').exists()).toBe(true);
+  });
+  it('sends only module-local inactive state while preserving all configured team capabilities', async () => {
+    API.configurationRecord.mockResolvedValue({
+      data: {
+        item: source({ active: true, allowed: ['jrc_contact_center_monitor'] }),
+      },
+    });
+    const wrapper = setup('teams');
+    await flushPromises();
+    await wrapper.get('[data-edit-authority="9"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-team-source-active]').setValue(false);
+    await wrapper.get('[data-review-authority]').setValue(true);
+    await wrapper.get('[data-submit]').trigger('submit');
+    await flushPromises();
+    expect(API.saveAccessAuthorization.mock.calls[0][3]).toEqual({
+      active: false,
+      allowed: ['jrc_contact_center_monitor'],
+    });
+    expect(wrapper.find('[data-user-eligible]').exists()).toBe(false);
+  });
+
+  it('requires the manager receipt before retrying a source withdrawal and clears it if the draft changes', async () => {
+    API.saveAccessAuthorization.mockRejectedValueOnce({
+      response: {
+        data: {
+          error: 'team_roster_confirmation_required',
+          review: {
+            account_id: '1',
+            team_id: '9',
+            team_name: 'SYNTHETIC team',
+            operation: 'deactivate_source',
+            queues: [
+              {
+                queue_id: '4',
+                unit_id: '5',
+                queue_name: 'SYNTHETIC last queue',
+                previous_count: 1,
+                remaining_count: 0,
+              },
+            ],
+            review_token: 'synthetic-signed-server-receipt',
+          },
+        },
+      },
+    });
+    const wrapper = setup('teams');
+    await flushPromises();
+    await wrapper.get('[data-edit-authority="9"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-team-source-active]').setValue(false);
+    await wrapper.get('[data-review-authority]').setValue(true);
+    await wrapper.get('[data-submit]').trigger('submit');
+    await flushPromises();
+    expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+    await wrapper.get('[data-team-manager-withdrawal-confirm]').setValue(true);
+    await wrapper.get('[data-review-authority]').setValue(true);
+    expect(wrapper.get('[data-submit]').element.disabled).toBe(false);
+    await wrapper.get('[data-team-source-active]').setValue(true);
+    expect(
+      wrapper.find('[data-team-manager-withdrawal-confirm]').exists()
+    ).toBe(false);
+    expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+    expect(API.saveAccessAuthorization).toHaveBeenCalledTimes(1);
+  });
+
+  it('names suspended origins without presenting them as effective inherited capabilities', async () => {
+    API.configurationRecord.mockResolvedValue({
+      data: {
+        item: source({
+          origins: {
+            teams: [
+              {
+                id: 3,
+                name: 'SYNTHETIC inactive team',
+                active: false,
+                configured_permissions: ['jrc_contact_center_monitor'],
+                permissions: [],
+              },
+            ],
+          },
+        }),
+      },
+    });
+    const wrapper = setup();
+    await flushPromises();
+    await wrapper.get('[data-edit-authority="9"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-inactive-team-origins]').text()).toContain(
+      'SYNTHETIC inactive team'
+    );
+    expect(
+      wrapper
+        .find('[data-inherited-origin="jrc_contact_center_monitor"]')
+        .exists()
+    ).toBe(false);
   });
 });

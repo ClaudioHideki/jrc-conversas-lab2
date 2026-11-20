@@ -59,7 +59,7 @@ class JrcContactCenter::Administration
   end
 
   def global_configuration?
-    coverage = JrcCrm::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
+    coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
     @policy.configure? && (!coverage.configured? || coverage.group?)
   end
 
@@ -75,12 +75,12 @@ class JrcContactCenter::Administration
   end
 
   def native_role_editor_available?
-    coverage = JrcCrm::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
+    coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
     native_roles_available? && (!coverage.configured? || coverage.group?)
   end
 
   def native_access_editor_available?
-    coverage = JrcCrm::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
+    coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
     @policy.administer? && @context.fetch(:account_user).administrator? && (!coverage.configured? || coverage.group?)
   end
 
@@ -109,7 +109,7 @@ class JrcContactCenter::Administration
   end
 
   def corporate_options
-    coverage = JrcCrm::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
+    coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: @context.fetch(:user))
     { companies: @account.master_companies.where(id: coverage.company_ids).order(:name).map { |row| { id: row.id, name: row.name } },
       units: @account.jrc_crm_business_units.where(id: coverage.unit_ids).order(:name).map do |row|
         { id: row.id, name: row.name, company_id: row.company_id }

@@ -43,7 +43,7 @@ class JrcContactCenter::CustomerContext
     raise Pundit::NotAuthorizedError unless @user_context && @user_context.fetch(:account).id == @account.id
 
     member = @account.account_users.find(@user_context.fetch(:account_user).id)
-    coverage = JrcCrm::CorporateCoverage.new(account: @account, user: member.user)
+    coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: member.user)
     relation = corporate_contacts(coverage)
     return relation if unrestricted_native_member?(member, coverage)
 

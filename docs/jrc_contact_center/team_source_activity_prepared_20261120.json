@@ -1,0 +1,49 @@
+{
+  "status": "implemented_pending_native_validation",
+  "parent_sha": "17d6536a7e30c609c9b865f45fbaf26afc32f156",
+  "business_decisions": {
+    "team": "Suspend only this native team Call Center source; keep shared roster, individual eligibility/grants/denials, other teams and other modules. Recheck every restored authority and corporate widening.",
+    "audio": "Institutional audio library by native operational unit and corporate coverage. Not implemented in this increment; no call recordings mixed."
+  },
+  "changes": [
+    "Module-local TeamState extension (absent row preserves legacy active)",
+    "Current/proposed CC-only permissions and corporate projection",
+    "Scoped audit, native revisions and atomic writes",
+    "Manager review if final configured eligible queue agent is lost",
+    "Existing authority popup/status filters; no new parallel team register"
+  ],
+  "migrations": {
+    "new": "20261120070000_create_contact_center_team_states.rb",
+    "sha256": "7466db5b4b1823d9d5a7296fd40bcfe405f0f3c78ff6ef902b94cb69228c0d1b",
+    "previous_six": "unchanged exact identities",
+    "local_or_production_execution": false,
+    "no_backfill": true,
+    "rollback_risk": "Do not run an old binary ignoring inactive TeamState: it could restore suspended sources. Migration down is blocked."
+  },
+  "prepared_tests": [
+    "Native authenticated APIs, restored latent rights and independent individual grants",
+    "Shared CRM coverage preserved; corporate widening checks",
+    "Manager receipts, empty queue prevention, atomic mandatory audits",
+    "Real Account-lock wait after actor/target source revocation",
+    "Fresh/upgrade/idempotent/schema reload/composite FK/account lifecycle",
+    "Vue draft confirmation and revision behavior",
+    "Existing Chrome flows extended in four projects, real API persistence/native roster"
+  ],
+  "light_checks": {
+    "migration_guard_cases": 38,
+    "passed": 38,
+    "local_test_runner": "Node in-process isolation; first sandbox child spawn EPERM was not counted as passed"
+  },
+  "deadline_paint": {
+    "prior_sha": "17d6536a",
+    "computed_accent": "red",
+    "actual_screenshot": "green, manual acceptance failed",
+    "new_fix": "Tailwind native progress pseudo-element colors; regression now reads real screenshot pixels; pending CI"
+  },
+  "not_claimed": [
+    "All 23 figures complete",
+    "PABX publishing/ACKs/commands",
+    "Supabase or provider homologation",
+    "Institutional audio implemented"
+  ]
+}

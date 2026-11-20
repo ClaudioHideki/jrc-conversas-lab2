@@ -16,6 +16,8 @@ export const qualificationFormMigrationPath = 'db/migrate/20261119203000_create_
 export const qualificationFormMigrationHash = '6c9c9d3fd89691f7168a493d53e7d0124b72f95908d93cc8d7d96a5fd19eed26';
 export const endingReasonMigrationPath = 'db/migrate/20261120023000_create_contact_center_ending_reason_versions.rb';
 export const endingReasonMigrationHash = 'e0376ccbd1cb244e447841a2a0b8d32e083eff359a19c25ddfe2304d9c363247';
+export const teamStateMigrationPath = 'db/migrate/20261120070000_create_contact_center_team_states.rb';
+export const teamStateMigrationHash = '7466db5b4b1823d9d5a7296fd40bcfe405f0f3c78ff6ef902b94cb69228c0d1b';
 export const endingReasonSqlPath = 'lib/jrc_contact_center/ending_reason_origin_sql.rb';
 export const endingReasonSqlHash = 'c0dca8b84c8c4b02d78ed07be4e23bb253f0d64994dccc232ba879941ef35bf8';
 export const endingReasonCatalogSqlPath = 'lib/jrc_contact_center/ending_reason_catalog_sql.rb';
@@ -27,6 +29,7 @@ export const reviewedMigrations = Object.freeze({
   [deferredPauseMigrationPath]: deferredPauseMigrationHash,
   [qualificationFormMigrationPath]: qualificationFormMigrationHash,
   [endingReasonMigrationPath]: endingReasonMigrationHash,
+  [teamStateMigrationPath]: teamStateMigrationHash,
 });
 const base = 'a24adc6dd8bb660f955b76cce0172ae1638deee2';
 
@@ -42,12 +45,12 @@ export function verifyAccessMigration(changes, content, schema) {
 }
 
 // Preserve the original one-migration verifier and its negative tests above.
-// The current candidate admits exactly six reviewed forward additions, never an arbitrary extra migration.
+// The current candidate admits exactly seven reviewed forward additions, never an arbitrary extra migration.
 export function verifyReviewedMigrations(changes, readCurrent, schema) {
   const expected = Object.keys(reviewedMigrations).sort();
   const rows = changes.trim().split('\n').filter(Boolean).sort();
   if (JSON.stringify(rows) !== JSON.stringify(expected.map(path => `A\t${path}`))) {
-    throw new Error('Only the six exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
+    throw new Error('Only the seven exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
   }
   for (const path of expected) {
     const actual = createHash('sha256').update(readCurrent(path)).digest('hex');

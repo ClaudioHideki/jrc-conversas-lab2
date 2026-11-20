@@ -659,3 +659,11 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 
 - [x] **CC-PHONE-CANDIDATE-PROVENANCE-20261120:** SHA50d26506,CI44685351828:1.808Rails distintos,81recargas,875Vue,212Chrome;zero falhas/pendências/erros externos/ignorados/flaky.316capturas com hashes conferidos e8novas revisadas. Aviso real e360doHoya bloqueado sem vínculo;fluxo do Cadastro Mestre vinculado continua válido,sem autoassociação pelo telefone. Artefato14608219003,SHA-25691f07fbb27ea87c70bceb05056177ff5d9ab33d2d656c6b1bb7166e5179c3b9f. Relatório docs/jrc_contact_center/phone_candidate_provenance_verified_20261120.json. A figura21 e as23referências continuam parciais.
 - Próximo incremento preparado:nome autorizado da fila selecionada e barraACW conforme prazo real;13arquivos de código/testes/documentação com lint estático sem erros,sem migrar ou alterar regras. Exigir CI própria e212Chrome.
+
+### Call Center — 20/11/2026 — origem de equipe
+
+- [x] Decisão: inativar somente a origem da equipe no Call Center; preservar vínculos e demais módulos.
+- [x] Preparar estado local, autorização/cobertura atual e proposta, auditoria e confirmação da última elegibilidade em fila.
+- [ ] Executar os testes nativos e conferir Chrome deste incremento antes de aceitar a alteração.
+- [ ] Confirmar a pintura real da barra ACW: captura de 17d6536a ainda verde; accent-color isolado não era evidência suficiente.
+- [ ] Implementar biblioteca institucional por unidade conforme decisão aprovada; não misturar gravações de chamadas.

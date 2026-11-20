@@ -15,7 +15,7 @@ class JrcContactCenter::ConfigurationAuditScope
     @policy = JrcContactCenter::ModulePolicy.new(context, :contact_center)
     @access = JrcContactCenter::AccessScope.new(user_context: context)
     @organization = JrcContactCenter::OrganizationalScope.new(account: @account, account_user: @member)
-    @coverage = JrcCrm::CorporateCoverage.new(account: @account, user: context.fetch(:user))
+    @coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: context.fetch(:user))
     @relation = relation
   end
 

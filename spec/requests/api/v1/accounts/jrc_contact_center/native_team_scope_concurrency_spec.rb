@@ -140,6 +140,41 @@ RSpec.describe 'Current corporate team authority after a real account lock wait'
     end
   end
 
+  it 'rechecks a suspended actor team source after the real authority request waited for the account lock' do
+    group.destroy!
+    team.add_members([actor.id])
+    account.jrc_crm_user_business_units.create!(user: actor, team: team, scope: 'GROUP', structure_managed: true)
+    link = account.account_users.find_by!(user: recipient)
+    actor_context = { account: account, account_user: account.account_users.find_by!(user: actor), user: actor }
+    service = JrcContactCenter::AccessAuthorization.new(context: actor_context)
+    grant = service.grant_for(link)
+    expected = service.revision(link, grant)
+    status = race_with_scope_change(
+      change: -> { JrcContactCenter::TeamState.create!(account: account, team: team, active: false) }, verb: :patch,
+      endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/access_authorizations/users/#{link.id}",
+      payload: { authorization: { eligible: true }, expected_revision: expected }, defer: true
+    )
+    expect(status).to eq(401)
+    expect(JrcContactCenter::AccessGrant.where(account_user: link)).to be_empty
+    expect(JrcCrm::CorporateCoverage.new(account: account, user: actor)).to be_group
+    expect(JrcContactCenter::CorporateCoverage.new(account: account, user: actor)).not_to be_group
+  end
+
+  it 'rejects a stale target source status after waiting rather than overwriting a concurrent inactivation' do
+    link = account.account_users.find_by!(user: actor)
+    service = JrcContactCenter::AccessAuthorization.new(context: { account: account, account_user: link, user: actor })
+    grant = service.grant_for(team)
+    expected = service.revision(team, grant)
+    status = race_with_scope_change(
+      change: -> { JrcContactCenter::TeamState.create!(account: account, team: team, active: false) }, verb: :patch,
+      endpoint: "/api/v1/accounts/#{account.id}/jrc_contact_center/access_authorizations/teams/#{team.id}",
+      payload: { authorization: { active: true }, expected_revision: expected }, defer: true
+    )
+    expect(status).to eq(409)
+    expect(JrcContactCenter::TeamState.find_by!(team: team)).not_to be_active
+    expect(JrcContactCenter::AccessGrant.where(team: team)).to be_empty
+  end
+
   context 'when the last configured agent depends on native team membership' do
     before do
       peer = account.account_users.find_by!(user: recipient)

@@ -21,7 +21,7 @@ class Api::V1::Accounts::JrcContactCenter::PauseCatalogsController < Api::V1::Ac
 
   def authorize_catalog!
     authorize_contact_center!(:configure?)
-    coverage = JrcCrm::CorporateCoverage.new(account: Current.account, user: Current.user)
+    coverage = JrcContactCenter::CorporateCoverage.new(account: Current.account, user: Current.user)
     raise Pundit::NotAuthorizedError if coverage.configured? && !coverage.group?
   end
 
