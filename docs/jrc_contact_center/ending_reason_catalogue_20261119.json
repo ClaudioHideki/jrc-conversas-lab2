@@ -67,5 +67,33 @@
     "automatic_activation_on_real_accounts": false,
     "existing_call_policy_must_be_preserved": true,
     "external_PABX_commands_authorized": false
-  }
+  },
+  "f51_native_results": {
+    "sha": "f51c65d76bffcf8f551b93ad1aa222d464f23128",
+    "run": 44654884502,
+    "status": "blocked_by_one_style_offense",
+    "native_distinct_examples": 1746,
+    "native_schema_reload_reexecutions": 66,
+    "rspec_failures": 0,
+    "rspec_pending": 0,
+    "rspec_outside_errors": 0,
+    "vue_passed": 856,
+    "new_ruby_offenses": [
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb",
+        "line": 181,
+        "cop": "Style/StringConcatenation"
+      }
+    ],
+    "chrome": "not_executed",
+    "assets": "not_built",
+    "correction": "Equivalent Ruby string interpolation in the query-body isolation regression; no assertions or production behavior changed.",
+    "future_wip_excluded": [
+      "app/models/jrc_contact_center/call_session.rb",
+      "app/models/jrc_contact_center/ending_reason_version.rb",
+      "app/services/jrc_contact_center/acw_ending_reasons.rb",
+      "app/services/jrc_contact_center/acw_policy_audit.rb"
+    ]
+  },
+  "next_checkpoint": "One style-only correction followed by the existing complete native/browser gate; Chrome remains unvalidated until reports pass."
 }

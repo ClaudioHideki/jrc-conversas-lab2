@@ -178,7 +178,7 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
   end
 
   it 'does not accept a query field as a replacement for the typed JSON catalogue body' do
-    patch endpoint + '?voice_reason_catalog[]=synthetic', headers: headers, params: payload.except(:voice_reason_catalog), as: :json
+    patch "#{endpoint}?voice_reason_catalog[]=synthetic", headers: headers, params: payload.except(:voice_reason_catalog), as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(account.reload.settings).not_to have_key(JrcContactCenter::AcwPolicy::KEY)
     expect(audits).to be_empty
