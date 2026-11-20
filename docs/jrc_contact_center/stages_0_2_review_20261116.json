@@ -5733,5 +5733,38 @@
     "complete_candidate_approved": false,
     "native_application_vue_chrome": "not yet run; 228 Chrome cases mandatory",
     "word_gap_audit": "docs/jrc_contact_center/audio_word_acceptance_gaps_20261120.json"
+  },
+  "audio_bytes_prepared_20261120": {
+    "status": "prepared_not_executed",
+    "parent_candidate": "53e5743f94a2fefa98ab556f33aa48fb818008dd",
+    "authority": "Current native configure policy, account and unit coverage before and after byte IO; latest immutable clean decoded observation only",
+    "integrity": "Native storage checksum, exact size and returned-buffer SHA-256, plus client exact headers and byte SHA-256 before any object URL",
+    "browser": "Explicit preview/download, no autoplay, no-store, ephemeral object URL revoked on source/profile/proof change and unmount",
+    "native_tests": "Six service and seven request examples prepared; actual scanner/decoder positives, no native execution yet",
+    "chrome_required_next": 232,
+    "chrome_new": "One additional case per desktop/mobile light/dark project with native media playback and independent downloaded SHA-256",
+    "production_external": "No PABX command, publication, registry or real channel; synthetic signature DB does not prove malware coverage",
+    "remaining": "Incoming codec validation before final persistence, waveform/usage ledger/source tabs and complete Word layout remain open"
+  },
+  "audio_native_wav_progress_20261120": {
+    "producer": "53e5743f94a2fefa98ab556f33aa48fb818008dd",
+    "run": 44796979099,
+    "artifact_sha256": "d52cd5f21bc97a4821c5663f5715d49c494d9436cc057b3a5cdf845dc9bbb9b7",
+    "schema_reload": {
+      "examples": 130,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "core": {
+      "examples": 1821,
+      "passed": 1818,
+      "failures": 3,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "report": "docs/jrc_contact_center/audio_wav_decode_correction_20261120.json",
+    "next_status": "correction prepared, not executed",
+    "required_chrome": 228
   }
 }

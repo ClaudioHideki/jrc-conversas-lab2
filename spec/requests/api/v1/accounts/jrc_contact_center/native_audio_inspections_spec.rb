@@ -57,8 +57,9 @@ RSpec.describe 'Institutional audio native scanner and decoder receipts', type: 
         file.write(bytes.byteslice(0, 44))
         file.flush
         native_upload = ActionDispatch::Http::UploadedFile.new(tempfile: file, filename: 'SYNTHETIC-empty.wav', type: 'audio/wav')
-        record = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                               .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC empty header' }, file: native_upload, key: key)
+        record = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context)).create!(
+          unit_id: unit.id, attributes: { name: 'SYNTHETIC empty header' }, file: native_upload, key: key
+        )
         path = "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_assets/#{record.audio_asset_id}/versions/#{record.id}/inspections"
         post path, headers: headers, params: { idempotency_key: 'synthetic-native-inspection-0001' }, as: :json
         expect(response).to have_http_status(:created)

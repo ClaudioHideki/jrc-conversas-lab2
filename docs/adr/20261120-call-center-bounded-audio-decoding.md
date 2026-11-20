@@ -13,3 +13,12 @@ Este incremento não adiciona regras de negócio, scanner alternativo, tabela de
 `AudioSafetyObservation`, ainda fora do checkpoint e sem execução nativa, prepara essa correlação reutilizando `JrcServiceDesk::AttachmentScanner` e suas verificações de socket local. A configuração específica `JRC_CC_AUDIO_CLAMAV_SOCKET` não altera o scanner ou as variáveis do Service Desk. Ausência do serviço, resposta malformada ou falta do SHA correto mantêm a observação bloqueada. Os testes de composição com doubles são identificados como contratos de dependências, separados dos testes que executam FFmpeg/FFprobe reais. Nenhum resultado isolado desse serviço autoriza reprodução nem modifica o estado de uma versão.
 
 A disponibilidade/versionamento de FFmpeg no runner e no runtime deverão ser verificados, sem assumir que a imagem já o inclui. Não há build Docker autorizado nesta frente.
+
+
+## Seguimento nativo 53e5743f
+
+A CI44796979099 aprovou130 casos de recarga e1818/1821 casos core. Os três erros se restringem ao caminho WAV positivo; MP3/OGG/MP4 e o bloqueio de cabeçalho vazio passaram. O artefato não continha a telemetria WAV original, portanto a causa exata não é inferida como confirmada.
+
+Preparada uma prova direta das amostras PCM decodificadas pelo muxer `hash` oficialmente documentado pelo FFmpeg (https://ffmpeg.org/ffmpeg-formats.html#hash). Uma única linhaSHA-256 completa deve diferir do hash do fluxo vazio. Não basta exit0, cabeçalho válido ou progresso final. A duração continua vindo dos metadados medidos; não se inventa tempo para produzir aprovação. Entrada continua restrita a `fd`, saída a `pipe`, sem caminhos privados e com os mesmos limites de processo.
+
+Os novos testes nativos comparam o hashPCM efetivo ao hash calculado independentemente a partir das amostras sintéticas, rejeitam WAV sem amostras e preservam a saída do comando legado e do probe em relatórioJSON. A execução e a confirmação da causa ainda são obrigatórias.

@@ -1,0 +1,38 @@
+{
+  "sha": "53e5743f94a2fefa98ab556f33aa48fb818008dd",
+  "run": 44796979099,
+  "artifact": 14659951903,
+  "artifact_sha256": "d52cd5f21bc97a4821c5663f5715d49c494d9436cc057b3a5cdf845dc9bbb9b7",
+  "status": "failed_candidate_correction_prepared",
+  "schema_reload": {
+    "examples": 130,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "core": {
+    "examples": 1821,
+    "passed": 1818,
+    "failures": 3,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "new_ruby_offenses_before": 27,
+  "new_ruby_offenses_after": 1,
+  "remaining_lint": "One 152-column fixture continuation; fixed by the same explicit multiline call",
+  "failing_paths": [
+    "spec/services/jrc_contact_center/audio_media_probe_spec.rb[1:1]",
+    "spec/requests/api/v1/accounts/jrc_contact_center/native_audio_inspections_spec.rb[1:1]",
+    "spec/requests/api/v1/accounts/jrc_contact_center/native_audio_inspections_spec.rb[1:4]"
+  ],
+  "confirmed": "Native scanner works, detects harmless marker and preserves unavailable/idempotent observations. Only the positive WAV decode path fails; real MP3/OGG/MP4 probes passed. The exact legacy native WAV progress output was not in this artifact.",
+  "correction_prepared": "Require a complete SHA-256 hash of actual decoded PCM frames, excluding the empty stream hash, instead of using progress timestamps as proof of emitted samples. Preserve no-shell, fd-only input, explicit formats, pipe-only output, xerror, actual decoding and all resource limits.",
+  "primary_documentation": "https://ffmpeg.org/ffmpeg-formats.html#hash",
+  "new_native_regression": "Compare the real decoded WAV hash to independently computed source PCM SHA-256, reject empty WAV, archive exact legacy progress and native metadata for cause verification; parser-contract tests are explicitly synthetic",
+  "no_duration_fabricated": true,
+  "older_nine_migrations_unchanged": true,
+  "inspection_migration_unchanged_since_53e5743f": true,
+  "vue_assets_chrome": "Not run; candidate remains blocked",
+  "correction_natively_approved": false,
+  "full_23_figures_complete": false
+}
