@@ -4854,5 +4854,79 @@
     ],
     "quality_gates_weakened": false,
     "full_23_complete": false
+  },
+  "history_hoya_raw_pass_manifest_failure_b11f3131_20261119": {
+    "status": "native_and_browser_cases_passed_but_evidence_gate_failed",
+    "sha": "b11f313163d3a41c766a45a1488f236d11a833a9",
+    "run": 44644260127,
+    "rails_distinct": 1707,
+    "schema_reload_reexecutions": 66,
+    "vue": 836,
+    "chrome": 200,
+    "chrome_per_project": 50,
+    "failures_pending_outside_skips_flaky": 0,
+    "artifact": 14591250055,
+    "artifact_sha256": "f3af69eb72e740747f0626b4abb17afcdbf5e1fe9bf57418288d80c128843c3a",
+    "archive_crc_verified": true,
+    "png_count": 292,
+    "manual_images_viewed": 8,
+    "missing_producer_acceptance_manifest": true,
+    "complete_gate_approved": false,
+    "root_cause": "IndentationError in evidence manifest Python after all200Chrome passed",
+    "minimum_correction": "Align count assertion with existing block; keep strict count and positive/zero result checks",
+    "regression_guard": {
+      "tests_passed": 7,
+      "current_blocks_compiled": [
+        {
+          "line": 191,
+          "end": 202
+        },
+        {
+          "line": 230,
+          "end": 263
+        }
+      ],
+      "original_error_reproduced": {
+        "type": "IndentationError",
+        "line": 237
+      }
+    },
+    "scope_limits": [
+      "actual voice ACW workspace and state history only, not full app or real PABX",
+      "no complete23figure claim"
+    ]
+  },
+  "ending_reason_catalogue_prepared_20261119": {
+    "status": "prepared_pending_native_validation",
+    "reference_figures": [
+      9,
+      10
+    ],
+    "storage": "existing Account ACW settings, existing authenticated ACW policy API and native scoped audit",
+    "new_migrations": [],
+    "new_permissions": [],
+    "preservation": [
+      "legacy revision absent catalogue",
+      "six-field v1 rules and frozen origins",
+      "exact existing form versions and answers",
+      "account/company/unit scopes"
+    ],
+    "functional_increment": [
+      "name, category, description, order, active status",
+      "immutable code and deactivation instead of deletion",
+      "versioned CAS and atomic audit",
+      "named active choices in existing native rule editor",
+      "bounded filters and pagination",
+      "explicit conflict and uncertain-write review"
+    ],
+    "still_pending": [
+      "mandatory reason catalogue per queue",
+      "immutable operational display labels/audience of all new reasons",
+      "per-destination automation, idempotent receipts and retry",
+      "PABX contract and external homologation"
+    ],
+    "required_chrome": 204,
+    "execution_state": "not_started_for_this_source",
+    "no_real_accounts_configured": true
   }
 }

@@ -586,3 +586,22 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - Artefato14586662951,43535321bytes,SHA-256e339cfe18499e9ebebc172ac0a6242ff579bdc1b1e08cf13c5b20aabfcad6430,CRCconferido.8capturas novas inspecionadas individualmente. Não são homologação integral porque os testes falharam.
 - Mobile:histórico ocupava quase todo o popup com filtros;agora recolhíveis comHTMLnativo,sem retirar campos e com abertura/fechamento explícitos noChrome. FixtureHoya usa altura finitah-screen,já compilada peloCSSnativo,sem alterarTailwindglobal ou mascarar CSSdo produto.
 -200cenários mantidos. Revalidar o próprio novoSHA e os quatro temas/tamanhos;nenhum gate reduzido,nenhumDocker/PABXreal,mergeoudeploy.23figuras continuam abertas.
+
+
+### 19/11 — Catálogo administrativo de encerramentos preparado
+
+- Reutiliza a política/API/auditoria nativa de ACW;sem nova migration,grant,cadastro paralelo ou ativação externa.
+- Nome,código,categoria,descrição,ordem,status,versão,CAS,desativação sem apagar histórico e opções nomeadas no editor de regras.
+- Popup com filtros,paginação10/100,erro visível,conflito revisado,descarte explícito e perda de autoridade sem retenção de dados.
+- Registros v1 e versões/respostas do atendimento já capturado são preservados. Ausência do catálogo mantém exatamente a revisão legada.
+- Testes Rails/Vue e um novo percurso Chrome por projeto preparados:204Chrome exigidos,sem retirar os200anteriores.
+- Validação do novo incremento ainda pendente. Obrigatoriedade por fila,labels operacionais congelados e automações por destino permanecem pendentes das figuras9/10.
+
+
+### 19/11 — Histórico/Hoya:200Chrome aprovados;manifesto final bloqueado por indentação
+
+- CI44644260127/b11f3131:1707Rails distintos,66reexecuções schema,836Vue,200Chrome(50porprojeto),lints,assets ebootstrap15cards aprovados. Zero falhas,pendências,skips,flaky ou erros externos nos relatórios desses testes.
+- O job final falhou depois de200passed:IndentationError na asserção de contagem do Python que gera o manifesto. O manifesto produtor ficou ausente;CI NÃO aprovada integralmente. Não criar manifesto fictício nem substituir o resultado agregado por sucesso.
+- ZIP14591250055,42606531bytes,SHA-256f3af69eb72e740747f0626b4abb17afcdbf5e1fe9bf57418288d80c128843c3a eCRC verificados.292PNGs noZIP;8capturas de histórico/Hoya inspecionadas nos4projetos,com hashes derivados do arquivo íntegro. Não equivalem a um manifesto de aceite produzido pelo runner.
+- Correção mínima de recuo preserva todas as assertivas. Novo compilador estático dos2blocos Python,sem executá-los,tem7regressões aprovadas incluindo a reprodução exata de unexpectedindent. Executa antes das dependências pesadas para evitar repetição dessa falha.
+- Próximo checkpoint inclui o catálogo administrativo e exige204Chrome,os testes nativos afetados e manifesto íntegro;nenhumgate é dispensado.23figuras permanecem abertas.

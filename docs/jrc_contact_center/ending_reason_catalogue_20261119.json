@@ -1,0 +1,33 @@
+{
+  "status": "prepared_pending_native_validation",
+  "reference_figures": [
+    9,
+    10
+  ],
+  "storage": "existing Account ACW settings, existing authenticated ACW policy API and native scoped audit",
+  "new_migrations": [],
+  "new_permissions": [],
+  "preservation": [
+    "legacy revision absent catalogue",
+    "six-field v1 rules and frozen origins",
+    "exact existing form versions and answers",
+    "account/company/unit scopes"
+  ],
+  "functional_increment": [
+    "name, category, description, order, active status",
+    "immutable code and deactivation instead of deletion",
+    "versioned CAS and atomic audit",
+    "named active choices in existing native rule editor",
+    "bounded filters and pagination",
+    "explicit conflict and uncertain-write review"
+  ],
+  "still_pending": [
+    "mandatory reason catalogue per queue",
+    "immutable operational display labels/audience of all new reasons",
+    "per-destination automation, idempotent receipts and retry",
+    "PABX contract and external homologation"
+  ],
+  "required_chrome": 204,
+  "execution_state": "not_started_for_this_source",
+  "no_real_accounts_configured": true
+}

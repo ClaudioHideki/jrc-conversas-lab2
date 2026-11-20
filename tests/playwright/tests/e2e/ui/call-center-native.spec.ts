@@ -32,47 +32,51 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('Hoya workspace native')
-    ? 'hoya_forms'
-    : info.title.startsWith('state history native')
-      ? 'state_history'
-      : info.title.startsWith('operational form native')
-        ? 'operational_forms'
-        : info.title.startsWith('form bindings native')
-          ? 'form_bindings'
-          : info.title.startsWith('deferred pause native uncertain')
-            ? 'deferred_pause_retry'
-            : info.title.startsWith('deferred pause native')
-              ? 'deferred_pause'
-              : info.title.startsWith('whole native team deletion')
-                ? 'team_deletion'
-                : info.title.startsWith('pending ACW native navigation')
-                  ? 'acw_navigation'
-                  : info.title.startsWith('pending ACW native draft')
-                    ? 'acw_draft'
-                    : info.title.startsWith('pending ACW native review')
-                      ? 'acw_review'
-                      : info.title.startsWith('team roster last eligible')
-                        ? 'team_withdrawal'
-                        : info.title.startsWith('native local routing')
-                          ? 'routing'
-                          : info.title.startsWith('scoped ACW native')
-                            ? 'acw'
-                            : info.title.startsWith(
-                                  'last eligible queue withdrawal'
-                                )
-                              ? 'withdrawal'
+  const pauseKey = info.title.startsWith('ending reason native')
+    ? 'form_bindings'
+    : info.title.startsWith('Hoya workspace native')
+      ? 'hoya_forms'
+      : info.title.startsWith('state history native')
+        ? 'state_history'
+        : info.title.startsWith('operational form native')
+          ? 'operational_forms'
+          : info.title.startsWith('form bindings native')
+            ? 'form_bindings'
+            : info.title.startsWith('deferred pause native uncertain')
+              ? 'deferred_pause_retry'
+              : info.title.startsWith('deferred pause native')
+                ? 'deferred_pause'
+                : info.title.startsWith('whole native team deletion')
+                  ? 'team_deletion'
+                  : info.title.startsWith('pending ACW native navigation')
+                    ? 'acw_navigation'
+                    : info.title.startsWith('pending ACW native draft')
+                      ? 'acw_draft'
+                      : info.title.startsWith('pending ACW native review')
+                        ? 'acw_review'
+                        : info.title.startsWith('team roster last eligible')
+                          ? 'team_withdrawal'
+                          : info.title.startsWith('native local routing')
+                            ? 'routing'
+                            : info.title.startsWith('scoped ACW native')
+                              ? 'acw'
                               : info.title.startsWith(
-                                    'local pause duration supervisor'
+                                    'last eligible queue withdrawal'
                                   )
-                                ? 'duration'
+                                ? 'withdrawal'
                                 : info.title.startsWith(
-                                      'local pause catalog operator'
+                                      'local pause duration supervisor'
                                     )
-                                  ? 'operations'
-                                  : info.title.startsWith('local pause catalog')
-                                    ? 'editor'
-                                    : null;
+                                  ? 'duration'
+                                  : info.title.startsWith(
+                                        'local pause catalog operator'
+                                      )
+                                    ? 'operations'
+                                    : info.title.startsWith(
+                                          'local pause catalog'
+                                        )
+                                      ? 'editor'
+                                      : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -6167,4 +6171,200 @@ test('Hoya workspace native restores and persists versioned ACW answers in the a
   expect(errors).toEqual([]);
   expect(external).toEqual([]);
   expect(commands).toEqual([]);
+});
+
+test('ending reason native catalogue persists revisions and deactivation with filtering paging and authorized rule selection', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].form_bindings;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const endpoint = ownApi + '/acw_policy';
+  const location = `/app/accounts/${target.account_id}/contact-center/control-desk/closures`;
+  const original = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect(original.status()).toBe(200);
+  const initial = (await original.json()).item;
+  expect(initial.voice_reason_catalog).toEqual({ version: 0, entries: [] });
+  const seedRows = Array.from({ length: 12 }, (_, i) => ({
+    code: `synthetic_seed_${i}`,
+    name: `SYNTHETIC ending reason ${i}`,
+    category: 'SYNTHETIC native category',
+    description: 'SYNTHETIC bounded catalogue seed',
+    order: i,
+    active: i % 2 === 0,
+  }));
+  const prepared = await page.request.patch(endpoint, {
+    headers: target.administrator,
+    data: {
+      limits: initial.limits,
+      expected_revision: initial.revision,
+      voice_reason_catalog: seedRows,
+    },
+  });
+  expect(prepared.status()).toBe(200);
+  await page.goto(location);
+  await page.locator('[data-manage-ending-reasons]').click();
+  await expectContainedDialog(page);
+  let catalog = page.locator('[data-ending-reason-catalog]');
+  await expect(catalog.locator('[data-ending-entry]')).toHaveCount(10);
+  await catalog.locator('[data-ending-next]').click();
+  await expect(catalog.locator('[data-ending-entry]')).toHaveCount(2);
+  await catalog.locator('[data-ending-search]').fill('reason 11');
+  await expect(catalog.locator('[data-ending-entry]')).toHaveCount(1);
+  await catalog.locator('[data-ending-status]').selectOption('active');
+  await expect(catalog.locator('[data-ending-entry]')).toHaveCount(0);
+  await catalog.locator('[data-ending-clear]').click();
+  await expect(catalog.locator('[data-ending-entry]')).toHaveCount(10);
+  await catalog.locator('[data-ending-add]').click();
+  let row = catalog.locator('[data-ending-entry]').last();
+  await expect(row.locator('[data-ending-code]')).toHaveValue('');
+  await expect(catalog.locator('[data-ending-save]')).toBeDisabled();
+  const code = 'synthetic_browser_ending';
+  await row.locator('[data-ending-code]').fill(code);
+  await row.locator('[data-ending-name]').fill('SYNTHETIC browser ending');
+  await row
+    .locator('[data-ending-category]')
+    .fill('SYNTHETIC browser category');
+  await row
+    .locator('[data-ending-description]')
+    .fill('SYNTHETIC persisted description');
+  await row.locator('[data-ending-order]').fill('120');
+  await row.locator('[data-ending-active]').check();
+  const written = page.waitForResponse(
+    response =>
+      response.url().endsWith('/acw_policy') &&
+      response.request().method() === 'PATCH'
+  );
+  await catalog.locator('[data-ending-save]').click();
+  const saved = await written;
+  expect(saved.status()).toBe(200);
+  expect((await saved.json()).item.voice_reason_catalog.version).toBe(2);
+  await expect(catalog.locator('[data-ending-saved]')).toBeVisible();
+  await page.reload();
+  await page.locator('[data-manage-ending-reasons]').click();
+  catalog = page.locator('[data-ending-reason-catalog]');
+  await catalog.locator('[data-ending-search]').fill(code);
+  row = catalog.locator('[data-ending-entry]').first();
+  await row.locator('summary').click();
+  await expect(row.locator('[data-ending-name]')).toHaveValue(
+    'SYNTHETIC browser ending'
+  );
+  await expect(row.locator('[data-ending-category]')).toHaveValue(
+    'SYNTHETIC browser category'
+  );
+  await expect(row.locator('[data-ending-description]')).toHaveValue(
+    'SYNTHETIC persisted description'
+  );
+  await expect(row.locator('[data-ending-code]')).toBeDisabled();
+  await expect(row.locator('[data-ending-active]')).toBeChecked();
+  await catalog.locator('[data-ending-close]').click();
+  await expect(catalog).not.toBeVisible();
+  await page.locator('[data-create]').click();
+  const rulesDialog = page.getByRole('dialog');
+  await rulesDialog.locator('[data-add-acw-rule]').click();
+  const rule = rulesDialog.locator('[data-acw-rule-row]').last();
+  await rule.locator('[data-acw-rule-reason]').selectOption(code);
+  await expect(
+    rule.locator('[data-acw-rule-reason] option:checked')
+  ).toHaveText('SYNTHETIC browser ending');
+  await rule.locator('[data-acw-rule-time]').fill('00:01');
+  const configured = page.waitForResponse(
+    response =>
+      response.url().endsWith('/acw_policy') &&
+      response.request().method() === 'PATCH'
+  );
+  await rulesDialog
+    .getByRole('button', { name: 'Salvar', exact: true })
+    .click();
+  expect((await configured).status()).toBe(200);
+  await expect(rulesDialog).not.toBeVisible();
+  const current = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect(current.status()).toBe(200);
+  const state = (await current.json()).item;
+  expect(
+    state.voice_rules.filter(value => value.id === target.form_rule_id)
+  ).toEqual(
+    initial.voice_rules.filter(value => value.id === target.form_rule_id)
+  );
+  expect(
+    state.voice_rules.find(value => value.reason_code === code)
+  ).toMatchObject({ active: false, limit_seconds: 60 });
+  await page.locator('[data-manage-ending-reasons]').click();
+  catalog = page.locator('[data-ending-reason-catalog]');
+  await catalog.locator('[data-ending-search]').fill(code);
+  row = catalog.locator('[data-ending-entry]').first();
+  await row.locator('summary').click();
+  await row.locator('[data-ending-name]').fill('SYNTHETIC revised ending');
+  await row.locator('[data-ending-active]').uncheck();
+  const deactivated = page.waitForResponse(
+    response =>
+      response.url().endsWith('/acw_policy') &&
+      response.request().method() === 'PATCH'
+  );
+  await catalog.locator('[data-ending-save]').click();
+  const receipt = await deactivated;
+  expect(receipt.status()).toBe(200);
+  const final = (await receipt.json()).item;
+  expect(final.voice_reason_catalog.version).toBe(3);
+  expect(final.voice_reason_catalog.entries).toHaveLength(13);
+  expect(
+    final.voice_reason_catalog.entries.find(value => value.code === code)
+  ).toMatchObject({ active: false, name: 'SYNTHETIC revised ending' });
+  expect(final.voice_rules).toEqual(state.voice_rules);
+  await expect(catalog.locator('[data-ending-saved]')).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page.locator('html').evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await row.scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-ending-reason-catalog.png`,
+    fullPage: false,
+  });
+  const operator = await page.request.get(endpoint, {
+    headers: target.operator,
+  });
+  expect(operator.status()).toBe(200);
+  expect((await operator.json()).item).not.toHaveProperty(
+    'voice_reason_catalog'
+  );
+  const denied = await page.request.patch(endpoint, {
+    headers: target.operator,
+    data: {
+      limits: final.limits,
+      voice_reason_catalog: [],
+      expected_revision: final.revision,
+    },
+  });
+  expect(denied.status()).toBe(401);
+  const operatorPage = await page.context().newPage();
+  await operatorPage.addInitScript(
+    auth => Reflect.set(window, '__SYNTHETIC_AUTH__', auth),
+    target.operator
+  );
+  const metadata = operatorPage.waitForResponse(
+    response =>
+      response.url().endsWith('/administration') && response.status() === 200
+  );
+  await operatorPage.goto(location);
+  expect(
+    (await (await metadata).json()).capabilities.configuration_global
+  ).toBe(false);
+  await expect(operatorPage.getByRole('alert')).toContainText(
+    'Seção indisponível no seu escopo de acesso.'
+  );
+  await expect(
+    operatorPage.locator('[data-administration-section]')
+  ).toHaveCount(0);
+  await expect(
+    operatorPage.locator('[data-manage-ending-reasons]')
+  ).toHaveCount(0);
+  await operatorPage.close();
 });

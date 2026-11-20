@@ -11,6 +11,8 @@ class JrcContactCenter::AcwPolicyAudit
     attributes['voice_rules'] = rules if rules.any?
     bindings = JrcContactCenter::AcwFormBindingPolicy.new(account: account).call
     attributes['voice_form_bindings'] = bindings if bindings.any?
+    reasons = JrcContactCenter::AcwEndingReasons.new(account: account).call
+    attributes['voice_reason_catalog'] = reasons if reasons.fetch('version').positive?
     { 'attributes' => attributes, 'omitted_fields' => omitted }
   end
 

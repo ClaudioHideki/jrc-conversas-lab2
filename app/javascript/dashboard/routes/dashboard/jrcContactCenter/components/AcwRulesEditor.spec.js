@@ -86,4 +86,67 @@ describe('native scoped voice ACW editor', () => {
     expect(wrapper.get('[data-add-acw-rule]').element.disabled).toBe(true);
     wrapper.unmount();
   });
+  it('offers active catalogue names without activating rules or removing legacy codes', async () => {
+    const wrapper = mountEditor([rule], {
+      reasonCatalog: [
+        { code: 'synthetic', name: 'SYNTHETIC authorized name', active: true },
+        { code: 'inactive', name: 'SYNTHETIC inactive', active: false },
+      ],
+    });
+    const select = wrapper.get('[data-acw-rule-reason]');
+    expect(select.text()).toContain('SYNTHETIC authorized name');
+    expect(select.find('option[value="inactive"]').exists()).toBe(false);
+    expect(select.find('option[value="resolved"]').exists()).toBe(true);
+    await select.setValue('synthetic');
+    expect(wrapper.emitted('update:modelValue')[0][0]).toEqual([
+      { ...rule, reason_code: 'synthetic' },
+    ]);
+    wrapper.unmount();
+  });
+
+  it('retains an inactive or old unlisted code already used by a frozen rule', () => {
+    const saved = { ...rule, reason_code: 'inactive' };
+    const wrapper = mountEditor([saved], {
+      reasonCatalog: [
+        { code: 'inactive', name: 'SYNTHETIC old', active: false },
+      ],
+    });
+    expect(wrapper.get('[data-acw-rule-reason]').element.value).toBe(
+      'inactive'
+    );
+    expect(
+      wrapper.get('[data-acw-rule-reason] option[value="inactive"]').text()
+    ).toBe('inactive');
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('does not offer an explicitly inactive catalogue override for a different legacy reason', () => {
+    const wrapper = mountEditor([{ ...rule, reason_code: 'resolved' }], {
+      reasonCatalog: [
+        { code: 'order', name: 'SYNTHETIC old order', active: false },
+      ],
+    });
+    expect(
+      wrapper.find('[data-acw-rule-reason] option[value="order"]').exists()
+    ).toBe(false);
+    expect(wrapper.get('[data-acw-rule-reason]').element.value).toBe(
+      'resolved'
+    );
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('treats a prototype-named code as ordinary catalogue data without prototype lookup', () => {
+    const wrapper = mountEditor([rule], {
+      reasonCatalog: [
+        { code: '__proto__', name: 'SYNTHETIC literal code', active: true },
+      ],
+    });
+    expect(
+      wrapper.get('[data-acw-rule-reason] option[value="__proto__"]').text()
+    ).toBe('SYNTHETIC literal code');
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    wrapper.unmount();
+  });
 });

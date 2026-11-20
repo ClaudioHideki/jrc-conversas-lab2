@@ -22,6 +22,7 @@ class JrcContactCenter::AcwPolicy
     signature = [KEY, @account.id, policy.fetch(:voice_required), values]
     scoped = JrcContactCenter::AcwScopedRules.new(account: @account).call
     signature << scoped.map { |row| JrcContactCenter::AcwRulePrecedence::FIELDS.map { |field| row.fetch(field) } } if scoped.any?
+    signature = JrcContactCenter::AcwEndingReasons.new(account: @account).signature(signature)
     Digest::SHA256.hexdigest(JrcContactCenter::AcwFormBindingPolicy.new(account: @account).signature(signature).to_json)
   end
 
@@ -30,7 +31,7 @@ class JrcContactCenter::AcwPolicy
   end
 
   def update!(attributes = nil, voice_required: :unchanged, expected_revision: :legacy, voice_rules: :unchanged, **legacy_limits)
-    voice_form_bindings = legacy_limits.delete(:voice_form_bindings) { :unchanged }
+    extended = legacy_limits.extract!(:voice_form_bindings, :voice_reason_catalog)
     values = validated_limits(attributes || legacy_limits)
     raise JrcContactCenter::OperationError, 'invalid_acw_policy' unless [true, false, :unchanged].include?(voice_required)
 
@@ -38,7 +39,7 @@ class JrcContactCenter::AcwPolicy
       JrcContactCenter::ConfigurationRevision.check_token!(revision, expected_revision) unless expected_revision == :legacy
       before = JrcContactCenter::AcwPolicyAudit.capture(@account)
       current = updated_settings(values, voice_required, voice_rules, expected_revision)
-      current = form_settings(current, voice_form_bindings, expected_revision)
+      current = extended_settings(current, extended, expected_revision)
       @account.update!(settings: @account.settings.merge(KEY => current))
       JrcContactCenter::AcwPolicyAudit.write!(account: @account, before: before, after: JrcContactCenter::AcwPolicyAudit.capture(@account))
     end
@@ -46,6 +47,16 @@ class JrcContactCenter::AcwPolicy
   end
 
   private
+
+  def extended_settings(settings, options, expected_revision)
+    current = form_settings(settings, options.fetch(:voice_form_bindings, :unchanged), expected_revision)
+    reason_settings(current, options.fetch(:voice_reason_catalog, :unchanged), expected_revision)
+  end
+
+  def reason_settings(settings, entries, expected_revision)
+    JrcContactCenter::ConfigurationRevision.check_token!(revision, expected_revision) unless entries == :unchanged
+    JrcContactCenter::AcwEndingReasons.new(account: @account).propose(settings: settings, entries: entries)
+  end
 
   def form_settings(settings, bindings, expected_revision)
     JrcContactCenter::ConfigurationRevision.check_token!(revision, expected_revision) unless bindings == :unchanged

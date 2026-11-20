@@ -15,6 +15,7 @@ require_relative '../../app/services/jrc_contact_center/acw_rule_precedence'
 require_relative '../../app/services/jrc_contact_center/acw_scoped_rules'
 require_relative '../../app/services/jrc_contact_center/acw_form_bindings'
 require_relative '../../app/services/jrc_contact_center/acw_form_binding_policy'
+require_relative '../../app/services/jrc_contact_center/acw_ending_reasons'
 require_relative '../../app/services/jrc_contact_center/acw_policy'
 require_relative '../../app/services/jrc_contact_center/acw_policy_audit'
 

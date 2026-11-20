@@ -13,6 +13,7 @@ import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import PauseCatalogEditor from './PauseCatalogEditor.vue';
 import AcwRulesEditor from './AcwRulesEditor.vue';
 import AcwFormLibrary from './AcwFormLibrary.vue';
+import EndingReasonCatalog from './EndingReasonCatalog.vue';
 import QueueWithdrawalConfirmation from './QueueWithdrawalConfirmation.vue';
 import TeamRosterWithdrawalConfirmation from './TeamRosterWithdrawalConfirmation.vue';
 import { useQueueWithdrawalReview } from '../composables/useQueueWithdrawalReview';
@@ -138,8 +139,10 @@ const canConfigureAcw = computed(
     props.context.capabilities.configuration_global === true
 );
 const formsOpen = ref(false);
+const reasonsOpen = ref(false);
 watch([key, () => props.accountId, canConfigureAcw], () => {
   formsOpen.value = false;
+  reasonsOpen.value = false;
 });
 const canEditRoles = computed(
   () => key.value === 'permissions' && props.context.native_links?.role_editor
@@ -319,6 +322,7 @@ const open = async row => {
         voice: format(policy.limits.voice),
         whatsapp: format(policy.limits.whatsapp),
         voice_required: policy.voice_required,
+        voice_reason_catalog: policy.voice_reason_catalog?.entries || [],
         ...(Array.isArray(policy.voice_rules)
           ? { voice_rules: policy.voice_rules.map(rule => ({ ...rule })) }
           : {}),
@@ -760,6 +764,21 @@ onBeforeUnmount(() => {
     >
       {{ t('JRC_CONTACT_CENTER.ACW_FORMS.MANAGE') }}
     </button>
+    <button
+      v-if="canConfigureAcw"
+      type="button"
+      class="rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11"
+      data-manage-ending-reasons
+      @click="reasonsOpen = true"
+    >
+      {{ t('JRC_CONTACT_CENTER.ENDING_REASONS.TITLE') }}
+    </button>
+    <EndingReasonCatalog
+      v-if="canConfigureAcw && reasonsOpen"
+      :key="String(accountId)"
+      :account-id="accountId"
+      @close="reasonsOpen = false"
+    />
     <AcwFormLibrary
       v-if="canConfigureAcw && formsOpen"
       :key="String(accountId)"
@@ -975,6 +994,7 @@ onBeforeUnmount(() => {
             v-if="Array.isArray(draft.voice_rules)"
             v-model="draft.voice_rules"
             v-model:bindings="draft.voice_form_bindings"
+            :reason-catalog="draft.voice_reason_catalog"
             :account-id="accountId"
             :disabled="saving"
           />

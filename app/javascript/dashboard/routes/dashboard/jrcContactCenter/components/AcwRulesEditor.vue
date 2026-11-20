@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AcwRuleTarget from './AcwRuleTarget.vue';
 import AcwRuleFormBinding from './AcwRuleFormBinding.vue';
@@ -7,6 +8,7 @@ const props = defineProps({
   accountId: { type: [String, Number], required: true },
   modelValue: { type: Array, required: true },
   disabled: { type: Boolean, default: false },
+  reasonCatalog: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['update:modelValue']);
 const bindings = defineModel('bindings', { type: Array, default: () => [] });
@@ -20,7 +22,14 @@ const setBinding = (ruleId, value) => {
   ];
 };
 const { t } = useI18n();
-const reasons = acwLabels(t).reasons;
+const reasons = computed(() => {
+  const choices = Object.assign(Object.create(null), acwLabels(t).reasons);
+  props.reasonCatalog.forEach(row => {
+    if (row.active) choices[row.code] = row.name;
+    else delete choices[row.code];
+  });
+  return choices;
+});
 const labels = {
   TITLE: t('JRC_CONTACT_CENTER.ACW_RULES.TITLE'),
   HINT: t('JRC_CONTACT_CENTER.ACW_RULES.HINT'),

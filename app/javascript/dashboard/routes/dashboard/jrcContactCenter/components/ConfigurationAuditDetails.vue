@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { endingReasonSummary } from '../endingReasonPresentation';
 import { pauseCatalogSummary } from '../pauseCatalogPresentation';
 import {
   acwRulesSummary,
@@ -48,6 +49,7 @@ const fieldLabels = {
   voice_required: t('JRC_CONTACT_CENTER.ADMIN.VOICE_REQUIRED'),
   voice_rules: t('JRC_CONTACT_CENTER.ACW_RULES.TITLE'),
   voice_form_bindings: t('JRC_CONTACT_CENTER.ACW_FORMS.BINDINGS_TITLE'),
+  voice_reason_catalog: t('JRC_CONTACT_CENTER.ENDING_REASONS.TITLE'),
   revision: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.REVISION'),
   integrity_sha256: t('JRC_CONTACT_CENTER.LOCAL_IVR.INTEGRITY'),
   name: t('JRC_CONTACT_CENTER.ADMIN.NAME'),
@@ -164,6 +166,7 @@ const value = (entry, field = '') => {
   )
     return entry.map(item => permissionLabels[item] || item).join('\n') || '—';
   if (field === 'voice_rules') return acwRulesSummary(entry, t);
+  if (field === 'voice_reason_catalog') return endingReasonSummary(entry, t);
   if (field === 'voice_form_bindings') return acwFormBindingsSummary(entry, t);
   if (field === 'settings')
     return (

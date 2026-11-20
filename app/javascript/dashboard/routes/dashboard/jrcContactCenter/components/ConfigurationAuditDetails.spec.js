@@ -128,4 +128,31 @@ describe('native ACW audit detail', () => {
     );
     wrapper.unmount();
   });
+  it('presents a versioned ending catalogue with Portuguese labels and preserved inactive state', () => {
+    const wrapper = render({
+      before: {},
+      after: {
+        voice_reason_catalog: {
+          version: 2,
+          entries: [
+            {
+              code: 'synthetic',
+              name: 'SYNTHETIC reviewed reason',
+              category: 'SYNTHETIC',
+              description: 'SYNTHETIC description',
+              order: 0,
+              active: false,
+            },
+          ],
+        },
+      },
+    });
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.ENDING_REASONS.TITLE');
+    expect(wrapper.text()).toContain('SYNTHETIC reviewed reason');
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.ENDING_REASONS.INACTIVE'
+    );
+    expect(wrapper.text()).not.toContain('"entries":');
+    wrapper.unmount();
+  });
 });
