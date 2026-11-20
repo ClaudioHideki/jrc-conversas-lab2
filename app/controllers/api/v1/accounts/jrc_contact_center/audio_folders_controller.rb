@@ -13,7 +13,9 @@ class Api::V1::Accounts::JrcContactCenter::AudioFoldersController < Api::V1::Acc
   end
 
   def show
-    render json: base_payload.merge(item: present(scoped_folders.find(identifier!(params[:id]))))
+    folder = scoped_folders.find(identifier!(params[:id]))
+    path = JrcContactCenter::AudioFolderPath.new(folder: folder, scope: scoped_folders).call
+    render json: base_payload.merge(item: present(folder).merge('path' => path))
   end
 
   def create

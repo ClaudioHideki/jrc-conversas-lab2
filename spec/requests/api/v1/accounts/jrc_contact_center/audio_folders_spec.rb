@@ -74,6 +74,23 @@ RSpec.describe 'Institutional audio folders stay within the current native opera
     expect(folder.reload.name).to eq('SYNTHETIC renamed')
   end
 
+  it 'returns the complete authorized native folder path and denies a foreign account folder at the same API' do
+    child = JrcContactCenter::AudioFolder.create!(account: account, unit: units.first, parent: folder, name: 'SYNTHETIC child')
+    leaf = JrcContactCenter::AudioFolder.create!(account: account, unit: units.first, parent: child, name: 'SYNTHETIC leaf')
+    get "#{base}/#{leaf.id}", headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('item').fetch('path')).to eq(
+      [folder, child, leaf].map { |row| { 'id' => row.id.to_s, 'name' => row.name } }
+    )
+    expect(response.parsed_body.fetch('item').fetch('unit_id')).to eq(units.first.id.to_s)
+    foreign_account = create(:account)
+    foreign_unit = JrcContactCenter::Unit.create!(account: foreign_account, code: 'FOREIGN', name: 'SYNTHETIC foreign unit', kind: 'sac')
+    foreign = JrcContactCenter::AudioFolder.create!(account: foreign_account, unit: foreign_unit, name: 'SYNTHETIC foreign path')
+    get "#{base}/#{foreign.id}", headers: headers
+    expect(response).to have_http_status(:not_found)
+    expect(response.body).not_to include(foreign.name)
+  end
+
   it 'blocks a parent cycle instead of reorganizing an ancestor under its descendant' do
     child = JrcContactCenter::AudioFolder.create!(account: account, unit: units.first, parent: folder, name: 'SYNTHETIC child')
     expected = JrcContactCenter::ConfigurationRevision.token(folder)

@@ -134,12 +134,26 @@ const closeEditor = () => {
   parentOptions.value = [];
   revision.capture(null);
 };
-const load = async () => {
-  generation += 1;
-  const version = generation;
+const forgetPrivateRecords = () => {
   items.value = [];
   currentFolder.value = null;
   meta.value = { page: page.value, pages: 0, total: 0 };
+};
+const clearDeniedContext = () => {
+  generation += 1;
+  dialog.value.close();
+  closeEditor();
+  forgetPrivateRecords();
+  opening.value = false;
+  loading.value = false;
+  saving.value = false;
+  parentLoading.value = false;
+  error.value = true;
+};
+const load = async () => {
+  generation += 1;
+  const version = generation;
+  forgetPrivateRecords();
   error.value = false;
   loading.value = false;
   if (!canManage.value) return;
@@ -185,8 +199,12 @@ const loadParents = async () => {
       row => String(row.id) !== String(editing.value?.id)
     );
     parentMeta.value = response.data.meta;
-  } catch {
-    if (version === parentGeneration) parentError.value = true;
+  } catch (failure) {
+    if (version === parentGeneration) {
+      if ([401, 403, 404].includes(failure?.response?.status))
+        clearDeniedContext();
+      else parentError.value = true;
+    }
   } finally {
     if (version === parentGeneration) parentLoading.value = false;
   }
@@ -229,8 +247,13 @@ const open = async row => {
     editorOpen.value = true;
     dialog.value.open();
     await loadParents();
-  } catch {
-    if (version === generation) error.value = true;
+  } catch (failure) {
+    if (version === generation) {
+      if ([401, 403, 404].includes(failure?.response?.status)) {
+        clearDeniedContext();
+      }
+      error.value = true;
+    }
   } finally {
     if (version === generation) opening.value = false;
   }
@@ -261,10 +284,7 @@ const save = async () => {
   } catch (failure) {
     if (version !== generation) return;
     if ([401, 403, 404].includes(failure?.response?.status)) {
-      dialog.value.close();
-      closeEditor();
-      items.value = [];
-      error.value = true;
+      clearDeniedContext();
     } else saveError.value = !revision.handleError(failure);
     reviewedDraft.value = '';
   } finally {
@@ -392,9 +412,18 @@ onBeforeUnmount(() => {
         {{ label('ROOT') }}
       </button>
       <template v-if="currentFolder">
-        <span class="break-words text-n-slate-12">{{
-          currentFolder.name
-        }}</span>
+        <button
+          v-for="ancestor in currentFolder.path"
+          :key="ancestor.id"
+          type="button"
+          :disabled="ancestor.id === currentFolder.id"
+          :aria-current="ancestor.id === currentFolder.id ? 'page' : undefined"
+          :data-audio-folder-path="ancestor.id"
+          class="min-w-0 max-w-full break-words text-left text-n-blue-11 disabled:text-n-slate-12"
+          @click="navigate(ancestor.id)"
+        >
+          {{ ancestor.name }}
+        </button>
         <button
           type="button"
           class="text-n-blue-11"

@@ -1,0 +1,35 @@
+{
+  "status": "prepared_not_native_verified",
+  "baseline": "fa43cbf7392e537f6457bb32b8318aa1210fe2ac",
+  "purpose": "Full native authorized folder breadcrumb for figures6/16, including maximum-length names in 390px; same folder identities and no DB or grant changes",
+  "security": [
+    "Caller supplies native current authorized relation",
+    "Same account and unit pinned to authorized selected folder",
+    "One recursive PostgreSQL query; immutable local SQL shape and quoted native ID, never raw params",
+    "Cycles report invalid hierarchy; incomplete scope raises not found instead of returning partial hidden ancestry",
+    "Late ancestor response discarded after account/profile/unit change",
+    "Known authorization/not-found failures clear list/path/private editor and invalidate late responses on all read/write entry points"
+  ],
+  "tests_prepared": {
+    "service": 6,
+    "request": 1,
+    "vue_added": 7,
+    "chrome": "All220 retained, four native folder scenarios extended with120-character path, ancestor navigation and actual operator401 after opening a private draft; no API mocks"
+  },
+  "not_yet_executed": [
+    "native PostgreSQL recursive path",
+    "Vue runtime",
+    "Chrome longest-name geometry"
+  ],
+  "external_unchanged": [
+    "no file uploads or player",
+    "no PABX",
+    "no scanner/TTS claims"
+  ],
+  "reviewed_source_files": [
+    "audio_folder_path.rb",
+    "AudioFolderLibrary.vue",
+    "audio_folders_controller.rb"
+  ],
+  "scope": "Prepared only: full breadcrumb and denial cleanup; excludes the unpublished file/version scaffolding"
+}

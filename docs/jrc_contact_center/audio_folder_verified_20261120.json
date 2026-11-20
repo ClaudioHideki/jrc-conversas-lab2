@@ -1,0 +1,71 @@
+{
+  "sha": "fa43cbf7392e537f6457bb32b8318aa1210fe2ac",
+  "run": 44729757403,
+  "job": 136266192334,
+  "verification_status": "complete_verified_evidence",
+  "native_distinct": 1883,
+  "native_breakdown": {
+    "core": 1692,
+    "concurrency": 106,
+    "corporate": 85
+  },
+  "schema_reload_reexecutions": 101,
+  "vue": 911,
+  "chrome": {
+    "passed": 220,
+    "projects": {
+      "desktop-light": 55,
+      "desktop-dark": 55,
+      "mobile-light": 55,
+      "mobile-dark": 55
+    },
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0,
+    "skipped": 0,
+    "flaky": 0
+  },
+  "bootstrap_cards": 15,
+  "lint": "no new frontend/Ruby errors",
+  "assets": "fresh protected build",
+  "artifact": {
+    "id": 14630025679,
+    "bytes": 47174245,
+    "sha256": "2688543b2412ae6dbaa7c1203a2c1a7b50b24d5d165206538bb56e1770e18eb2",
+    "github_digest_and_crc_verified": true
+  },
+  "screenshot_hashes_verified": 336,
+  "visual_review": {
+    "actually_opened": 8,
+    "views": [
+      "folder list",
+      "reviewed conflict popup"
+    ],
+    "viewports": [
+      1440,
+      390
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "result": "Readable controls, explicit unfinished-file notice, contained dialogs and no observed horizontal overflow in these scenarios"
+  },
+  "accepted_increment": [
+    "native per-unit folders and hierarchy storage",
+    "create/edit/move/review/CAS",
+    "pagination/search/navigation",
+    "current account/company/unit authorization and after-lock revocation checks",
+    "audit resource and historical scopes",
+    "explicit account-shared team label remains separate from individual grant"
+  ],
+  "not_accepted_by_this_run": [
+    "new full ancestor path and longest-name layout, prepared after this SHA",
+    "new denial cleanup, prepared after this SHA",
+    "institutional file/model scaffolding, not published or runtime ready",
+    "file upload/versions/player/scanner/Nico/provider publication",
+    "all23 figures or stage4 as a whole"
+  ],
+  "full_23_figures_complete": false,
+  "production_unchanged": true
+}

@@ -693,3 +693,9 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 ### 20/11 — Checagem de pendências do card Áudios
 
 - 0dc2c080/CI44720588860:1883Rails distintos,101recargas,911Vue,lint e assets reais aprovados. Chrome216/220: quatro falhas na checagem genérica do card Áudios, cuja organização de pastas já tem aviso específico de arquivos/Nico/publicação pendentes. Recuperados artefato14624389798/SHA-2562bd6bca282f86994e043ce761a730725dca1d77d4ffe1ba4d1c4202dcc5edcd5 e capturas reais. Corrigir a acessibilidade do aviso e exigir seu texto integral mais ausência de controles de upload/player/publicação; manter as checagens dos outros cards. Não aceitar o incremento sem220/220 no novo SHA.
+
+### 20/11 — Aceite da fundação de pastas por unidade
+
+- [x] fa43cbf7/CI44729757403:1883Rails distintos,101recargas,911Vue e220Chrome(55por projeto) aprovados;336capturas com hashes verificados e8amostras efetivamente abertas(1440/390,claro/escuro). Artefato14630025679/SHA-2562688543b2412ae6dbaa7c1203a2c1a7b50b24d5d165206538bb56e1770e18eb2. Cadastro/revisão/movimentação de pastas, filtros/paginação e isolamento nativos validados. Nenhum arquivo de áudio/versão/player foi aceito como concluído.
+- [ ] Próximo incremento preparado: caminho completo de ancestrais, nome de120caracteres em390px e limpeza/invalidação de respostas após acesso negado. Seis testes de serviço,umAPI,seteVue preparados; preservar220Chrome. Exigir execução no novoSHA, sem atribuir os resultados de fa43cbf7 ao código posterior.
+- [ ] Arquivos/versões permanecem preparação separada e incompleta, fora deste checkpoint de navegação; sem nova migration, API ou dependência publicada para esses arquivos.

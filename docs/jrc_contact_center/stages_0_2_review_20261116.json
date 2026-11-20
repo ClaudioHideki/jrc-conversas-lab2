@@ -408,13 +408,13 @@
     {
       "figure": 6,
       "title": "Biblioteca de áudios e pastas",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         4
       ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
-        "Institutional audio folders/versioning/storage are stage 4; call recordings are not this catalog"
+        "Pastas por unidade validadas em fa43cbf7. Arquivos privados, versões, scanner, metadados, player, vínculos reais e Nico continuam pendentes; a figura completa não está concluída."
       ],
       "code_references": [],
       "reference": {
@@ -456,6 +456,12 @@
         "scope": "Pastas por unidade, hierarquia, popup, revisão e auditoria, sem arquivos/player/versões ou fornecedor.",
         "status": "Preparado com verificações leves; aguarda próximo SHA e CI nativa própria.",
         "evidence": "docs/jrc_contact_center/audio_folder_prepared_20261120.json"
+      },
+      "institutional_folder_increment": {
+        "sha": "fa43cbf7392e537f6457bb32b8318aa1210fe2ac",
+        "run": 44729757403,
+        "status": "implemented_and_native_Chrome_validated_folder_subset_only",
+        "report": "audio_folder_verified_20261120.json"
       }
     },
     {
@@ -974,7 +980,8 @@
           "evidence": "docs/jrc_contact_center/team_source_activity_verified_20261120.json",
           "scope": "Estado da origem de equipe local, confirmação do gestor e preservação de vínculos; supervisor principal/hierarquia continuam pendentes."
         }
-      ]
+      ],
+      "word_hierarchy_clarification": "A referência escrita exige supervisor principal/adicionais, agentes, filas e políticas reutilizáveis. A árvore explícita dos Word corresponde a pastas; não foi encontrado campo parent_team. Esta leitura não conclui as funções de supervisão e filas ainda pendentes."
     },
     {
       "figure": 13,
@@ -1159,14 +1166,15 @@
     {
       "figure": 16,
       "title": "Detalhes do áudio institucional",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         4,
         7
       ],
       "implemented_in_0_2": [],
       "remaining_or_external": [
-        "Corrected Word caption: institutional audio details, not a recording policy. Library is stage 4; call recording policy has its own visual gap"
+        "Corrected Word caption: institutional audio details, not a recording policy. Library is stage 4; call recording policy has its own visual gap",
+        "Pastas por unidade validadas em fa43cbf7. Arquivos privados, versões, scanner, metadados, player, vínculos reais e Nico continuam pendentes; a figura completa não está concluída."
       ],
       "code_references": [],
       "reference": {
@@ -1203,6 +1211,12 @@
         "complete_reference": [
           "Corrected Word caption: institutional audio details, not a recording policy. Library is stage 4; call recording policy has its own visual gap"
         ]
+      },
+      "institutional_folder_increment": {
+        "sha": "fa43cbf7392e537f6457bb32b8318aa1210fe2ac",
+        "run": 44729757403,
+        "status": "implemented_and_native_Chrome_validated_folder_subset_only",
+        "report": "audio_folder_verified_20261120.json"
       }
     },
     {
@@ -1623,8 +1637,8 @@
     "Popup nativo de perfis com persistência explícita, feature flags reais e limites da cobertura corporativa"
   ],
   "provider_contracts": "control_desk_contracts_20261116.json",
-  "scope_limit": "No real provider commands, ACK, automatic corporate grant or production operation. Exactly six forward Contact Center migrations and separately hash-pinned ending-reason SQL sources are under the native gate; five previously validated additions remain byte-preserved. Native Team remains Account-scoped; Call Center inheritance never creates queue participation.",
-  "validation_state": "incremental_native_and_Chrome_validated_through_a0cd67f4_required_queues_pending_all_23_figures_still_open",
+  "scope_limit": "No real provider commands, ACK, automatic corporate grant or production operation. Exactly eight forward Call Center migrations and two hash-pinned ending-reason SQL sources are under the native gate; all previously published additions remain byte-preserved. Native Team remains Account-scoped; its Call Center origin and permissions never create queue participation.",
+  "validation_state": "native_and_Chrome_verified_through_fa43cbf7_folder_foundation_23_figures_still_partial",
   "full_23_figures_complete": false,
   "continuity_20261116": {
     "preserved_checkpoint": "15eaa800336626a3d5c5712870b43d169c64e6ad",
@@ -5455,5 +5469,77 @@
     "audio_library": "Unidade operacional nativa e cobertura atual; separada de gravações de chamadas.",
     "source": "Respostas explícitas do usuário nesta conversa",
     "pending_definition": false
+  },
+  "institutional_audio_folders_verified_fa43cbf7": {
+    "sha": "fa43cbf7392e537f6457bb32b8318aa1210fe2ac",
+    "run": 44729757403,
+    "job": 136266192334,
+    "verification_status": "complete_verified_evidence",
+    "native_distinct": 1883,
+    "native_breakdown": {
+      "core": 1692,
+      "concurrency": 106,
+      "corporate": 85
+    },
+    "schema_reload_reexecutions": 101,
+    "vue": 911,
+    "chrome": {
+      "passed": 220,
+      "projects": {
+        "desktop-light": 55,
+        "desktop-dark": 55,
+        "mobile-light": 55,
+        "mobile-dark": 55
+      },
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "bootstrap_cards": 15,
+    "lint": "no new frontend/Ruby errors",
+    "assets": "fresh protected build",
+    "artifact": {
+      "id": 14630025679,
+      "bytes": 47174245,
+      "sha256": "2688543b2412ae6dbaa7c1203a2c1a7b50b24d5d165206538bb56e1770e18eb2",
+      "github_digest_and_crc_verified": true
+    },
+    "screenshot_hashes_verified": 336,
+    "visual_review": {
+      "actually_opened": 8,
+      "views": [
+        "folder list",
+        "reviewed conflict popup"
+      ],
+      "viewports": [
+        1440,
+        390
+      ],
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "result": "Readable controls, explicit unfinished-file notice, contained dialogs and no observed horizontal overflow in these scenarios"
+    },
+    "accepted_increment": [
+      "native per-unit folders and hierarchy storage",
+      "create/edit/move/review/CAS",
+      "pagination/search/navigation",
+      "current account/company/unit authorization and after-lock revocation checks",
+      "audit resource and historical scopes",
+      "explicit account-shared team label remains separate from individual grant"
+    ],
+    "not_accepted_by_this_run": [
+      "new full ancestor path and longest-name layout, prepared after this SHA",
+      "new denial cleanup, prepared after this SHA",
+      "institutional file/model scaffolding, not published or runtime ready",
+      "file upload/versions/player/scanner/Nico/provider publication",
+      "all23 figures or stage4 as a whole"
+    ],
+    "full_23_figures_complete": false,
+    "production_unchanged": true,
+    "report": "audio_folder_verified_20261120.json"
   }
 }

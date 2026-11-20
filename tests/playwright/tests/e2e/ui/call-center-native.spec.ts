@@ -4229,9 +4229,9 @@ test('institutional audio folders native unit organization persists, paginates a
     library.locator(`[data-audio-folder="${target.audio_folder_id}"]`)
   ).toBeVisible();
   await library.locator('[data-new-audio-folder]').click();
-  await dialog
-    .locator('[data-audio-folder-name]')
-    .fill('SYNTHETIC new nested library');
+  const nestedName = 'SYNTHETIC_' + 'X'.repeat(110);
+  expect(nestedName.length).toBe(120);
+  await dialog.locator('[data-audio-folder-name]').fill(nestedName);
   await expect(save).toBeDisabled();
   await dialog.locator('[data-review-audio-folder]').check();
   const created = page.waitForResponse(
@@ -4250,7 +4250,7 @@ test('institutional audio folders native unit organization persists, paginates a
   await page.reload();
   await expect(
     library.locator(`[data-audio-folder="${nested.id}"]`)
-  ).toContainText('SYNTHETIC new nested library');
+  ).toContainText(nestedName);
   const scoped = { headers: target.scoped };
   const denied = await page.request.get(
     `${own}/audio_folders/${target.denied_audio_folder_id}`,
@@ -4286,6 +4286,66 @@ test('institutional audio folders native unit organization persists, paginates a
   expect((await persisted.json()).item.parent_id).toBe(
     target.audio_destination_id
   );
+  await library
+    .locator(`[data-audio-folder="${nested.id}"]`)
+    .getByRole('button', { name: nestedName, exact: true })
+    .click();
+  await expect(library.locator('[data-audio-folder-path]')).toHaveCount(2);
+  const currentPath = library.locator(
+    `[data-audio-folder-path="${nested.id}"]`
+  );
+  await expect(currentPath).toHaveAttribute('aria-current', 'page');
+  await expect(currentPath).toBeDisabled();
+  await expect(currentPath).toHaveText(nestedName);
+  await page.reload();
+  await expect(currentPath).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await library
+    .locator(`[data-audio-folder-path="${target.audio_destination_id}"]`)
+    .click();
+  await expect(
+    library.locator(`[data-audio-folder="${nested.id}"]`)
+  ).toBeVisible();
+  await library
+    .locator(`[data-audio-folder="${nested.id}"]`)
+    .getByRole('button', { name: nestedName, exact: true })
+    .click();
+  await expect(currentPath).toBeVisible();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-folder-native-library.png`,
+    fullPage: true,
+  });
+  await library.locator('[data-new-audio-folder]').click();
+  await expectContainedDialog(page);
+  await dialog
+    .locator('[data-audio-folder-name]')
+    .fill('SYNTHETIC denied after open');
+  await dialog.locator('[data-review-audio-folder]').check();
+  await page.evaluate(auth => {
+    Object.assign(Reflect.get(window, 'axios').defaults.headers.common, auth);
+  }, target.operator);
+  const revoked = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === prefix &&
+      response.request().method() === 'POST'
+  );
+  await save.click();
+  const revokedResult = await revoked;
+  expect(revokedResult.status()).toBe(401);
+  await expect(dialog).not.toBeVisible();
+  await expect(library.locator('[data-audio-folder-path]')).toHaveCount(0);
+  await expect(library.locator('[data-audio-folder]')).toHaveCount(0);
+  await expect(library.getByRole('alert')).toBeVisible();
+  const uncreated = await page.request.get(
+    `${own}/audio_folders?unit_id=${target.unit_id}&q=${encodeURIComponent('SYNTHETIC denied after open')}`,
+    { headers: target.administrator }
+  );
+  expect(uncreated.status()).toBe(200);
+  expect((await uncreated.json()).items).toEqual([]);
   fs.writeFileSync(
     `.codex/call-center-native-e2e/${info.project.name}-audio-folder-native-evidence.json`,
     JSON.stringify({
@@ -4298,10 +4358,13 @@ test('institutional audio folders native unit organization persists, paginates a
       brightness,
       stale: 409,
       denied: 404,
+      denied_after_open: revokedResult.status(),
+      long_folder_name_length: nestedName.length,
+      authorized_path_depth: 2,
     })
   );
   await page.screenshot({
-    path: `.codex/call-center-native-e2e/${info.project.name}-audio-folder-native-library.png`,
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-folder-denied-after-open.png`,
     fullPage: true,
   });
   expect(forbiddenWrites).toEqual([]);

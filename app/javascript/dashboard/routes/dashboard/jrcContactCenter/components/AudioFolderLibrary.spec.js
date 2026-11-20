@@ -53,6 +53,7 @@ const record = (values = {}) => ({
   parent_id: null,
   parent_name: null,
   name: 'SYNTHETIC root',
+  path: [{ id: '9', name: 'SYNTHETIC root' }],
   description: '',
   revision: 'a'.repeat(64),
   ...values,
@@ -87,6 +88,35 @@ beforeEach(() => {
 });
 
 describe('unit scoped institutional folder UI', () => {
+  it('navigates an authorized ancestor without editing folder identity or its unit', async () => {
+    mocks.route.query.audio_parent = '9';
+    API.audioFolder.mockResolvedValueOnce({
+      data: {
+        item: record({
+          parent_id: '8',
+          path: [
+            { id: '7', name: 'SYNTHETIC root ancestor' },
+            { id: '8', name: 'SYNTHETIC parent' },
+            { id: '9', name: 'SYNTHETIC current' },
+          ],
+        }),
+      },
+    });
+    const wrapper = setup();
+    await flushPromises();
+    expect(
+      wrapper.get('[data-audio-folder-path="9"]').attributes('aria-current')
+    ).toBe('page');
+    expect(wrapper.get('[data-audio-folder-path="9"]').element.disabled).toBe(
+      true
+    );
+    await wrapper.get('[data-audio-folder-path="7"]').trigger('click');
+    expect(mocks.replace).toHaveBeenCalledWith({
+      query: { audio_parent: '7', audio_page: 1, audio_q: undefined },
+    });
+    expect(API.saveAudioFolder).not.toHaveBeenCalled();
+  });
+
   it('loads native unit filters and preserves query pagination without requesting another account', async () => {
     const wrapper = setup();
     await flushPromises();
@@ -254,5 +284,111 @@ describe('unit scoped institutional folder UI', () => {
       '2',
       expect.objectContaining({ unit_id: '20' })
     );
+  });
+
+  it('discards a late private ancestor path after the account and unit change', async () => {
+    mocks.route.query.audio_parent = '9';
+    let finish;
+    API.audioFolder.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    API.audioFolder.mockRejectedValueOnce({ response: { status: 404 } });
+    const wrapper = setup();
+    await flushPromises();
+    await wrapper.setProps({
+      accountId: '2',
+      context: {
+        capabilities: { configure: true },
+        units: [{ id: '20', name: 'SYNTHETIC current unit' }],
+      },
+    });
+    await flushPromises();
+    finish({
+      data: {
+        item: record({
+          path: [{ id: '1', name: 'SYNTHETIC private old ancestor' }],
+        }),
+      },
+    });
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('SYNTHETIC private old ancestor');
+    expect(wrapper.find('[data-audio-folder-path]').exists()).toBe(false);
+    expect(API.audioFolder).toHaveBeenCalledWith('2', '9');
+  });
+
+  it.each([401, 403, 404])(
+    'clears private list, path and editor when a save is denied with %s',
+    async status => {
+      mocks.route.query.audio_parent = '9';
+      API.saveAudioFolder.mockRejectedValueOnce({ response: { status } });
+      const wrapper = setup();
+      await flushPromises();
+      expect(wrapper.find('[data-audio-folder-path]').exists()).toBe(true);
+      await wrapper.get('[data-new-audio-folder]').trigger('click');
+      await flushPromises();
+      await wrapper
+        .get('[data-audio-folder-name]')
+        .setValue('SYNTHETIC denied draft');
+      await wrapper.get('[data-review-audio-folder]').setValue(true);
+      await wrapper.get('[data-submit]').trigger('submit');
+      await flushPromises();
+      expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+      expect(wrapper.find('[data-audio-folder-path]').exists()).toBe(false);
+      expect(wrapper.find('[data-audio-folder]').exists()).toBe(false);
+      expect(wrapper.get('[role="alert"]').exists()).toBe(true);
+      expect(API.saveAudioFolder).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it('clears private paths and rows when opening a previously listed folder is denied', async () => {
+    mocks.route.query.audio_parent = '9';
+    API.audioFolder.mockResolvedValueOnce({ data: { item: record() } });
+    API.audioFolder.mockRejectedValueOnce({ response: { status: 401 } });
+    const wrapper = setup();
+    await flushPromises();
+    expect(wrapper.find('[data-audio-folder-path]').exists()).toBe(true);
+    await wrapper.get('[data-edit-audio-folder="9"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+    expect(wrapper.find('[data-audio-folder-path]').exists()).toBe(false);
+    expect(wrapper.find('[data-audio-folder]').exists()).toBe(false);
+    expect(wrapper.get('[role="alert"]').exists()).toBe(true);
+  });
+
+  it('clears the private editor if loading destination folders reveals revoked access', async () => {
+    mocks.route.query.audio_parent = '9';
+    const wrapper = setup();
+    await flushPromises();
+    expect(wrapper.find('[data-audio-folder-path]').exists()).toBe(true);
+    let finish;
+    API.audioFolders.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    API.audioFolders.mockRejectedValueOnce({ response: { status: 401 } });
+    await wrapper.get('[data-new-audio-folder]').trigger('click');
+    await flushPromises();
+    await wrapper
+      .get('[data-audio-parent-search]')
+      .setValue('SYNTHETIC revoked');
+    await flushPromises();
+    finish({
+      data: {
+        items: [record({ name: 'SYNTHETIC private late destination' })],
+        meta: { pages: 1, total: 1 },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+    expect(wrapper.find('[data-audio-folder-path]').exists()).toBe(false);
+    expect(wrapper.find('[data-audio-folder]').exists()).toBe(false);
+    expect(wrapper.get('[role="alert"]').exists()).toBe(true);
+    expect(API.saveAudioFolder).not.toHaveBeenCalled();
+    expect(wrapper.text()).not.toContain('SYNTHETIC private late destination');
   });
 });

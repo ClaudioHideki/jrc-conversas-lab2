@@ -15,3 +15,7 @@ Status: decisão e auditoria de reaproveitamento confirmadas; implementação de
 Preparação da fundação: endpoints internos de pastas (lista/detalhe/criar/editar), popup no card já existente, paginação/pesquisa e movimentação na mesma unidade, revisão/CAS compartilhada e auditoria nativa. A ordem de exclusão de Account/Unit não é alterada; a FK nativa de unidade já restringe exclusão direta da conta, e os testes preservam essa regra. Não existe API de exclusão ou arquivo neste incremento.
 
 A CI deverá provar autorização após espera real pelo lock da Account (perfil, cobertura e autenticação revogados), revisão concorrente e ciclo de hierarquia concorrente. Quatro cenários de Chrome serão acrescentados aos216existentes, em contas sintéticas exclusivas, usando a API e o CSS reais. Recursos de auditoria de pasta e de origem de equipe ganham identificação no filtro e rótulos portugueses; não ganham nova autoridade.
+
+## Fundação validada
+
+fa43cbf7/CI44729757403:1883Rails distintos,101recargas,911Vue,220Chrome e336capturas verificadas. Oito capturas efetivamente revisadas, cobrindo lista/popup em1440/390 e claro/escuro. Aceite somente da organização de pastas por unidade; detalhes em `docs/jrc_contact_center/audio_folder_verified_20261120.json`. Caminho completo, limpeza após negativa e arquivos/versões são incrementos posteriores, ainda sem validação deste SHA.
