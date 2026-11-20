@@ -650,3 +650,12 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - [x] **CC-ENDING-REQUIRED-QUEUES-20261120 / CC-CURRENT-MEMBERSHIP-AUTH / CC-GRANT-ACTOR-AUTH:** SHA86c4ad53,CI44679530987 com1.808Rails distintos,81recargas,870Vue e212Chrome aprovados;zero falhas/pendências/erros externos/ignorados/flaky.15cards no probe,308capturas com hashes verificados e12revisadas em1440/390,claro/escuro. Artefato14606540165/SHA-256d174620ae05e9ce122ab38a3c77490d7ab0c8565db845618299d7afeb555b8f8. Relatório docs/jrc_contact_center/required_ending_queues_verified_20261120.json. Não ativado em contas reais;sem aceite integral das23figuras.
 - [ ] Seguimento visual identificado em evidência real:exibir nomes autorizados nos chips de filas selecionadas;alinhar a cor da barra nativa ao estado excedido doACW,sem alterar prazos/relógios.
 - Próximo incremento já preparado:origem do candidato telefônico e projeção360doHoya somente com vínculo da chamada. A evidência86não comprova essa alteração posterior.
+
+### 20/11 — Seguimento visual comprovado por capturas
+
+- [ ] **CC-ENDING-QUEUE-NAMES-ACW-PAINT:** Preparados nomes autorizados das filas selecionadas fora do catálogo/revisão e cor da barra nativa conforme estado real doACW. Um novo Rails,assertivas de acesso negado,cincoVue e ampliação do Chrome existente nos quatro projetos;212cenários preservados. Lint direcionado sem erros;execução nativa pendente. ADR20261120-call-center-ending-queue-labels-and-acw-paint.md. Não integra oSHA50d26506 emCI;sem migrações ou alteração de regras.
+
+### 20/11 — Contexto telefônico validado
+
+- [x] **CC-PHONE-CANDIDATE-PROVENANCE-20261120:** SHA50d26506,CI44685351828:1.808Rails distintos,81recargas,875Vue,212Chrome;zero falhas/pendências/erros externos/ignorados/flaky.316capturas com hashes conferidos e8novas revisadas. Aviso real e360doHoya bloqueado sem vínculo;fluxo do Cadastro Mestre vinculado continua válido,sem autoassociação pelo telefone. Artefato14608219003,SHA-25691f07fbb27ea87c70bceb05056177ff5d9ab33d2d656c6b1bb7166e5179c3b9f. Relatório docs/jrc_contact_center/phone_candidate_provenance_verified_20261120.json. A figura21 e as23referências continuam parciais.
+- Próximo incremento preparado:nome autorizado da fila selecionada e barraACW conforme prazo real;13arquivos de código/testes/documentação com lint estático sem erros,sem migrar ou alterar regras. Exigir CI própria e212Chrome.

@@ -26,12 +26,21 @@ class Api::V1::Accounts::JrcContactCenter::AcwPoliciesController < Api::V1::Acco
   def render_policy(policy)
     response.headers['Cache-Control'] = 'no-store'
     item = policy.call.merge(id: Current.account.id.to_s, revision: policy.revision)
-    if scoped_configuration_allowed?
-      item[:voice_rules] = JrcContactCenter::AcwScopedRules.new(account: Current.account).call
-      item[:voice_form_bindings] = JrcContactCenter::AcwFormBindingPolicy.new(account: Current.account).call
-      item[:voice_reason_catalog] = JrcContactCenter::AcwEndingReasons.new(account: Current.account).call
-    end
+    append_scoped_configuration!(item) if scoped_configuration_allowed?
     render json: base_payload.merge(item: item)
+  end
+
+  def append_scoped_configuration!(item)
+    item[:voice_rules] = JrcContactCenter::AcwScopedRules.new(account: Current.account).call
+    item[:voice_form_bindings] = JrcContactCenter::AcwFormBindingPolicy.new(account: Current.account).call
+    item[:voice_reason_catalog] = JrcContactCenter::AcwEndingReasons.new(account: Current.account).call
+    item[:voice_reason_queues] = required_reason_queues(item.fetch(:voice_reason_catalog))
+  end
+
+  # Display metadata only; never part of the immutable catalogue or its authorization.
+  def required_reason_queues(catalog)
+    ids = catalog.fetch('required_queue_ids', [])
+    contact_center_access.queues.where(id: ids).order(:id).pluck(:id, :name).map { |id, name| { id: id.to_s, name: name } }
   end
 
   def scoped_rules_options

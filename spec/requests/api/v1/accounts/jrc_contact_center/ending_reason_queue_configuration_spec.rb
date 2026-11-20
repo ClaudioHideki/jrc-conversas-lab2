@@ -21,6 +21,20 @@ RSpec.describe 'Explicit required ending reason queues', type: :request do
     end
   end
 
+  it 'projects authorized queue names without changing the catalogue, its revision or its history when a queue is renamed' do
+    previous = account.reload.settings.deep_dup
+    revision = policy.revision
+    get endpoint, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig('item', 'voice_reason_queues')).to eq([{ 'id' => queue.id.to_s, 'name' => queue.name }])
+    queue.update!(name: 'SYNTHETIC renamed queue')
+    get endpoint, headers: headers
+    expect(response.parsed_body.dig('item', 'voice_reason_queues')).to eq([{ 'id' => queue.id.to_s, 'name' => 'SYNTHETIC renamed queue' }])
+    expect(policy.revision).to eq(revision)
+    expect(account.reload.settings).to eq(previous)
+    expect(JrcContactCenter::EndingReasonVersion.where(account: account).count).to eq(1)
+  end
+
   it 'requires a literal confirmation when adding a new queue but not when preserving an already confirmed requirement' do
     configure_ending_reasons!(queues: [])
     [nil, false, 'true', 1].each do |confirmation|

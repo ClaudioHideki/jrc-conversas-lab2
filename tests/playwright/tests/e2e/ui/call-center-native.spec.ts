@@ -6422,6 +6422,20 @@ test('registered ending native preserves the call catalogue while managers revis
   const target = session.pause_targets[info.project.name].required_endings;
   const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
   const policyEndpoint = ownApi + '/acw_policy';
+  const queueEndpoint = ownApi + `/queues/${target.queue_id}`;
+  const originalQueue = await page.request.get(queueEndpoint, {
+    headers: target.administrator,
+  });
+  expect(originalQueue.status()).toBe(200);
+  const longQueueName = 'SYNTHETIC '.padEnd(120, 'X');
+  const renamedQueue = await page.request.patch(queueEndpoint, {
+    headers: target.administrator,
+    data: {
+      queue: { name: longQueueName },
+      expected_revision: (await originalQueue.json()).item.revision,
+    },
+  });
+  expect(renamedQueue.status()).toBe(200);
   const location = `/app/accounts/${target.account_id}/contact-center/control-desk/closures`;
   await page.goto(location);
   await page.locator('[data-manage-ending-reasons]').click();
@@ -6461,6 +6475,19 @@ test('registered ending native preserves the call catalogue while managers revis
     String(target.queue_id),
   ]);
   expect(latest.voice_required).toBe(false);
+  const namedQueue = await page.request.get(
+    ownApi + `/queues/${target.queue_id}`,
+    { headers: target.administrator }
+  );
+  expect(namedQueue.status()).toBe(200);
+  const queueName = (await namedQueue.json()).item.name;
+  expect(queueName).toBe(longQueueName);
+  expect(latest.voice_reason_queues).toEqual([
+    { id: String(target.queue_id), name: queueName },
+  ]);
+  await expect(catalog.locator('[data-ending-selected-queue] span')).toHaveText(
+    queueName
+  );
   await catalog
     .locator('[data-ending-required-queues]')
     .scrollIntoViewIfNeeded();
@@ -6518,7 +6545,9 @@ test('registered ending native preserves the call catalogue while managers revis
     headers: target.operator,
   });
   expect(denied.status()).toBe(200);
-  expect((await denied.json()).item).not.toHaveProperty('voice_reason_catalog');
+  const operatorPolicy = (await denied.json()).item;
+  expect(operatorPolicy).not.toHaveProperty('voice_reason_catalog');
+  expect(operatorPolicy).not.toHaveProperty('voice_reason_queues');
   await operatorPage.goto(
     `/app/accounts/${target.account_id}/synthetic-hoya-acw/${target.call_session_id}`
   );
@@ -6559,6 +6588,29 @@ test('registered ending native preserves the call catalogue while managers revis
     )
   ).toBe(true);
   await form.scrollIntoViewIfNeeded();
+  const deadlineProgress = operatorPage.locator('[data-acw-deadline-progress]');
+  await expect(deadlineProgress).toBeVisible();
+  const deadlinePaint = await deadlineProgress.evaluate(
+    (element: HTMLProgressElement) => ({
+      accent: getComputedStyle(element).accentColor,
+      value: element.value,
+      max: element.max,
+    })
+  );
+  expect(deadlinePaint.accent).toMatch(/^rgb\(/);
+  const deadlineChannels = deadlinePaint.accent.match(/[\d.]+/g)!.map(Number);
+  expect(deadlineChannels).toHaveLength(3);
+  if (deadlinePaint.value >= deadlinePaint.max) {
+    expect(deadlineChannels[0]).toBeGreaterThan(deadlineChannels[1]);
+    expect(deadlineChannels[0]).toBeGreaterThan(deadlineChannels[2]);
+  } else {
+    expect(deadlineChannels[2]).toBeGreaterThan(deadlineChannels[0]);
+    expect(deadlineChannels[2]).toBeGreaterThan(deadlineChannels[1]);
+  }
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-acw-deadline-paint.json`,
+    JSON.stringify(deadlinePaint)
+  );
   await operatorPage.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-ending-frozen-hoya.png`,
   });

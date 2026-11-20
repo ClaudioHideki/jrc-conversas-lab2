@@ -52,6 +52,27 @@ beforeEach(() => {
 });
 
 describe('native ending reason catalogue dialog', () => {
+  it('shows an authorized selected queue outside the current picker page and preserves unknown references without inventing names', async () => {
+    const configured = response([entry(0)]);
+    configured.data.item.voice_reason_catalog.required_queue_ids = [
+      '950',
+      '951',
+    ];
+    configured.data.item.voice_reason_queues = [
+      { id: '950', name: 'SYNTHETIC selected native queue' },
+    ];
+    API.acwPolicy.mockResolvedValue(configured);
+    const wrapper = render();
+    await flushPromises();
+    const selected = wrapper.findAll('[data-ending-selected-queue]');
+    expect(selected).toHaveLength(2);
+    expect(selected[0].text()).toContain('SYNTHETIC selected native queue');
+    expect(selected[1].text()).toContain(
+      'JRC_CONTACT_CENTER.ENDING_REASONS.QUEUE_ID'
+    );
+    expect(API.updateAcwPolicy).not.toHaveBeenCalled();
+  });
+
   it('paginates a bounded catalogue and applies and clears the native name and status filters', async () => {
     API.acwPolicy.mockResolvedValue(
       response(Array.from({ length: 12 }, (_, i) => entry(i)))

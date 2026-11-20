@@ -23,6 +23,7 @@ export const useEndingReasonCatalog = ({ accountId }) => {
   const baseline = ref([]);
   const version = ref(0);
   const requiredQueueIds = ref([]);
+  const requiredQueues = ref([]);
   const baselineQueueIds = ref([]);
   const queueConfirmation = ref(false);
   const revisionDraft = computed(() => ({
@@ -105,6 +106,13 @@ export const useEndingReasonCatalog = ({ accountId }) => {
       )
     )
       throw new Error('Invalid native ending reason queues');
+    requiredQueues.value = Array.isArray(item.voice_reason_queues)
+      ? item.voice_reason_queues.filter(
+          queue =>
+            queueIds.includes(String(queue.id)) &&
+            typeof queue.name === 'string'
+        )
+      : [];
     requiredQueueIds.value = [...queueIds];
     baselineQueueIds.value = [...queueIds];
     queueConfirmation.value = false;
@@ -122,6 +130,7 @@ export const useEndingReasonCatalog = ({ accountId }) => {
     entries.value = [];
     baseline.value = [];
     policy.value = null;
+    requiredQueues.value = [];
     error.value = '';
     saved.value = false;
     loading.value = true;
@@ -166,6 +175,7 @@ export const useEndingReasonCatalog = ({ accountId }) => {
           entries.value = [];
           baseline.value = [];
           requiredQueueIds.value = [];
+          requiredQueues.value = [];
           baselineQueueIds.value = [];
           policy.value = null;
           revision.capture(null);
@@ -191,6 +201,7 @@ export const useEndingReasonCatalog = ({ accountId }) => {
       saving.value = false;
       version.value = 0;
       requiredQueueIds.value = [];
+      requiredQueues.value = [];
       baselineQueueIds.value = [];
       queueConfirmation.value = false;
       load();
@@ -204,11 +215,13 @@ export const useEndingReasonCatalog = ({ accountId }) => {
     baseline.value = [];
     policy.value = null;
     requiredQueueIds.value = [];
+    requiredQueues.value = [];
     baselineQueueIds.value = [];
   });
   return {
     entries,
     requiredQueueIds,
+    requiredQueues,
     queueConfirmation,
     addsQueues,
     revisionDraft,

@@ -215,6 +215,78 @@ describe('native ending reason configuration lifecycle', () => {
 });
 
 describe('explicit required ending reason queues', () => {
+  it('uses only authorized selected queue labels and never includes display metadata in a policy write', async () => {
+    API.acwPolicy.mockResolvedValue(
+      response([row()], {
+        voice_reason_catalog: {
+          version: 2,
+          entries: [row()],
+          required_queue_ids: ['21'],
+        },
+        voice_reason_queues: [
+          { id: '21', name: 'SYNTHETIC selected' },
+          { id: '99', name: 'SYNTHETIC unrelated' },
+        ],
+      })
+    );
+    API.updateAcwPolicy.mockResolvedValue(
+      response([row()], {
+        voice_reason_catalog: {
+          version: 3,
+          entries: [row()],
+          required_queue_ids: ['21'],
+        },
+        voice_reason_queues: [{ id: '21', name: 'SYNTHETIC current' }],
+      })
+    );
+    const { catalog } = fixture();
+    await flushPromises();
+    expect(catalog.requiredQueues.value).toEqual([
+      { id: '21', name: 'SYNTHETIC selected' },
+    ]);
+    catalog.entries.value[0].name = 'SYNTHETIC revised';
+    await catalog.save();
+    expect(API.updateAcwPolicy.mock.calls[0][2]).not.toHaveProperty(
+      'voice_reason_queues'
+    );
+    expect(catalog.requiredQueues.value).toEqual([
+      { id: '21', name: 'SYNTHETIC current' },
+    ]);
+  });
+
+  it('clears queue labels immediately across accounts and on denied configuration writes', async () => {
+    const item = response([row()], {
+      voice_reason_catalog: {
+        version: 2,
+        entries: [row()],
+        required_queue_ids: ['21'],
+      },
+      voice_reason_queues: [{ id: '21', name: 'SYNTHETIC private previous' }],
+    });
+    API.acwPolicy.mockResolvedValue(item);
+    const { catalog, accountId } = fixture();
+    await flushPromises();
+    catalog.entries.value[0].name = 'SYNTHETIC draft';
+    API.updateAcwPolicy.mockRejectedValueOnce({ response: { status: 401 } });
+    await catalog.save();
+    expect(catalog.requiredQueues.value).toEqual([]);
+    await catalog.load();
+    expect(catalog.requiredQueues.value).toHaveLength(1);
+    let resolveNext;
+    API.acwPolicy.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveNext = resolve;
+        })
+    );
+    accountId.value = '2';
+    await flushPromises();
+    expect(catalog.requiredQueues.value).toEqual([]);
+    resolveNext(response([], { id: '2' }));
+    await flushPromises();
+    expect(catalog.requiredQueues.value).toEqual([]);
+  });
+
   it('requires confirmation before saving newly selected queues through the existing native policy API', async () => {
     API.acwPolicy.mockResolvedValue(response([row()]));
     API.updateAcwPolicy.mockResolvedValue(

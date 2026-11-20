@@ -1531,6 +1531,9 @@ onBeforeUnmount(() => {
                 }}</span>
                 <progress
                   class="h-2 w-full"
+                  :class="acwOverdue ? 'accent-n-ruby-9' : 'accent-n-blue-9'"
+                  data-acw-deadline-progress
+                  :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.ACW')"
                   :value="Math.min(acwElapsedSeconds, acwLimitSeconds)"
                   :max="acwLimitSeconds"
                 />

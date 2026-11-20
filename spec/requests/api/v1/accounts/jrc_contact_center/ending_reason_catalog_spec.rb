@@ -122,6 +122,7 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
     get endpoint, headers: operator.create_new_auth_token
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('item')).not_to have_key('voice_reason_catalog')
+    expect(response.parsed_body.fetch('item')).not_to have_key('voice_reason_queues')
     expect(response.body).not_to include(entry[:name])
     revision = response.parsed_body.dig('item', 'revision')
     patch endpoint, headers: operator.create_new_auth_token, params: payload.merge(expected_revision: revision), as: :json
@@ -152,6 +153,7 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
     get endpoint, headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('item')).not_to have_key('voice_reason_catalog')
+    expect(response.parsed_body.fetch('item')).not_to have_key('voice_reason_queues')
     revision = response.parsed_body.dig('item', 'revision')
     patch endpoint, headers: headers, params: payload.merge(expected_revision: revision), as: :json
     expect(response).to have_http_status(:unauthorized)

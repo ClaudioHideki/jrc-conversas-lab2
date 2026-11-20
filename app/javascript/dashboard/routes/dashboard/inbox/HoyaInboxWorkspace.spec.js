@@ -700,6 +700,36 @@ describe('inbox native SIP action guards', () => {
     expect(CCAPI.completeQualification).not.toHaveBeenCalled();
   });
 
+  it.each([false, true])(
+    'matches the deadline bar to the actual overdue state=%s without changing the clock or applied limit',
+    async overdue => {
+      const pending = {
+        ...pendingResponse.data.items[0],
+        started_at: new Date(
+          Date.now() - (overdue ? 90000 : 1000)
+        ).toISOString(),
+        overdue,
+      };
+      CCAPI.qualifications.mockResolvedValue({
+        data: { ...pendingResponse.data, items: [pending] },
+      });
+      const wrapper = mount(HoyaInboxWorkspace, { props, global });
+      await flushPromises();
+      const progress = wrapper.get('[data-acw-deadline-progress]');
+      expect(progress.classes()).toContain(
+        overdue ? 'accent-n-ruby-9' : 'accent-n-blue-9'
+      );
+      expect(Number(progress.attributes('max'))).toBe(40);
+      if (overdue) expect(Number(progress.attributes('value'))).toBe(40);
+      else {
+        expect(Number(progress.attributes('value'))).toBeGreaterThanOrEqual(1);
+        expect(Number(progress.attributes('value'))).toBeLessThan(40);
+      }
+      expect(CCAPI.completeQualification).not.toHaveBeenCalled();
+      expect(sip.answer).not.toHaveBeenCalled();
+    }
+  );
+
   it('restores required tabulation when reopening an ended voice interaction', async () => {
     CCAPI.qualifications.mockResolvedValue(pendingResponse);
     const wrapper = mount(HoyaInboxWorkspace, { props, global });

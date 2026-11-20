@@ -13,3 +13,7 @@ Cinco regressões Vue preparam a distinção visual, a ocorrência sem associaç
 A projeção do Hoya também deixa de usar o primeiro candidato como contactId do painel 360º. Somente o vínculo nativo da chamada pode carregar esse painel; há aviso permanente na área central para o candidato, inclusive antes de abrir outras abas. A conversa de texto conserva seu remetente nativo. O Chrome existente também abre o Hoya com o mesmo banco sintético e exige Visão geral desabilitada enquanto a chamada não possui vínculo.
 
 O incremento não integra o SHA 86c4ad53 atualmente em validação. A figura 21 permanece parcial: contexto completo de contratos e histórico, atalhos e integrações das etapas posteriores exigem os critérios próprios. Não há publicação, deploy, comandos PABX ou alterações em dados reais.
+
+## Validação do incremento
+
+SHA50d26506b7f5b294b022e59d6c11935f94281eea,CI44685351828:1.808Rails distintos,81reexecuções de schema,875Vue,212Chrome e316capturas com hashes verificados. Zero falhas/pendências/erros externos/ignorados/flaky. Oito capturas novas revisadas em1440/390 e claro/escuro confirmam aviso e360bloqueado sem vínculo. Artefato14608219003,SHA-25691f07fbb27ea87c70bceb05056177ff5d9ab33d2d656c6b1bb7166e5179c3b9f. O estágio preparado acima é histórico. A figura21 permanece parcial;este aceite não abrange ajustes posteriores de rótulos/cores.

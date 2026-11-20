@@ -686,6 +686,17 @@
           "Selected queue chip falls back to native queue ID; add authorized display names without exposing hidden units.",
           "Native progress color at exceeded ACW limit does not match red warning; retain real elapsed values and deadline checks."
         ]
+      },
+      "queue_labels_deadline_paint_prepared_20261120": {
+        "status": "prepared_not_natively_validated",
+        "after_sha": "50d26506b7f5b294b022e59d6c11935f94281eea",
+        "visual_origin": "12real captures reviewed from86c4ad53/artifact14606540165",
+        "scope": "Existing scoped Queue display names outside immutable catalogue;Tailwind native progress accent from actual deadline state",
+        "native_prepared": 1,
+        "vue_prepared": 5,
+        "chrome_count_preserved": 212,
+        "deny_boundaries": "Metadata withheld from ordinary operators and unit-only managers;no global cache,no client-supplied label authority",
+        "history": "Queue rename does not change catalogue/revision/ledger;no migration or clock/rule change"
       }
     },
     {
@@ -1444,6 +1455,44 @@
         "local_checks": "Changed Vue/spec ESLint zero errors; TypeScript formatted; native runtime pending",
         "remaining": "Full historical/contracts context and source-specific actions remain partial",
         "hoya": "Customer360 projection requires native call.contact_id; unique phone candidate cannot enable Overview, sidebar, cross-channel link or contextual CRM queries. Text sender path unchanged."
+      },
+      "phone_candidate_provenance_verified_50d26506": {
+        "sha": "50d26506b7f5b294b022e59d6c11935f94281eea",
+        "run": 44685351828,
+        "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/44685351828",
+        "verification_status": "complete_verified_evidence",
+        "rails_distinct": 1808,
+        "counts": {
+          "core": 1624,
+          "concurrency": 99,
+          "corporate": 85
+        },
+        "schema_reload_reexecutions": 81,
+        "vue": 875,
+        "chrome": 212,
+        "chrome_per_project": 53,
+        "failure_pending_skipped_flaky_outside_errors": 0,
+        "new_ruby_offenses": 0,
+        "bootstrap_cards": 15,
+        "screenshot_hashes_verified": 316,
+        "manual_visual_review": 8,
+        "artifact": 14608219003,
+        "artifact_sha256": "91f07fbb27ea87c70bceb05056177ff5d9ab33d2d656c6b1bb7166e5179c3b9f",
+        "artifact_bytes": 45118601,
+        "zip_crc": "all entries verified",
+        "verified_behavior": [
+          "Call customer context exposes native link provenance without changing legacy status",
+          "Native unlinked call remains contact_id=null;no directory link exposed",
+          "Phone candidate warning visible in native call and Hoya across1440/390light/dark",
+          "Hoya Customer360 and cross-channel context require the explicit native call contact",
+          "Linked authorized Customer Master,edits,persistence,denied unit/account and draft preservation remain valid",
+          "Rapid call/account response guard and occurrence write using only native call contact pass Vue regressions"
+        ],
+        "not_complete": [
+          "All23Wordfigures",
+          "Current queue-label/progress-color follow-up prepared after this SHA",
+          "Real PABX,Supabase and other external homologations"
+        ]
       }
     },
     {
@@ -5263,6 +5312,93 @@
     "visual_follow_up": [
       "Selected queue chip falls back to native queue ID; add authorized display names without exposing hidden units.",
       "Native progress color at exceeded ACW limit does not match red warning; retain real elapsed values and deadline checks."
+    ]
+  },
+  "queue_labels_deadline_paint_prepared_20261120": {
+    "status": "prepared_not_natively_validated",
+    "after_sha": "50d26506b7f5b294b022e59d6c11935f94281eea",
+    "visual_origin": "12real captures reviewed from86c4ad53/artifact14606540165",
+    "scope": "Existing scoped Queue display names outside immutable catalogue;Tailwind native progress accent from actual deadline state",
+    "native_prepared": 1,
+    "vue_prepared": 5,
+    "chrome_count_preserved": 212,
+    "deny_boundaries": "Metadata withheld from ordinary operators and unit-only managers;no global cache,no client-supplied label authority",
+    "history": "Queue rename does not change catalogue/revision/ledger;no migration or clock/rule change"
+  },
+  "phone_candidate_provenance_verified_50d26506_20261120": {
+    "sha": "50d26506b7f5b294b022e59d6c11935f94281eea",
+    "run": 44685351828,
+    "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/44685351828",
+    "verification_status": "complete_verified_evidence",
+    "rails_distinct": 1808,
+    "counts": {
+      "core": 1624,
+      "concurrency": 99,
+      "corporate": 85
+    },
+    "schema_reload_reexecutions": 81,
+    "vue": 875,
+    "chrome": 212,
+    "chrome_per_project": 53,
+    "failure_pending_skipped_flaky_outside_errors": 0,
+    "new_ruby_offenses": 0,
+    "bootstrap_cards": 15,
+    "screenshot_hashes_verified": 316,
+    "manual_visual_review": 8,
+    "artifact": 14608219003,
+    "artifact_sha256": "91f07fbb27ea87c70bceb05056177ff5d9ab33d2d656c6b1bb7166e5179c3b9f",
+    "artifact_bytes": 45118601,
+    "zip_crc": "all entries verified",
+    "verified_behavior": [
+      "Call customer context exposes native link provenance without changing legacy status",
+      "Native unlinked call remains contact_id=null;no directory link exposed",
+      "Phone candidate warning visible in native call and Hoya across1440/390light/dark",
+      "Hoya Customer360 and cross-channel context require the explicit native call contact",
+      "Linked authorized Customer Master,edits,persistence,denied unit/account and draft preservation remain valid",
+      "Rapid call/account response guard and occurrence write using only native call contact pass Vue regressions"
+    ],
+    "not_complete": [
+      "All23Wordfigures",
+      "Current queue-label/progress-color follow-up prepared after this SHA",
+      "Real PABX,Supabase and other external homologations"
+    ]
+  },
+  "latest_verified_call_center_increment": {
+    "sha": "50d26506b7f5b294b022e59d6c11935f94281eea",
+    "run": 44685351828,
+    "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/44685351828",
+    "verification_status": "complete_verified_evidence",
+    "rails_distinct": 1808,
+    "counts": {
+      "core": 1624,
+      "concurrency": 99,
+      "corporate": 85
+    },
+    "schema_reload_reexecutions": 81,
+    "vue": 875,
+    "chrome": 212,
+    "chrome_per_project": 53,
+    "failure_pending_skipped_flaky_outside_errors": 0,
+    "new_ruby_offenses": 0,
+    "bootstrap_cards": 15,
+    "screenshot_hashes_verified": 316,
+    "manual_visual_review": 8,
+    "artifact": 14608219003,
+    "artifact_sha256": "91f07fbb27ea87c70bceb05056177ff5d9ab33d2d656c6b1bb7166e5179c3b9f",
+    "artifact_bytes": 45118601,
+    "zip_crc": "all entries verified",
+    "verified_behavior": [
+      "Call customer context exposes native link provenance without changing legacy status",
+      "Native unlinked call remains contact_id=null;no directory link exposed",
+      "Phone candidate warning visible in native call and Hoya across1440/390light/dark",
+      "Hoya Customer360 and cross-channel context require the explicit native call contact",
+      "Linked authorized Customer Master,edits,persistence,denied unit/account and draft preservation remain valid",
+      "Rapid call/account response guard and occurrence write using only native call contact pass Vue regressions"
+    ],
+    "not_complete": [
+      "All23Wordfigures",
+      "Current queue-label/progress-color follow-up prepared after this SHA",
+      "Real PABX,Supabase and other external homologations"
     ]
   }
 }

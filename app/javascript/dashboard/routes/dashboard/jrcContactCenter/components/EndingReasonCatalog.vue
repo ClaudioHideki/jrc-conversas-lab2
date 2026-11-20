@@ -52,6 +52,7 @@ const catalog = useEndingReasonCatalog({
 const {
   entries,
   requiredQueueIds,
+  requiredQueues,
   queueConfirmation,
   addsQueues,
   revisionDraft,
@@ -221,7 +222,8 @@ onMounted(() => dialog.value.open());
               class="flex flex-wrap items-center gap-2"
               data-ending-selected-queue
             >
-              <span>{{
+              <span class="min-w-0 max-w-full break-words">{{
+                requiredQueues.find(row => row.id === id)?.name ||
                 t('JRC_CONTACT_CENTER.ENDING_REASONS.QUEUE_ID', { id })
               }}</span>
               <button
