@@ -8,11 +8,7 @@ class Api::V1::Accounts::JrcContactCenter::AudioFoldersController < Api::V1::Acc
   def index
     params[:page] = 1 if params[:page].blank?
     relation = scoped_folders.where(unit_id: permitted_unit(params.require(:unit_id)).id)
-    if params.key?(:parent_id)
-      selected = params[:parent_id]
-      parent = selected.nil? || selected == '' ? nil : relation.find(identifier!(selected))
-      relation = relation.where(parent_id: parent&.id)
-    end
+    relation = within_parent(relation)
     render json: list_payload(search_records(relation, fields: ['name']).order(:name, :id)) { |folder| present(folder) }
   end
 
@@ -43,6 +39,14 @@ class Api::V1::Accounts::JrcContactCenter::AudioFoldersController < Api::V1::Acc
   end
 
   private
+
+  def within_parent(relation)
+    return relation unless params.key?(:parent_id)
+
+    selected = params[:parent_id]
+    parent = selected.nil? || selected == '' ? nil : relation.find(identifier!(selected))
+    relation.where(parent_id: parent&.id)
+  end
 
   def with_current_folder_authority
     JrcContactCenter::AuthorityTransaction.call(account: Current.account, member: Current.account_user) do

@@ -685,3 +685,7 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 - [x] **CC-TEAM-SOURCE-ACTIVITY / CC-ENDING-QUEUE-NAMES-ACW-PAINT:** e9e364ec/CI44709382400:1848Rails distintos,90recargas,890Vue,216Chrome,328capturas verificadas;zero falhas/pendências/erros externos/flaky/ignorados.Confirmação do gestor e pintura real revisadas em1440/390 claro/escuro; artefato14619566711/SHA-256304d0afed8f869a8a9d6cad1d3b0e2c660473d7b7d51c06a3a201ea4c1903cae.
 - [ ] Seguimento textual: reutilizar TEAM_ALLOWED no popup da equipe e revalidar no próximo SHA. Biblioteca institucional permanece fundação preparada, não aceita por esse run.
+
+### 20/11 — Primeiro gate nativo das pastas
+
+- ce34ac15/CI44716460983:1883Rails distintos(1692core+106concorrência+85corporativos),101recargas e911Vue aprovados;lintfrontend sem erros. Quatro apontamentosRuby bloqueiam assets/Chrome. Corrigidos o filtro extraído sem mudança semântica, a posição da única rota aditiva no escopo existente e o alinhamento da mesma fixture. Nenhuma migration/SQL/permissão/configuração de lint alterada. Artefato14620304502/SHA-25619e0ebb0129f7ec868ea8f57828e02b8855d2a499679e27b93ef49c8c077c106 verificado. Exigir novo gate e220Chrome antes de aceitar.

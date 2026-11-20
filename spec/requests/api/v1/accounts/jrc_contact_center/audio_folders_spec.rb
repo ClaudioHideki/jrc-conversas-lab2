@@ -21,8 +21,9 @@ RSpec.describe 'Institutional audio folders stay within the current native opera
   before do
     account.enable_features!('jrc_contact_center', 'audit_logs', 'custom_roles')
     member.update!(custom_role: create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_configure]))
-    account.jrc_crm_user_business_units.create!(user: actor, scope: 'BUSINESS_UNIT', company: company,
-                                               business_unit: business.first, active: true, structure_managed: true)
+    account.jrc_crm_user_business_units.create!(
+      user: actor, scope: 'BUSINESS_UNIT', company: company, business_unit: business.first, active: true, structure_managed: true
+    )
   end
 
   it 'persists an organizational folder in its real unit without producing an audio, grant or provider command' do

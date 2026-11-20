@@ -1,0 +1,51 @@
+{
+  "sha": "ce34ac15363f3a8a71ba8f85ed1f19dff679fe56",
+  "run": 44716460983,
+  "job": 136220995843,
+  "overall": "failure_lint_no_assets_or_chrome",
+  "native_distinct": 1883,
+  "native_breakdown": {
+    "core": 1692,
+    "concurrency": 106,
+    "corporate": 85
+  },
+  "native_example_id_overlap": 0,
+  "schema_reload": 101,
+  "vue": 911,
+  "zero_failures_pending_outside_errors_in_executed_native_suites": true,
+  "frontend_lint": "passed",
+  "ruby_new_offenses": [
+    {
+      "path": "app/controllers/api/v1/accounts/jrc_contact_center/audio_folders_controller.rb",
+      "cop": "Metrics/AbcSize",
+      "cause": "index26.4/26; extract exact existing parent scope into within_parent without changing inputs/relation"
+    },
+    {
+      "path": "config/routes/jrc_contact_center.rb",
+      "cop": "Metrics/BlockLength",
+      "cause": "first31/30; move only additive audio_folders declaration into established additive thirdnamespace, identical URL/name/controller/actions"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb",
+      "cops": [
+        "Layout/ArgumentAlignment",
+        "Layout/HashAlignment"
+      ],
+      "cause": "Use explicit parenthesized native fixture create!; same attributes/authority assertions"
+    }
+  ],
+  "artifact": {
+    "id": 14620304502,
+    "sha256": "19e0ebb0129f7ec868ea8f57828e02b8855d2a499679e27b93ef49c8c077c106",
+    "size": 305284,
+    "github_digest_and_crc_verified": true
+  },
+  "migrations": "All eight hashes and two frozenSQL unchanged; audio ba0f1191 remains unchanged",
+  "not_executed": [
+    "assets",
+    "Chromebootstrap",
+    "220Chrome"
+  ],
+  "next": "new SHA must pass full required gates; do not reuse1883/911as evidence of changed code or claim folder UI accepted",
+  "production_unchanged": true
+}

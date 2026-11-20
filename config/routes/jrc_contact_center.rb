@@ -3,7 +3,6 @@ namespace :api, defaults: { format: 'json' } do
     resources :accounts, only: [] do
       namespace :jrc_contact_center, module: 'accounts/jrc_contact_center' do
         resources :administration, only: %i[index show]
-        resources :audio_folders, only: %i[index show create update]
         get 'context', to: 'context#show'
         get 'customer_context', to: 'customer_context#show'
         resource :agent_state, only: %i[show update], controller: 'agent_states'
@@ -63,12 +62,13 @@ namespace :api, defaults: { format: 'json' } do
   end
 end
 
-# Read-only operational history; the existing route blocks remain unchanged.
+# Additive operational history and institutional organization; established routes remain unchanged.
 namespace :api, defaults: { format: 'json' } do
   namespace :v1 do
     resources :accounts, only: [] do
       namespace :jrc_contact_center, module: 'accounts/jrc_contact_center' do
         resources :agent_state_histories, only: [:index]
+        resources :audio_folders, only: %i[index show create update]
       end
     end
   end

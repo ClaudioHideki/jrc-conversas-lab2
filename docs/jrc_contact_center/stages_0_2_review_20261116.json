@@ -5437,6 +5437,17 @@
         9,
         12
       ]
+    },
+    {
+      "date": "2026-11-20",
+      "sha": "ce34ac15363f3a8a71ba8f85ed1f19dff679fe56",
+      "evidence": "docs/jrc_contact_center/audio_folder_first_native_20261120.json",
+      "status": "Backend1883distintos e101schema,VUE911 aprovados,lintfrontend sem erros. Quatro apontamentosRuby bloqueiam assets/220Chrome;correção preserva consultas,rotas,fixtures e hashes. Sem aceite das pastas ou da biblioteca completa.",
+      "figures": [
+        6,
+        12,
+        16
+      ]
     }
   ],
   "approved_team_audio_boundaries_20261120": {
