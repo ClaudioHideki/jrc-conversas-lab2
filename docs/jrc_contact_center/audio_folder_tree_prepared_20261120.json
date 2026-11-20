@@ -1,0 +1,17 @@
+{
+  "status": "implemented_draft_static_lint_only",
+  "product_parent": "26867ce7117078488c4edf4d938022b8c04f0777",
+  "figures": [6, 16],
+  "native_api_reused": "audio_folders#index, same authorized unit and explicit parent_id,20 per page",
+  "native_rules_unchanged": true,
+  "prepared_vue_cases": 14,
+  "chrome": "All232 retained;4 existing native folder scenarios require real lazy expansion, collapse, server identity, nested navigation and390px overflow checks. Not yet run.",
+  "access": "Clear branch and parent library on401/403/404. Discard late results after collapse, unmount, account/unit/profile/coverage change. No cached permission grants.",
+  "accessibility": "Native list/disclosure buttons with aria-expanded/controls, no unimplemented ARIA tree contract. Unique component IDs, wrapped names, bounded scrolling and capped visual indentation.",
+  "migrations_changed": false,
+  "new_permissions": false,
+  "pabx_publication": false,
+  "full_23_figures_complete": false,
+  "remaining": ["Actual usage ledger and guarded duplicate/delete", "Browser capture", "Nico generation with actual capabilities", "Call-recording policy and external PABX contract"],
+  "adr": "docs/adr/20261120-call-center-lazy-audio-folder-tree.md"
+}

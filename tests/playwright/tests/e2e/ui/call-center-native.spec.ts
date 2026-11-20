@@ -4479,6 +4479,56 @@ test('institutional audio folders native unit organization persists, paginates a
     path: `.codex/call-center-native-e2e/${info.project.name}-audio-folder-native-library.png`,
     fullPage: true,
   });
+  await page.goto(
+    `${url}?audio_unit=${target.unit_id}&audio_q=${encodeURIComponent(target.audio_destination_name)}`
+  );
+  const disclosure = library.locator(
+    `[data-expand-audio-folder="${target.audio_destination_id}"]`
+  );
+  await expect(disclosure).toHaveAttribute('aria-expanded', 'false');
+  await expect(
+    library.locator(`[data-audio-folder="${nested.id}"]`)
+  ).toHaveCount(0);
+  const childRequest = page.waitForResponse(response => {
+    const requested = new URL(response.url());
+    return (
+      requested.pathname === prefix &&
+      requested.searchParams.get('parent_id') === target.audio_destination_id &&
+      response.request().method() === 'GET'
+    );
+  });
+  await disclosure.click();
+  const childrenResponse = await childRequest;
+  expect(childrenResponse.status()).toBe(200);
+  const childRows = await childrenResponse.json();
+  expect(childRows.account_id).toBe(String(target.account_id));
+  expect(childRows.items).toContainEqual(
+    expect.objectContaining({
+      id: nested.id,
+      parent_id: target.audio_destination_id,
+      unit_id: String(target.unit_id),
+    })
+  );
+  await expect(disclosure).toHaveAttribute('aria-expanded', 'true');
+  const nestedLink = library.locator(`[data-open-audio-folder="${nested.id}"]`);
+  await expect(nestedLink).toHaveText(nestedName);
+  await nestedLink.scrollIntoViewIfNeeded();
+  await expect(nestedLink).toBeInViewport();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-folder-native-tree.png`,
+    fullPage: true,
+  });
+  await disclosure.click();
+  await expect(nestedLink).toHaveCount(0);
+  await disclosure.click();
+  await expect(nestedLink).toBeVisible();
+  await nestedLink.click();
+  await expect(currentPath).toHaveAttribute('aria-current', 'page');
   await library.locator('[data-new-audio-folder]').click();
   await expectContainedDialog(page);
   await dialog
@@ -4521,6 +4571,9 @@ test('institutional audio folders native unit organization persists, paginates a
       denied_after_open: revokedResult.status(),
       long_folder_name_length: nestedName.length,
       authorized_path_depth: 2,
+      native_lazy_tree: true,
+      tree_children_status: childrenResponse.status(),
+      collapsed_children_removed: true,
     })
   );
   await page.screenshot({

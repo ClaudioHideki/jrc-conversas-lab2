@@ -739,3 +739,7 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] **CC-AUDIO-DURATION-20261120:** Duração real da observação atual na lista e nos detalhes, sem zero fictício ou reaproveitamento de inspeção antiga. Consulta em lote e atualização por identidade exata preparadas; testes nativos/Vue/232 Chrome pendentes. Ver `docs/jrc_contact_center/audio_verified_duration_prepared_20261120.json`.
 
 - **Evidência parcial `1d11a7bf` / CI `44819662149`:** 2.060 Rails distintos e131 recarga aprovados; Vue999/1.000 com um índice de argumento incorreto no teste; quatro convenções RSpec restantes corrigidas no incremento seguinte. Assets/232Chrome não executaram. Não representa aceite do layout ou de todas as23figuras. Ver `docs/jrc_contact_center/audio_admission_backend_verified_20261120.json`.
+
+- [ ] **CC-AUDIO-TREE-20261120:** Expansão de subpastas por API nativa, paginação limitada e limpeza de respostas atrasadas/perda de acesso preparadas.14Vue e os232Chrome ampliados ainda pendentes; não representa aceite das23figuras. Ver `docs/jrc_contact_center/audio_folder_tree_prepared_20261120.json`.
+
+- **Evidência parcial `26867ce7` / CI `44826071664`:** 2.066 Rails distintos e131recargas aprovados; duração/consulta em lote nativas aprovadas. Vue1.010/1.011 e uma convenção de alinhamento Ruby bloquearam assets/Chrome. Correções mantêm inspeção atual indisponível, histórico antigo e ausência de prévia. Ver `docs/jrc_contact_center/audio_duration_backend_verified_20261120.json`.

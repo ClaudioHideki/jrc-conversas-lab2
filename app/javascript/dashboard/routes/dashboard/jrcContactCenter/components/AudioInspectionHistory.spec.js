@@ -124,12 +124,19 @@ describe('current audio metadata events (transport fixtures, not native scanner 
       versionId: '99',
       proof: later,
     });
+    const current = wrapper.get('[data-audio-inspection="101"]');
     expect(
-      wrapper.find('[data-audio-inspection-state="unavailable"]').exists()
+      current.get('[data-audio-inspection-state="unavailable"]').exists()
     ).toBe(true);
+    expect(current.find('[data-audio-decoded-metadata]').exists()).toBe(false);
     expect(
-      wrapper.find('[data-audio-inspection-state="verified"]').exists()
-    ).toBe(false);
+      wrapper
+        .get(
+          '[data-audio-inspection="100"] [data-audio-inspection-state="verified"]'
+        )
+        .exists()
+    ).toBe(true);
+    expect(wrapper.find('audio-version-preview-stub').exists()).toBe(false);
   });
 
   it('does not emit an accepted old-profile observation after current permission was withdrawn', async () => {

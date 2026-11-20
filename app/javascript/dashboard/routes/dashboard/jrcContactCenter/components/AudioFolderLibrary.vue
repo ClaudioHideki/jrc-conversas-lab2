@@ -7,6 +7,7 @@ import API from 'dashboard/api/jrcContactCenter';
 import { useMapGetter } from 'dashboard/composables/store';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import AudioAssetLibrary from './AudioAssetLibrary.vue';
+import AudioFolderBranch from './AudioFolderBranch.vue';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 
 const props = defineProps({
@@ -484,29 +485,18 @@ onBeforeUnmount(() => {
           data-audio-folder-scroll
           class="max-h-80 space-y-2 overflow-y-auto overscroll-contain pr-1"
         >
-          <li
+          <AudioFolderBranch
             v-for="row in items"
             :key="row.id"
-            class="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-3"
-            :data-audio-folder="row.id"
-          >
-            <button
-              type="button"
-              class="min-w-0 flex-1 break-words text-left text-n-blue-11"
-              @click="navigate(row.id)"
-            >
-              {{ row.name }}
-            </button>
-            <button
-              type="button"
-              :disabled="opening || saving"
-              class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
-              :data-edit-audio-folder="row.id"
-              @click="open(row)"
-            >
-              {{ label('EDIT') }}
-            </button>
-          </li>
+            :account-id="accountId"
+            :unit-id="unitId"
+            :folder="row"
+            :can-manage="canManage"
+            :busy="opening || saving"
+            @navigate="navigate"
+            @edit="open"
+            @denied="clearDeniedContext"
+          />
         </ul>
         <nav
           v-if="meta.pages > 1"

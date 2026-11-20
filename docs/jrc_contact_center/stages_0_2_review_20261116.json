@@ -5843,5 +5843,35 @@
     "assets_chrome": "not_run",
     "full_candidate_approved": false,
     "all_word_complete": false
+  },
+  "audio_folder_tree_prepared_20261120": {
+    "status": "Implemented draft; static lint passed;14Vue and extended232Chrome still pending",
+    "figures": [
+      6,
+      16
+    ],
+    "report": "docs/jrc_contact_center/audio_folder_tree_prepared_20261120.json",
+    "native_api_permissions_and_migrations_unchanged": true,
+    "all_word_complete": false
+  },
+  "audio_duration_backend_verified_20261120": {
+    "status": "partial_native_verified_not_candidate_approval",
+    "producer": "26867ce7117078488c4edf4d938022b8c04f0777",
+    "run": 44826071664,
+    "artifact": 14676265190,
+    "artifact_sha256": "e02a5110bf1f8d5865f66e07c6bea14c2eaf8b34fa0312055173cee947efbc3c",
+    "native_distinct": 2066,
+    "schema_reload_separate": 131,
+    "migrations": "Fresh/re-execution/reload, native fingerprints and protection steps passed. No historical source changed.",
+    "duration": "Five real authenticated metadata cases and one bounded batch query case passed; current unavailable proof hides older duration. Three-file batch is not scale validation.",
+    "vue_passed": 1010,
+    "vue_failed": 1,
+    "new_ruby_offenses": 1,
+    "vue_cause": "Assertion searched the entire history for any verified entry, although a preserved older clean receipt is valid. Prepared assertion scopes the current unavailable record, requires no current metadata/preview, and explicitly retains the historical verified record.",
+    "ruby_cause": "One fluent .includes alignment in AudioLibraryAccess, no functional change.",
+    "assets_and_chrome": "Skipped by mandatory gates;232 remain required on the next SHA.",
+    "full_23_figures_complete": false,
+    "scanner_limitation": "Real ClamAV with only synthetic definitions; no operational malware coverage or external homologation claimed.",
+    "report": "docs/jrc_contact_center/audio_duration_backend_verified_20261120.json"
   }
 }

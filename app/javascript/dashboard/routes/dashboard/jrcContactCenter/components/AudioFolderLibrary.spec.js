@@ -88,6 +88,38 @@ beforeEach(() => {
 });
 
 describe('unit scoped institutional folder UI', () => {
+  it('uses scoped lazy children for navigation and clears the library when their native request loses permission', async () => {
+    const wrapper = setup();
+    await flushPromises();
+    API.audioFolders.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        items: [record({ id: '11', parent_id: '9', name: 'SYNTHETIC nested' })],
+        meta: { page: 1, pages: 1, total: 1 },
+      },
+    });
+    await wrapper.get('[data-expand-audio-folder="9"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-open-audio-folder="11"]').trigger('click');
+    expect(mocks.replace).toHaveBeenCalledWith({
+      query: {
+        audio_parent: '11',
+        audio_q: undefined,
+        audio_page: 1,
+        audio_file_page: 1,
+        audio_file_q: undefined,
+      },
+    });
+    API.audioFolders.mockRejectedValueOnce({ response: { status: 403 } });
+    await wrapper.get('[data-expand-audio-folder="11"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-audio-folder="9"]').exists()).toBe(false);
+    expect(wrapper.get('[role="alert"]').text()).toBe(
+      'JRC_CONTACT_CENTER.AUDIO_FOLDERS.ERROR'
+    );
+    expect(API.saveAudioFolder).not.toHaveBeenCalled();
+  });
+
   it('returns to the last real folder page after reorganization without leaving an inaccessible empty second page', async () => {
     mocks.route.query = {
       audio_page: '2',
