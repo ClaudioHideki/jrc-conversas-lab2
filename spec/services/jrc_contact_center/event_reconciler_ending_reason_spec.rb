@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 # The existing normalized inbox contract is simulated here, not a real provider signature or ACK.
-RSpec.describe JrcContactCenter::EventReconciler, 'frozen ending reason compatibility with native normalized events' do
+RSpec.describe JrcContactCenter::EventReconciler do
   include_context 'with a frozen ending reason catalogue'
 
   it 'preserves the first observed policy while the reconciler corrects started_at from a late call.created event' do
@@ -13,7 +13,7 @@ RSpec.describe JrcContactCenter::EventReconciler, 'frozen ending reason compatib
         provider: 'jrc_pabx', call_session_id: external, correlation_id: correlation, payload: { direction: 'inbound' } },
       signature_verified: true
     ).record
-    JrcContactCenter::EventReconciler.new(event_record: first).call
+    described_class.new(event_record: first).call
     expect(first.reload.status).to eq('processed')
     call = JrcContactCenter::CallSession.find_by!(account: account, correlation_id: correlation)
     original = call.ending_reason_version_id
@@ -25,7 +25,7 @@ RSpec.describe JrcContactCenter::EventReconciler, 'frozen ending reason compatib
         provider: 'jrc_pabx', call_session_id: external, correlation_id: correlation, payload: { direction: 'inbound' } },
       signature_verified: true
     ).record
-    JrcContactCenter::EventReconciler.new(event_record: correction).call
+    described_class.new(event_record: correction).call
     expect(correction.reload.status).to eq('processed')
     expect(call.reload.started_at).to eq(earlier)
     expect(call.ending_reason_version_id).to eq(original)

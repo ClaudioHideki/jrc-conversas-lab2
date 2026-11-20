@@ -846,6 +846,7 @@ onBeforeUnmount(() => {
           :key="row.id || row.name"
           class="flex min-w-0 flex-wrap items-center justify-between gap-3 py-3"
           data-resource-row
+          :data-resource-id="row.id"
         >
           <div class="min-w-0">
             <p class="break-words font-semibold text-n-slate-12">
@@ -1062,7 +1063,7 @@ onBeforeUnmount(() => {
                 {{ row.name }}
                 {{
                   row.eligible === false
-                    ? ` · ${t('JRC_CONTACT_CENTER.ACCESS.PENDING')}`
+                    ? ` · ${t('JRC_CONTACT_CENTER.ACCESS.ENROLLMENT_UNAVAILABLE')}`
                     : ''
                 }}
               </option>

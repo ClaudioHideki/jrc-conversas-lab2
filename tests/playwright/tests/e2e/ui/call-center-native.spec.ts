@@ -32,53 +32,55 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('registered ending native')
-    ? 'required_endings'
-    : info.title.startsWith('ending reason native')
-      ? 'form_bindings'
-      : info.title.startsWith('Hoya workspace native')
-        ? 'hoya_forms'
-        : info.title.startsWith('state history native')
-          ? 'state_history'
-          : info.title.startsWith('operational form native')
-            ? 'operational_forms'
-            : info.title.startsWith('form bindings native')
-              ? 'form_bindings'
-              : info.title.startsWith('deferred pause native uncertain')
-                ? 'deferred_pause_retry'
-                : info.title.startsWith('deferred pause native')
-                  ? 'deferred_pause'
-                  : info.title.startsWith('whole native team deletion')
-                    ? 'team_deletion'
-                    : info.title.startsWith('pending ACW native navigation')
-                      ? 'acw_navigation'
-                      : info.title.startsWith('pending ACW native draft')
-                        ? 'acw_draft'
-                        : info.title.startsWith('pending ACW native review')
-                          ? 'acw_review'
-                          : info.title.startsWith('team roster last eligible')
-                            ? 'team_withdrawal'
-                            : info.title.startsWith('native local routing')
-                              ? 'routing'
-                              : info.title.startsWith('scoped ACW native')
-                                ? 'acw'
-                                : info.title.startsWith(
-                                      'last eligible queue withdrawal'
-                                    )
-                                  ? 'withdrawal'
+  const pauseKey = info.title.startsWith('inactive membership native')
+    ? 'membership_eligibility'
+    : info.title.startsWith('registered ending native')
+      ? 'required_endings'
+      : info.title.startsWith('ending reason native')
+        ? 'form_bindings'
+        : info.title.startsWith('Hoya workspace native')
+          ? 'hoya_forms'
+          : info.title.startsWith('state history native')
+            ? 'state_history'
+            : info.title.startsWith('operational form native')
+              ? 'operational_forms'
+              : info.title.startsWith('form bindings native')
+                ? 'form_bindings'
+                : info.title.startsWith('deferred pause native uncertain')
+                  ? 'deferred_pause_retry'
+                  : info.title.startsWith('deferred pause native')
+                    ? 'deferred_pause'
+                    : info.title.startsWith('whole native team deletion')
+                      ? 'team_deletion'
+                      : info.title.startsWith('pending ACW native navigation')
+                        ? 'acw_navigation'
+                        : info.title.startsWith('pending ACW native draft')
+                          ? 'acw_draft'
+                          : info.title.startsWith('pending ACW native review')
+                            ? 'acw_review'
+                            : info.title.startsWith('team roster last eligible')
+                              ? 'team_withdrawal'
+                              : info.title.startsWith('native local routing')
+                                ? 'routing'
+                                : info.title.startsWith('scoped ACW native')
+                                  ? 'acw'
                                   : info.title.startsWith(
-                                        'local pause duration supervisor'
+                                        'last eligible queue withdrawal'
                                       )
-                                    ? 'duration'
+                                    ? 'withdrawal'
                                     : info.title.startsWith(
-                                          'local pause catalog operator'
+                                          'local pause duration supervisor'
                                         )
-                                      ? 'operations'
+                                      ? 'duration'
                                       : info.title.startsWith(
-                                            'local pause catalog'
+                                            'local pause catalog operator'
                                           )
-                                        ? 'editor'
-                                        : null;
+                                        ? 'operations'
+                                        : info.title.startsWith(
+                                              'local pause catalog'
+                                            )
+                                          ? 'editor'
+                                          : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -354,7 +356,7 @@ test('native queue eligibility is rechecked before saving and preserves the revi
   await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   expect((await rejected).status()).toBe(422);
   await expect(dialog.getByRole('alert')).toContainText(
-    'pendente de autorização'
+    'não está elegível para novas atribuições'
   );
   await expect(dialog.getByLabel('Usuário', { exact: true })).toHaveValue(
     String(targets.enrollment_eligible.id)
@@ -6539,4 +6541,137 @@ test('registered ending native preserves the call catalogue while managers revis
   expect(external).toEqual([]);
   expect(commands).toEqual([]);
   await operatorPage.close();
+});
+
+test('inactive membership native denies enrollment despite a retained grant and safely deactivates an existing link', async ({
+  page,
+}, info) => {
+  const target =
+    session.pause_targets[info.project.name].membership_eligibility;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const endpoint = ownApi + '/queue_memberships';
+  const errors = [];
+  const external = [];
+  const commands = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.route('**/*', route => {
+    const url = new URL(route.request().url());
+    if (
+      ['http:', 'https:'].includes(url.protocol) &&
+      url.hostname !== '127.0.0.1'
+    ) {
+      external.push(url.origin + url.pathname);
+      return route.abort('blockedbyclient');
+    }
+    if (
+      /\/(commands|sync_calls|telephony_integration)(?:[/?]|$)/.test(
+        url.pathname
+      ) &&
+      !['GET', 'HEAD'].includes(route.request().method())
+    )
+      commands.push(url.pathname);
+    return route.continue();
+  });
+  const initial = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect(initial.status()).toBe(200);
+  const before = (await initial.json()).meta.total;
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/queues?queues_tab=memberships`
+  );
+  await page.locator('[data-create]').click();
+  let dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
+  const unavailable = dialog.locator(`option[value="${target.operator_id}"]`);
+  await expect(unavailable).toBeDisabled();
+  await expect(unavailable).toContainText(
+    'Indisponível para novas atribuições'
+  );
+  for (const participates of [true, false]) {
+    const denied = await page.request.post(endpoint, {
+      headers: target.administrator,
+      data: {
+        queue_membership: {
+          queue_id: target.enrollment_queue_id,
+          account_user_id: target.operator_id,
+          participates,
+          supervises: !participates,
+        },
+      },
+    });
+    expect(denied.status()).toBe(422);
+    expect((await denied.json()).error).toBe('ineligible_member');
+  }
+  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  let row = page.locator(
+    `[data-resource-id="${target.inactive_membership_id}"]`
+  );
+  await row.locator('[data-edit]').click();
+  dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
+  await expect(
+    dialog.locator(`option[value="${target.operator_id}"]`)
+  ).toBeEnabled();
+  await expect(dialog.getByLabel('Usuário', { exact: true })).toHaveValue(
+    String(target.operator_id)
+  );
+  await dialog.getByLabel('Ativo', { exact: true }).uncheck();
+  let saved = page.waitForResponse(
+    r =>
+      r.url().endsWith(`/queue_memberships/${target.inactive_membership_id}`) &&
+      r.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await saved).status()).toBe(200);
+  await page.reload();
+  row = page.locator(`[data-resource-id="${target.inactive_membership_id}"]`);
+  await expect(row).toContainText('Inativo');
+  await row.locator('[data-edit]').click();
+  dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Ativo', { exact: true }).check();
+  saved = page.waitForResponse(
+    r =>
+      r.url().endsWith(`/queue_memberships/${target.inactive_membership_id}`) &&
+      r.request().method() === 'PATCH'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  expect((await saved).status()).toBe(422);
+  await expect(dialog.getByRole('alert')).toContainText(
+    'não está elegível para novas atribuições'
+  );
+  await expect(dialog.getByLabel('Ativo', { exact: true })).toBeChecked();
+  const stored = await page.request.get(
+    endpoint + `/${target.inactive_membership_id}`,
+    { headers: target.administrator }
+  );
+  expect(stored.status()).toBe(200);
+  expect((await stored.json()).item).toMatchObject({
+    active: false,
+    account_user_id: target.operator_id,
+  });
+  const after = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect((await after.json()).meta.total).toBe(before);
+  const grant = await page.request.get(
+    ownApi + `/access_authorizations/users/${target.operator_id}`,
+    { headers: target.administrator }
+  );
+  expect(grant.status()).toBe(200);
+  expect((await grant.json()).item.eligible).toBe(true);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page.locator('html').evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-inactive-recipient-guard.png`,
+  });
+  expect(errors).toEqual([]);
+  expect(external).toEqual([]);
+  expect(commands).toEqual([]);
 });

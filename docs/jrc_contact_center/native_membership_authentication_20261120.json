@@ -1,0 +1,32 @@
+{
+  "status": "prepared_native_and_browser_pending",
+  "word_figures": [
+    3,
+    12
+  ],
+  "decision_dependency": "None for this correction; team inactivation semantics are separate.",
+  "native_reuse": [
+    "Current User.active_for_authentication?",
+    "Explicit AccessGrant eligibility",
+    "Native Account/parent locks, fresh configuration scope and mandatory audit",
+    "Existing unavailable-option and draft-preservation UI",
+    "Existing guarded synthetic runner and native PostgreSQL fixtures"
+  ],
+  "regressions_prepared": {
+    "request_examples": 4,
+    "committed_lock_examples": 3,
+    "vue_examples": 1,
+    "additional_chrome_paths": 4,
+    "total_chrome_required": 212
+  },
+  "static_validation": {
+    "frontend_new_errors": 0,
+    "component_change": "Two reviewed hunks:stable authorized row id and accurate unavailable label; existing warnings retained",
+    "workflow_compile_regressions": 7,
+    "embedded_blocks_compiled": 2,
+    "reviewed_rename_checks": 6,
+    "native_test_assertions_preserved": 7
+  },
+  "last_native_evidence": "ending-722bee5a-native-pass-lint-block.json;does not include this follow-up",
+  "protection": "No migration change, real grants, production data, provider command, build Docker, merge or deployment."
+}

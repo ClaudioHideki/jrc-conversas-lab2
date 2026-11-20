@@ -141,6 +141,32 @@ describe('administrative workflow', () => {
     }
   );
 
+  it('keeps an unavailable native recipient disabled with an accurate enrollment label', async () => {
+    mocks.route.query = { queues_tab: 'memberships' };
+    API.queueMemberships.mockResolvedValue({
+      data: {
+        items: [],
+        agents: [
+          {
+            account_user_id: '8',
+            name: 'SYNTHETIC unavailable',
+            eligible: false,
+          },
+        ],
+      },
+    });
+    const wrapper = mountSection('queues');
+    await flushPromises();
+    await wrapper.get('[data-create]').trigger('click');
+    await flushPromises();
+    const option = wrapper.get('option[value="8"]');
+    expect(option.element.disabled).toBe(true);
+    expect(option.text()).toContain(
+      'JRC_CONTACT_CENTER.ACCESS.ENROLLMENT_UNAVAILABLE'
+    );
+    expect(API.saveQueueMembership).not.toHaveBeenCalled();
+  });
+
   it('does not load a native role editor without the server capability', async () => {
     const wrapper = mountSection('permissions', 'native_module');
     await flushPromises();

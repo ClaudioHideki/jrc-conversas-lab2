@@ -1,5 +1,5 @@
 {
-  "status": "prepared_not_natively_validated",
+  "status": "implemented_native_tests_passed_visual_and_final_lint_pending",
   "business_rule": {
     "registered_reason_required": "Explicitly selected native queues only",
     "existing_calls": "Keep their pinned catalogue revision, or their pre-feature legacy state",
@@ -84,7 +84,7 @@
   "native_delayed_event_compatibility_prepared": {
     "source": "JrcContactCenter::EventReconciler#session_details uses the earlier of stored started_at and the normalized event timestamp.",
     "correction": "Preserve that native behavior and freeze the separate first-observed policy timestamp and catalogue id. No reconciler or provider endpoint change.",
-    "test": "spec/services/jrc_contact_center/ending_reason_event_compatibility_spec.rb",
+    "test": "spec/services/jrc_contact_center/event_reconciler_ending_reason_spec.rb",
     "native_validation": "pending",
     "real_provider_hmac_ack": "not tested"
   },
@@ -119,5 +119,23 @@
     "correction": "Travel only fixture setup to2minutes ago,call starts1minute ago and ends10seconds after its start. Native check and all business assertions unchanged.",
     "ruby": "Five new findings after the previous five were resolved:extract unchanged constraint/receipt construction;align string;describe native class;remove terminal blank.",
     "vue_chrome": "not run; no approval inferred"
+  },
+  "gate_722bee5a": {
+    "sha": "722bee5a05dce1e8313df55659083b724f75d484",
+    "run": 44672804599,
+    "native_rails_unique": 1798,
+    "counts": {
+      "call-center-rspec.json": 1619,
+      "call-center-pabx-rspec.json": 94,
+      "call-center-corporate-rspec.json": 85
+    },
+    "schema_reload_reexecutions": 81,
+    "vue": 869,
+    "new_ruby_lint": 4,
+    "ruby_findings_scope": "One new test only:class/path/describe/described_class conventions. All5previous findings resolved.",
+    "assets_chrome": "not run",
+    "overall_ci": "failure",
+    "artifact_id": 14601452894,
+    "artifact_sha256": "bc0bfae765abe6344d73fd74c1b923568882c2779f2e0aa385671188ca0eba9e"
   }
 }

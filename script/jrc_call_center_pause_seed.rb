@@ -21,7 +21,7 @@ class JrcContactCenter::SyntheticPauseSeed
       %w[
         editor operations withdrawal duration acw routing state_history
         team_withdrawal acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
-        operational_forms form_bindings hoya_forms required_endings
+        operational_forms form_bindings hoya_forms required_endings membership_eligibility
       ].index_with do |kind|
         new("#{project}-#{kind}").call
       end
@@ -66,9 +66,20 @@ class JrcContactCenter::SyntheticPauseSeed
     if @project.end_with?('-required_endings')
       payload.merge!(JrcContactCenter::SyntheticEndingReasonSeed.new(account: @account, admin: admin, operator: operator, queue: queue).call)
     end
+    prepare_inactive_membership(payload, queue, operator) if @project.end_with?('-membership_eligibility')
     return unless @project.end_with?('-operational_forms', '-form_bindings', '-hoya_forms')
 
     payload.merge!(JrcContactCenter::SyntheticOperationalFormSeed.new(account: @account, admin: admin, queue: queue).call)
+  end
+
+  def prepare_inactive_membership(payload, queue, operator)
+    target = JrcContactCenter::Queue.create!(account: @account, unit: queue.unit, code: 'SYNTHETIC-ENROLLMENT',
+                                             name: 'SYNTHETIC new enrollment queue')
+    membership = queue.memberships.find_by!(account_user: operator)
+    operator.user.update!(confirmed_at: nil)
+    raise 'Synthetic recipient must not be active for authentication' if operator.user.reload.active_for_authentication?
+
+    payload.merge!(enrollment_queue_id: target.id, inactive_membership_id: membership.id, inactive_user_id: operator.user_id)
   end
 
   def pending_qualification(queue, operator)

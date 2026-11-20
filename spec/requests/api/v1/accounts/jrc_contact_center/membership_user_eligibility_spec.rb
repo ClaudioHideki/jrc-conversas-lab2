@@ -62,4 +62,43 @@ RSpec.describe 'Call Center enrollment requires explicit user eligibility', type
     expect(response).to have_http_status(:unprocessable_entity)
     expect(membership.reload.account_user_id).not_to eq(member.id)
   end
+
+  it 'marks an unconfirmed user unavailable even when an explicit grant remains and online presence is true' do
+    recipient.update!(confirmed_at: nil, availability: :online)
+    JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true)
+    expect(recipient.reload.active_for_authentication?).to be(false)
+    get base, headers: headers
+    option = response.parsed_body.fetch('agents').find { |row| row['account_user_id'] == member.id.to_s }
+    expect(option).to include('eligible' => false)
+    expect(JrcContactCenter::AccessGrant.find_by!(account_user: member).eligible).to be(true)
+  end
+
+  [true, false].each do |participates|
+    it "blocks #{participates ? 'participation' : 'supervision'} for an unconfirmed user without changing its real grant" do
+      recipient.update!(confirmed_at: nil)
+      grant = JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true)
+      attributes = { queue_membership: { queue_id: queue.id, account_user_id: member.id,
+                                       participates: participates, supervises: !participates } }
+      expect { post base, headers: headers, params: attributes, as: :json }.not_to change(JrcContactCenter::QueueMembership, :count)
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body.fetch('error')).to eq('ineligible_member')
+      expect(grant.reload.eligible).to be(true)
+      expect(recipient.reload.active_for_authentication?).to be(false)
+    end
+  end
+
+  it 'still allows safe deactivation for an unconfirmed recipient and refuses reactivation' do
+    grant = JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true)
+    membership = JrcContactCenter::QueueMembership.create!(account: account, queue: queue, account_user: member)
+    recipient.update!(confirmed_at: nil)
+    patch "#{base}/#{membership.id}", headers: headers, params: { queue_membership: { active: false } }, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(membership.reload.active).to be(false)
+    patch "#{base}/#{membership.id}", headers: headers, params: { queue_membership: { active: true } }, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.fetch('error')).to eq('ineligible_member')
+    expect(membership.reload.active).to be(false)
+    expect(grant.reload.eligible).to be(true)
+  end
+
 end

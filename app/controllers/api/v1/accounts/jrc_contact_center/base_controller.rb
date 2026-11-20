@@ -78,6 +78,9 @@ class Api::V1::Accounts::JrcContactCenter::BaseController < Api::V1::Accounts::B
   def reauthorize_configuration_write!(record)
     Current.account.reload
     Current.account_user.reload
+    Current.user.reload
+    raise Pundit::NotAuthorizedError unless Current.user.active_for_authentication?
+
     @contact_center_access = JrcContactCenter::AccessScope.new(user_context: pundit_user)
     raise Pundit::NotAuthorizedError unless @contact_center_access.policy.configure?
 

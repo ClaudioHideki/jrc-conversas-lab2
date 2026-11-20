@@ -139,13 +139,14 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     end
   end
 
-  def hold_account_change(change)
+  def hold_account_change(change, defer_change: false)
     workers << Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
         Account.find(account.id).with_lock do
-          change.call
+          change.call unless defer_change
           entered << true
           Timeout.timeout(15) { release.pop }
+          change.call if defer_change
         end
       end
     rescue StandardError => e
@@ -153,11 +154,11 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     end
   end
 
-  def race_with_account_change(change, endpoint: nil, payload: nil, verb: :patch)
+  def race_with_account_change(change, endpoint: nil, payload: nil, verb: :patch, defer_change: false)
     endpoint ||= "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy"
     payload ||= { limits: { voice: 60, whatsapp: 120 }, voice_required: false }
     observe_account_read
-    hold_account_change(change)
+    hold_account_change(change, defer_change: defer_change)
     Timeout.timeout(8) { entered.pop }
     dispatch_configuration_request(verb, endpoint, payload)
     Timeout.timeout(8) { read.pop }
@@ -648,5 +649,37 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     expect(version.definition.fetch('entries').sole.fetch('name')).to eq('SYNTHETIC newest')
     expect(version.revision).to eq(1)
     expect(JrcContactCenter::AcwEndingReasons.new(account: account.reload).call).to eq(version.definition)
+  end
+
+  %w[create update].each do |operation|
+    it "does not #{operation} a queue after the authenticated actor becomes unconfirmed during the Account lock wait" do
+      previous = JrcContactCenter::Queue.where(account: account).order(:id).pluck(:id, :name, :code, :unit_id)
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/queues"
+      endpoint += "/#{queue.id}" if operation == 'update'
+      payload = { queue: { unit_id: units.first.id, code: 'SYNTHETIC-UNCONFIRMED', name: 'Forbidden after deactivation' } }
+      change = -> { User.find(actor.id).update!(confirmed_at: nil) }
+      status = race_with_account_change(
+        change, endpoint: endpoint, payload: payload, verb: operation == 'create' ? :post : :patch, defer_change: true
+      )
+      expect(status).to eq(401)
+      expect(JrcContactCenter::Queue.where(account: account).order(:id).pluck(:id, :name, :code, :unit_id)).to eq(previous)
+      expect(actor.reload.active_for_authentication?).to be(false)
+    end
+  end
+
+  it 'does not enroll a newly unconfirmed recipient after a committed account lock wait despite its retained grant' do
+    JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
+    recipient = create(:user, :contact_center_eligible, account: account)
+    member = account.account_users.find_by!(user: recipient)
+    JrcCrm::UserBusinessUnit.create!(account: account, user: recipient, scope: 'BUSINESS_UNIT', business_unit: business_units.first,
+                                    company: company, active: true, structure_managed: true)
+    change = -> { User.find(recipient.id).update!(confirmed_at: nil) }
+    payload = { queue_membership: { queue_id: queue.id, account_user_id: member.id } }
+    endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/queue_memberships"
+    status = race_with_account_change(change, endpoint: endpoint, payload: payload, verb: :post, defer_change: true)
+    expect(status).to eq(422)
+    expect(JrcContactCenter::QueueMembership.where(account_user: member)).to be_empty
+    expect(JrcContactCenter::AccessGrant.find_by!(account_user: member).eligible).to be(true)
+    expect(recipient.reload.active_for_authentication?).to be(false)
   end
 end

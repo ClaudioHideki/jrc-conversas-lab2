@@ -52,7 +52,8 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
   def agent_options
     eligible_ids = JrcContactCenter::AccessGrant.where(account: Current.account, eligible: true).pluck(:account_user_id).to_set
     eligible_members.includes(:user).order(:id).map do |member|
-      { account_user_id: member.id.to_s, name: member.user.available_name, eligible: eligible_ids.include?(member.id) }
+      { account_user_id: member.id.to_s, name: member.user.available_name,
+        eligible: eligible_ids.include?(member.id) && member.user.active_for_authentication? }
     end
   end
 
@@ -115,8 +116,9 @@ class Api::V1::Accounts::JrcContactCenter::QueueMembershipsController < Api::V1:
     return if deactivating_membership?(attributes, membership)
 
     member_id = attributes[:account_user_id].presence || membership&.account_user_id
+    member = Current.account.account_users.includes(:user).find(member_id)
     eligible = JrcContactCenter::AccessGrant.exists?(account: Current.account, account_user_id: member_id, eligible: true)
-    return if eligible
+    return if eligible && member.user.active_for_authentication?
 
     raise JrcContactCenter::OperationError, 'ineligible_member'
   end

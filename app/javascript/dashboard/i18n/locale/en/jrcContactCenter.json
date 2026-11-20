@@ -1975,8 +1975,9 @@
       "SERVER_VALIDATES": "As etiquetas mostram o estado atual. O servidor revalidará a alçada e calculará o resultado das alterações ao salvar.",
       "REVIEW": "Revisei as alterações, as origens e os bloqueios antes de confirmar.",
       "TEAM_ALLOWED": "Concessão herdável da equipe",
-      "ENROLLMENT_BLOCKED": "Este usuário está pendente de autorização no Call Center. O vínculo não foi salvo e os dados foram preservados.",
-      "ENROLLMENT_SCOPE": "O usuário não possui cobertura para a unidade desta fila. Revise os vínculos corporativos existentes. O vínculo não foi salvo e os dados foram preservados."
+      "ENROLLMENT_BLOCKED": "Este usuário não está elegível para novas atribuições no Call Center. Verifique a ativação do acesso e a situação do usuário. O vínculo não foi salvo e os dados foram preservados.",
+      "ENROLLMENT_SCOPE": "O usuário não possui cobertura para a unidade desta fila. Revise os vínculos corporativos existentes. O vínculo não foi salvo e os dados foram preservados.",
+      "ENROLLMENT_UNAVAILABLE": "Indisponível para novas atribuições"
     },
     "LOCAL_IVR": {
       "TITLE": "URAs locais",
