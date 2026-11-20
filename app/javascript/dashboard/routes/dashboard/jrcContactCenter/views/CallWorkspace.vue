@@ -65,6 +65,13 @@ const callTone = computed(() => {
   };
   return tones[call.value?.status] || 'blue';
 });
+const hasUnlinkedPhoneCandidate = computed(
+  () =>
+    !call.value?.contact_id &&
+    !customer.value?.directory?.contact_id &&
+    customer.value?.contacts?.length === 1 &&
+    !customer.value?.ambiguous
+);
 const customerName = computed(() =>
   customer.value?.ambiguous
     ? t('JRC_CONTACT_CENTER.CALL.AMBIGUOUS')
@@ -327,6 +334,14 @@ defineExpose({
     </header>
 
     <div class="p-4 sm:p-5">
+      <p
+        v-if="hasUnlinkedPhoneCandidate"
+        role="status"
+        data-customer-phone-candidate
+        class="mb-4 rounded-xl border border-n-amber-5 bg-n-amber-2 p-3 text-sm text-n-amber-11"
+      >
+        {{ t('JRC_CONTACT_CENTER.CALL.PHONE_CANDIDATE') }}
+      </p>
       <div
         v-if="failed"
         role="alert"

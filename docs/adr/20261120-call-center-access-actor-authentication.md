@@ -9,3 +9,7 @@ A correção acrescenta somente essa verificação antes das ramificações nati
 Um teste preserva deliberadamente o objeto antigo em memória, altera o User por outro objeto nativo e exige recusa sem persistir o grant. Outros dois usam o banco descartável, transação e pg_stat_activity para comprovar espera real pelo lock antes de retirar autenticação. Cobrem concessões individuais e por equipe, com snapshot integral dos grants antes/depois.
 
 Os testes e esta alteração não integram o SHA 76c37bbe já em CI. Serão validados no checkpoint deste incremento; as evidências anteriores não serão atribuídas a este complemento. Não há mudanças de interface, novas operações externas, ativação de alçadas, publicação ou deploy.
+
+## Validação nativa concluída
+
+SHA86c4ad536c5cfdcb091498ae4552ad2b8a143773,CI44679530987:1.808Rails distintos,81reexecuções schema,870Vue,212Chrome,zero falhas/pendências/erros externos.308capturas com hashes conferidos e12revisadas visualmente. Artefato14606540165,SHA-256d174620ae05e9ce122ab38a3c77490d7ab0c8565db845618299d7afeb555b8f8. Os estados preparados acima registram o histórico;este incremento está validado,sem concluir as23figuras.

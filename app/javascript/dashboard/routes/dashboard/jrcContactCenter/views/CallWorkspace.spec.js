@@ -311,3 +311,122 @@ describe('native master updates inside an attendance draft', () => {
     expect(wrapper.text()).not.toContain('SYNTHETIC obsolete account');
   });
 });
+
+describe('phone candidates are not confirmed call links', () => {
+  const candidate = {
+    status: 'identified',
+    identity_source: 'phone_candidates',
+    ambiguous: false,
+    contacts: [{ id: '77', name: 'SYNTHETIC possible contact' }],
+  };
+  const payload = customer => ({
+    data: {
+      item: {
+        id: 10,
+        contact_id: null,
+        direction: 'inbound',
+        ani: '+5511999999999',
+        status: 'connected',
+        customer,
+      },
+    },
+  });
+  const render = () =>
+    mount(CallWorkspace, {
+      props: {
+        accountId: '1',
+        callId: 10,
+        context: { capabilities: { operate: true } },
+      },
+      global: { stubs: { RouterLink: true } },
+    });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    JrcContactCenterAPI.call.mockResolvedValue(payload(candidate));
+    JrcContactCenterAPI.agentState.mockResolvedValue({
+      data: { item: { account_user_id: '20' } },
+    });
+    JrcContactCenterAPI.createCase.mockResolvedValue({ data: { item: {} } });
+  });
+
+  it('labels a unique phone candidate without opening the native master or replacing the legacy API status', async () => {
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.get('[data-customer-phone-candidate]').text()).toBe(
+      'JRC_CONTACT_CENTER.CALL.PHONE_CANDIDATE'
+    );
+    expect(wrapper.find('[data-open-linked-master]').exists()).toBe(false);
+    expect(wrapper.emitted('loaded').at(-1)[0]).toMatchObject({
+      call: { contact_id: null },
+      customer: { status: 'identified', identity_source: 'phone_candidates' },
+    });
+    expect(JrcContactCenterAPI.customerContext).not.toHaveBeenCalled();
+  });
+
+  it('preserves the original unlinked call when saving an occurrence despite a unique telephone match', async () => {
+    const wrapper = render();
+    await flushPromises();
+    await wrapper
+      .get('input[aria-label="JRC_CONTACT_CENTER.CALL.CATEGORY"]')
+      .setValue('SYNTHETIC');
+    await wrapper
+      .get('textarea[aria-label="JRC_CONTACT_CENTER.OCCURRENCES.SUMMARY"]')
+      .setValue('SYNTHETIC attendance');
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'JRC_CONTACT_CENTER.CALL.CREATE_CASE')
+      .trigger('click');
+    await flushPromises();
+    expect(JrcContactCenterAPI.createCase).toHaveBeenCalledTimes(1);
+    expect(JrcContactCenterAPI.createCase).toHaveBeenCalledWith('1', {
+      call_session_id: 10,
+      contact_id: undefined,
+      owner_account_user_id: '20',
+      channel: 'phone',
+      category: 'SYNTHETIC',
+      summary: 'SYNTHETIC attendance',
+    });
+    expect(wrapper.get('[data-customer-phone-candidate]').exists()).toBe(true);
+    expect(wrapper.find('[data-open-linked-master]').exists()).toBe(false);
+  });
+
+  it('clears the phone candidate immediately on navigation and ignores a late response from the previous call', async () => {
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.find('[data-customer-phone-candidate]').exists()).toBe(true);
+    let resolvePrevious;
+    JrcContactCenterAPI.call.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolvePrevious = resolve;
+        })
+    );
+    await wrapper.setProps({ callId: 11 });
+    expect(wrapper.find('[data-customer-phone-candidate]').exists()).toBe(
+      false
+    );
+    const linked = payload({
+      ...candidate,
+      identity_source: 'call_contact_link',
+      directory: { contact_id: '77' },
+    });
+    linked.data.item.id = 12;
+    linked.data.item.contact_id = 77;
+    JrcContactCenterAPI.call.mockResolvedValueOnce(linked);
+    await wrapper.setProps({ accountId: '9', callId: 12 });
+    await flushPromises();
+    resolvePrevious(payload(candidate));
+    await flushPromises();
+    expect(wrapper.find('[data-customer-phone-candidate]').exists()).toBe(
+      false
+    );
+    expect(wrapper.emitted('loaded').at(-1)[0]).toMatchObject({
+      call: { id: 12, contact_id: 77 },
+      customer: { identity_source: 'call_contact_link' },
+    });
+    expect(wrapper.findComponent(LinkedContactMaster).props('accountId')).toBe(
+      '9'
+    );
+  });
+});

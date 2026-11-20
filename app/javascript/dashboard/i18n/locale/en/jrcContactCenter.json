@@ -46,7 +46,8 @@
       "CATEGORY": "Motivo do atendimento",
       "CREATE_CASE": "Criar ocorrencia",
       "CREATE_CALLBACK": "Agendar callback na Minha Agenda",
-      "SAVED": "Registro salvo."
+      "SAVED": "Registro salvo.",
+      "PHONE_CANDIDATE": "Possível correspondência pelo telefone. A identidade ainda precisa de confirmação; este resultado não vincula o contato, a empresa ou contratos à chamada."
     },
     "SUBTITLE": "Telefonia, contexto do cliente, supervisao e indicadores em uma unica operacao.",
     "STATUS": {

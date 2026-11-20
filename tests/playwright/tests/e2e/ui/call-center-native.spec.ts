@@ -3192,7 +3192,50 @@ test('linked Customer Master preserves native permissions, persisted values and 
     page.getByText('SYNTHETIC master contact 0', { exact: true }).first()
   ).toBeVisible();
   await expect(page.locator('[data-open-linked-master]')).toHaveCount(0);
+  await expect(page.locator('[data-customer-phone-candidate]')).toContainText(
+    'Possível correspondência pelo telefone'
+  );
+  const candidateCall = await page.request.get(
+    source + `/jrc_contact_center/call_sessions/${target.unlinked_call_id}`,
+    { headers: target.operator }
+  );
+  expect(candidateCall.status()).toBe(200);
+  const candidate = (await candidateCall.json()).item;
+  expect(candidate.contact_id).toBeNull();
+  expect(candidate.customer.identity_source).toBe('phone_candidates');
+  expect(candidate.customer).not.toHaveProperty('directory');
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page.locator('html').evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-phone-candidate-not-confirmed.png`,
+  });
+  await page.goto(
+    `/app/accounts/${target.account_id}/synthetic-hoya-acw/${target.unlinked_call_id}`
+  );
+  const hoya = page.getByTestId('hoya-inbox-workspace');
+  await expect(hoya.locator('[data-hoya-phone-candidate]')).toContainText(
+    'Possível correspondência pelo telefone'
+  );
+  await expect(
+    hoya.getByRole('button', { name: 'Visão geral 360°', exact: true })
+  ).toBeDisabled();
+  await expect(hoya.locator('[data-open-linked-master]')).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-hoya-unconfirmed-phone-candidate.png`,
+  });
   await page.goto(callRoute(target.call_id));
+  await expect(page.locator('[data-customer-phone-candidate]')).toHaveCount(0);
   await page.locator('[data-open-linked-master]').click();
   await expect(dialog).toBeVisible();
   const roleUrl = source + `/custom_roles/${target.role_id}`;

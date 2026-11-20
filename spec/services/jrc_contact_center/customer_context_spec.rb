@@ -72,6 +72,7 @@ RSpec.describe JrcContactCenter::CustomerContext do
       expect(result[:directory]).to eq(contact_id: contact.id.to_s)
       expect(result[:contacts]).to contain_exactly(include(id: contact.id.to_s))
       expect(result[:status]).to eq('identified')
+      expect(result[:identity_source]).to eq('call_contact_link')
     end
 
     it 'keeps the prior call context but hides the master entry when that native module is unavailable' do
@@ -89,6 +90,8 @@ RSpec.describe JrcContactCenter::CustomerContext do
       expect(result[:status]).to eq('identified')
       expect(result[:contacts]).to contain_exactly(include(id: contact.id.to_s))
       expect(result).not_to have_key(:directory)
+      expect(result[:identity_source]).to eq('phone_candidates')
+      expect(unlinked.contact_id).to be_nil
     end
 
     it 'does not convert Call Center configure or operate rights into native contact management rights' do

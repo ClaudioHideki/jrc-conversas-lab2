@@ -248,6 +248,45 @@
         "primary_supervisor_and_queue_hierarchy_complete": false,
         "last_agent_business_decision_resolved": false,
         "full_figure_complete": false
+      },
+      "verified_increment_86c4ad53": {
+        "sha": "86c4ad536c5cfdcb091498ae4552ad2b8a143773",
+        "run": 44679530987,
+        "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/44679530987",
+        "verification_status": "complete_verified_evidence",
+        "native_rails_distinct": 1808,
+        "native_counts": {
+          "core": 1624,
+          "concurrency": 99,
+          "corporate": 85
+        },
+        "schema_reload_reexecutions": 81,
+        "vue": 870,
+        "chrome": 212,
+        "chrome_per_project": 53,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "chrome_skipped": 0,
+        "chrome_flaky": 0,
+        "new_ruby_offenses": 0,
+        "bootstrap_cards": 15,
+        "screenshots_hash_verified": 308,
+        "manual_visual_review": 12,
+        "artifact_id": 14606540165,
+        "artifact_sha256": "d174620ae05e9ce122ab38a3c77490d7ab0c8565db845618299d7afeb555b8f8",
+        "artifact_size": 44301526,
+        "zip_crc": "all entries verified",
+        "scope": "Required registered ending reasons on selected queues;immutable call catalogue and delayed-event compatibility;current native recipient and grant actor authentication;no real account activation or PABX command.",
+        "not_complete": [
+          "All23Wordfigures",
+          "ExternalPABX andSupabase",
+          "Phonecandidate/Hoyanativecontactfollowup preparedafterthisSHA"
+        ],
+        "visual_follow_up": [
+          "Selected queue chip falls back to native queue ID; add authorized display names without exposing hidden units.",
+          "Native progress color at exceeded ACW limit does not match red warning; retain real elapsed values and deadline checks."
+        ]
       }
     },
     {
@@ -608,6 +647,45 @@
         "errors_failures_pending_skipped": 0,
         "all23_figures_complete": false,
         "new_required_queues_included": false
+      },
+      "verified_increment_86c4ad53": {
+        "sha": "86c4ad536c5cfdcb091498ae4552ad2b8a143773",
+        "run": 44679530987,
+        "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/44679530987",
+        "verification_status": "complete_verified_evidence",
+        "native_rails_distinct": 1808,
+        "native_counts": {
+          "core": 1624,
+          "concurrency": 99,
+          "corporate": 85
+        },
+        "schema_reload_reexecutions": 81,
+        "vue": 870,
+        "chrome": 212,
+        "chrome_per_project": 53,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "chrome_skipped": 0,
+        "chrome_flaky": 0,
+        "new_ruby_offenses": 0,
+        "bootstrap_cards": 15,
+        "screenshots_hash_verified": 308,
+        "manual_visual_review": 12,
+        "artifact_id": 14606540165,
+        "artifact_sha256": "d174620ae05e9ce122ab38a3c77490d7ab0c8565db845618299d7afeb555b8f8",
+        "artifact_size": 44301526,
+        "zip_crc": "all entries verified",
+        "scope": "Required registered ending reasons on selected queues;immutable call catalogue and delayed-event compatibility;current native recipient and grant actor authentication;no real account activation or PABX command.",
+        "not_complete": [
+          "All23Wordfigures",
+          "ExternalPABX andSupabase",
+          "Phonecandidate/Hoyanativecontactfollowup preparedafterthisSHA"
+        ],
+        "visual_follow_up": [
+          "Selected queue chip falls back to native queue ID; add authorized display names without exposing hidden units.",
+          "Native progress color at exceeded ACW limit does not match red warning; retain real elapsed values and deadline checks."
+        ]
       }
     },
     {
@@ -827,7 +905,46 @@
         "last_agent_business_decision_resolved": false,
         "full_figure_complete": false
       },
-      "indirect_roster_review_prepared": "Implementação de retirada indireta por TeamMember preparada; aguarda Rails/Vue/152Chrome no novo SHA. Não inclui exclusão da entidade Team nem hierarquia/PABX."
+      "indirect_roster_review_prepared": "Implementação de retirada indireta por TeamMember preparada; aguarda Rails/Vue/152Chrome no novo SHA. Não inclui exclusão da entidade Team nem hierarquia/PABX.",
+      "verified_increment_86c4ad53": {
+        "sha": "86c4ad536c5cfdcb091498ae4552ad2b8a143773",
+        "run": 44679530987,
+        "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/44679530987",
+        "verification_status": "complete_verified_evidence",
+        "native_rails_distinct": 1808,
+        "native_counts": {
+          "core": 1624,
+          "concurrency": 99,
+          "corporate": 85
+        },
+        "schema_reload_reexecutions": 81,
+        "vue": 870,
+        "chrome": 212,
+        "chrome_per_project": 53,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0,
+        "chrome_skipped": 0,
+        "chrome_flaky": 0,
+        "new_ruby_offenses": 0,
+        "bootstrap_cards": 15,
+        "screenshots_hash_verified": 308,
+        "manual_visual_review": 12,
+        "artifact_id": 14606540165,
+        "artifact_sha256": "d174620ae05e9ce122ab38a3c77490d7ab0c8565db845618299d7afeb555b8f8",
+        "artifact_size": 44301526,
+        "zip_crc": "all entries verified",
+        "scope": "Required registered ending reasons on selected queues;immutable call catalogue and delayed-event compatibility;current native recipient and grant actor authentication;no real account activation or PABX command.",
+        "not_complete": [
+          "All23Wordfigures",
+          "ExternalPABX andSupabase",
+          "Phonecandidate/Hoyanativecontactfollowup preparedafterthisSHA"
+        ],
+        "visual_follow_up": [
+          "Selected queue chip falls back to native queue ID; add authorized display names without exposing hidden units.",
+          "Native progress color at exceeded ACW limit does not match red warning; retain real elapsed values and deadline checks."
+        ]
+      }
     },
     {
       "figure": 13,
@@ -1315,6 +1432,18 @@
         "complete_reference": [
           "Full analysis context popup, linked contracts and source-specific navigation are stage 7"
         ]
+      },
+      "phone_candidate_provenance_prepared_20261120": {
+        "status": "prepared_not_natively_validated",
+        "current_native_ci_excludes_this_increment": "86c4ad536c5cfdcb091498ae4552ad2b8a143773",
+        "figure": 21,
+        "api": "Existing for_call gains identity_source; legacy status and by_phone contract preserved",
+        "authorization": "Existing scoped contacts, corporate coverage and ContactDirectory unchanged; no automatic link or grants",
+        "vue_prepared": 5,
+        "chrome": "Existing linked native master case extended across four projects; total212 preserved; real call API asserts contact_id remains null; existing Hoya fixture also proves disabled Overview and captures the visible warning",
+        "local_checks": "Changed Vue/spec ESLint zero errors; TypeScript formatted; native runtime pending",
+        "remaining": "Full historical/contracts context and source-specific actions remain partial",
+        "hoya": "Customer360 projection requires native call.contact_id; unique phone candidate cannot enable Overview, sidebar, cross-channel link or contextual CRM queries. Text sender path unchanged."
       }
     },
     {
@@ -5084,5 +5213,56 @@
     "new_request_examples": 1,
     "new_committed_lock_examples": 2,
     "no_new_permission_or_account_activation": true
+  },
+  "phone_candidate_provenance_prepared_20261120": {
+    "status": "prepared_not_natively_validated",
+    "current_native_ci_excludes_this_increment": "86c4ad536c5cfdcb091498ae4552ad2b8a143773",
+    "figure": 21,
+    "api": "Existing for_call gains identity_source; legacy status and by_phone contract preserved",
+    "authorization": "Existing scoped contacts, corporate coverage and ContactDirectory unchanged; no automatic link or grants",
+    "vue_prepared": 5,
+    "chrome": "Existing linked native master case extended across four projects; total212 preserved; real call API asserts contact_id remains null; existing Hoya fixture also proves disabled Overview and captures the visible warning",
+    "local_checks": "Changed Vue/spec ESLint zero errors; TypeScript formatted; native runtime pending",
+    "remaining": "Full historical/contracts context and source-specific actions remain partial",
+    "hoya": "Customer360 projection requires native call.contact_id; unique phone candidate cannot enable Overview, sidebar, cross-channel link or contextual CRM queries. Text sender path unchanged."
+  },
+  "verified_86c4ad53_20261120": {
+    "sha": "86c4ad536c5cfdcb091498ae4552ad2b8a143773",
+    "run": 44679530987,
+    "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/44679530987",
+    "verification_status": "complete_verified_evidence",
+    "native_rails_distinct": 1808,
+    "native_counts": {
+      "core": 1624,
+      "concurrency": 99,
+      "corporate": 85
+    },
+    "schema_reload_reexecutions": 81,
+    "vue": 870,
+    "chrome": 212,
+    "chrome_per_project": 53,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0,
+    "chrome_skipped": 0,
+    "chrome_flaky": 0,
+    "new_ruby_offenses": 0,
+    "bootstrap_cards": 15,
+    "screenshots_hash_verified": 308,
+    "manual_visual_review": 12,
+    "artifact_id": 14606540165,
+    "artifact_sha256": "d174620ae05e9ce122ab38a3c77490d7ab0c8565db845618299d7afeb555b8f8",
+    "artifact_size": 44301526,
+    "zip_crc": "all entries verified",
+    "scope": "Required registered ending reasons on selected queues;immutable call catalogue and delayed-event compatibility;current native recipient and grant actor authentication;no real account activation or PABX command.",
+    "not_complete": [
+      "All23Wordfigures",
+      "ExternalPABX andSupabase",
+      "Phonecandidate/Hoyanativecontactfollowup preparedafterthisSHA"
+    ],
+    "visual_follow_up": [
+      "Selected queue chip falls back to native queue ID; add authorized display names without exposing hidden units.",
+      "Native progress color at exceeded ACW limit does not match red warning; retain real elapsed values and deadline checks."
+    ]
   }
 }

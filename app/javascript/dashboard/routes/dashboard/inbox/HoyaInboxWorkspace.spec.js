@@ -142,6 +142,62 @@ describe('inbox native SIP action guards', () => {
     });
     expect(wrapper.find('[data-voice-settings]').exists()).toBe(false);
   });
+  it('keeps a unique telephone candidate outside the customer 360 identity and displays the source warning', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    await flushPromises();
+    wrapper.findComponent({ name: 'CallWorkspace' }).vm.$emit('loaded', {
+      call: { id: 7, contact_id: null, status: 'connected' },
+      customer: {
+        status: 'identified',
+        identity_source: 'phone_candidates',
+        contacts: [{ id: 77, name: 'SYNTHETIC candidate' }],
+        ambiguous: false,
+      },
+    });
+    await flushPromises();
+    expect(wrapper.vm.identity.contactId).toBeNull();
+    expect(wrapper.get('[data-hoya-phone-candidate]').text()).toBe(
+      'JRC_CONTACT_CENTER.CALL.PHONE_CANDIDATE'
+    );
+    expect(
+      wrapper
+        .get('button[aria-label="JRC_CONTACT_CENTER.INBOX_360.OVERVIEW"]')
+        .attributes('disabled')
+    ).toBeDefined();
+    expect(wrapper.find('[data-open-linked-master]').exists()).toBe(false);
+  });
+
+  it('uses the explicit call contact for customer 360 and clears that identity when the next call is unlinked', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    await flushPromises();
+    const native = wrapper.findComponent({ name: 'CallWorkspace' });
+    native.vm.$emit('loaded', {
+      call: { id: 7, contact_id: 77, status: 'connected' },
+      customer: {
+        status: 'identified',
+        identity_source: 'call_contact_link',
+        contacts: [{ id: 77 }],
+        ambiguous: false,
+      },
+    });
+    await flushPromises();
+    expect(wrapper.vm.identity.contactId).toBe(77);
+    expect(wrapper.find('[data-hoya-phone-candidate]').exists()).toBe(false);
+    expect(
+      wrapper
+        .get('button[aria-label="JRC_CONTACT_CENTER.INBOX_360.OVERVIEW"]')
+        .attributes('disabled')
+    ).toBeUndefined();
+    await wrapper.setProps({ currentCallId: 8 });
+    await flushPromises();
+    expect(wrapper.vm.identity.contactId).toBeNull();
+    expect(
+      wrapper
+        .get('button[aria-label="JRC_CONTACT_CENTER.INBOX_360.OVERVIEW"]')
+        .attributes('disabled')
+    ).toBeDefined();
+  });
+
   it('loads the next page at the end of the existing mixed channel list without changing the selected interaction', async () => {
     const wrapper = mount(HoyaInboxWorkspace, {
       props: { ...props, canLoadMore: true },

@@ -1,0 +1,39 @@
+{
+  "sha": "86c4ad536c5cfdcb091498ae4552ad2b8a143773",
+  "run": 44679530987,
+  "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/44679530987",
+  "verification_status": "complete_verified_evidence",
+  "native_rails_distinct": 1808,
+  "native_counts": {
+    "core": 1624,
+    "concurrency": 99,
+    "corporate": 85
+  },
+  "schema_reload_reexecutions": 81,
+  "vue": 870,
+  "chrome": 212,
+  "chrome_per_project": 53,
+  "failures": 0,
+  "pending": 0,
+  "outside_errors": 0,
+  "chrome_skipped": 0,
+  "chrome_flaky": 0,
+  "new_ruby_offenses": 0,
+  "bootstrap_cards": 15,
+  "screenshots_hash_verified": 308,
+  "manual_visual_review": 12,
+  "artifact_id": 14606540165,
+  "artifact_sha256": "d174620ae05e9ce122ab38a3c77490d7ab0c8565db845618299d7afeb555b8f8",
+  "artifact_size": 44301526,
+  "zip_crc": "all entries verified",
+  "scope": "Required registered ending reasons on selected queues;immutable call catalogue and delayed-event compatibility;current native recipient and grant actor authentication;no real account activation or PABX command.",
+  "not_complete": [
+    "All23Wordfigures",
+    "ExternalPABX andSupabase",
+    "Phonecandidate/Hoyanativecontactfollowup preparedafterthisSHA"
+  ],
+  "visual_follow_up": [
+    "Selected queue chip falls back to native queue ID; add authorized display names without exposing hidden units.",
+    "Native progress color at exceeded ACW limit does not match red warning; retain real elapsed values and deadline checks."
+  ]
+}

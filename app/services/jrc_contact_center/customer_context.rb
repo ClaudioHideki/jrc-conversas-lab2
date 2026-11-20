@@ -28,7 +28,7 @@ class JrcContactCenter::CustomerContext
     return linked_contact(call.contact_id) if call.contact_id
 
     result = by_phone(call.direction == 'outbound' ? call.dnis : call.ani)
-    result.merge(status: identity_status(result))
+    result.merge(status: identity_status(result), identity_source: result[:contacts].any? ? 'phone_candidates' : 'unidentified')
   end
 
   def module_context(user_context:, access:)
@@ -63,10 +63,11 @@ class JrcContactCenter::CustomerContext
 
   def linked_contact(id)
     contact = authorized_contacts.find_by(id: id)
-    return empty_result.merge(status: 'unavailable') unless contact
+    return empty_result.merge(status: 'unavailable', identity_source: 'unavailable') unless contact
 
     company = @account.master_companies.find_by(id: contact.company_id) if contact.company_id
-    { contacts: [contact_payload(contact, company)], ambiguous: false, status: 'identified', directory: directory_link(contact) }
+    { contacts: [contact_payload(contact, company)], ambiguous: false, status: 'identified',
+      identity_source: 'call_contact_link', directory: directory_link(contact) }
   end
 
   # Only an explicit, authorized call/contact link may open the native master.

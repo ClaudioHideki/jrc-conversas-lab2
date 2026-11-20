@@ -13,3 +13,7 @@ Três testes concorrentes usam o PostgreSQL descartável e barreiras nativas. A 
 O Chrome exige53percursos em cada uma das quatro combinações1440/390 eclaro/escuro:212no total, preservando os208anteriores. O novo percurso usa User não confirmado real no banco sintético, prova o grant retido, recusa forçada pela API, desativa pela UI, recarrega e recusa reativação preservando o rascunho. O fixture falha se o destinatário ainda puder autenticar. Nenhum comando PABX ou publicação é executado.
 
 A correção independe da regra de inativação de equipes, ainda em decisão. Native Team, permissões herdadas e fontes corporativas permanecem intactas neste incremento.
+
+## Validação nativa concluída
+
+SHA86c4ad536c5cfdcb091498ae4552ad2b8a143773,CI44679530987:1.808Rails distintos,81reexecuções schema,870Vue,212Chrome,zero falhas/pendências/erros externos.308capturas com hashes conferidos e12revisadas visualmente. Artefato14606540165,SHA-256d174620ae05e9ce122ab38a3c77490d7ab0c8565db845618299d7afeb555b8f8. Os estados preparados acima registram o histórico;este incremento está validado,sem concluir as23figuras.

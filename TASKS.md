@@ -640,3 +640,13 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - ADR: `docs/adr/20261120-call-center-access-actor-authentication.md`. Este complemento é preparado neste incremento e ainda precisa de testes nativos próprios; não integra a CI de `76c37bbe`.
 
 - CI `44676273362` / `76c37bbe`: 1.805 Rails distintos (1.623 core, 97 concorrência, 85 corporativos), 81 reexecuções de schema e 870 Vue aprovados, com zero falhas, pendências ou erros externos. Restaram quatro infrações de layout em três locais dos novos specs de usuários: recuo da chave interna, argumentos e linha vazia final. As convenções do spec de eventos foram corrigidas. Assets/Chrome não executados; CI continua reprovada. Artefato `14602728856`, SHA-256 `67eb015954e17b2738db9adad4a6ea9dca45a6516dfef716bfe40482d8395413`, verificado. Corrigir somente whitespace e validar o complemento de autenticação do gestor no próximo SHA; 212 Chrome continuam obrigatórios.
+
+### 20/11 — Origem da correspondência telefônica
+
+- [ ] **CC-PHONE-CANDIDATE-PROVENANCE-20261120:** Campo aditivo identity_source e aviso na tela para candidato único ainda sem vínculo nativo. Preservar status legado, filtros, ContactDirectory e call.contact_id nas escritas; painel360doHoya exige vínculo nativo,sem promover candidato. Cinco regressões Vue e ampliação do Chrome nativo nas quatro combinações preparados; lint direcionado aprovado, Rails/Vue/Chrome ainda pendentes no novo SHA. ADR20261120-call-center-phone-candidate-provenance.md. Não integra a CI86c4ad53 em andamento e não conclui a figura21.
+
+### 20/11 — Aceite nativo dos encerramentos e da autenticação atual
+
+- [x] **CC-ENDING-REQUIRED-QUEUES-20261120 / CC-CURRENT-MEMBERSHIP-AUTH / CC-GRANT-ACTOR-AUTH:** SHA86c4ad53,CI44679530987 com1.808Rails distintos,81recargas,870Vue e212Chrome aprovados;zero falhas/pendências/erros externos/ignorados/flaky.15cards no probe,308capturas com hashes verificados e12revisadas em1440/390,claro/escuro. Artefato14606540165/SHA-256d174620ae05e9ce122ab38a3c77490d7ab0c8565db845618299d7afeb555b8f8. Relatório docs/jrc_contact_center/required_ending_queues_verified_20261120.json. Não ativado em contas reais;sem aceite integral das23figuras.
+- [ ] Seguimento visual identificado em evidência real:exibir nomes autorizados nos chips de filas selecionadas;alinhar a cor da barra nativa ao estado excedido doACW,sem alterar prazos/relógios.
+- Próximo incremento já preparado:origem do candidato telefônico e projeção360doHoya somente com vínculo da chamada. A evidência86não comprova essa alteração posterior.

@@ -277,12 +277,15 @@ const contactId = computed(() => {
     )
   )
     return null;
-  if (call.value?.contact_id) return call.value.contact_id;
-  const customer = callDetails.value?.customer;
-  return !customer?.ambiguous && customer?.contacts?.length === 1
-    ? customer.contacts[0].id
-    : null;
+  return call.value?.contact_id || null;
 });
+const hasUnlinkedPhoneCandidate = computed(
+  () =>
+    isVoice.value &&
+    !call.value?.contact_id &&
+    callDetails.value?.customer?.contacts?.length === 1 &&
+    !callDetails.value?.customer?.ambiguous
+);
 const identity = computed(() => ({
   accountId: props.accountId,
   callId: props.currentCallId,
@@ -1223,6 +1226,14 @@ onBeforeUnmount(() => {
             <span class="i-lucide-contact-round size-4" />
           </button>
         </header>
+        <p
+          v-if="hasUnlinkedPhoneCandidate"
+          role="status"
+          data-hoya-phone-candidate
+          class="m-0 shrink-0 border-b border-n-amber-5 bg-n-amber-2 p-3 text-xs text-n-amber-11"
+        >
+          {{ t('JRC_CONTACT_CENTER.CALL.PHONE_CANDIDATE') }}
+        </p>
         <div
           class="flex min-w-0 shrink-0 border-b border-n-blue-6 bg-n-slate-2 p-1"
         >
