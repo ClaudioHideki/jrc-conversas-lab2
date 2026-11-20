@@ -2328,7 +2328,8 @@
       "PREVIOUS": "Anterior",
       "NEXT": "Próxima",
       "PAGE": "Página {page} de {pages} · Total {total}",
-      "ROW_TITLE": "{name} · {state}"
+      "ROW_TITLE": "{name} · {state}",
+      "FILTERS": "Filtros do histórico"
     }
   }
 }

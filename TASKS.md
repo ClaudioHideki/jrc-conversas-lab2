@@ -578,3 +578,11 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - Novo percurso preparado com o componente HoyaInboxWorkspace inteiro,Pinia/Vuex com identidade nativa e APIsRails locais reais:formulário versionado,obrigatoriedade,false/zero,salvar,recarregar,concluir e confirmar persistência. Softphone não inicializado,HTTP externo bloqueado antes da rede,nenhum comando aoPABX.
 - Quatro percursos novos(um por projeto)acrescentados aos196anteriores:200Chrome obrigatórios. Não equivale à aplicação implantada inteira,conversaWhatsApp real ou homologaçãoSIP/PABX. A nova compilação permanece exclusiva no runner isolado.
 - Lint estático dos quatro arquivos frontend preparados:zero erros/avisos. Aguardar o próximo SHA nativo antes de declarar o histórico ou o Hoya homologados.23figuras seguem abertas.
+
+### 19/11 — Chrome real do histórico e Hoya:192/200,correções finais necessárias
+
+- CI44636656581/3456fbe7:1707Rails distintos,66schema,836Vue,lints,assets reais ebootstrap15cards aprovados. Chrome192/200;8falhas,0skips/flaky/erros externos. As192identidades aprovadas correspondem exatamente ao conjunto2a0cde0c,reexecutado no novoSHA.
+- Causas confirmadas em4projetos cada:aguardava401na descoberta administrativa que corretamente permite200comcontrol=false;leitura final doHoya semcall_session_id retornou422após o fluxo efetivamente completar. Corrigidos somente os contratos de teste;histórico protegido continua401 e fila externa404.
+- Artefato14586662951,43535321bytes,SHA-256e339cfe18499e9ebebc172ac0a6242ff579bdc1b1e08cf13c5b20aabfcad6430,CRCconferido.8capturas novas inspecionadas individualmente. Não são homologação integral porque os testes falharam.
+- Mobile:histórico ocupava quase todo o popup com filtros;agora recolhíveis comHTMLnativo,sem retirar campos e com abertura/fechamento explícitos noChrome. FixtureHoya usa altura finitah-screen,já compilada peloCSSnativo,sem alterarTailwindglobal ou mascarar CSSdo produto.
+-200cenários mantidos. Revalidar o próprio novoSHA e os quatro temas/tamanhos;nenhum gate reduzido,nenhumDocker/PABXreal,mergeoudeploy.23figuras continuam abertas.

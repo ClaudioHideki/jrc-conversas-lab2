@@ -78,5 +78,45 @@
     "assets": "not_run",
     "chrome": "not_run"
   },
-  "status": "backend_verified_frontend_homologation_pending"
+  "status": "native_backend_vue_and_primary_chrome_flow_verified_final_assertions_pending",
+  "first_chrome_gate": {
+    "sha": "3456fbe7b7cf56d9ed7eb1befae656a9de99bffe",
+    "run": 44636656581,
+    "native_distinct": 1707,
+    "schema_reexecutions": 66,
+    "vue": 836,
+    "native_and_vue_failures_pending_outside_errors": 0,
+    "new_ruby_offenses": 0,
+    "frontend_lint": "passed",
+    "assets": "passed",
+    "bootstrap_cards": 15,
+    "bootstrap_page_errors": 0,
+    "chrome": {
+      "total": 200,
+      "passed": 192,
+      "failed": 8,
+      "skipped": 0,
+      "flaky": 0,
+      "prior192_identity_sets_equal": true
+    },
+    "confirmed_new_failures": [
+      "Four history cases waited for metadata401; native administration discovery access? allows200 with control=false. Protected history401 and external queue404 assertions passed.",
+      "Four Hoya cases completed the actual draft/reload/finish flow but final read lacked call_session_id and correctly returned422."
+    ],
+    "artifact": 14586662951,
+    "artifact_sha256": "e339cfe18499e9ebebc172ac0a6242ff579bdc1b1e08cf13c5b20aabfcad6430",
+    "artifact_bytes": 43535321,
+    "crc_verified": true,
+    "manual_new_screenshots_inspected": 8,
+    "approval": "partial_not_homologated",
+    "corrections_prepared": [
+      "Exact metadata200/control=false contract with UI absence checks",
+      "Actual call_session_id in final persistence read",
+      "Finite Hoya test parent using existing h-screen CSS utility",
+      "Native collapsible history filters for mobile usability; all fields retained"
+    ],
+    "quality_gates_weakened": false,
+    "full_23_complete": false
+  },
+  "mobile_follow_up": "Filters are now natively collapsible; no fields removed. Requires new Chrome screenshots and its own candidate gate."
 }

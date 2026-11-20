@@ -5975,6 +5975,9 @@ test('state history native preserves scope, filters, pagination and private even
   );
   await dialog.locator('[data-history-next]').click();
   await expect(dialog.locator('[data-history-row]')).toHaveCount(7);
+  const filters = dialog.locator('[data-history-filters]');
+  await expect(filters).toHaveJSProperty('open', false);
+  await filters.locator('summary').click();
   await dialog.locator('[data-history-filter="state"]').selectOption('paused');
   await dialog
     .locator('[data-history-filter="queue_id"]')
@@ -5998,6 +6001,9 @@ test('state history native preserves scope, filters, pagination and private even
       () => document.documentElement.scrollWidth <= window.innerWidth
     )
   ).toBe(true);
+  await filters.locator('summary').click();
+  await expect(filters).toHaveJSProperty('open', false);
+  await dialog.locator('[data-history-row]').first().scrollIntoViewIfNeeded();
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-state-history.png`,
     fullPage: false,
@@ -6031,13 +6037,14 @@ test('state history native preserves scope, filters, pagination and private even
     auth => Reflect.set(window, '__SYNTHETIC_AUTH__', auth),
     target.operator
   );
-  const noAdministration = operatorPage.waitForResponse(
+  const metadataResponse = operatorPage.waitForResponse(
     response =>
-      response.url().endsWith('/administration') && response.status() === 401
+      response.url().endsWith('/administration') && response.status() === 200
   );
   await operatorPage.goto(location);
-  await noAdministration;
-  await expect(operatorPage.getByRole('alert')).toBeVisible();
+  const metadata = await (await metadataResponse).json();
+  expect(metadata.capabilities.control).toBe(false);
+  await expect(operatorPage.locator('[data-provider-state]')).toBeVisible();
   await expect(operatorPage.locator('[data-open-state-history]')).toHaveCount(
     0
   );
@@ -6146,9 +6153,12 @@ test('Hoya workspace native restores and persists versioned ACW answers in the a
   const final = await completed;
   expect(final.status()).toBe(200);
   expect((await final.json()).item.completed_at).not.toBeNull();
-  const state = await page.request.get(ownApi + '/qualifications', {
-    headers: target.operator,
-  });
+  const state = await page.request.get(
+    ownApi + `/qualifications?call_session_id=${target.call_session_id}`,
+    {
+      headers: target.operator,
+    }
+  );
   expect(state.status()).toBe(200);
   const original = (await state.json()).items.find(
     row => String(row.id) === String(target.qualification_id)

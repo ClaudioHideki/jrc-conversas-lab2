@@ -36,10 +36,7 @@ onMounted(load);
 </script>
 
 <template>
-  <section
-    class="h-[calc(100dvh-3rem)] min-h-0 w-full min-w-0"
-    data-native-hoya-acw
-  >
+  <section class="h-screen min-h-0 w-full min-w-0" data-native-hoya-acw>
     <p v-if="failed" role="alert">{{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}</p>
     <p v-else-if="loading" role="status">
       {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}

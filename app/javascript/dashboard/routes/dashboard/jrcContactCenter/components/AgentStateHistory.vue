@@ -12,6 +12,7 @@ const props = defineProps({
 const { t } = useI18n();
 const copy = computed(() => ({
   TITLE: t('JRC_CONTACT_CENTER.STATE_HISTORY.TITLE'),
+  FILTERS: t('JRC_CONTACT_CENTER.STATE_HISTORY.FILTERS'),
   CLOSE: t('JRC_CONTACT_CENTER.STATE_HISTORY.CLOSE'),
   SCOPE: t('JRC_CONTACT_CENTER.STATE_HISTORY.SCOPE'),
   FROM: t('JRC_CONTACT_CENTER.STATE_HISTORY.FROM'),
@@ -116,83 +117,92 @@ watch(
           <p class="rounded-lg bg-n-blue-2 p-3 text-n-blue-11">
             {{ text('SCOPE') }}
           </p>
-          <form
-            class="grid min-w-0 gap-3 sm:grid-cols-2"
-            @submit.prevent="history.apply"
+          <details
+            class="rounded-lg border border-n-weak p-3"
+            data-history-filters
           >
-            <label v-for="key in ['from', 'to']" :key="key" class="min-w-0">
-              {{ text(key.toUpperCase()) }}
-              <input
-                v-model="filters[key]"
-                type="date"
-                :data-history-filter="key"
-                :disabled="loading"
-                class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
-              />
-            </label>
-            <label class="min-w-0">
-              {{ text('AGENT') }}
-              <input
-                v-model="filters.q"
-                type="search"
-                maxlength="100"
-                data-history-filter="q"
-                :disabled="loading"
-                class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
-              />
-            </label>
-            <label class="min-w-0">
-              {{ text('STATE') }}
-              <select
-                v-model="filters.state"
-                data-history-filter="state"
-                :disabled="loading"
-                class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
-              >
-                <option value="">{{ text('ALL') }}</option>
-                <option v-for="state in states" :key="state" :value="state">
-                  {{ stateLabel(state) }}
-                </option>
-              </select>
-            </label>
-            <label class="min-w-0 sm:col-span-2">
-              {{ text('QUEUE') }}
-              <select
-                v-model="filters.queue_id"
-                data-history-filter="queue_id"
-                :disabled="loading"
-                class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
-              >
-                <option value="">{{ text('ALL') }}</option>
-                <option
-                  v-for="queue in context.queues"
-                  :key="queue.id"
-                  :value="String(queue.id)"
+            <summary class="cursor-pointer font-medium">
+              {{ text('FILTERS') }}
+            </summary>
+            <form
+              class="mt-3 grid min-w-0 gap-3 sm:grid-cols-2"
+              @submit.prevent="history.apply"
+            >
+              <label v-for="key in ['from', 'to']" :key="key" class="min-w-0">
+                {{ text(key.toUpperCase()) }}
+                <input
+                  v-model="filters[key]"
+                  type="date"
+                  lang="pt-BR"
+                  :data-history-filter="key"
+                  :disabled="loading"
+                  class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                />
+              </label>
+              <label class="min-w-0">
+                {{ text('AGENT') }}
+                <input
+                  v-model="filters.q"
+                  type="search"
+                  maxlength="100"
+                  data-history-filter="q"
+                  :disabled="loading"
+                  class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                />
+              </label>
+              <label class="min-w-0">
+                {{ text('STATE') }}
+                <select
+                  v-model="filters.state"
+                  data-history-filter="state"
+                  :disabled="loading"
+                  class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
                 >
-                  {{ queue.name }}
-                </option>
-              </select>
-            </label>
-            <div class="flex flex-wrap gap-2 sm:col-span-2">
-              <button
-                type="submit"
-                :disabled="loading"
-                data-history-apply
-                class="rounded-lg bg-n-brand px-3 py-2 text-white disabled:opacity-50"
-              >
-                {{ text('APPLY') }}
-              </button>
-              <button
-                type="button"
-                :disabled="loading"
-                data-history-clear
-                class="rounded-lg border border-n-weak px-3 py-2 disabled:opacity-50"
-                @click="history.clear"
-              >
-                {{ text('CLEAR') }}
-              </button>
-            </div>
-          </form>
+                  <option value="">{{ text('ALL') }}</option>
+                  <option v-for="state in states" :key="state" :value="state">
+                    {{ stateLabel(state) }}
+                  </option>
+                </select>
+              </label>
+              <label class="min-w-0 sm:col-span-2">
+                {{ text('QUEUE') }}
+                <select
+                  v-model="filters.queue_id"
+                  data-history-filter="queue_id"
+                  :disabled="loading"
+                  class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                >
+                  <option value="">{{ text('ALL') }}</option>
+                  <option
+                    v-for="queue in context.queues"
+                    :key="queue.id"
+                    :value="String(queue.id)"
+                  >
+                    {{ queue.name }}
+                  </option>
+                </select>
+              </label>
+              <div class="flex flex-wrap gap-2 sm:col-span-2">
+                <button
+                  type="submit"
+                  :disabled="loading"
+                  data-history-apply
+                  class="rounded-lg bg-n-brand px-3 py-2 text-white disabled:opacity-50"
+                >
+                  {{ text('APPLY') }}
+                </button>
+                <button
+                  type="button"
+                  :disabled="loading"
+                  data-history-clear
+                  class="rounded-lg border border-n-weak px-3 py-2 disabled:opacity-50"
+                  @click="history.clear"
+                >
+                  {{ text('CLEAR') }}
+                </button>
+              </div>
+            </form>
+          </details>
           <p v-if="window" class="break-words text-xs text-n-slate-11">
             {{ t('JRC_CONTACT_CENTER.STATE_HISTORY.WINDOW', window) }}
           </p>

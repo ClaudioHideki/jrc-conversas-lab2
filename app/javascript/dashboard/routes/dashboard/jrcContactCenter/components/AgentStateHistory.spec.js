@@ -93,6 +93,12 @@ describe('operational pause and state history popup', () => {
       'JRC_CONTACT_CENTER.STATE_HISTORY.UNCONFIRMED'
     );
     expect(wrapper.find('[data-history-next]').element.disabled).toBe(true);
+    expect(
+      wrapper.find('[data-history-filters]').attributes('open')
+    ).toBeUndefined();
+    expect(wrapper.find('[data-history-filters] summary').text()).toContain(
+      'JRC_CONTACT_CENTER.STATE_HISTORY.FILTERS'
+    );
     expect(API.agentStateHistory).toHaveBeenCalledTimes(1);
   });
 
