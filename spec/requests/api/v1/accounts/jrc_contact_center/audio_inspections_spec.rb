@@ -5,8 +5,8 @@ RSpec.describe 'Institutional audio inspection authority and native persistence'
 
   let(:headers) { actor.create_new_auth_token }
   let(:version) do
-    JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                  .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC inspectable audio' }, file: upload, key: key)
+    legacy = JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
+    legacy.create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC inspectable audio' }, file: upload, key: key)
   end
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_assets/#{version.audio_asset_id}/versions/#{version.id}/inspections" }
 

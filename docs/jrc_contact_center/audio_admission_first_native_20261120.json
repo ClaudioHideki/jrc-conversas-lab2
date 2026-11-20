@@ -1,0 +1,46 @@
+{
+  "producer": "3e631663dbc2e4f8b6a62c7581c88f45c19ad5ed",
+  "run": 44816431858,
+  "job": 136565854542,
+  "artifact_id": 14669733851,
+  "artifact_sha256": "399aaa84e6de8c84e8bd90e7ab8d0266be1b8ddde0684dbc6c741bf84cf8d0c0",
+  "status": "failed_not_approved",
+  "reload": {
+    "examples": 130,
+    "passed": 129,
+    "failed": 1,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "failure": {
+    "id": "./spec/models/jrc_contact_center/audio_version_spec.rb[1:1]",
+    "cause": "Initial admission now creates an inspection. Rails dependent restrict_with_error callback prevents destroy before the native readonly persistence check, raising RecordNotDestroyed instead of the established ReadOnlyRecord contract. Deletion remained blocked.",
+    "correction": "Local AudioVersion prepend-before-destroy immutable guard, before dependency/audit callbacks. Shared AppendOnly and database constraints unchanged. Additional regression checks destroy/destroy!, proof retention, audit retention and bytes."
+  },
+  "ruby": {
+    "new_offenses": 17,
+    "causes": [
+      "2 fixture-method ABC metrics",
+      "continuation/argument alignment",
+      "2 class-description declarations"
+    ],
+    "correction": "Extract narrowly scoped fixture creation/digest helpers, use named local receiver instead of long fluent chains, align arguments and identify classes. No rules disabled; native revalidation pending."
+  },
+  "not_run": [
+    "main Rails regression",
+    "concurrency",
+    "Approvals/Backoffice",
+    "Vue",
+    "assets",
+    "Chrome232"
+  ],
+  "migrations": "All ten migrations and source SQL unchanged; fresh installation passed. Schema reload test gate remains mandatory.",
+  "spec_names": {
+    "reason": "Preserve native class/path convention after correcting DescribeClass; same14 examples retained",
+    "renames": {
+      "audio_admission_spec.rb": "audio_uploads_admission_spec.rb",
+      "audio_received_observation_spec.rb": "audio_safety_observation_received_spec.rb"
+    },
+    "examples_removed": 0
+  }
+}

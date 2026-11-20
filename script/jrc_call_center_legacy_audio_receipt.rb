@@ -30,12 +30,17 @@ class JrcContactCenter::SyntheticLegacyAudioReceipt
   def persist!(unit, values, input, blob, key)
     @access.unit(unit.id)
     @access.folder(values['folder_id'], unit: unit)
+    asset = JrcContactCenter::AudioAsset.create!(values.merge('account' => @access.account, 'unit' => unit))
+    attributes = input.version_attributes.merge(
+      account: @access.account, unit_id: unit.id, audio_asset: asset, blob: blob, created_by: @access.actor,
+      source_kind: 'user_upload', number: 1, idempotency_key: key, input_digest: input_digest(unit, values, input)
+    )
+    JrcContactCenter::AudioVersion.create!(attributes)
+  end
+
+  def input_digest(unit, values, input)
     fields = [@access.account.id.to_s, @access.actor.id.to_s, unit.id.to_s, nil,
               values.sort.to_h, input.filename, input.content_type, input.byte_size, input.sha256]
-    asset = JrcContactCenter::AudioAsset.create!(values.merge('account' => @access.account, 'unit' => unit))
-    JrcContactCenter::AudioVersion.create!(input.version_attributes.merge(
-      account: @access.account, unit_id: unit.id, audio_asset: asset, blob: blob, created_by: @access.actor,
-      source_kind: 'user_upload', number: 1, idempotency_key: key, input_digest: Digest::SHA256.hexdigest(JSON.generate(fields))
-    ))
+    Digest::SHA256.hexdigest(JSON.generate(fields))
   end
 end

@@ -7,8 +7,8 @@ RSpec.describe 'Institutional audio byte access uses current native authority an
   let(:headers) { actor.create_new_auth_token }
   let(:access) { JrcContactCenter::AudioLibraryAccess.new(context: context) }
   let(:version) do
-    JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: access)
-                                  .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC byte access' }, file: upload, key: key)
+    legacy = JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: access)
+    legacy.create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC byte access' }, file: upload, key: key)
   end
   let(:proof) do
     JrcContactCenter::AudioInspections.new(access: access)

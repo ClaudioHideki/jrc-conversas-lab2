@@ -27,8 +27,8 @@ RSpec.describe CreateContactCenterAudioInspections do
   end
 
   it 'adds an empty observation domain beside populated exact versions without changing any of the nine preceding schemas' do
-    source = JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                           .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC upgrade source' }, file: upload, key: key)
+    legacy = JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
+    source = legacy.create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC upgrade source' }, file: upload, key: key)
     in_owned_preinspection_schema do |connection|
       %w[accounts users account_users active_storage_blobs jrc_contact_center_audio_versions].each do |table|
         connection.execute("INSERT INTO #{table} SELECT * FROM public.#{table}")

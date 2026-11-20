@@ -11,6 +11,7 @@ class JrcContactCenter::AudioVersion < JrcContactCenter::ApplicationRecord
   belongs_to :blob, class_name: 'ActiveStorage::Blob'
   belongs_to :created_by, class_name: 'User'
   has_many :inspections, class_name: 'JrcContactCenter::AudioInspection', inverse_of: :audio_version, dependent: :restrict_with_error
+  before_destroy(prepend: true) { raise ActiveRecord::ReadOnlyRecord, 'Institutional audio versions are immutable' if persisted? }
 
   validates :number, numericality: { only_integer: true, greater_than: 0 }, uniqueness: { scope: :audio_asset_id }
   validates :byte_size, numericality: { only_integer: true, greater_than: 0 }

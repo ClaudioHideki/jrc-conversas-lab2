@@ -5,19 +5,27 @@ require_relative 'jrc_call_center_legacy_audio_receipt'
 # Only called behind SyntheticPauseSeed's owned PostgreSQL/Redis runner guard.
 class JrcContactCenter::SyntheticAudioFolderSeed
   def self.call(account:, queues:, member:)
-    folders = (1..22).map do |number|
-      JrcContactCenter::AudioFolder.create!(account: account, unit: queues.first.unit, name: format('SYNTHETIC folder %02d', number))
-    end
+    folders = create_folders(account, queues.first.unit)
     hidden = JrcContactCenter::AudioFolder.create!(account: account, unit: queues.last.unit, name: 'SYNTHETIC inaccessible library')
-    payload = {
+    {
       audio_folder_id: folders.first.id.to_s, audio_folder_name: folders.first.name,
       audio_destination_id: folders.last.id.to_s, audio_destination_name: folders.last.name,
       denied_audio_folder_id: hidden.id.to_s
-    }
+    }.merge(legacy_identifiers(account, queues.first.unit, member))
+  end
+
+  def self.create_folders(account, unit)
+    (1..22).map do |number|
+      JrcContactCenter::AudioFolder.create!(account: account, unit: unit, name: format('SYNTHETIC folder %02d', number))
+    end
+  end
+
+  def self.legacy_identifiers(account, unit, member)
     access = JrcContactCenter::AudioLibraryAccess.new(context: { account: account, user: member.user, account_user: member })
-    payload[:technical_legacy_audio_id] = legacy_receipt(access, queues.first.unit, 'technical', 16).audio_asset_id.to_s
-    payload[:preview_legacy_audio_id] = legacy_receipt(access, queues.first.unit, 'preview', 32_000).audio_asset_id.to_s
-    payload
+    {
+      technical_legacy_audio_id: legacy_receipt(access, unit, 'technical', 16).audio_asset_id.to_s,
+      preview_legacy_audio_id: legacy_receipt(access, unit, 'preview', 32_000).audio_asset_id.to_s
+    }
   end
 
   def self.legacy_receipt(access, unit, name, samples)
@@ -32,5 +40,5 @@ class JrcContactCenter::SyntheticAudioFolderSeed
       )
     end
   end
-  private_class_method :legacy_receipt
+  private_class_method :create_folders, :legacy_identifiers, :legacy_receipt
 end

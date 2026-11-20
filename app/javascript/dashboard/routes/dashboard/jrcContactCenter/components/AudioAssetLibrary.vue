@@ -58,11 +58,35 @@ const labels = computed(() => ({
   INSPECTION_UNAVAILABLE: t(
     'JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_UNAVAILABLE'
   ),
+  DETAILS: t('JRC_CONTACT_CENTER.AUDIO_FILES.DETAILS'),
+  CLOSE_DETAILS: t('JRC_CONTACT_CENTER.AUDIO_FILES.CLOSE_DETAILS'),
+  FOLDER: t('JRC_CONTACT_CENTER.AUDIO_FILES.FOLDER'),
+  ROOT: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.ROOT'),
+  ACTIONS: t('JRC_CONTACT_CENTER.AUDIO_FILES.ACTIONS'),
+  PRIVATE: t('JRC_CONTACT_CENTER.AUDIO_FILES.PRIVATE'),
+  SOURCE_UPLOAD: t('JRC_CONTACT_CENTER.AUDIO_FILES.SOURCE_UPLOAD'),
+  SOURCE_CAPTURE: t('JRC_CONTACT_CENTER.AUDIO_FILES.SOURCE_CAPTURE'),
+  UNKNOWN_SOURCE: t('JRC_CONTACT_CENTER.AUDIO_FILES.UNKNOWN_SOURCE'),
 }));
 const label = key => labels.value[key];
 const route = useRoute();
 const router = useRouter();
+const sourceLabel = kind =>
+  ({
+    user_upload: label('SOURCE_UPLOAD'),
+    browser_capture: label('SOURCE_CAPTURE'),
+  })[kind] || label('UNKNOWN_SOURCE');
 const currentUser = useMapGetter('getCurrentUser');
+const details = ref(null);
+const detailsLoading = ref(false);
+const detailsError = ref(false);
+let detailsGeneration = 0;
+const clearDetails = () => {
+  detailsGeneration += 1;
+  details.value = null;
+  detailsLoading.value = false;
+  detailsError.value = false;
+};
 const fileDescription = (name, size) =>
   [name, `${size} ${label('BYTES')}`].join(' · ');
 const versionDescription = version =>
@@ -116,6 +140,7 @@ const clearHistory = () => {
 };
 const forget = () => {
   generation += 1;
+  clearDetails();
   items.value = [];
   meta.value = { total: 0, pages: 0 };
   maxBytes.value = 0;
@@ -130,7 +155,43 @@ const denied = () => {
   error.value = true;
   emit('denied');
 };
+const openDetails = async row => {
+  if (!canManage.value) return;
+  clearDetails();
+  const current = detailsGeneration;
+  const origin = JSON.stringify([
+    props.accountId,
+    props.unitId,
+    props.folderId,
+  ]);
+  detailsLoading.value = true;
+  try {
+    const response = await API.audioAsset(props.accountId, row.id);
+    if (
+      current !== detailsGeneration ||
+      origin !==
+        JSON.stringify([props.accountId, props.unitId, props.folderId]) ||
+      !canManage.value
+    )
+      return;
+    const record = response.data.item;
+    if (
+      String(response.data.account_id) !== String(props.accountId) ||
+      record?.id !== row.id ||
+      record.unit_id !== props.unitId
+    )
+      throw new Error('Invalid current institutional audio details');
+    details.value = record;
+  } catch (failure) {
+    if (current !== detailsGeneration) return;
+    if ([401, 403, 404].includes(failure?.response?.status)) denied();
+    else detailsError.value = true;
+  } finally {
+    if (current === detailsGeneration) detailsLoading.value = false;
+  }
+};
 const load = async () => {
+  clearDetails();
   generation += 1;
   const version = generation;
   items.value = [];
@@ -225,6 +286,7 @@ const loadHistory = async () => {
 };
 const openHistory = row => {
   if (!canManage.value || saving.value || opening.value) return;
+  clearDetails();
   clearHistory();
   historyItem.value = row;
   const firstPage = historyPage.value === 1;
@@ -357,52 +419,179 @@ onBeforeUnmount(() => {
     <p v-else-if="!items.length" class="text-sm text-n-slate-11">
       {{ label('EMPTY') }}
     </p>
-    <ul v-else class="space-y-3">
-      <li
-        v-for="row in items"
-        :key="row.id"
-        :data-audio-asset="row.id"
-        class="min-w-0 rounded-xl border border-n-weak bg-n-solid-1 p-3 text-sm text-n-slate-12"
+    <div
+      v-else
+      class="grid min-w-0 grid-cols-1 items-start gap-4"
+      :class="details ? 'xl:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]' : ''"
+      data-audio-files-and-details
+    >
+      <div
+        class="max-h-[36rem] min-w-0 overflow-auto overscroll-contain rounded-xl border border-n-weak"
+        data-audio-file-scroll
       >
-        <p class="break-words font-semibold">{{ row.name }}</p>
-        <p v-if="row.description" class="break-words text-n-slate-11">
-          {{ row.description }}
-        </p>
-        <p v-if="row.latest_version" class="break-words text-n-slate-11">
-          {{ versionDescription(row.latest_version) }}
-        </p>
-        <p class="text-n-amber-11">{{ label('NOT_VERIFIED') }}</p>
-        <div class="mt-3 flex flex-wrap gap-3">
+        <table class="w-full table-fixed text-left text-sm text-n-slate-12">
+          <caption class="sr-only">
+            {{
+              label('TITLE')
+            }}
+          </caption>
+          <thead class="sticky top-0 bg-n-solid-2">
+            <tr>
+              <th scope="col" class="w-1/2 p-3">{{ label('NAME') }}</th>
+              <th scope="col" class="w-1/4 p-3">{{ label('VERSION') }}</th>
+              <th scope="col" class="w-1/4 p-3">{{ label('ACTIONS') }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-n-weak bg-n-solid-1">
+            <tr
+              v-for="row in items"
+              :key="row.id"
+              :data-audio-asset="row.id"
+              :aria-selected="details?.id === row.id"
+              :class="details?.id === row.id ? 'bg-n-blue-2' : ''"
+            >
+              <td class="min-w-0 break-words p-3 align-top">
+                <button
+                  type="button"
+                  :data-audio-asset-details-open="row.id"
+                  class="max-w-full break-words text-left font-semibold text-n-blue-11"
+                  @click="openDetails(row)"
+                >
+                  {{ row.name }}
+                </button>
+                <p class="mt-1 break-words text-n-slate-11">
+                  {{ row.folder_name || label('ROOT') }}
+                </p>
+                <p
+                  v-if="row.description"
+                  class="mt-1 break-words text-n-slate-11"
+                >
+                  {{ row.description }}
+                </p>
+              </td>
+              <td class="min-w-0 break-words p-3 align-top text-n-slate-11">
+                <p v-if="row.latest_version">
+                  {{ versionDescription(row.latest_version) }}
+                </p>
+                <p v-if="row.latest_version" class="mt-1 break-words">
+                  {{ row.latest_version.content_type }}
+                </p>
+                <p class="mt-2 text-n-amber-11">{{ label('PRIVATE') }}</p>
+              </td>
+              <td class="min-w-0 break-words p-3 align-top">
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    :disabled="saving || opening"
+                    :data-edit-audio-asset="row.id"
+                    class="max-w-full break-words rounded-lg border border-n-blue-6 px-2 py-2 text-n-blue-11"
+                    @click="editor.open('edit', row)"
+                  >
+                    {{ label('EDIT') }}
+                  </button>
+                  <button
+                    type="button"
+                    :disabled="saving || opening"
+                    :data-replace-audio-asset="row.id"
+                    class="max-w-full break-words rounded-lg border border-n-blue-6 px-2 py-2 text-n-blue-11"
+                    @click="editor.open('replace', row)"
+                  >
+                    {{ label('REPLACE') }}
+                  </button>
+                  <button
+                    type="button"
+                    :disabled="saving || opening"
+                    :data-audio-asset-history="row.id"
+                    class="max-w-full break-words rounded-lg border border-n-blue-6 px-2 py-2 text-n-blue-11"
+                    @click="openHistory(row)"
+                  >
+                    {{ label('HISTORY') }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <aside
+        v-if="details"
+        class="max-h-[48rem] min-w-0 space-y-4 overflow-y-auto overscroll-contain rounded-xl border border-n-weak bg-n-solid-1 p-4 text-sm text-n-slate-12"
+        data-audio-asset-details
+        :aria-label="label('DETAILS')"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <h4 class="break-words font-semibold">{{ label('DETAILS') }}</h4>
           <button
             type="button"
-            :disabled="saving || opening"
-            :data-edit-audio-asset="row.id"
-            class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11"
-            @click="editor.open('edit', row)"
+            class="shrink-0 text-n-blue-11"
+            data-close-audio-details
+            @click="clearDetails"
           >
-            {{ label('EDIT') }}
-          </button>
-          <button
-            type="button"
-            :disabled="saving || opening"
-            :data-replace-audio-asset="row.id"
-            class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11"
-            @click="editor.open('replace', row)"
-          >
-            {{ label('REPLACE') }}
-          </button>
-          <button
-            type="button"
-            :disabled="saving || opening"
-            :data-audio-asset-history="row.id"
-            class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11"
-            @click="openHistory(row)"
-          >
-            {{ label('HISTORY') }}
+            {{ label('CLOSE_DETAILS') }}
           </button>
         </div>
-      </li>
-    </ul>
+        <dl class="min-w-0 space-y-3">
+          <div>
+            <dt class="text-n-slate-11">{{ label('NAME') }}</dt>
+            <dd class="break-words">{{ details.name }}</dd>
+          </div>
+          <div>
+            <dt class="text-n-slate-11">{{ label('FOLDER') }}</dt>
+            <dd class="break-words">
+              {{ details.folder_name || label('ROOT') }}
+            </dd>
+          </div>
+          <div v-if="details.description">
+            <dt class="text-n-slate-11">{{ label('DESCRIPTION') }}</dt>
+            <dd class="break-words">{{ details.description }}</dd>
+          </div>
+          <div v-if="details.purpose">
+            <dt class="text-n-slate-11">{{ label('PURPOSE') }}</dt>
+            <dd class="break-words">{{ details.purpose }}</dd>
+          </div>
+          <template v-if="details.latest_version">
+            <div>
+              <dt class="text-n-slate-11">{{ label('SOURCE') }}</dt>
+              <dd class="break-words">
+                {{ sourceLabel(details.latest_version.source_kind) }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-n-slate-11">{{ label('VERSION') }}</dt>
+              <dd class="break-words">
+                {{ versionDescription(details.latest_version) }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-n-slate-11">{{ label('FORMAT') }}</dt>
+              <dd class="break-words">
+                {{ details.latest_version.content_type }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-n-slate-11">{{ label('CHECKSUM') }}</dt>
+              <dd class="break-all">{{ details.latest_version.sha256 }}</dd>
+            </div>
+          </template>
+        </dl>
+        <p class="break-words text-n-amber-11">{{ label('NOT_VERIFIED') }}</p>
+        <AudioInspectionHistory
+          v-if="details.latest_version"
+          :key="`${details.id}:${details.latest_version.id}`"
+          :account-id="accountId"
+          :asset-id="details.id"
+          :version="details.latest_version"
+          :can-manage="canManage"
+          @denied="denied"
+        />
+      </aside>
+    </div>
+    <p v-if="detailsLoading" role="status" class="text-sm text-n-slate-11">
+      {{ label('LOADING') }}
+    </p>
+    <p v-if="detailsError" role="alert" class="text-sm text-n-ruby-11">
+      {{ label('ERROR') }}
+    </p>
     <nav
       v-if="meta.pages > 1"
       :aria-label="label('PAGINATION')"

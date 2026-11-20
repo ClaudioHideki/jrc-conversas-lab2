@@ -5801,5 +5801,24 @@
     "reload_passed": 130,
     "new_ruby_offenses": 0,
     "chrome_executed": false
+  },
+  "audio_library_word_layout_prepared_20261120": {
+    "status": "Prepared only; static lint passed, Vue/real Chrome pending",
+    "figures": [
+      6,
+      16
+    ],
+    "reference": "docs/jrc_contact_center/audio_library_layout_prepared_20261120.json",
+    "all_word_complete": false
+  },
+  "audio_admission_first_native_20261120": {
+    "producer": "3e631663dbc2e4f8b6a62c7581c88f45c19ad5ed",
+    "run": 44816431858,
+    "status": "Failed; local immutable callback ordering correction and17 lint corrections prepared; revalidation pending",
+    "report": "docs/jrc_contact_center/audio_admission_first_native_20261120.json",
+    "reload_passed": 129,
+    "reload_failed": 1,
+    "core_executed": false,
+    "all_word_complete": false
   }
 }

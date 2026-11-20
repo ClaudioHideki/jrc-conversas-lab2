@@ -2423,6 +2423,12 @@
     },
     "AUDIO_FILES": {
       "TITLE": "Áudios institucionais",
+      "DETAILS": "Detalhes do áudio",
+      "CLOSE_DETAILS": "Fechar detalhes",
+      "FOLDER": "Pasta",
+      "ACTIONS": "Ações",
+      "PRIVATE": "Privado; uso no PABX bloqueado",
+      "UNKNOWN_SOURCE": "Origem não informada",
       "LIMITS": "Recebimento privado com histórico e verificações por versão. Prévia e download exigem a verificação técnica atual e seu acesso à unidade. Uso em fluxos e publicação no PABX permanecem bloqueados.",
       "SEARCH": "Pesquisar áudios nesta pasta",
       "FILTER": "Filtrar áudios",

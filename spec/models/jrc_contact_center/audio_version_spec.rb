@@ -28,6 +28,18 @@ RSpec.describe JrcContactCenter::AudioVersion do
     expect(original.reload.number).to eq(1)
   end
 
+  it 'checks immutable history before dependent-inspection callbacks or destruction audit can run' do
+    original = receipt
+    proof = original.inspections.sole
+    audit_ids = Audited.audit_class.where(auditable: original).pluck(:id)
+    expect(proof.ready?).to be(true)
+    expect { original.destroy }.to raise_error(ActiveRecord::ReadOnlyRecord)
+    expect { original.destroy! }.to raise_error(ActiveRecord::ReadOnlyRecord)
+    expect(original.reload.inspections.pluck(:id)).to eq([proof.id])
+    expect(Audited.audit_class.where(auditable: original).pluck(:id)).to eq(audit_ids)
+    expect(original.blob.download).to eq(bytes)
+  end
+
   it 'preserves referenced blob identity and refuses removal of its private marker' do
     original = receipt
     expect do

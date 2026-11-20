@@ -1,11 +1,11 @@
 require 'rails_helper'
 
 # Actual owned native scanner/decoder; definition DB is synthetic and proves no production malware coverage.
-RSpec.describe 'Institutional audio final admission' do
+RSpec.describe JrcContactCenter::AudioUploads, 'final admission' do
   include_context 'with an institutional audio receipt'
 
   let(:access) { JrcContactCenter::AudioLibraryAccess.new(context: context) }
-  let(:service) { JrcContactCenter::AudioUploads.new(access: access) }
+  let(:service) { described_class.new(access: access) }
   let(:attributes) { { name: 'SYNTHETIC admitted audio' } }
   let(:received) { service.create!(unit_id: unit.id, attributes: attributes, file: upload, key: key) }
 
@@ -14,7 +14,7 @@ RSpec.describe 'Institutional audio final admission' do
     proof = access.inspections(version).sole
     expect(proof.ready?).to be(true)
     expect(proof).to have_attributes(attempt: 1, source_blob_id: version.blob_id, expected_sha256: version.sha256,
-                                    observed_sha256: version.sha256, created_by_id: actor.id)
+                                     observed_sha256: version.sha256, created_by_id: actor.id)
     expect(proof.metadata).to include('codec' => 'pcm_s16le', 'duration_ms' => 1)
     expect(Audited.audit_class.where(auditable: proof, action: 'create').count).to eq(1)
     expect(version.blob.download).to eq(bytes)
@@ -101,8 +101,8 @@ RSpec.describe 'Institutional audio final admission' do
   end
 
   it 'keeps a historical unverified receipt immutable on replay without pretending it passed the new admission check' do
-    historical = JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: access)
-                                                            .create!(unit_id: unit.id, attributes: attributes, file: upload, key: key)
+    legacy = JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: access)
+    historical = legacy.create!(unit_id: unit.id, attributes: attributes, file: upload, key: key)
     with_modified_env JRC_CC_AUDIO_CLAMAV_SOCKET: nil do
       expect(service.create!(unit_id: unit.id, attributes: attributes, file: upload, key: key).id).to eq(historical.id)
     end

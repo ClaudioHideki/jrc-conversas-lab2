@@ -5,8 +5,8 @@ RSpec.describe JrcContactCenter::AudioSafetyObservation do
 
   let(:access) { JrcContactCenter::AudioLibraryAccess.new(context: context) }
   let(:version) do
-    JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: access)
-                                  .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC observation' }, file: upload, key: key)
+    legacy = JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: access)
+    legacy.create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC observation' }, file: upload, key: key)
   end
   let(:scanner) do
     # Dependency contract fixture only. It is not a real ClamAV/homologation proof.

@@ -355,157 +355,195 @@ onBeforeUnmount(() => {
     >
       {{ label('LIMITS') }}
     </p>
-    <form class="flex flex-wrap items-end gap-3" @submit.prevent="search">
-      <label
-        class="w-full min-w-0 text-sm text-n-slate-12 sm:min-w-48 sm:flex-1"
-        >{{ label('UNIT') }}
-        <select
-          :value="unitId"
-          data-audio-unit
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-          @change="
-            query({
-              audio_unit: $event.target.value,
-              audio_parent: undefined,
-              audio_page: 1,
-              audio_q: undefined,
-              audio_file_page: 1,
-              audio_file_q: undefined,
-            })
-          "
-        >
-          <option v-for="unit in units" :key="unit.id" :value="String(unit.id)">
-            {{ unit.name }}
-          </option>
-        </select>
-      </label>
-      <label
-        class="w-full min-w-0 text-sm text-n-slate-12 sm:min-w-48 sm:flex-1"
-        >{{ label('SEARCH') }}
-        <input
-          v-model="q"
-          type="search"
-          maxlength="100"
-          data-audio-search
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-        />
-      </label>
-      <button
-        type="submit"
-        class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
-      >
-        {{ label('FILTER') }}
-      </button>
-      <button
-        type="button"
-        class="rounded-lg border border-n-weak px-3 py-2 text-sm text-n-slate-12"
-        @click="
-          q = '';
-          search();
-        "
-      >
-        {{ label('CLEAR') }}
-      </button>
-      <button
-        type="button"
-        :disabled="!canManage || loading || opening || saving"
-        data-new-audio-folder
-        class="rounded-lg bg-n-brand px-3 py-2 text-sm text-white disabled:opacity-40"
-        @click="open(null)"
-      >
-        {{ label('NEW') }}
-      </button>
-    </form>
-    <p v-if="!canManage" role="status" class="text-sm text-n-amber-11">
-      {{ label('NO_UNIT') }}
-    </p>
-    <nav
-      v-else
-      class="flex min-w-0 flex-wrap items-center gap-2 text-sm"
-      :aria-label="label('PATH')"
+    <div
+      class="grid min-w-0 grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]"
+      data-audio-library-layout
     >
-      <button type="button" class="text-n-blue-11" @click="navigate(null)">
-        {{ label('ROOT') }}
-      </button>
-      <template v-if="currentFolder">
-        <button
-          v-for="ancestor in currentFolder.path"
-          :key="ancestor.id"
-          type="button"
-          :disabled="ancestor.id === currentFolder.id"
-          :aria-current="ancestor.id === currentFolder.id ? 'page' : undefined"
-          :data-audio-folder-path="ancestor.id"
-          class="min-w-0 max-w-full break-words text-left text-n-blue-11 disabled:text-n-slate-12"
-          @click="navigate(ancestor.id)"
-        >
-          {{ ancestor.name }}
-        </button>
-        <button
-          type="button"
-          class="text-n-blue-11"
-          @click="navigate(currentFolder.parent_id)"
-        >
-          {{ label('UP') }}
-        </button>
-      </template>
-    </nav>
-    <p v-if="loading || opening" role="status" class="text-sm text-n-slate-11">
-      {{ label('LOADING') }}
-    </p>
-    <p v-else-if="error" role="alert" class="text-sm text-n-ruby-11">
-      {{ label('ERROR') }}
-    </p>
-    <p v-else-if="canManage && !items.length" class="text-sm text-n-slate-11">
-      {{ label('EMPTY') }}
-    </p>
-    <ul v-else class="space-y-2">
-      <li
-        v-for="row in items"
-        :key="row.id"
-        class="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-3"
-        :data-audio-folder="row.id"
+      <aside
+        class="min-w-0 space-y-3 rounded-xl border border-n-weak bg-n-solid-1 p-3"
+        data-audio-folder-navigation
       >
-        <button
-          type="button"
-          class="min-w-0 flex-1 break-words text-left text-n-blue-11"
-          @click="navigate(row.id)"
+        <form class="flex flex-wrap items-end gap-3" @submit.prevent="search">
+          <label
+            class="w-full min-w-0 text-sm text-n-slate-12 sm:min-w-48 sm:flex-1"
+            >{{ label('UNIT') }}
+            <select
+              :value="unitId"
+              data-audio-unit
+              class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+              @change="
+                query({
+                  audio_unit: $event.target.value,
+                  audio_parent: undefined,
+                  audio_page: 1,
+                  audio_q: undefined,
+                  audio_file_page: 1,
+                  audio_file_q: undefined,
+                })
+              "
+            >
+              <option
+                v-for="unit in units"
+                :key="unit.id"
+                :value="String(unit.id)"
+              >
+                {{ unit.name }}
+              </option>
+            </select>
+          </label>
+          <label
+            class="w-full min-w-0 text-sm text-n-slate-12 sm:min-w-48 sm:flex-1"
+            >{{ label('SEARCH') }}
+            <input
+              v-model="q"
+              type="search"
+              maxlength="100"
+              data-audio-search
+              class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+            />
+          </label>
+          <button
+            type="submit"
+            class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
+          >
+            {{ label('FILTER') }}
+          </button>
+          <button
+            type="button"
+            class="rounded-lg border border-n-weak px-3 py-2 text-sm text-n-slate-12"
+            @click="
+              q = '';
+              search();
+            "
+          >
+            {{ label('CLEAR') }}
+          </button>
+          <button
+            type="button"
+            :disabled="!canManage || loading || opening || saving"
+            data-new-audio-folder
+            class="rounded-lg bg-n-brand px-3 py-2 text-sm text-white disabled:opacity-40"
+            @click="open(null)"
+          >
+            {{ label('NEW') }}
+          </button>
+        </form>
+        <p v-if="!canManage" role="status" class="text-sm text-n-amber-11">
+          {{ label('NO_UNIT') }}
+        </p>
+        <nav
+          v-else
+          class="flex min-w-0 flex-wrap items-center gap-2 text-sm"
+          :aria-label="label('PATH')"
         >
-          {{ row.name }}
-        </button>
-        <button
-          type="button"
-          :disabled="opening || saving"
-          class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
-          :data-edit-audio-folder="row.id"
-          @click="open(row)"
+          <button type="button" class="text-n-blue-11" @click="navigate(null)">
+            {{ label('ROOT') }}
+          </button>
+          <template v-if="currentFolder">
+            <button
+              v-for="ancestor in currentFolder.path"
+              :key="ancestor.id"
+              type="button"
+              :disabled="ancestor.id === currentFolder.id"
+              :aria-current="
+                ancestor.id === currentFolder.id ? 'page' : undefined
+              "
+              :data-audio-folder-path="ancestor.id"
+              class="min-w-0 max-w-full break-words text-left text-n-blue-11 disabled:text-n-slate-12"
+              @click="navigate(ancestor.id)"
+            >
+              {{ ancestor.name }}
+            </button>
+            <button
+              type="button"
+              class="text-n-blue-11"
+              @click="navigate(currentFolder.parent_id)"
+            >
+              {{ label('UP') }}
+            </button>
+          </template>
+        </nav>
+        <p
+          v-if="loading || opening"
+          role="status"
+          class="text-sm text-n-slate-11"
         >
-          {{ label('EDIT') }}
-        </button>
-      </li>
-    </ul>
-    <nav
-      v-if="meta.pages > 1"
-      class="flex flex-wrap items-center gap-3 text-sm text-n-slate-12"
-      :aria-label="label('PAGINATION')"
-    >
-      <button
-        type="button"
-        :disabled="loading || page <= 1"
-        @click="query({ audio_page: page - 1 })"
-      >
-        {{ label('PREVIOUS') }}
-      </button>
-      <p data-audio-folder-pagination-total class="inline-flex flex-wrap gap-1">
-        {{ paginationLabel }}
-      </p>
-      <button
-        type="button"
-        :disabled="loading || page >= meta.pages"
-        @click="query({ audio_page: page + 1 })"
-      >
-        {{ label('NEXT') }}
-      </button>
-    </nav>
+          {{ label('LOADING') }}
+        </p>
+        <p v-else-if="error" role="alert" class="text-sm text-n-ruby-11">
+          {{ label('ERROR') }}
+        </p>
+        <p
+          v-else-if="canManage && !items.length"
+          class="text-sm text-n-slate-11"
+        >
+          {{ label('EMPTY') }}
+        </p>
+        <ul
+          v-else
+          data-audio-folder-scroll
+          class="max-h-80 space-y-2 overflow-y-auto overscroll-contain pr-1"
+        >
+          <li
+            v-for="row in items"
+            :key="row.id"
+            class="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-3"
+            :data-audio-folder="row.id"
+          >
+            <button
+              type="button"
+              class="min-w-0 flex-1 break-words text-left text-n-blue-11"
+              @click="navigate(row.id)"
+            >
+              {{ row.name }}
+            </button>
+            <button
+              type="button"
+              :disabled="opening || saving"
+              class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
+              :data-edit-audio-folder="row.id"
+              @click="open(row)"
+            >
+              {{ label('EDIT') }}
+            </button>
+          </li>
+        </ul>
+        <nav
+          v-if="meta.pages > 1"
+          class="flex flex-wrap items-center gap-3 text-sm text-n-slate-12"
+          :aria-label="label('PAGINATION')"
+        >
+          <button
+            type="button"
+            :disabled="loading || page <= 1"
+            @click="query({ audio_page: page - 1 })"
+          >
+            {{ label('PREVIOUS') }}
+          </button>
+          <p
+            data-audio-folder-pagination-total
+            class="inline-flex flex-wrap gap-1"
+          >
+            {{ paginationLabel }}
+          </p>
+          <button
+            type="button"
+            :disabled="loading || page >= meta.pages"
+            @click="query({ audio_page: page + 1 })"
+          >
+            {{ label('NEXT') }}
+          </button>
+        </nav>
+      </aside>
+      <AudioAssetLibrary
+        v-if="canManage && !error && !loading"
+        :account-id="accountId"
+        :context="context"
+        :unit-id="unitId"
+        :folder-id="parentId"
+        @denied="clearDeniedContext"
+      />
+    </div>
     <Dialog
       ref="dialog"
       contained
@@ -625,13 +663,5 @@ onBeforeUnmount(() => {
         </label>
       </div>
     </Dialog>
-    <AudioAssetLibrary
-      v-if="canManage && !error && !loading"
-      :account-id="accountId"
-      :context="context"
-      :unit-id="unitId"
-      :folder-id="parentId"
-      @denied="clearDeniedContext"
-    />
   </section>
 </template>

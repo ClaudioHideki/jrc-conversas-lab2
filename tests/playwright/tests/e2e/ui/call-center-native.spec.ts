@@ -7519,6 +7519,29 @@ test('institutional audio folders native private receipt, revisions and permissi
   });
   await page.goto(`${url}?audio_unit=${target.unit_id}`);
   await expect(library).toBeVisible();
+  const folderScroll = folderLibrary.locator('[data-audio-folder-scroll]');
+  await expect(folderScroll).toBeVisible();
+  const folderSize = await folderScroll.evaluate(node => ({
+    height: node.getBoundingClientRect().height,
+    content: node.scrollHeight,
+    visible: node.clientHeight,
+  }));
+  expect(folderSize.height).toBeLessThanOrEqual(321);
+  expect(folderSize.content).toBeGreaterThan(folderSize.visible);
+  const folderBounds = await folderLibrary
+    .locator('[data-audio-folder-navigation]')
+    .boundingBox();
+  const fileBounds = await library.boundingBox();
+  expect(folderBounds).not.toBeNull();
+  expect(fileBounds).not.toBeNull();
+  if (page.viewportSize().width >= 1280)
+    expect(fileBounds.x).toBeGreaterThanOrEqual(
+      folderBounds.x + folderBounds.width
+    );
+  else
+    expect(fileBounds.y).toBeGreaterThanOrEqual(
+      folderBounds.y + folderBounds.height
+    );
   await library.locator('[data-new-audio-asset]').click();
   await expectContainedDialog(page);
   await dialog.locator('[data-audio-asset-name]').fill(name);
@@ -7651,6 +7674,33 @@ test('institutional audio folders native private receipt, revisions and permissi
     `${url}?audio_unit=${target.unit_id}&audio_parent=${target.audio_destination_id}`
   );
   await expect(library.locator('[data-audio-asset]')).toHaveCount(6);
+  await library
+    .locator(`[data-audio-asset-details-open="${original.id}"]`)
+    .click();
+  const details = library.locator('[data-audio-asset-details]');
+  await expect(details).toContainText(name);
+  await expect(details).toContainText(sha256);
+  await expect(details).toContainText(target.audio_destination_name);
+  await details.locator('[data-toggle-audio-inspections]').click();
+  await expect(
+    details.locator('[data-audio-inspection-state="verified"]')
+  ).toBeVisible();
+  await expect(details.locator('[data-audio-decoded-metadata]')).toContainText(
+    'pcm_s16le'
+  );
+  await details.locator('[data-close-audio-details]').scrollIntoViewIfNeeded();
+  await expect(details.locator('[data-close-audio-details]')).toBeInViewport();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth
+    )
+  ).toBe(false);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-table-authorized-details.png`,
+    fullPage: true,
+  });
+  await details.locator('[data-close-audio-details]').click();
+  await expect(details).toHaveCount(0);
   await library.locator('[data-audio-file-size]').selectOption('5');
   await expect(library.locator('[data-audio-asset]')).toHaveCount(5);
   await expect(library.locator('[data-audio-file-total]')).toContainText('6');

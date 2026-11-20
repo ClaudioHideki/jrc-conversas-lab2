@@ -55,8 +55,13 @@ const row = {
   folder_id: null,
   revision: 'a'.repeat(64),
   latest_version: {
+    id: '90',
+    audio_asset_id: '44',
+    unit_id: '10',
     number: 2,
     file_name: 'SYNTHETIC.wav',
+    content_type: 'audio/wav',
+    sha256: 'f'.repeat(64),
     byte_size: 60,
     ready: false,
     security_state: 'not_verified',
@@ -92,7 +97,7 @@ beforeEach(() => {
       max_upload_bytes: 1000,
     },
   });
-  API.audioAsset.mockResolvedValue({ data: { item: row } });
+  API.audioAsset.mockResolvedValue({ data: { account_id: '1', item: row } });
   API.updateAudioAsset.mockResolvedValue({
     data: { account_id: '1', item: row },
   });
@@ -112,6 +117,114 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it('opens current authorized details from the native endpoint and closes without mutating the file', async () => {
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-asset-details-open="44"]').trigger('click');
+    await flushPromises();
+    expect(API.audioAsset).toHaveBeenCalledWith('1', '44');
+    const details = wrapper.get('[data-audio-asset-details]');
+    expect(details.text()).toContain(row.name);
+    expect(details.text()).toContain(row.latest_version.sha256);
+    expect(details.text()).toContain('audio/wav');
+    expect(details.find('audio, a[download]').exists()).toBe(false);
+    await details.get('[data-close-audio-details]').trigger('click');
+    expect(wrapper.find('[data-audio-asset-details]').exists()).toBe(false);
+    expect(API.updateAudioAsset).not.toHaveBeenCalled();
+    expect(API.receiveAudioVersion).not.toHaveBeenCalled();
+  });
+
+  it('ignores a slower previous selection instead of showing one file under another selection', async () => {
+    const other = {
+      ...row,
+      id: '45',
+      name: 'SYNTHETIC next selection',
+      latest_version: null,
+    };
+    API.audioAssets.mockResolvedValueOnce({
+      data: {
+        items: [row, other],
+        meta: { page: 1, pages: 1, total: 2 },
+        max_upload_bytes: 1000,
+      },
+    });
+    let resolvePrevious;
+    API.audioAsset.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolvePrevious = resolve;
+        })
+    );
+    API.audioAsset.mockResolvedValueOnce({
+      data: { account_id: '1', item: other },
+    });
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-asset-details-open="44"]').trigger('click');
+    await wrapper.get('[data-audio-asset-details-open="45"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-audio-asset-details]').text()).toContain(
+      other.name
+    );
+    resolvePrevious({ data: { account_id: '1', item: row } });
+    await flushPromises();
+    expect(wrapper.get('[data-audio-asset-details]').text()).toContain(
+      other.name
+    );
+    expect(wrapper.get('[data-audio-asset-details]').text()).not.toContain(
+      row.name
+    );
+  });
+
+  it('forgets an outstanding details request after a native unit change', async () => {
+    let resolve;
+    API.audioAsset.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-asset-details-open="44"]').trigger('click');
+    API.audioAssets.mockResolvedValueOnce({
+      data: {
+        items: [],
+        meta: { page: 1, pages: 0, total: 0 },
+        max_upload_bytes: 1000,
+      },
+    });
+    await wrapper.setProps({ unitId: '11' });
+    resolve({ data: { account_id: '1', item: row } });
+    await flushPromises();
+    expect(wrapper.find('[data-audio-asset-details]').exists()).toBe(false);
+  });
+
+  it('withholds details and clears private rows when current server authority is denied', async () => {
+    API.audioAsset.mockRejectedValueOnce({ response: { status: 403 } });
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-asset-details-open="44"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-audio-asset-details]').exists()).toBe(false);
+    expect(wrapper.find('[data-audio-asset="44"]').exists()).toBe(false);
+    expect(wrapper.emitted('denied')).toHaveLength(1);
+  });
+
+  it('does not display details returned for another account or unit', async () => {
+    API.audioAsset.mockResolvedValueOnce({
+      data: { account_id: '2', item: { ...row, unit_id: '11' } },
+    });
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-asset-details-open="44"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-audio-asset-details]').exists()).toBe(false);
+    expect(wrapper.find('[role="alert"]').text()).toContain(
+      'JRC_CONTACT_CENTER.AUDIO_FILES.ERROR'
+    );
+  });
+
   it('returns to the last real page after a move removes the final row without discarding folder or search context', async () => {
     mocks.route.query = {
       audio_file_page: '2',
@@ -143,9 +256,7 @@ describe('unit scoped private audio metadata UI', () => {
       per_page: 20,
     });
     expect(wrapper.text()).toContain(row.name);
-    expect(wrapper.text()).toContain(
-      'JRC_CONTACT_CENTER.AUDIO_FILES.NOT_VERIFIED'
-    );
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.AUDIO_FILES.PRIVATE');
     expect(wrapper.findAll('audio, video, a[download]')).toHaveLength(0);
     expect(wrapper.text()).not.toContain('00:00');
     expect(wrapper.text()).toContain('SYNTHETIC.wav');

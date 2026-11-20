@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 # Real owned ClamAV/FFmpeg, synthetic definition DB. No final library record may exist at this point.
-RSpec.describe 'Institutional audio verification before final persistence' do
+RSpec.describe JrcContactCenter::AudioSafetyObservation, 'before final persistence' do
   include_context 'with an institutional audio receipt'
 
   let(:access) { JrcContactCenter::AudioLibraryAccess.new(context: context) }
@@ -9,7 +9,7 @@ RSpec.describe 'Institutional audio verification before final persistence' do
   let(:blob) do
     JrcContactCenter::PrivateAudioBlob.upload(file: input.file, filename: input.filename, content_type: input.content_type)
   end
-  let(:observer) { JrcContactCenter::AudioSafetyObservation.new(access: access) }
+  let(:observer) { described_class.new(access: access) }
 
   before do
     owned = ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' && ENV.fetch('JRC_CC_AUDIO_CLAMAV_SOCKET', '').start_with?('/run/jrc-cc-audio-')

@@ -1,0 +1,45 @@
+{
+  "status": "implemented_draft_static_lint_only",
+  "product_parent": "3e631663dbc2e4f8b6a62c7581c88f45c19ad5ed",
+  "figures": [
+    6,
+    16
+  ],
+  "reference_images": [
+    {
+      "path": "doc2/image5.png",
+      "purpose": "folder navigation and library"
+    },
+    {
+      "path": "doc2/image14.png",
+      "purpose": "library and authorized details"
+    }
+  ],
+  "implemented": [
+    "Bounded folder navigation beside native files at desktop width; stacked on mobile",
+    "Real native file table with bounded scrolling and existing metadata, move, replacement and version actions",
+    "Current native API details panel; account/unit identity checked; late selections and context changes discarded",
+    "Same existing inspection and exact-byte preview components; no automatic media requests",
+    "Truthful private/non-published/source labels, no fake duration or usage counts"
+  ],
+  "new_vue_prepared": 5,
+  "chrome": "All232 retained; existing4 upload variants extended with actual bounds and server-backed details. Not executed for this draft.",
+  "remaining": [
+    "Expandable complete folder tree beyond bounded native hierarchy browsing",
+    "Per-file verified duration and usage columns",
+    "Actual native usage/reference ledger and guarded duplicate/delete actions",
+    "Waveform from real samples",
+    "Capture/Nico generation, subject to actual capabilities",
+    "External PABX codec/ACK/publication contract"
+  ],
+  "authorizations_unchanged": true,
+  "migrations_changed": false,
+  "full_word_conformance": false,
+  "adr": "docs/adr/20261120-call-center-audio-word-layout.md",
+  "checked_source_fields": [
+    "current account id",
+    "current unit id",
+    "selected asset id",
+    "native immutable version metadata"
+  ]
+}
