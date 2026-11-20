@@ -5554,10 +5554,34 @@
     "full_23_figures_complete": false
   },
   "institutional_audio_receipts_candidate_20261120": {
-    "status": "implemented_candidate_not_natively_validated",
+    "status": "native_validation_blocked_schema_reload",
     "parent": "7dfccc8f5b2e2c0cdfd1a55972715635586f8838",
     "required_chrome": 224,
     "details": "docs/jrc_contact_center/audio_file_receipt_prepared_20261120.json",
-    "not_full_figure_acceptance": true
+    "not_full_figure_acceptance": true,
+    "failed_attempts": [
+      {
+        "sha": "9b8bc559e64634a361c937d98c3dd27c1c898952",
+        "run": 44759123101,
+        "schema_examples": 114,
+        "schema_failures": 1,
+        "new_ruby_offenses": 57
+      },
+      {
+        "sha": "5c4b8793b23d7ed2542c890b49cf021fa1085e20",
+        "run": 44763568917,
+        "status": "completed_failure",
+        "schema_examples": 115,
+        "schema_failures": 1,
+        "new_ruby_offenses": 1
+      }
+    ],
+    "do_not_claim_new_Chrome_evidence": true,
+    "next_correction": "audio_file_second_reload_review_20261120.json"
+  },
+  "audio_schema_diagnostics_prepared_20261120": {
+    "status": "prepared_not_executed",
+    "scope": "Only structural metadata in exclusively owned GitHub synthetic DBs; record exact fresh/reload components, no customer records or credentials.",
+    "does_not_replace_mandatory_idempotence_and_tamper_gates": true
   }
 }

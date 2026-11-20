@@ -108,8 +108,9 @@ class CreateContactCenterAudioFiles < ActiveRecord::Migration[7.1]
     add_check_constraint VERSIONS, "idempotency_key ~ '^[A-Za-z0-9_-]{16,100}$'", name: 'cc_audio_version_idempotency'
     add_check_constraint VERSIONS, 'length(file_name) > 0 AND position(chr(13) in file_name) = 0 AND position(chr(10) in file_name) = 0',
                          name: 'cc_audio_version_filename'
-    add_check_constraint VERSIONS, "source_kind IN ('user_upload', 'browser_capture') AND " \
-                                   "content_type IN ('audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/webm')",
+    add_check_constraint VERSIONS, "source_kind::text IN ('user_upload'::text, 'browser_capture'::text) AND " \
+                                   "content_type::text IN ('audio/mpeg'::text, 'audio/wav'::text, 'audio/ogg'::text, " \
+                                   "'audio/mp4'::text, 'audio/webm'::text)",
                          name: 'cc_audio_version_type'
   end
 end

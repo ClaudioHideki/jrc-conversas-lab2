@@ -137,7 +137,7 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
       get URI.parse(blob.url).request_uri
       expect(response).to have_http_status(:not_found)
       url = blob.service.url_for_direct_upload(blob.key, expires_in: 5.minutes, content_type: blob.content_type,
-                                                                                content_length: blob.byte_size, checksum: blob.checksum)
+                                                         content_length: blob.byte_size, checksum: blob.checksum)
       put URI.parse(url).request_uri, params: bytes, headers: { 'Content-Type' => 'audio/wav' }
       expect(response).to have_http_status(:not_found)
     end

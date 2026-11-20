@@ -21,7 +21,7 @@ export const teamStateMigrationHash = '7466db5b4b1823d9d5a7296fd40bcfe405f0f3c78
 export const audioFolderMigrationPath = 'db/migrate/20261120090000_create_contact_center_audio_folders.rb';
 export const audioFolderMigrationHash = 'ba0f119179aa59ca0b2df5cb9cd9425b2e31f707e8355b6931f495303bb4a8d7';
 export const audioFileMigrationPath = 'db/migrate/20261120120000_create_contact_center_audio_files.rb';
-export const audioFileMigrationHash = '736bf1be42ed29fc595eebac7dd70f8a639af6d5227a180be4949a8123424bda';
+export const audioFileMigrationHash = '75cfea1bac450ff452e5cddd61aaf242f6d0f166dc7379a2a12acabb51a738d4';
 export const audioFileSqlSources = Object.freeze({
   "lib/jrc_contact_center/audio_file_storage_sql.rb": "78cd8c6013eb8d7378d49c128b87061e442f282f982c13760cc97baebf4558db",
   "lib/jrc_contact_center/audio_file_origin_sql.rb": "19aa49167a6748d7c01af16399456d498ecb16b40600e45b151bcb91c1da5001",

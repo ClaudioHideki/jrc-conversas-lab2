@@ -76,6 +76,18 @@ RSpec.describe CreateContactCenterAudioFiles do
     expect(accepted).to eq(['SYNTHETIC.wav'])
   end
 
+  it 'keeps all and only the exact source/type pairs without unstable varchar-array coercions' do
+    connection = ActiveRecord::Base.connection
+    constraint = connection.check_constraints(:jrc_contact_center_audio_versions).find { |row| row.name == 'cc_audio_version_type' }
+    expect(constraint.expression).not_to include('character varying', '::text[]')
+    sources = %w[user_upload browser_capture forged]
+    types = %w[audio/mpeg audio/wav audio/ogg audio/mp4 audio/webm application/pdf audio/WAV]
+    values = sources.product(types).map { |source, type| "(#{connection.quote(source)}, #{connection.quote(type)})" }.join(', ')
+    accepted = connection.select_rows("SELECT source_kind, content_type FROM (VALUES #{values}) AS files(source_kind, content_type) " \
+                                      "WHERE #{constraint.expression}")
+    expect(accepted.sort).to eq(sources.first(2).product(types.first(5)).sort)
+  end
+
   it 'detects removal of an exact origin constraint without accepting matching column names as proof' do
     in_owned_preupgrade_schema do |connection|
       described_class.new.up

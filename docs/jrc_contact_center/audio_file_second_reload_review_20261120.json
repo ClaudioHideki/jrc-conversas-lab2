@@ -1,0 +1,28 @@
+{
+  "status": "second_native_failure_reviewed_next_correction_prepared",
+  "sha": "5c4b8793b23d7ed2542c890b49cf021fa1085e20",
+  "run": 44763568917,
+  "artifact": 14644736092,
+  "artifact_sha256": "bf8e6fbd2b89aff82f0de37be7e05c3cef2872eb3c0ce13a52790922e0b58012",
+  "schema_entry_sha256": "15425c43c774caf7f003cfd41f4248a62c97faf6e5652357cdb10f323fa1a8cd",
+  "schema_reload": {
+    "duration": 9.950076007,
+    "example_count": 115,
+    "failure_count": 1,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "new_ruby_offenses": 1,
+  "prior_ruby_offenses": 57,
+  "new_CR_LF_regression_passed": true,
+  "remaining_schema_failure": "Exact actual fresh/reloaded function/trigger/table verifier; no other reload failures",
+  "evidence_constraint": "ADD CONSTRAINT \"cc_audio_version_type\" CHECK ((((source_kind)::text = ANY ((ARRAY['user_upload'::character varying, 'browser_capture'::character varying])::text[])) AND ((content_type)::text = ANY ((ARRAY['audio/mpeg'::character varying, 'audio/wav'::character varying, 'audio/ogg'::character varying, 'audio/mp4'::character varying, 'audio/webm'::character varying])::text[]))));",
+  "next_minimal_correction": "Explicit text casts preserve the same two sources/five MIME types while avoiding varchar-array coercion representation. Same correction already proved for ACW315ab. Current audio root-cause comparison must still be confirmed by same-SHA native fresh/reload vectors. No fingerprint normalization/exclusion/restamp of unknown schemas.",
+  "new_type_regression": "All21actualPostgreSQL source/type pairs, acceptingexactly10; no varchararraycoercions. Existing full schema negative tampering and idempotence scenarios remain.",
+  "old_unapproved_audio_migration_sha256": "736bf1be42ed29fc595eebac7dd70f8a639af6d5227a180be4949a8123424bda",
+  "next_unapproved_audio_migration_sha256": "75cfea1bac450ff452e5cddd61aaf242f6d0f166dc7379a2a12acabb51a738d4",
+  "historical_eight_migrations_unchanged": true,
+  "database_or_production_changes": false,
+  "all23complete": false,
+  "new_files_Chrome_validated": false
+}

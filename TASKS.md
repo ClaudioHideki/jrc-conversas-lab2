@@ -707,3 +707,5 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] Codec/scanner/metadados/player, gravação, Nico, vínculos e layout completo ainda pendentes. Todos os novos recibos são privados e não verificados; não aceitar as figuras6/16 nem todas23 como concluídas.
 
 - [ ] Recebimento privado9b8: instalação nova aprovada; recarga113/114 e lint57infrações novas bloquearam a CI44759123101. Correção CR/LF sem relaxar fingerprint, JSON explícito e lint preparada; teste PostgreSQL real e224Chrome continuam obrigatórios. Ver audio_file_schema_reload_correction_20261120.json.
+
+- [ ] Recebimento privado5c4b/CI44763568917:114/115recargas, novo casoCR/LF aprovado, lint57→1. Casts explícitos (mesmo conjunto permitido) e21pares PostgreSQL, alinhamento final e vetoresfresh/reload preparados; aprovação dos uploads e224Chrome ainda pendente.
