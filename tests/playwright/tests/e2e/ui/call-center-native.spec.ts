@@ -8287,6 +8287,66 @@ test('institutional audio folders native browser capture uses only the synthetic
   await expect(saved).toContainText('Gravação do navegador');
   await page.reload();
   await expect(saved).toContainText(name);
+  const chooseFormat = async (format: string) => {
+    await library
+      .locator('[data-audio-file-source-filter]')
+      .selectOption('browser_capture');
+    await library
+      .locator('[data-audio-file-format-filter]')
+      .selectOption(format);
+    const selected = page.waitForResponse(response => {
+      const requested = new URL(response.url());
+      return (
+        requested.pathname === prefix &&
+        requested.searchParams.get('source_kind') === 'browser_capture' &&
+        requested.searchParams.get('content_type') === format &&
+        response.request().method() === 'GET'
+      );
+    });
+    await library
+      .getByRole('button', { name: 'Filtrar áudios', exact: true })
+      .click();
+    const response = await selected;
+    expect(response.status()).toBe(200);
+    return response.json();
+  };
+  const filtered = await chooseFormat('audio/ogg');
+  expect(filtered.meta.total).toBe(1);
+  expect(filtered.items.map(item => item.id)).toEqual([asset.id]);
+  await page.reload();
+  await expect(library.locator('[data-audio-file-source-filter]')).toHaveValue(
+    'browser_capture'
+  );
+  await expect(library.locator('[data-audio-file-format-filter]')).toHaveValue(
+    'audio/ogg'
+  );
+  const incompatible = await chooseFormat('audio/wav');
+  expect(incompatible.meta.total).toBe(0);
+  expect(incompatible.items).toEqual([]);
+  await expect(saved).toHaveCount(0);
+  const clearing = page.waitForResponse(response => {
+    const requested = new URL(response.url());
+    return (
+      requested.pathname === prefix &&
+      response.request().method() === 'GET' &&
+      !requested.searchParams.has('source_kind') &&
+      !requested.searchParams.has('content_type') &&
+      !requested.searchParams.get('q')
+    );
+  });
+  await library
+    .getByRole('button', { name: 'Limpar busca de áudios', exact: true })
+    .click();
+  expect((await clearing).status()).toBe(200);
+  const cleared = new URL(page.url()).searchParams;
+  expect(cleared.get('audio_unit')).toBe(String(target.unit_id));
+  expect(cleared.has('audio_file_source')).toBe(false);
+  expect(cleared.has('audio_file_format')).toBe(false);
+  expect(cleared.has('audio_file_q')).toBe(false);
+  await page.goto(
+    `${url}?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(name)}`
+  );
+  await expect(saved).toContainText(name);
   await saved.locator(`[data-audio-asset-details-open="${asset.id}"]`).click();
   await expect(library.locator('[data-audio-asset-details]')).toContainText(
     version.sha256
@@ -8314,6 +8374,9 @@ test('institutional audio folders native browser capture uses only the synthetic
       denied: denied.status(),
       native_posts: writes,
       dark,
+      filtered_total: filtered.meta.total,
+      wrong_format_total: incompatible.meta.total,
+      filters_persisted_and_cleared: true,
     })
   );
   expect(unexpected).toEqual([]);

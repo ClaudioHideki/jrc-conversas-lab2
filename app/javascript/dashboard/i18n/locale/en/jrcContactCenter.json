@@ -2454,6 +2454,8 @@
       "UNKNOWN_SOURCE": "Origem não informada",
       "DURATION": "Duração",
       "DURATION_UNKNOWN": "Sem duração verificada",
+      "ALL_SOURCES": "Todas as origens",
+      "ALL_FORMATS": "Todos os formatos",
       "LIMITS": "Recebimento privado com histórico e verificações por versão. Prévia e download exigem a verificação técnica atual e seu acesso à unidade. Uso em fluxos e publicação no PABX permanecem bloqueados.",
       "SEARCH": "Pesquisar áudios nesta pasta",
       "FILTER": "Filtrar áudios",

@@ -43,11 +43,7 @@ class JrcContactCenter::AudioUploads
   end
 
   def prepare_request!(request)
-    raise JrcContactCenter::OperationError, 'invalid_institutional_audio_source' unless %w[user_upload browser_capture].include?(request.source_kind)
-
-    valid = request.key.is_a?(String) && request.key.match?(/\A[\w-]{16,100}\z/)
-    raise JrcContactCenter::OperationError, 'invalid_institutional_audio_upload_key' unless valid
-
+    validate_request!(request)
     @access.refresh!
     request.asset_id = @access.identifier!(request.asset_id) if request.asset_id
     request.unit_id = @access.asset(request.asset_id).unit_id if request.asset_id
@@ -56,6 +52,13 @@ class JrcContactCenter::AudioUploads
     return if request.asset_id
 
     prepare_creation!(request, unit)
+  end
+
+  def validate_request!(request)
+    raise JrcContactCenter::OperationError, 'invalid_institutional_audio_source' unless %w[user_upload browser_capture].include?(request.source_kind)
+
+    valid = request.key.is_a?(String) && request.key.match?(/\A[\w-]{16,100}\z/)
+    raise JrcContactCenter::OperationError, 'invalid_institutional_audio_upload_key' unless valid
   end
 
   def prepare_creation!(request, unit)

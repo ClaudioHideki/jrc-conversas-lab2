@@ -1,0 +1,32 @@
+{
+  "status": "partial_native_and_vue_verified_not_chrome_or_candidate_approval",
+  "producer": "ca831c77f9054a9321e3703aad1eeaa2dfd5627f",
+  "run": 44834724720,
+  "native_distinct": 2078,
+  "schema_reload_separate": 131,
+  "vue_passed": 1050,
+  "new_capture_http_passed": 12,
+  "new_capture_vue_passed": 25,
+  "proved": "Typed provenance, current native account/unit/configuration, real scanner/codec admission, exact replay and origin conflicts, unchanged historical upload digest, replacement history, local lifecycle fixture cleanup and review.",
+  "not_proved": "Actual Chrome capture, CSS/layout, physical devices, production malware coverage or external PABX/Nico.",
+  "new_ruby_offenses": [
+    {
+      "path": "app/controllers/api/v1/accounts/jrc_contact_center/audio_versions_controller.rb",
+      "method": "create",
+      "abc": 27.09,
+      "limit": 26
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_uploads.rb",
+      "method": "prepare_request!",
+      "abc": 26.19,
+      "limit": 26
+    }
+  ],
+  "correction_prepared": "Extract the unchanged response render contract and source/key validation, retaining original error priority, native authorization order and all assertions. No suppression or rule change.",
+  "prior_alignment_offense": "Resolved; absent from this report.",
+  "assets_and_chrome": "Skipped by mandatory quality gate;236 still required.",
+  "artifact": 14679163416,
+  "artifact_sha256": "9c59fe6e057bce2feb0dbfd407c407c24ce5ab4faace75b51f295f8ea5bd2821",
+  "full_23_figures_complete": false
+}

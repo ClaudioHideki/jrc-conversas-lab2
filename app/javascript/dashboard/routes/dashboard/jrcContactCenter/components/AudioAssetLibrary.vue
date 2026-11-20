@@ -75,6 +75,8 @@ const labels = computed(() => ({
   IMPORT: t('JRC_CONTACT_CENTER.AUDIO_CAPTURE.IMPORT'),
   RECORD: t('JRC_CONTACT_CENTER.AUDIO_CAPTURE.RECORD'),
   NICO_PENDING: t('JRC_CONTACT_CENTER.AUDIO_CAPTURE.NICO_PENDING'),
+  ALL_SOURCES: t('JRC_CONTACT_CENTER.AUDIO_FILES.ALL_SOURCES'),
+  ALL_FORMATS: t('JRC_CONTACT_CENTER.AUDIO_FILES.ALL_FORMATS'),
 }));
 const label = key => labels.value[key];
 const route = useRoute();
@@ -126,6 +128,15 @@ const maxBytes = ref(0);
 const loading = ref(false);
 const error = ref(false);
 const q = ref('');
+const sourceFilter = ref('');
+const formatFilter = ref('');
+const formats = [
+  'audio/wav',
+  'audio/mpeg',
+  'audio/ogg',
+  'audio/mp4',
+  'audio/webm',
+];
 const history = ref([]);
 const historyMeta = ref({ total: 0, pages: 0 });
 const historyPage = ref(1);
@@ -262,6 +273,12 @@ const load = async () => {
       q: route.query.audio_file_q || '',
       page: page.value,
       per_page: perPage.value,
+      ...(route.query.audio_file_source
+        ? { source_kind: route.query.audio_file_source }
+        : {}),
+      ...(route.query.audio_file_format
+        ? { content_type: route.query.audio_file_format }
+        : {}),
     });
     if (version !== generation) return;
     const lastPage = Math.max(1, response.data.meta.pages);
@@ -338,6 +355,23 @@ const saveEditor = () => {
 };
 const filter = values =>
   router.replace({ query: { ...route.query, ...values } });
+const applyFilters = () => {
+  const values = { audio_file_q: q.value || undefined, audio_file_page: 1 };
+  Object.entries({
+    audio_file_source: sourceFilter.value,
+    audio_file_format: formatFilter.value,
+  }).forEach(([key, value]) => {
+    if (value || route.query[key] !== undefined)
+      values[key] = value || undefined;
+  });
+  return filter(values);
+};
+const clearFilters = () => {
+  q.value = '';
+  sourceFilter.value = '';
+  formatFilter.value = '';
+  applyFilters();
+};
 const loadHistory = async () => {
   historyGeneration += 1;
   const version = historyGeneration;
@@ -383,6 +417,8 @@ watch(
     page,
     perPage,
     () => route.query.audio_file_q,
+    () => route.query.audio_file_source,
+    () => route.query.audio_file_format,
     () => {
       const user = currentUser.value;
       const member = user?.accounts?.find(
@@ -402,6 +438,8 @@ watch(
     forget();
     editor.clear();
     q.value = route.query.audio_file_q || '';
+    sourceFilter.value = route.query.audio_file_source || '';
+    formatFilter.value = route.query.audio_file_format || '';
     load();
   },
   { immediate: true }
@@ -428,9 +466,7 @@ onBeforeUnmount(() => {
     <form
       v-if="canManage"
       class="flex flex-wrap items-end gap-3"
-      @submit.prevent="
-        filter({ audio_file_q: q || undefined, audio_file_page: 1 })
-      "
+      @submit.prevent="applyFilters"
     >
       <label class="w-full min-w-0 text-sm text-n-slate-12 sm:flex-1">
         <span>{{ label('SEARCH') }}</span>
@@ -440,6 +476,31 @@ onBeforeUnmount(() => {
           data-audio-file-search
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
         />
+      </label>
+      <label class="block min-w-0 max-w-full text-sm text-n-slate-12">
+        <span>{{ label('SOURCE') }}</span>
+        <select
+          v-model="sourceFilter"
+          data-audio-file-source-filter
+          class="mt-1 w-full max-w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+        >
+          <option value="">{{ label('ALL_SOURCES') }}</option>
+          <option value="user_upload">{{ label('SOURCE_UPLOAD') }}</option>
+          <option value="browser_capture">{{ label('SOURCE_CAPTURE') }}</option>
+        </select>
+      </label>
+      <label class="block min-w-0 max-w-full text-sm text-n-slate-12">
+        <span>{{ label('FORMAT') }}</span>
+        <select
+          v-model="formatFilter"
+          data-audio-file-format-filter
+          class="mt-1 w-full max-w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+        >
+          <option value="">{{ label('ALL_FORMATS') }}</option>
+          <option v-for="format in formats" :key="format" :value="format">
+            {{ format }}
+          </option>
+        </select>
       </label>
       <button
         type="submit"
@@ -468,7 +529,7 @@ onBeforeUnmount(() => {
       <button
         type="button"
         class="rounded-lg px-3 py-2 text-sm text-n-blue-11"
-        @click="filter({ audio_file_q: undefined, audio_file_page: 1 })"
+        @click="clearFilters"
       >
         {{ label('CLEAR') }}
       </button>

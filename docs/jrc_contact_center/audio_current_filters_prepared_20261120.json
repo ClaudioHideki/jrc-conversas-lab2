@@ -1,0 +1,16 @@
+{
+  "status": "implemented_draft_not_natively_tested",
+  "parent": "ca831c77f9054a9321e3703aad1eeaa2dfd5627f",
+  "figures": [6, 16],
+  "native_existing": "AudioLibraryAccess unit/folder-authorized relation, index search/totals/pagination, immutable exact versions",
+  "query": "Typed optional source_kind and content_type, applied only to the latest version of each already-authorized asset before totals and pagination. Malformed criteria fail closed.",
+  "native_http_prepared": 10,
+  "vue_prepared": 4,
+  "chrome": "236 retained;4 existing capture variants extended for real OGG/Opus source/format filtering, reload, wrong-format empty result and clearing with unit preservation. Not run.",
+  "migrations_changed": false,
+  "permissions_changed": false,
+  "new_endpoint": false,
+  "new_format_admission": false,
+  "not_claimed": ["Operational active/inactive status", "Actual usage bindings", "PABX codec compatibility", "Nico synthesis", "Full23 figures acceptance"],
+  "adr": "docs/adr/20261120-call-center-current-audio-filters.md"
+}

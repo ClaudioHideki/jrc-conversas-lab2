@@ -21,11 +21,15 @@ class Api::V1::Accounts::JrcContactCenter::AudioVersionsController < Api::V1::Ac
       asset_id: params[:audio_asset_id], file: params.require(:file), key: params.require(:idempotency_key), expected: params[:expected_revision],
       source_kind: params.fetch(:source_kind, 'user_upload')
     )
-    render json: base_payload.merge(item: JrcContactCenter::AudioLibraryPresenter.asset(library.asset(version.audio_asset_id)),
-                                    received_version: present(version)), status: :created
+    render_received(version)
   end
 
   private
+
+  def render_received(version)
+    render json: base_payload.merge(item: JrcContactCenter::AudioLibraryPresenter.asset(library.asset(version.audio_asset_id)),
+                                    received_version: present(version)), status: :created
+  end
 
   def library
     @library ||= JrcContactCenter::AudioLibraryAccess.new(context: pundit_user)
