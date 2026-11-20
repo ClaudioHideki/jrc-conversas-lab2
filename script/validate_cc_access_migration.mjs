@@ -21,11 +21,11 @@ export const teamStateMigrationHash = '7466db5b4b1823d9d5a7296fd40bcfe405f0f3c78
 export const audioFolderMigrationPath = 'db/migrate/20261120090000_create_contact_center_audio_folders.rb';
 export const audioFolderMigrationHash = 'ba0f119179aa59ca0b2df5cb9cd9425b2e31f707e8355b6931f495303bb4a8d7';
 export const audioFileMigrationPath = 'db/migrate/20261120120000_create_contact_center_audio_files.rb';
-export const audioFileMigrationHash = '99b509f4b8677a9d4f10c88d213fc4efb42781e00a13b4ee3231e10e0d95ade5';
+export const audioFileMigrationHash = '736bf1be42ed29fc595eebac7dd70f8a639af6d5227a180be4949a8123424bda';
 export const audioFileSqlSources = Object.freeze({
   "lib/jrc_contact_center/audio_file_storage_sql.rb": "78cd8c6013eb8d7378d49c128b87061e442f282f982c13760cc97baebf4558db",
   "lib/jrc_contact_center/audio_file_origin_sql.rb": "19aa49167a6748d7c01af16399456d498ecb16b40600e45b151bcb91c1da5001",
-  "lib/jrc_contact_center/audio_file_schema_receipt.rb": "a5c7f4861a22d8b76c40922e04a87e1bdabe7b51b3d425170dcc5b8cd63b17af"
+  "lib/jrc_contact_center/audio_file_schema_receipt.rb": "aab9f70fb0f917504ea843fa34bf73d32f9d11292f41581f104f83198086404c"
 });
 export const endingReasonSqlPath = 'lib/jrc_contact_center/ending_reason_origin_sql.rb';
 export const endingReasonSqlHash = 'c0dca8b84c8c4b02d78ed07be4e23bb253f0d64994dccc232ba879941ef35bf8';

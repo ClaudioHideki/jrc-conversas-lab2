@@ -29,7 +29,10 @@ module JrcContactCenter::ProtectedAudioBlob
     data = ActiveStorage.verifier.verified(encoded, purpose: params[:encoded_token] ? :blob_token : :blob_key)
     return unless data.is_a?(Hash)
 
-    key = data[:key] || data['key']
+    institutional_blob_for_key(data[:key] || data['key'])
+  end
+
+  def institutional_blob_for_key(key)
     return unless key.is_a?(String)
 
     key = key.split('/')[1] if key.start_with?('variants/')

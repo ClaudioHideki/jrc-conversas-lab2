@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe JrcContactCenter::AudioUploads do
-  include_context 'institutional audio receipt'
+  include_context 'with an institutional audio receipt'
 
   let(:access) { JrcContactCenter::AudioLibraryAccess.new(context: context) }
   let(:service) { described_class.new(access: access) }
@@ -11,7 +11,7 @@ RSpec.describe JrcContactCenter::AudioUploads do
   it 'receives exact private bytes with an immutable origin and no implicit ActiveStorage attachment or provider command' do
     version = receipt
     expect(version).to have_attributes(number: 1, account_id: account.id, unit_id: unit.id, created_by_id: actor.id,
-                                      sha256: Digest::SHA256.hexdigest(bytes), byte_size: bytes.bytesize, source_kind: 'user_upload')
+                                       sha256: Digest::SHA256.hexdigest(bytes), byte_size: bytes.bytesize, source_kind: 'user_upload')
     expect(version.blob.download).to eq(bytes)
     expect(version.blob.metadata).to include(JrcContactCenter::PrivateAudioBlob::MARKER => true)
     expect(ActiveStorage::Attachment.where(blob: version.blob)).to be_empty

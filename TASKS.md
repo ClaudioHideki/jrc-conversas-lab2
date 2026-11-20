@@ -705,3 +705,5 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] APIs/UI de recebimento privado, edição/movimentação e histórico preparados; CAS/idempotência e guards de bytes/attachments. Migration20261120120000 aditiva, sem alterar as oito anteriores; schema/SQL fixados por hashes e upgrade/reload/tamper cases preparados. Exigir nova CI nativa no próprio SHA.
 - [ ] Quatro Chrome novos, mantendo os220 anteriores: arquivo inválido/válido,6registros reais/página5, persistência/versões, acesso negado e temas390/1440. Stubs Vue e48checks leves do gate não substituem esta prova.
 - [ ] Codec/scanner/metadados/player, gravação, Nico, vínculos e layout completo ainda pendentes. Todos os novos recibos são privados e não verificados; não aceitar as figuras6/16 nem todas23 como concluídas.
+
+- [ ] Recebimento privado9b8: instalação nova aprovada; recarga113/114 e lint57infrações novas bloquearam a CI44759123101. Correção CR/LF sem relaxar fingerprint, JSON explícito e lint preparada; teste PostgreSQL real e224Chrome continuam obrigatórios. Ver audio_file_schema_reload_correction_20261120.json.

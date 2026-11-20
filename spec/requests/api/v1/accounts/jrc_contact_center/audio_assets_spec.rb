@@ -1,13 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe 'Private institutional audio receipts reuse native account and unit authority', type: :request do
-  include_context 'institutional audio receipt'
+  include_context 'with an institutional audio receipt'
 
   let(:headers) { actor.create_new_auth_token }
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_assets" }
   let(:receipt) do
     JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                 .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC private message' }, file: upload, key: key)
+                                  .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC private message' }, file: upload, key: key)
   end
 
   it 'accepts actual multipart bytes and presents metadata without a signed locator, storage key or readiness claim' do
@@ -29,7 +29,7 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
     expect(response.parsed_body.fetch('meta')).to include('page' => 1, 'per_page' => 1, 'total' => 1)
     expected = response.parsed_body.fetch('items').first.fetch('revision')
     patch "#{base}/#{asset.id}", headers: headers,
-                                params: { asset: { name: 'SYNTHETIC renamed', folder_id: folder.id.to_s }, expected_revision: expected }, as: :json
+                                 params: { asset: { name: 'SYNTHETIC renamed', folder_id: folder.id.to_s }, expected_revision: expected }, as: :json
     expect(response).to have_http_status(:ok)
     expect(asset.reload).to have_attributes(name: 'SYNTHETIC renamed', folder_id: folder.id, unit_id: unit.id)
     expect(receipt.reload.blob.download).to eq(bytes)
@@ -41,10 +41,10 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
     asset = receipt.audio_asset
     expected = JrcContactCenter::AudioAssetRevision.token(asset, version: receipt)
     patch "#{base}/#{asset.id}", headers: headers,
-                                params: { asset: { name: 'SYNTHETIC first edit' }, expected_revision: expected }, as: :json
+                                 params: { asset: { name: 'SYNTHETIC first edit' }, expected_revision: expected }, as: :json
     expect(response).to have_http_status(:ok)
     patch "#{base}/#{asset.id}", headers: headers,
-                                params: { asset: { name: 'SYNTHETIC stale edit' }, expected_revision: expected }, as: :json
+                                 params: { asset: { name: 'SYNTHETIC stale edit' }, expected_revision: expected }, as: :json
     expect(response).to have_http_status(:conflict)
     expect(asset.reload.name).to eq('SYNTHETIC first edit')
   end
@@ -74,7 +74,7 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
     get "#{base}/#{hidden.id}/versions", headers: headers
     expect(response).to have_http_status(:not_found)
     post base, headers: headers, params: { asset: { name: 'SYNTHETIC forged folder', folder_id: hidden_folder.id },
-                                          unit_id: unit.id, file: upload, idempotency_key: key }
+                                           unit_id: unit.id, file: upload, idempotency_key: key }
     expect(response).to have_http_status(:not_found)
     expect(JrcContactCenter::AudioVersion.where(account: account)).to be_empty
   end
@@ -87,7 +87,7 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
     expect(response).to have_http_status(:not_found)
     expect(response.body).not_to include(foreign.name)
     post base, headers: headers, params: { account_id: other.id, asset: { name: 'SYNTHETIC forged' },
-                                          unit_id: unit.id, file: upload, idempotency_key: key }
+                                           unit_id: unit.id, file: upload, idempotency_key: key }
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcContactCenter::AudioVersion.where(account: account)).to be_empty
   end
@@ -126,7 +126,7 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
 
   it 'does not receive a caller-supplied blob reference instead of the actual uploaded bytes' do
     post base, headers: headers, params: { asset: { name: 'SYNTHETIC forged blob' }, unit_id: unit.id,
-                                          file: { signed_id: receipt.blob.signed_id }, idempotency_key: 'synthetic-audio-request-0002' }, as: :json
+                                           file: { signed_id: receipt.blob.signed_id }, idempotency_key: 'synthetic-audio-request-0002' }, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcContactCenter::AudioVersion.where(account: account).count).to eq(1)
   end
@@ -137,7 +137,7 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
       get URI.parse(blob.url).request_uri
       expect(response).to have_http_status(:not_found)
       url = blob.service.url_for_direct_upload(blob.key, expires_in: 5.minutes, content_type: blob.content_type,
-                                                        content_length: blob.byte_size, checksum: blob.checksum)
+                                                                                content_length: blob.byte_size, checksum: blob.checksum)
       put URI.parse(url).request_uri, params: bytes, headers: { 'Content-Type' => 'audio/wav' }
       expect(response).to have_http_status(:not_found)
     end
@@ -154,7 +154,7 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
 
   it 'filters the actual file and private receipt correlators using the native request logger' do
     filtered = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
-                                            .filter({ 'file' => upload, 'idempotency_key' => key, 'input_digest' => 'f' * 64 })
+                                             .filter({ 'file' => upload, 'idempotency_key' => key, 'input_digest' => 'f' * 64 })
     expect(filtered).to eq('file' => '[FILTERED]', 'idempotency_key' => '[FILTERED]', 'input_digest' => '[FILTERED]')
   end
 end

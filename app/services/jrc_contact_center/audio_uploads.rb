@@ -79,7 +79,7 @@ class JrcContactCenter::AudioUploads
 
   def replay!(request, digest)
     version = JrcContactCenter::AudioVersion.find_by(account: @access.account, unit_id: request.unit_id,
-                                                   created_by: @access.actor, idempotency_key: request.key)
+                                                     created_by: @access.actor, idempotency_key: request.key)
     return unless version
     return version if version.input_digest == digest
 
@@ -117,7 +117,7 @@ class JrcContactCenter::AudioUploads
       check_revision!(asset, request)
     else
       asset = JrcContactCenter::AudioAsset.create!(request.attributes.merge('account' => @access.account,
-                                                                          'unit' => @access.unit(request.unit_id)))
+                                                                            'unit' => @access.unit(request.unit_id)))
     end
     version_attributes = input.version_attributes.merge(account: @access.account, unit_id: asset.unit_id, audio_asset: asset,
                                                         blob: @pending_blob, created_by: @access.actor, source_kind: 'user_upload',

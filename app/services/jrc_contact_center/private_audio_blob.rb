@@ -18,8 +18,8 @@ class JrcContactCenter::PrivateAudioBlob
     return if JrcContactCenter::AudioVersion.uncached { JrcContactCenter::AudioVersion.exists?(blob_id: blob.id) }
 
     JrcBackoffice::PrivateBlob.clean_uncommitted(blob, marker: MARKER)
-  rescue StandardError => error
-    Rails.logger.warn("contact_center_owned_audio_cleanup_pending class=#{error.class.name}")
+  rescue StandardError => e
+    Rails.logger.warn("contact_center_owned_audio_cleanup_pending class=#{e.class.name}")
   end
 
   def self.owned?(blob)

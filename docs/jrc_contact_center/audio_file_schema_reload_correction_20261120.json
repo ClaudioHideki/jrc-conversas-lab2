@@ -1,0 +1,47 @@
+{
+  "status": "correction_prepared_native_validation_pending",
+  "failed_sha": "9b8bc559e64634a361c937d98c3dd27c1c898952",
+  "run": 44759123101,
+  "reload": {
+    "examples": 114,
+    "passed": 113,
+    "failed": 1,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "new_ruby_offenses": 57,
+  "evidence": {
+    "artifact_id": 14641575796,
+    "artifact_sha256": "b9154bc03d26c92158589df79e724b6b55531075c51118e10863b6d195ee8b60",
+    "schema_entry_sha256": "93cf6a3a91c6c284d7cb3afb41a6ce6d6c25efe419cc0b65a4ea9a399e55d26f",
+    "dumped_constraint_has_LF_but_lost_CR": true,
+    "fragment_utf8": "ADD CONSTRAINT \"cc_audio_version_filename\" CHECK (((length((file_name)::text) > 0) AND ((file_name)::text !~ '[\n    ]'::text)));\n  JRC_SCHEMA_SQL_eb7d6a89ba04\n\n  execute <<~'JRC_SC"
+  },
+  "cause": "SQL E-string embeds CR/LF in pg_get_constraintdef. Existing exact schema dumper line.rstrip removesCR during reload, changing the fingerprint. The preserved schema contains onlyLF in that constraint; the failing exact verifier correctly rejected it.",
+  "correction": "Same CR/LF restriction expressed as position(chr(13)/chr(10)); no literal control bytes, no normalization of fingerprint or weakened verification. Created_at moved into create_table block without changing schema field order. Receipt predicate factored only for lint.",
+  "draft_only": true,
+  "production_migrations_executed": false,
+  "historical_eight_migrations_unchanged": true,
+  "old_migration_sha256": "99b509f4b8677a9d4f10c88d213fc4efb42781e00a13b4ee3231e10e0d95ade5",
+  "new_migration_sha256": "736bf1be42ed29fc595eebac7dd70f8a639af6d5227a180be4949a8123424bda",
+  "old_receipt_source_sha256": "a5c7f4861a22d8b76c40922e04a87e1bdabe7b51b3d425170dcc5b8cd63b17af",
+  "new_receipt_source_sha256": "aab9f70fb0f917504ea843fa34bf73d32f9d11292f41581f104f83198086404c",
+  "other_corrections": [
+    "Explicit JSON body wrapping disabled only2newtyped controllers",
+    "Ruby layout/metrics corrected without rule/config exclusions",
+    "SQL guard specs use actual quoted SQL to verify database constraints, no model validation bypass convenience APIs",
+    "Concurrent real upload barriers/transactions retained; helper split only",
+    "Shared temporary fixture cleanup uses UploadedFile-owned Tempfile; no instance variables"
+  ],
+  "native_regression": [
+    "Exact constraint SQL has no CR/LF literals and rejects realCR,LF,CRLF,empty on PostgreSQL",
+    "Existing actual migrated/reloaded idempotence scenario preserved",
+    "All rawSQL immutability/origin/blob/attachment cases preserved"
+  ],
+  "not_approved": [
+    "new upload workflows",
+    "native Rails and Vue on corrected SHA",
+    "224Chrome and screenshots",
+    "full23figures"
+  ]
+}

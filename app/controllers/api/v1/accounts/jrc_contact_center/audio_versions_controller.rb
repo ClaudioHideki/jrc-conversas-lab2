@@ -2,6 +2,8 @@
 
 # Version history and private admission only. There is deliberately no byte-release action here.
 class Api::V1::Accounts::JrcContactCenter::AudioVersionsController < Api::V1::Accounts::JrcContactCenter::BaseController
+  wrap_parameters false
+
   before_action -> { response.headers['Cache-Control'] = 'no-store' }
   before_action -> { authorize_contact_center!(:configure?) }
 
@@ -19,7 +21,7 @@ class Api::V1::Accounts::JrcContactCenter::AudioVersionsController < Api::V1::Ac
       asset_id: params[:audio_asset_id], file: params.require(:file), key: params.require(:idempotency_key), expected: params[:expected_revision]
     )
     render json: base_payload.merge(item: JrcContactCenter::AudioLibraryPresenter.asset(library.asset(version.audio_asset_id)),
-                                   received_version: present(version)), status: :created
+                                    received_version: present(version)), status: :created
   end
 
   private

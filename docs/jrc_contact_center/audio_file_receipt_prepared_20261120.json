@@ -1,16 +1,16 @@
 {
-  "status": "implemented_candidate_not_natively_validated",
+  "status": "native_attempt_failed_correction_prepared",
   "source_parent": "7dfccc8f5b2e2c0cdfd1a55972715635586f8838",
   "branch": "codex/call-center-control-desk-20261116",
   "scope": "Private institutional audio receipts/metadata/version history by native operational unit; not a complete media library",
   "migration": {
-    "status": "prepared_not_executed",
+    "status": "fresh_attempt_passed_reload_rejected_correctly_new_draft_correction_pending",
     "migration": "db/migrate/20261120120000_create_contact_center_audio_files.rb",
-    "sha256": "99b509f4b8677a9d4f10c88d213fc4efb42781e00a13b4ee3231e10e0d95ade5",
+    "sha256": "736bf1be42ed29fc595eebac7dd70f8a639af6d5227a180be4949a8123424bda",
     "sources": {
       "lib/jrc_contact_center/audio_file_storage_sql.rb": "78cd8c6013eb8d7378d49c128b87061e442f282f982c13760cc97baebf4558db",
       "lib/jrc_contact_center/audio_file_origin_sql.rb": "19aa49167a6748d7c01af16399456d498ecb16b40600e45b151bcb91c1da5001",
-      "lib/jrc_contact_center/audio_file_schema_receipt.rb": "a5c7f4861a22d8b76c40922e04a87e1bdabe7b51b3d425170dcc5b8cd63b17af"
+      "lib/jrc_contact_center/audio_file_schema_receipt.rb": "aab9f70fb0f917504ea843fa34bf73d32f9d11292f41581f104f83198086404c"
     },
     "historical_eight_unchanged": true,
     "requires_native_install_upgrade_idempotence_reload_and_storage_tests": true,
@@ -80,5 +80,18 @@
     "frontend_errors": 0,
     "new_component_warnings": 0,
     "not_native_Rails_Vue_or_Chrome": true
+  },
+  "failed_native_attempt": {
+    "sha": "9b8bc559e64634a361c937d98c3dd27c1c898952",
+    "run": 44759123101,
+    "reload": {
+      "examples": 114,
+      "passed": 113,
+      "failed": 1,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "new_ruby_offenses": 57,
+    "correction_report": "audio_file_schema_reload_correction_20261120.json"
   }
 }

@@ -11,7 +11,7 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
     raise 'Exclusive synthetic committed audio database required' unless owned && !ActiveRecord::Base.connection.transaction_open?
   end
 
-  include_context 'institutional audio receipt'
+  include_context 'with an institutional audio receipt'
 
   let(:workers) { [] }
   let(:arrived) { Queue.new }
@@ -27,35 +27,48 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
     # until runner teardown. Do not disable triggers or delete accepted history as test cleanup.
   end
 
-  def race_staged_receipts(&operation)
+  def race_staged_receipts
     identifiers = { account: account.id, user: actor.id, account_user: member.id }
+    stage_barrier
+    2.times do |index|
+      workers << Thread.new { execute_worker(identifiers, index) { |*arguments| yield(*arguments) } }
+    end
+    2.times { Timeout.timeout(20) { arrived.pop } }
+    2.times { release << true }
+    Array.new(2) { Timeout.timeout(25) { results.pop } }
+  end
+
+  def stage_barrier
     allow(JrcContactCenter::PrivateAudioBlob).to receive(:upload).and_wrap_original do |original, **values|
       stored = original.call(**values)
       arrived << true
       Timeout.timeout(15) { release.pop }
       stored
     end
-    2.times do |index|
-      workers << Thread.new do
-        ActiveRecord::Base.connection_pool.with_connection do
-          fresh = { account: Account.find(identifiers[:account]), user: User.find(identifiers[:user]),
-                    account_user: AccountUser.find(identifiers[:account_user]) }
-          Tempfile.create(['synthetic-concurrent-audio', '.wav']) do |file|
-            file.binmode
-            file.write(bytes)
-            file.rewind
-            uploaded = ActionDispatch::Http::UploadedFile.new(tempfile: file, filename: 'SYNTHETIC.wav', type: 'audio/wav')
-            service = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: fresh))
-            results << operation.call(service, uploaded, index)
-          end
-        end
-      rescue StandardError => error
-        results << error
+  end
+
+  def execute_worker(identifiers, index)
+    ActiveRecord::Base.connection_pool.with_connection do
+      service = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: worker_context(identifiers)))
+      concurrent_upload do |uploaded|
+        results << yield(service, uploaded, index)
       end
     end
-    2.times { Timeout.timeout(20) { arrived.pop } }
-    2.times { release << true }
-    2.times.map { Timeout.timeout(25) { results.pop } }
+  rescue StandardError => e
+    results << e
+  end
+
+  def worker_context(identifiers)
+    { account: Account.find(identifiers[:account]), user: User.find(identifiers[:user]), account_user: AccountUser.find(identifiers[:account_user]) }
+  end
+
+  def concurrent_upload
+    Tempfile.create(['synthetic-concurrent-audio', '.wav']) do |file|
+      file.binmode
+      file.write(bytes)
+      file.rewind
+      yield ActionDispatch::Http::UploadedFile.new(tempfile: file, filename: 'SYNTHETIC.wav', type: 'audio/wav')
+    end
   end
 
   it 'commits exactly one version and compensates the redundant owned staging blob for simultaneous identical request keys' do
@@ -74,7 +87,7 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
 
   it 'allows only one actual replacement when two different uploads reviewed the same exact prior version' do
     first = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                        .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC existing' }, file: upload, key: key)
+                                          .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC existing' }, file: upload, key: key)
     expected = JrcContactCenter::AudioAssetRevision.token(first.audio_asset, version: first)
     original_blobs = ActiveStorage::Blob.count
     outcomes = race_staged_receipts do |service, uploaded, index|
@@ -89,7 +102,7 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
 
   it 'keeps the native orphan-purge path harmless for committed private history without weakening its foreign-key protection' do
     original = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                           .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC protected purge' }, file: upload, key: key)
+                                             .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC protected purge' }, file: upload, key: key)
     expect { original.blob.purge }.not_to raise_error
     expect(ActiveStorage::Blob.exists?(original.blob_id)).to be(true)
     expect(original.reload.blob.download).to eq(bytes)

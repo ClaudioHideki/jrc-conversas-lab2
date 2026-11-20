@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Api::V1::Accounts::JrcContactCenter::AudioAssetsController < Api::V1::Accounts::JrcContactCenter::BaseController
+  # This API has an explicit typed asset body; do not add a second inferred audio_asset root.
+  wrap_parameters false
+
   before_action -> { response.headers['Cache-Control'] = 'no-store' }
   before_action -> { authorize_contact_center!(:configure?) }
 
@@ -23,7 +26,7 @@ class Api::V1::Accounts::JrcContactCenter::AudioAssetsController < Api::V1::Acco
       unit_id: params.require(:unit_id), attributes: params.require(:asset), file: params.require(:file), key: params.require(:idempotency_key)
     )
     render json: base_payload.merge(item: present(library.asset(version.audio_asset_id)),
-                                   received_version: JrcContactCenter::AudioLibraryPresenter.version(version)), status: :created
+                                    received_version: JrcContactCenter::AudioLibraryPresenter.version(version)), status: :created
   end
 
   def update

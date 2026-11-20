@@ -10,12 +10,17 @@ class JrcContactCenter::AudioAssetAttributes
     values = values.stringify_keys
     raise JrcContactCenter::OperationError, 'invalid_institutional_audio' unless (values.keys - KEYS).empty?
 
-    text = values.slice('name', 'description', 'purpose').all? do |key, item|
-      item.is_a?(String) || (key != 'name' && item.nil?)
-    end
-    raise JrcContactCenter::OperationError, 'invalid_institutional_audio' unless text
+    validate_text!(values)
 
     values['name'] = values['name'].strip if values.key?('name')
     values
   end
+
+  def self.validate_text!(values)
+    text = values.slice('name', 'description', 'purpose').all? do |key, item|
+      item.is_a?(String) || (key != 'name' && item.nil?)
+    end
+    raise JrcContactCenter::OperationError, 'invalid_institutional_audio' unless text
+  end
+  private_class_method :validate_text!
 end

@@ -10,7 +10,7 @@ class JrcContactCenter::AudioAsset < JrcContactCenter::ApplicationRecord
   has_one :latest_version, lambda {
     select('DISTINCT ON (jrc_contact_center_audio_versions.audio_asset_id) jrc_contact_center_audio_versions.*')
       .order(:audio_asset_id, number: :desc)
-  }, class_name: 'JrcContactCenter::AudioVersion', foreign_key: :audio_asset_id, inverse_of: :audio_asset
+  }, class_name: 'JrcContactCenter::AudioVersion', foreign_key: :audio_asset_id, inverse_of: :audio_asset, dependent: :restrict_with_error
   attr_readonly :account_id, :unit_id
 
   validates :name, presence: true, length: { maximum: 120 }

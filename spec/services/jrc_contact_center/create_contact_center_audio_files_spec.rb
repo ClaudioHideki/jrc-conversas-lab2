@@ -65,6 +65,17 @@ RSpec.describe CreateContactCenterAudioFiles do
     end
   end
 
+  it 'preserves the exact CR/LF filename restriction without embedding control bytes in schema SQL' do
+    connection = ActiveRecord::Base.connection
+    constraint = connection.check_constraints(:jrc_contact_center_audio_versions).find { |row| row.name == 'cc_audio_version_filename' }
+    expect(constraint.expression).not_to match(/[\r\n]/)
+    expect(constraint.expression).to include('chr(13)', 'chr(10)')
+    names = ['SYNTHETIC.wav', "SYNTHETIC\r.wav", "SYNTHETIC\n.wav", "SYNTHETIC\r\n.wav", '']
+    values = names.map { |name| "(#{connection.quote(name)})" }.join(', ')
+    accepted = connection.select_values("SELECT file_name FROM (VALUES #{values}) AS files(file_name) WHERE #{constraint.expression}")
+    expect(accepted).to eq(['SYNTHETIC.wav'])
+  end
+
   it 'detects removal of an exact origin constraint without accepting matching column names as proof' do
     in_owned_preupgrade_schema do |connection|
       described_class.new.up

@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe JrcContactCenter::AudioFileInput do
-  include_context 'institutional audio receipt'
+  include_context 'with an institutional audio receipt'
 
   it 'detects the actual bytes instead of trusting the declared client MIME' do
     upload.content_type = 'application/pdf'

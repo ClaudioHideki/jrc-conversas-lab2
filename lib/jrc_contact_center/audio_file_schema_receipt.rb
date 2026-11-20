@@ -25,14 +25,18 @@ class JrcContactCenter::AudioFileSchemaReceipt
   end
 
   def verify!
-    valid = TABLES.all? { |table| @connection.table_exists?(table) }
-    valid &&= COLUMNS.all? { |table, names| @connection.columns(table).map(&:name).sort == names.sort }
-    valid &&= functions.length == FUNCTIONS.length && triggers.length == TRIGGERS.length
-    valid &&= TABLES.all? { |table| @connection.table_comment(table) == token }
+    valid = complete_structure? && TABLES.all? { |table| @connection.table_comment(table) == token }
     raise ActiveRecord::MigrationError, 'Unexpected institutional audio file schema; preserve history and investigate' unless valid
   end
 
   private
+
+  def complete_structure?
+    return false unless TABLES.all? { |table| @connection.table_exists?(table) }
+    return false unless COLUMNS.all? { |table, names| @connection.columns(table).map(&:name).sort == names.sort }
+
+    functions.length == FUNCTIONS.length && triggers.length == TRIGGERS.length
+  end
 
   def token
     structure = TABLES.map do |table|
@@ -40,7 +44,7 @@ class JrcContactCenter::AudioFileSchemaReceipt
       indexes = @connection.indexes(table).map { |row| [row.name, row.columns, row.unique, row.where] }.sort
       [table, columns, indexes]
     end
-    'jrc_cc_audio_files_v1:' + Digest::SHA256.hexdigest(JSON.generate([structure, constraints, functions, triggers]))
+    "jrc_cc_audio_files_v1:#{Digest::SHA256.hexdigest(JSON.generate([structure, constraints, functions, triggers]))}"
   end
 
   def relations
