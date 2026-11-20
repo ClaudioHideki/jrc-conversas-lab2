@@ -315,6 +315,8 @@ onBeforeUnmount(() => {
   <section class="min-w-0 space-y-4" data-audio-folder-library>
     <h3 class="text-lg font-semibold text-n-slate-12">{{ label('TITLE') }}</h3>
     <p
+      role="status"
+      data-audio-library-limits
       class="rounded-xl border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
     >
       {{ label('LIMITS') }}

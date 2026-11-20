@@ -689,3 +689,7 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 ### 20/11 — Primeiro gate nativo das pastas
 
 - ce34ac15/CI44716460983:1883Rails distintos(1692core+106concorrência+85corporativos),101recargas e911Vue aprovados;lintfrontend sem erros. Quatro apontamentosRuby bloqueiam assets/Chrome. Corrigidos o filtro extraído sem mudança semântica, a posição da única rota aditiva no escopo existente e o alinhamento da mesma fixture. Nenhuma migration/SQL/permissão/configuração de lint alterada. Artefato14620304502/SHA-25619e0ebb0129f7ec868ea8f57828e02b8855d2a499679e27b93ef49c8c077c106 verificado. Exigir novo gate e220Chrome antes de aceitar.
+
+### 20/11 — Checagem de pendências do card Áudios
+
+- 0dc2c080/CI44720588860:1883Rails distintos,101recargas,911Vue,lint e assets reais aprovados. Chrome216/220: quatro falhas na checagem genérica do card Áudios, cuja organização de pastas já tem aviso específico de arquivos/Nico/publicação pendentes. Recuperados artefato14624389798/SHA-2562bd6bca282f86994e043ce761a730725dca1d77d4ffe1ba4d1c4202dcc5edcd5 e capturas reais. Corrigir a acessibilidade do aviso e exigir seu texto integral mais ausência de controles de upload/player/publicação; manter as checagens dos outros cards. Não aceitar o incremento sem220/220 no novo SHA.

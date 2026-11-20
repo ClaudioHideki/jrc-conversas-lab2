@@ -103,6 +103,12 @@ describe('unit scoped institutional folder UI', () => {
       query: { audio_q: 'SYNTHETIC search', audio_page: 1 },
     });
     expect(wrapper.find('[data-audio-folder="9"]').exists()).toBe(true);
+    expect(wrapper.get('[data-audio-library-limits]').attributes('role')).toBe(
+      'status'
+    );
+    expect(wrapper.get('[data-audio-library-limits]').text()).toBe(
+      'JRC_CONTACT_CENTER.AUDIO_FOLDERS.LIMITS'
+    );
   });
 
   it('requires explicit review and persists a folder rather than an audio or provider command', async () => {

@@ -931,7 +931,23 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
     await expect(page.locator('[data-administration-section] h2')).toHaveText(
       name
     );
-    if (pending.includes(key)) {
+    if (key === 'audio') {
+      const library = page.locator('[data-audio-folder-library]');
+      const limits = library.locator(
+        '[data-audio-library-limits][role="status"]'
+      );
+      await expect(library).toBeVisible();
+      await expect(limits).toHaveCount(1);
+      await expect(limits).toBeVisible();
+      await expect(limits).toHaveText(
+        'Organização local por unidade. Importação de arquivos, gravação, Nico e publicação de áudios ainda estão em implementação. Esta biblioteca não contém gravações de chamadas.'
+      );
+      await expect(library.locator('[data-new-audio-folder]')).toHaveCount(1);
+      await expect(page.locator('[data-create], [data-publish]')).toHaveCount(
+        0
+      );
+      await expect(library.locator('input[type="file"], audio')).toHaveCount(0);
+    } else if (pending.includes(key)) {
       const pendingNotice = page
         .locator('[data-administration-section] [role="status"]')
         .filter({ hasText: 'Funcionalidade pendente' });

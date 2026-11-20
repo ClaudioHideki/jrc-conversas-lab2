@@ -1,0 +1,42 @@
+{
+  "sha": "0dc2c0809b9fdaac375f9075365621e71eabbb19",
+  "run": 44720588860,
+  "job": 136234981236,
+  "overall": "failed_chrome_card_pending_notice_assertion",
+  "native_distinct": 1883,
+  "native_breakdown": {
+    "core": 1692,
+    "concurrency": 106,
+    "corporate": 85
+  },
+  "schema_reload": 101,
+  "vue": 911,
+  "lint": "passed_frontend_and_zero_new_ruby_offenses",
+  "assets": "passed_protected_real_build",
+  "bootstrap": {
+    "passed": true,
+    "cards": 15
+  },
+  "chrome": {
+    "total": 220,
+    "passed": 216,
+    "failed": 4,
+    "skipped": 0,
+    "flaky": 0,
+    "same_failure": "card audio expects generic pending notice, while bounded folder UI explicitly reports unfinished files/recording/Nico/provider publishing"
+  },
+  "artifact": {
+    "id": 14624389798,
+    "sha256": "2bd6bca282f86994e043ce761a730725dca1d77d4ffe1ba4d1c4202dcc5edcd5",
+    "size": 46490635,
+    "github_digest_crc_verified": true
+  },
+  "fix": "Expose existing exact audio limits as accessible status and require its complete Portuguese content, real folders control and absence of file/player/provider controls; preserve the generic pending checks on all other incomplete cards",
+  "manual_visual_review": [
+    "desktop-light library",
+    "mobile-light library",
+    "mobile-dark conflict popup"
+  ],
+  "acceptance": "not accepted; require 220/220 and complete producer evidence on next SHA",
+  "production_unchanged": true
+}
