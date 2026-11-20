@@ -17,7 +17,8 @@ RSpec.describe 'Institutional audio native scanner and decoder receipts', type: 
     raise 'Native audio proof requires the owned synthetic Linux tools, not another scanner' unless owned
 
     tools = JSON.parse(File.read('/tmp/call-center-audio-native-tools.json'))
-    expected = { 'signature_database' => 'SYNTHETIC_TEST_ONLY', 'malware_coverage_proven' => false, 'external_homologation' => false }
+    expected = { 'signature_database' => 'SYNTHETIC_TEST_ONLY', 'malware_coverage_proven' => false, 'external_homologation' => false,
+                 'certificate_sha256' => '60200e4b4b1b1b7257bb4550487aeb142034341f3300a8526e77a3134a940e9d' }
     valid = tools.slice(*expected.keys) == expected && tools['actual_engine'].is_a?(String) && tools['actual_engine'].start_with?('ClamAV ')
     raise 'Owned synthetic ClamAV engine identity required; no malware coverage is implied' unless valid
   end

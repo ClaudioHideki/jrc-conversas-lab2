@@ -1,0 +1,36 @@
+{
+  "blocked_sha": "d8d109b8c9f245f3c6dd7a71951ad63cab37f240",
+  "run": 44790171557,
+  "artifact": 14656935020,
+  "artifact_sha256": "c13013df07f118cb34b2c8c40bab3d6d4bc90cf0ffdd7eafbaf39acc903e51c8",
+  "startup_log_sha256": "7622801b5f27b97603cea7c81347c36cdf533ba46f23d3a128e3f80852769f5f",
+  "confirmed_cause": "ClamAV CVD signature verifier could not initialize: default /etc/clamav/certs absent",
+  "fix": "Use official pinned public CA in the exclusively owned process directory, with supported CVDCertsDirectory and CVD_CERTS_DIR; no system trust modification",
+  "public_ca_provenance": {
+    "official_repository": "Cisco-Talos/clamav",
+    "release_tag": "clamav-1.5.4",
+    "commit_sha": "fa59fca15872bb8a914ba4c68188bcc8a502cbdf",
+    "tag_object_sha": "2cbd122d3a401b9bded52ef6bf201bff605af474",
+    "verification": {
+      "verified": true,
+      "reason": "valid"
+    },
+    "source_path": "certs/clamav.crt",
+    "source_blob_sha": "e15e461f5931f1001b3096aa35e1748b7509346c",
+    "pem_sha256": "60200e4b4b1b1b7257bb4550487aeb142034341f3300a8526e77a3134a940e9d",
+    "der_sha256": "6b3d4e1b5e26318c0bb6a22fb1206d287fa3fb0c5fe34eebbf8613954f8a64a7",
+    "public_certificate_only": true,
+    "bytes": 1976
+  },
+  "static_python_blocks_compiled": 2,
+  "native_revalidation": "pending",
+  "signature_validation_disabled": false,
+  "timeouts_or_assertions_reduced": false,
+  "application_or_historical_migrations_changed": false,
+  "local_public_ca_check": {
+    "openssl_validity": "passed",
+    "openssl_self_signature": "passed",
+    "operating_system_trust_modified": false,
+    "native_runner_revalidation": "still_required"
+  }
+}

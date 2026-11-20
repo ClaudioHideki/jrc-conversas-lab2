@@ -24,8 +24,16 @@ socket_root="/run/jrc-cc-audio-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
 test ! -e "$native_root"
 test ! -e "$socket_root"
 mkdir "$native_root"
-mkdir "$native_root/package" "$native_root/database" "$native_root/binary"
+mkdir "$native_root/package" "$native_root/database" "$native_root/binary" "$native_root/certs"
 sudo install -d -m 700 -o "$(id -un)" -g "$(id -gn)" "$socket_root"
+
+# Public upstream CA from verified signed tag clamav-1.5.4 / commit fa59fca15872bb8a914ba4c68188bcc8a502cbdf.
+# It is only this process's CVD trust input: no private key, system trust update or signature-check bypass.
+ca_source=.github/fixtures/clamav/clamav-root-1.5.4.crt
+printf '%s  %s\n' 60200e4b4b1b1b7257bb4550487aeb142034341f3300a8526e77a3134a940e9d "$ca_source" | sha256sum --check --strict
+openssl x509 -in "$ca_source" -checkend 0 -noout
+openssl verify -check_ss_sig -CAfile "$ca_source" "$ca_source"
+install -m 600 "$ca_source" "$native_root/certs/clamav.crt"
 
 # Existing HTTPS APT helper must have refreshed all four signed suites first.
 # apt-get download checks package hashes from that authenticated index. No daemon/freshclam package is installed.
@@ -66,6 +74,7 @@ PY
 cat > "$native_root/clamd.conf" <<EOF
 Foreground yes
 DatabaseDirectory $native_root/database
+CVDCertsDirectory $native_root/certs
 LocalSocket $socket_root/clamd.sock
 LocalSocketMode 600
 FixStaleSocket no
@@ -82,7 +91,7 @@ EOF
 
 startup_log=/tmp/call-center-audio-native-tools-startup.txt
 test ! -e "$startup_log"
-setsid "$daemon" --config-file="$native_root/clamd.conf" > "$startup_log" 2>&1 &
+CVD_CERTS_DIR="$native_root/certs" setsid "$daemon" --config-file="$native_root/clamd.conf" > "$startup_log" 2>&1 &
 daemon_pid=$!
 printf '%s\n' "$daemon_pid" > "$native_root/owned-daemon-pid.txt"
 python3 -B - "$socket_root/clamd.sock" "$native_root" "$deb" "$candidate" <<'PY'
@@ -115,6 +124,8 @@ assert version.startswith('ClamAV ')
 report = {'actual_engine': version, 'signature_database': 'SYNTHETIC_TEST_ONLY', 'malware_coverage_proven': False,
           'external_homologation': False, 'database_sha256': sha256((root / 'database/synthetic.hdb').read_bytes()).hexdigest(),
           'package_sha256': sha256(Path(sys.argv[3]).read_bytes()).hexdigest(), 'package_version': sys.argv[4],
+          'certificate_sha256': sha256((root / 'certs/clamav.crt').read_bytes()).hexdigest(),
+          'certificate_source_commit': 'fa59fca15872bb8a914ba4c68188bcc8a502cbdf',
           'binary_sha256': sha256((root / 'binary/usr/sbin/clamd').read_bytes()).hexdigest()}
 Path('/tmp/call-center-audio-native-tools.json').write_text(json.dumps(report, indent=2) + '\n')
 print(json.dumps(report))
