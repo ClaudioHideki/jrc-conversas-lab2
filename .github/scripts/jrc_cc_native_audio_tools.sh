@@ -80,7 +80,9 @@ CommandReadTimeout 10
 SelfCheck 0
 EOF
 
-setsid "$daemon" --config-file="$native_root/clamd.conf" > "$native_root/startup.log" 2>&1 &
+startup_log=/tmp/call-center-audio-native-tools-startup.txt
+test ! -e "$startup_log"
+setsid "$daemon" --config-file="$native_root/clamd.conf" > "$startup_log" 2>&1 &
 daemon_pid=$!
 printf '%s\n' "$daemon_pid" > "$native_root/owned-daemon-pid.txt"
 python3 -B - "$socket_root/clamd.sock" "$native_root" "$deb" "$candidate" <<'PY'

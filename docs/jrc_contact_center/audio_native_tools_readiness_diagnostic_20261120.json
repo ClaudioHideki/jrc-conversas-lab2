@@ -1,0 +1,24 @@
+{
+  "product_sha": "894412617e68149b355690e04dced0bcda15f8f6",
+  "run": 44788906642,
+  "job": 136471023384,
+  "status": "native_setup_failed_no_application_tests_executed",
+  "confirmed": [
+    "Immutable identity and disposable-resource checks passed",
+    "HTTPS APT dependency step passed; ffmpeg and ffprobe found",
+    "libclamav12 and downloaded clamav-daemon were 1.5.4+dfsg-0ubuntu0.24.04.1",
+    "Exact daemon package downloaded over HTTPS from archive.ubuntu.com",
+    "Owned ClamAV readiness probe expired after its unchanged 30-second deadline",
+    "No migrations, Rails, Vue, assets or Chrome tests ran on this SHA",
+    "No artifact was produced because the daemon startup output was outside the upload paths"
+  ],
+  "unknown": "The internal daemon startup cause cannot be recovered from this run's retained logs; do not infer it from the timeout alone.",
+  "sanitized_job_log_sha256": "37b9dc6d98bba207118dac241572e54eb7d06c878546e5193c4fea50b49609a1",
+  "correction": "Preserve only this owned synthetic daemon's startup output under the existing /tmp/call-center-*.txt artifact path. Refuse to overwrite an existing log.",
+  "gates_unchanged": true,
+  "timeout_unchanged_seconds": 30,
+  "no_fake_scanner_result": true,
+  "no_product_behavior_change": true,
+  "full_23_figures_complete": false,
+  "external_homologation": false
+}
