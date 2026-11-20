@@ -50,5 +50,18 @@ class JrcContactCenter::ConfigurationAudit
       }
     )
   end
+
+  def self.write_audio_read!(version, inspection:, actor:)
+    snapshot = JrcContactCenter::ConfigurationAuditSnapshot.capture(version)
+    Audited.audit_class.create!(
+      auditable: version, associated: version.account, user: actor, action: 'read', comment: COMMENT,
+      audited_changes: {
+        'attributes' => [snapshot.fetch('attributes'), snapshot.fetch('attributes')],
+        'cc_scope' => { 'before' => snapshot.fetch('scope'), 'after' => snapshot.fetch('scope') },
+        'omitted_fields' => [], 'schema_version' => 1,
+        'audio_read' => { 'audio_version_id' => version.id.to_s, 'inspection_id' => inspection.id.to_s, 'sha256' => version.sha256 }
+      }
+    )
+  end
   private_class_method :manager_review
 end

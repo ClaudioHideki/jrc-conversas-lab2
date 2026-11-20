@@ -73,6 +73,17 @@ RSpec.describe JrcContactCenter::AudioSafetyObservation do
     expect(original.reload.sha256).to eq(Digest::SHA256.hexdigest(bytes))
   end
 
+  it 'reports unavailable for a missing owned synthetic file without invoking either dependency or inventing metadata' do
+    original = version
+    JrcContactCenter::SyntheticAudioStorageGuard.call
+    original.blob.service.delete(original.blob.key)
+    expect(scanner).not_to receive(:scan)
+    expect(probe).not_to receive(:call)
+    result = described_class.new(access: access, scanner: scanner, probe: probe).call(asset_id: original.audio_asset_id, version_id: original.id)
+    expect(result.attributes).to include(state: 'unavailable', probe_state: 'not_run', metadata: {}, observed_sha256: nil)
+    expect(original.reload.sha256).to eq(Digest::SHA256.hexdigest(bytes))
+  end
+
   it 'rechecks authority after dependency IO instead of returning a result from an earlier permitted profile' do
     original = version
     response = scanner.scan(nil)

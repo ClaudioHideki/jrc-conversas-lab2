@@ -1932,7 +1932,8 @@
       "EMAIL": "E-mail",
       "CHAT": "Chat",
       "PROVIDER": "Regra do provedor",
-      "TEAM_SOURCE": "Origem de permissões da equipe"
+      "TEAM_SOURCE": "Origem de permissões da equipe",
+      "READ": "Leitura de arquivo"
     },
     "CONFIGURATION_REVISION": {
       "CONFLICT": "Este registro mudou em outra sessão ou não tem uma revisão válida. Seu rascunho foi preservado. Carregue a versão atual e compare antes de confirmar uma nova tentativa.",
@@ -2422,7 +2423,7 @@
     },
     "AUDIO_FILES": {
       "TITLE": "Áudios institucionais",
-      "LIMITS": "Recebimento privado com histórico de versões e verificações técnicas por arquivo. Prévia, download, uso em fluxos e publicação no PABX permanecem bloqueados nesta entrega.",
+      "LIMITS": "Recebimento privado com histórico e verificações por versão. Prévia e download exigem a verificação técnica atual e seu acesso à unidade. Uso em fluxos e publicação no PABX permanecem bloqueados.",
       "SEARCH": "Pesquisar áudios nesta pasta",
       "FILTER": "Filtrar áudios",
       "CLEAR": "Limpar busca de áudios",
@@ -2436,7 +2437,7 @@
       "EDIT": "Editar e mover",
       "REPLACE": "Receber nova versão",
       "HISTORY": "Histórico de versões do áudio",
-      "NOT_VERIFIED": "Arquivo privado — consulte as verificações no histórico. Reprodução e publicação permanecem bloqueadas.",
+      "NOT_VERIFIED": "Arquivo privado — consulte a verificação atual e as ações autorizadas no histórico. Não publicado no PABX.",
       "PAGINATION": "Paginação dos áudios",
       "PREVIOUS": "Anterior",
       "NEXT": "Próxima",
@@ -2462,7 +2463,7 @@
     },
     "AUDIO_INSPECTIONS": {
       "TITLE": "Verificações técnicas desta versão",
-      "LIMITS": "O scanner e o decodificador verificam os bytes desta versão. Cada tentativa fica no histórico. Essa verificação não libera reprodução, download, uso em fluxos ou publicação no PABX.",
+      "LIMITS": "O scanner e o decodificador verificam os bytes desta versão. Cada tentativa fica no histórico. A prévia exige nova autorização e integridade; esta verificação não autoriza uso em fluxos ou publicação no PABX.",
       "INSPECT": "Verificar arquivo",
       "SCANNING": "Verificando o arquivo privado...",
       "LOADING": "Carregando verificações autorizadas...",
@@ -2489,6 +2490,17 @@
       "NEXT": "Próxima",
       "PAGE": "Página",
       "TOTAL": "Total"
+    },
+    "AUDIO_PREVIEW": {
+      "LIMITS": "Prévia privada desta versão verificada. Não publica no PABX nem comprova compatibilidade com o fornecedor.",
+      "OPEN": "Abrir prévia e download",
+      "LOADING": "Verificando acesso e integridade…",
+      "PLAYER": "Prévia do áudio institucional verificado",
+      "DOWNLOAD": "Baixar esta versão",
+      "CLOSE": "Fechar prévia",
+      "ERROR": "Não foi possível validar e abrir o áudio. Nenhum arquivo foi liberado. Tente novamente após revisar o acesso.",
+      "NOT_READY": "A verificação desta versão mudou. Atualize o histórico antes de tentar novamente.",
+      "PLAYBACK_ERROR": "O navegador não conseguiu reproduzir este formato. O arquivo verificado continua disponível para download; a compatibilidade com o PABX não está comprovada."
     }
   }
 }

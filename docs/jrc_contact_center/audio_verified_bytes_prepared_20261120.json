@@ -1,0 +1,50 @@
+{
+  "status": "prepared_not_natively_executed",
+  "prepared_at": "2026-11-20T19:03:41.003773+00:00",
+  "base": "c276759e707d55692cd1616819b911a35d329ffa",
+  "files": {
+    "app/services/jrc_contact_center/audio_bytes.rb": "2810d30db7e1a18fc733895e0e3be1033c38020ecce8e778d7f48c3a5eee672b",
+    "app/controllers/api/v1/accounts/jrc_contact_center/audio_bytes_controller.rb": "cc49f29cce09b46624a6d7e584ca731f83bf8366bd975a042f48fe8d4e523c11",
+    "config/routes/jrc_contact_center.rb": "c0a6b31038ef789e3907ba9e339ec3dc3480f9ac05a0ab5a07ec4922d546675c",
+    "app/javascript/dashboard/api/jrcContactCenter.js": "86e17a3341a6faee9c845206e01f139c2ae0474b9a78ae592b0e53d3ac1caf1b",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useAudioBytes.js": "9ca3efb449b55e092240040383e889c336ea5f03f5c8eceb8ead89e6660a4480",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioVersionPreview.vue": "dadf58900b8df702f7437d798d9f8ffadaca7feb2fc8a9e4b3c995ec2858f44a",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioInspectionHistory.vue": "bfc65091ea2a0d97de47f7b4a6d015d97d96ed16b3500257fea00206e64f9a2b",
+    "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "7bcf6e5240040d07d2350b14c8eee668da6c6a4797ada096220dd219004bf6d7",
+    "spec/services/jrc_contact_center/audio_bytes_spec.rb": "d468e2a89ee125e901ecaca66937b3e09d8963bc5554674ed2c36c50f210fd41",
+    "spec/requests/api/v1/accounts/jrc_contact_center/audio_bytes_spec.rb": "a53e348065f2e48cac71efd7f00b3d518ebbd7761bf0d25a81e15215869e837a",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useAudioBytes.spec.js": "5685fea5d51b0af83264dd9b0081495de2495bbddc85ab50928e3b5555db0b44",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/audioAssetsApi.spec.js": "ef7956ab523ffd398bfdf70ea16b43d6bc0532b16f9f3070cc0671c1c2a0c24d",
+    "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "d86196f1d4064e9e8e9aa4855483c2cb13c434c34407012696aa158a95ae2260",
+    "app/services/jrc_contact_center/configuration_audit_query.rb": "e68cc79c3a21d3bdde8085c45e56fc08bc1a586983ec6533020a2bb61dc98a38",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditPanel.vue": "97234230b864004bd7304ba7c1378b46f02b4a8f6f678ea8e99d03ce2197efd9",
+    "app/services/jrc_contact_center/audio_safety_observation.rb": "664d36d1cbf70f7e90482e97f3746c5510cd41e5ac7858f967943723e3b4bded",
+    "spec/services/jrc_contact_center/audio_safety_observation_spec.rb": "d24361d9c6e28547548d0f255594f4ec35917841cc4f25b3124cb32def8d3930",
+    "app/services/jrc_contact_center/configuration_audit.rb": "49157dcba938bb9d08a005976d9fd2ebab5d4ec64f78259d79bf4957f332c458"
+  },
+  "native_tests_required": [
+    "nine native reader cases, including post-IO unit/proof changes and a failed audit write",
+    "nine authenticated HTTP cases, including scoped read audit and missing owned storage",
+    "Vue transport lifecycle tests",
+    "four additional desktop/mobile light/dark real Chrome cases"
+  ],
+  "required_chrome_total": 232,
+  "local_checks": {
+    "targeted_frontend_lint": "zero errors and zero warnings after corrections",
+    "workflow_compiler_tests": 7,
+    "embedded_python_blocks": 2
+  },
+  "scope": "Exact latest clean decoded observation, native policy/account/unit revalidated before and after file IO, native MD5 plus buffer SHA-256, browser exact headers and buffer SHA-256 before blob URL; no store/URL grants",
+  "limits": [
+    "No PABX publication or ACKs",
+    "Not evidence of production malware coverage; the owned engine database remains synthetic",
+    "Incoming codec validation before final persistence and other Word gaps remain open"
+  ],
+  "full_word_complete": false,
+  "filename_privacy": "The API streams without a private filename in Rails send_data instrumentation; the authorized UI uses its native version metadata for the downloaded file name.",
+  "audit": "Native read audit committed before byte release with explicit actor/current scope, exact version/inspection/SHA-256; no Current override, filename, storage key or bytes. Download performs a new server authorization and integrity read rather than treating an older preview buffer as a grant. This does not claim each subsequent local playback was logged.",
+  "missing_storage": "Map the native FileNotFoundError to an unavailable inspection without fake metadata. A separate HTTP case with an earlier real proof must fail503 and create no successful read audit. Only a newly generated test blob in the guarded synthetic runner is removed.",
+  "base_verified_report": "docs/jrc_contact_center/audio_inspections_verified_20261120.json",
+  "playback": "Reuse the native pause_playing_audio event contract so concurrent shared media players stop; no automatic playback. Browser-only format errors retain a verified download, which itself makes a fresh server read.",
+  "runtime": "Windows Node24.19 differs from pinned24.22.3; no Vue tests were run with that mismatched runtime. New native execution must use the pinned runner. Runtime FFmpeg/socket readiness still needs the future image/environment validation."
+}

@@ -49,7 +49,7 @@ class JrcContactCenter::AudioSafetyObservation
     end
   rescue ActiveStorage::IntegrityError
     observation('checksum_mismatch', nil)
-  rescue IOError, SystemCallError
+  rescue ActiveStorage::FileNotFoundError, IOError, SystemCallError
     observation('unavailable', nil)
   end
 

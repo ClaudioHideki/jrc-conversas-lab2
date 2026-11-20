@@ -1,0 +1,103 @@
+{
+  "scope": "Native institutional audio inspection increment, not a completed library or all 23 figures",
+  "sha": "c276759e707d55692cd1616819b911a35d329ffa",
+  "run": 44801034652,
+  "job": 136512927472,
+  "artifact": 14666236517,
+  "artifact_sha256": "0f8f11ff01fd506eafef969c64f2e33264f736e9f72a46aa2dc744fc8cc5d7ca",
+  "verification_status": "complete_verified_evidence",
+  "distinct_rails_examples": 2022,
+  "schema_reload_examples_separate": 130,
+  "vue_examples": 974,
+  "chrome_examples": 228,
+  "chrome_projects": {
+    "desktop-light": 57,
+    "desktop-dark": 57,
+    "mobile-light": 57,
+    "mobile-dark": 57
+  },
+  "failures": 0,
+  "pending": 0,
+  "outside_errors": 0,
+  "skipped_chrome": 0,
+  "flaky_chrome": 0,
+  "new_ruby_offenses": 0,
+  "assets": "guarded real Vite/CSS build passed; source identity and actual Google Chrome bootstrap with 15 cards passed",
+  "screenshot_hashes_verified": 352,
+  "screenshots_actually_viewed": [
+    {
+      "file": "desktop-light-audio-technical-inspection.png",
+      "sha256": "23d619d338579a9750d79b9f8d62785f8b4264240173be7828442e065b4ad80e",
+      "viewed": true
+    },
+    {
+      "file": "desktop-light-audio-private-version-history.png",
+      "sha256": "bf291852f13582d86ebb0b4f237e2d8e12ff003f5c33d47f25f3cd456cab6017",
+      "viewed": true
+    },
+    {
+      "file": "desktop-dark-audio-technical-inspection.png",
+      "sha256": "6202b87286ff839d743f30f76657002efb53d5792151e7b0580accf65b6fd70d",
+      "viewed": true
+    },
+    {
+      "file": "desktop-dark-audio-private-version-history.png",
+      "sha256": "bd923725e06230d1f0f9863ebea901fcf24679fc636e2777e05ba5a456e15bf3",
+      "viewed": true
+    },
+    {
+      "file": "mobile-light-audio-technical-inspection.png",
+      "sha256": "affdc92da76256e0df51ae448e5cf4c2ae9f03b541035c1b7f5b03f09cc11585",
+      "viewed": true
+    },
+    {
+      "file": "mobile-light-audio-private-version-history.png",
+      "sha256": "e178b0611d3b7d78373c8bba561de29b183b8d23a493d37509d5f095b072eee9",
+      "viewed": true
+    },
+    {
+      "file": "mobile-dark-audio-technical-inspection.png",
+      "sha256": "e044992e19f27599d132a17b662a277aafd52ae09bc1b2d0b40ce0ac440a60e0",
+      "viewed": true
+    },
+    {
+      "file": "mobile-dark-audio-private-version-history.png",
+      "sha256": "e88c21a453e1be1047479c80b03b8390cecb35e2750eb7548dbfd4076f075e8d",
+      "viewed": true
+    }
+  ],
+  "visual_review": {
+    "themes": "Actual light/dark text/backgrounds checked in desktop1440/mobile390",
+    "history": "Real versions and SHA wrap without horizontal overflow; contained modal; mobile metadata continues in the internal scroll area",
+    "word_differences": "Long vertical folder list and the final tree/table/details layout remain open. Next Chrome revision also scrolls metadata/player into view explicitly."
+  },
+  "native_engine": {
+    "actual_engine": "ClamAV 1.5.4",
+    "signature_database": "SYNTHETIC_TEST_ONLY",
+    "malware_coverage_proven": false,
+    "external_homologation": false,
+    "database_sha256": "141ccde580eb2c844f98ded1922be3ec225e66a71e0ee91b0c9094256daeac8e",
+    "package_sha256": "e9943d5e9dc7a5b37162ad19331a960aa6713b9f74bf64074cb1ac4f210abf4d",
+    "package_version": "1.5.4+dfsg-0ubuntu0.24.04.1",
+    "certificate_sha256": "60200e4b4b1b1b7257bb4550487aeb142034341f3300a8526e77a3134a940e9d",
+    "certificate_source_commit": "fa59fca15872bb8a914ba4c68188bcc8a502cbdf",
+    "binary_sha256": "d3365e97487942f205c7779d839b2fe12c1d7442335379ded189350df7320fe0"
+  },
+  "wav_cause_confirmed": {
+    "old_result": "Native FFmpeg6.1.1 exited0 yet final progress reported out_time_us=0 for actual250ms WAV",
+    "actual_probe_duration_seconds": "0.250000",
+    "direct_decoded_pcm_sha256": "fc19b1997119425765295aeab72d76faa6927d4f83985d328c26f20468d6cc76",
+    "result": "Direct decoded PCM hash matched independently computed samples; empty-WAV rejection and actual MP3/OGG/MP4 remained passing"
+  },
+  "old_nine_migrations_unchanged": true,
+  "native_inspection_migration_cases_passed": 6,
+  "old_audio_schema_fingerprint": "jrc_cc_audio_files_v1:581ccf5a93895eda0ca259d1e62ac87d64acc70736cee5f173fddf1a4a4b209d",
+  "validated": "Current native authority/unit isolation, real owned ClamAV synthetic-marker behavior, actual bounded decoding and measured metadata, append-only inspection history, idempotency and committed concurrency",
+  "not_validated_by_this_sha": [
+    "Byte preview/download endpoints and read audit (prepared next, not in producer)",
+    "Production malware definitions or external PABX/Nico",
+    "Final pre-save codec admission, usage ledger and complete Word layout"
+  ],
+  "full_23_figures_complete": false,
+  "docker_publication_or_deploy": false
+}

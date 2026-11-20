@@ -242,6 +242,12 @@ test('institutional audio folders native exact-version scanner and decoder histo
   await expect(version.locator('[data-audio-decoded-metadata]')).toContainText(
     'pcm_s16le'
   );
+  await version
+    .locator('[data-audio-decoded-metadata]')
+    .scrollIntoViewIfNeeded();
+  await expect(
+    version.locator('[data-audio-decoded-metadata]')
+  ).toBeInViewport();
   await expect(version.locator('audio, video, a[download]')).toHaveCount(0);
   const repeated = await page.request.post(
     `${own}/audio_assets/${asset.id}/versions/${asset.latest_version.id}/inspections`,
@@ -7776,6 +7782,170 @@ test('institutional audio folders native private receipt, revisions and permissi
       horizontal_overflow: overflow,
       color,
       brightness,
+    })
+  );
+});
+
+test('institutional audio folders native verified bytes playback download and withdrawal', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].audio_folders;
+  const own = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const header = Buffer.alloc(44);
+  header.write('RIFF', 0);
+  header.writeUInt32LE(32036, 4);
+  header.write('WAVEfmt ', 8);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(1, 22);
+  header.writeUInt32LE(8000, 24);
+  header.writeUInt32LE(16000, 28);
+  header.writeUInt16LE(2, 32);
+  header.writeUInt16LE(16, 34);
+  header.write('data', 36);
+  header.writeUInt32LE(32000, 40);
+  const bytes = Buffer.concat([header, Buffer.alloc(32000)]);
+  const sha256 = createHash('sha256').update(bytes).digest('hex');
+  const received = await page.request.post(`${own}/audio_assets`, {
+    headers: target.administrator,
+    multipart: {
+      unit_id: String(target.unit_id),
+      'asset[name]': `SYNTHETIC preview ${randomUUID()}`,
+      idempotency_key: randomUUID(),
+      file: {
+        name: 'SYNTHETIC-preview.wav',
+        mimeType: 'audio/wav',
+        buffer: bytes,
+      },
+    },
+  });
+  expect(received.status()).toBe(201);
+  const asset = (await received.json()).item;
+  const versionId = asset.latest_version.id;
+  const path = `${new URL(own).pathname}/audio_assets/${asset.id}/versions/${versionId}/bytes`;
+  const unverified = await page.request.get(`http://127.0.0.1:5387${path}`, {
+    headers: target.administrator,
+  });
+  expect(unverified.status()).toBe(409);
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}`
+  );
+  const library = page.locator('[data-audio-asset-library]');
+  await library.locator(`[data-audio-asset-history="${asset.id}"]`).click();
+  await expectContainedDialog(page);
+  const dialog = page.getByRole('dialog');
+  const version = dialog.locator('[data-audio-version="1"]');
+  await version.locator('[data-toggle-audio-inspections]').click();
+  await expect(version.locator('[data-open-audio-bytes]')).toHaveCount(0);
+  await version.locator('[data-inspect-audio-version]').click();
+  await expect(
+    version.locator('[data-audio-inspection-state="verified"]')
+  ).toBeVisible();
+  const inspectId = await version
+    .locator('[data-audio-inspection]')
+    .first()
+    .getAttribute('data-audio-inspection');
+  const opened = page.waitForResponse(
+    response => new URL(response.url()).pathname === path
+  );
+  await version.locator('[data-open-audio-bytes]').click();
+  const byteResponse = await opened;
+  expect(byteResponse.status()).toBe(200);
+  expect(
+    createHash('sha256')
+      .update(await byteResponse.body())
+      .digest('hex')
+  ).toBe(sha256);
+  expect(byteResponse.headers()['cache-control']).toBe('no-store');
+  expect(byteResponse.headers()['x-jrc-audio-inspection']).toBe(inspectId);
+  const player = version.locator('[data-audio-verified-player]');
+  await expect(player).toBeVisible();
+  await player.scrollIntoViewIfNeeded();
+  await expect(player).toBeInViewport();
+  await expect
+    .poll(async () =>
+      player.evaluate((node: HTMLAudioElement) => node.readyState)
+    )
+    .toBeGreaterThanOrEqual(1);
+  const duration = await player.evaluate(
+    (node: HTMLAudioElement) => node.duration
+  );
+  expect(duration).toBeCloseTo(2, 2);
+  expect(
+    await player.evaluate(node => getComputedStyle(node).colorScheme)
+  ).toBe(info.project.name.endsWith('dark') ? 'dark' : 'light');
+  await player.evaluate((node: HTMLAudioElement) => node.play());
+  await expect
+    .poll(async () =>
+      player.evaluate((node: HTMLAudioElement) => node.currentTime)
+    )
+    .toBeGreaterThan(0);
+  await player.evaluate((node: HTMLAudioElement) => node.pause());
+  expect(await player.getAttribute('src')).toMatch(/^blob:/);
+  await version.locator('[data-close-audio-bytes]').click();
+  await expect(player).toHaveCount(0);
+  await version.locator('[data-open-audio-bytes]').click();
+  await expect(player).toBeVisible();
+  const downloadStarted = page.waitForEvent('download');
+  const downloadRead = page.waitForResponse(
+    response => new URL(response.url()).pathname === path
+  );
+  await version.locator('[data-download-audio-bytes]').click();
+  expect((await downloadRead).status()).toBe(200);
+  const download = await downloadStarted;
+  const downloadedPath = await download.path();
+  expect(downloadedPath).not.toBeNull();
+  const downloadedHash = createHash('sha256')
+    .update(fs.readFileSync(downloadedPath!))
+    .digest('hex');
+  expect(downloadedHash).toBe(sha256);
+  expect(download.suggestedFilename()).toBe('SYNTHETIC-preview.wav');
+  await expect(player).toBeVisible();
+  await player.scrollIntoViewIfNeeded();
+  await expect(player).toBeInViewport();
+  await expect
+    .poll(async () =>
+      player.evaluate((node: HTMLAudioElement) => node.readyState)
+    )
+    .toBeGreaterThanOrEqual(1);
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > window.innerWidth
+  );
+  expect(overflow).toBe(false);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-verified-preview.png`,
+    fullPage: true,
+  });
+  await page.evaluate(auth => {
+    Object.assign(Reflect.get(window, 'axios').defaults.headers.common, auth);
+  }, target.operator);
+  const withdrawn = page.waitForResponse(
+    response => new URL(response.url()).pathname === path
+  );
+  await version.locator('[data-download-audio-bytes]').click();
+  expect((await withdrawn).status()).toBe(401);
+  await expect(dialog).not.toBeVisible();
+  await expect(
+    page.locator('[data-audio-verified-player], [data-download-audio-bytes]')
+  ).toHaveCount(0);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-verified-preview.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      synthetic: true,
+      external_homologation: false,
+      signature_db: 'SYNTHETIC_TEST_ONLY',
+      asset: asset.id,
+      version: versionId,
+      inspection: inspectId,
+      sha256,
+      downloaded_sha256: downloadedHash,
+      actual_browser_duration_seconds: duration,
+      quarantined: unverified.status(),
+      verified_bytes: byteResponse.status(),
+      reauthorized_download: 200,
+      denied_after_open: 401,
+      horizontal_overflow: overflow,
     })
   );
 });

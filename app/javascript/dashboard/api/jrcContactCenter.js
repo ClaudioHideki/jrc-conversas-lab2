@@ -35,6 +35,11 @@ const ivrRevision = revision => {
 };
 
 export default {
+  audioBytes: (accountId, assetId, versionId) =>
+    axios.get(
+      `${base(accountId)}/audio_assets/${recordIdentity(assetId)}/versions/${recordIdentity(versionId)}/bytes`,
+      { responseType: 'blob', timeout: 30000 }
+    ),
   audioInspections: (accountId, assetId, versionId, params = {}) =>
     axios.get(audioInspectionPath(accountId, assetId, versionId), { params }),
   inspectAudioVersion: (accountId, assetId, versionId, idempotencyKey) =>

@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAudioInspections } from '../composables/useAudioInspections';
+import AudioVersionPreview from './AudioVersionPreview.vue';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -110,7 +111,7 @@ const stateLabel = row => {
       </button>
       <p v-if="!loading && !items.length">{{ label('EMPTY') }}</p>
       <article
-        v-for="row in items"
+        v-for="(row, index) in items"
         :key="row.id"
         :data-audio-inspection="row.id"
         class="min-w-0 space-y-2 rounded-lg border border-n-weak p-3"
@@ -163,6 +164,15 @@ const stateLabel = row => {
             </dd>
           </div>
         </dl>
+        <AudioVersionPreview
+          v-if="page === 1 && index === 0 && row.ready"
+          :account-id="accountId"
+          :asset-id="assetId"
+          :version="version"
+          :inspection-id="row.id"
+          :can-manage="canManage && !loading && !saving"
+          @denied="emit('denied')"
+        />
       </article>
       <nav
         v-if="meta.pages > 1"

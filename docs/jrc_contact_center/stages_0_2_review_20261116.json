@@ -5740,11 +5740,12 @@
     "authority": "Current native configure policy, account and unit coverage before and after byte IO; latest immutable clean decoded observation only",
     "integrity": "Native storage checksum, exact size and returned-buffer SHA-256, plus client exact headers and byte SHA-256 before any object URL",
     "browser": "Explicit preview/download, no autoplay, no-store, ephemeral object URL revoked on source/profile/proof change and unmount",
-    "native_tests": "Six service and seven request examples prepared; actual scanner/decoder positives, no native execution yet",
+    "native_tests": "Nine reader service, nine request and an added missing-owned-storage observation case prepared; actual tools/native scoped audit and audit-write-failure fixture, all still pending execution",
     "chrome_required_next": 232,
     "chrome_new": "One additional case per desktop/mobile light/dark project with native media playback and independent downloaded SHA-256",
     "production_external": "No PABX command, publication, registry or real channel; synthetic signature DB does not prove malware coverage",
-    "remaining": "Incoming codec validation before final persistence, waveform/usage ledger/source tabs and complete Word layout remain open"
+    "remaining": "Incoming codec validation before final persistence, waveform/usage ledger/source tabs and complete Word layout remain open",
+    "audit": "Native read audit pins exact inspection/version/hash with explicit actor; every download performs a fresh native read"
   },
   "audio_native_wav_progress_20261120": {
     "producer": "53e5743f94a2fefa98ab556f33aa48fb818008dd",
@@ -5766,5 +5767,18 @@
     "report": "docs/jrc_contact_center/audio_wav_decode_correction_20261120.json",
     "next_status": "correction prepared, not executed",
     "required_chrome": 228
+  },
+  "audio_inspections_verified_20261120": {
+    "producer": "c276759e707d55692cd1616819b911a35d329ffa",
+    "run": 44801034652,
+    "report": "docs/jrc_contact_center/audio_inspections_verified_20261120.json",
+    "distinct_rails": 2022,
+    "reload_separate": 130,
+    "vue": 974,
+    "chrome": 228,
+    "hashes_checked": 352,
+    "actually_viewed_png": 8,
+    "scope": "Technical inspection history only; bytes/UI remain a subsequent candidate",
+    "all_word_complete": false
   }
 }

@@ -9,6 +9,13 @@ afterEach(() => {
 });
 
 describe('private audio metadata and actual multipart API contract', () => {
+  it('fetches exact-version bytes using native authorization headers rather than a signed storage URL', () => {
+    API.audioBytes('1', '9007199254740993', '9007199254740994');
+    expect(global.axios.get).toHaveBeenCalledWith(
+      '/api/v1/accounts/1/jrc_contact_center/audio_assets/9007199254740993/versions/9007199254740994/bytes',
+      { responseType: 'blob', timeout: 30000 }
+    );
+  });
   it('passes bounded native unit, folder and pagination filters without accepting them as authentication', () => {
     const params = {
       unit_id: '10',
@@ -63,6 +70,8 @@ describe('private audio metadata and actual multipart API contract', () => {
     id => {
       expect(() => API.audioAsset('1', id)).toThrow();
       expect(() => API.receiveAudioVersion('1', id, new FormData())).toThrow();
+      expect(() => API.audioBytes('1', id, '99')).toThrow();
+      expect(() => API.audioBytes('1', '44', id)).toThrow();
       expect(global.axios.get).not.toHaveBeenCalled();
       expect(global.axios.post).not.toHaveBeenCalled();
     }
