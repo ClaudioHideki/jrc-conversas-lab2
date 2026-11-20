@@ -7,6 +7,8 @@ class JrcContactCenter::AccessAuthorization
   end
 
   def authorize!
+    raise Pundit::NotAuthorizedError unless @user.reload.active_for_authentication?
+
     return if @user.is_a?(SuperAdmin)
 
     policy = JrcContactCenter::ModulePolicy.new(@context, :contact_center)

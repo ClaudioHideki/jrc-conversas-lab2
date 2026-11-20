@@ -1,5 +1,5 @@
 {
-  "status": "implemented_native_tests_passed_visual_and_final_lint_pending",
+  "status": "native_tests_passed_final_lint_and_browser_pending",
   "business_rule": {
     "registered_reason_required": "Explicitly selected native queues only",
     "existing_calls": "Keep their pinned catalogue revision, or their pre-feature legacy state",
@@ -137,5 +137,22 @@
     "overall_ci": "failure",
     "artifact_id": 14601452894,
     "artifact_sha256": "bc0bfae765abe6344d73fd74c1b923568882c2779f2e0aa385671188ca0eba9e"
+  },
+  "gate_76c37bbe": {
+    "sha": "76c37bbe70200220a2dad4c57f6e1cf02f34b1a9",
+    "run": 44676273362,
+    "native_rails_unique": 1805,
+    "core": 1623,
+    "concurrency": 97,
+    "corporate": 85,
+    "schema_reload_reexecutions": 81,
+    "vue": 870,
+    "new_ruby_findings": 4,
+    "finding_scope": "Three whitespace locations in the two new request specs; all four previous event-reconciler conventions resolved.",
+    "assets_chrome": "not run",
+    "overall_ci": "failure",
+    "artifact_id": 14602728856,
+    "artifact_sha256": "67eb015954e17b2738db9adad4a6ea9dca45a6516dfef716bfe40482d8395413",
+    "guard_fixes": "Match the inner queue_id key column41 and create! first argument column37;remove terminal blank. No predicates or assertions changed."
   }
 }

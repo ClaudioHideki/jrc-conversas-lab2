@@ -78,7 +78,7 @@ RSpec.describe 'Call Center enrollment requires explicit user eligibility', type
       recipient.update!(confirmed_at: nil)
       grant = JrcContactCenter::AccessGrant.create!(account: account, account_user: member, eligible: true)
       attributes = { queue_membership: { queue_id: queue.id, account_user_id: member.id,
-                                       participates: participates, supervises: !participates } }
+                                         participates: participates, supervises: !participates } }
       expect { post base, headers: headers, params: attributes, as: :json }.not_to change(JrcContactCenter::QueueMembership, :count)
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response.parsed_body.fetch('error')).to eq('ineligible_member')
@@ -100,5 +100,4 @@ RSpec.describe 'Call Center enrollment requires explicit user eligibility', type
     expect(membership.reload.active).to be(false)
     expect(grant.reload.eligible).to be(true)
   end
-
 end

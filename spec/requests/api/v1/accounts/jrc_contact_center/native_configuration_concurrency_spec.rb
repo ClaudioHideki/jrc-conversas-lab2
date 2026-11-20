@@ -672,7 +672,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     recipient = create(:user, :contact_center_eligible, account: account)
     member = account.account_users.find_by!(user: recipient)
     JrcCrm::UserBusinessUnit.create!(account: account, user: recipient, scope: 'BUSINESS_UNIT', business_unit: business_units.first,
-                                    company: company, active: true, structure_managed: true)
+                                     company: company, active: true, structure_managed: true)
     change = -> { User.find(recipient.id).update!(confirmed_at: nil) }
     payload = { queue_membership: { queue_id: queue.id, account_user_id: member.id } }
     endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/queue_memberships"
@@ -681,5 +681,25 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     expect(JrcContactCenter::QueueMembership.where(account_user: member)).to be_empty
     expect(JrcContactCenter::AccessGrant.find_by!(account_user: member).eligible).to be(true)
     expect(recipient.reload.active_for_authentication?).to be(false)
+  end
+
+  %w[users teams].each do |kind|
+    it "does not write #{kind} grants after actor authentication is withdrawn during the committed account lock wait" do
+      JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
+      actor_member = account.account_users.find_by!(user: actor)
+      actor_member.custom_role.update!(permissions: JrcContactCenter::ModulePolicy::PERMISSIONS)
+      subject = kind == 'teams' ? create(:team, account: account) : create(:user, account: account).account_users.find_by!(account: account)
+      service = JrcContactCenter::AccessAuthorization.new(context: { account: account, account_user: actor_member, user: actor })
+      grant = service.grant_for(subject)
+      attributes = { allowed: ['jrc_contact_center_view'] }
+      attributes[:eligible] = true if kind == 'users'
+      payload = { authorization: attributes, expected_revision: service.revision(subject, grant) }
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/access_authorizations/#{kind}/#{subject.id}"
+      before = JrcContactCenter::AccessGrant.where(account: account).order(:id).map(&:attributes)
+      change = -> { User.find(actor.id).update!(confirmed_at: nil) }
+      expect(race_with_account_change(change, endpoint: endpoint, payload: payload, defer_change: true)).to eq(401)
+      expect(JrcContactCenter::AccessGrant.where(account: account).order(:id).map(&:attributes)).to eq(before)
+      expect(actor.reload.active_for_authentication?).to be(false)
+    end
   end
 end

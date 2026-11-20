@@ -5060,5 +5060,29 @@
     "assets_chrome": "not_run",
     "overall_ci": "failure",
     "all23_complete": false
+  },
+  "membership_authentication_native_76c37bbe_20261120": {
+    "sha": "76c37bbe70200220a2dad4c57f6e1cf02f34b1a9",
+    "run": 44676273362,
+    "native_rails_unique": 1805,
+    "core": 1623,
+    "concurrency": 97,
+    "corporate": 85,
+    "schema_reload_reexecutions": 81,
+    "vue": 870,
+    "new_ruby_findings": 4,
+    "finding_scope": "Three whitespace locations in the two new request specs; all four previous event-reconciler conventions resolved.",
+    "assets_chrome": "not run",
+    "overall_ci": "failure",
+    "artifact_id": 14602728856,
+    "artifact_sha256": "67eb015954e17b2738db9adad4a6ea9dca45a6516dfef716bfe40482d8395413",
+    "guard_fixes": "Match the inner queue_id key column41 and create! first argument column37;remove terminal blank. No predicates or assertions changed."
+  },
+  "grant_actor_authentication_prepared_20261120": {
+    "status": "prepared_native_validation_pending",
+    "scope": "Existing AccessAuthorization service,current actor authentication only",
+    "new_request_examples": 1,
+    "new_committed_lock_examples": 2,
+    "no_new_permission_or_account_activation": true
   }
 }

@@ -145,4 +145,16 @@ RSpec.describe 'Call Center explicit access authorizations', type: :request do
       expect(JrcContactCenter::AccessGrant.exists?(account_user: member)).to be(false)
     end
   end
+
+  it 'refuses a cached actor after native authentication is withdrawn before an authorization write' do
+    expected = revision
+    expect(actor.confirmed?).to be(true)
+    User.find(actor.id).update!(confirmed_at: nil)
+    expect(actor.confirmed?).to be(true)
+    expect do
+      service.update!(subject: member, attributes: { eligible: true, allowed: ['jrc_contact_center_view'] }, expected: expected)
+    end.to raise_error(Pundit::NotAuthorizedError)
+    expect(JrcContactCenter::AccessGrant.exists?(account_user: member)).to be(false)
+    expect(actor.reload.active_for_authentication?).to be(false)
+  end
 end

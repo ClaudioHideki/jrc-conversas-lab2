@@ -632,3 +632,11 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 
 - CI44672804599/722bee5a:1.798Rails distintos(1.619core,94concorrência,85corporativos),81reexecuções schema e869Vue aprovados,com0falhas/pendências/erros externos.4infrações somente de convençãoRSpec no teste novo bloquearam assets/Chrome. Corrigidas por renomeação revisada e described_class;as7assertivas e o histórico foram preservados. Artefato14601452894/SHA-256bc0bfae765abe6344d73fd74c1b923568882c2779f2e0aa385671188ca0eba9e verificado. Não declarar CI integralmente aprovada.
 - Nova lacuna concreta das figuras3/12:um grant elegível remanescente podia permitir vínculo de usuário não autenticável. API/opções agora revalidam o User nativo;desativação segura continua disponível,sem mudar grants. O próprio ator é recarregado após espera dos locks.4testes HTTP,3corridas PostgreSQL,1Vue e4novosChrome preparados;212Chrome exigidos,sem retirar os208anteriores. ADR20261120-call-center-current-membership-authentication.md. Sem execução nativa ainda para esse complemento.
+
+### 20/11 — Autenticação do gestor após lock de permissões
+
+- Correção independente preparada em `AccessAuthorization#authorize!`: recarregar o User e exigir autenticação ativa antes das regras nativas de concessão.
+- Um teste de objeto desatualizado e dois testes PostgreSQL concorrentes preparados, cobrindo autorizações individuais e de equipe sem alterar grants.
+- ADR: `docs/adr/20261120-call-center-access-actor-authentication.md`. Este complemento é preparado neste incremento e ainda precisa de testes nativos próprios; não integra a CI de `76c37bbe`.
+
+- CI `44676273362` / `76c37bbe`: 1.805 Rails distintos (1.623 core, 97 concorrência, 85 corporativos), 81 reexecuções de schema e 870 Vue aprovados, com zero falhas, pendências ou erros externos. Restaram quatro infrações de layout em três locais dos novos specs de usuários: recuo da chave interna, argumentos e linha vazia final. As convenções do spec de eventos foram corrigidas. Assets/Chrome não executados; CI continua reprovada. Artefato `14602728856`, SHA-256 `67eb015954e17b2738db9adad4a6ea9dca45a6516dfef716bfe40482d8395413`, verificado. Corrigir somente whitespace e validar o complemento de autenticação do gestor no próximo SHA; 212 Chrome continuam obrigatórios.
