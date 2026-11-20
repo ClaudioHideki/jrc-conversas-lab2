@@ -5780,5 +5780,26 @@
     "actually_viewed_png": 8,
     "scope": "Technical inspection history only; bytes/UI remain a subsequent candidate",
     "all_word_complete": false
+  },
+  "audio_admission_before_final_persistence_prepared_20261120": {
+    "status": "Prepared; native CI and Chrome pending. Parent failure confirmed as one case-insensitive-header assertion; exact native lookup correction prepared.",
+    "word_figures": [
+      6,
+      16
+    ],
+    "report": "docs/jrc_contact_center/audio_admission_prepared_20261120.json",
+    "native_history_and_permissions_preserved": true,
+    "all_word_complete": false
+  },
+  "audio_bytes_first_native_20261120": {
+    "producer": "79c8242ff0582d89a2a0f75ad060909411b0c367",
+    "run": 44812239377,
+    "status": "failed: one header-key normalization assertion; not approved",
+    "report": "docs/jrc_contact_center/audio_bytes_first_native_20261120.json",
+    "core_passed": 1843,
+    "core_failed": 1,
+    "reload_passed": 130,
+    "new_ruby_offenses": 0,
+    "chrome_executed": false
   }
 }

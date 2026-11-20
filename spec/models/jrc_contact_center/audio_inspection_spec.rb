@@ -4,7 +4,7 @@ RSpec.describe JrcContactCenter::AudioInspection do
   include_context 'with an institutional audio receipt'
 
   let(:version) do
-    JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
+    JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
                                   .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC inspected source' }, file: upload, key: key)
   end
   let(:attributes) do

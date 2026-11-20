@@ -83,6 +83,8 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
     expect(JrcContactCenter::AudioAsset.where(account: account).count).to eq(1)
     expect(JrcContactCenter::AudioVersion.where(account: account).count).to eq(1)
     expect(ActiveStorage::Blob.count).to eq(original_blobs + 1)
+    expect(JrcContactCenter::AudioInspection.where(account: account).count).to eq(1)
+    expect(JrcContactCenter::AudioInspection.where(account: account).sole.ready?).to be(true)
   end
 
   it 'allows only one actual replacement when two different uploads reviewed the same exact prior version' do
@@ -98,6 +100,7 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
     expect(JrcContactCenter::AudioVersion.where(audio_asset_id: first.audio_asset_id).order(:number).pluck(:number)).to eq([1, 2])
     expect(ActiveStorage::Blob.count).to eq(original_blobs + 1)
     expect(first.reload.blob.download).to eq(bytes)
+    expect(JrcContactCenter::AudioInspection.where(account: account).order(:audio_version_id).pluck(:attempt)).to eq([1, 1])
   end
 
   it 'keeps the native orphan-purge path harmless for committed private history without weakening its foreign-key protection' do

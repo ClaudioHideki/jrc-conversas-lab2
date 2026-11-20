@@ -1,0 +1,32 @@
+{
+  "status": "implemented_draft_not_natively_validated",
+  "figures": [
+    6,
+    16
+  ],
+  "word_paragraph": "doc2:0158",
+  "parent": "79c8242ff0582d89a2a0f75ad060909411b0c367",
+  "parent_ci": "44812239377: 1843/1844 core; 130 reload; zero new Ruby offenses. One header-key normalization assertion corrected; frontend/Chrome not run.",
+  "last_verified": "c276759e707d55692cd1616819b911a35d329ffa",
+  "flow": [
+    "authorize current native account/user/unit",
+    "stage only owned private blob",
+    "verify MD5/SHA and actual scanner before bounded decode",
+    "recheck native authority",
+    "atomically persist immutable version plus initial exact inspection and native audits",
+    "compensate only own uncommitted staged blob on failure"
+  ],
+  "historical_receipts": "Immutable; accepted replay does not add clearance or require a live tool. Historical fixtures are native, guarded and separate from live upload.",
+  "frontend": "Metadata retained on explicit invalid file/codec/safety rejection; unavailable inspection preserves file and review. Unknown results preserve original submission/key.",
+  "new_native_prepared": {
+    "observation": 6,
+    "service_admission": 8,
+    "api_admission": 4,
+    "concurrent_initial_receipt_assertions": true
+  },
+  "chrome": "All 232 retained; historical playback/inspection use actual guarded legacy fixtures; four existing upload variants add invalid-codec before-save and initial-inspection checks. Not run.",
+  "vue": "4 new cases prepared; static lint passed; no local mismatched-runtime Vue execution.",
+  "migrations": "All ten migrations and SQL hashes unchanged",
+  "external": "No PABX commands. No real malware coverage, runtime deployment or external homologation claimed.",
+  "full_23_figures_complete": false
+}

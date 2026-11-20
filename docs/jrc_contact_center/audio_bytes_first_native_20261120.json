@@ -1,0 +1,37 @@
+{
+  "producer": "79c8242ff0582d89a2a0f75ad060909411b0c367",
+  "run": 44812239377,
+  "job": 136551466489,
+  "status": "failed_not_approved",
+  "artifact_id": 14668008643,
+  "artifact_sha256": "8148244cf9722910c9559d4629eff6f0f38b87c790f7b7c966a905e7125141d1",
+  "core": {
+    "examples": 1844,
+    "passed": 1843,
+    "failed": 1,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "reload": {
+    "examples": 130,
+    "failed": 0,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "new_ruby_offenses": 0,
+  "failure": {
+    "id": "./spec/requests/api/v1/accounts/jrc_contact_center/audio_bytes_spec.rb[1:2]",
+    "line": 40,
+    "cause": "Rack normalizes stored HTTP header keys to lowercase; Hash#slice returned lowercase keys with correct values, while the expectation used mixed case. Exact bytes and response status had already matched.",
+    "correction": "Read each required header through native case-insensitive lookup, then compare all exact values and required protections; no product or authorization bypass."
+  },
+  "unexecuted": [
+    "concurrency",
+    "Approvals/Backoffice",
+    "Vue",
+    "assets",
+    "bootstrap",
+    "232 Chrome"
+  ],
+  "remaining": "Revalidate correction and admission increment on a new exact SHA; do not reuse c276 evidence as proof of the new code."
+}

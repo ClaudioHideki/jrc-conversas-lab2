@@ -361,4 +361,59 @@ describe('private institutional audio editor delegates all actual authority to t
     expect(editor.file.value).toBeNull();
     expect(editor.revision.state.expected).toBe('');
   });
+
+  it.each([
+    'institutional_audio_invalid_codec',
+    'institutional_audio_unsafe_file',
+    'institutional_audio_integrity_failed',
+  ])(
+    'allows correction after a definitive native %s rejection without losing the metadata',
+    async code => {
+      const { editor, file, review, onSaved } = fixture();
+      API.receiveAudioAsset.mockRejectedValueOnce({
+        response: { status: 422, data: { error: code } },
+      });
+      await editor.open('upload');
+      editor.draft.value.name = 'SYNTHETIC retained metadata';
+      choose(editor, file);
+      review();
+      await editor.save();
+      expect(editor.error.value).toBe('INVALID_FILE');
+      expect(editor.file.value).toBeNull();
+      expect(editor.submission.value).toBeNull();
+      expect(editor.draft.value.name).toBe('SYNTHETIC retained metadata');
+      expect(onSaved).not.toHaveBeenCalled();
+      choose(editor, file);
+      review();
+      await editor.save();
+      expect(onSaved).toHaveBeenCalledOnce();
+    }
+  );
+
+  it('retains the file after an explicit unavailable-before-persistence response and requires review before retry', async () => {
+    const { editor, file, review, onSaved } = fixture();
+    API.receiveAudioAsset.mockRejectedValueOnce({
+      response: {
+        status: 503,
+        data: { error: 'institutional_audio_inspection_unavailable' },
+      },
+    });
+    await editor.open('upload');
+    editor.draft.value.name = 'SYNTHETIC preserved';
+    choose(editor, file);
+    review();
+    await editor.save();
+    const priorKey =
+      API.receiveAudioAsset.mock.calls[0][2].get('idempotency_key');
+    expect(editor.error.value).toBe('INSPECTION_UNAVAILABLE');
+    expect(editor.file.value).toBe(file);
+    expect(editor.submission.value).toBeNull();
+    expect(editor.canSave.value).toBe(false);
+    review();
+    await editor.save();
+    expect(API.receiveAudioAsset.mock.calls[1][2].get('idempotency_key')).toBe(
+      priorKey
+    );
+    expect(onSaved).toHaveBeenCalledOnce();
+  });
 });

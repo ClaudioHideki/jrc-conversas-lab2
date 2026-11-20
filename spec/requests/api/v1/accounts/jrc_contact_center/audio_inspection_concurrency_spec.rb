@@ -17,7 +17,7 @@ RSpec.describe 'Institutional audio committed inspection concurrency', type: :re
   let(:workers) { [] }
   let(:barriers) { { arrived: Queue.new, release: Queue.new, results: Queue.new } }
   let(:version) do
-    JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
+    JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
                                   .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC concurrent inspection' }, file: upload, key: key)
   end
 

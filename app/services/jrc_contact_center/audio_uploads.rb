@@ -3,7 +3,7 @@
 require 'json'
 require 'digest'
 
-# Private receipt only: no scan claim, byte release, telephony command or publication.
+# Validates owned staged bytes before final persistence. No telephony command or publication.
 class JrcContactCenter::AudioUploads
   Request = Struct.new(:unit_id, :asset_id, :attributes, :key, :expected, keyword_init: true)
 
@@ -31,8 +31,8 @@ class JrcContactCenter::AudioUploads
     replay = replay_before_stage!(request, digest)
     return replay if replay
 
-    stage!(input)
-    version = @access.transaction { persist_or_replay!(request, input, digest) }
+    observation = inspect_staged!(request, input)
+    version = @access.transaction { persist_or_replay!(request, input, digest, observation) }
     JrcContactCenter::PrivateAudioBlob.clean_uncommitted(@pending_blob) if version.blob_id != @pending_blob.id
     version
   rescue StandardError
@@ -108,7 +108,12 @@ class JrcContactCenter::AudioUploads
     input.verify_stored!(@pending_blob)
   end
 
-  def persist_or_replay!(request, input, digest)
+  def inspect_staged!(request, input)
+    stage!(input)
+    JrcContactCenter::AudioSafetyObservation.new(access: @access).receive!(unit_id: request.unit_id, blob: @pending_blob, input: input)
+  end
+
+  def persist_or_replay!(request, input, digest, observation)
     asset = current_origin!(request)
     existing = replay!(request, digest)
     return existing if existing
@@ -119,10 +124,15 @@ class JrcContactCenter::AudioUploads
       asset = JrcContactCenter::AudioAsset.create!(request.attributes.merge('account' => @access.account,
                                                                             'unit' => @access.unit(request.unit_id)))
     end
-    version_attributes = input.version_attributes.merge(account: @access.account, unit_id: asset.unit_id, audio_asset: asset,
-                                                        blob: @pending_blob, created_by: @access.actor, source_kind: 'user_upload',
-                                                        number: @access.versions(asset).maximum(:number).to_i + 1,
-                                                        idempotency_key: request.key, input_digest: digest)
-    JrcContactCenter::AudioVersion.create!(version_attributes)
+    version = JrcContactCenter::AudioVersion.create!(version_attributes(asset, request, input, digest))
+    JrcContactCenter::AudioInspections.new(access: @access).record_received!(version: version, upload_key: request.key, attributes: observation)
+    version
+  end
+
+  def version_attributes(asset, request, input, digest)
+    input.version_attributes.merge(account: @access.account, unit_id: asset.unit_id, audio_asset: asset,
+                                   blob: @pending_blob, created_by: @access.actor, source_kind: 'user_upload',
+                                   number: @access.versions(asset).maximum(:number).to_i + 1,
+                                   idempotency_key: request.key, input_digest: digest)
   end
 end

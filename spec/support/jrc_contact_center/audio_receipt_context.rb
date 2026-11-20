@@ -1,5 +1,6 @@
 # Reused only by explicitly included native synthetic receipt specs; never seeds production.
 require Rails.root.join('script/jrc_call_center_audio_storage_guard')
+require Rails.root.join('script/jrc_call_center_legacy_audio_receipt')
 
 RSpec.shared_context 'with an institutional audio receipt' do
   let(:account) { create(:account) }

@@ -193,11 +193,21 @@ export const useAudioAssetEditor = ({
         [
           'invalid_institutional_audio_file',
           'unsupported_institutional_audio_file',
+          'institutional_audio_invalid_codec',
+          'institutional_audio_unsafe_file',
+          'institutional_audio_integrity_failed',
         ].includes(failure?.response?.data?.error)
       ) {
         submission.value = null;
         file.value = null;
         error.value = 'INVALID_FILE';
+      } else if (
+        failure?.response?.status === 503 &&
+        failure?.response?.data?.error ===
+          'institutional_audio_inspection_unavailable'
+      ) {
+        submission.value = null;
+        error.value = 'INSPECTION_UNAVAILABLE';
       } else if (!revision.handleError(failure))
         error.value = submission.value ? 'RECEIPT_ERROR' : 'SAVE_ERROR';
       reviewedDraft.value = '';

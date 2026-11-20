@@ -51,7 +51,9 @@ class JrcContactCenter::SyntheticPauseSeed
     if @project.end_with?('-state_history')
       payload.merge!(JrcContactCenter::SyntheticStateHistorySeed.call(account: @account, member: operator, queues: queues))
     end
-    payload.merge!(JrcContactCenter::SyntheticAudioFolderSeed.call(account: @account, queues: queues)) if @project.end_with?('-audio_folders')
+    if @project.end_with?('-audio_folders')
+      payload.merge!(JrcContactCenter::SyntheticAudioFolderSeed.call(account: @account, queues: queues, member: admin))
+    end
     prepare_special_sources(payload, queues.first, admin, operator)
     payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?(*PENDING_ACW_PROJECTS)
     payload

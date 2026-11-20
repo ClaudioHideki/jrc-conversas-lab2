@@ -22,6 +22,20 @@ class JrcContactCenter::AudioInspections
     persist!(asset_id, version_id, key, digest, observed)
   end
 
+  # Server-internal admission receipt, atomic with the newly created immutable version.
+  def record_received!(version:, upload_key:, attributes:)
+    @access.transaction do
+      current = current_version(version.audio_asset_id, version.id)
+      key = "received_#{Digest::SHA256.hexdigest(upload_key)}"
+      fields = ['institutional_audio_received_v1', input_digest(current), upload_key]
+      digest = Digest::SHA256.hexdigest(JSON.generate(fields))
+      existing = replay!(current, key, digest)
+      next existing if existing
+
+      JrcContactCenter::AudioInspection.create!(inspection_attributes(current, key, digest, attributes))
+    end
+  end
+
   private
 
   def current_version(asset_id, version_id)

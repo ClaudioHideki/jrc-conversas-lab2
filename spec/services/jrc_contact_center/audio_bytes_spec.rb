@@ -6,7 +6,7 @@ RSpec.describe JrcContactCenter::AudioBytes do
 
   let(:access) { JrcContactCenter::AudioLibraryAccess.new(context: context) }
   let(:version) do
-    JrcContactCenter::AudioUploads.new(access: access)
+    JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: access)
                                   .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC private preview' }, file: upload, key: key)
   end
   let(:inspection) do

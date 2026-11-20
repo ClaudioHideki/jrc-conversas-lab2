@@ -7,7 +7,7 @@ RSpec.describe 'Institutional audio byte access uses current native authority an
   let(:headers) { actor.create_new_auth_token }
   let(:access) { JrcContactCenter::AudioLibraryAccess.new(context: context) }
   let(:version) do
-    JrcContactCenter::AudioUploads.new(access: access)
+    JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: access)
                                   .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC byte access' }, file: upload, key: key)
   end
   let(:proof) do
@@ -37,11 +37,13 @@ RSpec.describe 'Institutional audio byte access uses current native authority an
     get endpoint, headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.body.b).to eq(bytes)
-    expect(response.headers.slice('X-JRC-Audio-Account', 'X-JRC-Audio-Unit', 'X-JRC-Audio-Version', 'X-JRC-Audio-Inspection')).to eq(
+    identities = %w[X-JRC-Audio-Account X-JRC-Audio-Unit X-JRC-Audio-Version X-JRC-Audio-Inspection].index_with { |name| response.headers[name] }
+    expect(identities).to eq(
       'X-JRC-Audio-Account' => account.id.to_s, 'X-JRC-Audio-Unit' => unit.id.to_s,
       'X-JRC-Audio-Version' => version.id.to_s, 'X-JRC-Audio-Inspection' => current.id.to_s
     )
-    expect(response.headers.slice('Cache-Control', 'X-Content-Type-Options', 'X-JRC-Audio-SHA256')).to eq(
+    protections = %w[Cache-Control X-Content-Type-Options X-JRC-Audio-SHA256].index_with { |name| response.headers[name] }
+    expect(protections).to eq(
       'Cache-Control' => 'no-store', 'X-Content-Type-Options' => 'nosniff', 'X-JRC-Audio-SHA256' => Digest::SHA256.hexdigest(bytes)
     )
     expect(response.media_type).to eq('audio/wav')

@@ -7,6 +7,7 @@ require 'timeout'
 # Internal observation only; this grants no byte access and does not publish or mark a version ready.
 class JrcContactCenter::AudioSafetyObservation
   Result = Struct.new(:version, :attributes, keyword_init: true)
+  StagedInput = Struct.new(:blob, :sha256, :content_type, keyword_init: true)
   Deadline = Class.new(StandardError)
   ADAPTER = 'clamav-instream-v1'
 
@@ -27,7 +28,28 @@ class JrcContactCenter::AudioSafetyObservation
     end
   end
 
+  # A private staged blob is not a final library asset/version. The receiver owns its cleanup.
+  def receive!(unit_id:, blob:, input:)
+    @access.transaction { @access.unit(unit_id) }
+    source = StagedInput.new(blob: blob, sha256: input.sha256, content_type: input.content_type).freeze
+    attributes = bounded_inspection(source)
+    @access.transaction do
+      @access.unit(unit_id)
+      require_received_media!(attributes)
+    end
+    attributes
+  end
+
   private
+
+  def require_received_media!(attributes)
+    if attributes[:state] == 'unavailable' || attributes[:probe_state] == 'unavailable'
+      raise JrcContactCenter::OperationError.new('institutional_audio_inspection_unavailable', status: :service_unavailable)
+    end
+    raise JrcContactCenter::OperationError, 'institutional_audio_integrity_failed' if attributes[:state] == 'checksum_mismatch'
+    raise JrcContactCenter::OperationError, 'institutional_audio_unsafe_file' unless attributes[:state] == 'clean'
+    raise JrcContactCenter::OperationError, 'institutional_audio_invalid_codec' unless attributes[:probe_state] == 'valid'
+  end
 
   def bounded_inspection(version)
     Timeout.timeout(45, Deadline) { inspect_bytes(version) }

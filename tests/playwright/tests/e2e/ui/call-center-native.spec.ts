@@ -185,22 +185,18 @@ test('institutional audio folders native exact-version scanner and decoder histo
   header.writeUInt32LE(16, 40);
   const bytes = Buffer.concat([header, Buffer.alloc(16)]);
   const sha256 = createHash('sha256').update(bytes).digest('hex');
-  const received = await page.request.post(`${own}/audio_assets`, {
-    headers: target.administrator,
-    multipart: {
-      unit_id: String(target.unit_id),
-      'asset[name]': `SYNTHETIC technical ${randomUUID()}`,
-      idempotency_key: randomUUID(),
-      file: {
-        name: 'SYNTHETIC-technical.wav',
-        mimeType: 'audio/wav',
-        buffer: bytes,
-      },
-    },
-  });
-  expect(received.status()).toBe(201);
-  const asset = (await received.json()).item;
-  await page.goto(`${url}?audio_unit=${target.unit_id}`);
+  // A real pre-admission quarantine receipt seeded in this owned synthetic database, not a bypass in the upload API.
+  const legacy = await page.request.get(
+    `${own}/audio_assets/${target.technical_legacy_audio_id}`,
+    {
+      headers: target.administrator,
+    }
+  );
+  expect(legacy.status()).toBe(200);
+  const asset = (await legacy.json()).item;
+  await page.goto(
+    `${url}?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(asset.name)}`
+  );
   const library = page.locator('[data-audio-asset-library]');
   await library.locator(`[data-audio-asset-history="${asset.id}"]`).click();
   await expectContainedDialog(page);
@@ -7557,6 +7553,41 @@ test('institutional audio folders native private receipt, revisions and permissi
   await expect(dialog.locator('[data-audio-asset-name]')).toHaveValue(name);
   await expect(dialog.locator('[data-audio-asset-file]')).toBeEnabled();
   await dialog.locator('[data-audio-asset-file]').setInputFiles({
+    name: 'SYNTHETIC-empty.wav',
+    mimeType: 'audio/wav',
+    buffer: header,
+  });
+  await dialog.locator('[data-review-audio-asset]').check();
+  const rejectedCodec = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === prefix &&
+      response.request().method() === 'POST'
+  );
+  await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
+  const invalidCodec = await rejectedCodec;
+  expect(invalidCodec.status()).toBe(422);
+  expect((await invalidCodec.json()).error).toBe(
+    'institutional_audio_invalid_codec'
+  );
+  await expect(dialog.locator('[data-audio-asset-name]')).toHaveValue(name);
+  await expect(dialog.locator('[data-audio-asset-folder]')).toHaveValue(
+    target.audio_destination_id
+  );
+  await expect(dialog).toContainText(
+    'O servidor verifica segurança e decodificação antes de salvar uma nova versão.'
+  );
+  const absent = await page.request.get(`${own}/audio_assets`, {
+    headers: target.administrator,
+    params: { unit_id: String(target.unit_id), q: name },
+  });
+  expect(absent.status()).toBe(200);
+  expect((await absent.json()).meta.total).toBe(0);
+  await expectContainedDialog(page);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-codec-rejected-before-save.png`,
+    fullPage: true,
+  });
+  await dialog.locator('[data-audio-asset-file]').setInputFiles({
     name: 'SYNTHETIC.wav',
     mimeType: 'audio/wav',
     buffer: bytes,
@@ -7580,6 +7611,21 @@ test('institutional audio folders native private receipt, revisions and permissi
   });
   expect(original.unit_id).toBe(String(target.unit_id));
   expect(original.folder_id).toBe(target.audio_destination_id);
+  const receivedProof = await page.request.get(
+    `${own}/audio_assets/${original.id}/versions/${original.latest_version.id}/inspections`,
+    { headers: target.administrator }
+  );
+  expect(receivedProof.status()).toBe(200);
+  const initialProof = await receivedProof.json();
+  expect(initialProof.meta.total).toBe(1);
+  expect(initialProof.items[0]).toMatchObject({
+    ready: true,
+    state: 'clean',
+    probe_state: 'valid',
+    attempt: 1,
+    expected_sha256: sha256,
+    observed_sha256: sha256,
+  });
   expect(JSON.stringify(original)).not.toMatch(
     /blob_id|signed_id|service_url|idempotency_key|input_digest/
   );
@@ -7806,21 +7852,15 @@ test('institutional audio folders native verified bytes playback download and wi
   header.writeUInt32LE(32000, 40);
   const bytes = Buffer.concat([header, Buffer.alloc(32000)]);
   const sha256 = createHash('sha256').update(bytes).digest('hex');
-  const received = await page.request.post(`${own}/audio_assets`, {
-    headers: target.administrator,
-    multipart: {
-      unit_id: String(target.unit_id),
-      'asset[name]': `SYNTHETIC preview ${randomUUID()}`,
-      idempotency_key: randomUUID(),
-      file: {
-        name: 'SYNTHETIC-preview.wav',
-        mimeType: 'audio/wav',
-        buffer: bytes,
-      },
-    },
-  });
-  expect(received.status()).toBe(201);
-  const asset = (await received.json()).item;
+  // A real pre-admission quarantine receipt seeded in this owned synthetic database, not a bypass in the upload API.
+  const legacy = await page.request.get(
+    `${own}/audio_assets/${target.preview_legacy_audio_id}`,
+    {
+      headers: target.administrator,
+    }
+  );
+  expect(legacy.status()).toBe(200);
+  const asset = (await legacy.json()).item;
   const versionId = asset.latest_version.id;
   const path = `${new URL(own).pathname}/audio_assets/${asset.id}/versions/${versionId}/bytes`;
   const unverified = await page.request.get(`http://127.0.0.1:5387${path}`, {
@@ -7828,7 +7868,7 @@ test('institutional audio folders native verified bytes playback download and wi
   });
   expect(unverified.status()).toBe(409);
   await page.goto(
-    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}`
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(asset.name)}`
   );
   const library = page.locator('[data-audio-asset-library]');
   await library.locator(`[data-audio-asset-history="${asset.id}"]`).click();
