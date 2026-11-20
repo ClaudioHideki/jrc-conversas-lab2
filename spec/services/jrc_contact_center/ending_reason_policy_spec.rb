@@ -112,7 +112,7 @@ RSpec.describe JrcContactCenter::EndingReasonPolicy do
   it 'leaves another queue optional and accepts its explicitly started legacy reason without granting configuration access' do
     other = JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'SYNTHETIC-OTHER', name: 'SYNTHETIC other')
     call = JrcContactCenter::CallSession.create!(account: account, provider: 'synthetic', correlation_id: SecureRandom.uuid,
-                                                 direction: 'inbound', status: 'ended', started_at: Time.current, ended_at: 1.minute.from_now,
+                                                 direction: 'inbound', status: 'ended', started_at: 30.seconds.ago, ended_at: 10.seconds.ago,
                                                  current_unit: unit, current_queue: other)
     JrcContactCenter::CallLeg.create!(account: account, call_session: call, account_user: member, queue: other, direction: 'inbound',
                                       status: 'ended', started_at: call.started_at, answered_at: call.started_at, ended_at: call.ended_at)
@@ -135,5 +135,4 @@ RSpec.describe JrcContactCenter::EndingReasonPolicy do
     end.to raise_error(ActiveRecord::StatementInvalid, /Call ending reason origin is immutable/)
     expect(call.reload.ending_reason_captured_started_at).to eq(captured)
   end
-
 end

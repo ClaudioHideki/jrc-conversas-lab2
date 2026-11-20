@@ -1426,8 +1426,8 @@
     "Popup nativo de perfis com persistência explícita, feature flags reais e limites da cobertura corporativa"
   ],
   "provider_contracts": "control_desk_contracts_20261116.json",
-  "scope_limit": "No provider endpoint, ACK, automatic corporate grant or production operation. Current reviewed increment adds only pinned AccessGrant migration 20261117190000; historical migrations, SQLs, dependencies, lint rules and other modules remain preserved. Native Team remains Account-scoped; CC inheritance does not create queue participation.",
-  "validation_state": "incremental_native_and_Chrome_validated_through_0519ee64_all_23_figures_still_open",
+  "scope_limit": "No real provider commands, ACK, automatic corporate grant or production operation. Exactly six forward Contact Center migrations and separately hash-pinned ending-reason SQL sources are under the native gate; five previously validated additions remain byte-preserved. Native Team remains Account-scoped; Call Center inheritance never creates queue participation.",
+  "validation_state": "incremental_native_and_Chrome_validated_through_a0cd67f4_required_queues_pending_all_23_figures_still_open",
   "full_23_figures_complete": false,
   "continuity_20261116": {
     "preserved_checkpoint": "15eaa800336626a3d5c5712870b43d169c64e6ad",

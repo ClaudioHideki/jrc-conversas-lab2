@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 # The existing normalized inbox contract is simulated here, not a real provider signature or ACK.
-RSpec.describe 'Frozen ending reason compatibility with native normalized events' do
+RSpec.describe JrcContactCenter::EventReconciler, 'frozen ending reason compatibility with native normalized events' do
   include_context 'with a frozen ending reason catalogue'
 
   it 'preserves the first observed policy while the reconciler corrects started_at from a late call.created event' do

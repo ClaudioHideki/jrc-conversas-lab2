@@ -60,6 +60,10 @@ class CreateContactCenterEndingReasonVersions < ActiveRecord::Migration[7.1]
     add_index TABLE, [:account_id, :revision], unique: true, name: 'cc_ending_reason_revision_key'
     add_index TABLE, :source_audit_id, unique: true, name: 'cc_ending_reason_audit_key'
     add_index TABLE, [:account_id, :created_at], name: 'cc_ending_reason_effective_time'
+    create_version_constraints
+  end
+
+  def create_version_constraints
     add_check_constraint TABLE, "revision > 0 AND integrity_sha256 ~ '^[0-9a-f]{64}$'", name: 'cc_ending_reason_identity'
     add_check_constraint TABLE, "jsonb_typeof(definition) = 'object' AND octet_length(definition::text) <= 145000 " \
                                 "AND definition ? 'version' AND definition ? 'entries' " \
@@ -130,9 +134,7 @@ class CreateContactCenterEndingReasonVersions < ActiveRecord::Migration[7.1]
   end
 
   def schema_receipt
-    components = [connection.columns(TABLE), call_capture_columns].map do |columns|
-      columns.map { |column| [column.name, column.sql_type, column.null, column.default] }
-    end
+    components = column_receipt
     components << connection.select_rows('SELECT pg_get_constraintdef(oid, true) FROM pg_constraint ' \
                                          "WHERE conrelid = '#{TABLE}'::regclass OR (conrelid = '#{CALLS}'::regclass " \
                                          "AND conname IN ('cc_ending_reason_call_account_fk', 'cc_ending_reason_call_capture')) ORDER BY conname")
@@ -141,6 +143,12 @@ class CreateContactCenterEndingReasonVersions < ActiveRecord::Migration[7.1]
                                          "AND tgrelid IN (#{guard_relations}) ORDER BY tgname")
     components << connection.indexes(TABLE).map { |index| [index.name, index.columns, index.unique] }.sort
     "jrc_cc_ending_reasons_v1:#{Digest::SHA256.hexdigest(components.to_json)}"
+  end
+
+  def column_receipt
+    [connection.columns(TABLE), call_capture_columns].map do |columns|
+      columns.map { |column| [column.name, column.sql_type, column.null, column.default] }
+    end
   end
 
   def guard_relations

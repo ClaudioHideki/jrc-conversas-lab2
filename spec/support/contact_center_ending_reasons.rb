@@ -16,7 +16,7 @@ RSpec.shared_context 'with a frozen ending reason catalogue' do
   let(:manager) { JrcContactCenter::QualificationManager.new(account: account, member: member) }
   let(:session) do
     JrcContactCenter::CallSession.create!(account: account, provider: 'synthetic', correlation_id: SecureRandom.uuid,
-                                          direction: 'inbound', status: 'connected', started_at: Time.current,
+                                          direction: 'inbound', status: 'connected', started_at: 1.minute.ago,
                                           current_unit: unit, current_queue: queue)
   end
   let(:leg) do
@@ -42,7 +42,9 @@ RSpec.shared_context 'with a frozen ending reason catalogue' do
   end
 
   before do
-    account.enable_features!('jrc_contact_center')
-    configure_ending_reasons!
+    travel_to(2.minutes.ago) do
+      account.enable_features!('jrc_contact_center')
+      configure_ending_reasons!
+    end
   end
 end

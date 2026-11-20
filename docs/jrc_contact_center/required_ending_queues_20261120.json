@@ -70,7 +70,7 @@
     "migrations_rails_vue_chrome": "not executed; no native approval inferred",
     "correction": "Exact sixth migration plus SQL helper hash,34guardregressions; indentation, frozen SQL constants with four unchanged normalized SQL bodies, same predicates factored to comply with metrics."
   },
-  "reviewed_migration_sha256": "d04e5fc11cddbde1fe3d10adf64ebad2dcbcaba5be0496eb0b37dc655a5caff1",
+  "reviewed_migration_sha256": "e0376ccbd1cb244e447841a2a0b8d32e083eff359a19c25ddfe2304d9c363247",
   "frozen_sql_sha256": "c0dca8b84c8c4b02d78ed07be4e23bb253f0d64994dccc232ba879941ef35bf8",
   "historical_header_regression_prepared": {
     "reason": "A PostgreSQL CHECK must explicitly reject a missing entries key or a nonnumeric version instead of accepting NULL. This matches the existing strict catalogue document contract.",
@@ -97,5 +97,27 @@
     "result": "failed:13of79schema_examples in shared Current.set setup;five Ruby layout findings",
     "core_rails_vue_chrome": "not reached; not approved",
     "correction": "Native thread-local Current.user with ensure restoration; constructor/call split and hash indentation. Separate immutable captured policy timestamp retains native late-event correction."
+  },
+  "gate_c6447b02": {
+    "sha": "c6447b02bbf6c5b44d861eb71c581abe58dfe0c8",
+    "run": 44670523987,
+    "artifact_id": 14599529621,
+    "artifact_sha256": "13eaa6e719342d8681c98e11e7df549ff53b54f01805d623258c0524af878750",
+    "schema_reload": {
+      "examples": 81,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "core_rails": {
+      "examples": 1619,
+      "failures": 4,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "cause": "Shared synthetic call ended10seconds in the future;native completion chronology CHECK correctly rejected three service completions and one API completion.",
+    "correction": "Travel only fixture setup to2minutes ago,call starts1minute ago and ends10seconds after its start. Native check and all business assertions unchanged.",
+    "ruby": "Five new findings after the previous five were resolved:extract unchanged constraint/receipt construction;align string;describe native class;remove terminal blank.",
+    "vue_chrome": "not run; no approval inferred"
   }
 }

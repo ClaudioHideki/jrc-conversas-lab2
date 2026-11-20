@@ -34,7 +34,7 @@ RSpec.describe CreateContactCenterEndingReasonVersions do
     connection.execute('CREATE SCHEMA cc_ending_reason_upgrade_synthetic')
     tables.each { |table| connection.execute("CREATE TABLE cc_ending_reason_upgrade_synthetic.#{table} (LIKE public.#{table} INCLUDING ALL)") }
     connection.execute('ALTER TABLE cc_ending_reason_upgrade_synthetic.jrc_contact_center_call_sessions ' \
-                         'DROP COLUMN ending_reason_version_id, DROP COLUMN ending_reason_captured_started_at')
+                       'DROP COLUMN ending_reason_version_id, DROP COLUMN ending_reason_captured_started_at')
     connection.execute("INSERT INTO cc_ending_reason_upgrade_synthetic.accounts SELECT * FROM public.accounts WHERE id = #{account.id}")
     connection.execute("INSERT INTO cc_ending_reason_upgrade_synthetic.audits SELECT * FROM public.audits WHERE associated_type = 'Account' " \
                        "AND associated_id = #{account.id}")
