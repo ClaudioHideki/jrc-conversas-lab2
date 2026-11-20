@@ -33,6 +33,17 @@ const ivrRevision = revision => {
 };
 
 export default {
+  audioFolders: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/audio_folders`, { params }),
+  audioFolder: (accountId, id) =>
+    axios.get(`${base(accountId)}/audio_folders/${recordIdentity(id)}`),
+  saveAudioFolder: (accountId, id, folder, options = {}) =>
+    id !== undefined && id !== null
+      ? axios.patch(`${base(accountId)}/audio_folders/${recordIdentity(id)}`, {
+          folder,
+          ...options,
+        })
+      : axios.post(`${base(accountId)}/audio_folders`, { folder }),
   acwForms: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/acw_forms`, { params }),
   saveAcwForm: (accountId, id, form) =>
@@ -87,10 +98,15 @@ export default {
       ivr_drafts: 'ivr_drafts',
       acw_forms: 'acw_forms',
       routing_rules: 'routing_rules',
+      audio_folders: 'audio_folders',
     };
     if (!paths[resource] || !/^[1-9]\d*$/.test(String(id)))
       throw new Error('Invalid configuration context');
     if (resource === 'ivr_drafts') return axios.get(ivrPath(accountId, id));
+    if (resource === 'audio_folders')
+      return axios.get(
+        `${base(accountId)}/audio_folders/${recordIdentity(id)}`
+      );
     if (resource === 'acw_forms')
       return axios.get(`${base(accountId)}/acw_forms/${recordIdentity(id)}`);
     if (resource === 'routing_rules')

@@ -14,6 +14,7 @@ import PauseCatalogEditor from './PauseCatalogEditor.vue';
 import AcwRulesEditor from './AcwRulesEditor.vue';
 import AcwFormLibrary from './AcwFormLibrary.vue';
 import EndingReasonCatalog from './EndingReasonCatalog.vue';
+import AudioFolderLibrary from './AudioFolderLibrary.vue';
 import QueueWithdrawalConfirmation from './QueueWithdrawalConfirmation.vue';
 import TeamRosterWithdrawalConfirmation from './TeamRosterWithdrawalConfirmation.vue';
 import { useQueueWithdrawalReview } from '../composables/useQueueWithdrawalReview';
@@ -597,7 +598,7 @@ onBeforeUnmount(() => {
       {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}
     </p>
     <p
-      v-if="pending"
+      v-if="pending && key !== 'audio'"
       role="status"
       class="rounded-xl border border-n-amber-6 bg-n-amber-2 p-4 text-sm text-n-amber-11"
     >
@@ -788,6 +789,12 @@ onBeforeUnmount(() => {
       :key="String(accountId)"
       :account-id="accountId"
       @close="reasonsOpen = false"
+    />
+    <AudioFolderLibrary
+      v-if="key === 'audio' && context.capabilities.configure"
+      :key="String(accountId)"
+      :account-id="accountId"
+      :context="context"
     />
     <AcwFormLibrary
       v-if="canConfigureAcw && formsOpen"

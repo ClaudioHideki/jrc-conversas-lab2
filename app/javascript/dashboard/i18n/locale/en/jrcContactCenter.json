@@ -1931,7 +1931,8 @@
       "WHATSAPP": "WhatsApp",
       "EMAIL": "E-mail",
       "CHAT": "Chat",
-      "PROVIDER": "Regra do provedor"
+      "PROVIDER": "Regra do provedor",
+      "TEAM_SOURCE": "Origem de permissões da equipe"
     },
     "CONFIGURATION_REVISION": {
       "CONFLICT": "Este registro mudou em outra sessão ou não tem uma revisão válida. Seu rascunho foi preservado. Carregue a versão atual e compare antes de confirmar uma nova tentativa.",
@@ -2386,6 +2387,38 @@
       "OPERATIONAL_REQUIRED": "Selecione um motivo cadastrado na versão desta chamada.",
       "OPERATIONAL_VERSION": "Catálogo de encerramentos — versão {version}",
       "CONTEXT_ERROR": "Não foi possível confirmar os motivos desta chamada. Atualize o contexto antes de concluir."
+    },
+    "AUDIO_FOLDERS": {
+      "TITLE": "Pastas de áudios institucionais",
+      "LIMITS": "Organização local por unidade. Importação de arquivos, gravação, Nico e publicação de áudios ainda estão em implementação. Esta biblioteca não contém gravações de chamadas.",
+      "UNIT": "Unidade operacional",
+      "SEARCH": "Pesquisar pastas",
+      "FILTER": "Aplicar filtros",
+      "CLEAR": "Limpar filtros",
+      "NEW": "Nova pasta",
+      "NO_UNIT": "Nenhuma unidade disponível no seu escopo de configuração.",
+      "PATH": "Navegação das pastas",
+      "ROOT": "Pasta raiz",
+      "UP": "Pasta anterior",
+      "LOADING": "Carregando pastas...",
+      "ERROR": "Não foi possível carregar as pastas autorizadas. Confira a unidade e tente novamente.",
+      "EMPTY": "Nenhuma pasta neste local.",
+      "EDIT": "Editar e mover",
+      "PAGINATION": "Paginação das pastas",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "TOTAL": "Total",
+      "PAGE": "Página",
+      "EDITOR": "Organizar pasta de áudio",
+      "SAVE": "Salvar pasta",
+      "CANCEL": "Cancelar",
+      "SAVE_ERROR": "Não foi possível salvar. O rascunho foi preservado; verifique o nome, o destino e as permissões.",
+      "NAME": "Nome da pasta",
+      "DESCRIPTION": "Descrição",
+      "SEARCH_PARENT": "Pesquisar pasta de destino",
+      "PARENT_ERROR": "Não foi possível consultar as pastas de destino. Ajuste a busca para tentar novamente.",
+      "PARENT": "Pasta de destino na mesma unidade",
+      "REVIEW": "Revisei a unidade, o nome e o destino desta pasta."
     }
   }
 }

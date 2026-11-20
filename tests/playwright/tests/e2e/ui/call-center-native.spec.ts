@@ -32,59 +32,65 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('inactive membership native')
-    ? 'membership_eligibility'
-    : info.title.startsWith('registered ending native')
-      ? 'required_endings'
-      : info.title.startsWith('ending reason native')
-        ? 'form_bindings'
-        : info.title.startsWith('Hoya workspace native')
-          ? 'hoya_forms'
-          : info.title.startsWith('state history native')
-            ? 'state_history'
-            : info.title.startsWith('operational form native')
-              ? 'operational_forms'
-              : info.title.startsWith('form bindings native')
-                ? 'form_bindings'
-                : info.title.startsWith('deferred pause native uncertain')
-                  ? 'deferred_pause_retry'
-                  : info.title.startsWith('deferred pause native')
-                    ? 'deferred_pause'
-                    : info.title.startsWith('whole native team deletion')
-                      ? 'team_deletion'
-                      : info.title.startsWith('pending ACW native navigation')
-                        ? 'acw_navigation'
-                        : info.title.startsWith('pending ACW native draft')
-                          ? 'acw_draft'
-                          : info.title.startsWith('pending ACW native review')
-                            ? 'acw_review'
-                            : info.title.startsWith('team source last eligible')
-                              ? 'team_activity'
+  const pauseKey = info.title.startsWith('institutional audio folders native')
+    ? 'audio_folders'
+    : info.title.startsWith('inactive membership native')
+      ? 'membership_eligibility'
+      : info.title.startsWith('registered ending native')
+        ? 'required_endings'
+        : info.title.startsWith('ending reason native')
+          ? 'form_bindings'
+          : info.title.startsWith('Hoya workspace native')
+            ? 'hoya_forms'
+            : info.title.startsWith('state history native')
+              ? 'state_history'
+              : info.title.startsWith('operational form native')
+                ? 'operational_forms'
+                : info.title.startsWith('form bindings native')
+                  ? 'form_bindings'
+                  : info.title.startsWith('deferred pause native uncertain')
+                    ? 'deferred_pause_retry'
+                    : info.title.startsWith('deferred pause native')
+                      ? 'deferred_pause'
+                      : info.title.startsWith('whole native team deletion')
+                        ? 'team_deletion'
+                        : info.title.startsWith('pending ACW native navigation')
+                          ? 'acw_navigation'
+                          : info.title.startsWith('pending ACW native draft')
+                            ? 'acw_draft'
+                            : info.title.startsWith('pending ACW native review')
+                              ? 'acw_review'
                               : info.title.startsWith(
-                                    'team roster last eligible'
+                                    'team source last eligible'
                                   )
-                                ? 'team_withdrawal'
-                                : info.title.startsWith('native local routing')
-                                  ? 'routing'
-                                  : info.title.startsWith('scoped ACW native')
-                                    ? 'acw'
-                                    : info.title.startsWith(
-                                          'last eligible queue withdrawal'
-                                        )
-                                      ? 'withdrawal'
+                                ? 'team_activity'
+                                : info.title.startsWith(
+                                      'team roster last eligible'
+                                    )
+                                  ? 'team_withdrawal'
+                                  : info.title.startsWith(
+                                        'native local routing'
+                                      )
+                                    ? 'routing'
+                                    : info.title.startsWith('scoped ACW native')
+                                      ? 'acw'
                                       : info.title.startsWith(
-                                            'local pause duration supervisor'
+                                            'last eligible queue withdrawal'
                                           )
-                                        ? 'duration'
+                                        ? 'withdrawal'
                                         : info.title.startsWith(
-                                              'local pause catalog operator'
+                                              'local pause duration supervisor'
                                             )
-                                          ? 'operations'
+                                          ? 'duration'
                                           : info.title.startsWith(
-                                                'local pause catalog'
+                                                'local pause catalog operator'
                                               )
-                                            ? 'editor'
-                                            : null;
+                                            ? 'operations'
+                                            : info.title.startsWith(
+                                                  'local pause catalog'
+                                                )
+                                              ? 'editor'
+                                              : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -4070,6 +4076,221 @@ test('local pause catalog operator preserves legacy history and enforces only au
   });
 });
 
+test('institutional audio folders native unit organization persists, paginates and rejects stale reviews', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].audio_folders;
+  const own = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const prefix = `/api/v1/accounts/${target.account_id}/jrc_contact_center/audio_folders`;
+  const url = `/app/accounts/${target.account_id}/contact-center/control-desk/audio`;
+  const library = page.locator('[data-audio-folder-library]');
+  const forbiddenWrites: string[] = [];
+  page.on('request', request => {
+    if (
+      /\/(commands|sync_calls|telephony_integration|call_recordings)(?:[/?]|$)/.test(
+        request.url()
+      ) &&
+      !['GET', 'HEAD'].includes(request.method())
+    )
+      forbiddenWrites.push(request.url());
+  });
+  await page.goto(`${url}?audio_unit=${target.unit_id}&audio_page=2`);
+  await expect(library.locator('[data-audio-folder]')).toHaveCount(2);
+  await expect(
+    library.locator('[data-audio-folder-pagination-total]')
+  ).toContainText('22');
+  await library.locator('[data-audio-search]').fill(target.audio_folder_name);
+  await library
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  await expect(library.locator('[data-audio-folder]')).toHaveCount(1);
+  await library
+    .locator(`[data-edit-audio-folder="${target.audio_folder_id}"]`)
+    .click();
+  await expectContainedDialog(page);
+  const dialog = page.getByRole('dialog');
+  const save = dialog.getByRole('button', {
+    name: 'Salvar pasta',
+    exact: true,
+  });
+  await expect(save).toBeDisabled();
+  await dialog
+    .locator('[data-audio-parent-search]')
+    .fill(target.audio_destination_name);
+  await expect(dialog.locator('[data-audio-folder-parent] option')).toHaveCount(
+    2
+  );
+  await dialog
+    .locator('[data-audio-folder-parent]')
+    .selectOption(target.audio_destination_id);
+  await dialog
+    .locator('[data-audio-folder-name]')
+    .fill(`SYNTHETIC reviewed ${info.project.name}`);
+  const external = await page.request.get(
+    `${own}/audio_folders/${target.audio_folder_id}`,
+    { headers: target.administrator }
+  );
+  expect(external.status()).toBe(200);
+  const current = (await external.json()).item;
+  const renamed = await page.request.patch(
+    `${own}/audio_folders/${target.audio_folder_id}`,
+    {
+      headers: target.administrator,
+      data: {
+        folder: { name: 'SYNTHETIC newer native revision' },
+        expected_revision: current.revision,
+      },
+    }
+  );
+  expect(renamed.status()).toBe(200);
+  await dialog.locator('[data-review-audio-folder]').check();
+  const stale = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname ===
+        `${prefix}/${target.audio_folder_id}` &&
+      response.request().method() === 'PATCH'
+  );
+  await save.click();
+  const staleResult = await stale;
+  expect(staleResult.status()).toBe(409);
+  expect((await staleResult.json()).error).toBe('stale_configuration_revision');
+  const conflict = dialog.locator('[data-configuration-conflict]');
+  await expect(conflict).toBeVisible();
+  await expect(save).toBeDisabled();
+  await conflict.getByRole('button').click();
+  await expect(dialog.locator('[data-configuration-latest]')).toContainText(
+    'SYNTHETIC newer native revision'
+  );
+  await expect(dialog.locator('[data-audio-folder-name]')).toHaveValue(
+    `SYNTHETIC reviewed ${info.project.name}`
+  );
+  await dialog.locator('[data-configuration-review]').check();
+  await dialog.locator('[data-review-audio-folder]').check();
+  await save.scrollIntoViewIfNeeded();
+  await expectContainedDialog(page);
+  const color = await dialog
+    .locator('[data-audio-folder-editor]')
+    .evaluate(element => getComputedStyle(element).color);
+  const brightness = color
+    .match(/[\d.]+/g)
+    .slice(0, 3)
+    .map(Number)
+    .reduce((sum, value) => sum + value, 0);
+  expect(
+    await page
+      .locator('html')
+      .evaluate(element => element.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  if (info.project.name.endsWith('dark'))
+    expect(brightness).toBeGreaterThan(600);
+  else expect(brightness).toBeLessThan(300);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-folder-reviewed-conflict.png`,
+    fullPage: true,
+  });
+  const saved = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname ===
+        `${prefix}/${target.audio_folder_id}` &&
+      response.request().method() === 'PATCH'
+  );
+  await save.click();
+  expect((await saved).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  await page.goto(
+    `${url}?audio_unit=${target.unit_id}&audio_parent=${target.audio_destination_id}`
+  );
+  await expect(
+    library.locator(`[data-audio-folder="${target.audio_folder_id}"]`)
+  ).toContainText(`SYNTHETIC reviewed ${info.project.name}`);
+  await page.reload();
+  await expect(
+    library.locator(`[data-audio-folder="${target.audio_folder_id}"]`)
+  ).toBeVisible();
+  await library.locator('[data-new-audio-folder]').click();
+  await dialog
+    .locator('[data-audio-folder-name]')
+    .fill('SYNTHETIC new nested library');
+  await expect(save).toBeDisabled();
+  await dialog.locator('[data-review-audio-folder]').check();
+  const created = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === prefix &&
+      response.request().method() === 'POST'
+  );
+  await save.click();
+  const creation = await created;
+  expect(creation.status()).toBe(201);
+  const nested = (await creation.json()).item;
+  expect(nested).toMatchObject({
+    unit_id: String(target.unit_id),
+    parent_id: target.audio_destination_id,
+  });
+  await page.reload();
+  await expect(
+    library.locator(`[data-audio-folder="${nested.id}"]`)
+  ).toContainText('SYNTHETIC new nested library');
+  const scoped = { headers: target.scoped };
+  const denied = await page.request.get(
+    `${own}/audio_folders/${target.denied_audio_folder_id}`,
+    scoped
+  );
+  expect(denied.status()).toBe(404);
+  const deniedList = await page.request.get(
+    `${own}/audio_folders?unit_id=${target.denied_unit_id}`,
+    scoped
+  );
+  expect(deniedList.status()).toBe(404);
+  const operatorDenied = await page.request.get(
+    `${own}/audio_folders?unit_id=${target.unit_id}`,
+    { headers: target.operator }
+  );
+  expect(operatorDenied.status()).toBe(401);
+  const audit = await page.request.get(
+    `${own}/configuration_audits?resource_type=audio_folder&resource_id=${target.audio_folder_id}`,
+    { headers: target.administrator }
+  );
+  expect(audit.status()).toBe(200);
+  expect((await audit.json()).items).toContainEqual(
+    expect.objectContaining({
+      resource_type: 'audio_folder',
+      resource_id: Number(target.audio_folder_id),
+      operation: 'update',
+    })
+  );
+  const persisted = await page.request.get(
+    `${own}/audio_folders/${target.audio_folder_id}`,
+    { headers: target.administrator }
+  );
+  expect((await persisted.json()).item.parent_id).toBe(
+    target.audio_destination_id
+  );
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-folder-native-evidence.json`,
+    JSON.stringify({
+      synthetic: true,
+      sha: process.env.GITHUB_SHA,
+      unit: String(target.unit_id),
+      folder: target.audio_folder_id,
+      nested: nested.id,
+      color,
+      brightness,
+      stale: 409,
+      denied: 404,
+    })
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-folder-native-library.png`,
+    fullPage: true,
+  });
+  expect(forbiddenWrites).toEqual([]);
+});
+
 test('team source last eligible inactivation preserves shared roster and requires manager review', async ({
   page,
 }, info) => {
@@ -4101,6 +4322,9 @@ test('team source last eligible inactivation preserves shared roster and require
   await section.locator(`[data-edit-authority="${target.team_id}"]`).click();
   await expectContainedDialog(page);
   const dialog = page.getByRole('dialog');
+  await expect(
+    dialog.locator('[data-allow]').first().locator('..')
+  ).toContainText('Concessão herdável da equipe');
   await dialog.locator('[data-team-source-active]').uncheck();
   await dialog.locator('[data-review-authority]').check();
   const first = page.waitForResponse(

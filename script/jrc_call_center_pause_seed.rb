@@ -1,6 +1,7 @@
 require_relative 'jrc_call_center_operational_form_seed'
 require_relative 'jrc_call_center_state_history_seed'
 require_relative 'jrc_call_center_ending_reason_seed'
+require_relative 'jrc_call_center_audio_folder_seed'
 
 # Exclusive synthetic accounts; no channels, inboxes or PABX configuration.
 class JrcContactCenter::SyntheticPauseSeed
@@ -21,7 +22,7 @@ class JrcContactCenter::SyntheticPauseSeed
       %w[
         editor operations withdrawal duration acw routing state_history
         team_withdrawal team_activity acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
-        operational_forms form_bindings hoya_forms required_endings membership_eligibility
+        operational_forms form_bindings hoya_forms required_endings membership_eligibility audio_folders
       ].index_with do |kind|
         new("#{project}-#{kind}").call
       end
@@ -50,6 +51,7 @@ class JrcContactCenter::SyntheticPauseSeed
     if @project.end_with?('-state_history')
       payload.merge!(JrcContactCenter::SyntheticStateHistorySeed.call(account: @account, member: operator, queues: queues))
     end
+    payload.merge!(JrcContactCenter::SyntheticAudioFolderSeed.call(account: @account, queues: queues)) if @project.end_with?('-audio_folders')
     prepare_special_sources(payload, queues.first, admin, operator)
     payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?(*PENDING_ACW_PROJECTS)
     payload

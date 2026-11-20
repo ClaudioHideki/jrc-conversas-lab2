@@ -29,9 +29,9 @@ test('keeps the timestamp protection against a newer base schema', () => {
 const reviewedChanges = Object.keys(reviewedMigrations).map(path => `A\t${path}`).join('\n');
 const readReviewed = path => readFileSync(new URL('../' + path, import.meta.url));
 
-test('current candidate admits all seven exact hash-pinned additions regardless of Git output order', () => {
+test('current candidate admits all eight exact hash-pinned additions regardless of Git output order', () => {
   const reversed = reviewedChanges.split('\n').reverse().join('\n');
-  assert.equal(verifyReviewedMigrations(reversed, readReviewed, schema).migrationCount, 7);
+  assert.equal(verifyReviewedMigrations(reversed, readReviewed, schema).migrationCount, 8);
 });
 
 for (const omitted of Object.keys(reviewedMigrations)) {

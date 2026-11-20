@@ -34,6 +34,27 @@ beforeEach(() => {
 });
 
 describe('expected configuration revision lifecycle', () => {
+  it('requires the exact native revision for institutional folder edits and conflict reloads', async () => {
+    const { revision, resource } = mountRevision();
+    resource.value = 'audio_folders';
+    await flushPromises();
+    revision.capture({ id: 10, revision: original });
+    expect(revision.state.required).toBe(true);
+    expect(revision.options()).toEqual({ expected_revision: original });
+    expect(revision.handleError(conflict('stale_configuration_revision'))).toBe(
+      true
+    );
+    await revision.reload();
+    expect(API.configurationRecord).toHaveBeenCalledWith(
+      '1',
+      'audio_folders',
+      10
+    );
+    expect(revision.canSave.value).toBe(false);
+    revision.review(true);
+    expect(revision.options()).toEqual({ expected_revision: refreshed });
+  });
+
   it('blocks an old captured context immediately when account or resource changes', () => {
     const { revision, accountId, resource } = mountRevision();
     revision.capture({ id: 10, revision: original });

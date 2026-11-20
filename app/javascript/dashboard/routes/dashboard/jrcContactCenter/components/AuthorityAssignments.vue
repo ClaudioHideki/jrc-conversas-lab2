@@ -440,7 +440,9 @@ onBeforeUnmount(() => {
               type="checkbox"
               :value="permission"
               :data-allow="permission"
-            /><span>{{ label('ALLOWED') }}</span></label
+            /><span>{{
+              label(users ? 'ALLOWED' : 'TEAM_ALLOWED')
+            }}</span></label
           >
           <div v-if="users">
             <label class="flex items-start gap-2 text-sm">

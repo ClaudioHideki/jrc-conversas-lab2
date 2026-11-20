@@ -178,6 +178,12 @@ describe('native subject authorizations', () => {
     await flushPromises();
     await wrapper.get('[data-edit-authority="9"]').trigger('click');
     await flushPromises();
+    expect(wrapper.get('[role="dialog"]').text()).toContain(
+      'JRC_CONTACT_CENTER.ACCESS.TEAM_ALLOWED'
+    );
+    expect(wrapper.get('[role="dialog"]').text()).not.toContain(
+      'JRC_CONTACT_CENTER.ACCESS.ALLOWED'
+    );
     expect(wrapper.find('[data-user-eligible]').exists()).toBe(false);
     expect(wrapper.find('[data-deny]').exists()).toBe(false);
     await wrapper

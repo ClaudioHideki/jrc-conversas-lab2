@@ -50,6 +50,7 @@ const labels = {
   status: t('JRC_CONTACT_CENTER.ADMIN.STATUS'),
   timezone: t('JRC_CONTACT_CENTER.ADMIN.TIMEZONE'),
   unit_id: t('JRC_CONTACT_CENTER.ADMIN.UNIT'),
+  parent_id: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.PARENT'),
   queue_id: t('JRC_CONTACT_CENTER.ADMIN.QUEUE'),
   account_user_id: t('JRC_CONTACT_CENTER.ADMIN.AGENT'),
   priority: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.PRIORITY'),
@@ -112,6 +113,7 @@ const fields = computed(
       ],
       access_users: ['eligible', 'allowed', 'denied'],
       access_teams: ['allowed', 'active'],
+      audio_folders: ['name', 'description', 'parent_id'],
       ivr_drafts: ['name', 'revision', 'definition'],
       acw_forms: ['name', 'description', 'status', 'revision', 'definition'],
       acw_policy: [
@@ -149,6 +151,7 @@ const format = (record, field) => {
     }
   }
   if (value === undefined || value === null || value === '') return '—';
+  if (field === 'parent_id') return record.parent_name || String(value);
   if (typeof value === 'boolean') return value ? text.yes : text.no;
   if (['allowed', 'denied'].includes(field))
     return (

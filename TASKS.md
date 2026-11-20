@@ -671,3 +671,17 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 #### Evidência intermediária 075d60b7
 
 Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incremento não aceito: um mock Vue sem interpolação e15 infrações Ruby bloquearam assets/Chrome. Correções preparadas sem reduzir asserções, regras ou autoridade. A conferência da pintura ACW real continua obrigatória. Biblioteca por unidade segue em preparação separada, sem rota, banco ou operação ativa.
+
+### 20/11 — Pastas institucionais por unidade (fundação)
+
+- [x] Decisão por unidade nativa e cobertura atual; não é catálogo de gravações de chamadas.
+- [x] Preparar pastas, hierarquia, revisão obrigatória, auditoria, filtros e popup, sem grants, duplicação do Help Center ou chamada ao fornecedor.
+- [x] Quarenta verificações leves do gate de oito migrations e sete testes do compilador de workflow aprovados; novo componente/transportes sem erros de lint.
+- [ ] Executar Rails/Vue, concorrência e os quatro cenários Chrome adicionais (220 totais) no próximo SHA. Nenhum resultado de mocks substitui a prova de banco e navegador.
+- [ ] Implementar arquivos privados, versões, scanner, player e vínculos verificáveis; figuras5/6/16 continuam parciais. TTS/publicação/ACK aguardam contratos reais.
+- [ ] Mostrar origem da equipe e pasta como recursos da auditoria existente; conferir filtros/isolamento/histórico nativamente.
+
+### 20/11 — Aceite da origem de equipe e pintura ACW
+
+- [x] **CC-TEAM-SOURCE-ACTIVITY / CC-ENDING-QUEUE-NAMES-ACW-PAINT:** e9e364ec/CI44709382400:1848Rails distintos,90recargas,890Vue,216Chrome,328capturas verificadas;zero falhas/pendências/erros externos/flaky/ignorados.Confirmação do gestor e pintura real revisadas em1440/390 claro/escuro; artefato14619566711/SHA-256304d0afed8f869a8a9d6cad1d3b0e2c660473d7b7d51c06a3a201ea4c1903cae.
+- [ ] Seguimento textual: reutilizar TEAM_ALLOWED no popup da equipe e revalidar no próximo SHA. Biblioteca institucional permanece fundação preparada, não aceita por esse run.

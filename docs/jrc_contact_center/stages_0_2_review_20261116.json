@@ -287,7 +287,14 @@
           "Selected queue chip falls back to native queue ID; add authorized display names without exposing hidden units.",
           "Native progress color at exceeded ACW limit does not match red warning; retain real elapsed values and deadline checks."
         ]
-      }
+      },
+      "incremental_validation": [
+        {
+          "sha": "e9e364ec49e55ec2531177dc6c1ca7f34c109206",
+          "evidence": "docs/jrc_contact_center/team_source_activity_verified_20261120.json",
+          "scope": "Estado da origem de equipe local, confirmação do gestor e preservação de vínculos; supervisor principal/hierarquia continuam pendentes."
+        }
+      ]
     },
     {
       "figure": 4,
@@ -444,6 +451,11 @@
         "complete_reference": [
           "Institutional audio folders/versioning/storage are stage 4; call recordings are not this catalog"
         ]
+      },
+      "prepared_increment": {
+        "scope": "Pastas por unidade, hierarquia, popup, revisão e auditoria, sem arquivos/player/versões ou fornecedor.",
+        "status": "Preparado com verificações leves; aguarda próximo SHA e CI nativa própria.",
+        "evidence": "docs/jrc_contact_center/audio_folder_prepared_20261120.json"
       }
     },
     {
@@ -840,7 +852,7 @@
         "Remoção/edição de membros da equipe exige revisão explícita assinada do gestor e auditoria transacional quando retira o último agente configurado elegível; escopos atuais e IDs canônicos revalidados. CI44461118646/3b9aa6db,1270Rails+16schema,573Vue,152Chrome,232capturas. Não inclui excluir a entidade Team ou comandos PABX."
       ],
       "remaining_or_external": [
-        "Supervisor principal,hierarquia e estado operacional próprio da equipe permanecem pendentes.",
+        "Supervisor principal e hierarquia próprios da equipe permanecem pendentes; estado da origem no Call Center validado em e9e364ec.",
         "Disponibilidade/capacidades/ACKsPABX aguardam contrato externo.",
         "Retirada de membro e exclusão da entidadeTeam possuem revisão nativa de último agente,confirmação do gestor e auditoria;aceite preservado em7d55fe76 e reexecutado em2a0cde0c. Não altera vínculos independentes."
       ],
@@ -955,7 +967,14 @@
           "Selected queue chip falls back to native queue ID; add authorized display names without exposing hidden units.",
           "Native progress color at exceeded ACW limit does not match red warning; retain real elapsed values and deadline checks."
         ]
-      }
+      },
+      "incremental_validation": [
+        {
+          "sha": "e9e364ec49e55ec2531177dc6c1ca7f34c109206",
+          "evidence": "docs/jrc_contact_center/team_source_activity_verified_20261120.json",
+          "scope": "Estado da origem de equipe local, confirmação do gestor e preservação de vínculos; supervisor principal/hierarquia continuam pendentes."
+        }
+      ]
     },
     {
       "figure": 13,
@@ -5364,42 +5383,14 @@
     ]
   },
   "latest_verified_call_center_increment": {
-    "sha": "50d26506b7f5b294b022e59d6c11935f94281eea",
-    "run": 44685351828,
-    "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/44685351828",
-    "verification_status": "complete_verified_evidence",
-    "rails_distinct": 1808,
-    "counts": {
-      "core": 1624,
-      "concurrency": 99,
-      "corporate": 85
-    },
-    "schema_reload_reexecutions": 81,
-    "vue": 875,
-    "chrome": 212,
-    "chrome_per_project": 53,
-    "failure_pending_skipped_flaky_outside_errors": 0,
-    "new_ruby_offenses": 0,
-    "bootstrap_cards": 15,
-    "screenshot_hashes_verified": 316,
-    "manual_visual_review": 8,
-    "artifact": 14608219003,
-    "artifact_sha256": "91f07fbb27ea87c70bceb05056177ff5d9ab33d2d656c6b1bb7166e5179c3b9f",
-    "artifact_bytes": 45118601,
-    "zip_crc": "all entries verified",
-    "verified_behavior": [
-      "Call customer context exposes native link provenance without changing legacy status",
-      "Native unlinked call remains contact_id=null;no directory link exposed",
-      "Phone candidate warning visible in native call and Hoya across1440/390light/dark",
-      "Hoya Customer360 and cross-channel context require the explicit native call contact",
-      "Linked authorized Customer Master,edits,persistence,denied unit/account and draft preservation remain valid",
-      "Rapid call/account response guard and occurrence write using only native call contact pass Vue regressions"
-    ],
-    "not_complete": [
-      "All23Wordfigures",
-      "Current queue-label/progress-color follow-up prepared after this SHA",
-      "Real PABX,Supabase and other external homologations"
-    ]
+    "sha": "e9e364ec49e55ec2531177dc6c1ca7f34c109206",
+    "run": 44709382400,
+    "native_distinct_examples": 1848,
+    "schema_reload_examples": 90,
+    "vue": 890,
+    "chrome": 216,
+    "screenshots_verified": 328,
+    "all_23_complete": false
   },
   "incremental_reviews": [
     {
@@ -5435,6 +5426,23 @@
         12
       ],
       "audio": "Preparação por unidade preservada separadamente; não incorporada a este reparo da equipe."
+    },
+    {
+      "date": "2026-11-20",
+      "sha": "e9e364ec49e55ec2531177dc6c1ca7f34c109206",
+      "evidence": "docs/jrc_contact_center/team_source_activity_verified_20261120.json",
+      "status": "Inativação da origem de equipe e pintura ACW validadas;1848Rails,90recargas,890Vue,216Chrome,328capturas verificadas. O rótulo de concessão da equipe exige seguimento no próximo SHA.",
+      "figures": [
+        3,
+        9,
+        12
+      ]
     }
-  ]
+  ],
+  "approved_team_audio_boundaries_20261120": {
+    "team_inactivation": "Somente origem desta equipe no Call Center. Não altera elegibilidade individual, outras origens ou módulos.",
+    "audio_library": "Unidade operacional nativa e cobertura atual; separada de gravações de chamadas.",
+    "source": "Respostas explícitas do usuário nesta conversa",
+    "pending_definition": false
+  }
 }

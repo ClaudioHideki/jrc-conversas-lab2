@@ -93,6 +93,29 @@ beforeEach(() => {
 });
 
 describe('scoped administrative audit interface', () => {
+  it.each([
+    ['audio_folder', 'JRC_CONTACT_CENTER.AUDIO_FOLDERS.TITLE'],
+    ['team_source', 'JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.TEAM_SOURCE'],
+  ])(
+    'filters native %s records using its localized resource label',
+    async (resource, label) => {
+      const wrapper = render();
+      await flushPromises();
+      const filter = wrapper
+        .findAll('select')
+        .find(select => select.find(`option[value="${resource}"]`).exists());
+      await filter.setValue(resource);
+      await wrapper.find('form').trigger('submit');
+      await flushPromises();
+      expect(API.configurationAudits).toHaveBeenLastCalledWith(
+        '1',
+        expect.objectContaining({ resource_type: resource })
+      );
+      expect(filter.text()).toContain(label);
+      expect(mocks.route.query.audit_config_resource_type).toBe(resource);
+    }
+  );
+
   it('filters native routing history without treating it as provider publication', async () => {
     const wrapper = render();
     await flushPromises();

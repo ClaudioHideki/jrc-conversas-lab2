@@ -12,6 +12,7 @@ const resources = [
   'acw_policy',
   'pause_catalog',
   'routing_rules',
+  'audio_folders',
 ];
 const validRevision = (value, resource) =>
   ['ivr_drafts', 'acw_forms'].includes(resource)

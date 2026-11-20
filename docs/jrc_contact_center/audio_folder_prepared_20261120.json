@@ -1,0 +1,61 @@
+{
+  "recorded_at": "2026-11-20T09:48:57.446255+00:00",
+  "status": "prepared_not_natively_tested_not_committed",
+  "approved_decisions": {
+    "team_activity": "Suspend only this CC origin, preserve individual and other-team/module accesses",
+    "institutional_library": "native operational unit and current corporate coverage"
+  },
+  "light_checks": {
+    "migration_admission": {
+      "cases": 40,
+      "pass": 40,
+      "fail": 0,
+      "skip": 0,
+      "final_audio_migration_sha256": "ba0f119179aa59ca0b2df5cb9cd9425b2e31f707e8355b6931f495303bb4a8d7"
+    },
+    "workflow_checker": {
+      "cases": 7,
+      "pass": 7,
+      "compiled_embedded_python": 2
+    },
+    "frontend_lint": {
+      "exit_code": 0,
+      "new_audio_components_and_tests": {
+        "AudioFolderLibrary.spec.js": 0,
+        "AudioFolderLibrary.vue": 0,
+        "audioFoldersApi.spec.js": 0
+      },
+      "preexisting_warnings_preserved": true,
+      "checked_files": 14
+    },
+    "chrome_source_count": {
+      "tests_per_project": 55,
+      "projects": 4,
+      "expected": 220,
+      "executed_for_audio": false
+    }
+  },
+  "prepared_native": {
+    "request_examples": 18,
+    "model_examples": 7,
+    "migration_examples": 4,
+    "concurrency_examples_added": 5,
+    "vue_folder_examples": 8,
+    "api_transport_examples": 10,
+    "revision_lifecycle_examples_added": 1,
+    "chrome_total_expected": 220,
+    "new_folder_cases": 4,
+    "previous_216_preserved": true,
+    "audit_ui_examples_added": 2,
+    "team_source_audit_examples_added": 1,
+    "team_label_followup": "Reuse existing TEAM_ALLOWED and extend existing Vue/4Chrome assertions; no permission change"
+  },
+  "limits": [
+    "No upload/file/player/version/TTS/provider implementation declared complete",
+    "Native Rails/Vue/Chrome not executed for this unpublished increment",
+    "No actual account grants/PABX changes",
+    "Existing native Unit to Account deletion restriction preserved",
+    "Do not publish audio until current e9 CI evidence collected and all native gates pass"
+  ],
+  "auditing": "Added explicit team_source/audio_folder resource keys to existing query and Portuguese display labels; native historical unit scopes preserved"
+}

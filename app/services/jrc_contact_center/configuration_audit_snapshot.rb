@@ -7,6 +7,7 @@ class JrcContactCenter::ConfigurationAuditSnapshot
     'JrcContactCenter::QueueMembership' => %w[queue_id account_user_id role priority active starts_at ends_at],
     'JrcContactCenter::AccessGrant' => %w[account_user_id team_id eligible allowed denied],
     'JrcContactCenter::TeamState' => %w[team_id active lock_version],
+    'JrcContactCenter::AudioFolder' => %w[unit_id parent_id name description lock_version],
     'JrcContactCenter::RoutingRule' => %w[version rule_key kind source_value target_unit_id target_queue_id priority state starts_at ends_at]
   }.freeze
 
@@ -15,6 +16,11 @@ class JrcContactCenter::ConfigurationAuditSnapshot
 
     if record.is_a?(JrcContactCenter::AccessGrant) || record.is_a?(JrcContactCenter::TeamState)
       return { 'attributes' => attributes_for(record), 'scope' => { 'account_id' => record.account_id.to_s } }
+    end
+
+    if record.is_a?(JrcContactCenter::AudioFolder)
+      unit = JrcContactCenter::Unit.find_by!(account_id: record.account_id, id: record.unit_id)
+      return { 'attributes' => attributes_for(record), 'scope' => scope_for(record, unit, nil) }
     end
 
     queue = queue_for(record)

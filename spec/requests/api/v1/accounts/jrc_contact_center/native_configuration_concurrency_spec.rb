@@ -65,6 +65,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       JrcContactCenter::Case.where(account: account).destroy_all
       JrcContactCenter::QueueMembership.where(account: account).destroy_all
       JrcContactCenter::Queue.where(account: account).destroy_all
+      JrcContactCenter::AudioFolder.where(account: account).delete_all
       JrcContactCenter::Unit.where(account: account).destroy_all
       JrcCrm::UserBusinessUnit.where(account: account).destroy_all
       JrcCrm::BusinessUnit.where(account: account).destroy_all
@@ -681,6 +682,47 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     expect(JrcContactCenter::QueueMembership.where(account_user: member)).to be_empty
     expect(JrcContactCenter::AccessGrant.find_by!(account_user: member).eligible).to be(true)
     expect(recipient.reload.active_for_authentication?).to be(false)
+  end
+
+  %w[profile coverage authentication].each do |origin|
+    it "does not create an institutional folder after #{origin} is revoked while waiting for the native account lock" do
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_folders"
+      payload = { folder: { unit_id: units.first.id, name: 'SYNTHETIC forbidden folder' } }
+      change = lambda do
+        case origin
+        when 'profile'
+          account.account_users.find_by!(user: actor).custom_role.update!(permissions: ['jrc_contact_center_view'])
+        when 'coverage'
+          JrcCrm::UserBusinessUnit.where(account: account, user: actor).find_each { |coverage| coverage.update!(active: false) }
+        else
+          User.find(actor.id).update!(confirmed_at: nil)
+        end
+      end
+      status = race_with_account_change(change, endpoint: endpoint, payload: payload, verb: :post, defer_change: true)
+      expect(status).to eq(origin == 'coverage' ? 404 : 401)
+      expect(JrcContactCenter::AudioFolder.where(account: account)).to be_empty
+      expect(Audited.audit_class.where(associated: account, auditable_type: 'JrcContactCenter::AudioFolder')).to be_empty
+    end
+  end
+
+  it 'rejects a stale institutional folder revision after the actual request waits for a committed edit' do
+    folder = JrcContactCenter::AudioFolder.create!(account: account, unit: units.first, name: 'SYNTHETIC original folder')
+    endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_folders/#{folder.id}"
+    payload = { folder: { name: 'SYNTHETIC stale folder' }, expected_revision: JrcContactCenter::ConfigurationRevision.token(folder) }
+    change = -> { JrcContactCenter::AudioFolder.find(folder.id).update!(name: 'SYNTHETIC newer folder') }
+    expect(race_with_account_change(change, endpoint: endpoint, payload: payload, defer_change: true)).to eq(409)
+    expect(folder.reload.name).to eq('SYNTHETIC newer folder')
+  end
+
+  it 'rechecks parent ancestry after the native lock wait instead of committing a concurrent hierarchy cycle' do
+    first = JrcContactCenter::AudioFolder.create!(account: account, unit: units.first, name: 'SYNTHETIC first folder')
+    second = JrcContactCenter::AudioFolder.create!(account: account, unit: units.first, name: 'SYNTHETIC second folder')
+    endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_folders/#{first.id}"
+    payload = { folder: { parent_id: second.id }, expected_revision: JrcContactCenter::ConfigurationRevision.token(first) }
+    change = -> { JrcContactCenter::AudioFolder.find(second.id).update!(parent_id: first.id) }
+    expect(race_with_account_change(change, endpoint: endpoint, payload: payload, defer_change: true)).to eq(422)
+    expect(first.reload.parent_id).to be_nil
+    expect(second.reload.parent_id).to eq(first.id)
   end
 
   %w[users teams].each do |kind|

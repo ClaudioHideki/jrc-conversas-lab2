@@ -13,3 +13,5 @@ A barra progress reutiliza exclusivamente acwOverdue, acwElapsedSeconds e acwLim
 Preparados: um caso Rails de metadados/renomeação/imutabilidade, assertivas adicionais de acesso negado, três regressões Vue de rótulos e duas de prazo. Os 212 Chrome continuam obrigatórios; o caso nativo existente é ampliado com GET real da fila, comparação de nome, recusa ao operador e leitura da cor CSS efetiva nos quatro projetos. O cenário renomeia somente a fila sintética, com revisão nativa, para120caracteres sem espaços finais e verifica a quebra dentro do popup em390px. Nenhuma evidência anterior será atribuída ao novo código antes da CI.
 
 Sem migração, alteração de permissões reais, PABX, publicação, build Docker ou deploy. As 23 figuras continuam parcialmente implementadas, com dependências próprias documentadas.
+
+Aceite visual e9e364ec/CI44709382400: pseudo-elementos Tailwind corrigem a pintura real da progress; PNGs do próprio controle nos quatro projetos demonstram RGB206,44,82. Capturas completas do Hoya claro/escuro revisadas. O accent-color isolado de17d não era prova visual suficiente. Nenhum prazo ou estado operacional alterado.

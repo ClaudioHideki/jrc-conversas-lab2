@@ -1,0 +1,90 @@
+{
+  "sha": "e9e364ec49e55ec2531177dc6c1ca7f34c109206",
+  "run": 44709382400,
+  "job": 136196894833,
+  "status": "validated_increment_not_complete_23_figures",
+  "native_distinct_examples": 1848,
+  "native_breakdown": {
+    "core": 1662,
+    "pabx_concurrency": 101,
+    "corporate": 85
+  },
+  "schema_reload_examples": 90,
+  "vue": 890,
+  "chrome": {
+    "total": 216,
+    "per_project": 54,
+    "failures": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "outside_errors": 0,
+    "projects": [
+      "desktop-light",
+      "desktop-dark",
+      "mobile-light",
+      "mobile-dark"
+    ]
+  },
+  "artifact": {
+    "id": 14619566711,
+    "bytes": 46522325,
+    "sha256": "304d0afed8f869a8a9d6cad1d3b0e2c660473d7b7d51c06a3a201ea4c1903cae",
+    "crc_verified": true,
+    "screenshot_hashes_verified": 328
+  },
+  "screenshots_manually_reviewed": [
+    "desktop-light-team-source-manager-review.png",
+    "desktop-dark-team-source-manager-review.png",
+    "mobile-light-team-source-manager-review.png",
+    "mobile-dark-team-source-manager-review.png",
+    "desktop-light-acw-deadline-bar.png",
+    "mobile-dark-acw-deadline-bar.png",
+    "desktop-light-ending-frozen-hoya.png",
+    "mobile-dark-ending-frozen-hoya.png"
+  ],
+  "screenshot_hashes": {
+    "desktop-light-team-source-manager-review.png": "e2b7d9de91ffd2033fe3b2466497454ac3c2b6d361353f6ec08d00bf45e0b475",
+    "desktop-dark-team-source-manager-review.png": "4875d0bf8b25a88ad94f56d18a1124eafb8fcec9f14938a6604debce8d032894",
+    "mobile-light-team-source-manager-review.png": "f955177e4d626330a2b87a8c457125ca1144935a1964ac6310d865da6f7c4b20",
+    "mobile-dark-team-source-manager-review.png": "ebe83dda6fc52b1ff7546950a5d95f9a3dd0bc14f157d2a813df64a0fd9e60bd",
+    "desktop-light-acw-deadline-bar.png": "730af8c10732d377d1e63b9b8ce9cec669657ccbee275335da5e4289b90533b7",
+    "mobile-dark-acw-deadline-bar.png": "3c8c39014279b98d3e8a2a2dac1e54ced9a70ead6f98e86df471d4bb49821335",
+    "desktop-light-ending-frozen-hoya.png": "a7fdfe95666a08cad8eb87c42664f88b5d27a900d37e54175738e41bd26567e5",
+    "mobile-dark-ending-frozen-hoya.png": "72e8cd51cc7dd0a1f7c4dab84d7b41382066370443a75347fab05321fe84b8af"
+  },
+  "painted_acw_rgb": {
+    "desktop-light": [
+      206,
+      44,
+      82
+    ],
+    "desktop-dark": [
+      206,
+      44,
+      82
+    ],
+    "mobile-light": [
+      206,
+      44,
+      82
+    ],
+    "mobile-dark": [
+      206,
+      44,
+      82
+    ]
+  },
+  "observed": [
+    "Explicit manager review and queue transition1to0 displayed; no shared roster deletion",
+    "Popup contained in1440and390 with readable light/dark review and reachable footer",
+    "Actual overdue bar painted ruby; computed accent alone previously inadequate",
+    "Native manager reactivation restores origin, preserves individual eligibility and other modules"
+  ],
+  "minor_followup": "Team grant checkbox still says Concessão individual on e9 captures. Reuse existing TEAM_ALLOWED label, add assertions, require next SHA verification. No functional permission defect inferred.",
+  "not_validated_by_this_run": [
+    "Unpublished audio folders",
+    "Full Word figures3/12 or23figure completion",
+    "PABX/realaccount operational deployment"
+  ],
+  "production_unchanged": true
+}

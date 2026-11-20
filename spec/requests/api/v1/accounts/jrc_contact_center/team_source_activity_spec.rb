@@ -155,4 +155,18 @@ RSpec.describe 'Call Center team source activity without changing shared teams',
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/administration/teams", headers: headers, params: { status: 'active', page: 1 }
     expect(response.parsed_body.fetch('items')).to be_empty
   end
+
+  it 'identifies the local source state in its existing authenticated audit history without publishing it' do
+    patch endpoint, headers: headers, params: { authorization: { active: false }, expected_revision: authority.revision(team, grant) }, as: :json
+    expect(response).to have_http_status(:ok)
+    state = JrcContactCenter::TeamState.find_by!(account: account, team: team)
+    filters = { resource_type: 'team_source', resource_id: state.id.to_s, history: 'true' }
+    get "/api/v1/accounts/#{account.id}/jrc_contact_center/configuration_audits", headers: headers, params: filters
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items')).to include(
+      hash_including('resource_type' => 'team_source', 'resource_id' => state.id, 'after' => hash_including('active' => false))
+    )
+    expect(team.team_members.pluck(:user_id)).to eq([recipient.id])
+    expect(JrcContactCenter::Command.where(account: account)).to be_empty
+  end
 end
