@@ -605,3 +605,12 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - ZIP14591250055,42606531bytes,SHA-256f3af69eb72e740747f0626b4abb17afcdbf5e1fe9bf57418288d80c128843c3a eCRC verificados.292PNGs noZIP;8capturas de histórico/Hoya inspecionadas nos4projetos,com hashes derivados do arquivo íntegro. Não equivalem a um manifesto de aceite produzido pelo runner.
 - Correção mínima de recuo preserva todas as assertivas. Novo compilador estático dos2blocos Python,sem executá-los,tem7regressões aprovadas incluindo a reprodução exata de unexpectedindent. Executa antes das dependências pesadas para evitar repetição dessa falha.
 - Próximo checkpoint inclui o catálogo administrativo e exige204Chrome,os testes nativos afetados e manifesto íntegro;nenhumgate é dispensado.23figuras permanecem abertas.
+
+
+### 19/11 — Catálogo:primeira rodada nativa e correção dos contratos de entrada
+
+- CI44651345480/f89707d5:1566core,4falhas;66/66schema,0pendências/erros externos.8novas infrações de layout Ruby. Frontend/Chrome não executados. Artefato14590544888/SHA-25669fcfa73b033030441c18d57e0a7bc849c5aa345e5b8aaa3995cdc9dad29841a verificado;coletor estrito recusou uma dupla de descrições lógicas iguais,sem descartar registros.
+- Duas preparações de teste enviavam revisão antiga e um hash usava ordem bruta de JSONB. Agora usa token HTTP real e vetor literal v1 de seis campos. Snapshot/formulários/respostas já iniciados continuam conferidos integralmente.
+- Falha real:[null] era normalizado pelo Rails para[]antes do domínio. O novo DTO lê somente esse campo do JSON comActiveSupport,limite1MiB,sem alterar parsing global,autoridade ou mass assignment. Null/false e combinações com entrada válida devem continuar rejeitados atomicamente.
+- Nomes dos casos agora distinguem os valores;verificador de identidades permanece estrito. Mais3cenários backend sobre null misto e substituto por query.204Chrome mantidos;nenhum teste desabilitado.
+- Regra de negócio aprovada:filas selecionadas exigem motivo cadastrado,e chamadas iniciadas preservam a política anterior. Implementação operacional desse complemento ainda pendente,sem ativação em contas reais.

@@ -55,10 +55,21 @@ class Api::V1::Accounts::JrcContactCenter::AcwPoliciesController < Api::V1::Acco
   def reason_catalog_options
     return {} unless params.key?(:voice_reason_catalog)
 
-    input = params[:voice_reason_catalog]
-    return { voice_reason_catalog: input } unless input.is_a?(Array)
+    { voice_reason_catalog: reason_catalog_document }
+  end
 
-    { voice_reason_catalog: input.map { |row| row.respond_to?(:to_unsafe_h) ? row.to_unsafe_h : row } }
+  # Preserve null/false entries instead of silently broadening Rails' deep-munged array.
+  # Use the same JSON decoder as Rails, only for this bounded typed configuration field.
+  def reason_catalog_document
+    raw = request.raw_post
+    valid = request.media_type == 'application/json' && raw.bytesize <= 1_048_576
+    raise JrcContactCenter::OperationError, 'invalid_acw_ending_reasons' unless valid
+
+    document = ActiveSupport::JSON.decode(raw)
+    valid = document.is_a?(Hash) && document.key?('voice_reason_catalog')
+    raise JrcContactCenter::OperationError, 'invalid_acw_ending_reasons' unless valid
+
+    document.fetch('voice_reason_catalog')
   end
 
   def scoped_configuration_allowed?

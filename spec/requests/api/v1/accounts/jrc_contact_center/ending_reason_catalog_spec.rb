@@ -4,12 +4,17 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
   let(:account) { create(:account) }
   let(:actor) { create(:user, :contact_center_eligible, account: account, role: :administrator) }
   let(:headers) { actor.create_new_auth_token }
-  let(:policy) { JrcContactCenter::AcwPolicy.new(account: account.reload) }
   let(:endpoint) { "/api/v1/accounts/#{account.id}/jrc_contact_center/acw_policy" }
   let(:entry) do
     { code: 'synthetic_sale', name: 'SYNTHETIC sale', category: 'SYNTHETIC sales', description: 'SYNTHETIC note', order: 0, active: true }
   end
-  let(:payload) { { limits: { voice: 180, whatsapp: 180 }, voice_reason_catalog: [entry], expected_revision: policy.revision } }
+  let(:payload) do
+    {
+      limits: { voice: 180, whatsapp: 180 },
+      voice_reason_catalog: [entry],
+      expected_revision: JrcContactCenter::AcwPolicy.new(account: account.reload).revision
+    }
+  end
   let(:audits) { Audited.audit_class.where(associated: account, comment: JrcContactCenter::ConfigurationAudit::ACW_COMMENT) }
 
   before { account.enable_features!('jrc_contact_center', 'audit_logs') }
@@ -37,7 +42,10 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
 
   it 'preserves old versions in the audit and deactivates without deleting codes or qualifications' do
     patch endpoint, headers: headers, params: payload, as: :json
-    second = payload.merge(voice_reason_catalog: [entry.merge(name: 'SYNTHETIC revised', active: false)], expected_revision: policy.revision)
+    second = payload.merge(
+      voice_reason_catalog: [entry.merge(name: 'SYNTHETIC revised', active: false)],
+      expected_revision: response.parsed_body.dig('item', 'revision')
+    )
     patch endpoint, headers: headers, params: second, as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig('item', 'voice_reason_catalog', 'version')).to eq(2)
@@ -47,7 +55,8 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
 
   it 'does not create another version or audit when a confirmed configuration is repeated without changes' do
     patch endpoint, headers: headers, params: payload, as: :json
-    patch endpoint, headers: headers, params: payload.merge(expected_revision: policy.revision), as: :json
+    revision = response.parsed_body.dig('item', 'revision')
+    patch endpoint, headers: headers, params: payload.merge(expected_revision: revision), as: :json
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig('item', 'voice_reason_catalog', 'version')).to eq(1)
     expect(audits.count).to eq(1)
@@ -56,11 +65,13 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
   it 'rejects deleting or renaming persisted codes without silently losing old references' do
     patch endpoint, headers: headers, params: payload, as: :json
     stored = account.reload.settings.deep_dup
-    patch endpoint, headers: headers, params: payload.merge(voice_reason_catalog: [], expected_revision: policy.revision), as: :json
+    revision = response.parsed_body.dig('item', 'revision')
+    patch endpoint, headers: headers, params: payload.merge(voice_reason_catalog: [], expected_revision: revision), as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.parsed_body['error']).to eq('ending_reason_deactivation_required')
-    patch endpoint, headers: headers,
-          params: payload.merge(voice_reason_catalog: [entry.merge(code: 'another')], expected_revision: policy.revision), as: :json
+    patch endpoint,
+          headers: headers,
+          params: payload.merge(voice_reason_catalog: [entry.merge(code: 'another')], expected_revision: revision), as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(account.reload.settings).to eq(stored)
     expect(audits.count).to eq(1)
@@ -73,7 +84,7 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
     patch endpoint, headers: headers, params: initial, as: :json
     patch endpoint, headers: headers, params: initial.merge(limits: { voice: 300, whatsapp: 300 }), as: :json
     expect(response).to have_http_status(:conflict)
-    expect(policy.call.fetch(:limits)).to eq('voice' => 180, 'whatsapp' => 180)
+    expect(JrcContactCenter::AcwPolicy.new(account: account.reload).call.fetch(:limits)).to eq('voice' => 180, 'whatsapp' => 180)
     expect(audits.count).to eq(1)
   end
 
@@ -88,7 +99,7 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
 
   [{ name: '' }, { code: ' leading' }, { active: 'true' }, { order: 1.5 }, { category: '' }, { description: nil },
    { account_id: 99 }, { name: 'N' * 121 }].each do |invalid|
-    it "rejects invalid fields #{invalid.keys.join(',')} without persisting a partial change" do
+    it "rejects invalid fields #{invalid.inspect} without persisting a partial change" do
       patch endpoint, headers: headers, params: payload.merge(voice_reason_catalog: [entry.merge(invalid)]), as: :json
       expect(response).to have_http_status(:unprocessable_entity)
       expect(audits).to be_empty
@@ -112,7 +123,8 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('item')).not_to have_key('voice_reason_catalog')
     expect(response.body).not_to include(entry[:name])
-    patch endpoint, headers: operator.create_new_auth_token, params: payload.merge(expected_revision: policy.revision), as: :json
+    revision = response.parsed_body.dig('item', 'revision')
+    patch endpoint, headers: operator.create_new_auth_token, params: payload.merge(expected_revision: revision), as: :json
     expect(response).to have_http_status(:unauthorized)
     expect(audits.count).to eq(1)
   end
@@ -121,7 +133,8 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
     foreign = create(:account)
     foreign.enable_features!('jrc_contact_center')
     revision = JrcContactCenter::AcwPolicy.new(account: foreign).revision
-    patch "/api/v1/accounts/#{foreign.id}/jrc_contact_center/acw_policy", headers: headers,
+    patch "/api/v1/accounts/#{foreign.id}/jrc_contact_center/acw_policy",
+          headers: headers,
           params: payload.merge(expected_revision: revision, account_id: foreign.id), as: :json
     expect(response).to have_http_status(:unauthorized)
     expect(foreign.reload.settings).not_to have_key(JrcContactCenter::AcwPolicy::KEY)
@@ -132,15 +145,19 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
     patch endpoint, headers: headers, params: payload, as: :json
     company = account.master_companies.create!(name: 'SYNTHETIC issuer', relationship_type: 'internal')
     unit = JrcCrm::BusinessUnit.create!(account: account, operating_company: company, name: 'SYNTHETIC unit', code: 'SYNTHETIC')
-    JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', business_unit: unit,
-                                   company: company, active: true, structure_managed: true)
+    JrcCrm::UserBusinessUnit.create!(
+      account: account, user: actor, scope: 'BUSINESS_UNIT', business_unit: unit,
+      company: company, active: true, structure_managed: true
+    )
     get endpoint, headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('item')).not_to have_key('voice_reason_catalog')
-    patch endpoint, headers: headers, params: payload.merge(expected_revision: policy.revision), as: :json
+    revision = response.parsed_body.dig('item', 'revision')
+    patch endpoint, headers: headers, params: payload.merge(expected_revision: revision), as: :json
     expect(response).to have_http_status(:unauthorized)
     expect(audits.count).to eq(1)
   end
+
   it 'persists the bounded maximum of 100 independent codes without creating operational records' do
     rows = Array.new(100) { |i| entry.merge(code: "synthetic_#{i}", order: i) }
     patch endpoint, headers: headers, params: payload.merge(voice_reason_catalog: rows), as: :json
@@ -150,4 +167,20 @@ RSpec.describe 'Native ACW ending reason catalogue configuration', type: :reques
     expect(JrcContactCenter::Qualification.where(account: account)).to be_empty
   end
 
+  %w[before after].each do |position|
+    it "rejects a null #{position} a valid entry instead of accepting a partially filtered catalogue" do
+      rows = position == 'before' ? [nil, entry] : [entry, nil]
+      patch endpoint, headers: headers, params: payload.merge(voice_reason_catalog: rows), as: :json
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(account.reload.settings).not_to have_key(JrcContactCenter::AcwPolicy::KEY)
+      expect(audits).to be_empty
+    end
+  end
+
+  it 'does not accept a query field as a replacement for the typed JSON catalogue body' do
+    patch endpoint + '?voice_reason_catalog[]=synthetic', headers: headers, params: payload.except(:voice_reason_catalog), as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(account.reload.settings).not_to have_key(JrcContactCenter::AcwPolicy::KEY)
+    expect(audits).to be_empty
+  end
 end

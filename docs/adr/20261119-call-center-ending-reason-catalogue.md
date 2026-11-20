@@ -37,3 +37,24 @@ com CSS compilado neste próprio SHA, cria/edita/recarrega/desativa e seleciona 
 na regra nativa sem ativá-la. Contagens positivas e zero falhas/pendências são obrigatórias.
 
 O aceite desse incremento não conclui as figuras 9/10 nem a integração com automações.
+
+
+## Validação nativa e complemento aprovado
+
+A primeira rodada f89707d5 confirmou 1566 exemplos Rails core, com quatro falhas,
+e 66/66 na recarga de schema. Oito infrações novas de layout Ruby. Vue/Chrome não
+foram executados. O verificador estrito também recusou duas identidades lógicas
+iguais em casos de nome mínimo/máximo; os nomes devem ser distintos, sem deduplicar.
+
+A entrada `[null]` era normalizada para `[]` pelo deep-munge antes do domínio.
+O novo campo é recuperado exclusivamente de JSON tipado, com o decodificador nativo
+ActiveSupport e corpo limitado a 1 MiB. Apenas esse campo segue para o validador
+existente. A autenticação e o escopo continuam nativos; nenhuma configuração global
+de parsing muda. Null/false e campos desconhecidos não são filtrados para produzir
+uma configuração válida. Os testes de revisão usam o token HTTP atual; o teste do
+hash preserva exatamente o vetor de seis campos v1, sem depender da ordem JSONB.
+
+O usuário aprovou exigir motivo cadastrado em toda chamada das filas selecionadas,
+preservando os atendimentos já iniciados. A implementação operacional dessa regra
+continua pendente. A versão deve ser vinculada ao início da chamada, com origem
+nativa e proveniência verificável, sem impor a configuração nova retroativamente.

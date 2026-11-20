@@ -42,10 +42,14 @@ RSpec.describe JrcContactCenter::AcwEndingReasons do
     rule = { 'id' => 'synthetic', 'reason_code' => 'order', 'scope' => 'general', 'scope_id' => nil, 'active' => true, 'limit_seconds' => 120 }
     policy.update!({ voice: 180, whatsapp: 180 }, voice_rules: [rule], expected_revision: policy.revision)
     before = JrcContactCenter::AcwScopedRules.new(account: account).call
-    hash = Digest::SHA256.hexdigest(before.to_json)
+    hash = Digest::SHA256.hexdigest(before.map { |row| JrcContactCenter::AcwRulePrecedence::FIELDS.map { |key| row.fetch(key) } }.to_json)
+    expected = [['synthetic', 'order', 'general', nil, true, 120]]
+    expect(hash).to eq(Digest::SHA256.hexdigest(expected.to_json))
     policy.update!({ voice: 180, whatsapp: 180 }, voice_reason_catalog: [entry], expected_revision: policy.revision)
     expect(JrcContactCenter::AcwScopedRules.new(account: account).call).to eq(before)
-    expect(Digest::SHA256.hexdigest(JrcContactCenter::AcwScopedRules.new(account: account).call.to_json)).to eq(hash)
+    after = JrcContactCenter::AcwScopedRules.new(account: account).call
+    vector = after.map { |row| JrcContactCenter::AcwRulePrecedence::FIELDS.map { |key| row.fetch(key) } }
+    expect(Digest::SHA256.hexdigest(vector.to_json)).to eq(hash)
     expect(JrcContactCenter::Qualification.where(account: account)).to be_empty
   end
 
@@ -59,7 +63,6 @@ RSpec.describe JrcContactCenter::AcwEndingReasons do
     account.update!(settings: account.settings.deep_merge(JrcContactCenter::AcwPolicy::KEY => { described_class::KEY => reversed }))
     expect(policy.revision).to eq(persisted)
   end
-
 
   it 'filters the complete new request catalogue while leaving the existing account identity available to logs' do
     filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
@@ -83,5 +86,4 @@ RSpec.describe JrcContactCenter::AcwEndingReasons do
       expect(JrcContactCenter::AcwQualificationPolicy.new(record).snapshot).to eq(previous_origin)
     end
   end
-
 end

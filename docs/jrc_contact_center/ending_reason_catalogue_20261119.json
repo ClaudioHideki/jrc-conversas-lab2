@@ -29,5 +29,43 @@
   ],
   "required_chrome": 204,
   "execution_state": "not_started_for_this_source",
-  "no_real_accounts_configured": true
+  "no_real_accounts_configured": true,
+  "native_first_round": {
+    "status": "native_failure_corrective_increment_prepared",
+    "sha": "f89707d587cc3615f806a05e96928f9e270dfe7e",
+    "run": 44651345480,
+    "artifact": 14590544888,
+    "artifact_sha256": "69fcfa73b033030441c18d57e0a7bc849c5aa345e5b8aaa3995cdc9dad29841a",
+    "core_examples": 1566,
+    "core_failures": 4,
+    "core_pending_outside_errors": 0,
+    "schema_reload": 66,
+    "schema_failures": 0,
+    "ruby_new_offenses": 8,
+    "frontend_and_chrome": "not_executed_due_native_failure",
+    "strict_evidence_guard": "duplicate logical description in two real name-validation cases; not deduplicated or approved",
+    "confirmed_causes": [
+      "two tests reused stale memoized Account revisions instead of the current HTTP precondition",
+      "one rule-preservation assertion hashed raw JSON key order rather than the unchanged six-field native vector",
+      "Rails deep-munge discarded a null list entry before domain validation"
+    ],
+    "prepared_corrections": [
+      "use exact revisions returned by authenticated requests",
+      "compare the exact legacy six-field vector and prove frozen native qualification unchanged",
+      "decode only the bounded new typed catalogue with Rails own JSON decoder; no global parser change or model mass assignment",
+      "preserve null/false and reject mixed null/valid arrays and query substitutes",
+      "give every data-driven example a distinct name; keep strict evidence identity guard",
+      "fix eight local Ruby layout offenses without exclusions or rule changes"
+    ],
+    "new_schema_or_permissions": false
+  },
+  "approved_queue_requirement": {
+    "status": "business_rule_approved_pending_implementation",
+    "question": "Obrigatoriedade por fila exige motivo cadastrado em toda chamada das filas selecionadas, preservando atendimentos já iniciados?",
+    "answer": "Sim, exigir motivo cadastrado nas filas selecionadas",
+    "catalogue_baseline": "f89707d587cc3615f806a05e96928f9e270dfe7e",
+    "automatic_activation_on_real_accounts": false,
+    "existing_call_policy_must_be_preserved": true,
+    "external_PABX_commands_authorized": false
+  }
 }
