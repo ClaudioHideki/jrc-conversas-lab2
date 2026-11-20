@@ -715,3 +715,5 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 - [x] Backendbfc1:1947Railsdistintos,116recargas separadas, vetores schemaexatos e lintRuby0. IncluiHTTPmultipartreal, SQLorigem/imutabilidade, concorrência e regressões corporativas.
 - [ ] Vuebfc1:962/964, duas expectativas booleanas de arquivo0/101bytes falharamnull≠false. PredicateBoolean corrigido, asserções mantidas, lintlocal1arquivo0infrações; CIe224Chrome pendentes.
+
+- 2026-11-20 — Call Center: recebimentos privados e versões validados no SHA `82e330c8` (CI `44776659369`): 1.947 exemplos Rails distintos, 116 de recarga separados, 964 Vue, 224 Chrome; 348 hashes PNG e oito capturas revisadas. Arquivos continuam bloqueados para reprodução/publicação. Preparado o incremento aditivo de observações técnicas por versão, com scanner nativo reutilizado, decodificação limitada, histórico/API/UI, idempotência e testes de concorrência. Migration 10 e este incremento ainda aguardam execução nativa; as nove migrations anteriores permanecem preservadas. Figuras 6/16 e conjunto das 23 referências continuam parciais.

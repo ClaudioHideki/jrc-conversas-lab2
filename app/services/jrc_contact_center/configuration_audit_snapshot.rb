@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class JrcContactCenter::ConfigurationAuditSnapshot
-  UNIT_SCOPED_TYPES = %w[JrcContactCenter::AudioFolder JrcContactCenter::AudioAsset JrcContactCenter::AudioVersion].freeze
+  UNIT_SCOPED_TYPES = %w[JrcContactCenter::AudioFolder JrcContactCenter::AudioAsset JrcContactCenter::AudioVersion
+                         JrcContactCenter::AudioInspection].freeze
   FIELDS = {
     'JrcContactCenter::Unit' => %w[code name kind status timezone parent_unit_id],
     'JrcContactCenter::Queue' => %w[unit_id code name service_kind strategy status max_wait_seconds active_from active_until],
@@ -11,6 +12,8 @@ class JrcContactCenter::ConfigurationAuditSnapshot
     'JrcContactCenter::AudioFolder' => %w[unit_id parent_id name description lock_version],
     'JrcContactCenter::AudioAsset' => %w[unit_id folder_id name description purpose lock_version],
     'JrcContactCenter::AudioVersion' => %w[unit_id audio_asset_id number source_kind content_type byte_size sha256 created_by_id],
+    'JrcContactCenter::AudioInspection' => %w[unit_id audio_version_id attempt state probe_state expected_sha256 observed_sha256
+                                            scanner_adapter decoder_version metadata observed_at created_by_id],
     'JrcContactCenter::RoutingRule' => %w[version rule_key kind source_value target_unit_id target_queue_id priority state starts_at ends_at]
   }.freeze
 

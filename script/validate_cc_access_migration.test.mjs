@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { migrationPath, ivrMigrationPath, endingReasonSqlPath, endingReasonCatalogSqlPath, reviewedMigrations, audioFileSqlSources, verifyAccessMigration, verifyReviewedMigrations } from './validate_cc_access_migration.mjs';
+import { migrationPath, ivrMigrationPath, endingReasonSqlPath, endingReasonCatalogSqlPath, reviewedMigrations, audioFileSqlSources, audioInspectionSqlSources, verifyAccessMigration, verifyReviewedMigrations } from './validate_cc_access_migration.mjs';
 
 const content = readFileSync(new URL('../db/migrate/20261117190000_add_contact_center_access_grants.rb', import.meta.url));
 const schema = 'ActiveRecord::Schema[7.1].define(version: 2026_11_16_190000) do\nend';
@@ -29,9 +29,9 @@ test('keeps the timestamp protection against a newer base schema', () => {
 const reviewedChanges = Object.keys(reviewedMigrations).map(path => `A\t${path}`).join('\n');
 const readReviewed = path => readFileSync(new URL('../' + path, import.meta.url));
 
-test('current candidate admits all nine exact hash-pinned additions regardless of Git output order', () => {
+test('current candidate admits all ten exact hash-pinned additions regardless of Git output order', () => {
   const reversed = reviewedChanges.split('\n').reverse().join('\n');
-  assert.equal(verifyReviewedMigrations(reversed, readReviewed, schema).migrationCount, 9);
+  assert.equal(verifyReviewedMigrations(reversed, readReviewed, schema).migrationCount, 10);
 });
 
 for (const omitted of Object.keys(reviewedMigrations)) {
@@ -100,5 +100,19 @@ for (const path of Object.keys(audioFileSqlSources)) {
       return readReviewed(key);
     };
     assert.throws(() => verifyReviewedMigrations(reviewedChanges, missing, schema), /Missing private audio SQL\/receipt/);
+  });
+}
+
+for (const path of Object.keys(audioInspectionSqlSources)) {
+  test(`rejects any mutation of the independently reviewed audio inspection source ${path}`, () => {
+    const altered = key => key === path ? Buffer.concat([readReviewed(key), Buffer.from('\n')]) : readReviewed(key);
+    assert.throws(() => verifyReviewedMigrations(reviewedChanges, altered, schema), /Reviewed audio inspection SQL\/receipt source changed/);
+  });
+  test(`requires the independently reviewed audio inspection source ${path}`, () => {
+    const missing = key => {
+      if (key === path) throw new Error('Missing audio inspection SQL/receipt');
+      return readReviewed(key);
+    };
+    assert.throws(() => verifyReviewedMigrations(reviewedChanges, missing, schema), /Missing audio inspection SQL\/receipt/);
   });
 }

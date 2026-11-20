@@ -1,0 +1,192 @@
+{
+  "status": "private_receipts_and_version_history_natively_verified",
+  "product_sha": "82e330c87715cda974474785e9a774db4170e8c2",
+  "branch": "codex/call-center-control-desk-20261116",
+  "run": 44776659369,
+  "job": 136428155475,
+  "artifact": 14653484475,
+  "artifact_sha256": "278efeedfc7cec6e38a995a525108fc55ca91db9d2fc0beff214288a2eb179f4",
+  "native_distinct_examples": 1947,
+  "schema_reload_examples_separate": 116,
+  "vue_tests": 964,
+  "chrome_cases": 224,
+  "failures": 0,
+  "pending": 0,
+  "outside_errors": 0,
+  "flaky": 0,
+  "screenshot_hashes_verified": 348,
+  "actual_screenshots_viewed": [
+    {
+      "artifact_file": "desktop-light-audio-private-version-history.png",
+      "sha256": "f273d7ff18d4c2231f0175eeb02a4cde39e4125c6361c73ce6d772907c925fc4",
+      "width_height": [
+        1440,
+        2565
+      ],
+      "visually_reviewed": true
+    },
+    {
+      "artifact_file": "desktop-light-audio-private-library.png",
+      "sha256": "0fe382397504d73ebac112892abaff10c7873b77e068dae460d088dc229fed62",
+      "width_height": [
+        1440,
+        2565
+      ],
+      "visually_reviewed": true
+    },
+    {
+      "artifact_file": "desktop-dark-audio-private-version-history.png",
+      "sha256": "1b93c29e07fcf263bce094964bb9dab0de08ae10290c8902d8c7f16cee67c807",
+      "width_height": [
+        1440,
+        2565
+      ],
+      "visually_reviewed": true
+    },
+    {
+      "artifact_file": "desktop-dark-audio-private-library.png",
+      "sha256": "9c806f37e863a4afe2d2449f9420b424285a610fe0ae428baf8c09f75a8ba010",
+      "width_height": [
+        1440,
+        2565
+      ],
+      "visually_reviewed": true
+    },
+    {
+      "artifact_file": "mobile-light-audio-private-version-history.png",
+      "sha256": "433a7eb6fd5815314a0671a2a67f15508c6f8c69abab40c4d3e483c841ac017a",
+      "width_height": [
+        390,
+        3411
+      ],
+      "visually_reviewed": true
+    },
+    {
+      "artifact_file": "mobile-light-audio-private-library.png",
+      "sha256": "9b05aa51fc736f8c21350199bb8812264772baebcfe61b95e21c7e308c301128",
+      "width_height": [
+        390,
+        3411
+      ],
+      "visually_reviewed": true
+    },
+    {
+      "artifact_file": "mobile-dark-audio-private-version-history.png",
+      "sha256": "cf7e50af5b4d650cd1cef46165f7a82f061c6ef50a6456496a0229e947cb3d10",
+      "width_height": [
+        390,
+        3411
+      ],
+      "visually_reviewed": true
+    },
+    {
+      "artifact_file": "mobile-dark-audio-private-library.png",
+      "sha256": "c4a021f923a5cf5c0f1b2e9670f5c86814859bc569926053b789adc70c94e3e2",
+      "width_height": [
+        390,
+        3411
+      ],
+      "visually_reviewed": true
+    }
+  ],
+  "real_chrome_receipts": [
+    {
+      "project": "desktop-light",
+      "synthetic": true,
+      "sha": "82e330c87715cda974474785e9a774db4170e8c2",
+      "unit": "845",
+      "asset": "26",
+      "rejected_format": 422,
+      "accepted": 201,
+      "stale": 409,
+      "denied_unit": 404,
+      "denied_role": 401,
+      "denied_after_open": 401,
+      "versions": 2,
+      "first_sha256": "86b5f5a4a69b226cef532cb4019df8ff0c08a804fa919af5d116e6e257cd9eac",
+      "latest_sha256": "1ea7fca273bb76a5c84b895b159832a0e6acaeb280b3c08020c93e6daa991e09",
+      "private_ready": false,
+      "total_before_move": 6,
+      "native_page_size": 5,
+      "horizontal_overflow": false,
+      "color": "rgb(28, 32, 36)",
+      "brightness": 32
+    },
+    {
+      "project": "desktop-dark",
+      "synthetic": true,
+      "sha": "82e330c87715cda974474785e9a774db4170e8c2",
+      "unit": "887",
+      "asset": "32",
+      "rejected_format": 422,
+      "accepted": 201,
+      "stale": 409,
+      "denied_unit": 404,
+      "denied_role": 401,
+      "denied_after_open": 401,
+      "versions": 2,
+      "first_sha256": "86b5f5a4a69b226cef532cb4019df8ff0c08a804fa919af5d116e6e257cd9eac",
+      "latest_sha256": "1ea7fca273bb76a5c84b895b159832a0e6acaeb280b3c08020c93e6daa991e09",
+      "private_ready": false,
+      "total_before_move": 6,
+      "native_page_size": 5,
+      "horizontal_overflow": false,
+      "color": "rgb(237, 238, 240)",
+      "brightness": 238.33333333333334
+    },
+    {
+      "project": "mobile-light",
+      "synthetic": true,
+      "sha": "82e330c87715cda974474785e9a774db4170e8c2",
+      "unit": "929",
+      "asset": "38",
+      "rejected_format": 422,
+      "accepted": 201,
+      "stale": 409,
+      "denied_unit": 404,
+      "denied_role": 401,
+      "denied_after_open": 401,
+      "versions": 2,
+      "first_sha256": "86b5f5a4a69b226cef532cb4019df8ff0c08a804fa919af5d116e6e257cd9eac",
+      "latest_sha256": "1ea7fca273bb76a5c84b895b159832a0e6acaeb280b3c08020c93e6daa991e09",
+      "private_ready": false,
+      "total_before_move": 6,
+      "native_page_size": 5,
+      "horizontal_overflow": false,
+      "color": "rgb(28, 32, 36)",
+      "brightness": 32
+    },
+    {
+      "project": "mobile-dark",
+      "synthetic": true,
+      "sha": "82e330c87715cda974474785e9a774db4170e8c2",
+      "unit": "971",
+      "asset": "44",
+      "rejected_format": 422,
+      "accepted": 201,
+      "stale": 409,
+      "denied_unit": 404,
+      "denied_role": 401,
+      "denied_after_open": 401,
+      "versions": 2,
+      "first_sha256": "86b5f5a4a69b226cef532cb4019df8ff0c08a804fa919af5d116e6e257cd9eac",
+      "latest_sha256": "1ea7fca273bb76a5c84b895b159832a0e6acaeb280b3c08020c93e6daa991e09",
+      "private_ready": false,
+      "total_before_move": 6,
+      "native_page_size": 5,
+      "horizontal_overflow": false,
+      "color": "rgb(237, 238, 240)",
+      "brightness": 238.33333333333334
+    }
+  ],
+  "scope": "Private receipts, native file type/limits, CAS, versions, paging, unit/role denial and responsive history; not complete figures 6/16",
+  "remaining": [
+    "Scanner and media verification increment prepared but not yet natively executed",
+    "Authorized private playback/download",
+    "Browser recording and Nico generation",
+    "Usage bindings and provider publication depend on remaining implementation/contract"
+  ],
+  "full_23_figures_complete": false,
+  "external_homologation": false,
+  "no_docker_or_deploy": true
+}

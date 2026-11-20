@@ -462,6 +462,12 @@
         "run": 44729757403,
         "status": "implemented_and_native_Chrome_validated_folder_subset_only",
         "report": "audio_folder_verified_20261120.json"
+      },
+      "private_receipts_evidence_20261120": {
+        "product_sha": "82e330c87715cda974474785e9a774db4170e8c2",
+        "run": 44776659369,
+        "report": "docs/jrc_contact_center/audio_private_receipts_verified_20261120.json",
+        "state": "validated increment; complete figure remains partial"
       }
     },
     {
@@ -1216,6 +1222,12 @@
         "run": 44729757403,
         "status": "implemented_and_native_Chrome_validated_folder_subset_only",
         "report": "audio_folder_verified_20261120.json"
+      },
+      "private_receipts_evidence_20261120": {
+        "product_sha": "82e330c87715cda974474785e9a774db4170e8c2",
+        "run": 44776659369,
+        "report": "docs/jrc_contact_center/audio_private_receipts_verified_20261120.json",
+        "state": "validated increment; complete figure remains partial"
       }
     },
     {
@@ -5690,5 +5702,21 @@
       "numFailedTests": 2,
       "numPendingTests": 0
     }
+  },
+  "audio_private_receipts_verified_20261120": {
+    "product_sha": "82e330c87715cda974474785e9a774db4170e8c2",
+    "run": 44776659369,
+    "report": "docs/jrc_contact_center/audio_private_receipts_verified_20261120.json",
+    "status": "private_receipts_and_version_history_natively_verified",
+    "full_23_figures_complete": false
+  },
+  "audio_inspections_prepared_20261120": {
+    "status": "implemented pending native validation",
+    "schema_additions": 1,
+    "historical_migrations_preserved": 9,
+    "actual_engine_test_plan": "Real ClamAV engine, synthetic test-only signature DB; real ffprobe/ffmpeg",
+    "native_tests_passed": false,
+    "chrome_required_next": 228,
+    "bytes_and_provider_publication": "blocked"
   }
 }

@@ -14,4 +14,12 @@ class JrcContactCenter::AudioLibraryPresenter
           .merge('id' => record.id.to_s, 'audio_asset_id' => record.audio_asset_id.to_s, 'unit_id' => record.unit_id.to_s,
                  'created_by_name' => record.created_by.name, 'security_state' => 'not_verified', 'ready' => false)
   end
+
+  def self.inspection(record)
+    fields = record.as_json(only: %i[attempt state probe_state expected_sha256 observed_sha256 scanner_adapter
+                                    decoder_version observed_at created_at])
+    fields.merge('id' => record.id.to_s, 'audio_version_id' => record.audio_version_id.to_s, 'unit_id' => record.unit_id.to_s,
+                 'metadata' => record.metadata.slice(*JrcContactCenter::AudioMediaMetadata::FIELDS),
+                 'created_by_name' => record.created_by.name, 'ready' => record.ready?)
+  end
 end

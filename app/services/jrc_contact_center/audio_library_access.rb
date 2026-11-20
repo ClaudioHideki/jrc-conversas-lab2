@@ -63,6 +63,11 @@ class JrcContactCenter::AudioLibraryAccess
     versions(asset).order(number: :desc).first
   end
 
+  def inspections(version)
+    current = versions(asset(version.audio_asset_id)).find(version.id)
+    JrcContactCenter::AudioInspection.where(account: @account, unit_id: current.unit_id, audio_version: current)
+  end
+
   def identifier!(value)
     text = value.to_s
     valid = (value.is_a?(String) || value.is_a?(Integer)) && text.match?(/\A[1-9][0-9]{0,18}\z/) && text.to_i <= 9_223_372_036_854_775_807

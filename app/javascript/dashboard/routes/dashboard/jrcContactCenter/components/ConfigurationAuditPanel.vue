@@ -65,6 +65,7 @@ const resourceLabels = {
   audio_folder: t('JRC_CONTACT_CENTER.AUDIO_FOLDERS.TITLE'),
   audio_asset: t('JRC_CONTACT_CENTER.AUDIO_FILES.TITLE'),
   audio_version: t('JRC_CONTACT_CENTER.AUDIO_FILES.HISTORY'),
+  audio_inspection: t('JRC_CONTACT_CENTER.AUDIO_INSPECTIONS.TITLE'),
 };
 const operationLabels = {
   create: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.CREATE'),

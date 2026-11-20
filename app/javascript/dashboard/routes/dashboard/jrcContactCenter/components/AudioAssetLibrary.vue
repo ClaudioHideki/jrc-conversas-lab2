@@ -7,6 +7,7 @@ import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import API from 'dashboard/api/jrcContactCenter';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import AudioFolderPicker from './AudioFolderPicker.vue';
+import AudioInspectionHistory from './AudioInspectionHistory.vue';
 import { useAudioAssetEditor } from '../composables/useAudioAssetEditor';
 
 const props = defineProps({
@@ -563,6 +564,14 @@ onBeforeUnmount(() => {
             {{ [label('CHECKSUM'), version.sha256].join(': ') }}
           </p>
           <p class="text-n-amber-11">{{ label('NOT_VERIFIED') }}</p>
+          <AudioInspectionHistory
+            v-if="historyItem"
+            :account-id="accountId"
+            :asset-id="historyItem.id"
+            :version="version"
+            :can-manage="canManage"
+            @denied="denied"
+          />
         </article>
         <nav
           v-if="historyMeta.pages > 1"

@@ -164,6 +164,164 @@ test.beforeEach(async ({ page }, info) => {
   );
 });
 
+test('institutional audio folders native exact-version scanner and decoder history', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].audio_folders;
+  const own = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const url = `/app/accounts/${target.account_id}/contact-center/control-desk/audio`;
+  const header = Buffer.alloc(44);
+  header.write('RIFF', 0);
+  header.writeUInt32LE(52, 4);
+  header.write('WAVEfmt ', 8);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(1, 22);
+  header.writeUInt32LE(8000, 24);
+  header.writeUInt32LE(16000, 28);
+  header.writeUInt16LE(2, 32);
+  header.writeUInt16LE(16, 34);
+  header.write('data', 36);
+  header.writeUInt32LE(16, 40);
+  const bytes = Buffer.concat([header, Buffer.alloc(16)]);
+  const sha256 = createHash('sha256').update(bytes).digest('hex');
+  const received = await page.request.post(`${own}/audio_assets`, {
+    headers: target.administrator,
+    multipart: {
+      unit_id: String(target.unit_id),
+      'asset[name]': `SYNTHETIC technical ${randomUUID()}`,
+      idempotency_key: randomUUID(),
+      file: {
+        name: 'SYNTHETIC-technical.wav',
+        mimeType: 'audio/wav',
+        buffer: bytes,
+      },
+    },
+  });
+  expect(received.status()).toBe(201);
+  const asset = (await received.json()).item;
+  await page.goto(`${url}?audio_unit=${target.unit_id}`);
+  const library = page.locator('[data-audio-asset-library]');
+  await library.locator(`[data-audio-asset-history="${asset.id}"]`).click();
+  await expectContainedDialog(page);
+  const dialog = page.getByRole('dialog');
+  const version = dialog.locator('[data-audio-version="1"]');
+  await version.locator('[data-toggle-audio-inspections]').click();
+  await expect(version).toContainText(
+    'Esta versão ainda não possui verificações técnicas.'
+  );
+  const endpoint = `${new URL(own).pathname}/audio_assets/${asset.id}/versions/${asset.latest_version.id}/inspections`;
+  const inspection = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === endpoint &&
+      response.request().method() === 'POST'
+  );
+  await version.locator('[data-inspect-audio-version]').click();
+  const accepted = await inspection;
+  expect(accepted.status()).toBe(201);
+  const item = (await accepted.json()).item;
+  expect(item).toMatchObject({
+    ready: true,
+    state: 'clean',
+    probe_state: 'valid',
+    observed_sha256: sha256,
+    attempt: 1,
+  });
+  expect(item.metadata).toMatchObject({
+    content_type: 'audio/wav',
+    codec: 'pcm_s16le',
+    sample_rate: 8000,
+    channels: 1,
+  });
+  expect(item.metadata.duration_ms).toBeGreaterThan(0);
+  expect(item.metadata.probe_version).toMatch(/^ffprobe version /);
+  expect(item.decoder_version).toMatch(/^ffmpeg version /);
+  await expect(
+    version.locator('[data-audio-inspection-state="verified"]')
+  ).toBeVisible();
+  await expect(version.locator('[data-audio-decoded-metadata]')).toContainText(
+    'pcm_s16le'
+  );
+  await expect(version.locator('audio, video, a[download]')).toHaveCount(0);
+  const repeated = await page.request.post(
+    `${own}/audio_assets/${asset.id}/versions/${asset.latest_version.id}/inspections`,
+    {
+      headers: target.administrator,
+      data: accepted.request().postDataJSON(),
+    }
+  );
+  expect(repeated.status()).toBe(201);
+  expect((await repeated.json()).item.id).toBe(item.id);
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > window.innerWidth
+  );
+  expect(overflow).toBe(false);
+  const color = await version
+    .locator('[data-audio-inspection-state="verified"]')
+    .evaluate(element => getComputedStyle(element).color);
+  const brightness =
+    (color.match(/\d+(?:\.\d+)?/g) || [])
+      .slice(0, 3)
+      .map(Number)
+      .reduce((sum, value) => sum + value, 0) / 3;
+  if (info.project.name.endsWith('dark'))
+    expect(brightness).toBeGreaterThan(200);
+  else expect(brightness).toBeLessThan(180);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-technical-inspection.png`,
+    fullPage: true,
+  });
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await page.reload();
+  await library.locator(`[data-audio-asset-history="${asset.id}"]`).click();
+  await expectContainedDialog(page);
+  await version.locator('[data-toggle-audio-inspections]').click();
+  await expect(version.locator('[data-audio-inspection]')).toHaveCount(1);
+  await expect(
+    version.locator('[data-audio-inspection-state="verified"]')
+  ).toBeVisible();
+  await page.evaluate(auth => {
+    Object.assign(Reflect.get(window, 'axios').defaults.headers.common, auth);
+  }, target.operator);
+  const denied = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === endpoint &&
+      response.request().method() === 'POST'
+  );
+  await version.locator('[data-inspect-audio-version]').click();
+  expect((await denied).status()).toBe(401);
+  await expect(dialog).not.toBeVisible();
+  await expect(library.locator('[data-audio-inspection]')).toHaveCount(0);
+  const persisted = await page.request.get(
+    `${own}/audio_assets/${asset.id}/versions/${asset.latest_version.id}/inspections`,
+    { headers: target.administrator }
+  );
+  expect(persisted.status()).toBe(200);
+  expect((await persisted.json()).meta.total).toBe(1);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-technical-receipt.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      synthetic: true,
+      engine_signature_db: 'SYNTHETIC_TEST_ONLY',
+      external_homologation: false,
+      asset: asset.id,
+      version: asset.latest_version.id,
+      inspection: item.id,
+      sha256,
+      native_scanner_state: item.state,
+      native_probe_state: item.probe_state,
+      metadata: item.metadata,
+      decoder_version: item.decoder_version,
+      duplicate_response_id: item.id,
+      denied_after_open: 401,
+      horizontal_overflow: overflow,
+      color,
+      brightness,
+    })
+  );
+});
+
 test.afterEach(async ({ page }, info) => {
   const observations = nativeObservations.get(page);
   if (!observations) return;

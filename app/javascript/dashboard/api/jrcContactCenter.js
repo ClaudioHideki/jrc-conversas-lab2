@@ -26,6 +26,8 @@ const recordIdentity = id => {
 };
 const ivrPath = (accountId, id) =>
   `${base(accountId)}/ivr_drafts/${recordIdentity(id)}`;
+const audioInspectionPath = (accountId, assetId, versionId) =>
+  `${base(accountId)}/audio_assets/${recordIdentity(assetId)}/versions/${recordIdentity(versionId)}/inspections`;
 const ivrRevision = revision => {
   if (!Number.isInteger(revision) || revision < 1 || revision > 2147483647)
     throw new Error('Invalid local IVR revision');
@@ -33,6 +35,12 @@ const ivrRevision = revision => {
 };
 
 export default {
+  audioInspections: (accountId, assetId, versionId, params = {}) =>
+    axios.get(audioInspectionPath(accountId, assetId, versionId), { params }),
+  inspectAudioVersion: (accountId, assetId, versionId, idempotencyKey) =>
+    axios.post(audioInspectionPath(accountId, assetId, versionId), {
+      idempotency_key: idempotencyKey,
+    }),
   audioAssets: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/audio_assets`, { params }),
   audioAsset: (accountId, id) =>
