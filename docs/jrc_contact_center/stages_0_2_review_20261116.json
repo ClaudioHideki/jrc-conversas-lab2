@@ -5554,7 +5554,7 @@
     "full_23_figures_complete": false
   },
   "institutional_audio_receipts_candidate_20261120": {
-    "status": "schema_verified_HTTP_fixture_correction_prepared",
+    "status": "native_backend_verified_Vue_boolean_correction_prepared",
     "parent": "7dfccc8f5b2e2c0cdfd1a55972715635586f8838",
     "required_chrome": 224,
     "details": "docs/jrc_contact_center/audio_file_receipt_prepared_20261120.json",
@@ -5577,7 +5577,7 @@
       }
     ],
     "do_not_claim_new_Chrome_evidence": true,
-    "next_correction": "audio_file_second_reload_review_20261120.json"
+    "next_correction": "docs/jrc_contact_center/audio_receipts_boolean_contract_20261120.json"
   },
   "audio_schema_diagnostics_prepared_20261120": {
     "status": "prepared_not_executed",
@@ -5636,5 +5636,59 @@
       "call-center-rubocop.json": "0fcc36686ed41eb2e2baa3561eff47c5c655dc47ab7fb54c827fd934fe649fef"
     },
     "other_modules_main_original_checkout_unchanged": true
+  },
+  "audio_receipts_backend_verified_bfc1aa7c_20261120": {
+    "sha": "bfc1aa7c8a46d2f39303ac59d6d23cf530352480",
+    "run": 44770903177,
+    "artifact": 14649166818,
+    "artifact_sha256": "90c6dbd2f92c2ad63f6026d5e3150a4998bb3f0153da87a0e36f003cff05ab93",
+    "native_distinct": 1947,
+    "rails": {
+      "call-center-corporate-rspec.json": {
+        "duration": 387.417300786,
+        "example_count": 85,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "call-center-ivr-schema-reload-rspec.json": {
+        "duration": 10.055139314,
+        "example_count": 116,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "call-center-pabx-rspec.json": {
+        "duration": 47.485469996,
+        "example_count": 109,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "call-center-rspec.json": {
+        "duration": 247.285140277,
+        "example_count": 1753,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      }
+    },
+    "schema_vectors": {
+      "exactly_equal": true,
+      "calculated": "jrc_cc_audio_files_v1:581ccf5a93895eda0ca259d1e62ac87d64acc70736cee5f173fddf1a4a4b209d",
+      "component_hashes": {
+        "structure": "495b3c822a5fd3c667e9872e110bcc51c0d4af800025a7af28b6c9931550b515",
+        "constraints": "8af8170bd4a97750701c32b34079c8811eea7765c6a052de7f6ded99d28dde64",
+        "functions": "30ba6b188e98466dddb8783a29e1f17f2ea65b394d6834cfd3e1a47436952660",
+        "triggers": "141d5531bc13a727e9eca127ab6814ee3a6acacf46d1551b2f056b0568c50f8f"
+      }
+    },
+    "new_ruby_offenses": 0,
+    "vue": {
+      "numTotalTests": 964,
+      "numPassedTests": 962,
+      "numFailedTests": 2,
+      "numPendingTests": 0
+    }
   }
 }

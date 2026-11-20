@@ -1,0 +1,90 @@
+{
+  "status": "native_backend_verified_boolean_UI_contract_correction_pending",
+  "sha": "bfc1aa7c8a46d2f39303ac59d6d23cf530352480",
+  "run": 44770903177,
+  "artifact": 14649166818,
+  "artifact_sha256": "90c6dbd2f92c2ad63f6026d5e3150a4998bb3f0153da87a0e36f003cff05ab93",
+  "native_distinct": 1947,
+  "rails": {
+    "call-center-corporate-rspec.json": {
+      "duration": 387.417300786,
+      "example_count": 85,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "duration": 10.055139314,
+      "example_count": 116,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-pabx-rspec.json": {
+      "duration": 47.485469996,
+      "example_count": 109,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-rspec.json": {
+      "duration": 247.285140277,
+      "example_count": 1753,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    }
+  },
+  "schema_vectors": {
+    "exactly_equal": true,
+    "calculated": "jrc_cc_audio_files_v1:581ccf5a93895eda0ca259d1e62ac87d64acc70736cee5f173fddf1a4a4b209d",
+    "component_hashes": {
+      "structure": "495b3c822a5fd3c667e9872e110bcc51c0d4af800025a7af28b6c9931550b515",
+      "constraints": "8af8170bd4a97750701c32b34079c8811eea7765c6a052de7f6ded99d28dde64",
+      "functions": "30ba6b188e98466dddb8783a29e1f17f2ea65b394d6834cfd3e1a47436952660",
+      "triggers": "141d5531bc13a727e9eca127ab6814ee3a6acacf46d1551b2f056b0568c50f8f"
+    }
+  },
+  "new_ruby_offenses": 0,
+  "vue": {
+    "numTotalTests": 964,
+    "numPassedTests": 962,
+    "numFailedTests": 2,
+    "numPendingTests": 0
+  },
+  "vue_failures": [
+    {
+      "file": "/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useAudioAssetEditor.spec.js",
+      "test": "private institutional audio editor delegates all actual authority to the native APIs rejects a file of 0 bytes before submission",
+      "messages": [
+        "AssertionError: expected null to be false // Object.is equality\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useAudioAssetEditor.spec.js:252:36\n    at file:///home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/node_modules/.pnpm/@vitest+runner@3.0.5/node_modules/@vitest/runner/dist/index.js:561:22"
+      ]
+    },
+    {
+      "file": "/home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useAudioAssetEditor.spec.js",
+      "test": "private institutional audio editor delegates all actual authority to the native APIs rejects a file of 101 bytes before submission",
+      "messages": [
+        "AssertionError: expected null to be false // Object.is equality\n    at /home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useAudioAssetEditor.spec.js:252:36\n    at file:///home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/node_modules/.pnpm/@vitest+runner@3.0.5/node_modules/@vitest/runner/dist/index.js:561:22"
+      ]
+    }
+  ],
+  "cause": "JavaScript&&returnsnull when file.value isnull after empty/oversized selection. canSave contract isBoolean; both existing stricttoBe(false) assertions correctly exposed this. Sending remained blocked; no backend input or access checks changed.",
+  "minimal_correction": "Wrap the complete existing computed predicate inBoolean without changing any clause. Keep the original strict assertions, invalid-file errors, explicit review and no-request checks.",
+  "local_lint": {
+    "changed_paths": 1,
+    "errors": 0,
+    "warnings": 0,
+    "runtime": "existing frozenESLint/Prettier from local reused dependencies; heap384MiB; no Vue/Rails/build locally"
+  },
+  "required_next": [
+    "sameSHAVue/lint and requirednativegates",
+    "fresh guarded assets/bootstrap",
+    "all224Chrome and actual screenshots"
+  ],
+  "not_complete": [
+    "Wordfigure6/16 complete",
+    "scanner/codec/media metadata/player/Nico",
+    "full23figures"
+  ],
+  "original_main_and_other_modules_preserved": true
+}

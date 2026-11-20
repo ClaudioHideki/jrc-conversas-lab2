@@ -712,3 +712,6 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 - [x] Schema privado5e8b:116recargas aprovadas, vetoresfresh/reloadidênticos, lintRuby0novasinfrações. Não equivale ao aceite dos uploads.
 - [ ] Core5e8b:1751/1753passaram;2falhas de transporteHTTP corrigidas nafixtureRackmultipart, comasserção adicional. Manter gates restantes e224Chrome obrigatórios; nenhuma imagem/publicação/deploy.
+
+- [x] Backendbfc1:1947Railsdistintos,116recargas separadas, vetores schemaexatos e lintRuby0. IncluiHTTPmultipartreal, SQLorigem/imutabilidade, concorrência e regressões corporativas.
+- [ ] Vuebfc1:962/964, duas expectativas booleanas de arquivo0/101bytes falharamnull≠false. PredicateBoolean corrigido, asserções mantidas, lintlocal1arquivo0infrações; CIe224Chrome pendentes.

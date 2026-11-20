@@ -40,19 +40,20 @@ export const useAudioAssetEditor = ({
       file.value?.lastModified,
     ]);
   const reviewed = computed(() => reviewedDraft.value === fingerprint());
-  const canSave = computed(
-    () =>
+  const canSave = computed(() =>
+    Boolean(
       canManage.value &&
-      openedScope.value === scopeKey() &&
-      !saving.value &&
-      !opening.value &&
-      reviewed.value &&
-      revision.canSave.value &&
-      (mode.value === 'edit' ||
-        (file.value &&
-          file.value.size > 0 &&
-          file.value.size <= maxBytes.value)) &&
-      (mode.value === 'replace' || draft.value.name.trim().length > 0)
+        openedScope.value === scopeKey() &&
+        !saving.value &&
+        !opening.value &&
+        reviewed.value &&
+        revision.canSave.value &&
+        (mode.value === 'edit' ||
+          (file.value &&
+            file.value.size > 0 &&
+            file.value.size <= maxBytes.value)) &&
+        (mode.value === 'replace' || draft.value.name.trim().length > 0)
+    )
   );
   const close = () => {
     generation += 1;
