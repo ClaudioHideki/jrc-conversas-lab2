@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAudioInspections } from '../composables/useAudioInspections';
 import AudioVersionPreview from './AudioVersionPreview.vue';
@@ -10,7 +10,7 @@ const props = defineProps({
   version: { type: Object, required: true },
   canManage: { type: Boolean, required: true },
 });
-const emit = defineEmits(['denied']);
+const emit = defineEmits(['denied', 'latest']);
 const { t } = useI18n();
 const labels = computed(() => ({
   TITLE: t('JRC_CONTACT_CENTER.AUDIO_INSPECTIONS.TITLE'),
@@ -75,6 +75,27 @@ const stateLabel = row => {
     return label(`PROBE_${row.probe_state.toUpperCase()}`);
   return label(`STATE_${row.state.toUpperCase()}`);
 };
+const reportLatest = proof =>
+  emit('latest', {
+    accountId: String(props.accountId),
+    assetId: props.assetId,
+    versionId: props.version.id,
+    unitId: props.version.unit_id,
+    proof,
+  });
+watch(saving, value => {
+  if (value) reportLatest(null);
+});
+watch([items, loading, page, error, opened], () => {
+  if (
+    opened.value &&
+    !loading.value &&
+    !saving.value &&
+    !error.value &&
+    page.value === 1
+  )
+    reportLatest(items.value[0] || null);
+});
 </script>
 
 <template>

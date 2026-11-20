@@ -7634,6 +7634,11 @@ test('institutional audio folders native private receipt, revisions and permissi
   });
   expect(original.unit_id).toBe(String(target.unit_id));
   expect(original.folder_id).toBe(target.audio_destination_id);
+  expect(original.latest_version.technical_verification).toMatchObject({
+    audio_version_id: original.latest_version.id,
+    ready: true,
+    metadata: { duration_ms: 1, codec: 'pcm_s16le' },
+  });
   const receivedProof = await page.request.get(
     `${own}/audio_assets/${original.id}/versions/${original.latest_version.id}/inspections`,
     { headers: target.administrator }
@@ -7674,6 +7679,12 @@ test('institutional audio folders native private receipt, revisions and permissi
     `${url}?audio_unit=${target.unit_id}&audio_parent=${target.audio_destination_id}`
   );
   await expect(library.locator('[data-audio-asset]')).toHaveCount(6);
+  const durationField =
+    page.viewportSize().width < 640
+      ? `[data-mobile-audio-file-duration="${original.id}"]`
+      : `[data-audio-file-duration="${original.id}"]`;
+  await expect(library.locator(durationField)).toBeVisible();
+  await expect(library.locator(durationField)).toHaveText('00:00.001');
   await library
     .locator(`[data-audio-asset-details-open="${original.id}"]`)
     .click();
@@ -7681,6 +7692,9 @@ test('institutional audio folders native private receipt, revisions and permissi
   await expect(details).toContainText(name);
   await expect(details).toContainText(sha256);
   await expect(details).toContainText(target.audio_destination_name);
+  await expect(details.locator('[data-audio-details-duration]')).toHaveText(
+    '00:00.001'
+  );
   await details.locator('[data-toggle-audio-inspections]').click();
   await expect(
     details.locator('[data-audio-inspection-state="verified"]')

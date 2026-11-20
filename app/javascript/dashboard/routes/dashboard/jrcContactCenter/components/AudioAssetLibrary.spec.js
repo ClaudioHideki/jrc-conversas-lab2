@@ -3,6 +3,7 @@ import { computed, defineComponent, reactive, ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
 import AudioAssetLibrary from './AudioAssetLibrary.vue';
+import AudioInspectionHistory from './AudioInspectionHistory.vue';
 
 const mocks = vi.hoisted(() => ({ route: null, replace: vi.fn(), user: null }));
 vi.mock('vue-router', () => ({
@@ -92,12 +93,14 @@ beforeEach(() => {
   });
   API.audioAssets.mockResolvedValue({
     data: {
-      items: [row],
+      items: [structuredClone(row)],
       meta: { page: 1, pages: 2, total: 21 },
       max_upload_bytes: 1000,
     },
   });
-  API.audioAsset.mockResolvedValue({ data: { account_id: '1', item: row } });
+  API.audioAsset.mockResolvedValue({
+    data: { account_id: '1', item: structuredClone(row) },
+  });
   API.updateAudioAsset.mockResolvedValue({
     data: { account_id: '1', item: row },
   });
@@ -117,6 +120,132 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it.each([
+    [1, '00:00.001'],
+    [12000, '00:12'],
+    [3600000, '1:00:00'],
+  ])(
+    'displays the actual verified %i millisecond duration without rounding a short file to zero',
+    async (ms, shown) => {
+      const item = structuredClone(row);
+      item.latest_version.technical_verification = {
+        ready: true,
+        metadata: { duration_ms: ms },
+      };
+      API.audioAssets.mockResolvedValueOnce({
+        data: {
+          items: [item],
+          meta: { page: 1, pages: 1, total: 1 },
+          max_upload_bytes: 1000,
+        },
+      });
+      const wrapper = fixture();
+      await flushPromises();
+      expect(wrapper.get('[data-audio-file-duration="44"]').text()).toBe(shown);
+      expect(wrapper.get('[data-mobile-audio-file-duration="44"]').text()).toBe(
+        shown
+      );
+    }
+  );
+
+  it('does not display a previous duration when the supplied current verification is unavailable', async () => {
+    const item = structuredClone(row);
+    item.latest_version.technical_verification = {
+      ready: false,
+      state: 'unavailable',
+      metadata: { duration_ms: 12000 },
+    };
+    API.audioAssets.mockResolvedValueOnce({
+      data: {
+        items: [item],
+        meta: { page: 1, pages: 1, total: 1 },
+        max_upload_bytes: 1000,
+      },
+    });
+    const wrapper = fixture();
+    await flushPromises();
+    expect(wrapper.get('[data-audio-file-duration="44"]').text()).toBe(
+      'JRC_CONTACT_CENTER.AUDIO_FILES.DURATION_UNKNOWN'
+    );
+    expect(wrapper.text()).not.toContain('00:12');
+    expect(wrapper.text()).not.toContain('00:00');
+  });
+
+  it('invalidates list and details while a current inspection is uncertain and updates only the matching exact-version receipt', async () => {
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-asset-details-open="44"]').trigger('click');
+    await flushPromises();
+    const history = wrapper.findComponent(AudioInspectionHistory);
+    const source = {
+      accountId: '1',
+      unitId: '10',
+      assetId: '44',
+      versionId: '90',
+    };
+    const proof = {
+      id: '99',
+      audio_version_id: '90',
+      unit_id: '10',
+      expected_sha256: row.latest_version.sha256,
+      state: 'clean',
+      probe_state: 'valid',
+      ready: true,
+      metadata: { duration_ms: 12000 },
+    };
+    history.vm.$emit('latest', { ...source, proof });
+    await flushPromises();
+    expect(wrapper.get('[data-audio-file-duration="44"]').text()).toBe('00:12');
+    expect(wrapper.get('[data-audio-details-duration]').text()).toBe('00:12');
+    history.vm.$emit('latest', { ...source, proof: null });
+    await flushPromises();
+    expect(wrapper.get('[data-audio-file-duration="44"]').text()).toBe(
+      'JRC_CONTACT_CENTER.AUDIO_FILES.DURATION_UNKNOWN'
+    );
+    expect(wrapper.get('[data-audio-details-duration]').text()).toBe(
+      'JRC_CONTACT_CENTER.AUDIO_FILES.DURATION_UNKNOWN'
+    );
+    history.vm.$emit('latest', {
+      ...source,
+      proof: { ...proof, metadata: { duration_ms: 1 } },
+    });
+    await flushPromises();
+    expect(wrapper.get('[data-audio-file-duration="44"]').text()).toBe(
+      '00:00.001'
+    );
+    expect(wrapper.get('[data-audio-details-duration]').text()).toBe(
+      '00:00.001'
+    );
+    expect(API.receiveAudioVersion).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { accountId: '2', unitId: '10', assetId: '44', versionId: '90' },
+    { accountId: '1', unitId: '11', assetId: '44', versionId: '90' },
+    { accountId: '1', unitId: '10', assetId: '44', versionId: '91' },
+  ])('ignores an observation event from another source: %o', async source => {
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-asset-details-open="44"]').trigger('click');
+    await flushPromises();
+    wrapper.findComponent(AudioInspectionHistory).vm.$emit('latest', {
+      ...source,
+      proof: {
+        id: '99',
+        audio_version_id: '90',
+        unit_id: '10',
+        expected_sha256: row.latest_version.sha256,
+        ready: true,
+        metadata: { duration_ms: 12000 },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.get('[data-audio-file-duration="44"]').text()).toBe(
+      'JRC_CONTACT_CENTER.AUDIO_FILES.DURATION_UNKNOWN'
+    );
+    expect(wrapper.text()).not.toContain('00:12');
+  });
+
   it('opens current authorized details from the native endpoint and closes without mutating the file', async () => {
     const wrapper = fixture();
     await flushPromises();

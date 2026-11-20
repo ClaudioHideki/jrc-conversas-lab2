@@ -404,14 +404,14 @@ describe('private institutional audio editor delegates all actual authority to t
     review();
     await editor.save();
     const priorKey =
-      API.receiveAudioAsset.mock.calls[0][2].get('idempotency_key');
+      API.receiveAudioAsset.mock.calls[0][1].get('idempotency_key');
     expect(editor.error.value).toBe('INSPECTION_UNAVAILABLE');
     expect(editor.file.value).toBe(file);
     expect(editor.submission.value).toBeNull();
     expect(editor.canSave.value).toBe(false);
     review();
     await editor.save();
-    expect(API.receiveAudioAsset.mock.calls[1][2].get('idempotency_key')).toBe(
+    expect(API.receiveAudioAsset.mock.calls[1][1].get('idempotency_key')).toBe(
       priorKey
     );
     expect(onSaved).toHaveBeenCalledOnce();

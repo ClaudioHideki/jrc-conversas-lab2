@@ -1,22 +1,24 @@
 require 'rails_helper'
 
 # Real owned ClamAV/FFmpeg, synthetic definition DB. No final library record may exist at this point.
-RSpec.describe JrcContactCenter::AudioSafetyObservation, 'before final persistence' do
+RSpec.describe JrcContactCenter::AudioSafetyObservation do
   include_context 'with an institutional audio receipt'
 
-  let(:access) { JrcContactCenter::AudioLibraryAccess.new(context: context) }
   let(:input) { JrcContactCenter::AudioFileInput.new(file: upload) }
+  let(:staged_blobs) { [] }
   let(:blob) do
-    JrcContactCenter::PrivateAudioBlob.upload(file: input.file, filename: input.filename, content_type: input.content_type)
+    stored = JrcContactCenter::PrivateAudioBlob.upload(file: input.file, filename: input.filename, content_type: input.content_type)
+    staged_blobs << stored
+    stored
   end
-  let(:observer) { described_class.new(access: access) }
+  let(:observer) { described_class.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context)) }
 
   before do
     owned = ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' && ENV.fetch('JRC_CC_AUDIO_CLAMAV_SOCKET', '').start_with?('/run/jrc-cc-audio-')
     raise 'Owned native synthetic scanner required before final audio persistence' unless Rails.env.test? && owned
   end
 
-  after { JrcContactCenter::PrivateAudioBlob.clean_uncommitted(blob) }
+  after { staged_blobs.each { |stored| JrcContactCenter::PrivateAudioBlob.clean_uncommitted(stored) } }
 
   it 'verifies actual staged bytes without creating a final asset, immutable version or inspection row' do
     result = observer.receive!(unit_id: unit.id, blob: blob, input: input)

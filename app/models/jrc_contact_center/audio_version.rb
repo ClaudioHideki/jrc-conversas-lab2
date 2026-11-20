@@ -11,6 +11,11 @@ class JrcContactCenter::AudioVersion < JrcContactCenter::ApplicationRecord
   belongs_to :blob, class_name: 'ActiveStorage::Blob'
   belongs_to :created_by, class_name: 'User'
   has_many :inspections, class_name: 'JrcContactCenter::AudioInspection', inverse_of: :audio_version, dependent: :restrict_with_error
+  has_one :latest_inspection, lambda {
+    select('DISTINCT ON (jrc_contact_center_audio_inspections.audio_version_id) jrc_contact_center_audio_inspections.*')
+      .order(:audio_version_id, attempt: :desc)
+  }, class_name: 'JrcContactCenter::AudioInspection', foreign_key: :audio_version_id,
+     inverse_of: :audio_version, dependent: :restrict_with_error
   before_destroy(prepend: true) { raise ActiveRecord::ReadOnlyRecord, 'Institutional audio versions are immutable' if persisted? }
 
   validates :number, numericality: { only_integer: true, greater_than: 0 }, uniqueness: { scope: :audio_asset_id }

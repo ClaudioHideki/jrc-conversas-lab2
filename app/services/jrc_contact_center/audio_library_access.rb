@@ -40,7 +40,8 @@ class JrcContactCenter::AudioLibraryAccess
   end
 
   def assets
-    JrcContactCenter::AudioAsset.where(account: @account, unit_id: units.select(:id)).includes(:folder, latest_version: :created_by)
+    JrcContactCenter::AudioAsset.where(account: @account, unit_id: units.select(:id))
+                              .includes(:folder, latest_version: %i[created_by latest_inspection])
   end
 
   def asset(id)

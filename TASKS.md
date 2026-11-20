@@ -735,3 +735,7 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] **CC-AUDIO-ADMISSION-20261120:** Validar scanner e codec antes da versão final (Word Figura 6, §0158), gravar observação inicial/auditoria atomicamente e preservar recibos legados. Implementação e testes preparados; validação nativa/Chrome pendente. Ver `docs/jrc_contact_center/audio_admission_prepared_20261120.json`.
 
 - [ ] **CC-AUDIO-WORD-LAYOUT-20261120:** Figuras 6/16: navegação de pastas contida, tabela nativa e painel de detalhes reautorizados preparados. Preservadas edição/movimentação, substituição, histórico e prévia exata. Vue e Chrome reais pendentes; árvore completa, vínculos e ações adicionais continuam abertos. Ver `docs/jrc_contact_center/audio_library_layout_prepared_20261120.json`.
+
+- [ ] **CC-AUDIO-DURATION-20261120:** Duração real da observação atual na lista e nos detalhes, sem zero fictício ou reaproveitamento de inspeção antiga. Consulta em lote e atualização por identidade exata preparadas; testes nativos/Vue/232 Chrome pendentes. Ver `docs/jrc_contact_center/audio_verified_duration_prepared_20261120.json`.
+
+- **Evidência parcial `1d11a7bf` / CI `44819662149`:** 2.060 Rails distintos e131 recarga aprovados; Vue999/1.000 com um índice de argumento incorreto no teste; quatro convenções RSpec restantes corrigidas no incremento seguinte. Assets/232Chrome não executaram. Não representa aceite do layout ou de todas as23figuras. Ver `docs/jrc_contact_center/audio_admission_backend_verified_20261120.json`.

@@ -5820,5 +5820,28 @@
     "reload_failed": 1,
     "core_executed": false,
     "all_word_complete": false
+  },
+  "audio_verified_duration_prepared_20261120": {
+    "status": "Prepared; native/Vue/Chrome pending",
+    "figures": [
+      6,
+      16
+    ],
+    "report": "docs/jrc_contact_center/audio_verified_duration_prepared_20261120.json",
+    "permissions_unchanged": true,
+    "all_word_complete": false
+  },
+  "audio_admission_backend_verified_20261120": {
+    "producer": "1d11a7bf6bfbd9541679f6c85208118a46cc3ef9",
+    "run": 44819662149,
+    "report": "docs/jrc_contact_center/audio_admission_backend_verified_20261120.json",
+    "native_distinct": 2060,
+    "schema_reload_separate": 131,
+    "vue_passed": 999,
+    "vue_failed": 1,
+    "new_ruby_offenses": 4,
+    "assets_chrome": "not_run",
+    "full_candidate_approved": false,
+    "all_word_complete": false
   }
 }

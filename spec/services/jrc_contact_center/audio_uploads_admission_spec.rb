@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 # Actual owned native scanner/decoder; definition DB is synthetic and proves no production malware coverage.
-RSpec.describe JrcContactCenter::AudioUploads, 'final admission' do
+RSpec.describe JrcContactCenter::AudioUploads do
   include_context 'with an institutional audio receipt'
 
   let(:access) { JrcContactCenter::AudioLibraryAccess.new(context: context) }

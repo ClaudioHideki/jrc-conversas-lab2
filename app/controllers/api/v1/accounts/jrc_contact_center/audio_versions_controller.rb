@@ -10,7 +10,7 @@ class Api::V1::Accounts::JrcContactCenter::AudioVersionsController < Api::V1::Ac
   def index
     params[:page] = 1 if params[:page].blank?
     asset = library.asset(params[:audio_asset_id])
-    render json: list_payload(library.versions(asset).includes(:created_by).order(number: :desc)) { |row| present(row) }
+    render json: list_payload(library.versions(asset).includes(:created_by, :latest_inspection).order(number: :desc)) { |row| present(row) }
   end
 
   def create

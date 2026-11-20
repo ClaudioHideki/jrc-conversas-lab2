@@ -67,6 +67,8 @@ const labels = computed(() => ({
   SOURCE_UPLOAD: t('JRC_CONTACT_CENTER.AUDIO_FILES.SOURCE_UPLOAD'),
   SOURCE_CAPTURE: t('JRC_CONTACT_CENTER.AUDIO_FILES.SOURCE_CAPTURE'),
   UNKNOWN_SOURCE: t('JRC_CONTACT_CENTER.AUDIO_FILES.UNKNOWN_SOURCE'),
+  DURATION: t('JRC_CONTACT_CENTER.AUDIO_FILES.DURATION'),
+  DURATION_UNKNOWN: t('JRC_CONTACT_CENTER.AUDIO_FILES.DURATION_UNKNOWN'),
 }));
 const label = key => labels.value[key];
 const route = useRoute();
@@ -100,6 +102,18 @@ const versionOrigin = version =>
   );
 const pageDescription = (count, number) =>
   `${label('TOTAL')} ${count} · ${label('PAGE')} ${number}`;
+const duration = version => {
+  const proof = version?.technical_verification;
+  const ms = proof?.metadata?.duration_ms;
+  if (proof?.ready !== true || !Number.isSafeInteger(ms) || ms <= 0)
+    return label('DURATION_UNKNOWN');
+  const seconds = Math.floor(ms / 1000);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = String(Math.floor(seconds / 60) % 60).padStart(2, '0');
+  const remainder = String(seconds % 60).padStart(2, '0');
+  const fraction = ms % 1000 ? `.${String(ms % 1000).padStart(3, '0')}` : '';
+  return `${hours ? `${hours}:` : ''}${minutes}:${remainder}${fraction}`;
+};
 const items = ref([]);
 const meta = ref({ total: 0, pages: 0 });
 const maxBytes = ref(0);
@@ -129,6 +143,40 @@ const canManage = computed(
     props.context.capabilities?.configure === true &&
     (props.context.units || []).some(row => String(row.id) === props.unitId)
 );
+const applyVerification = event => {
+  if (
+    event.accountId !== String(props.accountId) ||
+    event.unitId !== props.unitId
+  )
+    return;
+  const assign = asset => {
+    const version = asset?.latest_version;
+    if (
+      !version ||
+      asset?.id !== event.assetId ||
+      version.id !== event.versionId
+    )
+      return;
+    const record = event.proof;
+    const valid =
+      record?.audio_version_id === version.id &&
+      record?.unit_id === props.unitId &&
+      record?.expected_sha256 === version.sha256;
+    version.technical_verification = valid
+      ? {
+          id: record.id,
+          audio_version_id: record.audio_version_id,
+          state: record.state,
+          probe_state: record.probe_state,
+          observed_at: record.observed_at,
+          ready: record.ready === true,
+          metadata: record.ready === true ? record.metadata : {},
+        }
+      : null;
+  };
+  items.value.forEach(assign);
+  assign(details.value);
+};
 let generation = 0;
 let historyGeneration = 0;
 const clearHistory = () => {
@@ -437,9 +485,18 @@ onBeforeUnmount(() => {
           </caption>
           <thead class="sticky top-0 bg-n-solid-2">
             <tr>
-              <th scope="col" class="w-1/2 p-3">{{ label('NAME') }}</th>
-              <th scope="col" class="w-1/4 p-3">{{ label('VERSION') }}</th>
-              <th scope="col" class="w-1/4 p-3">{{ label('ACTIONS') }}</th>
+              <th scope="col" class="w-1/2 p-3 sm:w-2/5">
+                {{ label('NAME') }}
+              </th>
+              <th scope="col" class="hidden w-1/5 p-3 sm:table-cell">
+                {{ label('DURATION') }}
+              </th>
+              <th scope="col" class="w-1/4 p-3 sm:w-1/5">
+                {{ label('VERSION') }}
+              </th>
+              <th scope="col" class="w-1/4 p-3 sm:w-1/5">
+                {{ label('ACTIONS') }}
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-n-weak bg-n-solid-1">
@@ -468,6 +525,18 @@ onBeforeUnmount(() => {
                 >
                   {{ row.description }}
                 </p>
+                <p class="mt-1 break-words text-n-slate-11 sm:hidden">
+                  {{ label('DURATION') }}
+                  <span :data-mobile-audio-file-duration="row.id">{{
+                    duration(row.latest_version)
+                  }}</span>
+                </p>
+              </td>
+              <td
+                class="hidden min-w-0 break-words p-3 align-top text-n-slate-11 sm:table-cell"
+                :data-audio-file-duration="row.id"
+              >
+                {{ duration(row.latest_version) }}
               </td>
               <td class="min-w-0 break-words p-3 align-top text-n-slate-11">
                 <p v-if="row.latest_version">
@@ -551,6 +620,12 @@ onBeforeUnmount(() => {
           </div>
           <template v-if="details.latest_version">
             <div>
+              <dt class="text-n-slate-11">{{ label('DURATION') }}</dt>
+              <dd data-audio-details-duration>
+                {{ duration(details.latest_version) }}
+              </dd>
+            </div>
+            <div>
               <dt class="text-n-slate-11">{{ label('SOURCE') }}</dt>
               <dd class="break-words">
                 {{ sourceLabel(details.latest_version.source_kind) }}
@@ -583,6 +658,7 @@ onBeforeUnmount(() => {
           :version="details.latest_version"
           :can-manage="canManage"
           @denied="denied"
+          @latest="applyVerification"
         />
       </aside>
     </div>
@@ -763,6 +839,7 @@ onBeforeUnmount(() => {
             :version="version"
             :can-manage="canManage"
             @denied="denied"
+            @latest="applyVerification"
           />
         </article>
         <nav

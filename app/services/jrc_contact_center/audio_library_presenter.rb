@@ -12,7 +12,8 @@ class JrcContactCenter::AudioLibraryPresenter
   def self.version(record)
     record.as_json(only: %i[number source_kind file_name content_type byte_size sha256 created_at])
           .merge('id' => record.id.to_s, 'audio_asset_id' => record.audio_asset_id.to_s, 'unit_id' => record.unit_id.to_s,
-                 'created_by_name' => record.created_by.name, 'security_state' => 'not_verified', 'ready' => false)
+                 'created_by_name' => record.created_by.name, 'security_state' => 'not_verified', 'ready' => false,
+                 'technical_verification' => technical_verification(record))
   end
 
   def self.inspection(record)
@@ -22,4 +23,14 @@ class JrcContactCenter::AudioLibraryPresenter
                  'metadata' => record.metadata.slice(*JrcContactCenter::AudioMediaMetadata::FIELDS),
                  'created_by_name' => record.created_by.name, 'ready' => record.ready?)
   end
+
+  def self.technical_verification(version)
+    proof = version.latest_inspection
+    return unless proof
+
+    fields = proof.as_json(only: %i[state probe_state observed_at])
+    fields.merge('id' => proof.id.to_s, 'audio_version_id' => version.id.to_s, 'ready' => proof.ready?,
+                 'metadata' => proof.ready? ? proof.metadata.slice(*JrcContactCenter::AudioMediaMetadata::FIELDS) : {})
+  end
+  private_class_method :technical_verification
 end

@@ -1,0 +1,28 @@
+{
+  "status": "implemented_draft_not_natively_validated",
+  "product_parent": "1d11a7bf6bfbd9541679f6c85208118a46cc3ef9",
+  "word_figures": [
+    6,
+    16
+  ],
+  "source": "Current exact immutable AudioInspection selected with native DISTINCT ON and preloaded for the scoped list",
+  "payload": "Additive technical_verification; legacy top-level publication/readiness fields unchanged. No locator, credential or write permission.",
+  "display": "Clock duration only for a current ready technical observation with a positive safe integer duration_ms. Sub-second values retain milliseconds. Missing/unavailable metadata never becomes00:00 or an older clean duration.",
+  "refresh": "Current inspection invalidates the derived list/detail metadata while pending; only matching account/unit/asset/version/SHA observations can refresh it. No byte request or publication permission is granted.",
+  "native_prepared": {
+    "authenticated_api": 5,
+    "batch_queries": 1,
+    "batches": "Actual owned scanner/decoder positives; one version query and one inspection query for three files. Not a scale homologation.",
+    "historical_metadata": "Actual guarded native legacy fixture, not an upload bypass."
+  },
+  "vue_prepared": 11,
+  "chrome": "All232 retained;4 native upload variants additionally require exact duration in list and details at1440/390px and both themes. Not run.",
+  "fixture_cleanup": "Staged observation specs clean only blobs actually created; cleanup no longer evaluates a lazy upload after a failed setup guard.",
+  "migrations_changed": false,
+  "all_23_complete": false,
+  "vue_scope": {
+    "list_details_identity_and_duration": 8,
+    "inspection_history_event_contracts": 3
+  },
+  "adr": "docs/adr/20261120-call-center-current-audio-duration.md"
+}

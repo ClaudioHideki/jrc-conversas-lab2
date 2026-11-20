@@ -1,0 +1,33 @@
+{
+  "producer": "1d11a7bf6bfbd9541679f6c85208118a46cc3ef9",
+  "run": 44819662149,
+  "job": 136576941880,
+  "artifact_id": 14673926330,
+  "artifact_sha256": "d324cb3fd393f6f48146f13792b4db82c1fbe8ff32d992b555eef03bcab8340d",
+  "status": "backend_verified_full_candidate_blocked",
+  "native_distinct": 2060,
+  "core": 1863,
+  "concurrency": 112,
+  "approvals_backoffice": 85,
+  "native_identity_sets": "Each report has positive examples; no duplicate example IDs across the three groups; zero failure/pending/outside errors.",
+  "schema_reload_separate": 131,
+  "migrations": "Fresh install, reexecution and reload checks passed; historical source hashes retained.",
+  "storage_supabase_guard": "passed in isolated synthetic resources; external homologation not claimed",
+  "vue": {
+    "total": 1000,
+    "passed": 999,
+    "failed": 1,
+    "pending": 0,
+    "failing_case": "retains the file after an explicit unavailable-before-persistence response and requires review before retry",
+    "cause": "Test accessed receiveAudioAsset.mock.calls[n][2], but this API receives(accountId, body), so the body is index1. No failing product assertion was bypassed.",
+    "correction": "Use the actual two-argument signature for both reads; retain file/key/review/retry assertions."
+  },
+  "ruby": {
+    "new_offenses": 4,
+    "cause": "A second non-method describe argument changes RSpec expected path and violates DescribeMethod.",
+    "correction": "Keep the class as the describe target and remove the redundant secondary label. Names and14 cases remain intact; no exclusions or cop configuration changes."
+  },
+  "assets_and_232_chrome": "Not executed for this SHA because mandatory gates blocked them.",
+  "new_duration_increment": "Not part of this native result. Must be validated on its own new exact SHA.",
+  "full_23_figures_complete": false
+}
