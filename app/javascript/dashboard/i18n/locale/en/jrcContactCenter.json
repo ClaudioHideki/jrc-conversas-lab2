@@ -2391,7 +2391,7 @@
     },
     "AUDIO_FOLDERS": {
       "TITLE": "Pastas de áudios institucionais",
-      "LIMITS": "Biblioteca local por unidade, separada das gravações de chamadas. Arquivos recebidos permanecem privados e sem reprodução até a verificação de segurança. Gravação, Nico e publicação no PABX ainda estão em implementação.",
+      "LIMITS": "Biblioteca privada por unidade, separada das gravações de chamadas. Reprodução exige inspeção técnica atual. Síntese pelo Nico e publicação no PABX dependem de integração homologada.",
       "UNIT": "Unidade operacional",
       "SEARCH": "Pesquisar pastas",
       "FILTER": "Aplicar filtros",
@@ -2424,6 +2424,25 @@
       "PARENT_ERROR": "Não foi possível consultar as pastas de destino. Ajuste a busca para tentar novamente.",
       "PARENT": "Pasta de destino na mesma unidade",
       "REVIEW": "Revisei a unidade, o nome e o destino desta pasta."
+    },
+    "AUDIO_CAPTURE": {
+      "SOURCE_METHOD": "Origem da mensagem institucional",
+      "IMPORT": "Importar arquivo",
+      "RECORD": "Gravar mensagem",
+      "NICO_PENDING": "Nico: integração de síntese pendente",
+      "LIMITS": "O microfone só será solicitado ao iniciar. Ouça e revise a gravação antes de usá-la. Salvar exige acesso à unidade e verificações no servidor; não publica no PABX.",
+      "START": "Iniciar gravação",
+      "STOP": "Concluir gravação",
+      "DISCARD": "Descartar gravação",
+      "USE": "Usar esta gravação",
+      "LOCAL_PREVIEW": "Prévia local da gravação ainda não salva",
+      "REQUESTING": "Aguardando permissão do microfone...",
+      "RECORDING": "Gravando. Conclua ou descarte quando terminar.",
+      "PROCESSING": "Preparando a gravação para revisão...",
+      "CAPTURE_DENIED": "O acesso ao microfone foi negado. Confira a permissão do navegador ou importe um arquivo.",
+      "CAPTURE_UNSUPPORTED": "A gravação não está disponível neste navegador. Importe um arquivo em um formato aceito.",
+      "CAPTURE_ERROR": "Não foi possível preparar a gravação. Os demais campos foram preservados; tente novamente ou importe um arquivo.",
+      "INVALID_CAPTURE": "A gravação está vazia ou ultrapassou o limite de arquivo. Grave uma mensagem menor ou importe um arquivo válido."
     },
     "AUDIO_FILES": {
       "TITLE": "Áudios institucionais",

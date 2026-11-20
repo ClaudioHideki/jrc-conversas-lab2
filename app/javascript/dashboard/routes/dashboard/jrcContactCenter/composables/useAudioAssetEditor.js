@@ -16,6 +16,8 @@ export const useAudioAssetEditor = ({
   const selected = ref(null);
   const draft = ref({ name: '', description: '', purpose: '', folder_id: '' });
   const file = shallowRef(null);
+  const sourceKind = ref('user_upload');
+  const session = ref(0);
   const submission = shallowRef(null);
   const saving = ref(false);
   const opening = ref(false);
@@ -38,6 +40,7 @@ export const useAudioAssetEditor = ({
       file.value?.name,
       file.value?.size,
       file.value?.lastModified,
+      sourceKind.value,
     ]);
   const reviewed = computed(() => reviewedDraft.value === fingerprint());
   const canSave = computed(() =>
@@ -57,8 +60,10 @@ export const useAudioAssetEditor = ({
   );
   const close = () => {
     generation += 1;
+    session.value += 1;
     selected.value = null;
     file.value = null;
+    sourceKind.value = 'user_upload';
     submission.value = null;
     draft.value = { name: '', description: '', purpose: '', folder_id: '' };
     reviewedDraft.value = '';
@@ -109,6 +114,7 @@ export const useAudioAssetEditor = ({
     if (submission.value || saving.value) return;
     const value = event.target.files?.[0];
     file.value = null;
+    sourceKind.value = 'user_upload';
     reviewedDraft.value = '';
     error.value = '';
     if (!value) return;
@@ -118,11 +124,17 @@ export const useAudioAssetEditor = ({
     }
     file.value = value;
   };
+  const chooseCapturedFile = value => {
+    if (submission.value || saving.value) return;
+    chooseFile({ target: { files: [value] } });
+    if (file.value) sourceKind.value = 'browser_capture';
+  };
   const body = () => {
     if (!submission.value) {
       const form = new FormData();
       form.append('file', file.value);
       form.append('idempotency_key', key);
+      form.append('source_kind', sourceKind.value);
       if (mode.value === 'upload') {
         form.append('unit_id', unitId.value);
         Object.entries(draft.value).forEach(([name, value]) =>
@@ -155,6 +167,7 @@ export const useAudioAssetEditor = ({
       version.unit_id !== unitId.value ||
       !Number.isInteger(version.number) ||
       version.number < 1 ||
+      version.source_kind !== sourceKind.value ||
       version.byte_size !== file.value?.size ||
       typeof version.sha256 !== 'string' ||
       !/^[a-f0-9]{64}$/.test(version.sha256)
@@ -223,6 +236,9 @@ export const useAudioAssetEditor = ({
     selected,
     draft,
     file,
+    sourceKind,
+    session,
+    openedScope,
     submission,
     saving,
     opening,
@@ -236,6 +252,7 @@ export const useAudioAssetEditor = ({
     close,
     clear,
     chooseFile,
+    chooseCapturedFile,
     save,
   };
 };

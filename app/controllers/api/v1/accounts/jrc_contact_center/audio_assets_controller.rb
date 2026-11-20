@@ -21,9 +21,10 @@ class Api::V1::Accounts::JrcContactCenter::AudioAssetsController < Api::V1::Acco
   end
 
   def create
-    validate_body!(%w[asset unit_id file idempotency_key])
+    validate_body!(%w[asset unit_id file idempotency_key source_kind])
     version = JrcContactCenter::AudioUploads.new(access: library).create!(
-      unit_id: params.require(:unit_id), attributes: params.require(:asset), file: params.require(:file), key: params.require(:idempotency_key)
+      unit_id: params.require(:unit_id), attributes: params.require(:asset), file: params.require(:file),
+      key: params.require(:idempotency_key), source_kind: params.fetch(:source_kind, 'user_upload')
     )
     render json: base_payload.merge(item: present(library.asset(version.audio_asset_id)),
                                     received_version: JrcContactCenter::AudioLibraryPresenter.version(version)), status: :created

@@ -1,0 +1,22 @@
+{
+  "status": "implemented_draft_static_checks_only",
+  "parent": "faf35daa70109892103270dc09ae1945ed4dd599",
+  "figures": [5, 6, 16],
+  "native_existing": ["AudioUploads", "AudioLibraryAccess", "PrivateAudioBlob", "AudioSafetyObservation", "AudioInspections", "webmOpusToOgg"],
+  "new_catalog_or_endpoint": false,
+  "source_kind": "Optional typed declared provenance only. Preserve old user_upload canonical digest; capture has a distinct canonical origin. Never an access grant or device attestation.",
+  "migrations_changed": false,
+  "native_http_prepared": 12,
+  "vue_prepared": 25,
+  "vue_breakdown": {"capture_lifecycle": 15, "preview_ui": 5, "editor": 4, "parent_wiring": 1},
+  "chrome_prepared": {"previous_required": 232, "new_required": 236, "new_per_project": 1, "actual_results": "not_run"},
+  "physical_device_access": false,
+  "shared_message_recorder_modified": false,
+  "shared_converter_modified": false,
+  "resource_limits": "Bound encoded/converted bytes by native max_upload_bytes; stop only owned tracks/recorder. No browser PCM decode, automatic upload or autoplay.",
+  "existing_security": "Native current account/unit/configuration policy, exact version, real bounded server scanner/decoder, immutable evidence, CAS, idempotency and deny behavior preserved.",
+  "static_infrastructure_review": "Exact config addition of fake-device flag and232→236 assertion; previous scenarios, worker1/retries0, signatures/migration/positive-report requirements preserved. No actual workflow executed for this draft.",
+  "external_pending": ["Physical device and Safari homologation", "Operational malware definition coverage", "Actual Nico synthesis connector", "PABX codecs/publication/ACK contract"],
+  "full_23_figures_complete": false,
+  "adr": "docs/adr/20261120-call-center-institutional-browser-capture.md"
+}

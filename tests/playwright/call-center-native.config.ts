@@ -17,6 +17,8 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:5386',
     channel: 'chrome',
     headless: true,
+    // This synthetic local suite must never access a physical microphone.
+    launchOptions: { args: ['--use-fake-device-for-media-stream'] },
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
     screenshot: 'only-on-failure',

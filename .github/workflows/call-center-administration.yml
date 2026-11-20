@@ -240,7 +240,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
-          assert stats['expected'] == 232
+          assert stats['expected'] == 236
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
           source = Path('docs/jrc_contact_center/stages_0_2_review_20261116.json')

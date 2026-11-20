@@ -4,6 +4,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
 import AudioAssetLibrary from './AudioAssetLibrary.vue';
 import AudioInspectionHistory from './AudioInspectionHistory.vue';
+import AudioCaptureDraft from './AudioCaptureDraft.vue';
 
 const mocks = vi.hoisted(() => ({ route: null, replace: vi.fn(), user: null }));
 vi.mock('vue-router', () => ({
@@ -72,10 +73,10 @@ const context = {
   capabilities: { configure: true },
   units: [{ id: '10' }, { id: '11' }],
 };
-const fixture = () =>
+const fixture = (stubs = {}) =>
   mount(AudioAssetLibrary, {
     props: { accountId: '1', unitId: '10', folderId: '', context },
-    global: { stubs: { Dialog, AudioFolderPicker: true } },
+    global: { stubs: { Dialog, AudioFolderPicker: true, ...stubs } },
   });
 enableAutoUnmount(afterEach);
 beforeEach(() => {
@@ -120,6 +121,55 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it('keeps common fields across source methods, blocks save while capturing and requires review before the existing native upload', async () => {
+    const wrapper = fixture({ AudioCaptureDraft: true });
+    await flushPromises();
+    await wrapper.get('[data-new-audio-asset]').trigger('click');
+    await flushPromises();
+    await wrapper
+      .get('[data-audio-asset-name]')
+      .setValue('SYNTHETIC captured draft');
+    await wrapper.get('[data-audio-source-capture]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-audio-asset-name]').element.value).toBe(
+      'SYNTHETIC captured draft'
+    );
+    expect(wrapper.find('[data-audio-asset-file]').exists()).toBe(false);
+    const capture = wrapper.findComponent(AudioCaptureDraft);
+    capture.vm.$emit('busy', true);
+    await flushPromises();
+    expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+    capture.vm.$emit('busy', false);
+    const file = new File(['SYNTHETIC'.padEnd(60, '0')], 'capture.ogg', {
+      type: 'audio/ogg',
+    });
+    capture.vm.$emit('selected', file);
+    await flushPromises();
+    expect(wrapper.get('[data-audio-selected-file]').text()).toContain(
+      'capture.ogg'
+    );
+    expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+    await wrapper.get('[data-review-audio-asset]').setValue(true);
+    API.receiveAudioAsset.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        item: structuredClone(row),
+        received_version: {
+          ...structuredClone(row.latest_version),
+          source_kind: 'browser_capture',
+        },
+      },
+    });
+    await wrapper.get('[role="dialog"]').trigger('submit');
+    await flushPromises();
+    expect(API.receiveAudioAsset).toHaveBeenCalledOnce();
+    const [account, body] = API.receiveAudioAsset.mock.calls[0];
+    expect(account).toBe('1');
+    expect(body.get('source_kind')).toBe('browser_capture');
+    expect(body.get('file')).toBe(file);
+    expect(body.get('asset[name]')).toBe('SYNTHETIC captured draft');
+  });
+
   it.each([
     [1, '00:00.001'],
     [12000, '00:12'],

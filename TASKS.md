@@ -743,3 +743,7 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] **CC-AUDIO-TREE-20261120:** Expansão de subpastas por API nativa, paginação limitada e limpeza de respostas atrasadas/perda de acesso preparadas.14Vue e os232Chrome ampliados ainda pendentes; não representa aceite das23figuras. Ver `docs/jrc_contact_center/audio_folder_tree_prepared_20261120.json`.
 
 - **Evidência parcial `26867ce7` / CI `44826071664`:** 2.066 Rails distintos e131recargas aprovados; duração/consulta em lote nativas aprovadas. Vue1.010/1.011 e uma convenção de alinhamento Ruby bloquearam assets/Chrome. Correções mantêm inspeção atual indisponível, histórico antigo e ausência de prévia. Ver `docs/jrc_contact_center/audio_duration_backend_verified_20261120.json`.
+
+- [ ] **CC-AUDIO-CAPTURE-20261120:** Gravação institucional no editor existente preparada: início explícito, recursos da sessão, remux nativo, prévia local e recebimento privado com origem por versão.12HTTP,25Vue e236Chrome pendentes; sem microfone físico, endpoint novo, migration ou comandos PABX. Nico permanece integração pendente. Ver `docs/jrc_contact_center/audio_browser_capture_prepared_20261120.json`.
+
+- **Evidência parcial `faf35daa` / CI `44830541470`:** 2.066 Rails distintos,131recargas e1.025Vue aprovados, incluindo14novos de árvore e correção do histórico. Lintfrontend aprovado; uma coluna Ruby ainda bloqueou assets/Chrome, agora medida e alinhada exatamente. Ver `docs/jrc_contact_center/audio_folder_tree_backend_verified_20261120.json`.

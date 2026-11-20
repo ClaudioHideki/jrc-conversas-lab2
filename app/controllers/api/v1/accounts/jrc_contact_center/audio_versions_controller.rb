@@ -14,11 +14,12 @@ class Api::V1::Accounts::JrcContactCenter::AudioVersionsController < Api::V1::Ac
   end
 
   def create
-    keys = %w[file idempotency_key expected_revision]
+    keys = %w[file idempotency_key expected_revision source_kind]
     raise JrcContactCenter::OperationError, 'invalid_institutional_audio' unless (request.request_parameters.keys - keys).empty?
 
     version = JrcContactCenter::AudioUploads.new(access: library).replace!(
-      asset_id: params[:audio_asset_id], file: params.require(:file), key: params.require(:idempotency_key), expected: params[:expected_revision]
+      asset_id: params[:audio_asset_id], file: params.require(:file), key: params.require(:idempotency_key), expected: params[:expected_revision],
+      source_kind: params.fetch(:source_kind, 'user_upload')
     )
     render json: base_payload.merge(item: JrcContactCenter::AudioLibraryPresenter.asset(library.asset(version.audio_asset_id)),
                                     received_version: present(version)), status: :created

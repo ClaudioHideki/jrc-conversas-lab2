@@ -1,0 +1,18 @@
+{
+  "status": "partial_native_and_vue_verified_not_chrome_or_candidate_approval",
+  "producer": "faf35daa70109892103270dc09ae1945ed4dd599",
+  "run": 44830541470,
+  "native_distinct": 2066,
+  "schema_reload_separate": 131,
+  "vue_passed": 1025,
+  "vue_failed": 0,
+  "new_folder_vue_cases_passed": 14,
+  "frontend_lint": "passed",
+  "new_ruby_offenses": 1,
+  "ruby_diagnosis": "Reported dot33(1-based) for.where; prior.includes remained32(1-based). Exact measured correction aligns both at zero-based32, no functional change.",
+  "assets_and_chrome": "Skipped by mandatory Ruby lint gate;232 Chrome were not executed.",
+  "artifact": 14677877848,
+  "artifact_sha256": "698ed7658771c332e1389142a67061b48aed0f85c6a6e7adae0646db9a511b43",
+  "full_23_figures_complete": false,
+  "next_prepared_increment": "Browser capture with12 native HTTP,25Vue and236 Chrome, using the same private upload API; still untested."
+}

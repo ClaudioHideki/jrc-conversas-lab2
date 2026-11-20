@@ -8106,3 +8106,215 @@ test('institutional audio folders native verified bytes playback download and wi
     })
   );
 });
+
+test('institutional audio folders native browser capture uses only the synthetic device and preserves reviewed origin', async ({
+  page,
+  context,
+}, info) => {
+  test.setTimeout(180000);
+  const target = session.pause_targets[info.project.name].audio_folders;
+  const own = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const prefix = `/api/v1/accounts/${target.account_id}/jrc_contact_center/audio_assets`;
+  const url = `/app/accounts/${target.account_id}/contact-center/control-desk/audio`;
+  const name = `SYNTHETIC captured ${info.project.name}`;
+  const library = page.locator('[data-audio-asset-library]');
+  const dialog = page.getByRole('dialog');
+  const unexpected: string[] = [];
+  let writes = 0;
+  page.on('request', request => {
+    const path = new URL(request.url()).pathname;
+    if (path === prefix && request.method() === 'POST') writes += 1;
+    if (
+      /\/(commands|sync_calls|telephony_integration|call_recordings)(?:[/?]|$)/.test(
+        request.url()
+      ) &&
+      !['GET', 'HEAD'].includes(request.method())
+    )
+      unexpected.push(path);
+  });
+  await context.grantPermissions(['microphone'], {
+    origin: 'http://127.0.0.1:5386',
+  });
+  await page.goto(`${url}?audio_unit=${target.unit_id}`);
+  expect(new URL(page.url()).origin).toBe('http://127.0.0.1:5386');
+  const fakeDevice = await page.evaluate(async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    return devices.some(
+      device => device.kind === 'audioinput' && /fake/i.test(device.label)
+    );
+  });
+  expect(fakeDevice).toBe(true);
+  await library.locator('[data-new-audio-asset]').click();
+  await expectContainedDialog(page);
+  await dialog.locator('[data-audio-asset-name]').fill(name);
+  await dialog
+    .locator('[data-audio-asset-description]')
+    .fill('SYNTHETIC common fields retained across capture/import');
+  await dialog.locator('[data-audio-source-capture]').click();
+  const capture = dialog.locator('[data-institutional-capture]');
+  await expect(capture.locator('audio')).toHaveCount(0);
+  const save = dialog.getByRole('button', { name: 'Salvar', exact: true });
+  await expect(save).toBeDisabled();
+  await capture.locator('[data-start-institutional-capture]').click();
+  await expect(
+    capture.locator('[data-stop-institutional-capture]')
+  ).toBeVisible();
+  await expect
+    .poll(async () =>
+      Number(
+        await capture
+          .locator('[data-institutional-captured-bytes]')
+          .getAttribute('data-bytes')
+      )
+    )
+    .toBeGreaterThan(0);
+  await expect(save).toBeDisabled();
+  await capture.locator('[data-stop-institutional-capture]').click();
+  const preview = capture.locator('[data-institutional-capture-preview]');
+  await expect(preview).toBeVisible();
+  await expect
+    .poll(() =>
+      preview.evaluate(
+        (audio: HTMLAudioElement) =>
+          Number.isFinite(audio.duration) && audio.duration > 0
+      )
+    )
+    .toBe(true);
+  expect(
+    await preview.evaluate((audio: HTMLAudioElement) => audio.paused)
+  ).toBe(true);
+  await preview.evaluate((audio: HTMLAudioElement) => audio.play());
+  await expect
+    .poll(() =>
+      preview.evaluate((audio: HTMLAudioElement) => audio.currentTime)
+    )
+    .toBeGreaterThan(0);
+  await capture.locator('[data-discard-institutional-capture]').click();
+  await expect(preview).toHaveCount(0);
+  await expect(dialog.locator('[data-audio-asset-name]')).toHaveValue(name);
+  await expect(dialog.locator('[data-audio-asset-description]')).toHaveValue(
+    'SYNTHETIC common fields retained across capture/import'
+  );
+  expect(writes).toBe(0);
+  await capture.locator('[data-start-institutional-capture]').click();
+  await expect
+    .poll(async () =>
+      Number(
+        await capture
+          .locator('[data-institutional-captured-bytes]')
+          .getAttribute('data-bytes')
+      )
+    )
+    .toBeGreaterThan(0);
+  await capture.locator('[data-stop-institutional-capture]').click();
+  await expect(preview).toBeVisible();
+  await expect
+    .poll(() =>
+      preview.evaluate(
+        (audio: HTMLAudioElement) =>
+          Number.isFinite(audio.duration) && audio.duration > 0
+      )
+    )
+    .toBe(true);
+  const localDuration = await preview.evaluate(
+    (audio: HTMLAudioElement) => audio.duration
+  );
+  await preview.scrollIntoViewIfNeeded();
+  await expect(preview).toBeInViewport();
+  const dark = info.project.name.endsWith('dark');
+  expect(
+    await page.locator('html').evaluate(node => node.classList.contains('dark'))
+  ).toBe(dark);
+  expect(
+    await preview.evaluate(node => getComputedStyle(node).colorScheme)
+  ).toBe(dark ? 'dark' : 'light');
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-capture-local-review.png`,
+    fullPage: true,
+  });
+  await capture.locator('[data-use-institutional-capture]').click();
+  await expect(dialog.locator('[data-audio-selected-file]')).toContainText(
+    'gravacao-institucional.ogg'
+  );
+  await expect(save).toBeDisabled();
+  await dialog.locator('[data-review-audio-asset]').check();
+  const sent = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === prefix &&
+      response.request().method() === 'POST'
+  );
+  await save.click();
+  const received = await sent;
+  expect(received.status()).toBe(201);
+  const body = await received.json();
+  const asset = body.item;
+  const version = body.received_version;
+  expect(body.account_id).toBe(String(target.account_id));
+  expect(asset.unit_id).toBe(String(target.unit_id));
+  expect(version.source_kind).toBe('browser_capture');
+  expect(version.content_type).toBe('audio/ogg');
+  expect(version.technical_verification.ready).toBe(true);
+  expect(version.technical_verification.metadata.codec).toBe('opus');
+  expect(version.technical_verification.metadata.duration_ms).toBeGreaterThan(
+    0
+  );
+  await expect(dialog).not.toBeVisible();
+  expect(writes).toBe(1);
+  const stored = await page.request.get(
+    `${own}/audio_assets/${asset.id}/versions/${version.id}/bytes`,
+    { headers: target.scoped }
+  );
+  expect(stored.status()).toBe(200);
+  const actualHash = createHash('sha256')
+    .update(await stored.body())
+    .digest('hex');
+  expect(actualHash).toBe(version.sha256);
+  const denied = await page.request.get(
+    `${own}/audio_assets/${asset.id}/versions/${version.id}/bytes`,
+    { headers: target.operator }
+  );
+  expect(denied.status()).toBe(401);
+  await page.goto(
+    `${url}?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(name)}`
+  );
+  const saved = library.locator(`[data-audio-asset="${asset.id}"]`);
+  await expect(saved).toContainText(name);
+  await expect(saved).toContainText('Gravação do navegador');
+  await page.reload();
+  await expect(saved).toContainText(name);
+  await saved.locator(`[data-audio-asset-details-open="${asset.id}"]`).click();
+  await expect(library.locator('[data-audio-asset-details]')).toContainText(
+    version.sha256
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-capture-native-persisted.png`,
+    fullPage: true,
+  });
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-capture-native-evidence.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      synthetic: true,
+      physical_microphone: false,
+      fake_device: fakeDevice,
+      external_homologation: false,
+      unit: String(target.unit_id),
+      asset: asset.id,
+      version: version.id,
+      source_kind: version.source_kind,
+      inspection: version.technical_verification.id,
+      local_duration_seconds: localDuration,
+      native_duration_ms: version.technical_verification.metadata.duration_ms,
+      downloaded_sha256: actualHash,
+      denied: denied.status(),
+      native_posts: writes,
+      dark,
+    })
+  );
+  expect(unexpected).toEqual([]);
+});

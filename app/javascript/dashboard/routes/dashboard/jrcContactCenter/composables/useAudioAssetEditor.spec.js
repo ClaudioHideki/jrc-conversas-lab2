@@ -29,6 +29,7 @@ const accepted = () => ({
       audio_asset_id: '44',
       unit_id: '10',
       number: 1,
+      source_kind: 'user_upload',
       byte_size: 15,
       sha256: 'f'.repeat(64),
     },
@@ -92,6 +93,78 @@ beforeEach(() => {
 });
 
 describe('private institutional audio editor delegates all actual authority to the native APIs', () => {
+  it('requires a new review for capture provenance while reusing the same typed multipart endpoint', async () => {
+    const { editor, file, review } = fixture();
+    await editor.open('upload');
+    editor.draft.value.name = 'SYNTHETIC recorded message';
+    choose(editor, file);
+    review();
+    expect(editor.canSave.value).toBe(true);
+    editor.chooseCapturedFile(file);
+    expect(editor.canSave.value).toBe(false);
+    expect(editor.sourceKind.value).toBe('browser_capture');
+    review();
+    API.receiveAudioAsset.mockResolvedValueOnce({
+      data: {
+        ...accepted().data,
+        received_version: {
+          ...accepted().data.received_version,
+          source_kind: 'browser_capture',
+        },
+      },
+    });
+    await editor.save();
+    const body = API.receiveAudioAsset.mock.calls[0][1];
+    expect(body.get('source_kind')).toBe('browser_capture');
+    expect(body.get('file')).toBe(file);
+    expect(body.get('asset[name]')).toBe('SYNTHETIC recorded message');
+  });
+
+  it('locks capture origin and bytes into an uncertain native receipt and never replaces them silently on retry', async () => {
+    const { editor, file, review } = fixture();
+    API.receiveAudioAsset.mockRejectedValueOnce({ response: { status: 503 } });
+    await editor.open('upload');
+    editor.draft.value.name = 'SYNTHETIC uncertain capture';
+    editor.chooseCapturedFile(file);
+    review();
+    await editor.save();
+    const sent = API.receiveAudioAsset.mock.calls[0][1];
+    choose(
+      editor,
+      new File(['SYNTHETIC changed'], 'other.wav', { type: 'audio/wav' })
+    );
+    expect(editor.file.value).toBe(file);
+    expect(editor.sourceKind.value).toBe('browser_capture');
+    review();
+    API.receiveAudioAsset.mockResolvedValueOnce({
+      data: {
+        ...accepted().data,
+        received_version: {
+          ...accepted().data.received_version,
+          source_kind: 'browser_capture',
+        },
+      },
+    });
+    await editor.save();
+    expect(API.receiveAudioAsset.mock.calls[1][1]).toBe(sent);
+    expect(sent.get('source_kind')).toBe('browser_capture');
+  });
+
+  it('clears capture source and bytes on native unit change and creates a new editor session on reopening', async () => {
+    const { editor, file, unitId } = fixture();
+    await editor.open('upload');
+    const session = editor.session.value;
+    editor.chooseCapturedFile(file);
+    unitId.value = '11';
+    await flushPromises();
+    expect(editor.file.value).toBeNull();
+    expect(editor.sourceKind.value).toBe('user_upload');
+    expect(editor.openedScope.value).toBe('');
+    await editor.open('upload');
+    expect(editor.session.value).toBeGreaterThan(session);
+    expect(editor.openedScope.value).toContain('11');
+  });
+
   it('preserves the fresh root folder rather than silently moving a concurrently reorganized audio back to the old folder', async () => {
     const { editor, folderId } = fixture();
     folderId.value = '22';
@@ -102,6 +175,18 @@ describe('private institutional audio editor delegates all actual authority to t
   });
   it.each([
     ['missing receipt', () => ({ data: {} })],
+    [
+      'wrong capture origin',
+      () => ({
+        data: {
+          ...accepted().data,
+          received_version: {
+            ...accepted().data.received_version,
+            source_kind: 'browser_capture',
+          },
+        },
+      }),
+    ],
     [
       'foreign account',
       () => ({ ...accepted(), data: { ...accepted().data, account_id: '2' } }),

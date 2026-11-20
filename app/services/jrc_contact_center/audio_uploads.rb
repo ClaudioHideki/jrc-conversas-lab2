@@ -5,19 +5,19 @@ require 'digest'
 
 # Validates owned staged bytes before final persistence. No telephony command or publication.
 class JrcContactCenter::AudioUploads
-  Request = Struct.new(:unit_id, :asset_id, :attributes, :key, :expected, keyword_init: true)
+  Request = Struct.new(:unit_id, :asset_id, :attributes, :key, :expected, :source_kind, keyword_init: true)
 
   def initialize(access:)
     @access = access
   end
 
-  def create!(unit_id:, attributes:, file:, key:)
-    request = Request.new(unit_id: unit_id, attributes: JrcContactCenter::AudioAssetAttributes.parse(attributes), key: key)
+  def create!(unit_id:, attributes:, file:, key:, source_kind: 'user_upload')
+    request = Request.new(unit_id: unit_id, attributes: JrcContactCenter::AudioAssetAttributes.parse(attributes), key: key, source_kind: source_kind)
     receive!(request, file)
   end
 
-  def replace!(asset_id:, file:, key:, expected:)
-    request = Request.new(asset_id: asset_id, attributes: {}, key: key, expected: expected)
+  def replace!(asset_id:, file:, key:, expected:, source_kind: 'user_upload')
+    request = Request.new(asset_id: asset_id, attributes: {}, key: key, expected: expected, source_kind: source_kind)
     receive!(request, file)
   end
 
@@ -43,6 +43,8 @@ class JrcContactCenter::AudioUploads
   end
 
   def prepare_request!(request)
+    raise JrcContactCenter::OperationError, 'invalid_institutional_audio_source' unless %w[user_upload browser_capture].include?(request.source_kind)
+
     valid = request.key.is_a?(String) && request.key.match?(/\A[\w-]{16,100}\z/)
     raise JrcContactCenter::OperationError, 'invalid_institutional_audio_upload_key' unless valid
 
@@ -74,6 +76,8 @@ class JrcContactCenter::AudioUploads
   def input_digest(request, input)
     fields = [@access.account.id.to_s, @access.actor.id.to_s, request.unit_id, request.asset_id,
               request.attributes.sort.to_h, input.filename, input.content_type, input.byte_size, input.sha256]
+    # Keep canonical digests of historical uploads identical. Capture origin never grants permission.
+    fields << request.source_kind if request.source_kind != 'user_upload'
     Digest::SHA256.hexdigest(JSON.generate(fields))
   end
 
@@ -131,7 +135,7 @@ class JrcContactCenter::AudioUploads
 
   def version_attributes(asset, request, input, digest)
     input.version_attributes.merge(account: @access.account, unit_id: asset.unit_id, audio_asset: asset,
-                                   blob: @pending_blob, created_by: @access.actor, source_kind: 'user_upload',
+                                   blob: @pending_blob, created_by: @access.actor, source_kind: request.source_kind,
                                    number: @access.versions(asset).maximum(:number).to_i + 1,
                                    idempotency_key: request.key, input_digest: digest)
   end

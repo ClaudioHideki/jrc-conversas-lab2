@@ -4,10 +4,12 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useMapGetter } from 'dashboard/composables/store';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
+import Icon from 'dashboard/components-next/icon/Icon.vue';
 import API from 'dashboard/api/jrcContactCenter';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import AudioFolderPicker from './AudioFolderPicker.vue';
 import AudioInspectionHistory from './AudioInspectionHistory.vue';
+import AudioCaptureDraft from './AudioCaptureDraft.vue';
 import { useAudioAssetEditor } from '../composables/useAudioAssetEditor';
 
 const props = defineProps({
@@ -69,6 +71,10 @@ const labels = computed(() => ({
   UNKNOWN_SOURCE: t('JRC_CONTACT_CENTER.AUDIO_FILES.UNKNOWN_SOURCE'),
   DURATION: t('JRC_CONTACT_CENTER.AUDIO_FILES.DURATION'),
   DURATION_UNKNOWN: t('JRC_CONTACT_CENTER.AUDIO_FILES.DURATION_UNKNOWN'),
+  SOURCE_METHOD: t('JRC_CONTACT_CENTER.AUDIO_CAPTURE.SOURCE_METHOD'),
+  IMPORT: t('JRC_CONTACT_CENTER.AUDIO_CAPTURE.IMPORT'),
+  RECORD: t('JRC_CONTACT_CENTER.AUDIO_CAPTURE.RECORD'),
+  NICO_PENDING: t('JRC_CONTACT_CENTER.AUDIO_CAPTURE.NICO_PENDING'),
 }));
 const label = key => labels.value[key];
 const route = useRoute();
@@ -301,7 +307,32 @@ const {
 } = editor;
 const revision = editor.revision;
 const folderLoading = ref(false);
+const sourceMethod = ref('upload');
+const captureBusy = ref(false);
+const captureContext = computed(() =>
+  JSON.stringify([
+    props.accountId,
+    props.unitId,
+    props.folderId,
+    editor.session.value,
+  ])
+);
+watch(editor.session, () => {
+  sourceMethod.value = 'upload';
+  captureBusy.value = false;
+});
+const chooseSource = method => {
+  if (saving.value || submission.value || sourceMethod.value === method) return;
+  editor.chooseFile({ target: { files: [] } });
+  captureBusy.value = false;
+  sourceMethod.value = method;
+};
+const captureState = value => {
+  captureBusy.value = value;
+  if (value) editor.chooseFile({ target: { files: [] } });
+};
 const saveEditor = () => {
+  if (captureBusy.value) return;
   if (mode.value !== 'replace' && folderLoading.value) return;
   editor.save();
 };
@@ -699,7 +730,7 @@ onBeforeUnmount(() => {
       :confirm-button-label="label('SAVE')"
       :cancel-button-label="label('CANCEL')"
       :disable-confirm-button="
-        !canSave || (mode !== 'replace' && folderLoading)
+        !canSave || captureBusy || (mode !== 'replace' && folderLoading)
       "
       :is-loading="saving"
       :dismissible="!saving"
@@ -766,7 +797,55 @@ onBeforeUnmount(() => {
           />
         </template>
         <template v-if="mode !== 'edit'">
-          <label class="block min-w-0 break-words">
+          <div
+            role="group"
+            :aria-label="label('SOURCE_METHOD')"
+            class="flex min-w-0 flex-wrap gap-2"
+          >
+            <button
+              type="button"
+              :aria-pressed="sourceMethod === 'upload'"
+              :disabled="saving || Boolean(submission)"
+              data-audio-source-upload
+              class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11 disabled:opacity-40"
+              :class="
+                sourceMethod === 'upload' ? 'bg-n-blue-3' : 'bg-n-solid-1'
+              "
+              @click="chooseSource('upload')"
+            >
+              <Icon
+                icon="i-lucide-upload"
+                class="mr-2 inline-block size-4"
+                aria-hidden="true"
+              />{{ label('IMPORT') }}
+            </button>
+            <button
+              type="button"
+              :aria-pressed="sourceMethod === 'capture'"
+              :disabled="saving || Boolean(submission)"
+              data-audio-source-capture
+              class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11 disabled:opacity-40"
+              :class="
+                sourceMethod === 'capture' ? 'bg-n-blue-3' : 'bg-n-solid-1'
+              "
+              @click="chooseSource('capture')"
+            >
+              <Icon
+                icon="i-lucide-mic"
+                class="mr-2 inline-block size-4"
+                aria-hidden="true"
+              />{{ label('RECORD') }}
+            </button>
+            <span
+              class="max-w-full break-words rounded-lg border border-n-weak px-3 py-2 text-n-slate-11"
+            >
+              {{ label('NICO_PENDING') }}
+            </span>
+          </div>
+          <label
+            v-if="sourceMethod === 'upload'"
+            class="block min-w-0 break-words"
+          >
             <span>{{ label('FILE') }}</span>
             <input
               type="file"
@@ -777,6 +856,16 @@ onBeforeUnmount(() => {
               @change="editor.chooseFile"
             />
           </label>
+          <AudioCaptureDraft
+            v-if="sourceMethod === 'capture' && editor.openedScope.value"
+            :key="editor.session.value"
+            :context-key="captureContext"
+            :max-bytes="maxBytes"
+            :disabled="saving || Boolean(submission) || !canManage"
+            @selected="editor.chooseCapturedFile"
+            @busy="captureState"
+            @discard="editor.chooseFile({ target: { files: [] } })"
+          />
           <p class="break-words">{{ label('MAX_BYTES') }} {{ maxBytes }}</p>
           <p v-if="file" class="break-words" data-audio-selected-file>
             {{ fileDescription(file.name, file.size) }}
