@@ -5718,5 +5718,20 @@
     "native_tests_passed": false,
     "chrome_required_next": 228,
     "bytes_and_provider_publication": "blocked"
+  },
+  "audio_inspection_native_progress_20261120": {
+    "sha": "3b20ccc06ebadb42d744681dc5f7303ea88f8094",
+    "run": 44792107487,
+    "report": "docs/jrc_contact_center/audio_inspection_native_correction_20261120.json",
+    "schema_reload_examples": 130,
+    "schema_reload_passed": 129,
+    "schema_reload_failed": 1,
+    "new_migration_native_examples_passed": 6,
+    "scanner_preparation": "actual ClamAV 1.5.4 initialized with isolated verified public CA and synthetic test-only signatures",
+    "actual_malware_coverage": false,
+    "old_audio_file_schema_preserved": true,
+    "complete_candidate_approved": false,
+    "native_application_vue_chrome": "not yet run; 228 Chrome cases mandatory",
+    "word_gap_audit": "docs/jrc_contact_center/audio_word_acceptance_gaps_20261120.json"
   }
 }

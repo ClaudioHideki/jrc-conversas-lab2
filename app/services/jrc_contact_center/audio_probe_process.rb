@@ -32,11 +32,14 @@ class JrcContactCenter::AudioProbeProcess
     result = Result.new(:unavailable, nil)
   ensure
     finish_owned_process(pid, process, result)
-    writer&.close unless writer&.closed?
-    reader&.close unless reader&.closed?
+    close_owned_pipes(writer, reader)
   end
 
   private
+
+  def close_owned_pipes(*pipes)
+    pipes.compact.each { |pipe| pipe.close unless pipe.closed? }
+  end
 
   def spawn_options
     { pgroup: true, close_others: true, unsetenv_others: true, err: File::NULL,
@@ -60,10 +63,13 @@ class JrcContactCenter::AudioProbeProcess
   def finish_owned_process(pid, process, result)
     return unless pid
 
-    pending = process.nil? || process.alive?
-    stop_owned_group(pid) if pending && result&.state != :ok
+    stop_owned_group(pid) if owned_child_pending?(process) && result&.state != :ok
     process ? process.join : Process.waitpid(pid)
   rescue Errno::ECHILD
     nil
+  end
+
+  def owned_child_pending?(process)
+    process.nil? || process.alive?
   end
 end

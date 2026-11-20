@@ -13,7 +13,7 @@ class JrcContactCenter::ConfigurationAuditSnapshot
     'JrcContactCenter::AudioAsset' => %w[unit_id folder_id name description purpose lock_version],
     'JrcContactCenter::AudioVersion' => %w[unit_id audio_asset_id number source_kind content_type byte_size sha256 created_by_id],
     'JrcContactCenter::AudioInspection' => %w[unit_id audio_version_id attempt state probe_state expected_sha256 observed_sha256
-                                            scanner_adapter decoder_version metadata observed_at created_by_id],
+                                              scanner_adapter decoder_version metadata observed_at created_by_id],
     'JrcContactCenter::RoutingRule' => %w[version rule_key kind source_value target_unit_id target_queue_id priority state starts_at ends_at]
   }.freeze
 

@@ -37,7 +37,7 @@ class JrcContactCenter::AudioInspections
 
   def replay!(version, key, digest)
     record = JrcContactCenter::AudioInspection.find_by(account: @access.account, unit_id: version.unit_id,
-                                                     created_by: @access.actor, idempotency_key: key)
+                                                       created_by: @access.actor, idempotency_key: key)
     return unless record
     return record if record.input_digest == digest
 

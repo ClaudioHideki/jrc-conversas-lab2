@@ -1,0 +1,81 @@
+{
+  "scope": "Call Center institutional audio, figures 5, 6 and 16; incremental acceptance, not recording-policy homologation",
+  "word_sources": [
+    {
+      "file": "JRC_Conversas_Call_Center_Parte_1_Especificacao_DEV_Com_Imagens.docx",
+      "sha256": "5db370d9b7598a720d32f7f60eba4e22b4b61878327bd4459176ff729fe7a2c8"
+    },
+    {
+      "file": "JRC_Conversas_Call_Center_Parte_1_Detalhamento_Funcional_23_Imagens.docx",
+      "sha256": "8f9300cf1940012f71be1a97903a192f7b5a18667e6da6664b9f972866e7e88b"
+    }
+  ],
+  "verified_code": "82e330c87715cda974474785e9a774db4170e8c2",
+  "technical_inspection_candidate": "3b20ccc06ebadb42d744681dc5f7303ea88f8094",
+  "technical_candidate_status": "fresh schema and scanner preparation passed; reload/test gate failed, diagnosis pending; not approved",
+  "criteria": [
+    {
+      "id": "F06-B",
+      "status": "implemented_and_validated_increment",
+      "evidence": "audio_private_receipts_verified_20261120.json",
+      "behavior": "Scoped folder move and rename preserve asset identity, old versions and stored SHA-256; actual Rails + desktop/mobile Chrome with light/dark themes",
+      "remaining": "Real usage bindings and published destinations remain unimplemented; do not claim preservation of provider-published links was tested"
+    },
+    {
+      "id": "F06-admission-before-final-save",
+      "status": "implemented_with_difference",
+      "word_text_reference": "Complement, paragraph 0158: missing file or codec failure must be validated before persistence",
+      "current": "Header/type/size checks precede a private quarantined receipt. Exact codec decoding is a separate prepared observation, not yet wired before final asset/version creation",
+      "next": "After proving real scanner/decoder integration, validate new incoming staged bytes before committing final asset/version and bind the observation atomically. Preserve prior quarantined receipts and audit; no history deletion"
+    },
+    {
+      "id": "F06-row-fields",
+      "status": "partial",
+      "current": "Real name, size, MIME, version, private status, scoped folder/search/pagination and version actor/time/hash",
+      "remaining": "Origin/use/status filters, measured duration in the main list, actual usage bindings, final tree/table/details layout"
+    },
+    {
+      "id": "F06-A",
+      "status": "pending",
+      "current": "No delete endpoint; immutable versions and protected native blob/attachment paths remain enforced",
+      "remaining": "Scoped usage ledger and explanatory dependency listing; referenced published audio deletion must remain blocked, without fake empty usage results"
+    },
+    {
+      "id": "F16-A",
+      "status": "partial",
+      "current": "Actual scoped metadata and immutable version history; technical metadata/history UI prepared but not homologated",
+      "remaining": "Authorized byte preview/download, measured waveform and synchronized selected-row details; actual destinations"
+    },
+    {
+      "id": "F05-A",
+      "status": "pending",
+      "current": "Native upload dialog and private receipts validated; no institutional browser recording/Nico generation integration claimed",
+      "remaining": "Validated source tabs, browser capture, existing Nico capability/provider integration, review before final save; no fabricated voices or external commands"
+    },
+    {
+      "id": "F05-B",
+      "status": "pending",
+      "current": "Native upload errors and uncertain response preserve the draft/request context. This is not a Nico generation-failure proof",
+      "remaining": "Real internal generation failure handling and explicit external-provider homologation when authorized"
+    },
+    {
+      "id": "F16-B",
+      "status": "separate_requirement_pending",
+      "current": "Complement explicitly identifies figure 16 as institutional audio details, not call-recording retention policy",
+      "remaining": "Keep the original written recording-policy requirement open and obtain evidence of its own screen; do not use library screenshots to close it"
+    }
+  ],
+  "external_dependencies": [
+    "PABX codec capabilities, configuration publication and ACK contract remain unavailable; no endpoints or capabilities invented",
+    "Nico external speech service and real channels require explicit authorized homologation; internal independent work continues"
+  ],
+  "security_preserved": [
+    "Native account and current unit/corporate coverage",
+    "No recording-listen grant reused as institutional configuration",
+    "No unauthenticated or generic ActiveStorage byte access",
+    "Exact version/hash authority and immutable history",
+    "No real data, user grants, provider commands, production migrations, Docker publication or deploy"
+  ],
+  "full_figures_complete": false,
+  "full_23_figures_complete": false
+}

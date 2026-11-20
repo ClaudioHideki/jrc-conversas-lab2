@@ -23,10 +23,10 @@ export const audioFolderMigrationHash = 'ba0f119179aa59ca0b2df5cb9cd9425b2e31f70
 export const audioFileMigrationPath = 'db/migrate/20261120120000_create_contact_center_audio_files.rb';
 export const audioFileMigrationHash = '75cfea1bac450ff452e5cddd61aaf242f6d0f166dc7379a2a12acabb51a738d4';
 export const audioInspectionMigrationPath = 'db/migrate/20261120153000_create_contact_center_audio_inspections.rb';
-export const audioInspectionMigrationHash = 'c2e3079021371db24a782d4e8d72f6a71eb99a915f64ffb0bcaed3d3a8c2a9e7';
+export const audioInspectionMigrationHash = '4415dbe1ca204bbe35e9fb0567aa05cecbdcf32e7a20afd6406188d94e31163f';
 export const audioInspectionSqlSources = Object.freeze({
   'lib/jrc_contact_center/audio_inspection_sql.rb': 'd7a42667936a6dda80a42d63e2e4bfc2a4857fc5fe3712ee0f047f2e6bfbb73f',
-  'lib/jrc_contact_center/audio_inspection_schema_receipt.rb': 'e621100ea31d3e7588289d43c6a45a8aba5a62e9cab9545d3ca79d203a1e74d8',
+  'lib/jrc_contact_center/audio_inspection_schema_receipt.rb': '8cb4e61c65722e24e5c541f098b6682d0056f56e4792a1e189dd81cf41f372b5',
 });
 export const audioFileSqlSources = Object.freeze({
   "lib/jrc_contact_center/audio_file_storage_sql.rb": "78cd8c6013eb8d7378d49c128b87061e442f282f982c13760cc97baebf4558db",

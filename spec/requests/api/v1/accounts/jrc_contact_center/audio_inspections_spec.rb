@@ -6,7 +6,7 @@ RSpec.describe 'Institutional audio inspection authority and native persistence'
   let(:headers) { actor.create_new_auth_token }
   let(:version) do
     JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                 .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC inspectable audio' }, file: upload, key: key)
+                                  .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC inspectable audio' }, file: upload, key: key)
   end
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_assets/#{version.audio_asset_id}/versions/#{version.id}/inspections" }
 
@@ -52,7 +52,7 @@ RSpec.describe 'Institutional audio inspection authority and native persistence'
 
   it 'does not accept client-shaped state, metadata, actor or account declarations as technical proof' do
     post base, headers: headers, params: { idempotency_key: 'synthetic-inspection-http-0001', state: 'clean', ready: true,
-                                         metadata: { duration_ms: 1 }, user_id: actor.id, account_id: account.id }, as: :json
+                                           metadata: { duration_ms: 1 }, user_id: actor.id, account_id: account.id }, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcContactCenter::AudioInspection.where(account: account)).to be_empty
     expect(version.reload.blob.download).to eq(bytes)

@@ -5,7 +5,7 @@ class CreateContactCenterAudioInspections < ActiveRecord::Migration[7.1]
   TABLE = :jrc_contact_center_audio_inspections
   SQL_SOURCES = {
     'lib/jrc_contact_center/audio_inspection_sql.rb' => 'd7a42667936a6dda80a42d63e2e4bfc2a4857fc5fe3712ee0f047f2e6bfbb73f',
-    'lib/jrc_contact_center/audio_inspection_schema_receipt.rb' => 'e621100ea31d3e7588289d43c6a45a8aba5a62e9cab9545d3ca79d203a1e74d8'
+    'lib/jrc_contact_center/audio_inspection_schema_receipt.rb' => '8cb4e61c65722e24e5c541f098b6682d0056f56e4792a1e189dd81cf41f372b5'
   }.freeze
 
   def up
@@ -35,6 +35,7 @@ class CreateContactCenterAudioInspections < ActiveRecord::Migration[7.1]
   def load_sources!
     SQL_SOURCES.each do |path, expected|
       raise ActiveRecord::MigrationError, 'Unreviewed private audio inspection source' unless expected.match?(/\A[0-9a-f]{64}\z/)
+
       actual = Digest::SHA256.file(Rails.root.join(path)).hexdigest
       raise ActiveRecord::MigrationError, 'Private audio inspection source changed' unless actual == expected
 

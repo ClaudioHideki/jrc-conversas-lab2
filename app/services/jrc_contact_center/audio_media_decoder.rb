@@ -3,7 +3,7 @@
 # Decoding proves media readability, never antivirus clearance or permission to publish.
 class JrcContactCenter::AudioMediaDecoder
   BINARY = '/usr/bin/ffmpeg'
-  FORMATS = 'wav,mp3,ogg,mov,matroska,webm'.freeze
+  FORMATS = 'wav,mp3,ogg,mov,matroska,webm'
 
   def identity
     result = JrcContactCenter::AudioProbeProcess.new.call(arguments: [BINARY, '-version'])
@@ -24,7 +24,7 @@ class JrcContactCenter::AudioMediaDecoder
 
   def decoded_progress?(output)
     final_time = output.scan(/^out_time_us=([0-9]{1,19})$/).last&.first
-    output.end_with?("progress=end\n") && final_time && final_time.to_i.positive?
+    output.end_with?("progress=end\n") && final_time&.to_i&.positive?
   end
 
   def fd_available?

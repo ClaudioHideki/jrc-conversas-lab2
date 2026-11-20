@@ -5,7 +5,7 @@ RSpec.describe JrcContactCenter::AudioInspection do
 
   let(:version) do
     JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                 .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC inspected source' }, file: upload, key: key)
+                                  .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC inspected source' }, file: upload, key: key)
   end
   let(:attributes) do
     # Synthetic observation fixture for model/SQL invariants, not an actual scanner or codec proof.
@@ -34,7 +34,7 @@ RSpec.describe JrcContactCenter::AudioInspection do
 
   it 'keeps accepted observations immutable at the model and database levels' do
     saved = record
-    expect { saved.update!(state: 'unavailable') }.to raise_error(ActiveRecord::ReadOnlyRecord)
+    expect { saved.update!(decoder_version: 'ffmpeg version SYNTHETIC changed') }.to raise_error(ActiveRecord::ReadOnlyRecord)
     expect { saved.destroy! }.to raise_error(ActiveRecord::ReadOnlyRecord)
     expect do
       described_class.transaction(requires_new: true) do

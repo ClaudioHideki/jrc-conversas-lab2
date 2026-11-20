@@ -19,17 +19,21 @@ class JrcContactCenter::AudioMediaMetadata
   def self.extract(document, version:)
     return unless document.is_a?(Hash)
 
-    streams = document.fetch('streams')
-    return unless streams.is_a?(Array) && streams.length == 1 && streams.first.is_a?(Hash)
-
-    stream = streams.first
+    stream = audio_stream(document.fetch('streams'))
     format = document.fetch('format')
-    return unless stream['codec_type'] == 'audio' && format.is_a?(Hash)
+    return unless stream && format.is_a?(Hash)
 
     metadata = stream_metadata(stream, format, version)
     valid?(metadata) ? metadata : nil
   rescue KeyError
     nil
+  end
+
+  def self.audio_stream(streams)
+    return unless streams.is_a?(Array) && streams.length == 1 && streams.first.is_a?(Hash)
+
+    stream = streams.first
+    stream if stream['codec_type'] == 'audio'
   end
 
   def self.stream_metadata(stream, format, version)
@@ -66,5 +70,5 @@ class JrcContactCenter::AudioMediaMetadata
 
     (decimal * 1000).round.to_i
   end
-  private_class_method :integer, :duration, :stream_metadata, :valid_text?, :valid_numbers?
+  private_class_method :integer, :duration, :audio_stream, :stream_metadata, :valid_text?, :valid_numbers?
 end

@@ -10,7 +10,7 @@ class JrcContactCenter::AudioMediaProbe
     identity = runtime_identity
     decoder = JrcContactCenter::AudioMediaDecoder.new
     decoder_version = decoder.identity
-    return failure('unavailable') unless identity && decoder_version
+    return failure('unavailable') unless [identity, decoder_version].all?
 
     result = JrcContactCenter::AudioProbeProcess.new.call(arguments: arguments, file: file)
     return failure(result.state == :nonzero ? 'invalid' : 'unavailable') unless result.state == :ok

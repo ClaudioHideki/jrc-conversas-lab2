@@ -1,0 +1,177 @@
+{
+  "sha": "3b20ccc06ebadb42d744681dc5f7303ea88f8094",
+  "run": 44792107487,
+  "artifact": 14658475849,
+  "artifact_sha256": "9ddee92a8848020800a23edb3dd1d187f8c56cb009b6ef16bffc34f7dcb353c2",
+  "status": "failed_candidate_correction_prepared",
+  "schema_reload": {
+    "duration": 11.326610682,
+    "example_count": 130,
+    "failure_count": 1,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "new_migration_native_cases_passed": 6,
+  "old_file_domain_fingerprint_preserved": "jrc_cc_audio_files_v1:581ccf5a93895eda0ca259d1e62ac87d64acc70736cee5f173fddf1a4a4b209d",
+  "schema_fingerprint_failure": false,
+  "actual_scanner_preparation": {
+    "actual_engine": "ClamAV 1.5.4",
+    "signature_database": "SYNTHETIC_TEST_ONLY",
+    "malware_coverage_proven": false,
+    "external_homologation": false,
+    "database_sha256": "141ccde580eb2c844f98ded1922be3ec225e66a71e0ee91b0c9094256daeac8e",
+    "package_sha256": "e9943d5e9dc7a5b37162ad19331a960aa6713b9f74bf64074cb1ac4f210abf4d",
+    "package_version": "1.5.4+dfsg-0ubuntu0.24.04.1",
+    "certificate_sha256": "60200e4b4b1b1b7257bb4550487aeb142034341f3300a8526e77a3134a940e9d",
+    "certificate_source_commit": "fa59fca15872bb8a914ba4c68188bcc8a502cbdf",
+    "binary_sha256": "d3365e97487942f205c7779d839b2fe12c1d7442335379ded189350df7320fe0"
+  },
+  "single_test_failure_cause": "The mutation changed state to unavailable while probe_state was valid; validation correctly rejected it before the immutable-write guard",
+  "test_correction": "Use a different syntactically valid decoder identity so model validation passes and the unchanged ReadOnlyRecord guard is actually exercised. Keep SQL update/delete rejection assertions.",
+  "new_ruby_offenses": [
+    {
+      "path": "app/services/jrc_contact_center/audio_inspections.rb",
+      "line": 40,
+      "cop": "Layout/ArgumentAlignment"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_inspections.rb",
+      "line": 40,
+      "cop": "Layout/HashAlignment"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_library_presenter.rb",
+      "line": 20,
+      "cop": "Layout/ArrayAlignment"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_media_decoder.rb",
+      "line": 6,
+      "cop": "Style/RedundantFreeze"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_media_decoder.rb",
+      "line": 27,
+      "cop": "Style/SafeNavigation"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_media_metadata.rb",
+      "line": 19,
+      "cop": "Metrics/CyclomaticComplexity"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_media_metadata.rb",
+      "line": 19,
+      "cop": "Metrics/PerceivedComplexity"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_media_probe.rb",
+      "line": 9,
+      "cop": "Metrics/CyclomaticComplexity"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_probe_process.rb",
+      "line": 18,
+      "cop": "Metrics/CyclomaticComplexity"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_probe_process.rb",
+      "line": 18,
+      "cop": "Metrics/PerceivedComplexity"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_probe_process.rb",
+      "line": 60,
+      "cop": "Metrics/CyclomaticComplexity"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_safety_observation.rb",
+      "line": 11,
+      "cop": "Style/RedundantFreeze"
+    },
+    {
+      "path": "app/services/jrc_contact_center/configuration_audit_snapshot.rb",
+      "line": 16,
+      "cop": "Layout/ArrayAlignment"
+    },
+    {
+      "path": "db/migrate/20261120153000_create_contact_center_audio_inspections.rb",
+      "line": 37,
+      "cop": "Layout/EmptyLineAfterGuardClause"
+    },
+    {
+      "path": "lib/jrc_contact_center/audio_inspection_schema_receipt.rb",
+      "line": 21,
+      "cop": "Metrics/CyclomaticComplexity"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/audio_inspection_spec.rb",
+      "line": 8,
+      "cop": "Layout/MultilineMethodCallIndentation"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb",
+      "line": 21,
+      "cop": "Layout/MultilineMethodCallIndentation"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb",
+      "line": 71,
+      "cop": "Style/WordArray"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/audio_inspections_spec.rb",
+      "line": 9,
+      "cop": "Layout/MultilineMethodCallIndentation"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/audio_inspections_spec.rb",
+      "line": 55,
+      "cop": "Layout/HashAlignment"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/native_audio_inspections_spec.rb",
+      "line": 10,
+      "cop": "Layout/MultilineMethodCallIndentation"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/native_audio_inspections_spec.rb",
+      "line": 45,
+      "cop": "Layout/MultilineMethodCallIndentation"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/native_audio_inspections_spec.rb",
+      "line": 61,
+      "cop": "Layout/MultilineMethodCallIndentation"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/audio_safety_observation_spec.rb",
+      "line": 9,
+      "cop": "Layout/MultilineMethodCallIndentation"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/audio_safety_observation_spec.rb",
+      "line": 46,
+      "cop": "Layout/ArgumentAlignment"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/audio_safety_observation_spec.rb",
+      "line": 46,
+      "cop": "Layout/HashAlignment"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/create_contact_center_audio_inspections_spec.rb",
+      "line": 31,
+      "cop": "Layout/MultilineMethodCallIndentation"
+    }
+  ],
+  "ruby_corrections": "Only reviewed alignment/word-array/frozen-literal style and decomposition of input validation, pipe closure, child-pending and schema structure checks. No conditions, limits or fingerprint components removed.",
+  "new_inspection_receipt_source_sha256": "8cb4e61c65722e24e5c541f098b6682d0056f56e4792a1e189dd81cf41f372b5",
+  "new_candidate_migration_sha256": "4415dbe1ca204bbe35e9fb0567aa05cecbdcf32e7a20afd6406188d94e31163f",
+  "nine_preceding_migrations_unchanged": true,
+  "database_definition_changed": false,
+  "local_hash_gate_cases_passed": 54,
+  "native_application_vue_chrome": "not run on this SHA; mandatory after correction",
+  "corrections_natively_approved": false,
+  "full_23_figures_complete": false
+}

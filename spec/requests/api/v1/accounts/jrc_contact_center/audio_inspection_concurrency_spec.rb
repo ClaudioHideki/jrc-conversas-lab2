@@ -18,7 +18,7 @@ RSpec.describe 'Institutional audio committed inspection concurrency', type: :re
   let(:barriers) { { arrived: Queue.new, release: Queue.new, results: Queue.new } }
   let(:version) do
     JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                 .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC concurrent inspection' }, file: upload, key: key)
+                                  .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC concurrent inspection' }, file: upload, key: key)
   end
 
   after do
@@ -68,7 +68,7 @@ RSpec.describe 'Institutional audio committed inspection concurrency', type: :re
   end
 
   it 'accepts exactly one observation and audit for simultaneous identical keys after actual native media IO' do
-    start_native_inspections(['synthetic-inspection-race-key', 'synthetic-inspection-race-key'])
+    start_native_inspections(%w[synthetic-inspection-race-key synthetic-inspection-race-key])
     outcomes = finish_native_inspections
     expect(outcomes.map(&:class)).to eq([JrcContactCenter::AudioInspection, JrcContactCenter::AudioInspection])
     expect(outcomes.map(&:id).uniq.length).to eq(1)

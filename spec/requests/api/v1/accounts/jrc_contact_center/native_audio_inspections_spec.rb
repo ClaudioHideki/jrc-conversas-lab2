@@ -7,7 +7,7 @@ RSpec.describe 'Institutional audio native scanner and decoder receipts', type: 
   let(:headers) { actor.create_new_auth_token }
   let(:version) do
     JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                 .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC native inspection' }, file: upload, key: key)
+                                  .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC native inspection' }, file: upload, key: key)
   end
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_assets/#{version.audio_asset_id}/versions/#{version.id}/inspections" }
 
@@ -42,7 +42,7 @@ RSpec.describe 'Institutional audio native scanner and decoder receipts', type: 
       file.flush
       native_upload = ActionDispatch::Http::UploadedFile.new(tempfile: file, filename: 'SYNTHETIC-marker.wav', type: 'audio/wav')
       record = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                           .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC marker only' }, file: native_upload, key: key)
+                                             .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC marker only' }, file: native_upload, key: key)
       path = "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_assets/#{record.audio_asset_id}/versions/#{record.id}/inspections"
       post path, headers: headers, params: { idempotency_key: 'synthetic-native-inspection-0001' }, as: :json
       expect(response).to have_http_status(:created)
@@ -58,7 +58,7 @@ RSpec.describe 'Institutional audio native scanner and decoder receipts', type: 
         file.flush
         native_upload = ActionDispatch::Http::UploadedFile.new(tempfile: file, filename: 'SYNTHETIC-empty.wav', type: 'audio/wav')
         record = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
-                                             .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC empty header' }, file: native_upload, key: key)
+                                               .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC empty header' }, file: native_upload, key: key)
         path = "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_assets/#{record.audio_asset_id}/versions/#{record.id}/inspections"
         post path, headers: headers, params: { idempotency_key: 'synthetic-native-inspection-0001' }, as: :json
         expect(response).to have_http_status(:created)

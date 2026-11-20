@@ -8,7 +8,7 @@ require 'timeout'
 class JrcContactCenter::AudioSafetyObservation
   Result = Struct.new(:version, :attributes, keyword_init: true)
   Deadline = Class.new(StandardError)
-  ADAPTER = 'clamav-instream-v1'.freeze
+  ADAPTER = 'clamav-instream-v1'
 
   def initialize(access:, scanner: JrcServiceDesk::AttachmentScanner.new, probe: JrcContactCenter::AudioMediaProbe.new)
     @access = access

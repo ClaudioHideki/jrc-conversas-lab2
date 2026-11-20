@@ -19,13 +19,16 @@ class JrcContactCenter::AudioInspectionSchemaReceipt
   end
 
   def verify!
-    valid = @connection.table_exists?(TABLE) && @connection.columns(TABLE).map(&:name).sort == COLUMNS.sort
-    valid &&= functions.length == 1 && triggers.length == 1 && triggers.first[1] == 'O'
-    valid &&= @connection.table_comment(TABLE) == token
+    valid = complete_structure? && @connection.table_comment(TABLE) == token
     raise ActiveRecord::MigrationError, 'Unexpected institutional audio inspection schema; preserve history' unless valid
   end
 
   private
+
+  def complete_structure?
+    @connection.table_exists?(TABLE) && @connection.columns(TABLE).map(&:name).sort == COLUMNS.sort &&
+      functions.length == 1 && triggers.length == 1 && triggers.first[1] == 'O'
+  end
 
   def token
     columns = @connection.columns(TABLE).map { |row| [row.name, row.sql_type, row.null, row.default, row.default_function, row.collation] }

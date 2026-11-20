@@ -6,7 +6,7 @@ RSpec.describe JrcContactCenter::AudioSafetyObservation do
   let(:access) { JrcContactCenter::AudioLibraryAccess.new(context: context) }
   let(:version) do
     JrcContactCenter::AudioUploads.new(access: access)
-                                 .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC observation' }, file: upload, key: key)
+                                  .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC observation' }, file: upload, key: key)
   end
   let(:scanner) do
     # Dependency contract fixture only. It is not a real ClamAV/homologation proof.
@@ -43,7 +43,7 @@ RSpec.describe JrcContactCenter::AudioSafetyObservation do
 
   it 'rejects a clean dependency response for different bytes before calling the media parser' do
     allow(scanner).to receive(:scan).and_return('service_desk_scan_state' => 'clean', 'service_desk_scan_adapter' => 'clamav-instream-v1',
-                                              'service_desk_scan_sha256' => 'f' * 64, 'service_desk_scanned_at' => Time.current.iso8601(6))
+                                                'service_desk_scan_sha256' => 'f' * 64, 'service_desk_scanned_at' => Time.current.iso8601(6))
     expect(probe).not_to receive(:call)
     result = described_class.new(access: access, scanner: scanner, probe: probe).call(asset_id: version.audio_asset_id, version_id: version.id)
     expect(result.attributes).to include(state: 'checksum_mismatch', probe_state: 'not_run', metadata: {})
