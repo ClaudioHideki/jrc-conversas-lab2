@@ -1983,7 +1983,8 @@
       "TEAM_ACTIVE": "Equipe ativa no Call Center",
       "TEAM_INACTIVE": "Equipe inativa no Call Center",
       "TEAM_LOCAL_STATUS": "A inativação suspende somente as permissões e a cobertura herdadas desta equipe no Call Center. Preserva os vínculos, a elegibilidade individual, outras equipes e os demais módulos.",
-      "INACTIVE_ORIGINS": "Origens de equipe suspensas no Call Center: {teams}"
+      "INACTIVE_ORIGINS": "Origens de equipe suspensas no Call Center: {teams}",
+      "MANAGE_TEAM_SOURCE": "Situação e permissões no Call Center"
     },
     "LOCAL_IVR": {
       "TITLE": "URAs locais",

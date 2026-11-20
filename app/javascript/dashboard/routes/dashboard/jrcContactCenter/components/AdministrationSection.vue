@@ -202,6 +202,16 @@ const clear = () => {
   status.value = '';
   search();
 };
+const openTeamAuthority = row =>
+  router.replace({
+    name: 'jrc_contact_center_admin_section',
+    params: { accountId: props.accountId, section: 'permissions' },
+    query: {
+      permission_scope: 'teams',
+      access_teams_q: row.name,
+      access_teams_page: 1,
+    },
+  });
 const load = async () => {
   generation += 1;
   const version = generation;
@@ -805,8 +815,9 @@ onBeforeUnmount(() => {
             class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
         /></label>
         <label
-          v-if="local && resource !== 'teams'"
+          v-if="local"
           class="text-sm text-n-slate-11"
+          data-resource-status-filter
           >{{ label('STATUS')
           }}<select
             v-model="status"
@@ -854,6 +865,17 @@ onBeforeUnmount(() => {
             </p>
             <p class="break-words text-sm text-n-slate-11">{{ row.detail }}</p>
             <p
+              v-if="resource === 'teams'"
+              class="text-sm text-n-slate-11"
+              data-team-source-status
+            >
+              {{
+                row.cc_active === false
+                  ? t('JRC_CONTACT_CENTER.ACCESS.TEAM_INACTIVE')
+                  : t('JRC_CONTACT_CENTER.ACCESS.TEAM_ACTIVE')
+              }}
+            </p>
+            <p
               v-if="resource === 'memberships'"
               class="text-sm text-n-slate-11"
             >
@@ -886,6 +908,15 @@ onBeforeUnmount(() => {
               }}
             </p>
           </div>
+          <button
+            v-if="resource === 'teams' && context.native_links?.access_editor"
+            type="button"
+            class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
+            data-manage-team-authority
+            @click="openTeamAuthority(row)"
+          >
+            {{ t('JRC_CONTACT_CENTER.ACCESS.MANAGE_TEAM_SOURCE') }}
+          </button>
           <button
             v-if="canEdit"
             type="button"

@@ -10,8 +10,9 @@ RSpec.describe JrcContactCenter::TeamState do
     expect(state).not_to be_valid
     expect do
       described_class.transaction(requires_new: true) do
-        values = { account_id: account.id, team_id: foreign.id, active: false, created_at: Time.current, updated_at: Time.current }
-        described_class.insert_all!([values])
+        described_class.connection.execute('INSERT INTO jrc_contact_center_team_states ' \
+                                          '(account_id, team_id, active, created_at, updated_at) ' \
+                                          "VALUES (#{account.id}, #{foreign.id}, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)")
       end
     end.to raise_error(ActiveRecord::InvalidForeignKey)
     expect(described_class.where(account: account)).to be_empty
@@ -21,11 +22,15 @@ RSpec.describe JrcContactCenter::TeamState do
     state = described_class.create!(account: account, team: team, active: false)
     expect do
       described_class.transaction(requires_new: true) do
-        described_class.insert_all!([state.attributes.except('id')])
+        described_class.connection.execute('INSERT INTO jrc_contact_center_team_states ' \
+                                          '(account_id, team_id, active, created_at, updated_at) ' \
+                                          "VALUES (#{account.id}, #{team.id}, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)")
       end
     end.to raise_error(ActiveRecord::RecordNotUnique)
     expect do
-      described_class.transaction(requires_new: true) { state.update_columns(active: nil) }
+      described_class.transaction(requires_new: true) do
+        described_class.connection.execute("UPDATE jrc_contact_center_team_states SET active = NULL WHERE id = #{state.id}")
+      end
     end.to raise_error(ActiveRecord::NotNullViolation)
     expect(state.reload).not_to be_active
   end

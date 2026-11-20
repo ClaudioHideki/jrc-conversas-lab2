@@ -871,4 +871,48 @@ describe('global ACW administrative popup revision', () => {
       }
     );
   });
+  it('shows the Call Center team source status without editing the native roster or hiding the team', async () => {
+    mocks.route.query.queues_tab = 'teams';
+    API.administrativeList.mockResolvedValue({
+      data: {
+        items: [{ id: 7, name: 'SYNTHETIC native team', cc_active: false }],
+        can_manage: true,
+      },
+    });
+    const wrapper = mountSection('queues');
+    await wrapper.setProps({
+      context: { ...context, native_links: { access_editor: true } },
+    });
+    await flushPromises();
+    expect(wrapper.get('[data-team-source-status]').text()).toContain(
+      'JRC_CONTACT_CENTER.ACCESS.TEAM_INACTIVE'
+    );
+    await wrapper.get('[data-manage-team-authority]').trigger('click');
+    expect(mocks.replace).toHaveBeenCalledWith({
+      name: 'jrc_contact_center_admin_section',
+      params: { accountId: '1', section: 'permissions' },
+      query: {
+        permission_scope: 'teams',
+        access_teams_q: 'SYNTHETIC native team',
+        access_teams_page: 1,
+      },
+    });
+    expect(TeamsAPI.updateAgents).not.toHaveBeenCalled();
+  });
+
+  it('does not expose team-source authorization management to a configure-only actor', async () => {
+    mocks.route.query.queues_tab = 'teams';
+    API.administrativeList.mockResolvedValue({
+      data: {
+        items: [{ id: 7, name: 'SYNTHETIC native team', cc_active: false }],
+        can_manage: true,
+      },
+    });
+    const wrapper = mountSection('queues');
+    await flushPromises();
+    expect(wrapper.find('[data-manage-team-authority]').exists()).toBe(false);
+    expect(wrapper.get('[data-team-source-status]').text()).toContain(
+      'JRC_CONTACT_CENTER.ACCESS.TEAM_INACTIVE'
+    );
+  });
 });

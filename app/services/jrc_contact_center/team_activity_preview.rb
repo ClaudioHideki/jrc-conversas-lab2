@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
 # Shares the native last-agent impact calculation; never changes the shared roster.
-class JrcContactCenter::TeamActivityPreview < JrcContactCenter::TeamRosterPreview
-  attr_reader :revision
+class JrcContactCenter::TeamActivityPreview
+  attr_reader :revision, :before_ids, :after_ids, :team, :operation
 
   def initialize(account:, actor:, team:, revision:)
-    @account, @actor, @team, @revision = account, actor, account.teams.find(team.id), revision
+    @account = account
+    @actor = actor
+    @team = account.teams.find(team.id)
+    @revision = revision
     @operation = 'deactivate_source'
     @before_ids = @team.team_members.order(:user_id).pluck(:user_id).freeze
     @after_ids = @before_ids
@@ -21,9 +24,7 @@ class JrcContactCenter::TeamActivityPreview < JrcContactCenter::TeamRosterPrevie
     at = Time.current
     previous = JrcContactCenter::ConfiguredQueueEligibility.new(account: @account, at: at)
     proposed = JrcContactCenter::ConfiguredQueueEligibility.new(account: @account, at: at, team_activity_preview: { @team.id => false })
-    impacts = affected_queues.filter_map { |queue| queue_impact(queue, previous, proposed) }
-    authorize_impacts!(impacts) if impacts.any?
-    impacts
+    JrcContactCenter::QueueEligibilityComparison.new(account: @account, actor: @actor, previous: previous, proposed: proposed).call(affected_queues)
   end
 
   private

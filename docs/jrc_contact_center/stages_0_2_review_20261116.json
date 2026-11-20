@@ -5413,6 +5413,17 @@
       "approved": "Module-local team source inactivation, preserving shared membership/individual eligibility/other teams/modules; audio by unit approved, still pending implementation.",
       "evidence": "docs/jrc_contact_center/team_source_activity_prepared_20261120.json",
       "visual_residual": "17d6536a actual ACW bar remained green despite computed red. Explicit paint correction and screenshot pixel regression prepared."
+    },
+    {
+      "date": "2026-11-20",
+      "sha": "075d60b70d998db7697d9059ad80bede779fa251",
+      "evidence": "docs/jrc_contact_center/team_source_activity_backend_evidence_20261120.json",
+      "status": "Backend validado; Vue e lint bloqueados, correção preparada. Sem build/Chrome e sem aceite visual deste incremento.",
+      "figures": [
+        3,
+        12
+      ],
+      "followup": "Situação na lista administrativa e atalho autorizado para editor existente; testes de transporte da confirmação. Revalidar no novo SHA."
     }
   ]
 }

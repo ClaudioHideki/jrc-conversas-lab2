@@ -13,7 +13,11 @@ vi.mock('vue-router', () => ({
   useRoute: () => mocks.route,
   useRouter: () => ({ replace: mocks.replace }),
 }));
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, values) => (values?.teams ? `${key} ${values.teams}` : key),
+  }),
+}));
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: {
     accessAuthorizations: vi.fn(),

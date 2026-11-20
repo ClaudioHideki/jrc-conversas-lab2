@@ -145,4 +145,14 @@ RSpec.describe 'Call Center team source activity without changing shared teams',
     expect(JrcContactCenter::TeamState.where(team: team)).to be_empty
     expect(grant.reload.allowed).to eq(['jrc_contact_center_monitor'])
   end
+  it 'shows the module-local status in native administrative teams and filters it without deleting their shared membership' do
+    JrcContactCenter::TeamState.create!(account: account, team: team, active: false)
+    get "/api/v1/accounts/#{account.id}/jrc_contact_center/administration/teams", headers: headers, params: { status: 'inactive', page: 1 }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items')).to contain_exactly(a_hash_including('id' => team.id, 'cc_active' => false))
+    expect(team.members).to include(recipient)
+    get "/api/v1/accounts/#{account.id}/jrc_contact_center/administration/teams", headers: headers, params: { status: 'active', page: 1 }
+    expect(response.parsed_body.fetch('items')).to be_empty
+  end
+
 end

@@ -65,8 +65,9 @@ RSpec.describe 'Manager review of Call Center team-source last-agent loss', type
   it 'does not reuse the source-status receipt as a shared roster withdrawal receipt' do
     patch endpoint, headers: headers, params: payload, as: :json
     token = response.parsed_body.fetch('review').fetch('review_token')
-    patch "/api/v1/accounts/#{account.id}/teams/#{team.id}/team_members", headers: headers,
-            params: { user_ids: [], manager_confirmation: { confirmed: true, review_token: token } }, as: :json
+    native_endpoint = "/api/v1/accounts/#{account.id}/teams/#{team.id}/team_members"
+    confirmation = { confirmed: true, review_token: token }
+    patch native_endpoint, headers: headers, params: { user_ids: [], manager_confirmation: confirmation }, as: :json
     expect(response).to have_http_status(:conflict)
     expect(team.members).to include(recipient)
     expect(JrcContactCenter::TeamState.where(team: team)).to be_empty

@@ -1,0 +1,64 @@
+{
+  "sha": "075d60b70d998db7697d9059ad80bede779fa251",
+  "run": 44700319493,
+  "job": 136166827281,
+  "overall": "failure_not_accepted",
+  "native_backend": "passed",
+  "native_distinct_examples": 1847,
+  "schema_reload_reexecutions": 90,
+  "rspec": {
+    "call-center-rspec.json": {
+      "duration": 177.064579169,
+      "example_count": 1661,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-pabx-rspec.json": {
+      "duration": 34.417493787,
+      "example_count": 101,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-corporate-rspec.json": {
+      "duration": 275.569651622,
+      "example_count": 85,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "duration": 5.812598679,
+      "example_count": 90,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    }
+  },
+  "vue": {
+    "total": 883,
+    "passed": 882,
+    "failed": 1,
+    "pending": 0,
+    "cause": "Translation mock returned only key; team-name interpolation omitted. Assertion retained, mock corrected in follow-up."
+  },
+  "ruby_new_offenses": 15,
+  "ruby_followup": "Actual findings corrected; no rule/exclusion/tolerance changed. Shared eligibility comparison composed by roster and source previews without fake superclass initialization.",
+  "chrome": "not run; asset build and Chrome remained blocked by Vue/lint",
+  "paint": "actual screenshot pixel assertion is prepared, not validated yet",
+  "artifact": {
+    "id": 14613044246,
+    "zip_sha256": "42095c18eb57b93e88c5c2c74e5ece2e94ea908ff8ebdbeb8bbac4e076b8da6c",
+    "remote_digest_and_zip_crc": "verified"
+  },
+  "report_sha256": {
+    "call-center-rspec.json": "e52dcf9ed70e49862929155c45273327b9aa18d9a7657e7ef4b109351de61a40",
+    "call-center-pabx-rspec.json": "9d005efdeee4343f7571bd6c2925cbe9df28791d0e1d41270895bf5f47028d4f",
+    "call-center-corporate-rspec.json": "c200ea3d57d80f14dd4ea905d929631daf76b82dad2655125657600d3c318bcd",
+    "call-center-ivr-schema-reload-rspec.json": "db266a53455385189e36d0c5ff2ed7dc8f94abe40069de52dabbd88c0c0525c6"
+  },
+  "subsequent_changes": "Not covered by this SHA; all affected native gates must run again for the correction checkpoint.",
+  "external_homologation": false,
+  "stages_complete": false
+}

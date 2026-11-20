@@ -667,3 +667,7 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - [ ] Executar os testes nativos e conferir Chrome deste incremento antes de aceitar a alteração.
 - [ ] Confirmar a pintura real da barra ACW: captura de 17d6536a ainda verde; accent-color isolado não era evidência suficiente.
 - [ ] Implementar biblioteca institucional por unidade conforme decisão aprovada; não misturar gravações de chamadas.
+
+#### Evidência intermediária 075d60b7
+
+Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incremento não aceito: um mock Vue sem interpolação e15 infrações Ruby bloquearam assets/Chrome. Correções preparadas sem reduzir asserções, regras ou autoridade. A conferência da pintura ACW real continua obrigatória. Biblioteca por unidade segue em preparação separada, sem rota, banco ou operação ativa.

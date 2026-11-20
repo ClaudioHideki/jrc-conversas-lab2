@@ -36,7 +36,7 @@ class Api::V1::Accounts::JrcContactCenter::AccessAuthorizationsController < Api:
 
   def filter_status(relation)
     return filter_team_status(relation) unless users?
-    return relation unless params[:status].present?
+    return relation if params[:status].blank?
 
     eligible = JrcContactCenter::AccessGrant.where(account: Current.account, eligible: true).select(:account_user_id)
     return relation.where(id: eligible) if params[:status] == 'eligible'
@@ -57,7 +57,7 @@ class Api::V1::Accounts::JrcContactCenter::AccessAuthorizationsController < Api:
 
   def confirmation
     value = params[:manager_confirmation]
-    value&.respond_to?(:permit) ? value.permit(:confirmed, :review_token).to_h.symbolize_keys : nil
+    value.respond_to?(:permit) ? value.permit(:confirmed, :review_token).to_h.symbolize_keys : nil
   end
 
   def users?

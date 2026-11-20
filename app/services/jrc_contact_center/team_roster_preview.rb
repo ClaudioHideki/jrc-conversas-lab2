@@ -27,9 +27,7 @@ class JrcContactCenter::TeamRosterPreview
     at = Time.current
     previous = JrcContactCenter::ConfiguredQueueEligibility.new(account: @account, at: at)
     proposed = JrcContactCenter::ConfiguredQueueEligibility.new(account: @account, at: at, team_membership_projection: projection)
-    impacts = affected_queues.filter_map { |queue| queue_impact(queue, previous, proposed) }
-    authorize_impacts!(impacts) if impacts.any?
-    impacts
+    JrcContactCenter::QueueEligibilityComparison.new(account: @account, actor: @actor, previous: previous, proposed: proposed).call(affected_queues)
   end
 
   private
@@ -61,25 +59,5 @@ class JrcContactCenter::TeamRosterPreview
     members = @account.account_users.where(user_id: changed).select(:id)
     queue_ids = JrcContactCenter::QueueMembership.where(account: @account, account_user_id: members).select(:queue_id)
     JrcContactCenter::Queue.where(account: @account, id: queue_ids).includes(:unit).order(:id)
-  end
-
-  def queue_impact(queue, previous, proposed)
-    memberships = queue.memberships.where(account: @account).order(:id).to_a
-    before = memberships.filter_map { |row| row.account_user_id if previous.call(row) }.uniq.sort
-    after = memberships.filter_map { |row| row.account_user_id if proposed.call(row) }.uniq.sort
-    return unless before.any? && after.empty?
-
-    { queue: queue, before_ids: before, after_ids: after,
-      queue_revision: JrcContactCenter::ConfigurationRevision.token(queue),
-      unit_revision: JrcContactCenter::ConfigurationRevision.token(queue.unit) }
-  end
-
-  def authorize_impacts!(impacts)
-    context = { account: @account, account_user: @actor, user: @actor.user }
-    access = JrcContactCenter::AccessScope.new(user_context: context)
-    raise Pundit::NotAuthorizedError unless access.policy.configure?
-
-    permitted = access.queues.pluck(:id)
-    raise Pundit::NotAuthorizedError unless impacts.all? { |row| permitted.include?(row.fetch(:queue).id) }
   end
 end

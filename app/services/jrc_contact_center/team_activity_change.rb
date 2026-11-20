@@ -3,9 +3,12 @@
 # One module-local status and its manager receipt inside the account authority transaction.
 class JrcContactCenter::TeamActivityChange
   def initialize(account:, actor:, team:, active:, revision:)
-    @account, @actor, @team = account, actor, team
+    @account = account
+    @actor = actor
+    @team = team
     @state = JrcContactCenter::TeamState.find_or_initialize_by(account: account, team: team)
-    @active, @revision = active, revision
+    @active = active
+    @revision = revision
     raise JrcContactCenter::OperationError, 'invalid_access_authorization' unless [true, false].include?(active)
   end
 

@@ -2,9 +2,14 @@
 
 # Validate restored rights and coverage before persisting a team source change.
 class JrcContactCenter::TeamGrantEffects
-  def initialize(account:, actor:, authority:, team:, grant:, previous:, activity:)
-    @account, @actor, @authority = account, actor, authority
-    @team, @grant, @previous, @activity = team, grant, previous, activity
+  def initialize(authority:, team:, grant:, previous:, activity:)
+    @account = authority.account
+    @actor = authority.user
+    @authority = authority
+    @team = team
+    @grant = grant
+    @previous = previous
+    @activity = activity
   end
 
   def check!

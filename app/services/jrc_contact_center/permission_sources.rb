@@ -1,13 +1,14 @@
 class JrcContactCenter::PermissionSources
   UNSPECIFIED = Object.new.freeze
 
-  def initialize(account:, member:, individual: UNSPECIFIED, team_overrides: {}, extra_permissions: [], team_activity_overrides: {})
+  def initialize(account:, member:, individual: UNSPECIFIED, team_overrides: {}, **sources)
     @account = account
     @member = member
     @preview = individual
     @team_overrides = team_overrides
-    @extra_permissions = extra_permissions
-    @team_activity_overrides = team_activity_overrides
+    sources.assert_valid_keys(:extra_permissions, :team_activity_overrides)
+    @extra_permissions = sources.fetch(:extra_permissions, [])
+    @team_activity_overrides = sources.fetch(:team_activity_overrides, {})
   end
 
   def individual
@@ -39,8 +40,8 @@ class JrcContactCenter::PermissionSources
   end
 
   def teams
-    JrcContactCenter::TeamSourceProjection.new(account: @account, activity: @team_activity_overrides)
-                                        .team_ids(account: @account, user: @member.user, current: all_teams)
+    projection = JrcContactCenter::TeamSourceProjection.new(account: @account, activity: @team_activity_overrides)
+    projection.team_ids(account: @account, user: @member.user, current: all_teams)
   end
 
   def inherited_permissions

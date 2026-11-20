@@ -1,4 +1,6 @@
 class JrcContactCenter::AccessAuthorization
+  attr_reader :account, :user
+
   def initialize(context:)
     @context = context
     @account = context.fetch(:account)
@@ -93,7 +95,7 @@ class JrcContactCenter::AccessAuthorization
       JrcContactCenter::GrantGuard.check!(actor: @user, account: @account, proposed: proposed, previous: previous[:effective])
     else
       JrcContactCenter::TeamGrantEffects.new(
-        account: @account, actor: @user, authority: self, team: subject, grant: grant, previous: previous[:allowed], activity: activity
+        authority: self, team: subject, grant: grant, previous: previous[:allowed], activity: activity
       ).check!
     end
   end

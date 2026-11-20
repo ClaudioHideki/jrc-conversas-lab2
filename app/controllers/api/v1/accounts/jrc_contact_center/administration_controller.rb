@@ -31,10 +31,27 @@ class Api::V1::Accounts::JrcContactCenter::AdministrationController < Api::V1::A
     organizational = JrcContactCenter::OrganizationalScope.new(account: Current.account, account_user: Current.account_user)
     relation = Current.account.teams.order(:name, :id)
     relation = relation.where(id: TeamMember.where(user: Current.user).select(:team_id)) if organizational.restricted?
-    payload = list_payload(search_records(relation, fields: ['name'])) { |team| team.as_json(only: %i[id name description updated_at]) }
+    payload = team_list_payload(filter_team_activity(relation))
     payload[:can_manage] = team_management_allowed?(organizational)
     payload[:agents] = team_agent_options if payload[:can_manage]
     render json: payload
+  end
+
+  def team_list_payload(relation)
+    inactive = JrcContactCenter::TeamState.where(account: Current.account, team_id: relation.select(:id), active: false).pluck(:team_id)
+    list_payload(search_records(relation, fields: ['name'])) do |team|
+      team.as_json(only: %i[id name description updated_at]).merge('cc_active' => !inactive.include?(team.id))
+    end
+  end
+
+  def filter_team_activity(relation)
+    return relation if params[:status].blank?
+
+    inactive = JrcContactCenter::TeamState.where(account: Current.account, active: false).select(:team_id)
+    return relation.where.not(id: inactive) if params[:status] == 'active'
+    return relation.where(id: inactive) if params[:status] == 'inactive'
+
+    raise JrcContactCenter::OperationError, 'invalid_access_authorization'
   end
 
   def team_management_allowed?(organizational)
