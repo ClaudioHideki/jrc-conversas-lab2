@@ -45,12 +45,17 @@ class JrcContactCenter::AcwEndingReasons
     validate_change!(previous, current, queues, activation_confirmed)
     return settings if previous.fetch('entries') == current && previous.fetch('required_queue_ids', []) == queues
 
-    state = { 'version' => previous.fetch('version') + 1, 'entries' => current }
-    state['required_queue_ids'] = queues if previous.key?('required_queue_ids') || queues.any?
-    settings.merge(KEY => state)
+    settings.merge(KEY => versioned_state(previous, current, queues))
   end
 
   private
+
+  # Keep the original document shape when queue enforcement has never been configured.
+  def versioned_state(previous, entries, queues)
+    state = { 'version' => previous.fetch('version') + 1, 'entries' => entries }
+    state['required_queue_ids'] = queues if previous.key?('required_queue_ids') || queues.any?
+    state
+  end
 
   def valid_header?(value)
     keys = %w[entries required_queue_ids version]
@@ -88,7 +93,7 @@ class JrcContactCenter::AcwEndingReasons
 
   # Historical queue identifiers are retained after native queue deletion; they are not grants.
   def stored_queue_ids?(values)
-    return false unless values.is_a?(Array) && values.length <= MAX_ENTRIES && values.all? { |id| id.is_a?(String) }
+    return false unless values.is_a?(Array) && values.length <= MAX_ENTRIES && values.all?(String)
     return false unless values == values.uniq.sort
 
     values.all? do |id|

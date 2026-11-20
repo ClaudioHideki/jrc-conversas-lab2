@@ -45,10 +45,10 @@ RSpec.describe 'Required registered voice ending reasons', type: :request do
     company = account.master_companies.create!(name: 'SYNTHETIC issuer', relationship_type: 'internal')
     business = JrcCrm::BusinessUnit.create!(account: account, operating_company: company, code: 'SYNTHETIC', name: 'SYNTHETIC covered unit')
     permitted = JrcContactCenter::Unit.create!(account: account, code: 'SYNTHETIC-B', name: 'SYNTHETIC mapped', kind: 'sac',
-                                             settings: { issuer_company_id: company.id, business_unit_id: business.id })
+                                               settings: { issuer_company_id: company.id, business_unit_id: business.id })
     session.update!(current_unit: permitted, current_queue: nil)
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', business_unit: business, company: company,
-                                   active: true, structure_managed: true)
+                                     active: true, structure_managed: true)
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/qualifications/#{id}/form_context", headers: headers, params: { reason_code: '' }
     expect(response).to have_http_status(:not_found)
     expect(response.body).not_to include(entry.fetch('name'))

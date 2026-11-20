@@ -16,11 +16,12 @@ RSpec.shared_context 'with a frozen ending reason catalogue' do
   let(:manager) { JrcContactCenter::QualificationManager.new(account: account, member: member) }
   let(:session) do
     JrcContactCenter::CallSession.create!(account: account, provider: 'synthetic', correlation_id: SecureRandom.uuid,
-                                        direction: 'inbound', status: 'connected', started_at: Time.current, current_unit: unit, current_queue: queue)
+                                          direction: 'inbound', status: 'connected', started_at: Time.current,
+                                          current_unit: unit, current_queue: queue)
   end
   let(:leg) do
     JrcContactCenter::CallLeg.create!(account: account, call_session: session, account_user: member, queue: queue,
-                                    direction: 'inbound', status: 'connected', started_at: session.started_at, answered_at: session.started_at)
+                                      direction: 'inbound', status: 'connected', started_at: session.started_at, answered_at: session.started_at)
   end
   let(:record) do
     leg
@@ -30,8 +31,11 @@ RSpec.shared_context 'with a frozen ending reason catalogue' do
 
   def configure_ending_reasons!(entries: [entry], queues: [queue.id.to_s], confirmed: true)
     Current.set(user: actor) do
-      policy.update!({ voice: 180, whatsapp: 180 }, voice_required: false, voice_reason_catalog: entries,
-                     voice_reason_required_queue_ids: queues, voice_reason_confirmation: confirmed, expected_revision: policy.revision)
+      policy.update!(
+        { voice: 180, whatsapp: 180 },
+        voice_required: false, voice_reason_catalog: entries,
+        voice_reason_required_queue_ids: queues, voice_reason_confirmation: confirmed, expected_revision: policy.revision
+      )
     end
   end
 

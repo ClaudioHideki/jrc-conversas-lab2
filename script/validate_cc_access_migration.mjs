@@ -14,12 +14,17 @@ export const deferredPauseMigrationPath = 'db/migrate/20261119193000_create_cont
 export const deferredPauseMigrationHash = '6dff254f8838085a16cd2eb6b4e516d477b8d15c6cba09873e7020ae792c9db2';
 export const qualificationFormMigrationPath = 'db/migrate/20261119203000_create_contact_center_qualification_forms.rb';
 export const qualificationFormMigrationHash = '6c9c9d3fd89691f7168a493d53e7d0124b72f95908d93cc8d7d96a5fd19eed26';
+export const endingReasonMigrationPath = 'db/migrate/20261120023000_create_contact_center_ending_reason_versions.rb';
+export const endingReasonMigrationHash = 'fbcf02176eddf2bb2a48b81862b05c484f57e470ceaea852fd85c3b650da9151';
+export const endingReasonSqlPath = 'lib/jrc_contact_center/ending_reason_origin_sql.rb';
+export const endingReasonSqlHash = 'c0dca8b84c8c4b02d78ed07be4e23bb253f0d64994dccc232ba879941ef35bf8';
 export const reviewedMigrations = Object.freeze({
   [migrationPath]: migrationHash,
   [ivrMigrationPath]: ivrMigrationHash,
   [acwFormMigrationPath]: acwFormMigrationHash,
   [deferredPauseMigrationPath]: deferredPauseMigrationHash,
   [qualificationFormMigrationPath]: qualificationFormMigrationHash,
+  [endingReasonMigrationPath]: endingReasonMigrationHash,
 });
 const base = 'a24adc6dd8bb660f955b76cce0172ae1638deee2';
 
@@ -35,17 +40,19 @@ export function verifyAccessMigration(changes, content, schema) {
 }
 
 // Preserve the original one-migration verifier and its negative tests above.
-// The current candidate admits exactly five reviewed forward additions, never an arbitrary extra migration.
+// The current candidate admits exactly six reviewed forward additions, never an arbitrary extra migration.
 export function verifyReviewedMigrations(changes, readCurrent, schema) {
   const expected = Object.keys(reviewedMigrations).sort();
   const rows = changes.trim().split('\n').filter(Boolean).sort();
   if (JSON.stringify(rows) !== JSON.stringify(expected.map(path => `A\t${path}`))) {
-    throw new Error('Only the five exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
+    throw new Error('Only the six exact reviewed additions are admitted; historical migrations/schema/SQL remain protected.');
   }
   for (const path of expected) {
     const actual = createHash('sha256').update(readCurrent(path)).digest('hex');
     if (actual !== reviewedMigrations[path]) throw new Error(`Reviewed migration content changed: ${path}`);
   }
+  const sourceHash = createHash('sha256').update(readCurrent(endingReasonSqlPath)).digest('hex');
+  if (sourceHash !== endingReasonSqlHash) throw new Error('Reviewed ending reason SQL source changed.');
   return validateNewMigrationTimestamps(schema, expected);
 }
 

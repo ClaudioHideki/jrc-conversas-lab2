@@ -14,9 +14,9 @@ RSpec.describe JrcContactCenter::EndingReasonPolicy do
 
   it 'leaves a call started before activation on the legacy optional path instead of applying the new requirement retroactively' do
     old = JrcContactCenter::CallSession.create!(account: account, provider: 'synthetic', correlation_id: SecureRandom.uuid,
-                                               direction: 'inbound', status: 'connected', started_at: 1.day.ago, current_queue: queue)
+                                                direction: 'inbound', status: 'connected', started_at: 1.day.ago, current_queue: queue)
     JrcContactCenter::CallLeg.create!(account: account, call_session: old, account_user: member, queue: queue, direction: 'inbound',
-                                    status: 'connected', started_at: old.started_at, answered_at: old.started_at)
+                                      status: 'connected', started_at: old.started_at, answered_at: old.started_at)
     old.update!(status: 'ended', ended_at: Time.current)
     expect(old.reload.ending_reason_version_id).to be_nil
     expect(JrcContactCenter::Qualification.where(call_session: old)).to be_empty
@@ -24,7 +24,7 @@ RSpec.describe JrcContactCenter::EndingReasonPolicy do
 
   it 'does not attach the new requirement retroactively to an old unpinned call through SQL' do
     old = JrcContactCenter::CallSession.create!(account: account, provider: 'synthetic', correlation_id: SecureRandom.uuid,
-                                               direction: 'inbound', status: 'created', started_at: 1.day.ago)
+                                                direction: 'inbound', status: 'created', started_at: 1.day.ago)
     version = JrcContactCenter::EndingReasonVersion.where(account: account).sole
     expect do
       old.class.transaction(requires_new: true) do
@@ -69,7 +69,7 @@ RSpec.describe JrcContactCenter::EndingReasonPolicy do
     expect do
       JrcContactCenter::Qualification.transaction(requires_new: true) do
         JrcContactCenter::Qualification.connection.execute("UPDATE jrc_contact_center_qualifications SET reason_code = 'missing', " \
-                                                         "outcome_code = 'completed', completed_at = CURRENT_TIMESTAMP WHERE id = #{id}")
+                                                           "outcome_code = 'completed', completed_at = CURRENT_TIMESTAMP WHERE id = #{id}")
       end
     end.to raise_error(ActiveRecord::StatementInvalid, /Registered ending reason required/)
     expect(record.reload.completed_at).to be_nil
@@ -80,7 +80,7 @@ RSpec.describe JrcContactCenter::EndingReasonPolicy do
     expect do
       origin.class.transaction(requires_new: true) do
         origin.class.connection.execute("UPDATE #{origin.class.table_name} SET metadata = metadata - 'ending_reason_snapshot_v1' " \
-                                         "WHERE id = #{origin.id}")
+                                        "WHERE id = #{origin.id}")
       end
     end.to raise_error(ActiveRecord::StatementInvalid, /Ending reason original evidence is immutable/)
     manager.complete!(record, reason_code: entry.fetch('code'), outcome_code: 'completed')
@@ -112,10 +112,10 @@ RSpec.describe JrcContactCenter::EndingReasonPolicy do
   it 'leaves another queue optional and accepts its explicitly started legacy reason without granting configuration access' do
     other = JrcContactCenter::Queue.create!(account: account, unit: unit, code: 'SYNTHETIC-OTHER', name: 'SYNTHETIC other')
     call = JrcContactCenter::CallSession.create!(account: account, provider: 'synthetic', correlation_id: SecureRandom.uuid,
-                                                direction: 'inbound', status: 'ended', started_at: Time.current, ended_at: 1.minute.from_now,
-                                                current_unit: unit, current_queue: other)
+                                                 direction: 'inbound', status: 'ended', started_at: Time.current, ended_at: 1.minute.from_now,
+                                                 current_unit: unit, current_queue: other)
     JrcContactCenter::CallLeg.create!(account: account, call_session: call, account_user: member, queue: other, direction: 'inbound',
-                                    status: 'ended', started_at: call.started_at, answered_at: call.started_at, ended_at: call.ended_at)
+                                      status: 'ended', started_at: call.started_at, answered_at: call.started_at, ended_at: call.ended_at)
     expect(JrcContactCenter::Qualification.where(call_session: call)).to be_empty
     pending = manager.start!(call_session: call)
     expect(described_class.new(pending).private_payload.dig('ending_reason_context', 'required')).to be(false)

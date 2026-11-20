@@ -11,14 +11,18 @@ class JrcContactCenter::QualificationDraftRevision
       value.respond_to?(:iso8601) ? value.utc.iso8601(6) : value
     end
     signature = ['qualification_manual_state_v1', values]
-    forms = JrcContactCenter::QualificationForms.new(record).revision_component if include_forms
-    signature << forms if forms
-    ending = JrcContactCenter::EndingReasonPolicy.new(record).private_payload if include_forms
-    signature << ending if ending&.any?
+    signature.concat(private_components(record)) if include_forms
     Digest::SHA256.hexdigest(signature.to_json)
   end
 
   def self.check!(record, expected)
     JrcContactCenter::ConfigurationRevision.check_token!(token(record), expected)
   end
+
+  def self.private_components(record)
+    forms = JrcContactCenter::QualificationForms.new(record).revision_component
+    ending = JrcContactCenter::EndingReasonPolicy.new(record).private_payload
+    [forms, (ending if ending.any?)].compact
+  end
+  private_class_method :private_components
 end

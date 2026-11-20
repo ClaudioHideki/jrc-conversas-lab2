@@ -27,31 +27,37 @@ class JrcContactCenter::EndingReasonPolicy
   end
 
   def registered?(reason)
-    context = private_payload['ending_reason_context']
-    context && context.fetch('options').any? { |entry| entry.fetch('code') == reason }
+    reason_option?(private_payload['ending_reason_context'], reason)
   end
 
   def validate!(reason, complete:)
     context = private_payload['ending_reason_context']
-    return unless context && context.fetch('required')
+    return unless context&.fetch('required')
     return if reason.blank? && !complete
-    return if reason.is_a?(String) && context.fetch('options').any? { |entry| entry.fetch('code') == reason }
+    return if reason_option?(context, reason)
 
     raise JrcContactCenter::OperationError, 'registered_ending_reason_required'
   end
 
   def snapshot
     event = JrcContactCenter::AgentStateEvent.where(account_id: @record.account_id, account_user_id: @record.account_user_id,
-                                                  source: 'jrc_conversas', state: 'acw',
-                                                  external_event_id: "qualification:#{@record.id}:pending").pick(:metadata)
+                                                    source: 'jrc_conversas', state: 'acw',
+                                                    external_event_id: "qualification:#{@record.id}:pending").pick(:metadata)
     context = event&.fetch(KEY, nil)
     if @record.call_session_id && !context && @record.call_session.reload.ending_reason_version_id
       raise JrcContactCenter::OperationError, 'ending_reason_origin_unavailable'
     end
+
     context
   end
 
   private
+
+  def reason_option?(context, reason)
+    return false unless context && reason.is_a?(String)
+
+    context.fetch('options').any? { |entry| entry.fetch('code') == reason }
+  end
 
   def frozen_version(context)
     row = JrcContactCenter::EndingReasonVersion.where(account_id: @record.account_id).find(context.fetch('catalogue_id'))

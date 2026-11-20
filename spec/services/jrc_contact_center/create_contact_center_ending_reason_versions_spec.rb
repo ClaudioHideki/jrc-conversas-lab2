@@ -36,7 +36,7 @@ RSpec.describe CreateContactCenterEndingReasonVersions do
     connection.execute('ALTER TABLE cc_ending_reason_upgrade_synthetic.jrc_contact_center_call_sessions DROP COLUMN ending_reason_version_id')
     connection.execute("INSERT INTO cc_ending_reason_upgrade_synthetic.accounts SELECT * FROM public.accounts WHERE id = #{account.id}")
     connection.execute("INSERT INTO cc_ending_reason_upgrade_synthetic.audits SELECT * FROM public.audits WHERE associated_type = 'Account' " \
-                         "AND associated_id = #{account.id}")
+                       "AND associated_id = #{account.id}")
   end
 
   it 'upgrades populated native account and audit structures without fabricating dates or actors' do

@@ -4,7 +4,7 @@
 class CreateContactCenterEndingReasonVersions < ActiveRecord::Migration[7.1]
   TABLE = :jrc_contact_center_ending_reason_versions
   CALLS = :jrc_contact_center_call_sessions
-  ORIGIN_SQL_SHA256 = '109e09f227ab4e04d33fdf61d609e21020fbd4d22b2982407adc1da6e85f0cbb'
+  ORIGIN_SQL_SHA256 = 'c0dca8b84c8c4b02d78ed07be4e23bb253f0d64994dccc232ba879941ef35bf8'
 
   def up
     source = Rails.root.join('lib/jrc_contact_center/ending_reason_origin_sql.rb')
@@ -14,13 +14,13 @@ class CreateContactCenterEndingReasonVersions < ActiveRecord::Migration[7.1]
     return verify_existing! if table_exists?(TABLE)
 
     create_versions
-    execute version_guard_sql
+    execute VERSION_GUARD_SQL
     backfill_proven_history!
     add_column CALLS, :ending_reason_version_id, :bigint
     add_foreign_key CALLS, TABLE, column: [:ending_reason_version_id, :account_id], primary_key: [:id, :account_id],
-                                 deferrable: :deferred, name: 'cc_ending_reason_call_account_fk'
+                                  deferrable: :deferred, name: 'cc_ending_reason_call_account_fk'
     add_index CALLS, :ending_reason_version_id, name: 'cc_ending_reason_call_version'
-    execute call_guard_sql
+    execute CALL_GUARD_SQL
     execute JrcContactCenter::EndingReasonOriginSql.new.call
     change_table_comment TABLE, schema_receipt
   end
@@ -53,90 +53,86 @@ class CreateContactCenterEndingReasonVersions < ActiveRecord::Migration[7.1]
                                 'AND jsonb_array_length(definition -> \'entries\') <= 100', name: 'cc_ending_reason_definition'
   end
 
-  def version_guard_sql
-    <<~SQL.squish
-      CREATE FUNCTION cc_ending_reason_version_guard() RETURNS trigger LANGUAGE plpgsql AS $guard$
-      DECLARE source audits%ROWTYPE; last_revision integer; previous_definition jsonb;
-      BEGIN
-        IF TG_OP = 'DELETE' AND NOT EXISTS (SELECT 1 FROM accounts WHERE id = OLD.account_id) THEN RETURN OLD; END IF;
-        IF TG_OP <> 'INSERT' THEN RAISE EXCEPTION 'Ending reason versions are immutable'; END IF;
-        PERFORM 1 FROM accounts WHERE id = NEW.account_id FOR UPDATE;
-        IF NOT FOUND THEN RAISE EXCEPTION 'Ending reason account unavailable'; END IF;
-        SELECT * INTO source FROM audits WHERE id = NEW.source_audit_id;
-        IF NOT FOUND OR source.auditable_type IS DISTINCT FROM 'Account' OR source.auditable_id IS DISTINCT FROM NEW.account_id
-          OR source.associated_type IS DISTINCT FROM 'Account' OR source.associated_id IS DISTINCT FROM NEW.account_id
-          OR source.action IS DISTINCT FROM 'update' OR source.comment IS DISTINCT FROM 'jrc_contact_center_acw_policy_v1'
-          OR source.audited_changes #> '{attributes,1,voice_reason_catalog}' IS DISTINCT FROM NEW.definition THEN
-          RAISE EXCEPTION 'Ending reason audit provenance unavailable';
-        END IF;
-        SELECT revision, definition INTO last_revision, previous_definition
-          FROM jrc_contact_center_ending_reason_versions WHERE account_id = NEW.account_id ORDER BY revision DESC LIMIT 1;
-        IF NEW.revision <> COALESCE(last_revision, 0) + 1
-          OR source.audited_changes #> '{attributes,0,voice_reason_catalog}' IS DISTINCT FROM previous_definition THEN
-          RAISE EXCEPTION 'Ending reason revision sequence conflict';
-        END IF;
-        IF last_revision IS NOT NULL AND source.created_at < (SELECT MAX(created_at)
-          FROM jrc_contact_center_ending_reason_versions WHERE account_id = NEW.account_id) THEN
-          RAISE EXCEPTION 'Ending reason effective time conflict';
-        END IF;
-        NEW.created_at = source.created_at;
-        NEW.actor_user_id = source.user_id;
-        NEW.actor_user_type = source.user_type;
-        NEW.integrity_sha256 = encode(sha256(convert_to(jsonb_build_object('account_id', NEW.account_id,
-          'revision', NEW.revision, 'source_audit_id', NEW.source_audit_id, 'definition', NEW.definition)::text, 'UTF8')), 'hex');
-        RETURN NEW;
-      END $guard$;
-      CREATE TRIGGER cc_ending_reason_version_guard BEFORE INSERT OR UPDATE OR DELETE
-        ON jrc_contact_center_ending_reason_versions FOR EACH ROW EXECUTE FUNCTION cc_ending_reason_version_guard();
-    SQL
-  end
+  VERSION_GUARD_SQL = <<~SQL.squish.freeze
+    CREATE FUNCTION cc_ending_reason_version_guard() RETURNS trigger LANGUAGE plpgsql AS $guard$
+    DECLARE source audits%ROWTYPE; last_revision integer; previous_definition jsonb;
+    BEGIN
+      IF TG_OP = 'DELETE' AND NOT EXISTS (SELECT 1 FROM accounts WHERE id = OLD.account_id) THEN RETURN OLD; END IF;
+      IF TG_OP <> 'INSERT' THEN RAISE EXCEPTION 'Ending reason versions are immutable'; END IF;
+      PERFORM 1 FROM accounts WHERE id = NEW.account_id FOR UPDATE;
+      IF NOT FOUND THEN RAISE EXCEPTION 'Ending reason account unavailable'; END IF;
+      SELECT * INTO source FROM audits WHERE id = NEW.source_audit_id;
+      IF NOT FOUND OR source.auditable_type IS DISTINCT FROM 'Account' OR source.auditable_id IS DISTINCT FROM NEW.account_id
+        OR source.associated_type IS DISTINCT FROM 'Account' OR source.associated_id IS DISTINCT FROM NEW.account_id
+        OR source.action IS DISTINCT FROM 'update' OR source.comment IS DISTINCT FROM 'jrc_contact_center_acw_policy_v1'
+        OR source.audited_changes #> '{attributes,1,voice_reason_catalog}' IS DISTINCT FROM NEW.definition THEN
+        RAISE EXCEPTION 'Ending reason audit provenance unavailable';
+      END IF;
+      SELECT revision, definition INTO last_revision, previous_definition
+        FROM jrc_contact_center_ending_reason_versions WHERE account_id = NEW.account_id ORDER BY revision DESC LIMIT 1;
+      IF NEW.revision <> COALESCE(last_revision, 0) + 1
+        OR source.audited_changes #> '{attributes,0,voice_reason_catalog}' IS DISTINCT FROM previous_definition THEN
+        RAISE EXCEPTION 'Ending reason revision sequence conflict';
+      END IF;
+      IF last_revision IS NOT NULL AND source.created_at < (SELECT MAX(created_at)
+        FROM jrc_contact_center_ending_reason_versions WHERE account_id = NEW.account_id) THEN
+        RAISE EXCEPTION 'Ending reason effective time conflict';
+      END IF;
+      NEW.created_at = source.created_at;
+      NEW.actor_user_id = source.user_id;
+      NEW.actor_user_type = source.user_type;
+      NEW.integrity_sha256 = encode(sha256(convert_to(jsonb_build_object('account_id', NEW.account_id,
+        'revision', NEW.revision, 'source_audit_id', NEW.source_audit_id, 'definition', NEW.definition)::text, 'UTF8')), 'hex');
+      RETURN NEW;
+    END $guard$;
+    CREATE TRIGGER cc_ending_reason_version_guard BEFORE INSERT OR UPDATE OR DELETE
+      ON jrc_contact_center_ending_reason_versions FOR EACH ROW EXECUTE FUNCTION cc_ending_reason_version_guard();
+  SQL
 
-  def call_guard_sql
-    <<~SQL.squish
-      CREATE FUNCTION cc_ending_reason_call_guard() RETURNS trigger LANGUAGE plpgsql AS $guard$
-      DECLARE configured jsonb; latest jsonb; selected_id bigint;
-      BEGIN
-        IF TG_OP = 'UPDATE' THEN
-          IF NEW.ending_reason_version_id IS DISTINCT FROM OLD.ending_reason_version_id
-            OR (OLD.ending_reason_version_id IS NOT NULL AND (NEW.account_id IS DISTINCT FROM OLD.account_id
-              OR NEW.started_at IS DISTINCT FROM OLD.started_at)) THEN
-            RAISE EXCEPTION 'Call ending reason origin is immutable';
-          END IF;
-          RETURN NEW;
+  CALL_GUARD_SQL = <<~SQL.squish.freeze
+    CREATE FUNCTION cc_ending_reason_call_guard() RETURNS trigger LANGUAGE plpgsql AS $guard$
+    DECLARE configured jsonb; latest jsonb; selected_id bigint;
+    BEGIN
+      IF TG_OP = 'UPDATE' THEN
+        IF NEW.ending_reason_version_id IS DISTINCT FROM OLD.ending_reason_version_id
+          OR (OLD.ending_reason_version_id IS NOT NULL AND (NEW.account_id IS DISTINCT FROM OLD.account_id
+            OR NEW.started_at IS DISTINCT FROM OLD.started_at)) THEN
+          RAISE EXCEPTION 'Call ending reason origin is immutable';
         END IF;
-        SELECT settings #> '{jrc_contact_center_acw,voice_reason_catalog}' INTO configured
-          FROM accounts WHERE id = NEW.account_id FOR UPDATE;
-        SELECT definition INTO latest FROM jrc_contact_center_ending_reason_versions
-          WHERE account_id = NEW.account_id ORDER BY revision DESC LIMIT 1;
-        IF configured IS DISTINCT FROM latest THEN RAISE EXCEPTION 'Ending reason ledger is not synchronized'; END IF;
-        SELECT id INTO selected_id FROM jrc_contact_center_ending_reason_versions
-          WHERE account_id = NEW.account_id AND created_at <= NEW.started_at ORDER BY created_at DESC, revision DESC LIMIT 1;
-        IF NEW.ending_reason_version_id IS NOT NULL AND NEW.ending_reason_version_id IS DISTINCT FROM selected_id THEN
-          RAISE EXCEPTION 'Call ending reason version cannot be supplied';
-        END IF;
-        NEW.ending_reason_version_id = selected_id;
         RETURN NEW;
-      END $guard$;
-      CREATE TRIGGER cc_ending_reason_call_guard BEFORE INSERT OR UPDATE ON jrc_contact_center_call_sessions
-        FOR EACH ROW EXECUTE FUNCTION cc_ending_reason_call_guard();
-    SQL
-  end
+      END IF;
+      SELECT settings #> '{jrc_contact_center_acw,voice_reason_catalog}' INTO configured
+        FROM accounts WHERE id = NEW.account_id FOR UPDATE;
+      SELECT definition INTO latest FROM jrc_contact_center_ending_reason_versions
+        WHERE account_id = NEW.account_id ORDER BY revision DESC LIMIT 1;
+      IF configured IS DISTINCT FROM latest THEN RAISE EXCEPTION 'Ending reason ledger is not synchronized'; END IF;
+      SELECT id INTO selected_id FROM jrc_contact_center_ending_reason_versions
+        WHERE account_id = NEW.account_id AND created_at <= NEW.started_at ORDER BY created_at DESC, revision DESC LIMIT 1;
+      IF NEW.ending_reason_version_id IS NOT NULL AND NEW.ending_reason_version_id IS DISTINCT FROM selected_id THEN
+        RAISE EXCEPTION 'Call ending reason version cannot be supplied';
+      END IF;
+      NEW.ending_reason_version_id = selected_id;
+      RETURN NEW;
+    END $guard$;
+    CREATE TRIGGER cc_ending_reason_call_guard BEFORE INSERT OR UPDATE ON jrc_contact_center_call_sessions
+      FOR EACH ROW EXECUTE FUNCTION cc_ending_reason_call_guard();
+  SQL
 
   # Only exact, ordered native audit evidence can recover earlier catalogue revisions.
   # Missing evidence blocks migration; neither dates nor actors are invented.
   def backfill_proven_history!
     accounts = connection.select_rows("SELECT id, settings #> '{jrc_contact_center_acw,voice_reason_catalog}' FROM accounts " \
-                                     "WHERE settings #> '{jrc_contact_center_acw,voice_reason_catalog}' IS NOT NULL ORDER BY id")
+                                      "WHERE settings #> '{jrc_contact_center_acw,voice_reason_catalog}' IS NOT NULL ORDER BY id")
     accounts.each { |id, document| backfill_account!(id, json_document(document)) }
   end
 
   def backfill_account!(id, current)
     audits = connection.select_rows("SELECT id, audited_changes #> '{attributes,1,voice_reason_catalog}' FROM audits " \
-                                   "WHERE auditable_type = 'Account' AND auditable_id = #{Integer(id)} " \
-                                   "AND associated_type = 'Account' AND associated_id = #{Integer(id)} " \
-                                   "AND comment = 'jrc_contact_center_acw_policy_v1' AND action = 'update' " \
-                                   "AND audited_changes #> '{attributes,1,voice_reason_catalog}' IS DISTINCT FROM " \
-                                   "audited_changes #> '{attributes,0,voice_reason_catalog}' ORDER BY id")
+                                    "WHERE auditable_type = 'Account' AND auditable_id = #{Integer(id)} " \
+                                    "AND associated_type = 'Account' AND associated_id = #{Integer(id)} " \
+                                    "AND comment = 'jrc_contact_center_acw_policy_v1' AND action = 'update' " \
+                                    "AND audited_changes #> '{attributes,1,voice_reason_catalog}' IS DISTINCT FROM " \
+                                    "audited_changes #> '{attributes,0,voice_reason_catalog}' ORDER BY id")
     audits.each do |audit_id, document|
       value = json_document(document)
       execute "INSERT INTO #{TABLE} (account_id, revision, source_audit_id, definition) " \
@@ -153,14 +149,21 @@ class CreateContactCenterEndingReasonVersions < ActiveRecord::Migration[7.1]
 
   def verify_existing!
     columns = %w[id account_id revision source_audit_id actor_user_id actor_user_type definition integrity_sha256 created_at]
-    valid = connection.columns(TABLE).map(&:name).sort == columns.sort && column_exists?(CALLS, :ending_reason_version_id, :bigint)
-    valid &&= connection.foreign_keys(CALLS).any? { |key| key.name == 'cc_ending_reason_call_account_fk' && key.deferrable == :deferred }
+    valid = connection.columns(TABLE).map(&:name).sort == columns.sort
+    valid &&= call_reference?
     guards = connection.select_values("SELECT tgname FROM pg_trigger WHERE NOT tgisinternal AND tgname LIKE 'cc_ending_reason_%' " \
-                                       "AND tgrelid IN (#{guard_relations})").sort
+                                      "AND tgrelid IN (#{guard_relations})").sort
     expected = %w[cc_ending_reason_call_guard cc_ending_reason_origin_guard cc_ending_reason_qualification_guard cc_ending_reason_version_guard]
     valid &&= guards == expected
     valid &&= connection.table_comment(TABLE) == schema_receipt
     raise ActiveRecord::MigrationError, 'Unexpected ending reason ledger schema; review before reexecution' unless valid
+  end
+
+  def call_reference?
+    column = connection.columns(CALLS).find { |item| item.name == 'ending_reason_version_id' }
+    return false unless column&.sql_type == 'bigint' && column.null
+
+    connection.foreign_keys(CALLS).any? { |key| key.name == 'cc_ending_reason_call_account_fk' && key.deferrable == :deferred }
   end
 
   def schema_receipt

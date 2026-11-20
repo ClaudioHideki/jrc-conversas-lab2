@@ -57,5 +57,16 @@
     "sha": "a0cd67f47b509e8d09e324b1958c5e779a354320",
     "run": 44659483934,
     "new_queued_feature_included": false
-  }
+  },
+  "first_gate_0d475bcc": {
+    "sha": "0d475bccbbee546a45bc6eeee81daeaba0de532d",
+    "run": 44664906180,
+    "artifact_id": 14597965698,
+    "artifact_sha256": "7ebc317ce568d951d8c85783c1db73cbd1108d68d324d5af5857daef9fbb68a7",
+    "result": "blocked by the five-addition migration admission and59newRubyoffenses",
+    "migrations_rails_vue_chrome": "not executed; no native approval inferred",
+    "correction": "Exact sixth migration plus SQL helper hash,34guardregressions; indentation, frozen SQL constants with four unchanged normalized SQL bodies, same predicates factored to comply with metrics."
+  },
+  "reviewed_migration_sha256": "fbcf02176eddf2bb2a48b81862b05c484f57e470ceaea852fd85c3b650da9151",
+  "frozen_sql_sha256": "c0dca8b84c8c4b02d78ed07be4e23bb253f0d64994dccc232ba879941ef35bf8"
 }

@@ -67,9 +67,11 @@ RSpec.describe JrcContactCenter::EndingReasonVersion do
     version = described_class.where(account: account).sole
     foreign = create(:account)
     source = Audited.audit_class.find(version.source_audit_id)
-    forged = source.attributes.except('id').merge('auditable_type' => nil, 'auditable_id' => nil,
-                                                 'associated_type' => nil, 'associated_id' => nil)
-    audit_id = Audited.audit_class.insert_all!([forged], returning: %w[id]).rows.sole.sole
+    table = Audited.audit_class.connection.quote_table_name(Audited.audit_class.table_name)
+    audit_id = Audited.audit_class.connection.select_value(
+      "INSERT INTO #{table} (audited_changes, action, comment, created_at) " \
+      "SELECT audited_changes, action, comment, created_at FROM #{table} WHERE id = #{source.id} RETURNING id"
+    )
     expect do
       described_class.transaction(requires_new: true) do
         definition = described_class.connection.quote(version.definition.to_json)
