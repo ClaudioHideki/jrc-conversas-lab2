@@ -5,7 +5,7 @@ import API from 'dashboard/api/jrcContactCenter';
 import EndingReasonCatalog from './EndingReasonCatalog.vue';
 
 vi.mock('dashboard/api/jrcContactCenter', () => ({
-  default: { acwPolicy: vi.fn(), updateAcwPolicy: vi.fn() },
+  default: { acwPolicy: vi.fn(), updateAcwPolicy: vi.fn(), queues: vi.fn() },
 }));
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 enableAutoUnmount(afterEach);
@@ -48,6 +48,7 @@ const render = () =>
 beforeEach(() => {
   vi.clearAllMocks();
   API.acwPolicy.mockResolvedValue(response([]));
+  API.queues.mockResolvedValue({ data: { items: [], meta: { pages: 0 } } });
 });
 
 describe('native ending reason catalogue dialog', () => {

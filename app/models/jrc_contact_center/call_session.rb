@@ -8,6 +8,7 @@ class JrcContactCenter::CallSession < JrcContactCenter::ApplicationRecord
   belongs_to :company, class_name: 'JrcCustomers::Company', optional: true
   belongs_to :current_unit, class_name: 'JrcContactCenter::Unit', optional: true
   belongs_to :current_queue, class_name: 'JrcContactCenter::Queue', optional: true
+  belongs_to :ending_reason_version, class_name: 'JrcContactCenter::EndingReasonVersion', optional: true
   has_many :legs, class_name: 'JrcContactCenter::CallLeg', dependent: :restrict_with_error
   has_many :ivr_events, class_name: 'JrcContactCenter::IvrEvent', dependent: :restrict_with_error
   has_many :fallback_events, class_name: 'JrcContactCenter::FallbackEvent', dependent: :restrict_with_error

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Account-local administrative catalogue. Old rules and pending qualifications are not rewritten.
+# Account-local catalogue. The caller retains native global configuration authority and Account locking.
 class JrcContactCenter::AcwEndingReasons
   KEY = 'voice_reason_catalog'
   FIELDS = %w[code name category description order active].freeze
@@ -14,10 +14,16 @@ class JrcContactCenter::AcwEndingReasons
     settings = @account.settings.fetch(JrcContactCenter::AcwPolicy::KEY, {})
     return { 'version' => 0, 'entries' => [] } unless settings.key?(KEY)
 
-    value = settings.fetch(KEY)
+    validate_document!(settings.fetch(KEY)).deep_dup
+  end
 
+  def validate_document!(value)
     invalid! unless valid_header?(value) && validate!(value['entries']) == value['entries']
-    value.deep_dup
+    if value.key?('required_queue_ids')
+      invalid! unless stored_queue_ids?(value['required_queue_ids'])
+      validate_required!(value.fetch('entries'), value.fetch('required_queue_ids'))
+    end
+    value
   end
 
   def signature(values)
@@ -25,25 +31,73 @@ class JrcContactCenter::AcwEndingReasons
     return values unless state.fetch('version').positive?
 
     rows = state.fetch('entries').map { |row| FIELDS.map { |field| row.fetch(field) } }
-    values + [[KEY, state.fetch('version'), rows]]
+    signature = values + [[KEY, state.fetch('version'), rows]]
+    queues = state.fetch('required_queue_ids', [])
+    queues.any? ? signature + [['required_ending_reason_queues_v1', queues]] : signature
   end
 
-  def propose(settings:, entries:)
-    return settings if entries == :unchanged
+  def propose(settings:, entries:, required_queue_ids: :unchanged, activation_confirmed: false)
+    return settings if entries == :unchanged && required_queue_ids == :unchanged
 
     previous = call
-    current = validate!(entries)
-    removed = previous.fetch('entries').pluck('code') - current.pluck('code')
-    raise JrcContactCenter::OperationError, 'ending_reason_deactivation_required' if removed.any?
-    return settings if previous.fetch('entries') == current
+    current = entries == :unchanged ? previous.fetch('entries') : validate!(entries)
+    queues = required_queue_ids == :unchanged ? previous.fetch('required_queue_ids', []) : validated_queue_ids(required_queue_ids)
+    validate_change!(previous, current, queues, activation_confirmed)
+    return settings if previous.fetch('entries') == current && previous.fetch('required_queue_ids', []) == queues
 
-    settings.merge(KEY => { 'version' => previous.fetch('version') + 1, 'entries' => current })
+    state = { 'version' => previous.fetch('version') + 1, 'entries' => current }
+    state['required_queue_ids'] = queues if previous.key?('required_queue_ids') || queues.any?
+    settings.merge(KEY => state)
   end
 
   private
 
   def valid_header?(value)
-    value.is_a?(Hash) && value.keys.sort == %w[entries version] && value['version'].is_a?(Integer) && value['version'].positive?
+    keys = %w[entries required_queue_ids version]
+    value.is_a?(Hash) && (value.keys - keys).empty? && value.key?('entries') &&
+      value['version'].is_a?(Integer) && value['version'].between?(1, 2_147_483_647)
+  end
+
+  def validate_change!(previous, entries, queues, confirmed)
+    removed = previous.fetch('entries').pluck('code') - entries.pluck('code')
+    raise JrcContactCenter::OperationError, 'ending_reason_deactivation_required' if removed.any?
+
+    validate_required!(entries, queues)
+    added = queues - previous.fetch('required_queue_ids', [])
+    return unless added.any? && confirmed != true
+
+    raise JrcContactCenter::OperationError, 'ending_reason_queue_confirmation_required'
+  end
+
+  def validate_required!(entries, queues)
+    return if queues.empty? || entries.any? { |entry| entry.fetch('active') }
+
+    raise JrcContactCenter::OperationError, 'active_ending_reason_required'
+  end
+
+  def validated_queue_ids(values)
+    invalid! unless values.is_a?(Array) && values.length <= MAX_ENTRIES
+    ids = values.map do |value|
+      invalid! unless queue_identifier?(value)
+      value.to_s
+    end
+    invalid! unless ids.uniq.length == ids.length
+    JrcContactCenter::Queue.where(account: @account).find(ids) if ids.any?
+    ids.sort
+  end
+
+  # Historical queue identifiers are retained after native queue deletion; they are not grants.
+  def stored_queue_ids?(values)
+    return false unless values.is_a?(Array) && values.length <= MAX_ENTRIES && values.all? { |id| id.is_a?(String) }
+    return false unless values == values.uniq.sort
+
+    values.all? do |id|
+      queue_identifier?(id)
+    end
+  end
+
+  def queue_identifier?(value)
+    (value.is_a?(Integer) || value.is_a?(String)) && value.to_s.match?(/\A[1-9]\d{0,18}\z/) && value.to_i <= 9_223_372_036_854_775_807
   end
 
   def validate!(entries)

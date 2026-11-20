@@ -22,6 +22,13 @@ export const useEndingReasonCatalog = ({ accountId }) => {
   const entries = ref([]);
   const baseline = ref([]);
   const version = ref(0);
+  const requiredQueueIds = ref([]);
+  const baselineQueueIds = ref([]);
+  const queueConfirmation = ref(false);
+  const revisionDraft = computed(() => ({
+    entries: entries.value,
+    requiredQueueIds: requiredQueueIds.value,
+  }));
   const policy = ref(null);
   const loading = ref(false);
   const saving = ref(false);
@@ -30,26 +37,42 @@ export const useEndingReasonCatalog = ({ accountId }) => {
   const revision = useConfigurationRevision({
     accountId,
     resource: computed(() => 'acw_policy'),
-    draft: entries,
+    draft: revisionDraft,
   });
   let generation = 0;
   let alive = true;
   const dirty = computed(
-    () => JSON.stringify(entries.value) !== JSON.stringify(baseline.value)
+    () =>
+      JSON.stringify(entries.value) !== JSON.stringify(baseline.value) ||
+      JSON.stringify(requiredQueueIds.value) !==
+        JSON.stringify(baselineQueueIds.value)
   );
   const valid = computed(
     () =>
+      requiredQueueIds.value.length <= 100 &&
+      (!requiredQueueIds.value.length ||
+        entries.value.some(row => row.active)) &&
       entries.value.length <= 100 &&
       new TextEncoder().encode(JSON.stringify(entries.value)).byteLength <=
         131072 &&
       entries.value.every(validEndingReason) &&
       new Set(entries.value.map(row => row.code)).size === entries.value.length
   );
+  const addsQueues = computed(() =>
+    requiredQueueIds.value.some(id => !baselineQueueIds.value.includes(id))
+  );
+  watch(
+    () => JSON.stringify(requiredQueueIds.value),
+    () => {
+      queueConfirmation.value = false;
+    }
+  );
   const canSave = computed(
     () =>
       policy.value &&
       dirty.value &&
       valid.value &&
+      (!addsQueues.value || queueConfirmation.value) &&
       !loading.value &&
       !saving.value &&
       revision.canSave.value
@@ -67,6 +90,24 @@ export const useEndingReasonCatalog = ({ accountId }) => {
       !item.voice_reason_catalog.entries.every(validEndingReason)
     )
       throw new Error('Missing authorized ending reason catalog');
+    const queueIds = Object.hasOwn(
+      item.voice_reason_catalog,
+      'required_queue_ids'
+    )
+      ? item.voice_reason_catalog.required_queue_ids
+      : [];
+    if (
+      !Array.isArray(queueIds) ||
+      queueIds.length > 100 ||
+      new Set(queueIds).size !== queueIds.length ||
+      !queueIds.every(
+        id => typeof id === 'string' && /^[1-9]\d{0,18}$/.test(id)
+      )
+    )
+      throw new Error('Invalid native ending reason queues');
+    requiredQueueIds.value = [...queueIds];
+    baselineQueueIds.value = [...queueIds];
+    queueConfirmation.value = false;
     policy.value = item;
     entries.value = copy(item.voice_reason_catalog.entries);
     baseline.value = copy(entries.value);
@@ -98,6 +139,14 @@ export const useEndingReasonCatalog = ({ accountId }) => {
     const request = generation;
     const account = String(accountId.value);
     const submitted = copy(entries.value);
+    const queues = [...requiredQueueIds.value].sort();
+    const queueOptions =
+      JSON.stringify(queues) === JSON.stringify(baselineQueueIds.value)
+        ? {}
+        : {
+            voice_reason_required_queue_ids: queues,
+            voice_reason_confirmation: queueConfirmation.value,
+          };
     saving.value = true;
     error.value = '';
     saved.value = false;
@@ -106,6 +155,7 @@ export const useEndingReasonCatalog = ({ accountId }) => {
       const response = await API.updateAcwPolicy(account, latest.limits, {
         ...revision.options(),
         voice_reason_catalog: submitted,
+        ...queueOptions,
       });
       if (!current(request, account)) return;
       accept(response.data.item);
@@ -115,6 +165,8 @@ export const useEndingReasonCatalog = ({ accountId }) => {
         if ([401, 403, 404].includes(failure?.response?.status)) {
           entries.value = [];
           baseline.value = [];
+          requiredQueueIds.value = [];
+          baselineQueueIds.value = [];
           policy.value = null;
           revision.capture(null);
           error.value = 'DENIED';
@@ -138,6 +190,9 @@ export const useEndingReasonCatalog = ({ accountId }) => {
       baseline.value = [];
       saving.value = false;
       version.value = 0;
+      requiredQueueIds.value = [];
+      baselineQueueIds.value = [];
+      queueConfirmation.value = false;
       load();
     },
     { immediate: true }
@@ -148,9 +203,15 @@ export const useEndingReasonCatalog = ({ accountId }) => {
     entries.value = [];
     baseline.value = [];
     policy.value = null;
+    requiredQueueIds.value = [];
+    baselineQueueIds.value = [];
   });
   return {
     entries,
+    requiredQueueIds,
+    queueConfirmation,
+    addsQueues,
+    revisionDraft,
     baseline,
     version,
     loading,

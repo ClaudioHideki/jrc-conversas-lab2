@@ -31,7 +31,7 @@ class JrcContactCenter::AcwPolicy
   end
 
   def update!(attributes = nil, voice_required: :unchanged, expected_revision: :legacy, voice_rules: :unchanged, **legacy_limits)
-    extended = legacy_limits.extract!(:voice_form_bindings, :voice_reason_catalog)
+    extended = legacy_limits.extract!(:voice_form_bindings, :voice_reason_catalog, :voice_reason_required_queue_ids, :voice_reason_confirmation)
     values = validated_limits(attributes || legacy_limits)
     raise JrcContactCenter::OperationError, 'invalid_acw_policy' unless [true, false, :unchanged].include?(voice_required)
 
@@ -50,12 +50,16 @@ class JrcContactCenter::AcwPolicy
 
   def extended_settings(settings, options, expected_revision)
     current = form_settings(settings, options.fetch(:voice_form_bindings, :unchanged), expected_revision)
-    reason_settings(current, options.fetch(:voice_reason_catalog, :unchanged), expected_revision)
+    reason_settings(current, options, expected_revision)
   end
 
-  def reason_settings(settings, entries, expected_revision)
-    JrcContactCenter::ConfigurationRevision.check_token!(revision, expected_revision) unless entries == :unchanged
-    JrcContactCenter::AcwEndingReasons.new(account: @account).propose(settings: settings, entries: entries)
+  def reason_settings(settings, options, expected_revision)
+    entries = options.fetch(:voice_reason_catalog, :unchanged)
+    queues = options.fetch(:voice_reason_required_queue_ids, :unchanged)
+    JrcContactCenter::ConfigurationRevision.check_token!(revision, expected_revision) unless entries == :unchanged && queues == :unchanged
+    JrcContactCenter::AcwEndingReasons.new(account: @account).propose(
+      settings: settings, entries: entries, required_queue_ids: queues, activation_confirmed: options.fetch(:voice_reason_confirmation, false)
+    )
   end
 
   def form_settings(settings, bindings, expected_revision)

@@ -10,6 +10,38 @@ const invalid = () => {
   throw new TypeError('Invalid native qualification form context');
 };
 
+export const endingReasonContext = value => {
+  if (value === undefined) return null;
+  if (
+    !value ||
+    typeof value !== 'object' ||
+    !Number.isInteger(value.revision) ||
+    value.revision < 1 ||
+    !/^[0-9a-f]{64}$/.test(value.integrity_sha256) ||
+    typeof value.required !== 'boolean' ||
+    !Array.isArray(value.options) ||
+    value.options.length > 100
+  )
+    invalid();
+  const codes = new Set();
+  value.options.forEach(row => {
+    if (
+      !row ||
+      typeof row.code !== 'string' ||
+      !row.code.trim() ||
+      row.code.length > 100 ||
+      typeof row.name !== 'string' ||
+      !row.name.trim() ||
+      row.name.length > 120 ||
+      codes.has(row.code)
+    )
+      invalid();
+    codes.add(row.code);
+  });
+  if (value.required && !value.options.length) invalid();
+  return clone(value);
+};
+
 // Read-only schema lookup for the current own attendance. Never requests the manager catalogue.
 export const useQualificationForms = ({
   pending,
@@ -24,7 +56,23 @@ export const useQualificationForms = ({
   const error = ref(false);
   let generation = 0;
   let disposed = false;
+  const ending = computed(() => {
+    try {
+      return {
+        valid: true,
+        value: endingReasonContext(pending.value?.ending_reason_context),
+      };
+    } catch {
+      return { valid: false, value: null };
+    }
+  });
+  const reasonOptions = computed(() => ending.value.value?.options || []);
+  const reasonRequired = computed(() => ending.value.value?.required === true);
+  const reasonRevision = computed(() => ending.value.value?.revision);
   const present = computed(() => Boolean(pending.value?.acw_form_context));
+  const contextAvailable = computed(
+    () => present.value || Boolean(ending.value.value) || !ending.value.valid
+  );
   const reasonCodes = computed(() =>
     Array.isArray(pending.value?.acw_form_context?.reason_codes)
       ? [...pending.value.acw_form_context.reason_codes]
@@ -43,7 +91,13 @@ export const useQualificationForms = ({
     return key && Object.hasOwn(answers.value, key) ? answers.value[key] : {};
   });
   const ready = computed(() => {
-    if (!present.value) return true;
+    if (!ending.value.valid) return false;
+    if (
+      reasonRequired.value &&
+      !reasonOptions.value.some(row => row.code === reason.value)
+    )
+      return false;
+    if (!contextAvailable.value) return true;
     if (loading.value || error.value) return false;
     if (!selected.value) return true;
     try {
@@ -90,7 +144,7 @@ export const useQualificationForms = ({
     selected.value = null;
     loading.value = false;
     error.value = false;
-    if (!present.value || !reason.value.trim()) return;
+    if (!contextAvailable.value || !reason.value.trim()) return;
     loading.value = true;
     try {
       const response = await ContactCenterAPI.qualificationFormContext(
@@ -106,11 +160,14 @@ export const useQualificationForms = ({
         String(item?.account_user_id) !==
           String(pending.value.account_user_id) ||
         item?.reason_code !== reason.value ||
-        !item.acw_form_context ||
-        !Object.hasOwn(item.acw_form_context, 'selected')
+        (present.value &&
+          (!item.acw_form_context ||
+            !Object.hasOwn(item.acw_form_context, 'selected'))) ||
+        JSON.stringify(endingReasonContext(item.ending_reason_context)) !==
+          JSON.stringify(ending.value.value)
       )
         invalid();
-      accept(item.acw_form_context.selected);
+      accept(item.acw_form_context?.selected ?? null);
     } catch (failure) {
       if (!disposed && version === generation && key === identity()) {
         error.value = true;
@@ -123,7 +180,7 @@ export const useQualificationForms = ({
         loading.value = false;
     }
   };
-  watch([identity, present], load, { immediate: true });
+  watch([identity, present, contextAvailable], load, { immediate: true });
   onBeforeUnmount(() => {
     disposed = true;
     generation += 1;
@@ -133,6 +190,9 @@ export const useQualificationForms = ({
     selected,
     present,
     reasonCodes,
+    reasonOptions,
+    reasonRequired,
+    reasonRevision,
     values,
     loading,
     error,

@@ -580,6 +580,34 @@
         "reference": "SegundoWord,image8.png/figura9; captura reala16e8a49.desktop-light",
         "difference": "Popup existente dizia Novo registro para política já existente; título específico preparado. Não completa formulário/regras avançadas do mockup.",
         "validation": "Uma regressãoVue e asserção nos quatroChrome existentes preparadas; exigem CI do próprioSHA."
+      },
+      "required_ending_queues_increment_20261120": {
+        "status": "prepared; native and Chrome execution pending",
+        "approved_rule": "Require a registered reason in explicitly selected queues, preserving calls already started.",
+        "requirement_matrix": "docs/jrc_contact_center/required_ending_queues_20261120.json",
+        "adr": "docs/adr/call-center-ending-reason-call-versions-20261120.md",
+        "native_migration": "20261120023000_create_contact_center_ending_reason_versions.rb",
+        "old_five_migrations_preserved": true,
+        "runtime_controls": "Native global configure authority, confirmation, optimistic revision, Account locking, immutable call/catalogue provenance and own/current/original scope intersection",
+        "expected_chrome": 208,
+        "previous_chrome_retained": 204,
+        "real_pabx_operation": false
+      },
+      "ending_reason_catalogue_native_browser_20261120": {
+        "sha": "a0cd67f47b509e8d09e324b1958c5e779a354320",
+        "run": 44659483934,
+        "job": 136033885972,
+        "native_distinct": 1746,
+        "schema_reexecutions": 66,
+        "vue": 856,
+        "chrome": 204,
+        "screenshots_producer_hashes_verified": 296,
+        "artifact": 14597130876,
+        "artifact_sha256": "9f155288cc59f14f9480e9c7c5a4617dd9527b1d0a4586d9adac713e784b8721",
+        "manual_images_inspected": 4,
+        "errors_failures_pending_skipped": 0,
+        "all23_figures_complete": false,
+        "new_required_queues_included": false
       }
     },
     {
@@ -3425,25 +3453,20 @@
     "complete_23_figures": false
   },
   "latest_verified_increment": {
-    "status": "implemented_and_validated_in_synthetic_native_harness",
-    "sha": "2a0cde0c9ee012cd807b1cbca6cffd508898e47a",
-    "run": 44614231287,
-    "rails_distinct": 1686,
-    "schema_reload_reexecutions": 66,
-    "vue": 822,
-    "chrome": 192,
-    "chrome_per_project": 48,
-    "screenshots_sha256_verified": 284,
-    "artifact": 14575213612,
-    "artifact_sha256": "5bae1770a1aec3823ef586b9a7a7f49d2f8fe68c94ad7c4357d6a136f0ca53a3",
-    "failures_pending_outside_skips_flaky": 0,
-    "manual_visual_review": [
-      "desktop-light",
-      "desktop-dark",
-      "mobile-light",
-      "mobile-dark"
-    ],
-    "limits": "Actual reused product controls and CSS, authenticated Rails APIs and disposable PostgreSQL; synthetic provider events only. Does not homologate the entire Hoya shell, external PABX, production or all23figures."
+    "sha": "a0cd67f47b509e8d09e324b1958c5e779a354320",
+    "run": 44659483934,
+    "job": 136033885972,
+    "native_distinct": 1746,
+    "schema_reexecutions": 66,
+    "vue": 856,
+    "chrome": 204,
+    "screenshots_producer_hashes_verified": 296,
+    "artifact": 14597130876,
+    "artifact_sha256": "9f155288cc59f14f9480e9c7c5a4617dd9527b1d0a4586d9adac713e784b8721",
+    "manual_images_inspected": 4,
+    "errors_failures_pending_skipped": 0,
+    "all23_figures_complete": false,
+    "new_required_queues_included": false
   },
   "team_roster_indirect_review_prepared_20261118": {
     "reference_parent": "3f8f2bc80348841bcf32e5dfa0600606e12b778f",
@@ -4966,5 +4989,33 @@
     "automatic_activation_on_real_accounts": false,
     "existing_call_policy_must_be_preserved": true,
     "external_PABX_commands_authorized": false
+  },
+  "required_ending_queues_prepared_20261120": {
+    "status": "prepared; native and Chrome execution pending",
+    "approved_rule": "Require a registered reason in explicitly selected queues, preserving calls already started.",
+    "requirement_matrix": "docs/jrc_contact_center/required_ending_queues_20261120.json",
+    "adr": "docs/adr/call-center-ending-reason-call-versions-20261120.md",
+    "native_migration": "20261120023000_create_contact_center_ending_reason_versions.rb",
+    "old_five_migrations_preserved": true,
+    "runtime_controls": "Native global configure authority, confirmation, optimistic revision, Account locking, immutable call/catalogue provenance and own/current/original scope intersection",
+    "expected_chrome": 208,
+    "previous_chrome_retained": 204,
+    "real_pabx_operation": false
+  },
+  "ending_reason_catalogue_final_gate_a0cd67f4_20261120": {
+    "sha": "a0cd67f47b509e8d09e324b1958c5e779a354320",
+    "run": 44659483934,
+    "job": 136033885972,
+    "native_distinct": 1746,
+    "schema_reexecutions": 66,
+    "vue": 856,
+    "chrome": 204,
+    "screenshots_producer_hashes_verified": 296,
+    "artifact": 14597130876,
+    "artifact_sha256": "9f155288cc59f14f9480e9c7c5a4617dd9527b1d0a4586d9adac713e784b8721",
+    "manual_images_inspected": 4,
+    "errors_failures_pending_skipped": 0,
+    "all23_figures_complete": false,
+    "new_required_queues_included": false
   }
 }

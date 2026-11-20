@@ -32,51 +32,53 @@ const expectContainedDialog = async (page: Page) => {
     .toBe(true);
 };
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('ending reason native')
-    ? 'form_bindings'
-    : info.title.startsWith('Hoya workspace native')
-      ? 'hoya_forms'
-      : info.title.startsWith('state history native')
-        ? 'state_history'
-        : info.title.startsWith('operational form native')
-          ? 'operational_forms'
-          : info.title.startsWith('form bindings native')
-            ? 'form_bindings'
-            : info.title.startsWith('deferred pause native uncertain')
-              ? 'deferred_pause_retry'
-              : info.title.startsWith('deferred pause native')
-                ? 'deferred_pause'
-                : info.title.startsWith('whole native team deletion')
-                  ? 'team_deletion'
-                  : info.title.startsWith('pending ACW native navigation')
-                    ? 'acw_navigation'
-                    : info.title.startsWith('pending ACW native draft')
-                      ? 'acw_draft'
-                      : info.title.startsWith('pending ACW native review')
-                        ? 'acw_review'
-                        : info.title.startsWith('team roster last eligible')
-                          ? 'team_withdrawal'
-                          : info.title.startsWith('native local routing')
-                            ? 'routing'
-                            : info.title.startsWith('scoped ACW native')
-                              ? 'acw'
-                              : info.title.startsWith(
-                                    'last eligible queue withdrawal'
-                                  )
-                                ? 'withdrawal'
+  const pauseKey = info.title.startsWith('registered ending native')
+    ? 'required_endings'
+    : info.title.startsWith('ending reason native')
+      ? 'form_bindings'
+      : info.title.startsWith('Hoya workspace native')
+        ? 'hoya_forms'
+        : info.title.startsWith('state history native')
+          ? 'state_history'
+          : info.title.startsWith('operational form native')
+            ? 'operational_forms'
+            : info.title.startsWith('form bindings native')
+              ? 'form_bindings'
+              : info.title.startsWith('deferred pause native uncertain')
+                ? 'deferred_pause_retry'
+                : info.title.startsWith('deferred pause native')
+                  ? 'deferred_pause'
+                  : info.title.startsWith('whole native team deletion')
+                    ? 'team_deletion'
+                    : info.title.startsWith('pending ACW native navigation')
+                      ? 'acw_navigation'
+                      : info.title.startsWith('pending ACW native draft')
+                        ? 'acw_draft'
+                        : info.title.startsWith('pending ACW native review')
+                          ? 'acw_review'
+                          : info.title.startsWith('team roster last eligible')
+                            ? 'team_withdrawal'
+                            : info.title.startsWith('native local routing')
+                              ? 'routing'
+                              : info.title.startsWith('scoped ACW native')
+                                ? 'acw'
                                 : info.title.startsWith(
-                                      'local pause duration supervisor'
+                                      'last eligible queue withdrawal'
                                     )
-                                  ? 'duration'
+                                  ? 'withdrawal'
                                   : info.title.startsWith(
-                                        'local pause catalog operator'
+                                        'local pause duration supervisor'
                                       )
-                                    ? 'operations'
+                                    ? 'duration'
                                     : info.title.startsWith(
-                                          'local pause catalog'
+                                          'local pause catalog operator'
                                         )
-                                      ? 'editor'
-                                      : null;
+                                      ? 'operations'
+                                      : info.title.startsWith(
+                                            'local pause catalog'
+                                          )
+                                        ? 'editor'
+                                        : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -6366,5 +6368,175 @@ test('ending reason native catalogue persists revisions and deactivation with fi
   await expect(
     operatorPage.locator('[data-manage-ending-reasons]')
   ).toHaveCount(0);
+  await operatorPage.close();
+});
+
+test('registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].required_endings;
+  const ownApi = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const policyEndpoint = ownApi + '/acw_policy';
+  const location = `/app/accounts/${target.account_id}/contact-center/control-desk/closures`;
+  await page.goto(location);
+  await page.locator('[data-manage-ending-reasons]').click();
+  const catalog = page.locator('[data-ending-reason-catalog]');
+  await expectContainedDialog(page);
+  await expect(catalog.locator('[data-ending-selected-queue]')).toHaveCount(1);
+  await catalog.locator('[data-ending-required-queues] summary').click();
+  await catalog.locator('[data-ending-selected-queue] button').click();
+  const row = catalog.locator('[data-ending-entry]').first();
+  await row.locator('summary').click();
+  await row.locator('[data-ending-name]').fill('SYNTHETIC future ending');
+  await row.locator('[data-ending-active]').uncheck();
+  let saved = page.waitForResponse(
+    r => r.url().endsWith('/acw_policy') && r.request().method() === 'PATCH'
+  );
+  await catalog.locator('[data-ending-save]').click();
+  expect((await saved).status()).toBe(200);
+  await expect(catalog.locator('[data-ending-saved]')).toBeVisible();
+  if (!(await row.evaluate(el => el.open)))
+    await row.locator('summary').click();
+  await row.locator('[data-ending-active]').check();
+  await catalog
+    .locator('[data-acw-rule-target] select')
+    .selectOption(String(target.queue_id));
+  await catalog.locator('[data-ending-add-queue]').click();
+  await expect(catalog.locator('[data-ending-save]')).toBeDisabled();
+  await catalog.locator('[data-ending-queue-confirmation]').check();
+  saved = page.waitForResponse(
+    r => r.url().endsWith('/acw_policy') && r.request().method() === 'PATCH'
+  );
+  await catalog.locator('[data-ending-save]').click();
+  const current = await saved;
+  expect(current.status()).toBe(200);
+  const latest = (await current.json()).item;
+  expect(latest.voice_reason_catalog.version).toBe(4);
+  expect(latest.voice_reason_catalog.required_queue_ids).toEqual([
+    String(target.queue_id),
+  ]);
+  expect(latest.voice_required).toBe(false);
+  await catalog
+    .locator('[data-ending-required-queues]')
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-ending-required-queues.png`,
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  expect(
+    await page.locator('html').evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+
+  const operatorPage = await page.context().newPage();
+  const errors = [];
+  const external = [];
+  const commands = [];
+  operatorPage.on('pageerror', error => errors.push(error.message));
+  await operatorPage.route('**/*', route => {
+    const url = new URL(route.request().url());
+    if (
+      ['http:', 'https:'].includes(url.protocol) &&
+      url.hostname !== '127.0.0.1'
+    ) {
+      external.push(url.origin + url.pathname);
+      return route.abort('blockedbyclient');
+    }
+    if (
+      /\/(commands|sync_calls|telephony_integration)(?:[/?]|$)/.test(
+        url.pathname
+      ) &&
+      !['GET', 'HEAD'].includes(route.request().method())
+    )
+      commands.push(url.pathname);
+    return route.continue();
+  });
+  await operatorPage.addInitScript(
+    ({ auth, dark }) => {
+      Reflect.set(window, '__SYNTHETIC_AUTH__', auth);
+      document.addEventListener('DOMContentLoaded', () =>
+        document.documentElement.classList.toggle('dark', dark)
+      );
+    },
+    { auth: target.operator, dark: info.project.name.endsWith('dark') }
+  );
+  const legacy = await page.request.get(
+    ownApi + `/qualifications?call_session_id=${target.legacy_call_session_id}`,
+    { headers: target.operator }
+  );
+  expect(legacy.status()).toBe(200);
+  expect((await legacy.json()).items).toEqual([]);
+  const denied = await page.request.get(policyEndpoint, {
+    headers: target.operator,
+  });
+  expect(denied.status()).toBe(200);
+  expect((await denied.json()).item).not.toHaveProperty('voice_reason_catalog');
+  await operatorPage.goto(
+    `/app/accounts/${target.account_id}/synthetic-hoya-acw/${target.call_session_id}`
+  );
+  let form = operatorPage.locator('[data-pending-qualification-form]');
+  await expect(form).toBeVisible();
+  await expect(form.locator('[data-ending-reason-version]')).toContainText('2');
+  const reason = form.locator('[data-qualification-field="reason"]');
+  await expect(reason.locator('option')).toHaveCount(2);
+  await expect(reason.locator('option').last()).toHaveText(
+    'SYNTHETIC original ending'
+  );
+  await reason.selectOption(target.ending_reason_code);
+  await form
+    .locator('[data-qualification-field="result"]')
+    .selectOption('completed');
+  await expect(form.locator('[data-complete-qualification]')).toBeEnabled();
+  const draft = operatorPage.waitForResponse(
+    r =>
+      r.url().endsWith(`/qualifications/${target.qualification_id}/draft`) &&
+      r.request().method() === 'PATCH'
+  );
+  await form.locator('[data-save-qualification-draft]').click();
+  expect((await draft).status()).toBe(200);
+  await operatorPage.reload();
+  form = operatorPage.locator('[data-pending-qualification-form]');
+  await expect(form.locator('[data-qualification-field="reason"]')).toHaveValue(
+    target.ending_reason_code
+  );
+  await expect(form.locator('[data-ending-reason-version]')).toContainText('2');
+  expect(
+    await operatorPage
+      .locator('html')
+      .evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  expect(
+    await operatorPage.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  await form.scrollIntoViewIfNeeded();
+  await operatorPage.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-ending-frozen-hoya.png`,
+  });
+  const completed = operatorPage.waitForResponse(
+    r =>
+      r.url().endsWith(`/qualifications/${target.qualification_id}`) &&
+      r.request().method() === 'PATCH'
+  );
+  await form.locator('[data-complete-qualification]').click();
+  const result = await completed;
+  expect(result.status()).toBe(200);
+  expect((await result.json()).item.completed_at).not.toBeNull();
+  const persisted = await page.request.get(
+    ownApi + `/qualifications?call_session_id=${target.call_session_id}`,
+    { headers: target.operator }
+  );
+  const record = (await persisted.json()).items.find(
+    row => String(row.id) === String(target.qualification_id)
+  );
+  expect(record.reason_code).toBe(target.ending_reason_code);
+  expect(record.completed_at).not.toBeNull();
+  expect(errors).toEqual([]);
+  expect(external).toEqual([]);
+  expect(commands).toEqual([]);
   await operatorPage.close();
 });

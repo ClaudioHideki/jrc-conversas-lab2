@@ -38,7 +38,7 @@ class JrcContactCenter::QualificationProjection
 
       return legacy_payload(record)
     end
-    private_forms = forms.private_payload
+    private_forms = forms.private_payload.merge(JrcContactCenter::EndingReasonPolicy.new(record).private_payload)
     revision = JrcContactCenter::QualificationDraftRevision.token(record)
     record.operational_payload.merge('draft_revision' => revision).merge(private_forms)
   end

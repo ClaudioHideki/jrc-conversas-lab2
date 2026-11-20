@@ -1,12 +1,16 @@
 <script setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AcwFormFields from '../jrcContactCenter/components/AcwFormFields.vue';
 
-defineProps({
+const props = defineProps({
   disabled: { type: Boolean, default: false },
   conflict: { type: Boolean, default: false },
   canSave: { type: Boolean, default: false },
   saved: { type: Boolean, default: false },
+  reasonOptions: { type: Array, default: () => [] },
+  reasonRequired: { type: Boolean, default: false },
+  reasonRevision: { type: Number, default: null },
   formsPresent: { type: Boolean, default: false },
   formReasonCodes: { type: Array, default: () => [] },
   selectedForm: { type: Object, default: null },
@@ -26,10 +30,68 @@ const result = defineModel('result', { type: String, default: '' });
 const note = defineModel('note', { type: String, default: '' });
 const { t } = useI18n();
 const separator = ' · ';
+const reasons = computed(() => {
+  const choices = new Map();
+  if (!props.reasonRequired) {
+    Object.entries({
+      resolved: t('JRC_CONTACT_CENTER.INBOX_360.REASON_RESOLVED'),
+      information: t('JRC_CONTACT_CENTER.INBOX_360.REASON_INFORMATION'),
+      order: t('JRC_CONTACT_CENTER.INBOX_360.REASON_ORDER'),
+      callback: t('JRC_CONTACT_CENTER.INBOX_360.REASON_CALLBACK'),
+      transfer: t('JRC_CONTACT_CENTER.INBOX_360.REASON_TRANSFER'),
+    }).forEach(([key, label]) => choices.set(key, label));
+    props.formReasonCodes.forEach(code => {
+      if (!choices.has(code)) choices.set(code, code);
+    });
+    if (reason.value && !choices.has(reason.value))
+      choices.set(reason.value, reason.value);
+  }
+  props.reasonOptions.forEach(row => {
+    choices.set(row.code, row.name);
+  });
+  return [...choices].map(([code, label]) => ({ code, label }));
+});
 </script>
 
 <template>
   <div class="min-w-0" data-pending-qualification-form>
+    <p
+      v-if="reasonRevision"
+      class="mt-3 text-xs text-n-slate-11"
+      data-ending-reason-version
+    >
+      {{
+        t('JRC_CONTACT_CENTER.ENDING_REASONS.OPERATIONAL_VERSION', {
+          version: reasonRevision,
+        })
+      }}
+    </p>
+    <p v-if="reasonRequired" class="mt-2 text-xs text-n-amber-11">
+      {{ t('JRC_CONTACT_CENTER.ENDING_REASONS.OPERATIONAL_REQUIRED') }}
+    </p>
+    <div
+      v-if="reasonRevision && !formsPresent && (formLoading || formError)"
+      class="mt-3 space-y-2 text-sm"
+      data-ending-context-status
+    >
+      <p v-if="formLoading" role="status" class="text-n-slate-11">
+        {{ t('JRC_CONTACT_CENTER.COMMON.LOADING') }}
+      </p>
+      <template v-else>
+        <p role="alert" class="text-n-ruby-11">
+          {{ t('JRC_CONTACT_CENTER.ENDING_REASONS.CONTEXT_ERROR') }}
+        </p>
+        <button
+          type="button"
+          :disabled="disabled"
+          class="rounded-lg border border-n-weak px-3 py-2"
+          data-reload-ending-context
+          @click="emit('reloadForm')"
+        >
+          {{ t('JRC_CONTACT_CENTER.COMMON.REFRESH') }}
+        </button>
+      </template>
+    </div>
     <div class="mt-4 grid min-w-0 grid-cols-1 gap-3">
       <label class="text-xs font-medium text-n-slate-11">
         {{ t('JRC_CONTACT_CENTER.ACW_OPERATION.REASON_REQUIRED') }}
@@ -42,52 +104,8 @@ const separator = ' · ';
           <option value="">
             {{ t('JRC_CONTACT_CENTER.INBOX_360.CLOSING_REASON_PLACEHOLDER') }}
           </option>
-          <option
-            v-if="
-              reason &&
-              ![
-                'resolved',
-                'information',
-                'order',
-                'callback',
-                'transfer',
-              ].includes(reason)
-            "
-            :value="reason"
-          >
-            {{ reason }}
-          </option>
-          <option
-            v-for="code in formReasonCodes.filter(
-              value =>
-                ![
-                  'resolved',
-                  'information',
-                  'order',
-                  'callback',
-                  'transfer',
-                  reason,
-                ].includes(value)
-            )"
-            :key="code"
-            :value="code"
-          >
-            {{ code }}
-          </option>
-          <option value="resolved">
-            {{ t('JRC_CONTACT_CENTER.INBOX_360.REASON_RESOLVED') }}
-          </option>
-          <option value="information">
-            {{ t('JRC_CONTACT_CENTER.INBOX_360.REASON_INFORMATION') }}
-          </option>
-          <option value="order">
-            {{ t('JRC_CONTACT_CENTER.INBOX_360.REASON_ORDER') }}
-          </option>
-          <option value="callback">
-            {{ t('JRC_CONTACT_CENTER.INBOX_360.REASON_CALLBACK') }}
-          </option>
-          <option value="transfer">
-            {{ t('JRC_CONTACT_CENTER.INBOX_360.REASON_TRANSFER') }}
+          <option v-for="{ code, label } in reasons" :key="code" :value="code">
+            {{ label }}
           </option>
         </select>
       </label>

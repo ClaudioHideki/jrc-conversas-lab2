@@ -1,6 +1,9 @@
 import { mount, flushPromises } from '@vue/test-utils';
 import { computed, defineComponent, ref } from 'vue';
-import { useQualificationForms } from './useQualificationForms';
+import {
+  useQualificationForms,
+  endingReasonContext,
+} from './useQualificationForms';
 import API from 'dashboard/api/jrcContactCenter';
 
 vi.mock('dashboard/api/jrcContactCenter', () => ({
@@ -209,5 +212,67 @@ describe('Own immutable ACW form lookup', () => {
     expect(f.forms.error.value).toBe(true);
     expect(f.forms.ready.value).toBe(false);
     f.wrapper.unmount();
+  });
+});
+
+describe('frozen registered ending reasons on the existing own context', () => {
+  const context = () => ({
+    revision: 3,
+    integrity_sha256: 'c'.repeat(64),
+    required: true,
+    options: [{ code: 'registered', name: 'SYNTHETIC registered' }],
+  });
+  it('loads an ending-only native context without showing or requiring a fake form', async () => {
+    API.qualificationFormContext.mockResolvedValue(
+      response(null, {
+        reason_code: 'registered',
+        acw_form_context: undefined,
+        ending_reason_context: context(),
+      })
+    );
+    const f = fixture({ legacy: true });
+    f.pending.value.ending_reason_context = context();
+    f.reason.value = 'registered';
+    await flushPromises();
+    expect(f.forms.present.value).toBe(false);
+    expect(f.forms.reasonRequired.value).toBe(true);
+    expect(f.forms.reasonOptions.value).toEqual(context().options);
+    expect(f.forms.ready.value).toBe(true);
+    expect(API.qualificationFormContext).toHaveBeenCalledWith(
+      1,
+      55,
+      'registered'
+    );
+    f.reason.value = 'resolved';
+    await flushPromises();
+    expect(f.forms.ready.value).toBe(false);
+    f.wrapper.unmount();
+  });
+
+  it('rejects a response that substitutes another frozen catalogue revision', async () => {
+    API.qualificationFormContext.mockResolvedValue(
+      response(null, {
+        reason_code: 'registered',
+        ending_reason_context: { ...context(), revision: 4 },
+      })
+    );
+    const f = fixture({ legacy: true });
+    f.pending.value.ending_reason_context = context();
+    f.reason.value = 'registered';
+    await flushPromises();
+    expect(f.forms.error.value).toBe(true);
+    expect(f.forms.ready.value).toBe(false);
+    f.wrapper.unmount();
+  });
+
+  it.each([
+    null,
+    false,
+    { required: true },
+    { ...context(), required: 'true' },
+    { ...context(), options: [] },
+    { ...context(), options: [...context().options, ...context().options] },
+  ])('rejects malformed frozen catalogue %j', value => {
+    expect(() => endingReasonContext(value)).toThrow(TypeError);
   });
 });

@@ -617,4 +617,34 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     expect(JrcContactCenter::RoutingRule.where(account: account)).to be_empty
     expect(Audited.audit_class.where(associated: account, auditable_type: 'JrcContactCenter::RoutingRule')).to be_empty
   end
+
+  it 'does not activate a required ending queue after eligibility is revoked while the request waits for the native account lock' do
+    JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
+    entry = { code: 'synthetic', name: 'SYNTHETIC reason', category: 'SYNTHETIC', description: '', order: 0, active: true }
+    payload = { limits: { voice: 180, whatsapp: 180 }, voice_reason_catalog: [entry], voice_reason_required_queue_ids: [queue.id.to_s],
+                voice_reason_confirmation: true, expected_revision: JrcContactCenter::AcwPolicy.new(account: account.reload).revision }
+    change = -> { JrcContactCenter::AccessGrant.find_by!(account_user: account.account_users.find_by!(user: actor)).update!(eligible: false) }
+    expect(race_with_account_change(change, payload: payload)).to eq(401)
+    expect(JrcContactCenter::EndingReasonVersion.where(account: account)).to be_empty
+    expect(account.reload.settings).not_to have_key(JrcContactCenter::AcwPolicy::KEY)
+  end
+
+  it 'does not overwrite a newer catalogue and exact immutable version when an earlier HTTP reviewer waits for the same account lock' do
+    JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
+    entry = { code: 'synthetic', name: 'SYNTHETIC newest', category: 'SYNTHETIC', description: '', order: 0, active: true }
+    expected = JrcContactCenter::AcwPolicy.new(account: account.reload).revision
+    payload = { limits: { voice: 180, whatsapp: 180 }, voice_reason_catalog: [entry.merge(name: 'SYNTHETIC stale')],
+                voice_reason_required_queue_ids: [queue.id.to_s], voice_reason_confirmation: true, expected_revision: expected }
+    change = lambda do
+      fresh = JrcContactCenter::AcwPolicy.new(account: Account.find(account.id))
+      fresh.update!({ voice: 180, whatsapp: 180 }, voice_reason_catalog: [entry], voice_reason_required_queue_ids: [queue.id.to_s],
+                    voice_reason_confirmation: true, expected_revision: fresh.revision)
+    end
+    expect(race_with_account_change(change, payload: payload)).to eq(409)
+    version = JrcContactCenter::EndingReasonVersion.where(account: account).sole
+    expect(version.definition.fetch('entries').sole.fetch('name')).to eq('SYNTHETIC newest')
+    expect(version.revision).to eq(1)
+    expect(JrcContactCenter::AcwEndingReasons.new(account: account.reload).call).to eq(version.definition)
+  end
+
 end

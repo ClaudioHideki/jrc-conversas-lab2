@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
+import AcwRuleTarget from './AcwRuleTarget.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import { useEndingReasonCatalog } from '../composables/useEndingReasonCatalog';
 const props = defineProps({
@@ -50,6 +51,10 @@ const catalog = useEndingReasonCatalog({
 });
 const {
   entries,
+  requiredQueueIds,
+  queueConfirmation,
+  addsQueues,
+  revisionDraft,
   baseline,
   version,
   loading,
@@ -63,10 +68,22 @@ const {
 } = catalog;
 const dialog = ref(null);
 const q = ref('');
+const queue = ref('');
+const locked = computed(() => loading.value || saving.value);
+const addQueue = () => {
+  if (
+    locked.value ||
+    !queue.value ||
+    requiredQueueIds.value.includes(queue.value) ||
+    requiredQueueIds.value.length >= 100
+  )
+    return;
+  requiredQueueIds.value = [...requiredQueueIds.value, queue.value].sort();
+  queue.value = '';
+};
 const status = ref('all');
 const page = ref(1);
 const discard = ref(false);
-const locked = computed(() => loading.value || saving.value);
 const selected = computed(() =>
   entries.value
     .filter(
@@ -161,12 +178,82 @@ onMounted(() => dialog.value.open());
         </p>
         <ConfigurationRevisionConflict
           :state="revision.state"
-          :draft="entries"
+          :draft="revisionDraft"
           resource="acw_policy"
           :reviewed="revision.reviewed()"
           @reload="revision.reload"
           @review="revision.review"
         />
+        <details
+          class="min-w-0 space-y-3 rounded-xl border border-n-weak p-3"
+          data-ending-required-queues
+        >
+          <summary class="cursor-pointer text-sm font-semibold">
+            {{ t('JRC_CONTACT_CENTER.ENDING_REASONS.REQUIRED_QUEUES') }}
+          </summary>
+          <p class="mt-3 text-sm text-n-slate-11">
+            {{ t('JRC_CONTACT_CENTER.ENDING_REASONS.REQUIRED_QUEUES_HINT') }}
+          </p>
+          <AcwRuleTarget
+            v-model="queue"
+            :account-id="accountId"
+            scope="queue"
+            :disabled="locked"
+          />
+          <button
+            type="button"
+            :disabled="
+              locked ||
+              !queue ||
+              requiredQueueIds.includes(queue) ||
+              requiredQueueIds.length >= 100
+            "
+            class="rounded-lg border border-n-weak px-3 py-2 text-sm disabled:opacity-40"
+            data-ending-add-queue
+            @click="addQueue"
+          >
+            {{ t('JRC_CONTACT_CENTER.ENDING_REASONS.ADD_QUEUE') }}
+          </button>
+          <ul class="space-y-2 text-sm">
+            <li
+              v-for="id in requiredQueueIds"
+              :key="id"
+              class="flex flex-wrap items-center gap-2"
+              data-ending-selected-queue
+            >
+              <span>{{
+                t('JRC_CONTACT_CENTER.ENDING_REASONS.QUEUE_ID', { id })
+              }}</span>
+              <button
+                type="button"
+                :disabled="locked"
+                class="rounded-lg border border-n-weak px-2 py-1"
+                @click="
+                  requiredQueueIds = requiredQueueIds.filter(
+                    value => value !== id
+                  )
+                "
+              >
+                {{ t('JRC_CONTACT_CENTER.ENDING_REASONS.REMOVE_QUEUE') }}
+              </button>
+            </li>
+          </ul>
+          <label
+            v-if="addsQueues"
+            class="flex items-start gap-2 text-sm text-n-amber-11"
+          >
+            <input
+              v-model="queueConfirmation"
+              :disabled="locked"
+              type="checkbox"
+              class="mt-1"
+              data-ending-queue-confirmation
+            />
+            <span>{{
+              t('JRC_CONTACT_CENTER.ENDING_REASONS.QUEUE_CONFIRMATION')
+            }}</span>
+          </label>
+        </details>
         <div class="grid min-w-0 gap-3 sm:grid-cols-3">
           <label class="min-w-0 text-sm">
             <span>{{ text('SEARCH') }}</span>

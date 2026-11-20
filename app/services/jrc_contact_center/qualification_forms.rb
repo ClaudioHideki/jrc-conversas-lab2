@@ -85,7 +85,8 @@ class JrcContactCenter::QualificationForms
 
   def binding_for(snapshot, reason)
     return if reason.blank?
-    raise JrcContactCenter::OperationError, 'invalid_qualification_form_reason' unless snapshot.fetch('reason_codes').include?(reason)
+    registered = JrcContactCenter::EndingReasonPolicy.new(@record).registered?(reason)
+    raise JrcContactCenter::OperationError, 'invalid_qualification_form_reason' unless snapshot.fetch('reason_codes').include?(reason) || registered
 
     origin = snapshot.fetch('origin')
     rule = JrcContactCenter::AcwRulePrecedence.new(rules: origin.fetch('rules')).call(

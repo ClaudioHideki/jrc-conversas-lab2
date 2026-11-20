@@ -1,0 +1,61 @@
+{
+  "status": "prepared_not_natively_validated",
+  "business_rule": {
+    "registered_reason_required": "Explicitly selected native queues only",
+    "existing_calls": "Keep their pinned catalogue revision, or their pre-feature legacy state",
+    "global_voice_mode": "Existing mode preserved; required queues also enforce ACW when global voice is optional",
+    "confirmation": "Literal true when adding queues; changing selection resets UI confirmation"
+  },
+  "reuse": [
+    "Native Account ACW policy and audit",
+    "Native global configuration authority and current revision",
+    "Native queue picker, pagination and account relations",
+    "Native own qualification context, draft and completion",
+    "Native Hoya message/voice workspace",
+    "Existing PostgreSQL schema dumper"
+  ],
+  "new_ledger": "Materialized immutable versions of the existing account catalogue; not another administration module",
+  "source_proof": "Native account audit id, existing actor primitives, audit effective timestamp and PostgreSQL SHA-256",
+  "migration": "20261120023000_create_contact_center_ending_reason_versions.rb",
+  "migration_execution": "Only planned on the existing exclusively owned GitHub disposable databases; not executed yet",
+  "legacy_migrations": "Five historical migrations byte-preserved",
+  "authorization": [
+    "Fresh active user and native operate permission",
+    "Own qualification write and private context",
+    "Current call scope plus original queue/unit intersection",
+    "No account, member or unit parameter grants"
+  ],
+  "tests_prepared": [
+    "Native version/audit atomic rollback and immutability",
+    "Native populated structures upgrade, unproven audit rejection, idempotence and schema reload",
+    "Call started before activation remains optional",
+    "Call version preserved when catalogue changes before ACW",
+    "Registered reason enforcement via API and direct SQL",
+    "Draft persistence and retry without implicit completion",
+    "Account, owner and original unit denial",
+    "Native account retirement block and unreferenced account lifecycle",
+    "Null audit identity rejection",
+    "Two native committed account-lock/permission races",
+    "Vue explicit confirmation and unchanged hidden queue selections",
+    "Vue ending-only context and exact revision identity",
+    "Numeric/prototype-like code order",
+    "Four additional Chrome cases preserving all old204: admin version2to4, optional old call, frozen required call, Hoya draft/reload/complete, light/dark1440/390"
+  ],
+  "validation_so_far": {
+    "local_light_frontend_lint": "Zero errors in12changed files; two preexisting Hoya warnings",
+    "workflow_python_regressions": 7,
+    "embedded_python_blocks_compiled": 2,
+    "rails": "not yet run for this increment",
+    "chrome": "not yet run for this increment"
+  },
+  "operational_limits": [
+    "No actual account activation, provider commands, publication, deployment or production migrations",
+    "PABX contracts and real SIP remain externally unvalidated",
+    "Rollback to a pre-feature image after activation needs a reviewed policy/drain plan"
+  ],
+  "prior_ci": {
+    "sha": "a0cd67f47b509e8d09e324b1958c5e779a354320",
+    "run": 44659483934,
+    "new_queued_feature_included": false
+  }
+}

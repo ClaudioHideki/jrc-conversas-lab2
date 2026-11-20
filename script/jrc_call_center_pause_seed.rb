@@ -1,5 +1,6 @@
 require_relative 'jrc_call_center_operational_form_seed'
 require_relative 'jrc_call_center_state_history_seed'
+require_relative 'jrc_call_center_ending_reason_seed'
 
 # Exclusive synthetic accounts; no channels, inboxes or PABX configuration.
 class JrcContactCenter::SyntheticPauseSeed
@@ -20,7 +21,7 @@ class JrcContactCenter::SyntheticPauseSeed
       %w[
         editor operations withdrawal duration acw routing state_history
         team_withdrawal acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
-        operational_forms form_bindings hoya_forms
+        operational_forms form_bindings hoya_forms required_endings
       ].index_with do |kind|
         new("#{project}-#{kind}").call
       end
@@ -61,6 +62,9 @@ class JrcContactCenter::SyntheticPauseSeed
     if @project.end_with?('-team_deletion')
       JrcContactCenter::AccessGrant.find_by!(account: @account, account_user: admin).update!(allowed: ['jrc_contact_center_audit'])
       payload.merge!(team_source(operator, corporate: false))
+    end
+    if @project.end_with?('-required_endings')
+      payload.merge!(JrcContactCenter::SyntheticEndingReasonSeed.new(account: @account, admin: admin, operator: operator, queue: queue).call)
     end
     return unless @project.end_with?('-operational_forms', '-form_bindings', '-hoya_forms')
 

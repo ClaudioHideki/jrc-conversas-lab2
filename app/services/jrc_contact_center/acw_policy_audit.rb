@@ -19,7 +19,7 @@ class JrcContactCenter::AcwPolicyAudit
   def self.write!(account:, before:, after:)
     return if before == after
 
-    Audited.audit_class.create!(
+    audit = Audited.audit_class.create!(
       auditable: account, associated: account, user: Current.user, action: 'update',
       comment: JrcContactCenter::ConfigurationAudit::ACW_COMMENT, audited_changes: {
         'attributes' => [before.fetch('attributes'), after.fetch('attributes')],
@@ -28,5 +28,14 @@ class JrcContactCenter::AcwPolicyAudit
         'schema_version' => 1
       }
     )
+    record_ending_reason!(account, before, after, audit)
+    audit
   end
+
+  def self.record_ending_reason!(account, before, after, audit)
+    return if before.fetch('attributes')['voice_reason_catalog'] == after.fetch('attributes')['voice_reason_catalog']
+
+    JrcContactCenter::EndingReasonVersion.record_change!(account: account, before: before, after: after, audit: audit)
+  end
+  private_class_method :record_ending_reason!
 end

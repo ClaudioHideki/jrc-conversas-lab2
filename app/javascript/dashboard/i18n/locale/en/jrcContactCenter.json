@@ -2365,7 +2365,16 @@
       "PAGINATION": "Página {page} de {pages} · {total} motivos",
       "REMOVE_NEW": "Remover motivo não salvo",
       "NEW": "Novo motivo",
-      "UNSAVED": "Existem alterações não salvas neste catálogo."
+      "UNSAVED": "Existem alterações não salvas neste catálogo.",
+      "REQUIRED_QUEUES": "Motivo cadastrado obrigatório por fila",
+      "REQUIRED_QUEUES_HINT": "A exigência será aplicada às novas chamadas das filas selecionadas. Chamadas já iniciadas conservam sua versão e seus motivos. Nenhuma configuração será publicada no PABX.",
+      "ADD_QUEUE": "Adicionar fila selecionada",
+      "QUEUE_ID": "Fila #{id}",
+      "REMOVE_QUEUE": "Retirar exigência para novas chamadas",
+      "QUEUE_CONFIRMATION": "Confirmo a exigência de motivo cadastrado nas novas chamadas destas filas. É necessário manter ao menos um motivo ativo.",
+      "OPERATIONAL_REQUIRED": "Selecione um motivo cadastrado na versão desta chamada.",
+      "OPERATIONAL_VERSION": "Catálogo de encerramentos — versão {version}",
+      "CONTEXT_ERROR": "Não foi possível confirmar os motivos desta chamada. Atualize o contexto antes de concluir."
     }
   }
 }

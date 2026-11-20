@@ -41,6 +41,7 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
       response.headers['Cache-Control'] = 'no-store'
       item = { id: record.id, account_id: record.account_id, account_user_id: record.account_user_id, reason_code: reason }
       item.merge!(JrcContactCenter::QualificationForms.new(record).private_payload(reason: reason))
+      item.merge!(JrcContactCenter::EndingReasonPolicy.new(record).private_payload)
       render json: base_payload.merge(item: item)
     end
   end

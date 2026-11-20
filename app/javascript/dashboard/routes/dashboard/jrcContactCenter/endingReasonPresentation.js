@@ -11,6 +11,11 @@ export const endingReasonSummary = (catalog, t) => {
     inactive: t('JRC_CONTACT_CENTER.ENDING_REASONS.INACTIVE'),
   };
   const header = `${labels.version} ${catalog.version}`;
+  const queues = catalog.required_queue_ids?.length
+    ? [
+        `${t('JRC_CONTACT_CENTER.ENDING_REASONS.REQUIRED_QUEUES')}: ${catalog.required_queue_ids.map(id => `#${id}`).join(', ')}`,
+      ]
+    : [];
   const rows = catalog.entries.map(row =>
     [
       `${labels.code}: ${row.code}`,
@@ -21,5 +26,5 @@ export const endingReasonSummary = (catalog, t) => {
       `${labels.status}: ${row.active ? labels.active : labels.inactive}`,
     ].join(' · ')
   );
-  return [header, ...rows].join('\n');
+  return [header, ...queues, ...rows].join('\n');
 };

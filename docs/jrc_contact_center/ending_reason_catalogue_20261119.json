@@ -95,5 +95,22 @@
       "app/services/jrc_contact_center/acw_policy_audit.rb"
     ]
   },
-  "next_checkpoint": "One style-only correction followed by the existing complete native/browser gate; Chrome remains unvalidated until reports pass."
+  "next_checkpoint": "One style-only correction followed by the existing complete native/browser gate; Chrome remains unvalidated until reports pass.",
+  "final_verified_evidence_a0cd67f4": {
+    "sha": "a0cd67f47b509e8d09e324b1958c5e779a354320",
+    "run": 44659483934,
+    "job": 136033885972,
+    "native_distinct": 1746,
+    "schema_reexecutions": 66,
+    "vue": 856,
+    "chrome": 204,
+    "screenshots_producer_hashes_verified": 296,
+    "artifact": 14597130876,
+    "artifact_sha256": "9f155288cc59f14f9480e9c7c5a4617dd9527b1d0a4586d9adac713e784b8721",
+    "manual_images_inspected": 4,
+    "errors_failures_pending_skipped": 0,
+    "all23_figures_complete": false,
+    "new_required_queues_included": false
+  },
+  "next_increment": "Required queues with immutable call catalogue version; separate migration/native/browser evidence required."
 }

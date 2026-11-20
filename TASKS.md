@@ -616,3 +616,5 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - Regra de negócio aprovada:filas selecionadas exigem motivo cadastrado,e chamadas iniciadas preservam a política anterior. Implementação operacional desse complemento ainda pendente,sem ativação em contas reais.
 
 - [ ] **CC-ENDING-REASON-LINT-20261120:** CI `44654884502` aprovou 1.746 exemplos Rails distintos, 66 reexecuções de recarga de schema e 856 testes Vue. Uma infração Style/StringConcatenation em um teste bloqueou assets/Chrome. Correção apenas de interpolação; os 204 cenários Chrome continuam obrigatórios. A obrigatoriedade por fila está aprovada, mas sua implementação em andamento não integra este checkpoint.
+
+- [ ] **CC-ENDING-REQUIRED-QUEUES-20261120:** Implementar a decisão aprovada da figura 9 com versão imutável por chamada, seleção e confirmação de filas, exigência nativa e SQL, contexto próprio no Hoya e preservação de chamadas antigas. ADR `docs/adr/call-center-ending-reason-call-versions-20261120.md`. Novo incremento preparado; testes nativos e 208 cenários Chrome ainda pendentes. Sem ativação real ou comandos PABX.

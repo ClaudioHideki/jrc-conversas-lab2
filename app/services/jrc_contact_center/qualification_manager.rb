@@ -8,10 +8,10 @@ class JrcContactCenter::QualificationManager
 
   def self.ensure_voice!(session)
     return unless session.account.feature_enabled?('jrc_contact_center')
-    return unless JrcContactCenter::AcwPolicy.new(account: session.account).voice_required?
-
+    required = JrcContactCenter::AcwPolicy.new(account: Account.find(session.account_id)).voice_required?
     session.legs.where.not(account_user_id: nil).where.not(answered_at: nil).includes(:account_user).find_each do |leg|
       next unless %w[ended failed].include?(session.status) || %w[ended failed transferred].include?(leg.status)
+      next unless required || JrcContactCenter::EndingReasonPolicy.required_call?(session, leg)
 
       new(account: session.account, member: leg.account_user).start!(call_session: session, started_at: leg.ended_at || session.ended_at)
     end
@@ -53,6 +53,7 @@ class JrcContactCenter::QualificationManager
       end
 
       now = Time.current
+      JrcContactCenter::EndingReasonPolicy.new(record).validate!(attributes.fetch(:reason_code, record.reason_code), complete: true)
       JrcContactCenter::QualificationForms.new(record).save!(attributes, complete: true)
       record.update!(completion_values(record, attributes, now))
       record.conversation&.update!(status: :resolved)

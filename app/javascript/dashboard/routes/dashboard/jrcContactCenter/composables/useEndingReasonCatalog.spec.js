@@ -213,3 +213,72 @@ describe('native ending reason configuration lifecycle', () => {
     );
   });
 });
+
+describe('explicit required ending reason queues', () => {
+  it('requires confirmation before saving newly selected queues through the existing native policy API', async () => {
+    API.acwPolicy.mockResolvedValue(response([row()]));
+    API.updateAcwPolicy.mockResolvedValue(
+      response([row()], {
+        voice_reason_catalog: {
+          version: 2,
+          entries: [row()],
+          required_queue_ids: ['21'],
+        },
+      })
+    );
+    const { catalog } = fixture();
+    await flushPromises();
+    catalog.requiredQueueIds.value = ['21'];
+    await flushPromises();
+    expect(catalog.dirty.value).toBe(true);
+    expect(catalog.canSave.value).toBe(false);
+    await catalog.save();
+    expect(API.updateAcwPolicy).not.toHaveBeenCalled();
+    catalog.queueConfirmation.value = true;
+    expect(catalog.canSave.value).toBe(true);
+    await catalog.save();
+    expect(API.updateAcwPolicy.mock.calls[0][2]).toMatchObject({
+      voice_reason_required_queue_ids: ['21'],
+      voice_reason_confirmation: true,
+    });
+    expect(catalog.requiredQueueIds.value).toEqual(['21']);
+    expect(catalog.dirty.value).toBe(false);
+  });
+
+  it('invalidates confirmation after queue changes and blocks the last active reason from being removed', async () => {
+    API.acwPolicy.mockResolvedValue(response([row()]));
+    const { catalog } = fixture();
+    await flushPromises();
+    catalog.requiredQueueIds.value = ['21'];
+    await flushPromises();
+    catalog.queueConfirmation.value = true;
+    catalog.requiredQueueIds.value = ['21', '22'];
+    await flushPromises();
+    expect(catalog.queueConfirmation.value).toBe(false);
+    catalog.queueConfirmation.value = true;
+    catalog.entries.value[0].active = false;
+    expect(catalog.valid.value).toBe(false);
+    expect(catalog.canSave.value).toBe(false);
+  });
+
+  it('keeps previously selected queue ids even when their native catalogue page is not currently displayed', async () => {
+    API.acwPolicy.mockResolvedValue(
+      response([row()], {
+        voice_reason_catalog: {
+          version: 3,
+          entries: [row()],
+          required_queue_ids: ['21', '950'],
+        },
+      })
+    );
+    const { catalog, accountId } = fixture();
+    await flushPromises();
+    catalog.entries.value[0].name = 'SYNTHETIC next';
+    expect(catalog.requiredQueueIds.value).toEqual(['21', '950']);
+    expect(catalog.canSave.value).toBe(true);
+    accountId.value = '2';
+    await flushPromises();
+    expect(catalog.requiredQueueIds.value).toEqual([]);
+    expect(catalog.error.value).toBe('LOAD_FAILED');
+  });
+});

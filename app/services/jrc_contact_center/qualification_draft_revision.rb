@@ -13,6 +13,8 @@ class JrcContactCenter::QualificationDraftRevision
     signature = ['qualification_manual_state_v1', values]
     forms = JrcContactCenter::QualificationForms.new(record).revision_component if include_forms
     signature << forms if forms
+    ending = JrcContactCenter::EndingReasonPolicy.new(record).private_payload if include_forms
+    signature << ending if ending&.any?
     Digest::SHA256.hexdigest(signature.to_json)
   end
 
