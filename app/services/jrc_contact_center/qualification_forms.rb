@@ -90,9 +90,8 @@ class JrcContactCenter::QualificationForms
     raise JrcContactCenter::OperationError, 'invalid_qualification_form_reason' unless snapshot.fetch('reason_codes').include?(reason) || registered
 
     origin = snapshot.fetch('origin')
-    rule = JrcContactCenter::AcwRulePrecedence.new(rules: origin.fetch('rules')).call(
-                                                   reason_code: reason, queue_id: origin.fetch('queue_id'), team_ids: origin.fetch('team_ids')
-    )
+    precedence = JrcContactCenter::AcwRulePrecedence.new(rules: origin.fetch('rules'))
+    rule = precedence.call(reason_code: reason, queue_id: origin.fetch('queue_id'), team_ids: origin.fetch('team_ids'))
     snapshot.fetch('bindings').find { |pin| pin.fetch('rule_id') == rule.fetch('id') } if rule
   end
 

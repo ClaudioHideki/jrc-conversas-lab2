@@ -30,13 +30,15 @@ RSpec.shared_context 'with a frozen ending reason catalogue' do
   end
 
   def configure_ending_reasons!(entries: [entry], queues: [queue.id.to_s], confirmed: true)
-    Current.set(user: actor) do
-      policy.update!(
-        { voice: 180, whatsapp: 180 },
-        voice_required: false, voice_reason_catalog: entries,
-        voice_reason_required_queue_ids: queues, voice_reason_confirmation: confirmed, expected_revision: policy.revision
-      )
-    end
+    previous_user = Current.user
+    Current.user = actor
+    policy.update!(
+      { voice: 180, whatsapp: 180 },
+      voice_required: false, voice_reason_catalog: entries,
+      voice_reason_required_queue_ids: queues, voice_reason_confirmation: confirmed, expected_revision: policy.revision
+    )
+  ensure
+    Current.user = previous_user
   end
 
   before do

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { migrationPath, ivrMigrationPath, endingReasonSqlPath, reviewedMigrations, verifyAccessMigration, verifyReviewedMigrations } from './validate_cc_access_migration.mjs';
+import { migrationPath, ivrMigrationPath, endingReasonSqlPath, endingReasonCatalogSqlPath, reviewedMigrations, verifyAccessMigration, verifyReviewedMigrations } from './validate_cc_access_migration.mjs';
 
 const content = readFileSync(new URL('../db/migrate/20261117190000_add_contact_center_access_grants.rb', import.meta.url));
 const schema = 'ActiveRecord::Schema[7.1].define(version: 2026_11_16_190000) do\nend';
@@ -73,4 +73,18 @@ test('requires the new reviewed SQL helper to exist instead of silently treating
     return readReviewed(key);
   };
   assert.throws(() => verifyReviewedMigrations(reviewedChanges, missing, schema), /Missing reviewed SQL helper/);
+});
+
+
+test('rejects a one-byte mutation of the separate catalogue/call SQL while migration and ACW-origin SQL remain unchanged', () => {
+  const altered = key => key === endingReasonCatalogSqlPath ? Buffer.concat([readReviewed(key), Buffer.from('\n')]) : readReviewed(key);
+  assert.throws(() => verifyReviewedMigrations(reviewedChanges, altered, schema), /Reviewed ending reason SQL source changed/);
+});
+
+test('requires the independently reviewed catalogue/call SQL source to exist', () => {
+  const missing = key => {
+    if (key === endingReasonCatalogSqlPath) throw new Error('Missing catalogue SQL helper');
+    return readReviewed(key);
+  };
+  assert.throws(() => verifyReviewedMigrations(reviewedChanges, missing, schema), /Missing catalogue SQL helper/);
 });

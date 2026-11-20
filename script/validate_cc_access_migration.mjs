@@ -15,9 +15,11 @@ export const deferredPauseMigrationHash = '6dff254f8838085a16cd2eb6b4e516d477b8d
 export const qualificationFormMigrationPath = 'db/migrate/20261119203000_create_contact_center_qualification_forms.rb';
 export const qualificationFormMigrationHash = '6c9c9d3fd89691f7168a493d53e7d0124b72f95908d93cc8d7d96a5fd19eed26';
 export const endingReasonMigrationPath = 'db/migrate/20261120023000_create_contact_center_ending_reason_versions.rb';
-export const endingReasonMigrationHash = 'fbcf02176eddf2bb2a48b81862b05c484f57e470ceaea852fd85c3b650da9151';
+export const endingReasonMigrationHash = 'd04e5fc11cddbde1fe3d10adf64ebad2dcbcaba5be0496eb0b37dc655a5caff1';
 export const endingReasonSqlPath = 'lib/jrc_contact_center/ending_reason_origin_sql.rb';
 export const endingReasonSqlHash = 'c0dca8b84c8c4b02d78ed07be4e23bb253f0d64994dccc232ba879941ef35bf8';
+export const endingReasonCatalogSqlPath = 'lib/jrc_contact_center/ending_reason_catalog_sql.rb';
+export const endingReasonCatalogSqlHash = 'c729952430c681932c3ae7686880cdee96d532f183d2fada33181e0a6ee5445f';
 export const reviewedMigrations = Object.freeze({
   [migrationPath]: migrationHash,
   [ivrMigrationPath]: ivrMigrationHash,
@@ -51,8 +53,10 @@ export function verifyReviewedMigrations(changes, readCurrent, schema) {
     const actual = createHash('sha256').update(readCurrent(path)).digest('hex');
     if (actual !== reviewedMigrations[path]) throw new Error(`Reviewed migration content changed: ${path}`);
   }
-  const sourceHash = createHash('sha256').update(readCurrent(endingReasonSqlPath)).digest('hex');
-  if (sourceHash !== endingReasonSqlHash) throw new Error('Reviewed ending reason SQL source changed.');
+  for (const [path, expectedHash] of [[endingReasonSqlPath, endingReasonSqlHash], [endingReasonCatalogSqlPath, endingReasonCatalogSqlHash]]) {
+    const sourceHash = createHash('sha256').update(readCurrent(path)).digest('hex');
+    if (sourceHash !== expectedHash) throw new Error(`Reviewed ending reason SQL source changed: ${path}`);
+  }
   return validateNewMigrationTimestamps(schema, expected);
 }
 

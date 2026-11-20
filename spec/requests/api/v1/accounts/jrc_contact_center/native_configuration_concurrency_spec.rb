@@ -588,7 +588,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
         endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/routing_rules"
         endpoint += "/#{rule.id}" if rule
         payload = { routing_rule: { version: 1, rule_key: 'synthetic-new', kind: 'ddd', source_value: '21',
-                    target_unit_id: units.first.id, target_queue_id: queue.id, priority: 2, state: 'draft' } }
+                                    target_unit_id: units.first.id, target_queue_id: queue.id, priority: 2, state: 'draft' } }
         status = race_with_account_change(change, endpoint: endpoint, payload: payload, verb: operation == 'create' ? :post : :patch)
         expect(status).to eq(source == 'coverage' ? 404 : 401)
         observed = ActiveRecord::Base.uncached { rows.pluck(:id, :source_value, :priority, :state) }
@@ -609,7 +609,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       original.call(*args, **kwargs)
     end
     payload = { routing_rule: { version: 1, rule_key: 'synthetic-audit-rollback', kind: 'ddd', source_value: '11',
-                target_unit_id: units.first.id, target_queue_id: queue.id, priority: 1, state: 'draft' } }
+                                target_unit_id: units.first.id, target_queue_id: queue.id, priority: 1, state: 'draft' } }
     post "/api/v1/accounts/#{account.id}/jrc_contact_center/routing_rules", headers: headers, params: payload, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(state[:routing_audit_attempt]).to be(true)
@@ -637,8 +637,11 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
                 voice_reason_required_queue_ids: [queue.id.to_s], voice_reason_confirmation: true, expected_revision: expected }
     change = lambda do
       fresh = JrcContactCenter::AcwPolicy.new(account: Account.find(account.id))
-      fresh.update!({ voice: 180, whatsapp: 180 }, voice_reason_catalog: [entry], voice_reason_required_queue_ids: [queue.id.to_s],
-                    voice_reason_confirmation: true, expected_revision: fresh.revision)
+      fresh.update!(
+        { voice: 180, whatsapp: 180 },
+        voice_reason_catalog: [entry], voice_reason_required_queue_ids: [queue.id.to_s],
+        voice_reason_confirmation: true, expected_revision: fresh.revision
+      )
     end
     expect(race_with_account_change(change, payload: payload)).to eq(409)
     version = JrcContactCenter::EndingReasonVersion.where(account: account).sole

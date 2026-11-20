@@ -618,3 +618,10 @@ Correção da anotação de origem: os quatro arquivos api-origins do artefato88
 - [ ] **CC-ENDING-REASON-LINT-20261120:** CI `44654884502` aprovou 1.746 exemplos Rails distintos, 66 reexecuções de recarga de schema e 856 testes Vue. Uma infração Style/StringConcatenation em um teste bloqueou assets/Chrome. Correção apenas de interpolação; os 204 cenários Chrome continuam obrigatórios. A obrigatoriedade por fila está aprovada, mas sua implementação em andamento não integra este checkpoint.
 
 - [ ] **CC-ENDING-REQUIRED-QUEUES-20261120:** Implementar a decisão aprovada da figura 9 com versão imutável por chamada, seleção e confirmação de filas, exigência nativa e SQL, contexto próprio no Hoya e preservação de chamadas antigas. ADR `docs/adr/call-center-ending-reason-call-versions-20261120.md`. Novo incremento preparado; testes nativos e 208 cenários Chrome ainda pendentes. Sem ativação real ou comandos PABX.
+
+### 20/11 — Obrigatoriedade por fila: preparação nativa corrigida
+
+- Catálogo administrativo anterior efetivamente validado no SHA a0cd67f4/CI44659483934:1.746Rails distintos,66reexecuções schema,856Vue,204Chrome e296capturas com hashes verificados. Essa evidência não cobre a nova exigência por fila.
+- CI44667891699/267c8d17:instalação e recarga de schema executadas;13dos79exemplos de recarga falharam antes das assertivas porque o fixture chamou Current.set, inexistente no módulo nativo.66casos anteriores passaram. Cinco infrações Ruby restantes;core/Vue/Chrome não executados.
+- Correção usa Current.user com restauração em ensure somente no fixture/seed sintéticos. Preserva o reconciliador nativo de eventos atrasados separando horário operacional corrigível e captura imutável da política. Regressões adicionais de SQL/upgrade preparadas,sem alteração das cinco migrations anteriores.
+-36testes estáticos do gate aprovados:seis migrations exatas,dois SQLs com hashes independentes,ausência/mutação/retroatividade rejeitadas. Exigir nova CI nativa,208Chrome e manifesto íntegro no próprio SHA;nenhumPABXreal,deployoupublicação.

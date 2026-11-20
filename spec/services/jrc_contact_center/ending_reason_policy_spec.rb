@@ -122,4 +122,18 @@ RSpec.describe JrcContactCenter::EndingReasonPolicy do
     manager.complete!(pending, reason_code: 'resolved', outcome_code: 'completed')
     expect(pending.reload.completed_at).to be_present
   end
+
+  it 'keeps the captured policy timestamp immutable independently of correctable operational timestamps' do
+    call = session.reload
+    captured = call.ending_reason_captured_started_at
+    expect(captured).to eq(call.started_at)
+    expect do
+      call.class.transaction(requires_new: true) do
+        call.class.connection.execute("UPDATE #{call.class.table_name} SET ending_reason_captured_started_at = started_at - INTERVAL '1 second' " \
+                                      "WHERE id = #{call.id}")
+      end
+    end.to raise_error(ActiveRecord::StatementInvalid, /Call ending reason origin is immutable/)
+    expect(call.reload.ending_reason_captured_started_at).to eq(captured)
+  end
+
 end

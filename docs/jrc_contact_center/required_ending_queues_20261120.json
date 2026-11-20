@@ -17,7 +17,7 @@
   "new_ledger": "Materialized immutable versions of the existing account catalogue; not another administration module",
   "source_proof": "Native account audit id, existing actor primitives, audit effective timestamp and PostgreSQL SHA-256",
   "migration": "20261120023000_create_contact_center_ending_reason_versions.rb",
-  "migration_execution": "Only planned on the existing exclusively owned GitHub disposable databases; not executed yet",
+  "migration_execution": "Fresh installation and schema reload ran in CI267;13new examples failed in synthetic Current.set setup. New capture/header compatibility revision still requires native validation.",
   "legacy_migrations": "Five historical migrations byte-preserved",
   "authorization": [
     "Fresh active user and native operate permission",
@@ -39,7 +39,10 @@
     "Vue explicit confirmation and unchanged hidden queue selections",
     "Vue ending-only context and exact revision identity",
     "Numeric/prototype-like code order",
-    "Four additional Chrome cases preserving all old204: admin version2to4, optional old call, frozen required call, Hoya draft/reload/complete, light/dark1440/390"
+    "Four additional Chrome cases preserving all old204: admin version2to4, optional old call, frozen required call, Hoya draft/reload/complete, light/dark1440/390",
+    "Native EventIngestor and EventReconciler delayed started_at correction",
+    "Immutable captured policy timestamp through direct SQL",
+    "Reject missing entries and string version even in proven legacy audit history"
   ],
   "validation_so_far": {
     "local_light_frontend_lint": "Zero errors in12changed files; two preexisting Hoya warnings",
@@ -67,6 +70,32 @@
     "migrations_rails_vue_chrome": "not executed; no native approval inferred",
     "correction": "Exact sixth migration plus SQL helper hash,34guardregressions; indentation, frozen SQL constants with four unchanged normalized SQL bodies, same predicates factored to comply with metrics."
   },
-  "reviewed_migration_sha256": "fbcf02176eddf2bb2a48b81862b05c484f57e470ceaea852fd85c3b650da9151",
-  "frozen_sql_sha256": "c0dca8b84c8c4b02d78ed07be4e23bb253f0d64994dccc232ba879941ef35bf8"
+  "reviewed_migration_sha256": "d04e5fc11cddbde1fe3d10adf64ebad2dcbcaba5be0496eb0b37dc655a5caff1",
+  "frozen_sql_sha256": "c0dca8b84c8c4b02d78ed07be4e23bb253f0d64994dccc232ba879941ef35bf8",
+  "historical_header_regression_prepared": {
+    "reason": "A PostgreSQL CHECK must explicitly reject a missing entries key or a nonnumeric version instead of accepting NULL. This matches the existing strict catalogue document contract.",
+    "cases": [
+      "missing_entries",
+      "string_version"
+    ],
+    "native_validation": "pending",
+    "production_changes": false
+  },
+  "native_delayed_event_compatibility_prepared": {
+    "source": "JrcContactCenter::EventReconciler#session_details uses the earlier of stored started_at and the normalized event timestamp.",
+    "correction": "Preserve that native behavior and freeze the separate first-observed policy timestamp and catalogue id. No reconciler or provider endpoint change.",
+    "test": "spec/services/jrc_contact_center/ending_reason_event_compatibility_spec.rb",
+    "native_validation": "pending",
+    "real_provider_hmac_ack": "not tested"
+  },
+  "catalog_call_sql_sha256": "c729952430c681932c3ae7686880cdee96d532f183d2fada33181e0a6ee5445f",
+  "gate_267c8d17": {
+    "sha": "267c8d1763ffb6b20cda236165f34267340dbd98",
+    "run": 44667891699,
+    "artifact_id": 14598294659,
+    "artifact_sha256": "c2345b7aca8d234ef21a96014fb42967b377f5cc229c4c67df96a0790e1cfb97",
+    "result": "failed:13of79schema_examples in shared Current.set setup;five Ruby layout findings",
+    "core_rails_vue_chrome": "not reached; not approved",
+    "correction": "Native thread-local Current.user with ensure restoration; constructor/call split and hash indentation. Separate immutable captured policy timestamp retains native late-event correction."
+  }
 }

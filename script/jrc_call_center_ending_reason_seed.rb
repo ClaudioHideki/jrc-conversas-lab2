@@ -8,24 +8,30 @@ class JrcContactCenter::SyntheticEndingReasonSeed
   end
 
   def call
+    previous_user = Current.user
+    Current.user = @admin.user
     policy = JrcContactCenter::AcwPolicy.new(account: @account)
     entry = { code: 'synthetic_registered', name: 'SYNTHETIC original ending', category: 'SYNTHETIC', description: '', order: 0, active: true }
-    Current.set(user: @admin.user) do
-      policy.update!({ voice: 180, whatsapp: 180 }, voice_required: false, voice_reason_catalog: [entry], expected_revision: policy.revision)
-      optional = ended_call
-      policy.update!(
-        { voice: 180, whatsapp: 180 },
-        voice_reason_required_queue_ids: [@queue.id.to_s],
-        voice_reason_confirmation: true, expected_revision: policy.revision
-      )
-      required = ended_call
-      record = JrcContactCenter::Qualification.find_by!(account: @account, account_user: @operator, call_session: required)
-      { call_session_id: required.id, qualification_id: record.id, legacy_call_session_id: optional.id,
-        ending_reason_code: entry.fetch(:code), ending_reason_revision: 2 }
-    end
+    seed_call_revisions(policy, entry)
+  ensure
+    Current.user = previous_user
   end
 
   private
+
+  def seed_call_revisions(policy, entry)
+    policy.update!({ voice: 180, whatsapp: 180 }, voice_required: false, voice_reason_catalog: [entry], expected_revision: policy.revision)
+    optional = ended_call
+    policy.update!(
+      { voice: 180, whatsapp: 180 },
+      voice_reason_required_queue_ids: [@queue.id.to_s],
+      voice_reason_confirmation: true, expected_revision: policy.revision
+    )
+    required = ended_call
+    record = JrcContactCenter::Qualification.find_by!(account: @account, account_user: @operator, call_session: required)
+    { call_session_id: required.id, qualification_id: record.id, legacy_call_session_id: optional.id,
+      ending_reason_code: entry.fetch(:code), ending_reason_revision: 2 }
+  end
 
   def ended_call
     session = JrcContactCenter::CallSession.create!(account: @account, provider: 'synthetic', correlation_id: SecureRandom.uuid,

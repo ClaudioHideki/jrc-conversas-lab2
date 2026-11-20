@@ -33,7 +33,8 @@ RSpec.describe CreateContactCenterEndingReasonVersions do
                 jrc_contact_center_agent_state_events jrc_contact_center_queues]
     connection.execute('CREATE SCHEMA cc_ending_reason_upgrade_synthetic')
     tables.each { |table| connection.execute("CREATE TABLE cc_ending_reason_upgrade_synthetic.#{table} (LIKE public.#{table} INCLUDING ALL)") }
-    connection.execute('ALTER TABLE cc_ending_reason_upgrade_synthetic.jrc_contact_center_call_sessions DROP COLUMN ending_reason_version_id')
+    connection.execute('ALTER TABLE cc_ending_reason_upgrade_synthetic.jrc_contact_center_call_sessions ' \
+                         'DROP COLUMN ending_reason_version_id, DROP COLUMN ending_reason_captured_started_at')
     connection.execute("INSERT INTO cc_ending_reason_upgrade_synthetic.accounts SELECT * FROM public.accounts WHERE id = #{account.id}")
     connection.execute("INSERT INTO cc_ending_reason_upgrade_synthetic.audits SELECT * FROM public.audits WHERE associated_type = 'Account' " \
                        "AND associated_id = #{account.id}")
@@ -64,13 +65,37 @@ RSpec.describe CreateContactCenterEndingReasonVersions do
   it 'does not retroactively pin existing native call rows during upgrade' do
     call = session.reload
     in_owned_preupgrade_schema do |connection|
-      columns = call.attributes.keys.reject { |key| key == 'ending_reason_version_id' }.map { |key| connection.quote_column_name(key) }.join(', ')
+      names = call.attributes.keys - %w[ending_reason_version_id ending_reason_captured_started_at]
+      columns = names.map { |key| connection.quote_column_name(key) }.join(', ')
       connection.execute("INSERT INTO jrc_contact_center_call_sessions (#{columns}) SELECT #{columns} FROM public.jrc_contact_center_call_sessions " \
                          "WHERE id = #{call.id}")
       described_class.new.up
       expect(connection.select_value("SELECT ending_reason_version_id FROM jrc_contact_center_call_sessions WHERE id = #{call.id}")).to be_nil
+      captured = connection.select_value("SELECT ending_reason_captured_started_at FROM jrc_contact_center_call_sessions WHERE id = #{call.id}")
+      expect(captured).to be_nil
     end
     expect(call.reload.ending_reason_version_id).to be_present
+  end
+
+  %w[missing_entries string_version].each do |malformation|
+    it "blocks a proven but malformed legacy catalogue #{malformation} instead of accepting a nullable CHECK result" do
+      definition = JrcContactCenter::EndingReasonVersion.where(account: account).sole.definition.deep_dup
+      if malformation == 'missing_entries'
+        definition.delete('entries')
+      else
+        definition['version'] = '1'
+      end
+      in_owned_preupgrade_schema do |connection|
+        value = connection.quote(definition.to_json)
+        connection.execute("UPDATE accounts SET settings = jsonb_set(settings, '{jrc_contact_center_acw,voice_reason_catalog}', #{value}::jsonb)")
+        connection.execute("UPDATE audits SET audited_changes = jsonb_set(audited_changes, '{attributes,1,voice_reason_catalog}', #{value}::jsonb) " \
+                           "WHERE comment = 'jrc_contact_center_acw_policy_v1'")
+        expect do
+          connection.transaction(requires_new: true) { described_class.new.up }
+        end.to raise_error(ActiveRecord::StatementInvalid, /cc_ending_reason_definition/)
+      end
+      expect(JrcContactCenter::EndingReasonVersion.where(account: account).sole.definition.fetch('entries')).to eq([entry])
+    end
   end
 
   it 'verifies reexecution and refuses missing trigger evidence without rebuilding the guard silently' do
