@@ -709,3 +709,6 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] Recebimento privado9b8: instalação nova aprovada; recarga113/114 e lint57infrações novas bloquearam a CI44759123101. Correção CR/LF sem relaxar fingerprint, JSON explícito e lint preparada; teste PostgreSQL real e224Chrome continuam obrigatórios. Ver audio_file_schema_reload_correction_20261120.json.
 
 - [ ] Recebimento privado5c4b/CI44763568917:114/115recargas, novo casoCR/LF aprovado, lint57→1. Casts explícitos (mesmo conjunto permitido) e21pares PostgreSQL, alinhamento final e vetoresfresh/reload preparados; aprovação dos uploads e224Chrome ainda pendente.
+
+- [x] Schema privado5e8b:116recargas aprovadas, vetoresfresh/reloadidênticos, lintRuby0novasinfrações. Não equivale ao aceite dos uploads.
+- [ ] Core5e8b:1751/1753passaram;2falhas de transporteHTTP corrigidas nafixtureRackmultipart, comasserção adicional. Manter gates restantes e224Chrome obrigatórios; nenhuma imagem/publicação/deploy.

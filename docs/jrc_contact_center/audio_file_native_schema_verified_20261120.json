@@ -1,0 +1,53 @@
+{
+  "status": "schema_and_ruby_lint_verified_two_HTTP_fixture_failures",
+  "sha": "5e8b0051209b9fe3ed09b167686eeb3280eead46",
+  "run": 44766293645,
+  "artifact_id": 14645649431,
+  "artifact_sha256": "3062a45858b7170012eea0d96c5daf21490b116b980d1cb971257597c828b2c1",
+  "reload": {
+    "duration": 13.158126799,
+    "example_count": 116,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "core": {
+    "duration": 300.835149519,
+    "example_count": 1753,
+    "failure_count": 2,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "new_ruby_offenses": 0,
+  "schema_components_identical": true,
+  "schema_receipt": "jrc_cc_audio_files_v1:581ccf5a93895eda0ca259d1e62ac87d64acc70736cee5f173fddf1a4a4b209d",
+  "component_hashes": {
+    "structure": "495b3c822a5fd3c667e9872e110bcc51c0d4af800025a7af28b6c9931550b515",
+    "constraints": "8af8170bd4a97750701c32b34079c8811eea7765c6a052de7f6ded99d28dde64",
+    "functions": "30ba6b188e98466dddb8783a29e1f17f2ea65b394d6834cfd3e1a47436952660",
+    "triggers": "141d5531bc13a727e9eca127ab6814ee3a6acacf46d1551b2f056b0568c50f8f"
+  },
+  "failed_example_ids": [
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_assets_spec.rb[1:1]",
+    "./spec/requests/api/v1/accounts/jrc_contact_center/audio_assets_spec.rb[1:4]"
+  ],
+  "diagnosis": "Only two POST upload paths failed422 before their intended201/428 checks. Shared fixture supplies ActionDispatch UploadedFile to HTTP Rack transport. Pinned rack-test2.1 chooses multipart only for Rack::Test::UploadedFile; existing native request fixtures use that transport wrapper. Strict backend correctly rejects a scalar instead of actualbytes.",
+  "minimal_correction": "Only request fixture changes:60actualWAVbytes in Rack::Test::UploadedFile/StringIO, own IO closed, shared direct-service fixture unchanged. Add explicit actualmultipartmediaType/parsedUploadedFileclass assertion; all201/428/409/history/security expectations retained. No production code, schema or lint rule changes.",
+  "not_proven": [
+    "corrected HTTP native rerun",
+    "concurrency/corporate gates on correctedSHA",
+    "Vue/assets/bootstrap224Chrome",
+    "codec/scanner/player/full23figures"
+  ],
+  "reports": {
+    "call-center-acw-form-schema-fresh.json": "47fa97c6148cb054598567f9d05e51b9d074424aecbc446f8c510049184b9f52",
+    "call-center-acw-form-schema-reload.json": "fcc5c14f064a7f2351ffdeba0b4c3fe778e3a820fc9764b0b4ec5194b7b82901",
+    "call-center-acw-form-schema-rspec-context.json": "e71e724b3d6c0fa0cf054272c4bd659ab2cc92701a997d36430e121c842b050e",
+    "call-center-audio-schema-fresh.json": "7e5da3c0806aa6fa7df5a5bd8e1109bc6d1c98bc2b131ce753c179eb88769ee2",
+    "call-center-audio-schema-reload.json": "547b313d0e1b9b8b520f4cb8121c121f3af58a5df76074d70e5718459dbbffa0",
+    "call-center-ivr-schema-reload-rspec.json": "70a4f13bac95fdf98d95e56a136118371a66c4ad2fcdb9f17eeb21a6066346dd",
+    "call-center-rspec.json": "e56afc9d54b19d65278045ecc027fe64e7cae56faa1a1b2f70d379542f2acce2",
+    "call-center-rubocop.json": "0fcc36686ed41eb2e2baa3561eff47c5c655dc47ab7fb54c827fd934fe649fef"
+  },
+  "other_modules_main_original_checkout_unchanged": true
+}

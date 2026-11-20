@@ -4,15 +4,18 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
   include_context 'with an institutional audio receipt'
 
   let(:headers) { actor.create_new_auth_token }
+  let(:multipart_file) { Rack::Test::UploadedFile.new(StringIO.new(bytes), 'audio/wav', original_filename: 'SYNTHETIC.wav') }
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_assets" }
   let(:receipt) do
     JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
                                   .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC private message' }, file: upload, key: key)
   end
 
+  after { multipart_file.close }
+
   it 'accepts actual multipart bytes and presents metadata without a signed locator, storage key or readiness claim' do
     post base, headers: headers,
-               params: { asset: { name: 'SYNTHETIC received message' }, unit_id: unit.id, file: upload, idempotency_key: key }
+               params: { asset: { name: 'SYNTHETIC received message' }, unit_id: unit.id, file: multipart_file, idempotency_key: key }
     expect(response).to have_http_status(:created)
     item = response.parsed_body.fetch('item')
     expect(item).to include('unit_id' => unit.id.to_s, 'name' => 'SYNTHETIC received message')
@@ -20,6 +23,7 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
     expect(response.headers['Cache-Control']).to eq('no-store')
     expect(response.body).not_to match(/signed_id|blob_id|service_url|idempotency_key|input_digest/)
     expect(item.fetch('revision')).to match(/\A[0-9a-f]{64}\z/)
+    expect([request.media_type, request.request_parameters.fetch('file').class]).to eq(['multipart/form-data', ActionDispatch::Http::UploadedFile])
   end
 
   it 'bounds native pagination and persists reviewed rename and reorganization within the exact same unit' do
@@ -52,11 +56,11 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
   it 'requires a revision for replacement and returns a bounded immutable version history' do
     asset = receipt.audio_asset
     endpoint = "#{base}/#{asset.id}/versions"
-    post endpoint, headers: headers, params: { file: upload, idempotency_key: 'synthetic-audio-request-0002' }
+    post endpoint, headers: headers, params: { file: multipart_file, idempotency_key: 'synthetic-audio-request-0002' }
     expect(response).to have_http_status(:precondition_required)
     expected = JrcContactCenter::AudioAssetRevision.token(asset, version: receipt)
     post endpoint, headers: headers,
-                   params: { file: upload, idempotency_key: 'synthetic-audio-request-0002', expected_revision: expected }
+                   params: { file: multipart_file, idempotency_key: 'synthetic-audio-request-0002', expected_revision: expected }
     expect(response).to have_http_status(:created)
     get endpoint, headers: headers, params: { page: 1, per_page: 1 }
     expect(response.parsed_body.fetch('items').pluck('number')).to eq([2])
@@ -74,7 +78,7 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
     get "#{base}/#{hidden.id}/versions", headers: headers
     expect(response).to have_http_status(:not_found)
     post base, headers: headers, params: { asset: { name: 'SYNTHETIC forged folder', folder_id: hidden_folder.id },
-                                           unit_id: unit.id, file: upload, idempotency_key: key }
+                                           unit_id: unit.id, file: multipart_file, idempotency_key: key }
     expect(response).to have_http_status(:not_found)
     expect(JrcContactCenter::AudioVersion.where(account: account)).to be_empty
   end
@@ -87,7 +91,7 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
     expect(response).to have_http_status(:not_found)
     expect(response.body).not_to include(foreign.name)
     post base, headers: headers, params: { account_id: other.id, asset: { name: 'SYNTHETIC forged' },
-                                           unit_id: unit.id, file: upload, idempotency_key: key }
+                                           unit_id: unit.id, file: multipart_file, idempotency_key: key }
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcContactCenter::AudioVersion.where(account: account)).to be_empty
   end
