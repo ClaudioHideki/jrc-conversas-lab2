@@ -40,7 +40,7 @@ class Api::V1::Accounts::JrcContactCenter::AdministrationController < Api::V1::A
   def team_list_payload(relation)
     inactive = JrcContactCenter::TeamState.where(account: Current.account, team_id: relation.select(:id), active: false).pluck(:team_id)
     list_payload(search_records(relation, fields: ['name'])) do |team|
-      team.as_json(only: %i[id name description updated_at]).merge('cc_active' => !inactive.include?(team.id))
+      team.as_json(only: %i[id name description updated_at]).merge('cc_active' => inactive.exclude?(team.id))
     end
   end
 

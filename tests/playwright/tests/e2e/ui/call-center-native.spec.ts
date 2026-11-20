@@ -58,29 +58,33 @@ test.beforeEach(async ({ page }, info) => {
                           ? 'acw_draft'
                           : info.title.startsWith('pending ACW native review')
                             ? 'acw_review'
-                            : info.title.startsWith('team roster last eligible')
-                              ? 'team_withdrawal'
-                              : info.title.startsWith('native local routing')
-                                ? 'routing'
-                                : info.title.startsWith('scoped ACW native')
-                                  ? 'acw'
-                                  : info.title.startsWith(
-                                        'last eligible queue withdrawal'
-                                      )
-                                    ? 'withdrawal'
+                            : info.title.startsWith('team source last eligible')
+                              ? 'team_activity'
+                              : info.title.startsWith(
+                                    'team roster last eligible'
+                                  )
+                                ? 'team_withdrawal'
+                                : info.title.startsWith('native local routing')
+                                  ? 'routing'
+                                  : info.title.startsWith('scoped ACW native')
+                                    ? 'acw'
                                     : info.title.startsWith(
-                                          'local pause duration supervisor'
+                                          'last eligible queue withdrawal'
                                         )
-                                      ? 'duration'
+                                      ? 'withdrawal'
                                       : info.title.startsWith(
-                                            'local pause catalog operator'
+                                            'local pause duration supervisor'
                                           )
-                                        ? 'operations'
+                                        ? 'duration'
                                         : info.title.startsWith(
-                                              'local pause catalog'
+                                              'local pause catalog operator'
                                             )
-                                          ? 'editor'
-                                          : null;
+                                          ? 'operations'
+                                          : info.title.startsWith(
+                                                'local pause catalog'
+                                              )
+                                            ? 'editor'
+                                            : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;
@@ -4064,6 +4068,145 @@ test('local pause catalog operator preserves legacy history and enforces only au
     path: `.codex/call-center-native-e2e/${info.project.name}-pause-catalog-operator.png`,
     fullPage: false,
   });
+});
+
+test('team source last eligible inactivation preserves shared roster and requires manager review', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].team_activity;
+  const nativeBase = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}`;
+  const own = `${nativeBase}/jrc_contact_center`;
+  const sourcePath = `/api/v1/accounts/${target.account_id}/jrc_contact_center/access_authorizations/teams/${target.team_id}`;
+  const rosterUrl = `${nativeBase}/teams/${target.team_id}/team_members`;
+  const queueUrl = `${own}/queue_memberships?queue_id=${target.queue_id}`;
+  const initial = await page.request.get(queueUrl, {
+    headers: target.administrator,
+  });
+  expect(initial.status()).toBe(200);
+  const membership = (await initial.json()).items[0];
+  const nativeWrites: string[] = [];
+  page.on('request', request => {
+    if (
+      /\/(commands|sync_calls|telephony_integration|team_members)(?:[/?]|$)/.test(
+        request.url()
+      ) &&
+      !['GET', 'HEAD'].includes(request.method())
+    )
+      nativeWrites.push(request.url());
+  });
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/permissions?permission_scope=teams&access_teams_q=${encodeURIComponent(target.team_name)}`
+  );
+  const section = page.locator('[data-authority-assignments]');
+  await section.locator(`[data-edit-authority="${target.team_id}"]`).click();
+  await expectContainedDialog(page);
+  const dialog = page.getByRole('dialog');
+  await dialog.locator('[data-team-source-active]').uncheck();
+  await dialog.locator('[data-review-authority]').check();
+  const first = page.waitForResponse(
+    r =>
+      new URL(r.url()).pathname === sourcePath &&
+      r.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Salvar permissões', exact: true })
+    .click();
+  const blocked = await first;
+  expect(blocked.status()).toBe(409);
+  const review = (await blocked.json()).review;
+  expect(review).toMatchObject({
+    account_id: String(target.account_id),
+    team_id: String(target.team_id),
+    operation: 'deactivate_source',
+  });
+  expect(review.queues).toEqual([
+    expect.objectContaining({
+      queue_id: String(target.queue_id),
+      previous_count: 1,
+      remaining_count: 0,
+    }),
+  ]);
+  const panel = dialog.locator('[data-team-roster-withdrawal-review]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText(review.queues[0].queue_name);
+  await expect(
+    dialog.getByRole('button', { name: 'Salvar permissões', exact: true })
+  ).toBeDisabled();
+  const unchanged = await page.request.get(rosterUrl, {
+    headers: target.administrator,
+  });
+  expect((await unchanged.json()).map(row => row.id)).toContain(
+    target.operator_user_id
+  );
+  await dialog.locator('[data-team-manager-withdrawal-confirm]').check();
+  await dialog.locator('[data-review-authority]').check();
+  await panel.scrollIntoViewIfNeeded();
+  await expectContainedDialog(page);
+  expect(
+    await page.locator('html').evaluate(el => el.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-team-source-manager-review.png`,
+    fullPage: true,
+  });
+  const confirmed = page.waitForResponse(
+    r =>
+      new URL(r.url()).pathname === sourcePath &&
+      r.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Salvar permissões', exact: true })
+    .click();
+  expect((await confirmed).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  const persisted = await page.request.get(
+    `${own}/access_authorizations/users/${membership.account_user_id}`,
+    { headers: target.administrator }
+  );
+  expect(persisted.status()).toBe(200);
+  const userState = (await persisted.json()).item;
+  expect(userState.eligible).toBe(true);
+  expect(userState.effective).toEqual([]);
+  const denied = await page.request.get(`${own}/context`, {
+    headers: target.operator,
+  });
+  expect(denied.status()).toBe(401);
+  const after = await page.request.get(queueUrl, {
+    headers: target.administrator,
+  });
+  expect((await after.json()).items).toContainEqual(
+    expect.objectContaining({ id: membership.id, active: true })
+  );
+  const intact = await page.request.get(rosterUrl, {
+    headers: target.administrator,
+  });
+  expect((await intact.json()).map(row => row.id)).toContain(
+    target.operator_user_id
+  );
+  await page.reload();
+  await expect(section).toContainText('Equipe inativa no Call Center');
+  await section.locator(`[data-edit-authority="${target.team_id}"]`).click();
+  await dialog.locator('[data-team-source-active]').check();
+  await dialog.locator('[data-review-authority]').check();
+  const restored = page.waitForResponse(
+    r =>
+      new URL(r.url()).pathname === sourcePath &&
+      r.request().method() === 'PATCH'
+  );
+  await dialog
+    .getByRole('button', { name: 'Salvar permissões', exact: true })
+    .click();
+  expect((await restored).status()).toBe(200);
+  const available = await page.request.get(`${own}/context`, {
+    headers: target.operator,
+  });
+  expect(available.status()).toBe(200);
+  expect(nativeWrites).toEqual([]);
 });
 
 test('team roster last eligible withdrawal uses real native review, persistence and scoped audit', async ({

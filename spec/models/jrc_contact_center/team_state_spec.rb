@@ -10,9 +10,10 @@ RSpec.describe JrcContactCenter::TeamState do
     expect(state).not_to be_valid
     expect do
       described_class.transaction(requires_new: true) do
-        described_class.connection.execute('INSERT INTO jrc_contact_center_team_states ' \
-                                          '(account_id, team_id, active, created_at, updated_at) ' \
-                                          "VALUES (#{account.id}, #{foreign.id}, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)")
+        described_class.connection.execute(<<~SQL.squish)
+          INSERT INTO jrc_contact_center_team_states (account_id, team_id, active, created_at, updated_at)
+          VALUES (#{account.id}, #{foreign.id}, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        SQL
       end
     end.to raise_error(ActiveRecord::InvalidForeignKey)
     expect(described_class.where(account: account)).to be_empty
@@ -22,9 +23,10 @@ RSpec.describe JrcContactCenter::TeamState do
     state = described_class.create!(account: account, team: team, active: false)
     expect do
       described_class.transaction(requires_new: true) do
-        described_class.connection.execute('INSERT INTO jrc_contact_center_team_states ' \
-                                          '(account_id, team_id, active, created_at, updated_at) ' \
-                                          "VALUES (#{account.id}, #{team.id}, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)")
+        described_class.connection.execute(<<~SQL.squish)
+          INSERT INTO jrc_contact_center_team_states (account_id, team_id, active, created_at, updated_at)
+          VALUES (#{account.id}, #{team.id}, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        SQL
       end
     end.to raise_error(ActiveRecord::RecordNotUnique)
     expect do

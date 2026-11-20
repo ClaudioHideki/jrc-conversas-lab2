@@ -20,7 +20,7 @@ class JrcContactCenter::SyntheticPauseSeed
     projects.index_with do |project|
       %w[
         editor operations withdrawal duration acw routing state_history
-        team_withdrawal acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
+        team_withdrawal team_activity acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
         operational_forms form_bindings hoya_forms required_endings membership_eligibility
       ].index_with do |kind|
         new("#{project}-#{kind}").call
@@ -58,7 +58,7 @@ class JrcContactCenter::SyntheticPauseSeed
   private
 
   def prepare_special_sources(payload, queue, admin, operator)
-    payload.merge!(team_source(operator)) if @project.end_with?('-team_withdrawal')
+    payload.merge!(team_source(operator)) if @project.end_with?('-team_withdrawal', '-team_activity')
     if @project.end_with?('-team_deletion')
       JrcContactCenter::AccessGrant.find_by!(account: @account, account_user: admin).update!(allowed: ['jrc_contact_center_audit'])
       payload.merge!(team_source(operator, corporate: false))

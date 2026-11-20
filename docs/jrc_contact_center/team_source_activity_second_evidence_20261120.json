@@ -1,0 +1,31 @@
+{
+  "sha": "16197e7ed72b8454091ef06f32c1ea527350557f",
+  "run": 44703882520,
+  "job": 136178544726,
+  "overall": "failure_not_accepted",
+  "native_distinct": 1848,
+  "schema_reload_reexecutions": 90,
+  "vue": {
+    "passed": 890,
+    "total": 890,
+    "failed": 0,
+    "pending": 0
+  },
+  "frontend_lint": "passed",
+  "ruby_remaining": 5,
+  "ruby_remaining_causes": [
+    "Negated collection include predicate",
+    "Two concatenated SQL string indentation findings",
+    "Missing and extra example/block blank lines"
+  ],
+  "followup": "Five findings corrected without rule exclusions or weaker assertions. Four extra real Chrome manager receipt cases prepared using separate synthetic accounts; original212 retained, expected216.",
+  "chrome": "not run on this SHA, no visual acceptance claimed",
+  "artifact": {
+    "id": 14615851650,
+    "sha256": "e2a4084193dcddd66bac8f789f1a7e645ea6445ddadd5be5329ec0301ace3dfc",
+    "reports_checked": true
+  },
+  "audio_folder_wip": "Excluded from focused team repair. Prepared8th migration and verifier not natively validated or published.",
+  "stages_complete": false,
+  "external_homologation": false
+}

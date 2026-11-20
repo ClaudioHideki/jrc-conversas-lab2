@@ -5424,6 +5424,17 @@
         12
       ],
       "followup": "Situação na lista administrativa e atalho autorizado para editor existente; testes de transporte da confirmação. Revalidar no novo SHA."
+    },
+    {
+      "date": "2026-11-20",
+      "sha": "16197e7ed72b8454091ef06f32c1ea527350557f",
+      "evidence": "docs/jrc_contact_center/team_source_activity_second_evidence_20261120.json",
+      "status": "Rails1848, recarga90, Vue890 e lint frontend aprovados. Cinco apontamentos Ruby bloqueiam aceite. Correção preserva as asserções e acrescenta quatro cenários reais de confirmação do gestor;216previstos, ainda não executados.",
+      "figures": [
+        3,
+        12
+      ],
+      "audio": "Preparação por unidade preservada separadamente; não incorporada a este reparo da equipe."
     }
   ]
 }
