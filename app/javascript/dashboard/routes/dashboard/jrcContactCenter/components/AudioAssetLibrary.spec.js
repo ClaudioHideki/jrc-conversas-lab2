@@ -121,6 +121,34 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it.each([
+    ['user_upload', 'SOURCE_UPLOAD'],
+    ['browser_capture', 'SOURCE_CAPTURE'],
+    [undefined, 'UNKNOWN_SOURCE'],
+  ])(
+    'shows the actual latest-version origin %s in its row without inventing missing provenance',
+    async (source, shown) => {
+      const item = structuredClone(row);
+      item.latest_version.source_kind = source;
+      API.audioAssets.mockResolvedValueOnce({
+        data: {
+          items: [item],
+          meta: { page: 1, pages: 1, total: 1 },
+          max_upload_bytes: 1000,
+        },
+      });
+      const wrapper = fixture();
+      await flushPromises();
+      const displayed = wrapper
+        .get('[data-audio-asset="44"]')
+        .get('[data-audio-file-source="44"]');
+      expect(displayed.text()).toContain(
+        `JRC_CONTACT_CENTER.AUDIO_FILES.${shown}`
+      );
+      expect(API.audioAsset).not.toHaveBeenCalled();
+    }
+  );
+
   it('applies source and format drafts through the native route while retaining unit and unrelated filters', async () => {
     mocks.route.query = { audio_unit: '10', unrelated: 'preserved' };
     const wrapper = fixture();

@@ -658,6 +658,15 @@ onBeforeUnmount(() => {
                 <p v-if="row.latest_version" class="mt-1 break-words">
                   {{ row.latest_version.content_type }}
                 </p>
+                <p
+                  v-if="row.latest_version"
+                  :data-audio-file-source="row.id"
+                  class="mt-1 break-words"
+                >
+                  {{
+                    `${label('SOURCE')}: ${sourceLabel(row.latest_version.source_kind)}`
+                  }}
+                </p>
                 <p class="mt-2 text-n-amber-11">{{ label('PRIVATE') }}</p>
               </td>
               <td

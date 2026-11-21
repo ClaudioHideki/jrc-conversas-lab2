@@ -1,0 +1,96 @@
+{
+  "status": "partial_real_chrome_verified_origin_row_correction_pending",
+  "producer": "9da5f3e8fc98122e8cf021daa3b295fd19146030",
+  "run": 44854936459,
+  "job": 136694801012,
+  "native_distinct": 2093,
+  "schema_reload_separate": 131,
+  "vue_passed": 1054,
+  "lint_frontend": "passed",
+  "new_ruby_offenses": 0,
+  "fresh_assets": "passed",
+  "bootstrap": "15 real cards; no page or HTTP errors",
+  "chrome": {
+    "required": 236,
+    "passed": 232,
+    "failed": 4,
+    "skipped": 0,
+    "flaky": 0,
+    "outside_errors": 0,
+    "passed_per_project": 58
+  },
+  "remaining_failure": "All four synthetic-device capture cases fail only when the persisted row lacks the required translated origin. The unchanged assertion must pass; do not remove it.",
+  "prefix_assertions_reached_before_failure": [
+    "Explicit synthetic device, real MediaRecorder/remux, actual local audio playback, discard with zero writes and common fields preserved",
+    "Single reviewed upload returns201 with browser_capture, canonical audio/ogg and actual clean/decoded Opus observation",
+    "Authenticated exact-version download returns200 and matches SHA-256; recording-only operator returns401",
+    "Native list reload shows the saved asset; origin text is absent in its row"
+  ],
+  "not_claimed": [
+    "These prefixes are observed assertions before a failing test, not four fully approved scenarios.",
+    "Capture-case format filtering and later reload assertions were not reached.",
+    "No production scanner coverage, physical microphone, Nico synthesis or PABX homologation."
+  ],
+  "actual_visual_review": {
+    "opened": [
+      "desktop-light-audio-folder-native-tree.png",
+      "mobile-dark-audio-folder-native-tree.png",
+      "desktop-dark-audio-table-authorized-details.png",
+      "mobile-light-audio-table-authorized-details.png"
+    ],
+    "findings": "Folder labels and mobile actions are readable after the grid/stacked-row correction. Real desktop side panel and mobile stacked details preserve themes and authorized values. Current row still lacks origin.",
+    "folder_label_widths": [
+      {
+        "project": "desktop-dark",
+        "label_width": 152,
+        "native_lazy_tree": true,
+        "sha": "9da5f3e8fc98122e8cf021daa3b295fd19146030"
+      },
+      {
+        "project": "desktop-light",
+        "label_width": 152,
+        "native_lazy_tree": true,
+        "sha": "9da5f3e8fc98122e8cf021daa3b295fd19146030"
+      },
+      {
+        "project": "mobile-dark",
+        "label_width": 220,
+        "native_lazy_tree": true,
+        "sha": "9da5f3e8fc98122e8cf021daa3b295fd19146030"
+      },
+      {
+        "project": "mobile-light",
+        "label_width": 220,
+        "native_lazy_tree": true,
+        "sha": "9da5f3e8fc98122e8cf021daa3b295fd19146030"
+      }
+    ],
+    "selected_image_sha256": {
+      "desktop-dark-audio-folder-native-tree.png": "6b67de3097944494fcc861517e5f9d9e6ef5352d15e281c9f55a9714eb262cd8",
+      "desktop-dark-audio-table-authorized-details.png": "ec3db9722ea872e2423181691af5a552c53fc113ad2ee433ee4fef113e7fb220",
+      "desktop-light-audio-folder-native-tree.png": "dfe597015bc320cd917dc3f6ac8874d1123a02e2fcc7e2dfa41425215489863f",
+      "desktop-light-audio-table-authorized-details.png": "935dabc646cb4648c7364c989c145ddac82c2ef7d2d3bedfc29c183ce78efb5a",
+      "mobile-dark-audio-folder-native-tree.png": "c3d1cb4ad9adafe09e28cbe6a87165a95bcd66b80b21b488cdaaf76e3b40f850",
+      "mobile-dark-audio-table-authorized-details.png": "6966592263c6dea9a0c86a2e7dc536ed348e0197b413700df63b777dd5071ec2",
+      "mobile-light-audio-folder-native-tree.png": "10a76e9aaa90fca4fcfafbee042b2c4ccb2b3b421ad8a7ae7dd855e2e10b69e4",
+      "mobile-light-audio-table-authorized-details.png": "b02d4305d632fb1f1ceeed56dc2ff25d72bbbaacf59dfc901720975485b14bb3"
+    }
+  },
+  "next_correction_prepared": {
+    "product": "Render existing latest_version.source_kind through the existing localized mapping in the actual table row; no extra request, edit, cache or new API.",
+    "vue_cases": 3,
+    "vue_status": "Prepared, not executed natively yet",
+    "cases": [
+      "user_upload",
+      "browser_capture",
+      "missing legacy origin remains unknown"
+    ],
+    "static_lint": "Two changed files; zero errors/warnings",
+    "chrome_required_unchanged": 236,
+    "backend_sql_permissions_and_shared_recorder": "unchanged"
+  },
+  "artifact": 14689199573,
+  "artifact_sha256": "ee23b388f067a3273e357b065d2b3eee1120cc5491be0a6d809a845debc98bbc",
+  "full_23_figures_complete": false,
+  "external_homologation": false
+}

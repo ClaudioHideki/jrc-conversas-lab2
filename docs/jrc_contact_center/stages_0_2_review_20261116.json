@@ -6028,5 +6028,29 @@
     "artifact_sha256": "f15cb999534accc87d08b6ef627d253b881c0fa26cf1f32fa43cf7839ec1f22b",
     "full_23_figures_complete": false,
     "report": "docs/jrc_contact_center/audio_opus_native_verified_20261120.json"
+  },
+  "audio_capture_row_origin_20261121": {
+    "status": "partial_real_chrome_verified_origin_row_correction_pending",
+    "producer": "9da5f3e8fc98122e8cf021daa3b295fd19146030",
+    "run": 44854936459,
+    "native_distinct": 2093,
+    "schema_reload_separate": 131,
+    "vue_passed": 1054,
+    "new_ruby_offenses": 0,
+    "fresh_assets": "passed",
+    "chrome": {
+      "required": 236,
+      "passed": 232,
+      "failed": 4,
+      "skipped": 0,
+      "flaky": 0,
+      "outside_errors": 0,
+      "passed_per_project": 58
+    },
+    "remaining_failure": "All four synthetic-device capture cases fail only when the persisted row lacks the required translated origin. The unchanged assertion must pass; do not remove it.",
+    "artifact": 14689199573,
+    "artifact_sha256": "ee23b388f067a3273e357b065d2b3eee1120cc5491be0a6d809a845debc98bbc",
+    "full_23_figures_complete": false,
+    "report": "docs/jrc_contact_center/audio_capture_row_origin_20261121.json"
   }
 }
