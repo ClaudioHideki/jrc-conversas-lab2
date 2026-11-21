@@ -2650,6 +2650,17 @@
       "DELIVERED": "ZIP verificado e entregue ao navegador. Confira a conclusão do download no navegador.",
       "ERROR": "Não foi possível verificar o ZIP. A seleção foi preservada. Reabra a revisão antes de tentar novamente.",
       "SOURCE_CHANGED": "Uma versão ou verificação mudou. Feche a revisão, atualize a lista e selecione novamente os áudios."
+    },
+    "AUDIO_MOVE": {
+      "OPEN": "Mover selecionados",
+      "TITLE": "Mover áudios selecionados",
+      "SAVE": "Mover áudios",
+      "EXPLANATION": "Reorganiza somente os áudios selecionados, dentro da mesma unidade. Identidades, arquivos, versões e vínculos são preservados. Não publica configurações nem envia comandos ao PABX.",
+      "SOURCE_VERSION": "Áudio {id} · Versão {version}",
+      "REVIEW": "Revisei a unidade, os áudios selecionados, os vínculos locais apresentados e a pasta de destino. Autorizo somente esta reorganização.",
+      "SOURCE_CHANGED": "Um áudio mudou desde a seleção. Nenhuma nova tentativa será enviada automaticamente. Feche, atualize a lista e revise novamente antes de continuar.",
+      "ERROR": "Não foi possível confirmar a mudança de pasta. Preserve a seleção e confira o estado atual antes de uma nova tentativa.",
+      "SAVED": "Mudança de pasta confirmada para {count} áudio(s). Identidades e versões preservadas."
     }
   }
 }

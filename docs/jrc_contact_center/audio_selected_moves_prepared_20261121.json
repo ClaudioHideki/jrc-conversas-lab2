@@ -1,0 +1,135 @@
+{
+  "status": "implemented_in_owned_overlay_native_and_chrome_pending",
+  "base": "cfe118f1c6af036b523c39025487c87d8840bac9",
+  "figures": [
+    6,
+    16
+  ],
+  "reuse": [
+    "AudioLibraryAccess",
+    "AuthorityTransaction",
+    "AudioAssetRevision",
+    "AudioAsset native audit callbacks",
+    "Existing selection, Native Dialog and AudioFolderPicker"
+  ],
+  "semantics": [
+    "Metadata-only same-unit folder update of up to20 distinct identities",
+    "All revisions validated before the first write; deterministic write order and full transaction rollback",
+    "No file, version, inspection, permission or provider changes",
+    "No-op destination does not produce extra updates or audits",
+    "Current actor authority refreshed under the native Account mutex",
+    "Unknown response preserves review intent, blocks automatic retry and requires refreshed selection",
+    "Context/profile/unit/selection changes discard private popup state; late responses ignored"
+  ],
+  "known_first_ui_limit": "Reuses the existing verified-file ZIP selection; individual metadata movement remains available for other assets. Broader bulk metadata selection is still pending.",
+  "preliminary_mocked_cases": {
+    "audio-selected-move": {
+      "passed": 16,
+      "sha256": "fd47a7f97173829d6832e88cb00fb255f6870e2391de89a92b250f1b90650ab2",
+      "resources": {
+        "kind": "Windows bounded mocked unit check; not native Rails/Chrome or codec proof",
+        "target": "audio-selected-move",
+        "exit_code": 0,
+        "stop": null,
+        "seconds": 3.0160000000032596,
+        "initial": {
+          "physical_total_bytes": 12711890944,
+          "physical_available_bytes": 2665824256,
+          "c_free_bytes": 53666181120,
+          "read_only": true
+        },
+        "minimum": {
+          "physical_total_bytes": 12711890944,
+          "physical_available_bytes": 2466381824,
+          "c_free_bytes": 53666181120,
+          "read_only": true
+        },
+        "final": {
+          "physical_total_bytes": 12711890944,
+          "physical_available_bytes": 2663096320,
+          "c_free_bytes": 53666172928,
+          "read_only": true
+        },
+        "log_bytes": 500
+      }
+    },
+    "audio-selected-move-projected-r2": {
+      "passed": 37,
+      "sha256": "1cf0d9775a3e1c09c09ce9f3a163c561850d5c0cfaaa885782fe05c6b96b82cd",
+      "resources": {
+        "kind": "Windows bounded mocked unit check; not native Rails/Chrome or codec proof",
+        "target": "audio-selected-move-projected-r2",
+        "exit_code": 0,
+        "stop": null,
+        "seconds": 5.530999999988126,
+        "initial": {
+          "physical_total_bytes": 12711890944,
+          "physical_available_bytes": 2559922176,
+          "c_free_bytes": 53663936512,
+          "read_only": true
+        },
+        "minimum": {
+          "physical_total_bytes": 12711890944,
+          "physical_available_bytes": 2182987776,
+          "c_free_bytes": 53663936512,
+          "read_only": true
+        },
+        "final": {
+          "physical_total_bytes": 12711890944,
+          "physical_available_bytes": 2516590592,
+          "c_free_bytes": 53663916032,
+          "read_only": true
+        },
+        "log_bytes": 656
+      }
+    },
+    "audio-selected-move-dialog-r4": {
+      "passed": 4,
+      "sha256": "c6be8a34f350c12c2768d07f50c00abd4ebb9d455e8522eb3dabab0c500512e9",
+      "resources": {
+        "kind": "Windows bounded mocked unit check; not native Rails/Chrome or codec proof",
+        "target": "audio-selected-move-dialog-r4",
+        "exit_code": 0,
+        "stop": null,
+        "seconds": 3.5160000000032596,
+        "initial": {
+          "physical_total_bytes": 12711890944,
+          "physical_available_bytes": 2530304000,
+          "c_free_bytes": 53659807744,
+          "read_only": true
+        },
+        "minimum": {
+          "physical_total_bytes": 12711890944,
+          "physical_available_bytes": 2314891264,
+          "c_free_bytes": 53659807744,
+          "read_only": true
+        },
+        "final": {
+          "physical_total_bytes": 12711890944,
+          "physical_available_bytes": 2515230720,
+          "c_free_bytes": 53659803648,
+          "read_only": true
+        },
+        "log_bytes": 513
+      }
+    }
+  },
+  "distinct_preliminary_cases": 57,
+  "previous_library_cases_included": 34,
+  "new_vue_cases_prepared": 23,
+  "native_examples_prepared_not_run": {
+    "input": 5,
+    "service": 10,
+    "api": 7,
+    "actual_http_concurrency": 2
+  },
+  "preliminary_static_js_vue": {
+    "files": 9,
+    "errors": 0,
+    "warnings": 0
+  },
+  "actual_chrome_required": "Same244 identities, native reviewed destination and return to root, persistence, stale409/operator401, computed CSS and1440/390screenshots",
+  "migrations_or_dependencies_or_real_grants_changed": false,
+  "workflow_changed": false,
+  "full_figure_complete": false
+}

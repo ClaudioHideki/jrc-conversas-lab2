@@ -1,0 +1,154 @@
+{
+  "status": "native_and_actual_chrome_verified_increment_not_complete_figure6",
+  "producer": "cfe118f1c6af036b523c39025487c87d8840bac9",
+  "run": 44931816060,
+  "artifact": 14720220034,
+  "artifact_sha256": "e00d7d3399de2c76ae788724a3fe7f270d0e35a2fa1342a52d5880de89ab410e",
+  "native_distinct": 2464,
+  "schema_reload_separate": 175,
+  "vue": 1237,
+  "chrome": 244,
+  "same_prior_native_cases_preserved": {
+    "core": 2236,
+    "concurrency": 117,
+    "vue": 1213,
+    "chrome": 244
+  },
+  "new_native_examples": 26,
+  "new_vue_cases": 24,
+  "new_chrome_assertions_in_same_existing_cases": true,
+  "actual_download_receipts": {
+    "desktop-dark-audio-archive-native.json": {
+      "sha256": "f7afc457bf145ffc5295de78937de0c81b80ae50268a10cc76dadfea8c90cea3",
+      "receipt": {
+        "sha": "cfe118f1c6af036b523c39025487c87d8840bac9",
+        "synthetic": true,
+        "external_homologation": false,
+        "account": "2043",
+        "unit": "1302",
+        "created": 200,
+        "zip_sha256": "709d0348480ab81f6c158bc78e8b024a4a1c4ba5942fccd7dd8af94d11f8ed22",
+        "manifest_sha256": "4a9e4220741e37b3bb5a6dad84a8dab02cb57c8421f21b03199790e82f41db66",
+        "files": 2,
+        "entries": 3,
+        "sources": [
+          "242",
+          "263"
+        ],
+        "exact_versions": [
+          "241",
+          "265"
+        ],
+        "operator_denied": 401,
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "desktop-light-audio-archive-native.json": {
+      "sha256": "f493cd7adf380ab9d9385e7c5012b1d6006cacfe408d1cba1b5338f497cdd899",
+      "receipt": {
+        "sha": "cfe118f1c6af036b523c39025487c87d8840bac9",
+        "synthetic": true,
+        "external_homologation": false,
+        "account": "2021",
+        "unit": "1258",
+        "created": 200,
+        "zip_sha256": "88c62f82733e933cd0098b1f9db35a6ac523fc7f6bb803715121f204e5a92f81",
+        "manifest_sha256": "015cac277f20194cbe217dc4c499fe38d79fa074870b1a489e9036e035a19b8b",
+        "files": 2,
+        "entries": 3,
+        "sources": [
+          "240",
+          "253"
+        ],
+        "exact_versions": [
+          "239",
+          "253"
+        ],
+        "operator_denied": 401,
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "mobile-dark-audio-archive-native.json": {
+      "sha256": "1548e8d2d6358a20d8223ea1b62bdaa27566b8c7b0380941525c3d8ad4fe7778",
+      "receipt": {
+        "sha": "cfe118f1c6af036b523c39025487c87d8840bac9",
+        "synthetic": true,
+        "external_homologation": false,
+        "account": "2087",
+        "unit": "1390",
+        "created": 200,
+        "zip_sha256": "546d2d1ca450a3fe63bae0522cac4deb9485702d42dc18a9359cb1587cf04302",
+        "manifest_sha256": "8243ad5e9fabf8a43ef289d73f76416d50f63ccbfef723eb91de624ea4d6df6e",
+        "files": 2,
+        "entries": 3,
+        "sources": [
+          "246",
+          "283"
+        ],
+        "exact_versions": [
+          "245",
+          "289"
+        ],
+        "operator_denied": 401,
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "mobile-light-audio-archive-native.json": {
+      "sha256": "29ecc3eaf71d4cce48d14ceffece505227b91dba83db4acae42167939c0c995e",
+      "receipt": {
+        "sha": "cfe118f1c6af036b523c39025487c87d8840bac9",
+        "synthetic": true,
+        "external_homologation": false,
+        "account": "2065",
+        "unit": "1346",
+        "created": 200,
+        "zip_sha256": "6b833fd2c08ce451ffe0c146992d348ccbaab6febde4bf116beba374132401d0",
+        "manifest_sha256": "4b4f6c8a164d94e99134f0d1373c4dc04d02e52ee7d13ef07509dc514684454b",
+        "files": 2,
+        "entries": 3,
+        "sources": [
+          "244",
+          "273"
+        ],
+        "exact_versions": [
+          "243",
+          "277"
+        ],
+        "operator_denied": 401,
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    }
+  },
+  "actual_images_opened": [
+    "desktop-dark-audio-archive-delivered.png",
+    "desktop-dark-audio-archive-reviewed.png",
+    "desktop-light-audio-archive-delivered.png",
+    "desktop-light-audio-archive-reviewed.png",
+    "mobile-dark-audio-archive-delivered.png",
+    "mobile-dark-audio-archive-reviewed.png",
+    "mobile-light-audio-archive-delivered.png",
+    "mobile-light-audio-archive-reviewed.png"
+  ],
+  "visual_findings": [
+    "Oito PNGs abertos em pares: revisão e entrega do ZIP em1440/390px, claro/escuro.",
+    "O popup identifica a seleção, versão, tamanho, SHA e o limite da conferência de vínculos locais; não afirma homologação do PABX.",
+    "A lista possui rolagem vertical interna: as capturas mostram o primeiro áudio e o início do segundo. Não são prova de que todos os detalhes estavam simultaneamente visíveis.",
+    "Caixa de revisão e botões Fechar/Baixar ZIP estão legíveis e dentro do popup em390px, sem transbordamento horizontal visível.",
+    "As quatro capturas após o download mostram mensagem em português de ZIP verificado e entregue ao navegador, orientando conferir a conclusão no navegador.",
+    "Cores e textos claros/escuros conferidos visualmente; recibos nativos e conteúdo do ZIP verificados separadamente pelo teste no runner.",
+    "O ZIP bruto não foi reaberto a partir do artefato: os JSONs preservam os hashes e o resultado da inspeção real no runner. Não há homologação externa ou conclusão integral da figura6."
+  ],
+  "screenshot_hashes_verified": 412,
+  "byte_evidence_limit": "Actual download bytes and manifest were verified in the runner by browser and Python; this audit verifies their preserved receipts.",
+  "raw_synthetic_zip_independently_reopened_from_artifact": false,
+  "no_provider_configuration_or_external_homologation": true,
+  "still_pending": [
+    "Broader metadata selection and remaining figure6 bulk operations",
+    "Complete published-reference inventory before deletion",
+    "Provider conversion/publication/ACKs"
+  ]
+}

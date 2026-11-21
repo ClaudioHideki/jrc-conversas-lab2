@@ -819,3 +819,7 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 
 - [ ] ZIP institucional: primeira CI f98c630f confirmou2464 Rails/175 reload/1237 Vue e lint frontend; quatro infrações Ruby corrigidas sem supressões. Resultado interno entry_count evita colisão com Struct.count; cabeçalhos e testes de segurança preservados. Exigir nova CI, assets e244Chrome antes de aceite. Movimentação selecionada continua somente em preparação privada, sem misturar ao reparo.
+
+
+- [x] ZIP institucional: produtor cfe118f1, 2464 Rails/175 reload/1237 Vue/244 Chrome aprovados e oito screenshots efetivamente revisadas. Download real e manifesto inspecionados no runner; JSONs e hashes preservados. Isso não declara inventário completo do fornecedor.
+- [ ] Movimento selecionado: implementação com CAS de todas as origens, transação nativa/auditoria e popup revisado. 57 testes preliminares com mocks incluem34 anteriores; 24 casos Rails preparados, ainda não executados. Exigir CI nativa e Chrome real antes do aceite. A seleção em lote de todos os estados de metadados permanece pendente.

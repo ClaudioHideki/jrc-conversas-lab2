@@ -117,6 +117,7 @@ export const useAudioArchive = ({
         ...items.value,
         Object.freeze({
           assetId: row.id,
+          revision: row.revision,
           versionId: row.latest_version.id,
           inspectionId: row.latest_version.technical_verification.id,
           sha256: row.latest_version.sha256,

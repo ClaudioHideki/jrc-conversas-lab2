@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { computed, defineComponent, reactive, ref } from 'vue';
+import { computed, defineComponent, h, reactive, ref } from 'vue';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import API from 'dashboard/api/jrcContactCenter';
 import AudioAssetLibrary from './AudioAssetLibrary.vue';
@@ -125,6 +125,86 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it('passes the current reviewed selection to the native move dialog and clears it after a validated success receipt', async () => {
+    const item = structuredClone(row);
+    item.latest_version.technical_verification = { id: '100', ready: true };
+    API.audioAssets.mockResolvedValue({
+      data: {
+        items: [item],
+        meta: { total: 1, pages: 1 },
+        max_upload_bytes: 1000,
+        archive_limits: { max_entries: 20, max_bytes: 1000 },
+      },
+    });
+    const wrapper = fixture({
+      AudioSelectedMoveDialog: {
+        props: { selection: Array },
+        emits: ['saved'],
+        setup(props, { emit }) {
+          return () =>
+            h(
+              'button',
+              {
+                'data-unit-move-receipt': true,
+                'data-selected': props.selection.length,
+                onClick: () => emit('saved', [{ id: '44' }]),
+              },
+              'SYNTHETIC validated child receipt'
+            );
+        },
+      },
+    });
+    await flushPromises();
+    await wrapper.get('[data-audio-archive-select="44"]').setValue(true);
+    expect(
+      wrapper.get('[data-unit-move-receipt]').attributes('data-selected')
+    ).toBe('1');
+    await wrapper.get('[data-unit-move-receipt]').trigger('click');
+    await flushPromises();
+    expect(API.audioAssets).toHaveBeenCalledTimes(2);
+    expect(
+      wrapper.get('[data-unit-move-receipt]').attributes('data-selected')
+    ).toBe('0');
+    expect(
+      wrapper.get('[data-audio-selected-move-saved]').attributes('data-count')
+    ).toBe('1');
+  });
+
+  it('removes a prior move receipt when the native operator profile or unit context changes', async () => {
+    const wrapper = fixture({
+      AudioSelectedMoveDialog: {
+        emits: ['saved'],
+        setup(_props, { emit }) {
+          return () =>
+            h(
+              'button',
+              {
+                'data-unit-move-receipt': true,
+                onClick: () => emit('saved', [{ id: '44' }]),
+              },
+              'SYNTHETIC validated child receipt'
+            );
+        },
+      },
+    });
+    await flushPromises();
+    await wrapper.get('[data-unit-move-receipt]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-audio-selected-move-saved]').exists()).toBe(
+      true
+    );
+    mocks.user.value.accounts[0].permissions = [
+      'jrc_contact_center_recordings_listen',
+    ];
+    await wrapper.setProps({
+      context: { capabilities: { configure: false }, units: [] },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-audio-selected-move-saved]').exists()).toBe(
+      false
+    );
+  });
+
   it('keeps selected download disabled for quarantined rows and never requests bytes implicitly', async () => {
     const wrapper = fixture();
     await flushPromises();

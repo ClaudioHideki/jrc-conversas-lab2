@@ -45,6 +45,8 @@ export default {
       `${base(accountId)}/team_supervisions/${recordIdentity(teamId)}`,
       { supervision, expected_revision: options.expected_revision }
     ),
+  moveAudioAssets: (accountId, body) =>
+    axios.post(`${base(accountId)}/audio_asset_moves`, body),
   audioArchive: (accountId, items) =>
     axios.post(
       `${base(accountId)}/audio_archives`,

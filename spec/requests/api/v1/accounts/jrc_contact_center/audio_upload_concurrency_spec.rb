@@ -145,4 +145,81 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
     expect(ActiveStorage::Blob.count).to eq(original_blobs + 1)
     expect(first.reload.audio_asset.name).to eq('SYNTHETIC source for conflicting copy')
   end
+  def dispatch_audio_metadata_move(endpoint, headers, payload, barrier: false)
+    workers << Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        arrived << ActiveRecord::Base.connection.raw_connection.backend_pid
+        Timeout.timeout(10) { release.pop } if barrier
+        session = ActionDispatch::Integration::Session.new(Rails.application)
+        session.post(endpoint, headers: headers, params: payload, as: :json)
+        results << session.response.status
+      end
+    rescue StandardError => e
+      results << e
+    end
+  end
+
+  it 'accepts one concurrent reviewed metadata move and denies stale replay without partially updating the selection' do
+    sources = Array.new(2) do |index|
+      JrcContactCenter::AudioAsset.create!(account: account, unit: unit, name: "SYNTHETIC simultaneous metadata #{index}")
+    end
+    destination = JrcContactCenter::AudioFolder.create!(account: account, unit: unit, name: 'SYNTHETIC simultaneous destination')
+    payload = { unit_id: unit.id.to_s, folder_id: destination.id.to_s, items: sources.map do |record|
+      { audio_asset_id: record.id.to_s, expected_revision: JrcContactCenter::AudioAssetRevision.token(record, version: nil) }
+    end }
+    endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/audio_asset_moves"
+    headers = actor.create_new_auth_token
+    before_audits = Audited.audit_class.where(auditable: sources, action: 'update').count
+    2.times { dispatch_audio_metadata_move(endpoint, headers, payload, barrier: true) }
+    Timeout.timeout(10) { 2.times { arrived.pop } }
+    2.times { release << true }
+    Timeout.timeout(25) { workers.each(&:join) }
+    outcomes = Array.new(2) { results.pop }
+    expect(outcomes).to all(be_a(Integer))
+    expect(outcomes.sort).to eq([200, 409])
+    expect(sources.map { |record| record.reload.folder_id }).to eq([destination.id, destination.id])
+    expect(Audited.audit_class.where(auditable: sources, action: 'update').count - before_audits).to eq(2)
+    expect(JrcContactCenter::AudioVersion.where(account: account)).to be_empty
+  end
+
+  it 'reauthorizes a queued real metadata request after an actual Account lock and committed profile withdrawal' do
+    record = JrcContactCenter::AudioAsset.create!(account: account, unit: unit, name: 'SYNTHETIC locked metadata source')
+    destination = JrcContactCenter::AudioFolder.create!(account: account, unit: unit, name: 'SYNTHETIC locked destination')
+    payload = { unit_id: unit.id.to_s, folder_id: destination.id.to_s,
+                items: [{ audio_asset_id: record.id.to_s, expected_revision: JrcContactCenter::AudioAssetRevision.token(record, version: nil) }] }
+    headers = actor.create_new_auth_token
+    role_id = member.custom_role_id
+    account_id = account.id
+    workers << Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        Account.find(account_id).with_lock do
+          arrived << true
+          Timeout.timeout(15) { release.pop }
+          CustomRole.find(role_id).update!(permissions: ['jrc_contact_center_view'])
+        end
+      end
+    rescue StandardError => e
+      results << e
+    end
+    Timeout.timeout(10) { arrived.pop }
+    dispatch_audio_metadata_move("/api/v1/accounts/#{account.id}/jrc_contact_center/audio_asset_moves", headers, payload)
+    pid = Timeout.timeout(10) { arrived.pop }
+    Timeout.timeout(8) do
+      loop do
+        sql = "SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE pid = #{Integer(pid)} AND wait_event_type = 'Lock' " \
+              "AND query LIKE '%accounts%' AND query LIKE '%FOR UPDATE%')"
+        break if ActiveRecord::Base.connection.uncached { ActiveRecord::Base.connection.select_value(sql) }
+
+        sleep 0.02
+      end
+    end
+    release << true
+    Timeout.timeout(25) { workers.each(&:join) }
+    expect(results.size).to eq(1)
+    expect(results.pop).to eq(401)
+    expect(record.reload.folder_id).to be_nil
+    expect(Audited.audit_class.where(auditable: record, action: 'update')).to be_empty
+    expect(member.custom_role.reload.permissions).to eq(['jrc_contact_center_view'])
+  end
+
 end

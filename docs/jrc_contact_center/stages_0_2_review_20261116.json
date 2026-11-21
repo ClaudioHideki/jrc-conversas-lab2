@@ -6612,8 +6612,10 @@
   },
   "audio_archive_prepared_20261121": {
     "report": "docs/jrc_contact_center/audio_archive_prepared_20261121.json",
-    "native_and_chrome_pending": true,
-    "full_figure_complete": false
+    "native_and_chrome_pending": false,
+    "full_figure_complete": false,
+    "verified_producer": "cfe118f1c6af036b523c39025487c87d8840bac9",
+    "verified_report": "docs/jrc_contact_center/audio_archive_native_verified_20261121.json"
   },
   "nico_review_business_confirmation_20261121": {
     "decision": "Explicit own permission through profile/team plus authorized recording access; no automatic administrator grant",
@@ -6631,5 +6633,20 @@
     "ruby_lint_findings": 4,
     "corrected_revalidation_pending": true,
     "assets_and_chrome_not_executed": true
+  },
+  "audio_archive_native_verified_20261121": {
+    "producer": "cfe118f1c6af036b523c39025487c87d8840bac9",
+    "report": "docs/jrc_contact_center/audio_archive_native_verified_20261121.json",
+    "native": 2464,
+    "vue": 1237,
+    "chrome": 244,
+    "actual_images_reviewed": 8,
+    "full_figure_complete": false
+  },
+  "audio_selected_moves_prepared_20261121": {
+    "report": "docs/jrc_contact_center/audio_selected_moves_prepared_20261121.json",
+    "native_and_chrome_pending": true,
+    "broader_metadata_bulk_selection_pending": true,
+    "full_figure_complete": false
   }
 }

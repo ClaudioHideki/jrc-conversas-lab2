@@ -8182,6 +8182,18 @@ test('institutional audio folders native private receipt, revisions and permissi
 test('institutional audio folders native verified bytes playback download and withdrawal', async ({
   page,
 }, info) => {
+  const selectedMoveForbiddenWrites: string[] = [];
+  page.on('request', request => {
+    const path = new URL(request.url()).pathname;
+    if (
+      /\/(commands|sync_calls|telephony_integration|team_members|queue_memberships)(?:[/?]|$)/.test(
+        path
+      ) &&
+      !['GET', 'HEAD'].includes(request.method())
+    )
+      selectedMoveForbiddenWrites.push(path);
+  });
+
   const target = session.pause_targets[info.project.name].audio_folders;
   const own = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
   const header = Buffer.alloc(44);
@@ -8629,6 +8641,184 @@ with zipfile.ZipFile(sys.argv[1]) as archive:
   await expect(
     library.locator('[data-audio-archive-select]:checked')
   ).toHaveCount(0);
+
+  // Same native selection, metadata-only movement and reviewed return to root. Existing playback assertions follow unchanged.
+  await library.locator(`[data-audio-archive-select="${asset.id}"]`).check();
+  await library
+    .locator(`[data-audio-archive-select="${copied.item.id}"]`)
+    .check();
+  await library.locator('[data-open-audio-selected-move]').click();
+  await expectContainedDialog(page);
+  const selectedMoveDialog = dialog.locator(
+    '[data-audio-selected-move-dialog]'
+  );
+  await expect(
+    selectedMoveDialog.locator('[data-audio-selected-move-item]')
+  ).toHaveCount(2);
+  const moveReview = selectedMoveDialog.locator(
+    '[data-review-audio-selected-move]'
+  );
+  await expect(moveReview).toBeEnabled();
+  await selectedMoveDialog
+    .locator('[data-audio-asset-folder-search]')
+    .fill(target.audio_destination_name);
+  await expect(
+    selectedMoveDialog.locator(
+      `[data-audio-asset-folder] option[value="${target.audio_destination_id}"]`
+    )
+  ).toHaveCount(1);
+  await selectedMoveDialog
+    .locator('[data-audio-asset-folder]')
+    .selectOption(target.audio_destination_id);
+  await moveReview.check();
+  const moveConfirm = dialog.getByRole('button', {
+    name: 'Mover áudios',
+    exact: true,
+  });
+  await expect(moveConfirm).toBeEnabled();
+  expect(
+    await moveConfirm
+      .locator('span')
+      .last()
+      .evaluate(node => node.scrollWidth <= node.clientWidth)
+  ).toBe(true);
+  const moveTheme = await selectedMoveDialog
+    .locator('[data-audio-asset-folder]')
+    .evaluate(node => ({
+      background: getComputedStyle(node).backgroundColor,
+      foreground: getComputedStyle(node).color,
+    }));
+  const moveBrightness = color =>
+    color
+      .match(/[0-9.]+/g)
+      .slice(0, 3)
+      .map(Number)
+      .reduce((sum, value) => sum + value, 0);
+  expect(moveTheme.background).not.toBe('rgba(0, 0, 0, 0)');
+  if (info.project.name.endsWith('-dark')) {
+    expect(moveBrightness(moveTheme.background)).toBeLessThan(300);
+    expect(moveBrightness(moveTheme.foreground)).toBeGreaterThan(600);
+  } else {
+    expect(moveBrightness(moveTheme.background)).toBeGreaterThan(600);
+    expect(moveBrightness(moveTheme.foreground)).toBeLessThan(300);
+  }
+  expect(
+    await dialog.evaluate(node => node.scrollWidth > node.clientWidth)
+  ).toBe(false);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-selected-move-reviewed.png`,
+    fullPage: false,
+  });
+  const movePath = `${new URL(own).pathname}/audio_asset_moves`;
+  const movedResponse = page.waitForResponse(
+    response => new URL(response.url()).pathname === movePath
+  );
+  await moveConfirm.click();
+  const moved = await movedResponse;
+  expect(moved.status()).toBe(200);
+  expect(moved.headers()['cache-control']).toBe('no-store');
+  const movePayload = moved.request().postDataJSON();
+  const movedItems = (await moved.json()).items;
+  expect(movedItems.map(row => row.id)).toEqual([asset.id, copied.item.id]);
+  expect(
+    movedItems.every(
+      row =>
+        row.folder_id === target.audio_destination_id &&
+        row.unit_id === String(target.unit_id)
+    )
+  ).toBe(true);
+  expect(movedItems.map(row => row.latest_version.id)).toEqual([
+    versionId,
+    copied.received_version.id,
+  ]);
+  expect(movedItems.map(row => row.latest_version.sha256)).toEqual([
+    sha256,
+    sha256,
+  ]);
+  await expect(dialog).not.toBeVisible();
+  await expect(
+    library.locator('[data-audio-selected-move-saved]')
+  ).toHaveAttribute('data-count', '2');
+  const staleMove = await page.request.post(`${own}/audio_asset_moves`, {
+    headers: target.administrator,
+    data: movePayload,
+  });
+  expect(staleMove.status()).toBe(409);
+  const deniedMove = await page.request.post(`${own}/audio_asset_moves`, {
+    headers: target.operator,
+    data: movePayload,
+  });
+  expect(deniedMove.status()).toBe(401);
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_parent=${target.audio_destination_id}&audio_file_size=50`
+  );
+  await expect(
+    library.locator(`[data-audio-asset="${asset.id}"]`)
+  ).toBeVisible();
+  await expect(
+    library.locator(`[data-audio-asset="${copied.item.id}"]`)
+  ).toBeVisible();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-selected-move-persisted.png`,
+    fullPage: true,
+  });
+  await library.locator(`[data-audio-archive-select="${asset.id}"]`).check();
+  await library
+    .locator(`[data-audio-archive-select="${copied.item.id}"]`)
+    .check();
+  await library.locator('[data-open-audio-selected-move]').click();
+  await expectContainedDialog(page);
+  await expect(
+    selectedMoveDialog.locator('[data-review-audio-selected-move]')
+  ).toBeEnabled();
+  await expect(
+    selectedMoveDialog.locator('[data-audio-asset-folder]')
+  ).toHaveValue('');
+  await selectedMoveDialog.locator('[data-review-audio-selected-move]').check();
+  const rootResponse = page.waitForResponse(
+    response => new URL(response.url()).pathname === movePath
+  );
+  await moveConfirm.click();
+  const returned = await rootResponse;
+  expect(returned.status()).toBe(200);
+  const returnedItems = (await returned.json()).items;
+  expect(returnedItems.map(row => row.id)).toEqual([asset.id, copied.item.id]);
+  expect(returnedItems.every(row => row.folder_id === null)).toBe(true);
+  expect(returnedItems.map(row => row.latest_version.id)).toEqual([
+    versionId,
+    copied.received_version.id,
+  ]);
+  expect(returnedItems.map(row => row.latest_version.sha256)).toEqual([
+    sha256,
+    sha256,
+  ]);
+  await expect(dialog).not.toBeVisible();
+  expect(selectedMoveForbiddenWrites).toEqual([]);
+  const selectedMoveOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > innerWidth
+  );
+  expect(selectedMoveOverflow).toBe(false);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-selected-move-native.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      synthetic: true,
+      external_homologation: false,
+      unit: String(target.unit_id),
+      assets: [asset.id, copied.item.id],
+      exact_versions: [versionId, copied.received_version.id],
+      destination: target.audio_destination_id,
+      moved: moved.status(),
+      returned_to_root: returned.status(),
+      stale_review: staleMove.status(),
+      operator_denied: deniedMove.status(),
+      hashes_after_move: returnedItems.map(row => row.latest_version.sha256),
+      theme_css: moveTheme,
+      horizontal_overflow: selectedMoveOverflow,
+      provider_writes: selectedMoveForbiddenWrites.length > 0,
+      forbidden_browser_write_paths: selectedMoveForbiddenWrites,
+    })
+  );
 
   // Restore the original authorized history/player so all prior withdrawal assertions remain intact.
   await page.goto(

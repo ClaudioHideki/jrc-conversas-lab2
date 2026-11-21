@@ -11,6 +11,7 @@ import AudioFolderPicker from './AudioFolderPicker.vue';
 import AudioInspectionHistory from './AudioInspectionHistory.vue';
 import AudioCaptureDraft from './AudioCaptureDraft.vue';
 import AudioIvrUsages from './AudioIvrUsages.vue';
+import AudioSelectedMoveDialog from './AudioSelectedMoveDialog.vue';
 import { useAudioAssetEditor } from '../composables/useAudioAssetEditor';
 import { useAudioArchive } from '../composables/useAudioArchive';
 
@@ -119,6 +120,7 @@ const actorScope = computed(() => {
 });
 const details = ref(null);
 const lastCopy = ref(null);
+const lastMoveCount = ref(0);
 const detailsLoading = ref(false);
 const detailsError = ref(false);
 let detailsGeneration = 0;
@@ -242,6 +244,7 @@ const forget = () => {
   archiveLimits.value = { max_entries: 0, max_bytes: 0 };
   generation += 1;
   lastCopy.value = null;
+  lastMoveCount.value = 0;
   clearDetails();
   items.value = [];
   meta.value = { total: 0, pages: 0 };
@@ -351,6 +354,10 @@ const load = async () => {
   } finally {
     if (version === generation) loading.value = false;
   }
+};
+const selectedMoveSaved = rows => {
+  lastMoveCount.value = rows.length;
+  return load();
 };
 editor = useAudioAssetEditor({
   accountId: computed(() => props.accountId),
@@ -951,6 +958,16 @@ onBeforeUnmount(() => {
           aria-hidden="true"
         />{{ t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.OPEN') }}
       </button>
+      <AudioSelectedMoveDialog
+        :account-id="accountId"
+        :unit-id="unitId"
+        :context-key="actorScope"
+        :can-manage="canManage"
+        :selection="archive.items.value"
+        :disabled="archive.busy.value || loading || saving || opening"
+        @denied="denied"
+        @saved="selectedMoveSaved"
+      />
       <button
         type="button"
         :disabled="!archive.items.value.length || archive.busy.value"
@@ -961,6 +978,15 @@ onBeforeUnmount(() => {
         {{ t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.CLEAR') }}
       </button>
     </section>
+    <p
+      v-if="lastMoveCount"
+      role="status"
+      :data-count="lastMoveCount"
+      data-audio-selected-move-saved
+      class="break-words rounded-lg border border-n-teal-6 bg-n-teal-2 p-3 text-sm text-n-teal-11"
+    >
+      {{ t('JRC_CONTACT_CENTER.AUDIO_MOVE.SAVED', { count: lastMoveCount }) }}
+    </p>
     <nav
       v-if="meta.pages > 1"
       :aria-label="label('PAGINATION')"
