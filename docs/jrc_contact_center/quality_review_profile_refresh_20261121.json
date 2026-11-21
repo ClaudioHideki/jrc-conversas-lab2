@@ -1,0 +1,44 @@
+{
+  "status": "native_partial_verified_cached_response_test_fix_pending",
+  "producer": "51f293b7eefc69e5fd2ae95314125fc338e72a19",
+  "run": 44867208994,
+  "job": 136733449113,
+  "core": {
+    "examples": 1933,
+    "passed": 1932,
+    "failures": 1,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "schema_reload": {
+    "examples": 159,
+    "passed": 159,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "new_cases_in_core": {
+    "total": 37,
+    "passed": 36,
+    "failed": 1
+  },
+  "new_ruby_offenses": 0,
+  "failure": "The profile-refresh test used a let-memoized permissions list from its first GET after making the second GET.",
+  "confirmed": [
+    "All12 migration cases now pass, including real first replacement, induced second failure and complete rollback with grant preservation",
+    "All16 source/policy cases pass and8of9authenticated API cases pass",
+    "Both GET status assertions passed; the failing expression read the first cached body, not a fresh extraction of the second response"
+  ],
+  "correction": "Read permissions directly from the current second response; retain review denial assertion and separately require recording-listen absence. Preserve the stored profile grant.",
+  "not_claimed": [
+    "The actual second response was not preserved by the old failing assertion; effective HTTP revocation still requires the next run",
+    "Concurrency/corporate, Vue, frontend, assets and236Chrome did not execute in this run",
+    "The own-review increment or23figures are fully approved"
+  ],
+  "product_migration_workflow_and_gates_changed": false,
+  "assertions_removed": false,
+  "real_grants_changed": false,
+  "artifact": 14692414822,
+  "artifact_sha256": "5cb118cc22cf85e90dae07f7ad659cc9cb538996b200dc24b365f5b416851e5c",
+  "full_23_figures_complete": false
+}

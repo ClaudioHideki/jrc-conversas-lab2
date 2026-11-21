@@ -6110,5 +6110,31 @@
     "report": "docs/jrc_contact_center/quality_review_fixture_correction_20261121.json",
     "product_and_migration_unchanged": true,
     "full_23_figures_complete": false
+  },
+  "quality_review_profile_refresh_20261121": {
+    "status": "native_partial_verified_cached_response_test_fix_pending",
+    "producer": "51f293b7eefc69e5fd2ae95314125fc338e72a19",
+    "run": 44867208994,
+    "core": {
+      "examples": 1933,
+      "passed": 1932,
+      "failures": 1,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "schema_reload": {
+      "examples": 159,
+      "passed": 159,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "new_cases_in_core": {
+      "total": 37,
+      "passed": 36,
+      "failed": 1
+    },
+    "new_ruby_offenses": 0,
+    "report": "docs/jrc_contact_center/quality_review_profile_refresh_20261121.json"
   }
 }

@@ -30,7 +30,9 @@ RSpec.describe 'Call Center Nico review permissions in authenticated native APIs
     grant.update!(denied: ['jrc_contact_center_recordings_listen'])
     get '/api/v1/profile', headers: headers
     expect(response).to have_http_status(:ok)
-    expect(permissions).not_to include(review)
+    fresh = response.parsed_body.fetch('accounts').find { |item| item.fetch('id') == account.id }.fetch('permissions')
+    expect(fresh).not_to include(review)
+    expect(fresh).not_to include('jrc_contact_center_recordings_listen')
     expect(role.reload.permissions).to include(review)
   end
 
