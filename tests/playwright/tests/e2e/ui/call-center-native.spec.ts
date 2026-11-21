@@ -8616,11 +8616,90 @@ test('local IVR audio reference pins native verified history and never crosses u
   expect(
     (await persisted.json()).item.definition.nodes[0].audio_reference
   ).toEqual(reference);
+  const inspectLocalUsages = async (hasReference: boolean) => {
+    await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+    await page.goto(
+      `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.allowed_unit_id}&audio_file_q=${encodeURIComponent(audioName)}`
+    );
+    const library = page.locator('[data-audio-asset-library]');
+    await expect(
+      library.locator('[data-audio-file-source-filter]')
+    ).toHaveAccessibleName('Origem do arquivo');
+    await expect(
+      library.locator('[data-audio-file-format-filter]')
+    ).toHaveAccessibleName('Formato recebido');
+    await expect(
+      library.locator('[data-audio-file-size]')
+    ).toHaveAccessibleName('Áudios por página');
+    await library
+      .locator(`[data-audio-asset-details-open="${received.item.id}"]`)
+      .click();
+    const details = library.locator('[data-audio-asset-details]');
+    const response = page.waitForResponse(
+      result =>
+        new URL(result.url()).pathname ===
+        `${prefix}/audio_assets/${received.item.id}/usages`
+    );
+    await details.locator('[data-audio-usages-open]').click();
+    expect((await response).status()).toBe(200);
+    const payload = await (await response).json();
+    expect(payload.coverage).toBe('current_local_ivr_drafts_only');
+    expect(payload.provider_configuration_verified).toBe(false);
+    expect(payload.meta.total).toBe(hasReference ? 1 : 0);
+    const usagePopup = dialog.locator('[data-audio-usages]');
+    await expectContainedDialog(page);
+    await expect(usagePopup).toContainText('Esta consulta não verifica o PABX');
+    if (hasReference) {
+      expect(payload.items[0].draft_id).toBe(initial.id);
+      expect(payload.items[0].draft_revision).toBe(1);
+      expect(payload.items[0].references[0].audio_version_id).toBe(original.id);
+      expect(payload.items[0].references[0].sha256).toBe(original.sha256);
+      expect(payload.items[0].provider_applied).toBe(false);
+      await expect(
+        usagePopup.locator(`[data-audio-usage-draft="${initial.id}"]`)
+      ).toContainText(name);
+      await expect(usagePopup).toContainText(original.sha256);
+      await expect(usagePopup).not.toContainText(
+        'SYNTHETIC inaccessible menu audio'
+      );
+    } else {
+      expect(payload.items).toEqual([]);
+      await expect(usagePopup).toContainText(
+        'Nenhum vínculo nas revisões atuais'
+      );
+    }
+    expect(
+      await dialog.evaluate(
+        element => element.scrollWidth <= element.clientWidth + 1
+      )
+    ).toBe(true);
+    await page.screenshot({
+      path: `.codex/call-center-native-e2e/${info.project.name}-audio-local-usages-${hasReference ? 'pinned' : 'unlinked'}.png`,
+      fullPage: true,
+    });
+    await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+    await page.goto(
+      `/app/accounts/${target.account_id}/contact-center/ura?native_navigation=1`
+    );
+    await page
+      .locator(`[data-ivr-draft="${initial.id}"]`)
+      .getByRole('button', { name: 'Abrir rascunho', exact: true })
+      .click();
+  };
+  await inspectLocalUsages(true);
+  await expect(picker.locator('[data-ivr-audio-pinned]')).toContainText(
+    'Versão 1 fixada'
+  );
   const forbidden = await page.request.get(
     `${own}/audio_assets/${other.item.id}/versions/${other.received_version.id}`,
     { headers: target.scoped }
   );
   expect(forbidden.status()).toBe(404);
+  const forbiddenUsages = await page.request.get(
+    `${own}/audio_assets/${other.item.id}/usages`,
+    { headers: target.scoped }
+  );
+  expect(forbiddenUsages.status()).toBe(404);
   const forged = JSON.parse(JSON.stringify(initial.definition));
   forged.nodes[0].audio_reference = {
     asset_id: other.item.id,
@@ -8695,6 +8774,7 @@ test('local IVR audio reference pins native verified history and never crosses u
   expect(
     (await historical.json()).item.definition.nodes[0].audio_reference
   ).toEqual(reference);
+  await inspectLocalUsages(false);
   expect(unexpected).toEqual([]);
   fs.writeFileSync(
     `.codex/call-center-native-e2e/${info.project.name}-ivr-audio-reference-native.json`,
@@ -8712,6 +8792,8 @@ test('local IVR audio reference pins native verified history and never crosses u
       known_refusal_preserves_revision: unchangedItem.revision,
       known_refusal_keeps_editor_unlocked: true,
       explicit_unlink_preserves_history: true,
+      local_usages_pin_and_unlink_verified: true,
+      local_usages_denied_status: forbiddenUsages.status(),
       provider_applied: false,
       provider_writes: unexpected,
     })

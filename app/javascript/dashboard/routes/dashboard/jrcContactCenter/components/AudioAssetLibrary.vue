@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useMapGetter } from 'dashboard/composables/store';
@@ -10,6 +10,7 @@ import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import AudioFolderPicker from './AudioFolderPicker.vue';
 import AudioInspectionHistory from './AudioInspectionHistory.vue';
 import AudioCaptureDraft from './AudioCaptureDraft.vue';
+import AudioIvrUsages from './AudioIvrUsages.vue';
 import { useAudioAssetEditor } from '../composables/useAudioAssetEditor';
 
 const props = defineProps({
@@ -20,6 +21,12 @@ const props = defineProps({
 });
 const emit = defineEmits(['denied']);
 const { t } = useI18n();
+const { uid } = getCurrentInstance();
+const filterIds = {
+  source: `audio-source-${uid}`,
+  format: `audio-format-${uid}`,
+  size: `audio-size-${uid}`,
+};
 const labels = computed(() => ({
   TITLE: t('JRC_CONTACT_CENTER.AUDIO_FILES.TITLE'),
   LIMITS: t('JRC_CONTACT_CENTER.AUDIO_FILES.LIMITS'),
@@ -477,9 +484,10 @@ onBeforeUnmount(() => {
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
         />
       </label>
-      <label class="block min-w-0 max-w-full text-sm text-n-slate-12">
-        <span>{{ label('SOURCE') }}</span>
+      <div class="block min-w-0 max-w-full text-sm text-n-slate-12">
+        <label :for="filterIds.source">{{ label('SOURCE') }}</label>
         <select
+          :id="filterIds.source"
           v-model="sourceFilter"
           data-audio-file-source-filter
           class="mt-1 w-full max-w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -488,10 +496,11 @@ onBeforeUnmount(() => {
           <option value="user_upload">{{ label('SOURCE_UPLOAD') }}</option>
           <option value="browser_capture">{{ label('SOURCE_CAPTURE') }}</option>
         </select>
-      </label>
-      <label class="block min-w-0 max-w-full text-sm text-n-slate-12">
-        <span>{{ label('FORMAT') }}</span>
+      </div>
+      <div class="block min-w-0 max-w-full text-sm text-n-slate-12">
+        <label :for="filterIds.format">{{ label('FORMAT') }}</label>
         <select
+          :id="filterIds.format"
           v-model="formatFilter"
           data-audio-file-format-filter
           class="mt-1 w-full max-w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -501,16 +510,17 @@ onBeforeUnmount(() => {
             {{ format }}
           </option>
         </select>
-      </label>
+      </div>
       <button
         type="submit"
         class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
       >
         {{ label('FILTER') }}
       </button>
-      <label class="block min-w-0 text-sm text-n-slate-12">
-        <span>{{ label('PAGE_SIZE') }}</span>
+      <div class="block min-w-0 text-sm text-n-slate-12">
+        <label :for="filterIds.size">{{ label('PAGE_SIZE') }}</label>
         <select
+          :id="filterIds.size"
           :value="perPage"
           data-audio-file-size
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -525,7 +535,7 @@ onBeforeUnmount(() => {
             {{ size }}
           </option>
         </select>
-      </label>
+      </div>
       <button
         type="button"
         class="rounded-lg px-3 py-2 text-sm text-n-blue-11"
@@ -778,6 +788,14 @@ onBeforeUnmount(() => {
           </template>
         </dl>
         <p class="break-words text-n-amber-11">{{ label('NOT_VERIFIED') }}</p>
+        <AudioIvrUsages
+          :key="`usages:${details.id}`"
+          :account-id="accountId"
+          :asset-id="details.id"
+          :unit-id="unitId"
+          :can-manage="canManage"
+          @denied="denied"
+        />
         <AudioInspectionHistory
           v-if="details.latest_version"
           :key="`${details.id}:${details.latest_version.id}`"

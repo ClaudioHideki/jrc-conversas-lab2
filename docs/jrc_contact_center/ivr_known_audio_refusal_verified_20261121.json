@@ -1,0 +1,45 @@
+{
+  "status": "implemented_and_native_vue_chrome_verified",
+  "producer": "49abeccdf470703f89e1d7cb7025dfec3ac56c10",
+  "run": 44881693667,
+  "job": 136778165441,
+  "native_distinct": 2210,
+  "schema_reload_separate": 159,
+  "vue": 1102,
+  "chrome": {
+    "passed": 240,
+    "per_project": 60,
+    "failed": 0,
+    "pending": 0,
+    "flaky": 0
+  },
+  "all2009previous_core_ids_preserved_and_passed": true,
+  "four_native_owned_unverified_fixture_specs_passed": true,
+  "known409_actual_native_receipts": [
+    "desktop-dark-ivr-audio-reference-native.json",
+    "desktop-light-ivr-audio-reference-native.json",
+    "mobile-dark-ivr-audio-reference-native.json",
+    "mobile-light-ivr-audio-reference-native.json"
+  ],
+  "verified_behavior": [
+    "Explicit unique menu audio labels, independent of option text",
+    "Real native409 for a private legacy version with no fabricated inspection",
+    "Editor stays editable; saved revision remains1 and exact original audio pin remains unchanged",
+    "Explicit unlink/save works afterward and retains original immutable history",
+    "Unknown network and stale revision safeguards remain unchanged"
+  ],
+  "lint_assets_bootstrap": "Passed; no new offenses, fresh assets and15cards",
+  "artifact": 14700401148,
+  "artifact_sha256": "837a0f87d83ee6a1705a428e44ff2bb6f42b610a3e208e9c75999ac4315f8574",
+  "screenshots_hash_verified": 384,
+  "actually_opened": [
+    "desktop-dark-ivr-audio-known-refusal.png",
+    "desktop-light-ivr-audio-known-refusal.png",
+    "mobile-dark-ivr-audio-known-refusal.png",
+    "mobile-light-ivr-audio-known-refusal.png"
+  ],
+  "not_in_this_producer": "Read-only usages popup, library filter labels and four Nico private value files prepared afterward",
+  "migrations_preserved": 11,
+  "real_provider_operations": false,
+  "full23figures_complete": false
+}

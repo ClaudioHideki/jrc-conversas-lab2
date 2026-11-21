@@ -50,6 +50,10 @@ export default {
     axios.get(`${base(accountId)}/audio_assets`, { params }),
   audioAsset: (accountId, id) =>
     axios.get(`${base(accountId)}/audio_assets/${recordIdentity(id)}`),
+  audioUsages: (accountId, id, params = {}) =>
+    axios.get(`${base(accountId)}/audio_assets/${recordIdentity(id)}/usages`, {
+      params,
+    }),
   receiveAudioAsset: (accountId, body) =>
     axios.post(`${base(accountId)}/audio_assets`, body),
   updateAudioAsset: (accountId, id, asset, options = {}) =>

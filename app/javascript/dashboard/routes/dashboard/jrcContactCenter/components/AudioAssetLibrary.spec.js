@@ -121,6 +121,22 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it('names source, format and page size independently of their option contents', async () => {
+    const wrapper = fixture();
+    await flushPromises();
+    [
+      ['[data-audio-file-source-filter]', 'SOURCE'],
+      ['[data-audio-file-format-filter]', 'FORMAT'],
+      ['[data-audio-file-size]', 'PAGE_SIZE'],
+    ].forEach(([selector, label]) => {
+      const control = wrapper.get(selector);
+      const text = wrapper.get(`label[for="${control.attributes('id')}"]`);
+      expect(text.text()).toBe(`JRC_CONTACT_CENTER.AUDIO_FILES.${label}`);
+      expect(text.element.control).toBe(control.element);
+      expect(text.find('option').exists()).toBe(false);
+    });
+  });
+
   it.each([
     ['user_upload', 'SOURCE_UPLOAD'],
     ['browser_capture', 'SOURCE_CAPTURE'],

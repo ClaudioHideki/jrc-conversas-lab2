@@ -2458,7 +2458,7 @@
       "DURATION_UNKNOWN": "Sem duração verificada",
       "ALL_SOURCES": "Todas as origens",
       "ALL_FORMATS": "Todos os formatos",
-      "LIMITS": "Recebimento privado com histórico e verificações por versão. Prévia e download exigem a verificação técnica atual e seu acesso à unidade. Uso em fluxos e publicação no PABX permanecem bloqueados.",
+      "LIMITS": "Recebimento privado com histórico e verificações por versão. Prévia e download exigem a verificação técnica atual e seu acesso à unidade. Vínculos em rascunhos locais não publicam o áudio no PABX.",
       "SEARCH": "Pesquisar áudios nesta pasta",
       "FILTER": "Filtrar áudios",
       "CLEAR": "Limpar busca de áudios",
@@ -2563,6 +2563,28 @@
       "CANCEL": "Cancelar seleção",
       "RETRY": "Verificar vínculo novamente",
       "VERSION_OPTION": "{number} · {file} {state}"
+    },
+    "AUDIO_USAGES": {
+      "OPEN": "Ver vínculos locais",
+      "TITLE": "Vínculos do áudio em URAs locais",
+      "CLOSE": "Fechar",
+      "LIMITS": "São exibidas apenas as revisões atuais dos rascunhos de URA autorizados. Revisões arquivadas são identificadas. Esta consulta não verifica o PABX nem representa vínculos de filas, números ou campanhas.",
+      "LOADING": "Consultando vínculos autorizados...",
+      "ERROR": "Não foi possível consultar os vínculos. Confira seu acesso e tente novamente.",
+      "RETRY": "Tentar novamente",
+      "EMPTY": "Nenhum vínculo nas revisões atuais dos rascunhos de URA autorizados. Isso não comprova ausência de uso no PABX.",
+      "DRAFT": "Rascunho",
+      "REVISION": "Revisão",
+      "ARCHIVED": "Rascunho arquivado; sem confirmação no PABX",
+      "LOCAL": "Rascunho local; sem confirmação no PABX",
+      "MENU": "Menu",
+      "VERSION_ID": "ID da versão de áudio",
+      "PAGINATION": "Paginação dos vínculos locais",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "TOTAL": "Total de rascunhos",
+      "PAGE": "Página",
+      "CHECKSUM": "SHA-256"
     }
   }
 }

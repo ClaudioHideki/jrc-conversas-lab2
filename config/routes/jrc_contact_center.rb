@@ -70,6 +70,7 @@ namespace :api, defaults: { format: 'json' } do
         resources :agent_state_histories, only: [:index]
         resources :audio_folders, only: %i[index show create update]
         resources :audio_assets, only: %i[index show create update] do
+          resource :usages, only: [:show], controller: 'audio_usages'
           resources :versions, only: %i[index show create], controller: 'audio_versions' do
             resource :bytes, only: [:show], controller: 'audio_bytes'
             resources :inspections, only: %i[index create], controller: 'audio_inspections'

@@ -1,0 +1,46 @@
+{
+  "status": "prepared_native_validation_pending",
+  "base": "49abeccdf470703f89e1d7cb7025dfec3ac56c10",
+  "runtime_changes": [
+    "Read-only local IVR usages through native current and historical scopes",
+    "Native Dialog in existing institutional audio details, no new catalogue",
+    "Immutable private Nico input and source snapshot value objects; no review endpoint or recording mutation"
+  ],
+  "audio_usages": {
+    "route": "GET /api/v1/accounts/:account_id/jrc_contact_center/audio_assets/:audio_asset_id/usages",
+    "default_page_size": 10,
+    "max_page_size": 20,
+    "coverage": "Current local IVR draft heads only; archived distinguished; no operational provider claim",
+    "native_tests_prepared": 13,
+    "vue_tests_prepared": "Explicit selection, paging, errors, authorization and late responses; verify exact executed count",
+    "chrome_scenarios_preserved": 240,
+    "chrome_extension": "Pinned version and explicit unlink shown via actual API/Dialog in each4projects; foreignunit404; no PABX commands",
+    "additional_accessibility": "Explicit per-component labels for source, format and page size, preserving selectors and filter behavior; Vue and actual Chrome accessible-name assertions prepared"
+  },
+  "nico": {
+    "permission_already_verified": "jrc_contact_center_quality_review; explicit profile/team plus authorized recording access; no administrator fallback",
+    "input_fields": [
+      "classification",
+      "adjusted_summary",
+      "adjusted_themes",
+      "recommendation_ids",
+      "justification",
+      "expected_revision",
+      "expected_source_sha256",
+      "request_id"
+    ],
+    "source": "Exact current JrcVoiceQuality::SupabaseClient.summary_payload projection",
+    "immutability": "Private in-memory deep-frozen copies and canonical SHA; not a database ledger",
+    "suggestions_only": true,
+    "native_tests_executed_at_this_stage": false,
+    "remaining": [
+      "Server-proven recording/call/unit source binding without aliasing Hodu/pabx_v1/jrc_pabx identities",
+      "Append-only persistent snapshot/review ledger with current authority, CAS/idempotence/audit",
+      "Authenticated API and complete Word23popup/Chrome"
+    ],
+    "external_operations_performed": false
+  },
+  "changes_not_in_active_CI": 44881693667,
+  "new_migrations_or_grants": false,
+  "full23figures_complete": false
+}

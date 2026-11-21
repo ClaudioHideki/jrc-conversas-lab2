@@ -412,9 +412,14 @@
       "stages": [
         4
       ],
-      "implemented_in_0_2": [],
+      "implemented_in_0_2": [
+        "Biblioteca institucional por unidade: pastas/árvore, upload e captura sintética real, versões privadas, scanner/decodificador reais isolados, duração/origem/filtros/paginação, prévia/download autenticados e histórico validados em bfe0d49d; não são gravações telefônicas.",
+        "Vínculo exato de versão/hash no menu da URA local, histórico imutável e isolamento de conta/unidade validados em86ed16c6, inclusive240Chrome."
+      ],
       "remaining_or_external": [
-        "Pastas por unidade e navegação validadas em7dfccc8f. Recebimento privado/versões em preparação separada; scanner, metadados de mídia, reprodução, vínculos reais e Nico ainda não homologados. A figura completa não está concluída."
+        "Ver vínculos locais em implementação no próximo checkpoint: somente revisões atuais de URA, sem afirmar estado no PABX.",
+        "Vínculos operacionais de filas/números/campanhas, duplicação/exclusão com impacto completo, forma de onda e TTS continuam pendentes.",
+        "Microfone real, scanner em ambiente operacional e capacidades/ACKsPABX não foram homologados externamente."
       ],
       "code_references": [],
       "reference": {
@@ -429,7 +434,7 @@
         "Campos e dados apresentados:  Cada linha deve informar nome, duracao, origem, tipo de utilizacao, status, versao e pasta; popup Ver Vinculos lista URAs, filas, numeros e campanhas que utilizam o audio. Disponibilizar metadados de integridade e formato nos detalhes.",
         "Estados de erro e excecoes:  Sem arquivo ou falha de codec, exibir validacao antes de persistir. Na tentativa de excluir item em uso, apresentar lista de dependencias e a acao correta para desvinculacao/versionamento."
       ],
-      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "popups_and_forms": "Editor nativo de metadados/movimentação/recebimento/captura, revisão explícita, histórico e prévia autenticada comprovados nos incrementos citados. Dialog de vínculos locais preparado, ainda pendente no próximo SHA; não representa todos os destinos do Word.",
       "permissions": "Regras e permissoes:  Uma pasta nao substitui a identidade do audio. Excluir arquivo com vinculo ativo publicado e proibido. Mover/renomear nao pode quebrar referencias. A copia deve gerar identidade propria; uma mudanca no arquivo da biblioteca nao altera versao em execucao.",
       "acceptance_scenarios": [
         "•  F06-A: excluir audio referenciado por URA publicada e bloqueado com detalhe do vinculo.",
@@ -449,7 +454,9 @@
       "acceptance_scope": {
         "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
         "complete_reference": [
-          "Institutional audio folders/versioning/storage are stage 4; call recordings are not this catalog"
+          "Ver vínculos locais em implementação no próximo checkpoint: somente revisões atuais de URA, sem afirmar estado no PABX.",
+          "Vínculos operacionais de filas/números/campanhas, duplicação/exclusão com impacto completo, forma de onda e TTS continuam pendentes.",
+          "Microfone real, scanner em ambiente operacional e capacidades/ACKsPABX não foram homologados externamente."
         ]
       },
       "prepared_increment": {
@@ -468,6 +475,18 @@
         "run": 44776659369,
         "report": "docs/jrc_contact_center/audio_private_receipts_verified_20261120.json",
         "state": "validated increment; complete figure remains partial"
+      },
+      "reconciliation_20261121": {
+        "verified_producer": "86ed16c6919adfb4a7abd44c9605dad99cbcb0e4",
+        "report": "docs/jrc_contact_center/ivr_exact_audio_native_verified_20261121.json",
+        "complete_figure": false
+      },
+      "current_acceptance_reconciled_20261121": {
+        "complete_figure": false,
+        "verified_audio_report": "docs/jrc_contact_center/ivr_exact_audio_native_verified_20261121.json",
+        "verified_own_review_permission_report": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json",
+        "prepared_next_report": "docs/jrc_contact_center/audio_usages_and_nico_values_prepared_20261121.json",
+        "prepared_is_not_validated": true
       }
     },
     {
@@ -792,10 +811,11 @@
         "Herança por Team nativo, configuração por AccountUser, elegibilidade explícita, bloqueios individuais prioritários e proteção de fallback implementados incrementalmente; evidências por SHA constam em continuity_20261117.",
         "Herança por equipe, bloqueios individuais prioritários, elegibilidade explícita e revisão concorrente homologados no Chrome real em dd8ece07, sem concessões implícitas.",
         "Origens nomeadas de perfil/equipes, negações prioritárias e tratamento de revisão validados em 7011dac7. Exportação efetiva no perfil autenticado e consumidores de rotas/menus em revalidação no checkpoint 54b1a152.",
-        "Perfil autenticado, rotas e navegação usam a política efetiva CC, incluindo herança, elegibilidade e negações; demais permissões preservadas. API e Chrome real com revogação aprovados em cf040419."
+        "Perfil autenticado, rotas e navegação usam a política efetiva CC, incluindo herança, elegibilidade e negações; demais permissões preservadas. API e Chrome real com revogação aprovados em cf040419.",
+        "Décima quarta capacidade nativa de revisão do Nico, explícita e dependente de acesso à gravação, validada em3c7747d8; nenhum grant automático ou usuário real alterado."
       ],
       "remaining_or_external": [
-        "Matriz visual multi-módulo completa da referência ainda não equivale ao editor setorial das 13 capacidades CC; permissões dos demais módulos preservadas.",
+        "Matriz visual multi-módulo completa da referência ainda não equivale ao editor setorial das 14 capacidades CC; permissões dos demais módulos preservadas.",
         "Clientes nativos anteriores sem expected_revision preservam o contrato; precondição global obrigatória depende de migração coordenada de clientes."
       ],
       "code_references": [
@@ -837,12 +857,16 @@
       "acceptance_scope": {
         "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
         "complete_reference": [
-          "Pendente 0–2: herança por equipe/usuário não possui contrato ou armazenamento nativo; requer decisão arquitetural, sem concessões por suposição.",
-          "Pendente 0–2: revisão esperada pelo navegador não existe no payload; bloqueio transacional impede restauração de poder revogado, mas não detecta sobrescrita de campos por dois formulários.",
-          "Exclusão de perfil com membros usa dependência nullify nativa; mudança de política exige avaliar todos os módulos.",
-          "Pendente 0–2: matriz visual completa multi-módulo da figura; as concessões existentes seguem explícitas e revisadas.",
-          "Pendente 0–2: native_role? mantém acesso legado quando custom_role_id é nulo. O requisito de não ativar novos usuários automaticamente exige política de elegibilidade/migração que preserve usuários existentes; não foi alterado por suposição."
+          "Matriz visual multi-módulo completa da referência ainda não equivale ao editor setorial das 14 capacidades CC; permissões dos demais módulos preservadas.",
+          "Clientes nativos anteriores sem expected_revision preservam o contrato; precondição global obrigatória depende de migração coordenada de clientes."
         ]
+      },
+      "current_acceptance_reconciled_20261121": {
+        "complete_figure": false,
+        "verified_audio_report": "docs/jrc_contact_center/ivr_exact_audio_native_verified_20261121.json",
+        "verified_own_review_permission_report": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json",
+        "prepared_next_report": "docs/jrc_contact_center/audio_usages_and_nico_values_prepared_20261121.json",
+        "prepared_is_not_validated": true
       }
     },
     {
@@ -1177,9 +1201,14 @@
         4,
         7
       ],
-      "implemented_in_0_2": [],
+      "implemented_in_0_2": [
+        "Biblioteca institucional por unidade: pastas/árvore, upload e captura sintética real, versões privadas, scanner/decodificador reais isolados, duração/origem/filtros/paginação, prévia/download autenticados e histórico validados em bfe0d49d; não são gravações telefônicas.",
+        "Vínculo exato de versão/hash no menu da URA local, histórico imutável e isolamento de conta/unidade validados em86ed16c6, inclusive240Chrome."
+      ],
       "remaining_or_external": [
-        "Pastas por unidade e navegação validadas em7dfccc8f. Recebimento privado/versões em preparação separada; scanner, metadados de mídia, reprodução, vínculos reais e Nico ainda não homologados. A figura completa não está concluída."
+        "Ver vínculos locais em implementação no próximo checkpoint: somente revisões atuais de URA, sem afirmar estado no PABX.",
+        "Vínculos operacionais de filas/números/campanhas, duplicação/exclusão com impacto completo, forma de onda e TTS continuam pendentes.",
+        "Microfone real, scanner em ambiente operacional e capacidades/ACKsPABX não foram homologados externamente."
       ],
       "code_references": [],
       "reference": {
@@ -1194,7 +1223,7 @@
         "Campos e dados apresentados:  O painel mostra metadados de audio reutilizavel, nao retencao de gravacao telefonica. Versoes, formato e tamanho devem ser obtidos do arquivo armazenado; a lista de destinos vinculados deve ser real.",
         "Estados de erro e excecoes:  Falha de reproducao mostra motivo e preserva selecao. Ausencia de direito de download/edicao nao deve ser contornada pelo acesso direto ao objeto armazenado."
       ],
-      "popups_and_forms": "Popup/tela específicos da referência não equivalem ao atalho da Central; consultar lacunas e etapa.",
+      "popups_and_forms": "Editor nativo de metadados/movimentação/recebimento/captura, revisão explícita, histórico e prévia autenticada comprovados nos incrementos citados. Dialog de vínculos locais preparado, ainda pendente no próximo SHA; não representa todos os destinos do Word.",
       "permissions": "Regras e permissoes:  Manter as regras da biblioteca descritas nas Figuras 5 e 6. Nao usar esta imagem para homologar o cadastro de Politicas de Gravacao; a tela propria de politicas (empresa, filas, aviso ao cliente, retencao e status no PABX) segue como lacuna visual a definir com DEV/produto.",
       "acceptance_scenarios": [
         "•  F16-A: selecionar audio atualiza os metadados e os vinculos corretos, sem trazer gravações de chamadas.",
@@ -1214,7 +1243,9 @@
       "acceptance_scope": {
         "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
         "complete_reference": [
-          "Corrected Word caption: institutional audio details, not a recording policy. Library is stage 4; call recording policy has its own visual gap"
+          "Ver vínculos locais em implementação no próximo checkpoint: somente revisões atuais de URA, sem afirmar estado no PABX.",
+          "Vínculos operacionais de filas/números/campanhas, duplicação/exclusão com impacto completo, forma de onda e TTS continuam pendentes.",
+          "Microfone real, scanner em ambiente operacional e capacidades/ACKsPABX não foram homologados externamente."
         ]
       },
       "institutional_folder_increment": {
@@ -1228,6 +1259,18 @@
         "run": 44776659369,
         "report": "docs/jrc_contact_center/audio_private_receipts_verified_20261120.json",
         "state": "validated increment; complete figure remains partial"
+      },
+      "reconciliation_20261121": {
+        "verified_producer": "86ed16c6919adfb4a7abd44c9605dad99cbcb0e4",
+        "report": "docs/jrc_contact_center/ivr_exact_audio_native_verified_20261121.json",
+        "complete_figure": false
+      },
+      "current_acceptance_reconciled_20261121": {
+        "complete_figure": false,
+        "verified_audio_report": "docs/jrc_contact_center/ivr_exact_audio_native_verified_20261121.json",
+        "verified_own_review_permission_report": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json",
+        "prepared_next_report": "docs/jrc_contact_center/audio_usages_and_nico_values_prepared_20261121.json",
+        "prepared_is_not_validated": true
       }
     },
     {
@@ -1595,9 +1638,13 @@
       "stages": [
         7
       ],
-      "implemented_in_0_2": [],
+      "implemented_in_0_2": [
+        "Base de autoridade própria validada em3c7747d8: perfil/equipe explícitos, escuta autorizada, elegibilidade, negações e ausência de fallback administrativo; não equivale ao fluxo completo de revisão."
+      ],
       "remaining_or_external": [
-        "Append-only human review/version conflicts and explicit justification require stage 7"
+        "Valores/snapshot privados em memória preparados; exigem validação nativa no próximo checkpoint.",
+        "Vínculo comprovado de chamada/gravação/unidade, ledger persistente imutável, conflitos/idempotência/auditoria, API e popup completos ainda pendentes.",
+        "Não inferir equivalência de origensHodu/pabx_v1/jrc_pabx ou unidade a partir do usuário; não executar recomendações automaticamente."
       ],
       "code_references": [],
       "reference": {
@@ -1632,8 +1679,17 @@
       "acceptance_scope": {
         "foundation": "Consultar implemented_in_0_2 e evidências por SHA; código nativo existente não equivale ao painel completo da referência.",
         "complete_reference": [
-          "Append-only human review/version conflicts and explicit justification require stage 7"
+          "Valores/snapshot privados em memória preparados; exigem validação nativa no próximo checkpoint.",
+          "Vínculo comprovado de chamada/gravação/unidade, ledger persistente imutável, conflitos/idempotência/auditoria, API e popup completos ainda pendentes.",
+          "Não inferir equivalência de origensHodu/pabx_v1/jrc_pabx ou unidade a partir do usuário; não executar recomendações automaticamente."
         ]
+      },
+      "current_acceptance_reconciled_20261121": {
+        "complete_figure": false,
+        "verified_audio_report": "docs/jrc_contact_center/ivr_exact_audio_native_verified_20261121.json",
+        "verified_own_review_permission_report": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json",
+        "prepared_next_report": "docs/jrc_contact_center/audio_usages_and_nico_values_prepared_20261121.json",
+        "prepared_is_not_validated": true
       }
     }
   ],
@@ -6256,5 +6312,29 @@
     "changes": "Explicit labels; known409 retains editable draft; owned unverified fixture and actual API rejection",
     "chrome_count_preserved": 240,
     "permissions_or_migrations_changed": false
+  },
+  "audio_usages_and_nico_values_prepared_20261121": {
+    "status": "prepared_native_validation_pending",
+    "report": "docs/jrc_contact_center/audio_usages_and_nico_values_prepared_20261121.json",
+    "new_migrations_or_grants": false,
+    "chrome_scenarios_preserved": 240
+  },
+  "ivr_known_audio_refusal_verified_20261121": {
+    "status": "implemented_and_native_vue_chrome_verified",
+    "producer": "49abeccdf470703f89e1d7cb7025dfec3ac56c10",
+    "run": 44881693667,
+    "native_distinct": 2210,
+    "schema_reload_separate": 159,
+    "vue": 1102,
+    "chrome": {
+      "passed": 240,
+      "per_project": 60,
+      "failed": 0,
+      "pending": 0,
+      "flaky": 0
+    },
+    "artifact": 14700401148,
+    "artifact_sha256": "837a0f87d83ee6a1705a428e44ff2bb6f42b610a3e208e9c75999ac4315f8574",
+    "report": "docs/jrc_contact_center/ivr_known_audio_refusal_verified_20261121.json"
   }
 }
