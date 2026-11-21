@@ -1,0 +1,48 @@
+{
+  "status": "native_backend_progress_verified_fixture_warmup_revalidation_pending",
+  "producer": "73b7dd0456d97395ca420824f21d279ab1a21cae",
+  "run": 44875894660,
+  "job": 136760383571,
+  "core": {
+    "examples": 2009,
+    "passed": 2007,
+    "failed": 2,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "original1933core_ids_all_passed": true,
+  "new76cases": {
+    "passed": 74,
+    "failed": 2
+  },
+  "verified_new_files": {
+    "graph_and_scale": 12,
+    "schema_and_malformed_input": 48,
+    "authenticated_api": 8,
+    "atomic_write_and_replay": "6of8; two baseline-count fixtures pending correction"
+  },
+  "confirmed_native_behavior": [
+    "Exact version/hash and current observation validation",
+    "No audio byte read during graph validation; old ready inspection does not override new unavailable result",
+    "Account/unit and joined asset/version rejection; separate Nico review right grants no institutional access",
+    "New library version does not redirect original pin; explicit unlink and original history persist",
+    "Native metadata, create/reload/export APIs and fresh scope revocation",
+    "128node graph with127menu references/eight actually observed versions passes bounded SQL assertion"
+  ],
+  "schema_reload_separate": {
+    "passed": 159,
+    "failed": 0,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "remaining_test_cause": "input_for lazily materialized the native voice queue after global audit counts were captured, before the writer transaction",
+  "fixture_fix": "Construct the same input/queue before ledger_counts; keep exact zero change assertion on identities, versions and all audits, plus original exceptions",
+  "lint_fix": "Use Ruby anonymous block forwarding for the same SQL-count operation, without changing its bound or assertions",
+  "product_code_permissions_migrations_sql_or_gates_changed_by_this_fix": false,
+  "vue_assets_chrome": "Not executed at this producer;240Chrome still required",
+  "artifact": 14696079109,
+  "artifact_bytes": 231889,
+  "artifact_sha256": "eb9fe0a7bbcf8ccc0c97f48b69211b9ac31bc07c3578ed2e328591aa9e8eb34b",
+  "four_nico_value_files": "Remain deliberately uncommitted and outside this corrective checkpoint",
+  "full_23_figures_complete": false
+}

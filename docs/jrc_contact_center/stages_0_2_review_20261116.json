@@ -6206,5 +6206,31 @@
     "artifact": 14695632005,
     "artifact_sha256": "dbcfb8c90100a198fd836052a09ed49764d059f68e0e6dc180a0d2beee9eb989",
     "report": "docs/jrc_contact_center/ivr_exact_audio_native_query_fix_20261121.json"
+  },
+  "ivr_audio_backend_verified_fixture_warmup_20261121": {
+    "status": "native_backend_progress_verified_fixture_warmup_revalidation_pending",
+    "producer": "73b7dd0456d97395ca420824f21d279ab1a21cae",
+    "run": 44875894660,
+    "core": {
+      "examples": 2009,
+      "passed": 2007,
+      "failed": 2,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "original1933core_ids_all_passed": true,
+    "new76cases": {
+      "passed": 74,
+      "failed": 2
+    },
+    "schema_reload_separate": {
+      "passed": 159,
+      "failed": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "artifact": 14696079109,
+    "artifact_sha256": "eb9fe0a7bbcf8ccc0c97f48b69211b9ac31bc07c3578ed2e328591aa9e8eb34b",
+    "report": "docs/jrc_contact_center/ivr_audio_backend_verified_fixture_warmup_20261121.json"
   }
 }

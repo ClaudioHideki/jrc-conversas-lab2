@@ -143,11 +143,11 @@ RSpec.describe JrcContactCenter::IvrGraph, '#audio_proofs' do
     expect(graph.audio_proofs.pluck('version_id')).to match_array(versions.map { |version| version.id.to_s })
   end
 
-  def graph_select_count(&operation)
+  def graph_select_count(&)
     count = 0
     callback = ->(_name, _start, _finish, _id, payload) { count += 1 if payload.fetch(:sql).lstrip.start_with?('SELECT') }
     ActiveSupport::Notifications.subscribed(callback, 'sql.active_record') do
-      ActiveRecord::Base.uncached(&operation)
+      ActiveRecord::Base.uncached(&)
     end
     count
   end

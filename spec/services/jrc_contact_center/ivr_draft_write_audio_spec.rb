@@ -33,16 +33,18 @@ RSpec.describe JrcContactCenter::IvrDraftWrite do
 
   it 'does not create an identity, revision or audit when audio has not been observed' do
     audio_version
+    input = input_for
     before = ledger_counts
-    expect { write_audio_draft }.to raise_error(JrcContactCenter::OperationError, 'ivr_audio_not_verified')
+    expect { write_audio_draft(input) }.to raise_error(JrcContactCenter::OperationError, 'ivr_audio_not_verified')
     expect(ledger_counts).to eq(before)
   end
 
   it 'does not commit a partial revision when the audit fails' do
     audio_proof
+    input = input_for
     before = ledger_counts
     allow(JrcContactCenter::IvrDraftAudit).to receive(:write!).and_raise(ActiveRecord::RecordInvalid)
-    expect { write_audio_draft }.to raise_error(ActiveRecord::RecordInvalid)
+    expect { write_audio_draft(input) }.to raise_error(ActiveRecord::RecordInvalid)
     expect(ledger_counts).to eq(before)
   end
 
