@@ -20,6 +20,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
     audioAssets: vi.fn(),
     audioAsset: vi.fn(),
     audioVersions: vi.fn(),
+    duplicateAudioAsset: vi.fn(),
     updateAudioAsset: vi.fn(),
     receiveAudioAsset: vi.fn(),
     receiveAudioVersion: vi.fn(),
@@ -121,6 +122,88 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it('keeps duplication disabled for a quarantined file instead of presenting it as technically ready', async () => {
+    const wrapper = fixture();
+    await flushPromises();
+    expect(wrapper.get('[data-copy-audio-asset="44"]').element.disabled).toBe(
+      true
+    );
+    expect(API.duplicateAudioAsset).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-audio-copy-source]').exists()).toBe(false);
+  });
+
+  it('opens the existing reviewed editor in copy mode with pinned metadata and no upload or microphone controls', async () => {
+    const item = structuredClone(row);
+    item.latest_version.technical_verification = { ready: true };
+    item.latest_version.source_kind = 'user_upload';
+    API.audioAssets.mockResolvedValueOnce({
+      data: {
+        items: [item],
+        meta: { total: 1, pages: 1 },
+        max_upload_bytes: 1000,
+      },
+    });
+    API.audioAsset.mockResolvedValueOnce({ data: { account_id: '1', item } });
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-copy-audio-asset="44"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-audio-copy-source]').text()).toContain(
+      item.latest_version.sha256
+    );
+    expect(wrapper.find('[data-audio-asset-file]').exists()).toBe(false);
+    expect(wrapper.find('[data-audio-source-capture]').exists()).toBe(false);
+    expect(wrapper.find('[data-audio-asset-name]').exists()).toBe(true);
+    expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+    expect(API.duplicateAudioAsset).not.toHaveBeenCalled();
+    await wrapper
+      .get('[data-audio-asset-name]')
+      .setValue('SYNTHETIC copy outside old filter');
+    await wrapper.get('[data-review-audio-asset]').setValue(true);
+    API.duplicateAudioAsset.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        item: {
+          ...item,
+          id: '45',
+          name: 'SYNTHETIC copy outside old filter',
+          revision: 'b'.repeat(64),
+          latest_version: {
+            ...item.latest_version,
+            id: '91',
+            audio_asset_id: '45',
+            number: 1,
+          },
+        },
+        received_version: {
+          ...item.latest_version,
+          id: '91',
+          audio_asset_id: '45',
+          number: 1,
+        },
+      },
+    });
+    await wrapper.get('[role="dialog"]').trigger('submit');
+    await flushPromises();
+    expect(wrapper.get('[data-audio-copy-receipt="45"]').exists()).toBe(true);
+    await wrapper.get('[data-open-copied-audio]').trigger('click');
+    expect(mocks.replace).toHaveBeenCalledWith({
+      query: {
+        audio_unit: '10',
+        audio_parent: undefined,
+        audio_file_q: 'SYNTHETIC copy outside old filter',
+        audio_file_page: 1,
+        audio_file_source: undefined,
+        audio_file_format: undefined,
+      },
+    });
+    await wrapper.setProps({
+      context: { ...context, capabilities: { configure: false } },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-audio-copy-receipt="45"]').exists()).toBe(false);
+  });
+
   it('names source, format and page size independently of their option contents', async () => {
     const wrapper = fixture();
     await flushPromises();

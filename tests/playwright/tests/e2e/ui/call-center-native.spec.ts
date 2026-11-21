@@ -60,7 +60,7 @@ test('team supervision native metadata persists reviewed roles, pages candidates
   const dialog = page.getByRole('dialog');
   const editor = dialog.locator('[data-team-supervision-editor]');
   const save = dialog.getByRole('button', {
-    name: 'Salvar configurações',
+    name: 'Salvar vínculos',
     exact: true,
   });
   await expect(editor).toContainText('Este vínculo não concede permissões');
@@ -68,6 +68,11 @@ test('team supervision native metadata persists reviewed roles, pages candidates
     0
   );
   await expect(save).toBeDisabled();
+  expect(
+    await save
+      .locator('span.truncate')
+      .evaluate(node => node.scrollWidth <= node.clientWidth)
+  ).toBe(true);
   await editor
     .getByLabel('Pesquisar pessoas', { exact: true })
     .fill('SYNTHETIC supervisor');
@@ -8311,6 +8316,184 @@ test('institutional audio folders native verified bytes playback download and wi
     path: `.codex/call-center-native-e2e/${info.project.name}-audio-verified-preview.png`,
     fullPage: true,
   });
+  // Same real native library and reviewed editor; no second catalog or provider write.
+  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await library.locator(`[data-copy-audio-asset="${asset.id}"]`).click();
+  await expectContainedDialog(page);
+  await expect(dialog.locator('[data-audio-copy-source]')).toContainText(
+    sha256
+  );
+  await expect(dialog.locator('[data-audio-asset-file]')).toHaveCount(0);
+  await expect(dialog.locator('[data-audio-source-capture]')).toHaveCount(0);
+  const copyName = `SYNTHETIC isolated duplicate ${info.project.name}`;
+  await dialog.locator('[data-audio-asset-name]').fill(copyName);
+  const copySave = dialog.getByRole('button', { name: 'Salvar', exact: true });
+  await expect(copySave).toBeDisabled();
+  // A genuine concurrent metadata change requires current-source review; it does not repin the bytes.
+  const currentSource = (
+    await (
+      await page.request.get(`${own}/audio_assets/${asset.id}`, {
+        headers: target.administrator,
+      })
+    ).json()
+  ).item;
+  const renamedSource = await page.request.patch(
+    `${own}/audio_assets/${asset.id}`,
+    {
+      headers: target.administrator,
+      data: {
+        asset: { description: 'SYNTHETIC concurrent source review' },
+        expected_revision: currentSource.revision,
+      },
+    }
+  );
+  expect(renamedSource.status()).toBe(200);
+  await dialog.locator('[data-review-audio-asset]').check();
+  const copyPath = `${new URL(own).pathname}/audio_assets/${asset.id}/duplicate`;
+  const firstCopy = page.waitForResponse(
+    response => new URL(response.url()).pathname === copyPath
+  );
+  await copySave.click();
+  expect((await firstCopy).status()).toBe(409);
+  await expect(dialog.locator('[data-configuration-conflict]')).toBeVisible();
+  await dialog
+    .getByRole('button', {
+      name: 'Carregar versão atual para comparar',
+      exact: true,
+    })
+    .click();
+  await dialog.locator('[data-configuration-review]').check();
+  await dialog.locator('[data-review-audio-asset]').check();
+  await expect(dialog.locator('[data-audio-copy-source]')).toContainText(
+    sha256
+  );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth
+    )
+  ).toBe(false);
+  expect(
+    await page.locator('html').evaluate(node => node.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-copy-reviewed.png`,
+    fullPage: false,
+  });
+  const copiedResponse = page.waitForResponse(
+    response => new URL(response.url()).pathname === copyPath
+  );
+  await copySave.click();
+  const copyResponse = await copiedResponse;
+  expect(copyResponse.status()).toBe(201);
+  const copyPayload = copyResponse.request().postDataJSON();
+  const copied = await copyResponse.json();
+  expect(copied.item.id).not.toBe(asset.id);
+  expect(copied.received_version.id).not.toBe(versionId);
+  expect(copied.received_version).toMatchObject({
+    audio_asset_id: copied.item.id,
+    unit_id: String(target.unit_id),
+    number: 1,
+    sha256,
+    byte_size: bytes.length,
+    technical_verification: { ready: true },
+  });
+  await expect(dialog).not.toBeVisible();
+  await expect(
+    library.locator(`[data-audio-copy-receipt="${copied.item.id}"]`)
+  ).toContainText(copied.item.id);
+  await library.locator('[data-open-copied-audio]').click();
+  await expect(
+    library.locator(`[data-audio-asset="${copied.item.id}"]`)
+  ).toContainText(copyName);
+  const replayedCopy = await page.request.post(
+    `http://127.0.0.1:5387${copyPath}`,
+    {
+      headers: target.administrator,
+      data: copyPayload,
+    }
+  );
+  expect(replayedCopy.status()).toBe(201);
+  expect((await replayedCopy.json()).received_version.id).toBe(
+    copied.received_version.id
+  );
+  const copiedBytes = await page.request.get(
+    `${own}/audio_assets/${copied.item.id}/versions/${copied.received_version.id}/bytes`,
+    {
+      headers: target.administrator,
+    }
+  );
+  expect(copiedBytes.status()).toBe(200);
+  expect(
+    createHash('sha256')
+      .update(await copiedBytes.body())
+      .digest('hex')
+  ).toBe(sha256);
+  const unchanged = await page.request.get(`${own}/audio_assets/${asset.id}`, {
+    headers: target.administrator,
+  });
+  expect((await unchanged.json()).item.latest_version.id).toBe(versionId);
+  const copyAudit = await page.request.get(`${own}/configuration_audits`, {
+    headers: target.administrator,
+    params: {
+      resource_type: 'audio_version',
+      resource_id: copied.received_version.id,
+      history: 'true',
+      operation: 'copy',
+    },
+  });
+  expect(copyAudit.status()).toBe(200);
+  const copyHistory = (await copyAudit.json()).items;
+  expect(copyHistory).toHaveLength(1);
+  expect(copyHistory[0].audio_copy).toEqual({
+    source_asset_id: asset.id,
+    source_version_id: versionId,
+    source_sha256: sha256,
+  });
+  const deniedCopy = await page.request.post(
+    `http://127.0.0.1:5387${copyPath}`,
+    { headers: target.operator, data: copyPayload }
+  );
+  expect(deniedCopy.status()).toBe(401);
+  await page.reload();
+  await expect(
+    library.locator(`[data-audio-asset="${copied.item.id}"]`)
+  ).toContainText(copyName);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-copy-persisted.png`,
+    fullPage: true,
+  });
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-copy-native.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      synthetic: true,
+      external_homologation: false,
+      source_asset: asset.id,
+      source_version: versionId,
+      new_asset: copied.item.id,
+      new_version: copied.received_version.id,
+      source_sha256: sha256,
+      verified_copied_sha256: copied.received_version.sha256,
+      native_new_inspection: copied.received_version.technical_verification.id,
+      stale_review: 409,
+      created: copyResponse.status(),
+      replayed: replayedCopy.status(),
+      authorized_bytes: copiedBytes.status(),
+      audit_count: copyHistory.length,
+      operator_denied: deniedCopy.status(),
+      horizontal_overflow: false,
+    })
+  );
+  // Restore the original authorized history/player so all prior withdrawal assertions remain intact.
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(asset.name)}`
+  );
+  await library.locator(`[data-audio-asset-history="${asset.id}"]`).click();
+  await expectContainedDialog(page);
+  await version.locator('[data-toggle-audio-inspections]').click();
+  await version.locator('[data-open-audio-bytes]').click();
+  await expect(player).toBeVisible();
   await page.evaluate(auth => {
     Object.assign(Reflect.get(window, 'axios').defaults.headers.common, auth);
   }, target.operator);

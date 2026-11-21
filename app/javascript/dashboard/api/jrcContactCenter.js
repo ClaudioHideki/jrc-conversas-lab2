@@ -64,6 +64,11 @@ export default {
     axios.get(`${base(accountId)}/audio_assets/${recordIdentity(id)}/usages`, {
       params,
     }),
+  duplicateAudioAsset: (accountId, id, body) =>
+    axios.post(
+      `${base(accountId)}/audio_assets/${recordIdentity(id)}/duplicate`,
+      body
+    ),
   receiveAudioAsset: (accountId, body) =>
     axios.post(`${base(accountId)}/audio_assets`, body),
   updateAudioAsset: (accountId, id, asset, options = {}) =>

@@ -24,6 +24,27 @@ const render = (record = {}) =>
   });
 
 describe('native ACW audit detail', () => {
+  it('presents the exact institutional copy origin separately from the new version and authority grants', () => {
+    const wrapper = render({
+      resource_type: 'audio_version',
+      operation: 'copy',
+      audio_copy: {
+        source_asset_id: '9007199254740993',
+        source_version_id: '9007199254740995',
+        source_sha256: 'f'.repeat(64),
+      },
+    });
+    const lineage = wrapper.get('[data-audited-audio-copy]');
+    expect(lineage.text()).toContain(
+      'JRC_CONTACT_CENTER.AUDIO_FILES.COPY_SOURCE'
+    );
+    expect(lineage.text()).toContain('9007199254740993');
+    expect(lineage.text()).toContain('9007199254740995');
+    expect(lineage.text()).toContain('f'.repeat(64));
+    expect(lineage.find('a').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
   it('uses the existing translated label for the explicit Nico review permission in a native grant audit', () => {
     const wrapper = render({
       resource_type: 'access',

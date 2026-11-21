@@ -798,3 +798,9 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - Team supervision6a5e22fb:2210/2212 Rails aprovados; duas expectativas corrigidas preservando o legado.175 reload passaram;35 infrações de lint identificadas, correções exigem novo SHA. Mantidos os2117 casos anteriores. Concorrência, Vue, assets e244Chrome continuam obrigatórios e pendentes. Recibo team_supervision_first_native_20261121.json.
 
 -7706a6f0:2212/2212 Rails e175 reload aprovados;112 casos concorrentes anteriores preservados. Os3 casos novos falharam apenas no after hook por FK corporativa; corrigida a limpeza exclusiva do fixture.35 infrações anteriores resolvidas;7 remanescentes no describe/described_class do spec corrigidas e aguardando revalidação. Vue/assets/244Chrome ainda bloqueados.
+
+
+- [ ] **Duplicação institucional — figuras6/16 (21/11):** novo asset/versão1/blob na mesma unidade, origem fixada, nova inspeção, CAS e reautorização final, recibo idempotente e auditoria nativa. Mesmo editor com revisão explícita;48unitários com transporte substituído aprovados (28regressões/20novos). Preparados24casos Rails,2concorrentes,3Vue de apresentação e extensão dos mesmos244Chrome. Persistência, scanner e visual do novo SHA ainda não aprovados. Ver `docs/jrc_contact_center/audio_copy_prepared_20261121.json`. Sem PABX, grants ou migrations novos.
+
+
+- [x] **Supervisão explícita — `31582e3a`, CI44906859540:** 2412Rails distintos,175reload separados,1188Vue e244Chrome aprovados;zero falhas/pendências/erros, lint/assets/bootstrap15 aprovados. Quatro capturas efetivamente abertas;persistência, paginação, conflito e negações comprovados. Sem grants ou participação automática. Ver `docs/jrc_contact_center/team_supervision_native_verified_20261121.json`. Figuras3/12 completas e cópia institucional ainda não concluídas por este resultado.

@@ -27,11 +27,11 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
     # until runner teardown. Do not disable triggers or delete accepted history as test cleanup.
   end
 
-  def race_staged_receipts
+  def race_staged_receipts(service_class: JrcContactCenter::AudioUploads)
     identifiers = { account: account.id, user: actor.id, account_user: member.id }
     stage_barrier
     2.times do |index|
-      workers << Thread.new { execute_worker(identifiers, index) { |*arguments| yield(*arguments) } }
+      workers << Thread.new { execute_worker(identifiers, index, service_class) { |*arguments| yield(*arguments) } }
     end
     2.times { Timeout.timeout(20) { arrived.pop } }
     2.times { release << true }
@@ -47,9 +47,9 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
     end
   end
 
-  def execute_worker(identifiers, index)
+  def execute_worker(identifiers, index, service_class)
     ActiveRecord::Base.connection_pool.with_connection do
-      service = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: worker_context(identifiers)))
+      service = service_class.new(access: JrcContactCenter::AudioLibraryAccess.new(context: worker_context(identifiers)))
       concurrent_upload do |uploaded|
         results << yield(service, uploaded, index)
       end
@@ -109,5 +109,40 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
     expect { original.blob.purge }.not_to raise_error
     expect(ActiveStorage::Blob.exists?(original.blob_id)).to be(true)
     expect(original.reload.blob.download).to eq(bytes)
+  end
+
+  it 'commits one independent copy and cleans only redundant staging for simultaneous identical copy requests' do
+    first = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
+                                          .create!(unit_id: unit.id, file: upload, key: key,
+                                                   attributes: { name: 'SYNTHETIC source for concurrent copy' })
+    request = { asset_id: first.audio_asset_id, version_id: first.id, attributes: { name: 'SYNTHETIC concurrent copy' },
+                key: 'synthetic-concurrent-copy-0001', expected: JrcContactCenter::AudioAssetRevision.token(first.audio_asset, version: first) }
+    original_blobs = ActiveStorage::Blob.count
+    outcomes = race_staged_receipts(service_class: JrcContactCenter::AudioCopies) { |service, _file, _index| service.call(**request) }
+    expect(outcomes.map(&:class)).to eq([JrcContactCenter::AudioVersion, JrcContactCenter::AudioVersion])
+    expect(outcomes.map(&:id).uniq.length).to eq(1)
+    expect(JrcContactCenter::AudioAsset.where(account: account).count).to eq(2)
+    expect(ActiveStorage::Blob.count).to eq(original_blobs + 1)
+    expect(Audited.audit_class.where(auditable: outcomes.first, action: 'copy').count).to eq(1)
+    expect(outcomes.first.audio_asset_id).not_to eq(first.audio_asset_id)
+    expect([first.reload.blob.download, outcomes.first.blob.download]).to eq([bytes, bytes])
+  end
+
+  it 'refuses a raced copy key bound to different metadata without creating a second copy or changing the original' do
+    first = JrcContactCenter::AudioUploads.new(access: JrcContactCenter::AudioLibraryAccess.new(context: context))
+                                          .create!(unit_id: unit.id, file: upload, key: key,
+                                                   attributes: { name: 'SYNTHETIC source for conflicting copy' })
+    request = { asset_id: first.audio_asset_id, version_id: first.id, key: 'synthetic-conflicting-copy-0001',
+                expected: JrcContactCenter::AudioAssetRevision.token(first.audio_asset, version: first) }
+    original_blobs = ActiveStorage::Blob.count
+    outcomes = race_staged_receipts(service_class: JrcContactCenter::AudioCopies) do |service, _file, index|
+      service.call(**request, attributes: { name: "SYNTHETIC competing copy #{index}" })
+    end
+    expect(outcomes.count { |row| row.is_a?(JrcContactCenter::AudioVersion) }).to eq(1)
+    expect(outcomes.select { |row| row.is_a?(JrcContactCenter::OperationError) }.map(&:code)).to eq(['institutional_audio_upload_key_conflict'])
+    expect(JrcContactCenter::AudioAsset.where(account: account).count).to eq(2)
+    expect(JrcContactCenter::AudioVersion.where(account: account).count).to eq(2)
+    expect(ActiveStorage::Blob.count).to eq(original_blobs + 1)
+    expect(first.reload.audio_asset.name).to eq('SYNTHETIC source for conflicting copy')
   end
 end

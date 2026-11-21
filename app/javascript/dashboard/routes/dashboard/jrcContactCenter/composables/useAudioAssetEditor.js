@@ -14,6 +14,7 @@ export const useAudioAssetEditor = ({
   const dialog = ref(null);
   const mode = ref('upload');
   const selected = ref(null);
+  const copyVersion = shallowRef(null);
   const draft = ref({ name: '', description: '', purpose: '', folder_id: '' });
   const file = shallowRef(null);
   const sourceKind = ref('user_upload');
@@ -41,6 +42,7 @@ export const useAudioAssetEditor = ({
       file.value?.size,
       file.value?.lastModified,
       sourceKind.value,
+      copyVersion.value,
     ]);
   const reviewed = computed(() => reviewedDraft.value === fingerprint());
   const canSave = computed(() =>
@@ -49,9 +51,11 @@ export const useAudioAssetEditor = ({
         openedScope.value === scopeKey() &&
         !saving.value &&
         !opening.value &&
+        error.value !== 'COPY_SOURCE_NOT_READY' &&
         reviewed.value &&
         revision.canSave.value &&
         (mode.value === 'edit' ||
+          (mode.value === 'copy' && copyVersion.value) ||
           (file.value &&
             file.value.size > 0 &&
             file.value.size <= maxBytes.value)) &&
@@ -62,6 +66,7 @@ export const useAudioAssetEditor = ({
     generation += 1;
     session.value += 1;
     selected.value = null;
+    copyVersion.value = null;
     file.value = null;
     sourceKind.value = 'user_upload';
     submission.value = null;
@@ -89,6 +94,28 @@ export const useAudioAssetEditor = ({
         ? (await API.audioAsset(accountId.value, row.id)).data.item
         : null;
       if (version !== generation || origin !== scopeKey()) return;
+      if (nextMode === 'copy') {
+        const source = record?.latest_version;
+        if (
+          record?.unit_id !== unitId.value ||
+          source?.audio_asset_id !== record.id ||
+          source?.unit_id !== unitId.value ||
+          source?.technical_verification?.ready !== true ||
+          !Number.isSafeInteger(source?.byte_size) ||
+          source.byte_size <= 0 ||
+          source.byte_size > maxBytes.value
+        )
+          throw new Error('Source requires a current native inspection');
+        copyVersion.value = Object.freeze({
+          id: source.id,
+          sha256: source.sha256,
+          byte_size: source.byte_size,
+          number: source.number,
+          file_name: source.file_name,
+          source_kind: source.source_kind,
+        });
+        sourceKind.value = source.source_kind;
+      }
       mode.value = nextMode;
       selected.value = record;
       draft.value = {
@@ -129,6 +156,15 @@ export const useAudioAssetEditor = ({
     chooseFile({ target: { files: [value] } });
     if (file.value) sourceKind.value = 'browser_capture';
   };
+  const copyBody = () => {
+    if (!submission.value)
+      submission.value = Object.freeze({
+        asset: Object.freeze({ ...draft.value }),
+        source_version_id: copyVersion.value.id,
+        idempotency_key: key,
+      });
+    return { ...submission.value, expected_revision: revision.state.expected };
+  };
   const body = () => {
     if (!submission.value) {
       const form = new FormData();
@@ -157,7 +193,10 @@ export const useAudioAssetEditor = ({
       item.unit_id === unitId.value &&
       typeof item.revision === 'string' &&
       /^[a-f0-9]{64}$/.test(item.revision) &&
-      (!selected.value || item.id === selected.value.id);
+      (!selected.value ||
+        (mode.value === 'copy'
+          ? item.id !== selected.value.id
+          : item.id === selected.value.id));
     if (!valid) throw new Error('Invalid institutional audio receipt');
     if (mode.value === 'edit') return;
     const version = response.data?.received_version;
@@ -168,7 +207,13 @@ export const useAudioAssetEditor = ({
       !Number.isInteger(version.number) ||
       version.number < 1 ||
       version.source_kind !== sourceKind.value ||
-      version.byte_size !== file.value?.size ||
+      version.byte_size !==
+        (mode.value === 'copy'
+          ? copyVersion.value?.byte_size
+          : file.value?.size) ||
+      (mode.value === 'copy' &&
+        (version.number !== 1 ||
+          version.sha256 !== copyVersion.value?.sha256)) ||
       typeof version.sha256 !== 'string' ||
       !/^[a-f0-9]{64}$/.test(version.sha256)
     )
@@ -181,7 +226,13 @@ export const useAudioAssetEditor = ({
     error.value = '';
     try {
       let response;
-      if (mode.value === 'edit')
+      if (mode.value === 'copy')
+        response = await API.duplicateAudioAsset(
+          accountId.value,
+          selected.value.id,
+          copyBody()
+        );
+      else if (mode.value === 'edit')
         response = await API.updateAudioAsset(
           accountId.value,
           selected.value.id,
@@ -197,12 +248,24 @@ export const useAudioAssetEditor = ({
       else response = await API.receiveAudioAsset(accountId.value, body());
       if (version !== generation) return;
       savedReceipt(response);
+      const copied = mode.value === 'copy' ? response.data.item : null;
       clear();
-      await onSaved();
+      if (copied) await onSaved(copied);
+      else await onSaved();
     } catch (failure) {
       if (version !== generation) return;
       if ([401, 403, 404].includes(failure?.response?.status)) onDenied();
       else if (
+        mode.value === 'copy' &&
+        [
+          'institutional_audio_not_verified',
+          'institutional_audio_inspection_changed',
+          'institutional_audio_read_limit_exceeded',
+        ].includes(failure?.response?.data?.error)
+      ) {
+        submission.value = null;
+        error.value = 'COPY_SOURCE_NOT_READY';
+      } else if (
         [
           'invalid_institutional_audio_file',
           'unsupported_institutional_audio_file',
@@ -234,6 +297,7 @@ export const useAudioAssetEditor = ({
     dialog,
     mode,
     selected,
+    copyVersion,
     draft,
     file,
     sourceKind,

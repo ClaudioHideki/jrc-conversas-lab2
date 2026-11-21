@@ -2495,7 +2495,15 @@
       "RECEIPT_ERROR": "O recebimento não foi confirmado. Os dados foram preservados: revise e tente novamente com esta mesma solicitação, sem duplicar o arquivo. Se fechar, consulte a lista para conferir um eventual recebimento.",
       "PAGE_SIZE": "Áudios por página",
       "SOURCE_UPLOAD": "Arquivo recebido",
-      "SOURCE_CAPTURE": "Gravação do navegador"
+      "SOURCE_CAPTURE": "Gravação do navegador",
+      "COPY": "Duplicar áudio",
+      "COPY_SOURCE": "Versão de origem da cópia",
+      "SOURCE_ID": "Áudio de origem",
+      "SOURCE_VERSION_ID": "ID da versão de origem",
+      "COPY_REVIEW": "A cópia terá cadastro e arquivo próprios, sem alterar o original ou seus vínculos. A versão indicada será inspecionada novamente antes da gravação. Não publica no PABX.",
+      "COPY_SOURCE_NOT_READY": "A origem mudou ou não atende à verificação atual. Feche este formulário, confira a inspeção e abra a duplicação novamente. A cópia não foi gravada por esta tentativa.",
+      "COPY_SAVED": "Cópia gravada: {name} (ID {id}).",
+      "OPEN_COPY": "Ver cópia gravada"
     },
     "AUDIO_INSPECTIONS": {
       "TITLE": "Verificações técnicas desta versão",
@@ -2618,7 +2626,7 @@
       "USE_SERVER": "Usar seleção atual do servidor",
       "LOADING": "Consultando supervisão…",
       "RETRY": "Tentar novamente",
-      "SAVE": "Salvar configurações",
+      "SAVE": "Salvar vínculos",
       "CANCEL": "Cancelar",
       "PAGINATION": "Paginação das pessoas da conta",
       "UNKNOWN": "Vínculo de usuário #{id}",

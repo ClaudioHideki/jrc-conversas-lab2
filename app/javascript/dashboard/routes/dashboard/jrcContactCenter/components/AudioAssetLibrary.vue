@@ -42,6 +42,14 @@ const labels = computed(() => ({
   BYTES: t('JRC_CONTACT_CENTER.AUDIO_FILES.BYTES'),
   EDIT: t('JRC_CONTACT_CENTER.AUDIO_FILES.EDIT'),
   REPLACE: t('JRC_CONTACT_CENTER.AUDIO_FILES.REPLACE'),
+  COPY: t('JRC_CONTACT_CENTER.AUDIO_FILES.COPY'),
+  COPY_REVIEW: t('JRC_CONTACT_CENTER.AUDIO_FILES.COPY_REVIEW'),
+  COPY_SOURCE: t('JRC_CONTACT_CENTER.AUDIO_FILES.COPY_SOURCE'),
+  COPY_SOURCE_NOT_READY: t(
+    'JRC_CONTACT_CENTER.AUDIO_FILES.COPY_SOURCE_NOT_READY'
+  ),
+  SOURCE_ID: t('JRC_CONTACT_CENTER.AUDIO_FILES.SOURCE_ID'),
+  SOURCE_VERSION_ID: t('JRC_CONTACT_CENTER.AUDIO_FILES.SOURCE_VERSION_ID'),
   HISTORY: t('JRC_CONTACT_CENTER.AUDIO_FILES.HISTORY'),
   NOT_VERIFIED: t('JRC_CONTACT_CENTER.AUDIO_FILES.NOT_VERIFIED'),
   PAGINATION: t('JRC_CONTACT_CENTER.AUDIO_FILES.PAGINATION'),
@@ -95,6 +103,7 @@ const sourceLabel = kind =>
   })[kind] || label('UNKNOWN_SOURCE');
 const currentUser = useMapGetter('getCurrentUser');
 const details = ref(null);
+const lastCopy = ref(null);
 const detailsLoading = ref(false);
 const detailsError = ref(false);
 let detailsGeneration = 0;
@@ -212,6 +221,7 @@ const clearHistory = () => {
 };
 const forget = () => {
   generation += 1;
+  lastCopy.value = null;
   clearDetails();
   items.value = [];
   meta.value = { total: 0, pages: 0 };
@@ -313,7 +323,10 @@ editor = useAudioAssetEditor({
   folderId: computed(() => props.folderId),
   canManage,
   maxBytes,
-  onSaved: load,
+  onSaved: copied => {
+    lastCopy.value = copied || null;
+    return load();
+  },
   onDenied: denied,
 });
 const {
@@ -362,6 +375,18 @@ const saveEditor = () => {
 };
 const filter = values =>
   router.replace({ query: { ...route.query, ...values } });
+const openCopied = () => {
+  const item = lastCopy.value;
+  if (!item || !canManage.value || item.unit_id !== props.unitId) return;
+  filter({
+    audio_unit: props.unitId,
+    audio_parent: item.folder_id || undefined,
+    audio_file_q: item.name,
+    audio_file_page: 1,
+    audio_file_source: undefined,
+    audio_file_format: undefined,
+  });
+};
 const applyFilters = () => {
   const values = { audio_file_q: q.value || undefined, audio_file_page: 1 };
   Object.entries({
@@ -553,6 +578,30 @@ onBeforeUnmount(() => {
         {{ label('NEW') }}
       </button>
     </form>
+    <section
+      v-if="lastCopy && canManage"
+      role="status"
+      class="min-w-0 space-y-2 rounded-lg border border-n-teal-6 bg-n-teal-2 p-3 text-sm text-n-slate-12"
+      :data-audio-copy-receipt="lastCopy.id"
+    >
+      <p class="break-words">
+        {{
+          t('JRC_CONTACT_CENTER.AUDIO_FILES.COPY_SAVED', {
+            name: lastCopy.name,
+            id: lastCopy.id,
+          })
+        }}
+      </p>
+      <button
+        type="button"
+        :disabled="loading || saving || opening"
+        data-open-copied-audio
+        class="rounded-lg border border-n-blue-6 px-3 py-2 text-n-blue-11 disabled:opacity-40"
+        @click="openCopied"
+      >
+        {{ t('JRC_CONTACT_CENTER.AUDIO_FILES.OPEN_COPY') }}
+      </button>
+    </section>
     <p v-if="!canManage" class="text-sm text-n-slate-11">
       {{ label('NO_ACCESS') }}
     </p>
@@ -707,6 +756,19 @@ onBeforeUnmount(() => {
                   </button>
                   <button
                     type="button"
+                    :disabled="
+                      saving ||
+                      opening ||
+                      row.latest_version?.technical_verification?.ready !== true
+                    "
+                    :data-copy-audio-asset="row.id"
+                    class="max-w-full break-words rounded-lg border border-n-blue-6 px-2 py-2 text-n-blue-11 disabled:opacity-40"
+                    @click="editor.open('copy', row)"
+                  >
+                    {{ label('COPY') }}
+                  </button>
+                  <button
+                    type="button"
                     :disabled="saving || opening"
                     :data-audio-asset-history="row.id"
                     class="max-w-full break-words rounded-lg border border-n-blue-6 px-2 py-2 text-n-blue-11"
@@ -840,7 +902,11 @@ onBeforeUnmount(() => {
       contained
       use-form
       :title="
-        label(mode === 'upload' ? 'NEW' : mode === 'edit' ? 'EDIT' : 'REPLACE')
+        label(
+          { upload: 'NEW', edit: 'EDIT', replace: 'REPLACE', copy: 'COPY' }[
+            mode
+          ]
+        )
       "
       :confirm-button-label="label('SAVE')"
       :cancel-button-label="label('CANCEL')"
@@ -911,7 +977,30 @@ onBeforeUnmount(() => {
             @denied="denied"
           />
         </template>
-        <template v-if="mode !== 'edit'">
+        <section
+          v-if="mode === 'copy' && editor.copyVersion.value"
+          class="min-w-0 space-y-2 rounded-lg border border-n-blue-6 bg-n-blue-2 p-3"
+          data-audio-copy-source
+        >
+          <h4 class="font-semibold">{{ label('COPY_SOURCE') }}</h4>
+          <p class="break-words">{{ editor.selected.value?.name }}</p>
+          <p class="break-all">
+            {{ [label('SOURCE_ID'), editor.selected.value?.id].join(': ') }}
+          </p>
+          <p class="break-all">
+            {{
+              [label('SOURCE_VERSION_ID'), editor.copyVersion.value.id].join(
+                ': '
+              )
+            }}
+          </p>
+          <p class="break-words">
+            {{ versionDescription(editor.copyVersion.value) }}
+          </p>
+          <p class="break-all">{{ editor.copyVersion.value.sha256 }}</p>
+          <p>{{ label('COPY_REVIEW') }}</p>
+        </section>
+        <template v-if="['upload', 'replace'].includes(mode)">
           <div
             role="group"
             :aria-label="label('SOURCE_METHOD')"

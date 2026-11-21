@@ -31,6 +31,16 @@ class Api::V1::Accounts::JrcContactCenter::AudioAssetsController < Api::V1::Acco
                                     received_version: JrcContactCenter::AudioLibraryPresenter.version(version)), status: :created
   end
 
+  def duplicate
+    validate_body!(%w[asset source_version_id expected_revision idempotency_key])
+    version = JrcContactCenter::AudioCopies.new(access: library).call(
+      asset_id: params[:id], version_id: params.require(:source_version_id), attributes: params.require(:asset),
+      key: params.require(:idempotency_key), expected: params[:expected_revision]
+    )
+    render json: base_payload.merge(item: present(library.asset(version.audio_asset_id)),
+                                    received_version: JrcContactCenter::AudioLibraryPresenter.version(version)), status: :created
+  end
+
   def update
     validate_body!(%w[asset expected_revision])
     library.transaction do

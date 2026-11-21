@@ -1,0 +1,151 @@
+{
+  "status": "native_and_four_project_browser_verified_increment",
+  "producer_sha": "31582e3a12c14944f64d447bf9d675a6a0e30fac",
+  "run": 44906859540,
+  "job": 136854194196,
+  "artifact": 14710305011,
+  "artifact_sha256": "2bff4b41dc3b9c92b0be0f716098ecabef88c82b56e5bbea2d186116a9aed33f",
+  "native_distinct_examples": 2412,
+  "schema_reload_separate": {
+    "duration": 15.014790894,
+    "example_count": 175,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "vue": {
+    "numTotalTests": 1188,
+    "numPassedTests": 1188,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "chrome": {
+    "startTime": "2026-11-21T13:34:38.310Z",
+    "duration": 998438.073,
+    "expected": 244,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "projects": {
+    "desktop-light": 61,
+    "desktop-dark": 61,
+    "mobile-light": 61,
+    "mobile-dark": 61
+  },
+  "screenshots_hash_verified": 396,
+  "actually_opened": [
+    "desktop-dark-team-supervision-reviewed.png",
+    "desktop-light-team-supervision-reviewed.png",
+    "mobile-dark-team-supervision-reviewed.png",
+    "mobile-light-team-supervision-reviewed.png"
+  ],
+  "visual_findings": {
+    "desktop_light_dark": "Native dialog, real colors, labels, selected principal/additional and search readable; contained in1440px.",
+    "mobile_light_dark": "Contained at390px with readable long names and native scrollable body; no horizontal page overflow. Existing long save label is visually truncated, though accessible and functional.",
+    "followup": "Shorten only Team supervision save label and assert full visible caption in the next candidate. Full team/queue/hierarchy figure remains partial."
+  },
+  "selected_image_sha256": {
+    "desktop-dark-team-supervision-reviewed.png": "0d9b2309bbdee19f56cdec59ec1687f049121637a9220b9e5cc0f832b30455a9",
+    "desktop-light-team-supervision-reviewed.png": "73ec06a34b3a84dad56affc167ffbb9942ce54df62e2539dfc9fc904748ed30b",
+    "mobile-dark-team-supervision-reviewed.png": "c0ae53dce12cd40b5330227fca36e5c5fb1d3df69d6b1506365c3b66aa5dc931",
+    "mobile-light-team-supervision-reviewed.png": "c0c2d997a07e83eaa5bd212be7483a98f47eb42bb62985a23835a98bc2195085"
+  },
+  "previous_core_preserved": 2117,
+  "previous_concurrency_preserved": 112,
+  "new_core": 95,
+  "new_concurrency": 3,
+  "browser_receipts": {
+    "desktop-dark-team-supervision-native.json": {
+      "sha256": "36b1d6214318367278955e4c22cfa95b5fde5536911dd3f998d957625cfa05d5",
+      "receipt": {
+        "synthetic": true,
+        "sha": "31582e3a12c14944f64d447bf9d675a6a0e30fac",
+        "team": "336",
+        "saved": 200,
+        "persisted_primary": "2337",
+        "persisted_additional": "2338",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    },
+    "desktop-light-team-supervision-native.json": {
+      "sha256": "815d91427b5324582ce71fc9286c035bee386f1c92bc14cd87de62f5135ba8ac",
+      "receipt": {
+        "synthetic": true,
+        "sha": "31582e3a12c14944f64d447bf9d675a6a0e30fac",
+        "team": "332",
+        "saved": 200,
+        "persisted_primary": "2249",
+        "persisted_additional": "2250",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    },
+    "mobile-dark-team-supervision-native.json": {
+      "sha256": "428825bf71a157714db22c5f460d28cad1cb67d1ac4a61d0f3034a0c2c7669d5",
+      "receipt": {
+        "synthetic": true,
+        "sha": "31582e3a12c14944f64d447bf9d675a6a0e30fac",
+        "team": "344",
+        "saved": 200,
+        "persisted_primary": "2513",
+        "persisted_additional": "2514",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    },
+    "mobile-light-team-supervision-native.json": {
+      "sha256": "5b87955e4f17940cf61194d450bd704750a81c405c8106907b0659538ba32b2d",
+      "receipt": {
+        "synthetic": true,
+        "sha": "31582e3a12c14944f64d447bf9d675a6a0e30fac",
+        "team": "340",
+        "saved": 200,
+        "persisted_primary": "2425",
+        "persisted_additional": "2426",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    }
+  },
+  "proved_increment": [
+    "Primary/additional supervision on existing native Team, separate from membership and grants",
+    "Explicit eligibility, current corporate coverage, no automatic Nico/recording access",
+    "Authenticated scoped API, immutable origin/CAS/rollback/native audit",
+    "Three actual competing/revoked HTTP cases and owned fixture cleanup",
+    "Real popup search/page, review, save/reload, conflict and denials in four projects"
+  ],
+  "preservation": {
+    "old11migrations_unchanged": true,
+    "additional_migration": "20261121090000",
+    "additional_migration_sha256": "eab5fb4a891c52e72879eb306d3f31913d59c59af5b3eea641229e785479cf2d",
+    "no_real_users_or_provider_operations": true
+  },
+  "limits": [
+    "Full figures3/12 still partial: hierarchy, hours and team/queue integration remain separate",
+    "PABX commands and ACK need supplier contract",
+    "Full human Nico review still requires a proven source/unit binding and ledger",
+    "Audio-copy WIP is later code and is not approved by this producer"
+  ],
+  "whole_23_figures_complete": false,
+  "visual_divergences_remaining": [
+    "Mobile long save caption truncated on producer315; own caption correction and exact width assertion are later code pending new native validation"
+  ]
+}

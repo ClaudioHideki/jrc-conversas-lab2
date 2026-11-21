@@ -315,6 +315,32 @@ const value = (entry, field = '') => {
       </section>
     </div>
     <section
+      v-if="record.audio_copy"
+      class="min-w-0 space-y-2 rounded-lg border border-n-blue-6 p-3 text-sm text-n-slate-12"
+      data-audited-audio-copy
+    >
+      <h4 class="font-medium">
+        {{ t('JRC_CONTACT_CENTER.AUDIO_FILES.COPY_SOURCE') }}
+      </h4>
+      <p class="break-words">
+        {{
+          [
+            t('JRC_CONTACT_CENTER.AUDIO_FILES.SOURCE_ID'),
+            record.audio_copy.source_asset_id,
+          ].join(': ')
+        }}
+      </p>
+      <p class="break-words">
+        {{
+          [
+            t('JRC_CONTACT_CENTER.AUDIO_FILES.SOURCE_VERSION_ID'),
+            record.audio_copy.source_version_id,
+          ].join(': ')
+        }}
+      </p>
+      <p class="break-all">{{ record.audio_copy.source_sha256 }}</p>
+    </section>
+    <section
       v-if="record.manager_review"
       class="min-w-0 rounded-lg border border-n-amber-6 p-3 text-sm text-n-slate-12"
       data-audited-manager-withdrawal

@@ -88,7 +88,7 @@ class JrcContactCenter::ConfigurationAuditQuery
     value = @params[:operation].presence
     return records unless value
 
-    raise JrcContactCenter::OperationError, 'invalid_audit_filter' unless %w[create update destroy read].include?(value)
+    raise JrcContactCenter::OperationError, 'invalid_audit_filter' unless %w[create update destroy read copy].include?(value)
 
     records.where(action: value)
   end

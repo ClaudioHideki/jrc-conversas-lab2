@@ -23,10 +23,17 @@ class JrcContactCenter::ConfigurationAuditPresenter
     if changes['manager_review'].is_a?(Hash)
       payload[:manager_review] = changes['manager_review'].slice(*JrcContactCenter::TeamRosterWithdrawalReview::AUDIT_FIELDS)
     end
-    payload
+    payload.merge(copy_lineage(changes))
   end
 
   private
+
+  def copy_lineage(changes)
+    value = changes['audio_copy']
+    return {} unless value.is_a?(Hash)
+
+    { audio_copy: value.slice(*JrcContactCenter::AudioCopyOrigin::AUDIT_FIELDS) }
+  end
 
   def role_attributes(changes)
     previous, current = changes.fetch('permissions')

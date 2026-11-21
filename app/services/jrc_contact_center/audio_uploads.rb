@@ -5,7 +5,7 @@ require 'digest'
 
 # Validates owned staged bytes before final persistence. No telephony command or publication.
 class JrcContactCenter::AudioUploads
-  Request = Struct.new(:unit_id, :asset_id, :attributes, :key, :expected, :source_kind, keyword_init: true)
+  Request = Struct.new(:unit_id, :asset_id, :attributes, :key, :expected, :source_kind, :origin, keyword_init: true)
 
   def initialize(access:)
     @access = access
@@ -49,6 +49,7 @@ class JrcContactCenter::AudioUploads
     request.unit_id = @access.asset(request.asset_id).unit_id if request.asset_id
     unit = @access.unit(request.unit_id)
     request.unit_id = unit.id.to_s
+    request.origin&.authorize!(unit)
     return if request.asset_id
 
     prepare_creation!(request, unit)
@@ -70,6 +71,7 @@ class JrcContactCenter::AudioUploads
 
   def current_origin!(request)
     unit = @access.unit(request.unit_id)
+    request.origin&.authorize!(unit)
     return @access.asset(request.asset_id) if request.asset_id
 
     @access.folder(request.attributes['folder_id'], unit: unit)
@@ -81,6 +83,7 @@ class JrcContactCenter::AudioUploads
               request.attributes.sort.to_h, input.filename, input.content_type, input.byte_size, input.sha256]
     # Keep canonical digests of historical uploads identical. Capture origin never grants permission.
     fields << request.source_kind if request.source_kind != 'user_upload'
+    fields << request.origin.digest_binding if request.origin
     Digest::SHA256.hexdigest(JSON.generate(fields))
   end
 
@@ -105,6 +108,7 @@ class JrcContactCenter::AudioUploads
   end
 
   def check_revision!(asset, request)
+    request.origin&.check_revision!
     return unless asset
 
     JrcContactCenter::AudioAssetRevision.check!(asset, version: @access.latest(asset), expected: request.expected)
@@ -125,14 +129,12 @@ class JrcContactCenter::AudioUploads
     existing = replay!(request, digest)
     return existing if existing
 
-    if asset
-      check_revision!(asset, request)
-    else
-      asset = JrcContactCenter::AudioAsset.create!(request.attributes.merge('account' => @access.account,
-                                                                            'unit' => @access.unit(request.unit_id)))
-    end
+    check_revision!(asset, request)
+    asset ||= JrcContactCenter::AudioAsset.create!(request.attributes.merge('account' => @access.account,
+                                                                           'unit' => @access.unit(request.unit_id)))
     version = JrcContactCenter::AudioVersion.create!(version_attributes(asset, request, input, digest))
     JrcContactCenter::AudioInspections.new(access: @access).record_received!(version: version, upload_key: request.key, attributes: observation)
+    request.origin&.record_copy!(version)
     version
   end
 

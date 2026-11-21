@@ -1,0 +1,82 @@
+{
+  "status": "implemented_native_and_visual_validation_pending",
+  "base": "31582e3a12c14944f64d447bf9d675a6a0e30fac",
+  "figures": [
+    6,
+    16
+  ],
+  "reuse": [
+    "Native AudioLibraryAccess account/unit/configure scope",
+    "Verified private AudioBytes",
+    "AudioUploads admission/scanner/decoder/storage/compensation/idempotency",
+    "Existing native audio editor, revision comparison and scoped audit"
+  ],
+  "implemented": [
+    "Same-unit independent asset/version-one/blob; original links untouched",
+    "Pinned source version/SHA in mutation identity; revision remains a precondition",
+    "No inherited readiness; new real technical inspection required",
+    "Reauthorize and recheck source revision again at final transaction",
+    "Known replay without source byte read or another scan",
+    "Strict authenticated duplicate route, no client account/user/unit grants",
+    "Reviewed editor without upload/microphone controls; uncertain response retains intention",
+    "Allowlisted copy lineage in existing native audit and Portuguese presentation",
+    "Explicit persisted-copy receipt and native navigation even outside the current folder/filter; cleared on context withdrawal"
+  ],
+  "local_checks": {
+    "transport_mocked_tests": 48,
+    "old_editor_regressions": 28,
+    "new_editor_and_transport": 20,
+    "native_acceptance": false,
+    "sha256": {
+      "audio-copy-light-vitest-result.json": "8483e2bbd0f0aa0fa05d1ee058b6c81e9621e6a54ff7886f63ca66c78e4f32e6",
+      "audio-copy-light-vitest.log": "e4066b9b0cf9a1139416a1ab4375daee826a601ae0395a1409d7a281eda6adbe",
+      "audio-copy-light-resource-receipt.json": "673139d300eecad3ec9d9928ccdba293c34ab529e41c808868d9bfb9e7ee8020"
+    },
+    "supplementary_views": {
+      "audit_mocked_cases_passed": 9,
+      "library_cases_run": 0,
+      "status": "library_not_run_missing_old_windows_dependency_@vueuse/components",
+      "not_native_acceptance": true,
+      "report_sha256": "77b79df26fb753a8cc7b9c2ad861b52f07b23e520a9c9d34d6b03771c3e79a80",
+      "log_sha256": "c5870bb73ca2b9927ba973619a2b6e8a8b2f22764e4bce3182944bf792ca9d44"
+    },
+    "source_guard_revalidation": {
+      "mocked_tests": 18,
+      "overlaps_prior_copy_cases": 16,
+      "additional_cases": 2,
+      "status": "passed_not_native_acceptance",
+      "report_sha256": "ffeab4f351ede76c85c5d05f05d82b7f96766fdc9fa9ff32579a67dbe0888bd4"
+    },
+    "receipt_revalidation": {
+      "mocked_tests": 18,
+      "not_additional_18_cases": true,
+      "status": "passed_not_native_acceptance",
+      "report_sha256": "14329dedd6d96170f5f421ff3a8c0195bccff9c9b7b7dea4b52f1ce9e261958c"
+    }
+  },
+  "native_prepared_not_yet_executed": {
+    "service_cases": 15,
+    "authenticated_api_cases": 9,
+    "real_competing_requests": 2,
+    "new_view_component_cases": 3,
+    "chrome": "Extend existing preview case in each of four projects, preserving every prior assertion and the 244-case gate"
+  },
+  "limits": [
+    "No call-recording duplication",
+    "No external provider publication or commands",
+    "No new grants, schema or migration",
+    "Legacy unsupported formats remain subject to native admission",
+    "Bulk copy, deletion impact and complete figures remain pending"
+  ],
+  "resources": {
+    "physical_total_bytes": 12711890944,
+    "physical_available_bytes": 3112402944,
+    "c_free_bytes": 54160003072,
+    "read_only": true
+  },
+  "related_observed_qa": {
+    "producer": "31582e3a12c14944f64d447bf9d675a6a0e30fac",
+    "change": "Shorten Team supervision own save caption; full visible caption assertion in four Chrome projects",
+    "requires_new_producer": true
+  }
+}
