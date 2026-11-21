@@ -8230,6 +8230,430 @@ test('institutional audio folders native verified bytes playback download and wi
     `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(asset.name)}`
   );
   const library = page.locator('[data-audio-asset-library]');
+  // Native filter/reload/clear against the existing quarantined source, before any new inspection.
+  const inspectionQueryPath = `${new URL(own).pathname}/audio_assets`;
+  const inspectionCriterion = library.locator(
+    '[data-audio-file-inspection-filter]'
+  );
+  await expect(inspectionCriterion).toHaveValue('');
+  await inspectionCriterion.selectOption('uninspected');
+  const inspectionFilteredResponse = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === inspectionQueryPath &&
+      new URL(response.url()).searchParams.get('inspection_state') ===
+        'uninspected'
+  );
+  await library
+    .getByRole('button', { name: 'Filtrar áudios', exact: true })
+    .click();
+  const inspectionFiltered = await inspectionFilteredResponse;
+  expect(inspectionFiltered.status()).toBe(200);
+  expect((await inspectionFiltered.json()).items.map(row => row.id)).toEqual([
+    asset.id,
+  ]);
+  await expect(
+    library.locator(`[data-audio-asset="${asset.id}"]`)
+  ).toBeVisible();
+  expect(new URL(page.url()).searchParams.get('audio_file_inspection')).toBe(
+    'uninspected'
+  );
+  await page.reload();
+  await expect(inspectionCriterion).toHaveValue('uninspected');
+  await expect(
+    library.locator(`[data-audio-asset="${asset.id}"]`)
+  ).toBeVisible();
+  const inspectionQueryTheme = await inspectionCriterion.evaluate(node => ({
+    background: getComputedStyle(node).backgroundColor,
+    foreground: getComputedStyle(node).color,
+  }));
+  const inspectionQueryBrightness = color =>
+    color
+      .match(/[0-9.]+/g)
+      .slice(0, 3)
+      .map(Number)
+      .reduce((sum, value) => sum + value, 0);
+  expect(inspectionQueryTheme.background).not.toBe('rgba(0, 0, 0, 0)');
+  if (info.project.name.endsWith('-dark')) {
+    expect(
+      inspectionQueryBrightness(inspectionQueryTheme.background)
+    ).toBeLessThan(300);
+    expect(
+      inspectionQueryBrightness(inspectionQueryTheme.foreground)
+    ).toBeGreaterThan(600);
+  } else {
+    expect(
+      inspectionQueryBrightness(inspectionQueryTheme.background)
+    ).toBeGreaterThan(600);
+    expect(
+      inspectionQueryBrightness(inspectionQueryTheme.foreground)
+    ).toBeLessThan(300);
+  }
+  const inspectionQueryOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > innerWidth
+  );
+  expect(inspectionQueryOverflow).toBe(false);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-inspection-filter-uninspected.png`,
+    fullPage: true,
+  });
+  await inspectionCriterion.selectOption('no_file');
+  const inspectionNoFileResponse = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === inspectionQueryPath &&
+      new URL(response.url()).searchParams.get('inspection_state') === 'no_file'
+  );
+  await library
+    .getByRole('button', { name: 'Filtrar áudios', exact: true })
+    .click();
+  const inspectionNoFile = await inspectionNoFileResponse;
+  expect(inspectionNoFile.status()).toBe(200);
+  expect((await inspectionNoFile.json()).meta.total).toBe(0);
+  await expect(library.locator(`[data-audio-asset="${asset.id}"]`)).toHaveCount(
+    0
+  );
+  await library
+    .getByRole('button', { name: 'Limpar busca de áudios', exact: true })
+    .click();
+  await expect(inspectionCriterion).toHaveValue('');
+  await expect
+    .poll(() => new URL(page.url()).searchParams.has('audio_file_inspection'))
+    .toBe(false);
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(asset.name)}`
+  );
+
+  // Organizing a quarantined native file must not grant inspection, preview or ZIP admission.
+  const organizationInspectionPath = `${own}/audio_assets/${asset.id}/versions/${versionId}/inspections`;
+  const inspectionsBeforeResponse = await page.request.get(
+    organizationInspectionPath,
+    { headers: target.administrator }
+  );
+  expect(inspectionsBeforeResponse.status()).toBe(200);
+  const inspectionsBefore = (await inspectionsBeforeResponse.json()).items.map(
+    row => row.id
+  );
+  const organizationByteRequests: string[] = [];
+  const organizationByteObserver = request => {
+    const requestPath = new URL(request.url()).pathname;
+    if (
+      requestPath === path ||
+      requestPath === `${new URL(own).pathname}/audio_archives`
+    )
+      organizationByteRequests.push(requestPath);
+  };
+  page.on('request', organizationByteObserver);
+  const purpose = library.locator('[data-audio-selection-purpose]');
+  const organizationSelect = library.locator(
+    `[data-audio-archive-select="${asset.id}"]`
+  );
+  await expect(purpose).toHaveValue('download');
+  await expect(organizationSelect).toBeDisabled();
+  await purpose.selectOption('organize');
+  await expect(organizationSelect).toBeEnabled();
+  await organizationSelect.check();
+  await expect(library.locator('[data-open-audio-archive]')).toBeDisabled();
+  await library.locator('[data-open-audio-selected-move]').click();
+  await expectContainedDialog(page);
+  const organizationDialog = page.getByRole('dialog');
+  await expect(
+    organizationDialog.locator('[data-review-audio-selected-move]')
+  ).toBeEnabled();
+  await expect(
+    organizationDialog.locator('[data-audio-selected-move-item]')
+  ).toContainText(asset.latest_version.sha256);
+  await organizationDialog
+    .locator('[data-audio-asset-folder-search]')
+    .fill(target.audio_destination_name);
+  await expect(
+    organizationDialog.locator(
+      `[data-audio-asset-folder] option[value="${target.audio_destination_id}"]`
+    )
+  ).toHaveCount(1);
+  await organizationDialog
+    .locator('[data-audio-asset-folder]')
+    .selectOption(target.audio_destination_id);
+  await organizationDialog.locator('[data-review-audio-selected-move]').check();
+  const organizationConfirm = organizationDialog.getByRole('button', {
+    name: 'Mover áudios',
+    exact: true,
+  });
+  await expect(organizationConfirm).toBeEnabled();
+  expect(
+    await organizationConfirm
+      .locator('span')
+      .last()
+      .evaluate(node => node.scrollWidth <= node.clientWidth)
+  ).toBe(true);
+  expect(
+    await organizationDialog.evaluate(
+      node => node.scrollWidth > node.clientWidth
+    )
+  ).toBe(false);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-uninspected-organization-reviewed.png`,
+    fullPage: false,
+  });
+  const organizationMovePath = `${new URL(own).pathname}/audio_asset_moves`;
+  const organizationResponse = page.waitForResponse(
+    response => new URL(response.url()).pathname === organizationMovePath
+  );
+  await organizationConfirm.click();
+  const organizationMoved = await organizationResponse;
+  expect(organizationMoved.status()).toBe(200);
+  const organizationMovedItems = (await organizationMoved.json()).items;
+  expect(organizationMovedItems).toHaveLength(1);
+  expect(organizationMovedItems[0]).toMatchObject({
+    id: asset.id,
+    unit_id: String(target.unit_id),
+    folder_id: target.audio_destination_id,
+    latest_version: { id: versionId, sha256: asset.latest_version.sha256 },
+  });
+  await expect(organizationDialog).not.toBeVisible();
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_parent=${target.audio_destination_id}&audio_file_q=${encodeURIComponent(asset.name)}`
+  );
+  await expect(
+    library.locator(`[data-audio-asset="${asset.id}"]`)
+  ).toBeVisible();
+  await expect(organizationSelect).toBeDisabled();
+  await purpose.selectOption('organize');
+  await organizationSelect.check();
+  await expect(
+    library.locator('[data-audio-organization-selection]')
+  ).toHaveAttribute('data-count', '1');
+  await expect(library.locator('[data-open-audio-archive]')).toBeDisabled();
+  const organizationTheme = await purpose.evaluate(node => ({
+    background: getComputedStyle(node).backgroundColor,
+    foreground: getComputedStyle(node).color,
+  }));
+  const organizationBrightness = color =>
+    color
+      .match(/[0-9.]+/g)
+      .slice(0, 3)
+      .map(Number)
+      .reduce((sum, value) => sum + value, 0);
+  expect(organizationTheme.background).not.toBe('rgba(0, 0, 0, 0)');
+  if (info.project.name.endsWith('-dark')) {
+    expect(organizationBrightness(organizationTheme.background)).toBeLessThan(
+      300
+    );
+    expect(
+      organizationBrightness(organizationTheme.foreground)
+    ).toBeGreaterThan(600);
+  } else {
+    expect(
+      organizationBrightness(organizationTheme.background)
+    ).toBeGreaterThan(600);
+    expect(organizationBrightness(organizationTheme.foreground)).toBeLessThan(
+      300
+    );
+  }
+  const organizationOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > innerWidth
+  );
+  expect(organizationOverflow).toBe(false);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-uninspected-organization-persisted.png`,
+    fullPage: true,
+  });
+  await library.locator('[data-open-audio-selected-move]').click();
+  await expectContainedDialog(page);
+  await expect(
+    organizationDialog.locator('[data-review-audio-selected-move]')
+  ).toBeEnabled();
+  await expect(
+    organizationDialog.locator('[data-audio-asset-folder]')
+  ).toHaveValue('');
+  await organizationDialog.locator('[data-review-audio-selected-move]').check();
+  const organizationRootResponse = page.waitForResponse(
+    response => new URL(response.url()).pathname === organizationMovePath
+  );
+  await organizationConfirm.click();
+  const organizationRoot = await organizationRootResponse;
+  expect(organizationRoot.status()).toBe(200);
+  expect((await organizationRoot.json()).items[0]).toMatchObject({
+    id: asset.id,
+    folder_id: null,
+    latest_version: { id: versionId, sha256: asset.latest_version.sha256 },
+  });
+  await expect(organizationDialog).not.toBeVisible();
+  page.off('request', organizationByteObserver);
+  expect(organizationByteRequests).toEqual([]);
+  const stillUnverified = await page.request.get(
+    `http://127.0.0.1:5387${path}`,
+    { headers: target.administrator }
+  );
+  expect(stillUnverified.status()).toBe(409);
+  const inspectionsAfterResponse = await page.request.get(
+    organizationInspectionPath,
+    { headers: target.administrator }
+  );
+  expect(inspectionsAfterResponse.status()).toBe(200);
+  const inspectionsAfter = (await inspectionsAfterResponse.json()).items.map(
+    row => row.id
+  );
+  expect(inspectionsAfter).toEqual(inspectionsBefore);
+  expect(selectedMoveForbiddenWrites).toEqual([]);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-uninspected-organization-native.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      synthetic: true,
+      external_homologation: false,
+      unit: String(target.unit_id),
+      asset: asset.id,
+      exact_version: versionId,
+      sha256: asset.latest_version.sha256,
+      moved: organizationMoved.status(),
+      returned_to_root: organizationRoot.status(),
+      byte_before: unverified.status(),
+      byte_after: stillUnverified.status(),
+      inspection_ids_before: inspectionsBefore,
+      inspection_ids_after: inspectionsAfter,
+      browser_byte_or_zip_requests: organizationByteRequests,
+      theme_css: organizationTheme,
+      horizontal_overflow: organizationOverflow,
+      provider_writes: selectedMoveForbiddenWrites.length > 0,
+      forbidden_browser_write_paths: selectedMoveForbiddenWrites,
+    })
+  );
+  // A native synthetic identity with no file, held in a separate seeded folder, not a shaped API mock.
+  const metadataByteRequests: string[] = [];
+  const metadataByteObserver = request => {
+    const requestPath = new URL(request.url()).pathname;
+    if (/\/audio_archives$|\/bytes$/.test(requestPath))
+      metadataByteRequests.push(requestPath);
+  };
+  page.on('request', metadataByteObserver);
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_parent=${target.metadata_audio_folder_id}&audio_file_q=${encodeURIComponent(target.metadata_audio_name)}`
+  );
+  const metadataSelected = library.locator(
+    `[data-audio-archive-select="${target.metadata_audio_id}"]`
+  );
+  await expect(metadataSelected).toBeDisabled();
+  await purpose.selectOption('organize');
+  await metadataSelected.check();
+  await expect(library.locator('[data-open-audio-archive]')).toBeDisabled();
+  await library.locator('[data-open-audio-selected-move]').click();
+  await expectContainedDialog(page);
+  await expect(
+    organizationDialog.locator('[data-audio-selected-no-file]')
+  ).toContainText('Sem arquivo recebido');
+  await expect(
+    organizationDialog.locator('[data-review-audio-selected-move]')
+  ).toBeEnabled();
+  await expect(
+    organizationDialog.locator('[data-audio-asset-folder]')
+  ).toHaveValue('');
+  await organizationDialog.locator('[data-review-audio-selected-move]').check();
+  expect(
+    await organizationDialog.evaluate(
+      node => node.scrollWidth > node.clientWidth
+    )
+  ).toBe(false);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-metadata-organization-reviewed.png`,
+    fullPage: false,
+  });
+  const metadataRootResponse = page.waitForResponse(
+    response => new URL(response.url()).pathname === organizationMovePath
+  );
+  await organizationConfirm.click();
+  const metadataRoot = await metadataRootResponse;
+  expect(metadataRoot.status()).toBe(200);
+  expect((await metadataRoot.json()).items).toEqual([
+    expect.objectContaining({
+      id: target.metadata_audio_id,
+      unit_id: String(target.unit_id),
+      folder_id: null,
+      latest_version: null,
+    }),
+  ]);
+  await expect(organizationDialog).not.toBeVisible();
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(target.metadata_audio_name)}`
+  );
+  await expect(
+    library.locator(`[data-audio-asset="${target.metadata_audio_id}"]`)
+  ).toBeVisible();
+  await expect(metadataSelected).toBeDisabled();
+  await purpose.selectOption('organize');
+  await metadataSelected.check();
+  await expect(library.locator('[data-open-audio-archive]')).toBeDisabled();
+  const metadataOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > innerWidth
+  );
+  expect(metadataOverflow).toBe(false);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-metadata-organization-persisted.png`,
+    fullPage: true,
+  });
+  await library.locator('[data-open-audio-selected-move]').click();
+  await expectContainedDialog(page);
+  await expect(
+    organizationDialog.locator('[data-audio-selected-no-file]')
+  ).toBeVisible();
+  await organizationDialog
+    .locator('[data-audio-asset-folder-search]')
+    .fill(target.metadata_audio_folder_name);
+  await expect(
+    organizationDialog.locator(
+      `[data-audio-asset-folder] option[value="${target.metadata_audio_folder_id}"]`
+    )
+  ).toHaveCount(1);
+  await organizationDialog
+    .locator('[data-audio-asset-folder]')
+    .selectOption(target.metadata_audio_folder_id);
+  await organizationDialog.locator('[data-review-audio-selected-move]').check();
+  const metadataRestoredResponse = page.waitForResponse(
+    response => new URL(response.url()).pathname === organizationMovePath
+  );
+  await organizationConfirm.click();
+  const metadataRestored = await metadataRestoredResponse;
+  expect(metadataRestored.status()).toBe(200);
+  expect((await metadataRestored.json()).items[0]).toMatchObject({
+    id: target.metadata_audio_id,
+    folder_id: target.metadata_audio_folder_id,
+    latest_version: null,
+  });
+  await expect(organizationDialog).not.toBeVisible();
+  page.off('request', metadataByteObserver);
+  expect(metadataByteRequests).toEqual([]);
+  const metadataHistoryResponse = await page.request.get(
+    `${own}/audio_assets/${target.metadata_audio_id}/versions`,
+    { headers: target.administrator }
+  );
+  expect(metadataHistoryResponse.status()).toBe(200);
+  const metadataHistory = await metadataHistoryResponse.json();
+  expect(metadataHistory.items).toEqual([]);
+  expect(metadataHistory.meta.total).toBe(0);
+  expect(selectedMoveForbiddenWrites).toEqual([]);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-metadata-organization-native.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      synthetic: true,
+      external_homologation: false,
+      unit: String(target.unit_id),
+      asset: target.metadata_audio_id,
+      initial_folder: target.metadata_audio_folder_id,
+      moved_to_root: metadataRoot.status(),
+      restored_to_folder: metadataRestored.status(),
+      latest_version: null,
+      native_history_status: metadataHistoryResponse.status(),
+      native_version_count: metadataHistory.meta.total,
+      browser_byte_or_zip_requests: metadataByteRequests,
+      horizontal_overflow: metadataOverflow,
+      provider_writes: selectedMoveForbiddenWrites.length > 0,
+    })
+  );
+
+  // Return to the original route/default purpose so all existing inspection/player/copy/ZIP/move assertions remain intact.
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(asset.name)}`
+  );
+
   await library.locator(`[data-audio-asset-history="${asset.id}"]`).click();
   await expectContainedDialog(page);
   const dialog = page.getByRole('dialog');
@@ -8337,6 +8761,104 @@ test('institutional audio folders native verified bytes playback download and wi
   await expect(closeHistory).toBeVisible();
   await closeHistory.click();
   await expect(dialog).not.toBeVisible();
+  // Same real source now has the previously verified scanner/decoder observation; no seeded readiness claim.
+  await inspectionCriterion.selectOption('clean');
+  const cleanQueryResponse = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === inspectionQueryPath &&
+      new URL(response.url()).searchParams.get('inspection_state') === 'clean'
+  );
+  await library
+    .getByRole('button', { name: 'Filtrar áudios', exact: true })
+    .click();
+  const cleanQuery = await cleanQueryResponse;
+  expect(cleanQuery.status()).toBe(200);
+  const cleanQueryItems = (await cleanQuery.json()).items;
+  expect(cleanQueryItems).toHaveLength(1);
+  expect(cleanQueryItems[0]).toMatchObject({
+    id: asset.id,
+    latest_version: {
+      id: versionId,
+      sha256,
+      technical_verification: { id: inspectId, state: 'clean', ready: true },
+    },
+  });
+  await expect(
+    library.locator(`[data-audio-asset="${asset.id}"]`)
+  ).toBeVisible();
+  await expect(
+    library.locator('[data-audio-inspection-filter-note]')
+  ).toContainText('O resultado do scanner não libera prévia ou envio');
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-inspection-filter-clean.png`,
+    fullPage: true,
+  });
+  await inspectionCriterion.selectOption('uninspected');
+  const inspectedExcludedResponse = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === inspectionQueryPath &&
+      new URL(response.url()).searchParams.get('inspection_state') ===
+        'uninspected'
+  );
+  await library
+    .getByRole('button', { name: 'Filtrar áudios', exact: true })
+    .click();
+  const inspectedExcluded = await inspectedExcludedResponse;
+  expect(inspectedExcluded.status()).toBe(200);
+  expect((await inspectedExcluded.json()).meta.total).toBe(0);
+  await expect(library.locator(`[data-audio-asset="${asset.id}"]`)).toHaveCount(
+    0
+  );
+  const invalidInspectionFilter = await page.request.get(
+    `${own}/audio_assets`,
+    {
+      headers: target.administrator,
+      params: { unit_id: String(target.unit_id), inspection_state: 'ready' },
+    }
+  );
+  expect(invalidInspectionFilter.status()).toBe(422);
+  const inspectionFilterDenied = await page.request.get(`${own}/audio_assets`, {
+    headers: target.operator,
+    params: { unit_id: String(target.unit_id), inspection_state: 'no_file' },
+  });
+  expect(inspectionFilterDenied.status()).toBe(401);
+  await library
+    .getByRole('button', { name: 'Limpar busca de áudios', exact: true })
+    .click();
+  await expect(inspectionCriterion).toHaveValue('');
+  await expect
+    .poll(() => new URL(page.url()).searchParams.has('audio_file_inspection'))
+    .toBe(false);
+  expect(selectedMoveForbiddenWrites).toEqual([]);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-inspection-filter-native.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      synthetic: true,
+      external_homologation: false,
+      unit: String(target.unit_id),
+      asset: asset.id,
+      exact_version: versionId,
+      sha256,
+      real_inspection: inspectId,
+      uninspected_before: inspectionFiltered.status(),
+      no_file_excludes_received: inspectionNoFile.status(),
+      clean_after: cleanQuery.status(),
+      uninspected_excludes_inspected: inspectedExcluded.status(),
+      invalid_filter: invalidInspectionFilter.status(),
+      denied_role: inspectionFilterDenied.status(),
+      theme_css: inspectionQueryTheme,
+      horizontal_overflow: inspectionQueryOverflow,
+      provider_writes: selectedMoveForbiddenWrites.length > 0,
+    })
+  );
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(asset.name)}`
+  );
+  await expect(
+    library.locator(`[data-audio-asset="${asset.id}"]`)
+  ).toBeVisible();
+
   await library.locator(`[data-copy-audio-asset="${asset.id}"]`).click();
   await expectContainedDialog(page);
   await expect(dialog.locator('[data-audio-copy-source]')).toContainText(
@@ -8709,6 +9231,24 @@ with zipfile.ZipFile(sys.argv[1]) as archive:
     path: `.codex/call-center-native-e2e/${info.project.name}-audio-selected-move-reviewed.png`,
     fullPage: false,
   });
+  // Verify the entire review label can scroll clear of the pinned footer, not only the checkbox.
+  const selectedMoveConsent = moveReview.locator('..');
+  await selectedMoveConsent.scrollIntoViewIfNeeded();
+  const consentBounds = await selectedMoveConsent.boundingBox();
+  const consentConfirmBounds = await moveConfirm.boundingBox();
+  expect(consentBounds).not.toBeNull();
+  expect(consentConfirmBounds).not.toBeNull();
+  expect(consentBounds.y).toBeGreaterThanOrEqual(0);
+  expect(consentBounds.y + consentBounds.height).toBeLessThanOrEqual(
+    consentConfirmBounds.y
+  );
+  await expect(selectedMoveConsent).toContainText(
+    'Autorizo somente esta reorganização.'
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-selected-move-consent-readable.png`,
+    fullPage: false,
+  });
   const movePath = `${new URL(own).pathname}/audio_asset_moves`;
   const movedResponse = page.waitForResponse(
     response => new URL(response.url()).pathname === movePath
@@ -8758,6 +9298,11 @@ with zipfile.ZipFile(sys.argv[1]) as archive:
   await expect(
     library.locator(`[data-audio-asset="${copied.item.id}"]`)
   ).toBeVisible();
+  const persistedMovedSource = library.locator(
+    `[data-audio-asset="${asset.id}"]`
+  );
+  await persistedMovedSource.scrollIntoViewIfNeeded();
+  await expect(persistedMovedSource).toBeInViewport();
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${info.project.name}-audio-selected-move-persisted.png`,
     fullPage: true,

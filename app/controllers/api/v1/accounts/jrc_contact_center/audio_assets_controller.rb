@@ -15,7 +15,8 @@ class Api::V1::Accounts::JrcContactCenter::AudioAssetsController < Api::V1::Acco
     records = version_filtered(records)
     payload = list_payload(search_records(records, fields: ['name']).order(:name, :id)) { |row| present(row) }
     render json: payload.merge(max_upload_bytes: JrcContactCenter::AudioFileInput.max_bytes,
-                               archive_limits: JrcContactCenter::AudioArchiveInput.limits)
+                               archive_limits: JrcContactCenter::AudioArchiveInput.limits,
+                               move_limits: { max_entries: JrcContactCenter::AudioMoveInput::MAX_ENTRIES })
   end
 
   def show
@@ -55,7 +56,8 @@ class Api::V1::Accounts::JrcContactCenter::AudioAssetsController < Api::V1::Acco
   private
 
   def version_filtered(records)
-    JrcContactCenter::AudioAssetFilters.new(records: records, source_kind: params[:source_kind], content_type: params[:content_type]).call
+    JrcContactCenter::AudioAssetFilters.new(records: records, source_kind: params[:source_kind], content_type: params[:content_type],
+                                                   inspection_state: params[:inspection_state]).call
   end
 
   def library

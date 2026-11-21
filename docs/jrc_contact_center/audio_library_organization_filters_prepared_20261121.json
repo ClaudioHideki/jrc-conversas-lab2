@@ -1,0 +1,42 @@
+{
+  "status": "implemented_native_and_chrome_pending",
+  "base": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
+  "figures": [
+    6,
+    16
+  ],
+  "behavior": [
+    "Same private library/selection with explicit download versus folder-organization purpose",
+    "Metadata may have no file or an uninspected/unavailable inspection; requires exact native identity and revision",
+    "The native server advertises a separate organization limit; missing capability is not guessed",
+    "Selection-purpose changes clear all review state; organization never enables a byte preview or ZIP",
+    "Explicit null native version is distinct from a missing/incomplete response",
+    "Same native move service, unit authority, Account transaction, audit and CAS; no new write privilege",
+    "Inspection filter uses only current native version/latest attempt, before totals and pagination",
+    "Scanner state does not grant readiness, byte access or publication; no-file and uninspected are separate states"
+  ],
+  "preliminary_mocked_groups": {
+    "selection": 32,
+    "parent_library": 46,
+    "review_dialog": 8,
+    "unchanged_move_transport": 16
+  },
+  "distinct_preliminary_cases": 102,
+  "old_cases_included": 76,
+  "new_vue_examples_prepared": 26,
+  "native_examples_prepared_not_run": {
+    "metadata_api": 1,
+    "fixture_preservation": 1,
+    "inspection_filters_api": 11
+  },
+  "preliminary_lint": {
+    "files": 7,
+    "errors": 0,
+    "warnings": 0
+  },
+  "ruby_native_syntax_or_lint": false,
+  "required_chrome": "Same244 scenarios: quarantined source reviewed move+reload+return, unchanged exact version/hash and inspection IDs, byte409 before/after; separately native no-file metadata reviewed move/reload/restore with zero versions, no browser byte/ZIP requests; inspection filter reload/clear, actual clean native source, invalid422/role401; actual CSS and1440/390light/dark.",
+  "fixture_preservation": "Metadata-only source is in the existing penultimate folder; the original22folders and pagination destination/root sources stay intact. Native fixture spec prepared.",
+  "migrations_dependencies_permissions_or_workflows_changed": false,
+  "whole_figure_complete": false
+}

@@ -21,6 +21,19 @@ const source = () => ({
     technical_verification: { id: '100', ready: true },
   },
 });
+const row = () => ({
+  id: '9223372036854775806',
+  unit_id: '10',
+  revision: 'a'.repeat(64),
+  name: 'SYNTHETIC not inspected',
+  latest_version: {
+    id: '9223372036854775807',
+    number: 1,
+    sha256: 'b'.repeat(64),
+    byte_size: 60,
+    technical_verification: null,
+  },
+});
 const request = () => [
   {
     audio_asset_id: source().id,
@@ -46,12 +59,14 @@ const response = () => {
     },
   };
 };
-const fixture = () => {
+const fixture = (initialPurpose = 'download') => {
   const accountId = ref('1');
   const unitId = ref('10');
   const canManage = ref(true);
   const contextKey = ref('SYNTHETIC original actor profile');
   const limits = ref({ max_entries: 2, max_bytes: 6 });
+  const metadataLimits = ref({ max_entries: 2 });
+  const selectionPurpose = ref(initialPurpose);
   const onDenied = vi.fn();
   let state;
   const wrapper = mount(
@@ -63,6 +78,8 @@ const fixture = () => {
           canManage,
           contextKey,
           limits,
+          selectionPurpose,
+          metadataLimits,
           onDenied,
         });
         return () => null;
@@ -78,6 +95,8 @@ const fixture = () => {
     canManage,
     contextKey,
     limits,
+    selectionPurpose,
+    metadataLimits,
     onDenied,
   };
 };
@@ -367,5 +386,158 @@ describe('selected private audio archive (transport units, not native ZIP or cod
     wrapper.unmount();
     await flushPromises();
     expect(URL.revokeObjectURL).toHaveBeenCalledOnce();
+  });
+});
+
+describe('same private library selection distinguishes organization from authorized byte release', () => {
+  it('allows metadata organization of an uninspected source without reading or authorizing any bytes', async () => {
+    const { state } = fixture('organize');
+    expect(state.selectable(row())).toBe(true);
+    state.toggle(row());
+    expect(state.items.value).toHaveLength(1);
+    expect(state.items.value[0].revision).toBe('a'.repeat(64));
+    state.verified.value = true;
+    state.reviewed.value = true;
+    expect(state.canDownload.value).toBe(false);
+    await state.open();
+    await state.download();
+    expect(API.audioAsset).not.toHaveBeenCalled();
+    expect(API.audioArchive).not.toHaveBeenCalled();
+  });
+
+  it('allows organization of a native metadata record with no file without inventing a version or hash', () => {
+    const { state } = fixture('organize');
+    state.toggle({ ...row(), latest_version: null });
+    expect(state.items.value).toHaveLength(1);
+    expect(state.items.value[0].versionId).toBeUndefined();
+    expect(state.items.value[0].sha256).toBeUndefined();
+    expect(state.admitted.value).toBe(false);
+  });
+
+  it('uses the advertised metadata count limit while keeping byte admission separate', () => {
+    const { state } = fixture('organize');
+    state.toggle(row());
+    state.toggle({ ...row(), id: '12' });
+    state.toggle({ ...row(), id: '13' });
+    expect(state.items.value).toHaveLength(2);
+    expect(state.admitted.value).toBe(false);
+    state.toggle(row());
+    expect(state.items.value.map(item => item.assetId)).toEqual(['12']);
+  });
+
+  it('does not confuse malformed version metadata with an explicit no-file record', () => {
+    const { state } = fixture('organize');
+    [
+      undefined,
+      false,
+      [],
+      'SYNTHETIC malformed',
+      { id: '41', sha256: 'invalid', number: 1 },
+    ].forEach(latest => {
+      state.toggle({ ...row(), latest_version: latest });
+      expect(state.items.value).toEqual([]);
+    });
+  });
+
+  it('keeps an unavailable inspection distinct from a missing native file', () => {
+    const { state } = fixture('organize');
+    const value = row();
+    value.latest_version.technical_verification = {
+      id: '40',
+      ready: false,
+      state: 'unavailable',
+    };
+    state.toggle(value);
+    expect(state.items.value[0].versionId).toBe(value.latest_version.id);
+    expect(state.items.value[0].sha256).toBe(value.latest_version.sha256);
+    expect(state.canDownload.value).toBe(false);
+  });
+
+  it('never guesses an organizing limit when the server did not advertise one', () => {
+    const { state, metadataLimits } = fixture('organize');
+    metadataLimits.value = { max_entries: 0 };
+    expect(state.selectable(row())).toBe(false);
+    state.toggle(row());
+    expect(state.items.value).toEqual([]);
+  });
+
+  it('still requires current unit coverage, configuration authority, native string identity and a reviewed revision', () => {
+    const { state, canManage } = fixture('organize');
+    [
+      { ...row(), unit_id: '11' },
+      { ...row(), revision: undefined },
+      { ...row(), id: 12 },
+      { ...row(), id: '0' },
+    ].forEach(value => {
+      state.toggle(value);
+      expect(state.items.value).toEqual([]);
+    });
+    canManage.value = false;
+    state.toggle(row());
+    expect(state.items.value).toEqual([]);
+  });
+
+  it('does not convert an uninspected metadata selection into a download when its purpose changes', async () => {
+    const { state, selectionPurpose } = fixture('organize');
+    state.toggle(row());
+    selectionPurpose.value = 'download';
+    expect(state.items.value).toEqual([]);
+    expect(state.selectable(row())).toBe(false);
+    await state.open();
+    await state.download();
+    expect(API.audioArchive).not.toHaveBeenCalled();
+  });
+
+  it('clears private selections after changed metadata limits and changed operator profile', () => {
+    const { state, metadataLimits, contextKey } = fixture('organize');
+    state.toggle(row());
+    metadataLimits.value = { max_entries: 1 };
+    expect(state.items.value).toEqual([]);
+    state.toggle(row());
+    contextKey.value = 'SYNTHETIC restricted profile';
+    expect(state.items.value).toEqual([]);
+  });
+
+  it('does not grant downloads for technically ready sources while the explicit purpose is organization', async () => {
+    const { state } = fixture('organize');
+    const value = row();
+    value.latest_version.technical_verification = { id: '40', ready: true };
+    state.toggle(value);
+    state.reviewed.value = true;
+    state.verified.value = true;
+    expect(state.canDownload.value).toBe(false);
+    await state.download();
+    expect(API.audioArchive).not.toHaveBeenCalled();
+  });
+
+  it('fails closed on an unknown selection purpose instead of falling back to a byte operation', () => {
+    const { state } = fixture('SYNTHETIC unknown action');
+    const value = row();
+    value.latest_version.technical_verification = { id: '40', ready: true };
+    expect(state.selectable(value)).toBe(false);
+    expect(state.admitted.value).toBe(false);
+  });
+
+  it('ignores a delayed byte-review response after the operator changes to organizing metadata', async () => {
+    const { state, selectionPurpose, limits } = fixture('download');
+    limits.value = { max_entries: 20, max_bytes: 1000 };
+    const value = row();
+    value.latest_version.technical_verification = { id: '40', ready: true };
+    state.toggle(value);
+    let finish;
+    API.audioAsset.mockImplementation(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    const opening = state.open();
+    await flushPromises();
+    selectionPurpose.value = 'organize';
+    finish({ data: { account_id: '1', item: value } });
+    await opening;
+    expect(state.items.value).toEqual([]);
+    expect(state.verified.value).toBe(false);
+    expect(API.audioUsages).not.toHaveBeenCalled();
   });
 });

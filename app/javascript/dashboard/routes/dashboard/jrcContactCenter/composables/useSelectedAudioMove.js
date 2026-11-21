@@ -69,6 +69,11 @@ export const useSelectedAudioMove = ({
           ? 'SOURCE_CHANGED'
           : 'ERROR';
   };
+  const versionMatches = (row, item) =>
+    item.versionId === undefined
+      ? row.latest_version === null
+      : row.latest_version?.id === item.versionId &&
+        row.latest_version?.sha256 === item.sha256;
   const open = async () => {
     if (!canOpen.value || busy.value) return;
     clear();
@@ -92,8 +97,7 @@ export const useSelectedAudioMove = ({
               row?.id === item.assetId &&
               row.unit_id === unitId.value &&
               row.revision === item.revision &&
-              row.latest_version?.id === item.versionId &&
-              row.latest_version?.sha256 === item.sha256;
+              versionMatches(row, item);
             if (!valid) {
               const problem = new Error(
                 'Selected institutional source changed'
@@ -157,8 +161,7 @@ export const useSelectedAudioMove = ({
               row.unit_id === unitId.value &&
               row.folder_id === destination &&
               /^[a-f0-9]{64}$/.test(row.revision) &&
-              row.latest_version?.id === item.versionId &&
-              row.latest_version?.sha256 === item.sha256
+              versionMatches(row, item)
           )
         );
       if (!valid)

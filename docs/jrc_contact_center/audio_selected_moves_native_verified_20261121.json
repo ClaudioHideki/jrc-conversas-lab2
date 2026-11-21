@@ -1,0 +1,188 @@
+{
+  "status": "native_and_actual_chrome_verified_increment_not_complete_figure6",
+  "producer": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
+  "run": 44941024455,
+  "artifact": 14723627900,
+  "artifact_sha256": "22432d672ed10246a54b7c60e92a03957845f5d7973c3e987400286a3b70d508",
+  "native_distinct": 2488,
+  "schema_reload_separate": 175,
+  "vue": 1260,
+  "chrome": 244,
+  "preserved_cases": {
+    "call-center-rspec.json": {
+      "same_cases_preserved": 2262,
+      "new_cases": 22
+    },
+    "call-center-pabx-rspec.json": {
+      "same_cases_preserved": 117,
+      "new_cases": 2
+    },
+    "vue": {
+      "same_cases_preserved": 1237,
+      "new_cases": 23
+    }
+  },
+  "actual_move_receipts": {
+    "desktop-dark-audio-selected-move-native.json": {
+      "sha256": "f3e0169265085abe50a166804b2c4699d8d5cf005c55a131338d761f9a28e130",
+      "receipt": {
+        "sha": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1347",
+        "assets": [
+          "278",
+          "299"
+        ],
+        "exact_versions": [
+          "242",
+          "266"
+        ],
+        "destination": "121",
+        "moved": 200,
+        "returned_to_root": 200,
+        "stale_review": 409,
+        "operator_denied": 401,
+        "hashes_after_move": [
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f"
+        ],
+        "theme_css": {
+          "background": "rgb(23, 23, 26)",
+          "foreground": "rgb(237, 238, 240)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    },
+    "desktop-light-audio-selected-move-native.json": {
+      "sha256": "3b072924e07d4bfe9bac5e697c473ebbf90c6b02c13c162f7feb4bd1f4104da7",
+      "receipt": {
+        "sha": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1303",
+        "assets": [
+          "276",
+          "289"
+        ],
+        "exact_versions": [
+          "240",
+          "254"
+        ],
+        "destination": "98",
+        "moved": 200,
+        "returned_to_root": 200,
+        "stale_review": 409,
+        "operator_denied": 401,
+        "hashes_after_move": [
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f"
+        ],
+        "theme_css": {
+          "background": "rgb(255, 255, 255)",
+          "foreground": "rgb(28, 32, 36)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    },
+    "mobile-dark-audio-selected-move-native.json": {
+      "sha256": "2c3bd7648871b2b6181e8f8ffe31f876673337b2eed0931f3b1e5c1d83bfe797",
+      "receipt": {
+        "sha": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1435",
+        "assets": [
+          "282",
+          "319"
+        ],
+        "exact_versions": [
+          "246",
+          "290"
+        ],
+        "destination": "167",
+        "moved": 200,
+        "returned_to_root": 200,
+        "stale_review": 409,
+        "operator_denied": 401,
+        "hashes_after_move": [
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f"
+        ],
+        "theme_css": {
+          "background": "rgb(23, 23, 26)",
+          "foreground": "rgb(237, 238, 240)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    },
+    "mobile-light-audio-selected-move-native.json": {
+      "sha256": "fc84fc0ca4e00bca17995002a178d96bf94033391a72f6744fd8b06c96ce5ebd",
+      "receipt": {
+        "sha": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1391",
+        "assets": [
+          "280",
+          "309"
+        ],
+        "exact_versions": [
+          "244",
+          "278"
+        ],
+        "destination": "144",
+        "moved": 200,
+        "returned_to_root": 200,
+        "stale_review": 409,
+        "operator_denied": 401,
+        "hashes_after_move": [
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+          "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f"
+        ],
+        "theme_css": {
+          "background": "rgb(255, 255, 255)",
+          "foreground": "rgb(28, 32, 36)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    }
+  },
+  "actual_images_opened": [
+    "desktop-dark-audio-selected-move-persisted.png",
+    "desktop-dark-audio-selected-move-reviewed.png",
+    "desktop-light-audio-selected-move-persisted.png",
+    "desktop-light-audio-selected-move-reviewed.png",
+    "mobile-dark-audio-selected-move-persisted.png",
+    "mobile-dark-audio-selected-move-reviewed.png",
+    "mobile-light-audio-selected-move-persisted.png",
+    "mobile-light-audio-selected-move-reviewed.png"
+  ],
+  "visual_findings": [
+    "Opened all8 original images. Native same-unit move popup and loaded destination library are legible at1440/390 in light/dark; dialog/buttons remain within the viewport and checksums wrap.",
+    "Dark fields remain dark with readable text; no horizontal page/dialog overflow is reported in the four preserved native receipts.",
+    "The internal scroll shows the first source and only the next source heading at the reviewed capture position; no claim that both full cards are simultaneously visible.",
+    "The mobile capture does not show the complete confirmation label at its current internal scroll position. The native contained Dialog has an explicit overflow-y-auto content region and pinned footer. The next combined increment adds actual whole-label scroll geometry and another consent screenshot.",
+    "Persisted-list captures show the selected destination and initial unrelated extra records, not both moved source names in the inner list viewport. Exact persisted two-source/version/hash200 results and stale409/role401 are proved by real API/browser receipts; next increment explicitly scrolls the moved source into the persisted screenshot.",
+    "This accepts only the tested movement increment with the above capture limits; it is not full Word/figure6/23 acceptance or external PABX homologation."
+  ],
+  "screenshot_hashes_verified": 420,
+  "native_concurrency": [
+    "Two real authenticated HTTP requests use one revision; exactly200/409 and two updates/audits",
+    "A committed profile withdrawal while the native Account lock is held denies the waiting move without changes"
+  ],
+  "limits": [
+    "First UI used verified-file selection; broader metadata organization is the next separately tested increment",
+    "Local IVR draft references only; no published-provider inventory or external homologation",
+    "No claims of complete bulk copy/deletion or entire23 figures"
+  ],
+  "no_migrations_dependencies_grants_or_provider_changes": true
+}

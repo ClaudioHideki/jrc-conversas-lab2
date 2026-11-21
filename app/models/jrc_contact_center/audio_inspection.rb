@@ -5,12 +5,14 @@ class JrcContactCenter::AudioInspection < JrcContactCenter::ApplicationRecord
   include JrcApprovals::Immutable
   include JrcContactCenter::AdministrativeAuditable
 
+  STATES = %w[clean infected unavailable checksum_mismatch].freeze
+
   belongs_to :audio_version, class_name: 'JrcContactCenter::AudioVersion', inverse_of: :inspections
   belongs_to :source_blob, class_name: 'ActiveStorage::Blob'
   belongs_to :created_by, class_name: 'User'
 
   validates :attempt, numericality: { only_integer: true, greater_than: 0 }, uniqueness: { scope: :audio_version_id }
-  validates :state, inclusion: { in: %w[clean infected unavailable checksum_mismatch] }
+  validates :state, inclusion: { in: STATES }
   validates :probe_state, inclusion: { in: %w[not_run valid invalid unavailable] }
   validates :expected_sha256, format: { with: /\A[0-9a-f]{64}\z/ }
   validates :observed_sha256, format: { with: /\A[0-9a-f]{64}\z/ }, allow_nil: true

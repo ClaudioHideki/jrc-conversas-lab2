@@ -826,3 +826,7 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 
 - [ ] Movimento selecionado90ab82f7: 2488 Rails/175 reload/1260 Vue aprovados; dois achados Ruby exclusivamente de linhas em branco no spec de concorrência. Correção preserva todas as linhas não vazias e asserções; novo SHA exige lint, assets e Chrome.
+
+
+- [x] Movimento selecionado: produtor 3e3cc17f, 2488 Rails/175 reload/1260 Vue/244 Chrome, concorrência HTTP nativa e oito screenshots efetivamente revisadas. Sem alterações de arquivos, versões, inspeções ou provedor.
+- [ ] Biblioteca: seleção para organização dos metadados no mesmo catálogo, finalidade explícita, limite anunciado, revisão/CAS, resposta sem arquivo explícita e filtro nativo da última inspeção. 102 testes preliminares incluem76 anteriores; 26 novos Vue e13 Rails preparados. Exigir CI e Chrome reais; figura6 e conjunto23 não concluídos.

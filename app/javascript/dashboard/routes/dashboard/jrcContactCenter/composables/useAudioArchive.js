@@ -33,6 +33,8 @@ export const useAudioArchive = ({
   canManage,
   contextKey,
   limits,
+  selectionPurpose = ref('download'),
+  metadataLimits = ref({ max_entries: 0 }),
   onDenied,
 }) => {
   const dialog = ref(null);
@@ -49,9 +51,11 @@ export const useAudioArchive = ({
   const total = computed(() =>
     items.value.reduce((sum, row) => sum + row.byteSize, 0)
   );
+  const organizing = computed(() => selectionPurpose.value === 'organize');
   const admitted = computed(
     () =>
       canManage.value &&
+      selectionPurpose.value === 'download' &&
       items.value.length > 0 &&
       items.value.length <= limits.value.max_entries &&
       total.value <= limits.value.max_bytes
@@ -92,9 +96,34 @@ export const useAudioArchive = ({
       version.byte_size > 0
     );
   };
+  const metadataVersion = version =>
+    version === null ||
+    (version &&
+      typeof version === 'object' &&
+      !Array.isArray(version) &&
+      typeof version.id === 'string' &&
+      /^[1-9][0-9]{0,18}$/.test(version.id) &&
+      typeof version.sha256 === 'string' &&
+      /^[a-f0-9]{64}$/.test(version.sha256) &&
+      Number.isSafeInteger(version.number) &&
+      version.number > 0);
+  const metadataReady = row =>
+    row.unit_id === unitId.value &&
+    typeof row.id === 'string' &&
+    /^[1-9][0-9]{0,18}$/.test(row.id) &&
+    typeof row.revision === 'string' &&
+    /^[a-f0-9]{64}$/.test(row.revision) &&
+    metadataVersion(row.latest_version);
   const selected = row => items.value.some(item => item.assetId === row.id);
   const selectable = row => {
-    if (!canManage.value || busy.value || !ready(row)) return false;
+    if (!canManage.value || busy.value) return false;
+    if (organizing.value)
+      return (
+        metadataReady(row) &&
+        metadataLimits.value.max_entries > 0 &&
+        (selected(row) || items.value.length < metadataLimits.value.max_entries)
+      );
+    if (selectionPurpose.value !== 'download' || !ready(row)) return false;
     return (
       selected(row) ||
       (items.value.length < limits.value.max_entries &&
@@ -118,11 +147,13 @@ export const useAudioArchive = ({
         Object.freeze({
           assetId: row.id,
           revision: row.revision,
-          versionId: row.latest_version.id,
-          inspectionId: row.latest_version.technical_verification.id,
-          sha256: row.latest_version.sha256,
-          byteSize: row.latest_version.byte_size,
-          number: row.latest_version.number,
+          versionId: row.latest_version?.id,
+          inspectionId: row.latest_version?.technical_verification?.id,
+          sha256: row.latest_version?.sha256,
+          byteSize: Number.isSafeInteger(row.latest_version?.byte_size)
+            ? row.latest_version.byte_size
+            : 0,
+          number: row.latest_version?.number,
           name: row.name,
         }),
       ];
@@ -250,7 +281,18 @@ export const useAudioArchive = ({
       if (current === generation) downloading.value = false;
     }
   };
-  watch([accountId, unitId, canManage, contextKey], close, { flush: 'sync' });
+  watch(
+    [
+      accountId,
+      unitId,
+      canManage,
+      contextKey,
+      selectionPurpose,
+      metadataLimits,
+    ],
+    close,
+    { flush: 'sync' }
+  );
   onBeforeUnmount(clear);
   return {
     dialog,
@@ -265,6 +307,7 @@ export const useAudioArchive = ({
     opening,
     downloading,
     admitted,
+    organizing,
     canDownload,
     selected,
     selectable,

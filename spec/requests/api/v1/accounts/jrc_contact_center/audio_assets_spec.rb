@@ -13,6 +13,19 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
 
   after { multipart_file.close }
 
+  it 'advertises the bounded organization limit for authorized metadata without granting file readiness or private bytes' do
+    asset = JrcContactCenter::AudioAsset.create!(account: account, unit: unit, name: 'SYNTHETIC metadata without a file')
+    get base, headers: headers, params: { unit_id: unit.id }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('move_limits')).to eq('max_entries' => JrcContactCenter::AudioMoveInput::MAX_ENTRIES)
+    item = response.parsed_body.fetch('items').find { |entry| entry.fetch('id') == asset.id.to_s }
+    expect(item.fetch('latest_version')).to be_nil
+    expect(item.fetch('revision')).to match(/\A[0-9a-f]{64}\z/)
+    expect(response.headers['Cache-Control']).to eq('no-store')
+    expect(response.body).not_to match(/signed_id|blob_id|service_url/)
+  end
+
+
   it 'accepts actual multipart bytes and presents metadata without a signed locator, storage key or readiness claim' do
     post base, headers: headers,
                params: { asset: { name: 'SYNTHETIC received message' }, unit_id: unit.id, file: multipart_file, idempotency_key: key }

@@ -11,13 +11,20 @@ class JrcContactCenter::SyntheticAudioFolderSeed
       audio_folder_id: folders.first.id.to_s, audio_folder_name: folders.first.name,
       audio_destination_id: folders.last.id.to_s, audio_destination_name: folders.last.name,
       denied_audio_folder_id: hidden.id.to_s
-    }.merge(legacy_identifiers(account, queues.first.unit, member))
+    }.merge(legacy_identifiers(account, queues.first.unit, member)).merge(metadata_identifiers(account, folders[-2]))
   end
 
   def self.create_folders(account, unit)
     (1..22).map do |number|
       JrcContactCenter::AudioFolder.create!(account: account, unit: unit, name: format('SYNTHETIC folder %02d', number))
     end
+  end
+
+  def self.metadata_identifiers(account, folder)
+    asset = JrcContactCenter::AudioAsset.create!(account: account, unit: folder.unit, folder: folder,
+                                                name: 'SYNTHETIC metadata only organization')
+    { metadata_audio_id: asset.id.to_s, metadata_audio_name: asset.name,
+      metadata_audio_folder_id: folder.id.to_s, metadata_audio_folder_name: folder.name }
   end
 
   def self.legacy_identifiers(account, unit, member)
@@ -40,5 +47,5 @@ class JrcContactCenter::SyntheticAudioFolderSeed
       )
     end
   end
-  private_class_method :create_folders, :legacy_identifiers, :legacy_receipt
+  private_class_method :create_folders, :metadata_identifiers, :legacy_identifiers, :legacy_receipt
 end

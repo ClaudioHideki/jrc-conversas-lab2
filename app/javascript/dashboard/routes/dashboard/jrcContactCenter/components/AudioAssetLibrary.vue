@@ -28,6 +28,8 @@ const filterIds = {
   source: `audio-source-${uid}`,
   format: `audio-format-${uid}`,
   size: `audio-size-${uid}`,
+  inspection: `audio-inspection-${uid}`,
+  selection: `audio-selection-purpose-${uid}`,
 };
 const labels = computed(() => ({
   TITLE: t('JRC_CONTACT_CENTER.AUDIO_FILES.TITLE'),
@@ -93,6 +95,21 @@ const labels = computed(() => ({
   RECORD: t('JRC_CONTACT_CENTER.AUDIO_CAPTURE.RECORD'),
   NICO_PENDING: t('JRC_CONTACT_CENTER.AUDIO_CAPTURE.NICO_PENDING'),
   ALL_SOURCES: t('JRC_CONTACT_CENTER.AUDIO_FILES.ALL_SOURCES'),
+  INSPECTION_FILTER: t('JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_FILTER'),
+  ALL_INSPECTIONS: t('JRC_CONTACT_CENTER.AUDIO_FILES.ALL_INSPECTIONS'),
+  INSPECTION_NO_FILE: t('JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_NO_FILE'),
+  INSPECTION_UNINSPECTED: t(
+    'JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_UNINSPECTED'
+  ),
+  INSPECTION_CLEAN: t('JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_CLEAN'),
+  INSPECTION_INFECTED: t('JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_INFECTED'),
+  INSPECTION_CHECKSUM: t('JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_CHECKSUM'),
+  INSPECTION_FILTER_NOTE: t(
+    'JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_FILTER_NOTE'
+  ),
+  INSPECTION_FILTER_UNAVAILABLE: t(
+    'JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_FILTER_UNAVAILABLE'
+  ),
   ALL_FORMATS: t('JRC_CONTACT_CENTER.AUDIO_FILES.ALL_FORMATS'),
 }));
 const label = key => labels.value[key];
@@ -159,11 +176,22 @@ const items = ref([]);
 const meta = ref({ total: 0, pages: 0 });
 const maxBytes = ref(0);
 const archiveLimits = ref({ max_entries: 0, max_bytes: 0 });
+const metadataLimits = ref({ max_entries: 0 });
+const selectionPurpose = ref('download');
 const loading = ref(false);
 const error = ref(false);
 const q = ref('');
 const sourceFilter = ref('');
 const formatFilter = ref('');
+const inspectionFilter = ref('');
+const inspectionStates = [
+  { value: 'no_file', label: 'INSPECTION_NO_FILE' },
+  { value: 'uninspected', label: 'INSPECTION_UNINSPECTED' },
+  { value: 'clean', label: 'INSPECTION_CLEAN' },
+  { value: 'infected', label: 'INSPECTION_INFECTED' },
+  { value: 'unavailable', label: 'INSPECTION_FILTER_UNAVAILABLE' },
+  { value: 'checksum_mismatch', label: 'INSPECTION_CHECKSUM' },
+];
 const formats = [
   'audio/wav',
   'audio/mpeg',
@@ -242,6 +270,7 @@ const clearHistory = () => {
 const forget = () => {
   archive.close();
   archiveLimits.value = { max_entries: 0, max_bytes: 0 };
+  metadataLimits.value = { max_entries: 0 };
   generation += 1;
   lastCopy.value = null;
   lastMoveCount.value = 0;
@@ -266,9 +295,15 @@ archive = useAudioArchive({
   canManage,
   contextKey: actorScope,
   limits: archiveLimits,
+  selectionPurpose,
+  metadataLimits,
   onDenied: denied,
 });
 archiveDialog = archive.dialog;
+const selectionLabel = row =>
+  archive.organizing.value
+    ? t('JRC_CONTACT_CENTER.AUDIO_SELECTION.SELECT', { name: row.name })
+    : t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.SELECT', { name: row.name });
 const openDetails = async row => {
   if (!canManage.value) return;
   clearDetails();
@@ -307,6 +342,7 @@ const openDetails = async row => {
 const load = async () => {
   archive.close();
   archiveLimits.value = { max_entries: 0, max_bytes: 0 };
+  metadataLimits.value = { max_entries: 0 };
   clearDetails();
   generation += 1;
   const version = generation;
@@ -327,6 +363,9 @@ const load = async () => {
       ...(route.query.audio_file_source
         ? { source_kind: route.query.audio_file_source }
         : {}),
+      ...(route.query.audio_file_inspection
+        ? { inspection_state: route.query.audio_file_inspection }
+        : {}),
       ...(route.query.audio_file_format
         ? { content_type: route.query.audio_file_format }
         : {}),
@@ -342,6 +381,7 @@ const load = async () => {
     items.value = response.data.items;
     meta.value = response.data.meta;
     maxBytes.value = response.data.max_upload_bytes;
+    metadataLimits.value = response.data.move_limits || { max_entries: 0 };
     archiveLimits.value = response.data.archive_limits || {
       max_entries: 0,
       max_bytes: 0,
@@ -427,6 +467,9 @@ const openCopied = () => {
     audio_file_page: 1,
     audio_file_source: undefined,
     audio_file_format: undefined,
+    ...(route.query.audio_file_inspection !== undefined
+      ? { audio_file_inspection: undefined }
+      : {}),
   });
 };
 const applyFilters = () => {
@@ -434,6 +477,7 @@ const applyFilters = () => {
   Object.entries({
     audio_file_source: sourceFilter.value,
     audio_file_format: formatFilter.value,
+    audio_file_inspection: inspectionFilter.value,
   }).forEach(([key, value]) => {
     if (value || route.query[key] !== undefined)
       values[key] = value || undefined;
@@ -444,6 +488,7 @@ const clearFilters = () => {
   q.value = '';
   sourceFilter.value = '';
   formatFilter.value = '';
+  inspectionFilter.value = '';
   applyFilters();
 };
 const loadHistory = async () => {
@@ -493,6 +538,7 @@ watch(
     () => route.query.audio_file_q,
     () => route.query.audio_file_source,
     () => route.query.audio_file_format,
+    () => route.query.audio_file_inspection,
     actorScope,
   ],
   () => {
@@ -501,6 +547,7 @@ watch(
     q.value = route.query.audio_file_q || '';
     sourceFilter.value = route.query.audio_file_source || '';
     formatFilter.value = route.query.audio_file_format || '';
+    inspectionFilter.value = route.query.audio_file_inspection || '';
     load();
   },
   { immediate: true }
@@ -565,6 +612,26 @@ onBeforeUnmount(() => {
           </option>
         </select>
       </div>
+      <div class="block min-w-0 max-w-full text-sm text-n-slate-12">
+        <label :for="filterIds.inspection">{{
+          label('INSPECTION_FILTER')
+        }}</label>
+        <select
+          :id="filterIds.inspection"
+          v-model="inspectionFilter"
+          data-audio-file-inspection-filter
+          class="mt-1 w-full max-w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+        >
+          <option value="">{{ label('ALL_INSPECTIONS') }}</option>
+          <option
+            v-for="state in inspectionStates"
+            :key="state.value"
+            :value="state.value"
+          >
+            {{ label(state.label) }}
+          </option>
+        </select>
+      </div>
       <button
         type="submit"
         class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
@@ -607,6 +674,13 @@ onBeforeUnmount(() => {
         {{ label('NEW') }}
       </button>
     </form>
+    <p
+      v-if="canManage"
+      class="break-words text-sm text-n-slate-11"
+      data-audio-inspection-filter-note
+    >
+      {{ label('INSPECTION_FILTER_NOTE') }}
+    </p>
     <section
       v-if="lastCopy && canManage"
       role="status"
@@ -712,11 +786,7 @@ onBeforeUnmount(() => {
                       !archive.selectable(row) || loading || saving || opening
                     "
                     :data-audio-archive-select="row.id"
-                    :aria-label="
-                      t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.SELECT', {
-                        name: row.name,
-                      })
-                    "
+                    :aria-label="selectionLabel(row)"
                     class="size-4 shrink-0"
                     @change="archive.toggle(row)"
                   />
@@ -925,11 +995,44 @@ onBeforeUnmount(() => {
       {{ label('ERROR') }}
     </p>
     <section
-      v-if="canManage && archiveLimits.max_entries > 0"
+      v-if="
+        canManage &&
+        (archiveLimits.max_entries > 0 || metadataLimits.max_entries > 0)
+      "
       class="flex min-w-0 flex-wrap items-center gap-3 rounded-lg border border-n-blue-6 bg-n-blue-2 p-3 text-sm text-n-slate-12"
       data-audio-archive-controls
     >
-      <p class="min-w-0 break-words">
+      <label :for="filterIds.selection" class="block min-w-0">
+        <span>{{ t('JRC_CONTACT_CENTER.AUDIO_SELECTION.PURPOSE') }}</span>
+        <select
+          :id="filterIds.selection"
+          v-model="selectionPurpose"
+          data-audio-selection-purpose
+          :disabled="archive.busy.value || loading || saving || opening"
+          class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
+        >
+          <option value="download" :disabled="archiveLimits.max_entries <= 0">
+            {{ t('JRC_CONTACT_CENTER.AUDIO_SELECTION.DOWNLOAD') }}
+          </option>
+          <option value="organize" :disabled="metadataLimits.max_entries <= 0">
+            {{ t('JRC_CONTACT_CENTER.AUDIO_SELECTION.ORGANIZE') }}
+          </option>
+        </select>
+      </label>
+      <p
+        v-if="archive.organizing.value"
+        class="min-w-0 break-words"
+        data-audio-organization-selection
+        :data-count="archive.items.value.length"
+      >
+        {{
+          t('JRC_CONTACT_CENTER.AUDIO_SELECTION.COUNT', {
+            count: archive.items.value.length,
+            max: metadataLimits.max_entries,
+          })
+        }}
+      </p>
+      <p v-else class="min-w-0 break-words">
         {{
           t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.SELECTION', {
             count: archive.items.value.length,
@@ -949,6 +1052,11 @@ onBeforeUnmount(() => {
           opening
         "
         data-open-audio-archive
+        :title="
+          archive.organizing.value
+            ? t('JRC_CONTACT_CENTER.AUDIO_SELECTION.NO_BYTES')
+            : undefined
+        "
         class="rounded-lg border border-n-blue-6 bg-n-solid-1 px-3 py-2 text-n-blue-11 disabled:opacity-40"
         @click="archive.open"
       >

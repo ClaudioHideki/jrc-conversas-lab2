@@ -104,7 +104,7 @@ const close = () => {
           class="min-w-0 space-y-1 rounded-lg border border-n-weak p-3"
         >
           <p class="break-words font-semibold">{{ item.name }}</p>
-          <p class="break-words">
+          <p v-if="item.versionId" class="break-words">
             {{
               t('JRC_CONTACT_CENTER.AUDIO_MOVE.SOURCE_VERSION', {
                 id: item.assetId,
@@ -112,7 +112,10 @@ const close = () => {
               })
             }}
           </p>
-          <p class="break-all">{{ item.sha256 }}</p>
+          <p v-if="item.versionId" class="break-all">{{ item.sha256 }}</p>
+          <p v-else class="break-words" data-audio-selected-no-file>
+            {{ t('JRC_CONTACT_CENTER.AUDIO_MOVE.NO_FILE') }}
+          </p>
           <p
             v-if="state.usages.value[item.assetId] !== undefined"
             class="break-words"

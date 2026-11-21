@@ -125,6 +125,269 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it('names the native inspection filter without presenting a scanner result as byte-readiness or publication', async () => {
+    const wrapper = fixture();
+    await flushPromises();
+    const control = wrapper.get('[data-audio-file-inspection-filter]');
+    expect(wrapper.get(`label[for="${control.attributes('id')}"]`).text()).toBe(
+      'JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_FILTER'
+    );
+    expect(
+      control.findAll('option').map(option => option.element.value)
+    ).toEqual([
+      '',
+      'no_file',
+      'uninspected',
+      'clean',
+      'infected',
+      'unavailable',
+      'checksum_mismatch',
+    ]);
+    expect(wrapper.get('[data-audio-inspection-filter-note]').text()).toBe(
+      'JRC_CONTACT_CENTER.AUDIO_FILES.INSPECTION_FILTER_NOTE'
+    );
+    expect(
+      wrapper.get('[data-audio-archive-select="44"]').element.disabled
+    ).toBe(true);
+  });
+
+  it('loads the inspection criterion from the native route before scoped totals and preserves it on pagination', async () => {
+    mocks.route.query = {
+      audio_unit: '10',
+      audio_file_inspection: 'unavailable',
+      audio_file_q: 'SYNTHETIC',
+      unrelated: 'preserved',
+    };
+    const wrapper = fixture();
+    await flushPromises();
+    expect(
+      wrapper.get('[data-audio-file-inspection-filter]').element.value
+    ).toBe('unavailable');
+    expect(API.audioAssets).toHaveBeenCalledWith('1', {
+      unit_id: '10',
+      folder_id: '',
+      page: 1,
+      per_page: 20,
+      q: 'SYNTHETIC',
+      inspection_state: 'unavailable',
+    });
+    await wrapper.get('nav').findAll('button')[1].trigger('click');
+    expect(mocks.replace).toHaveBeenCalledWith({
+      query: { ...mocks.route.query, audio_file_page: 2 },
+    });
+  });
+
+  it('applies reviewed inspection and other filter drafts without losing the native unit or unrelated route state', async () => {
+    mocks.route.query = {
+      audio_unit: '10',
+      audio_file_page: 2,
+      unrelated: 'preserved',
+    };
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper
+      .get('[data-audio-file-inspection-filter]')
+      .setValue('uninspected');
+    await wrapper
+      .get('[data-audio-file-source-filter]')
+      .setValue('user_upload');
+    await wrapper.get('form').trigger('submit');
+    expect(mocks.replace).toHaveBeenCalledWith({
+      query: {
+        ...mocks.route.query,
+        audio_file_page: 1,
+        audio_file_q: undefined,
+        audio_file_source: 'user_upload',
+        audio_file_inspection: 'uninspected',
+      },
+    });
+  });
+
+  it('removes an active inspection filter together with every other criterion and resets pagination', async () => {
+    mocks.route.query = {
+      audio_unit: '10',
+      audio_file_page: 2,
+      audio_file_q: 'SYNTHETIC',
+      audio_file_source: 'user_upload',
+      audio_file_format: 'audio/wav',
+      audio_file_inspection: 'unavailable',
+    };
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('form').findAll('button')[1].trigger('click');
+    expect(mocks.replace).toHaveBeenLastCalledWith({
+      query: {
+        ...mocks.route.query,
+        audio_file_page: 1,
+        audio_file_q: undefined,
+        audio_file_source: undefined,
+        audio_file_format: undefined,
+        audio_file_inspection: undefined,
+      },
+    });
+    expect(
+      wrapper.get('[data-audio-file-inspection-filter]').element.value
+    ).toBe('');
+  });
+
+  it('ignores a delayed unfiltered response after the operator requests a native inspection criterion', async () => {
+    let finish;
+    API.audioAssets.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    const wrapper = fixture();
+    API.audioAssets.mockResolvedValueOnce({
+      data: {
+        items: [],
+        meta: { page: 1, pages: 0, total: 0 },
+        max_upload_bytes: 1000,
+      },
+    });
+    mocks.route.query.audio_file_inspection = 'infected';
+    await flushPromises();
+    finish({
+      data: {
+        items: [structuredClone(row)],
+        meta: { page: 1, pages: 1, total: 1 },
+        max_upload_bytes: 1000,
+      },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-audio-asset="44"]').exists()).toBe(false);
+    expect(API.audioAssets).toHaveBeenLastCalledWith(
+      '1',
+      expect.objectContaining({ inspection_state: 'infected' })
+    );
+  });
+
+  it('keeps an invalid native inspection filter failed rather than silently loading a broader list', async () => {
+    mocks.route.query.audio_file_inspection = 'ready';
+    API.audioAssets.mockRejectedValueOnce({
+      response: {
+        status: 422,
+        data: { error: 'invalid_institutional_audio_filter' },
+      },
+    });
+    const wrapper = fixture();
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      'JRC_CONTACT_CENTER.AUDIO_FILES.ERROR'
+    );
+    expect(wrapper.find('[data-audio-asset="44"]').exists()).toBe(false);
+    expect(API.audioAssets).toHaveBeenCalledOnce();
+  });
+
+  it('does not offer organizing metadata until the native server advertises its bounded capability', async () => {
+    const wrapper = fixture();
+    await flushPromises();
+    expect(
+      wrapper.get('[data-audio-selection-purpose] option[value="organize"]')
+        .element.disabled
+    ).toBe(true);
+    expect(
+      wrapper.get('[data-audio-archive-select="44"]').element.disabled
+    ).toBe(true);
+    expect(
+      wrapper.get('[data-open-audio-selected-move]').element.disabled
+    ).toBe(true);
+    expect(API.audioArchive).not.toHaveBeenCalled();
+  });
+
+  it('organizes an explicit no-file native record without exposing a download action or inventing byte totals', async () => {
+    API.audioAssets.mockResolvedValue({
+      data: {
+        items: [{ ...structuredClone(row), latest_version: null }],
+        meta: { total: 1, pages: 1 },
+        archive_limits: { max_entries: 20, max_bytes: 1000 },
+        move_limits: { max_entries: 20 },
+        max_upload_bytes: 1000,
+      },
+    });
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-selection-purpose]').setValue('organize');
+    await wrapper.get('[data-audio-archive-select="44"]').setValue(true);
+    expect(
+      wrapper
+        .get('[data-audio-organization-selection]')
+        .attributes('data-count')
+    ).toBe('1');
+    expect(wrapper.get('[data-open-audio-archive]').element.disabled).toBe(
+      true
+    );
+    expect(
+      wrapper.get('[data-open-audio-selected-move]').element.disabled
+    ).toBe(false);
+    expect(wrapper.get('[data-audio-archive-controls]').text()).not.toContain(
+      'AUDIO_ARCHIVE.SELECTION'
+    );
+    expect(API.audioArchive).not.toHaveBeenCalled();
+    expect(API.audioVersions).not.toHaveBeenCalled();
+  });
+
+  it('keeps organization of an uninspected large file separate and clears it on switching back to download', async () => {
+    const item = structuredClone(row);
+    item.latest_version.byte_size = 1001;
+    API.audioAssets.mockResolvedValue({
+      data: {
+        items: [item],
+        meta: { total: 1, pages: 1 },
+        archive_limits: { max_entries: 20, max_bytes: 1000 },
+        move_limits: { max_entries: 20 },
+        max_upload_bytes: 1000,
+      },
+    });
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-selection-purpose]').setValue('organize');
+    expect(
+      wrapper.get('[data-audio-archive-select="44"]').element.disabled
+    ).toBe(false);
+    await wrapper.get('[data-audio-archive-select="44"]').setValue(true);
+    expect(
+      wrapper.get('[data-open-audio-selected-move]').element.disabled
+    ).toBe(false);
+    await wrapper.get('[data-audio-selection-purpose]').setValue('download');
+    expect(
+      wrapper.get('[data-audio-archive-select="44"]').element.checked
+    ).toBe(false);
+    expect(
+      wrapper.get('[data-audio-archive-select="44"]').element.disabled
+    ).toBe(true);
+    expect(
+      wrapper.get('[data-open-audio-selected-move]').element.disabled
+    ).toBe(true);
+    expect(API.audioArchive).not.toHaveBeenCalled();
+  });
+
+  it('forgets organized metadata when the authenticated profile loses configuration authority', async () => {
+    API.audioAssets.mockResolvedValue({
+      data: {
+        items: [structuredClone(row)],
+        meta: { total: 1, pages: 1 },
+        archive_limits: { max_entries: 20, max_bytes: 1000 },
+        move_limits: { max_entries: 20 },
+        max_upload_bytes: 1000,
+      },
+    });
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-selection-purpose]').setValue('organize');
+    await wrapper.get('[data-audio-archive-select="44"]').setValue(true);
+    await wrapper.setProps({
+      context: { ...context, capabilities: { configure: false } },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-audio-archive-controls]').exists()).toBe(false);
+    expect(wrapper.find('[data-open-audio-selected-move]').exists()).toBe(
+      false
+    );
+    expect(API.audioArchive).not.toHaveBeenCalled();
+  });
+
   it('passes the current reviewed selection to the native move dialog and clears it after a validated success receipt', async () => {
     const item = structuredClone(row);
     item.latest_version.technical_verification = { id: '100', ready: true };

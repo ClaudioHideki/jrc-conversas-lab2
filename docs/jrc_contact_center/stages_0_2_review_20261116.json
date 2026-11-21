@@ -499,6 +499,30 @@
         "report": "docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json",
         "full_figure_complete": false,
         "subset": "Local audio usage popup"
+      },
+      "latest_native_audio_increments_20261121": {
+        "copy": "docs/jrc_contact_center/audio_copy_native_verified_20261121.json",
+        "zip": "docs/jrc_contact_center/audio_archive_native_verified_20261121.json",
+        "selected_same_unit_movement": "docs/jrc_contact_center/audio_selected_moves_native_verified_20261121.json",
+        "corrected_move_producer": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
+        "chrome_projects": [
+          "desktop-light",
+          "desktop-dark",
+          "mobile-light",
+          "mobile-dark"
+        ],
+        "real_move_apis_and_audit_and_revision_conflicts": true,
+        "broader_metadata_selection": {
+          "report": "docs/jrc_contact_center/audio_library_organization_filters_prepared_20261121.json",
+          "native_and_chrome_pending": true
+        },
+        "not_complete": [
+          "Full published-provider reference inventory before deletion",
+          "Provider conversion/publication/ACKs",
+          "Remaining figure6 bulk operations",
+          "New metadata selection and inspection filter await fresh native/Chrome proof"
+        ],
+        "full_figure_complete": false
       }
     },
     {
@@ -1295,6 +1319,30 @@
         "report": "docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json",
         "full_figure_complete": false,
         "subset": "Local audio usage popup"
+      },
+      "latest_native_audio_increments_20261121": {
+        "copy": "docs/jrc_contact_center/audio_copy_native_verified_20261121.json",
+        "zip": "docs/jrc_contact_center/audio_archive_native_verified_20261121.json",
+        "selected_same_unit_movement": "docs/jrc_contact_center/audio_selected_moves_native_verified_20261121.json",
+        "corrected_move_producer": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
+        "chrome_projects": [
+          "desktop-light",
+          "desktop-dark",
+          "mobile-light",
+          "mobile-dark"
+        ],
+        "real_move_apis_and_audit_and_revision_conflicts": true,
+        "broader_metadata_selection": {
+          "report": "docs/jrc_contact_center/audio_library_organization_filters_prepared_20261121.json",
+          "native_and_chrome_pending": true
+        },
+        "not_complete": [
+          "Full published-provider reference inventory before deletion",
+          "Provider conversion/publication/ACKs",
+          "Remaining figure6 bulk operations",
+          "New metadata selection and inspection filter await fresh native/Chrome proof"
+        ],
+        "full_figure_complete": false
       }
     },
     {
@@ -6645,9 +6693,11 @@
   },
   "audio_selected_moves_prepared_20261121": {
     "report": "docs/jrc_contact_center/audio_selected_moves_prepared_20261121.json",
-    "native_and_chrome_pending": true,
+    "native_and_chrome_pending": false,
     "broader_metadata_bulk_selection_pending": true,
-    "full_figure_complete": false
+    "full_figure_complete": false,
+    "verified_producer": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
+    "verified_report": "docs/jrc_contact_center/audio_selected_moves_native_verified_20261121.json"
   },
   "audio_selected_moves_first_native_lint_20261121": {
     "producer": "90ab82f7654679cfb689e3349665bc802aee680b",
@@ -6658,5 +6708,19 @@
     "only_blank_lines_corrected": true,
     "assets_and_chrome_not_executed": true,
     "revalidation_required": true
+  },
+  "audio_selected_moves_native_verified_20261121": {
+    "producer": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
+    "report": "docs/jrc_contact_center/audio_selected_moves_native_verified_20261121.json",
+    "native": 2488,
+    "vue": 1260,
+    "chrome": 244,
+    "actual_images_reviewed": 8,
+    "full_figure_complete": false
+  },
+  "audio_library_organization_filters_prepared_20261121": {
+    "report": "docs/jrc_contact_center/audio_library_organization_filters_prepared_20261121.json",
+    "native_and_chrome_pending": true,
+    "whole_figure_complete": false
   }
 }

@@ -2503,7 +2503,16 @@
       "COPY_REVIEW": "A cópia terá cadastro e arquivo próprios, sem alterar o original ou seus vínculos. A versão indicada será inspecionada novamente antes da gravação. Não publica no PABX.",
       "COPY_SOURCE_NOT_READY": "A origem mudou ou não atende à verificação atual. Feche este formulário, confira a inspeção e abra a duplicação novamente. A cópia não foi gravada por esta tentativa.",
       "COPY_SAVED": "Cópia gravada: {name} (ID {id}).",
-      "OPEN_COPY": "Ver cópia gravada"
+      "OPEN_COPY": "Ver cópia gravada",
+      "INSPECTION_FILTER": "Resultado da inspeção",
+      "ALL_INSPECTIONS": "Todas as inspeções",
+      "INSPECTION_NO_FILE": "Cadastro sem arquivo",
+      "INSPECTION_UNINSPECTED": "Arquivo sem inspeção",
+      "INSPECTION_CLEAN": "Scanner: sem ameaça",
+      "INSPECTION_INFECTED": "Scanner: ameaça detectada",
+      "INSPECTION_CHECKSUM": "Integridade divergente",
+      "INSPECTION_FILTER_NOTE": "O resultado do scanner não libera prévia ou envio. A decodificação e a verificação de integridade continuam obrigatórias.",
+      "INSPECTION_FILTER_UNAVAILABLE": "Scanner: indisponível"
     },
     "AUDIO_INSPECTIONS": {
       "TITLE": "Verificações técnicas desta versão",
@@ -2660,7 +2669,16 @@
       "REVIEW": "Revisei a unidade, os áudios selecionados, os vínculos locais apresentados e a pasta de destino. Autorizo somente esta reorganização.",
       "SOURCE_CHANGED": "Um áudio mudou desde a seleção. Nenhuma nova tentativa será enviada automaticamente. Feche, atualize a lista e revise novamente antes de continuar.",
       "ERROR": "Não foi possível confirmar a mudança de pasta. Preserve a seleção e confira o estado atual antes de uma nova tentativa.",
-      "SAVED": "Mudança de pasta confirmada para {count} áudio(s). Identidades e versões preservadas."
+      "SAVED": "Mudança de pasta confirmada para {count} áudio(s). Identidades e versões preservadas.",
+      "NO_FILE": "Sem arquivo recebido. Esta ação reorganiza somente o cadastro."
+    },
+    "AUDIO_SELECTION": {
+      "PURPOSE": "Selecionar para",
+      "DOWNLOAD": "Baixar arquivos verificados",
+      "ORGANIZE": "Organizar pastas",
+      "COUNT": "{count} áudio(s) selecionado(s) para organização · limite {max}.",
+      "SELECT": "Selecionar {name} para organização",
+      "NO_BYTES": "A seleção para organização não autoriza prévia ou download. Para baixar, selecione novamente arquivos tecnicamente verificados."
     }
   }
 }

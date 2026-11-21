@@ -155,6 +155,128 @@ beforeEach(() => {
 });
 
 describe('selected audio move dialog (mocked Dialog/Picker, not actual CSS or persistence proof)', () => {
+  it('reviews a native metadata record with no file without inventing a version or a checksum', async () => {
+    API.audioAsset.mockResolvedValue({
+      data: { account_id: '1', item: { ...actual(), latest_version: null } },
+    });
+    const wrapper = fixture({
+      selection: [
+        {
+          ...row(),
+          versionId: undefined,
+          sha256: undefined,
+          number: undefined,
+        },
+      ],
+    });
+    await wrapper.get('[data-open-audio-selected-move]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-audio-selected-no-file]').text()).toContain(
+      'Sem arquivo recebido'
+    );
+    expect(wrapper.text()).not.toContain('undefined');
+    expect(wrapper.get('[data-private-confirm]').element.disabled).toBe(true);
+    expect(API.moveAudioAssets).not.toHaveBeenCalled();
+  });
+
+  it('persists only the reviewed metadata identity and revision for a source with no native file', async () => {
+    API.audioAsset.mockResolvedValue({
+      data: { account_id: '1', item: { ...actual(), latest_version: null } },
+    });
+    API.moveAudioAssets.mockResolvedValue({
+      data: {
+        account_id: '1',
+        items: [
+          {
+            ...actual(),
+            latest_version: null,
+            folder_id: null,
+            revision: 'c'.repeat(64),
+          },
+        ],
+      },
+    });
+    const wrapper = fixture({
+      selection: [
+        {
+          ...row(),
+          versionId: undefined,
+          sha256: undefined,
+          number: undefined,
+        },
+      ],
+    });
+    await wrapper.get('[data-open-audio-selected-move]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-review-audio-selected-move]').setValue(true);
+    await wrapper.get('[data-private-confirm]').trigger('click');
+    await flushPromises();
+    expect(API.moveAudioAssets).toHaveBeenCalledExactlyOnceWith('1', {
+      unit_id: '10',
+      folder_id: null,
+      items: [{ audio_asset_id: '21', expected_revision: 'a'.repeat(64) }],
+    });
+    expect(wrapper.emitted('saved')).toHaveLength(1);
+  });
+
+  it('does not treat an incomplete source response as an explicitly absent native file', async () => {
+    const incomplete = actual();
+    delete incomplete.latest_version;
+    API.audioAsset.mockResolvedValue({
+      data: { account_id: '1', item: incomplete },
+    });
+    const wrapper = fixture({
+      selection: [
+        {
+          ...row(),
+          versionId: undefined,
+          sha256: undefined,
+          number: undefined,
+        },
+      ],
+    });
+    await wrapper.get('[data-open-audio-selected-move]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      'Um áudio mudou desde a seleção'
+    );
+    expect(wrapper.get('[data-private-confirm]').element.disabled).toBe(true);
+    expect(API.moveAudioAssets).not.toHaveBeenCalled();
+  });
+
+  it('rejects a move receipt that omits the explicit no-file state instead of claiming persistence', async () => {
+    API.audioAsset.mockResolvedValue({
+      data: { account_id: '1', item: { ...actual(), latest_version: null } },
+    });
+    const incomplete = {
+      ...actual(),
+      folder_id: null,
+      revision: 'c'.repeat(64),
+    };
+    delete incomplete.latest_version;
+    API.moveAudioAssets.mockResolvedValue({
+      data: { account_id: '1', items: [incomplete] },
+    });
+    const wrapper = fixture({
+      selection: [
+        {
+          ...row(),
+          versionId: undefined,
+          sha256: undefined,
+          number: undefined,
+        },
+      ],
+    });
+    await wrapper.get('[data-open-audio-selected-move]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-review-audio-selected-move]').setValue(true);
+    await wrapper.get('[data-private-confirm]').trigger('click');
+    await flushPromises();
+    expect(wrapper.emitted('saved')).toBeUndefined();
+    expect(wrapper.get('[role="alert"]').exists()).toBe(true);
+    expect(wrapper.get('[data-private-confirm]').element.disabled).toBe(true);
+  });
+
   it('keeps the action disabled without selection, configure capability or valid reviewed revision', async () => {
     const wrapper = fixture({ selection: [] });
     expect(
