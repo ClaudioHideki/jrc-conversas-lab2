@@ -36,6 +36,25 @@ afterEach(() => {
 });
 
 describe('existing IVR menu institutional audio controls', () => {
+  it('gives every menu its own explicit label/control association', async () => {
+    API.audioAssets.mockResolvedValue({
+      data: { items: [], meta: { page: 1, pages: 0 } },
+    });
+    const first = setup();
+    const second = setup();
+    await first.get('[data-ivr-audio-choose]').trigger('click');
+    await second.get('[data-ivr-audio-choose]').trigger('click');
+    await flushPromises();
+    const left = first.get('[data-ivr-audio-asset]');
+    const right = second.get('[data-ivr-audio-asset]');
+    expect(left.attributes('id')).not.toBe(right.attributes('id'));
+    expect(
+      first.get(`label[for="${left.attributes('id')}"]`).element.control
+    ).toBe(left.element);
+    expect(
+      second.get(`label[for="${right.attributes('id')}"]`).element.control
+    ).toBe(right.element);
+  });
   it('requires explicit asset, exact version and confirmation without auto-selecting or publishing', async () => {
     API.audioAssets.mockResolvedValue({
       data: {
@@ -51,8 +70,22 @@ describe('existing IVR menu institutional audio controls', () => {
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
     await wrapper.get('[data-ivr-audio-choose]').trigger('click');
     await flushPromises();
+    const assetSelect = wrapper.get('[data-ivr-audio-asset]');
+    const assetLabel = wrapper.get(
+      `label[for="${assetSelect.attributes('id')}"]`
+    );
+    expect(assetLabel.text()).toBe('Áudio institucional');
+    expect(assetLabel.element.control).toBe(assetSelect.element);
+    expect(assetLabel.find('option').exists()).toBe(false);
     await wrapper.get('[data-ivr-audio-asset]').setValue('11');
     await flushPromises();
+    const versionSelect = wrapper.get('[data-ivr-audio-version]');
+    const versionLabel = wrapper.get(
+      `label[for="${versionSelect.attributes('id')}"]`
+    );
+    expect(versionLabel.text()).toBe('Versão do áudio');
+    expect(versionLabel.element.control).toBe(versionSelect.element);
+    expect(versionLabel.find('option').exists()).toBe(false);
     expect(
       wrapper.get('[data-ivr-audio-confirm]').attributes('disabled')
     ).toBeDefined();

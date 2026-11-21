@@ -182,6 +182,12 @@ export const useIvrDraftEditor = ({ accountId, initialId }) => {
       else if ([401, 403, 404].includes(error?.response?.status)) {
         state.denied = true;
         state.error = 'DENIED';
+      } else if (
+        error?.response?.status === 409 &&
+        error.response.data?.error === 'ivr_audio_not_verified'
+      ) {
+        state.uncertain = false;
+        state.error = 'ivr_audio_not_verified';
       } else if (error?.response?.status === 422)
         state.error = error.response.data.error || 'SAVE_FAILED';
       else {

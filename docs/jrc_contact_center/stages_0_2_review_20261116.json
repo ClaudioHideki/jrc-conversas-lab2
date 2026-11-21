@@ -6232,5 +6232,29 @@
     "artifact": 14696079109,
     "artifact_sha256": "eb9fe0a7bbcf8ccc0c97f48b69211b9ac31bc07c3578ed2e328591aa9e8eb34b",
     "report": "docs/jrc_contact_center/ivr_audio_backend_verified_fixture_warmup_20261121.json"
+  },
+  "ivr_exact_audio_native_verified_20261121": {
+    "status": "implemented_and_verified_exact_local_ivr_audio_reference_increment",
+    "producer": "86ed16c6919adfb4a7abd44c9605dad99cbcb0e4",
+    "run": 44877800328,
+    "rails_distinct": 2206,
+    "schema_reload_separate": 159,
+    "vue": 1099,
+    "chrome": {
+      "passed": 240,
+      "per_project": 60,
+      "failures": 0,
+      "pending": 0,
+      "flaky": 0
+    },
+    "artifact": 14698395979,
+    "artifact_sha256": "54173feba700db6d2732a91af64ac83359cab5aa2b381a86390cecaf476bf210",
+    "report": "docs/jrc_contact_center/ivr_exact_audio_native_verified_20261121.json"
+  },
+  "ivr_audio_accessibility_refusal_followup_20261121": {
+    "status": "prepared_native_validation_pending",
+    "changes": "Explicit labels; known409 retains editable draft; owned unverified fixture and actual API rejection",
+    "chrome_count_preserved": 240,
+    "permissions_or_migrations_changed": false
   }
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, getCurrentInstance } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AudioVersionPreview from './AudioVersionPreview.vue';
 import { useIvrAudioReference } from '../composables/useIvrAudioReference';
@@ -11,6 +11,9 @@ const props = defineProps({
   disabled: { type: Boolean, default: false },
 });
 const emit = defineEmits(['update:modelValue']);
+const { uid } = getCurrentInstance();
+const assetInputId = `ivr-menu-audio-asset-${uid}`;
+const versionInputId = `ivr-menu-audio-version-${uid}`;
 const { t } = useI18n();
 const labels = computed(() => ({
   TITLE: t('JRC_CONTACT_CENTER.IVR_AUDIO.TITLE'),
@@ -140,9 +143,12 @@ const remove = () => {
       <p v-else-if="!assets.items.length" class="text-sm text-n-slate-11">
         {{ text('EMPTY') }}
       </p>
-      <label class="block min-w-0 text-sm text-n-slate-12">
-        {{ text('ASSET') }}
+      <div class="min-w-0">
+        <label :for="assetInputId" class="block text-sm text-n-slate-12">{{
+          text('ASSET')
+        }}</label>
         <select
+          :id="assetInputId"
           :value="versions.assetId"
           :disabled="disabled || busy"
           data-ivr-audio-asset
@@ -158,7 +164,7 @@ const remove = () => {
             {{ asset.name }}
           </option>
         </select>
-      </label>
+      </div>
       <div
         v-if="assets.pages > 1"
         class="flex flex-wrap items-center gap-2 text-xs"
@@ -181,12 +187,12 @@ const remove = () => {
           {{ text('NEXT') }}
         </button>
       </div>
-      <label
-        v-if="versions.assetId"
-        class="block min-w-0 text-sm text-n-slate-12"
-      >
-        {{ text('VERSION') }}
+      <div v-if="versions.assetId" class="min-w-0">
+        <label :for="versionInputId" class="block text-sm text-n-slate-12">{{
+          text('VERSION')
+        }}</label>
         <select
+          :id="versionInputId"
           :value="candidate?.id || ''"
           :disabled="disabled || busy"
           data-ivr-audio-version
@@ -209,7 +215,7 @@ const remove = () => {
             }}
           </option>
         </select>
-      </label>
+      </div>
       <div
         v-if="versions.pages > 1"
         class="flex flex-wrap items-center gap-2 text-xs"

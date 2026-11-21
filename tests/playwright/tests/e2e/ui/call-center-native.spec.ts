@@ -8531,8 +8531,14 @@ test('local IVR audio reference pins native verified history and never crosses u
     .fill(audioName);
   await picker.getByRole('button', { name: 'Buscar', exact: true }).click();
   await expect(picker.locator('[data-ivr-audio-asset] option')).toHaveCount(2);
+  await expect(picker.locator('[data-ivr-audio-asset]')).toHaveAccessibleName(
+    'Áudio institucional'
+  );
   await picker.locator('[data-ivr-audio-asset]').selectOption(received.item.id);
   await expect(picker.locator('[data-ivr-audio-version]')).toBeEnabled();
+  await expect(picker.locator('[data-ivr-audio-version]')).toHaveAccessibleName(
+    'Versão do áudio'
+  );
   await picker.locator('[data-ivr-audio-version]').selectOption(original.id);
   await picker.locator('[data-open-audio-bytes]').click();
   const player = picker.locator('[data-audio-verified-player]');
@@ -8636,6 +8642,42 @@ test('local IVR audio reference pins native verified history and never crosses u
   });
   expect(rejected.status()).toBe(422);
   expect((await rejected.json()).error).toBe('ivr_unavailable_audio');
+  const unverified = JSON.parse(JSON.stringify(initial.definition));
+  unverified.nodes[0].audio_reference = target.unverified_audio_ref;
+  await dialog.getByRole('tab', { name: 'JSON', exact: true }).click();
+  await dialog.locator('#ivr-json').fill(JSON.stringify(unverified));
+  await dialog
+    .getByRole('button', { name: 'Aplicar JSON ao rascunho', exact: true })
+    .click();
+  await dialog.getByRole('tab', { name: 'Fluxo', exact: true }).click();
+  const refused = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname ===
+        `${prefix}/ivr_drafts/${initial.id}` &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.locator('[data-ivr-save]').click();
+  const knownRefusal = await refused;
+  expect(knownRefusal.status()).toBe(409);
+  expect((await knownRefusal.json()).error).toBe('ivr_audio_not_verified');
+  await expect(
+    dialog.getByText(
+      'A versão do áudio não possui verificação técnica atual. Revise o vínculo na biblioteca.',
+      { exact: true }
+    )
+  ).toBeVisible();
+  await expect(dialog.locator('[data-ivr-save]')).toBeEnabled();
+  await expect(dialog.locator('[data-ivr-saved]')).toHaveCount(0);
+  const unchanged = await page.request.get(`${own}/ivr_drafts/${initial.id}`, {
+    headers: target.scoped,
+  });
+  const unchangedItem = (await unchanged.json()).item;
+  expect(unchangedItem.revision).toBe(1);
+  expect(unchangedItem.definition.nodes[0].audio_reference).toEqual(reference);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-ivr-audio-known-refusal.png`,
+    fullPage: true,
+  });
   await picker.locator('[data-ivr-audio-remove]').click();
   const changed = page.waitForResponse(
     response =>
@@ -8666,6 +8708,9 @@ test('local IVR audio reference pins native verified history and never crosses u
       authenticated_native_persistence: true,
       denied_unit_status: forbidden.status(),
       forged_graph_status: rejected.status(),
+      known_refusal_status: knownRefusal.status(),
+      known_refusal_preserves_revision: unchangedItem.revision,
+      known_refusal_keeps_editor_unlocked: true,
       explicit_unlink_preserves_history: true,
       provider_applied: false,
       provider_writes: unexpected,

@@ -50,6 +50,39 @@ beforeEach(() => {
 });
 
 describe('local IVR editor persistence and safe retries', () => {
+  it('preserves the editable draft after a definite native audio-readiness refusal', async () => {
+    API.saveIvrDraft.mockRejectedValueOnce({
+      response: { status: 409, data: { error: 'ivr_audio_not_verified' } },
+    });
+    const { editor } = mountEditor();
+    prepare(editor);
+    const original = JSON.stringify(editor.draft.value);
+    expect(await editor.save()).toBe(false);
+    expect(editor.state.error).toBe('ivr_audio_not_verified');
+    expect(editor.state.uncertain).toBe(false);
+    expect(editor.locked.value).toBe(false);
+    expect(editor.canSave.value).toBe(true);
+    expect(JSON.stringify(editor.draft.value)).toBe(original);
+    expect(API.configurationRecord).not.toHaveBeenCalled();
+  });
+  it('clears uncertainty only after a definite native refusal of the same retry body', async () => {
+    API.saveIvrDraft
+      .mockRejectedValueOnce(new Error('network interruption'))
+      .mockRejectedValueOnce({
+        response: { status: 409, data: { error: 'ivr_audio_not_verified' } },
+      });
+    const { editor } = mountEditor();
+    prepare(editor);
+    expect(await editor.save()).toBe(false);
+    expect(editor.state.uncertain).toBe(true);
+    expect(await editor.save('draft', true)).toBe(false);
+    expect(editor.state.uncertain).toBe(false);
+    expect(editor.state.error).toBe('ivr_audio_not_verified');
+    expect(editor.locked.value).toBe(false);
+    expect(API.saveIvrDraft.mock.calls[0][2]).toEqual(
+      API.saveIvrDraft.mock.calls[1][2]
+    );
+  });
   it('clears exact audio and queue references on an explicit new-draft unit switch without changing menu choices', () => {
     const { editor } = mountEditor();
     prepare(editor);

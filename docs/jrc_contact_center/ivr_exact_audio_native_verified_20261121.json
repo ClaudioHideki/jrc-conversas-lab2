@@ -1,0 +1,50 @@
+{
+  "status": "implemented_and_verified_exact_local_ivr_audio_reference_increment",
+  "producer": "86ed16c6919adfb4a7abd44c9605dad99cbcb0e4",
+  "run": 44877800328,
+  "job": 136766252206,
+  "rails_distinct": 2206,
+  "schema_reload_separate": 159,
+  "vue": 1099,
+  "chrome": {
+    "passed": 240,
+    "per_project": 60,
+    "failures": 0,
+    "pending": 0,
+    "flaky": 0
+  },
+  "all_native_reports_failures_pending_outside_errors": 0,
+  "new76native_examples_verified_by_file": {
+    "ivr_graph_schema_validate_spec.rb": 48,
+    "ivr_graph_audio_proofs_spec.rb": 12,
+    "ivr_draft_write_audio_spec.rb": 8,
+    "ivr_audio_references_spec.rb": 8
+  },
+  "lint_new_offenses": 0,
+  "fresh_assets_and_bootstrap15": true,
+  "artifact": 14698395979,
+  "artifact_bytes": 56773101,
+  "artifact_sha256": "54173feba700db6d2732a91af64ac83359cab5aa2b381a86390cecaf476bf210",
+  "screenshots_hash_verified": 380,
+  "screenshots_actually_opened": [
+    "desktop-dark-ivr-audio-exact-version.png",
+    "desktop-light-ivr-audio-exact-version.png",
+    "mobile-dark-ivr-audio-exact-version.png",
+    "mobile-light-ivr-audio-exact-version.png"
+  ],
+  "native_chrome_receipts": [
+    "Exact stored version survives newer library version and reload",
+    "Foreign unit404 and forged graph422",
+    "Explicit unlink retains original immutable history",
+    "No provider operations; local definition only"
+  ],
+  "existing_eleven_migrations_preserved": true,
+  "followup_not_in_this_producer": {
+    "explicit_accessible_labels": "Prepared; unique label/control IDs and Vue/Chrome assertions need new SHA validation",
+    "known409_refusal": "Prepared; preserve editable draft only for ivr_audio_not_verified, retain uncertain network safeguards",
+    "native_fixture": "Owned synthetic legacy version without fabricated inspection; four specs and real Chrome409 prepared"
+  },
+  "nico_four_value_files": "Preserved separately, uncommitted; full human review remains pending",
+  "full23figures_complete": false,
+  "external_pabx_tts_scanner_and_device_homologation": "Not performed; synthetic isolated receipt only"
+}
