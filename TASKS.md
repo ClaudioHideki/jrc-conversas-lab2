@@ -796,3 +796,5 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - Nenhuma participação em equipe/fila ou concessão de permissões decorre desse vínculo. Contratos PABX e o ledger final de revisão Nico continuam pendentes; o direito próprio já está implementado sem concessão automática.
 
 - Team supervision6a5e22fb:2210/2212 Rails aprovados; duas expectativas corrigidas preservando o legado.175 reload passaram;35 infrações de lint identificadas, correções exigem novo SHA. Mantidos os2117 casos anteriores. Concorrência, Vue, assets e244Chrome continuam obrigatórios e pendentes. Recibo team_supervision_first_native_20261121.json.
+
+-7706a6f0:2212/2212 Rails e175 reload aprovados;112 casos concorrentes anteriores preservados. Os3 casos novos falharam apenas no after hook por FK corporativa; corrigida a limpeza exclusiva do fixture.35 infrações anteriores resolvidas;7 remanescentes no describe/described_class do spec corrigidas e aguardando revalidação. Vue/assets/244Chrome ainda bloqueados.

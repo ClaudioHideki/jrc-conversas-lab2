@@ -34,7 +34,12 @@ RSpec.describe 'Native team supervision competing reviewed writes', type: :reque
     workers.each { |worker| worker.join(20) }
     raise 'Synthetic team supervision worker still active' if workers.any?(&:alive?)
 
-    account.destroy! if account.persisted?
+    if account.persisted?
+      account.jrc_crm_user_business_units.destroy_all
+      account.jrc_crm_team_scopes.destroy_all
+      account.teams.destroy_all
+      account.destroy!
+    end
   end
 
   def dispatch_supervision(endpoint, headers, payload, barrier: false)

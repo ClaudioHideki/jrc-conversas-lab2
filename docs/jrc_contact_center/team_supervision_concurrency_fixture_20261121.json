@@ -1,0 +1,44 @@
+{
+  "status": "failed_native_gate_evidence_preserved_next_validation_required",
+  "sha": "7706a6f0fdac18131ff07a7f0b11147829004d00",
+  "run": 44904449361,
+  "artifact": 14708076843,
+  "artifact_sha256": "8c0e701bbc2233420076298bca6dae70c0c0c239e3013bbad1376ac99311ac7e",
+  "core": {
+    "duration": 390.510287425,
+    "example_count": 2212,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "reload": {
+    "duration": 18.443989729,
+    "example_count": 175,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "concurrency": {
+    "summary": {
+      "duration": 56.250001617,
+      "example_count": 115,
+      "failure_count": 3,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "previous112nativecases_preserved_passed": true,
+    "new3examples_not_approved": true,
+    "failure_phase": "after hook at line37, Account.destroy with guarded owned corporate source rows still referenced",
+    "constraint": "fk_rails_bcfbc9938e",
+    "correction": "Destroy only this suite Account corporate source/scopes/teams through native model lifecycle before destroying the Account; no global cleanup or FK disabling"
+  },
+  "lint": {
+    "remaining": 7,
+    "all35previous_findings_absent": true,
+    "only_path": "spec/models/jrc_contact_center/team_supervision_constraints_spec.rb",
+    "correction": "Describe only the tested class and use described_class for its transactions; same5raw SQL proofs retained"
+  },
+  "image_build_or_chrome": "blocked, not executed",
+  "migration_sha256": "eab5fb4a891c52e72879eb306d3f31913d59c59af5b3eea641229e785479cf2d",
+  "next_native_validation_required": true
+}

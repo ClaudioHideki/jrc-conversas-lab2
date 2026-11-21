@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe JrcContactCenter::TeamSupervision, 'native database boundaries' do
+RSpec.describe JrcContactCenter::TeamSupervision do
   let(:account) { create(:account) }
   let(:user) { create(:user, account: account) }
   let(:member) { account.account_users.find_by!(user: user) }
@@ -29,7 +29,7 @@ RSpec.describe JrcContactCenter::TeamSupervision, 'native database boundaries' d
   it 'rejects a foreign native team through its composite account FK even when model validation is bypassed' do
     foreign_team = create(:team, account: create(:account))
     expect do
-      JrcContactCenter::TeamSupervision.transaction(requires_new: true) do
+      described_class.transaction(requires_new: true) do
         insert_raw(row.merge(team_id: foreign_team.id))
       end
     end.to raise_error(ActiveRecord::InvalidForeignKey)
@@ -39,7 +39,7 @@ RSpec.describe JrcContactCenter::TeamSupervision, 'native database boundaries' d
     foreign = create(:user, account: create(:account))
     foreign_member = foreign.account_users.sole
     expect do
-      JrcContactCenter::TeamSupervision.transaction(requires_new: true) do
+      described_class.transaction(requires_new: true) do
         insert_raw(row.merge(account_user_id: foreign_member.id))
       end
     end.to raise_error(ActiveRecord::InvalidForeignKey)
@@ -50,7 +50,7 @@ RSpec.describe JrcContactCenter::TeamSupervision, 'native database boundaries' d
     second = create(:user, account: account)
     second_member = account.account_users.find_by!(user: second)
     expect do
-      JrcContactCenter::TeamSupervision.transaction(requires_new: true) do
+      described_class.transaction(requires_new: true) do
         insert_raw(row.merge(account_user_id: second_member.id, kind: 'primary'))
       end
     end.to raise_error(ActiveRecord::RecordNotUnique)
@@ -59,7 +59,7 @@ RSpec.describe JrcContactCenter::TeamSupervision, 'native database boundaries' d
   it 'does not allow the same native person to occupy both operational roles in one team' do
     insert_raw(row)
     expect do
-      JrcContactCenter::TeamSupervision.transaction(requires_new: true) do
+      described_class.transaction(requires_new: true) do
         insert_raw(row.merge(kind: 'primary'))
       end
     end.to raise_error(ActiveRecord::RecordNotUnique)
@@ -67,7 +67,7 @@ RSpec.describe JrcContactCenter::TeamSupervision, 'native database boundaries' d
 
   it 'enforces the exact kind check rather than accepting an invented grant or operator role' do
     expect do
-      JrcContactCenter::TeamSupervision.transaction(requires_new: true) do
+      described_class.transaction(requires_new: true) do
         insert_raw(row.merge(kind: 'agent'))
       end
     end.to raise_error(ActiveRecord::StatementInvalid) { |error|
