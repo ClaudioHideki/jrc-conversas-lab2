@@ -37,8 +37,8 @@ class JrcContactCenter::AudioInspectionFilter
 
   def current_inspections(versions)
     latest = JrcContactCenter::AudioInspection.where(audio_version_id: versions.select(:id))
-                                            .select('DISTINCT ON (jrc_contact_center_audio_inspections.audio_version_id) id')
-                                            .order(:audio_version_id, attempt: :desc)
+                                              .select('DISTINCT ON (jrc_contact_center_audio_inspections.audio_version_id) id')
+                                              .order(:audio_version_id, attempt: :desc)
     JrcContactCenter::AudioInspection.where(id: latest)
   end
 end

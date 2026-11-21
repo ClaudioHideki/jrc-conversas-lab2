@@ -25,7 +25,6 @@ RSpec.describe 'Private institutional audio receipts reuse native account and un
     expect(response.body).not_to match(/signed_id|blob_id|service_url/)
   end
 
-
   it 'accepts actual multipart bytes and presents metadata without a signed locator, storage key or readiness claim' do
     post base, headers: headers,
                params: { asset: { name: 'SYNTHETIC received message' }, unit_id: unit.id, file: multipart_file, idempotency_key: key }

@@ -6722,5 +6722,33 @@
     "report": "docs/jrc_contact_center/audio_library_organization_filters_prepared_20261121.json",
     "native_and_chrome_pending": true,
     "whole_figure_complete": false
+  },
+  "audio_library_organization_first_native_lint_20261121": {
+    "producer": "372e3e700b530cf5ead64f7bada8b88f93fa3c5d",
+    "run": 44947188637,
+    "job": 136976965669,
+    "status": "native_passed_seven_layout_findings_corrected_revalidation_pending",
+    "artifact": 14724609305,
+    "artifact_bytes": 371425,
+    "artifact_sha256": "c8c81731d34908cc95262e3fbb46ae09ca1dc04d6bb8a844cda4159791835bae",
+    "native": 2501,
+    "core": 2297,
+    "concurrency": 119,
+    "approvals_backoffice": 85,
+    "schema_reload_separate": 175,
+    "vue": 1286,
+    "failure_pending_outside_errors": 0,
+    "ruby_layout_findings": 7,
+    "source_files": [
+      "app/controllers/api/v1/accounts/jrc_contact_center/audio_assets_controller.rb",
+      "app/services/jrc_contact_center/audio_inspection_filter.rb",
+      "script/jrc_call_center_audio_folder_seed.rb",
+      "spec/requests/api/v1/accounts/jrc_contact_center/audio_assets_spec.rb"
+    ],
+    "nonblank_code_identical": true,
+    "functional_changes_in_correction": false,
+    "fresh_assets_and_chrome_executed": false,
+    "required_revalidation": "same complete native gates and244Chrome; do not reuse predecessor visuals for the new library organization/filter increment",
+    "whole_word_or_figure_acceptance": false
   }
 }

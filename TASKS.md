@@ -830,3 +830,5 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 - [x] Movimento selecionado: produtor 3e3cc17f, 2488 Rails/175 reload/1260 Vue/244 Chrome, concorrência HTTP nativa e oito screenshots efetivamente revisadas. Sem alterações de arquivos, versões, inspeções ou provedor.
 - [ ] Biblioteca: seleção para organização dos metadados no mesmo catálogo, finalidade explícita, limite anunciado, revisão/CAS, resposta sem arquivo explícita e filtro nativo da última inspeção. 102 testes preliminares incluem76 anteriores; 26 novos Vue e13 Rails preparados. Exigir CI e Chrome reais; figura6 e conjunto23 não concluídos.
+
+- [ ] **CALL-CENTER-AUDIO-ORGANIZATION-STYLE-20261121:** CI44947188637/372e3e70 preserved:2501native,175reload,1286Vue passed; seven Ruby layout findings corrected in four files with identical nonblank code. New assets/244Chrome were not executed. Full revalidation remains mandatory; figure6/23 is not accepted. Receipt: docs/jrc_contact_center/audio_library_organization_first_native_lint_20261121.json.

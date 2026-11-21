@@ -57,7 +57,7 @@ class Api::V1::Accounts::JrcContactCenter::AudioAssetsController < Api::V1::Acco
 
   def version_filtered(records)
     JrcContactCenter::AudioAssetFilters.new(records: records, source_kind: params[:source_kind], content_type: params[:content_type],
-                                                   inspection_state: params[:inspection_state]).call
+                                            inspection_state: params[:inspection_state]).call
   end
 
   def library

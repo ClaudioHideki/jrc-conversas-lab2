@@ -22,7 +22,7 @@ class JrcContactCenter::SyntheticAudioFolderSeed
 
   def self.metadata_identifiers(account, folder)
     asset = JrcContactCenter::AudioAsset.create!(account: account, unit: folder.unit, folder: folder,
-                                                name: 'SYNTHETIC metadata only organization')
+                                                 name: 'SYNTHETIC metadata only organization')
     { metadata_audio_id: asset.id.to_s, metadata_audio_name: asset.name,
       metadata_audio_folder_id: folder.id.to_s, metadata_audio_folder_name: folder.name }
   end
