@@ -12,6 +12,7 @@ import AudioInspectionHistory from './AudioInspectionHistory.vue';
 import AudioCaptureDraft from './AudioCaptureDraft.vue';
 import AudioIvrUsages from './AudioIvrUsages.vue';
 import { useAudioAssetEditor } from '../composables/useAudioAssetEditor';
+import { useAudioArchive } from '../composables/useAudioArchive';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -102,6 +103,20 @@ const sourceLabel = kind =>
     browser_capture: label('SOURCE_CAPTURE'),
   })[kind] || label('UNKNOWN_SOURCE');
 const currentUser = useMapGetter('getCurrentUser');
+const actorScope = computed(() => {
+  const user = currentUser.value;
+  const member = user?.accounts?.find(
+    row => String(row.id) === String(props.accountId)
+  );
+  return JSON.stringify([
+    user?.id,
+    member?.role,
+    member?.custom_role_id,
+    member?.contact_center_eligible,
+    [...(member?.permissions || [])].sort(),
+    (props.context.units || []).map(row => String(row.id)).sort(),
+  ]);
+});
 const details = ref(null);
 const lastCopy = ref(null);
 const detailsLoading = ref(false);
@@ -141,6 +156,7 @@ const duration = version => {
 const items = ref([]);
 const meta = ref({ total: 0, pages: 0 });
 const maxBytes = ref(0);
+const archiveLimits = ref({ max_entries: 0, max_bytes: 0 });
 const loading = ref(false);
 const error = ref(false);
 const q = ref('');
@@ -176,6 +192,8 @@ const canManage = computed(
     props.context.capabilities?.configure === true &&
     (props.context.units || []).some(row => String(row.id) === props.unitId)
 );
+let archive;
+let archiveDialog;
 const applyVerification = event => {
   if (
     event.accountId !== String(props.accountId) ||
@@ -220,6 +238,8 @@ const clearHistory = () => {
   historyLoading.value = false;
 };
 const forget = () => {
+  archive.close();
+  archiveLimits.value = { max_entries: 0, max_bytes: 0 };
   generation += 1;
   lastCopy.value = null;
   clearDetails();
@@ -237,6 +257,15 @@ const denied = () => {
   error.value = true;
   emit('denied');
 };
+archive = useAudioArchive({
+  accountId: computed(() => props.accountId),
+  unitId: computed(() => props.unitId),
+  canManage,
+  contextKey: actorScope,
+  limits: archiveLimits,
+  onDenied: denied,
+});
+archiveDialog = archive.dialog;
 const openDetails = async row => {
   if (!canManage.value) return;
   clearDetails();
@@ -273,6 +302,8 @@ const openDetails = async row => {
   }
 };
 const load = async () => {
+  archive.close();
+  archiveLimits.value = { max_entries: 0, max_bytes: 0 };
   clearDetails();
   generation += 1;
   const version = generation;
@@ -308,6 +339,10 @@ const load = async () => {
     items.value = response.data.items;
     meta.value = response.data.meta;
     maxBytes.value = response.data.max_upload_bytes;
+    archiveLimits.value = response.data.archive_limits || {
+      max_entries: 0,
+      max_bytes: 0,
+    };
   } catch (failure) {
     if (version === generation) {
       if ([401, 403, 404].includes(failure?.response?.status)) denied();
@@ -451,20 +486,7 @@ watch(
     () => route.query.audio_file_q,
     () => route.query.audio_file_source,
     () => route.query.audio_file_format,
-    () => {
-      const user = currentUser.value;
-      const member = user?.accounts?.find(
-        row => String(row.id) === String(props.accountId)
-      );
-      return JSON.stringify([
-        user?.id,
-        member?.role,
-        member?.custom_role_id,
-        member?.contact_center_eligible,
-        [...(member?.permissions || [])].sort(),
-        (props.context.units || []).map(row => String(row.id)).sort(),
-      ]);
-    },
+    actorScope,
   ],
   () => {
     forget();
@@ -673,6 +695,25 @@ onBeforeUnmount(() => {
                 role="cell"
                 class="block min-w-0 break-words p-3 align-top sm:table-cell"
               >
+                <label
+                  class="mr-1 inline-flex min-h-11 min-w-11 items-center justify-center align-middle"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="archive.selected(row)"
+                    :disabled="
+                      !archive.selectable(row) || loading || saving || opening
+                    "
+                    :data-audio-archive-select="row.id"
+                    :aria-label="
+                      t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.SELECT', {
+                        name: row.name,
+                      })
+                    "
+                    class="size-4 shrink-0"
+                    @change="archive.toggle(row)"
+                  />
+                </label>
                 <button
                   type="button"
                   :data-audio-asset-details-open="row.id"
@@ -876,6 +917,50 @@ onBeforeUnmount(() => {
     <p v-if="detailsError" role="alert" class="text-sm text-n-ruby-11">
       {{ label('ERROR') }}
     </p>
+    <section
+      v-if="canManage && archiveLimits.max_entries > 0"
+      class="flex min-w-0 flex-wrap items-center gap-3 rounded-lg border border-n-blue-6 bg-n-blue-2 p-3 text-sm text-n-slate-12"
+      data-audio-archive-controls
+    >
+      <p class="min-w-0 break-words">
+        {{
+          t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.SELECTION', {
+            count: archive.items.value.length,
+            bytes: archive.total.value,
+            max: archiveLimits.max_entries,
+            limit: archiveLimits.max_bytes,
+          })
+        }}
+      </p>
+      <button
+        type="button"
+        :disabled="
+          !archive.admitted.value ||
+          archive.busy.value ||
+          loading ||
+          saving ||
+          opening
+        "
+        data-open-audio-archive
+        class="rounded-lg border border-n-blue-6 bg-n-solid-1 px-3 py-2 text-n-blue-11 disabled:opacity-40"
+        @click="archive.open"
+      >
+        <Icon
+          icon="i-lucide-download"
+          class="mr-2 inline-block size-4"
+          aria-hidden="true"
+        />{{ t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.OPEN') }}
+      </button>
+      <button
+        type="button"
+        :disabled="!archive.items.value.length || archive.busy.value"
+        data-clear-audio-selection
+        class="rounded-lg px-3 py-2 text-n-blue-11 disabled:opacity-40"
+        @click="archive.close"
+      >
+        {{ t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.CLEAR') }}
+      </button>
+    </section>
     <nav
       v-if="meta.pages > 1"
       :aria-label="label('PAGINATION')"
@@ -1087,6 +1172,88 @@ onBeforeUnmount(() => {
             "
           />
           <span>{{ label('REVIEW') }}</span>
+        </label>
+      </div>
+    </Dialog>
+    <Dialog
+      ref="archiveDialog"
+      contained
+      use-form
+      :title="t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.TITLE')"
+      :confirm-button-label="t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.DOWNLOAD')"
+      :cancel-button-label="label('CANCEL')"
+      :disable-confirm-button="!archive.canDownload.value"
+      :is-loading="archive.downloading.value"
+      :dismissible="!archive.busy.value"
+      @confirm="archive.download"
+      @close="archive.clear"
+    >
+      <div
+        class="min-w-0 space-y-3 text-sm text-n-slate-12"
+        data-audio-archive-dialog
+      >
+        <p>{{ t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.EXPLANATION') }}</p>
+        <p v-if="archive.opening.value" role="status">{{ label('LOADING') }}</p>
+        <p
+          v-if="archive.error.value"
+          role="alert"
+          class="break-words text-n-ruby-11"
+        >
+          {{
+            archive.error.value === 'SOURCE_CHANGED'
+              ? t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.SOURCE_CHANGED')
+              : t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.ERROR')
+          }}
+        </p>
+        <p
+          v-if="archive.delivered.value"
+          role="status"
+          class="break-words text-n-teal-11"
+          data-audio-archive-delivered
+        >
+          {{ t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.DELIVERED') }}
+        </p>
+        <ul
+          class="max-h-64 min-w-0 space-y-3 overflow-y-auto overscroll-contain"
+        >
+          <li
+            v-for="item in archive.items.value"
+            :key="item.assetId"
+            class="min-w-0 space-y-1 rounded-lg border border-n-weak p-3"
+            :data-audio-archive-item="item.assetId"
+          >
+            <p class="break-words font-semibold">{{ item.name }}</p>
+            <p>
+              {{
+                t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.VERSION_BYTES', {
+                  version: item.number,
+                  bytes: item.byteSize,
+                })
+              }}
+            </p>
+            <p class="break-all">{{ item.sha256 }}</p>
+            <p
+              v-if="archive.usages.value[item.assetId] !== undefined"
+              class="break-words"
+            >
+              {{
+                t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.LOCAL_USAGES', {
+                  count: archive.usages.value[item.assetId],
+                })
+              }}
+            </p>
+          </li>
+        </ul>
+        <label
+          class="flex items-start gap-2 rounded-lg border border-n-blue-6 p-3"
+        >
+          <input
+            v-model="archive.reviewed.value"
+            type="checkbox"
+            :disabled="!archive.verified.value || archive.busy.value"
+            data-review-audio-archive
+          />
+          <span>{{ t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.REVIEW') }}</span>
         </label>
       </div>
     </Dialog>

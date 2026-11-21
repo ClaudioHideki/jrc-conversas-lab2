@@ -21,6 +21,8 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
     audioAsset: vi.fn(),
     audioVersions: vi.fn(),
     duplicateAudioAsset: vi.fn(),
+    audioArchive: vi.fn(),
+    audioUsages: vi.fn(),
     updateAudioAsset: vi.fn(),
     receiveAudioAsset: vi.fn(),
     receiveAudioVersion: vi.fn(),
@@ -98,6 +100,7 @@ beforeEach(() => {
       items: [structuredClone(row)],
       meta: { page: 1, pages: 2, total: 21 },
       max_upload_bytes: 1000,
+      archive_limits: { max_entries: 20, max_bytes: 1000 },
     },
   });
   API.audioAsset.mockResolvedValue({
@@ -122,6 +125,95 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it('keeps selected download disabled for quarantined rows and never requests bytes implicitly', async () => {
+    const wrapper = fixture();
+    await flushPromises();
+    expect(
+      wrapper.get('[data-audio-archive-select="44"]').element.disabled
+    ).toBe(true);
+    expect(wrapper.get('[data-open-audio-archive]').element.disabled).toBe(
+      true
+    );
+    expect(API.audioArchive).not.toHaveBeenCalled();
+  });
+
+  it('reviews a pinned selected source in the native dialog without authorizing an automatic download', async () => {
+    const item = structuredClone(row);
+    item.latest_version.technical_verification = { id: '100', ready: true };
+    API.audioAssets.mockResolvedValueOnce({
+      data: {
+        items: [item],
+        meta: { total: 1, pages: 1 },
+        max_upload_bytes: 1000,
+        archive_limits: { max_entries: 20, max_bytes: 1000 },
+      },
+    });
+    API.audioAsset.mockResolvedValueOnce({ data: { account_id: '1', item } });
+    API.audioUsages.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        unit_id: '10',
+        audio_asset_id: '44',
+        coverage: 'current_local_ivr_drafts_only',
+        provider_configuration_verified: false,
+        meta: { total: 0 },
+      },
+    });
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-archive-select="44"]').setValue(true);
+    expect(wrapper.get('[data-open-audio-archive]').element.disabled).toBe(
+      false
+    );
+    await wrapper.get('[data-open-audio-archive]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-audio-archive-dialog]').text()).toContain(
+      row.name
+    );
+    expect(wrapper.get('[data-review-audio-archive]').element.disabled).toBe(
+      false
+    );
+    expect(wrapper.get('[data-audio-archive-dialog]').text()).toContain(
+      row.latest_version.sha256
+    );
+    expect(
+      wrapper
+        .get('[data-audio-archive-dialog]')
+        .element.closest('form')
+        .querySelector('[data-submit]').disabled
+    ).toBe(true);
+    expect(API.audioArchive).not.toHaveBeenCalled();
+    await wrapper.setProps({
+      context: { capabilities: { configure: false }, units: [] },
+    });
+    expect(wrapper.find('[data-audio-archive-dialog]').exists()).toBe(false);
+  });
+
+  it('clears selected private metadata when native list navigation changes page or filter', async () => {
+    const item = structuredClone(row);
+    item.latest_version.technical_verification = { id: '100', ready: true };
+    API.audioAssets.mockResolvedValue({
+      data: {
+        items: [item],
+        meta: { total: 21, pages: 2 },
+        max_upload_bytes: 1000,
+        archive_limits: { max_entries: 20, max_bytes: 1000 },
+      },
+    });
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-archive-select="44"]').setValue(true);
+    mocks.route.query.audio_file_page = 2;
+    await flushPromises();
+    expect(
+      wrapper.get('[data-audio-archive-select="44"]').element.checked
+    ).toBe(false);
+    expect(wrapper.get('[data-open-audio-archive]').element.disabled).toBe(
+      true
+    );
+    expect(API.audioArchive).not.toHaveBeenCalled();
+  });
+
   it('keeps duplication disabled for a quarantined file instead of presenting it as technically ready', async () => {
     const wrapper = fixture();
     await flushPromises();

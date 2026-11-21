@@ -2635,6 +2635,21 @@
       "SUMMARY": "Supervisor principal: {name} · Adicionais: {count}",
       "ADDITIONAL_COUNT": "Supervisores adicionais ({count})",
       "PAGINATION_SUMMARY": "Total {total} · Página {page}"
+    },
+    "AUDIO_ARCHIVE": {
+      "TITLE": "Baixar áudios selecionados",
+      "OPEN": "Revisar download ZIP",
+      "DOWNLOAD": "Baixar ZIP",
+      "CLEAR": "Limpar seleção",
+      "SELECT": "Selecionar áudio: {name}",
+      "VERSION_BYTES": "Versão {version} · {bytes} bytes",
+      "SELECTION": "{count} selecionados · {bytes} bytes. Limite: {max} áudios e {limit} bytes. A seleção é limpa ao mudar a lista.",
+      "EXPLANATION": "O ZIP contém somente as versões selecionadas e um manifesto de integridade. A conta, a unidade e a verificação de cada arquivo são conferidas novamente. Nenhuma configuração é publicada no PABX.",
+      "REVIEW": "Conferi os áudios, as versões e os hashes acima e autorizo este download.",
+      "LOCAL_USAGES": "{count} rascunho(s) local(is) de URA autorizado(s). Uso no PABX e demais integrações não confirmado; nenhum vínculo será alterado.",
+      "DELIVERED": "ZIP verificado e entregue ao navegador. Confira a conclusão do download no navegador.",
+      "ERROR": "Não foi possível verificar o ZIP. A seleção foi preservada. Reabra a revisão antes de tentar novamente.",
+      "SOURCE_CHANGED": "Uma versão ou verificação mudou. Feche a revisão, atualize a lista e selecione novamente os áudios."
     }
   }
 }

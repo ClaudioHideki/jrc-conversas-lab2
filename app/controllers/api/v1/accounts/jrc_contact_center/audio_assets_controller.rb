@@ -14,7 +14,8 @@ class Api::V1::Accounts::JrcContactCenter::AudioAssetsController < Api::V1::Acco
     records = within_folder(records, unit)
     records = version_filtered(records)
     payload = list_payload(search_records(records, fields: ['name']).order(:name, :id)) { |row| present(row) }
-    render json: payload.merge(max_upload_bytes: JrcContactCenter::AudioFileInput.max_bytes)
+    render json: payload.merge(max_upload_bytes: JrcContactCenter::AudioFileInput.max_bytes,
+                               archive_limits: JrcContactCenter::AudioArchiveInput.limits)
   end
 
   def show

@@ -1,0 +1,222 @@
+{
+  "status": "native_and_actual_chrome_verified_increment_not_complete_figure6",
+  "producer": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+  "run": 44921431076,
+  "artifact": 14716019153,
+  "artifact_sha256": "891f8ae5a07dd90ee2849175e918cb5c6bdf61037b872c5f58cb1b9dbd9fb8ee",
+  "native_distinct": 2438,
+  "schema_reload_separate": 175,
+  "vue": 1213,
+  "chrome": {
+    "passed": 244,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "errors_outside_examples": 0
+  },
+  "same_previous_native_cases_preserved": {
+    "core": 2236,
+    "concurrency": 117,
+    "vue": 1213,
+    "chrome": 244
+  },
+  "copy_native_receipts": {
+    "desktop-dark-audio-copy-native.json": {
+      "sha256": "921d4e6041adb55bf30aad6cbbf01fa3de7d64cc54d4be4faf4519d63172fb68",
+      "receipt": {
+        "sha": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+        "synthetic": true,
+        "external_homologation": false,
+        "source_asset": "208",
+        "source_version": "209",
+        "new_asset": "229",
+        "new_version": "233",
+        "source_sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "verified_copied_sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "native_new_inspection": "211",
+        "stale_review": 409,
+        "created": 201,
+        "replayed": 201,
+        "authorized_bytes": 200,
+        "audit_count": 1,
+        "operator_denied": 401,
+        "horizontal_overflow": false
+      }
+    },
+    "desktop-light-audio-copy-native.json": {
+      "sha256": "0ba589e4f4c8e503e92fde435e14e208754e01beff802ba48ae53dc8703890b1",
+      "receipt": {
+        "sha": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+        "synthetic": true,
+        "external_homologation": false,
+        "source_asset": "206",
+        "source_version": "207",
+        "new_asset": "219",
+        "new_version": "221",
+        "source_sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "verified_copied_sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "native_new_inspection": "197",
+        "stale_review": 409,
+        "created": 201,
+        "replayed": 201,
+        "authorized_bytes": 200,
+        "audit_count": 1,
+        "operator_denied": 401,
+        "horizontal_overflow": false
+      }
+    },
+    "mobile-dark-audio-copy-native.json": {
+      "sha256": "9a28fb74ab1f0e1876424909d24f51ddcf6b3bce91534221add531e964b90908",
+      "receipt": {
+        "sha": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+        "synthetic": true,
+        "external_homologation": false,
+        "source_asset": "212",
+        "source_version": "213",
+        "new_asset": "249",
+        "new_version": "257",
+        "source_sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "verified_copied_sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "native_new_inspection": "239",
+        "stale_review": 409,
+        "created": 201,
+        "replayed": 201,
+        "authorized_bytes": 200,
+        "audit_count": 1,
+        "operator_denied": 401,
+        "horizontal_overflow": false
+      }
+    },
+    "mobile-light-audio-copy-native.json": {
+      "sha256": "13ecbd241627ec7df6ef64436d58e0084e7f6b25896e85fb3d903c05c8888c7e",
+      "receipt": {
+        "sha": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+        "synthetic": true,
+        "external_homologation": false,
+        "source_asset": "210",
+        "source_version": "211",
+        "new_asset": "239",
+        "new_version": "245",
+        "source_sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "verified_copied_sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "native_new_inspection": "225",
+        "stale_review": 409,
+        "created": 201,
+        "replayed": 201,
+        "authorized_bytes": 200,
+        "audit_count": 1,
+        "operator_denied": 401,
+        "horizontal_overflow": false
+      }
+    }
+  },
+  "team_native_receipts": {
+    "desktop-dark-team-supervision-native.json": {
+      "sha256": "e4da24ff09df245ad40c9d6371d9c9b46310e4ac3c50e8087e2bc0c017d80e7c",
+      "receipt": {
+        "synthetic": true,
+        "sha": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+        "team": "336",
+        "saved": 200,
+        "persisted_primary": "2361",
+        "persisted_additional": "2362",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    },
+    "desktop-light-team-supervision-native.json": {
+      "sha256": "0b5eebf3305e878e4e316142ac284af39f04909ef1ba53f6642de3f8b7912d4d",
+      "receipt": {
+        "synthetic": true,
+        "sha": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+        "team": "332",
+        "saved": 200,
+        "persisted_primary": "2273",
+        "persisted_additional": "2274",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    },
+    "mobile-dark-team-supervision-native.json": {
+      "sha256": "4189d562c50ec124b5c0b889466c83d82e48951029ddf0954d0ba09fe4c9cc8f",
+      "receipt": {
+        "synthetic": true,
+        "sha": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+        "team": "344",
+        "saved": 200,
+        "persisted_primary": "2537",
+        "persisted_additional": "2538",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    },
+    "mobile-light-team-supervision-native.json": {
+      "sha256": "627341786e24be189f460011fcecaf6087513112cf7224eb9cfc8ca6de1ee29a",
+      "receipt": {
+        "synthetic": true,
+        "sha": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+        "team": "340",
+        "saved": 200,
+        "persisted_primary": "2449",
+        "persisted_additional": "2450",
+        "candidate_total": 22,
+        "stale": 409,
+        "denied": 401,
+        "restricted": 401,
+        "no_queue_membership_or_provider_writes": true,
+        "horizontal_overflow": false
+      }
+    }
+  },
+  "screenshot_hashes_verified": 404,
+  "actual_images_opened": [
+    "desktop-dark-audio-copy-persisted.png",
+    "desktop-dark-audio-copy-reviewed.png",
+    "desktop-dark-team-supervision-reviewed.png",
+    "desktop-light-audio-copy-persisted.png",
+    "desktop-light-audio-copy-reviewed.png",
+    "desktop-light-team-supervision-reviewed.png",
+    "mobile-dark-audio-copy-persisted.png",
+    "mobile-dark-audio-copy-reviewed.png",
+    "mobile-dark-team-supervision-reviewed.png",
+    "mobile-light-audio-copy-persisted.png",
+    "mobile-light-audio-copy-reviewed.png",
+    "mobile-light-team-supervision-reviewed.png"
+  ],
+  "visual_findings": [
+    "Doze PNGs abertos e inspecionados individualmente em pares: desktop 1440 e celular 390, temas claro e escuro.",
+    "Quatro diálogos de cópia mostram versão e SHA de origem, revisão explícita e ações Fechar/Salvar; conteúdo longo quebra dentro do popup e o formulário tem rolagem vertical.",
+    "Quatro telas após gravação mostram a nova cópia com versão 1, duração 00:02 e arquivo de 32044 bytes; a restrição de uso no PABX permanece visível.",
+    "Quatro diálogos de supervisão mostram principal e adicionais, aviso de ausência de concessão de acesso e botão Salvar vínculos totalmente legível inclusive em 390 px.",
+    "Nenhum transbordamento horizontal visível nas imagens selecionadas; os recibos Chrome também registram horizontal_overflow=false.",
+    "Screenshots não substituem os recibos de persistência/autorização; estes foram verificados separadamente. Não há homologação de fornecedor externo ou conclusão integral das figuras."
+  ],
+  "source_preserved": [
+    "Same source version, bytes, immutable history and references",
+    "Independent new asset, version1 and new private blob",
+    "New native inspection without inherited approval",
+    "Stable retry receipt, CAS409 and operator401"
+  ],
+  "unchanged": [
+    "Twelve frozen migrations and SQL",
+    "Native account/unit/current-user scopes",
+    "No provider publication or commands",
+    "Originalb77ffe55 plus three pending file hashes; main and all protected environments"
+  ],
+  "still_pending": [
+    "Bulk selection actions, published-reference-safe deletion and all remaining figure6 criteria",
+    "Provider codecs/publication/ACKs and external homologation"
+  ]
+}

@@ -6600,5 +6600,26 @@
     "automatic_administrator_grant": false,
     "real_grants_changed": false,
     "full_review_pending_proven_source_binding": true
+  },
+  "audio_copy_native_verified_20261121": {
+    "producer": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+    "report": "docs/jrc_contact_center/audio_copy_native_verified_20261121.json",
+    "native": 2438,
+    "vue": 1213,
+    "chrome": 244,
+    "actual_images_reviewed": 12,
+    "full_figure_complete": false
+  },
+  "audio_archive_prepared_20261121": {
+    "report": "docs/jrc_contact_center/audio_archive_prepared_20261121.json",
+    "native_and_chrome_pending": true,
+    "full_figure_complete": false
+  },
+  "nico_review_business_confirmation_20261121": {
+    "decision": "Explicit own permission through profile/team plus authorized recording access; no automatic administrator grant",
+    "permission": "jrc_contact_center_quality_review",
+    "real_grants_changed": false,
+    "already_proven_foundation": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json",
+    "full_review_still_pending_proven_source_binding": true
   }
 }

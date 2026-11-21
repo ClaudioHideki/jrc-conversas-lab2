@@ -45,6 +45,12 @@ export default {
       `${base(accountId)}/team_supervisions/${recordIdentity(teamId)}`,
       { supervision, expected_revision: options.expected_revision }
     ),
+  audioArchive: (accountId, items) =>
+    axios.post(
+      `${base(accountId)}/audio_archives`,
+      { items },
+      { responseType: 'blob', timeout: 30000 }
+    ),
   audioBytes: (accountId, assetId, versionId) =>
     axios.get(
       `${base(accountId)}/audio_assets/${recordIdentity(assetId)}/versions/${recordIdentity(versionId)}/bytes`,

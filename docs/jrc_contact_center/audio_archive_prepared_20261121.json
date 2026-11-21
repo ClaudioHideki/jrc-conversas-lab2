@@ -1,0 +1,106 @@
+{
+  "status": "implemented_in_owned_overlay_native_and_chrome_pending",
+  "base": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+  "figures": [
+    6,
+    16
+  ],
+  "reuse": [
+    "AudioLibraryAccess",
+    "AudioBytes exact inspected SHA and native read audit",
+    "AudioIvrUsages current authorized local draft coverage",
+    "Same AudioAssetLibrary and native Dialog",
+    "Pinned existing rubyzip3.7.0; no dependency installation"
+  ],
+  "admission": {
+    "same_native_unit": true,
+    "max_items": 20,
+    "max_total_bytes": "min(40MiB, existing AudioFileInput.max_bytes)"
+  },
+  "semantics": [
+    "Read-only bounded ZIP and manifest; no new models, blobs, grants or migrations",
+    "Current authority and exact inspection before and after byte collection",
+    "Explicit reviewed download, count/selection/account/unit/ZIP hash verification in browser",
+    "Context/list/profile change clears private selection; pending double confirmation deduplicated",
+    "Local reference check explicitly does not prove provider or other module configuration",
+    "Byte delivery to browser is distinguished from successful storage on user disk"
+  ],
+  "preliminary_local_mocked_units": {
+    "passed": 20,
+    "failed": 0,
+    "pending": 0,
+    "native": false,
+    "json_sha256": "b6d42ad63cb8ed675af69a4f0c24c89197aedd06d9bf41e8e7bbac20a62dac39",
+    "resources": {
+      "kind": "Windows bounded mocked unit check; not native Rails/Chrome or codec proof",
+      "target": "audio-archive-actor-scope-r2",
+      "exit_code": 0,
+      "stop": null,
+      "seconds": 3.515999999974156,
+      "initial": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 2758475776,
+        "c_free_bytes": 53752258560,
+        "read_only": true
+      },
+      "minimum": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 2644975616,
+        "c_free_bytes": 53752258560,
+        "read_only": true
+      },
+      "final": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 2843144192,
+        "c_free_bytes": 53752246272,
+        "read_only": true
+      },
+      "log_bytes": 505
+    },
+    "overlaps_previous19": true
+  },
+  "preliminary_projected_library_and_api_units": {
+    "passed": 35,
+    "library": 34,
+    "api_transport": 1,
+    "previous_library_cases_included": 31,
+    "native_or_real_dialog_css": false,
+    "json_sha256": "8bc86cd91d164c8fee1f4a17072d8be68c96b46266e09b1ff5fa4cfa5f88c9c7",
+    "preliminary_failed_attempt_preserved": "audio-archive-projected-library-light-vitest-result.json",
+    "preliminary_failure": "Library0 collected due local mitt import resolution; API1 passed. Existing module paths then confirmed and configured locally.",
+    "dependency_install_or_product_source_workaround": false,
+    "exact_projected_base": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+    "projection_sha256": "c65e6f157155bd82aeba920abc014050b6ce8aa91f7dbd76555b6622c27ce33d"
+  },
+  "native_cases_prepared_not_run": {
+    "input": 6,
+    "service": 13,
+    "authenticated_api": 7
+  },
+  "vue_cases_prepared": {
+    "composable": 20,
+    "api": 1,
+    "existing_library": 3
+  },
+  "real_chrome_required": "Extend existing244cases in all4projects; real two-file ZIP, native manifest, SHA, current authority and original withdrawal assertions",
+  "dependency_source": {
+    "product_sha": "a2c2a671a2e4ea7cd72dfe412d1fa6809f99f133",
+    "rubyzip_pinned": "3.7.0",
+    "existing_caxlsx_dependency": true,
+    "files": {
+      "Gemfile.lock": "47a57b5e48dc5287800821e009a1e2fbe938eef3bc9f024f64418a3faf9f180a",
+      "Gemfile": "ca316cf633bf2e8e3f503696860a10e82cf0d05803d0d23c9a6d49665d69c9f4"
+    },
+    "dependency_install_or_update": false,
+    "native_archive_api_not_yet_proven": true
+  },
+  "workflow_changed": false,
+  "migrations_changed": false,
+  "external_operations": false,
+  "whole_figure_or_stages_complete": false,
+  "pending": [
+    "Native Rails, Vue and lint on immutable checkpoint",
+    "Fresh assets, actual ZIP download and screenshot review in4Chrome projects",
+    "Remaining bulk mutation/deletion and Word gaps; no provider contract guessed"
+  ]
+}

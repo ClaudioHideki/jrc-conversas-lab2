@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 
 const session = JSON.parse(
   fs.readFileSync('/tmp/call-center-e2e-session.private', 'utf8')
@@ -8490,6 +8491,145 @@ test('institutional audio folders native verified bytes playback download and wi
       horizontal_overflow: false,
     })
   );
+  // Read-only selected download uses the same two actual inspected sources and real browser controls.
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_size=50`
+  );
+  await library.locator(`[data-audio-archive-select="${asset.id}"]`).check();
+  await library
+    .locator(`[data-audio-archive-select="${copied.item.id}"]`)
+    .check();
+  await library.locator('[data-open-audio-archive]').click();
+  await expectContainedDialog(page);
+  const archiveDialog = dialog.locator('[data-audio-archive-dialog]');
+  await expect(archiveDialog.locator('[data-audio-archive-item]')).toHaveCount(
+    2
+  );
+  const archiveConfirm = dialog.getByRole('button', {
+    name: 'Baixar ZIP',
+    exact: true,
+  });
+  await expect(archiveConfirm).toBeDisabled();
+  await expect(
+    archiveDialog.locator('[data-review-audio-archive]')
+  ).toBeEnabled();
+  await archiveDialog.locator('[data-review-audio-archive]').check();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth
+    )
+  ).toBe(false);
+  expect(
+    await page.locator('html').evaluate(node => node.classList.contains('dark'))
+  ).toBe(info.project.name.endsWith('dark'));
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-archive-reviewed.png`,
+    fullPage: false,
+  });
+  const archivePath = `${new URL(own).pathname}/audio_archives`;
+  const zipResponse = page.waitForResponse(
+    response => new URL(response.url()).pathname === archivePath
+  );
+  const downloadEvent = page.waitForEvent('download');
+  await archiveConfirm.click();
+  const archiveResponse = await zipResponse;
+  expect(archiveResponse.status()).toBe(200);
+  expect(archiveResponse.headers()['cache-control']).toBe('no-store');
+  const archivePayload = archiveResponse.request().postDataJSON();
+  expect(archivePayload.items).toHaveLength(2);
+  const downloadedZip = await downloadEvent;
+  expect(downloadedZip.suggestedFilename()).toBe('audios-institucionais.zip');
+  const zipFile = await downloadedZip.path();
+  const zipBytes = fs.readFileSync(zipFile);
+  const zipSha = createHash('sha256').update(zipBytes).digest('hex');
+  expect(zipSha).toBe(archiveResponse.headers()['x-jrc-audio-sha256']);
+  expect(archiveResponse.headers()['x-jrc-audio-account']).toBe(
+    String(target.account_id)
+  );
+  expect(archiveResponse.headers()['x-jrc-audio-unit']).toBe(
+    String(target.unit_id)
+  );
+  // Python's existing standard ZIP reader inspects the actual download without extracting or installing packages.
+  const zipReceipt = JSON.parse(
+    execFileSync(
+      'python3',
+      [
+        '-B',
+        '-c',
+        `
+import hashlib, json, sys, zipfile
+with zipfile.ZipFile(sys.argv[1]) as archive:
+    raw_manifest = archive.read('manifesto.json')
+    manifest = json.loads(raw_manifest)
+    rows = manifest['items']
+    assert manifest['schema'] == 'jrc-private-audio-archive-v1'
+    assert len(rows) == 2 and len(archive.infolist()) == 3
+    names = [entry.filename for entry in archive.infolist()]
+    assert len(set(names)) == 3 and all('/' not in name and '\\\\' not in name for name in names)
+    for row in rows:
+        data = archive.read(row['archive_name'])
+        assert len(data) == row['byte_size'] and hashlib.sha256(data).hexdigest() == row['sha256']
+    print(json.dumps({'account_id': manifest['account_id'], 'items': rows, 'entries': len(names), 'manifest_sha256': hashlib.sha256(raw_manifest).hexdigest()}))
+`,
+        zipFile,
+      ],
+      { encoding: 'utf8', timeout: 10000, maxBuffer: 65536 }
+    )
+  );
+  expect(zipReceipt.account_id).toBe(String(target.account_id));
+  expect(zipReceipt.items.map(row => row.audio_asset_id)).toEqual([
+    asset.id,
+    copied.item.id,
+  ]);
+  expect(zipReceipt.items.map(row => row.audio_version_id)).toEqual([
+    versionId,
+    copied.received_version.id,
+  ]);
+  expect(zipReceipt.items.map(row => row.sha256)).toEqual([sha256, sha256]);
+  expect(
+    zipReceipt.items.every(row => row.unit_id === String(target.unit_id))
+  ).toBe(true);
+  expect(JSON.stringify(zipReceipt)).not.toMatch(
+    /blob_id|signed_id|service_url|idempotency_key|input_digest/
+  );
+  await expect(
+    archiveDialog.locator('[data-audio-archive-delivered]')
+  ).toBeVisible();
+  const deniedArchive = await page.request.post(`${own}/audio_archives`, {
+    headers: target.operator,
+    data: archivePayload,
+  });
+  expect(deniedArchive.status()).toBe(401);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-archive-delivered.png`,
+    fullPage: false,
+  });
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-archive-native.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      synthetic: true,
+      external_homologation: false,
+      account: String(target.account_id),
+      unit: String(target.unit_id),
+      created: archiveResponse.status(),
+      zip_sha256: zipSha,
+      manifest_sha256: zipReceipt.manifest_sha256,
+      files: 2,
+      entries: zipReceipt.entries,
+      sources: [asset.id, copied.item.id],
+      exact_versions: [versionId, copied.received_version.id],
+      operator_denied: deniedArchive.status(),
+      horizontal_overflow: false,
+      provider_writes: false,
+    })
+  );
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(
+    library.locator('[data-audio-archive-select]:checked')
+  ).toHaveCount(0);
+
   // Restore the original authorized history/player so all prior withdrawal assertions remain intact.
   await page.goto(
     `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(asset.name)}`
