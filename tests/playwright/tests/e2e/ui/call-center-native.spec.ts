@@ -8317,7 +8317,12 @@ test('institutional audio folders native verified bytes playback download and wi
     fullPage: true,
   });
   // Same real native library and reviewed editor; no second catalog or provider write.
-  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  const closeHistory = dialog.getByRole('button', {
+    name: 'Fechar',
+    exact: true,
+  });
+  await expect(closeHistory).toBeVisible();
+  await closeHistory.click();
   await expect(dialog).not.toBeVisible();
   await library.locator(`[data-copy-audio-asset="${asset.id}"]`).click();
   await expectContainedDialog(page);

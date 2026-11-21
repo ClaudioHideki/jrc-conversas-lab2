@@ -1,0 +1,39 @@
+{
+  "status": "native_and_vue_and_lint_passed_four_chrome_cases_blocked_by_test_selector",
+  "producer": "25076ac1412a3bddd723e3b842b478ec860f54c9",
+  "run": 44914547936,
+  "artifact": 14713637987,
+  "artifact_sha256": "cfb80ddcf84627df0e35567758b6e2ebd4f78467007a70db30d148ff2365ea0b",
+  "native_distinct": 2438,
+  "schema_reload_separate": 175,
+  "vue": 1213,
+  "new_ruby_offenses": 0,
+  "chrome": {
+    "passed": 240,
+    "failed": 4,
+    "total": 244,
+    "pending": 0,
+    "flaky": 0,
+    "outside_errors": 0
+  },
+  "cause": "New playback-to-copy transition looked for Cancelar; actual AUDIO_FILES.CANCEL, history Dialog and runner DOM all use Fechar",
+  "correction": "Only that test transition now requires the actually visible Fechar button before clicking; no product text or behavior changed",
+  "scope_preserved": [
+    "Every previous assertion, all244cases and four projects",
+    "All production Vue/Ruby/API/policy code",
+    "All twelve frozen migrations, SQL and workflow checks",
+    "Originalb77ffe55 and3pendingfile hashes; main and protected services"
+  ],
+  "copy_new_chrome_assertions_reached": false,
+  "new_native_execution_required": true,
+  "actual_failure_images_opened": [
+    "desktop-dark-actual-history-close.png",
+    "mobile-light-actual-history-close.png"
+  ],
+  "visual_observation": "Actual Fechar footer visible and readable in dark desktop and light390px mobile; no Cancelar button in the history dialog",
+  "image_integrity": "Selected PNGs recovered from the verified artifact; complete acceptance screenshot manifest absent because the Chrome gate failed",
+  "still_pending": [
+    "Four-project complete copy flow including original withdrawal assertions",
+    "Full stages/23figures and external provider homologation"
+  ]
+}

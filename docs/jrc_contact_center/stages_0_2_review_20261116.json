@@ -6583,5 +6583,22 @@
     "report": "docs/jrc_contact_center/audio_copy_first_native_20261121.json",
     "status": "native_backend_and_vue_passed_ruby_lint_blocked_assets_chrome",
     "whole_figures_complete": false
+  },
+  "audio_copy_chrome_close_diagnosis_20261121": {
+    "producer": "25076ac1412a3bddd723e3b842b478ec860f54c9",
+    "report": "docs/jrc_contact_center/audio_copy_chrome_close_diagnosis_20261121.json",
+    "passed": 240,
+    "failed": 4,
+    "selector_only_fix": true,
+    "new_chrome_gate_pending": true,
+    "whole_figure_complete": false
+  },
+  "nico_review_user_confirmation_20261121": {
+    "permission": "jrc_contact_center_quality_review",
+    "own_explicit_profile_or_team_grant": true,
+    "authorized_recording_access_required": true,
+    "automatic_administrator_grant": false,
+    "real_grants_changed": false,
+    "full_review_pending_proven_source_binding": true
   }
 }

@@ -807,3 +807,7 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 
 - [ ] **Cópia institucional — `9b2628a4`, CI44911548351:**2438Rails distintos/175reload/1213Vue aprovados; todos2212core/115concorrentes/1188Vue anteriores e26novos Rails/25Vue conferidos. Onze infrações Ruby em três arquivos bloquearam assets/Chrome; alinhamento e três sobrescritas equivalentes de kwargs corrigidos, sem mudança de comportamento, escopo, regras, migrations ou gates. Exigir novoSHA e244Chrome; ver `docs/jrc_contact_center/audio_copy_first_native_20261121.json`.
+
+
+- [ ] **Transição Chrome da cópia — produtor25076ac1:**2438Rails/175reload/1213Vue e ambos os lints passaram. 240/244Chrome passaram; os quatro cenários ampliados pararam antes da cópia porque o novo seletor procurava Cancelar no histórico, cujo botão real é Fechar. DOM e duas screenshots efetivamente vistos confirmam a causa. Corrigido somente esse seletor com asserção de visibilidade; preservar todas as verificações e exigir novo244Chrome. Ver `docs/jrc_contact_center/audio_copy_chrome_close_diagnosis_20261121.json`.
+- [ ] **Nicofig23:**confirmada permissão própria explícita por perfil/equipe mais acesso autorizado à gravação, sem concessão automática a administrador. Fundação nativa preservada; vínculo de origem e revisão completa continuam pendentes.
