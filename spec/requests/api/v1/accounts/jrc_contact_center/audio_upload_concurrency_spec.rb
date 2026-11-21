@@ -145,6 +145,7 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
     expect(ActiveStorage::Blob.count).to eq(original_blobs + 1)
     expect(first.reload.audio_asset.name).to eq('SYNTHETIC source for conflicting copy')
   end
+
   def dispatch_audio_metadata_move(endpoint, headers, payload, barrier: false)
     workers << Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
@@ -221,5 +222,4 @@ RSpec.describe 'Institutional private audio serializes uncertain native receipts
     expect(Audited.audit_class.where(auditable: record, action: 'update')).to be_empty
     expect(member.custom_role.reload.permissions).to eq(['jrc_contact_center_view'])
   end
-
 end

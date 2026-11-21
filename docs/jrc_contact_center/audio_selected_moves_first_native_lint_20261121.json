@@ -1,0 +1,58 @@
+{
+  "producer": "90ab82f7654679cfb689e3349665bc802aee680b",
+  "run": 44937074941,
+  "artifact": 14722090155,
+  "artifact_sha256": "8beb32c5107baaa961ca57ffa80655615b27c61df2698a579b8a1db2229372b8",
+  "status": "native_backend_vue_passed_two_ruby_whitespace_findings_assets_chrome_not_executed",
+  "native_distinct": 2488,
+  "core": 2284,
+  "concurrency": 119,
+  "corporate": 85,
+  "schema_reload_separate": 175,
+  "vue": 1260,
+  "native_failures_pending_outside": 0,
+  "frontend_lint_new_findings": 0,
+  "ruby_findings": [
+    {
+      "severity": "convention",
+      "message": "Add an empty line after `it`.",
+      "cop_name": "RSpec/EmptyLineAfterExample",
+      "corrected": false,
+      "correctable": true,
+      "location": {
+        "start_line": 147,
+        "start_column": 3,
+        "last_line": 147,
+        "last_column": 5,
+        "length": 3,
+        "line": 147,
+        "column": 3
+      }
+    },
+    {
+      "severity": "convention",
+      "message": "Extra empty line detected at block body end.",
+      "cop_name": "Layout/EmptyLinesAroundBlockBody",
+      "corrected": false,
+      "correctable": true,
+      "location": {
+        "start_line": 224,
+        "start_column": 1,
+        "last_line": 225,
+        "last_column": 1,
+        "length": 1,
+        "line": 224,
+        "column": 1
+      }
+    }
+  ],
+  "correction": {
+    "path": "spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb",
+    "only_blank_lines_changed": true,
+    "nonblank_source_lines_identical": true,
+    "test_assertions_removed": 0
+  },
+  "assets_or_chrome_executed": false,
+  "new_sha_native_and_chrome_validation_required": true,
+  "whole_figure_complete": false
+}

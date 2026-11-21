@@ -823,3 +823,6 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 - [x] ZIP institucional: produtor cfe118f1, 2464 Rails/175 reload/1237 Vue/244 Chrome aprovados e oito screenshots efetivamente revisadas. Download real e manifesto inspecionados no runner; JSONs e hashes preservados. Isso não declara inventário completo do fornecedor.
 - [ ] Movimento selecionado: implementação com CAS de todas as origens, transação nativa/auditoria e popup revisado. 57 testes preliminares com mocks incluem34 anteriores; 24 casos Rails preparados, ainda não executados. Exigir CI nativa e Chrome real antes do aceite. A seleção em lote de todos os estados de metadados permanece pendente.
+
+
+- [ ] Movimento selecionado90ab82f7: 2488 Rails/175 reload/1260 Vue aprovados; dois achados Ruby exclusivamente de linhas em branco no spec de concorrência. Correção preserva todas as linhas não vazias e asserções; novo SHA exige lint, assets e Chrome.

@@ -6648,5 +6648,15 @@
     "native_and_chrome_pending": true,
     "broader_metadata_bulk_selection_pending": true,
     "full_figure_complete": false
+  },
+  "audio_selected_moves_first_native_lint_20261121": {
+    "producer": "90ab82f7654679cfb689e3349665bc802aee680b",
+    "report": "docs/jrc_contact_center/audio_selected_moves_first_native_lint_20261121.json",
+    "native": 2488,
+    "vue": 1260,
+    "ruby_findings": 2,
+    "only_blank_lines_corrected": true,
+    "assets_and_chrome_not_executed": true,
+    "revalidation_required": true
   }
 }
