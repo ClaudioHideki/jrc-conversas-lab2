@@ -1,0 +1,30 @@
+{
+  "status": "native_opus_verified_not_chrome_or_candidate_approval",
+  "producer": "e6311213a33bb45008ce26295881d06de5471699",
+  "run": 44851946596,
+  "native_distinct": 2093,
+  "schema_reload_separate": 131,
+  "vue_passed": 1054,
+  "new_native_cases_passed": [
+    "JrcContactCenter::AudioFileInput with an Opus identification header, not yet evidence of playable media reproduces the former rejection when the byte-detected Opus subtype has no canonical mapping",
+    "JrcContactCenter::AudioFileInput with an Opus identification header, not yet evidence of playable media normalizes the actual Opus container without trusting a filename or client MIME and without rewriting bytes",
+    "JrcContactCenter::AudioMediaProbe derives actual ogg metadata encoded by libopus, not fixture JSON",
+    "Institutional Opus capture passes the real private admission boundary recognizes byte-detected audio/opus and stores canonical OGG only after actual scanning and decoding",
+    "Institutional Opus capture passes the real private admission boundary when recognizable Opus headers have no decodable audio frames still rejects the file and leaves no asset, version, observation or owned staging blob"
+  ],
+  "proved": "Pinned Marcel byte detection and previous-map rejection, canonical Opus normalization without byte rewriting, real scanner/decoder HTTP admission, truncated-header rejection with no final persistence/staging orphan, real native libopus probing.",
+  "remaining_lint": {
+    "path": "spec/requests/api/v1/accounts/jrc_contact_center/audio_opus_capture_spec.rb",
+    "cop": "Layout/HashAlignment",
+    "lines": [
+      32,
+      48
+    ]
+  },
+  "correction": "Exactly two leading spaces added on each reported line; first-key zero-based columns43/45 measured. Removing those four spaces reconstructs the exact parent SHA-256. No executable token or assertion changed.",
+  "assets_and_chrome": "Skipped by mandatory lint gate.236 remain required; no visual acceptance of responsive corrections yet.",
+  "artifact": 14687141030,
+  "artifact_sha256": "f15cb999534accc87d08b6ef627d253b881c0fa26cf1f32fa43cf7839ec1f22b",
+  "full_23_figures_complete": false,
+  "external_homologation": false
+}

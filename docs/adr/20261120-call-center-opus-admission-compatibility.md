@@ -13,3 +13,5 @@ Os testes preparados reproduzem a rejeição com o mapa anterior, verificam norm
 A revisão das capturas identificou nomes de pastas comprimidos a uma letra por linha e ações estreitas no celular. A mesma árvore coloca a ação em linha própria, mantém o nome integral acessível e limita apenas a exibição visual. A mesma tabela e seus controles passam a blocos verticais no celular, com papéis explícitos e cabeçalhos acessíveis; desktop preserva as colunas. Asserções reais de largura/altura complementam a ausência de transbordamento. Não há renderização paralela, novo cadastro ou simulação de uso operacional.
 
 Síntese Nico, vínculos completos, publicação/ACK PABX, cobertura operacional de malware e conclusão das23figuras continuam pendentes. Nenhuma imagem Docker, merge ou deploy foi autorizado por esta decisão.
+
+Evidência posterior: `e6311213`/CI44851946596 aprovou os cinco casos nativos adicionados, com2.093exemplos distintos e131recargas separados,1.054Vue e zero falhas/pendências/erros. Dois alinhamentos de hash dos testes bloquearam assets eChrome; a correção seguinte altera apenas quatro espaços. A conclusão visual continua pendente no novo SHA.

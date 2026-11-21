@@ -29,7 +29,7 @@ RSpec.describe 'Institutional Opus capture passes the real private admission bou
   it 'recognizes byte-detected audio/opus and stores canonical OGG only after actual scanning and decoding' do
     expect(Marcel::MimeType.for(StringIO.new(encoded))).to eq('audio/opus')
     post base, headers: headers, params: { asset: { name: 'SYNTHETIC actual Opus' }, unit_id: unit.id, file: multipart_file,
-                                         idempotency_key: key, source_kind: 'browser_capture' }
+                                           idempotency_key: key, source_kind: 'browser_capture' }
     expect(response).to have_http_status(:created)
     version = JrcContactCenter::AudioVersion.find(response.parsed_body.fetch('received_version').fetch('id'))
     expect(version).to have_attributes(source_kind: 'browser_capture', content_type: 'audio/ogg', sha256: Digest::SHA256.hexdigest(encoded))
@@ -45,7 +45,7 @@ RSpec.describe 'Institutional Opus capture passes the real private admission bou
       original = [JrcContactCenter::AudioAsset.count, JrcContactCenter::AudioVersion.count,
                   JrcContactCenter::AudioInspection.count, ActiveStorage::Blob.count]
       post base, headers: headers, params: { asset: { name: 'SYNTHETIC truncated Opus' }, unit_id: unit.id, file: multipart_file,
-                                           idempotency_key: key, source_kind: 'browser_capture' }
+                                             idempotency_key: key, source_kind: 'browser_capture' }
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response.parsed_body).to include('error' => 'institutional_audio_invalid_codec')
       expect([JrcContactCenter::AudioAsset.count, JrcContactCenter::AudioVersion.count,
