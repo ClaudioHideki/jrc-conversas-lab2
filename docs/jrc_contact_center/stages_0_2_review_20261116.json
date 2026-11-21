@@ -6087,5 +6087,28 @@
     ],
     "full_23_figures_complete": false,
     "report": "docs/jrc_contact_center/audio_browser_capture_verified_20261121.json"
+  },
+  "quality_review_fixture_correction_20261121": {
+    "status": "real_failure_preserved_test_only_correction_awaits_new_native_ci",
+    "producer": "93935376e33b3ee598e9e9f983cd8d5d6e4ae6c7",
+    "run": 44865637660,
+    "reload": {
+      "examples": 159,
+      "passed": 158,
+      "failures": 1,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "new_policy_cases": {
+      "passed": 16,
+      "failed": 0
+    },
+    "new_migration_cases": {
+      "passed": 11,
+      "failed": 1
+    },
+    "report": "docs/jrc_contact_center/quality_review_fixture_correction_20261121.json",
+    "product_and_migration_unchanged": true,
+    "full_23_figures_complete": false
   }
 }

@@ -69,9 +69,9 @@ RSpec.describe JrcContactCenter::ModulePolicy, '#quality_review?' do
     expect(team.team_members.exists?(user: user)).to be(true)
   end
 
-  [
-    'jrc_contact_center_view', 'jrc_contact_center_recordings_view',
-    'jrc_contact_center_recordings_listen', 'jrc_contact_center_quality_review'
+  %w[
+    jrc_contact_center_view jrc_contact_center_recordings_view
+    jrc_contact_center_recordings_listen jrc_contact_center_quality_review
   ].each do |denied|
     it "honors explicit #{denied} denial over profile, team and individual grants" do
       role.update!(permissions: recording + [review])

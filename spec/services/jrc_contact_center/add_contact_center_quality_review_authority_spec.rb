@@ -36,6 +36,18 @@ RSpec.describe AddContactCenterQualityReviewAuthority, type: :model do
     connection.check_constraints(table).to_h { |constraint| [constraint.name, [constraint.expression, constraint.validate?]] }
   end
 
+  def write_raw_capabilities(field, capabilities)
+    raise 'Known synthetic capability column required' unless %w[allowed denied].include?(field)
+
+    column = connection.quote_column_name(field)
+    entries = capabilities.map { |capability| connection.quote(capability) }.join(', ')
+    connection.execute(<<~SQL.squish)
+      UPDATE #{connection.quote_table_name(table)}
+      SET #{column} = ARRAY[#{entries}]::text[]
+      WHERE id = #{connection.quote(grant.id)}
+    SQL
+  end
+
   it 'accepts an already upgraded installation without manufacturing grants' do
     previous = definitions
     rows = JrcContactCenter::AccessGrant.order(:id).map(&:attributes)
@@ -67,17 +79,17 @@ RSpec.describe AddContactCenterQualityReviewAuthority, type: :model do
       grant
       legacy_constraints
       expect do
-        connection.transaction(requires_new: true) { grant.update_column(field, [review]) }
+        connection.transaction(requires_new: true) { write_raw_capabilities(field, [review]) }
       end.to raise_error(ActiveRecord::StatementInvalid)
       migration.up
-      grant.reload.update_column(field, [review])
+      grant.reload.update!(field => [review])
       expect(grant.reload.public_send(field)).to eq([review])
     end
 
     it "continues rejecting unknown #{field} rights at the SQL boundary" do
       grant
       expect do
-        connection.transaction(requires_new: true) { grant.update_column(field, ['unregistered_review_admin']) }
+        connection.transaction(requires_new: true) { write_raw_capabilities(field, ['unregistered_review_admin']) }
       end.to raise_error(ActiveRecord::StatementInvalid)
       expect(grant.reload.public_send(field)).to eq([])
     end
@@ -110,12 +122,18 @@ RSpec.describe AddContactCenterQualityReviewAuthority, type: :model do
     legacy_constraints
     previous = definitions
     attributes = grant.attributes
-    allow(migration).to receive(:add_check_constraint).and_wrap_original do |original, *args, **options|
-      raise ActiveRecord::MigrationError, 'SYNTHETIC second-constraint failure' if options[:name] == 'cc_access_denied_known'
+    expanded = expression('allowed', described_class::LEGACY_CAPABILITIES + [review])
+    first_applied = false
+    allow(migration.connection).to receive(:add_check_constraint).and_wrap_original do |original, *args, **options|
+      if options[:name] == 'cc_access_denied_known'
+        first_applied = definitions.fetch('cc_access_allowed_known').first == expanded
+        raise ActiveRecord::MigrationError, 'SYNTHETIC second-constraint failure'
+      end
 
       original.call(*args, **options)
     end
     expect { migration.up }.to raise_error(ActiveRecord::MigrationError, /SYNTHETIC second-constraint failure/)
+    expect(first_applied).to be(true)
     expect(definitions).to eq(previous)
     expect(grant.reload.attributes).to eq(attributes)
   end

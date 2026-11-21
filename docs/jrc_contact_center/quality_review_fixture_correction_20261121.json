@@ -1,0 +1,54 @@
+{
+  "status": "real_failure_preserved_test_only_correction_awaits_new_native_ci",
+  "producer": "93935376e33b3ee598e9e9f983cd8d5d6e4ae6c7",
+  "run": 44865637660,
+  "job": 136728551601,
+  "fresh_installation": "passed",
+  "schema_load": "passed; actual checks/probes and159RSpec examples executed",
+  "reload": {
+    "examples": 159,
+    "passed": 158,
+    "failures": 1,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "new_policy_cases": {
+    "passed": 16,
+    "failed": 0
+  },
+  "new_migration_cases": {
+    "passed": 11,
+    "failed": 1
+  },
+  "root_cause": "Our rollback test mocked add_check_constraint on the migration instance; Rails delegates it and verifying doubles correctly refused the nonexistent method.",
+  "correction": [
+    "Intercept the real migration.connection adapter, preserving actual PostgreSQL DDL and the induced second-constraint failure",
+    "Additionally prove the first replacement was actually observed before failure, then compare all restored constraints and unchanged persisted grant",
+    "Use guarded direct SQL only for negative database-boundary probes; the positive model path uses update! with validations",
+    "Preserve all four explicit-denial variants using the required word-array style"
+  ],
+  "new_lint_offenses_before": 4,
+  "lint_disabled": false,
+  "assertions_removed": false,
+  "product_logic_migration_and_ci_changed": false,
+  "unchanged_source_sha256": {
+    "db/migrate/20261121003000_add_contact_center_quality_review_authority.rb": "1e40fdf573254db5aae23d7474db96c2052818532c0ca0cc5b398807df889cd0",
+    "app/policies/jrc_contact_center/module_policy.rb": "7600c7111a23f02e6dda05a312b09d5661f3d0a285bf724dafaea99a27d0c965",
+    "app/javascript/dashboard/constants/contactCenterPermissions.js": "038c902f1cbb090cd9d4b8502994d8f3a64ac90f572d09dbd99ff5d1582eae1f",
+    "app/javascript/dashboard/i18n/locale/en/customRole.json": "5667d3b26215b816c296abd93c5eb81bb0566e6ac2451842afcf448563ddeeef",
+    ".github/workflows/call-center-administration.yml": "a1262fcf4a59637a09de903478a316ce00a2b14f83203cc5cb4d48dff4f0ed0a",
+    "script/validate_cc_access_migration.mjs": "3cf24391e3c97093e332f3d59ad08f49b121ba311a96bc61747cb662ca749ed5",
+    "script/validate_cc_access_migration.test.mjs": "e4849c66f90c7513296e8bfd8a9b8faaff21dcf6fb561445732405871a0cb66a"
+  },
+  "not_run": [
+    "Main Rails/API regressions",
+    "Vue",
+    "Frontend lint",
+    "Assets",
+    "236Chrome"
+  ],
+  "artifact": 14691609441,
+  "artifact_sha256": "c4452b9d5a67e08bcd0ce2c0850b1ebc839878921797ad81a9198ded875ef67e",
+  "new_sha_native_and_chrome_approval": "Pending; previous audio approval is limited to bfe0d49d",
+  "full_23_figures_complete": false
+}
