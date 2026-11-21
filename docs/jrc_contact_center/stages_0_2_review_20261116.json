@@ -6829,5 +6829,15 @@
     "same_chrome_cases": 244,
     "actually_opened": 12,
     "full_word_complete": false
+  },
+  "unit_calendars_first_native_lint_20261121": {
+    "producer": "866832eee11bd512598204000e4e94333546970d",
+    "report": "docs/jrc_contact_center/unit_calendars_first_native_lint_20261121.json",
+    "native_passed": 2541,
+    "separate_reload_passed": 175,
+    "vue_passed": 1374,
+    "ruby_new_offenses": 19,
+    "chrome": "not_run",
+    "status": "correction_prepared_revalidation_pending"
   }
 }

@@ -171,6 +171,30 @@ RSpec.describe 'Call Center internal unit calendars retain native scope, revisio
     expect(unit.reload.settings).not_to have_key(JrcContactCenter::CalendarCatalogState::KEY)
   end
 
+  {
+    zero_version: ->(state) { state['version'] = 0 },
+    foreign_scope: ->(state) { state.fetch('scope_snapshot')['account_id'] = '999999999999' },
+    extra_header: ->(state) { state['authority'] = false },
+    duplicate_identity: ->(state) { state.fetch('entries') << state.fetch('entries').first.deep_dup },
+    string_active: ->(state) { state.fetch('entries').first['active'] = 'true' },
+    too_many_entries: lambda do |state|
+      source = state.fetch('entries').sole
+      state['entries'] = Array.new(101) { source.deep_dup.merge('id' => SecureRandom.uuid) }
+    end
+  }.each do |name, change|
+    it "preserves the stored catalog and its audit when an internal caller supplies #{name}" do
+      post base, headers: headers, params: body, as: :json
+      expect(response).to have_http_status(:created)
+      stored = unit.reload.settings.deep_dup
+      audits = Audited.audit_class.where(auditable: unit).count
+      changed = stored.deep_dup
+      change.call(changed.fetch(JrcContactCenter::CalendarCatalogState::KEY))
+      expect(unit.update(settings: changed)).to be(false)
+      expect(unit.reload.settings).to eq(stored)
+      expect(Audited.audit_class.where(auditable: unit).count).to eq(audits)
+    end
+  end
+
   it 'does not remove or transfer a catalog silently when another internal caller changes the unit settings' do
     post base, headers: headers, params: body, as: :json
     expect(response).to have_http_status(:created)

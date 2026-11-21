@@ -1,0 +1,364 @@
+{
+  "producer": "866832eee11bd512598204000e4e94333546970d",
+  "run": 44960897572,
+  "artifact": 14730592144,
+  "artifact_sha256": "febe19a763ba49d30211c6673924b560e9cdb65cdd57c5c3f7529e57c40c6116",
+  "status": "failed_gate_preserved_not_an_accepted_candidate",
+  "native_passed": 2541,
+  "separate_schema_reload": 175,
+  "native_summaries": {
+    "call-center-rspec.json": {
+      "duration": 356.512577571,
+      "example_count": 2334,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-pabx-rspec.json": {
+      "duration": 50.884516955,
+      "example_count": 122,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-corporate-rspec.json": {
+      "duration": 297.586653056,
+      "example_count": 85,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "duration": 14.026676653,
+      "example_count": 175,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    }
+  },
+  "vue_passed": 1374,
+  "new_ruby_offenses": {
+    "app/controllers/api/v1/accounts/jrc_contact_center/unit_calendars_controller.rb": [
+      {
+        "severity": "convention",
+        "message": "Align the arguments of a method call if they span more than one line.",
+        "cop_name": "Layout/ArgumentAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 13,
+          "start_column": 36,
+          "last_line": 13,
+          "last_column": 65,
+          "length": 30,
+          "line": 13,
+          "column": 36
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Align the keys of a hash literal if they span more than one line.",
+        "cop_name": "Layout/HashAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 13,
+          "start_column": 36,
+          "last_line": 13,
+          "last_column": 65,
+          "length": 30,
+          "line": 13,
+          "column": 36
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Align the arguments of a method call if they span more than one line.",
+        "cop_name": "Layout/ArgumentAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 14,
+          "start_column": 36,
+          "last_line": 14,
+          "last_column": 67,
+          "length": 32,
+          "line": 14,
+          "column": 36
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Align the keys of a hash literal if they span more than one line.",
+        "cop_name": "Layout/HashAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 14,
+          "start_column": 36,
+          "last_line": 14,
+          "last_column": 67,
+          "length": 32,
+          "line": 14,
+          "column": 36
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Align the arguments of a method call if they span more than one line.",
+        "cop_name": "Layout/ArgumentAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 21,
+          "start_column": 36,
+          "last_line": 21,
+          "last_column": 51,
+          "length": 16,
+          "line": 21,
+          "column": 36
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Align the keys of a hash literal if they span more than one line.",
+        "cop_name": "Layout/HashAlignment",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 21,
+          "start_column": 36,
+          "last_line": 21,
+          "last_column": 51,
+          "length": 16,
+          "line": 21,
+          "column": 36
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Cyclomatic complexity for `selected_rows` is too high. [8/7]",
+        "cop_name": "Metrics/CyclomaticComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 70,
+          "start_column": 3,
+          "last_line": 80,
+          "last_column": 5,
+          "length": 579,
+          "line": 70,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Avoid multi-line chains of blocks.",
+        "cop_name": "Style/MultilineBlockChain",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 79,
+          "start_column": 5,
+          "last_line": 79,
+          "last_column": 15,
+          "length": 11,
+          "line": 79,
+          "column": 5
+        }
+      }
+    ],
+    "app/controllers/api/v1/accounts/jrc_contact_center/units_controller.rb": [
+      {
+        "severity": "convention",
+        "message": "Assignment Branch Condition size for unit_params is too high. [<4, 26, 4> 26.61/26]",
+        "cop_name": "Metrics/AbcSize",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 31,
+          "start_column": 3,
+          "last_line": 42,
+          "last_column": 5,
+          "length": 741,
+          "line": 31,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`.",
+        "cop_name": "Style/IfUnlessModifier",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 35,
+          "start_column": 5,
+          "last_line": 35,
+          "last_column": 6,
+          "length": 2,
+          "line": 35,
+          "column": 5
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Add empty line after guard clause.",
+        "cop_name": "Layout/EmptyLineAfterGuardClause",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 37,
+          "start_column": 5,
+          "last_line": 37,
+          "last_column": 7,
+          "length": 3,
+          "line": 37,
+          "column": 5
+        }
+      }
+    ],
+    "app/services/jrc_contact_center/calendar_catalog.rb": [
+      {
+        "severity": "convention",
+        "message": "Cyclomatic complexity for `write_entry!` is too high. [8/7]",
+        "cop_name": "Metrics/CyclomaticComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 43,
+          "start_column": 3,
+          "last_line": 57,
+          "last_column": 5,
+          "length": 631,
+          "line": 43,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Ternary operators must not be nested. Prefer `if` or `else` constructs instead.",
+        "cop_name": "Style/NestedTernaryOperator",
+        "corrected": false,
+        "correctable": true,
+        "location": {
+          "start_line": 55,
+          "start_column": 42,
+          "last_line": 55,
+          "last_column": 91,
+          "length": 50,
+          "line": 55,
+          "column": 42
+        }
+      }
+    ],
+    "app/services/jrc_contact_center/calendar_catalog_state.rb": [
+      {
+        "severity": "convention",
+        "message": "Assignment Branch Condition size for validate! is too high. [<4, 26, 16> 30.79/26]",
+        "cop_name": "Metrics/AbcSize",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 20,
+          "start_column": 3,
+          "last_line": 30,
+          "last_column": 5,
+          "length": 558,
+          "line": 20,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Cyclomatic complexity for `validate!` is too high. [12/7]",
+        "cop_name": "Metrics/CyclomaticComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 20,
+          "start_column": 3,
+          "last_line": 30,
+          "last_column": 5,
+          "length": 558,
+          "line": 20,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Perceived complexity for `validate!` is too high. [12/8]",
+        "cop_name": "Metrics/PerceivedComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 20,
+          "start_column": 3,
+          "last_line": 30,
+          "last_column": 5,
+          "length": 558,
+          "line": 20,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Cyclomatic complexity for `entry!` is too high. [8/7]",
+        "cop_name": "Metrics/CyclomaticComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 32,
+          "start_column": 3,
+          "last_line": 41,
+          "last_column": 5,
+          "length": 479,
+          "line": 32,
+          "column": 3
+        }
+      }
+    ],
+    "app/services/jrc_contact_center/calendar_definition.rb": [
+      {
+        "severity": "convention",
+        "message": "Cyclomatic complexity for `rows!` is too high. [9/7]",
+        "cop_name": "Metrics/CyclomaticComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 91,
+          "start_column": 3,
+          "last_line": 98,
+          "last_column": 5,
+          "length": 331,
+          "line": 91,
+          "column": 3
+        }
+      },
+      {
+        "severity": "convention",
+        "message": "Perceived complexity for `rows!` is too high. [9/8]",
+        "cop_name": "Metrics/PerceivedComplexity",
+        "corrected": false,
+        "correctable": false,
+        "location": {
+          "start_line": 91,
+          "start_column": 3,
+          "last_line": 98,
+          "last_column": 5,
+          "length": 331,
+          "line": 91,
+          "column": 3
+        }
+      }
+    ]
+  },
+  "total_new_ruby_offenses": 19,
+  "assets_and_chrome": "not_run_due_to_gate_failure",
+  "correction_intent": [
+    "Only alignment, separated input-shape predicates, separate validated filters and a nonnested row replacement helper",
+    "Same permission/Account mutex, native unit/company scopes, strict fields/types/limits/UUIDs, normalization, CAS and audit; no migration or workflow changes",
+    "Six additional native cases reject invalid state without modifying stored JSONB or its audit"
+  ],
+  "corrected_candidate_still_requires_native_gates_and_chrome": true
+}

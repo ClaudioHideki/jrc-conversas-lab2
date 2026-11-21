@@ -90,7 +90,7 @@ class JrcContactCenter::CalendarDefinition
 
   def rows!(input, fields)
     invalid! unless input.is_a?(Array) && input.length <= 1000
-    invalid! unless input.all? { |row| row.is_a?(Hash) && row.keys.all?(String) && row.keys.sort == fields.sort }
+    invalid! unless input.all? { |row| valid_row_fields?(row, fields) }
     dates = input.map { |row| row.fetch('date') }
     invalid! unless dates.uniq.length == dates.length
 
@@ -99,5 +99,9 @@ class JrcContactCenter::CalendarDefinition
 
   def invalid!
     raise JrcContactCenter::OperationError, 'invalid_contact_center_calendar'
+  end
+
+  def valid_row_fields?(row, fields)
+    row.is_a?(Hash) && row.keys.all?(String) && row.keys.sort == fields.sort
   end
 end

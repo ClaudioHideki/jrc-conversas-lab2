@@ -845,3 +845,11 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [x] Verificar 55 testes leves da projeção formatada e nenhuma infração nova; 32 avisos antigos do componente administrativo permanecem registrados.
 - [ ] Executar os 38 cenários Rails preparados, regressões, build protegido de assets e Chrome nativo em quatro projetos.
 - [ ] Homologar vínculos/impactos, recorrência, calendário totalmente fechado e PABX, conforme o relatório preparado. Não declarar as23 figuras concluídas.
+
+
+## Call Center — 21/11/2026 — correção do primeiro gate de calendários
+
+- [x] Preservar o checkpoint 866832ee e a reprovação real: 2.541 testes nativos, 175 de recarga e 1.374 Vue aprovados; 19 infrações Ruby novas.
+- [x] Corrigir as cinco fontes afetadas sem remover validações e preparar seis casos adicionais de rejeição persistente.
+- [ ] Revalidar o novo SHA nos gates existentes; assets e Chrome ainda não executados para este incremento.
+- [ ] Continuar os vínculos tipados e impactos do calendário sem inventar referências PABX.

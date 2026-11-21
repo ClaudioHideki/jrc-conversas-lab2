@@ -18,9 +18,8 @@ class JrcContactCenter::CalendarCatalogState
   end
 
   def validate!(state)
-    header = state.is_a?(Hash) && state.keys.all?(String) && state.keys.sort == %w[entries scope_snapshot version] &&
-             state['version'].is_a?(Integer) && state['version'].positive? && state.to_json.bytesize <= MAX_BYTES
-    invalid! unless header && state['scope_snapshot'] == scope
+    invalid! unless valid_header?(state)
+    invalid! unless state['scope_snapshot'] == scope
     entries = state.fetch('entries')
     invalid! unless entries.is_a?(Array) && entries.length <= MAX_ENTRIES
     ids = entries.map { |row| entry!(row).fetch('id') }
@@ -30,9 +29,7 @@ class JrcContactCenter::CalendarCatalogState
   end
 
   def entry!(input)
-    valid = input.is_a?(Hash) && input.keys.all?(String) && input.keys.sort == %w[active definition id] &&
-            input['id'].is_a?(String) && UUID.match?(input['id']) && [true, false].include?(input['active'])
-    invalid! unless valid
+    invalid! unless valid_entry_shape?(input)
     definition = JrcContactCenter::CalendarDefinition.new(input.fetch('definition')).values
     normalized = input.merge('definition' => definition)
     invalid! unless normalized == input
@@ -46,5 +43,17 @@ class JrcContactCenter::CalendarCatalogState
 
   def invalid!
     raise JrcContactCenter::OperationError, 'invalid_contact_center_calendar_catalog'
+  end
+
+  private
+
+  def valid_header?(state)
+    state.is_a?(Hash) && state.keys.all?(String) && state.keys.sort == %w[entries scope_snapshot version] &&
+      state['version'].is_a?(Integer) && state['version'].positive? && state.to_json.bytesize <= MAX_BYTES
+  end
+
+  def valid_entry_shape?(input)
+    input.is_a?(Hash) && input.keys.all?(String) && input.keys.sort == %w[active definition id] &&
+      input['id'].is_a?(String) && UUID.match?(input['id']) && [true, false].include?(input['active'])
   end
 end

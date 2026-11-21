@@ -9,16 +9,19 @@ class Api::V1::Accounts::JrcContactCenter::UnitCalendarsController < Api::V1::Ac
     page = page_number(:page, 1, 1_000_000)
     limit = page_number(:per_page, 20, 100)
     metadata = { page: page, per_page: limit, total: rows.length, pages: (rows.length.to_f / limit).ceil }
-    render json: base_payload.merge(items: rows.slice((page - 1) * limit, limit) || [], meta: metadata,
-                                   unit_id: data.fetch('unit_id'), unit_name: data.fetch('unit_name'), unit_timezone: data.fetch('unit_timezone'),
-                                   revision: data.fetch('revision'), local_only: true, pabx_confirmed: false)
+    render json: base_payload.merge(
+      items: rows.slice((page - 1) * limit, limit) || [], meta: metadata,
+      unit_id: data.fetch('unit_id'), unit_name: data.fetch('unit_name'), unit_timezone: data.fetch('unit_timezone'),
+      revision: data.fetch('revision'), local_only: true, pabx_confirmed: false
+    )
   end
 
   def show
     data = catalog.call
     item = data.fetch('entries').find { |row| row.fetch('id') == params[:id] } || raise(ActiveRecord::RecordNotFound)
-    render json: base_payload.merge(item: item, unit_id: data.fetch('unit_id'), revision: data.fetch('revision'),
-                                   local_only: true, pabx_confirmed: false)
+    render json: base_payload.merge(
+      item: item, unit_id: data.fetch('unit_id'), revision: data.fetch('revision'), local_only: true, pabx_confirmed: false
+    )
   end
 
   def create
@@ -68,15 +71,21 @@ class Api::V1::Accounts::JrcContactCenter::UnitCalendarsController < Api::V1::Ac
   end
 
   def selected_rows(rows)
+    query, status = calendar_filters
+    filtered = rows.select do |row|
+      row.fetch('definition').fetch('name').downcase.include?(query) &&
+        (status == 'all' || row.fetch('active') == (status == 'active'))
+    end
+    filtered.sort_by { |row| [row.fetch('definition').fetch('name').downcase, row.fetch('id')] }
+  end
+
+  def calendar_filters
     query = params.fetch(:q, '')
     status = params.fetch(:status, 'all')
     valid = query.is_a?(String) && query.length <= 100 && %w[all active inactive].include?(status)
     raise JrcContactCenter::OperationError, 'invalid_contact_center_calendar_filter' unless valid
 
-    rows.select do |row|
-      row.fetch('definition').fetch('name').downcase.include?(query.strip.downcase) &&
-        (status == 'all' || row.fetch('active') == (status == 'active'))
-    end.sort_by { |row| [row.fetch('definition').fetch('name').downcase, row.fetch('id')] }
+    [query.strip.downcase, status]
   end
 
   def page_number(key, fallback, maximum)

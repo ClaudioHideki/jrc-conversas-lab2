@@ -52,8 +52,14 @@ class JrcContactCenter::CalendarCatalog
     JrcContactCenter::ConfigurationRevision.check_token!(revision, expected_revision)
     return if current == entry
 
-    updated = current ? rows.map { |row| row.fetch('id') == entry.fetch('id') ? entry : row } : rows + [entry]
+    updated = replace_entry(rows, entry, current: current)
     persist!(before.merge('entries' => updated, 'version' => before.fetch('version') + 1))
+  end
+
+  def replace_entry(rows, entry, current:)
+    return rows + [entry] unless current
+
+    rows.map { |row| row.fetch('id') == entry.fetch('id') ? entry : row }
   end
 
   def check_identity!(create, current)
