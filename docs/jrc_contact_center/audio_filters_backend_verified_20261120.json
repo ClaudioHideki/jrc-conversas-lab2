@@ -1,0 +1,23 @@
+{
+  "status": "partial_native_and_vue_verified_not_chrome_or_candidate_approval",
+  "producer": "fb0fcbd202635e68b16317929ae52348ecf3ff35",
+  "run": 44838925096,
+  "native_distinct": 2088,
+  "schema_reload_separate": 131,
+  "vue_passed": 1054,
+  "new_native_filter_cases_passed": 10,
+  "new_vue_filter_cases_passed": 4,
+  "proved": "Real current-version filtering excludes a historical origin, combines native name/source/format with totals and pagination, rejects malformed criteria, preserves unit/configuration denial; Vue keeps route state and discards old responses.",
+  "prior_abc_offenses": "Both source validation and receipt-render issues are resolved in this report.",
+  "remaining_abc": {
+    "path": "app/controllers/api/v1/accounts/jrc_contact_center/audio_assets_controller.rb",
+    "method": "index",
+    "value": 26.94,
+    "limit": 26
+  },
+  "correction_prepared": "Move the unchanged scoped filter construction into private version_filtered; native authority, selection, parameters and all assertions remain identical.",
+  "assets_and_chrome": "Not executed;236 remain mandatory. No physical device or provider homologation claimed.",
+  "artifact": 14681572990,
+  "artifact_sha256": "cf53f41be3a1388089c1f40c4d32e05e8c8a2ee0d6eb232a8a8b6a8517f0fc7d",
+  "full_23_figures_complete": false
+}

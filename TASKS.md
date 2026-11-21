@@ -751,3 +751,5 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] **CC-AUDIO-FILTERS-20261120:** Filtros de origem/formato da versão atual na relação nativa autorizada, antes da busca/contagem/paginação. Rota, recarga e remoção preservam a unidade;10HTTP,4Vue e236Chrome ampliados pendentes. Usos/status operacional continuam abertos. Ver `docs/jrc_contact_center/audio_current_filters_prepared_20261120.json`.
 
 - **Evidência parcial `ca831c77` / CI `44834724720`:** 2.078 Rails distintos,131recargas e1.050Vue aprovados, incluindo12HTTP/25Vue de gravação. Alinhamento resolvido; dois limites ABC bloquearam assets/236Chrome. Preparada separação sem mudança funcional de validação e recibo, sem exceções de lint. Ver `docs/jrc_contact_center/audio_capture_backend_verified_20261120.json`.
+
+- **Evidência parcial `fb0fcbd2` / CI `44838925096`:** 2.088 Rails distintos,131recargas e1.054Vue aprovados. Dez HTTP/quatro Vue de filtros passaram; os dois ABC anteriores foram resolvidos. Index26,94/26 ainda bloqueou assets/236Chrome, com extração privada equivalente preparada. Ver `docs/jrc_contact_center/audio_filters_backend_verified_20261120.json`.
