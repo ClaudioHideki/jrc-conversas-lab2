@@ -5,7 +5,7 @@ require 'digest'
 # Header inspection is admission to private quarantine, never evidence of a clean or playable file.
 class JrcContactCenter::AudioFileInput
   TYPES = { 'audio/mpeg' => 'audio/mpeg', 'audio/wav' => 'audio/wav', 'audio/x-wav' => 'audio/wav',
-            'audio/vnd.wave' => 'audio/wav', 'audio/ogg' => 'audio/ogg', 'audio/mp4' => 'audio/mp4' }.freeze
+            'audio/vnd.wave' => 'audio/wav', 'audio/ogg' => 'audio/ogg', 'audio/opus' => 'audio/ogg', 'audio/mp4' => 'audio/mp4' }.freeze
   attr_reader :file, :filename, :content_type, :byte_size, :sha256
 
   def self.max_bytes

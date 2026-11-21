@@ -126,7 +126,7 @@ onBeforeUnmount(clear);
 <template>
   <li class="min-w-0 space-y-2" :data-audio-folder="folder.id">
     <div
-      class="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-n-weak bg-n-solid-1 p-3"
+      class="grid min-w-0 grid-cols-[1.75rem_minmax(0,1fr)] items-start gap-2 rounded-xl border border-n-weak bg-n-solid-1 p-3"
     >
       <button
         type="button"
@@ -151,7 +151,8 @@ onBeforeUnmount(clear);
         type="button"
         :disabled="!canManage || busy"
         :data-open-audio-folder="folder.id"
-        class="flex min-w-0 flex-1 items-start gap-2 break-words text-left text-n-blue-11"
+        :title="folder.name"
+        class="flex w-full min-w-0 items-start gap-2 break-words text-left text-n-blue-11"
         @click="emit('navigate', folder.id)"
       >
         <Icon
@@ -159,13 +160,13 @@ onBeforeUnmount(clear);
           class="mt-0.5 size-4 shrink-0"
           aria-hidden="true"
         />
-        <span class="min-w-0 break-words">{{ folder.name }}</span>
+        <span class="line-clamp-2 min-w-0 break-words">{{ folder.name }}</span>
       </button>
       <button
         type="button"
         :disabled="!canManage || busy"
         :data-edit-audio-folder="folder.id"
-        class="max-w-full break-words rounded-lg border border-n-blue-6 px-2 py-2 text-sm text-n-blue-11 disabled:opacity-40"
+        class="col-start-2 max-w-full justify-self-start break-words rounded-lg border border-n-blue-6 px-2 py-2 text-sm text-n-blue-11 disabled:opacity-40"
         @click="emit('edit', folder)"
       >
         {{ labels.EDIT }}

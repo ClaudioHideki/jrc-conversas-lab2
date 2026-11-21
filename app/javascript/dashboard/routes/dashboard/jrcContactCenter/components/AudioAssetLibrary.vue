@@ -569,14 +569,20 @@ onBeforeUnmount(() => {
         class="max-h-[36rem] min-w-0 overflow-auto overscroll-contain rounded-xl border border-n-weak"
         data-audio-file-scroll
       >
-        <table class="w-full table-fixed text-left text-sm text-n-slate-12">
+        <table
+          role="table"
+          class="block w-full table-fixed text-left text-sm text-n-slate-12 sm:table"
+        >
           <caption class="sr-only">
             {{
               label('TITLE')
             }}
           </caption>
-          <thead class="sticky top-0 bg-n-solid-2">
-            <tr>
+          <thead
+            role="rowgroup"
+            class="sr-only sm:not-sr-only sm:sticky sm:top-0 sm:bg-n-solid-2"
+          >
+            <tr role="row">
               <th scope="col" class="w-1/2 p-3 sm:w-2/5">
                 {{ label('NAME') }}
               </th>
@@ -591,15 +597,23 @@ onBeforeUnmount(() => {
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-n-weak bg-n-solid-1">
+          <tbody
+            role="rowgroup"
+            class="block divide-y divide-n-weak bg-n-solid-1 sm:table-row-group"
+          >
             <tr
               v-for="row in items"
               :key="row.id"
+              role="row"
+              class="grid grid-cols-1 sm:table-row"
               :data-audio-asset="row.id"
               :aria-selected="details?.id === row.id"
               :class="details?.id === row.id ? 'bg-n-blue-2' : ''"
             >
-              <td class="min-w-0 break-words p-3 align-top">
+              <td
+                role="cell"
+                class="block min-w-0 break-words p-3 align-top sm:table-cell"
+              >
                 <button
                   type="button"
                   :data-audio-asset-details-open="row.id"
@@ -625,12 +639,19 @@ onBeforeUnmount(() => {
                 </p>
               </td>
               <td
+                role="cell"
                 class="hidden min-w-0 break-words p-3 align-top text-n-slate-11 sm:table-cell"
                 :data-audio-file-duration="row.id"
               >
                 {{ duration(row.latest_version) }}
               </td>
-              <td class="min-w-0 break-words p-3 align-top text-n-slate-11">
+              <td
+                role="cell"
+                class="block min-w-0 break-words p-3 align-top text-n-slate-11 sm:table-cell"
+              >
+                <p class="mb-1 font-semibold text-n-slate-12 sm:hidden">
+                  {{ label('VERSION') }}
+                </p>
                 <p v-if="row.latest_version">
                   {{ versionDescription(row.latest_version) }}
                 </p>
@@ -639,7 +660,13 @@ onBeforeUnmount(() => {
                 </p>
                 <p class="mt-2 text-n-amber-11">{{ label('PRIVATE') }}</p>
               </td>
-              <td class="min-w-0 break-words p-3 align-top">
+              <td
+                role="cell"
+                class="block min-w-0 break-words p-3 align-top sm:table-cell"
+              >
+                <p class="mb-1 font-semibold sm:hidden">
+                  {{ label('ACTIONS') }}
+                </p>
                 <div class="flex flex-wrap gap-2">
                   <button
                     type="button"

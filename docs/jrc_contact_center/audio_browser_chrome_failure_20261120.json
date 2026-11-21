@@ -1,0 +1,69 @@
+{
+  "status": "partial_native_vue_assets_and_chrome_not_candidate_approval",
+  "producer": "8348dabec2904eac765ed45c00c1c3ffb19dd6f5",
+  "run": 44843469401,
+  "job": 136657352280,
+  "native_distinct": 2088,
+  "schema_reload_separate": 131,
+  "vue_passed": 1054,
+  "frontend_lint": "passed",
+  "new_ruby_offenses": 0,
+  "fresh_assets": "passed",
+  "actual_chrome_bootstrap": "15 cards; zero page or HTTP errors",
+  "chrome": {
+    "required": 236,
+    "passed": 228,
+    "failed": 8,
+    "skipped": 0,
+    "flaky": 0,
+    "outside_errors": 0,
+    "passed_per_project": 57
+  },
+  "failures": [
+    "Four card-navigation cases retained an obsolete exact limits text; the truthful new product notice is preserved.",
+    "Four actual synthetic-device recordings remuxed and played locally, but native saving returned422. Its response body was not captured by the original assertion."
+  ],
+  "confirmed_source_incompatibility": {
+    "pinned_gem": "Marcel1.1.0",
+    "official_source": "https://github.com/rails/marcel/blob/v1.1.0/lib/marcel/tables.rb",
+    "evidence": "The pinned magic table identifies Ogg/Opus as audio/opus; AudioFileInput TYPES lacks that subtype, so it raises unsupported_institutional_audio_file before scanning.",
+    "runtime_confirmation_of_complete_browser_path": "Pending the correction; do not claim the original422 body was observed."
+  },
+  "correction_prepared_not_yet_natively_tested": [
+    "Normalize byte-detected audio/opus to existing canonical audio/ogg only at private admission; no client MIME trust or bypass.",
+    "Two unit regressions include old-map reproduction; two authenticated HTTP cases use actual native Opus plus a truncated header; native probe adds libopus.",
+    "Keep exact current notice expectation and include only the error code in any future failed capture assertion.",
+    "Fix observed narrow folder labels and mobile table actions; keep one native data/action rendering with explicit table roles and add actual Chrome width bounds."
+  ],
+  "security_unchanged": [
+    "Current native account/unit/configure coverage",
+    "Scan before decoder",
+    "Exact checksum",
+    "Bounded actual decode",
+    "Atomic final persistence and owned staging cleanup",
+    "Immutable versions and current-inspection byte access"
+  ],
+  "artifact": 14684629456,
+  "artifact_sha256": "4ae24437a9dceb37e2442a5460e81f86a7149c06b228260429d978ecbd07da21",
+  "selected_screenshot_sha256": {
+    "desktop-dark-audio-capture-local-review.png": "fb00541f850fc9824dc87f3e423c1876b1293f546b5bbb0400248e69fdb55975",
+    "desktop-dark-audio-folder-native-tree.png": "087fa24e155aca9b2f9997ca8e15ea449efa838f45f24f4761aa8c89db6fa8c6",
+    "desktop-light-audio-capture-local-review.png": "b3d38508de30e26aedff3042735945e45c65d3160e105be1da4654e11d0de39d",
+    "desktop-light-audio-folder-native-tree.png": "016191b16ffe72b0b1db08f26c188f7323eabcc8a89bdd9f4bcfa660ed00110b",
+    "mobile-dark-audio-capture-local-review.png": "d7ce257499b2be0a6139bd1d7782ef4a4c5c4d767f6116e819c768dd17aae9ce",
+    "mobile-dark-audio-folder-native-tree.png": "d3ff8362ebb6ec0a692c4e5ebeebaa118ba9990ef447ecb1ed7e3e3553976fef",
+    "mobile-light-audio-capture-local-review.png": "85d96fccc9c4d46c72c11646b58c6371c9ddd4d973507c24d97079bbf93a677d",
+    "mobile-light-audio-folder-native-tree.png": "d357c7c224d73f78a06d6d128159268a0264c0802b3a8599c6eee40c3fdab58d"
+  },
+  "screenshots_actually_opened": [
+    "desktop-light-audio-capture-local-review.png",
+    "desktop-dark-audio-capture-local-review.png",
+    "mobile-light-audio-capture-local-review.png",
+    "mobile-dark-audio-capture-local-review.png",
+    "desktop-light-audio-folder-native-tree.png",
+    "mobile-dark-audio-folder-native-tree.png"
+  ],
+  "visual_findings": "Preview controls and themes actually rendered; folder names and narrow mobile actions need the prepared layout correction. Persisted capture not proved.",
+  "external_homologation": false,
+  "full_23_figures_complete": false
+}

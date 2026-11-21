@@ -5971,5 +5971,32 @@
     "artifact_sha256": "cf53f41be3a1388089c1f40c4d32e05e8c8a2ee0d6eb232a8a8b6a8517f0fc7d",
     "full_23_figures_complete": false,
     "report": "docs/jrc_contact_center/audio_filters_backend_verified_20261120.json"
+  },
+  "audio_browser_chrome_failure_20261120": {
+    "status": "partial_native_vue_assets_and_chrome_not_candidate_approval",
+    "producer": "8348dabec2904eac765ed45c00c1c3ffb19dd6f5",
+    "run": 44843469401,
+    "native_distinct": 2088,
+    "schema_reload_separate": 131,
+    "vue_passed": 1054,
+    "new_ruby_offenses": 0,
+    "fresh_assets": "passed",
+    "chrome": {
+      "required": 236,
+      "passed": 228,
+      "failed": 8,
+      "skipped": 0,
+      "flaky": 0,
+      "outside_errors": 0,
+      "passed_per_project": 57
+    },
+    "failures": [
+      "Four card-navigation cases retained an obsolete exact limits text; the truthful new product notice is preserved.",
+      "Four actual synthetic-device recordings remuxed and played locally, but native saving returned422. Its response body was not captured by the original assertion."
+    ],
+    "artifact": 14684629456,
+    "artifact_sha256": "4ae24437a9dceb37e2442a5460e81f86a7149c06b228260429d978ecbd07da21",
+    "full_23_figures_complete": false,
+    "report": "docs/jrc_contact_center/audio_browser_chrome_failure_20261120.json"
   }
 }

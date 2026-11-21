@@ -54,4 +54,29 @@ RSpec.describe JrcContactCenter::AudioFileInput do
     blob.purge
     expect(ActiveStorage::Blob.exists?(blob.id)).to be(false)
   end
+
+  context 'with an Opus identification header, not yet evidence of playable media' do
+    let(:bytes) do
+      header = 'OggS'.b + ("\0".b * 24)
+      header.setbyte(5, 2)
+      header.setbyte(26, 1)
+      header.setbyte(27, 19)
+      header + 'OpusHead'.b + [1, 1, 312, 48_000, 0, 0].pack('CCvVs<C')
+    end
+
+    it 'reproduces the former rejection when the byte-detected Opus subtype has no canonical mapping' do
+      expect(Marcel::MimeType.for(upload.tempfile)).to eq('audio/opus')
+      stub_const('JrcContactCenter::AudioFileInput::TYPES', described_class::TYPES.except('audio/opus'))
+      expect { described_class.new(file: upload) }.to raise_error(JrcContactCenter::OperationError, 'unsupported_institutional_audio_file')
+    end
+
+    it 'normalizes the actual Opus container without trusting a filename or client MIME and without rewriting bytes' do
+      upload.content_type = 'application/pdf'
+      input = described_class.new(file: upload)
+      expect(Marcel::MimeType.for(upload.tempfile)).to eq('audio/opus')
+      expect(input.content_type).to eq('audio/ogg')
+      expect(input.sha256).to eq(Digest::SHA256.hexdigest(bytes))
+      expect(File.binread(upload.tempfile.path)).to eq(bytes)
+    end
+  end
 end

@@ -50,8 +50,9 @@ RSpec.describe JrcContactCenter::AudioMediaProbe do
     end
   end
 
-  { 'libmp3lame' => ['mp3', 'audio/mpeg'], 'libvorbis' => ['ogg', 'audio/ogg'], 'aac' => ['mp4', 'audio/mp4'] }.each do |codec, (container, type)|
-    it "derives actual #{container} metadata from an owned synthetic encoding, not fixture JSON" do
+  { 'libmp3lame' => ['mp3', 'audio/mpeg'], 'libvorbis' => ['ogg', 'audio/ogg'],
+    'libopus' => ['ogg', 'audio/ogg'], 'aac' => ['mp4', 'audio/mp4'] }.each do |codec, (container, type)|
+    it "derives actual #{container} metadata encoded by #{codec}, not fixture JSON" do
       with_native_media(bytes) do |file|
         arguments = ['/usr/bin/ffmpeg', '-nostdin', '-v', 'error', '-threads', '1', '-i', 'fd:', '-map', '0:a:0',
                      '-c:a', codec, '-threads', '1', '-metadata', 'title=SYNTHETIC private media tag']

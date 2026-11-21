@@ -1100,7 +1100,7 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
       await expect(limits).toHaveCount(1);
       await expect(limits).toBeVisible();
       await expect(limits).toHaveText(
-        'Biblioteca local por unidade, separada das gravações de chamadas. Arquivos recebidos permanecem privados e sem reprodução até a verificação de segurança. Gravação, Nico e publicação no PABX ainda estão em implementação.'
+        'Biblioteca privada por unidade, separada das gravações de chamadas. Reprodução exige inspeção técnica atual. Síntese pelo Nico e publicação no PABX dependem de integração homologada.'
       );
       await expect(library.locator('[data-new-audio-folder]')).toHaveCount(1);
       await expect(page.locator('[data-create], [data-publish]')).toHaveCount(
@@ -4512,6 +4512,11 @@ test('institutional audio folders native unit organization persists, paginates a
   await expect(disclosure).toHaveAttribute('aria-expanded', 'true');
   const nestedLink = library.locator(`[data-open-audio-folder="${nested.id}"]`);
   await expect(nestedLink).toHaveText(nestedName);
+  await expect(nestedLink).toHaveAttribute('title', nestedName);
+  const folderLabelWidth = await nestedLink.evaluate(
+    node => node.getBoundingClientRect().width
+  );
+  expect(folderLabelWidth).toBeGreaterThan(90);
   await nestedLink.scrollIntoViewIfNeeded();
   await expect(nestedLink).toBeInViewport();
   expect(
@@ -4572,6 +4577,7 @@ test('institutional audio folders native unit organization persists, paginates a
       long_folder_name_length: nestedName.length,
       authorized_path_depth: 2,
       native_lazy_tree: true,
+      readable_folder_label_width: folderLabelWidth,
       tree_children_status: childrenResponse.status(),
       collapsed_children_removed: true,
     })
@@ -7738,6 +7744,14 @@ test('institutional audio folders native private receipt, revisions and permissi
       : `[data-audio-file-duration="${original.id}"]`;
   await expect(library.locator(durationField)).toBeVisible();
   await expect(library.locator(durationField)).toHaveText('00:00.001');
+  const readableAction = await library
+    .locator(`[data-edit-audio-asset="${original.id}"]`)
+    .evaluate(node => {
+      const bounds = node.getBoundingClientRect();
+      return { width: bounds.width, height: bounds.height };
+    });
+  expect(readableAction.width).toBeGreaterThan(90);
+  expect(readableAction.height).toBeLessThanOrEqual(60);
   await library
     .locator(`[data-audio-asset-details-open="${original.id}"]`)
     .click();
@@ -8250,8 +8264,8 @@ test('institutional audio folders native browser capture uses only the synthetic
   );
   await save.click();
   const received = await sent;
-  expect(received.status()).toBe(201);
   const body = await received.json();
+  expect(received.status(), String(body.error || '')).toBe(201);
   const asset = body.item;
   const version = body.received_version;
   expect(body.account_id).toBe(String(target.account_id));
