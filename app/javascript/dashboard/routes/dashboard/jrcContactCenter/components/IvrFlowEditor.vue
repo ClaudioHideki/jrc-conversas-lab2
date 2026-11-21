@@ -3,9 +3,11 @@ import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import IvrReferencePicker from './IvrReferencePicker.vue';
 import IvrFlowOverview from './IvrFlowOverview.vue';
+import IvrAudioReferencePicker from './IvrAudioReferencePicker.vue';
 import {
   addIvrNode,
   removeIvrNode,
+  setIvrAudioReference,
   IVR_NODES_LIMIT,
 } from '../helpers/ivrDraft';
 
@@ -104,6 +106,15 @@ const typeLabel = type => t(`JRC_CONTACT_CENTER.LOCAL_IVR.TYPES.${type}`);
         </button>
       </header>
       <template v-if="node.type === 'menu'">
+        <IvrAudioReferencePicker
+          :account-id="accountId"
+          :unit-id="unitId"
+          :model-value="node.audio_reference || null"
+          :disabled="disabled"
+          @update:model-value="
+            value => change(graph => setIvrAudioReference(graph, index, value))
+          "
+        />
         <div class="grid min-w-0 gap-3 sm:grid-cols-2">
           <label
             class="text-sm text-n-slate-12"

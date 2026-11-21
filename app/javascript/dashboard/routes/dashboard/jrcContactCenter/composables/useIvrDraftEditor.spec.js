@@ -50,6 +50,37 @@ beforeEach(() => {
 });
 
 describe('local IVR editor persistence and safe retries', () => {
+  it('clears exact audio and queue references on an explicit new-draft unit switch without changing menu choices', () => {
+    const { editor } = mountEditor();
+    prepare(editor);
+    editor.setGraph({
+      schema_version: 2,
+      start: 'entry',
+      nodes: [
+        {
+          id: 'entry',
+          type: 'menu',
+          options: [{ digit: '1', target: 'route' }],
+          audio_reference: {
+            asset_id: '11',
+            version_id: '21',
+            sha256: 'a'.repeat(64),
+          },
+        },
+        { id: 'route', type: 'queue', queue_id: '8' },
+      ],
+    });
+    editor.setUnit('9');
+    expect(editor.draft.value.unit_id).toBe('9');
+    expect(editor.draft.value.definition.nodes[0]).not.toHaveProperty(
+      'audio_reference'
+    );
+    expect(editor.draft.value.definition.nodes[0].options).toEqual([
+      { digit: '1', target: 'route' },
+    ]);
+    expect(editor.draft.value.definition.nodes[1].queue_id).toBe('');
+    expect(editor.jsonText.value).not.toContain('audio_reference');
+  });
   it('sends the native precondition and a UUID, then reloads the actual accepted head', async () => {
     const { editor } = mountEditor();
     prepare(editor);

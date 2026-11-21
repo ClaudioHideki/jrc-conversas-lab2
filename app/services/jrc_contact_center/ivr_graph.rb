@@ -2,7 +2,7 @@
 
 # Authorizes local draft references using the native module and organizational scopes.
 class JrcContactCenter::IvrGraph
-  attr_reader :data, :nodes, :unit_id
+  attr_reader :data, :nodes, :unit_id, :audio_proofs
 
   def initialize(graph, access:, unit_id:)
     @identity = access.policy.user_context.slice(:account, :account_user, :user)
@@ -49,6 +49,12 @@ class JrcContactCenter::IvrGraph
   def validate_references!(access)
     validate_unit!(access.units)
     validate_queues!(access.queues)
+    references = nodes.values.map { |node| node['audio_reference'] }.compact
+    @audio_proofs = if references.empty?
+                      []
+                    else
+                      JrcContactCenter::IvrAudioReferences.new(context: @identity, unit_id: unit_id).call(references)
+                    end
   end
 
   def validate_unit!(units)

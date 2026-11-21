@@ -69,11 +69,30 @@ class JrcContactCenter::AudioLibraryAccess
     JrcContactCenter::AudioInspection.where(account: @account, unit_id: current.unit_id, audio_version: current)
   end
 
+  # Bounded metadata projection for local draft references. No blobs or bytes are read.
+  def reference_versions(unit_id:, asset_ids:, version_ids:)
+    current_unit = unit(unit_id)
+    raise ActiveRecord::RecordNotFound unless current_unit.status == 'active'
+
+    permitted = assets.where(unit_id: current_unit.id, id: reference_ids!(asset_ids)).select(:id)
+    JrcContactCenter::AudioVersion.where(account: @account, unit: current_unit, audio_asset_id: permitted, id: reference_ids!(version_ids))
+                                 .includes(:latest_inspection)
+  end
+
   def identifier!(value)
     text = value.to_s
     valid = (value.is_a?(String) || value.is_a?(Integer)) && text.match?(/\A[1-9][0-9]{0,18}\z/) && text.to_i <= 9_223_372_036_854_775_807
     raise JrcContactCenter::OperationError, 'invalid_institutional_audio' unless valid
 
     text
+  end
+
+  private
+
+  def reference_ids!(values)
+    valid = values.is_a?(Array) && values.length.between?(1, 128)
+    raise JrcContactCenter::OperationError, 'invalid_institutional_audio' unless valid
+
+    values.map { |value| identifier!(value) }.uniq
   end
 end

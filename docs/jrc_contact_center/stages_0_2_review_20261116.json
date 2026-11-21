@@ -6136,5 +6136,44 @@
     },
     "new_ruby_offenses": 0,
     "report": "docs/jrc_contact_center/quality_review_profile_refresh_20261121.json"
+  },
+  "ivr_exact_audio_references_prepared_20261121": {
+    "status": "implemented_increment_native_and_chrome_validation_pending",
+    "figures": [
+      5,
+      6,
+      16
+    ],
+    "report": "docs/jrc_contact_center/ivr_exact_audio_references_prepared_20261121.json",
+    "chrome_required": 240,
+    "new_native_execution": "pending",
+    "full_23_complete": false
+  },
+  "quality_review_authority_verified_20261121": {
+    "status": "explicit_review_authority_foundation_native_and_real_chrome_verified",
+    "producer": "3c7747d894a9caebcadc06f496890408319b8452",
+    "run": 44869039094,
+    "permission": "jrc_contact_center_quality_review",
+    "native_distinct": 2130,
+    "schema_reload_separate": 159,
+    "vue_passed": 1060,
+    "chrome": {
+      "passed": 236,
+      "failed": 0,
+      "pending": 0,
+      "flaky": 0,
+      "outside_errors": 0,
+      "per_project": 59
+    },
+    "artifact": 14694877222,
+    "artifact_sha256": "224d1d8604469d82ce7de8de309b665aa6d66466ae932c4d9116d5303cdf4724",
+    "actual_images_opened": [
+      "desktop-light-permissions.png",
+      "desktop-dark-permissions.png",
+      "mobile-light-permissions.png",
+      "mobile-dark-permissions.png"
+    ],
+    "figure23_complete": false,
+    "report": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json"
   }
 }

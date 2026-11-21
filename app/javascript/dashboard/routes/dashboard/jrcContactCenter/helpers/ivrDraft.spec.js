@@ -5,6 +5,8 @@ import {
   addIvrNode,
   removeIvrNode,
   clearIvrQueues,
+  clearIvrAudioReferences,
+  setIvrAudioReference,
 } from './ivrDraft';
 
 describe('safe local IVR editing, without a provider contract', () => {
@@ -23,7 +25,7 @@ describe('safe local IVR editing, without a provider contract', () => {
     '[]',
     '{}',
     '{',
-    JSON.stringify({ ...valid(), schema_version: 2 }),
+    JSON.stringify({ ...valid(), schema_version: 3 }),
   ])('rejects malformed or unsupported import %s', value => {
     expect(() => parseIvrDraft(value)).toThrow();
   });
@@ -92,5 +94,70 @@ describe('safe local IVR editing, without a provider contract', () => {
   });
   it('refuses an oversized import without evaluating it', () => {
     expect(() => parseIvrDraft(' '.repeat(1048577))).toThrow();
+  });
+});
+
+describe('safe exact audio references in internal IVR schema two', () => {
+  const reference = () => ({
+    asset_id: '9007199254740993',
+    version_id: '22',
+    sha256: 'a'.repeat(64),
+  });
+  const graph = () => ({
+    schema_version: 2,
+    start: 'menu',
+    nodes: [
+      { id: 'menu', type: 'menu', options: [], audio_reference: reference() },
+      { id: 'end', type: 'end' },
+    ],
+  });
+  it('round-trips exact bigint strings and immutable version hashes without rounding', () => {
+    expect(parseIvrDraft(JSON.stringify(graph()))).toEqual(graph());
+  });
+  it('does not reinterpret a legacy schema one graph containing unknown audio data', () => {
+    const value = graph();
+    value.schema_version = 1;
+    expect(() => parseIvrDraft(JSON.stringify(value))).toThrow();
+  });
+  it.each([
+    null,
+    false,
+    [],
+    '',
+    {},
+    { ...reference(), asset_id: 11 },
+    { ...reference(), version_id: '01' },
+    { ...reference(), asset_id: '9223372036854775808' },
+    { ...reference(), sha256: 'A'.repeat(64) },
+    { ...reference(), sha256: 'a'.repeat(64) + '\n' },
+    { ...reference(), account_id: '1' },
+    { ...reference(), blob_id: '1' },
+  ])(
+    'rejects malformed or authority-bearing local references %j before editor hydration',
+    value => {
+      const invalid = graph();
+      invalid.nodes[0].audio_reference = value;
+      expect(() => parseIvrDraft(JSON.stringify(invalid))).toThrow();
+    }
+  );
+  it('promotes only explicit selections and clears unit references without removing the menu', () => {
+    const value = graph();
+    value.schema_version = 1;
+    delete value.nodes[0].audio_reference;
+    setIvrAudioReference(value, 0, reference());
+    expect(value.schema_version).toBe(2);
+    expect(value.nodes[0].audio_reference).toEqual(reference());
+    clearIvrAudioReferences(value);
+    expect(value.nodes[0]).toEqual({ id: 'menu', type: 'menu', options: [] });
+    expect(value.schema_version).toBe(2);
+    setIvrAudioReference(value, 0, reference());
+    setIvrAudioReference(value, 0, null);
+    expect(value.nodes[0]).not.toHaveProperty('audio_reference');
+    expect(() => setIvrAudioReference(value, 1, reference())).toThrow();
+  });
+  it('cannot attach menu audio to a terminal node', () => {
+    const invalid = graph();
+    invalid.nodes[1].audio_reference = reference();
+    expect(() => parseIvrDraft(JSON.stringify(invalid))).toThrow();
   });
 });

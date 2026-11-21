@@ -64,6 +64,10 @@ export default {
         params,
       }
     ),
+  audioVersion: (accountId, assetId, versionId) =>
+    axios.get(
+      `${base(accountId)}/audio_assets/${recordIdentity(assetId)}/versions/${recordIdentity(versionId)}`
+    ),
   receiveAudioVersion: (accountId, id, body) =>
     axios.post(
       `${base(accountId)}/audio_assets/${recordIdentity(id)}/versions`,

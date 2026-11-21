@@ -4,6 +4,37 @@ export const emptyIvr = () => ({ schema_version: 1, start: '', nodes: [] });
 const plainRecord = value =>
   value && typeof value === 'object' && !Array.isArray(value);
 
+export const validIvrAudioReference = value => {
+  const id = input =>
+    typeof input === 'string' &&
+    /^[1-9][0-9]{0,18}$/.test(input) &&
+    !/[^0-9]/.test(input) &&
+    (input.length < 19 || input <= '9223372036854775807');
+  return (
+    plainRecord(value) &&
+    Object.keys(value).length === 3 &&
+    id(value.asset_id) &&
+    id(value.version_id) &&
+    typeof value.sha256 === 'string' &&
+    /^[0-9a-f]{64}$/.test(value.sha256) &&
+    !/[^0-9a-f]/.test(value.sha256)
+  );
+};
+
+export const setIvrAudioReference = (graph, index, value) => {
+  const node = graph.nodes[index];
+  if (
+    node?.type !== 'menu' ||
+    (value !== null && !validIvrAudioReference(value))
+  )
+    throw new Error('invalid_ivr_graph');
+  if (value === null) delete node.audio_reference;
+  else {
+    graph.schema_version = 2;
+    node.audio_reference = { ...value };
+  }
+};
+
 // Only a safe editing shape is checked here. Native schema, references and access remain authoritative.
 export const parseIvrDraft = text => {
   if (
@@ -18,6 +49,10 @@ export const parseIvrDraft = text => {
     /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(node.id) &&
     !/[^A-Za-z0-9_-]/.test(node.id) &&
     ['menu', 'queue', 'end'].includes(node.type) &&
+    (!Object.hasOwn(node, 'audio_reference') ||
+      (graph.schema_version === 2 &&
+        node.type === 'menu' &&
+        validIvrAudioReference(node.audio_reference))) &&
     (node.type !== 'menu' ||
       (Array.isArray(node.options) &&
         node.options.length <= 12 &&
@@ -29,7 +64,7 @@ export const parseIvrDraft = text => {
         )));
   if (
     !plainRecord(graph) ||
-    graph.schema_version !== 1 ||
+    ![1, 2].includes(graph.schema_version) ||
     typeof graph.start !== 'string' ||
     !Array.isArray(graph.nodes) ||
     graph.nodes.length > IVR_NODES_LIMIT ||
@@ -74,6 +109,12 @@ export const removeIvrNode = (graph, id) => {
       if (node.on_timeout === id) node.on_timeout = '';
       if (node.on_invalid === id) node.on_invalid = '';
     });
+};
+
+export const clearIvrAudioReferences = graph => {
+  graph.nodes.forEach(node => {
+    delete node.audio_reference;
+  });
 };
 
 export const clearIvrQueues = graph => {

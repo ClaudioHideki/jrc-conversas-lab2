@@ -2083,7 +2083,9 @@
         "ivr_scope_changed": "O vínculo corporativo da unidade mudou. A edição desta identidade foi bloqueada; preserve o histórico e crie outro rascunho autorizado.",
         "ivr_invalid_simulation_input": "Use somente até 128 teclas: 0–9, asterisco ou cerquilha.",
         "invalid_ivr_revision": "Revise nome, estado e identidade da operação local.",
-        "ivr_archive_requires_unchanged_definition": "Salve ou descarte as alterações antes de arquivar o conteúdo já registrado."
+        "ivr_archive_requires_unchanged_definition": "Salve ou descarte as alterações antes de arquivar o conteúdo já registrado.",
+        "ivr_unavailable_audio": "O áudio escolhido não está disponível na unidade e no seu acesso atual.",
+        "ivr_audio_not_verified": "A versão do áudio não possui verificação técnica atual. Revise o vínculo na biblioteca."
       },
       "AUDIT_REVISION": "Revisão de URA local",
       "REFERENCE_UNAVAILABLE": "Referência indisponível no escopo atual. Revise a seleção.",
@@ -2535,6 +2537,32 @@
       "ERROR": "Não foi possível validar e abrir o áudio. Nenhum arquivo foi liberado. Tente novamente após revisar o acesso.",
       "NOT_READY": "A verificação desta versão mudou. Atualize o histórico antes de tentar novamente.",
       "PLAYBACK_ERROR": "O navegador não conseguiu reproduzir este formato. O arquivo verificado continua disponível para download; a compatibilidade com o PABX não está comprovada."
+    },
+    "IVR_AUDIO": {
+      "TITLE": "Áudio do menu",
+      "LIMITS": "Vínculo local de uma versão exata. Não publica a URA nem comprova compatibilidade com o PABX.",
+      "CHOOSE": "Vincular áudio",
+      "CHANGE": "Alterar vínculo",
+      "REMOVE": "Remover vínculo",
+      "SEARCH": "Buscar áudio na unidade",
+      "SEARCH_BUTTON": "Buscar",
+      "ASSET": "Áudio institucional",
+      "VERSION": "Versão do áudio",
+      "SELECT_ASSET": "Selecione um áudio autorizado",
+      "SELECT_VERSION": "Selecione uma versão verificada",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "PAGE": "Página {page} de {pages}",
+      "LOADING": "Consultando biblioteca autorizada…",
+      "ERROR": "Não foi possível verificar o áudio no seu acesso atual. Tente consultar novamente.",
+      "UNAVAILABLE": "O vínculo salvo não está disponível ou não possui verificação técnica atual. Revise antes de salvar.",
+      "EMPTY": "Nenhum áudio encontrado nesta unidade.",
+      "UNVERIFIED": "Sem verificação técnica atual",
+      "PINNED": "Versão {number} fixada · {file}",
+      "CONFIRM": "Usar esta versão",
+      "CANCEL": "Cancelar seleção",
+      "RETRY": "Verificar vínculo novamente",
+      "VERSION_OPTION": "{number} · {file} {state}"
     }
   }
 }

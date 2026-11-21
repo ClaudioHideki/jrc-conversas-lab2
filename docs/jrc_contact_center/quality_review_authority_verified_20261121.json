@@ -1,0 +1,111 @@
+{
+  "status": "explicit_review_authority_foundation_native_and_real_chrome_verified",
+  "producer": "3c7747d894a9caebcadc06f496890408319b8452",
+  "run": 44869039094,
+  "job": 136739160810,
+  "permission": "jrc_contact_center_quality_review",
+  "automatic_admin_grant": false,
+  "requires_authorized_recording_access": true,
+  "real_grants_or_users_changed": false,
+  "native_distinct": 2130,
+  "schema_reload_separate": 159,
+  "vue_passed": 1060,
+  "new_native_cases": {
+    "module_policy_quality_review_spec.rb": {
+      "passed": 16,
+      "failed": 0,
+      "ids": [
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:1]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:2]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:3]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:4]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:5]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:6]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:7]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:8]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:9]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:10]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:11]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:12]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:13]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:14]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:15]",
+        "./spec/services/jrc_contact_center/module_policy_quality_review_spec.rb[1:16]"
+      ]
+    },
+    "add_contact_center_quality_review_authority_spec.rb": {
+      "passed": 12,
+      "failed": 0,
+      "ids": [
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:1]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:2]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:3]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:4]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:5]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:6]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:7]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:8]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:9]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:10]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:11]",
+        "./spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb[1:12]"
+      ]
+    },
+    "quality_review_permissions_spec.rb": {
+      "passed": 9,
+      "failed": 0,
+      "ids": [
+        "./spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb[1:1]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb[1:2]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb[1:3]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb[1:4]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb[1:5]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb[1:6]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb[1:7]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb[1:8]",
+        "./spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb[1:9]"
+      ]
+    }
+  },
+  "chrome": {
+    "passed": 236,
+    "failed": 0,
+    "pending": 0,
+    "flaky": 0,
+    "outside_errors": 0,
+    "per_project": 59
+  },
+  "artifact": 14694877222,
+  "artifact_bytes": 56527284,
+  "artifact_sha256": "224d1d8604469d82ce7de8de309b665aa6d66466ae932c4d9116d5303cdf4724",
+  "screenshot_hashes_verified": 376,
+  "actual_images_opened": [
+    "desktop-light-permissions.png",
+    "desktop-dark-permissions.png",
+    "mobile-light-permissions.png",
+    "mobile-dark-permissions.png"
+  ],
+  "migration": {
+    "path": "db/migrate/20261121003000_add_contact_center_quality_review_authority.rb",
+    "sha256": "1e40fdf573254db5aae23d7474db96c2052818532c0ca0cc5b398807df889cd0",
+    "native_fresh_populated_upgrade_idempotence_atomic_rollback_and_reload": true,
+    "previous_ten_preserved": true,
+    "production_execution": false
+  },
+  "verified": [
+    "No administrator fallback, old13 rights alone or recording-only authority grants review",
+    "Explicit native role/team/individual sources, eligibility and recording prerequisites, including fresh revocation",
+    "Inactive team, removed membership, deny precedence and latent role/denial reactivation guards",
+    "Authenticated profiles, authorized native grant writes and redacted actor/scope audit",
+    "SQL known states, foreign/unknown subjects or capabilities rejection, populated data preservation and real transaction rollback",
+    "Native Chrome rights initially unchecked, explicit reviewed grant, persistence/readback/effective rights with recording prerequisites"
+  ],
+  "figure23_complete": false,
+  "still_pending": [
+    "Exact original analysis/call binding and immutable original snapshot",
+    "Append-only human review with reason/actor, CAS/idempotence and complete popup/API workflow",
+    "External Supabase/PABX/AI homologation remains separate"
+  ],
+  "full_23_figures_complete": false,
+  "external_homologation": false
+}

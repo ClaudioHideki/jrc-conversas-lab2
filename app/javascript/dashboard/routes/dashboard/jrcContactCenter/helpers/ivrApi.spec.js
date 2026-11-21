@@ -52,3 +52,20 @@ describe('native local IVR API identities', () => {
     expect(http.get).not.toHaveBeenCalled();
   });
 });
+
+describe('exact native institutional audio metadata identity', () => {
+  it('requests the exact authorized version without signing or reading bytes', () => {
+    API.audioVersion('1', '9007199254740993', '9007199254740994');
+    expect(http.get).toHaveBeenCalledWith(
+      '/api/v1/accounts/1/jrc_contact_center/audio_assets/9007199254740993/versions/9007199254740994'
+    );
+    expect(http.post).not.toHaveBeenCalled();
+  });
+  it.each(['../2', '1\n', '0', '9223372036854775808'])(
+    'rejects invalid version %s before a request',
+    value => {
+      expect(() => API.audioVersion('1', '11', value)).toThrow();
+      expect(http.get).not.toHaveBeenCalled();
+    }
+  );
+});

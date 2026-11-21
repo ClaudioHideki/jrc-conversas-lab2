@@ -13,6 +13,12 @@ class Api::V1::Accounts::JrcContactCenter::AudioVersionsController < Api::V1::Ac
     render json: list_payload(library.versions(asset).includes(:created_by, :latest_inspection).order(number: :desc)) { |row| present(row) }
   end
 
+  def show
+    asset = library.asset(params[:audio_asset_id])
+    version = library.versions(asset).includes(:created_by, :latest_inspection).find(library.identifier!(params[:id]))
+    render json: base_payload.merge(item: present(version))
+  end
+
   def create
     keys = %w[file idempotency_key expected_revision source_kind]
     raise JrcContactCenter::OperationError, 'invalid_institutional_audio' unless (request.request_parameters.keys - keys).empty?

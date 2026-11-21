@@ -1,0 +1,62 @@
+{
+  "status": "implemented_increment_native_and_chrome_validation_pending",
+  "base": "3c7747d894a9caebcadc06f496890408319b8452",
+  "figures": [
+    5,
+    6,
+    16
+  ],
+  "full_23_complete": false,
+  "schema": {
+    "legacy_1_unchanged": true,
+    "internal_2_opt_in": true,
+    "provider_contract": false
+  },
+  "implemented": [
+    "Exact asset/version/SHA pin in the existing menu editor",
+    "Authorized exact-version metadata and existing authenticated byte preview",
+    "Native current readiness, scope and relationship validation before writes",
+    "Native authority/unit/draft locks, immutable revisions, CAS/idempotence and sanitized proof audit",
+    "Pagination and explicit choose/confirm/unlink with context-generation guards",
+    "Current unavailable observation blocks reuse of old readiness; archival keeps the existing definition"
+  ],
+  "native_tests_prepared_not_executed": [
+    "spec/services/jrc_contact_center/ivr_graph_schema_validate_spec.rb",
+    "spec/services/jrc_contact_center/ivr_graph_audio_proofs_spec.rb",
+    "spec/services/jrc_contact_center/ivr_draft_write_audio_spec.rb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ivr_audio_references_spec.rb"
+  ],
+  "scale_prepared": "127 menu references / eight actually scanned and decoded versions; bounded SQL comparison not yet executed",
+  "light_helper_checks": {
+    "passed": 11,
+    "failed": 0,
+    "kind": "light pure helper assertions only; not Vue/Rails/Chrome",
+    "source_sha256": "71e831e9e3e2e0bc55c9e1dee4924daaef304bb6ca352bd4099b7ecdc3353480",
+    "node": "v24.19.0"
+  },
+  "frontend_lint": "Zero errors in prepared JS/Vue. New picker and composable have zero warnings; existing flow-editor warnings remain.",
+  "chrome_prepared": {
+    "existing_retained": 236,
+    "new_per_project": 1,
+    "required_total": 240,
+    "viewports": [
+      1440,
+      390
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "synthetic_database": true,
+    "new_scenarios_executed": false
+  },
+  "dependencies_or_migrations_added": false,
+  "remaining": [
+    "Native Rails/Vue/lint and all 240 real Chrome scenarios at the new checkpoint",
+    "Full audio destinations/operational usage/delete protection beyond local draft reference",
+    "Provider publication, ACKs/codecs and external synthesis not homologated",
+    "Nico human review popup and append-only original-analysis correction still pending"
+  ],
+  "production_or_real_user_changes": false,
+  "adr": "docs/adr/20261121-call-center-ivr-exact-audio-references.md"
+}

@@ -1,6 +1,6 @@
 # Direito explícito para revisão humana do Nico
 
-Status: implementação preparada; validação nativa do novo SHA pendente.
+Status: fundamento de autoridade validado no SHA `3c7747d8`; fluxo completo da revisão humana permanece pendente.
 
 A decisão de negócio exige direito próprio, concedido explicitamente, além do acesso autorizado à gravação. Ser administrador não concede revisão. O nome técnico é `jrc_contact_center_quality_review`; o rótulo operacional é “Call Center: revisar análises do Nico (exige acesso à gravação)”.
 
@@ -17,3 +17,5 @@ São preparados testes de PostgreSQL, upgrade populado, atomicidade, reexecuçã
 A primeira execução (`93935376`/CI44865637660) comprovou a instalação e a recarga física,16casos de política e11de12casos de migration. O teste de rollback falhou antes da execução ao interceptar um método delegado no objeto errado; o alvo foi corrigido para o adaptador real e foi acrescentada a prova da primeira alteração antes da falha. Os4apontamentos de lint eram de testes. A migration1e40, produto e gates permanecem iguais. A correção precisa da nova CI integral; APIs, Vue e Chrome não foram aprovados nessa rodada.
 
 Em `51f293b7`/CI44867208994 a recarga passou159/159, com rollback real validado; lintRuby ficou sem infrações novas. O core passou1932/1933. A única falha leu a resposta memoizada do primeiro GET no teste de revogação. O próximo teste lerá diretamente o segundo GET e verificará separadamente que revisão e escuta não aparecem. A efetiva resposta HTTP após a negativa ainda precisa dessa execução; produto, migration, workflow e gates continuam iguais.
+
+Evidência final deste fundamento: CI44869039094,2.130Rails distintos/159recargas separados/1.060Vue/236Chrome;37casos novos nativos conferidos e quatro imagens abertas. Sem falhas, pendências ou erros. Ver `docs/jrc_contact_center/quality_review_authority_verified_20261121.json`.

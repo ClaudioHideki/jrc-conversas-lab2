@@ -25,7 +25,7 @@ RSpec.describe JrcContactCenter::IvrGraph do
     expect(graph.nodes.keys).to contain_exactly('entry', 'route', 'end')
   end
 
-  [nil, false, [], {}, { 'schema_version' => 2, 'start' => 'end', 'nodes' => [{ 'id' => 'end', 'type' => 'end' }] }].each do |invalid|
+  [nil, false, [], {}, { 'schema_version' => 3, 'start' => 'end', 'nodes' => [{ 'id' => 'end', 'type' => 'end' }] }].each do |invalid|
     it "rejects malformed or unsupported JSON #{invalid.inspect} without accepting a provider contract" do
       expect { described_class.new(invalid, access: access, unit_id: unit.id) }.to raise_error(JrcContactCenter::OperationError, 'invalid_ivr_graph')
     end

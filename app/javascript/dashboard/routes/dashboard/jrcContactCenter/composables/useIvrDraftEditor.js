@@ -1,7 +1,12 @@
 import { computed, onBeforeUnmount, reactive, ref } from 'vue';
 import API from 'dashboard/api/jrcContactCenter';
 import { useConfigurationRevision } from './useConfigurationRevision';
-import { emptyIvr, parseIvrDraft, clearIvrQueues } from '../helpers/ivrDraft';
+import {
+  emptyIvr,
+  parseIvrDraft,
+  clearIvrQueues,
+  clearIvrAudioReferences,
+} from '../helpers/ivrDraft';
 
 export const useIvrDraftEditor = ({ accountId, initialId }) => {
   const draft = ref({
@@ -103,6 +108,7 @@ export const useIvrDraftEditor = ({ accountId, initialId }) => {
     draft.value.unit_id = id;
     const graph = JSON.parse(JSON.stringify(draft.value.definition));
     clearIvrQueues(graph);
+    clearIvrAudioReferences(graph);
     setGraph(graph);
   };
   const applyJson = text => {

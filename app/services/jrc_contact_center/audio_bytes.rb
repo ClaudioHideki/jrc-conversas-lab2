@@ -39,8 +39,7 @@ class JrcContactCenter::AudioBytes
     asset = @access.asset(asset_id)
     version = @access.versions(asset).find(@access.identifier!(version_id))
     proof = @access.inspections(version).order(attempt: :desc).first
-    valid = proof&.ready? && proof.source_blob_id == version.blob_id && proof.expected_sha256 == version.sha256
-    raise JrcContactCenter::OperationError.new('institutional_audio_not_verified', status: :conflict) unless valid
+    JrcContactCenter::AudioVersionReadiness.check!(version: version, proof: proof)
 
     [version, proof]
   end

@@ -38,9 +38,23 @@ class JrcContactCenter::IvrGraphSchema
     }
   }.freeze
 
+  AUDIO_REFERENCE = {
+    'type' => 'object', 'required' => %w[asset_id version_id sha256], 'additionalProperties' => false,
+    'properties' => {
+      'asset_id' => QUEUE_ID, 'version_id' => QUEUE_ID,
+      'sha256' => { 'type' => 'string', 'minLength' => 64, 'maxLength' => 64, 'pattern' => '^[0-9a-f]{64}$' }
+    }
+  }.freeze
+  MENU_V2 = MENU.deep_dup.tap { |schema| schema.fetch('properties')['audio_reference'] = AUDIO_REFERENCE }.freeze
+  SCHEMA_V2 = SCHEMA.deep_dup.tap do |schema|
+    schema.fetch('properties')['schema_version'] = { 'const' => 2 }
+    schema.dig('properties', 'nodes', 'items')['oneOf'] = [TERMINAL, QUEUE, MENU_V2]
+  end.freeze
+
   def self.validate!(graph)
     versioned = graph.is_a?(Hash) && graph['schema_version'].is_a?(Integer)
-    return if versioned && JSONSchemer.schema(SCHEMA).valid?(graph) && JSON.generate(graph).bytesize <= 1.megabyte
+    schema = versioned && { 1 => SCHEMA, 2 => SCHEMA_V2 }[graph['schema_version']]
+    return if schema && JSONSchemer.schema(schema).valid?(graph) && JSON.generate(graph).bytesize <= 1.megabyte
 
     raise JrcContactCenter::OperationError, 'invalid_ivr_graph'
   end

@@ -108,23 +108,25 @@ test.beforeEach(async ({ page }, info) => {
         ? session.customer_master_targets[info.project.name].operator
         : info.title.startsWith('local IVR supervisor')
           ? session.ivr_targets[info.project.name].observer
-          : info.title.startsWith('local IVR')
-            ? info.title.startsWith('local IVR scoped')
-              ? session.ivr_targets[info.project.name].scoped
-              : session.ivr_targets[info.project.name].administrator
-            : info.title.startsWith('native authenticated navigation')
-              ? session.navigation_targets[info.project.name].auth
-              : info.title.startsWith('native infrastructure root')
-                ? session.infrastructure
-                : info.title.startsWith('configuration audit boundary')
-                  ? session.auditor
-                  : info.title.startsWith('native role denied')
-                    ? session.delegated
-                    : info.title.startsWith('corporate boundary')
-                      ? session.restricted
-                      : info.title.startsWith('profile change')
-                        ? session.viewer
-                        : session.administrator;
+          : info.title.startsWith('local IVR audio reference')
+            ? session.ivr_audio_targets[info.project.name].scoped
+            : info.title.startsWith('local IVR')
+              ? info.title.startsWith('local IVR scoped')
+                ? session.ivr_targets[info.project.name].scoped
+                : session.ivr_targets[info.project.name].administrator
+              : info.title.startsWith('native authenticated navigation')
+                ? session.navigation_targets[info.project.name].auth
+                : info.title.startsWith('native infrastructure root')
+                  ? session.infrastructure
+                  : info.title.startsWith('configuration audit boundary')
+                    ? session.auditor
+                    : info.title.startsWith('native role denied')
+                      ? session.delegated
+                      : info.title.startsWith('corporate boundary')
+                        ? session.restricted
+                        : info.title.startsWith('profile change')
+                          ? session.viewer
+                          : session.administrator;
   if (
     info.title.startsWith('ACW form library') ||
     Boolean(pauseTarget) ||
@@ -140,7 +142,9 @@ test.beforeEach(async ({ page }, info) => {
           ? `/api/v1/accounts/${pauseTarget.account_id}/jrc_contact_center/`
           : info.title.startsWith('linked Customer Master')
             ? `/api/v1/accounts/${session.customer_master_targets[info.project.name].account_id}/`
-            : `/api/v1/accounts/${session.ivr_targets[info.project.name].account_id}/jrc_contact_center/`;
+            : info.title.startsWith('local IVR audio reference')
+              ? `/api/v1/accounts/${session.ivr_audio_targets[info.project.name].account_id}/jrc_contact_center/`
+              : `/api/v1/accounts/${session.ivr_targets[info.project.name].account_id}/jrc_contact_center/`;
     nativeObservations.set(page, observations);
     page.on('response', response => {
       const address = new URL(response.url());
@@ -8414,4 +8418,257 @@ test('institutional audio folders native browser capture uses only the synthetic
     })
   );
   expect(unexpected).toEqual([]);
+});
+
+test('local IVR audio reference pins native verified history and never crosses unit or publishes', async ({
+  page,
+}, info) => {
+  test.setTimeout(180000);
+  const target = session.ivr_audio_targets[info.project.name];
+  const own = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const prefix = `/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const name = `SYNTHETIC exact audio IVR ${info.project.name}`;
+  const audioName = `SYNTHETIC exact menu audio ${info.project.name}`;
+  const wav = (sample: number) => {
+    const buffer = Buffer.alloc(1644);
+    buffer.write('RIFF', 0);
+    buffer.writeUInt32LE(1636, 4);
+    buffer.write('WAVEfmt ', 8);
+    buffer.writeUInt32LE(16, 16);
+    buffer.writeUInt16LE(1, 20);
+    buffer.writeUInt16LE(1, 22);
+    buffer.writeUInt32LE(8000, 24);
+    buffer.writeUInt32LE(16000, 28);
+    buffer.writeUInt16LE(2, 32);
+    buffer.writeUInt16LE(16, 34);
+    buffer.write('data', 36);
+    buffer.writeUInt32LE(1600, 40);
+    for (let offset = 44; offset < buffer.length; offset += 2)
+      buffer.writeInt16LE(sample, offset);
+    return buffer;
+  };
+  const unexpected: string[] = [];
+  page.on('request', request => {
+    if (
+      !['GET', 'HEAD'].includes(request.method()) &&
+      /\/(commands|sync_calls|telephony_integration)(?:[/?]|$)/.test(
+        request.url()
+      )
+    )
+      unexpected.push(request.url());
+  });
+  const upload = async (unitId: number, headers, label: string) => {
+    const result = await page.request.post(`${own}/audio_assets`, {
+      headers,
+      multipart: {
+        unit_id: String(unitId),
+        'asset[name]': label,
+        idempotency_key: randomUUID(),
+        file: {
+          name: 'SYNTHETIC-menu.wav',
+          mimeType: 'audio/wav',
+          buffer: wav(0),
+        },
+      },
+    });
+    expect(result.status()).toBe(201);
+    return result.json();
+  };
+  const received = await upload(
+    target.allowed_unit_id,
+    target.scoped,
+    audioName
+  );
+  const other = await upload(
+    target.denied_unit_id,
+    target.administrator,
+    'SYNTHETIC inaccessible menu audio'
+  );
+  const original = received.received_version;
+  const reference = {
+    asset_id: received.item.id,
+    version_id: original.id,
+    sha256: original.sha256,
+  };
+  expect(original.technical_verification.ready).toBe(true);
+  expect(original.ready).toBe(false); // Technical observation is not provider publication.
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/ura?native_navigation=1`
+  );
+  await page.locator('[data-ivr-new]').click();
+  const dialog = page.getByRole('dialog');
+  await expectContainedDialog(page);
+  await dialog.locator('#ivr-name').fill(name);
+  await dialog
+    .locator('#ivr-unit')
+    .selectOption(String(target.allowed_unit_id));
+  await dialog.locator('[data-ivr-add="menu"]').click();
+  await dialog.locator('[data-ivr-add="end"]').click();
+  await dialog.locator('#ivr-start').selectOption('node_1');
+  await dialog
+    .getByLabel('Espera técnica (segundos)', { exact: true })
+    .fill('8');
+  await dialog
+    .getByLabel('Tentativas de dígito inválido', { exact: true })
+    .fill('2');
+  await dialog
+    .getByRole('button', { name: 'Adicionar opção DTMF', exact: true })
+    .click();
+  await dialog.getByLabel('Tecla DTMF', { exact: true }).selectOption('1');
+  await dialog
+    .getByLabel('Destino lógico', { exact: true })
+    .selectOption('node_2');
+  await dialog
+    .getByLabel('Destino sem resposta', { exact: true })
+    .selectOption('node_2');
+  await dialog
+    .getByLabel('Destino após tentativas inválidas', { exact: true })
+    .selectOption('node_2');
+  const picker = dialog.locator('[data-ivr-audio-reference]');
+  await picker.locator('[data-ivr-audio-choose]').click();
+  await picker
+    .getByLabel('Buscar áudio na unidade', { exact: true })
+    .fill(audioName);
+  await picker.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await expect(picker.locator('[data-ivr-audio-asset] option')).toHaveCount(2);
+  await picker.locator('[data-ivr-audio-asset]').selectOption(received.item.id);
+  await expect(picker.locator('[data-ivr-audio-version]')).toBeEnabled();
+  await picker.locator('[data-ivr-audio-version]').selectOption(original.id);
+  await picker.locator('[data-open-audio-bytes]').click();
+  const player = picker.locator('[data-audio-verified-player]');
+  await expect(player).toBeVisible();
+  await expect
+    .poll(() =>
+      player.evaluate(
+        (element: HTMLAudioElement) =>
+          Number.isFinite(element.duration) && element.duration > 0
+      )
+    )
+    .toBe(true);
+  expect(
+    await player.evaluate((element: HTMLAudioElement) => element.paused)
+  ).toBe(true);
+  await picker.locator('[data-ivr-audio-confirm]').click();
+  await expect(picker.locator('[data-ivr-audio-pinned]')).toContainText(
+    'Versão 1 fixada'
+  );
+  await picker.scrollIntoViewIfNeeded();
+  await expectContainedDialog(page);
+  expect(
+    await dialog.evaluate(
+      element => element.scrollWidth <= element.clientWidth + 1
+    )
+  ).toBe(true);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-ivr-audio-exact-version.png`,
+    fullPage: true,
+  });
+  const created = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === `${prefix}/ivr_drafts` &&
+      response.request().method() === 'POST'
+  );
+  await dialog.locator('[data-ivr-save]').click();
+  const saved = await created;
+  expect(saved.status()).toBe(201);
+  const initial = (await saved.json()).item;
+  expect(initial.definition.schema_version).toBe(2);
+  expect(initial.definition.nodes[0].audio_reference).toEqual(reference);
+  expect(initial).toMatchObject({ local_only: true, provider_applied: false });
+  await expect(dialog.locator('[data-ivr-saved]')).toBeVisible();
+  const replacement = await page.request.post(
+    `${own}/audio_assets/${received.item.id}/versions`,
+    {
+      headers: target.scoped,
+      multipart: {
+        expected_revision: received.item.revision,
+        idempotency_key: randomUUID(),
+        file: {
+          name: 'SYNTHETIC-menu-new.wav',
+          mimeType: 'audio/wav',
+          buffer: wav(1),
+        },
+      },
+    }
+  );
+  expect(replacement.status()).toBe(201);
+  const latest = (await replacement.json()).received_version;
+  expect(latest.number).toBe(2);
+  expect(latest.sha256).not.toBe(original.sha256);
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await page.reload();
+  await page
+    .locator(`[data-ivr-draft="${initial.id}"]`)
+    .getByRole('button', { name: 'Abrir rascunho', exact: true })
+    .click();
+  await expect(picker.locator('[data-ivr-audio-pinned]')).toContainText(
+    'Versão 1 fixada'
+  );
+  const persisted = await page.request.get(`${own}/ivr_drafts/${initial.id}`, {
+    headers: target.scoped,
+  });
+  expect(
+    (await persisted.json()).item.definition.nodes[0].audio_reference
+  ).toEqual(reference);
+  const forbidden = await page.request.get(
+    `${own}/audio_assets/${other.item.id}/versions/${other.received_version.id}`,
+    { headers: target.scoped }
+  );
+  expect(forbidden.status()).toBe(404);
+  const forged = JSON.parse(JSON.stringify(initial.definition));
+  forged.nodes[0].audio_reference = {
+    asset_id: other.item.id,
+    version_id: other.received_version.id,
+    sha256: other.received_version.sha256,
+  };
+  const rejected = await page.request.post(`${own}/ivr_drafts`, {
+    headers: target.scoped,
+    data: {
+      ivr_draft: {
+        unit_id: target.allowed_unit_id,
+        name: 'SYNTHETIC forbidden cross-unit pin',
+        status: 'draft',
+        request_id: randomUUID(),
+        expected_revision: 0,
+        definition: forged,
+      },
+    },
+  });
+  expect(rejected.status()).toBe(422);
+  expect((await rejected.json()).error).toBe('ivr_unavailable_audio');
+  await picker.locator('[data-ivr-audio-remove]').click();
+  const changed = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname ===
+        `${prefix}/ivr_drafts/${initial.id}` &&
+      response.request().method() === 'PATCH'
+  );
+  await dialog.locator('[data-ivr-save]').click();
+  expect((await changed).status()).toBe(200);
+  await expect(dialog.locator('[data-ivr-saved]')).toBeVisible();
+  const historical = await page.request.get(
+    `${own}/ivr_drafts/${initial.id}/versions/1`,
+    { headers: target.scoped }
+  );
+  expect(
+    (await historical.json()).item.definition.nodes[0].audio_reference
+  ).toEqual(reference);
+  expect(unexpected).toEqual([]);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-ivr-audio-reference-native.json`,
+    JSON.stringify({
+      synthetic: true,
+      account_id: target.account_id,
+      unit_id: target.allowed_unit_id,
+      exact_reference: reference,
+      newer_version_id: latest.id,
+      original_pin_preserved: true,
+      authenticated_native_persistence: true,
+      denied_unit_status: forbidden.status(),
+      forged_graph_status: rejected.status(),
+      explicit_unlink_preserves_history: true,
+      provider_applied: false,
+      provider_writes: unexpected,
+    })
+  );
 });

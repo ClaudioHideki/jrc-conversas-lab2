@@ -163,6 +163,8 @@ session = { access_targets: access_targets, navigation_targets: navigation_targe
             issuer_company_id: company.id, denied_business_unit_id: business_units.last.id }
 require_relative 'jrc_call_center_ivr_seed'
 session[:ivr_targets] = JrcContactCenter::SyntheticIvrSeed.call(projects: access_targets.keys)
+# Independent native scopes prevent audio mutations from reusing earlier IVR scenarios.
+session[:ivr_audio_targets] = JrcContactCenter::SyntheticIvrSeed.call(projects: access_targets.keys)
 # Independent account graph: never share mutable roles/forms with the existing IVR cases.
 session[:acw_form_targets] = JrcContactCenter::SyntheticIvrSeed.call(projects: access_targets.keys)
 session[:acw_form_targets].each_value do |target|
