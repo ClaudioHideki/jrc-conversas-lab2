@@ -52,6 +52,18 @@ beforeEach(() => {
 });
 
 describe('current audio metadata events (transport fixtures, not native scanner proof)', () => {
+  it('passes the actual current verified observation metadata to the private player, without fabricated duration or channels', async () => {
+    const wrapper = fixture();
+    await wrapper.get('[data-toggle-audio-inspections]').trigger('click');
+    await flushPromises();
+    const preview = wrapper.getComponent({ name: 'AudioVersionPreview' });
+    expect(preview.props('metadata')).toEqual(proof.metadata);
+    expect(preview.props('inspectionId')).toBe(proof.id);
+    expect(preview.props('version')).toEqual(version);
+    await wrapper.setProps({ canManage: false });
+    expect(wrapper.find('audio-version-preview-stub').exists()).toBe(false);
+  });
+
   it('reports only explicitly loaded first-page observations with the complete source identity', async () => {
     const latest = { ...proof, id: '105', attempt: 6 };
     API.audioInspections.mockResolvedValueOnce({

@@ -2585,6 +2585,12 @@
       "TOTAL": "Total de rascunhos",
       "PAGE": "Página",
       "CHECKSUM": "SHA-256"
+    },
+    "AUDIO_WAVEFORM": {
+      "LABEL": "Forma de onda do áudio institucional verificado. Use os controles do player para reproduzir e buscar uma posição.",
+      "LOADING": "Preparando a forma de onda a partir do áudio verificado…",
+      "LIMIT": "Forma de onda indisponível para este tamanho ou duração. A prévia e os controles de reprodução continuam disponíveis.",
+      "ERROR": "Não foi possível desenhar a forma de onda neste navegador. Use os controles de reprodução ou baixe a versão verificada."
     }
   }
 }

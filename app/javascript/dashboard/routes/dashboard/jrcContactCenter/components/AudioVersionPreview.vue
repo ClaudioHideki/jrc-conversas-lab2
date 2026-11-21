@@ -4,12 +4,14 @@ import { useI18n } from 'vue-i18n';
 import { useEmitter } from 'dashboard/composables/emitter';
 import { emitter } from 'shared/helpers/mitt';
 import { useAudioBytes } from '../composables/useAudioBytes';
+import AudioWaveform from './AudioWaveform.vue';
 
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
   assetId: { type: String, required: true },
   version: { type: Object, required: true },
   inspectionId: { type: String, required: true },
+  metadata: { type: Object, required: true },
   canManage: { type: Boolean, required: true },
 });
 const emit = defineEmits(['denied']);
@@ -74,6 +76,13 @@ watch(url, () => player.value?.pause(), { flush: 'sync' });
         data-audio-verified-player
         @error="playbackFailed"
         @play="startedPlaying"
+      />
+      <AudioWaveform
+        v-if="error !== 'PLAYBACK_ERROR'"
+        :url="url"
+        :media="player"
+        :metadata="metadata"
+        :byte-size="version.byte_size"
       />
       <div class="flex flex-wrap gap-3">
         <button

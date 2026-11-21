@@ -487,6 +487,18 @@
         "verified_own_review_permission_report": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json",
         "prepared_next_report": "docs/jrc_contact_center/audio_usages_and_nico_values_prepared_20261121.json",
         "prepared_is_not_validated": true
+      },
+      "private_waveform_increment_20261121": {
+        "status": "Prepared; native Vue and240Chrome not yet executed for this code",
+        "same_verified_bytes_and_player": true,
+        "reference": "docs/jrc_contact_center/private_audio_waveform_prepared_20261121.json",
+        "full_figure_complete": false
+      },
+      "audio_usages_nico_values_native_verified_20261121": {
+        "producer": "015628bf157f17a581715b47ee282cf35639d013",
+        "report": "docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json",
+        "full_figure_complete": false,
+        "subset": "Local audio usage popup"
       }
     },
     {
@@ -1271,6 +1283,18 @@
         "verified_own_review_permission_report": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json",
         "prepared_next_report": "docs/jrc_contact_center/audio_usages_and_nico_values_prepared_20261121.json",
         "prepared_is_not_validated": true
+      },
+      "private_waveform_increment_20261121": {
+        "status": "Prepared; native Vue and240Chrome not yet executed for this code",
+        "same_verified_bytes_and_player": true,
+        "reference": "docs/jrc_contact_center/private_audio_waveform_prepared_20261121.json",
+        "full_figure_complete": false
+      },
+      "audio_usages_nico_values_native_verified_20261121": {
+        "producer": "015628bf157f17a581715b47ee282cf35639d013",
+        "report": "docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json",
+        "full_figure_complete": false,
+        "subset": "Local audio usage popup"
       }
     },
     {
@@ -1690,6 +1714,12 @@
         "verified_own_review_permission_report": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json",
         "prepared_next_report": "docs/jrc_contact_center/audio_usages_and_nico_values_prepared_20261121.json",
         "prepared_is_not_validated": true
+      },
+      "audio_usages_nico_values_native_verified_20261121": {
+        "producer": "015628bf157f17a581715b47ee282cf35639d013",
+        "report": "docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json",
+        "full_figure_complete": false,
+        "subset": "Own-authority foundation and private input/source values; no persistent review API"
       }
     }
   ],
@@ -6352,5 +6382,23 @@
     "artifact": 14700713714,
     "artifact_sha256": "576c11c46c812dcb68105ac11ccd32f571cb23c97bf25927ecbd2324e0c35b89",
     "report": "docs/jrc_contact_center/audio_usages_nico_values_native_lint_followup_20261121.json"
+  },
+  "audio_usages_nico_values_native_verified_20261121": {
+    "status": "local_usages_and_private_values_verified_natively_not_full_nico_review",
+    "producer": "015628bf157f17a581715b47ee282cf35639d013",
+    "run": 44889202273,
+    "native_distinct": 2314,
+    "schema_reload_separate": 159,
+    "vue": 1122,
+    "chrome": {
+      "passed": 240,
+      "per_project": 60,
+      "failed": 0,
+      "pending": 0,
+      "flaky": 0
+    },
+    "artifact": 14702364821,
+    "artifact_sha256": "33483949c9d6c0646102a6292685097b471dd2505306afe48c9938ccc422042f",
+    "report": "docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json"
   }
 }

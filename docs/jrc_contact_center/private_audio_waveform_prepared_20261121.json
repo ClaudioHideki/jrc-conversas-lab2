@@ -1,0 +1,40 @@
+{
+  "status": "prepared_not_natively_validated",
+  "parent": "015628bf157f17a581715b47ee282cf35639d013",
+  "figures": [
+    6,
+    16
+  ],
+  "reference": "Second Word line338, actual library image doc1/image14.png",
+  "reuse": "Existing wavesurfer.js7.8.6 and private AudioVersionPreview/useAudioBytes with the same HTML media and verified blob URL",
+  "new_dependencies_migrations_permissions_or_api": false,
+  "visualization_bounds": {
+    "bytes": 20971520,
+    "duration_ms": 600000,
+    "channels_max": 2,
+    "visual_sample_rate": 8000
+  },
+  "limits_do_not_change_upload_playback_or_download": true,
+  "no_fake_peaks_or_provider_status": true,
+  "prepared_tests": [
+    "Library-mocked Vue: exact blob/media, no autoplay, actual draw state, resource bounds, decode failures, stale results and disposal",
+    "Current inspection metadata forwarded to the existing private player; denial removes the preview",
+    "Same240Chrome retained, with actual2s silent WAV/16000decoded samples, canvas width, native playback and close/revocation assertions"
+  ],
+  "native_tests_executed_for_this_increment": false,
+  "chrome_executed_for_this_increment": false,
+  "pending": [
+    "New SHA native gates and240Chrome",
+    "Actual screenshots in desktop/mobile and light/dark",
+    "Remaining audio destinations, actions, TTS and external PABX contract; full figures not complete"
+  ],
+  "paths_sha256": {
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioWaveform.vue": "7a1381f0e1d8b91d40e179e64af7880894287e33e0475a00aedbad8aa9f1212a",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioWaveform.spec.js": "2846a86f039d2994a6e4ba9d63d4a09c7803b71da774d82ec0b4fd4c6482bfab",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioVersionPreview.vue": "1862e5a3c48804a2fd70b53b3be7d0e88e4cd31d131d685c48e672472590c4bc",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioInspectionHistory.vue": "f8c7775b4dc841b93ddc213045b7b06546c6579cb963cf9fa4614ee3b216aaed",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioInspectionHistory.spec.js": "1cabe9a5f4951b6b32800f7c4e53559cfc9c85d9f419b7327903bcbda41d2172",
+    "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "643e7761d47ee2647ce669700a40dec5e2d736de5e4d86feef1f4fbf2b48e689",
+    "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "005a7ff853f8c89dc29a30c504d14e3eb0fb17d077c36aa23213a77c0bcd6996"
+  }
+}

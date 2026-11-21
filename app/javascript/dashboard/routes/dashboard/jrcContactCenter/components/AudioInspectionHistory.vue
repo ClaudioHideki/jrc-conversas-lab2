@@ -191,6 +191,7 @@ watch([items, loading, page, error, opened], () => {
           :asset-id="assetId"
           :version="version"
           :inspection-id="row.id"
+          :metadata="row.metadata"
           :can-manage="canManage && !loading && !saving"
           @denied="emit('denied')"
         />

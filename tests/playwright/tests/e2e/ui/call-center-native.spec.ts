@@ -8066,6 +8066,17 @@ test('institutional audio folders native verified bytes playback download and wi
     (node: HTMLAudioElement) => node.duration
   );
   expect(duration).toBeCloseTo(2, 2);
+  const waveform = version.locator('[data-audio-waveform]');
+  await expect(waveform).toHaveAttribute('data-audio-waveform', 'READY');
+  await expect(waveform).toHaveAttribute('data-decoded-samples', '16000');
+  const waveformSampleCount = Number(
+    await waveform.getAttribute('data-decoded-samples')
+  );
+  const waveformCanvasWidth = await waveform
+    .locator('canvas')
+    .first()
+    .evaluate((node: HTMLCanvasElement) => node.width);
+  expect(waveformCanvasWidth).toBeGreaterThan(0);
   expect(
     await player.evaluate(node => getComputedStyle(node).colorScheme)
   ).toBe(info.project.name.endsWith('dark') ? 'dark' : 'light');
@@ -8079,6 +8090,7 @@ test('institutional audio folders native verified bytes playback download and wi
   expect(await player.getAttribute('src')).toMatch(/^blob:/);
   await version.locator('[data-close-audio-bytes]').click();
   await expect(player).toHaveCount(0);
+  await expect(waveform).toHaveCount(0);
   await version.locator('[data-open-audio-bytes]').click();
   await expect(player).toBeVisible();
   const downloadStarted = page.waitForEvent('download');
@@ -8103,6 +8115,8 @@ test('institutional audio folders native verified bytes playback download and wi
       player.evaluate((node: HTMLAudioElement) => node.readyState)
     )
     .toBeGreaterThanOrEqual(1);
+  await expect(waveform).toHaveAttribute('data-audio-waveform', 'READY');
+  await expect(waveform).toHaveAttribute('data-decoded-samples', '16000');
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth
   );
@@ -8121,7 +8135,9 @@ test('institutional audio folders native verified bytes playback download and wi
   expect((await withdrawn).status()).toBe(401);
   await expect(dialog).not.toBeVisible();
   await expect(
-    page.locator('[data-audio-verified-player], [data-download-audio-bytes]')
+    page.locator(
+      '[data-audio-verified-player], [data-download-audio-bytes], [data-audio-waveform]'
+    )
   ).toHaveCount(0);
   fs.writeFileSync(
     `.codex/call-center-native-e2e/${info.project.name}-audio-verified-preview.json`,
@@ -8136,6 +8152,10 @@ test('institutional audio folders native verified bytes playback download and wi
       sha256,
       downloaded_sha256: downloadedHash,
       actual_browser_duration_seconds: duration,
+      actual_waveform_sample_count: waveformSampleCount,
+      actual_waveform_canvas_width: waveformCanvasWidth,
+      waveform_source:
+        'Same authorized SHA-256 verified private blob; silent PCM fixture has zero-valued samples',
       quarantined: unverified.status(),
       verified_bytes: byteResponse.status(),
       reauthorized_download: 200,
