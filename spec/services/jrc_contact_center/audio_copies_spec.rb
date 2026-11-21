@@ -27,8 +27,8 @@ RSpec.describe JrcContactCenter::AudioCopies do
     expect(duplicate.blob.download).to eq(bytes)
     expect([proof.audio_version_id, proof.ready?]).to eq([duplicate.id, true])
     expect(audit.audited_changes.fetch('audio_copy')).to eq('source_asset_id' => request.fetch(:asset_id),
-                                                         'source_version_id' => request.fetch(:version_id),
-                                                         'source_sha256' => source_version.sha256)
+                                                            'source_version_id' => request.fetch(:version_id),
+                                                            'source_sha256' => source_version.sha256)
     expect(source_version.reload.attributes).to eq(original)
   end
 
@@ -66,7 +66,7 @@ RSpec.describe JrcContactCenter::AudioCopies do
     )
     expected = JrcContactCenter::AudioAssetRevision.token(newer.audio_asset, version: newer)
     expect(newer.sha256).to eq(first.sha256)
-    expect { copies.call(**request.merge(version_id: newer.id.to_s, expected: expected)) }
+    expect { copies.call(**request, version_id: newer.id.to_s, expected: expected) }
       .to raise_error(JrcContactCenter::OperationError, 'institutional_audio_upload_key_conflict')
     expect(JrcContactCenter::AudioAsset.where(account: account).count).to eq(2)
     expect(source_version.reload.blob.download).to eq(bytes)
@@ -75,14 +75,14 @@ RSpec.describe JrcContactCenter::AudioCopies do
   it 'rejects a source asset in another unit before creating or reading any bytes' do
     request = copy_request
     hidden = JrcContactCenter::AudioAsset.create!(account: account, unit: units.last, name: 'SYNTHETIC denied source')
-    expect { copies.call(**request.merge(asset_id: hidden.id.to_s)) }.to raise_error(ActiveRecord::RecordNotFound)
+    expect { copies.call(**request, asset_id: hidden.id.to_s) }.to raise_error(ActiveRecord::RecordNotFound)
     expect(JrcContactCenter::AudioVersion.where(account: account).count).to eq(1)
   end
 
   it 'rejects a genuine version ID attached to the wrong native source asset' do
     request = copy_request
     other = JrcContactCenter::AudioAsset.create!(account: account, unit: unit, name: 'SYNTHETIC different source')
-    expect { copies.call(**request.merge(asset_id: other.id.to_s)) }.to raise_error(ActiveRecord::RecordNotFound)
+    expect { copies.call(**request, asset_id: other.id.to_s) }.to raise_error(ActiveRecord::RecordNotFound)
     expect(JrcContactCenter::AudioVersion.where(account: account).count).to eq(1)
   end
 

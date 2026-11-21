@@ -1,0 +1,46 @@
+{
+  "status": "native_backend_and_vue_passed_ruby_lint_blocked_assets_chrome",
+  "producer_sha": "9b2628a4905787e9fc817cf83df68d6a9eaaffe6",
+  "run": 44911548351,
+  "artifact": 14710728675,
+  "artifact_sha256": "a743b73777c2c383f9bb81d2cebbf89bb6bf1bf81bd12d703ded498f3b535d8e",
+  "native_distinct_examples": 2438,
+  "schema_reload_separate": 175,
+  "vue_passed": 1213,
+  "previous_cases_preserved": {
+    "call-center-rspec.json": {
+      "old_passed": 2212,
+      "new_passed": 24
+    },
+    "call-center-pabx-rspec.json": {
+      "old_passed": 115,
+      "new_passed": 2
+    },
+    "vue": {
+      "old_passed": 1188,
+      "new_passed": 25
+    }
+  },
+  "new_ruby_offenses": 11,
+  "offense_paths": [
+    "app/services/jrc_contact_center/audio_uploads.rb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb",
+    "spec/services/jrc_contact_center/audio_copies_spec.rb"
+  ],
+  "correction": [
+    "Align only the four offending continuation lines to their actual first hash argument",
+    "Three equivalent explicit keyword overrides replace inline Hash#merge splats in specs"
+  ],
+  "unchanged": [
+    "All permission/source/revision/idempotency/storage/inspection behavior",
+    "All twelve migration hashes and frozen SQL",
+    "Every previous native/Vue case and every244Chrome assertion",
+    "All lint/gate configurations"
+  ],
+  "pending": [
+    "Native lint on corrected SHA",
+    "New assets, bootstrap and244Chrome including copy replay and full mobile save caption",
+    "Actual new copy screenshots reviewed after successful producer"
+  ],
+  "not_complete": true
+}

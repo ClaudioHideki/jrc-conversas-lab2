@@ -111,7 +111,7 @@ RSpec.describe 'Institutional audio duplication uses the native receipt and acco
     items = response.parsed_body.fetch('items')
     expect(items.length).to eq(1)
     expect(items.first.fetch('audio_copy')).to eq('source_asset_id' => source_version.audio_asset_id.to_s,
-                                                'source_version_id' => source_version.id.to_s, 'source_sha256' => source_version.sha256)
+                                                  'source_version_id' => source_version.id.to_s, 'source_sha256' => source_version.sha256)
     expect(items.first.dig('scopes', 'after', 'unit_id')).to eq(unit.id.to_s)
     expect(response.body).not_to include(source_version.file_name, source_version.blob.key, source_version.idempotency_key)
   end

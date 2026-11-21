@@ -6577,5 +6577,11 @@
     "run": 44906859540,
     "report": "docs/jrc_contact_center/team_supervision_native_verified_20261121.json",
     "whole_figures_complete": false
+  },
+  "audio_copy_first_native_20261121": {
+    "producer": "9b2628a4905787e9fc817cf83df68d6a9eaaffe6",
+    "report": "docs/jrc_contact_center/audio_copy_first_native_20261121.json",
+    "status": "native_backend_and_vue_passed_ruby_lint_blocked_assets_chrome",
+    "whole_figures_complete": false
   }
 }

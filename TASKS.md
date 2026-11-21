@@ -804,3 +804,6 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 
 - [x] **Supervisão explícita — `31582e3a`, CI44906859540:** 2412Rails distintos,175reload separados,1188Vue e244Chrome aprovados;zero falhas/pendências/erros, lint/assets/bootstrap15 aprovados. Quatro capturas efetivamente abertas;persistência, paginação, conflito e negações comprovados. Sem grants ou participação automática. Ver `docs/jrc_contact_center/team_supervision_native_verified_20261121.json`. Figuras3/12 completas e cópia institucional ainda não concluídas por este resultado.
+
+
+- [ ] **Cópia institucional — `9b2628a4`, CI44911548351:**2438Rails distintos/175reload/1213Vue aprovados; todos2212core/115concorrentes/1188Vue anteriores e26novos Rails/25Vue conferidos. Onze infrações Ruby em três arquivos bloquearam assets/Chrome; alinhamento e três sobrescritas equivalentes de kwargs corrigidos, sem mudança de comportamento, escopo, regras, migrations ou gates. Exigir novoSHA e244Chrome; ver `docs/jrc_contact_center/audio_copy_first_native_20261121.json`.

@@ -131,7 +131,7 @@ class JrcContactCenter::AudioUploads
 
     check_revision!(asset, request)
     asset ||= JrcContactCenter::AudioAsset.create!(request.attributes.merge('account' => @access.account,
-                                                                           'unit' => @access.unit(request.unit_id)))
+                                                                            'unit' => @access.unit(request.unit_id)))
     version = JrcContactCenter::AudioVersion.create!(version_attributes(asset, request, input, digest))
     JrcContactCenter::AudioInspections.new(access: @access).record_received!(version: version, upload_key: request.key, attributes: observation)
     request.origin&.record_copy!(version)
