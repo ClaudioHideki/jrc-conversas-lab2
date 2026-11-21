@@ -4,8 +4,8 @@ RSpec.shared_context 'with a local IVR audio reference' do
 
   let(:library) { JrcContactCenter::AudioLibraryAccess.new(context: context) }
   let(:audio_version) do
-    JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: library)
-                                               .create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC pinned IVR audio' }, file: upload, key: key)
+    receiver = JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: library)
+    receiver.create!(unit_id: unit.id, attributes: { name: 'SYNTHETIC pinned IVR audio' }, file: upload, key: key)
   end
   let(:audio_proof) do
     service = JrcContactCenter::AudioInspections.new(access: library)
@@ -34,20 +34,24 @@ RSpec.shared_context 'with a local IVR audio reference' do
   end
 
   def other_scope_audio(target)
+    access = other_scope_access(target)
+    received = JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: access).create!(
+      unit_id: target.id, attributes: { name: 'SYNTHETIC separately authorized audio' }, file: upload,
+      key: "synthetic-ivr-other-#{target.id}-#{access.actor.id}"
+    )
+    JrcContactCenter::AudioInspections.new(access: access).create!(
+      asset_id: received.audio_asset_id, version_id: received.id, key: "synthetic-ivr-other-proof-#{target.id}-#{access.actor.id}"
+    )
+    received.reload
+  end
+
+  def other_scope_access(target)
     target.account.enable_features!('jrc_contact_center', 'custom_roles', 'audit_logs')
     owner = create(:user, :contact_center_eligible, account: target.account)
     link = target.account.account_users.find_by!(user: owner)
     role = create(:custom_role, account: target.account, permissions: %w[jrc_contact_center_view jrc_contact_center_configure])
     link.update!(custom_role: role)
     target.account.jrc_crm_user_business_units.create!(user: owner, scope: 'GROUP', active: true, structure_managed: true)
-    access = JrcContactCenter::AudioLibraryAccess.new(context: { account: target.account, user: owner, account_user: link })
-    received = JrcContactCenter::SyntheticLegacyAudioReceipt.new(access: access).create!(
-      unit_id: target.id, attributes: { name: 'SYNTHETIC separately authorized audio' }, file: upload,
-      key: "synthetic-ivr-other-#{target.id}-#{owner.id}"
-    )
-    JrcContactCenter::AudioInspections.new(access: access).create!(
-      asset_id: received.audio_asset_id, version_id: received.id, key: "synthetic-ivr-other-proof-#{target.id}-#{owner.id}"
-    )
-    received.reload
+    JrcContactCenter::AudioLibraryAccess.new(context: { account: target.account, user: owner, account_user: link })
   end
 end

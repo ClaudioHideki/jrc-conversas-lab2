@@ -40,8 +40,9 @@ RSpec.describe JrcContactCenter::IvrGraphSchema, '.validate!' do
     end
   end
 
+  invalid_ids = [0, 1, false, [], {}, '0', '-1', '1.0', '1/2', "1\n", '99999999999999999999']
   %w[asset_id version_id].each do |field|
-    [0, 1, false, [], {}, '0', '-1', '1.0', '1/2', "1\n", '99999999999999999999'].each do |invalid|
+    invalid_ids.each do |invalid|
       it "rejects an untyped or noncanonical #{field} identity #{invalid.inspect}" do
         menu['audio_reference'] = reference.merge(field => invalid)
         expect { described_class.validate!(definition) }.to raise_error(JrcContactCenter::OperationError, 'invalid_ivr_graph')

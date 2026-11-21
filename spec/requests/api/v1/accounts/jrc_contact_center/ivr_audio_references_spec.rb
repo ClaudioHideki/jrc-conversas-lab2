@@ -38,7 +38,7 @@ RSpec.describe 'Authenticated exact institutional audio and local IVR references
     expect(response.parsed_body.fetch('item')).to include('local_only' => true, 'provider_applied' => false)
     get "#{draft_url}/#{item.fetch('id')}/export", params: { revision: 1 }, headers: actor.create_new_auth_token
     expect(response).to have_http_status(:ok)
-    expect(JSON.parse(response.body)).to eq(ivr_definition)
+    expect(response.parsed_body).to eq(ivr_definition)
   end
 
   it 'rejects unverified audio through the write API with no partial draft' do

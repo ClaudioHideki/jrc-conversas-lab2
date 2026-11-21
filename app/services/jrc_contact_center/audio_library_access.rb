@@ -75,8 +75,8 @@ class JrcContactCenter::AudioLibraryAccess
     raise ActiveRecord::RecordNotFound unless current_unit.status == 'active'
 
     permitted = assets.where(unit_id: current_unit.id, id: reference_ids!(asset_ids)).select(:id)
-    JrcContactCenter::AudioVersion.where(account: @account, unit: current_unit, audio_asset_id: permitted, id: reference_ids!(version_ids))
-                                 .includes(:latest_inspection)
+    JrcContactCenter::AudioVersion.where(account: @account, unit_id: current_unit.id, audio_asset_id: permitted, id: reference_ids!(version_ids))
+                                  .includes(:latest_inspection)
   end
 
   def identifier!(value)

@@ -49,7 +49,7 @@ class JrcContactCenter::IvrGraph
   def validate_references!(access)
     validate_unit!(access.units)
     validate_queues!(access.queues)
-    references = nodes.values.map { |node| node['audio_reference'] }.compact
+    references = nodes.values.pluck('audio_reference').compact
     @audio_proofs = if references.empty?
                       []
                     else

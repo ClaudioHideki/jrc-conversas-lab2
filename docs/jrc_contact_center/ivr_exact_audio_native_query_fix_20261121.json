@@ -1,0 +1,51 @@
+{
+  "status": "native_failure_preserved_minimal_fix_awaiting_revalidation",
+  "producer": "d3320a64df8a769c13b14dd6b925d25439454504",
+  "run": 44873756661,
+  "job": 136753790476,
+  "core": {
+    "examples": 2009,
+    "passed": 1987,
+    "failed": 22,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "original_parent_core_preserved": {
+    "producer": "3c7747d894a9caebcadc06f496890408319b8452",
+    "ids_checked": 1933,
+    "all_passed": true
+  },
+  "new_cases": {
+    "examples": 76,
+    "passed": 54,
+    "failed": 22
+  },
+  "schema_reload_separate": {
+    "passed": 159,
+    "failed": 0,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "causes": [
+    "New reference query passed unit: to AudioVersion, which deliberately exposes unit_id without a unit association; PostgreSQL rejected a nonexistent unit column",
+    "One replacement fixture omitted the required explicit version: argument to the existing native AudioAssetRevision.token method",
+    "Thirteen native lint findings in seven added/modified files; no global rules or gates are disabled"
+  ],
+  "fix": [
+    "Use existing native unit_id column with the same account, authorized-asset subquery and exact-version predicates",
+    "Provide the actual library.latest(asset) to the fixture revision token",
+    "Align native method chains/hash arguments; preserve nil-only reference compaction through pluck",
+    "Keep all76 new examples; use a class-only RSpec describe, explicit callback, shared invalid-ID values and a smaller scoped fixture helper"
+  ],
+  "lint": {
+    "observed_new_offenses": 13,
+    "corrected_in_source_pending_native_confirmation": true
+  },
+  "concurrency_corporate_vue_assets_chrome": "Not executed at the failed producer; require native rerun, including240Chrome",
+  "artifact": 14695632005,
+  "artifact_bytes": 234729,
+  "artifact_sha256": "dbcfb8c90100a198fd836052a09ed49764d059f68e0e6dc180a0d2beee9eb989",
+  "migrations_sql_permissions_or_policy_weakened": false,
+  "separate_uncommitted_nico_input": "Held outside this corrective checkpoint",
+  "full_23_figures_complete": false
+}

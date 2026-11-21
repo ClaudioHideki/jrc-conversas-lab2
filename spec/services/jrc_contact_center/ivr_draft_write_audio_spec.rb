@@ -1,11 +1,13 @@
 require 'rails_helper'
 
-RSpec.describe JrcContactCenter::IvrDraftWrite, 'with exact local audio versions' do
+RSpec.describe JrcContactCenter::IvrDraftWrite do
   include_context 'with a local IVR audio reference'
 
   def input_for(definition: ivr_definition, revision: 0, request_id: SecureRandom.uuid, status: 'draft')
-    JrcContactCenter::IvrDraftInput.new(name: 'SYNTHETIC audio draft', status: status, definition: definition,
-                                      expected_revision: revision, request_id: request_id)
+    JrcContactCenter::IvrDraftInput.new(
+      name: 'SYNTHETIC audio draft', status: status, definition: definition,
+      expected_revision: revision, request_id: request_id
+    )
   end
 
   def write_audio_draft(input = input_for)

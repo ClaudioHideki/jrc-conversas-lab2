@@ -78,7 +78,7 @@ RSpec.describe JrcContactCenter::IvrGraph, '#audio_proofs' do
     upload.tempfile.flush
     upload.tempfile.rewind
     asset = library.asset(audio_version.audio_asset_id)
-    expected = JrcContactCenter::AudioAssetRevision.token(asset)
+    expected = JrcContactCenter::AudioAssetRevision.token(asset, version: library.latest(asset))
     latest = JrcContactCenter::AudioUploads.new(access: library).replace!(
       asset_id: asset.id, file: upload, key: 'synthetic-ivr-audio-replacement', expected: expected
     )
@@ -143,13 +143,12 @@ RSpec.describe JrcContactCenter::IvrGraph, '#audio_proofs' do
     expect(graph.audio_proofs.pluck('version_id')).to match_array(versions.map { |version| version.id.to_s })
   end
 
-  def graph_select_count
+  def graph_select_count(&operation)
     count = 0
     callback = ->(_name, _start, _finish, _id, payload) { count += 1 if payload.fetch(:sql).lstrip.start_with?('SELECT') }
     ActiveSupport::Notifications.subscribed(callback, 'sql.active_record') do
-      ActiveRecord::Base.uncached { yield }
+      ActiveRecord::Base.uncached(&operation)
     end
     count
   end
-
 end

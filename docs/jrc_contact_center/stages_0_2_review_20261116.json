@@ -6175,5 +6175,36 @@
     ],
     "figure23_complete": false,
     "report": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json"
+  },
+  "ivr_exact_audio_native_query_fix_20261121": {
+    "status": "native_failure_preserved_minimal_fix_awaiting_revalidation",
+    "producer": "d3320a64df8a769c13b14dd6b925d25439454504",
+    "run": 44873756661,
+    "core": {
+      "examples": 2009,
+      "passed": 1987,
+      "failed": 22,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "original_parent_core_preserved": {
+      "producer": "3c7747d894a9caebcadc06f496890408319b8452",
+      "ids_checked": 1933,
+      "all_passed": true
+    },
+    "new_cases": {
+      "examples": 76,
+      "passed": 54,
+      "failed": 22
+    },
+    "schema_reload_separate": {
+      "passed": 159,
+      "failed": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "artifact": 14695632005,
+    "artifact_sha256": "dbcfb8c90100a198fd836052a09ed49764d059f68e0e6dc180a0d2beee9eb989",
+    "report": "docs/jrc_contact_center/ivr_exact_audio_native_query_fix_20261121.json"
   }
 }
