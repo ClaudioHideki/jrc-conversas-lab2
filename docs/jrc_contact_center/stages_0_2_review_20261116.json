@@ -6336,5 +6336,21 @@
     "artifact": 14700401148,
     "artifact_sha256": "837a0f87d83ee6a1705a428e44ff2bb6f42b610a3e208e9c75999ac4315f8574",
     "report": "docs/jrc_contact_center/ivr_known_audio_refusal_verified_20261121.json"
+  },
+  "audio_usages_nico_values_native_lint_followup_20261121": {
+    "status": "native_backend_and_vue_passed_lint_only_followup_prepared_not_yet_revalidated",
+    "producer": "f0ef9825e6fa678612c4319c72a258fb5cfc2686",
+    "run": 44886482187,
+    "native_distinct": 2314,
+    "schema_reload_separate": 159,
+    "vue": 1122,
+    "new104native_verified_by_file": {
+      "quality_review_input_spec.rb": 61,
+      "quality_analysis_snapshot_spec.rb": 30,
+      "audio_usages_spec.rb": 13
+    },
+    "artifact": 14700713714,
+    "artifact_sha256": "576c11c46c812dcb68105ac11ccd32f571cb23c97bf25927ecbd2324e0c35b89",
+    "report": "docs/jrc_contact_center/audio_usages_nico_values_native_lint_followup_20261121.json"
   }
 }

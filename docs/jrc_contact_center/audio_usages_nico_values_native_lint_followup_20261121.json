@@ -1,0 +1,97 @@
+{
+  "status": "native_backend_and_vue_passed_lint_only_followup_prepared_not_yet_revalidated",
+  "producer": "f0ef9825e6fa678612c4319c72a258fb5cfc2686",
+  "run": 44886482187,
+  "job": 136792758123,
+  "native_distinct": 2314,
+  "core": 2117,
+  "concurrency": 112,
+  "corporate": 85,
+  "schema_reload_separate": 159,
+  "vue": 1122,
+  "all_native_and_vue_failures_pending_outside_errors": 0,
+  "all2013parent_core_ids_preserved_passed": true,
+  "new104native_verified_by_file": {
+    "quality_review_input_spec.rb": 61,
+    "quality_analysis_snapshot_spec.rb": 30,
+    "audio_usages_spec.rb": 13
+  },
+  "new20vue_passed": true,
+  "frontend_lint": "Passed",
+  "lint_offenses": [
+    {
+      "cop": "Metrics/AbcSize",
+      "line": 7,
+      "message": "Assignment Branch Condition size for show is too high. [<6, 27, 1> 27.68/26]"
+    },
+    {
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 33,
+      "message": "Cyclomatic complexity for `private_json_copy` is too high. [8/7]"
+    },
+    {
+      "cop": "Style/MultilineBlockChain",
+      "line": 63,
+      "message": "Avoid multi-line chains of blocks."
+    },
+    {
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 66,
+      "message": "Cyclomatic complexity for `suggestion_values` is too high. [10/7]"
+    },
+    {
+      "cop": "Metrics/PerceivedComplexity",
+      "line": 66,
+      "message": "Perceived complexity for `suggestion_values` is too high. [10/8]"
+    },
+    {
+      "cop": "Rails/IndexWith",
+      "line": 80,
+      "message": "Prefer `index_with` over `to_h { ... }`."
+    },
+    {
+      "cop": "Performance/RedundantEqualityComparisonBlock",
+      "line": 13,
+      "message": "Use `all?(String)` instead of block."
+    },
+    {
+      "cop": "Layout/EmptyLineAfterGuardClause",
+      "line": 31,
+      "message": "Add empty line after guard clause."
+    },
+    {
+      "cop": "Style/StringConcatenation",
+      "line": 130,
+      "message": "Prefer string interpolation to string concatenation."
+    },
+    {
+      "cop": "Lint/AmbiguousOperatorPrecedence",
+      "line": 130,
+      "message": "Wrap expressions with varying precedence with parentheses to avoid ambiguity."
+    },
+    {
+      "cop": "Lint/AmbiguousOperatorPrecedence",
+      "line": 23,
+      "message": "Wrap expressions with varying precedence with parentheses to avoid ambiguity."
+    },
+    {
+      "cop": "Style/WordArray",
+      "line": 123,
+      "message": "Use `%w` or `%W` for an array of words."
+    }
+  ],
+  "followup": [
+    "Extract unchanged default/max pagination into a private controller method; same scope and output",
+    "Extract unchanged JSON-key and suggestion-text predicates; do not drop malformed false values",
+    "Assign flat_map result before the same uniq; use index_with preserving sorted JSON object order",
+    "Native all?(String), guard spacing and explicit spec operator parentheses/word array"
+  ],
+  "tests_or_limits_weakened": false,
+  "migrations_permissions_sql_workflow_or_guards_changed": false,
+  "assets_chrome": "Not executed at this producer;240Chrome required after lint approval",
+  "artifact": 14700713714,
+  "artifact_bytes": 352680,
+  "artifact_sha256": "576c11c46c812dcb68105ac11ccd32f571cb23c97bf25927ecbd2324e0c35b89",
+  "nico_persistent_review": "Not implemented by these value objects; proven source/unit bridge, ledger and API/popup remain pending",
+  "full23figures_complete": false
+}

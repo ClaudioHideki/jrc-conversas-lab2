@@ -31,14 +31,19 @@ class JrcContactCenter::QualityAnalysisSnapshot
   end
 
   def private_json_copy(analysis)
-    valid = analysis.is_a?(Hash) && analysis.keys.all? { |key| key.is_a?(String) || key.is_a?(Symbol) }
-    valid &&= analysis.keys.map(&:to_s).uniq.length == analysis.length
-    unavailable! unless valid
+    unavailable! unless source_keys?(analysis)
 
     json = JSON.generate(analysis, max_nesting: 32)
     unavailable! unless json.bytesize <= 1.megabyte
 
     JSON.parse(json, max_nesting: 32)
+  end
+
+  def source_keys?(analysis)
+    return false unless analysis.is_a?(Hash)
+
+    keys = analysis.keys
+    keys.all? { |key| key.is_a?(String) || key.is_a?(Symbol) } && keys.map(&:to_s).uniq.length == keys.length
   end
 
   def identifier?(value)
@@ -55,29 +60,32 @@ class JrcContactCenter::QualityAnalysisSnapshot
   end
 
   def suggestions
-    SUGGESTION_FIELDS.flat_map do |field|
+    rows = SUGGESTION_FIELDS.flat_map do |field|
       suggestion_values(@data.fetch('payload_completo')[field]).map do |text|
         id = Digest::SHA256.hexdigest(JSON.generate([field, text]))
         { 'id' => id, 'category' => field, 'text' => text }
       end
-    end.uniq { |row| row.fetch('id') }
+    end
+    rows.uniq { |row| row.fetch('id') }
   end
 
   def suggestion_values(value)
     return [] if value.nil? || value == ''
 
     items = value.is_a?(Array) ? value : [value]
-    valid = items.length <= 40 && items.all? do |text|
-      text.is_a?(String) && text.valid_encoding? && text.bytesize.between?(1, 4_000) && text.strip.present?
-    end
+    valid = items.length <= 40 && items.all? { |text| suggestion_text?(text) }
     unavailable! unless valid
 
     items
   end
 
+  def suggestion_text?(text)
+    text.is_a?(String) && text.valid_encoding? && text.bytesize.between?(1, 4_000) && text.strip.present?
+  end
+
   def sorted(value)
     case value
-    when Hash then value.keys.sort.to_h { |key| [key, sorted(value.fetch(key))] }
+    when Hash then value.keys.sort.index_with { |key| sorted(value.fetch(key)) }
     when Array then value.map { |child| sorted(child) }
     else value
     end

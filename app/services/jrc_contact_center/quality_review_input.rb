@@ -10,7 +10,7 @@ class JrcContactCenter::QualityReviewInput
   attr_reader :attributes
 
   def initialize(values)
-    valid = values.is_a?(Hash) && values.keys.all? { |key| key.is_a?(String) } && (values.keys - FIELDS).empty?
+    valid = values.is_a?(Hash) && values.keys.all?(String) && (values.keys - FIELDS).empty?
     invalid! unless valid
     reason!(values['justification'])
     classification!(values['classification'])
@@ -29,6 +29,7 @@ class JrcContactCenter::QualityReviewInput
     unless ActiveSupport::SecurityUtils.secure_compare(expected, actual_sha256)
       raise JrcContactCenter::OperationError.new('quality_review_source_changed', status: :conflict)
     end
+
     invalid! unless (attributes.fetch('recommendation_ids') - available_recommendation_ids).empty?
 
     self

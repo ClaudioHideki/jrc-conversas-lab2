@@ -127,7 +127,7 @@ RSpec.describe JrcContactCenter::QualityAnalysisSnapshot do
   end
 
   it 'preserves the native Supabase identifier length and syntax without shortening a valid call identity' do
-    analysis[:call_id] = 'SYNTHETIC-' + 'x' * 245
+    analysis[:call_id] = "SYNTHETIC-#{'x' * 245}"
     expect(capture(call_id: analysis.fetch(:call_id)).data.fetch('call_id')).to eq(analysis.fetch(:call_id))
     analysis[:call_id] += 'x'
     expect { capture(call_id: analysis.fetch(:call_id)) }.to raise_error(JrcContactCenter::OperationError, 'quality_analysis_source_unavailable')

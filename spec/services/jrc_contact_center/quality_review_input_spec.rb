@@ -20,7 +20,7 @@ RSpec.describe JrcContactCenter::QualityReviewInput do
     expect(input.attributes.fetch('adjusted_themes')).to eq(['SYNTHETIC service'])
     expect { input.attributes['classification'] = 'positive' }.to raise_error(FrozenError)
     expect { input.attributes.fetch('adjusted_themes').first.replace('x') }.to raise_error(FrozenError)
-    expect { input.attributes.fetch('recommendation_ids') << 'c' * 64 }.to raise_error(FrozenError)
+    expect { input.attributes.fetch('recommendation_ids') << ('c' * 64) }.to raise_error(FrozenError)
   end
 
   it 'normalizes explicit input without assigning actor, permissions, origin or an operational action' do
@@ -120,7 +120,7 @@ RSpec.describe JrcContactCenter::QualityReviewInput do
     end
   end
 
-  ['adjusted_summary', 'justification'].each do |field|
+  %w[adjusted_summary justification].each do |field|
     it "rejects unsafe control characters in #{field} without logging the content" do
       values[field] = "SYNTHETIC\0payload"
       expect { described_class.new(values) }.to raise_error(JrcContactCenter::OperationError, 'invalid_quality_review')
