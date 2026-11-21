@@ -4,9 +4,9 @@
 class CreateContactCenterTeamSupervisions < ActiveRecord::Migration[7.1]
   TABLE = :jrc_contact_center_team_supervisions
   COLUMNS = %w[id account_id team_id account_user_id kind created_at updated_at].freeze
-  MEMBER_INDEX = 'cc_team_supervision_member'.freeze
-  PRIMARY_INDEX = 'cc_team_supervision_primary'.freeze
-  KIND_CHECK = 'cc_team_supervision_kind'.freeze
+  MEMBER_INDEX = 'cc_team_supervision_member'
+  PRIMARY_INDEX = 'cc_team_supervision_primary'
+  KIND_CHECK = 'cc_team_supervision_kind'
 
   def up
     previous = connection.select_value('SHOW lock_timeout')
@@ -50,10 +50,16 @@ class CreateContactCenterTeamSupervisions < ActiveRecord::Migration[7.1]
   def valid_columns?(columns)
     return false unless columns.values.none?(&:null)
 
-    ids = %w[id account_id team_id account_user_id]
-    valid = ids.all? { |name| columns.fetch(name).type == :integer && columns.fetch(name).limit == 8 }
+    valid = bigint_columns?(columns)
     valid &&= %w[created_at updated_at].all? { |name| columns.fetch(name).type == :datetime }
     valid && columns.fetch('kind').type == :text && valid_defaults?(columns)
+  end
+
+  def bigint_columns?(columns)
+    %w[id account_id team_id account_user_id].all? do |name|
+      column = columns.fetch(name)
+      column.type == :integer && column.limit == 8
+    end
   end
 
   def valid_defaults?(columns)
@@ -97,7 +103,7 @@ class CreateContactCenterTeamSupervisions < ActiveRecord::Migration[7.1]
   end
 
   def unique_index?(index, columns, predicate)
-    return false unless index && index.unique && index.columns == columns
+    return false unless index&.unique && index.columns == columns
 
     predicate ? normalize(index.where) == predicate : index.where.nil?
   end

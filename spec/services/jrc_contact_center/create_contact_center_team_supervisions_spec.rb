@@ -37,7 +37,7 @@ RSpec.describe CreateContactCenterTeamSupervisions do
     in_owned_preupgrade_schema do |connection|
       rows = { 'accounts' => account.id, 'teams' => team.id, 'account_users' => member.id }
       rows.each { |table, id| connection.execute("INSERT INTO #{table} SELECT * FROM public.#{table} WHERE id = #{id}") }
-      sql = "INSERT INTO jrc_contact_center_access_grants SELECT * FROM public.jrc_contact_center_access_grants " \
+      sql = 'INSERT INTO jrc_contact_center_access_grants SELECT * FROM public.jrc_contact_center_access_grants ' \
             "WHERE account_id = #{account.id}"
       connection.execute(sql)
       before = connection.select_all('SELECT * FROM jrc_contact_center_access_grants ORDER BY id').to_a
@@ -103,8 +103,8 @@ RSpec.describe CreateContactCenterTeamSupervisions do
     in_owned_preupgrade_schema do |connection|
       described_class.new.up
       connection.remove_check_constraint(:jrc_contact_center_team_supervisions, name: described_class::KIND_CHECK)
-      connection.add_check_constraint(:jrc_contact_center_team_supervisions, "kind IN ('primary', 'additional')",
-                                     name: described_class::KIND_CHECK, validate: false)
+      expression = "kind IN ('primary', 'additional')"
+      connection.add_check_constraint(:jrc_contact_center_team_supervisions, expression, name: described_class::KIND_CHECK, validate: false)
       expect { described_class.new.up }.to raise_error(ActiveRecord::MigrationError, /Unexpected Call Center team supervision schema/)
     end
   end

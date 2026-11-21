@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe JrcContactCenter::TeamSupervisionInput do
-  let(:values) { { 'primary_account_user_id' => '2', 'additional_account_user_ids' => ['4', '3'] } }
+  let(:values) { { 'primary_account_user_id' => '2', 'additional_account_user_ids' => %w[4 3] } }
 
   it 'preserves explicit primary and additional roles without generating membership or permission attributes' do
     input = described_class.new(values)

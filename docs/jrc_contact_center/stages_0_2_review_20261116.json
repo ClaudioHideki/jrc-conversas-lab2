@@ -6476,5 +6476,51 @@
       "Team-to-queue hierarchy/schedules/distribution remain separate",
       "PABX writes and ACK pending supplier contract"
     ]
+  },
+  "team_supervision_first_native_20261121": {
+    "status": "native_failure_preserved_corrections_require_new_sha_validation",
+    "sha": "6a5e22fb1dbd25f38891ee0254fb803be5fb1851",
+    "run": 44901452901,
+    "artifact": 14706873035,
+    "artifact_sha256": "bd921c0bd540c5d0b00878ea9a7ee8f8e995d9bfb03c7d8799108b29963f583d",
+    "core": {
+      "examples": 2212,
+      "passed": 2210,
+      "failures": 2,
+      "pending": 0,
+      "outside_errors": 0,
+      "previous2117cases_preserved_passed": true,
+      "new_examples": 95,
+      "new_passed": 93
+    },
+    "schema_reload": {
+      "examples": 175,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "root_causes": [
+      "Unconfigured-account proof inspected a cached CollectionProxy after destroying its member; use a fresh native relation to prove no records were created",
+      "The v1 supervise right already includes reports; compare actual permissions before/after and assert the existing v1 set plus no independent Nico review"
+    ],
+    "new_migration_lint_only": {
+      "timestamp": "20261121090000",
+      "old_hash": "3880f19614bfcbf603ed6a524c329547f5a240ea0c752e8a910ff67b977fd858",
+      "candidate_hash": "eab5fb4a891c52e72879eb306d3f31913d59c59af5b3eea641229e785479cf2d",
+      "create_table_ddl_identical": true,
+      "old11pins_unchanged": true,
+      "production_never_executed": true
+    },
+    "additional_regressions_prepared": [
+      "Actual account-lock wait followed by recipient eligibility withdrawal",
+      "Actual account-lock wait followed by actor permission withdrawal",
+      "Existing Portuguese label for the independent Nico review permission in audit"
+    ],
+    "vue_assets_chrome": "Not executed in this failed producer; cannot reuse a1a as approval for the new feature",
+    "no_production_provider_docker_or_real_grant_changes": true,
+    "lint": {
+      "new_findings": 35,
+      "revalidation_pending": true
+    }
   }
 }

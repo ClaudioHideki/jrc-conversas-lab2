@@ -50,17 +50,21 @@ class JrcContactCenter::TeamSupervisions
     authorize!
     rows = payload.fetch(:items)
     grouped = JrcContactCenter::TeamSupervision.where(account: @account, team_id: rows.pluck(:id))
-                                              .includes(account_user: :user).group_by(&:team_id)
+                                               .includes(account_user: :user).group_by(&:team_id)
     rows.each do |row|
-      selected = grouped.fetch(row.fetch(:id), [])
-      row[:team_identity] = row.fetch(:id).to_s
-      row[:primary_supervisor] = selected.find { |person| person.kind == 'primary' }&.account_user&.user&.name
-      row[:additional_supervisor_count] = selected.count { |person| person.kind == 'additional' }
+      row.merge!(summary_fields(row.fetch(:id), grouped))
     end
     payload
   end
 
   private
+
+  def summary_fields(id, grouped)
+    selected = grouped.fetch(id, [])
+    primary = selected.find { |person| person.kind == 'primary' }
+    { team_identity: id.to_s, primary_supervisor: primary&.account_user&.user&.name,
+      additional_supervisor_count: selected.count { |person| person.kind == 'additional' } }
+  end
 
   def selection_fields(rows)
     primary = rows.find { |row| row[:kind] == 'primary' }
@@ -107,8 +111,8 @@ class JrcContactCenter::TeamSupervisions
 
   def persist_selection!(record, desired)
     desired.each do |attributes|
-      row = JrcContactCenter::TeamSupervision.find_or_initialize_by(account: @account, team: record,
-                                                                  account_user_id: attributes.fetch(:account_user_id))
+      identity = { account: @account, team: record, account_user_id: attributes.fetch(:account_user_id) }
+      row = JrcContactCenter::TeamSupervision.find_or_initialize_by(identity)
       row.kind = attributes.fetch(:kind)
       row.save! if row.new_record? || row.changed?
     end

@@ -66,8 +66,8 @@ RSpec.describe JrcContactCenter::TeamSupervision do
     audit = Audited.audit_class.where(auditable_type: described_class.name, auditable_id: record.id, action: 'update').sole
     expect(audit.associated_id).to eq(account.id)
     expect(audit.audited_changes.fetch('attributes').map { |row| row.fetch('kind') }).to eq(%w[primary additional])
-    expect(audit.audited_changes.fetch('cc_scope')).to eq('before' => { 'account_id' => account.id.to_s },
-                                                      'after' => { 'account_id' => account.id.to_s })
+    boundary = { 'account_id' => account.id.to_s }
+    expect(audit.audited_changes.fetch('cc_scope')).to eq('before' => boundary, 'after' => boundary)
     expect(audit.audited_changes.fetch('omitted_fields')).to be_empty
   end
 

@@ -58,8 +58,8 @@ RSpec.describe JrcContactCenter::TeamSupervisionScope do
     source.destroy!
     unit.destroy!
     expect(boundary).to be_covered
-    expect(account.jrc_crm_team_scopes).to be_empty
-    expect(account.jrc_crm_user_business_units).to be_empty
+    expect(JrcCrm::TeamScope.where(account: account)).to be_empty
+    expect(JrcCrm::UserBusinessUnit.where(account: account)).to be_empty
   end
 
   it 'requires group coverage for an unscoped team when the corporate structure is configured' do

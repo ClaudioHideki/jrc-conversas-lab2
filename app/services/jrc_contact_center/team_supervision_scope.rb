@@ -9,20 +9,22 @@ class JrcContactCenter::TeamSupervisionScope
   end
 
   def covered?
-    return false unless @team.account_id == @account.id && @member.account_id == @account.id
+    return false unless same_account?
 
     requirements = JrcCrm::TeamScope.active.where(account: @account, team: @team).includes(:company, :business_unit, :team).to_a
     return false unless requirements.all? { |requirement| valid_requirement?(requirement) }
     return true if sources.exists?(scope: 'GROUP')
 
-    if requirements.empty?
-      return !JrcContactCenter::CorporateCoverage.new(account: @account, user: @member.user).configured?
-    end
+    return !JrcContactCenter::CorporateCoverage.new(account: @account, user: @member.user).configured? if requirements.empty?
 
     requirements.all? { |requirement| covered_requirement?(requirement) }
   end
 
   private
+
+  def same_account?
+    @team.account_id == @account.id && @member.account_id == @account.id
+  end
 
   def sources
     projection = JrcContactCenter::TeamSourceProjection.new(account: @account)

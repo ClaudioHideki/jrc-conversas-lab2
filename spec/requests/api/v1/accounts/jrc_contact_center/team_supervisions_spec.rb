@@ -48,6 +48,9 @@ RSpec.describe 'Call Center native team supervision metadata', type: :request do
   it 'saves and reloads primary/additional native members without adding distribution, recording or Nico rights' do
     extra = additional_member
     revision = current_state.fetch('revision')
+    context = { account: account, account_user: member, user: recipient }
+    permissions = JrcContactCenter::ModulePolicy.new(context, :contact_center).effective_permissions
+    expect(permissions).to match_array(%w[jrc_contact_center_view jrc_contact_center_supervise jrc_contact_center_reports])
     counts = [TeamMember.count, JrcContactCenter::QueueMembership.count, JrcContactCenter::AccessGrant.count]
     values[:additional_account_user_ids] = [extra.id.to_s]
     patch endpoint, headers: headers, params: { supervision: values, expected_revision: revision }, as: :json
@@ -56,8 +59,9 @@ RSpec.describe 'Call Center native team supervision metadata', type: :request do
     expect(state).to include('primary_account_user_id' => member.id.to_s, 'additional_account_user_ids' => [extra.id.to_s])
     expect(state.fetch('supervisors').map { |row| row.fetch('eligible') }).to eq([true, true])
     expect([TeamMember.count, JrcContactCenter::QueueMembership.count, JrcContactCenter::AccessGrant.count]).to eq(counts)
-    policy = JrcContactCenter::ModulePolicy.new({ account: account, account_user: member, user: recipient }, :contact_center)
-    expect(policy.effective_permissions).to match_array(%w[jrc_contact_center_view jrc_contact_center_supervise])
+    policy = JrcContactCenter::ModulePolicy.new(context, :contact_center)
+    expect(policy.effective_permissions).to match_array(permissions)
+    expect(policy).not_to be_quality_review
   end
 
   it 'changes the principal atomically while preserving the old person as an explicit additional supervisor' do
@@ -222,8 +226,8 @@ RSpec.describe 'Call Center native team supervision metadata', type: :request do
   it 'preserves a canonical bigint team identity and returns actual supervision summaries in the existing team list' do
     exact = account.teams.create!(id: 9_007_199_254_740_993, name: 'SYNTHETIC bigint supervision team')
     JrcContactCenter::TeamSupervision.create!(account: account, team: exact, account_user: member, kind: 'primary')
-    get "/api/v1/accounts/#{account.id}/jrc_contact_center/access_authorizations/teams", headers: headers,
-                                                                                             params: { q: exact.name }
+    path = "/api/v1/accounts/#{account.id}/jrc_contact_center/access_authorizations/teams"
+    get path, headers: headers, params: { q: exact.name }
     expect(response).to have_http_status(:ok)
     row = response.parsed_body.fetch('items').sole
     expect(row).to include('team_identity' => '9007199254740993', 'primary_supervisor' => recipient.name, 'additional_supervisor_count' => 0)
@@ -239,10 +243,11 @@ RSpec.describe 'Call Center native team supervision metadata', type: :request do
     revision = response.parsed_body.dig('item', 'revision')
     old = JrcContactCenter::TeamSupervision.where(team: team).pluck(:id, :account_user_id, :kind)
     count = Audited.audit_class.where(auditable_type: 'JrcContactCenter::TeamSupervision').count
-    allow_any_instance_of(JrcContactCenter::TeamSupervision).to receive(:save!).and_wrap_original do |original, *args|
-      raise 'SYNTHETIC persistence refusal' if original.receiver.account_user_id == extra.id
+    allow(JrcContactCenter::ConfigurationAudit).to receive(:write!).and_wrap_original do |original, target, **options|
+      refused = target.is_a?(JrcContactCenter::TeamSupervision) && target.account_user_id == extra.id && options[:action] == 'create'
+      raise 'SYNTHETIC persistence refusal' if refused
 
-      original.call(*args)
+      original.call(target, **options)
     end
     values.merge!(primary_account_user_id: extra.id.to_s, additional_account_user_ids: [member.id.to_s])
     service = JrcContactCenter::TeamSupervisions.new(context: { account: account, account_user: actor_link, user: actor })

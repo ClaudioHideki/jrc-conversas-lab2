@@ -104,6 +104,9 @@ const fieldTitle = field => {
   return fieldLabels[field] || field;
 };
 const permissionLabels = {
+  jrc_contact_center_quality_review: t(
+    'CUSTOM_ROLE.PERMISSIONS.JRC_CONTACT_CENTER_QUALITY_REVIEW'
+  ),
   jrc_contact_center_view: t('CUSTOM_ROLE.PERMISSIONS.JRC_CONTACT_CENTER_VIEW'),
   jrc_contact_center_operate: t(
     'CUSTOM_ROLE.PERMISSIONS.JRC_CONTACT_CENTER_OPERATE'

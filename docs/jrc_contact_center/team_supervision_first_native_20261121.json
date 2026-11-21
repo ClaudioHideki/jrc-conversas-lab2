@@ -1,0 +1,669 @@
+{
+  "status": "native_failure_preserved_corrections_require_new_sha_validation",
+  "sha": "6a5e22fb1dbd25f38891ee0254fb803be5fb1851",
+  "run": 44901452901,
+  "artifact": 14706873035,
+  "artifact_sha256": "bd921c0bd540c5d0b00878ea9a7ee8f8e995d9bfb03c7d8799108b29963f583d",
+  "core": {
+    "examples": 2212,
+    "passed": 2210,
+    "failures": 2,
+    "pending": 0,
+    "outside_errors": 0,
+    "previous2117cases_preserved_passed": true,
+    "new_examples": 95,
+    "new_passed": 93
+  },
+  "schema_reload": {
+    "examples": 175,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "root_causes": [
+    "Unconfigured-account proof inspected a cached CollectionProxy after destroying its member; use a fresh native relation to prove no records were created",
+    "The v1 supervise right already includes reports; compare actual permissions before/after and assert the existing v1 set plus no independent Nico review"
+  ],
+  "lint": {
+    "new_findings": 35,
+    "details": [
+      {
+        "path": "app/controllers/api/v1/accounts/jrc_contact_center/team_supervisions_controller.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Assignment Branch Condition size for candidates is too high. [<7, 33, 2> 33.79/26]",
+            "cop_name": "Metrics/AbcSize",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 20,
+              "start_column": 3,
+              "last_line": 30,
+              "last_column": 5,
+              "length": 553,
+              "line": 20,
+              "column": 3
+            }
+          }
+        ]
+      },
+      {
+        "path": "app/services/jrc_contact_center/team_supervision_input.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Assignment Branch Condition size for initialize is too high. [<7, 24, 12> 27.73/26]",
+            "cop_name": "Metrics/AbcSize",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 8,
+              "start_column": 3,
+              "last_line": 22,
+              "last_column": 5,
+              "length": 636,
+              "line": 8,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Cyclomatic complexity for `initialize` is too high. [10/7]",
+            "cop_name": "Metrics/CyclomaticComplexity",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 8,
+              "start_column": 3,
+              "last_line": 22,
+              "last_column": 5,
+              "length": 636,
+              "line": 8,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Perceived complexity for `initialize` is too high. [10/8]",
+            "cop_name": "Metrics/PerceivedComplexity",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 8,
+              "start_column": 3,
+              "last_line": 22,
+              "last_column": 5,
+              "length": 636,
+              "line": 8,
+              "column": 3
+            }
+          }
+        ]
+      },
+      {
+        "path": "app/services/jrc_contact_center/team_supervision_scope.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Cyclomatic complexity for `covered?` is too high. [8/7]",
+            "cop_name": "Metrics/CyclomaticComplexity",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 11,
+              "start_column": 3,
+              "last_line": 23,
+              "last_column": 5,
+              "length": 600,
+              "line": 11,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`.",
+            "cop_name": "Style/IfUnlessModifier",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 18,
+              "start_column": 5,
+              "last_line": 18,
+              "last_column": 6,
+              "length": 2,
+              "line": 18,
+              "column": 5
+            }
+          }
+        ]
+      },
+      {
+        "path": "app/services/jrc_contact_center/team_supervisions.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Cyclomatic complexity for `append_summaries` is too high. [8/7]",
+            "cop_name": "Metrics/CyclomaticComplexity",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 49,
+              "start_column": 3,
+              "last_line": 61,
+              "last_column": 5,
+              "length": 630,
+              "line": 49,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Align `.includes` with `.where` on line 52.",
+            "cop_name": "Layout/MultilineMethodCallIndentation",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 53,
+              "start_column": 47,
+              "last_line": 53,
+              "last_column": 55,
+              "length": 9,
+              "line": 53,
+              "column": 47
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Align the arguments of a method call if they span more than one line.",
+            "cop_name": "Layout/ArgumentAlignment",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 111,
+              "start_column": 67,
+              "last_line": 111,
+              "last_column": 117,
+              "length": 51,
+              "line": 111,
+              "column": 67
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Align the keys of a hash literal if they span more than one line.",
+            "cop_name": "Layout/HashAlignment",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 111,
+              "start_column": 67,
+              "last_line": 111,
+              "last_column": 117,
+              "length": 51,
+              "line": 111,
+              "column": 67
+            }
+          }
+        ]
+      },
+      {
+        "path": "db/migrate/20261121090000_create_contact_center_team_supervisions.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Do not freeze immutable objects, as freezing them has no effect.",
+            "cop_name": "Style/RedundantFreeze",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 7,
+              "start_column": 18,
+              "last_line": 7,
+              "last_column": 52,
+              "length": 35,
+              "line": 7,
+              "column": 18
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Do not freeze immutable objects, as freezing them has no effect.",
+            "cop_name": "Style/RedundantFreeze",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 8,
+              "start_column": 19,
+              "last_line": 8,
+              "last_column": 54,
+              "length": 36,
+              "line": 8,
+              "column": 19
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Do not freeze immutable objects, as freezing them has no effect.",
+            "cop_name": "Style/RedundantFreeze",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 9,
+              "start_column": 16,
+              "last_line": 9,
+              "last_column": 48,
+              "length": 33,
+              "line": 9,
+              "column": 16
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Cyclomatic complexity for `valid_columns?` is too high. [9/7]",
+            "cop_name": "Metrics/CyclomaticComplexity",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 50,
+              "start_column": 3,
+              "last_line": 57,
+              "last_column": 5,
+              "length": 413,
+              "line": 50,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Perceived complexity for `valid_columns?` is too high. [9/8]",
+            "cop_name": "Metrics/PerceivedComplexity",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 50,
+              "start_column": 3,
+              "last_line": 57,
+              "last_column": 5,
+              "length": 413,
+              "line": 50,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Use safe navigation (`&.`) instead of checking if an object exists before calling the method.",
+            "cop_name": "Style/SafeNavigation",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 100,
+              "start_column": 25,
+              "last_line": 100,
+              "last_column": 45,
+              "length": 21,
+              "line": 100,
+              "column": 25
+            }
+          }
+        ]
+      },
+      {
+        "path": "script/jrc_call_center_team_supervision_seed.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Assignment Branch Condition size for call is too high. [<7, 29, 1> 29.85/26]",
+            "cop_name": "Metrics/AbcSize",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 19,
+              "start_column": 3,
+              "last_line": 34,
+              "last_column": 5,
+              "length": 1306,
+              "line": 19,
+              "column": 3
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Align the arguments of a method call if they span more than one line.",
+            "cop_name": "Layout/ArgumentAlignment",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 29,
+              "start_column": 50,
+              "last_line": 29,
+              "last_column": 107,
+              "length": 58,
+              "line": 29,
+              "column": 50
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Align the keys of a hash literal if they span more than one line.",
+            "cop_name": "Layout/HashAlignment",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 29,
+              "start_column": 50,
+              "last_line": 29,
+              "last_column": 107,
+              "length": 58,
+              "line": 29,
+              "column": 50
+            }
+          }
+        ]
+      },
+      {
+        "path": "spec/models/jrc_contact_center/team_supervision_constraints_spec.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "The first argument to describe should be the class or module being tested.",
+            "cop_name": "RSpec/DescribeClass",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 3,
+              "start_column": 16,
+              "last_line": 3,
+              "last_column": 60,
+              "length": 45,
+              "line": 3,
+              "column": 16
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Avoid using `insert_all!` because it skips validations.",
+            "cop_name": "Rails/SkipsModelValidations",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 17,
+              "start_column": 43,
+              "last_line": 17,
+              "last_column": 53,
+              "length": 11,
+              "line": 17,
+              "column": 43
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Avoid using `insert_all!` because it skips validations.",
+            "cop_name": "Rails/SkipsModelValidations",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 27,
+              "start_column": 43,
+              "last_line": 27,
+              "last_column": 53,
+              "length": 11,
+              "line": 27,
+              "column": 43
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Avoid using `insert_all!` because it skips validations.",
+            "cop_name": "Rails/SkipsModelValidations",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 33,
+              "start_column": 39,
+              "last_line": 33,
+              "last_column": 49,
+              "length": 11,
+              "line": 33,
+              "column": 39
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Avoid using `insert_all!` because it skips validations.",
+            "cop_name": "Rails/SkipsModelValidations",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 38,
+              "start_column": 43,
+              "last_line": 38,
+              "last_column": 53,
+              "length": 11,
+              "line": 38,
+              "column": 43
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Avoid using `insert_all!` because it skips validations.",
+            "cop_name": "Rails/SkipsModelValidations",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 44,
+              "start_column": 39,
+              "last_line": 44,
+              "last_column": 49,
+              "length": 11,
+              "line": 44,
+              "column": 39
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Avoid using `insert_all!` because it skips validations.",
+            "cop_name": "Rails/SkipsModelValidations",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 47,
+              "start_column": 43,
+              "last_line": 47,
+              "last_column": 53,
+              "length": 11,
+              "line": 47,
+              "column": 43
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Avoid using `insert_all!` because it skips validations.",
+            "cop_name": "Rails/SkipsModelValidations",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 55,
+              "start_column": 43,
+              "last_line": 55,
+              "last_column": 53,
+              "length": 11,
+              "line": 55,
+              "column": 43
+            }
+          }
+        ]
+      },
+      {
+        "path": "spec/models/jrc_contact_center/team_supervision_spec.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Align the arguments of a method call if they span more than one line.",
+            "cop_name": "Layout/ArgumentAlignment",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 70,
+              "start_column": 55,
+              "last_line": 70,
+              "last_column": 100,
+              "length": 46,
+              "line": 70,
+              "column": 55
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Align the keys of a hash literal if they span more than one line.",
+            "cop_name": "Layout/HashAlignment",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 70,
+              "start_column": 55,
+              "last_line": 70,
+              "last_column": 100,
+              "length": 46,
+              "line": 70,
+              "column": 55
+            }
+          }
+        ]
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Use `Array.new(2)` with a block instead of `.times.map`.",
+            "cop_name": "Performance/TimesMap",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 66,
+              "start_column": 16,
+              "last_line": 66,
+              "last_column": 42,
+              "length": 27,
+              "line": 66,
+              "column": 16
+            }
+          }
+        ]
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/team_supervisions_spec.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Align the keys of a hash literal if they span more than one line.",
+            "cop_name": "Layout/HashAlignment",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 226,
+              "start_column": 94,
+              "last_line": 226,
+              "last_column": 118,
+              "length": 25,
+              "line": 226,
+              "column": 94
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Avoid stubbing using `allow_any_instance_of`.",
+            "cop_name": "RSpec/AnyInstance",
+            "corrected": false,
+            "correctable": false,
+            "location": {
+              "start_line": 242,
+              "start_column": 5,
+              "last_line": 242,
+              "last_column": 60,
+              "length": 56,
+              "line": 242,
+              "column": 5
+            }
+          }
+        ]
+      },
+      {
+        "path": "spec/services/jrc_contact_center/create_contact_center_team_supervisions_spec.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+            "cop_name": "Style/StringLiterals",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 40,
+              "start_column": 13,
+              "last_line": 40,
+              "last_column": 113,
+              "length": 101,
+              "line": 40,
+              "column": 13
+            }
+          },
+          {
+            "severity": "convention",
+            "message": "Align the arguments of a method call if they span more than one line.",
+            "cop_name": "Layout/ArgumentAlignment",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 107,
+              "start_column": 38,
+              "last_line": 107,
+              "last_column": 87,
+              "length": 50,
+              "line": 107,
+              "column": 38
+            }
+          }
+        ]
+      },
+      {
+        "path": "spec/services/jrc_contact_center/team_supervision_input_spec.rb",
+        "findings": [
+          {
+            "severity": "convention",
+            "message": "Use `%w` or `%W` for an array of words.",
+            "cop_name": "Style/WordArray",
+            "corrected": false,
+            "correctable": true,
+            "location": {
+              "start_line": 4,
+              "start_column": 87,
+              "last_line": 4,
+              "last_column": 96,
+              "length": 10,
+              "line": 4,
+              "column": 87
+            }
+          }
+        ]
+      }
+    ],
+    "corrections_pending_native_confirmation": true,
+    "global_config_or_rules_disabled": false
+  },
+  "new_migration_lint_only": {
+    "timestamp": "20261121090000",
+    "old_hash": "3880f19614bfcbf603ed6a524c329547f5a240ea0c752e8a910ff67b977fd858",
+    "candidate_hash": "eab5fb4a891c52e72879eb306d3f31913d59c59af5b3eea641229e785479cf2d",
+    "create_table_ddl_identical": true,
+    "old11pins_unchanged": true,
+    "production_never_executed": true
+  },
+  "additional_regressions_prepared": [
+    "Actual account-lock wait followed by recipient eligibility withdrawal",
+    "Actual account-lock wait followed by actor permission withdrawal",
+    "Existing Portuguese label for the independent Nico review permission in audit"
+  ],
+  "vue_assets_chrome": "Not executed in this failed producer; cannot reuse a1a as approval for the new feature",
+  "no_production_provider_docker_or_real_grant_changes": true
+}

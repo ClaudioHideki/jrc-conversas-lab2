@@ -24,6 +24,19 @@ const render = (record = {}) =>
   });
 
 describe('native ACW audit detail', () => {
+  it('uses the existing translated label for the explicit Nico review permission in a native grant audit', () => {
+    const wrapper = render({
+      resource_type: 'access',
+      before: { allowed: [] },
+      after: { allowed: ['jrc_contact_center_quality_review'] },
+    });
+    expect(wrapper.text()).toContain(
+      'CUSTOM_ROLE.PERMISSIONS.JRC_CONTACT_CENTER_QUALITY_REVIEW'
+    );
+    expect(wrapper.text()).not.toContain('jrc_contact_center_quality_review');
+    wrapper.unmount();
+  });
+
   it('presents native team supervision roles and the person label separately from queue-agent membership', () => {
     const wrapper = render({
       resource_type: 'team_supervision',

@@ -21,15 +21,18 @@ class Api::V1::Accounts::JrcContactCenter::TeamSupervisionsController < Api::V1:
     record = supervisions.team(params[:id])
     params[:page] = 1 if params[:page].blank?
     params[:per_page] = params.fetch(:per_page, 20).to_i.clamp(1, 20)
-    members = Current.account.account_users.includes(:user, :custom_role)
-    if params[:q].present?
-      pattern = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.first(100))}%"
-      members = members.joins(:user).where('users.name ILIKE ?', pattern)
-    end
-    render json: list_payload(members.order(:id)) { |member| supervisions.candidate(record, member) }
+    render json: list_payload(candidate_members.order(:id)) { |member| supervisions.candidate(record, member) }
   end
 
   private
+
+  def candidate_members
+    members = Current.account.account_users.includes(:user, :custom_role)
+    return members if params[:q].blank?
+
+    pattern = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.first(100))}%"
+    members.joins(:user).where('users.name ILIKE ?', pattern)
+  end
 
   def supervisions
     @supervisions ||= JrcContactCenter::TeamSupervisions.new(context: pundit_user)

@@ -17,8 +17,22 @@ class JrcContactCenter::SyntheticTeamSupervisionSeed
   end
 
   def call
+    team = create_team
+    primary, additional = create_supervisors
+    20.times { |index| create_member("pessoa sem concessão #{index}", nil) }
+    { team_id: team.id.to_s, team_name: team.name, primary_supervisor_id: primary.id.to_s, primary_supervisor_name: primary.user.name,
+      additional_supervisor_id: additional.id.to_s, additional_supervisor_name: additional.user.name }
+  end
+
+  private
+
+  def create_team
     team = @account.teams.create!(name: 'SYNTHETIC equipe de supervisão com nome extenso para a conferência de responsividade')
     @account.jrc_crm_team_scopes.create!(team: team, scope: 'BUSINESS_UNIT', business_unit_id: @unit.settings.fetch('business_unit_id'))
+    team
+  end
+
+  def create_supervisors
     permissions = %w[jrc_contact_center_view jrc_contact_center_supervise]
     role = CustomRole.create!(account: @account, name: 'SYNTHETIC explicit supervisors only', permissions: permissions)
     primary = create_member('principal com nome extenso para revisão do gestor', role)
@@ -26,14 +40,10 @@ class JrcContactCenter::SyntheticTeamSupervisionSeed
     [primary, additional].each do |member|
       JrcContactCenter::AccessGrant.create!(account: @account, account_user: member, eligible: true)
       @account.jrc_crm_user_business_units.create!(user: member.user, scope: 'BUSINESS_UNIT', structure_managed: true,
-                                                 business_unit_id: @unit.settings.fetch('business_unit_id'))
+                                                   business_unit_id: @unit.settings.fetch('business_unit_id'))
     end
-    20.times { |index| create_member("pessoa sem concessão #{index}", nil) }
-    { team_id: team.id.to_s, team_name: team.name, primary_supervisor_id: primary.id.to_s, primary_supervisor_name: primary.user.name,
-      additional_supervisor_id: additional.id.to_s, additional_supervisor_name: additional.user.name }
+    [primary, additional]
   end
-
-  private
 
   def create_member(name, role)
     user = User.new(name: "SYNTHETIC supervisor #{name}", email: "cc-supervision-#{SecureRandom.hex(8)}@example.test",

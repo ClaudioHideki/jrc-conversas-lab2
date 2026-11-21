@@ -37,6 +37,20 @@ RSpec.describe 'Native team supervision competing reviewed writes', type: :reque
     account.destroy! if account.persisted?
   end
 
+  def dispatch_supervision(endpoint, headers, payload, barrier: false)
+    workers << Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        ready << ActiveRecord::Base.connection.raw_connection.backend_pid
+        Timeout.timeout(10) { release.pop } if barrier
+        session = ActionDispatch::Integration::Session.new(Rails.application)
+        session.patch(endpoint, headers: headers, params: payload, as: :json)
+        results << session.response.status
+      end
+    rescue StandardError => e
+      results << e
+    end
+  end
+
   it 'accepts exactly one real concurrent request and refuses the stale revision without duplicate metadata or audit' do
     user = create(:user, :contact_center_eligible, account: account, role: :agent)
     selected = account.account_users.find_by!(user: user)
@@ -47,23 +61,11 @@ RSpec.describe 'Native team supervision competing reviewed writes', type: :reque
     get endpoint, headers: headers
     revision = response.parsed_body.fetch('item').fetch('revision')
     payload = { supervision: { primary_account_user_id: selected.id.to_s, additional_account_user_ids: [] }, expected_revision: revision }
-    2.times do
-      workers << Thread.new do
-        ActiveRecord::Base.connection_pool.with_connection do
-          ready << true
-          Timeout.timeout(10) { release.pop }
-          session = ActionDispatch::Integration::Session.new(Rails.application)
-          session.patch(endpoint, headers: headers, params: payload, as: :json)
-          results << session.response.status
-        end
-      rescue StandardError => e
-        results << e
-      end
-    end
+    2.times { dispatch_supervision(endpoint, headers, payload, barrier: true) }
     Timeout.timeout(10) { 2.times { ready.pop } }
     2.times { release << true }
     Timeout.timeout(25) { workers.each(&:join) }
-    outcomes = 2.times.map { results.pop }
+    outcomes = Array.new(2) { results.pop }
     expect(outcomes).to all(be_a(Integer))
     expect(outcomes.sort).to eq([200, 409])
     row = JrcContactCenter::TeamSupervision.where(team: team).sole
@@ -71,5 +73,52 @@ RSpec.describe 'Native team supervision competing reviewed writes', type: :reque
     expect(Audited.audit_class.where(auditable_type: row.class.name, auditable_id: row.id, action: 'create').count).to eq(1)
     expect(TeamMember.where(team: team)).to be_empty
     expect(JrcContactCenter::QueueMembership.where(account: account, account_user: selected)).to be_empty
+  end
+
+  %w[recipient actor].each do |target|
+    it "reauthorizes #{target} after a real Account lock wait and rejects a previously reviewed selection after revocation" do
+      user = create(:user, :contact_center_eligible, account: account, role: :agent)
+      selected = account.account_users.find_by!(user: user)
+      selected.update!(custom_role: role)
+      account.jrc_crm_user_business_units.create!(user: user, scope: 'GROUP', structure_managed: true)
+      headers = actor.create_new_auth_token
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/team_supervisions/#{team.id}"
+      get endpoint, headers: headers
+      payload = { supervision: { primary_account_user_id: selected.id.to_s, additional_account_user_ids: [] },
+                  expected_revision: response.parsed_body.fetch('item').fetch('revision') }
+      workers << Thread.new do
+        ActiveRecord::Base.connection_pool.with_connection do
+          Account.find(account.id).with_lock do
+            ready << true
+            Timeout.timeout(15) { release.pop }
+            if target == 'recipient'
+              JrcContactCenter::AccessGrant.find_by!(account_user: selected).update!(eligible: false)
+            else
+              CustomRole.find(role.id).update!(permissions: ['jrc_contact_center_view'])
+            end
+          end
+        end
+      rescue StandardError => e
+        results << e
+      end
+      Timeout.timeout(10) { ready.pop }
+      dispatch_supervision(endpoint, headers, payload)
+      pid = Timeout.timeout(10) { ready.pop }
+      Timeout.timeout(8) do
+        loop do
+          sql = "SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE pid = #{Integer(pid)} AND wait_event_type = 'Lock' " \
+                "AND query LIKE '%accounts%' AND query LIKE '%FOR UPDATE%')"
+          break if ActiveRecord::Base.connection.uncached { ActiveRecord::Base.connection.select_value(sql) }
+
+          sleep 0.02
+        end
+      end
+      release << true
+      Timeout.timeout(25) { workers.each(&:join) }
+      expect(results.size).to eq(1)
+      expect(results.pop).to eq(target == 'recipient' ? 422 : 401)
+      expect(JrcContactCenter::TeamSupervision.where(account: account)).to be_empty
+      expect(TeamMember.where(team: team)).to be_empty
+    end
   end
 end

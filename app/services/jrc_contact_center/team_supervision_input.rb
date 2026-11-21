@@ -9,15 +9,8 @@ class JrcContactCenter::TeamSupervisionInput
     valid = values.is_a?(Hash) && values.keys.all?(String) && values.keys.sort == FIELDS.sort
     invalid! unless valid
 
-    primary = values.fetch('primary_account_user_id')
-    @primary_id = primary.nil? ? nil : identifier(primary)
-    additional = values.fetch('additional_account_user_ids')
-    invalid! unless additional.is_a?(Array) && additional.length <= 128
-
-    @additional_ids = additional.map { |value| identifier(value) }
-    invalid! if @additional_ids.uniq.length != @additional_ids.length || @additional_ids.include?(@primary_id)
-
-    @additional_ids = @additional_ids.sort.freeze
+    @primary_id = optional_identifier(values.fetch('primary_account_user_id'))
+    @additional_ids = additional_identifiers(values.fetch('additional_account_user_ids'))
     freeze
   end
 
@@ -28,6 +21,19 @@ class JrcContactCenter::TeamSupervisionInput
   end
 
   private
+
+  def optional_identifier(value)
+    value.nil? ? nil : identifier(value)
+  end
+
+  def additional_identifiers(values)
+    invalid! unless values.is_a?(Array) && values.length <= 128
+
+    ids = values.map { |value| identifier(value) }
+    invalid! if ids.uniq.length != ids.length || ids.include?(@primary_id)
+
+    ids.sort.freeze
+  end
 
   def identifier(value)
     valid = value.is_a?(Integer) || (value.is_a?(String) && value.valid_encoding? && value.match?(/\A[1-9][0-9]{0,18}\z/))

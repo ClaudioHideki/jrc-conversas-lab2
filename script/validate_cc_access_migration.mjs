@@ -27,7 +27,7 @@ export const audioInspectionMigrationHash = '4415dbe1ca204bbe35e9fb0567aa05cecbd
 export const qualityReviewMigrationPath = 'db/migrate/20261121003000_add_contact_center_quality_review_authority.rb';
 export const qualityReviewMigrationHash = '1e40fdf573254db5aae23d7474db96c2052818532c0ca0cc5b398807df889cd0';
 export const teamSupervisionMigrationPath = 'db/migrate/20261121090000_create_contact_center_team_supervisions.rb';
-export const teamSupervisionMigrationHash = '3880f19614bfcbf603ed6a524c329547f5a240ea0c752e8a910ff67b977fd858';
+export const teamSupervisionMigrationHash = 'eab5fb4a891c52e72879eb306d3f31913d59c59af5b3eea641229e785479cf2d';
 export const audioInspectionSqlSources = Object.freeze({
   'lib/jrc_contact_center/audio_inspection_sql.rb': 'd7a42667936a6dda80a42d63e2e4bfc2a4857fc5fe3712ee0f047f2e6bfbb73f',
   'lib/jrc_contact_center/audio_inspection_schema_receipt.rb': '8cb4e61c65722e24e5c541f098b6682d0056f56e4792a1e189dd81cf41f372b5',

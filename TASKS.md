@@ -794,3 +794,5 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - Player privado com waveform: checkpoint a1a64397, CI44894876897 comprovada;2314 Rails/159 reload/1147 Vue/240 Chrome, quatro PNGs abertos. Limites no recibo private_audio_waveform_native_verified_20261121.json.
 - Figuras3/12: vínculo explícito de supervisor principal/adicionais, cobertura nativa, CAS/auditoria e popup preparados.37 testes unitários com transporte substituído passaram; migrations, persistência, concorrência e244 Chrome ainda exigem CI do novo SHA. Não concluído.
 - Nenhuma participação em equipe/fila ou concessão de permissões decorre desse vínculo. Contratos PABX e o ledger final de revisão Nico continuam pendentes; o direito próprio já está implementado sem concessão automática.
+
+- Team supervision6a5e22fb:2210/2212 Rails aprovados; duas expectativas corrigidas preservando o legado.175 reload passaram;35 infrações de lint identificadas, correções exigem novo SHA. Mantidos os2117 casos anteriores. Concorrência, Vue, assets e244Chrome continuam obrigatórios e pendentes. Recibo team_supervision_first_native_20261121.json.
