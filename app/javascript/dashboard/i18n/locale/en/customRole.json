@@ -135,7 +135,8 @@
       "JRC_CONTACT_CENTER_RECORDINGS_DOWNLOAD": "Call Center: baixar gravações",
       "JRC_CONTACT_CENTER_PUBLISH": "Call Center: publicar configurações",
       "JRC_CONTACT_CENTER_APPROVE": "Call Center: aprovar alterações",
-      "JRC_CONTACT_CENTER_AUDIT": "Call Center: consultar auditoria"
+      "JRC_CONTACT_CENTER_AUDIT": "Call Center: consultar auditoria",
+      "JRC_CONTACT_CENTER_QUALITY_REVIEW": "Call Center: revisar análises do Nico (exige acesso à gravação)"
     },
     "FORM": {
       "NAME": {

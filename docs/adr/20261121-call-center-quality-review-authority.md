@@ -1,0 +1,15 @@
+# Direito explícito para revisão humana do Nico
+
+Status: implementação preparada; validação nativa do novo SHA pendente.
+
+A decisão de negócio exige direito próprio, concedido explicitamente, além do acesso autorizado à gravação. Ser administrador não concede revisão. O nome técnico é `jrc_contact_center_quality_review`; o rótulo operacional é “Call Center: revisar análises do Nico (exige acesso à gravação)”.
+
+O direito usa `ModulePolicy`, `PermissionSources`, `CustomRole` Enterprise, os formulários nativos e `AccessGrant`. Sua efetividade exige a elegibilidade existente, módulo habilitado, visualização e escuta de gravações e a concessão própria. Negativas individuais prevalecem; equipes inativas ou associações removidas não fornecem direitos. Os serviços existentes continuam verificando concessões resultantes de mudanças de perfil, equipe ou remoção de negativas. Não existe papel novo, concessão por cargo, alteração de usuário real ou cobertura corporativa automática.
+
+A migration adicional `20261121003000` expande somente as duas restrições SQL de capacidades conhecidas. As dez migrations anteriores permanecem byte a byte preservadas. O upgrade confere as expressões conhecidas e validadas, sujeitos e FKs, faz as substituições em uma transação e limita a espera pelo lock a cinco segundos. Reexecução admite apenas o estado legado conhecido ou o novo estado conhecido. Não altera linhas, elegibilidade, auditorias, carteiras, outras equipes ou módulos. Rollback automático é recusado para preservar concessões e negativas; uma reversão exigiria análise própria, sem apagar direitos silenciosamente.
+
+O gate continua admitindo somente migrations específicas por SHA-256, incluindo agora essa décima primeira adição. Os testes negativos anteriores permanecem e passam a incluir omissão ou alteração dessa adição. A mesma prova de upgrade e os testes do direito serão executados também após recarga do schema no banco descartável dedicado. Nenhuma migration está sendo executada em ambiente existente.
+
+Esta entrega é a base de autorização da figura 23, não a conclusão do popup de correção. A revisão futura ainda precisa de vínculo comprovado com a chamada/gravação autorizada, versão/hash imutáveis da análise original, revisão append-only, razão obrigatória, autor, comparação de revisão e idempotência. O legado de gravações com módulo desabilitado não concede esse novo direito. Não alterar o resultado original no Supabase, inferir que um ID externo é um ID nativo ou autorizar por IDs enviados pelo cliente.
+
+São preparados testes de PostgreSQL, upgrade populado, atomicidade, reexecução, rollback recusado, perfis, equipes, negativas, elegibilidade, autenticação e tentativas de reativar um direito latente. Três casos Vue cobrem a configuração explícita; os cenários Chrome existentes recebem verificações de rótulo, marcação manual, persistência e efetividade, mantendo os 236 cenários obrigatórios. Testes simulados de componente não são homologação de gravação, PABX, Supabase ou IA externos.

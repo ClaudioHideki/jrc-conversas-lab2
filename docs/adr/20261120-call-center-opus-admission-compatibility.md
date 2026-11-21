@@ -1,6 +1,6 @@
 # Compatibilidade de Ogg/Opus na biblioteca institucional
 
-Status: correção implementada; execução nativa e Chrome do novo SHA pendentes.
+Status: incremento de admissão/captura validado no SHA `bfe0d49d`; demais requisitos do Word permanecem pendentes.
 
 A CI44843469401 de8348dabe passou Rails, Vue, migrations, lint, assets novos e bootstrap real. O Chrome passou228/236 cenários. Quatro falharam por uma expectativa de aviso antigo e quatro por422 ao salvar gravações feitas pelo dispositivo sintético. A prévia local foi reproduzida nos quatro perfis; isso não comprova persistência.
 
@@ -17,3 +17,5 @@ Síntese Nico, vínculos completos, publicação/ACK PABX, cobertura operacional
 Evidência posterior: `e6311213`/CI44851946596 aprovou os cinco casos nativos adicionados, com2.093exemplos distintos e131recargas separados,1.054Vue e zero falhas/pendências/erros. Dois alinhamentos de hash dos testes bloquearam assets eChrome; a correção seguinte altera apenas quatro espaços. A conclusão visual continua pendente no novo SHA.
 
 Evidência posterior de21/11: `9da5f3e8`/CI44854936459 passou lint, assets e232/236Chrome. As quatro capturas alcançaram201, inspeção Opus válida, download por hash e401negado; falharam depois por origem não exibida na linha. A próxima correção apenas apresenta o campo nativo já persistido e mantém a asserção. Cenários completos, filtros posteriores e novo SHA ainda precisam de validação.
+
+Validação integral desse incremento em21/11: `bfe0d49d`/CI44861246777 aprovou2.093Rails distintos,131recargas separados,1.057Vue e236Chrome,59porprojeto, zero falhas/pendências/erros. A origem da versão, filtros posteriores, persistência e download por hash foram comprovados. Há376PNGshasheados e quatro imagens realmente abertas; a captura usa dispositivo sintético, não microfone físico. Ver `docs/jrc_contact_center/audio_browser_capture_verified_20261121.json`.

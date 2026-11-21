@@ -1,0 +1,51 @@
+{
+  "status": "prepared_native_validation_pending",
+  "business_decision": "Explicit own review permission plus authorized recording access; no automatic administrator grant",
+  "permission": "jrc_contact_center_quality_review",
+  "real_users_changed": false,
+  "production_migrations_executed": false,
+  "migration": {
+    "path": "db/migrate/20261121003000_add_contact_center_quality_review_authority.rb",
+    "sha256": "1e40fdf573254db5aae23d7474db96c2052818532c0ca0cc5b398807df889cd0",
+    "historical_ten_changed": false,
+    "data_backfill": false,
+    "lock_wait_seconds": 5,
+    "automatic_down": "Refused; grants and denials preserved"
+  },
+  "local_light_checks": {
+    "migration_identity_gate": {
+      "passed": 56,
+      "failed": 0,
+      "pending": 0,
+      "native_pg": false
+    },
+    "workflow_embedded_python": {
+      "tests_passed": 7,
+      "blocks_compiled": 2
+    },
+    "frontend_lint": {
+      "errors": 0,
+      "new_warnings": 0,
+      "existing_warning": "AuthorityAssignments.spec.js unchanged Dialog stub literal SAVE"
+    },
+    "runtime": "Windows Node24.19.0 for static checks only, not pinned native Vue/Rails execution"
+  },
+  "prepared_native_cases": {
+    "policy_sources_and_guard": 16,
+    "authenticated_http": 9,
+    "migration": 12
+  },
+  "native_execution": "Not run on this preparation yet; own runner required",
+  "schema_reload": "Same migration and policy specs additionally required in separate disposable reload database",
+  "vue_new_cases": 3,
+  "chrome_required": 236,
+  "existing_chrome_extended": "Native authority user popup in all4projects: translated right initially unchecked; manually granted, reviewed, persisted and effective only with recording view/listen",
+  "figure23_complete": false,
+  "still_pending": [
+    "Native validation, schema reload and Chrome evidence at the new immutable commit",
+    "Authorized exact call/source binding and immutable original analysis snapshot",
+    "Append-only human review, reason/actor, CAS/idempotency, popup and complete negative API tests",
+    "External Supabase/PABX/AI homologation remains separate; no external operation executed"
+  ],
+  "adr": "docs/adr/20261121-call-center-quality-review-authority.md"
+}

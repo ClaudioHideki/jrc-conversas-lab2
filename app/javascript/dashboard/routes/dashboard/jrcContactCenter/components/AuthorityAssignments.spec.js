@@ -73,6 +73,45 @@ beforeEach(() => {
 });
 
 describe('native subject authorizations', () => {
+  it.each(['users', 'teams'])(
+    'shows the independent review right unchecked for %s without automatic persistence',
+    async type => {
+      const wrapper = setup(type);
+      await flushPromises();
+      await wrapper.get('[data-edit-authority="9"]').trigger('click');
+      await flushPromises();
+      expect(
+        wrapper.get('[data-allow="jrc_contact_center_quality_review"]').element
+          .checked
+      ).toBe(false);
+      expect(wrapper.text()).toContain(
+        'CUSTOM_ROLE.PERMISSIONS.JRC_CONTACT_CENTER_QUALITY_REVIEW'
+      );
+      expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+      expect(API.saveAccessAuthorization).not.toHaveBeenCalled();
+    }
+  );
+
+  it('requires explicit review before saving the independent quality-review denial', async () => {
+    const wrapper = setup();
+    await flushPromises();
+    await wrapper.get('[data-edit-authority="9"]').trigger('click');
+    await flushPromises();
+    await wrapper
+      .get('[data-deny="jrc_contact_center_quality_review"]')
+      .setValue(true);
+    expect(wrapper.get('[data-submit]').element.disabled).toBe(true);
+    expect(API.saveAccessAuthorization).not.toHaveBeenCalled();
+    await wrapper.get('[data-review-authority]').setValue(true);
+    await wrapper.get('[data-submit]').trigger('submit');
+    await flushPromises();
+    expect(API.saveAccessAuthorization.mock.calls[0][3]).toEqual({
+      eligible: false,
+      allowed: [],
+      denied: ['jrc_contact_center_quality_review'],
+    });
+  });
+
   it('identifies the authorized profile and exact team origin without treating inheritance as eligibility', async () => {
     API.configurationRecord.mockResolvedValue({
       data: {

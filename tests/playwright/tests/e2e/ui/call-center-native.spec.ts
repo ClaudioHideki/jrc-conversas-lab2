@@ -675,12 +675,21 @@ test('native access user eligibility, real pagination, denial and persistence', 
   const dialog = page.getByRole('dialog');
   await expectContainedDialog(page);
   await expect(dialog.locator('[data-user-eligible]')).not.toBeChecked();
+  await expect(
+    dialog.locator('[data-allow="jrc_contact_center_quality_review"]')
+  ).not.toBeChecked();
+  await expect(dialog).toContainText(
+    'Call Center: revisar análises do Nico (exige acesso à gravação)'
+  );
   await dialog.locator('[data-user-eligible]').check();
   await dialog
     .locator('[data-allow="jrc_contact_center_recordings_view"]')
     .check();
   await dialog
     .locator('[data-allow="jrc_contact_center_recordings_listen"]')
+    .check();
+  await dialog
+    .locator('[data-allow="jrc_contact_center_quality_review"]')
     .check();
   await dialog
     .locator('[data-deny="jrc_contact_center_recordings_download"]')
@@ -710,6 +719,9 @@ test('native access user eligibility, real pagination, denial and persistence', 
   await section.locator('[data-edit-authority="' + target.id + '"]').click();
   await expect(dialog.locator('[data-user-eligible]')).toBeChecked();
   await expect(
+    dialog.locator('[data-allow="jrc_contact_center_quality_review"]')
+  ).toBeChecked();
+  await expect(
     dialog.locator('[data-deny="jrc_contact_center_recordings_download"]')
   ).toBeChecked();
   const saved = await page.request.get(
@@ -719,6 +731,8 @@ test('native access user eligibility, real pagination, denial and persistence', 
   expect(saved.status()).toBe(200);
   const state = (await saved.json()).item;
   expect(state.effective).toContain('jrc_contact_center_recordings_listen');
+  expect(state.allowed).toContain('jrc_contact_center_quality_review');
+  expect(state.effective).toContain('jrc_contact_center_quality_review');
   expect(state.effective).not.toContain(
     'jrc_contact_center_recordings_download'
   );
@@ -758,6 +772,9 @@ test('native access team grants remain separate from eligibility and queue parti
   await expectContainedDialog(page);
   await expect(dialog.locator('[data-user-eligible]')).toHaveCount(0);
   await expect(dialog.locator('[data-deny]')).toHaveCount(0);
+  await expect(
+    dialog.locator('[data-allow="jrc_contact_center_quality_review"]')
+  ).not.toBeChecked();
   await dialog.locator('[data-allow="jrc_contact_center_monitor"]').check();
   await dialog.locator('[data-review-authority]').check();
   const persisted = page.waitForResponse(
@@ -1756,8 +1773,11 @@ test('native permission popup reuses the role editor and persists only explicitl
   await page.locator('[data-edit-native-role]').click();
   const dialog = page.getByRole('dialog');
   await expect(dialog.locator('input[id^="jrc_contact_center_"]')).toHaveCount(
-    13
+    14
   );
+  await expect(
+    dialog.locator('#jrc_contact_center_quality_review')
+  ).not.toBeChecked();
   await dialog
     .getByLabel('Descrição', { exact: true })
     .fill('SYNTHETIC explicitly reviewed permissions');

@@ -15,6 +15,7 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
     jrc_contact_center_publish
     jrc_contact_center_approve
     jrc_contact_center_audit
+    jrc_contact_center_quality_review
   ].freeze
 
   def access?
@@ -59,6 +60,11 @@ class JrcContactCenter::ModulePolicy < ApplicationPolicy
 
   def recordings_download?
     recordings_view? && allowed?('recordings_download')
+  end
+
+  # Review is independent and never inherits an administrator/configure fallback.
+  def quality_review?
+    recordings_listen? && allowed?('quality_review')
   end
 
   def effective_permissions

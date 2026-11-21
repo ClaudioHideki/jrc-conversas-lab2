@@ -12,4 +12,5 @@ export const CONTACT_CENTER_CUSTOM_ROLE_PERMISSIONS = Object.freeze([
   'jrc_contact_center_publish',
   'jrc_contact_center_approve',
   'jrc_contact_center_audit',
+  'jrc_contact_center_quality_review',
 ]);

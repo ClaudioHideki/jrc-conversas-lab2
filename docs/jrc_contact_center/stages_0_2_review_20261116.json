@@ -6052,5 +6052,40 @@
     "artifact_sha256": "ee23b388f067a3273e357b065d2b3eee1120cc5491be0a6d809a845debc98bbc",
     "full_23_figures_complete": false,
     "report": "docs/jrc_contact_center/audio_capture_row_origin_20261121.json"
+  },
+  "quality_review_explicit_authority_20261121": {
+    "status": "prepared_native_validation_pending",
+    "permission": "jrc_contact_center_quality_review",
+    "report": "docs/jrc_contact_center/quality_review_authority_preparation_20261121.json",
+    "automatic_administrator_grant": false,
+    "real_users_changed": false,
+    "figure23_complete": false
+  },
+  "audio_browser_capture_verified_20261121": {
+    "status": "native_and_real_chrome_verified_for_documented_audio_increment",
+    "producer": "bfe0d49d828ff7d74275aa1d157495c46201016c",
+    "run": 44861246777,
+    "native_distinct": 2093,
+    "schema_reload_separate": 131,
+    "vue_passed": 1057,
+    "chrome": {
+      "passed": 236,
+      "failed": 0,
+      "pending": 0,
+      "flaky": 0,
+      "outside_errors": 0,
+      "per_project": 59
+    },
+    "artifact": 14690564669,
+    "artifact_sha256": "314918cf7ba37b290f7d39c71c7167905952e6acad6299efaaf0397adcc08ed9",
+    "screenshot_hashes_verified": 376,
+    "actual_images_opened": [
+      "desktop-dark-audio-capture-native-persisted.png",
+      "mobile-light-audio-capture-native-persisted.png",
+      "desktop-light-audio-capture-local-review.png",
+      "mobile-dark-audio-capture-local-review.png"
+    ],
+    "full_23_figures_complete": false,
+    "report": "docs/jrc_contact_center/audio_browser_capture_verified_20261121.json"
   }
 }
