@@ -15,6 +15,55 @@ RSpec.describe 'Institutional audio duplication uses the native receipt and acco
       idempotency_key: 'synthetic-http-audio-copy-0001' }
   end
 
+  it 'preserves the first confirmed independent copy when permission is withdrawn before the second source is copied' do
+    access = JrcContactCenter::AudioLibraryAccess.new(context: context)
+    second = JrcContactCenter::AudioUploads.new(access: access).create!(
+      unit_id: unit.id, attributes: { name: 'SYNTHETIC second batch source' }, file: upload, key: 'synthetic-batch-second-source'
+    )
+    second_endpoint = endpoint.sub("/#{source_version.audio_asset_id}/duplicate", "/#{second.audio_asset_id}/duplicate")
+    second_body = { asset: { name: 'SYNTHETIC second independent copy' }, source_version_id: second.id.to_s,
+                    expected_revision: JrcContactCenter::AudioAssetRevision.token(second.audio_asset, version: second),
+                    idempotency_key: 'synthetic-batch-copy-second' }
+    post endpoint, headers: headers, params: body, as: :json
+    expect(response).to have_http_status(:created)
+    first_id = response.parsed_body.fetch('received_version').fetch('id')
+    member.custom_role.update!(permissions: ['jrc_contact_center_view'])
+    post second_endpoint, headers: headers, params: second_body, as: :json
+    expect(response).to have_http_status(:unauthorized)
+    expect(JrcContactCenter::AudioAsset.where(account: account).count).to eq(3)
+    expect(JrcContactCenter::AudioVersion.where(account: account).count).to eq(3)
+    expect(JrcContactCenter::AudioVersion.find(first_id).blob.download).to eq(bytes)
+    expect(second.reload.blob.download).to eq(bytes)
+    expect(second.audio_asset.versions.count).to eq(1)
+  end
+
+  it 'recovers both independently confirmed copy receipts with their original keys without new blobs, versions or audits' do
+    access = JrcContactCenter::AudioLibraryAccess.new(context: context)
+    second = JrcContactCenter::AudioUploads.new(access: access).create!(
+      unit_id: unit.id, attributes: { name: 'SYNTHETIC second replay source' }, file: upload, key: 'synthetic-replay-second-source'
+    )
+    first_body = body
+    second_endpoint = endpoint.sub("/#{source_version.audio_asset_id}/duplicate", "/#{second.audio_asset_id}/duplicate")
+    second_body = { asset: { name: 'SYNTHETIC second replayed copy' }, source_version_id: second.id.to_s,
+                    expected_revision: JrcContactCenter::AudioAssetRevision.token(second.audio_asset, version: second),
+                    idempotency_key: 'synthetic-batch-replay-second' }
+    post endpoint, headers: headers, params: first_body, as: :json
+    expect(response).to have_http_status(:created)
+    first_id = response.parsed_body.fetch('received_version').fetch('id')
+    post second_endpoint, headers: headers, params: second_body, as: :json
+    expect(response).to have_http_status(:created)
+    second_id = response.parsed_body.fetch('received_version').fetch('id')
+    expect([first_id, second_id].uniq.size).to eq(2)
+    original = [JrcContactCenter::AudioAsset.count, JrcContactCenter::AudioVersion.count, ActiveStorage::Blob.count]
+    post endpoint, headers: headers, params: first_body, as: :json
+    expect(response.parsed_body.fetch('received_version').fetch('id')).to eq(first_id)
+    post second_endpoint, headers: headers, params: second_body, as: :json
+    expect(response.parsed_body.fetch('received_version').fetch('id')).to eq(second_id)
+    expect([JrcContactCenter::AudioAsset.count, JrcContactCenter::AudioVersion.count, ActiveStorage::Blob.count]).to eq(original)
+    audits = Audited.audit_class.where(auditable_type: 'JrcContactCenter::AudioVersion', auditable_id: [first_id, second_id], action: 'copy')
+    expect(audits.count).to eq(2)
+  end
+
   it 'persists an independent identity, version one and private bytes through the real native inspection' do
     post endpoint, headers: headers, params: body, as: :json
     expect(response).to have_http_status(:created)

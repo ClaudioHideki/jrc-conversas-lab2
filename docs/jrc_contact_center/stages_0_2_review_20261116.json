@@ -6694,10 +6694,11 @@
   "audio_selected_moves_prepared_20261121": {
     "report": "docs/jrc_contact_center/audio_selected_moves_prepared_20261121.json",
     "native_and_chrome_pending": false,
-    "broader_metadata_bulk_selection_pending": true,
+    "broader_metadata_bulk_selection_pending": false,
     "full_figure_complete": false,
     "verified_producer": "3e3cc17f3a064e260ecd91947067479cb1965b8b",
-    "verified_report": "docs/jrc_contact_center/audio_selected_moves_native_verified_20261121.json"
+    "verified_report": "docs/jrc_contact_center/audio_selected_moves_native_verified_20261121.json",
+    "broader_metadata_bulk_selection_validated_by": "057fa9783ade63e251a1b89a6fcb997e5baec04b"
   },
   "audio_selected_moves_first_native_lint_20261121": {
     "producer": "90ab82f7654679cfb689e3349665bc802aee680b",
@@ -6720,8 +6721,10 @@
   },
   "audio_library_organization_filters_prepared_20261121": {
     "report": "docs/jrc_contact_center/audio_library_organization_filters_prepared_20261121.json",
-    "native_and_chrome_pending": true,
-    "whole_figure_complete": false
+    "native_and_chrome_pending": false,
+    "whole_figure_complete": false,
+    "verified_producer": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+    "verified_report": "docs/jrc_contact_center/audio_library_organization_native_verified_20261121.json"
   },
   "audio_library_organization_first_native_lint_20261121": {
     "producer": "372e3e700b530cf5ead64f7bada8b88f93fa3c5d",
@@ -6750,5 +6753,52 @@
     "fresh_assets_and_chrome_executed": false,
     "required_revalidation": "same complete native gates and244Chrome; do not reuse predecessor visuals for the new library organization/filter increment",
     "whole_word_or_figure_acceptance": false
+  },
+  "audio_selected_copies_prepared_20261121": {
+    "report": "docs/jrc_contact_center/audio_selected_copies_prepared_20261121.json",
+    "native_and_chrome_pending": true,
+    "whole_figure_complete": false
+  },
+  "calendar_precedence_confirmed_20261121": {
+    "kind": "User-confirmed internal Call Center calendar decision; not an implementation or external acceptance",
+    "confirmed_on": "2026-11-21",
+    "precedence": [
+      "explicit_date_exception",
+      "holiday",
+      "weekly_schedule"
+    ],
+    "overlapping_intervals": "reject",
+    "native_reference": "app/services/jrc_service_desk/snapshot_calendar.rb",
+    "native_calculator_version": "jrc-sd-snapshot-calendar-v1",
+    "reuse_boundaries": {
+      "calendar_math_and_contract": "reuse native validation and timezone handling",
+      "authorization": "native Call Center configure permission and account/corporate/unit coverage; no Service Desk grants inferred",
+      "identities": "never equate Call Center and Service Desk unit IDs",
+      "published_routing": "no publication, ACK, provider command or operational change without the real PABX contract",
+      "retrospective_changes": "do not reinterpret historical snapshots"
+    },
+    "remaining_work": [
+      "Persisted reusable named-calendar adapter and permissioned APIs, without inventing numbers or published bindings",
+      "Weekly intervals, holiday metadata and explicit date exceptions in the internal UI",
+      "Scoped bindings inventory and conflict checks",
+      "Native concurrency, persistence, timezone/DST and negative-scope tests",
+      "Desktop/mobile and light/dark Chrome proof"
+    ],
+    "native_compatibility_questions_to_resolve_in_code_review": [
+      "The SLA snapshot calculator rejects a calendar with no working intervals; a deliberately closed Call Center calendar must never acquire fabricated hours or deadlines.",
+      "Native SnapshotCalendar stores explicit dates, not a national/state/city holiday registry or a movable-holiday formula; do not pretend those catalogs already exist.",
+      "Only the date precedence and overlap policy have been confirmed here; provider routing capabilities remain unproved."
+    ],
+    "source_changed": false,
+    "provider_called": false
+  },
+  "audio_library_organization_native_verified_20261121": {
+    "producer": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+    "report": "docs/jrc_contact_center/audio_library_organization_native_verified_20261121.json",
+    "native": 2501,
+    "vue": 1286,
+    "chrome": 244,
+    "actual_images_opened": 16,
+    "full_figure_complete": false
   }
 }

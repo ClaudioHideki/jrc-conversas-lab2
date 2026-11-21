@@ -1,0 +1,33 @@
+{
+  "base": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+  "status": "implemented_native_and_chrome_pending",
+  "figures": [
+    6,
+    16
+  ],
+  "preliminary_mocked_cases": 79,
+  "old_library_cases_included": 46,
+  "new_vue_cases": 33,
+  "native_api_cases_prepared_not_run": 2,
+  "same_244_chrome_scenarios_extended_not_run": true,
+  "functional_contract": [
+    "Same native per-source duplicate API, private storage, fresh inspection and audit; no batch endpoint or parallel upload store",
+    "Only byte-admitted sources in the current account/unit/configure scope; no-file or uninspected organization is insufficient",
+    "Reopen and compare each exact source/revision/version/SHA/inspection before an explicit human review",
+    "Sequential per-item writes; confirmed receipts remain visible, and a failure stops following sources",
+    "Unknown outcomes require manual review and reuse the same frozen payload and request key; confirmed items are not resent",
+    "Profile/account/unit/selection changes clear private previews and ignore delayed responses",
+    "Names and destination lock after sending; server reauthorizes each original request and replay",
+    "Actual native Button footer disables dismissal during pending copies; not merely the Dialog backdrop/keyboard dismissible setting",
+    "Per-item confirmed/uncertain/blocked/pending outcomes, explicit partial-operation warning and bounded scope",
+    "Two real Chrome copies, native idempotency replay, private-byte SHA, one copy audit per destination, reload and operator denial prepared"
+  ],
+  "limitations": [
+    "No all-or-nothing batch promise; each native copy is an independent transaction",
+    "This preparation has no native or Chrome approval yet",
+    "Partial UI outcomes are mocked tests; no simulated browser failure is presented as native persistence proof",
+    "Not a full figure6/23 completion and no PABX/provider acceptance"
+  ],
+  "migrations_dependencies_grants_and_workflows_changed": false,
+  "heavy_local_operations": false
+}

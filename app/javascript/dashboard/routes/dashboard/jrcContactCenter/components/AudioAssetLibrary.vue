@@ -12,6 +12,7 @@ import AudioInspectionHistory from './AudioInspectionHistory.vue';
 import AudioCaptureDraft from './AudioCaptureDraft.vue';
 import AudioIvrUsages from './AudioIvrUsages.vue';
 import AudioSelectedMoveDialog from './AudioSelectedMoveDialog.vue';
+import AudioSelectedCopiesDialog from './AudioSelectedCopiesDialog.vue';
 import { useAudioAssetEditor } from '../composables/useAudioAssetEditor';
 import { useAudioArchive } from '../composables/useAudioArchive';
 
@@ -138,6 +139,7 @@ const actorScope = computed(() => {
 const details = ref(null);
 const lastCopy = ref(null);
 const lastMoveCount = ref(0);
+const lastSelectedCopies = ref(null);
 const detailsLoading = ref(false);
 const detailsError = ref(false);
 let detailsGeneration = 0;
@@ -274,6 +276,7 @@ const forget = () => {
   generation += 1;
   lastCopy.value = null;
   lastMoveCount.value = 0;
+  lastSelectedCopies.value = null;
   clearDetails();
   items.value = [];
   meta.value = { total: 0, pages: 0 };
@@ -394,6 +397,10 @@ const load = async () => {
   } finally {
     if (version === generation) loading.value = false;
   }
+};
+const selectedCopiesSettled = outcome => {
+  lastSelectedCopies.value = outcome;
+  return load();
 };
 const selectedMoveSaved = rows => {
   lastMoveCount.value = rows.length;
@@ -1066,6 +1073,23 @@ onBeforeUnmount(() => {
           aria-hidden="true"
         />{{ t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.OPEN') }}
       </button>
+      <AudioSelectedCopiesDialog
+        :account-id="accountId"
+        :unit-id="unitId"
+        :context-key="actorScope"
+        :can-manage="canManage"
+        :selection="archive.items.value"
+        :folder-id="folderId"
+        :admitted="
+          archive.admitted.value &&
+          !archive.busy.value &&
+          !loading &&
+          !saving &&
+          !opening
+        "
+        @denied="denied"
+        @settled="selectedCopiesSettled"
+      />
       <AudioSelectedMoveDialog
         :account-id="accountId"
         :unit-id="unitId"
@@ -1086,6 +1110,23 @@ onBeforeUnmount(() => {
         {{ t('JRC_CONTACT_CENTER.AUDIO_ARCHIVE.CLEAR') }}
       </button>
     </section>
+    <p
+      v-if="lastSelectedCopies && canManage"
+      role="status"
+      data-audio-selected-copies-settled
+      :data-confirmed="lastSelectedCopies.confirmed.length"
+      :data-uncertain="lastSelectedCopies.uncertain"
+      class="break-words rounded-lg border border-n-blue-6 bg-n-blue-2 p-3 text-sm text-n-slate-12"
+    >
+      {{
+        t('JRC_CONTACT_CENTER.AUDIO_SELECTED_COPIES.AFTER_CLOSE', {
+          confirmed: lastSelectedCopies.confirmed.length,
+          uncertain: lastSelectedCopies.uncertain,
+          blocked: lastSelectedCopies.blocked,
+          pending: lastSelectedCopies.pending,
+        })
+      }}
+    </p>
     <p
       v-if="lastMoveCount"
       role="status"

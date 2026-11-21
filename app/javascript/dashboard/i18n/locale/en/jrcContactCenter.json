@@ -2679,6 +2679,29 @@
       "COUNT": "{count} áudio(s) selecionado(s) para organização · limite {max}.",
       "SELECT": "Selecionar {name} para organização",
       "NO_BYTES": "A seleção para organização não autoriza prévia ou download. Para baixar, selecione novamente arquivos tecnicamente verificados."
+    },
+    "AUDIO_SELECTED_COPIES": {
+      "OPEN": "Copiar selecionados",
+      "TITLE": "Copiar áudios selecionados",
+      "EXPLANATION": "Cria novos cadastros na mesma unidade, com arquivos e versões independentes. As origens e seus vínculos são preservados. Não publica configurações no PABX.",
+      "COUNTS": "{confirmed} confirmada(s) · {uncertain} sem resultado confirmado · {blocked} bloqueada(s) · {pending} pendente(s) · total {total}.",
+      "SOURCE": "Áudio de origem {id} · Versão {version}",
+      "NAME": "Nome da nova cópia",
+      "CREATED": "Cópia {id}: {name}",
+      "FOLDER": "Pasta de destino na mesma unidade",
+      "COPY": "Criar cópias",
+      "RETRY": "Retentar pendentes",
+      "REVIEW": "Revisei os nomes, os áudios, suas versões e a pasta de destino. Autorizo as cópias ainda não confirmadas.",
+      "PENDING": "Pendente",
+      "SENDING": "Copiando",
+      "CONFIRMED": "Cópia confirmada",
+      "UNCERTAIN": "Resultado ainda não confirmado",
+      "BLOCKED": "Bloqueada; revise a origem antes de iniciar outra operação",
+      "PARTIAL": "As cópias confirmadas são preservadas. Uma resposta perdida pode corresponder a uma cópia já criada. Retentar pendentes não repete itens já confirmados.",
+      "COMPLETE": "Todas as cópias foram confirmadas pelo sistema. A prévia e o uso dos arquivos continuam sujeitos à inspeção e às permissões atuais.",
+      "ERROR": "Não foi possível confirmar todas as cópias. Confira o resultado de cada item antes de retentar ou fechar.",
+      "SOURCE_CHANGED": "Uma origem mudou ou não está mais liberada para cópia. As cópias já confirmadas foram preservadas. Atualize a biblioteca e revise os itens restantes.",
+      "AFTER_CLOSE": "Última operação: {confirmed} cópia(s) confirmada(s), {uncertain} resultado(s) ainda não confirmado(s), {blocked} bloqueada(s) e {pending} não processada(s)."
     }
   }
 }

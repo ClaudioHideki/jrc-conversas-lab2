@@ -9365,6 +9365,225 @@ with zipfile.ZipFile(sys.argv[1]) as archive:
     })
   );
 
+  // Two genuinely inspected sources, sequential native copies and unchanged idempotency receipts.
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_size=50`
+  );
+  await library.locator(`[data-audio-archive-select="${asset.id}"]`).check();
+  await library
+    .locator(`[data-audio-archive-select="${copied.item.id}"]`)
+    .check();
+  await library.locator('[data-open-audio-selected-copies]').click();
+  await expectContainedDialog(page);
+  const selectedCopiesDialog = dialog.locator(
+    '[data-audio-selected-copies-dialog]'
+  );
+  await expect(
+    selectedCopiesDialog.locator('[data-audio-selected-copy-item]')
+  ).toHaveCount(2);
+  const batchNames = [0, 1].map(
+    index => `SYNTHETIC selected copy ${index} ${info.project.name}`
+  );
+  await selectedCopiesDialog
+    .locator(`[data-audio-selected-copy-name="${asset.id}"]`)
+    .fill(batchNames[0]);
+  await selectedCopiesDialog
+    .locator(`[data-audio-selected-copy-name="${copied.item.id}"]`)
+    .fill(batchNames[1]);
+  await selectedCopiesDialog
+    .locator('[data-audio-asset-folder-search]')
+    .fill(target.metadata_audio_folder_name);
+  await expect(
+    selectedCopiesDialog.locator(
+      `[data-audio-asset-folder] option[value="${target.metadata_audio_folder_id}"]`
+    )
+  ).toHaveCount(1);
+  await selectedCopiesDialog
+    .locator('[data-audio-asset-folder]')
+    .selectOption(target.metadata_audio_folder_id);
+  const batchConfirm = dialog.getByRole('button', {
+    name: 'Criar cópias',
+    exact: true,
+  });
+  await expect(batchConfirm).toBeDisabled();
+  await selectedCopiesDialog
+    .locator('[data-review-audio-selected-copies]')
+    .check();
+  await expect(batchConfirm).toBeEnabled();
+  const batchTheme = await selectedCopiesDialog
+    .locator('[data-audio-asset-folder]')
+    .evaluate(node => ({
+      background: getComputedStyle(node).backgroundColor,
+      color: getComputedStyle(node).color,
+      dark: document.documentElement.classList.contains('dark'),
+    }));
+  expect(batchTheme.dark).toBe(info.project.name.endsWith('dark'));
+  expect(batchTheme.background).not.toBe(batchTheme.color);
+  if (batchTheme.dark)
+    expect(batchTheme.background).not.toBe('rgb(255, 255, 255)');
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
+  ).toBe(false);
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-selected-copies-reviewed.png`,
+    fullPage: false,
+  });
+  const batchPaths = [asset.id, copied.item.id].map(
+    id => `${new URL(own).pathname}/audio_assets/${id}/duplicate`
+  );
+  const batchResponses = batchPaths.map(batchPath =>
+    page.waitForResponse(
+      response =>
+        new URL(response.url()).pathname === batchPath &&
+        response.request().method() === 'POST'
+    )
+  );
+  await batchConfirm.click();
+  const batchResults = await Promise.all(batchResponses);
+  expect(batchResults.map(result => result.status())).toEqual([201, 201]);
+  const batchCopies = await Promise.all(
+    batchResults.map(result => result.json())
+  );
+  expect(new Set(batchCopies.map(result => result.item.id)).size).toBe(2);
+  expect(
+    new Set(batchCopies.map(result => result.received_version.id)).size
+  ).toBe(2);
+  const replayStatus: number[] = [];
+  const batchByteStatus: number[] = [];
+  const batchAuditCount: number[] = [];
+  for (const [index, result] of batchCopies.entries()) {
+    expect(result.item).toMatchObject({
+      name: batchNames[index],
+      unit_id: String(target.unit_id),
+      folder_id: target.metadata_audio_folder_id,
+    });
+    expect([asset.id, copied.item.id]).not.toContain(result.item.id);
+    expect(result.received_version).toMatchObject({
+      audio_asset_id: result.item.id,
+      unit_id: String(target.unit_id),
+      number: 1,
+      sha256,
+      byte_size: bytes.length,
+      technical_verification: { ready: true },
+    });
+    const replay = await page.request.post(
+      `http://127.0.0.1:5387${batchPaths[index]}`,
+      {
+        headers: target.administrator,
+        data: batchResults[index].request().postDataJSON(),
+      }
+    );
+    replayStatus.push(replay.status());
+    expect(replay.status()).toBe(201);
+    expect((await replay.json()).received_version.id).toBe(
+      result.received_version.id
+    );
+    const copiedFile = await page.request.get(
+      `${own}/audio_assets/${result.item.id}/versions/${result.received_version.id}/bytes`,
+      {
+        headers: target.administrator,
+      }
+    );
+    batchByteStatus.push(copiedFile.status());
+    expect(copiedFile.status()).toBe(200);
+    expect(
+      createHash('sha256')
+        .update(await copiedFile.body())
+        .digest('hex')
+    ).toBe(sha256);
+    const audits = await page.request.get(`${own}/configuration_audits`, {
+      headers: target.administrator,
+      params: {
+        resource_type: 'audio_version',
+        resource_id: result.received_version.id,
+        history: 'true',
+        operation: 'copy',
+      },
+    });
+    expect(audits.status()).toBe(200);
+    const auditRows = (await audits.json()).items;
+    batchAuditCount.push(auditRows.length);
+    expect(auditRows).toHaveLength(1);
+  }
+  await expect(
+    selectedCopiesDialog.locator('[data-audio-selected-copies-complete]')
+  ).toBeVisible();
+  await expect(
+    selectedCopiesDialog.locator('[data-audio-selected-copies-counts]')
+  ).toHaveAttribute('data-confirmed', '2');
+  await expect(batchConfirm).toHaveCount(0);
+  await selectedCopiesDialog
+    .locator(`[data-audio-selected-copy-created="${batchCopies[1].item.id}"]`)
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-selected-copies-confirmed.png`,
+    fullPage: false,
+  });
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(
+    library.locator('[data-audio-selected-copies-settled]')
+  ).toHaveAttribute('data-confirmed', '2');
+  await expect(
+    library.locator('[data-audio-archive-select]:checked')
+  ).toHaveCount(0);
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_parent=${target.metadata_audio_folder_id}&audio_file_q=${encodeURIComponent('SYNTHETIC selected copy')}`
+  );
+  for (const [index, result] of batchCopies.entries()) {
+    await expect(
+      library.locator(`[data-audio-asset="${result.item.id}"]`)
+    ).toContainText(batchNames[index]);
+  }
+  await page.reload();
+  for (const result of batchCopies)
+    await expect(
+      library.locator(`[data-audio-asset="${result.item.id}"]`)
+    ).toBeVisible();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
+  ).toBe(false);
+  await library
+    .locator(`[data-audio-asset="${batchCopies[0].item.id}"]`)
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-audio-selected-copies-persisted.png`,
+    fullPage: false,
+  });
+  const batchDenied = await page.request.post(
+    `http://127.0.0.1:5387${batchPaths[0]}`,
+    {
+      headers: target.operator,
+      data: batchResults[0].request().postDataJSON(),
+    }
+  );
+  expect(batchDenied.status()).toBe(401);
+  expect(selectedMoveForbiddenWrites).toEqual([]);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-audio-selected-copies-native.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      synthetic: true,
+      external_homologation: false,
+      account: String(target.account_id),
+      unit: String(target.unit_id),
+      sources: [asset.id, copied.item.id],
+      source_versions: [versionId, copied.received_version.id],
+      new_assets: batchCopies.map(result => result.item.id),
+      new_versions: batchCopies.map(result => result.received_version.id),
+      sha256,
+      created: batchResults.map(result => result.status()),
+      replayed: replayStatus,
+      authorized_bytes: batchByteStatus,
+      audit_counts: batchAuditCount,
+      operator_denied: batchDenied.status(),
+      theme_css: batchTheme,
+      horizontal_overflow: false,
+      provider_writes: false,
+      browser_simulated_failure: false,
+    })
+  );
+
   // Restore the original authorized history/player so all prior withdrawal assertions remain intact.
   await page.goto(
     `/app/accounts/${target.account_id}/contact-center/control-desk/audio?audio_unit=${target.unit_id}&audio_file_q=${encodeURIComponent(asset.name)}`

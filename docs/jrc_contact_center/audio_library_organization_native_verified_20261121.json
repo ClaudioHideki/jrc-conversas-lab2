@@ -1,0 +1,358 @@
+{
+  "producer": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+  "run": 44950332408,
+  "job": 136986621346,
+  "status": "bounded_native_and_actual_chrome_increment_verified",
+  "native": 2501,
+  "schema_reload_separate": 175,
+  "vue": 1286,
+  "chrome": 244,
+  "failures_pending_outside_errors_flaky_or_skipped": 0,
+  "new_ruby_or_frontend_lint_findings": 0,
+  "actual_fresh_assets_and_bootstrap": true,
+  "artifact": 14727187139,
+  "artifact_sha256": "12101d7f55588a7c05205ff4c4e854b3eb5d2e70ff8964f69f0f1437098456c5",
+  "all_screenshot_hashes_verified": 448,
+  "actual_images_opened": 16,
+  "selected_images": {
+    "desktop-dark-audio-inspection-filter-clean.png": "55a886ba192d785b536f5566da42991510f244919a45dc62fb7239600a0d4a91",
+    "desktop-dark-audio-metadata-organization-reviewed.png": "00ae06a34c0fdd594e5896e8243cefb558bace3fb62b85bc7862cd5babfba6fb",
+    "desktop-dark-audio-selected-move-consent-readable.png": "67267785b1b2d78ce21aa7d1c8c35388987be4c038c145a1e43b2c7f10e6bffd",
+    "desktop-dark-audio-uninspected-organization-persisted.png": "f090f5582532c7a2db604a69ae8b87942515d257cc5574bbd33c1e53ae9116d7",
+    "desktop-light-audio-inspection-filter-clean.png": "cff51ed8830f7a98851e0b9a3f356208e46bb4c215b2a8ec473bd2956f714278",
+    "desktop-light-audio-metadata-organization-reviewed.png": "5dd0aa237eedf1b4ed5610a038412f5a1befb98448aee729da26cc40d33e564f",
+    "desktop-light-audio-selected-move-consent-readable.png": "0b8c72509c1beee0d879f32072912c64d1377977fd676546533581f8c6a79737",
+    "desktop-light-audio-uninspected-organization-persisted.png": "8dc35715aad92354f735a93d1a230ccc85803282b6ad694947cd5e70e32e8311",
+    "mobile-dark-audio-inspection-filter-clean.png": "4e4659654082be0ffc9f41f814f305770babf0782bd5a102c1e89c51a3ed8759",
+    "mobile-dark-audio-metadata-organization-reviewed.png": "4150975f5b9a3c9cedf7470d1dfd22d136de43ba74c9985b59204398fb83d019",
+    "mobile-dark-audio-selected-move-consent-readable.png": "3579015c28d624c83b6ba5567fead11bf8e9a6e93d57ca98c88026c4a0a0fe00",
+    "mobile-dark-audio-uninspected-organization-persisted.png": "499c766150221ef5f06d25d1f16b423551a2318720f202823b18f323b7507856",
+    "mobile-light-audio-inspection-filter-clean.png": "aaee41d846f46e8fce4aca33f40da9ff82a710016ea33349761dc7946a17032e",
+    "mobile-light-audio-metadata-organization-reviewed.png": "b339085528e554a69407f9d62ae68e5ee8cc5c7af7a5ded2ca343147b587afc0",
+    "mobile-light-audio-selected-move-consent-readable.png": "ccde07c355fc8f09e76c7b1cb8e5792839a58cd016f8fddc8f9caae9f0f2d145",
+    "mobile-light-audio-uninspected-organization-persisted.png": "74ffc3475df641211f2c4547a4f6a6d23ee5564986720c2f905c6867aaa675ca"
+  },
+  "visual_findings": [
+    "Opened four exact screenshots for each actual Chrome project: desktop-light, desktop-dark, mobile-light and mobile-dark.",
+    "Actual synthetic uninspected source is visible in its persisted destination; version/file remain present while duplication is disabled and duration is not invented.",
+    "The no-file review explicitly says that only the identity is reorganized; it does not invent a file, bytes or a version.",
+    "Clean scanner filter is selected visibly, and the separate warning retains decoder/integrity and current-access requirements.",
+    "Dark modal, selects, inputs and list keep dark surfaces and readable text; no white panel replaces the dark form.",
+    "Actual390px screenshots and Chrome geometry checks show wrapped text and controls without horizontal overflow.",
+    "The separately scrolled consent images show the entire review text above the pinned footer, including both buttons, on mobile and desktop.",
+    "The move list has its own scroll area; the second source details are not all visible in the same consent screenshot. Exact identities/versions/hashes were separately verified in native receipts.",
+    "The no-file reviewed capture shows a disabled save button while native folder metadata is still loading. Later actual200 movement/return receipts and zero native versions establish completion; the disabled capture itself is not presented as a completed write.",
+    "Desktop search remains narrow and the mobile library remains vertically long. These are recorded visual/usability differences, not a claim of complete figure6 conformity.",
+    "TTS, provider codecs/publication, remote references and external PABX behavior are outside this accepted increment."
+  ],
+  "native_receipts": {
+    "desktop-dark-audio-inspection-filter-native.json": {
+      "sha256": "b3c36990365ad84efebc9d6e4a4ea0712d2bacf9dd1ad6bf1391ef1caf2c9a4e",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1373",
+        "asset": "302",
+        "exact_version": "263",
+        "sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "real_inspection": "253",
+        "uninspected_before": 200,
+        "no_file_excludes_received": 200,
+        "clean_after": 200,
+        "uninspected_excludes_inspected": 200,
+        "invalid_filter": 422,
+        "denied_role": 401,
+        "theme_css": {
+          "background": "rgb(23, 23, 26)",
+          "foreground": "rgb(237, 238, 240)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "desktop-dark-audio-metadata-organization-native.json": {
+      "sha256": "427b64b89fa9508e01c351167724526bd3aa8c11ac9d468e274edb107905ac88",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1373",
+        "asset": "303",
+        "initial_folder": "143",
+        "moved_to_root": 200,
+        "restored_to_folder": 200,
+        "latest_version": null,
+        "native_history_status": 200,
+        "native_version_count": 0,
+        "browser_byte_or_zip_requests": [],
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "desktop-dark-audio-uninspected-organization-native.json": {
+      "sha256": "1294dae9e92eafed791c1e33adc04939d1e6cc1f373ac01fc6e7e066d995bcb7",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1373",
+        "asset": "302",
+        "exact_version": "263",
+        "sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "moved": 200,
+        "returned_to_root": 200,
+        "byte_before": 409,
+        "byte_after": 409,
+        "inspection_ids_before": [],
+        "inspection_ids_after": [],
+        "browser_byte_or_zip_requests": [],
+        "theme_css": {
+          "background": "rgb(23, 23, 26)",
+          "foreground": "rgb(237, 238, 240)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    },
+    "desktop-light-audio-inspection-filter-native.json": {
+      "sha256": "69618b42f76c5472a7ce79edd4153f183c4a0410c263593367e67695aaf8a589",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1329",
+        "asset": "299",
+        "exact_version": "261",
+        "sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "real_inspection": "239",
+        "uninspected_before": 200,
+        "no_file_excludes_received": 200,
+        "clean_after": 200,
+        "uninspected_excludes_inspected": 200,
+        "invalid_filter": 422,
+        "denied_role": 401,
+        "theme_css": {
+          "background": "rgb(255, 255, 255)",
+          "foreground": "rgb(28, 32, 36)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "desktop-light-audio-metadata-organization-native.json": {
+      "sha256": "c088380ea1ce9ce8536e9d31126c3a3eb2e8a1c2c543b80cbd8e4811572400ae",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1329",
+        "asset": "300",
+        "initial_folder": "120",
+        "moved_to_root": 200,
+        "restored_to_folder": 200,
+        "latest_version": null,
+        "native_history_status": 200,
+        "native_version_count": 0,
+        "browser_byte_or_zip_requests": [],
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "desktop-light-audio-uninspected-organization-native.json": {
+      "sha256": "48f8af9e98bff7894e5fb8850dcb6a22a08b2693a41330386bf24ad080ebaa81",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1329",
+        "asset": "299",
+        "exact_version": "261",
+        "sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "moved": 200,
+        "returned_to_root": 200,
+        "byte_before": 409,
+        "byte_after": 409,
+        "inspection_ids_before": [],
+        "inspection_ids_after": [],
+        "browser_byte_or_zip_requests": [],
+        "theme_css": {
+          "background": "rgb(255, 255, 255)",
+          "foreground": "rgb(28, 32, 36)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    },
+    "mobile-dark-audio-inspection-filter-native.json": {
+      "sha256": "dd3ae5203519fda670e1aaf364c78fb84aea8b86492ff8e2925ac48b9a4cbf27",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1461",
+        "asset": "308",
+        "exact_version": "267",
+        "sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "real_inspection": "281",
+        "uninspected_before": 200,
+        "no_file_excludes_received": 200,
+        "clean_after": 200,
+        "uninspected_excludes_inspected": 200,
+        "invalid_filter": 422,
+        "denied_role": 401,
+        "theme_css": {
+          "background": "rgb(23, 23, 26)",
+          "foreground": "rgb(237, 238, 240)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "mobile-dark-audio-metadata-organization-native.json": {
+      "sha256": "4f1948206dd02f67cea8be37853e3b78427e73aa0ab2dfa25f69b159d5642729",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1461",
+        "asset": "309",
+        "initial_folder": "189",
+        "moved_to_root": 200,
+        "restored_to_folder": 200,
+        "latest_version": null,
+        "native_history_status": 200,
+        "native_version_count": 0,
+        "browser_byte_or_zip_requests": [],
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "mobile-dark-audio-uninspected-organization-native.json": {
+      "sha256": "59470b2d92c08b613f4c929f034254ca292b49523f66730dbb0e469f947133f3",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1461",
+        "asset": "308",
+        "exact_version": "267",
+        "sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "moved": 200,
+        "returned_to_root": 200,
+        "byte_before": 409,
+        "byte_after": 409,
+        "inspection_ids_before": [],
+        "inspection_ids_after": [],
+        "browser_byte_or_zip_requests": [],
+        "theme_css": {
+          "background": "rgb(23, 23, 26)",
+          "foreground": "rgb(237, 238, 240)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    },
+    "mobile-light-audio-inspection-filter-native.json": {
+      "sha256": "b0cb2891b6e8822480e14c225fbd134dbfb31f04e640e121bc40fd223c6bf43f",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1417",
+        "asset": "305",
+        "exact_version": "265",
+        "sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "real_inspection": "267",
+        "uninspected_before": 200,
+        "no_file_excludes_received": 200,
+        "clean_after": 200,
+        "uninspected_excludes_inspected": 200,
+        "invalid_filter": 422,
+        "denied_role": 401,
+        "theme_css": {
+          "background": "rgb(255, 255, 255)",
+          "foreground": "rgb(28, 32, 36)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "mobile-light-audio-metadata-organization-native.json": {
+      "sha256": "c6034d54435915de998de80bbe92fdd1397ed3334e8bff05841f1378b8c3e113",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1417",
+        "asset": "306",
+        "initial_folder": "166",
+        "moved_to_root": 200,
+        "restored_to_folder": 200,
+        "latest_version": null,
+        "native_history_status": 200,
+        "native_version_count": 0,
+        "browser_byte_or_zip_requests": [],
+        "horizontal_overflow": false,
+        "provider_writes": false
+      }
+    },
+    "mobile-light-audio-uninspected-organization-native.json": {
+      "sha256": "a8228b200c9ad77797afd6f72f1e5e60a892ae714b8c59d96fbc849165531703",
+      "receipt": {
+        "sha": "057fa9783ade63e251a1b89a6fcb997e5baec04b",
+        "synthetic": true,
+        "external_homologation": false,
+        "unit": "1417",
+        "asset": "305",
+        "exact_version": "265",
+        "sha256": "78f82cd49af869013e8ec414a15d71f5f4f2ec8d006b6a0c50527c91eaa7a85f",
+        "moved": 200,
+        "returned_to_root": 200,
+        "byte_before": 409,
+        "byte_after": 409,
+        "inspection_ids_before": [],
+        "inspection_ids_after": [],
+        "browser_byte_or_zip_requests": [],
+        "theme_css": {
+          "background": "rgb(255, 255, 255)",
+          "foreground": "rgb(28, 32, 36)"
+        },
+        "horizontal_overflow": false,
+        "provider_writes": false,
+        "forbidden_browser_write_paths": []
+      }
+    }
+  },
+  "prior_cases": {
+    "call-center-rspec.json": {
+      "preserved": 2284,
+      "new": 13
+    },
+    "call-center-pabx-rspec.json": {
+      "preserved": 119,
+      "new": 0
+    },
+    "call-center-corporate-rspec.json": {
+      "preserved": 85,
+      "new": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "preserved": 175,
+      "new": 0
+    },
+    "vue": {
+      "preserved": 1260,
+      "new": 26
+    }
+  },
+  "limits": [
+    "Own synthetic databases, bytes and ClamAV signature set; no external scanner/PABX homologation",
+    "Metadata organization and inspection filtering are accepted; not full figure6 or the23figures",
+    "Bulk copies, native calendars, full references/guarded deletion, TTS and provider publication remain separately pending"
+  ],
+  "full_figure_or_word_completion": false
+}

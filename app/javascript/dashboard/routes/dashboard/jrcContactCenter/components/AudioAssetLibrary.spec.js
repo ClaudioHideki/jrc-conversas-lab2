@@ -125,6 +125,104 @@ beforeEach(() => {
 });
 
 describe('unit scoped private audio metadata UI', () => {
+  it('passes only the byte-admitted native selection to copying and clears partial outcomes on scope changes', async () => {
+    const item = structuredClone(row);
+    item.latest_version.technical_verification = { id: '100', ready: true };
+    API.audioAssets.mockResolvedValue({
+      data: {
+        items: [item],
+        meta: { total: 1, pages: 1 },
+        max_upload_bytes: 1000,
+        archive_limits: { max_entries: 20, max_bytes: 1000 },
+        move_limits: { max_entries: 20 },
+      },
+    });
+    const wrapper = fixture({
+      AudioSelectedCopiesDialog: {
+        props: { selection: Array, admitted: Boolean },
+        emits: ['settled'],
+        setup(props, { emit }) {
+          return () =>
+            h(
+              'button',
+              {
+                'data-native-copy-outcome': true,
+                'data-admitted': String(props.admitted),
+                'data-selected': props.selection.length,
+                onClick: () =>
+                  emit('settled', {
+                    confirmed: [{ item: { id: '80' } }],
+                    uncertain: 1,
+                    blocked: 0,
+                    pending: 1,
+                  }),
+              },
+              'SYNTHETIC verified child outcome'
+            );
+        },
+      },
+    });
+    await flushPromises();
+    expect(
+      wrapper.get('[data-native-copy-outcome]').attributes('data-admitted')
+    ).toBe('false');
+    await wrapper.get('[data-audio-archive-select="44"]').setValue(true);
+    expect(
+      wrapper.get('[data-native-copy-outcome]').attributes('data-admitted')
+    ).toBe('true');
+    expect(
+      wrapper.get('[data-native-copy-outcome]').attributes('data-selected')
+    ).toBe('1');
+    await wrapper.get('[data-native-copy-outcome]').trigger('click');
+    await flushPromises();
+    expect(API.audioAssets).toHaveBeenCalledTimes(2);
+    expect(
+      wrapper.get('[data-audio-selected-copies-settled]').attributes()
+    ).toEqual(
+      expect.objectContaining({ 'data-confirmed': '1', 'data-uncertain': '1' })
+    );
+    expect(
+      wrapper.get('[data-native-copy-outcome]').attributes('data-selected')
+    ).toBe('0');
+    mocks.user.value.accounts[0].permissions = [
+      'jrc_contact_center_recordings_listen',
+    ];
+    await wrapper.setProps({
+      context: { capabilities: { configure: false }, units: [] },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-audio-selected-copies-settled]').exists()).toBe(
+      false
+    );
+    expect(API.duplicateAudioAsset).not.toHaveBeenCalled();
+  });
+
+  it('does not convert metadata-only organization into permission to duplicate private file bytes', async () => {
+    API.audioAssets.mockResolvedValue({
+      data: {
+        items: [{ ...structuredClone(row), latest_version: null }],
+        meta: { total: 1, pages: 1 },
+        max_upload_bytes: 1000,
+        archive_limits: { max_entries: 20, max_bytes: 1000 },
+        move_limits: { max_entries: 20 },
+      },
+    });
+    const wrapper = fixture();
+    await flushPromises();
+    await wrapper.get('[data-audio-selection-purpose]').setValue('organize');
+    await wrapper.get('[data-audio-archive-select="44"]').setValue(true);
+    expect(
+      wrapper.get('[data-open-audio-selected-move]').element.disabled
+    ).toBe(false);
+    expect(
+      wrapper.get('[data-open-audio-selected-copies]').element.disabled
+    ).toBe(true);
+    expect(wrapper.get('[data-open-audio-archive]').element.disabled).toBe(
+      true
+    );
+    expect(API.duplicateAudioAsset).not.toHaveBeenCalled();
+  });
+
   it('names the native inspection filter without presenting a scanner result as byte-readiness or publication', async () => {
     const wrapper = fixture();
     await flushPromises();
