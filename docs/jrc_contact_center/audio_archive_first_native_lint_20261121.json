@@ -1,0 +1,60 @@
+{
+  "status": "four_lint_causes_corrected_native_revalidation_pending",
+  "failed_producer": "f98c630f2f5db924c167a4bca38647a9940ef4b9",
+  "run": 44928716287,
+  "artifact": 14717219798,
+  "artifact_sha256": "56c0870e9938fe3cbbc5cc255698bade2515562dc8c90f128867190279a3464f",
+  "native_passed": 2464,
+  "schema_reload_passed_separately": 175,
+  "vue_passed": 1237,
+  "failed_gate": "Incremental Ruby lint without suppressing new offenses",
+  "findings": [
+    {
+      "path": "app/controllers/api/v1/accounts/jrc_contact_center/audio_archives_controller.rb",
+      "cop": "Metrics/AbcSize",
+      "line": 18,
+      "message": "Assignment Branch Condition size for identify_response is too high. [<7, 30, 0> 30.81/26]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_archives.rb",
+      "cop": "Lint/StructNewOverride",
+      "line": 10,
+      "message": "`:count` member overrides `Struct#count` and it may be unexpected."
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_archives.rb",
+      "cop": "Layout/EmptyLineAfterGuardClause",
+      "line": 37,
+      "message": "Add empty line after guard clause."
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/audio_archives_spec.rb",
+      "cop": "Style/HashSyntax",
+      "line": 39,
+      "message": "Don't mix styles in the same hash."
+    }
+  ],
+  "changes": [
+    "Cache response.headers in a local reference, keeping all seven identity/security headers and their values",
+    "Use private Result.entry_count instead of shadowing Struct.count; HTTP X-JRC-Audio-Count unchanged",
+    "Separate the guard and following expression with one empty line",
+    "Use uniform string-key syntax in the malformed-body security test"
+  ],
+  "modified_code_sha256": {
+    "app/controllers/api/v1/accounts/jrc_contact_center/audio_archives_controller.rb": "a0d5e484b82c1c1ed03a876a80ff5f86f45204e3110af1d39cb370ae3a49980e",
+    "app/services/jrc_contact_center/audio_archives.rb": "30030ad63e5e11f746e6600b917a638ff1cc81b2575f300fe72dda282064a58d",
+    "spec/services/jrc_contact_center/audio_archives_spec.rb": "d0a917e43f1524e605889c7c407b09efd6c18115078ae1d2fd1376416aef9462",
+    "spec/requests/api/v1/accounts/jrc_contact_center/audio_archives_spec.rb": "e53b04f7b36b094171f58d4223464171f849612e90ca4e6038eb8bd2a5d99a70"
+  },
+  "regressions_preserved": [
+    "Actual API spec still asserts exact account/unit/count/hash/bytes and security/cache headers",
+    "Actual ZIP service spec still asserts two selected entries and exact bytes",
+    "All previous access-denied and transactional scenarios retained"
+  ],
+  "native_ruby_or_rubocop_available_locally": false,
+  "assets_or_chrome_for_failed_sha": false,
+  "migrations_sql_permissions_or_workflow_changed": false,
+  "native_revalidation_required": true,
+  "selected_moves_still_private": true,
+  "full_figures_complete": false
+}

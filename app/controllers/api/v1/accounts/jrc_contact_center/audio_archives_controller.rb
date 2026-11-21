@@ -16,12 +16,13 @@ class Api::V1::Accounts::JrcContactCenter::AudioArchivesController < Api::V1::Ac
   private
 
   def identify_response(result)
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-JRC-Audio-Account'] = result.account_id
-    response.headers['X-JRC-Audio-Unit'] = result.unit_id
-    response.headers['X-JRC-Audio-Selection'] = result.selection_sha256
-    response.headers['X-JRC-Audio-SHA256'] = result.sha256
-    response.headers['X-JRC-Audio-Count'] = result.count.to_s
-    response.headers['X-JRC-Audio-Bytes'] = result.bytes.bytesize.to_s
+    headers = response.headers
+    headers['X-Content-Type-Options'] = 'nosniff'
+    headers['X-JRC-Audio-Account'] = result.account_id
+    headers['X-JRC-Audio-Unit'] = result.unit_id
+    headers['X-JRC-Audio-Selection'] = result.selection_sha256
+    headers['X-JRC-Audio-SHA256'] = result.sha256
+    headers['X-JRC-Audio-Count'] = result.entry_count.to_s
+    headers['X-JRC-Audio-Bytes'] = result.bytes.bytesize.to_s
   end
 end

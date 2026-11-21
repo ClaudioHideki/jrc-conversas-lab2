@@ -25,7 +25,7 @@ RSpec.describe JrcContactCenter::AudioArchives do
     request = items
     original = versions.map(&:attributes)
     result = archives.call(items: request)
-    expect([result.account_id, result.unit_id, result.count]).to eq([account.id.to_s, unit.id.to_s, 2])
+    expect([result.account_id, result.unit_id, result.entry_count]).to eq([account.id.to_s, unit.id.to_s, 2])
     expect(Digest::SHA256.hexdigest(result.bytes)).to eq(result.sha256)
     expect(result.selection_sha256).to eq(Digest::SHA256.hexdigest(JSON.generate(request.map { |row| row.sort.to_h })))
     Zip::File.open_buffer(StringIO.new(result.bytes)) do |archive|

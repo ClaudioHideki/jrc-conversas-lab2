@@ -36,7 +36,7 @@ RSpec.describe 'Private selected institutional audio downloads retain native aut
 
   it 'rejects root grants, storage locators and missing items without releasing private bytes' do
     %w[account_id user_id unit_id blob_id signed_id].each do |name|
-      post endpoint, headers: headers, params: { items: items, name => '999' }, as: :json
+      post endpoint, headers: headers, params: { 'items' => items, name => '999' }, as: :json
       expect(response).to have_http_status(:unprocessable_entity)
     end
     post endpoint, headers: headers, params: {}, as: :json

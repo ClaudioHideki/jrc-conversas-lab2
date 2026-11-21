@@ -6621,5 +6621,15 @@
     "real_grants_changed": false,
     "already_proven_foundation": "docs/jrc_contact_center/quality_review_authority_verified_20261121.json",
     "full_review_still_pending_proven_source_binding": true
+  },
+  "audio_archive_first_native_lint_20261121": {
+    "producer": "f98c630f2f5db924c167a4bca38647a9940ef4b9",
+    "report": "docs/jrc_contact_center/audio_archive_first_native_lint_20261121.json",
+    "native": 2464,
+    "reload": 175,
+    "vue": 1237,
+    "ruby_lint_findings": 4,
+    "corrected_revalidation_pending": true,
+    "assets_and_chrome_not_executed": true
   }
 }

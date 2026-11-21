@@ -7,7 +7,7 @@ require 'digest'
 # Reuses native authorized bytes, never storage locators or provider recordings.
 class JrcContactCenter::AudioArchives
   EXTENSIONS = { 'audio/wav' => '.wav', 'audio/mpeg' => '.mp3', 'audio/ogg' => '.ogg', 'audio/mp4' => '.m4a', 'audio/webm' => '.webm' }.freeze
-  Result = Struct.new(:bytes, :sha256, :selection_sha256, :account_id, :unit_id, :count, keyword_init: true)
+  Result = Struct.new(:bytes, :sha256, :selection_sha256, :account_id, :unit_id, :entry_count, keyword_init: true)
 
   def initialize(context:)
     @context = context
@@ -21,7 +21,7 @@ class JrcContactCenter::AudioArchives
     payload = archive_bytes(entries)
     @access.transaction { authorized_entries!(request) }
     Result.new(bytes: payload, sha256: Digest::SHA256.hexdigest(payload), selection_sha256: selection_digest(request),
-               account_id: @access.account.id.to_s, unit_id: entries.first.fetch('unit_id'), count: entries.length)
+               account_id: @access.account.id.to_s, unit_id: entries.first.fetch('unit_id'), entry_count: entries.length)
   end
 
   private
@@ -35,6 +35,7 @@ class JrcContactCenter::AudioArchives
     total = entries.sum { |row| row.fetch('byte_size') }
     valid = entries.pluck('unit_id').uniq.one? && total <= JrcContactCenter::AudioArchiveInput.limits.fetch(:max_bytes)
     raise JrcContactCenter::OperationError, 'institutional_audio_archive_limit_exceeded' unless valid
+
     entries
   end
 
