@@ -38,7 +38,9 @@ class JrcContactCenter::ConfigurationAuditSnapshot
 
   def self.attributes_for(record)
     attributes = record.as_json(only: FIELDS.fetch(record.class.name))
-    attributes['settings'] = record.settings.slice('issuer_company_id', 'business_unit_id') if record.is_a?(JrcContactCenter::Unit)
+    if record.is_a?(JrcContactCenter::Unit)
+      attributes['settings'] = record.settings.slice('issuer_company_id', 'business_unit_id', JrcContactCenter::CalendarCatalogState::KEY)
+    end
     if record.is_a?(JrcContactCenter::QueueMembership)
       attributes['participates'] = record.role == 'agent'
       attributes['supervises'] = record.role == 'supervisor' || record.settings['supervises'] == true

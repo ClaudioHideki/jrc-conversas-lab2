@@ -74,6 +74,9 @@ namespace :api, defaults: { format: 'json' } do
         resources :audio_asset_moves, only: [:create]
         resources :audio_archives, only: [:create]
         resources :audio_folders, only: %i[index show create update]
+        resources :unit_calendars, only: %i[index show create update] do
+          get :preview, on: :member
+        end
         resources :audio_assets, only: %i[index show create update] do
           post :duplicate, on: :member
           resource :usages, only: [:show], controller: 'audio_usages'

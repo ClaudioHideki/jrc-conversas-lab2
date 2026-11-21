@@ -16,8 +16,22 @@ class JrcContactCenter::Unit < JrcContactCenter::ApplicationRecord
   validates :timezone, presence: true
   validate :known_timezone
   validate :corporate_links
+  validate :native_calendar_catalog
 
   private
+
+  def native_calendar_catalog
+    key = JrcContactCenter::CalendarCatalogState::KEY
+    previous = new_record? ? {} : settings_in_database
+    return unless settings.key?(key) || previous.key?(key)
+
+    valid = !new_record? && settings.key?(key)
+    raise JrcContactCenter::OperationError, 'invalid_contact_center_calendar_catalog' unless valid
+
+    JrcContactCenter::CalendarCatalogState.new(unit: self).call
+  rescue JrcContactCenter::OperationError
+    errors.add(:settings, 'invalid_contact_center_calendar_catalog')
+  end
 
   def corporate_links
     return if settings['issuer_company_id'].blank? && settings['business_unit_id'].blank?

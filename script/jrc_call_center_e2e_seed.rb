@@ -163,6 +163,8 @@ session = { access_targets: access_targets, navigation_targets: navigation_targe
             issuer_company_id: company.id, denied_business_unit_id: business_units.last.id }
 require_relative 'jrc_call_center_ivr_seed'
 session[:ivr_targets] = JrcContactCenter::SyntheticIvrSeed.call(projects: access_targets.keys)
+# Independent native account graphs for calendar CRUD, scoped denials and revision races.
+session[:calendar_targets] = JrcContactCenter::SyntheticIvrSeed.call(projects: access_targets.keys)
 # Independent native scopes prevent audio mutations from reusing earlier IVR scenarios.
 session[:ivr_audio_targets] = JrcContactCenter::SyntheticIvrSeed.call(projects: access_targets.keys)
 require_relative 'jrc_call_center_ivr_audio_seed'

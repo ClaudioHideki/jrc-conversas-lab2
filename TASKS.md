@@ -836,3 +836,12 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] **CALL-CENTER-SELECTED-AUDIO-COPIES-20261121:** Same native duplicate flow, explicit per-item review/receipts, sequential writes and safe manual replay.79preliminary mocked cases include46prior Library cases;33newVue and2nativeAPI examples are prepared, not native-proved. Native footer dismissal is disabled while pending. Same244Chrome assertions extended for actual synthetic copies. Report: docs/jrc_contact_center/audio_selected_copies_prepared_20261121.json. Calendar precedence is confirmed separately; no PABX publication is enabled.
 
 - [x] **CALL-CENTER-AUDIO-ORGANIZATION-INCREMENT-20261121:** 057fa978/CI44950332408 independently verified:2501native,175separate schema reload,1286Vue,244actualChrome;448PNGhashes and16actual visual opens;12native organization/filter receipts. Metadata-only/no-file organization preserves versions and byte restrictions. Fullfigure6/23 and external PABX acceptance remain open. Receipt: docs/jrc_contact_center/audio_library_organization_native_verified_20261121.json.
+
+
+## Call Center — 21/11/2026 — calendário interno nativo candidato
+
+- [x] Preservar o incremento anterior de cópias de áudio com evidências nativas, Chrome e imagens efetivamente revisadas.
+- [x] Implementar o adaptador de calendários por unidade, precedência confirmada, expediente/feriados/exceções, revisão, filtros, paginação, auditoria e reautorização.
+- [x] Verificar 55 testes leves da projeção formatada e nenhuma infração nova; 32 avisos antigos do componente administrativo permanecem registrados.
+- [ ] Executar os 38 cenários Rails preparados, regressões, build protegido de assets e Chrome nativo em quatro projetos.
+- [ ] Homologar vínculos/impactos, recorrência, calendário totalmente fechado e PABX, conforme o relatório preparado. Não declarar as23 figuras concluídas.

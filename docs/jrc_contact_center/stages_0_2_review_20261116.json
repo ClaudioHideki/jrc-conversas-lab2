@@ -6800,5 +6800,34 @@
     "chrome": 244,
     "actual_images_opened": 16,
     "full_figure_complete": false
+  },
+  "unit_calendars_prepared_20261121": {
+    "producer_base": "5a75b4e542c332d53d4d5efee8909c00a7fc0e8c",
+    "report": "docs/jrc_contact_center/unit_calendars_prepared_20261121.json",
+    "status": "implemented_native_and_chrome_pending",
+    "mocked_passed": 55,
+    "native_or_chrome_accepted": false,
+    "precedence_confirmed": [
+      "explicit date exception before holiday before weekly",
+      "reject overlapping intervals"
+    ],
+    "remaining": [
+      "Scoped bindings and impact inventory for numbers/queues/IVR, without invented provider references",
+      "Fixed/movable holiday recurrence or locality registry is not inferred from the classification",
+      "Entirely closed ordinary-calendar semantics remain subject to the native calculator contract",
+      "Provider routing publication, capabilities, applied versions and ACKs require the actual PABX contract",
+      "Native tests and actual Chrome screenshots remain pending for this increment"
+    ]
+  },
+  "audio_selected_copies_native_verified_20261121": {
+    "producer": "5a75b4e542c332d53d4d5efee8909c00a7fc0e8c",
+    "run": 44955551212,
+    "artifact": 14728918054,
+    "artifact_sha256": "dab194dcddbbae9ee1959bbfe5715686f727e3cabde85212bbe382315948aeee",
+    "report": "docs/jrc_contact_center/audio_selected_copies_native_verified_20261121.json",
+    "native": 2503,
+    "same_chrome_cases": 244,
+    "actually_opened": 12,
+    "full_word_complete": false
   }
 }

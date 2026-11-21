@@ -1,0 +1,54 @@
+{
+  "base": "5a75b4e542c332d53d4d5efee8909c00a7fc0e8c",
+  "status": "implemented_native_and_chrome_pending",
+  "reference": "Complementary Word, section6 Horarios, feriados e excecoes; navigation figure1. Not a whole23-figure acceptance.",
+  "user_confirmed": [
+    "explicit date exception before holiday before weekly",
+    "reject overlapping intervals"
+  ],
+  "native_reuse": [
+    "JrcServiceDesk::SnapshotCalendar v1 validation, TZInfo/DST and calculation",
+    "Existing calendarRules/calendarIntervals helpers; Call Center Unit JSONB and administrative audit",
+    "AuthorityTransaction Account mutex, fresh AccessScope configure/unit/company coverage and ConfigurationRevision CAS",
+    "Existing Dialog/Button, route query pagination and optional native revision-reload lifecycle"
+  ],
+  "data_boundary": "Unit-scoped named configuration adapter; no separate calendar table, artificial Inbox or Service Desk unit grants",
+  "safety": [
+    "Strict typed JSON and bounded catalog; fields cannot confer authority",
+    "Generic Unit writes cannot replace or expose the reserved catalog; immutable account/company/unit header",
+    "New catalog starts empty; new draft inactive; no invented hours, dates, grants or provider state",
+    "Reviewed UUID creation can recover an identical committed response; unknown writes require current human review",
+    "Calendar receipt is captured while the same native Account lock remains held"
+  ],
+  "local_tests": {
+    "kind": "Mocked API unit tests of formatted in-memory product projection; not Rails or Chrome proof",
+    "passed": 55,
+    "failed": 0,
+    "pending": 0,
+    "report": "calendar-projected-r3-light-vitest-result.json"
+  },
+  "static_checks": {
+    "new_errors_or_warnings": 0,
+    "unchanged_administration_warnings": 32,
+    "same_61_chrome_scenarios": true,
+    "report": "calendar-projection-lint-r4-20261121.json"
+  },
+  "native_cases_prepared_not_run": {
+    "definition": 20,
+    "requests": 15,
+    "actual_lock_waits": 3
+  },
+  "chrome_prepared_not_run": [
+    "Native CRUD, reviewed conflict and reauthorization API denials, preview and real pagination",
+    "Separate synthetic account graphs and owned tabs, actual CSS, desktop1440/mobile390 and both themes"
+  ],
+  "remaining_word_requirements": [
+    "Scoped bindings and impact inventory for numbers/queues/IVR, without invented provider references",
+    "Fixed/movable holiday recurrence or locality registry is not inferred from the classification",
+    "Entirely closed ordinary-calendar semantics remain subject to the native calculator contract",
+    "Provider routing publication, capabilities, applied versions and ACKs require the actual PABX contract",
+    "Native tests and actual Chrome screenshots remain pending for this increment"
+  ],
+  "no_migrations_dependencies_permissions_workflows_or_provider_commands_added": true,
+  "full_word_complete": false
+}

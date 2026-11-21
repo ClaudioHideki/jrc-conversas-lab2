@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { verifyNativeCalendars } from './call-center-calendar-native.mjs';
 import type { Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -1337,6 +1338,12 @@ test('fifteen permission-bound cards, actual CSS, honest pending states and no o
       .getByText('Voltar às configurações do Call Center', { exact: true })
       .click();
   }
+  await verifyNativeCalendars(
+    page,
+    info,
+    session.calendar_targets[info.project.name],
+    session.unit_id
+  );
   await expect(page.locator('[data-provider-state]')).toHaveText(
     'Conexão PABX não configurada nesta conta.'
   );

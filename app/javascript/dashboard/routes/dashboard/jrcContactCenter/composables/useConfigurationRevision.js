@@ -15,6 +15,7 @@ const resources = [
   'routing_rules',
   'audio_folders',
   'audio_assets',
+  'unit_calendars',
 ];
 const validRevision = (value, resource) =>
   ['ivr_drafts', 'acw_forms'].includes(resource)
@@ -24,6 +25,7 @@ export const useConfigurationRevision = ({
   accountId,
   resource,
   draft,
+  reloadRecord,
   onDenied,
 }) => {
   const state = reactive({
@@ -99,7 +101,8 @@ export const useConfigurationRevision = ({
     state.reviewedDraft = '';
     try {
       let response;
-      if (source === 'pause_catalog')
+      if (reloadRecord) response = await reloadRecord(account, id);
+      else if (source === 'pause_catalog')
         response = await API.pauseCatalog(account);
       else if (source === 'acw_policy') response = await API.acwPolicy(account);
       else response = await API.configurationRecord(account, source, id);

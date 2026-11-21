@@ -744,4 +744,49 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       expect(actor.reload.active_for_authentication?).to be(false)
     end
   end
+
+  def synthetic_calendar_entry
+    definition = { 'name' => 'SYNTHETIC concurrent calendar', 'description' => '', 'timezone' => 'America/Sao_Paulo',
+                   'weekly' => (1..7).to_h { |day| [day.to_s, day == 1 ? [['08:00', '12:00']] : []] },
+                   'holidays' => [], 'exceptions' => [] }
+    { 'id' => SecureRandom.uuid, 'active' => false, 'definition' => definition }
+  end
+
+  %w[profile coverage].each do |source|
+    it "does not save a calendar after #{source} is withdrawn during the actual account lock wait" do
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/unit_calendars"
+      payload = { unit_id: units.first.id.to_s, calendar: synthetic_calendar_entry,
+                  expected_revision: JrcContactCenter::ConfigurationRevision.token(units.first) }
+      change = lambda do
+        if source == 'profile'
+          account.account_users.find_by!(user: actor).custom_role.update!(permissions: ['jrc_contact_center_view'])
+        else
+          JrcCrm::UserBusinessUnit.where(account: account, user: actor).find_each { |coverage| coverage.update!(active: false) }
+        end
+      end
+      result = race_with_account_change(change, endpoint: endpoint, payload: payload, verb: :post, defer_change: true)
+      expect(result).to eq(source == 'profile' ? 401 : 404)
+      expect(units.first.reload.settings).not_to have_key(JrcContactCenter::CalendarCatalogState::KEY)
+    end
+  end
+
+  it 'preserves the winning calendar when the actual stale request waits behind another committed calendar edit' do
+    member = account.account_users.find_by!(user: actor)
+    context = { account: account, account_user: member, user: actor }
+    catalog = JrcContactCenter::CalendarCatalog.new(context: context, unit_id: units.first.id)
+    entry = synthetic_calendar_entry
+    created = catalog.save!(entry, expected_revision: catalog.call.fetch('revision'), create: true)
+    endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/unit_calendars/#{entry.fetch('id')}"
+    payload = { unit_id: units.first.id.to_s, expected_revision: created.fetch('revision'),
+                calendar: entry.deep_merge('definition' => { 'name' => 'SYNTHETIC stale draft' }) }
+    change = lambda do
+      current = JrcContactCenter::CalendarCatalog.new(context: context, unit_id: units.first.id)
+      current.save!(entry.deep_merge('definition' => { 'name' => 'SYNTHETIC concurrent winner' }),
+                    expected_revision: current.call.fetch('revision'))
+    end
+    expect(race_with_account_change(change, endpoint: endpoint, payload: payload, defer_change: true)).to eq(409)
+    expect(catalog.find!(entry.fetch('id')).dig('definition', 'name')).to eq('SYNTHETIC concurrent winner')
+    expect(units.first.reload.settings.fetch(JrcContactCenter::CalendarCatalogState::KEY).fetch('version')).to eq(2)
+    expect(JrcContactCenter::Command.where(account: account)).to be_empty
+  end
 end

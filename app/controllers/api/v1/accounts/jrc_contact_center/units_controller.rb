@@ -32,6 +32,9 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
     permitted = params.require(:unit).permit(:code, :name, :kind, :status, :timezone, :parent_unit_id, settings: {})
     contact_center_access.units.find(permitted[:parent_unit_id]) if permitted[:parent_unit_id].present?
     settings = permitted[:settings].to_h
+    if settings.key?(JrcContactCenter::CalendarCatalogState::KEY)
+      raise JrcContactCenter::OperationError, 'calendar_requires_typed_configuration'
+    end
     settings = contact_center_access.units.find(params[:id]).settings.merge(settings) if action_name == 'update'
     JrcContactCenter::OrganizationalScope.new(account: Current.account, account_user: Current.account_user).authorize_links!(settings)
     permitted[:settings] = settings
@@ -40,6 +43,7 @@ class Api::V1::Accounts::JrcContactCenter::UnitsController < Api::V1::Accounts::
 
   def serialize(unit)
     unit.as_json(only: %i[id code name kind status timezone parent_unit_id settings created_at updated_at]).transform_keys(&:to_s)
-        .merge('revision' => JrcContactCenter::ConfigurationRevision.token(unit))
+        .merge('settings' => unit.settings.except(JrcContactCenter::CalendarCatalogState::KEY),
+               'revision' => JrcContactCenter::ConfigurationRevision.token(unit))
   end
 end

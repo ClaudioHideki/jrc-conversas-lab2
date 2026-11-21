@@ -34,7 +34,49 @@ const ivrRevision = revision => {
   return revision;
 };
 
+const calendarIdentity = value => {
+  if (
+    typeof value !== 'string' ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
+      value
+    )
+  )
+    throw new Error('Invalid local calendar identity');
+  return value;
+};
+
 export default {
+  unitCalendars: (accountId, unitId, params = {}) =>
+    axios.get(`${base(accountId)}/unit_calendars`, {
+      params: { ...params, unit_id: recordIdentity(unitId) },
+    }),
+  unitCalendar: (accountId, unitId, id) =>
+    axios.get(`${base(accountId)}/unit_calendars/${calendarIdentity(id)}`, {
+      params: { unit_id: recordIdentity(unitId) },
+    }),
+  saveUnitCalendar: (
+    accountId,
+    unitId,
+    calendar,
+    revision,
+    existing = false
+  ) => {
+    const path = `${base(accountId)}/unit_calendars`;
+    const id = calendarIdentity(calendar.id);
+    const data = {
+      unit_id: recordIdentity(unitId),
+      calendar,
+      expected_revision: revision,
+    };
+    return existing
+      ? axios.patch(`${path}/${id}`, data)
+      : axios.post(path, data);
+  },
+  previewUnitCalendar: (accountId, unitId, id, date) =>
+    axios.get(
+      `${base(accountId)}/unit_calendars/${calendarIdentity(id)}/preview`,
+      { params: { unit_id: recordIdentity(unitId), date } }
+    ),
   teamSupervisionCandidates: (accountId, teamId, params = {}) =>
     axios.get(
       `${base(accountId)}/team_supervisions/${recordIdentity(teamId)}/candidates`,

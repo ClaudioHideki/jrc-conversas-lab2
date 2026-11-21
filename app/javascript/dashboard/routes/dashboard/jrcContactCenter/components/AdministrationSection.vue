@@ -15,6 +15,7 @@ import AcwRulesEditor from './AcwRulesEditor.vue';
 import AcwFormLibrary from './AcwFormLibrary.vue';
 import EndingReasonCatalog from './EndingReasonCatalog.vue';
 import AudioFolderLibrary from './AudioFolderLibrary.vue';
+import CalendarLibrary from './CalendarLibrary.vue';
 import QueueWithdrawalConfirmation from './QueueWithdrawalConfirmation.vue';
 import TeamRosterWithdrawalConfirmation from './TeamRosterWithdrawalConfirmation.vue';
 import { useQueueWithdrawalReview } from '../composables/useQueueWithdrawalReview';
@@ -604,6 +605,11 @@ onBeforeUnmount(() => {
     >
       {{ label('PENDING') }}
     </p>
+    <CalendarLibrary
+      v-if="key === 'hours' && context.capabilities.configure"
+      :account-id="accountId"
+      :context="context"
+    />
     <PauseCatalogEditor
       v-if="key === 'pauses'"
       :account-id="accountId"
