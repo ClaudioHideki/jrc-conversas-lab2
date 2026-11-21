@@ -25,6 +25,7 @@ class Team < ApplicationRecord
   has_many :members, through: :team_members, source: :user
   has_many :conversations, dependent: :nullify
   has_many :sales_opportunities, dependent: :nullify
+  has_many :jrc_contact_center_supervisions, class_name: 'JrcContactCenter::TeamSupervision', inverse_of: :team, dependent: :destroy
 
   before_destroy :capture_filtered_unread_count_member_ids, prepend: true
   after_destroy_commit :invalidate_filtered_unread_counts_after_destroy

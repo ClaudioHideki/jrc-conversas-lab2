@@ -1,0 +1,33 @@
+{
+  "status": "validated_native_increment_not_entire_figure",
+  "sha": "a1a64397c418083403a6b7d7f54b4a71fb0dd0d0",
+  "run": 44894876897,
+  "artifact_id": 14705450892,
+  "artifact_sha256": "7d62f644d1d16c164d581e413ab971973c736e3b167c31f17f470fd71e3d4990",
+  "rails_distinct": 2314,
+  "schema_reload_separate": 159,
+  "vue": 1147,
+  "chrome": 240,
+  "screenshots_hash_verified": 392,
+  "screenshots_actually_opened": 4,
+  "zero_failures_pending_outside_errors_skipped_flaky": true,
+  "parent_preservation": {
+    "core": 2117,
+    "vue_including_duplicate_names": 1122
+  },
+  "waveform_native": {
+    "sample_count": 16000,
+    "duration_seconds": 2,
+    "desktop_canvas": 386,
+    "mobile_canvas": 264,
+    "same_private_blob_and_sha": true,
+    "reauthorized_download": 200,
+    "denial_after_open": 401
+  },
+  "boundaries": [
+    "No production or original checkout changes",
+    "No Docker/publication/deploy",
+    "No provider writes or real customer data",
+    "No entire23figures completion claim"
+  ]
+}

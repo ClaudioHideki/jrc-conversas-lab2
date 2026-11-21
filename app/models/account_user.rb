@@ -31,6 +31,7 @@ class AccountUser < ApplicationRecord
   belongs_to :account
   belongs_to :user
   belongs_to :inviter, class_name: 'User', optional: true
+  has_many :jrc_contact_center_supervisions, class_name: 'JrcContactCenter::TeamSupervision', inverse_of: :account_user, dependent: :destroy
 
   enum role: { agent: 0, administrator: 1 }
   enum availability: { online: 0, offline: 1, busy: 2, meeting: 3, feedback: 4, end_shift: 5, training: 6, bathroom_break: 7, lunch_break: 8,

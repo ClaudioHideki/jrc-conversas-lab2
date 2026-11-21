@@ -12,6 +12,7 @@ import {
 } from '../composables/useTeamRosterWithdrawalReview';
 import { CONTACT_CENTER_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/contactCenterPermissions';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
+import TeamSupervisionEditor from './TeamSupervisionEditor.vue';
 import { useConfigurationRevision } from '../composables/useConfigurationRevision';
 
 const props = defineProps({
@@ -32,6 +33,16 @@ const permissionLabel = key =>
   t(`CUSTOM_ROLE.PERMISSIONS.${key.toUpperCase()}`);
 const resource = computed(() => `access_${props.subjectType}`);
 const users = computed(() => props.subjectType === 'users');
+const teamIdentity = row => {
+  if (typeof row.team_identity === 'string') return row.team_identity;
+  return Number.isSafeInteger(row.id) && row.id > 0 ? String(row.id) : '';
+};
+const teamSummary = row =>
+  t('JRC_CONTACT_CENTER.TEAM_SUPERVISION.SUMMARY', {
+    name:
+      row.primary_supervisor || t('JRC_CONTACT_CENTER.TEAM_SUPERVISION.NONE'),
+    count: row.additional_supervisor_count,
+  });
 const query = suffix => route.query[`${resource.value}_${suffix}`];
 const page = computed(() => Math.max(1, Number(query('page')) || 1));
 const q = ref('');
@@ -266,7 +277,7 @@ onBeforeUnmount(() => {
     <ul v-else class="space-y-2">
       <li
         v-for="row in items"
-        :key="row.id"
+        :key="!users && teamIdentity(row) ? teamIdentity(row) : row.id"
         class="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-3"
       >
         <div class="min-w-0 flex-1">
@@ -278,7 +289,22 @@ onBeforeUnmount(() => {
                 : label(row.active === false ? 'TEAM_INACTIVE' : 'TEAM_ACTIVE')
             }}
           </p>
+          <p
+            v-if="!users && Number.isInteger(row.additional_supervisor_count)"
+            class="break-words text-sm text-n-slate-11"
+            :data-team-supervision-summary="teamIdentity(row)"
+          >
+            {{ teamSummary(row) }}
+          </p>
         </div>
+        <TeamSupervisionEditor
+          v-if="!users && teamIdentity(row)"
+          :account-id="accountId"
+          :team-id="teamIdentity(row)"
+          :team-name="row.name"
+          @changed="load"
+          @denied="load"
+        />
         <button
           type="button"
           :disabled="opening"

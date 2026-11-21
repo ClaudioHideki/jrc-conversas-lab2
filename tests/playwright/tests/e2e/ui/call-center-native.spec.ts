@@ -31,66 +31,252 @@ const expectContainedDialog = async (page: Page) => {
     })
     .toBe(true);
 };
+
+test('team supervision native metadata persists reviewed roles, pages candidates and rejects stale or denied writes', async ({
+  page,
+}, info) => {
+  const target = session.pause_targets[info.project.name].team_supervision;
+  const own = `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/jrc_contact_center`;
+  const endpoint = `${own}/team_supervisions/${target.team_id}`;
+  const prefix = new URL(endpoint).pathname;
+  const forbiddenWrites: string[] = [];
+  page.on('request', request => {
+    if (
+      /\/(commands|sync_calls|telephony_integration|team_members|queue_memberships)(?:[/?]|$)/.test(
+        request.url()
+      ) &&
+      !['GET', 'HEAD'].includes(request.method())
+    )
+      forbiddenWrites.push(request.url());
+  });
+  await page.goto(
+    `/app/accounts/${target.account_id}/contact-center/control-desk/permissions?permission_scope=teams&access_teams_q=${encodeURIComponent(target.team_name)}`
+  );
+  const openButton = page.locator(
+    `[data-team-supervision-open="${target.team_id}"]`
+  );
+  await openButton.click();
+  await expectContainedDialog(page);
+  const dialog = page.getByRole('dialog');
+  const editor = dialog.locator('[data-team-supervision-editor]');
+  const save = dialog.getByRole('button', {
+    name: 'Salvar configurações',
+    exact: true,
+  });
+  await expect(editor).toContainText('Este vínculo não concede permissões');
+  await expect(editor.locator('[data-team-supervision-primary]')).toHaveCount(
+    0
+  );
+  await expect(save).toBeDisabled();
+  await editor
+    .getByLabel('Pesquisar pessoas', { exact: true })
+    .fill('SYNTHETIC supervisor');
+  await editor.locator('[data-team-supervision-search]').click();
+  await expect(editor.getByRole('navigation')).toContainText('Total 22');
+  await editor.locator('[data-team-supervision-next]').click();
+  await expect(editor.getByRole('navigation')).toContainText('Página 2');
+  await expect(
+    editor.locator('[data-team-supervision-choose-primary]').first()
+  ).toBeDisabled();
+  await editor.locator('[data-team-supervision-previous]').click();
+  await expect(editor.getByRole('navigation')).toContainText('Página 1');
+  await editor
+    .locator(
+      `[data-team-supervision-choose-primary="${target.primary_supervisor_id}"]`
+    )
+    .click();
+  await editor
+    .locator(
+      `[data-team-supervision-additional="${target.additional_supervisor_id}"]`
+    )
+    .check();
+  await expect(save).toBeDisabled();
+  await editor.locator('[data-team-supervision-review]').check();
+  await editor
+    .locator('[data-team-supervision-primary]')
+    .scrollIntoViewIfNeeded();
+  await expectContainedDialog(page);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  ).toBe(true);
+  await expect(page.locator('html')).toHaveClass(
+    info.project.name.endsWith('dark') ? /dark/ : /^(?!.*\bdark\b).*$/
+  );
+  await page.screenshot({
+    path: `.codex/call-center-native-e2e/${info.project.name}-team-supervision-reviewed.png`,
+    fullPage: false,
+  });
+  const saved = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === prefix &&
+      response.request().method() === 'PATCH'
+  );
+  await save.click();
+  expect((await saved).status()).toBe(200);
+  await expect(dialog).not.toBeVisible();
+  await page.reload();
+  await expect(page.locator('[data-authority-assignments]')).toContainText(
+    target.primary_supervisor_name
+  );
+  await openButton.click();
+  await expectContainedDialog(page);
+  await expect(editor.locator('[data-team-supervision-primary]')).toHaveText(
+    target.primary_supervisor_name
+  );
+  const current = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect(current.status()).toBe(200);
+  const item = (await current.json()).item;
+  expect(item.additional_account_user_ids).toEqual([
+    target.additional_supervisor_id,
+  ]);
+  const changed = await page.request.patch(endpoint, {
+    headers: target.administrator,
+    data: {
+      supervision: {
+        primary_account_user_id: null,
+        additional_account_user_ids: [],
+      },
+      expected_revision: item.revision,
+    },
+  });
+  expect(changed.status()).toBe(200);
+  await editor.locator('[data-team-supervision-review]').check();
+  const stale = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === prefix &&
+      response.request().method() === 'PATCH'
+  );
+  await save.click();
+  expect((await stale).status()).toBe(409);
+  const conflict = dialog.locator('[data-configuration-conflict]');
+  await expect(conflict).toBeVisible();
+  await expect(save).toBeDisabled();
+  await conflict
+    .getByRole('button', {
+      name: 'Carregar versão atual para comparar',
+      exact: true,
+    })
+    .click();
+  await editor.locator('[data-team-supervision-use-server]').click();
+  await expect(editor.locator('[data-team-supervision-primary]')).toHaveCount(
+    0
+  );
+  await editor
+    .locator(
+      `[data-team-supervision-choose-primary="${target.primary_supervisor_id}"]`
+    )
+    .click();
+  await editor.locator('[data-team-supervision-review]').check();
+  await page.evaluate(auth => {
+    Object.assign(Reflect.get(window, 'axios').defaults.headers.common, auth);
+  }, target.operator);
+  const refused = page.waitForResponse(
+    response =>
+      new URL(response.url()).pathname === prefix &&
+      response.request().method() === 'PATCH'
+  );
+  await save.click();
+  expect((await refused).status()).toBe(401);
+  await expect(dialog).not.toBeVisible();
+  const final = await page.request.get(endpoint, {
+    headers: target.administrator,
+  });
+  expect((await final.json()).item.primary_account_user_id).toBeNull();
+  const restricted = await page.request.get(endpoint, {
+    headers: target.scoped,
+  });
+  expect(restricted.status()).toBe(401);
+  expect(forbiddenWrites).toEqual([]);
+  fs.writeFileSync(
+    `.codex/call-center-native-e2e/${info.project.name}-team-supervision-native.json`,
+    JSON.stringify({
+      synthetic: true,
+      sha: process.env.GITHUB_SHA,
+      team: target.team_id,
+      saved: 200,
+      persisted_primary: target.primary_supervisor_id,
+      persisted_additional: target.additional_supervisor_id,
+      candidate_total: 22,
+      stale: 409,
+      denied: 401,
+      restricted: 401,
+      no_queue_membership_or_provider_writes: true,
+      horizontal_overflow: false,
+    })
+  );
+});
 test.beforeEach(async ({ page }, info) => {
-  const pauseKey = info.title.startsWith('institutional audio folders native')
-    ? 'audio_folders'
-    : info.title.startsWith('inactive membership native')
-      ? 'membership_eligibility'
-      : info.title.startsWith('registered ending native')
-        ? 'required_endings'
-        : info.title.startsWith('ending reason native')
-          ? 'form_bindings'
-          : info.title.startsWith('Hoya workspace native')
-            ? 'hoya_forms'
-            : info.title.startsWith('state history native')
-              ? 'state_history'
-              : info.title.startsWith('operational form native')
-                ? 'operational_forms'
-                : info.title.startsWith('form bindings native')
-                  ? 'form_bindings'
-                  : info.title.startsWith('deferred pause native uncertain')
-                    ? 'deferred_pause_retry'
-                    : info.title.startsWith('deferred pause native')
-                      ? 'deferred_pause'
-                      : info.title.startsWith('whole native team deletion')
-                        ? 'team_deletion'
-                        : info.title.startsWith('pending ACW native navigation')
-                          ? 'acw_navigation'
-                          : info.title.startsWith('pending ACW native draft')
-                            ? 'acw_draft'
-                            : info.title.startsWith('pending ACW native review')
-                              ? 'acw_review'
+  const pauseKey = info.title.startsWith('team supervision native')
+    ? 'team_supervision'
+    : info.title.startsWith('institutional audio folders native')
+      ? 'audio_folders'
+      : info.title.startsWith('inactive membership native')
+        ? 'membership_eligibility'
+        : info.title.startsWith('registered ending native')
+          ? 'required_endings'
+          : info.title.startsWith('ending reason native')
+            ? 'form_bindings'
+            : info.title.startsWith('Hoya workspace native')
+              ? 'hoya_forms'
+              : info.title.startsWith('state history native')
+                ? 'state_history'
+                : info.title.startsWith('operational form native')
+                  ? 'operational_forms'
+                  : info.title.startsWith('form bindings native')
+                    ? 'form_bindings'
+                    : info.title.startsWith('deferred pause native uncertain')
+                      ? 'deferred_pause_retry'
+                      : info.title.startsWith('deferred pause native')
+                        ? 'deferred_pause'
+                        : info.title.startsWith('whole native team deletion')
+                          ? 'team_deletion'
+                          : info.title.startsWith(
+                                'pending ACW native navigation'
+                              )
+                            ? 'acw_navigation'
+                            : info.title.startsWith('pending ACW native draft')
+                              ? 'acw_draft'
                               : info.title.startsWith(
-                                    'team source last eligible'
+                                    'pending ACW native review'
                                   )
-                                ? 'team_activity'
+                                ? 'acw_review'
                                 : info.title.startsWith(
-                                      'team roster last eligible'
+                                      'team source last eligible'
                                     )
-                                  ? 'team_withdrawal'
+                                  ? 'team_activity'
                                   : info.title.startsWith(
-                                        'native local routing'
+                                        'team roster last eligible'
                                       )
-                                    ? 'routing'
-                                    : info.title.startsWith('scoped ACW native')
-                                      ? 'acw'
+                                    ? 'team_withdrawal'
+                                    : info.title.startsWith(
+                                          'native local routing'
+                                        )
+                                      ? 'routing'
                                       : info.title.startsWith(
-                                            'last eligible queue withdrawal'
+                                            'scoped ACW native'
                                           )
-                                        ? 'withdrawal'
+                                        ? 'acw'
                                         : info.title.startsWith(
-                                              'local pause duration supervisor'
+                                              'last eligible queue withdrawal'
                                             )
-                                          ? 'duration'
+                                          ? 'withdrawal'
                                           : info.title.startsWith(
-                                                'local pause catalog operator'
+                                                'local pause duration supervisor'
                                               )
-                                            ? 'operations'
+                                            ? 'duration'
                                             : info.title.startsWith(
-                                                  'local pause catalog'
+                                                  'local pause catalog operator'
                                                 )
-                                              ? 'editor'
-                                              : null;
+                                              ? 'operations'
+                                              : info.title.startsWith(
+                                                    'local pause catalog'
+                                                  )
+                                                ? 'editor'
+                                                : null;
   const pauseTarget = pauseKey
     ? session.pause_targets[info.project.name][pauseKey]
     : null;

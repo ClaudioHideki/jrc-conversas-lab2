@@ -93,10 +93,16 @@ const fieldLabels = {
   allowed: t('JRC_CONTACT_CENTER.ACCESS.ALLOWED'),
   denied: t('JRC_CONTACT_CENTER.ACCESS.DENIED'),
 };
-const fieldTitle = field =>
-  field === 'kind' && props.record.resource_type === 'routing_rule'
-    ? t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.KIND')
-    : fieldLabels[field] || field;
+const fieldTitle = field => {
+  if (field === 'kind' && props.record.resource_type === 'routing_rule')
+    return t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.KIND');
+  if (
+    field === 'account_user_id' &&
+    props.record.resource_type === 'team_supervision'
+  )
+    return t('JRC_CONTACT_CENTER.TEAM_SUPERVISION.PERSON');
+  return fieldLabels[field] || field;
+};
 const permissionLabels = {
   jrc_contact_center_view: t('CUSTOM_ROLE.PERMISSIONS.JRC_CONTACT_CENTER_VIEW'),
   jrc_contact_center_operate: t(
@@ -137,6 +143,8 @@ const permissionLabels = {
   ),
 };
 const enumLabels = {
+  primary: t('JRC_CONTACT_CENTER.TEAM_SUPERVISION.PRIMARY'),
+  additional: t('JRC_CONTACT_CENTER.TEAM_SUPERVISION.ROLE_ADDITIONAL'),
   user_upload: t('JRC_CONTACT_CENTER.AUDIO_FILES.SOURCE_UPLOAD'),
   browser_capture: t('JRC_CONTACT_CENTER.AUDIO_FILES.SOURCE_CAPTURE'),
   ddd: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.DDD'),

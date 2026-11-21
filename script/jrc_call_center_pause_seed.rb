@@ -2,6 +2,7 @@ require_relative 'jrc_call_center_operational_form_seed'
 require_relative 'jrc_call_center_state_history_seed'
 require_relative 'jrc_call_center_ending_reason_seed'
 require_relative 'jrc_call_center_audio_folder_seed'
+require_relative 'jrc_call_center_team_supervision_seed'
 
 # Exclusive synthetic accounts; no channels, inboxes or PABX configuration.
 class JrcContactCenter::SyntheticPauseSeed
@@ -22,7 +23,7 @@ class JrcContactCenter::SyntheticPauseSeed
       %w[
         editor operations withdrawal duration acw routing state_history
         team_withdrawal team_activity acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
-        operational_forms form_bindings hoya_forms required_endings membership_eligibility audio_folders
+        operational_forms form_bindings hoya_forms required_endings membership_eligibility audio_folders team_supervision
       ].index_with do |kind|
         new("#{project}-#{kind}").call
       end
@@ -62,6 +63,9 @@ class JrcContactCenter::SyntheticPauseSeed
   private
 
   def prepare_special_sources(payload, queue, admin, operator)
+    if @project.end_with?('-team_supervision')
+      payload.merge!(JrcContactCenter::SyntheticTeamSupervisionSeed.call(account: @account, unit: queue.unit))
+    end
     payload.merge!(team_source(operator)) if @project.end_with?('-team_withdrawal', '-team_activity')
     if @project.end_with?('-team_deletion')
       JrcContactCenter::AccessGrant.find_by!(account: @account, account_user: admin).update!(allowed: ['jrc_contact_center_audit'])

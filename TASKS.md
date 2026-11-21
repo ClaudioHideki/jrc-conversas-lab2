@@ -788,3 +788,9 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] **Forma de onda privada — figuras6/16 (21/11):** reutiliza WaveSurfer7.8.6 e o mesmo Blob/player verificado, sem dependência nova, autoplay, dados fictícios ou consulta de mídia adicional. Limites opcionais de visualização preservam reprodução/download. Testes Vue de ciclo de vida e mesmo240Chrome ampliados aguardam novoSHA; não é aceite integral. Ver `docs/jrc_contact_center/private_audio_waveform_prepared_20261121.json`.
 
 - [x] **Vínculos locais/valores privados Nico — `015628bf`, CI44889202273:** 2314Rails distintos,159recargas separados,1122Vue e240Chrome aprovados; zero falhas/pendências/erros, lint e assets novos aprovados.104novos casos e todos2117/1122do parent conferidos; 392PNGs porhash, quatro capturas abertas. Histórico/negação/unlink comprovados. Revisão humana persistente e forma de onda não pertencem a este aceite. Ver `docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json`.
+
+## CALL-CENTER-20261121 — Supervisão por equipe [WIP]
+
+- Player privado com waveform: checkpoint a1a64397, CI44894876897 comprovada;2314 Rails/159 reload/1147 Vue/240 Chrome, quatro PNGs abertos. Limites no recibo private_audio_waveform_native_verified_20261121.json.
+- Figuras3/12: vínculo explícito de supervisor principal/adicionais, cobertura nativa, CAS/auditoria e popup preparados.37 testes unitários com transporte substituído passaram; migrations, persistência, concorrência e244 Chrome ainda exigem CI do novo SHA. Não concluído.
+- Nenhuma participação em equipe/fila ou concessão de permissões decorre desse vínculo. Contratos PABX e o ledger final de revisão Nico continuam pendentes; o direito próprio já está implementado sem concessão automática.

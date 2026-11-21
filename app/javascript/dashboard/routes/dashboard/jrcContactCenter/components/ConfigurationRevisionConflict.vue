@@ -66,6 +66,8 @@ const labels = {
   eligible: t('JRC_CONTACT_CENTER.ACCESS.ELIGIBLE'),
   allowed: t('JRC_CONTACT_CENTER.ACCESS.ALLOWED'),
   denied: t('JRC_CONTACT_CENTER.ACCESS.DENIED'),
+  primary_supervisor: t('JRC_CONTACT_CENTER.TEAM_SUPERVISION.PRIMARY'),
+  additional_supervisors: t('JRC_CONTACT_CENTER.TEAM_SUPERVISION.ADDITIONAL'),
 };
 const choices = {
   ddd: t('JRC_CONTACT_CENTER.ROUTING_DRAFTS.DDD'),
@@ -119,6 +121,7 @@ const fields = computed(
       audio_assets: ['name', 'description', 'purpose', 'folder_id'],
       ivr_drafts: ['name', 'revision', 'definition'],
       acw_forms: ['name', 'description', 'status', 'revision', 'definition'],
+      team_supervisions: ['primary_supervisor', 'additional_supervisors'],
       acw_policy: [
         'voice',
         'whatsapp',
@@ -155,6 +158,7 @@ const format = (record, field) => {
   }
   if (value === undefined || value === null || value === '') return '—';
   if (field === 'parent_id') return record.parent_name || String(value);
+  if (field === 'additional_supervisors') return value.join('; ') || '—';
   if (typeof value === 'boolean') return value ? text.yes : text.no;
   if (['allowed', 'denied'].includes(field))
     return (

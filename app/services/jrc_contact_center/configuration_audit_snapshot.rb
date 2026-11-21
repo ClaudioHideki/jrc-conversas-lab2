@@ -3,12 +3,14 @@
 class JrcContactCenter::ConfigurationAuditSnapshot
   UNIT_SCOPED_TYPES = %w[JrcContactCenter::AudioFolder JrcContactCenter::AudioAsset JrcContactCenter::AudioVersion
                          JrcContactCenter::AudioInspection].freeze
+  ACCOUNT_SCOPED_TYPES = %w[JrcContactCenter::AccessGrant JrcContactCenter::TeamState JrcContactCenter::TeamSupervision].freeze
   FIELDS = {
     'JrcContactCenter::Unit' => %w[code name kind status timezone parent_unit_id],
     'JrcContactCenter::Queue' => %w[unit_id code name service_kind strategy status max_wait_seconds active_from active_until],
     'JrcContactCenter::QueueMembership' => %w[queue_id account_user_id role priority active starts_at ends_at],
     'JrcContactCenter::AccessGrant' => %w[account_user_id team_id eligible allowed denied],
     'JrcContactCenter::TeamState' => %w[team_id active lock_version],
+    'JrcContactCenter::TeamSupervision' => %w[team_id account_user_id kind],
     'JrcContactCenter::AudioFolder' => %w[unit_id parent_id name description lock_version],
     'JrcContactCenter::AudioAsset' => %w[unit_id folder_id name description purpose lock_version],
     'JrcContactCenter::AudioVersion' => %w[unit_id audio_asset_id number source_kind content_type byte_size sha256 created_by_id],
@@ -20,7 +22,7 @@ class JrcContactCenter::ConfigurationAuditSnapshot
   def self.capture(record)
     return routing_snapshot(record) if record.is_a?(JrcContactCenter::RoutingRule)
 
-    if record.is_a?(JrcContactCenter::AccessGrant) || record.is_a?(JrcContactCenter::TeamState)
+    if ACCOUNT_SCOPED_TYPES.include?(record.class.name)
       return { 'attributes' => attributes_for(record), 'scope' => { 'account_id' => record.account_id.to_s } }
     end
 

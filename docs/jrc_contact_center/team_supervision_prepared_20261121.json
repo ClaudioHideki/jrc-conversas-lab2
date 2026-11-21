@@ -1,0 +1,43 @@
+{
+  "status": "prepared_native_validation_pending",
+  "base": "a1a64397c418083403a6b7d7f54b4a71fb0dd0d0",
+  "figures": [
+    3,
+    12
+  ],
+  "native_reuse": [
+    "Existing Team/AccountUser and member search",
+    "ModulePolicy.supervise and administrator+explicitadminister",
+    "CurrentStructureScopes and active CC TeamSourceProjection",
+    "AuthorityTransaction Account mutex and ConfigurationRevision",
+    "Native configuration audit and existing Dialog"
+  ],
+  "no_automatic_effects": [
+    "No team membership",
+    "No queue membership",
+    "No SIP",
+    "No recording right",
+    "No Nico review grant",
+    "No real users or provider calls"
+  ],
+  "prepared_tests": [
+    "Strict input and coverage",
+    "Real authenticated API CRUD-selection/CAS",
+    "Native audit and rollback",
+    "Raw SQL account boundaries and primary uniqueness",
+    "Fresh/populated/reload migration",
+    "Actual competing native HTTP requests",
+    "Candidate search/page and bigint IDs",
+    "One additional Chrome case in each of four viewports/themes; preserve all240previous"
+  ],
+  "local_tests": {
+    "mocked_unit_only": 37,
+    "native_persistence": false,
+    "native_chrome": false,
+    "migration_identity_and_negative": 58
+  },
+  "external_and_later_gaps": [
+    "Team-to-queue hierarchy/schedules/distribution remain separate",
+    "PABX writes and ACK pending supplier contract"
+  ]
+}

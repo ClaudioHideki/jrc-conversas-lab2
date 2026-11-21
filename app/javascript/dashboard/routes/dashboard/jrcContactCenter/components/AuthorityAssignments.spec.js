@@ -73,6 +73,47 @@ beforeEach(() => {
 });
 
 describe('native subject authorizations', () => {
+  it('keeps two exact bigint team identities distinct for supervision without rounding them through legacy numeric IDs', async () => {
+    API.accessAuthorizations.mockResolvedValueOnce({
+      data: {
+        items: [
+          source({
+            id: 9007199254740992,
+            team_identity: '9007199254740992',
+            name: 'SYNTHETIC first team',
+          }),
+          source({
+            id: 9007199254740992,
+            team_identity: '9007199254740993',
+            name: 'SYNTHETIC second team',
+          }),
+        ],
+        meta: { page: 1, pages: 1, total: 2 },
+      },
+    });
+    const wrapper = setup('teams');
+    await flushPromises();
+    expect(
+      wrapper
+        .findAll('[data-team-supervision-open]')
+        .map(button => button.attributes('data-team-supervision-open'))
+    ).toEqual(['9007199254740992', '9007199254740993']);
+    expect(wrapper.text()).toContain('SYNTHETIC first team');
+    expect(wrapper.text()).toContain('SYNTHETIC second team');
+    expect(API.saveAccessAuthorization).not.toHaveBeenCalled();
+  });
+
+  it('does not invent a supervision summary for a legacy response that lacks the real native count', async () => {
+    const wrapper = setup('teams');
+    await flushPromises();
+    expect(wrapper.find('[data-team-supervision-summary]').exists()).toBe(
+      false
+    );
+    expect(wrapper.find('[data-team-supervision-open="9"]').exists()).toBe(
+      true
+    );
+  });
+
   it.each(['users', 'teams'])(
     'shows the independent review right unchecked for %s without automatic persistence',
     async type => {

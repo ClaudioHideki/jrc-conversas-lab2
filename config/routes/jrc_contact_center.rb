@@ -43,6 +43,9 @@ namespace :api, defaults: { format: 'json' } do
           get :form_context, on: :member
         end
         resources :access_authorizations, path: 'access_authorizations/:subject_type', only: %i[index show update]
+        resources :team_supervisions, only: %i[show update] do
+          get :candidates, on: :member
+        end
         resources :ivr_drafts, only: %i[index show create update] do
           post :preview, on: :collection
           get :versions, on: :member

@@ -11,7 +11,7 @@ class Api::V1::Accounts::JrcContactCenter::AccessAuthorizationsController < Api:
       pattern = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.first(100))}%"
       relation = users? ? relation.joins(:user).where('users.name ILIKE ?', pattern) : relation.where('teams.name ILIKE ?', pattern)
     end
-    render json: list_payload(relation.order(:id)) { |subject| present(subject) }
+    render json: access_list_payload(relation)
   end
 
   def show
@@ -25,6 +25,13 @@ class Api::V1::Accounts::JrcContactCenter::AccessAuthorizationsController < Api:
   end
 
   private
+
+  def access_list_payload(relation)
+    payload = list_payload(relation.order(:id)) { |subject| present(subject) }
+    return payload if users?
+
+    JrcContactCenter::TeamSupervisions.new(context: pundit_user).append_summaries(payload)
+  end
 
   def render_team_activity_review(error)
     render json: base_payload.merge(error: error.code, review: error.review), status: error.status

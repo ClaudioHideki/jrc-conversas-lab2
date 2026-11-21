@@ -24,6 +24,25 @@ const render = (record = {}) =>
   });
 
 describe('native ACW audit detail', () => {
+  it('presents native team supervision roles and the person label separately from queue-agent membership', () => {
+    const wrapper = render({
+      resource_type: 'team_supervision',
+      before: { account_user_id: '7', team_id: '9', kind: 'primary' },
+      after: { account_user_id: '7', team_id: '9', kind: 'additional' },
+    });
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.TEAM_SUPERVISION.PERSON'
+    );
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.TEAM_SUPERVISION.PRIMARY'
+    );
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.TEAM_SUPERVISION.ROLE_ADDITIONAL'
+    );
+    expect(wrapper.text()).not.toContain('JRC_CONTACT_CENTER.ADMIN.AGENT');
+    wrapper.unmount();
+  });
+
   it('uses routing-specific headings only for the native routing resource', async () => {
     const wrapper = render({
       resource_type: 'routing_rule',

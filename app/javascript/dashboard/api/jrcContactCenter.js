@@ -35,6 +35,16 @@ const ivrRevision = revision => {
 };
 
 export default {
+  teamSupervisionCandidates: (accountId, teamId, params = {}) =>
+    axios.get(
+      `${base(accountId)}/team_supervisions/${recordIdentity(teamId)}/candidates`,
+      { params }
+    ),
+  saveTeamSupervision: (accountId, teamId, supervision, options = {}) =>
+    axios.patch(
+      `${base(accountId)}/team_supervisions/${recordIdentity(teamId)}`,
+      { supervision, expected_revision: options.expected_revision }
+    ),
   audioBytes: (accountId, assetId, versionId) =>
     axios.get(
       `${base(accountId)}/audio_assets/${recordIdentity(assetId)}/versions/${recordIdentity(versionId)}/bytes`,
@@ -139,6 +149,7 @@ export default {
       memberships: 'queue_memberships',
       access_users: 'access_authorizations/users',
       access_teams: 'access_authorizations/teams',
+      team_supervisions: 'team_supervisions',
       ivr_drafts: 'ivr_drafts',
       acw_forms: 'acw_forms',
       routing_rules: 'routing_rules',
@@ -148,6 +159,10 @@ export default {
     if (!paths[resource] || !/^[1-9]\d*$/.test(String(id)))
       throw new Error('Invalid configuration context');
     if (resource === 'ivr_drafts') return axios.get(ivrPath(accountId, id));
+    if (resource === 'team_supervisions')
+      return axios.get(
+        `${base(accountId)}/team_supervisions/${recordIdentity(id)}`
+      );
     if (resource === 'audio_folders')
       return axios.get(
         `${base(accountId)}/audio_folders/${recordIdentity(id)}`

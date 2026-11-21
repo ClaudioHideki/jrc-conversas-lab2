@@ -7,6 +7,7 @@ const resources = [
   'memberships',
   'access_users',
   'access_teams',
+  'team_supervisions',
   'ivr_drafts',
   'acw_forms',
   'acw_policy',
