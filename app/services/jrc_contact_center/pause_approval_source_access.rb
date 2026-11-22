@@ -16,12 +16,7 @@ class JrcContactCenter::PauseApprovalSourceAccess
   end
 
   def allowed?
-    return false unless @account.active? && @actor.active_for_authentication? && @account.feature_enabled?('jrc_approvals')
-
-    context = { account: @account, account_user: @member, user: @actor }
-    policy = JrcContactCenter::ModulePolicy.new(context, :contact_center)
-    owner = @scope.review.actor_user_id == @actor.id && @scope.review.actor_account_user_id == @member.id
-    return false unless owner ? policy.operate? : policy.approve?
+    return false unless active_actor? && native_allowed?
 
     JrcApprovals::Authorization.scope!(@account, @scope.issuer_company_id, @scope.business_unit_id)
     authorization = JrcApprovals::Authorization.new(account: @account, user: @actor)
@@ -29,6 +24,17 @@ class JrcContactCenter::PauseApprovalSourceAccess
   end
 
   private
+
+  def active_actor?
+    @account.active? && @actor.active_for_authentication? && @account.feature_enabled?('jrc_approvals')
+  end
+
+  def native_allowed?
+    context = { account: @account, account_user: @member, user: @actor }
+    policy = JrcContactCenter::ModulePolicy.new(context, :contact_center)
+    owner = @scope.review.actor_user_id == @actor.id && @scope.review.actor_account_user_id == @member.id
+    owner ? policy.operate? : policy.approve?
+  end
 
   def units_covered?
     ids = @scope.unit_ids

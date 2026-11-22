@@ -56,15 +56,19 @@ class JrcContactCenter::SyntheticPauseSeed
     if @project.end_with?('-audio_folders')
       payload.merge!(JrcContactCenter::SyntheticAudioFolderSeed.call(account: @account, queues: queues, member: admin))
     end
+    prepare_pause_sources(payload, queues, admin, operator)
+    payload
+  end
+
+  private
+
+  def prepare_pause_sources(payload, queues, admin, operator)
     prepare_special_sources(payload, queues.first, admin, operator)
     if @project.end_with?('-approval')
       payload.merge!(JrcContactCenter::SyntheticPauseApprovalSeed.call(account: @account, admin: admin, operator: operator, queues: queues))
     end
     payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?(*PENDING_ACW_PROJECTS)
-    payload
   end
-
-  private
 
   def prepare_special_sources(payload, queue, admin, operator)
     if @project.end_with?('-team_supervision')

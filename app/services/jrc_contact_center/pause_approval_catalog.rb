@@ -15,12 +15,18 @@ class JrcContactCenter::PauseApprovalCatalog
     raise JrcApprovals::Error, 'DUPLICATE_CATALOG' if entries[key] && entries[key].model&.name != model.name
 
     JrcApprovals::Catalog.instance_variable_get(:@mutex).synchronize { entries.delete(key) }
+    register!(key, model)
+  end
+
+  def self.register!(key, model)
     JrcApprovals::Catalog.register(key: key, version: 1, model: model, fields: FIELDS,
                                    authorize: ->(actor, scope) { JrcContactCenter::PauseApprovalSourceAccess.allowed?(scope, actor) },
                                    request_authorize: ->(actor, scope) { scope.review.actor_user_id == actor.id },
                                    capture: ->(scope, actor) { capture(scope, actor) },
                                    verify: ->(scope, actor) { verify!(scope, actor) })
   end
+
+  private_class_method :register!
 
   def self.capture(scope, actor)
     raise Pundit::NotAuthorizedError unless JrcContactCenter::PauseApprovalSourceAccess.allowed?(scope, actor)

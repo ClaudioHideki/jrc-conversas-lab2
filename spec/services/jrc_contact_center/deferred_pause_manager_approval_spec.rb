@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Native all-scope pause approval', :approval_core do
+RSpec.describe JrcContactCenter::DeferredPauseManager, 'all-scope native approval', :approval_core do
   include_context 'with all-scope native pause approval'
 
   it 'creates every scope in the native Central atomically without applying a pause or pretending a provider ACK' do

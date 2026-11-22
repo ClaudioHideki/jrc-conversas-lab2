@@ -50,7 +50,7 @@ class JrcContactCenter::PauseApprovalIntent
     authorization = JrcApprovals::Authorization.new(account: @account, user: @user)
     coverage.fetch('groups').each do |group|
       authorization.authorize!('request_create', company_id: group.fetch('issuer_company_id')&.to_i,
-                                                unit_id: group.fetch('business_unit_id')&.to_i)
+                               unit_id: group.fetch('business_unit_id')&.to_i)
     end
   end
 end

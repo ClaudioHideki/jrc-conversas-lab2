@@ -7,8 +7,11 @@ class Api::V1::Accounts::JrcContactCenter::DeferredPauseRequestsController < Api
   def create
     record = with_current_operating_authority do
       values = request_values
-      params.key?(:expected_approval_digest) ? manager.request_reviewed!(values, expected_approval_digest: params[:expected_approval_digest]) :
+      if params.key?(:expected_approval_digest)
+        manager.request_reviewed!(values, expected_approval_digest: params[:expected_approval_digest])
+      else
         manager.request!(values)
+      end
     end
     render_state(record)
   end
@@ -24,6 +27,7 @@ class Api::V1::Accounts::JrcContactCenter::DeferredPauseRequestsController < Api
   def apply
     values = strict_values(%i[request_id expected_state_version])
     raise JrcContactCenter::OperationError, 'invalid_deferred_pause' unless values.keys.sort == %i[expected_state_version request_id]
+
     record = with_current_operating_authority { manager.apply!(**values) }
     render_state(record)
   end

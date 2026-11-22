@@ -5,12 +5,14 @@ RSpec.describe 'All-scope pause actual HTTP concurrency', :approval_core, type: 
   self.use_transactional_tests = false
 
   # This must run before any shared fixture writes. Database names alone do not establish ownership.
-  before do
+  around do |example|
     config = ApplicationRecord.connection_db_config
     owned = ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' && Rails.env.test? &&
             config.configuration_hash[:host] == '127.0.0.1' && config.database == 'corporate_gratuity_disposable'
     raise 'Exclusive hosted synthetic pause concurrency database required' unless owned
     raise 'Committed pause fixtures required' if ApplicationRecord.connection.transaction_open?
+
+    example.run
   end
 
   include_context 'with all-scope native pause approval'
@@ -37,13 +39,17 @@ RSpec.describe 'All-scope pause actual HTTP concurrency', :approval_core, type: 
       ApplicationRecord.connection_pool.with_connection do
         parallel[:ready] << ApplicationRecord.connection.raw_connection.backend_pid
         Timeout.timeout(15) { parallel[:gate].pop }
-        session = ActionDispatch::Integration::Session.new(Rails.application)
-        session.post(endpoint, headers: parallel[:headers], params: body, as: :json)
-        parallel[:results] << { status: session.response.status, body: session.response.parsed_body }
+        parallel[:results] << post_pause_review(endpoint, body)
       end
     rescue StandardError => e
       parallel[:results] << e
     end
+  end
+
+  def post_pause_review(endpoint, body)
+    session = ActionDispatch::Integration::Session.new(Rails.application)
+    session.post(endpoint, headers: parallel[:headers], params: body, as: :json)
+    { status: session.response.status, body: session.response.parsed_body }
   end
 
   def wait_for_pause_locks(count)

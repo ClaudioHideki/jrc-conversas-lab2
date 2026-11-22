@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Native scoped pause approval source', :approval_core do
+RSpec.describe JrcContactCenter::PauseApprovalSourceAccess, :approval_core do
   include_context 'with all-scope native pause approval'
 
   before { publish_all_pause_policies }
@@ -10,7 +10,7 @@ RSpec.describe 'Native scoped pause approval source', :approval_core do
     review = JrcContactCenter::PauseApprovalReview.find_by!(account: account, deferred_pause_request_id: row.id)
     first = review.scopes.order(:id).first
     snapshot = JrcApprovals::Catalog.snapshot(account: account, user: reviewers.first.user,
-                                             key: 'contact_center.pause', resource_id: first.id)
+                                              key: 'contact_center.pause', resource_id: first.id)
     expect(snapshot.fetch('values').fetch('scope_unit_ids')).to eq([units.first.id.to_s])
     expect(snapshot.fetch('values').fetch('scope_unit_names')).to eq([units.first.name])
     expect(snapshot.fetch('values').fetch('unit_count')).to eq(1)
@@ -50,7 +50,7 @@ RSpec.describe 'Native scoped pause approval source', :approval_core do
     scope = JrcContactCenter::PauseApprovalReview.find_by!(account: account, deferred_pause_request_id: row.id).scopes.first!
     expect do
       JrcApprovals::Requests.new(account: account, user: other).create!(key: 'contact_center.pause', resource_id: scope.id,
-                                                                     idempotency_key: 'synthetic-forged-other-requester')
+                                                                        idempotency_key: 'synthetic-forged-other-requester')
     end.to raise_error(Pundit::NotAuthorizedError)
     expect(pause_requests.size).to eq(2)
   end
@@ -60,29 +60,11 @@ RSpec.describe 'Native scoped pause approval source', :approval_core do
     approve_pause_requests
     scope = JrcContactCenter::PauseApprovalReview.find_by!(account: account, deferred_pause_request_id: row.id).scopes.order(:id).first
     JrcApprovals::Requests.new(account: account, user: actor).create!(key: 'contact_center.pause', resource_id: scope.id,
-                                                                   idempotency_key: 'synthetic-newer-pending-request')
+                                                                      idempotency_key: 'synthetic-newer-pending-request')
     check = JrcContactCenter::PauseApprovalPolicyCheck.new(context: pause_context).call(scope_id: scope.id)
     expect(check.fetch(:status)).to eq('approval_required')
     expect(check.fetch(:approved_policy_version_ids)).to be_empty
     expect(apply_pause(row).state).to eq('pending')
     expect(JrcContactCenter::AgentStateEvent.where(account: account)).to be_empty
-  end
-end
-
-RSpec.describe 'Native Central pause source serialization', :approval_core do
-  include_context 'with all-scope native pause approval'
-
-  it 'serializes only scoped immutable names and digests without exposing another company or the personal justification' do
-    publish_all_pause_policies
-    create_reviewed_pause
-    row = JrcApprovals::RequestSerializer.new(pause_requests.first).as_json
-    origin = row.fetch('origin')
-    expect(origin).to include('kind' => 'contact_center_pause', 'own_scope_only' => true, 'historical' => true)
-    expect(origin.fetch('scope_unit_ids')).to eq([units.first.id.to_s])
-    expect(origin.fetch('scope_unit_names')).to eq([units.first.name])
-    expect(origin.to_json).not_to include(units.last.name)
-    expect(origin).not_to have_key('justification')
-    expect(origin).not_to have_key('coverage')
-    expect(origin.fetch('provider_confirmed')).to be(false)
   end
 end

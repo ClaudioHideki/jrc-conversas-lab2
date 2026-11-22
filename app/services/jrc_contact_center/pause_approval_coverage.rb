@@ -38,8 +38,9 @@ class JrcContactCenter::PauseApprovalCoverage
   end
 
   def actor_authority
+    eligible = JrcContactCenter::PermissionSources.new(account: @account, member: @member).eligible?
     { 'role' => @member.role, 'custom_role_id' => @member.custom_role_id&.to_s,
-      'contact_center_eligible' => @member.contact_center_eligible, 'effective_permissions' => @policy.effective_permissions.sort }
+      'contact_center_eligible' => eligible, 'effective_permissions' => @policy.effective_permissions.sort }
   end
 
   def unit_snapshot(unit)

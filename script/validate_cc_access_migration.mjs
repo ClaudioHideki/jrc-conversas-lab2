@@ -56,7 +56,7 @@ export const reviewedMigrations = Object.freeze({
   [teamSupervisionMigrationPath]: teamSupervisionMigrationHash,
 });
 export const pauseApprovalMigrationPath = 'db/migrate/20261122120000_create_contact_center_pause_approval_evidence.rb';
-export const pauseApprovalMigrationHash = '870762a704add439c495d148bef900a3184b84d715131a2abab3fbf9577a96c0';
+export const pauseApprovalMigrationHash = 'f9fcc4ef74d2a9c9c60b28870bc42e8d69b5e2239a67faaf30e71afad77b354b';
 export const pauseApprovalSqlSources = Object.freeze({
   "db/functions/20261122120000_contact_center_pause_approval_evidence.sql": "98db0077317bf9a8df0e94a2f403913e022ea1db91d0059f883c474d2a4a19e3",
   "lib/jrc_contact_center/pause_approval_schema_receipt.rb": "2ff201721493e14ea1090d185177f86180cfa844362b7f3c61a1068c9629e653"

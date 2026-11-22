@@ -1,6 +1,7 @@
 require 'rails_helper'
+require Rails.root.join('db/migrate/20261122120000_create_contact_center_pause_approval_evidence')
 
-RSpec.describe 'Additive native pause approval schema', :approval_core do
+RSpec.describe CreateContactCenterPauseApprovalEvidence, :approval_core do
   include_context 'with all-scope native pause approval'
 
   def connection
@@ -13,18 +14,20 @@ RSpec.describe 'Additive native pause approval schema', :approval_core do
     selection = JrcContactCenter::DeferredPauseSelection.new(account: account, member: member).call(input)
     digest = Digest::SHA256.hexdigest(JrcContactCenter::DeferredPauseInput::FIELDS.map { |key| input[key] }.to_json)
     JrcContactCenter::DeferredPauseRequest.create!(account: account, account_user: member, actor_user_id: actor.id,
-      request_id: input.fetch(:command_id), request_digest: digest, state: 'pending', reason_code: input.fetch(:reason_code),
-      justification: '', **selection)
+                                                   request_id: input.fetch(:command_id), request_digest: digest, state: 'pending',
+                                                   reason_code: input.fetch(:reason_code),
+                                                   justification: '', **selection)
   end
 
   def synthetic_root(parent, intent)
     JrcContactCenter::PauseApprovalReview.create!(account: account, deferred_pause_request_id: parent.id,
-      actor_account_user_id: member.id, actor_user_id: actor.id, payload: intent.fetch('payload'), context_digest: intent.fetch('digest'))
+                                                  actor_account_user_id: member.id, actor_user_id: actor.id, payload: intent.fetch('payload'),
+                                                  context_digest: intent.fetch('digest'))
   end
 
   def synthetic_scope(root, group)
     root.scopes.create!(account: account, issuer_company_id: group.fetch('issuer_company_id').to_i,
-      business_unit_id: group.fetch('business_unit_id')&.to_i, unit_ids: group.fetch('unit_ids'))
+                        business_unit_id: group.fetch('business_unit_id')&.to_i, unit_ids: group.fetch('unit_ids'))
   end
 
   def check_complete!

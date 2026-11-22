@@ -18,9 +18,7 @@ class JrcContactCenter::DeferredPauseManager
   end
 
   def apply!(request_id:, expected_state_version:)
-    valid = request_id.is_a?(String) && JrcContactCenter::DeferredPauseInput::UUID.match?(request_id) &&
-            expected_state_version.is_a?(String) && /\A\d{1,100}\z/.match?(expected_state_version)
-    raise JrcContactCenter::OperationError, 'invalid_deferred_pause' unless valid
+    raise JrcContactCenter::OperationError, 'invalid_deferred_pause' unless valid_application?(request_id, expected_state_version)
 
     with_authority do
       record = records.lock.find_by!(request_id: request_id)
@@ -64,6 +62,11 @@ class JrcContactCenter::DeferredPauseManager
   end
 
   private
+
+  def valid_application?(request_id, version)
+    request_id.is_a?(String) && JrcContactCenter::DeferredPauseInput::UUID.match?(request_id) &&
+      version.is_a?(String) && /\A\d{1,100}\z/.match?(version)
+  end
 
   def request_with_review!(attributes, expected_digest)
     values = JrcContactCenter::DeferredPauseInput.call(attributes)
@@ -166,8 +169,12 @@ class JrcContactCenter::DeferredPauseManager
     return idle?(snapshot) unless approval.fetch(:required)
     return false unless approval.fetch(:status) == 'ready'
 
+    ready_for_approved_pause?(snapshot)
+  end
+
+  def ready_for_approved_pause?(snapshot)
     current = snapshot.current
-    !%w[busy ringing in_call].include?(current&.state) && (!current || current.started_at <= Time.current) && !snapshot.active_call? &&
+    %w[busy ringing in_call].exclude?(current&.state) && (!current || current.started_at <= Time.current) && !snapshot.active_call? &&
       !JrcContactCenter::Qualification.pending.exists?(account: @account, account_user: @member)
   end
 

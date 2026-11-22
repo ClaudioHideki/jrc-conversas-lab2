@@ -58,17 +58,17 @@ class CreateContactCenterPauseApprovalEvidence < ActiveRecord::Migration[7.1]
     end
     add_index SCOPES, [:account_id, :review_id, :id], name: 'cc_pause_approval_scope_review'
     add_index SCOPES, 'account_id, review_id, issuer_company_id, COALESCE(business_unit_id, 0)',
-                     unique: true, name: 'cc_pause_approval_scope_identity'
+              unique: true, name: 'cc_pause_approval_scope_identity'
   end
 
   def constraints
     add_foreign_key SCOPES, REVIEWS, column: [:account_id, :review_id], primary_key: [:account_id, :id],
-                                    on_delete: :cascade, name: 'cc_pause_approval_scope_root_fk'
+                    on_delete: :cascade, name: 'cc_pause_approval_scope_root_fk'
     add_check_constraint REVIEWS, "context_digest ~ '^[0-9a-f]{64}$' AND jsonb_typeof(payload) = 'object'",
                          name: 'cc_pause_approval_review_capture'
     add_check_constraint REVIEWS, 'deferred_pause_request_id > 0 AND actor_account_user_id > 0 AND actor_user_id > 0',
                          name: 'cc_pause_approval_review_identity'
-    add_check_constraint SCOPES, "issuer_company_id > 0 AND (business_unit_id IS NULL OR business_unit_id > 0) " \
-                                "AND jsonb_typeof(unit_ids) = 'array'", name: 'cc_pause_approval_scope_capture'
+    add_check_constraint SCOPES, 'issuer_company_id > 0 AND (business_unit_id IS NULL OR business_unit_id > 0) ' \
+                               "AND jsonb_typeof(unit_ids) = 'array'", name: 'cc_pause_approval_scope_capture'
   end
 end

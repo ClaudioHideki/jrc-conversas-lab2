@@ -12,11 +12,7 @@ class JrcContactCenter::PauseApprovalSourceCurrent
     parent = JrcContactCenter::DeferredPauseRequest.where(account_id: @review.account_id, id: @review.deferred_pause_request_id,
                                                           account_user_id: @review.actor_account_user_id,
                                                           actor_user_id: @review.actor_user_id, state: 'pending').first!
-    account = Account.find(@review.account_id)
-    member = account.account_users.find(@review.actor_account_user_id)
-    actor = User.find(@review.actor_user_id)
-    context = { account: account, account_user: member, user: actor }
-    current = JrcContactCenter::PauseApprovalIntent.new(context: context).call(input(parent, account, member))
+    current = current_intent(parent)
     return unavailable unless current.fetch('required')
 
     { 'current' => current.fetch('payload') == @review.payload && current.fetch('digest') == @review.context_digest,
@@ -26,6 +22,14 @@ class JrcContactCenter::PauseApprovalSourceCurrent
   end
 
   private
+
+  def current_intent(parent)
+    account = Account.find(@review.account_id)
+    member = account.account_users.find(@review.actor_account_user_id)
+    actor = User.find(@review.actor_user_id)
+    context = { account: account, account_user: member, user: actor }
+    JrcContactCenter::PauseApprovalIntent.new(context: context).call(input(parent, account, member))
+  end
 
   def input(parent, account, member)
     parent.attributes.symbolize_keys.slice(:reason_code, :queue_id, :justification).merge(

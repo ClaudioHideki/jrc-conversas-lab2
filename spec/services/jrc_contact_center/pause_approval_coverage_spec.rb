@@ -109,7 +109,7 @@ RSpec.describe JrcContactCenter::PauseApprovalCoverage do
 
   it 'revalidates explicit Call Center eligibility before every capture' do
     reader.call
-    member.update!(contact_center_eligible: false)
+    JrcContactCenter::AccessGrant.find_by!(account: account, account_user: member).update!(eligible: false)
     expect { reader.call }.to raise_error(Pundit::NotAuthorizedError)
   end
 

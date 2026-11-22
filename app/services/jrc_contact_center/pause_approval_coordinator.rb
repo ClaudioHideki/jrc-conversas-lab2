@@ -29,7 +29,7 @@ class JrcContactCenter::PauseApprovalCoordinator
     )
     scopes = intent.fetch('payload').fetch('coverage').fetch('groups').map { |group| create_scope!(review, group) }
     scopes.each { |scope| require_policies!(scope) }
-    scopes.each { |scope| request_scope!(record, scope) }
+    request_all!(record, scopes)
     review
   end
 
@@ -41,7 +41,7 @@ class JrcContactCenter::PauseApprovalCoordinator
 
   def create_scope!(review, group)
     review.scopes.create!(account: @account, issuer_company_id: group.fetch('issuer_company_id').to_i,
-                         business_unit_id: group.fetch('business_unit_id')&.to_i, unit_ids: group.fetch('unit_ids'))
+                          business_unit_id: group.fetch('business_unit_id')&.to_i, unit_ids: group.fetch('unit_ids'))
   end
 
   def require_policies!(scope)
@@ -49,6 +49,10 @@ class JrcContactCenter::PauseApprovalCoordinator
     snapshot = JrcApprovals::Catalog.snapshot(account: @account, user: @member.user, key: key, resource_id: scope.id, purpose: :request)
     versions = JrcApprovals::Selection.call(account: @account, key: key, snapshot: snapshot)
     raise JrcContactCenter::OperationError.new('pause_approval_policy_missing', status: :conflict) if versions.empty?
+  end
+
+  def request_all!(record, scopes)
+    scopes.each { |scope| request_scope!(record, scope) }
   end
 
   def request_scope!(record, scope)

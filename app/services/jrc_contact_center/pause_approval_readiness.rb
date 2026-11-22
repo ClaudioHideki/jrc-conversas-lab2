@@ -8,13 +8,22 @@ class JrcContactCenter::PauseApprovalReadiness
   end
 
   def call(record, lock: false)
-    raise ActiveRecord::RecordNotFound unless record.account_id == @account.id && record.account_user_id == @member.id
-    raise JrcContactCenter::OperationError, 'pause_approval_transaction_required' if lock && !ApplicationRecord.connection.transaction_open?
-
+    validate_record!(record, lock)
     review = JrcContactCenter::PauseApprovalReview.find_by(account: @account, deferred_pause_request_id: record.id)
     return { required: false, status: 'legacy', scopes: [] } unless review
 
     JrcApprovals::Ledger.lock!(@account.id, 'publication') if lock
+    review_status(review, lock)
+  end
+
+  private
+
+  def validate_record!(record, lock)
+    raise ActiveRecord::RecordNotFound unless record.account_id == @account.id && record.account_user_id == @member.id
+    raise JrcContactCenter::OperationError, 'pause_approval_transaction_required' if lock && !ApplicationRecord.connection.transaction_open?
+  end
+
+  def review_status(review, lock)
     return unavailable unless JrcContactCenter::PauseApprovalSourceCurrent.new(review).call.fetch('current')
 
     scopes = review.scopes.where(account: @account).order(:id).to_a
@@ -25,8 +34,6 @@ class JrcContactCenter::PauseApprovalReadiness
       digest: review.context_digest, scopes: rows, local_only: true, provider_confirmed: false }
   end
 
-  private
-
   def context
     { account: @account, account_user: @member, user: @member.user }
   end
@@ -35,10 +42,14 @@ class JrcContactCenter::PauseApprovalReadiness
     captured = review.payload.fetch('coverage').fetch('groups')
     scopes.any? && scopes.size == captured.size && captured.all? do |group|
       scopes.any? do |scope|
-        scope.issuer_company_id.to_s == group.fetch('issuer_company_id') &&
-          scope.business_unit_id&.to_s == group.fetch('business_unit_id') && scope.unit_ids == group.fetch('unit_ids')
+        matches_scope?(scope, group)
       end
     end
+  end
+
+  def matches_scope?(scope, group)
+    scope.issuer_company_id.to_s == group.fetch('issuer_company_id') &&
+      scope.business_unit_id&.to_s == group.fetch('business_unit_id') && scope.unit_ids == group.fetch('unit_ids')
   end
 
   def scope_readiness(scope, lock)

@@ -49,7 +49,7 @@ class JrcContactCenter::PauseApprovalPolicyCheck
 
   def requests(scope)
     relation = JrcApprovals::Request.where(account: @account, resource_type: 'JrcContactCenter::PauseApprovalScope', resource_id: scope.id,
-                                          requester_id: @member.id, module_key: 'contact_center', event_key: 'pause').order(:id)
+                                           requester_id: @member.id, module_key: 'contact_center', event_key: 'pause').order(:id)
     (@lock ? relation.lock : relation).to_a
   end
 
