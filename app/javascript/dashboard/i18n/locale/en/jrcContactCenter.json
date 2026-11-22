@@ -2877,6 +2877,32 @@
         "weekly": "Expediente semanal"
       },
       "DECISION": "{state} · {instant} · {timezone} · {precedence}"
+    },
+    "CALENDAR_IVR_USAGES": {
+      "OPEN": "URAs com este calendário",
+      "TITLE": "Calendário nas URAs internas",
+      "LIMITS": "Consulta somente a última versão interna das URAs autorizadas nesta unidade. Versões antigas permanecem no histórico. Não comprova configuração ou uso no PABX; números externos não são consultados.",
+      "SEARCH": "Buscar nome da URA",
+      "STATUS": "Estado interno",
+      "ALL": "Todos os estados internos",
+      "DRAFT": "Rascunho interno",
+      "ARCHIVED": "Arquivada internamente",
+      "FILTER": "Aplicar filtros",
+      "CLEAR": "Limpar filtros",
+      "LOADING": "Consultando vínculos internos…",
+      "ERROR": "Não foi possível consultar os vínculos internos. Nenhuma conclusão sobre o PABX foi feita.",
+      "RETRY": "Tentar consulta novamente",
+      "EMPTY": "Nenhuma URA autorizada encontrada com estes filtros.",
+      "CHANGED": "O catálogo mudou; a URA mantém seu snapshot histórico.",
+      "CURRENT": "Snapshot corresponde ao catálogo consultado.",
+      "LIST": "Ver na lista de URAs",
+      "CLOSE": "Fechar",
+      "PAGINATION": "Paginação das URAs vinculadas",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "IDENTITY": "URA {id} · revisão interna {revision}",
+      "REFERENCE": "Nó {id} · SHA-256 {sha}",
+      "TOTAL": "Total {total} · Página {page}"
     }
   }
 }

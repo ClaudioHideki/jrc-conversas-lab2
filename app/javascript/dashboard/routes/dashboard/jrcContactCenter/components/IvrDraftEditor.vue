@@ -448,7 +448,7 @@ onBeforeUnmount(() => {
               step="1"
               :disabled="locked"
               required
-              class="h-10 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 px-2 text-n-slate-12"
+              class="h-10 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 px-2 text-n-slate-12 [color-scheme:light] dark:[color-scheme:dark]"
             />
             <label
               for="ivr-simulation-zone"

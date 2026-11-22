@@ -8,6 +8,7 @@ import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import CalendarEditorDialog from './CalendarEditorDialog.vue';
 import QueueCalendarBindings from './QueueCalendarBindings.vue';
+import CalendarIvrUsages from './CalendarIvrUsages.vue';
 import {
   calendarIntervalsError,
   formatCalendarIntervals,
@@ -426,6 +427,14 @@ onBeforeUnmount(() => {
           @click="openPreview(row)"
         />
         <QueueCalendarBindings
+          :account-id="accountId"
+          :unit-id="unitId"
+          :calendar-id="row.id"
+          :context-key="actorScope"
+          :can-manage="canManage && !loading"
+          @denied="denied"
+        />
+        <CalendarIvrUsages
           :account-id="accountId"
           :unit-id="unitId"
           :calendar-id="row.id"

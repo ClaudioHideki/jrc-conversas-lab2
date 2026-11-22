@@ -271,6 +271,12 @@ export async function verifyNativeIvrCalendar(
       .getByRole('tab', { name: 'Simulação local', exact: true })
       .click();
     await expect(dialog.locator('#ivr-simulation-local')).toHaveValue('');
+    const datetimeColorScheme = await dialog
+      .locator('#ivr-simulation-local')
+      .evaluate(element => getComputedStyle(element).colorScheme);
+    expect(datetimeColorScheme).toBe(
+      info.project.name.endsWith('dark') ? 'dark' : 'light'
+    );
     await dialog.locator('#ivr-simulation-local').fill('2026-11-23T10:30');
     await dialog
       .locator('#ivr-simulation-zone')
@@ -370,6 +376,7 @@ export async function verifyNativeIvrCalendar(
           sha: process.env.GITHUB_SHA,
           synthetic: true,
           external_homologation: false,
+          datetime_color_scheme: datetimeColorScheme,
           account_id: target.account_id,
           unit_id: unit,
           draft_id: id,

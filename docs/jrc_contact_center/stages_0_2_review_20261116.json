@@ -7222,5 +7222,24 @@
     "dark_theme_defect_corrected_in_source_not_yet_revalidated": true,
     "next_native_gate_pending": true,
     "whole_word_complete": false
+  },
+  "ivr_calendar_routing_native_verified_20261122": {
+    "sha": "151ba582af05772bf25e4e143ceb6e7c91963e5e",
+    "run": 45019803114,
+    "report": "docs/jrc_contact_center/ivr_calendar_routing_native_verified_20261122.json",
+    "native": 2663,
+    "vue": 1495,
+    "chrome": 248,
+    "actual_images": 16,
+    "whole_word_complete": false,
+    "external_homologation": false
+  },
+  "calendar_ivr_usage_inventory_prepared_20261122": {
+    "report": "docs/jrc_contact_center/calendar_ivr_usage_inventory_prepared_20261122.json",
+    "mocked_vue_passed": 54,
+    "native_cases_not_run": 17,
+    "chrome_required_next": 252,
+    "status": "candidate only; native and visual acceptance pending",
+    "observed_datetime_icon_followup": "Scoped native color-scheme;91Vue passed, actual compiled CSS/icon pending in the same252Chrome candidate"
   }
 }

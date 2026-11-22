@@ -172,4 +172,39 @@ describe('reviewed internal removal API wire, not server authority proof', () =>
       expect(axios.delete).not.toHaveBeenCalled();
     }
   );
+
+  it('uses the native read-only calendar usage route while keeping the explicit unit authoritative', () => {
+    API.calendarIvrUsages('1', '10', calendar, {
+      unit_id: '999',
+      q: 'SYNTHETIC',
+      page: 2,
+      per_page: 10,
+      status: 'archived',
+    });
+    expect(axios.get).toHaveBeenCalledExactlyOnceWith(
+      `/api/v1/accounts/1/jrc_contact_center/unit_calendars/${calendar}/ivr_usages`,
+      {
+        params: {
+          unit_id: '10',
+          q: 'SYNTHETIC',
+          page: 2,
+          per_page: 10,
+          status: 'archived',
+        },
+      }
+    );
+    expect(axios.post).not.toHaveBeenCalled();
+    expect(axios.patch).not.toHaveBeenCalled();
+    expect(axios.delete).not.toHaveBeenCalled();
+  });
+
+  it('rejects malformed native unit and calendar usage identities before requesting anything', () => {
+    expect(() => API.calendarIvrUsages('1', '../other', calendar)).toThrow(
+      'Invalid local record identity'
+    );
+    expect(() => API.calendarIvrUsages('1', '10', '../other')).toThrow(
+      'Invalid local calendar identity'
+    );
+    expect(axios.get).not.toHaveBeenCalled();
+  });
 });

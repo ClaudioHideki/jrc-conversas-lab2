@@ -1,0 +1,212 @@
+{
+  "purpose": "Conclude the native calendar-to-URA current-reference inventory required by Word section6; not a provider impact statement",
+  "private_original_base": "6dcfa8251216fc5c331f2a1c159fa8e26fb75d5b",
+  "before_hashes_verified_against": "151ba582af05772bf25e4e143ceb6e7c91963e5e",
+  "implemented_privately": [
+    "Existing native unit calendar member route, configure permission, no-store and fresh native account/member/user checks",
+    "Reuse IvrDraftAccess intersection of current corporate coverage and immutable historical issuer/unit scope",
+    "Select the latest immutable revision before reference/status/text filters, native counts and pagination",
+    "One row per draft; multiple referenced calendar nodes remain within the row; no complete graphs, snapshots or private contact data returned",
+    "Existing CalendarLibrary opens native Dialog; Portuguese labels, explicit local/provider limits, server search/status and paging",
+    "Source edits do not rewrite snapshots; changed digest is visible; old references disappear from the current inventory only when the current URA unlinks",
+    "Profile/account/unit/calendar/context changes synchronously close and discard private data; late responses are ignored",
+    "Navigate to the existing unit/name-filtered URA list, without claiming an exact direct editor opening or granting access"
+  ],
+  "frozen_migrations_changed": false,
+  "provider_commands_or_publication": false,
+  "permissions_added_or_granted": false,
+  "local_mocked_vue_tests": {
+    "passed": 54,
+    "failed": 0,
+    "pending": 0,
+    "files": 3,
+    "report_sha256": "d680cfb9ec516cd91429c59fd39640883f46463bd7f8efbd00845887cb3facb9",
+    "native_database_or_browser_proof": false,
+    "resource_receipt": {
+      "kind": "Windows bounded mocked unit check; not native Rails/Chrome or codec proof",
+      "target": "calendar-ivr-inventory",
+      "exit_code": 0,
+      "stop": null,
+      "seconds": 7.015999999999622,
+      "initial": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 4417728512,
+        "c_free_bytes": 50886197248,
+        "read_only": true
+      },
+      "minimum": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 4039655424,
+        "c_free_bytes": 50886197248,
+        "read_only": true
+      },
+      "final": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 4305321984,
+        "c_free_bytes": 50886193152,
+        "read_only": true
+      },
+      "log_bytes": 824
+    }
+  },
+  "local_static_lint": [
+    {
+      "relative": "app/javascript/dashboard/api/jrcContactCenter.js",
+      "errors": 0,
+      "new_warnings": 0,
+      "inherited_warnings": 0,
+      "sha256": "bf28c8e123382d259009984efc43df23160216dd94779033b081d25aded79a04"
+    },
+    {
+      "relative": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useCalendarIvrUsages.js",
+      "errors": 0,
+      "new_warnings": 0,
+      "inherited_warnings": 0,
+      "sha256": "960dacfd1d87a79ffb06cc48018770f74b927ca1a0ec56dbf93ddd04c35fa32a"
+    },
+    {
+      "relative": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarIvrUsages.spec.js",
+      "errors": 0,
+      "new_warnings": 0,
+      "inherited_warnings": 0,
+      "sha256": "5eb5863bb8a296be4a93febdc8ee9f52261a9938ed07af2ccf12eac5d5c1fd8f"
+    },
+    {
+      "relative": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/calendarApi.spec.js",
+      "errors": 0,
+      "new_warnings": 0,
+      "inherited_warnings": 0,
+      "sha256": "92d941bac015a8a5a1a25a042264711665802621a5010114160f07703e6b0568"
+    },
+    {
+      "relative": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarLibrary.spec.js",
+      "errors": 0,
+      "new_warnings": 0,
+      "inherited_warnings": 0,
+      "sha256": "36e87ac6e67ceb7afda8369fa80935dff1d594f91c99cc6e9cf788b060b57592"
+    },
+    {
+      "relative": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarIvrUsages.vue",
+      "errors": 0,
+      "new_warnings": 0,
+      "inherited_warnings": 0,
+      "sha256": "8490d14f4b831594e90c06f40da86b9852dee2f29679e8180c0f3523533288e0"
+    },
+    {
+      "relative": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/CalendarLibrary.vue",
+      "errors": 0,
+      "new_warnings": 0,
+      "inherited_warnings": 0,
+      "sha256": "61b04cd1276007f8154293140000a729960d3fb6d96e569c87552b2de9ef0f42"
+    }
+  ],
+  "local_browser_static_checks_only": {
+    "source_tests_preserved": 62,
+    "added_test": 1,
+    "projects": 4,
+    "required_chrome_count": 252,
+    "mjs_grammar_passed": true,
+    "typescript_syntax_passed": true,
+    "yaml_syntax_passed": true,
+    "workflow_change_only_stricter_count": true,
+    "tests_executed": false,
+    "hashes": {
+      "tests/playwright/tests/e2e/ui/call-center-calendar-ivr-inventory-native.mjs": "455f17dc8b4d485119f61b7f61bd0ee9280f9f0fbd27e681a7121693eb116294",
+      "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "015201146759f272f2f3a1000ca5e6bcbdca58b0552d19d8ce6938c724709f7e",
+      ".github/workflows/call-center-administration.yml": "e28d8961d331f2e9331feda875d7351b5791dda2033d0d28ebdf190cc2526219"
+    }
+  },
+  "prepared_native_tests_not_run": {
+    "request_scenarios": 17,
+    "added_chrome_scenarios": 4,
+    "chrome_required_total": 252,
+    "existing_chrome_scenarios_preserved": 248
+  },
+  "representative_scale": "21 persisted drafts across three request pages and12 across two Chrome pages are prepared, not production-scale benchmark evidence",
+  "enterprise_override_search": "No matching CalendarCatalog, IvrDraftAccess, UnitCalendarsController or CalendarLibrary override found in the preserved enterprise tree",
+  "limits": [
+    "Parent151verified with native reports and16actual PNGs; this new query, UI and theme follow-up still require their own new SHA acceptance",
+    "No local Ruby/Rails/PostgreSQL execution; request/native lint/Chrome results are pending",
+    "Numbers and provider-published configuration are not queried; absence in this inventory does not authorize destructive removal",
+    "All23figures, provider contracts, real channels, scanner/provider environments and recording-origin bridge remain separate acceptance requirements"
+  ],
+  "native_accepted": false,
+  "visual_accepted": false,
+  "whole_word_complete": false,
+  "external_homologation": false,
+  "native_list_navigation_query_limit": "100Unicodecodepoints, matching native IvrDraftQuery; a name filter is not a promise of exact direct opening",
+  "parent_revalidation_checkpoint": "151ba582af05772bf25e4e143ceb6e7c91963e5e",
+  "parent_native_acceptance": {
+    "sha": "151ba582af05772bf25e4e143ceb6e7c91963e5e",
+    "run": 45019803114,
+    "artifact_sha256": "0e9d5ed99037332c3b6c05dc770c07e5874d4a58cc1d71670f7bc185ca33ced9",
+    "report": "docs/jrc_contact_center/ivr_calendar_routing_native_verified_20261122.json",
+    "actual_images_opened": 16,
+    "whole_word_complete": false
+  },
+  "native_dialog_contract": "Native Dialog.useForm defaults true; this popup disables the outer form and keeps one native search form; a keyboard submission is required in the prepared Chrome scenario",
+  "parent_findings_preserved": [
+    "9745Vuewarning/indentation failure; corrected on54",
+    "54passed244priorChrome;4newselector failures and real dark-calendar text defect corrected on151"
+  ],
+  "datetime_theme_followup": {
+    "actual_finding": "Parent151dark screenshots show a dark native datetime-picker icon, although typed entry and simulation are functional",
+    "change": "Reuse existing light/dark color-scheme utilities on only the native simulation datetime input; no custom CSS or clock changes",
+    "local_mocked_tests": 91,
+    "report_sha256": "e3788788c469cb1f34b5b39172caa6e68321a37b67b24417298404496c38ef4a",
+    "static_checks": {
+      "checks": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrDraftEditor.vue",
+          "errors": 0,
+          "new_warnings": 0,
+          "inherited_warnings": 11,
+          "sha256": "d16856db78d3e41b4490682ff61c25ff6be04b2be0ce186ce86261045ce56142"
+        },
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrCalendarFlow.spec.js",
+          "errors": 0,
+          "new_warnings": 0,
+          "inherited_warnings": 0,
+          "sha256": "69a45f36ee84655ad1619351f6a9083190a6f1dd76f23440f6e78934c7b27473"
+        }
+      ],
+      "browser_helper": {
+        "path": "tests/playwright/tests/e2e/ui/call-center-ivr-calendar-native.mjs",
+        "sha256": "24a90be58d861675a2932358646a18b3f8874f0506cc6d40760c2151262e0736",
+        "grammar_passed": true,
+        "actual_css_color_scheme_assertion_prepared": true,
+        "real_css_contrast_checks_preserved": true
+      },
+      "workflow_required_count": 252,
+      "native_css_browser_validation_executed": false
+    },
+    "resource_receipt": {
+      "kind": "Windows bounded mocked unit check; not native Rails/Chrome or codec proof",
+      "target": "ivr-calendar-datetime-controls",
+      "exit_code": 0,
+      "stop": null,
+      "seconds": 13.53099999999904,
+      "initial": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 4104617984,
+        "c_free_bytes": 50646372352,
+        "read_only": true
+      },
+      "minimum": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 3702407168,
+        "c_free_bytes": 50646323200,
+        "read_only": true
+      },
+      "final": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 4033933312,
+        "c_free_bytes": 50646323200,
+        "read_only": true
+      },
+      "log_bytes": 1428
+    },
+    "native_css_and_icon_status": "pending next immutable candidate, actual computed color-scheme and8new Chrome PNG reviews"
+  }
+}

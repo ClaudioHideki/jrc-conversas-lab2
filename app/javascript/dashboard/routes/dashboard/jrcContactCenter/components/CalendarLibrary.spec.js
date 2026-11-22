@@ -4,6 +4,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcContactCenter';
 import CalendarLibrary from './CalendarLibrary.vue';
+import CalendarIvrUsages from './CalendarIvrUsages.vue';
 import { newCalendarDefinition } from '../helpers/calendarForm';
 import locale from 'dashboard/i18n/locale/en/jrcContactCenter.json';
 const calendar = locale.JRC_CONTACT_CENTER.CALENDAR;
@@ -128,7 +129,7 @@ const fixture = () =>
         createI18n({
           legacy: false,
           locale: 'en',
-          messages: { en: { JRC_CONTACT_CENTER: { CALENDAR: calendar } } },
+          messages: { en: locale },
         }),
       ],
     },
@@ -325,5 +326,32 @@ describe('internal calendar library wiring; mocked APIs and Dialog, not native p
       wrapper.get('[data-calendar-editor-fixture]').attributes('data-configure')
     ).toBe('false');
     expect(wrapper.find('[data-unit-calendar]').exists()).toBe(false);
+  });
+
+  it('passes only the current authorized native unit, calendar and actor context to the usage popup', async () => {
+    const wrapper = fixture();
+    await flushPromises();
+    const popup = wrapper.getComponent(CalendarIvrUsages);
+    expect(popup.props()).toMatchObject({
+      accountId: '1',
+      unitId: '10',
+      calendarId: id,
+      canManage: true,
+    });
+    expect(popup.props('contextKey')).toContain('jrc_contact_center_configure');
+    expect(wrapper.find('[data-calendar-ivr-usages-open]').exists()).toBe(true);
+    expect(wrapper.find('[data-calendar-ivr-usages]').exists()).toBe(false);
+  });
+
+  it('clears the whole native calendar library when the usage child reports an authoritative denial', async () => {
+    const wrapper = fixture();
+    await flushPromises();
+    wrapper.getComponent(CalendarIvrUsages).vm.$emit('denied');
+    await flushPromises();
+    expect(wrapper.find('[data-unit-calendar]').exists()).toBe(false);
+    expect(wrapper.get('[role="alert"]').text()).toContain(calendar.LOAD_ERROR);
+    expect(wrapper.find('[data-calendar-ivr-usages-open]').exists()).toBe(
+      false
+    );
   });
 });

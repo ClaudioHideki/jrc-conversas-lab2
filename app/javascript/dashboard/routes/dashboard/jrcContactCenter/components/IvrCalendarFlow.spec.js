@@ -207,6 +207,12 @@ describe('existing URA editor calendar controls with native components; not brow
       'text-n-slate-12'
     );
     expect(wrapper.get('#ivr-simulation-local').element.value).toBe('');
+    expect(wrapper.get('#ivr-simulation-local').classes()).toContain(
+      '[color-scheme:light]'
+    );
+    expect(wrapper.get('#ivr-simulation-local').classes()).toContain(
+      'dark:[color-scheme:dark]'
+    );
     expect(API.previewIvrDraft).not.toHaveBeenCalled();
     await wrapper.get('#ivr-simulation-local').setValue('2026-11-23T10:00');
     await preview(wrapper).trigger('click');

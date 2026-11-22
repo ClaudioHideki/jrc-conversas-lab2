@@ -1,0 +1,124 @@
+{
+  "sha": "151ba582af05772bf25e4e143ceb6e7c91963e5e",
+  "run": 45019803114,
+  "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/45019803114",
+  "artifact": 14754639216,
+  "artifact_sha256": "0e9d5ed99037332c3b6c05dc770c07e5874d4a58cc1d71670f7bc185ca33ced9",
+  "native_distinct_examples": 2663,
+  "schema_reload_examples_separate": 175,
+  "vue_passed": 1495,
+  "chrome_passed": 248,
+  "failures": 0,
+  "pending": 0,
+  "outside_errors": 0,
+  "skipped_or_flaky": 0,
+  "actual_images_opened": [
+    "desktop-light-ivr-calendar-reviewed.png",
+    "desktop-light-ivr-calendar-historical-pin.png",
+    "desktop-light-ivr-calendar-open.png",
+    "desktop-light-ivr-calendar-closed.png",
+    "desktop-dark-ivr-calendar-reviewed.png",
+    "desktop-dark-ivr-calendar-historical-pin.png",
+    "desktop-dark-ivr-calendar-open.png",
+    "desktop-dark-ivr-calendar-closed.png",
+    "mobile-light-ivr-calendar-reviewed.png",
+    "mobile-light-ivr-calendar-historical-pin.png",
+    "mobile-light-ivr-calendar-open.png",
+    "mobile-light-ivr-calendar-closed.png",
+    "mobile-dark-ivr-calendar-reviewed.png",
+    "mobile-dark-ivr-calendar-historical-pin.png",
+    "mobile-dark-ivr-calendar-open.png",
+    "mobile-dark-ivr-calendar-closed.png"
+  ],
+  "image_sha256": {
+    "desktop-light-ivr-calendar-reviewed.png": "8d9a212077a03e69039a365de62d8734b4fa4fb1cfdac08cc569f6c011f7466b",
+    "desktop-light-ivr-calendar-historical-pin.png": "bb7852e7e37ccdebfabcc147d5eaabcc4eb2f0de650ada1116dc0f4f2e2d6f14",
+    "desktop-light-ivr-calendar-open.png": "f16820176aedb81976b160a7e6797301098a4068152598fed2831ef02ca241b2",
+    "desktop-light-ivr-calendar-closed.png": "b508c5b9cd0d3aff10459344642c9f8017c3e78f6284d368e594a6f32ccc8e0d",
+    "desktop-dark-ivr-calendar-reviewed.png": "26b582bd2af063dfc1679dee36522847d127c98831a9bcaf3a4898c8a83efc4e",
+    "desktop-dark-ivr-calendar-historical-pin.png": "76d730388e99dae7ea4fe1d98aa5739d7eee486171a2f67f7256c96094f4adcb",
+    "desktop-dark-ivr-calendar-open.png": "cacfff999889809ba983cd6731a93185b2141884ce6bee96cc81eafbeead588a",
+    "desktop-dark-ivr-calendar-closed.png": "1870fb46eb5043603d829d76cce00617048c62330c2736c0447536bb31bfc4b1",
+    "mobile-light-ivr-calendar-reviewed.png": "1e3d3d3856a8b138cf3934316e34ca671a886c751100af20b0829864a6ae6976",
+    "mobile-light-ivr-calendar-historical-pin.png": "428b52a5304258e7d25d6835b125da78cd0e95b7756be68eb87595484eb32124",
+    "mobile-light-ivr-calendar-open.png": "bde319833973e5ea0428d6e1cdacf2dbcff1909ece7dc5396a95af7f3e8325cb",
+    "mobile-light-ivr-calendar-closed.png": "9dd96574c6cd62507fe5671f8267df2f5c00f2441de6eea9569e9648704de1d4",
+    "mobile-dark-ivr-calendar-reviewed.png": "4a9c298a058c05ff4891a9d8be13cb3d0ef5b1901831986a8b03f2f934504b2f",
+    "mobile-dark-ivr-calendar-historical-pin.png": "24381efb968bf2fdd89e2bf7fab53299788d3f2d32b00bf6aff4db52d21afa6a",
+    "mobile-dark-ivr-calendar-open.png": "00ede2b4df26f5235e37039db0116e044e7043f5b1f7affcf665315c2e79a1f9",
+    "mobile-dark-ivr-calendar-closed.png": "b6ee83b822628958c9868e40d54bf56c0bcc85981e6efe513f1fdfc2165292a0"
+  },
+  "preserved_previous_case_multiplicity": {
+    "call-center-rspec.json": {
+      "preserved_including_explicit_schema_renames": 2408,
+      "added": 40
+    },
+    "call-center-pabx-rspec.json": {
+      "preserved_including_explicit_schema_renames": 128,
+      "added": 2
+    },
+    "call-center-corporate-rspec.json": {
+      "preserved_including_explicit_schema_renames": 85,
+      "added": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "preserved_including_explicit_schema_renames": 175,
+      "added": 0
+    },
+    "vue": {
+      "preserved": 1451,
+      "added": 44,
+      "existing_repeated_descriptions_kept_with_full_multiplicity": 6
+    },
+    "chrome": {
+      "preserved": 244,
+      "added": 4
+    }
+  },
+  "explicit_schema_sentinel_renames": [
+    {
+      "path": "services/jrc_contact_center/ivr_graph_schema_validate_spec.rb",
+      "before": "JrcContactCenter::IvrGraphSchema.validate! does not reinterpret unsupported or untyped schema identity 3",
+      "after": "JrcContactCenter::IvrGraphSchema.validate! does not reinterpret unsupported or untyped schema identity 4",
+      "reason": "Explicit schema3 now supported; unknown4 rejection remains and a positive3scenario was added"
+    },
+    {
+      "path": "services/jrc_contact_center/ivr_graph_spec.rb",
+      "before": "JrcContactCenter::IvrGraph rejects malformed or unsupported JSON {\"schema_version\" => 3, \"start\" => \"end\", \"nodes\" => [{\"id\" => \"end\", \"type\" => \"end\"}]} without accepting a provider contract",
+      "after": "JrcContactCenter::IvrGraph rejects malformed or unsupported JSON {\"schema_version\" => 4, \"start\" => \"end\", \"nodes\" => [{\"id\" => \"end\", \"type\" => \"end\"}]} without accepting a provider contract",
+      "reason": "Explicit schema3 now supported; unknown4 rejection remains and a positive3scenario was added"
+    },
+    {
+      "path": "dashboard/routes/dashboard/jrcContactCenter/helpers/ivrDraft.spec.js",
+      "before": "safe local IVR editing, without a provider contract rejects malformed or unsupported import {\"schema_version\":3,\"start\":\"end\",\"nodes\":[{\"id\":\"end\",\"type\":\"end\"}]}",
+      "after": "safe local IVR editing, without a provider contract rejects malformed or unsupported import {\"schema_version\":4,\"start\":\"end\",\"nodes\":[{\"id\":\"end\",\"type\":\"end\"}]}",
+      "reason": "Explicit schema3 now supported; unknown4 rejection remains and a positive3scenario was added"
+    }
+  ],
+  "behaviors_verified": [
+    "Explicit date exception, holiday, weekly precedence through the native snapshot calendar",
+    "Saved schema3 exact calendar pin survives source changes and native reload",
+    "Explicit instant and timezone route open/closed to different real graph destinations",
+    "Same-draft historical attestation, replay and denial of unproven or unauthorized references",
+    "Current permissions and unit coverage, immutable history and real PostgreSQL lock waits",
+    "Actual built CSS contrast and bounded dialogs in desktop/mobile and light/dark Chrome"
+  ],
+  "visual_findings": [
+    "Calendar name, timezone, internal status, exact-version explanation and details summary are legible in actual light and dark CSS",
+    "Original pin name survives source edit and page reload in all4projects; the actual map shows distinct open/node2 and closed/node3 edges",
+    "Explicit10:30 and11:00 simulations show open and closed local results with the original exception precedence, timezone and UTC timestamps",
+    "Native dialogs wrap within1440x1000 and390x844, with internal scrolling and reachable save/close controls",
+    "No screenshot claims an applied PABX change; the local-only warning is visible"
+  ],
+  "nonblocking_limits": [
+    "The native datetime-picker icon is still dark on the dark field; manual text entry and deterministic simulation work. A scoped color-scheme correction is queued for the next candidate",
+    "Some screenshots capture the transient disabled state immediately after the response; subsequent actual simulation and native completion are proven separately by the tests",
+    "The native datetime format follows the runner browser locale; screenshot data names are explicitly synthetic",
+    "Only this increment is accepted; all23figures, provider application and external homologation remain open"
+  ],
+  "visual_increment_accepted": true,
+  "whole_word_complete": false,
+  "external_homologation": false,
+  "provider_commands_executed": false,
+  "pending_next": "Current local URA usage inventory is a separate unvalidated candidate, not provider-impact proof"
+}

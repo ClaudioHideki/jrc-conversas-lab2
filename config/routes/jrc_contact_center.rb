@@ -75,6 +75,7 @@ namespace :api, defaults: { format: 'json' } do
         resources :audio_archives, only: [:create]
         resources :audio_folders, only: %i[index show create update]
         resources :unit_calendars, only: %i[index show create update] do
+          get :ivr_usages, on: :member
           get :preview, on: :member
         end
         resources :queue_calendars, only: %i[index show update destroy]

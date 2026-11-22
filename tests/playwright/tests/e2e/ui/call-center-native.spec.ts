@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { verifyNativeCalendars } from './call-center-calendar-native.mjs';
 import { verifyNativeIvrCalendar } from './call-center-ivr-calendar-native.mjs';
+import { verifyCalendarIvrInventory } from './call-center-calendar-ivr-inventory-native.mjs';
 import type { Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10300,6 +10301,17 @@ test('native URA calendar branches preserve the exact attested version across so
   page,
 }, info) => {
   await verifyNativeIvrCalendar(
+    page,
+    info,
+    session.calendar_targets[info.project.name],
+    session.unit_id
+  );
+});
+
+test('native calendar usage inventory paginates actual current URAs, preserves history and denies foreign scopes', async ({
+  page,
+}, info) => {
+  await verifyCalendarIvrInventory(
     page,
     info,
     session.calendar_targets[info.project.name],

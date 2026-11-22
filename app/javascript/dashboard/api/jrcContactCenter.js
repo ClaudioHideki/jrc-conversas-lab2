@@ -76,6 +76,13 @@ export default {
     axios.get(`${base(accountId)}/unit_calendars/${calendarIdentity(id)}`, {
       params: { unit_id: recordIdentity(unitId) },
     }),
+  calendarIvrUsages: (accountId, unitId, id, params = {}) =>
+    axios.get(
+      `${base(accountId)}/unit_calendars/${calendarIdentity(id)}/ivr_usages`,
+      {
+        params: { ...params, unit_id: recordIdentity(unitId) },
+      }
+    ),
   saveUnitCalendar: (
     accountId,
     unitId,
