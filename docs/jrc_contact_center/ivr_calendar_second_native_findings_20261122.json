@@ -1,0 +1,71 @@
+{
+  "sha": "9745d0474efbfe171291c211091c58d0673c5ce6",
+  "run": 45008526706,
+  "job": 137165412798,
+  "artifact": 14750561044,
+  "artifact_sha256": "e0d4afd8a9de692102860afdb62c940f2467eaec1045001dca122f65c6760665",
+  "verification_status": "failed_workflow_partial_evidence",
+  "native_distinct_examples_passed": 2663,
+  "native_counts": {
+    "core": 2448,
+    "concurrency": 130,
+    "approvals_backoffice": 85,
+    "schema_reload_separate": 175
+  },
+  "native_failures_pending_and_outside_errors": 0,
+  "vue": {
+    "examples": 1495,
+    "passed": 1494,
+    "failed": 1,
+    "pending": 0
+  },
+  "root_causes": [
+    "One queue-calendar component test still expected the old incorrect global claim that URA links did not exist; the UI now correctly limits this particular inventory to queues",
+    "Two FirstHashElementIndentation offenses remain in the foreign-origin request fixture; Ruby runtime tokens and all2448coreexamples already pass"
+  ],
+  "correction": {
+    "parent": "9745d0474efbfe171291c211091c58d0673c5ce6",
+    "run": 45008526706,
+    "artifact": 14750561044,
+    "artifact_sha256": "e0d4afd8a9de692102860afdb62c940f2467eaec1045001dca122f65c6760665",
+    "changes": [
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ivr_calendar_routing_spec.rb",
+        "before": "1556d5066d393ac72df6bf8b4a285ddc7ae4f58048544304b2993dddd03a126a",
+        "after": "e174544c9a1e254a4a0c74c31248499d5bdfdd310c9399b29026ba8c46c0b5a2",
+        "kind": "two whitespace-only corrections; identical Ruby tokens and assertions"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarBindings.spec.js",
+        "before": "a49d204fa794139b399bf8fc7b97296aa9273016fbd05065038245e9d08cbcce",
+        "after": "5b2c3f6c8214303c6a6a56aa8429da163dfbf87057b32d563f50d0bc3c111444",
+        "kind": "assert the truthful panel-specific limit and unknown provider impact; adds one assertion, removes no case"
+      }
+    ],
+    "product_runtime_changes": false,
+    "migrations_changed": false,
+    "gates_changed": false,
+    "native_revalidation_pending": true,
+    "whole_word_complete": false
+  },
+  "targeted_vue_after_correction": {
+    "passed": 6,
+    "failed": 0,
+    "pending": 0,
+    "native_persistence_proof": false
+  },
+  "not_run_on_this_sha": [
+    "Frontend lint",
+    "Assets build",
+    "Chrome248",
+    "Actual screenshots of the new URA calendar UI"
+  ],
+  "native_schema_installation_reload_and_trigger_proofs": "Passed; audio schema fresh/reload fingerprints match and immutable SQL assertions passed",
+  "next_checkpoint_requires_native_revalidation": true,
+  "new_usage_inventory": "Separately prepared and not applied, with52mockedVue,17native scenarios and4Chrome cases prepared; no native acceptance claimed",
+  "gates_or_permissions_weakened": false,
+  "migrations_changed": false,
+  "product_runtime_changed_by_correction": false,
+  "whole_word_complete": false,
+  "external_homologation": false
+}

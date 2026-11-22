@@ -7196,5 +7196,17 @@
     "ruby_findings": 22,
     "next_gate_pending": true,
     "whole_word_complete": false
+  },
+  "ivr_calendar_second_native_findings_20261122": {
+    "sha": "9745d0474efbfe171291c211091c58d0673c5ce6",
+    "run": 45008526706,
+    "report": "docs/jrc_contact_center/ivr_calendar_second_native_findings_20261122.json",
+    "native_distinct_passed": 2663,
+    "schema_reload_separate_passed": 175,
+    "vue_passed": 1494,
+    "vue_failed": 1,
+    "ruby_indentation_findings": 2,
+    "native_revalidation_pending": true,
+    "whole_word_complete": false
   }
 }

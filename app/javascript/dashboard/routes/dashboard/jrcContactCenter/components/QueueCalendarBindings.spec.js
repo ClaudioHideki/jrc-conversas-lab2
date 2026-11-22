@@ -149,7 +149,10 @@ describe('actual queue calendar component with native fields and mocked transpor
     await flushPromises();
     expect(wrapper.text()).toContain('Nenhum vínculo interno de fila');
     expect(wrapper.text()).toContain(
-      'Números e URAs ainda não possuem vínculo comprovado'
+      'Este painel consulta somente vínculos internos de filas autorizadas.'
+    );
+    expect(wrapper.text()).toContain(
+      'Números e URAs não são consultados aqui; o impacto no PABX permanece desconhecido.'
     );
     expect(
       wrapper

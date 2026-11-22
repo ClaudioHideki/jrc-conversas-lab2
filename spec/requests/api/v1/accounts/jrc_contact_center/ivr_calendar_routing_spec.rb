@@ -275,8 +275,8 @@ RSpec.describe 'Internal URA calendar branches use native scopes and exact attes
     other_unit = JrcContactCenter::Unit.create!(account: other, code: 'SYNTHETIC', name: 'SYNTHETIC foreign unit', kind: 'sac')
     input = JrcContactCenter::IvrDraftInput.new(name: 'SYNTHETIC foreign draft', status: 'draft', expected_revision: 0,
                                                 request_id: SecureRandom.uuid, definition: {
-                                                'schema_version' => 1, 'start' => 'done', 'nodes' => [{ 'id' => 'done', 'type' => 'end' }]
-                                              })
+                                                  'schema_version' => 1, 'start' => 'done', 'nodes' => [{ 'id' => 'done', 'type' => 'end' }]
+                                                })
     foreign = JrcContactCenter::IvrDraftWrite.new(context: { account: other, account_user: other_member, user: other_actor })
                                              .call(input: input, unit_id: other_unit.id).fetch(:draft)
     post "#{base}/preview", headers: headers, params: { ivr_preview: {
