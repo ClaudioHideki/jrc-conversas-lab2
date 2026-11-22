@@ -237,6 +237,30 @@
     "tests/playwright/tests/e2e/ui/call-center-pause-approval-native.mjs": "cf3ecaaff449a832e8ac6179fb5aa13870a27e5fbbffbae0f6db4d4fa2a882d2",
     "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "fd55dd3899c0f66a1d369d5a446e865034d9437f04d96d026d8ce1cc26e21251"
   },
-  "latest_correction_parent": "609ef64c75f30eeec0f19bdaa7cc9fc470a7d2f7",
-  "early_failure_diagnostics": "Only diagnostic RSpec uploads before lint; complete final artifact, exact SHA, full reports and all mandatory gates still required"
+  "latest_correction_parent": "db28a28c13c1beb9fd814c852cc18cdb6a6a8f30",
+  "early_failure_diagnostics": "Only diagnostic RSpec uploads before lint; complete final artifact, exact SHA, full reports and all mandatory gates still required",
+  "fourth_native_findings": {
+    "sha": "db28a28c13c1beb9fd814c852cc18cdb6a6a8f30",
+    "run": 45052462703,
+    "artifact": 14766957820,
+    "artifact_sha256": "a0b730c111e1f7f62e61c6100f160c4383f9d2298199d11d3c9f6b190d3134bc",
+    "core": {
+      "duration": 736.081408012,
+      "example_count": 2547,
+      "failure_count": 1,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "old_example_identities_preserved": 2466,
+    "new_pause_examples_passed": 81,
+    "old_examples_passed": 2465,
+    "sole_failed_example": "PABX incremental sync with real PostgreSQL and mocked HTTP rejects invalid cursor future before any API request",
+    "schema_reload_examples_passed": 187,
+    "ruby_new_offenses": 0,
+    "cause": "Future cursor was computed at file loading; by execution after more than 10 minutes it was no longer in the future. Runtime validation still rejects future timestamps. Only the test input timing changes.",
+    "production_changed": false,
+    "early_diagnostics_fixed_explicit_core_and_reload_paths": true,
+    "full_acceptance": false,
+    "native_revalidation_required": true
+  }
 }

@@ -144,7 +144,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-early-${{ github.sha }}
-          path: /tmp/call-center-*-rspec.json
+          path: |
+            /tmp/call-center-rspec.json
+            /tmp/call-center-ivr-schema-reload-rspec.json
           if-no-files-found: error
           retention-days: 7
       - name: Legacy isolated ACW value compatibility (not a persistence proof)

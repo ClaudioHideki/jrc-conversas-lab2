@@ -80,8 +80,9 @@ RSpec.describe 'PABX incremental sync with real PostgreSQL and mocked HTTP', :pa
     expect(integration.reload.pabx_sync_state).not_to have_key('cursor')
   end
 
-  ['broken', 10.minutes.from_now.iso8601].each do |cursor|
-    it "rejects invalid cursor #{cursor == 'broken' ? 'format' : 'future'} before any API request" do
+  %w[format future].each do |kind|
+    it "rejects invalid cursor #{kind} before any API request" do
+      cursor = kind == 'format' ? 'broken' : 10.minutes.from_now.iso8601
       integration.update!(pabx_sync_state: { cursor: cursor })
       expect { Pabx::Sync.new(integration).call }.to raise_error(Pabx::Error, 'INVALID_CURSOR')
       expect(a_request(:post, endpoint)).not_to have_been_made
