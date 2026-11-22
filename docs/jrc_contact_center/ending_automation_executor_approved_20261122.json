@@ -1,0 +1,13 @@
+{
+  "kind": "approved_business_rule_not_operational_activation",
+  "recorded_at": "2026-11-22T19:26:26.687846+00:00",
+  "branch": "codex/call-center-control-desk-20261116",
+  "candidate_sha": "f559530b05789aa7f44e98fb3cddbde436a90173",
+  "executor": "agent_who_completed_attendance",
+  "authority": "Current permissions, eligibility and native destination scope revalidated on every execution and retry",
+  "no_service_account_fallback": true,
+  "no_automatic_grants": true,
+  "current_pause_ci": 45056163636,
+  "decision_does_not_approve_old_origin_scope_inference": true,
+  "implementation_not_claimed": true
+}

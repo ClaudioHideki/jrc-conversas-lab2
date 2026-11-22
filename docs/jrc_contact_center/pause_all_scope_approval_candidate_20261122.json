@@ -237,7 +237,7 @@
     "tests/playwright/tests/e2e/ui/call-center-pause-approval-native.mjs": "cf3ecaaff449a832e8ac6179fb5aa13870a27e5fbbffbae0f6db4d4fa2a882d2",
     "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "fd55dd3899c0f66a1d369d5a446e865034d9437f04d96d026d8ce1cc26e21251"
   },
-  "latest_correction_parent": "db28a28c13c1beb9fd814c852cc18cdb6a6a8f30",
+  "latest_correction_parent": "f559530b05789aa7f44e98fb3cddbde436a90173",
   "early_failure_diagnostics": "Only diagnostic RSpec uploads before lint; complete final artifact, exact SHA, full reports and all mandatory gates still required",
   "fourth_native_findings": {
     "sha": "db28a28c13c1beb9fd814c852cc18cdb6a6a8f30",
@@ -262,5 +262,30 @@
     "early_diagnostics_fixed_explicit_core_and_reload_paths": true,
     "full_acceptance": false,
     "native_revalidation_required": true
+  },
+  "fifth_native_findings": {
+    "sha": "f559530b05789aa7f44e98fb3cddbde436a90173",
+    "run": 45056163636,
+    "job": 137311752542,
+    "artifact": 14770815366,
+    "artifact_sha256": "8f24143ad263b6eaad1854a365e9f7b75c20a9df351bd01d7764577c083b6bec",
+    "conclusion": "cancelled",
+    "confirmed_cause": "GitHub annotation: The job has exceeded the maximum execution time of 1h15m0s",
+    "core_rails": 2547,
+    "concurrency_rails": 135,
+    "approvals_backoffice_rails": 85,
+    "native_distinct_examples": 2767,
+    "schema_reload_examples": 187,
+    "vue_examples": 1760,
+    "all_recorded_native_and_vue_counts_zero_failures_pending_outside_errors": true,
+    "ruby_new_offenses": 0,
+    "frontend_lint_and_fresh_assets_passed": true,
+    "chrome_last_started_index": 186,
+    "chrome_required": 256,
+    "chrome_full_report_absent": true,
+    "pause_flow_verified_receipts_preserved": 2,
+    "full_workflow_accepted": false,
+    "change": "Only extend bounded job timeout75 to105; runner, resources, tests, one worker, zero retries and checks unchanged",
+    "product_functional_code_unchanged": true
   }
 }
