@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { migrationPath, ivrMigrationPath, endingReasonSqlPath, endingReasonCatalogSqlPath, reviewedMigrations, audioFileSqlSources, audioInspectionSqlSources, verifyAccessMigration, verifyReviewedMigrations } from './validate_cc_access_migration.mjs';
+import { migrationPath, ivrMigrationPath, endingReasonSqlPath, endingReasonCatalogSqlPath, reviewedMigrations, audioFileSqlSources, audioInspectionSqlSources, verifyAccessMigration, verifyReviewedMigrations,
+  pauseApprovalMigrationPath, pauseApprovalSqlSources, verifyPauseApprovalMigrations } from './validate_cc_access_migration.mjs';
 
 const content = readFileSync(new URL('../db/migrate/20261117190000_add_contact_center_access_grants.rb', import.meta.url));
 const schema = 'ActiveRecord::Schema[7.1].define(version: 2026_11_16_190000) do\nend';
@@ -116,3 +117,46 @@ for (const path of Object.keys(audioInspectionSqlSources)) {
     assert.throws(() => verifyReviewedMigrations(reviewedChanges, missing, schema), /Missing audio inspection SQL\/receipt/);
   });
 }
+
+const pauseDbSql = Object.keys(pauseApprovalSqlSources).filter(path => path.startsWith('db/'));
+const currentPaths = [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath, ...pauseDbSql];
+const pauseChanges = currentPaths.map(path => `A\t${path}`).join('\n');
+
+test('current pause candidate requires13exact forward migrations plus the exact new SQL, preserving the old12guard', () => {
+  assert.equal(verifyPauseApprovalMigrations(pauseChanges, readReviewed, schema).migrationCount, 13);
+  assert.equal(verifyReviewedMigrations(reviewedChanges, readReviewed, schema).migrationCount, 12);
+});
+for (const omitted of currentPaths) {
+  test(`rejects an incomplete pause evidence migration set missing ${omitted}`, () => {
+    const incomplete = currentPaths.filter(path => path !== omitted).map(path => `A\t${path}`).join('\n');
+    assert.throws(() => verifyPauseApprovalMigrations(incomplete, readReviewed, schema));
+  });
+}
+for (const change of [reviewedChanges, pauseChanges + `\nA\t${pauseApprovalMigrationPath}`,
+  pauseChanges + '\nM\tdb/schema.rb', pauseChanges + '\nM\tdb/sql/historical.sql',
+  pauseChanges + '\nM\tdb/functions/historical.sql', pauseChanges + '\nA\tdb/functions/unknown.sql',
+  pauseChanges + '\nA\tdb/migrate/20261122121000_unknown.rb', pauseChanges.replace('A\t', 'M\t')]) {
+  test(`rejects unreviewed pause database changes ${JSON.stringify(change)}`, () => {
+    assert.throws(() => verifyPauseApprovalMigrations(change, readReviewed, schema));
+  });
+}
+for (const path of [pauseApprovalMigrationPath, ...Object.keys(pauseApprovalSqlSources)]) {
+  test(`rejects a one-byte pause evidence source mutation ${path}`, () => {
+    const changed = key => key === path ? Buffer.concat([readReviewed(key), Buffer.from('\n')]) : readReviewed(key);
+    assert.throws(() => verifyPauseApprovalMigrations(pauseChanges, changed, schema));
+  });
+  test(`requires the reviewed pause evidence source ${path}`, () => {
+    const missing = key => { if (key === path) throw new Error('Missing reviewed pause evidence'); return readReviewed(key); };
+    assert.throws(() => verifyPauseApprovalMigrations(pauseChanges, missing, schema));
+  });
+}
+for (const path of Object.keys(reviewedMigrations)) {
+  test(`new admission still rejects a historical migration mutation ${path}`, () => {
+    const changed = key => key === path ? Buffer.concat([readReviewed(key), Buffer.from('\n')]) : readReviewed(key);
+    assert.throws(() => verifyPauseApprovalMigrations(pauseChanges, changed, schema));
+  });
+}
+test('new admission preserves forward-only timestamp checks against a newer schema base', () => {
+  assert.throws(() => verifyPauseApprovalMigrations(pauseChanges, readReviewed,
+    schema.replace('2026_11_16_190000', '2026_11_23_120000')));
+});

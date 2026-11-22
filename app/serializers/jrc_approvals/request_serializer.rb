@@ -17,6 +17,10 @@ class JrcApprovals::RequestSerializer
   private
 
   def origin
+    pause = @record.resource_type == 'JrcContactCenter::PauseApprovalScope' &&
+            @record.module_key == 'contact_center' && @record.event_key == 'pause'
+    return pause_origin if pause
+
     if @record.resource_type == 'JrcRelationship::BatchReview' &&
        @record.module_key == 'relationship' && @record.event_key == 'portfolio_distribution'
       return { 'origin' => { kind: 'portfolio_distribution', review_id: @record.resource_id } }
@@ -29,6 +33,14 @@ class JrcApprovals::RequestSerializer
     proposal = JrcBackoffice::AuthorityProposal.where(account_id: @record.account_id).find(@record.resource_id)
     { 'origin' => { kind: 'contract_authority', backoffice_request_id: proposal.backoffice_request_id,
                     contract_version_id: proposal.contract_version_id } }
+  end
+
+  # Only the already-authorized immutable request snapshot, never a live whole-account pause payload.
+  def pause_origin
+    values = @record.snapshot.fetch('values').slice('context_digest', 'reason_code', 'reason_label', 'scope_unit_ids',
+                                                   'scope_unit_names', 'unit_count', 'justification_digest')
+    { 'origin' => values.merge('kind' => 'contact_center_pause', 'scope_id' => @record.resource_id.to_s,
+                              'historical' => true, 'own_scope_only' => true, 'local_only' => true, 'provider_confirmed' => false) }
   end
 
   def stages

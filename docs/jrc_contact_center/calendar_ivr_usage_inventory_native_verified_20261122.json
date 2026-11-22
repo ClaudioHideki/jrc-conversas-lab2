@@ -1,0 +1,3240 @@
+{
+  "sha": "a9206b847e90073fc552ce1519add4c4856fb689",
+  "run": 45030951154,
+  "job": 137234200498,
+  "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/45030951154",
+  "artifact": 14759658388,
+  "artifact_sha256": "459fcecb4c2c18e760edce826c5c828599a38a07dfabb7d075584763326fcf85",
+  "native_distinct_examples": 2681,
+  "schema_reload_examples_separate": 175,
+  "vue_passed": 1526,
+  "chrome_passed": 252,
+  "failures": 0,
+  "pending": 0,
+  "outside_errors": 0,
+  "skipped_or_flaky": 0,
+  "ruby_new_offenses": 0,
+  "protected_assets_and_bootstrap": "passed",
+  "all536png_hashes_verified": true,
+  "actual_images_opened": [
+    "desktop-light-calendar-ivr-inventory-current-heads.png",
+    "desktop-light-calendar-ivr-inventory-page-two.png",
+    "desktop-light-calendar-ivr-inventory-archived.png",
+    "desktop-light-calendar-ivr-inventory-history-preserved.png",
+    "desktop-dark-calendar-ivr-inventory-current-heads.png",
+    "desktop-dark-calendar-ivr-inventory-page-two.png",
+    "desktop-dark-calendar-ivr-inventory-archived.png",
+    "desktop-dark-calendar-ivr-inventory-history-preserved.png",
+    "mobile-light-calendar-ivr-inventory-current-heads.png",
+    "mobile-light-calendar-ivr-inventory-page-two.png",
+    "mobile-light-calendar-ivr-inventory-archived.png",
+    "mobile-light-calendar-ivr-inventory-history-preserved.png",
+    "mobile-dark-calendar-ivr-inventory-current-heads.png",
+    "mobile-dark-calendar-ivr-inventory-page-two.png",
+    "mobile-dark-calendar-ivr-inventory-archived.png",
+    "mobile-dark-calendar-ivr-inventory-history-preserved.png",
+    "desktop-light-ivr-calendar-open.png",
+    "desktop-light-ivr-calendar-closed.png",
+    "desktop-dark-ivr-calendar-open.png",
+    "desktop-dark-ivr-calendar-closed.png",
+    "mobile-light-ivr-calendar-open.png",
+    "mobile-light-ivr-calendar-closed.png",
+    "mobile-dark-ivr-calendar-open.png",
+    "mobile-dark-ivr-calendar-closed.png"
+  ],
+  "image_sha256": {
+    "desktop-light-calendar-ivr-inventory-current-heads.png": "a40e901b99863b9c91e26dda82bd6c53b2ca4859bab4ce85e5194cc4bb26e5bb",
+    "desktop-light-calendar-ivr-inventory-page-two.png": "3e2b5ee960387cf1cc8aba44b6479175bd98a4823bbad3fd1bf6b24542e4b416",
+    "desktop-light-calendar-ivr-inventory-archived.png": "2e5875366be00dfb0de9baf25e907e2a3b4c19c9356ee657d847bc14737ffa52",
+    "desktop-light-calendar-ivr-inventory-history-preserved.png": "881fbc58d1fd8c4b83565d4766138a9000c6f1e346ecabef81d6a91ba89e42bf",
+    "desktop-light-ivr-calendar-open.png": "f16820176aedb81976b160a7e6797301098a4068152598fed2831ef02ca241b2",
+    "desktop-light-ivr-calendar-closed.png": "4b186e43caa86a6bdc5e61f5a8b7365942b27b59c03bdeb55f30a03b5edf0183",
+    "desktop-dark-calendar-ivr-inventory-current-heads.png": "e59cf16ef15464278c895b3a26a8f5da8cbb648b1a0b6dede3db7cbb4e7adbea",
+    "desktop-dark-calendar-ivr-inventory-page-two.png": "6819f0786b6aff639bc23463570beac6d8806f9207897ae78d1ce04f6c2af7bc",
+    "desktop-dark-calendar-ivr-inventory-archived.png": "8acb5523ed6bd310db62db8fda22dde53d16f23e0a30267855c2f162a8c8e82e",
+    "desktop-dark-calendar-ivr-inventory-history-preserved.png": "11bffb2fd26920674ee3537858d34095cbb32f2b824e92b9d73784549af7ce65",
+    "desktop-dark-ivr-calendar-open.png": "390f541b9203fe1dbdca8a4774d2a0eb338291681cd8dd9c8b0602c7bd68fa2e",
+    "desktop-dark-ivr-calendar-closed.png": "2285c7c4371369232c42bcbe77b818eae7decd1803ea489a5147ab69ba4999c4",
+    "mobile-light-calendar-ivr-inventory-current-heads.png": "7f452fefdc0f678d89f797b9c1a7693d035dd2a2b77f11a57b1b0d776336b331",
+    "mobile-light-calendar-ivr-inventory-page-two.png": "06ee1368db034aded8f834d78be1794e0cce52471ebb54a158e0c7608ea06950",
+    "mobile-light-calendar-ivr-inventory-archived.png": "d263411651971e34128c529c0f732f2c763abb7cccca95d96b22cb8e6e6af95e",
+    "mobile-light-calendar-ivr-inventory-history-preserved.png": "a16ba43933e42a53fbfbeed3750a5d2a1c8e9dd2af8cec2321cf06f1fd74b7eb",
+    "mobile-light-ivr-calendar-open.png": "7c509525544431ca582b4ddc16530993f2866fabcfd05ec5d37b534e6852af35",
+    "mobile-light-ivr-calendar-closed.png": "ac4eb56eac9b27cb11a3ec70d95a1e675d1ce08ceb964229e9fb62d616907cb1",
+    "mobile-dark-calendar-ivr-inventory-current-heads.png": "7dd33a9256b07fa9a0c6f4f37bbcb69b6a2c4b261abe3994f6b66b217988127f",
+    "mobile-dark-calendar-ivr-inventory-page-two.png": "1fbe73aaa333b7293476826eebf229bdbd083ee0177200bf20b3c5a7cef92033",
+    "mobile-dark-calendar-ivr-inventory-archived.png": "4abd0737b30d583f7fb2f5803fe749f0488233849eefcbedbeb3e366b4414b16",
+    "mobile-dark-calendar-ivr-inventory-history-preserved.png": "a06b67e0737c653057564a36a15c5d7c90fa3a2d041e6057c697a0c9f84d5714",
+    "mobile-dark-ivr-calendar-open.png": "1894edbdc1541619f4a320a07c6a72c660a0653611513ae7a567badcb0dd6f78",
+    "mobile-dark-ivr-calendar-closed.png": "691df5ff2f01a5900a3fd26b5356dbe6fad8a9f045d77e4580fd33ea4207a66e"
+  },
+  "prior_case_preservation": {
+    "call-center-rspec.json": {
+      "preserved": 2448,
+      "added": 18
+    },
+    "call-center-pabx-rspec.json": {
+      "preserved": 130,
+      "added": 0
+    },
+    "call-center-corporate-rspec.json": {
+      "preserved": 85,
+      "added": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "preserved": 175,
+      "added": 0
+    },
+    "vue": {
+      "preserved_with_full_multiplicity": 1495,
+      "added": 31
+    },
+    "chrome": {
+      "preserved": 248,
+      "added": 4
+    }
+  },
+  "native_inventory_contexts": {
+    "desktop-light": {
+      "sha": "a9206b847e90073fc552ce1519add4c4856fb689",
+      "synthetic": true,
+      "external_homologation": false,
+      "account_id": 2177,
+      "unit_id": "1564",
+      "calendar_id": "4723e56a-36bf-416c-a6d8-4390ea915154",
+      "exact_historical_pin": {
+        "calendar_id": "4723e56a-36bf-416c-a6d8-4390ea915154",
+        "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+        "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+        "snapshot": {
+          "id": "4723e56a-36bf-416c-a6d8-4390ea915154",
+          "active": true,
+          "definition": {
+            "name": "SYNTHETIC desktop-light usage inventory",
+            "weekly": {
+              "1": [
+                [
+                  "08:00",
+                  "12:00"
+                ]
+              ],
+              "2": [],
+              "3": [],
+              "4": [],
+              "5": [],
+              "6": [],
+              "7": []
+            },
+            "holidays": [],
+            "timezone": "America/Sao_Paulo",
+            "exceptions": [],
+            "description": ""
+          }
+        }
+      },
+      "first": {
+        "contract_version": 1,
+        "account_id": "2177",
+        "items": [
+          {
+            "draft_id": "181",
+            "draft_revision": 1,
+            "version_id": "202",
+            "name": "SYNTHETIC desktop-light usage 11",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "180",
+            "draft_revision": 1,
+            "version_id": "201",
+            "name": "SYNTHETIC desktop-light usage 10",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "179",
+            "draft_revision": 1,
+            "version_id": "200",
+            "name": "SYNTHETIC desktop-light usage 09",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "178",
+            "draft_revision": 1,
+            "version_id": "199",
+            "name": "SYNTHETIC desktop-light usage 08",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "177",
+            "draft_revision": 1,
+            "version_id": "198",
+            "name": "SYNTHETIC desktop-light usage 07",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "176",
+            "draft_revision": 1,
+            "version_id": "197",
+            "name": "SYNTHETIC desktop-light usage 06",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "175",
+            "draft_revision": 1,
+            "version_id": "196",
+            "name": "SYNTHETIC desktop-light usage 05",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "174",
+            "draft_revision": 1,
+            "version_id": "195",
+            "name": "SYNTHETIC desktop-light usage 04",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "173",
+            "draft_revision": 1,
+            "version_id": "194",
+            "name": "SYNTHETIC desktop-light usage 03",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "172",
+            "draft_revision": 1,
+            "version_id": "193",
+            "name": "SYNTHETIC desktop-light usage 02",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 12,
+          "pages": 2
+        },
+        "calendar_id": "4723e56a-36bf-416c-a6d8-4390ea915154",
+        "calendar_digest": "37cd7b0b453025840c0fe987bd74c4caf19b680194dbaad3f71232fc68191d16",
+        "unit_id": "1564",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "second": {
+        "contract_version": 1,
+        "account_id": "2177",
+        "items": [
+          {
+            "draft_id": "171",
+            "draft_revision": 1,
+            "version_id": "192",
+            "name": "SYNTHETIC desktop-light usage 01",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "170",
+            "draft_revision": 1,
+            "version_id": "191",
+            "name": "SYNTHETIC desktop-light usage 00",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 2,
+          "per_page": 10,
+          "total": 12,
+          "pages": 2
+        },
+        "calendar_id": "4723e56a-36bf-416c-a6d8-4390ea915154",
+        "calendar_digest": "37cd7b0b453025840c0fe987bd74c4caf19b680194dbaad3f71232fc68191d16",
+        "unit_id": "1564",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "searched": {
+        "contract_version": 1,
+        "account_id": "2177",
+        "items": [
+          {
+            "draft_id": "170",
+            "draft_revision": 1,
+            "version_id": "191",
+            "name": "SYNTHETIC desktop-light usage 00",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 1,
+          "pages": 1
+        },
+        "calendar_id": "4723e56a-36bf-416c-a6d8-4390ea915154",
+        "calendar_digest": "37cd7b0b453025840c0fe987bd74c4caf19b680194dbaad3f71232fc68191d16",
+        "unit_id": "1564",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "after_unlink": {
+        "contract_version": 1,
+        "account_id": "2177",
+        "items": [
+          {
+            "draft_id": "180",
+            "draft_revision": 2,
+            "version_id": "204",
+            "name": "SYNTHETIC desktop-light usage 10",
+            "status": "archived",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "179",
+            "draft_revision": 1,
+            "version_id": "200",
+            "name": "SYNTHETIC desktop-light usage 09",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "178",
+            "draft_revision": 1,
+            "version_id": "199",
+            "name": "SYNTHETIC desktop-light usage 08",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "177",
+            "draft_revision": 1,
+            "version_id": "198",
+            "name": "SYNTHETIC desktop-light usage 07",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "176",
+            "draft_revision": 1,
+            "version_id": "197",
+            "name": "SYNTHETIC desktop-light usage 06",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "175",
+            "draft_revision": 1,
+            "version_id": "196",
+            "name": "SYNTHETIC desktop-light usage 05",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "174",
+            "draft_revision": 1,
+            "version_id": "195",
+            "name": "SYNTHETIC desktop-light usage 04",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "173",
+            "draft_revision": 1,
+            "version_id": "194",
+            "name": "SYNTHETIC desktop-light usage 03",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "172",
+            "draft_revision": 1,
+            "version_id": "193",
+            "name": "SYNTHETIC desktop-light usage 02",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "171",
+            "draft_revision": 1,
+            "version_id": "192",
+            "name": "SYNTHETIC desktop-light usage 01",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 11,
+          "pages": 2
+        },
+        "calendar_id": "4723e56a-36bf-416c-a6d8-4390ea915154",
+        "calendar_digest": "37cd7b0b453025840c0fe987bd74c4caf19b680194dbaad3f71232fc68191d16",
+        "unit_id": "1564",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "archived": {
+        "contract_version": 1,
+        "account_id": "2177",
+        "items": [
+          {
+            "draft_id": "180",
+            "draft_revision": 2,
+            "version_id": "204",
+            "name": "SYNTHETIC desktop-light usage 10",
+            "status": "archived",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 1,
+          "pages": 1
+        },
+        "calendar_id": "4723e56a-36bf-416c-a6d8-4390ea915154",
+        "calendar_digest": "37cd7b0b453025840c0fe987bd74c4caf19b680194dbaad3f71232fc68191d16",
+        "unit_id": "1564",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "cleared": {
+        "contract_version": 1,
+        "account_id": "2177",
+        "items": [
+          {
+            "draft_id": "180",
+            "draft_revision": 2,
+            "version_id": "204",
+            "name": "SYNTHETIC desktop-light usage 10",
+            "status": "archived",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "179",
+            "draft_revision": 1,
+            "version_id": "200",
+            "name": "SYNTHETIC desktop-light usage 09",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "178",
+            "draft_revision": 1,
+            "version_id": "199",
+            "name": "SYNTHETIC desktop-light usage 08",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "177",
+            "draft_revision": 1,
+            "version_id": "198",
+            "name": "SYNTHETIC desktop-light usage 07",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "176",
+            "draft_revision": 1,
+            "version_id": "197",
+            "name": "SYNTHETIC desktop-light usage 06",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "175",
+            "draft_revision": 1,
+            "version_id": "196",
+            "name": "SYNTHETIC desktop-light usage 05",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "174",
+            "draft_revision": 1,
+            "version_id": "195",
+            "name": "SYNTHETIC desktop-light usage 04",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "173",
+            "draft_revision": 1,
+            "version_id": "194",
+            "name": "SYNTHETIC desktop-light usage 03",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "172",
+            "draft_revision": 1,
+            "version_id": "193",
+            "name": "SYNTHETIC desktop-light usage 02",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "171",
+            "draft_revision": 1,
+            "version_id": "192",
+            "name": "SYNTHETIC desktop-light usage 01",
+            "status": "draft",
+            "unit_id": "1564",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "f2e7b94d4c8476896dda739da1a34ef1d02ed6d14baa550b2baa9e7d1625168d",
+                "unit_revision": "c0d2667f5a17770bc12034d2356966ade307ac00805d3de0f0b30ac15c823228",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 11,
+          "pages": 2
+        },
+        "calendar_id": "4723e56a-36bf-416c-a6d8-4390ea915154",
+        "calendar_digest": "37cd7b0b453025840c0fe987bd74c4caf19b680194dbaad3f71232fc68191d16",
+        "unit_id": "1564",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "original_version_preserved": true,
+      "denied_statuses": [
+        404,
+        404,
+        401
+      ],
+      "page_errors": [],
+      "provider_writes": []
+    },
+    "desktop-dark": {
+      "sha": "a9206b847e90073fc552ce1519add4c4856fb689",
+      "synthetic": true,
+      "external_homologation": false,
+      "account_id": 2178,
+      "unit_id": "1566",
+      "calendar_id": "ac39e995-afeb-4f6f-bfbe-be69acfe6137",
+      "exact_historical_pin": {
+        "calendar_id": "ac39e995-afeb-4f6f-bfbe-be69acfe6137",
+        "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+        "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+        "snapshot": {
+          "id": "ac39e995-afeb-4f6f-bfbe-be69acfe6137",
+          "active": true,
+          "definition": {
+            "name": "SYNTHETIC desktop-dark usage inventory",
+            "weekly": {
+              "1": [
+                [
+                  "08:00",
+                  "12:00"
+                ]
+              ],
+              "2": [],
+              "3": [],
+              "4": [],
+              "5": [],
+              "6": [],
+              "7": []
+            },
+            "holidays": [],
+            "timezone": "America/Sao_Paulo",
+            "exceptions": [],
+            "description": ""
+          }
+        }
+      },
+      "first": {
+        "contract_version": 1,
+        "account_id": "2178",
+        "items": [
+          {
+            "draft_id": "221",
+            "draft_revision": 1,
+            "version_id": "250",
+            "name": "SYNTHETIC desktop-dark usage 11",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "220",
+            "draft_revision": 1,
+            "version_id": "249",
+            "name": "SYNTHETIC desktop-dark usage 10",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "219",
+            "draft_revision": 1,
+            "version_id": "248",
+            "name": "SYNTHETIC desktop-dark usage 09",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "218",
+            "draft_revision": 1,
+            "version_id": "247",
+            "name": "SYNTHETIC desktop-dark usage 08",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "217",
+            "draft_revision": 1,
+            "version_id": "246",
+            "name": "SYNTHETIC desktop-dark usage 07",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "216",
+            "draft_revision": 1,
+            "version_id": "245",
+            "name": "SYNTHETIC desktop-dark usage 06",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "215",
+            "draft_revision": 1,
+            "version_id": "244",
+            "name": "SYNTHETIC desktop-dark usage 05",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "214",
+            "draft_revision": 1,
+            "version_id": "243",
+            "name": "SYNTHETIC desktop-dark usage 04",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "213",
+            "draft_revision": 1,
+            "version_id": "242",
+            "name": "SYNTHETIC desktop-dark usage 03",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "212",
+            "draft_revision": 1,
+            "version_id": "241",
+            "name": "SYNTHETIC desktop-dark usage 02",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 12,
+          "pages": 2
+        },
+        "calendar_id": "ac39e995-afeb-4f6f-bfbe-be69acfe6137",
+        "calendar_digest": "6e18126f7a36df45f1ddd6bdae5ea9a6bc10f03e83721a0eab07c39350275033",
+        "unit_id": "1566",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "second": {
+        "contract_version": 1,
+        "account_id": "2178",
+        "items": [
+          {
+            "draft_id": "211",
+            "draft_revision": 1,
+            "version_id": "240",
+            "name": "SYNTHETIC desktop-dark usage 01",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "210",
+            "draft_revision": 1,
+            "version_id": "239",
+            "name": "SYNTHETIC desktop-dark usage 00",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 2,
+          "per_page": 10,
+          "total": 12,
+          "pages": 2
+        },
+        "calendar_id": "ac39e995-afeb-4f6f-bfbe-be69acfe6137",
+        "calendar_digest": "6e18126f7a36df45f1ddd6bdae5ea9a6bc10f03e83721a0eab07c39350275033",
+        "unit_id": "1566",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "searched": {
+        "contract_version": 1,
+        "account_id": "2178",
+        "items": [
+          {
+            "draft_id": "210",
+            "draft_revision": 1,
+            "version_id": "239",
+            "name": "SYNTHETIC desktop-dark usage 00",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 1,
+          "pages": 1
+        },
+        "calendar_id": "ac39e995-afeb-4f6f-bfbe-be69acfe6137",
+        "calendar_digest": "6e18126f7a36df45f1ddd6bdae5ea9a6bc10f03e83721a0eab07c39350275033",
+        "unit_id": "1566",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "after_unlink": {
+        "contract_version": 1,
+        "account_id": "2178",
+        "items": [
+          {
+            "draft_id": "220",
+            "draft_revision": 2,
+            "version_id": "252",
+            "name": "SYNTHETIC desktop-dark usage 10",
+            "status": "archived",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "219",
+            "draft_revision": 1,
+            "version_id": "248",
+            "name": "SYNTHETIC desktop-dark usage 09",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "218",
+            "draft_revision": 1,
+            "version_id": "247",
+            "name": "SYNTHETIC desktop-dark usage 08",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "217",
+            "draft_revision": 1,
+            "version_id": "246",
+            "name": "SYNTHETIC desktop-dark usage 07",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "216",
+            "draft_revision": 1,
+            "version_id": "245",
+            "name": "SYNTHETIC desktop-dark usage 06",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "215",
+            "draft_revision": 1,
+            "version_id": "244",
+            "name": "SYNTHETIC desktop-dark usage 05",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "214",
+            "draft_revision": 1,
+            "version_id": "243",
+            "name": "SYNTHETIC desktop-dark usage 04",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "213",
+            "draft_revision": 1,
+            "version_id": "242",
+            "name": "SYNTHETIC desktop-dark usage 03",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "212",
+            "draft_revision": 1,
+            "version_id": "241",
+            "name": "SYNTHETIC desktop-dark usage 02",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "211",
+            "draft_revision": 1,
+            "version_id": "240",
+            "name": "SYNTHETIC desktop-dark usage 01",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 11,
+          "pages": 2
+        },
+        "calendar_id": "ac39e995-afeb-4f6f-bfbe-be69acfe6137",
+        "calendar_digest": "6e18126f7a36df45f1ddd6bdae5ea9a6bc10f03e83721a0eab07c39350275033",
+        "unit_id": "1566",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "archived": {
+        "contract_version": 1,
+        "account_id": "2178",
+        "items": [
+          {
+            "draft_id": "220",
+            "draft_revision": 2,
+            "version_id": "252",
+            "name": "SYNTHETIC desktop-dark usage 10",
+            "status": "archived",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 1,
+          "pages": 1
+        },
+        "calendar_id": "ac39e995-afeb-4f6f-bfbe-be69acfe6137",
+        "calendar_digest": "6e18126f7a36df45f1ddd6bdae5ea9a6bc10f03e83721a0eab07c39350275033",
+        "unit_id": "1566",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "cleared": {
+        "contract_version": 1,
+        "account_id": "2178",
+        "items": [
+          {
+            "draft_id": "220",
+            "draft_revision": 2,
+            "version_id": "252",
+            "name": "SYNTHETIC desktop-dark usage 10",
+            "status": "archived",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "219",
+            "draft_revision": 1,
+            "version_id": "248",
+            "name": "SYNTHETIC desktop-dark usage 09",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "218",
+            "draft_revision": 1,
+            "version_id": "247",
+            "name": "SYNTHETIC desktop-dark usage 08",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "217",
+            "draft_revision": 1,
+            "version_id": "246",
+            "name": "SYNTHETIC desktop-dark usage 07",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "216",
+            "draft_revision": 1,
+            "version_id": "245",
+            "name": "SYNTHETIC desktop-dark usage 06",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "215",
+            "draft_revision": 1,
+            "version_id": "244",
+            "name": "SYNTHETIC desktop-dark usage 05",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "214",
+            "draft_revision": 1,
+            "version_id": "243",
+            "name": "SYNTHETIC desktop-dark usage 04",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "213",
+            "draft_revision": 1,
+            "version_id": "242",
+            "name": "SYNTHETIC desktop-dark usage 03",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "212",
+            "draft_revision": 1,
+            "version_id": "241",
+            "name": "SYNTHETIC desktop-dark usage 02",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "211",
+            "draft_revision": 1,
+            "version_id": "240",
+            "name": "SYNTHETIC desktop-dark usage 01",
+            "status": "draft",
+            "unit_id": "1566",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "be7c23ebba28e273c4c7d1f604a7fb3c2fb00dc0e5ffd165e7b5f148ca1da455",
+                "unit_revision": "0dfbddd0b4513dc42140ca916f5411e7c77f4ab1eb32d7189b901174bb4e7b50",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 11,
+          "pages": 2
+        },
+        "calendar_id": "ac39e995-afeb-4f6f-bfbe-be69acfe6137",
+        "calendar_digest": "6e18126f7a36df45f1ddd6bdae5ea9a6bc10f03e83721a0eab07c39350275033",
+        "unit_id": "1566",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "original_version_preserved": true,
+      "denied_statuses": [
+        404,
+        404,
+        401
+      ],
+      "page_errors": [],
+      "provider_writes": []
+    },
+    "mobile-light": {
+      "sha": "a9206b847e90073fc552ce1519add4c4856fb689",
+      "synthetic": true,
+      "external_homologation": false,
+      "account_id": 2179,
+      "unit_id": "1568",
+      "calendar_id": "044f7c23-8df1-42f0-868f-256ddbeb91c8",
+      "exact_historical_pin": {
+        "calendar_id": "044f7c23-8df1-42f0-868f-256ddbeb91c8",
+        "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+        "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+        "snapshot": {
+          "id": "044f7c23-8df1-42f0-868f-256ddbeb91c8",
+          "active": true,
+          "definition": {
+            "name": "SYNTHETIC mobile-light usage inventory",
+            "weekly": {
+              "1": [
+                [
+                  "08:00",
+                  "12:00"
+                ]
+              ],
+              "2": [],
+              "3": [],
+              "4": [],
+              "5": [],
+              "6": [],
+              "7": []
+            },
+            "holidays": [],
+            "timezone": "America/Sao_Paulo",
+            "exceptions": [],
+            "description": ""
+          }
+        }
+      },
+      "first": {
+        "contract_version": 1,
+        "account_id": "2179",
+        "items": [
+          {
+            "draft_id": "261",
+            "draft_revision": 1,
+            "version_id": "298",
+            "name": "SYNTHETIC mobile-light usage 11",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "260",
+            "draft_revision": 1,
+            "version_id": "297",
+            "name": "SYNTHETIC mobile-light usage 10",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "259",
+            "draft_revision": 1,
+            "version_id": "296",
+            "name": "SYNTHETIC mobile-light usage 09",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "258",
+            "draft_revision": 1,
+            "version_id": "295",
+            "name": "SYNTHETIC mobile-light usage 08",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "257",
+            "draft_revision": 1,
+            "version_id": "294",
+            "name": "SYNTHETIC mobile-light usage 07",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "256",
+            "draft_revision": 1,
+            "version_id": "293",
+            "name": "SYNTHETIC mobile-light usage 06",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "255",
+            "draft_revision": 1,
+            "version_id": "292",
+            "name": "SYNTHETIC mobile-light usage 05",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "254",
+            "draft_revision": 1,
+            "version_id": "291",
+            "name": "SYNTHETIC mobile-light usage 04",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "253",
+            "draft_revision": 1,
+            "version_id": "290",
+            "name": "SYNTHETIC mobile-light usage 03",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "252",
+            "draft_revision": 1,
+            "version_id": "289",
+            "name": "SYNTHETIC mobile-light usage 02",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 12,
+          "pages": 2
+        },
+        "calendar_id": "044f7c23-8df1-42f0-868f-256ddbeb91c8",
+        "calendar_digest": "a6e639f3a1650b49958dda9df3add6248630a5dda1289ef520de5714682c8437",
+        "unit_id": "1568",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "second": {
+        "contract_version": 1,
+        "account_id": "2179",
+        "items": [
+          {
+            "draft_id": "251",
+            "draft_revision": 1,
+            "version_id": "288",
+            "name": "SYNTHETIC mobile-light usage 01",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "250",
+            "draft_revision": 1,
+            "version_id": "287",
+            "name": "SYNTHETIC mobile-light usage 00",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 2,
+          "per_page": 10,
+          "total": 12,
+          "pages": 2
+        },
+        "calendar_id": "044f7c23-8df1-42f0-868f-256ddbeb91c8",
+        "calendar_digest": "a6e639f3a1650b49958dda9df3add6248630a5dda1289ef520de5714682c8437",
+        "unit_id": "1568",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "searched": {
+        "contract_version": 1,
+        "account_id": "2179",
+        "items": [
+          {
+            "draft_id": "250",
+            "draft_revision": 1,
+            "version_id": "287",
+            "name": "SYNTHETIC mobile-light usage 00",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 1,
+          "pages": 1
+        },
+        "calendar_id": "044f7c23-8df1-42f0-868f-256ddbeb91c8",
+        "calendar_digest": "a6e639f3a1650b49958dda9df3add6248630a5dda1289ef520de5714682c8437",
+        "unit_id": "1568",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "after_unlink": {
+        "contract_version": 1,
+        "account_id": "2179",
+        "items": [
+          {
+            "draft_id": "260",
+            "draft_revision": 2,
+            "version_id": "300",
+            "name": "SYNTHETIC mobile-light usage 10",
+            "status": "archived",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "259",
+            "draft_revision": 1,
+            "version_id": "296",
+            "name": "SYNTHETIC mobile-light usage 09",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "258",
+            "draft_revision": 1,
+            "version_id": "295",
+            "name": "SYNTHETIC mobile-light usage 08",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "257",
+            "draft_revision": 1,
+            "version_id": "294",
+            "name": "SYNTHETIC mobile-light usage 07",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "256",
+            "draft_revision": 1,
+            "version_id": "293",
+            "name": "SYNTHETIC mobile-light usage 06",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "255",
+            "draft_revision": 1,
+            "version_id": "292",
+            "name": "SYNTHETIC mobile-light usage 05",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "254",
+            "draft_revision": 1,
+            "version_id": "291",
+            "name": "SYNTHETIC mobile-light usage 04",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "253",
+            "draft_revision": 1,
+            "version_id": "290",
+            "name": "SYNTHETIC mobile-light usage 03",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "252",
+            "draft_revision": 1,
+            "version_id": "289",
+            "name": "SYNTHETIC mobile-light usage 02",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "251",
+            "draft_revision": 1,
+            "version_id": "288",
+            "name": "SYNTHETIC mobile-light usage 01",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 11,
+          "pages": 2
+        },
+        "calendar_id": "044f7c23-8df1-42f0-868f-256ddbeb91c8",
+        "calendar_digest": "a6e639f3a1650b49958dda9df3add6248630a5dda1289ef520de5714682c8437",
+        "unit_id": "1568",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "archived": {
+        "contract_version": 1,
+        "account_id": "2179",
+        "items": [
+          {
+            "draft_id": "260",
+            "draft_revision": 2,
+            "version_id": "300",
+            "name": "SYNTHETIC mobile-light usage 10",
+            "status": "archived",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 1,
+          "pages": 1
+        },
+        "calendar_id": "044f7c23-8df1-42f0-868f-256ddbeb91c8",
+        "calendar_digest": "a6e639f3a1650b49958dda9df3add6248630a5dda1289ef520de5714682c8437",
+        "unit_id": "1568",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "cleared": {
+        "contract_version": 1,
+        "account_id": "2179",
+        "items": [
+          {
+            "draft_id": "260",
+            "draft_revision": 2,
+            "version_id": "300",
+            "name": "SYNTHETIC mobile-light usage 10",
+            "status": "archived",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "259",
+            "draft_revision": 1,
+            "version_id": "296",
+            "name": "SYNTHETIC mobile-light usage 09",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "258",
+            "draft_revision": 1,
+            "version_id": "295",
+            "name": "SYNTHETIC mobile-light usage 08",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "257",
+            "draft_revision": 1,
+            "version_id": "294",
+            "name": "SYNTHETIC mobile-light usage 07",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "256",
+            "draft_revision": 1,
+            "version_id": "293",
+            "name": "SYNTHETIC mobile-light usage 06",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "255",
+            "draft_revision": 1,
+            "version_id": "292",
+            "name": "SYNTHETIC mobile-light usage 05",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "254",
+            "draft_revision": 1,
+            "version_id": "291",
+            "name": "SYNTHETIC mobile-light usage 04",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "253",
+            "draft_revision": 1,
+            "version_id": "290",
+            "name": "SYNTHETIC mobile-light usage 03",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "252",
+            "draft_revision": 1,
+            "version_id": "289",
+            "name": "SYNTHETIC mobile-light usage 02",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "251",
+            "draft_revision": 1,
+            "version_id": "288",
+            "name": "SYNTHETIC mobile-light usage 01",
+            "status": "draft",
+            "unit_id": "1568",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "b6398d48b0bb8d24f5a3f648d3030ba7006cbaf0c3502cdcb211ec359b35968f",
+                "unit_revision": "3729c90569dd513411c939b262e19c72694a3358cfd5f130f9829fe869180419",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 11,
+          "pages": 2
+        },
+        "calendar_id": "044f7c23-8df1-42f0-868f-256ddbeb91c8",
+        "calendar_digest": "a6e639f3a1650b49958dda9df3add6248630a5dda1289ef520de5714682c8437",
+        "unit_id": "1568",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "original_version_preserved": true,
+      "denied_statuses": [
+        404,
+        404,
+        401
+      ],
+      "page_errors": [],
+      "provider_writes": []
+    },
+    "mobile-dark": {
+      "sha": "a9206b847e90073fc552ce1519add4c4856fb689",
+      "synthetic": true,
+      "external_homologation": false,
+      "account_id": 2180,
+      "unit_id": "1570",
+      "calendar_id": "936d592d-555d-4f04-928d-645104804bfc",
+      "exact_historical_pin": {
+        "calendar_id": "936d592d-555d-4f04-928d-645104804bfc",
+        "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+        "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+        "snapshot": {
+          "id": "936d592d-555d-4f04-928d-645104804bfc",
+          "active": true,
+          "definition": {
+            "name": "SYNTHETIC mobile-dark usage inventory",
+            "weekly": {
+              "1": [
+                [
+                  "08:00",
+                  "12:00"
+                ]
+              ],
+              "2": [],
+              "3": [],
+              "4": [],
+              "5": [],
+              "6": [],
+              "7": []
+            },
+            "holidays": [],
+            "timezone": "America/Sao_Paulo",
+            "exceptions": [],
+            "description": ""
+          }
+        }
+      },
+      "first": {
+        "contract_version": 1,
+        "account_id": "2180",
+        "items": [
+          {
+            "draft_id": "301",
+            "draft_revision": 1,
+            "version_id": "346",
+            "name": "SYNTHETIC mobile-dark usage 11",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "300",
+            "draft_revision": 1,
+            "version_id": "345",
+            "name": "SYNTHETIC mobile-dark usage 10",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "299",
+            "draft_revision": 1,
+            "version_id": "344",
+            "name": "SYNTHETIC mobile-dark usage 09",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "298",
+            "draft_revision": 1,
+            "version_id": "343",
+            "name": "SYNTHETIC mobile-dark usage 08",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "297",
+            "draft_revision": 1,
+            "version_id": "342",
+            "name": "SYNTHETIC mobile-dark usage 07",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "296",
+            "draft_revision": 1,
+            "version_id": "341",
+            "name": "SYNTHETIC mobile-dark usage 06",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "295",
+            "draft_revision": 1,
+            "version_id": "340",
+            "name": "SYNTHETIC mobile-dark usage 05",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "294",
+            "draft_revision": 1,
+            "version_id": "339",
+            "name": "SYNTHETIC mobile-dark usage 04",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "293",
+            "draft_revision": 1,
+            "version_id": "338",
+            "name": "SYNTHETIC mobile-dark usage 03",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "292",
+            "draft_revision": 1,
+            "version_id": "337",
+            "name": "SYNTHETIC mobile-dark usage 02",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 12,
+          "pages": 2
+        },
+        "calendar_id": "936d592d-555d-4f04-928d-645104804bfc",
+        "calendar_digest": "cc8a8eec0e48f1e065887fac457889eb804de0f2460dddfb3cd9c31c5cffe11e",
+        "unit_id": "1570",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "second": {
+        "contract_version": 1,
+        "account_id": "2180",
+        "items": [
+          {
+            "draft_id": "291",
+            "draft_revision": 1,
+            "version_id": "336",
+            "name": "SYNTHETIC mobile-dark usage 01",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "290",
+            "draft_revision": 1,
+            "version_id": "335",
+            "name": "SYNTHETIC mobile-dark usage 00",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 2,
+          "per_page": 10,
+          "total": 12,
+          "pages": 2
+        },
+        "calendar_id": "936d592d-555d-4f04-928d-645104804bfc",
+        "calendar_digest": "cc8a8eec0e48f1e065887fac457889eb804de0f2460dddfb3cd9c31c5cffe11e",
+        "unit_id": "1570",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "searched": {
+        "contract_version": 1,
+        "account_id": "2180",
+        "items": [
+          {
+            "draft_id": "290",
+            "draft_revision": 1,
+            "version_id": "335",
+            "name": "SYNTHETIC mobile-dark usage 00",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 1,
+          "pages": 1
+        },
+        "calendar_id": "936d592d-555d-4f04-928d-645104804bfc",
+        "calendar_digest": "cc8a8eec0e48f1e065887fac457889eb804de0f2460dddfb3cd9c31c5cffe11e",
+        "unit_id": "1570",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "after_unlink": {
+        "contract_version": 1,
+        "account_id": "2180",
+        "items": [
+          {
+            "draft_id": "300",
+            "draft_revision": 2,
+            "version_id": "348",
+            "name": "SYNTHETIC mobile-dark usage 10",
+            "status": "archived",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "299",
+            "draft_revision": 1,
+            "version_id": "344",
+            "name": "SYNTHETIC mobile-dark usage 09",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "298",
+            "draft_revision": 1,
+            "version_id": "343",
+            "name": "SYNTHETIC mobile-dark usage 08",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "297",
+            "draft_revision": 1,
+            "version_id": "342",
+            "name": "SYNTHETIC mobile-dark usage 07",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "296",
+            "draft_revision": 1,
+            "version_id": "341",
+            "name": "SYNTHETIC mobile-dark usage 06",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "295",
+            "draft_revision": 1,
+            "version_id": "340",
+            "name": "SYNTHETIC mobile-dark usage 05",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "294",
+            "draft_revision": 1,
+            "version_id": "339",
+            "name": "SYNTHETIC mobile-dark usage 04",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "293",
+            "draft_revision": 1,
+            "version_id": "338",
+            "name": "SYNTHETIC mobile-dark usage 03",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "292",
+            "draft_revision": 1,
+            "version_id": "337",
+            "name": "SYNTHETIC mobile-dark usage 02",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "291",
+            "draft_revision": 1,
+            "version_id": "336",
+            "name": "SYNTHETIC mobile-dark usage 01",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 11,
+          "pages": 2
+        },
+        "calendar_id": "936d592d-555d-4f04-928d-645104804bfc",
+        "calendar_digest": "cc8a8eec0e48f1e065887fac457889eb804de0f2460dddfb3cd9c31c5cffe11e",
+        "unit_id": "1570",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "archived": {
+        "contract_version": 1,
+        "account_id": "2180",
+        "items": [
+          {
+            "draft_id": "300",
+            "draft_revision": 2,
+            "version_id": "348",
+            "name": "SYNTHETIC mobile-dark usage 10",
+            "status": "archived",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 1,
+          "pages": 1
+        },
+        "calendar_id": "936d592d-555d-4f04-928d-645104804bfc",
+        "calendar_digest": "cc8a8eec0e48f1e065887fac457889eb804de0f2460dddfb3cd9c31c5cffe11e",
+        "unit_id": "1570",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "cleared": {
+        "contract_version": 1,
+        "account_id": "2180",
+        "items": [
+          {
+            "draft_id": "300",
+            "draft_revision": 2,
+            "version_id": "348",
+            "name": "SYNTHETIC mobile-dark usage 10",
+            "status": "archived",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "299",
+            "draft_revision": 1,
+            "version_id": "344",
+            "name": "SYNTHETIC mobile-dark usage 09",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "298",
+            "draft_revision": 1,
+            "version_id": "343",
+            "name": "SYNTHETIC mobile-dark usage 08",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "297",
+            "draft_revision": 1,
+            "version_id": "342",
+            "name": "SYNTHETIC mobile-dark usage 07",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "296",
+            "draft_revision": 1,
+            "version_id": "341",
+            "name": "SYNTHETIC mobile-dark usage 06",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "295",
+            "draft_revision": 1,
+            "version_id": "340",
+            "name": "SYNTHETIC mobile-dark usage 05",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "294",
+            "draft_revision": 1,
+            "version_id": "339",
+            "name": "SYNTHETIC mobile-dark usage 04",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "293",
+            "draft_revision": 1,
+            "version_id": "338",
+            "name": "SYNTHETIC mobile-dark usage 03",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "292",
+            "draft_revision": 1,
+            "version_id": "337",
+            "name": "SYNTHETIC mobile-dark usage 02",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          },
+          {
+            "draft_id": "291",
+            "draft_revision": 1,
+            "version_id": "336",
+            "name": "SYNTHETIC mobile-dark usage 01",
+            "status": "draft",
+            "unit_id": "1570",
+            "references": [
+              {
+                "node_id": "hours",
+                "sha256": "addcd637d23d7f04f9c209208cd73272fd3baa1c679c02415b470eeb8835ec72",
+                "unit_revision": "3364dfad3668973571b5c990ffa2f7e46d43d49f5da68825a01ffc1fbbfeea69",
+                "calendar_changed": true
+              }
+            ],
+            "local_only": true,
+            "provider_applied": false
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "per_page": 10,
+          "total": 11,
+          "pages": 2
+        },
+        "calendar_id": "936d592d-555d-4f04-928d-645104804bfc",
+        "calendar_digest": "cc8a8eec0e48f1e065887fac457889eb804de0f2460dddfb3cd9c31c5cffe11e",
+        "unit_id": "1570",
+        "local_only": true,
+        "pabx_confirmed": false,
+        "coverage": "current_local_ivr_drafts_only",
+        "provider_configuration_verified": false
+      },
+      "original_version_preserved": true,
+      "denied_statuses": [
+        404,
+        404,
+        401
+      ],
+      "page_errors": [],
+      "provider_writes": []
+    }
+  },
+  "datetime_computed_theme_receipts": {
+    "desktop-light": {
+      "sha": "a9206b847e90073fc552ce1519add4c4856fb689",
+      "computed_color_scheme": "light",
+      "source": "desktop-light-ivr-calendar-native.json",
+      "actual_icon_visual_review_pending": true
+    },
+    "desktop-dark": {
+      "sha": "a9206b847e90073fc552ce1519add4c4856fb689",
+      "computed_color_scheme": "dark",
+      "source": "desktop-dark-ivr-calendar-native.json",
+      "actual_icon_visual_review_pending": true
+    },
+    "mobile-light": {
+      "sha": "a9206b847e90073fc552ce1519add4c4856fb689",
+      "computed_color_scheme": "light",
+      "source": "mobile-light-ivr-calendar-native.json",
+      "actual_icon_visual_review_pending": true
+    },
+    "mobile-dark": {
+      "sha": "a9206b847e90073fc552ce1519add4c4856fb689",
+      "computed_color_scheme": "dark",
+      "source": "mobile-dark-ivr-calendar-native.json",
+      "actual_icon_visual_review_pending": true
+    }
+  },
+  "visual_findings": [
+    "All16inventory captures have legible native light/dark text and notices, within1440x1000 and390x844",
+    "Search/status fields, wrapped exact hashes, current revision/state, changed-source warning and existing URA-list links are visible",
+    "Page2 shows distinct current records; archived results retain the current archived revision and the original historical pin",
+    "Internal content scrolls within the dialog while the close footer remains reachable; no horizontal viewport overflow was found",
+    "All8simulation captures show the native calendar icon in the correct light/dark scheme, explicit timezone and distinct open/node2 or closed/node3 results",
+    "No screenshot claims PABX publication, a provider-applied configuration, actual calls or an externally confirmed inventory"
+  ],
+  "nonblocking_limits": [
+    "Long lists are intentionally scrolled inside the dialog; some mobile shots show only the first row and require vertical scrolling for pagination",
+    "Some shots capture a transient disabled save/filter state; subsequent actions and persistence are independently proven by the native scenarios",
+    "The datetime widget follows the runner browser locale; synthetic data and graph node identifiers contain English fixture names",
+    "Inherited list bullets touch the inner left boundary; text, controls and links remain within the viewport",
+    "Only this increment is accepted; the complete23figures and provider homologation remain open"
+  ],
+  "native_accepted": true,
+  "visual_increment_accepted": true,
+  "whole_word_complete": false,
+  "historical12migrations_unchanged": true,
+  "runtime_catalog_reparenting_not_enabled": true,
+  "synthetic_sql_fault_injection_is_not_a_supported_operation": true,
+  "remaining": [
+    "Mandatory pause integration uses Central and every affected company/unit; implementation and native proof still incomplete",
+    "Full provider contract, PABX application/ACKs and external homologation remain unavailable",
+    "Other open23figure criteria remain recorded in the cumulative matrix"
+  ],
+  "main_merge_docker_publication_deploy_or_production_change": false
+}

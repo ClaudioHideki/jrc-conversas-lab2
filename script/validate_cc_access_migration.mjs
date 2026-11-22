@@ -55,6 +55,12 @@ export const reviewedMigrations = Object.freeze({
   [qualityReviewMigrationPath]: qualityReviewMigrationHash,
   [teamSupervisionMigrationPath]: teamSupervisionMigrationHash,
 });
+export const pauseApprovalMigrationPath = 'db/migrate/20261122120000_create_contact_center_pause_approval_evidence.rb';
+export const pauseApprovalMigrationHash = '870762a704add439c495d148bef900a3184b84d715131a2abab3fbf9577a96c0';
+export const pauseApprovalSqlSources = Object.freeze({
+  "db/functions/20261122120000_contact_center_pause_approval_evidence.sql": "98db0077317bf9a8df0e94a2f403913e022ea1db91d0059f883c474d2a4a19e3",
+  "lib/jrc_contact_center/pause_approval_schema_receipt.rb": "2ff201721493e14ea1090d185177f86180cfa844362b7f3c61a1068c9629e653"
+});
 const base = 'a24adc6dd8bb660f955b76cce0172ae1638deee2';
 
 export function verifyAccessMigration(changes, content, schema) {
@@ -95,9 +101,29 @@ export function verifyReviewedMigrations(changes, readCurrent, schema) {
   return validateNewMigrationTimestamps(schema, expected);
 }
 
+// Current exact admission adds one empty evidence domain. The original1/12verifiers and every historical hash remain unchanged.
+export function verifyPauseApprovalMigrations(changes, readCurrent, schema) {
+  const migrations = [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath].sort();
+  const sqlPaths = Object.keys(pauseApprovalSqlSources).filter(path => path.startsWith('db/'));
+  const expected = [...migrations, ...sqlPaths].map(path => `A\t${path}`).sort();
+  const rows = changes.trim().split('\n').filter(Boolean).sort();
+  if (JSON.stringify(rows) !== JSON.stringify(expected))
+    throw new Error('Only13exact reviewed migrations and their exact additive SQL are admitted; all other database changes remain blocked.');
+  if (createHash('sha256').update(readCurrent(pauseApprovalMigrationPath)).digest('hex') !== pauseApprovalMigrationHash)
+    throw new Error('Reviewed pause approval migration content changed.');
+  for (const [path, expectedHash] of Object.entries(pauseApprovalSqlSources)) {
+    if (createHash('sha256').update(readCurrent(path)).digest('hex') !== expectedHash)
+      throw new Error(`Reviewed pause approval SQL/receipt source changed: ${path}`);
+  }
+  const legacyChanges = Object.keys(reviewedMigrations).map(path => `A\t${path}`).join('\n');
+  verifyReviewedMigrations(legacyChanges, readCurrent, schema);
+  return validateNewMigrationTimestamps(schema, migrations);
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql'], { encoding: 'utf8' });
+  const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyReviewedMigrations(changes, readFileSync, schema);
-  console.log(JSON.stringify({ protectedBase: base, reviewedMigrations, ...result }));
+  const result = verifyPauseApprovalMigrations(changes, readFileSync, schema);
+  console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
+    [pauseApprovalMigrationPath]: pauseApprovalMigrationHash }, pauseApprovalSqlSources, ...result }));
 }

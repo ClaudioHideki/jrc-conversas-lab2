@@ -100,14 +100,14 @@ class JrcContactCenter::AgentStateManager
     validate_operator_state!(state, attributes, expected_version, deferred_request)
     previous = state.current
     values = attributes.except(:justification).merge(started_at: Time.current, source: LOCAL_SOURCE, external_event_id: event_id,
-                                                     metadata: operator_metadata(attributes, digest))
+                                                     metadata: operator_metadata(attributes, digest, deferred_request))
     event = events.create!(values)
     close_previous(previous, event)
     sync_native_availability(attributes)
     event
   end
 
-  def operator_metadata(attributes, digest)
+  def operator_metadata(attributes, digest, deferred_request = nil)
     metadata = { 'request_digest' => digest, 'provider_confirmed' => false }
     return metadata unless attributes[:state] == 'paused'
 
@@ -116,6 +116,9 @@ class JrcContactCenter::AgentStateManager
     catalog = JrcContactCenter::PauseCatalog.new(account: @account)
     definition = catalog.selection(attributes[:reason_code], member: @member, memberships: memberships)
     validate_pause_justification!(attributes, definition, catalog.enforced?)
+    metadata.merge!(JrcContactCenter::PauseApprovalGate.new(account: @account, member: @member).call(
+      definition: definition, deferred_request: deferred_request
+    ))
 
     metadata['pause_justification'] = attributes[:justification] if attributes[:justification]
     definition ? metadata.merge('pause_definition' => definition) : metadata

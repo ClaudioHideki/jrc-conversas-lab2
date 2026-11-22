@@ -16,13 +16,22 @@ class JrcContactCenter::DeferredPauseProjection
       next unless @member.user.reload.active_for_authentication? && JrcContactCenter::ModulePolicy.new(context, :contact_center).operate?
 
       payload = record.operator_payload
-      next payload.merge('private_details_available' => true) if details_available?(record)
+      next payload.merge('private_details_available' => true).merge(approval_payload(record)) if details_available?(record)
 
       payload.except('reason_code', 'reason_label', 'queue_id', 'justification').merge('private_details_available' => false)
     end
   end
 
   private
+
+  def approval_payload(record)
+    return {} unless %w[pending blocked].include?(record.state)
+
+    return {} unless JrcContactCenter::PauseApprovalReview.exists?(account: @account, deferred_pause_request_id: record.id)
+
+    status = JrcContactCenter::PauseApprovalReadiness.new(account: @account, member: @member).call(record)
+    { 'approval' => status }
+  end
 
   def details_available?(record)
     return false unless record.actor_user_id == @member.user_id

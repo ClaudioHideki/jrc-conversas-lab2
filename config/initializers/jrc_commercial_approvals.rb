@@ -5,4 +5,5 @@ Rails.application.config.to_prepare do
   JrcApprovals::GratuityCatalog.install!
   JrcBackoffice::AuthorityCatalog.install!
   JrcRelationship::DistributionApprovalCatalog.install!
+  JrcContactCenter::PauseApprovalCatalog.install!
 end

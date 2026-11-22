@@ -3,11 +3,12 @@ require_relative 'jrc_call_center_state_history_seed'
 require_relative 'jrc_call_center_ending_reason_seed'
 require_relative 'jrc_call_center_audio_folder_seed'
 require_relative 'jrc_call_center_team_supervision_seed'
+require_relative 'jrc_call_center_pause_approval_seed'
 
 # Exclusive synthetic accounts; no channels, inboxes or PABX configuration.
 class JrcContactCenter::SyntheticPauseSeed
   PENDING_ACW_PROJECTS = %w[
-    -acw_draft -acw_review -acw_navigation -deferred_pause -deferred_pause_retry -operational_forms -form_bindings -hoya_forms
+    -acw_draft -acw_review -acw_navigation -deferred_pause -deferred_pause_retry -operational_forms -form_bindings -hoya_forms -approval
   ].freeze
 
   def self.call(projects:)
@@ -23,7 +24,7 @@ class JrcContactCenter::SyntheticPauseSeed
       %w[
         editor operations withdrawal duration acw routing state_history
         team_withdrawal team_activity acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
-        operational_forms form_bindings hoya_forms required_endings membership_eligibility audio_folders team_supervision
+        operational_forms form_bindings hoya_forms required_endings membership_eligibility audio_folders team_supervision approval
       ].index_with do |kind|
         new("#{project}-#{kind}").call
       end
@@ -56,6 +57,9 @@ class JrcContactCenter::SyntheticPauseSeed
       payload.merge!(JrcContactCenter::SyntheticAudioFolderSeed.call(account: @account, queues: queues, member: admin))
     end
     prepare_special_sources(payload, queues.first, admin, operator)
+    if @project.end_with?('-approval')
+      payload.merge!(JrcContactCenter::SyntheticPauseApprovalSeed.call(account: @account, admin: admin, operator: operator, queues: queues))
+    end
     payload.merge!(pending_qualification(queues.first, operator)) if @project.end_with?(*PENDING_ACW_PROJECTS)
     payload
   end

@@ -262,9 +262,21 @@ export default {
     return axios.get(`${base(accountId)}/${paths[resource]}/${Number(id)}`);
   },
   pauseCatalog: accountId => axios.get(`${base(accountId)}/pause_catalog`),
-  requestDeferredPause: (accountId, values) =>
+  requestDeferredPause: (accountId, values, approvalDigest) =>
     axios.post(`${base(accountId)}/deferred_pause_request`, {
       deferred_pause_request: values,
+      ...(approvalDigest ? { expected_approval_digest: approvalDigest } : {}),
+    }),
+  previewPauseApproval: (accountId, values) =>
+    axios.post(`${base(accountId)}/deferred_pause_request/preview`, {
+      deferred_pause_request: values,
+    }),
+  applyApprovedPause: (accountId, requestId, stateVersion) =>
+    axios.post(`${base(accountId)}/deferred_pause_request/apply`, {
+      deferred_pause_request: {
+        request_id: requestId,
+        expected_state_version: stateVersion,
+      },
     }),
   cancelDeferredPause: (accountId, requestId) =>
     axios.delete(`${base(accountId)}/deferred_pause_request`, {

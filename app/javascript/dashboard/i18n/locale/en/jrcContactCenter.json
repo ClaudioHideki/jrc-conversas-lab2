@@ -2903,6 +2903,38 @@
       "IDENTITY": "URA {id} · revisão interna {revision}",
       "REFERENCE": "Nó {id} · SHA-256 {sha}",
       "TOTAL": "Total {total} · Página {page}"
+    },
+    "PAUSE_APPROVAL": {
+      "CATALOG_REQUIRED": "Exigir aprovação pela Central de Aprovações",
+      "CATALOG_POLICY": "Vale somente após ativar o catálogo nesta conta. Cada empresa e unidade afetada precisa de uma política aplicável e de aprovação válida. Nenhuma permissão ou política é criada automaticamente.",
+      "REVIEW_TITLE": "Revisar pausa com aprovação",
+      "REQUEST_CONFIRM": "Solicitar todas as aprovações",
+      "ALL_AFFECTED": "A pausa é do agente na conta inteira. A aprovação deve cobrir todas as empresas e unidades afetadas; a fila selecionada não reduz esse escopo.",
+      "NO_EARLY_PAUSE": "A solicitação não aplica a pausa nem retira a disponibilidade antes das aprovações. Chamadas e ACW seguem suas regras atuais.",
+      "SCOPE": "Empresa #{company} · Unidade de negócio #{unit}",
+      "REQUEST": "Solicitação #{id}",
+      "READY": "Todas as aprovações estão válidas. A pausa ainda precisa ser aplicada.",
+      "APPROVAL_REQUIRED": "Aguardando as aprovações de todos os escopos afetados.",
+      "REVIEW_REQUIRED": "O contexto mudou ou perdeu autorização. Cancele a solicitação e revise o impacto antes de criar outra.",
+      "POLICY_MISSING": "Falta uma política de aprovação aplicável neste escopo.",
+      "APPLY": "Aplicar pausa aprovada",
+      "APPLY_REVIEW": "O servidor conferirá novamente todas as aprovações e permissões. A pausa somente será aplicada após o fim da chamada e a conclusão do ACW. Nenhum comando será enviado ao PABX.",
+      "PREVIEW_FAILED": "Não foi possível conferir o impacto completo. Nenhuma solicitação de aprovação ou pausa foi criada.",
+      "RETRY_PREVIEW": "Conferir impacto novamente",
+      "PENDING": "Pendente",
+      "APPROVED": "Aprovada",
+      "REJECTED": "Rejeitada",
+      "RETURNED": "Devolvida",
+      "ESCALATED": "Escalada",
+      "CANCELLED": "Cancelada",
+      "EXPIRED": "Expirada",
+      "STALE": "Contexto desatualizado",
+      "UNAVAILABLE": "A Central não pôde criar todas as aprovações exigidas. Confira as políticas e os aprovadores elegíveis; nenhuma pausa ou aprovação parcial foi confirmada.",
+      "ORIGIN_TITLE": "Contexto registrado da pausa",
+      "ORIGIN_SCOPE_ONLY": "Esta solicitação cobre somente as unidades listadas. A pausa exige aprovações válidas de todos os escopos afetados.",
+      "ORIGIN_HISTORICAL": "Identificação do contexto completo registrado. Este painel é histórico; a autorização atual será conferida novamente ao decidir e ao aplicar a pausa.",
+      "ORIGIN_PRIVATE": "A justificativa pessoal permanece privada. Nenhum comando ao PABX será executado por esta decisão.",
+      "ORIGIN_UNVERIFIED": "Não foi possível conferir o contexto registrado desta pausa. A decisão está bloqueada até recuperar os dados corretos."
     }
   }
 }

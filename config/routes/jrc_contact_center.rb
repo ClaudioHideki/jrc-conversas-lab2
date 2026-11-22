@@ -37,7 +37,10 @@ namespace :api, defaults: { format: 'json' } do
     resources :accounts, only: [] do
       namespace :jrc_contact_center, module: 'accounts/jrc_contact_center' do
         resource :pause_catalog, only: %i[show update], controller: 'pause_catalogs'
-        resource :deferred_pause_request, only: %i[create destroy], controller: 'deferred_pause_requests'
+        resource :deferred_pause_request, only: %i[create destroy], controller: 'deferred_pause_requests' do
+          post :preview
+          post :apply
+        end
         resources :qualifications, only: [] do
           patch :draft, on: :member
           get :form_context, on: :member

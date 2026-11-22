@@ -18,6 +18,7 @@ import ModalHeader from 'dashboard/components/ModalHeader.vue';
 import SnackbarContainer from 'dashboard/components/SnackbarContainer.vue';
 import CustomRolesHome from 'dashboard/routes/dashboard/settings/customRoles/Index.vue';
 import PendingAcwFixture from './PendingAcwFixture.vue';
+import { routes as approvalRoutes } from 'dashboard/routes/dashboard/approvals/routes';
 import { routes as webphoneRoutes } from 'dashboard/routes/dashboard/webphone/routes';
 import { routes as contactCenterRoutes } from 'dashboard/routes/dashboard/jrcContactCenter/routes';
 import { validateLoggedInRoutes } from 'dashboard/helper/routeHelpers';
@@ -42,6 +43,7 @@ Object.assign(
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    ...approvalRoutes,
     ...teamRoutes.routes.flatMap(parent =>
       parent.children
         .filter(child => child.path)
@@ -145,7 +147,9 @@ const store = createStore({
 router.beforeEach(async to => {
   if (
     !nativeNavigation &&
-    !['ramal_settings', 'jrc_contact_center_ivr'].includes(to.name) &&
+    !['ramal_settings', 'jrc_contact_center_ivr', 'jrc_approvals'].includes(
+      to.name
+    ) &&
     !String(to.name).startsWith('settings_teams_')
   )
     return true;

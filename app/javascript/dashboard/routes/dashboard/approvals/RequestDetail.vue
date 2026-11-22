@@ -13,6 +13,8 @@ import ApprovalRequestReport from './ApprovalRequestReport.vue';
 import DistributionApprovalOrigin from './DistributionApprovalOrigin.vue';
 import Icon from 'next/icon/Icon.vue';
 import ApprovalStatus from './ApprovalStatus.vue';
+import PauseOrigin from './PauseOrigin.vue';
+import { validPauseOrigin } from './pauseOriginPresentation';
 const props = defineProps({
   request: { type: Object, required: true },
   context: { type: Object, default: null },
@@ -36,9 +38,20 @@ const decisionColor = decision => {
   if (decision === 'rejected') return 'ruby';
   return 'amber';
 };
+const pauseOriginRequired = computed(
+  () =>
+    props.request.module_key === 'contact_center' &&
+    props.request.event_key === 'pause'
+);
+const originReady = computed(
+  () => !pauseOriginRequired.value || validPauseOrigin(props.request)
+);
 const reason = ref('');
 const choices = computed(() => decisionChoices(props.request));
 const selectedChoice = ref(null);
+watch(originReady, ready => {
+  if (!ready) selectedChoice.value = null;
+});
 const adjusting = ref(false);
 const authoritySection = ref(null);
 const showAuthority = async () => {
@@ -48,7 +61,12 @@ const showAuthority = async () => {
   authoritySection.value?.focus({ preventScroll: true });
 };
 const choose = choice => {
-  if (!props.readOnly && !props.busy && reason.value.trim())
+  if (
+    !props.readOnly &&
+    !props.busy &&
+    originReady.value &&
+    reason.value.trim()
+  )
     selectedChoice.value = choice;
 };
 const label = (choice, index) => {
@@ -90,6 +108,7 @@ const confirm = payload => {
   if (
     !props.readOnly &&
     !props.busy &&
+    originReady.value &&
     selectedChoice.value &&
     props.request.lock_version === payload.expected_version
   )
@@ -191,7 +210,12 @@ const confirm = payload => {
     >
       <DistributionApprovalOrigin :request="request" />
     </section>
+    <PauseOrigin
+      v-if="pauseOriginRequired"
+      :request="request"
+    />
     <ApprovalOriginLink
+      v-if="!pauseOriginRequired"
       :request="request"
       :account-id="context?.account_id"
       @authority="showAuthority"
@@ -239,7 +263,7 @@ const confirm = payload => {
             :key="index"
             :label="label(choice, index)"
             :color="decisionColor(choice.decision)"
-            :disabled="busy || !reason.trim()"
+            :disabled="busy || !originReady || !reason.trim()"
             @click="choose(choice)"
           />
         </div>
@@ -285,7 +309,12 @@ const confirm = payload => {
       @confirm="confirm"
     >
       <template #origin>
+        <PauseOrigin
+          v-if="pauseOriginRequired"
+          :request="request"
+        />
         <ApprovalOriginLink
+          v-if="!pauseOriginRequired"
           :request="request"
           :account-id="context?.account_id"
           @authority="showAuthority"

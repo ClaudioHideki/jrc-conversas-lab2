@@ -5,6 +5,7 @@ import Icon from 'dashboard/components-next/icon/Icon.vue';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import VisualStatusBadge from '../components/visual/VisualStatusBadge.vue';
 import DeferredPauseDialog from '../components/DeferredPauseDialog.vue';
+import PauseApprovalStatus from '../components/PauseApprovalStatus.vue';
 import { agentStateLabels, pauseReasonLabels } from '../agentStateLabels';
 
 const props = defineProps({
@@ -97,6 +98,11 @@ const selectedDefinition = computed(() =>
         entry.all_queues ||
         entry.scope_queue_ids?.includes(queueId.value))
   )
+);
+const approvalRequired = computed(
+  () =>
+    state.value?.pause_catalog?.enforced === true &&
+    selectedDefinition.value?.approval_required === true
 );
 const justificationRequired = computed(
   () =>
@@ -204,6 +210,7 @@ const openPauseDialog = mode => {
     stateVersion: state.value.state_version,
     requestRevision: state.value.pause_request_revision,
     requestId: request?.request_id || '',
+    approvalRequired: mode === 'request' && approvalRequired.value,
     reasonCode: reason.value,
     queueId: queueId.value,
     justification: mode === 'request' ? justification.value : '',
@@ -222,7 +229,10 @@ const transition = async nextState => {
     (!hasValidPauseReason.value || !hasValidJustification.value)
   )
     return;
-  if (nextState === 'paused' && state.value.can_defer_pause) {
+  if (
+    nextState === 'paused' &&
+    (state.value.can_defer_pause || approvalRequired.value)
+  ) {
     openPauseDialog('request');
     return;
   }
@@ -570,6 +580,13 @@ onBeforeUnmount(() => {
                   : t('JRC_CONTACT_CENTER.DEFERRED_PAUSE.PENDING')
               }}
             </p>
+            <PauseApprovalStatus
+              v-if="state.deferred_pause_request.approval?.required"
+              :account-id="accountId"
+              :approval="state.deferred_pause_request.approval"
+              :busy="busy || operationalPollFailed"
+              @apply="openPauseDialog('apply')"
+            />
             <p v-if="deferredReasonLabel" class="break-words">
               {{ deferredReasonLabel }}
             </p>
@@ -668,7 +685,8 @@ onBeforeUnmount(() => {
               {{
                 item.state === 'available' && state.state === 'paused'
                   ? t('JRC_CONTACT_CENTER.INBOX_360.RESUME')
-                  : item.state === 'paused' && state.can_defer_pause
+                  : item.state === 'paused' &&
+                      (state.can_defer_pause || approvalRequired)
                     ? t('JRC_CONTACT_CENTER.DEFERRED_PAUSE.REQUEST_BUTTON')
                     : labels[item.state]
               }}
@@ -696,6 +714,7 @@ onBeforeUnmount(() => {
       :queue-id="pauseDialog.queueId"
       :justification="pauseDialog.justification"
       :request-id="pauseDialog.requestId"
+      :approval-required="pauseDialog.approvalRequired"
       @updated="applyDeferredState"
       @close="closeDeferredDialog"
       @refresh="refreshDeferredState"

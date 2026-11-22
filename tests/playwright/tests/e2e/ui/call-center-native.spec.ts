@@ -1,3 +1,4 @@
+import { verifyAllScopePauseApproval } from './call-center-pause-approval-native.mjs';
 import { test, expect } from '@playwright/test';
 import { verifyNativeCalendars } from './call-center-calendar-native.mjs';
 import { verifyNativeIvrCalendar } from './call-center-ivr-calendar-native.mjs';
@@ -10316,5 +10317,15 @@ test('native calendar usage inventory paginates actual current URAs, preserves h
     info,
     session.calendar_targets[info.project.name],
     session.unit_id
+  );
+});
+
+test('all-scope pause approval native requires both managers, preserves ACW and denies cross-unit decisions', async ({
+  page,
+}, info) => {
+  await verifyAllScopePauseApproval(
+    page,
+    info,
+    session.pause_targets[info.project.name].approval
   );
 });

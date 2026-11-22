@@ -122,7 +122,11 @@ class JrcContactCenter::AgentStateSnapshot
   def pending_work_reason
     return 'tabulation_pending' if pending_qualifications.exists?
 
-    'pause_pending' if deferred_pause_request
+    record = deferred_pause_request
+    return unless record
+    return if JrcContactCenter::PauseApprovalReview.exists?(account: @account, deferred_pause_request_id: record.id)
+
+    'pause_pending'
   end
 
   def provider_eligibility_reason

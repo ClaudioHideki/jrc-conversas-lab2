@@ -1,7 +1,7 @@
 # A value object for the existing AgentStateManager, not a second agent registry.
 class JrcContactCenter::PauseReasonDefinition
   FIELDS = %w[code name category description active minimum_minutes default_minutes maximum_minutes unit_ids custom_role_ids].freeze
-  OPTIONAL_FIELDS = %w[justification_required].freeze
+  OPTIONAL_FIELDS = %w[justification_required approval_required].freeze
   ALL_FIELDS = (FIELDS + OPTIONAL_FIELDS).freeze
   TIMES = %w[minimum_minutes default_minutes maximum_minutes].freeze
 
@@ -54,10 +54,16 @@ class JrcContactCenter::PauseReasonDefinition
     raise Invalid, ['code'] unless row['code'].match?(/\A[a-z0-9][a-z0-9_.-]{0,63}\z/)
     raise Invalid, ['active'] unless [true, false].include?(row['active'])
 
-    raise Invalid, ['justification_required'] if row.key?('justification_required') && [true, false].exclude?(row['justification_required'])
+    validate_flags!(row)
 
     description = row.fetch('description', '')
     raise Invalid, ['description'] unless description.is_a?(String) && description.length <= 1000
+  end
+
+  def validate_flags!(row)
+    OPTIONAL_FIELDS.each do |field|
+      raise Invalid, [field] if row.key?(field) && [true, false].exclude?(row[field])
+    end
   end
 
   def validate_times!(row)

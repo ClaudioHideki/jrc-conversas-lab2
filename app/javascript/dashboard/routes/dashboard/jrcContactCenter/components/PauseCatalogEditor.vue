@@ -15,6 +15,8 @@ const props = defineProps({
 const emit = defineEmits(['changed']);
 const { t } = useI18n();
 const copy = computed(() => ({
+  APPROVAL_REQUIRED: t('JRC_CONTACT_CENTER.PAUSE_APPROVAL.CATALOG_REQUIRED'),
+  APPROVAL_POLICY: t('JRC_CONTACT_CENTER.PAUSE_APPROVAL.CATALOG_POLICY'),
   HISTORY: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.HISTORY'),
   LOCAL_ONLY: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.LOCAL_ONLY'),
   GLOBAL_DENIED: t('JRC_CONTACT_CENTER.PAUSE_CATALOG.GLOBAL_DENIED'),
@@ -256,6 +258,7 @@ const open = (row = null) => {
         description: '',
         active: false,
         justification_required: false,
+        approval_required: false,
         unit_ids: [],
         custom_role_ids: [],
       };
@@ -586,6 +589,21 @@ onBeforeUnmount(() => {
               {{ text('JUSTIFICATION_REQUIRED') }}
               <span class="mt-1 block text-xs text-n-slate-10">{{
                 text('JUSTIFICATION_POLICY')
+              }}</span>
+            </span>
+          </label>
+          <label
+            class="flex min-w-0 items-start gap-2 text-sm text-n-slate-12 sm:col-span-2"
+          >
+            <input
+              v-model="input.approval_required"
+              type="checkbox"
+              :aria-invalid="invalid.includes('approval_required') || undefined"
+            />
+            <span class="space-y-1">
+              <span class="block">{{ text('APPROVAL_REQUIRED') }}</span>
+              <span class="block text-xs text-n-slate-10">{{
+                text('APPROVAL_POLICY')
               }}</span>
             </span>
           </label>

@@ -36,6 +36,7 @@ const deferredDialogStub = {
     'queueId',
     'justification',
     'requestId',
+    'approvalRequired',
   ],
   emits: ['updated', 'close', 'refresh', 'denied'],
   template: '<div data-deferred-dialog-stub />',
@@ -719,5 +720,161 @@ describe('deferred pause state observation (mocked read-only presentation)', () 
       'JRC_CONTACT_CENTER.DEFERRED_PAUSE.DENIED'
     );
     expect(wrapper.find('select').exists()).toBe(false);
+  });
+});
+
+describe('mandatory pause approval parent wiring (mocked presentation)', () => {
+  const definition = required => ({
+    code: 'reviewed_pause',
+    name: 'SYNTHETIC reviewed pause',
+    approval_required: required,
+    all_queues: true,
+    scope_queue_ids: ['3'],
+  });
+  const available = required => ({
+    ...deferredState,
+    state: 'available',
+    can_defer_pause: false,
+    queues: [{ id: '3', name: 'SYNTHETIC current queue' }],
+    pause_catalog: { enforced: true, entries: [definition(required)] },
+  });
+  const panel = value => {
+    JrcContactCenterAPI.agentState.mockResolvedValue({ data: { item: value } });
+    return mount(AgentStatePanel, {
+      props: { accountId: '1', canOperate: true },
+      global: {
+        stubs: {
+          DeferredPauseDialog: deferredDialogStub,
+          RouterLink: {
+            name: 'RouterLink',
+            props: ['to'],
+            template: '<a><slot /></a>',
+          },
+        },
+      },
+    });
+  };
+  const choose = async wrapper => {
+    await flushPromises();
+    await wrapper.findAll('select')[0].setValue('3');
+    await wrapper.findAll('select')[1].setValue('reviewed_pause');
+  };
+  const pause = wrapper =>
+    wrapper
+      .findAll('button')
+      .find(button => button.text().includes('DEFERRED_PAUSE.REQUEST_BUTTON'));
+
+  it('opens full-impact review even while idle instead of issuing a direct unapproved pause', async () => {
+    const wrapper = panel(available(true));
+    await choose(wrapper);
+    await pause(wrapper).trigger('click');
+    const dialog = wrapper.findComponent({ name: 'DeferredPauseDialog' });
+    expect(dialog.props()).toMatchObject({
+      mode: 'request',
+      approvalRequired: true,
+      memberId: '2',
+      queueId: '3',
+      reasonCode: 'reviewed_pause',
+    });
+    expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
+  });
+
+  it('keeps the existing immediate native path when the explicitly configured flag is false', async () => {
+    const wrapper = panel(available(false));
+    await choose(wrapper);
+    JrcContactCenterAPI.updateAgentState.mockResolvedValue({
+      data: { item: { ...available(false), state: 'paused' } },
+    });
+    const button = wrapper
+      .findAll('button')
+      .find(item =>
+        item.text().includes('JRC_CONTACT_CENTER.AGENT.STATES.paused')
+      );
+    await button.trigger('click');
+    await flushPromises();
+    expect(JrcContactCenterAPI.updateAgentState).toHaveBeenCalledOnce();
+    expect(
+      wrapper.findComponent({ name: 'DeferredPauseDialog' }).exists()
+    ).toBe(false);
+  });
+
+  it('opens the guarded apply confirmation only for a server-reported complete ready state', async () => {
+    const value = {
+      ...available(true),
+      deferred_pause_request: {
+        request_id: 'owned-approval-uuid',
+        state: 'pending',
+        reason_code: 'reviewed_pause',
+        reason_label: 'SYNTHETIC reviewed pause',
+        private_details_available: true,
+        approval: {
+          required: true,
+          status: 'ready',
+          local_only: true,
+          provider_confirmed: false,
+          digest: 'b'.repeat(64),
+          scopes: [
+            {
+              id: '1',
+              status: 'ready',
+              issuer_company_id: '10',
+              business_unit_id: '11',
+              requests: [],
+            },
+          ],
+        },
+      },
+    };
+    const wrapper = panel(value);
+    await flushPromises();
+    await wrapper.get('[data-pause-approval-apply]').trigger('click');
+    expect(
+      wrapper.findComponent({ name: 'DeferredPauseDialog' }).props()
+    ).toMatchObject({
+      mode: 'apply',
+      requestId: 'owned-approval-uuid',
+      stateVersion: '7',
+      approvalRequired: false,
+    });
+    expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
+  });
+
+  it('offers no effective pause action for incomplete approval and removes the panel after an operating-profile denial', async () => {
+    const value = {
+      ...available(true),
+      deferred_pause_request: {
+        request_id: 'owned-pending-uuid',
+        state: 'pending',
+        reason_code: 'reviewed_pause',
+        private_details_available: true,
+        approval: {
+          required: true,
+          status: 'approval_required',
+          local_only: true,
+          provider_confirmed: false,
+          scopes: [
+            {
+              id: '1',
+              status: 'approval_required',
+              issuer_company_id: '10',
+              business_unit_id: '11',
+              requests: [],
+            },
+          ],
+        },
+      },
+    };
+    const wrapper = panel(value);
+    await flushPromises();
+    expect(wrapper.find('[data-pause-approval-apply]').exists()).toBe(false);
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.PAUSE_APPROVAL.APPROVAL_REQUIRED'
+    );
+    await wrapper.setProps({ canOperate: false });
+    expect(wrapper.find('[data-pause-approval-status]').exists()).toBe(false);
+    expect(
+      wrapper.findComponent({ name: 'DeferredPauseDialog' }).exists()
+    ).toBe(false);
+    expect(JrcContactCenterAPI.updateAgentState).not.toHaveBeenCalled();
   });
 });

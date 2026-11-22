@@ -898,3 +898,11 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] Campo de data da simulação: corrigido esquema nativo claro/escuro para o ícone observado em151; 91Vue direcionados e lint sem novas infrações. CSS computado e8capturas aguardam a próxima CI; sem troca do relógio, contratos ou regras.
 - [ ] Inventário URA/calendário: CI9ab08119 preservada,2448casos anteriores aprovados e16/17novos. Corrigida a preparação do catálogo em escopo novo, mantendo a negação histórica;13ajustes de lint sem exclusões. Próxima CI ainda precisa aprovar Rails/Vue/252Chrome.
 - [ ] CI3f71ebf1 preservada:13infrações Ruby resolvidas;2464Rails aprovados e1falha na tentativa de reconfiguração proibida. Mantidas as validações nativas; adicionado teste de rejeição e separada a injeção adversarial de SQL no banco sintético. 18cenários novos e252Chrome ainda aguardam o próximo SHA.
+
+- [x] Inventário calendário→URAs internas e campo de data: a9206b84/CI45030951154, 2681Rails distintos,175recargas,1526Vue,252Chrome;536hashesPNG e24imagens realmente abertas. Casos anteriores preservados,18novos Rails e4novos Chrome; sem PABX. Prova: docs/jrc_contact_center/calendar_ivr_usage_inventory_native_verified_20261122.json.
+- [ ] Pausa com aprovação: confirmado uso da Central e cobertura de todas as empresas/unidades afetadas. Preparação privada em andamento; não ativada nem homologada.
+
+
+## Call Center 2026-11-22: all-affected-scope pause approval
+
+Implemented in the existing Central and deferred-pause flow; native CI, migrations, concurrency and actual Chrome remain pending. See docs/jrc_contact_center/pause_all_scope_approval_candidate_20261122.json. No real grants, policies, activation or provider commands.

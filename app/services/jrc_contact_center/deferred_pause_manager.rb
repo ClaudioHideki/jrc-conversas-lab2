@@ -10,11 +10,29 @@ class JrcContactCenter::DeferredPauseManager
   end
 
   def request!(attributes)
-    values = JrcContactCenter::DeferredPauseInput.call(attributes)
-    digest = Digest::SHA256.hexdigest(JrcContactCenter::DeferredPauseInput::FIELDS.map { |key| values[key] }.to_json)
-    with_authority { store_request!(values, digest) }
-  rescue ActiveRecord::RecordNotUnique
-    raise JrcContactCenter::OperationError.new('command_id_conflict', status: :conflict)
+    request_with_review!(attributes, nil)
+  end
+
+  def request_reviewed!(attributes, expected_approval_digest:)
+    request_with_review!(attributes, expected_approval_digest)
+  end
+
+  def apply!(request_id:, expected_state_version:)
+    valid = request_id.is_a?(String) && JrcContactCenter::DeferredPauseInput::UUID.match?(request_id) &&
+            expected_state_version.is_a?(String) && /\A\d{1,100}\z/.match?(expected_state_version)
+    raise JrcContactCenter::OperationError, 'invalid_deferred_pause' unless valid
+
+    with_authority do
+      record = records.lock.find_by!(request_id: request_id)
+      next record if record.state == 'applied'
+      raise JrcContactCenter::OperationError.new('pause_request_review_required', status: :conflict) unless record.state == 'pending'
+
+      snapshot = JrcContactCenter::AgentStateSnapshot.new(account_user: @member)
+      raise JrcContactCenter::OperationError.new('state_conflict', status: :conflict) unless snapshot.version == expected_state_version
+
+      apply_record!(record)
+      record
+    end
   end
 
   def cancel!(request_id)
@@ -47,11 +65,23 @@ class JrcContactCenter::DeferredPauseManager
 
   private
 
+  def request_with_review!(attributes, expected_digest)
+    values = JrcContactCenter::DeferredPauseInput.call(attributes)
+    digest = Digest::SHA256.hexdigest(JrcContactCenter::DeferredPauseInput::FIELDS.map { |key| values[key] }.to_json)
+    with_authority { store_request!(values, digest, expected_digest) }
+  rescue ActiveRecord::RecordNotUnique
+    raise JrcContactCenter::OperationError.new('command_id_conflict', status: :conflict)
+  end
+
+  def approval_coordinator
+    JrcContactCenter::PauseApprovalCoordinator.new(account: @account, member: @member)
+  end
+
   def records
     JrcContactCenter::DeferredPauseRequest.where(account: @account, account_user: @member)
   end
 
-  def store_request!(values, digest)
+  def store_request!(values, digest, expected_digest)
     existing = records.find_by(request_id: values[:command_id])
     return replay_request!(existing, digest) if existing
 
@@ -60,9 +90,11 @@ class JrcContactCenter::DeferredPauseManager
     raise JrcContactCenter::OperationError.new('pause_request_exists', status: :conflict) if records.active.exists?
 
     JrcContactCenter::DeferredPauseRevision.check!(account: @account, member: @member, expected: values[:expected_request_revision])
-    validate_pending_context!(snapshot)
+    intent = approval_coordinator.prepare!(values, expected_digest: expected_digest)
+    validate_pending_context!(snapshot) unless intent.fetch('required')
 
     record = create_request!(values, digest)
+    approval_coordinator.create!(record, intent)
     apply_record!(record)
     record
   end
@@ -118,7 +150,9 @@ class JrcContactCenter::DeferredPauseManager
     return change_state!(record, 'blocked', failure: 'access_revoked') unless authorized? && record.actor_user_id == @member.user_id
 
     snapshot = JrcContactCenter::AgentStateSnapshot.new(account_user: @member)
-    return unless idle?(snapshot)
+    approval = JrcContactCenter::PauseApprovalReadiness.new(account: @account, member: @member).call(record, lock: true)
+    return change_state!(record, 'blocked', failure: 'pause_request_review_required') if approval.fetch(:status) == 'review_required'
+    return unless ready_to_apply?(snapshot, approval)
 
     values = record.attributes.symbolize_keys.slice(:reason_code, :queue_id, :justification)
     current = JrcContactCenter::DeferredPauseSelection.new(account: @account, member: @member).call(values)
@@ -126,6 +160,15 @@ class JrcContactCenter::DeferredPauseManager
 
     native_pause!(record, snapshot.version, values)
     change_state!(record, 'applied')
+  end
+
+  def ready_to_apply?(snapshot, approval)
+    return idle?(snapshot) unless approval.fetch(:required)
+    return false unless approval.fetch(:status) == 'ready'
+
+    current = snapshot.current
+    !%w[busy ringing in_call].include?(current&.state) && (!current || current.started_at <= Time.current) && !snapshot.active_call? &&
+      !JrcContactCenter::Qualification.pending.exists?(account: @account, account_user: @member)
   end
 
   def idle?(snapshot)

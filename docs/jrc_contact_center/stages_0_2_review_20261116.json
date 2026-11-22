@@ -7260,5 +7260,32 @@
     "ruby_new_offenses": 0,
     "new_case_added_preserving_all17": true,
     "next_native_cases": 18
+  },
+  "calendar_ivr_usage_inventory_native_verified_20261122": {
+    "sha": "a9206b847e90073fc552ce1519add4c4856fb689",
+    "run": 45030951154,
+    "report": "docs/jrc_contact_center/calendar_ivr_usage_inventory_native_verified_20261122.json",
+    "native_distinct": 2681,
+    "reload_separate": 175,
+    "vue": 1526,
+    "chrome": 252,
+    "png_hashes": 536,
+    "actual_pngs_opened": 24,
+    "accepted_increment_only": true,
+    "all_previous_cases_preserved": true
+  },
+  "pause_approval_all_scopes_business_confirmation_20261122": {
+    "engine": "native Central de Aprovações",
+    "required_coverage": "Every affected company and operational unit",
+    "selection_queue_never_narrows_global_pause_impact": true,
+    "feature_or_grants_activated": false,
+    "implementation_and_native_acceptance": "still incomplete; private work only"
+  },
+  "pause_all_scope_approval_20261122": {
+    "report": "docs/jrc_contact_center/pause_all_scope_approval_candidate_20261122.json",
+    "status": "implemented_pending_native_and_chrome",
+    "all_affected_units_approved_by_user": true,
+    "real_account_activation": false,
+    "whole_word_complete": false
   }
 }
