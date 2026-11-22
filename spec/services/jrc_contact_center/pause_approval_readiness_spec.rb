@@ -1,9 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe JrcContactCenter::PauseApprovalReadiness, :approval_core do
-  include_context 'with all-scope native pause approval'
-
   subject(:readiness) { described_class.new(account: account, member: member) }
+
+  include_context 'with all-scope native pause approval'
 
   it 'projects captured operational unit names for every coherent owned scope without applying a pending pause' do
     publish_all_pause_policies

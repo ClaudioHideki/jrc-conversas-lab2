@@ -1,0 +1,107 @@
+{
+  "checkpoint_under_repair": "047a9da16b89bd73ce7233542d27742a9d1c3b80",
+  "failed_ci_run": 45070164239,
+  "actual_prior_results": {
+    "core": 2550,
+    "concurrency": 135,
+    "corporate": 85,
+    "schema_reload_separate": 187,
+    "vue_passed": 1767,
+    "vue_failed": 1,
+    "new_ruby_lint_offenses": 1,
+    "assets_and_chrome": "not_run_due_to_mandatory_gate_failure"
+  },
+  "repairs": [
+    "Reuse JRC_CONTACT_CENTER.NAVIGATION.CALL_CENTER and its native fallback; remove only the newly introduced untranslated approvals key.",
+    "Share module presentation between list and filter; preserve native module choices and custom translated labels.",
+    "Move RSpec subject before include_context; retain all three passed native scenario bodies."
+  ],
+  "local_light_validation": {
+    "vue": {
+      "examples": 28,
+      "failures": 0
+    },
+    "static_checks": {
+      "parent": "047a9da16b89bd73ce7233542d27742a9d1c3b80",
+      "results": [
+        {
+          "path": "app/javascript/dashboard/i18n/locale/en/jrcApprovals.json",
+          "sha256": "6445f258bd366911252678fdfbb1b1ff2884d798beaebd04b6083d198459d13a"
+        },
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/ApprovalInbox.vue",
+          "sha256": "06a1de9d58cca512b62e1449264d91b515c547bbb8731fd4e95eaf769869c28e",
+          "errors": 0,
+          "inherited_warnings": 9,
+          "new_warnings": []
+        },
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/ApprovalsPage.vue",
+          "sha256": "431b603ea2407b99b38504778e02f60edc1e5af6a9db34d19c77e1cfe9f20c19",
+          "errors": 0,
+          "inherited_warnings": 46,
+          "new_warnings": []
+        },
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/specs/contactCenterModule.spec.js",
+          "sha256": "f14b12a21ee9fa1bd1f2683d4312c3cc31af15de086c0dd38561c589f6bb7e2d",
+          "errors": 0,
+          "inherited_warnings": 0,
+          "new_warnings": []
+        },
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/modulePresentation.js",
+          "sha256": "fcc49556e6f5dcf074d0a04b8907087957ac416932307099bf3580c786d14587",
+          "errors": 0,
+          "inherited_warnings": 0,
+          "new_warnings": []
+        }
+      ],
+      "preserved": {
+        "app/javascript/dashboard/i18n/locale/pt_BR/jrcApprovals.json": "0ddf3ff17c5bf9613a132def1914ff7b9a519458daae08eb615224ae5791711d",
+        "app/javascript/dashboard/routes/dashboard/approvals/specs/portugueseCatalog.spec.js": "78688a3ed3612227e2d4642a30c488110638194dd5715eacb2bcb97d68b9b133"
+      },
+      "native_rails_or_browser": false
+    },
+    "resources": {
+      "kind": "Windows bounded mocked unit check; not native Rails/Chrome or codec proof",
+      "target": "pause-catalog-gate-fixed",
+      "exit_code": 0,
+      "stop": null,
+      "seconds": 7.51600000000326,
+      "initial": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 3562782720,
+        "c_free_bytes": 50681253888,
+        "read_only": true
+      },
+      "minimum": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 3300610048,
+        "c_free_bytes": 50681249792,
+        "read_only": true
+      },
+      "final": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 3539419136,
+        "c_free_bytes": 50681262080,
+        "read_only": true
+      },
+      "log_bytes": 6622
+    },
+    "native_or_css_proof": false
+  },
+  "preserved": [
+    "Generated pt_BR catalogue unchanged",
+    "Native Portuguese-coverage spec unchanged",
+    "No product authority/migration changes in this repair",
+    "Original checkout and its three pending files unchanged",
+    "New ending-reason confirmation work remains separate and unpublished"
+  ],
+  "pending": [
+    "Native Rails/Vue/lint gates on the new SHA",
+    "Fresh assets and 256 actual Chrome scenarios",
+    "Review actual screenshots, including dark contrast and captured operational-unit names",
+    "Implement and validate approved early reason confirmation; it must not complete ACW or execute integrations"
+  ]
+}

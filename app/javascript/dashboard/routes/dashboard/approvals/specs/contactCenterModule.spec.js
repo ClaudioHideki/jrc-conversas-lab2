@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import messages from 'dashboard/i18n/locale/en/jrcApprovals.json';
+import contactCenterMessages from 'dashboard/i18n/locale/en/jrcContactCenter.json';
 import ApprovalInbox from '../ApprovalInbox.vue';
 
 enableAutoUnmount(afterEach);
@@ -25,7 +26,10 @@ const render = (moduleKey, localMessages = {}) =>
           legacy: false,
           locale: 'pt_BR',
           fallbackLocale: 'en',
-          messages: { en: messages, pt_BR: localMessages },
+          messages: {
+            en: { ...messages, ...contactCenterMessages },
+            pt_BR: localMessages,
+          },
         }),
       ],
       stubs: { Icon: true },

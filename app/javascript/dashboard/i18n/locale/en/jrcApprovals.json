@@ -438,8 +438,7 @@
         "backoffice": "Backoffice",
         "relationship": "Relationship",
         "service_desk": "Service Desk",
-        "other": "Other module",
-        "contact_center": "Call Center"
+        "other": "Other module"
       },
       "states": {
         "pending": "Pending",

@@ -19,6 +19,7 @@ import ApprovalSummary from './ApprovalSummary.vue';
 import ApprovalStatus from './ApprovalStatus.vue';
 import { minorAmountText } from './tierPresentation';
 import { useApprovals } from './useApprovals';
+import { approvalModuleLabel } from './modulePresentation';
 import {
   WORKSPACE_MODULES,
   capability,
@@ -29,7 +30,8 @@ import {
 } from './model';
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+const { t, te, tm, rt } = useI18n();
+const moduleLabel = key => approvalModuleLabel(key, { t, te, tm, rt });
 const store = useStore();
 const accessIdentity = computed(() =>
   JSON.stringify([route.params.accountId, authorityScope(store.getters)])
@@ -903,7 +905,7 @@ const errorText = computed(() => {
                   :key="key"
                   :value="key"
                 >
-                  {{ t('JRC_APPROVALS.workspace.modules.' + key) }}
+                  {{ moduleLabel(key) }}
                 </option>
               </select></label
             >
