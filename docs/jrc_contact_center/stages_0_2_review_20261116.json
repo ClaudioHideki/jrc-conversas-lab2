@@ -6987,5 +6987,19 @@
     "queue_calendar_candidate": "341120a2 native/Vue passed; three test lint findings blocked assets/Chrome",
     "last_full_calendar_acceptance": "369e7351 / CI44964018731",
     "full_word_complete": false
+  },
+  "queue_calendar_browser_origin_diagnosis_20261122": {
+    "producer": "340b06af74a2380a89116717fb23cc95b9e95882",
+    "run": 44974688895,
+    "report": "docs/jrc_contact_center/queue_calendar_browser_origin_diagnosis_20261122.json",
+    "native": 2575,
+    "reload": 175,
+    "vue": 1403,
+    "lint_and_assets": "passed",
+    "chrome": "incomplete; wrong helper browser origin and eventual75minute limit",
+    "actual_failure_images_opened": 4,
+    "unchanged_timeouts": true,
+    "new_sha_revalidation_required": true,
+    "full_word_complete": false
   }
 }

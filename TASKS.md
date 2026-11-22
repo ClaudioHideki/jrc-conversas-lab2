@@ -866,3 +866,6 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 
 - [ ] Vínculo de calendário341120a2/CI44970957120:2573Rails,175reload e1403Vue aprovados; todos os casos anteriores preservados. Três achados Ruby em dois specs bloquearam assets/Chrome. Declaração dos três status e alinhamento corrigidos sem remover asserções; dois cenários adicionais de histórico e replay antigo preparados. Exigir novoSHA e prova Chrome. Ver docs/jrc_contact_center/queue_calendar_bindings_first_native_lint_20261122.json.
+
+
+- [ ] Vínculo de calendário340b06af/CI44974688895:2575Rails,175reload,1403Vue,lint,assets novos e bootstrap aprovados; Chrome sem relatório final após limite75min. Quatro falhas90s vieram da navegação do helper para5387Rails/login em vez da prévia5386; quatro imagens efetivamente vistas. Corrigida somente a origem relativa, com asserção de mesma origem e biblioteca real. Preservados90s/75min,244casos e gates. Exigir novoSHA, sem aceite de figura ou UI por este resultado. Ver docs/jrc_contact_center/queue_calendar_browser_origin_diagnosis_20261122.json.

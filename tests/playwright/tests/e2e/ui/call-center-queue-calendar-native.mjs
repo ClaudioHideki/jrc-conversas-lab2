@@ -14,6 +14,7 @@ export async function verifyNativeQueueCalendarBindings(
   const headers = target.scoped;
   const unit = String(target.allowed_unit_id);
   const originalUrl = page.url();
+  const browserOrigin = new URL(originalUrl).origin;
   const sourceList = await page.request.get(
     `${base}/unit_calendars?unit_id=${unit}`,
     { headers }
@@ -51,8 +52,13 @@ export async function verifyNativeQueueCalendarBindings(
     expect(result.status()).toBe(201);
   }
   await page.goto(
-    `http://127.0.0.1:5387/app/accounts/${target.account_id}/contact-center/control-desk/hours?calendar_unit=${unit}&calendar_q=${encodeURIComponent(entry.definition.name)}`
+    `/app/accounts/${target.account_id}/contact-center/control-desk/hours?calendar_unit=${unit}&calendar_q=${encodeURIComponent(entry.definition.name)}`
   );
+  expect(new URL(page.url()).origin).toBe(browserOrigin);
+  await expect(page.locator('[data-unit-calendar-library]')).toBeVisible();
+  await expect(
+    page.locator(`[data-unit-calendar="${identity}"]`)
+  ).toBeVisible();
   await page.locator(`[data-queue-calendar-bindings="${identity}"]`).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog.locator('[data-calendar-queue]')).toHaveCount(20);

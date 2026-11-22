@@ -1,0 +1,83 @@
+{
+  "producer": "340b06af74a2380a89116717fb23cc95b9e95882",
+  "run": 44974688895,
+  "job": 137061823792,
+  "artifact": 14736409764,
+  "artifact_bytes": 68712621,
+  "artifact_sha256": "f1e0dad508f5943380db92fffcf5de4e5f77c01a32d036fb4838ee70b0508bfc",
+  "result": "cancelled_incomplete_chrome_not_approved",
+  "confirmed_native": 2575,
+  "separate_schema_reload": 175,
+  "vue": 1403,
+  "failure_pending_outside_errors": 0,
+  "new_ruby_offenses": 0,
+  "frontend_lint": "passed",
+  "fresh_assets_and_actual_bootstrap": "passed",
+  "previous_case_preservation": {
+    "call-center-rspec.json": {
+      "preserved": 2340,
+      "added": 25
+    },
+    "call-center-pabx-rspec.json": {
+      "preserved": 122,
+      "added": 3
+    },
+    "call-center-corporate-rspec.json": {
+      "preserved": 85,
+      "added": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "preserved": 175,
+      "added": 0
+    },
+    "vue": {
+      "preserved": 1374,
+      "added": 29
+    }
+  },
+  "official_annotation": "The job has exceeded the maximum execution time of 1h15m0s",
+  "chrome": {
+    "expected": 244,
+    "final_json_available": false,
+    "last_started_index_in_sanitized_log": 216,
+    "confirmed_four_case_failures": "fifteen-card case in each project:90000ms timeout at helper browser navigation to the wrong origin",
+    "approved_count": "not asserted without final report",
+    "binding_receipts": 0
+  },
+  "root_cause": {
+    "helper": "tests/playwright/tests/e2e/ui/call-center-queue-calendar-native.mjs",
+    "line": 56,
+    "browser_wrong_origin": "http://127.0.0.1:5387 (Rails API/full login)",
+    "required_browser_origin": "http://127.0.0.1:5386 (native authenticated preview with actual CSS/components)",
+    "backend_requests": "Remain on real Rails5387; only browser navigation was wrong"
+  },
+  "visual_diagnosis": {
+    "actually_opened": 4,
+    "image_sha256": {
+      "native-permissions\\review-340b06af-queue-calendar-failure\\desktop-dark-test-failed-2.png": "61930a4b77df1b91cf7f4dbfe2c586399807e34ee9ad79f030e6cd67a2e3f3e2",
+      "native-permissions\\review-340b06af-queue-calendar-failure\\desktop-light-test-failed-2.png": "d4b0b355a5fa61db28a2009c1fcf33af5fc957ff55f676c7898928fefe9e5898",
+      "native-permissions\\review-340b06af-queue-calendar-failure\\mobile-dark-test-failed-2.png": "4bd921e5e14fa8e62c671e6cbfe5738f9be9320e797a56d753ecdee8a02ad292",
+      "native-permissions\\review-340b06af-queue-calendar-failure\\mobile-light-test-failed-2.png": "ee4bb4ef8712c2d1e8dc10cf906f3cb0c7be105b9de49676dd9d11b5e6d66ceb"
+    },
+    "findings": [
+      "All four opened second-failure captures show the full Rails login page, not the isolated authenticated Vue harness.",
+      "The own helper navigated the browser to API port5387; the real preview/browser origin in call-center-native.config.ts and vite.config.mjs is5386.",
+      "Parent error-context captures show the preserved original main tab after the owned calendar tab closed; they are not queue-binding success screenshots.",
+      "No queue/calendar native receipt or queue-binding screenshot was produced. No UI acceptance inferred."
+    ]
+  },
+  "sanitized_log": {
+    "job": 137061823792,
+    "run": 44974688895,
+    "sha": "340b06af74a2380a89116717fb23cc95b9e95882",
+    "raw_bytes": 2286092,
+    "raw_sha256_not_saved": "d64b6e84c4e9ad01d63b7dcbadd913a88397ac7396d163d42d39909f7b5224f2",
+    "sanitized_bytes": 2237370,
+    "sanitized_sha256": "ec559af6741e088d3884c9338a10d89388d6d38e6c16a967625d5ff99e21171d",
+    "credentials_or_signed_urls_printed": false
+  },
+  "correction": "Use the existing relative preview route; assert same browser origin and actual authorized library/item before clicking. No authentication bypass, timeout increase, test removal, source product/permission/database/workflow change.",
+  "revalidation_required": "New checkpoint, same gates and full244Chrome; no automatic rerun of the unchanged cancelled SHA.",
+  "remaining": "If runtime still exceeds the unchanged ceiling after this identified cause is corrected, preserve evidence and diagnose infrastructure before another attempt. Internal unlink/number/IVR/full provider impacts remain incomplete.",
+  "whole_word_complete": false
+}
