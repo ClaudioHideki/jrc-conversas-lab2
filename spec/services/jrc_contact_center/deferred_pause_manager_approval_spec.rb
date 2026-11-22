@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe JrcContactCenter::DeferredPauseManager, 'all-scope native approval', :approval_core do
+RSpec.describe JrcContactCenter::DeferredPauseManager, :approval_core do
   include_context 'with all-scope native pause approval'
 
   it 'creates every scope in the native Central atomically without applying a pause or pretending a provider ACK' do
@@ -147,7 +147,7 @@ RSpec.describe JrcContactCenter::DeferredPauseManager, 'all-scope native approva
     foreign = create(:account)
     foreign.enable_features!('jrc_contact_center')
     user = create(:user, :contact_center_eligible, account: foreign, role: :agent)
-    other = JrcContactCenter::DeferredPauseManager.new(account: foreign, member: foreign.account_users.find_by!(user: user))
+    other = described_class.new(account: foreign, member: foreign.account_users.find_by!(user: user))
     expect { other.apply!(request_id: row.request_id, expected_state_version: '0') }.to raise_error(ActiveRecord::RecordNotFound)
     expect(row.reload.state).to eq('pending')
     expect(JrcContactCenter::AgentStateEvent.where(account: foreign)).to be_empty

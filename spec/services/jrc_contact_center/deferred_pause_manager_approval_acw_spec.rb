@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe JrcContactCenter::DeferredPauseManager, 'approval after call and ACW', :approval_core do
+RSpec.describe JrcContactCenter::DeferredPauseManager, :approval_core do
   include_context 'with all-scope native pause approval'
   include_context 'with a native pending voice ACW for deferred pause'
 

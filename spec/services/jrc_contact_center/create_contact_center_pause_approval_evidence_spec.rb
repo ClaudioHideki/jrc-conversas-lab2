@@ -92,14 +92,14 @@ RSpec.describe CreateContactCenterPauseApprovalEvidence, :approval_core do
       connection.execute('DROP TABLE jrc_contact_center_pause_approval_reviews')
       connection.execute('DROP FUNCTION cc_pause_approval_scope_completeness()')
       connection.execute('DROP FUNCTION cc_pause_approval_evidence_guard()')
-      CreateContactCenterPauseApprovalEvidence.new.up
+      described_class.new.up
       JrcContactCenter::PauseApprovalReview.reset_column_information
       JrcContactCenter::PauseApprovalScope.reset_column_information
       expect([parent.reload.attributes, units.map { |unit| unit.reload.attributes },
               JrcContactCenter::QueueMembership.where(account: account).map(&:attributes)]).to eq(before)
       expect(JrcContactCenter::PauseApprovalReview.count).to eq(0)
       expect(JrcContactCenter::PauseApprovalScope.count).to eq(0)
-      expect { CreateContactCenterPauseApprovalEvidence.new.up }.not_to(change(JrcContactCenter::DeferredPauseRequest, :count))
+      expect { described_class.new.up }.not_to(change(JrcContactCenter::DeferredPauseRequest, :count))
     end
   end
 end

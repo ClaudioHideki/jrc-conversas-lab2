@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { isBrowserApiResponse } from './call-center-browser-api.mjs';
+import {
+  bindBrowserApiResponse,
+  isBrowserApiResponse,
+} from './call-center-browser-api.mjs';
 
 const browser =
   'http://127.0.0.1:5386/app/accounts/91/contact-center/control-desk/hours?calendar_unit=22';
@@ -121,4 +124,37 @@ test('does not loosen response status checks, which remain the responsibility of
   found.status = () => 409;
   assert.equal(isBrowserApiResponse(found, browser, api, 'PATCH'), true);
   assert.equal(found.status(), 409);
+});
+
+test('binds the owned navigated tab while the unrelated parent remains about:blank', () => {
+  const parent = { url: () => 'about:blank' };
+  const owned = { url: () => browser };
+  assert.throws(
+    () => isBrowserApiResponse(response(proxied), parent.url(), api, 'PATCH'),
+    TypeError
+  );
+  const bound = bindBrowserApiResponse(owned, 'http://127.0.0.1:5387');
+  assert.equal(bound(response(proxied), new URL(api).pathname, 'PATCH'), true);
+  assert.equal(bound(response(api), new URL(api).pathname, 'PATCH'), false);
+});
+
+test('bound observers retain exact account, method and preview origin checks', () => {
+  const bound = bindBrowserApiResponse(
+    { url: () => browser },
+    'http://127.0.0.1:5387'
+  );
+  const path = new URL(api).pathname;
+  assert.equal(
+    bound(
+      response(proxied.replace('accounts/91', 'accounts/92')),
+      path,
+      'PATCH'
+    ),
+    false
+  );
+  assert.equal(bound(response(proxied, 'GET'), path, 'PATCH'), false);
+  assert.equal(
+    bound(response(proxied.replace(':5386', ':5385')), path, 'PATCH'),
+    false
+  );
 });

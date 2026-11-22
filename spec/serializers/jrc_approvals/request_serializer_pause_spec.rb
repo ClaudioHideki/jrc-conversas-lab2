@@ -6,7 +6,7 @@ RSpec.describe JrcApprovals::RequestSerializer, :approval_core do
   it 'serializes only scoped immutable names and digests without exposing another company or the personal justification' do
     publish_all_pause_policies
     create_reviewed_pause
-    row = JrcApprovals::RequestSerializer.new(pause_requests.first).as_json
+    row = described_class.new(pause_requests.first).as_json
     origin = row.fetch('origin')
     expect(origin).to include('kind' => 'contact_center_pause', 'own_scope_only' => true, 'historical' => true)
     expect(origin.fetch('scope_unit_ids')).to eq([units.first.id.to_s])

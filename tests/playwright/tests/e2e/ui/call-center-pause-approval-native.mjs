@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
-import { isBrowserApiResponse } from './call-center-browser-api.mjs';
+import { bindBrowserApiResponse } from './call-center-browser-api.mjs';
 
 // Real native approval UI, CSS, PostgreSQL and ACW. No mocked API or external PABX.
 export async function verifyAllScopePauseApproval(parent, info, target) {
@@ -11,13 +11,6 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
   const dark = info.project.name.endsWith('dark');
   const base = `/api/v1/accounts/${target.account_id}`;
   const api = `http://127.0.0.1:5387${base}/jrc_contact_center`;
-  const browserResponse = (response, path, method) =>
-    isBrowserApiResponse(
-      response,
-      parent.url(),
-      `http://127.0.0.1:5387${path}`,
-      method
-    );
   const newPage = async auth => {
     const page = await parent.context().newPage();
     pages.push(page);
@@ -72,6 +65,7 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
     screenshots.push(path);
   };
   const page = await newPage(target.operator);
+  const browserResponse = bindBrowserApiResponse(page, 'http://127.0.0.1:5387');
   const state = async () => {
     const response = await page.request.get(api + '/agent_state', {
       headers: target.operator,
@@ -150,6 +144,10 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
     for (const [index, reviewer] of target.approval_reviewers.entries()) {
       const requestId = requestFor(reviewer);
       const reviewerPage = await newPage(reviewer.auth);
+      const reviewerResponse = bindBrowserApiResponse(
+        reviewerPage,
+        'http://127.0.0.1:5387'
+      );
       await reviewerPage.goto(
         `/app/accounts/${target.account_id}/approvals/inbox/${requestId}`
       );
@@ -179,7 +177,7 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
       ).toContainText(target.affected_unit_names[index]);
       await capture(reviewerPage, `reviewer-${index + 1}`, true);
       const decided = reviewerPage.waitForResponse(response =>
-        browserResponse(
+        reviewerResponse(
           response,
           `${base}/approvals/requests/${requestId}/decide`,
           'POST'

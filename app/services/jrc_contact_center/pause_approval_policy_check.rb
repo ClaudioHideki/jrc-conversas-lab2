@@ -16,13 +16,21 @@ class JrcContactCenter::PauseApprovalPolicyCheck
     refresh!
     scope = source_scope(scope_id)
     snapshot = JrcApprovals::Catalog.snapshot(account: @account, user: @user, key: KEY, resource_id: scope.id, purpose: :request)
-    versions = JrcApprovals::Selection.call(account: @account, key: KEY, snapshot: snapshot)
+    versions = selected_versions(snapshot)
     return { status: 'policy_missing', required: true, policy_version_ids: [], approved_policy_version_ids: [], requests: [] } if versions.empty?
 
     present(versions, requests(scope), snapshot)
   end
 
   private
+
+  def selected_versions(snapshot)
+    JrcApprovals::Selection.call(account: @account, key: KEY, snapshot: snapshot)
+  rescue JrcApprovals::Error => e
+    raise unless e.code == 'POLICY_REQUIRED'
+
+    []
+  end
 
   def refresh!
     @account = Account.find(@account_id)

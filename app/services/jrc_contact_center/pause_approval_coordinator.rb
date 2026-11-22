@@ -49,6 +49,10 @@ class JrcContactCenter::PauseApprovalCoordinator
     snapshot = JrcApprovals::Catalog.snapshot(account: @account, user: @member.user, key: key, resource_id: scope.id, purpose: :request)
     versions = JrcApprovals::Selection.call(account: @account, key: key, snapshot: snapshot)
     raise JrcContactCenter::OperationError.new('pause_approval_policy_missing', status: :conflict) if versions.empty?
+  rescue JrcApprovals::Error => e
+    raise unless e.code == 'POLICY_REQUIRED'
+
+    raise JrcContactCenter::OperationError.new('pause_approval_policy_missing', status: :conflict)
   end
 
   def request_all!(record, scopes)

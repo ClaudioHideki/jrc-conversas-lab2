@@ -24,13 +24,16 @@ class JrcApprovals::RequestSerializer
       return { 'origin' => { kind: 'portfolio_distribution', review_id: @record.resource_id } }
     end
 
-    legal_case = @record.resource_type == 'JrcBackoffice::AuthorityProposal' && @record.module_key == 'contracts' &&
-                 @record.event_key == 'signer_authority'
-    return {} unless legal_case
+    return {} unless authority_origin?
 
     proposal = JrcBackoffice::AuthorityProposal.where(account_id: @record.account_id).find(@record.resource_id)
     { 'origin' => { kind: 'contract_authority', backoffice_request_id: proposal.backoffice_request_id,
                     contract_version_id: proposal.contract_version_id } }
+  end
+
+  def authority_origin?
+    @record.resource_type == 'JrcBackoffice::AuthorityProposal' && @record.module_key == 'contracts' &&
+      @record.event_key == 'signer_authority'
   end
 
   def pause_origin?

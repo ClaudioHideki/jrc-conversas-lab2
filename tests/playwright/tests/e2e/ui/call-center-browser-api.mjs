@@ -9,3 +9,13 @@ export const isBrowserApiResponse = (response, browserUrl, apiUrl, method) => {
     response.url() === expected.href && response.request().method() === method
   );
 };
+
+// Bind the actual owned tab, which may differ from an untouched about:blank parent fixture.
+export const bindBrowserApiResponse =
+  (page, apiOrigin) => (response, path, method) =>
+    isBrowserApiResponse(
+      response,
+      page.url(),
+      new URL(path, apiOrigin).href,
+      method
+    );
