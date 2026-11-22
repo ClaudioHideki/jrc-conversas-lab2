@@ -1,0 +1,80 @@
+{
+  "parent": "6fcaa38496d8e2e2ff58413638623a288b04a4a5",
+  "run": 44981141842,
+  "job": 137081674510,
+  "artifact": 14738799098,
+  "artifact_sha256": "cd83cd6a1f82bc24596b6983c2c32d16b0948ffe663c923059d97d2bdb3fff0a",
+  "native_passed": 2575,
+  "separate_reload_passed": 175,
+  "vue_passed": 1403,
+  "chrome_passed": 240,
+  "chrome_timed_out": 4,
+  "chrome_skipped": 0,
+  "chrome_flaky": 0,
+  "outside_errors": 0,
+  "ruby_new_offenses": 0,
+  "assets_and_bootstrap": "passed on parent; no new SHA acceptance yet",
+  "cause": "Both PATCH response waits compared the browser Axios URL against direct Rails5387. The owned preview uses5386; screenshot state reached the409-only review control, but the observer could never match its response.",
+  "evidence_boundary": "HTTP409 in the failed attempt is inferred from the UI and the exclusive conflict handler; it was not directly captured by the broken observer. The corrected next run must capture409 and200 and persist observed origin/method/path/status.",
+  "correction": [
+    "Keep direct APIRequestContext calls on Rails5387 and browser navigation on the same owned preview origin.",
+    "Match the browser-origin API URL exactly, including account/queue path, query and HTTP method; keep the existing409/200 assertions.",
+    "Record at most20 matching-path response metadata entries, without headers or payloads, even before final assertions."
+  ],
+  "portable_observer_tests": {
+    "passed": 9,
+    "failed": 0,
+    "scope": "Local URL/method identity only, not Rails/Chrome acceptance",
+    "report": "queue-calendar-browser-api-local-tests-20261122.json"
+  },
+  "safe_artifact_admission": {
+    "exact_metadata_tests_passed": 14,
+    "default_limit_unchanged": true,
+    "test_outcome_not_approved": true
+  },
+  "actually_opened_images": {
+    "desktop-dark-test-failed-2.png": "aec8513d732e6bab422bdb02fcec7eaab1a6595bc947fa631dd9230aac07fa61",
+    "desktop-light-test-failed-2.png": "0cb1b87bc5c763730b0d2b753802517e4c36bd8aa51af0cdb6c97e5b5e3c0ef4",
+    "mobile-dark-test-failed-2.png": "1e53d0c02313e4ec013095b52e5491752e6c6e8f2e0ceca6cfe2ea97fd010e15",
+    "mobile-light-test-failed-2.png": "70018f3cf271906f848bff8bf889120835cdd991d998adb873dd8af856578b69"
+  },
+  "sanitized_job_log": {
+    "job": 137081674510,
+    "run": 44981141842,
+    "sha": "6fcaa38496d8e2e2ff58413638623a288b04a4a5",
+    "raw_bytes": 2290145,
+    "raw_sha256_not_saved": "e944d9741d81442c0911e52d0959058c92c9dc3322f6079d580a4a920e219193",
+    "sanitized_bytes": 2242051,
+    "sanitized_sha256": "d6124287075e8d764a1c64d866d6b9d211be0a543b57fae77bb8a17d40785205",
+    "credentials_or_signed_urls_printed": false
+  },
+  "test_helper_source": [
+    {
+      "path": "tests/playwright/tests/e2e/ui/call-center-browser-api.mjs",
+      "sha256": "a9970de36548c879c0e86fc176abdac7c6de8ce1d75747ec8f1180e9f3fd00a7"
+    },
+    {
+      "path": "tests/playwright/tests/e2e/ui/call-center-browser-api.test.mjs",
+      "sha256": "296d2b4c020c4c101844e6d4f42554f9fdc9664725b4f99e5b1cafeb7ce50e18"
+    },
+    {
+      "path": "tests/playwright/tests/e2e/ui/call-center-queue-calendar-native.mjs",
+      "sha256": "679fd10f224fb6ab37b26ecaa7d963a61d04e980e1f469e53e428aa43f421352"
+    }
+  ],
+  "unchanged": [
+    "Application runtime",
+    "Native API authorization",
+    "Rails/Vue assertions",
+    "All244Chrome titles",
+    "90second test and75minute job timeouts",
+    "Workflows",
+    "Main",
+    "Original b77ffe55 checkout and three pending file hashes",
+    "Migrations/SQL",
+    "Docker/WSL/5379/production"
+  ],
+  "acceptance": "not approved; require new SHA native/assets/244Chrome proof",
+  "whole_word_complete": false,
+  "next_unlink_increment": "Private prepared only, not included in this correction;77mocked tests include39prior, five affected popup cases rechecked after invalidating previous consent."
+}

@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
+import { isBrowserApiResponse } from './call-center-browser-api.mjs';
 
 // The caller owns this tab and its independent synthetic account. No intercepted or simulated API.
 export async function verifyNativeQueueCalendarBindings(
@@ -88,10 +89,32 @@ export async function verifyNativeQueueCalendarBindings(
   );
   expect(concurrent.status()).toBe(200);
   const bindingUrl = `${base}/queue_calendars/${target.queue_id}`;
-  const conflictResult = page.waitForResponse(
-    response =>
-      response.url() === bindingUrl && response.request().method() === 'PATCH'
-  );
+  const observed = [];
+  const matchesMutation = response => {
+    const url = new URL(response.url());
+    if (url.pathname === new URL(bindingUrl).pathname && observed.length < 20) {
+      observed.push({
+        origin: url.origin,
+        path: url.pathname,
+        method: response.request().method(),
+        status: response.status(),
+      });
+      fs.writeFileSync(
+        `.codex/call-center-native-e2e/${info.project.name}-queue-calendar-observed.json`,
+        JSON.stringify(
+          {
+            sha: process.env.GITHUB_SHA,
+            browser_origin: browserOrigin,
+            observed,
+          },
+          null,
+          2
+        )
+      );
+    }
+    return isBrowserApiResponse(response, originalUrl, bindingUrl, 'PATCH');
+  };
+  const conflictResult = page.waitForResponse(matchesMutation);
   await dialog.locator('[data-save-queue-calendar]').click();
   expect((await conflictResult).status()).toBe(409);
   await expect(dialog.locator('[data-reload-queue-calendar]')).toBeVisible();
@@ -127,10 +150,7 @@ export async function verifyNativeQueueCalendarBindings(
     'SYNTHETIC concurrently reviewed queue'
   );
   await dialog.locator('[data-confirm-queue-calendar]').check();
-  const acceptedResult = page.waitForResponse(
-    response =>
-      response.url() === bindingUrl && response.request().method() === 'PATCH'
-  );
+  const acceptedResult = page.waitForResponse(matchesMutation);
   await dialog.locator('[data-save-queue-calendar]').click();
   const accepted = await acceptedResult;
   expect(accepted.status()).toBe(200);

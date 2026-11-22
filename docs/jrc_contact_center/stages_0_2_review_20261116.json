@@ -7001,5 +7001,17 @@
     "unchanged_timeouts": true,
     "new_sha_revalidation_required": true,
     "full_word_complete": false
+  },
+  "queue_calendar_browser_response_observer_diagnosis_20261122": {
+    "report": "docs/jrc_contact_center/queue_calendar_browser_response_observer_diagnosis_20261122.json",
+    "parent": "6fcaa38496d8e2e2ff58413638623a288b04a4a5",
+    "run": 44981141842,
+    "native": 2575,
+    "reload": 175,
+    "vue": 1403,
+    "chrome_passed": 240,
+    "chrome_timed_out": 4,
+    "whole_word_complete": false,
+    "status": "Exact browser response identity correction prepared; new SHA and actual244Chrome proof required; no application change."
   }
 }
