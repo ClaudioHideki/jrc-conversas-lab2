@@ -10,6 +10,11 @@ class JrcContactCenter::ConfigurationRevision
     check_token!(token(record), expected)
   end
 
+  # Typed snapshots may outlive their mutable source record. Existing record tokens remain unchanged.
+  def self.content_token(value)
+    Digest::SHA256.hexdigest(canonical(value).to_json)
+  end
+
   def self.check_token!(actual, expected)
     unless expected.is_a?(String) && expected.present?
       raise JrcContactCenter::OperationError.new('configuration_revision_required', status: :precondition_required)

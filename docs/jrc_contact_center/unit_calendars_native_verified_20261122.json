@@ -1,0 +1,872 @@
+{
+  "producer": "369e7351746d5bb76e96a7bc9de767c86c2cba8e",
+  "run": 44964018731,
+  "job": 137028861703,
+  "status": "native_and_bounded_visual_increment_verified",
+  "artifact": 14732766846,
+  "artifact_bytes": 74634265,
+  "artifact_sha256": "74cb92534f679cfe06af6809dee624f08f9f96a29a684704d0ed57bce2a4b8ba",
+  "native_distinct": 2547,
+  "core": 2340,
+  "concurrency": 122,
+  "corporate": 85,
+  "schema_reload_separate": 175,
+  "vue": 1374,
+  "chrome": 244,
+  "failures_pending_outside_errors": 0,
+  "new_ruby_offenses": 0,
+  "fresh_assets_and_bootstrap": true,
+  "png_hashes_verified": 472,
+  "actually_opened": 12,
+  "prior_logical_cases": {
+    "call-center-rspec.json": {
+      "preserved": 2334,
+      "new": 6
+    },
+    "call-center-pabx-rspec.json": {
+      "preserved": 122,
+      "new": 0
+    },
+    "call-center-corporate-rspec.json": {
+      "preserved": 85,
+      "new": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "preserved": 175,
+      "new": 0
+    },
+    "vue": {
+      "preserved": 1374,
+      "new": 0
+    }
+  },
+  "native_receipts": {
+    "desktop-dark-calendar-native.json": {
+      "sha256": "c31ff161e29bb442cf40fc2e79289ea114e8ffca89343a323aae978bcfdeae8f",
+      "receipt": {
+        "sha": "369e7351746d5bb76e96a7bc9de767c86c2cba8e",
+        "synthetic": true,
+        "external_homologation": false,
+        "account_id": 2048,
+        "unit_id": 1314,
+        "calendar_id": "3dbb7a04-a747-430f-a785-6ef2c40758bb",
+        "create_status": 201,
+        "conflict_status": 409,
+        "update_status": 200,
+        "final": {
+          "contract_version": 1,
+          "account_id": "2048",
+          "item": {
+            "id": "3dbb7a04-a747-430f-a785-6ef2c40758bb",
+            "active": false,
+            "definition": {
+              "name": "SYNTHETIC desktop-dark calendar reviewed local edit",
+              "weekly": {
+                "1": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "2": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "3": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "4": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "5": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "6": [],
+                "7": []
+              },
+              "holidays": [
+                {
+                  "date": "2026-11-23",
+                  "kind": "internal",
+                  "name": "SYNTHETIC selected holiday 2026-11-23",
+                  "type": "movable"
+                },
+                {
+                  "date": "2026-11-24",
+                  "kind": "internal",
+                  "name": "SYNTHETIC selected holiday 2026-11-24",
+                  "type": "movable"
+                }
+              ],
+              "timezone": "UTC",
+              "exceptions": [
+                {
+                  "date": "2026-11-23",
+                  "name": "SYNTHETIC explicit duty",
+                  "intervals": [
+                    [
+                      "10:00",
+                      "11:00"
+                    ]
+                  ]
+                }
+              ],
+              "description": ""
+            }
+          },
+          "unit_id": "1314",
+          "revision": "152c7e57f4d96cd92a31327d14535c1dfa2bf9328ac910102027cf052886224b",
+          "local_only": true,
+          "pabx_confirmed": false
+        },
+        "previews": [
+          {
+            "date": "2026-11-23",
+            "timezone": "UTC",
+            "precedence": "exception",
+            "intervals": [
+              [
+                "10:00",
+                "11:00"
+              ]
+            ],
+            "working_seconds": 3600,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "3dbb7a04-a747-430f-a785-6ef2c40758bb",
+            "active": false,
+            "unit_id": "1314",
+            "name": "SYNTHETIC desktop-dark calendar reviewed local edit",
+            "revision": "152c7e57f4d96cd92a31327d14535c1dfa2bf9328ac910102027cf052886224b"
+          },
+          {
+            "date": "2026-11-24",
+            "timezone": "UTC",
+            "precedence": "holiday",
+            "intervals": [],
+            "working_seconds": 0,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "3dbb7a04-a747-430f-a785-6ef2c40758bb",
+            "active": false,
+            "unit_id": "1314",
+            "name": "SYNTHETIC desktop-dark calendar reviewed local edit",
+            "revision": "152c7e57f4d96cd92a31327d14535c1dfa2bf9328ac910102027cf052886224b"
+          },
+          {
+            "date": "2026-11-25",
+            "timezone": "UTC",
+            "precedence": "weekly",
+            "intervals": [
+              [
+                "08:00",
+                "12:00"
+              ],
+              [
+                "13:00",
+                "17:00"
+              ]
+            ],
+            "working_seconds": 28800,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "3dbb7a04-a747-430f-a785-6ef2c40758bb",
+            "active": false,
+            "unit_id": "1314",
+            "name": "SYNTHETIC desktop-dark calendar reviewed local edit",
+            "revision": "152c7e57f4d96cd92a31327d14535c1dfa2bf9328ac910102027cf052886224b"
+          }
+        ],
+        "denials": [
+          404,
+          404,
+          401
+        ],
+        "ui_pages": [
+          1,
+          2,
+          1
+        ],
+        "initial_total": 21,
+        "theme_css": {
+          "background": "rgb(23, 23, 26)",
+          "foreground": "rgb(237, 238, 240)",
+          "bg": [
+            23,
+            23,
+            26,
+            255
+          ],
+          "fg": [
+            237,
+            238,
+            240,
+            255
+          ]
+        },
+        "page_errors": [],
+        "provider_writes": []
+      }
+    },
+    "desktop-light-calendar-native.json": {
+      "sha256": "460eacb548a062b9a41256b11077cd7b7b5d4d84c4145e077dac4081c66de8f7",
+      "receipt": {
+        "sha": "369e7351746d5bb76e96a7bc9de767c86c2cba8e",
+        "synthetic": true,
+        "external_homologation": false,
+        "account_id": 2047,
+        "unit_id": 1312,
+        "calendar_id": "311c03ec-f316-42be-8257-95e57519b521",
+        "create_status": 201,
+        "conflict_status": 409,
+        "update_status": 200,
+        "final": {
+          "contract_version": 1,
+          "account_id": "2047",
+          "item": {
+            "id": "311c03ec-f316-42be-8257-95e57519b521",
+            "active": false,
+            "definition": {
+              "name": "SYNTHETIC desktop-light calendar reviewed local edit",
+              "weekly": {
+                "1": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "2": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "3": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "4": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "5": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "6": [],
+                "7": []
+              },
+              "holidays": [
+                {
+                  "date": "2026-11-23",
+                  "kind": "internal",
+                  "name": "SYNTHETIC selected holiday 2026-11-23",
+                  "type": "movable"
+                },
+                {
+                  "date": "2026-11-24",
+                  "kind": "internal",
+                  "name": "SYNTHETIC selected holiday 2026-11-24",
+                  "type": "movable"
+                }
+              ],
+              "timezone": "UTC",
+              "exceptions": [
+                {
+                  "date": "2026-11-23",
+                  "name": "SYNTHETIC explicit duty",
+                  "intervals": [
+                    [
+                      "10:00",
+                      "11:00"
+                    ]
+                  ]
+                }
+              ],
+              "description": ""
+            }
+          },
+          "unit_id": "1312",
+          "revision": "8df95ab347eb376e0e3ad355cdbf92a2fdf54ca83d597d49c915f98cd71173f4",
+          "local_only": true,
+          "pabx_confirmed": false
+        },
+        "previews": [
+          {
+            "date": "2026-11-23",
+            "timezone": "UTC",
+            "precedence": "exception",
+            "intervals": [
+              [
+                "10:00",
+                "11:00"
+              ]
+            ],
+            "working_seconds": 3600,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "311c03ec-f316-42be-8257-95e57519b521",
+            "active": false,
+            "unit_id": "1312",
+            "name": "SYNTHETIC desktop-light calendar reviewed local edit",
+            "revision": "8df95ab347eb376e0e3ad355cdbf92a2fdf54ca83d597d49c915f98cd71173f4"
+          },
+          {
+            "date": "2026-11-24",
+            "timezone": "UTC",
+            "precedence": "holiday",
+            "intervals": [],
+            "working_seconds": 0,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "311c03ec-f316-42be-8257-95e57519b521",
+            "active": false,
+            "unit_id": "1312",
+            "name": "SYNTHETIC desktop-light calendar reviewed local edit",
+            "revision": "8df95ab347eb376e0e3ad355cdbf92a2fdf54ca83d597d49c915f98cd71173f4"
+          },
+          {
+            "date": "2026-11-25",
+            "timezone": "UTC",
+            "precedence": "weekly",
+            "intervals": [
+              [
+                "08:00",
+                "12:00"
+              ],
+              [
+                "13:00",
+                "17:00"
+              ]
+            ],
+            "working_seconds": 28800,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "311c03ec-f316-42be-8257-95e57519b521",
+            "active": false,
+            "unit_id": "1312",
+            "name": "SYNTHETIC desktop-light calendar reviewed local edit",
+            "revision": "8df95ab347eb376e0e3ad355cdbf92a2fdf54ca83d597d49c915f98cd71173f4"
+          }
+        ],
+        "denials": [
+          404,
+          404,
+          401
+        ],
+        "ui_pages": [
+          1,
+          2,
+          1
+        ],
+        "initial_total": 21,
+        "theme_css": {
+          "background": "rgb(255, 255, 255)",
+          "foreground": "rgb(28, 32, 36)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "fg": [
+            28,
+            32,
+            36,
+            255
+          ]
+        },
+        "page_errors": [],
+        "provider_writes": []
+      }
+    },
+    "mobile-dark-calendar-native.json": {
+      "sha256": "4d746bb26ee684df54efa4f4260cd803cd392a76647edb22d0a341567e20101c",
+      "receipt": {
+        "sha": "369e7351746d5bb76e96a7bc9de767c86c2cba8e",
+        "synthetic": true,
+        "external_homologation": false,
+        "account_id": 2050,
+        "unit_id": 1318,
+        "calendar_id": "68892a7f-56b3-4c41-9d15-87743b346ae2",
+        "create_status": 201,
+        "conflict_status": 409,
+        "update_status": 200,
+        "final": {
+          "contract_version": 1,
+          "account_id": "2050",
+          "item": {
+            "id": "68892a7f-56b3-4c41-9d15-87743b346ae2",
+            "active": false,
+            "definition": {
+              "name": "SYNTHETIC mobile-dark calendar reviewed local edit",
+              "weekly": {
+                "1": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "2": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "3": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "4": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "5": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "6": [],
+                "7": []
+              },
+              "holidays": [
+                {
+                  "date": "2026-11-23",
+                  "kind": "internal",
+                  "name": "SYNTHETIC selected holiday 2026-11-23",
+                  "type": "movable"
+                },
+                {
+                  "date": "2026-11-24",
+                  "kind": "internal",
+                  "name": "SYNTHETIC selected holiday 2026-11-24",
+                  "type": "movable"
+                }
+              ],
+              "timezone": "UTC",
+              "exceptions": [
+                {
+                  "date": "2026-11-23",
+                  "name": "SYNTHETIC explicit duty",
+                  "intervals": [
+                    [
+                      "10:00",
+                      "11:00"
+                    ]
+                  ]
+                }
+              ],
+              "description": ""
+            }
+          },
+          "unit_id": "1318",
+          "revision": "ce6643f0a774e9bac900208387b985f391b48de507eb556e6084ef5b76806023",
+          "local_only": true,
+          "pabx_confirmed": false
+        },
+        "previews": [
+          {
+            "date": "2026-11-23",
+            "timezone": "UTC",
+            "precedence": "exception",
+            "intervals": [
+              [
+                "10:00",
+                "11:00"
+              ]
+            ],
+            "working_seconds": 3600,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "68892a7f-56b3-4c41-9d15-87743b346ae2",
+            "active": false,
+            "unit_id": "1318",
+            "name": "SYNTHETIC mobile-dark calendar reviewed local edit",
+            "revision": "ce6643f0a774e9bac900208387b985f391b48de507eb556e6084ef5b76806023"
+          },
+          {
+            "date": "2026-11-24",
+            "timezone": "UTC",
+            "precedence": "holiday",
+            "intervals": [],
+            "working_seconds": 0,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "68892a7f-56b3-4c41-9d15-87743b346ae2",
+            "active": false,
+            "unit_id": "1318",
+            "name": "SYNTHETIC mobile-dark calendar reviewed local edit",
+            "revision": "ce6643f0a774e9bac900208387b985f391b48de507eb556e6084ef5b76806023"
+          },
+          {
+            "date": "2026-11-25",
+            "timezone": "UTC",
+            "precedence": "weekly",
+            "intervals": [
+              [
+                "08:00",
+                "12:00"
+              ],
+              [
+                "13:00",
+                "17:00"
+              ]
+            ],
+            "working_seconds": 28800,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "68892a7f-56b3-4c41-9d15-87743b346ae2",
+            "active": false,
+            "unit_id": "1318",
+            "name": "SYNTHETIC mobile-dark calendar reviewed local edit",
+            "revision": "ce6643f0a774e9bac900208387b985f391b48de507eb556e6084ef5b76806023"
+          }
+        ],
+        "denials": [
+          404,
+          404,
+          401
+        ],
+        "ui_pages": [
+          1,
+          2,
+          1
+        ],
+        "initial_total": 21,
+        "theme_css": {
+          "background": "rgb(23, 23, 26)",
+          "foreground": "rgb(237, 238, 240)",
+          "bg": [
+            23,
+            23,
+            26,
+            255
+          ],
+          "fg": [
+            237,
+            238,
+            240,
+            255
+          ]
+        },
+        "page_errors": [],
+        "provider_writes": []
+      }
+    },
+    "mobile-light-calendar-native.json": {
+      "sha256": "9fdb4480869233fc89cdf5248ed1b0962f03fdb73c7e5e1ea78adfd4c1d72c09",
+      "receipt": {
+        "sha": "369e7351746d5bb76e96a7bc9de767c86c2cba8e",
+        "synthetic": true,
+        "external_homologation": false,
+        "account_id": 2049,
+        "unit_id": 1316,
+        "calendar_id": "1e6b5e37-89f2-4608-830b-3f17b117b67b",
+        "create_status": 201,
+        "conflict_status": 409,
+        "update_status": 200,
+        "final": {
+          "contract_version": 1,
+          "account_id": "2049",
+          "item": {
+            "id": "1e6b5e37-89f2-4608-830b-3f17b117b67b",
+            "active": false,
+            "definition": {
+              "name": "SYNTHETIC mobile-light calendar reviewed local edit",
+              "weekly": {
+                "1": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "2": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "3": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "4": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "5": [
+                  [
+                    "08:00",
+                    "12:00"
+                  ],
+                  [
+                    "13:00",
+                    "17:00"
+                  ]
+                ],
+                "6": [],
+                "7": []
+              },
+              "holidays": [
+                {
+                  "date": "2026-11-23",
+                  "kind": "internal",
+                  "name": "SYNTHETIC selected holiday 2026-11-23",
+                  "type": "movable"
+                },
+                {
+                  "date": "2026-11-24",
+                  "kind": "internal",
+                  "name": "SYNTHETIC selected holiday 2026-11-24",
+                  "type": "movable"
+                }
+              ],
+              "timezone": "UTC",
+              "exceptions": [
+                {
+                  "date": "2026-11-23",
+                  "name": "SYNTHETIC explicit duty",
+                  "intervals": [
+                    [
+                      "10:00",
+                      "11:00"
+                    ]
+                  ]
+                }
+              ],
+              "description": ""
+            }
+          },
+          "unit_id": "1316",
+          "revision": "778c6ec26e8151eb1fdc396d887761ebb1583bd253ac973eb0804c6d70251226",
+          "local_only": true,
+          "pabx_confirmed": false
+        },
+        "previews": [
+          {
+            "date": "2026-11-23",
+            "timezone": "UTC",
+            "precedence": "exception",
+            "intervals": [
+              [
+                "10:00",
+                "11:00"
+              ]
+            ],
+            "working_seconds": 3600,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "1e6b5e37-89f2-4608-830b-3f17b117b67b",
+            "active": false,
+            "unit_id": "1316",
+            "name": "SYNTHETIC mobile-light calendar reviewed local edit",
+            "revision": "778c6ec26e8151eb1fdc396d887761ebb1583bd253ac973eb0804c6d70251226"
+          },
+          {
+            "date": "2026-11-24",
+            "timezone": "UTC",
+            "precedence": "holiday",
+            "intervals": [],
+            "working_seconds": 0,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "1e6b5e37-89f2-4608-830b-3f17b117b67b",
+            "active": false,
+            "unit_id": "1316",
+            "name": "SYNTHETIC mobile-light calendar reviewed local edit",
+            "revision": "778c6ec26e8151eb1fdc396d887761ebb1583bd253ac973eb0804c6d70251226"
+          },
+          {
+            "date": "2026-11-25",
+            "timezone": "UTC",
+            "precedence": "weekly",
+            "intervals": [
+              [
+                "08:00",
+                "12:00"
+              ],
+              [
+                "13:00",
+                "17:00"
+              ]
+            ],
+            "working_seconds": 28800,
+            "local_only": true,
+            "pabx_confirmed": false,
+            "calendar_id": "1e6b5e37-89f2-4608-830b-3f17b117b67b",
+            "active": false,
+            "unit_id": "1316",
+            "name": "SYNTHETIC mobile-light calendar reviewed local edit",
+            "revision": "778c6ec26e8151eb1fdc396d887761ebb1583bd253ac973eb0804c6d70251226"
+          }
+        ],
+        "denials": [
+          404,
+          404,
+          401
+        ],
+        "ui_pages": [
+          1,
+          2,
+          1
+        ],
+        "initial_total": 21,
+        "theme_css": {
+          "background": "rgb(255, 255, 255)",
+          "foreground": "rgb(28, 32, 36)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "fg": [
+            28,
+            32,
+            36,
+            255
+          ]
+        },
+        "page_errors": [],
+        "provider_writes": []
+      }
+    }
+  },
+  "visual_findings": [
+    "Opened the exception editor, revision comparison and saved-date preview in all four real Chrome projects: twelve exact PNGs.",
+    "The date exception, reviewed local-only consent, preserved draft and current-state comparison are legible in both themes.",
+    "The390px modal fits horizontally; the body scrolls vertically while the title/footer remain visible. Some upper fields and comparison values are outside the captured scroll position, not claimed as fully visible.",
+    "Exception-editor captures show the save control disabled at that captured instant. Subsequent native201/conflict409/update200 receipts independently prove the reviewed writes.",
+    "The saved preview shows the persisted synthetic name, UTC, explicit date, weekly rule and two working intervals;28800seconds is still displayed as raw seconds.",
+    "Native date inputs use the runner browser date format; this is not a Portuguese locale/date-format acceptance.",
+    "Light/dark input and dialog surfaces match the real computed CSS receipts; no horizontal overflow or browser errors were detected.",
+    "Exception-over-holiday, holiday closure, weekly calculation, pagination, reload and cross-scope denials are proven by the native receipts rather than inferred from screenshots.",
+    "This accepts only the internal calendar increment. Typed component bindings, complete impact inventory, PABX publication and the full23-figure Word remain open."
+  ],
+  "decision": {
+    "precedence": [
+      "explicit_date_exception",
+      "holiday",
+      "weekly"
+    ],
+    "overlap": "reject"
+  },
+  "accepted": [
+    "typed persisted unit calendar catalog; weekly intervals, holiday metadata, explicit date exceptions",
+    "creation, update, reviewed409conflict, manual recovery and native audit",
+    "real native20/1 pagination, search/clear, reload and date preview",
+    "current account/company/unit/configure authorization and denied cross-scope access",
+    "four actual desktop1440/mobile390 light/dark Chrome projects"
+  ],
+  "remaining": [
+    "typed version-pinned queue/number/IVR bindings and impact coverage",
+    "provider publication/applied versions/ACK need actual PABX contract",
+    "full23figures remain partial"
+  ],
+  "clarification": "The Word specifies fixed/movable categories, not an automatic holiday registry or recurrence formula. No working hours or provider state inferred. Explicit closed-date exceptions are supported; the inherited native calculator rejects a calendar with no ordinary working intervals.",
+  "whole_word_complete": false,
+  "provider_commands": false,
+  "migrations_changed": false
+}

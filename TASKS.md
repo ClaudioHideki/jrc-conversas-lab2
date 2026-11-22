@@ -853,3 +853,13 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [x] Corrigir as cinco fontes afetadas sem remover validações e preparar seis casos adicionais de rejeição persistente.
 - [ ] Revalidar o novo SHA nos gates existentes; assets e Chrome ainda não executados para este incremento.
 - [ ] Continuar os vínculos tipados e impactos do calendário sem inventar referências PABX.
+
+
+## Call Center — calendário interno validado em22/11/2026
+
+- [x] Produtor369e7351/CI44964018731:2547Rails distintos,175reload separados,1374Vue e244Chrome reais, zero falhas/pendências/erros; lint, assets novos e bootstrap aprovados.472hashes PNG e12capturas efetivamente revisadas.
+- [x] Precedência exceção→feriado→expediente, bloqueio de sobreposição, persistência, conflito409, revisão manual, paginação e negações nativas comprovados. Ver docs/jrc_contact_center/unit_calendars_native_verified_20261122.json.
+- [ ] Vínculos tipados de calendário e inventário de impactos continuam pendentes; referências externas permanecem desconhecidas. Categorias fixo/móvel não presumem recorrência automática. Nenhuma publicação PABX; conjunto23não concluído.
+
+
+- [ ] Vínculo interno fila/calendário: snapshot exato, escopo nativo, dupla revisão CAS, auditoria e recuperação idempotente implementados.39Vue leves aprovados (29novos/10anteriores), sem aceite nativo ou visual deste novo incremento. Exigir novoSHA, banco real sintético e mesmos244Chrome. Números/URA/impacto externo continuam pendentes; nenhum Command/PABX/migration. Ver docs/jrc_contact_center/queue_calendar_bindings_prepared_20261122.json.

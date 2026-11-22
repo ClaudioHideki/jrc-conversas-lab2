@@ -13,8 +13,22 @@ class JrcContactCenter::Queue < JrcContactCenter::ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
   validates :max_wait_seconds, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
   validate :active_window_order
+  validate :native_calendar_binding
 
   private
+
+  def native_calendar_binding
+    key = JrcContactCenter::QueueCalendarState::KEY
+    previous = new_record? ? {} : settings_in_database
+    return unless settings.key?(key) || previous.key?(key)
+
+    valid = !new_record? && settings.key?(key)
+    raise JrcContactCenter::OperationError, 'invalid_queue_calendar_binding' unless valid
+
+    JrcContactCenter::QueueCalendarState.new(queue: self).call
+  rescue JrcContactCenter::OperationError, ActiveRecord::RecordNotFound
+    errors.add(:settings, 'invalid_queue_calendar_binding')
+  end
 
   def active_window_order
     errors.add(:active_until, 'must be after active_from') if active_from && active_until && active_until <= active_from

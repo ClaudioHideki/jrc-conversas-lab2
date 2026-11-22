@@ -45,6 +45,9 @@ class JrcContactCenter::ConfigurationAuditSnapshot
       attributes['participates'] = record.role == 'agent'
       attributes['supervises'] = record.role == 'supervisor' || record.settings['supervises'] == true
     end
+    if record.is_a?(JrcContactCenter::Queue) && record.settings.key?(JrcContactCenter::QueueCalendarState::KEY)
+      attributes['settings'] = record.settings.slice(JrcContactCenter::QueueCalendarState::KEY)
+    end
     attributes
   end
 

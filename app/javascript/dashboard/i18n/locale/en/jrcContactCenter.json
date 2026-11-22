@@ -2798,6 +2798,26 @@
       "PREVIEW_EXCEPTION": "Regra aplicada: exceção explícita da data.",
       "PREVIEW_HOLIDAY": "Regra aplicada: feriado.",
       "PREVIEW_WEEKLY": "Regra aplicada: expediente semanal."
+    },
+    "CALENDAR_BINDING": {
+      "OPEN": "Vínculos locais de filas",
+      "TITLE": "Vínculos e impactos do calendário",
+      "LOCAL_ONLY": "Somente configuração interna. O uso e o impacto no PABX são desconhecidos até a validação do fornecedor. Salvar não publica nem altera o roteamento.",
+      "SEARCH": "Pesquisar fila da unidade",
+      "RESOURCES": "Filas autorizadas da unidade. A presença nesta lista não significa que o PABX utiliza este calendário.",
+      "EMPTY": "Nenhuma fila autorizada encontrada.",
+      "NONE": "Sem vínculo interno de calendário.",
+      "REVIEW": "Revisar vínculo",
+      "PROPOSED": "Calendário atual proposto para este vínculo:",
+      "CHANGED": "O calendário do catálogo mudou. O snapshot deste vínculo foi preservado.",
+      "PINNED": "O vínculo guardará uma cópia exata desta configuração. Uma edição futura do catálogo não substituirá essa cópia automaticamente.",
+      "CONFIRM": "Revisei a fila, a unidade e o calendário. Autorizo substituir somente o vínculo interno, sem publicar alterações no PABX.",
+      "SAVE": "Salvar vínculo interno",
+      "SAVED": "Vínculo interno confirmado e auditado. Aplicação no PABX não confirmada.",
+      "CONFLICT": "A fila ou o calendário mudou. Carregue o estado atual e revise novamente antes de salvar.",
+      "UNCERTAIN": "O resultado não pôde ser confirmado. Nenhuma próxima operação será iniciada. Revise e tente recuperar somente esta mesma solicitação, sem alterar seu conteúdo.",
+      "APPLY": "Aplicar pesquisa",
+      "CURRENT": "Comparar com o snapshot do vínculo interno atual"
     }
   }
 }

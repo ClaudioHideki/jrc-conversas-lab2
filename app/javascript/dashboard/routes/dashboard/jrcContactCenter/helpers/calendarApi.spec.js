@@ -93,4 +93,54 @@ describe('calendar API wire identity, not server authorization or persistence pr
       { params: { unit_id: '9007199254740993' } }
     );
   });
+
+  it('keeps explicit account, unit and calendar identities authoritative in the paginated queue binding inventory', () => {
+    API.queueCalendars('1', '10', calendar, {
+      unit_id: '999',
+      calendar_id: 'other',
+      q: 'SYNTHETIC',
+      page: 2,
+    });
+    expect(axios.get).toHaveBeenCalledWith(
+      '/api/v1/accounts/1/jrc_contact_center/queue_calendars',
+      {
+        params: {
+          unit_id: '10',
+          calendar_id: calendar,
+          q: 'SYNTHETIC',
+          page: 2,
+        },
+      }
+    );
+  });
+
+  it('reads current queue state and sends the exact reviewed idempotent body through only the typed native route', () => {
+    API.queueCalendar('1', '10', '20');
+    expect(axios.get).toHaveBeenCalledWith(
+      '/api/v1/accounts/1/jrc_contact_center/queue_calendars/20',
+      { params: { unit_id: '10' } }
+    );
+    const body = Object.freeze({
+      unit_id: '10',
+      queue_id: '20',
+      reviewed: true,
+      calendar_id: calendar,
+    });
+    API.saveQueueCalendar('1', '20', body);
+    expect(axios.patch).toHaveBeenCalledWith(
+      '/api/v1/accounts/1/jrc_contact_center/queue_calendars/20',
+      body
+    );
+    expect(axios.patch.mock.calls[0][1]).toBe(body);
+  });
+
+  it('rejects malformed queue routes and calendar identities before the transport can be invoked', () => {
+    expect(() => API.queueCalendar('1', '10', '../other')).toThrow(
+      'Invalid local record identity'
+    );
+    expect(() => API.queueCalendars('1', '10', '../other')).toThrow(
+      'Invalid local calendar identity'
+    );
+    expect(axios.get).not.toHaveBeenCalled();
+  });
 });

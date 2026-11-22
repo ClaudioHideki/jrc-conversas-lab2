@@ -33,11 +33,24 @@ class Api::V1::Accounts::JrcContactCenter::QueuesController < Api::V1::Accounts:
     permitted = params.require(:queue).permit(:unit_id, :code, :name, :external_ref, :service_kind, :strategy, :status,
                                               :max_wait_seconds, :active_from, :active_until, settings: {})
     contact_center_access.units.find(permitted[:unit_id]) if permitted[:unit_id].present?
+    settings = permitted[:settings].to_h
+    validate_calendar_settings!(settings)
+    if action_name == 'update' && permitted.key?(:settings)
+      current = contact_center_access.queues.find(params[:id]).settings
+      permitted[:settings] = settings.merge(current.slice(JrcContactCenter::QueueCalendarState::KEY))
+    end
     permitted
   end
 
   def serialize(queue)
     queue.as_json(only: %i[id unit_id code name external_ref service_kind strategy status max_wait_seconds active_from active_until settings])
-         .merge('unit_name' => queue.unit.name, 'revision' => JrcContactCenter::ConfigurationRevision.token(queue))
+         .merge('settings' => queue.settings.except(JrcContactCenter::QueueCalendarState::KEY),
+                'unit_name' => queue.unit.name, 'revision' => JrcContactCenter::ConfigurationRevision.token(queue))
+  end
+
+  def validate_calendar_settings!(settings)
+    return unless settings.key?(JrcContactCenter::QueueCalendarState::KEY)
+
+    raise JrcContactCenter::OperationError, 'calendar_requires_typed_configuration'
   end
 end

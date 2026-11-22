@@ -7,6 +7,7 @@ import API from 'dashboard/api/jrcContactCenter';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import CalendarEditorDialog from './CalendarEditorDialog.vue';
+import QueueCalendarBindings from './QueueCalendarBindings.vue';
 import {
   calendarIntervalsError,
   formatCalendarIntervals,
@@ -423,6 +424,14 @@ onBeforeUnmount(() => {
           :disabled="loading || !canManage"
           :data-preview-unit-calendar="row.id"
           @click="openPreview(row)"
+        />
+        <QueueCalendarBindings
+          :account-id="accountId"
+          :unit-id="unitId"
+          :calendar-id="row.id"
+          :context-key="actorScope"
+          :can-manage="canManage && !loading"
+          @denied="denied"
         />
       </div>
     </article>

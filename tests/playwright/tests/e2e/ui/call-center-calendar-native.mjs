@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
+import { verifyNativeQueueCalendarBindings } from './call-center-queue-calendar-native.mjs';
 
 // Called inside the existing fifteen-card case. A dedicated synthetic account and owned tab
 // preserve the other 61 scenarios and their authenticated native graphs.
@@ -343,6 +344,15 @@ export async function verifyNativeCalendars(parent, info, target, foreignUnit) {
     expect(stored.item.definition.name).toBe(`${prefix} reviewed local edit`);
     expect(stored.item.definition.exceptions).toEqual(
       receipt.item.definition.exceptions
+    );
+    expect(errors).toEqual([]);
+    expect(forbidden).toEqual([]);
+    await verifyNativeQueueCalendarBindings(
+      page,
+      info,
+      target,
+      stored.item,
+      foreignUnit
     );
     expect(errors).toEqual([]);
     expect(forbidden).toEqual([]);

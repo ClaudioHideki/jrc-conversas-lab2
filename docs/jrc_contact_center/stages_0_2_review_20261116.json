@@ -6839,5 +6839,29 @@
     "ruby_new_offenses": 19,
     "chrome": "not_run",
     "status": "correction_prepared_revalidation_pending"
+  },
+  "unit_calendars_native_verified_20261122": {
+    "producer": "369e7351746d5bb76e96a7bc9de767c86c2cba8e",
+    "run": 44964018731,
+    "report": "docs/jrc_contact_center/unit_calendars_native_verified_20261122.json",
+    "native": 2547,
+    "reload_separate": 175,
+    "vue": 1374,
+    "chrome": 244,
+    "actual_images_opened": 12,
+    "remaining": [
+      "typed version-pinned queue/number/IVR bindings and impact coverage",
+      "provider publication/applied versions/ACK need actual PABX contract",
+      "full23figures remain partial"
+    ],
+    "full_word_complete": false
+  },
+  "queue_calendar_bindings_prepared_20261122": {
+    "report": "docs/jrc_contact_center/queue_calendar_bindings_prepared_20261122.json",
+    "status": "implemented_native_and_chrome_pending",
+    "mocked_units": 39,
+    "new_units": 29,
+    "native_chrome_accepted": false,
+    "full_word_complete": false
   }
 }

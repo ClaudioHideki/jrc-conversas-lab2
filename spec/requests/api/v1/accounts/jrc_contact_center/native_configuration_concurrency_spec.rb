@@ -789,4 +789,32 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     expect(units.first.reload.settings.fetch(JrcContactCenter::CalendarCatalogState::KEY).fetch('version')).to eq(2)
     expect(JrcContactCenter::Command.where(account: account)).to be_empty
   end
+
+  %w[profile coverage calendar_revision].each do |source|
+    it "does not bind a queue calendar after #{source} changes during the actual account mutex wait" do
+      member = account.account_users.find_by!(user: actor)
+      context = { account: account, account_user: member, user: actor }
+      catalog = JrcContactCenter::CalendarCatalog.new(context: context, unit_id: units.first.id)
+      entry = synthetic_calendar_entry
+      created = catalog.save!(entry, expected_revision: catalog.call.fetch('revision'), create: true)
+      payload = { 'unit_id' => units.first.id.to_s, 'queue_id' => queue.id.to_s, 'calendar_id' => entry.fetch('id'),
+                  'calendar_revision' => created.fetch('revision'), 'queue_revision' => JrcContactCenter::ConfigurationRevision.token(queue),
+                  'reviewed' => true, 'idempotency_key' => SecureRandom.uuid }
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/queue_calendars/#{queue.id}"
+      change = lambda do
+        case source
+        when 'profile' then member.custom_role.update!(permissions: ['jrc_contact_center_view'])
+        when 'coverage' then JrcCrm::UserBusinessUnit.where(account: account, user: actor).find_each { |row| row.update!(active: false) }
+        else
+          current = JrcContactCenter::CalendarCatalog.new(context: context, unit_id: units.first.id)
+          current.save!(entry.deep_merge('definition' => { 'name' => 'SYNTHETIC committed calendar' }),
+                        expected_revision: current.call.fetch('revision'))
+        end
+      end
+      status = race_with_account_change(change, endpoint: endpoint, payload: payload, defer_change: true)
+      expect(status).to eq({ 'profile' => 401, 'coverage' => 404, 'calendar_revision' => 409 }.fetch(source))
+      expect(queue.reload.settings).not_to have_key(JrcContactCenter::QueueCalendarState::KEY)
+      expect(JrcContactCenter::Command.where(account: account)).to be_empty
+    end
+  end
 end

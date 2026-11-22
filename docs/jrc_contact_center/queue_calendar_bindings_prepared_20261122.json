@@ -1,0 +1,56 @@
+{
+  "base": "369e7351746d5bb76e96a7bc9de767c86c2cba8e",
+  "status": "implemented_native_and_chrome_pending",
+  "reference": "Both original Word section6: local native queue binding increment only",
+  "storage": "One reserved typed JSONB association in each existing Queue; native configuration audit before/after; no new migration or duplicate catalog",
+  "security": [
+    "Fresh configure/corporate/unit/queue scopes after native Account mutex wait",
+    "Strict raw JSON, two CAS tokens, reviewed exact snapshot and canonical digest, request identity bound to full input",
+    "Generic queue API cannot read/write the reserved key; other settings retain native replacement semantics",
+    "Model rejects silent discard/transfer; snapshot stays pinned when calendar catalog changes",
+    "Unknown delivery has manual idempotent recovery; no automatic retries or duplicate writes",
+    "Frontend clears private snapshots and ignores late responses after actor/context/permission change"
+  ],
+  "local_mocked": {
+    "passed": 39,
+    "new": 29,
+    "prior": 10,
+    "failed_pending": 0,
+    "startup_failure_preserved": "First sandbox attempt returned spawn EPERM before examples; not accepted. A normal reviewed escalation ran the bounded check.",
+    "resource": {
+      "kind": "Windows bounded mocked unit check; not native Rails/Chrome or codec proof",
+      "target": "queue-calendar-bindings-r2",
+      "exit_code": 0,
+      "stop": null,
+      "seconds": 7.032000000006519,
+      "initial": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 1811369984,
+        "c_free_bytes": 54937968640,
+        "read_only": true
+      },
+      "minimum": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 1519562752,
+        "c_free_bytes": 54937964544,
+        "read_only": true
+      },
+      "final": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 1755750400,
+        "c_free_bytes": 54937939968,
+        "read_only": true
+      },
+      "log_bytes": 821
+    }
+  },
+  "native_request_and_actual_lock_tests": "Prepared; not executed on Windows",
+  "chrome": "Same244logical scenarios; actual queue binding workflow added inside existing owned calendar tab, four projects, no mocked API",
+  "remaining": [
+    "Numbers and versioned IVR bindings",
+    "Complete external provider references and production impact inventory",
+    "Actual PABX capabilities/publication/ACK; no contract invented"
+  ],
+  "no_migrations_dependencies_grants_workflows_provider_commands": true,
+  "full_word_complete": false
+}

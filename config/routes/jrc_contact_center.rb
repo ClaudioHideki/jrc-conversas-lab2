@@ -77,6 +77,7 @@ namespace :api, defaults: { format: 'json' } do
         resources :unit_calendars, only: %i[index show create update] do
           get :preview, on: :member
         end
+        resources :queue_calendars, only: %i[index show update]
         resources :audio_assets, only: %i[index show create update] do
           post :duplicate, on: :member
           resource :usages, only: [:show], controller: 'audio_usages'

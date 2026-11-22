@@ -46,6 +46,23 @@ const calendarIdentity = value => {
 };
 
 export default {
+  queueCalendars: (accountId, unitId, calendarId, params = {}) =>
+    axios.get(`${base(accountId)}/queue_calendars`, {
+      params: {
+        ...params,
+        unit_id: recordIdentity(unitId),
+        calendar_id: calendarIdentity(calendarId),
+      },
+    }),
+  queueCalendar: (accountId, unitId, queueId) =>
+    axios.get(`${base(accountId)}/queue_calendars/${recordIdentity(queueId)}`, {
+      params: { unit_id: recordIdentity(unitId) },
+    }),
+  saveQueueCalendar: (accountId, queueId, body) =>
+    axios.patch(
+      `${base(accountId)}/queue_calendars/${recordIdentity(queueId)}`,
+      body
+    ),
   unitCalendars: (accountId, unitId, params = {}) =>
     axios.get(`${base(accountId)}/unit_calendars`, {
       params: { ...params, unit_id: recordIdentity(unitId) },
