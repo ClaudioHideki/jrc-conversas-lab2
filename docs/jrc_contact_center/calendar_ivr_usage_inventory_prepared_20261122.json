@@ -117,7 +117,7 @@
     }
   },
   "prepared_native_tests_not_run": {
-    "request_scenarios": 17,
+    "request_scenarios": 18,
     "added_chrome_scenarios": 4,
     "chrome_required_total": 252,
     "existing_chrome_scenarios_preserved": 248
@@ -208,5 +208,12 @@
       "log_bytes": 1428
     },
     "native_css_and_icon_status": "pending next immutable candidate, actual computed color-scheme and8new Chrome PNG reviews"
+  },
+  "native_guard_fault_injection_distinction": {
+    "report": "docs/jrc_contact_center/calendar_ivr_inventory_second_native_findings_20261122.json",
+    "normal_reparenting_supported": false,
+    "runtime_guards_preserved": true,
+    "adversarial_metadata_fixture_synthetic_only": true,
+    "native_revalidation_pending": true
   }
 }

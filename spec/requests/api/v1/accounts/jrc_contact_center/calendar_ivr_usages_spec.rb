@@ -181,6 +181,25 @@ RSpec.describe 'Calendar usage inventory preserves current native URA heads and 
     expect(response).to have_http_status(:unauthorized)
   end
 
+  it 'rejects ordinary catalog removal and scope relabeling without changing the native source or historical draft' do
+    current = draft
+    original = current.latest_version.attributes.deep_dup
+    unit = units.first.reload
+    settings = unit.settings.deep_dup
+    other_company = account.master_companies.create!(name: 'SYNTHETIC guarded issuer', relationship_type: 'internal')
+    other_business = account.jrc_crm_business_units.create!(operating_company: other_company, code: 'C', name: 'SYNTHETIC guarded scope')
+    changed = settings.merge('issuer_company_id' => other_company.id, 'business_unit_id' => other_business.id)
+    expect { unit.update!(settings: changed) }.to raise_error(ActiveRecord::RecordInvalid, /invalid_contact_center_calendar_catalog/)
+    expect(unit.reload.settings).to eq(settings)
+    expect do
+      unit.update!(settings: settings.except(JrcContactCenter::CalendarCatalogState::KEY))
+    end.to raise_error(ActiveRecord::RecordInvalid, /invalid_contact_center_calendar_catalog/)
+    expect(unit.reload.settings).to eq(settings)
+    expect(current.scope_snapshot.fetch('issuer_company_id')).to eq(company.id.to_s)
+    expect(current.latest_version.attributes).to eq(original)
+    expect(JrcContactCenter::Command.where(account: account)).to be_empty
+  end
+
   it 'intersects current unit visibility with the immutable historical issuer company' do
     current = draft
     original = current.latest_version.attributes.deep_dup
@@ -189,18 +208,28 @@ RSpec.describe 'Calendar usage inventory preserves current native URA heads and 
     account.jrc_crm_user_business_units.where(user: actor).find_each { |row| row.update!(active: false) }
     account.jrc_crm_user_business_units.create!(user: actor, scope: 'BUSINESS_UNIT', company: next_company,
                                                 business_unit: next_business, active: true, structure_managed: true)
-    # New synthetic configuration in the new scope; never relabel the old catalog or the immutable draft snapshot.
+    # Adversarial synthetic SQL corruption of mutable unit/catalog metadata, not a supported reparenting operation.
+    # The ordinary model guard is tested above and remains enabled. No database trigger is disabled here.
     unit = units.first.reload
-    settings = unit.settings.except(JrcContactCenter::CalendarCatalogState::KEY)
-    unit.update!(settings: settings.merge('issuer_company_id' => next_company.id, 'business_unit_id' => next_business.id))
-    catalog.save!(entry, expected_revision: catalog.call.fetch('revision'), create: true)
-    expect(JrcContactCenter::CalendarCatalogState.new(unit: unit.reload).scope.fetch('issuer_company_id')).to eq(next_company.id.to_s)
-    expect(current.scope_snapshot.fetch('issuer_company_id')).to eq(company.id.to_s)
+    unit.settings = unit.settings.merge('issuer_company_id' => next_company.id, 'business_unit_id' => next_business.id)
+    key = JrcContactCenter::CalendarCatalogState::KEY
+    unit.settings[key]['scope_snapshot'] = JrcContactCenter::CalendarCatalogState.new(unit: unit).scope
+    connection = JrcContactCenter::Unit.connection
+    sql = <<~SQL.squish
+      UPDATE jrc_contact_center_units SET settings = #{connection.quote(unit.settings.to_json)}::jsonb
+      WHERE account_id = #{account.id} AND id = #{unit.id}
+    SQL
+    connection.execute(sql)
+    scopes = [JrcContactCenter::CalendarCatalogState.new(unit: unit.reload).call.fetch('scope_snapshot').fetch('issuer_company_id'),
+              current.scope_snapshot.fetch('issuer_company_id')]
+    expect(scopes).to eq([next_company.id.to_s, company.id.to_s])
     get base, headers: headers, params: { unit_id: unit.id }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items')).to eq([])
     expect(response.parsed_body.dig('meta', 'total')).to eq(0)
     expect(current.latest_version.attributes).to eq(original)
     expect(JrcContactCenter::Command.where(account: account)).to be_empty
+    get "/api/v1/accounts/#{account.id}/jrc_contact_center/ivr_drafts/#{current.id}", headers: headers
+    expect(response).to have_http_status(:not_found)
   end
 end

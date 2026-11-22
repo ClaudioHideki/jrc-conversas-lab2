@@ -1,0 +1,49 @@
+{
+  "failed_sha": "3f71ebf14928a68352c016247df3e5fda0f4f7de",
+  "run": 45028123769,
+  "job": 137225503680,
+  "artifact": 14757795125,
+  "artifact_sha256": "1ece6799d69587de9373d036c982a37e33f4071cf8e25de62cec19d817ce1aca",
+  "native_core": {
+    "total": 2465,
+    "passed": 2464,
+    "failed": 1,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "all2448previous_native_cases_passed": true,
+  "schema_reload_separate_passed": 175,
+  "ruby_new_offenses": 0,
+  "previous13ruby_offenses_resolved": true,
+  "vue_concurrency_corporate_assets_chrome": "not executed after core failure; not approved",
+  "confirmed_cause": "Unit.native_calendar_catalog correctly forbids removing an existing catalog or relabeling its captured corporate scope. The former new-scope fixture tried an unsupported write",
+  "correction": [
+    "Keep the native Unit validation, catalog validation, historical visibility, SQL and immutable triggers byte-identical",
+    "Add a real negative model scenario proving both ordinary reparenting and removal are rejected and stored source/history are unchanged",
+    "The original historical-scope scenario now explicitly injects adversarial mutable metadata through account/id-bounded SQL only in the disposable synthetic database",
+    "No database trigger or validation is disabled; the fixture is not represented as a supported operational reconfiguration or valid source attestation",
+    "Despite forged current unit/catalog scopeB, the immutable draft scopeA remains inaccessible in the inventory and through direct API lookup",
+    "Preserve all17prior expanded descriptions and history assertions; add1native guard scenario and a direct404check"
+  ],
+  "expected_next": {
+    "core": 2466,
+    "concurrency": 130,
+    "corporate": 85,
+    "native_distinct": 2681,
+    "schema_reload_separate": 175,
+    "vue": 1526,
+    "chrome": 252
+  },
+  "runtime_code_changed": false,
+  "migrations_or_sql_guard_sources_changed": false,
+  "native_accepted": false,
+  "visual_accepted": false,
+  "whole_word_complete": false,
+  "pending": "New immutable checkpoint must execute every native gate and actual Chrome proof; no local Ruby runtime is claimed",
+  "preserved_job_log": {
+    "sanitized_sha256": "bc6e80ff4930b263ca74315c182a5b36dff64e42ccc8441a997577c68174ec7e",
+    "sanitized_bytes": 1578012,
+    "raw_sha256_not_saved": "9eac8d0746b12a6735b656ae85bddca8ba578d1483eb61507791a2d52cd53092",
+    "credentials_or_signed_urls_printed": false
+  }
+}
