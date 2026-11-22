@@ -101,7 +101,7 @@ RSpec.describe 'Native mandatory pause approval API', :approval_core, type: :req
 
   it 'denies a reused preview after operating eligibility is revoked and exposes no stored impact' do
     headers
-    member.update!(contact_center_eligible: false)
+    JrcContactCenter::AccessGrant.find_by!(account: account, account_user: member).update!(eligible: false)
     post "#{endpoint}/preview", headers: headers, params: { deferred_pause_request: values }, as: :json
     expect(response).to have_http_status(:unauthorized)
     expect(response.parsed_body).not_to have_key('preview')
