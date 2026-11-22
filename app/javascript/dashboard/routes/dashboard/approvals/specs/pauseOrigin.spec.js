@@ -80,6 +80,29 @@ const request = () => ({
 });
 
 describe('native Central pause source presentation', () => {
+  it('explains the pause context without applying commercial-only guidance to the new source', () => {
+    const wrapper = mount(RequestDetail, { props: { request: request() } });
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.PAUSE_APPROVAL.SOURCE_HELP'
+    );
+    expect(wrapper.text()).not.toContain('JRC_APPROVALS.workspace.sourceHelp');
+  });
+
+  it('preserves the existing source guidance for an ordinary commercial request', () => {
+    const record = request();
+    Object.assign(record, {
+      module_key: 'crm',
+      event_key: 'price_exception',
+      resource_type: 'JrcCrm::SalesOrder',
+      origin: null,
+    });
+    const wrapper = mount(RequestDetail, { props: { request: record } });
+    expect(wrapper.text()).toContain('JRC_APPROVALS.workspace.sourceHelp');
+    expect(wrapper.text()).not.toContain(
+      'JRC_CONTACT_CENTER.PAUSE_APPROVAL.SOURCE_HELP'
+    );
+  });
+
   it('shows only the already-authorized own-scope historical snapshot and its opaque full-impact digest', () => {
     const record = request();
     const wrapper = mount(PauseOrigin, { props: { request: record } });

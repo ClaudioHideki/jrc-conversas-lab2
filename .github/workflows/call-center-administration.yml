@@ -92,7 +92,7 @@ jobs:
           node --test script/validate_ag_migration_identity.test.mjs script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
           node script/validate_ag_migration_identity.mjs
           node --test script/validate_cc_access_migration.test.mjs
-          node --test tests/playwright/tests/e2e/ui/call-center-browser-api.test.mjs
+          node --test --test-concurrency=1 tests/playwright/tests/e2e/ui/call-center-browser-api.test.mjs tests/playwright/tests/e2e/ui/call-center-text-contrast.test.mjs
           node script/validate_cc_access_migration.mjs
       - name: Disposable application schema and pending migrations
         run: |

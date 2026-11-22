@@ -287,5 +287,19 @@
     "full_workflow_accepted": false,
     "change": "Only extend bounded job timeout75 to105; runner, resources, tests, one worker, zero retries and checks unchanged",
     "product_functional_code_unchanged": true
-  }
+  },
+  "sixth_native_findings": {
+    "sha": "8a3853cf38cd17ef999f48312f648e4951156c77",
+    "run": 45063751101,
+    "artifact": 14772399283,
+    "artifact_sha256": "bd07cc95c93387403ac65216a77083a6aff54be9f1cb3d6e40000184a3e4fca4",
+    "native_distinct_examples": 2767,
+    "reload_examples_separate": 187,
+    "vue_cases": 1760,
+    "chrome_cases": 256,
+    "png_hashes_verified": 568,
+    "product_includes_this_delta": false,
+    "actual_visual_findings_still_require_correction": true
+  },
+  "visual_qa_correction_pending": "docs/jrc_contact_center/pause_approval_visual_qa_pending_20261122.json"
 }

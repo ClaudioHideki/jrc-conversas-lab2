@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
+import { measureTextContrast } from './call-center-text-contrast.mjs';
 import { bindBrowserApiResponse } from './call-center-browser-api.mjs';
 
 // Real native approval UI, CSS, PostgreSQL and ACW. No mocked API or external PABX.
@@ -8,6 +9,8 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
   const errors = [];
   const providerWrites = [];
   const screenshots = [];
+  const decisionContrast = [];
+  const persistedUnitNames = [];
   const dark = info.project.name.endsWith('dark');
   const base = `/api/v1/accounts/${target.account_id}`;
   const api = `http://127.0.0.1:5387${base}/jrc_contact_center`;
@@ -64,6 +67,11 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
     await page.screenshot({ path, fullPage: false });
     screenshots.push(path);
   };
+  const verifyPersistedUnitNames = async (widget, phase) => {
+    const labels = widget.locator('[data-pause-approval-unit-name]');
+    await expect(labels).toHaveText(target.affected_unit_names);
+    persistedUnitNames.push({ phase, names: await labels.allTextContents() });
+  };
   const page = await newPage(target.operator);
   const browserResponse = bindBrowserApiResponse(page, 'http://127.0.0.1:5387');
   const state = async () => {
@@ -119,6 +127,7 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
     await page.reload();
     await expect(widget.locator('[data-pause-approval-status]')).toBeVisible();
     await expect(widget.locator('[data-pause-approval-apply]')).toHaveCount(0);
+    await verifyPersistedUnitNames(widget, 'pending-reload');
     const pending = await state();
     const scopes = pending.deferred_pause_request.approval.scopes;
     const requestFor = reviewer => {
@@ -138,6 +147,53 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
     await expect(ownPage.getByRole('button', { name: /^Aprovar/ })).toHaveCount(
       0
     );
+    const ownBrowserResponse = bindBrowserApiResponse(
+      ownPage,
+      'http://127.0.0.1:5387'
+    );
+    const moduleFilter = ownPage.getByLabel('Módulo', { exact: true });
+    await moduleFilter.selectOption('contact_center');
+    const filtered = ownPage.waitForResponse(response => {
+      const url = new URL(response.url());
+      return (
+        ownBrowserResponse(
+          response,
+          base + '/approvals/requests' + url.search,
+          'GET'
+        ) && url.searchParams.get('module_key') === 'contact_center'
+      );
+    });
+    await ownPage
+      .getByRole('button', { name: 'Aplicar filtros', exact: true })
+      .click();
+    const filterResponse = await filtered;
+    expect(filterResponse.status()).toBe(200);
+    const filterParameters = Object.fromEntries(
+      new URL(filterResponse.url()).searchParams
+    );
+    expect(filterParameters).toEqual({
+      order: 'recent',
+      module_key: 'contact_center',
+      page: '1',
+      per_page: '25',
+      requested_by_me: 'true',
+    });
+    const filteredBody = await filterResponse.json();
+    expect(filteredBody).toHaveLength(2);
+    expect(filteredBody.every(row => row.module_key === 'contact_center')).toBe(
+      true
+    );
+    const expectedRequestIds = scopes.flatMap(scope =>
+      scope.requests.map(request => request.id)
+    );
+    const filteredRequestIds = filteredBody.map(row => row.id);
+    expect(filteredRequestIds.map(String).sort()).toEqual(
+      expectedRequestIds.map(String).sort()
+    );
+    for (const requestId of expectedRequestIds)
+      await expect(
+        ownPage.locator(`[data-approval-request="${requestId}"]`)
+      ).toContainText('Call Center');
     await capture(ownPage, 'own-request');
     await ownPage.close();
 
@@ -175,6 +231,23 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
       await expect(
         decisionDialog.locator('[data-native-pause-approval-origin]')
       ).toContainText(target.affected_unit_names[index]);
+      for (const [label, selector] of [
+        ['summary', '[data-approval-decision-summary] > p:first-child'],
+        ['reason', '[data-approval-decision-reason]'],
+      ]) {
+        const text = decisionDialog.locator(selector);
+        await expect(text).toBeVisible();
+        const rows = await text.evaluate(measureTextContrast);
+        expect(rows).toHaveLength(1);
+        const row = rows[0];
+        expect(row.foreground[3]).toBe(255);
+        expect(row.background[3]).toBe(255);
+        expect(
+          row.ratio,
+          JSON.stringify({ label, reviewer: index + 1, ...row })
+        ).toBeGreaterThanOrEqual(4.5);
+        decisionContrast.push({ label, reviewer: index + 1, ...row });
+      }
       await capture(reviewerPage, `reviewer-${index + 1}`, true);
       const decided = reviewerPage.waitForResponse(response =>
         reviewerResponse(
@@ -217,6 +290,7 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
       'ready'
     );
     await expect(widget.locator('[data-pause-approval-apply]')).toBeVisible();
+    await verifyPersistedUnitNames(widget, 'ready');
     await capture(page, 'ready');
     await widget.locator('[data-pause-approval-apply]').click();
     await expect(page.locator('[data-deferred-pause-confirm]')).toBeEnabled();
@@ -295,6 +369,15 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
           final_state: final.state,
           provider_confirmed: final.provider_confirmed,
           dark,
+          visual_qa_version: 1,
+          module_filter: {
+            module_key: 'contact_center',
+            status: filterResponse.status(),
+            parameters: filterParameters,
+            request_ids: filteredRequestIds,
+          },
+          persisted_unit_names: persistedUnitNames,
+          decision_contrast: decisionContrast,
           screenshots,
           errors,
           provider_writes: providerWrites,

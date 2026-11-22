@@ -7,4 +7,9 @@ class JrcContactCenter::PauseApprovalScope < JrcContactCenter::ApplicationRecord
   belongs_to :review, class_name: 'JrcContactCenter::PauseApprovalReview', inverse_of: :scopes
 
   validates :issuer_company_id, :unit_ids, presence: true
+
+  def unit_names
+    captured = review.payload.fetch('coverage').fetch('units').index_by { |unit| unit.fetch('id') }
+    unit_ids.map { |id| captured.fetch(id).fetch('name') }
+  end
 end

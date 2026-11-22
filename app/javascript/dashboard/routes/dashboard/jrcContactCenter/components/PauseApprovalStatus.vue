@@ -74,6 +74,14 @@ const statusLabel = computed(
           })
         }}
       </p>
+      <p
+        v-for="(name, index) in scope.unit_names || []"
+        :key="`${scope.id}-${index}`"
+        class="break-words"
+        data-pause-approval-unit-name
+      >
+        {{ name }}
+      </p>
       <p v-if="scope.status === 'policy_missing'">
         {{ t('JRC_CONTACT_CENTER.PAUSE_APPROVAL.POLICY_MISSING') }}
       </p>

@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Icon from 'next/icon/Icon.vue';
 import ApprovalStatus from './ApprovalStatus.vue';
-import { scopeLabel } from './model';
+import { scopeLabel, WORKSPACE_MODULES } from './model';
 defineProps({
   rows: { type: Array, required: true },
   request: { type: Object, default: null },
@@ -15,7 +15,9 @@ const emit = defineEmits(['select', 'back']);
 const { t, te, locale } = useI18n();
 const moduleLabel = key => {
   const label = `JRC_APPROVALS.workspace.modules.${key}`;
-  return te(label) ? t(label) : t('JRC_APPROVALS.workspace.modules.other');
+  return WORKSPACE_MODULES.includes(key) || te(label)
+    ? t(label)
+    : t('JRC_APPROVALS.workspace.modules.other');
 };
 const dateOptions = computed(() => ({
   dateStyle: 'short',

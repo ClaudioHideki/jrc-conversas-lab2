@@ -173,7 +173,11 @@ const confirm = payload => {
     <p
       class="rounded-xl border border-n-blue-5 bg-n-blue-2 p-3 text-sm text-n-slate-11"
     >
-      {{ t('JRC_APPROVALS.workspace.sourceHelp') }}
+      {{
+        pauseOriginRequired
+          ? t('JRC_CONTACT_CENTER.PAUSE_APPROVAL.SOURCE_HELP')
+          : t('JRC_APPROVALS.workspace.sourceHelp')
+      }}
     </p>
     <details class="rounded-xl border border-n-weak bg-n-background p-3">
       <summary class="cursor-pointer text-xs font-medium text-n-slate-11">

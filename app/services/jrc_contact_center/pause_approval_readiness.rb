@@ -55,7 +55,7 @@ class JrcContactCenter::PauseApprovalReadiness
   def scope_readiness(scope, lock)
     check = JrcContactCenter::PauseApprovalPolicyCheck.new(context: context, lock: lock).call(scope_id: scope.id)
     check.merge(id: scope.id.to_s, issuer_company_id: scope.issuer_company_id.to_s,
-                business_unit_id: scope.business_unit_id&.to_s, unit_ids: scope.unit_ids)
+                business_unit_id: scope.business_unit_id&.to_s, unit_ids: scope.unit_ids, unit_names: scope.unit_names)
   end
 
   def unavailable

@@ -2913,7 +2913,7 @@
       "NO_EARLY_PAUSE": "A solicitação não aplica a pausa nem retira a disponibilidade antes das aprovações. Chamadas e ACW seguem suas regras atuais.",
       "SCOPE": "Empresa #{company} · Unidade de negócio #{unit}",
       "REQUEST": "Solicitação #{id}",
-      "READY": "Todas as aprovações estão válidas. A pausa ainda precisa ser aplicada.",
+      "READY": "Todas as aprovações estão válidas. A pausa continua condicionada ao fim das chamadas e à conclusão do ACW.",
       "APPROVAL_REQUIRED": "Aguardando as aprovações de todos os escopos afetados.",
       "REVIEW_REQUIRED": "O contexto mudou ou perdeu autorização. Cancele a solicitação e revise o impacto antes de criar outra.",
       "POLICY_MISSING": "Falta uma política de aprovação aplicável neste escopo.",
@@ -2934,7 +2934,8 @@
       "ORIGIN_SCOPE_ONLY": "Esta solicitação cobre somente as unidades listadas. A pausa exige aprovações válidas de todos os escopos afetados.",
       "ORIGIN_HISTORICAL": "Identificação do contexto completo registrado. Este painel é histórico; a autorização atual será conferida novamente ao decidir e ao aplicar a pausa.",
       "ORIGIN_PRIVATE": "A justificativa pessoal permanece privada. Nenhum comando ao PABX será executado por esta decisão.",
-      "ORIGIN_UNVERIFIED": "Não foi possível conferir o contexto registrado desta pausa. A decisão está bloqueada até recuperar os dados corretos."
+      "ORIGIN_UNVERIFIED": "Não foi possível conferir o contexto registrado desta pausa. A decisão está bloqueada até recuperar os dados corretos.",
+      "SOURCE_HELP": "Consulte o contexto da pausa nas unidades autorizadas. A justificativa pessoal permanece privada."
     }
   }
 }

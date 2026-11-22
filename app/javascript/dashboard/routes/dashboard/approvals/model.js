@@ -1,4 +1,13 @@
 /* global BigInt */
+// Presentation choices only; native source and destination authorization remain server-side.
+export const WORKSPACE_MODULES = [
+  'crm',
+  'contracts',
+  'backoffice',
+  'relationship',
+  'service_desk',
+  'contact_center',
+];
 export const STATES = [
   'pending',
   'approved',

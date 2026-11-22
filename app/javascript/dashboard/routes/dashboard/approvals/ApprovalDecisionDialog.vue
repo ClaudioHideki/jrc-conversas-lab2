@@ -61,7 +61,10 @@ onMounted(() => dialog.value.open());
     @confirm="confirm"
     @close="emit('close')"
   >
-    <section class="min-w-0 space-y-4">
+    <section
+      class="min-w-0 space-y-4 text-n-slate-12"
+      data-approval-decision-summary
+    >
       <p class="font-semibold">
         {{ t('JRC_APPROVALS.request') }} #{{ request.id }} ·
         {{ t(`JRC_APPROVALS.decisionLabels.${choice.decision}`) }}
@@ -82,6 +85,7 @@ onMounted(() => dialog.value.open());
       </p>
       <div
         class="max-h-56 overflow-y-auto whitespace-pre-wrap break-words rounded-lg border border-n-weak bg-n-solid-2 p-3 text-sm"
+        data-approval-decision-reason
       >
         {{ reason }}
       </div>

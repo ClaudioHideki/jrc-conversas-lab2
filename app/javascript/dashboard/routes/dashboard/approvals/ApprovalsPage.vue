@@ -20,6 +20,7 @@ import ApprovalStatus from './ApprovalStatus.vue';
 import { minorAmountText } from './tierPresentation';
 import { useApprovals } from './useApprovals';
 import {
+  WORKSPACE_MODULES,
   capability,
   STATES,
   intent,
@@ -898,13 +899,7 @@ const errorText = computed(() => {
                   {{ t('JRC_APPROVALS.workspace.allModules') }}
                 </option>
                 <option
-                  v-for="key in [
-                    'crm',
-                    'contracts',
-                    'backoffice',
-                    'relationship',
-                    'service_desk',
-                  ]"
+                  v-for="key in WORKSPACE_MODULES"
                   :key="key"
                   :value="key"
                 >

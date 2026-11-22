@@ -36,6 +36,27 @@ const render = value =>
   });
 
 describe('all-scope pause status', () => {
+  it('keeps the captured operational unit name visible beside its own request', () => {
+    const value = approval();
+    value.scopes[0].unit_names = ['SYNTHETIC operational unit'];
+    const wrapper = render(value);
+    expect(wrapper.get('[data-pause-approval-unit-name]').text()).toBe(
+      'SYNTHETIC operational unit'
+    );
+    expect(
+      wrapper.findComponent({ name: 'RouterLink' }).props('to').params.id
+    ).toBe('7');
+    expect(wrapper.emitted('apply')).toBeUndefined();
+  });
+  it('escapes an operator-visible unit label instead of turning it into executable markup', () => {
+    const value = approval();
+    value.scopes[0].unit_names = ['<img src=x onerror=alert(1)>'];
+    const wrapper = render(value);
+    expect(wrapper.get('[data-pause-approval-unit-name]').text()).toBe(
+      '<img src=x onerror=alert(1)>'
+    );
+    expect(wrapper.find('img').exists()).toBe(false);
+  });
   it('offers an explicit apply action only for a coherent ready receipt', async () => {
     const wrapper = render(approval());
     await wrapper.get('[data-pause-approval-apply]').trigger('click');

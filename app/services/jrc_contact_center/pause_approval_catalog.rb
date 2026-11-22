@@ -37,15 +37,10 @@ class JrcContactCenter::PauseApprovalCatalog
     values = { context_digest: review.context_digest, current_context_digest: current.fetch('digest'),
                evidence_state: current.fetch('current') ? 'current' : 'stale', pause_request_id: review.deferred_pause_request_id,
                reason_code: intent.fetch('reason_code'), reason_label: review.payload.fetch('selection').fetch('reason_label'),
-               scope_unit_ids: scope.unit_ids, scope_unit_names: unit_names(scope), unit_count: scope.unit_ids.size,
+               scope_unit_ids: scope.unit_ids, scope_unit_names: scope.unit_names, unit_count: scope.unit_ids.size,
                justification_digest: JrcApprovals::Ledger.digest('justification' => intent.fetch('justification')) }
     { issuer_company_id: scope.issuer_company_id, business_unit_id: scope.business_unit_id, values: values }
   end
-
-  def self.unit_names(scope)
-    scope.review.payload.fetch('coverage').fetch('units').select { |unit| scope.unit_ids.include?(unit.fetch('id')) }.pluck('name')
-  end
-  private_class_method :unit_names
 
   def self.verify!(scope, actor)
     values = capture(scope, actor).fetch(:values)

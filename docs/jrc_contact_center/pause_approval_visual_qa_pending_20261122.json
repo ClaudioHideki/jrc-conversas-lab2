@@ -1,0 +1,58 @@
+{
+  "parent": "8a3853cf38cd17ef999f48312f648e4951156c77",
+  "recorded_at": "2026-11-22T21:04:00.668463+00:00",
+  "status": "implemented_locally_pending_exact_sha_native_and_actual_chrome",
+  "actual_original_visual_evidence": {
+    "sha": "f559530b05789aa7f44e98fb3cddbde436a90173",
+    "images_opened": 16,
+    "projects": [
+      "desktop-light",
+      "desktop-dark"
+    ],
+    "cancelled_run_is_not_full_acceptance": true
+  },
+  "corrected_findings": [
+    "Native decision-dialog body now uses the existing theme text color; no fixture or global CSS override",
+    "Native Central inbox and module filter identify Call Center through the existing locale fallback",
+    "Pause source guidance describes authorized operational scope instead of unrelated commercial data",
+    "Pending and ready projections include immutable captured unit names only after fresh complete-scope authorization",
+    "Ready copy preserves the call and ACW prerequisites and does not claim an early operational pause"
+  ],
+  "no_engine_state_or_historical_snapshot_change": true,
+  "database_migrations_changed": false,
+  "checks_completed": {
+    "vue_targeted": 26,
+    "lint_paths": 15,
+    "lint_errors": 0,
+    "lint_new_warnings": 0,
+    "monitor_tests": 12,
+    "observer_and_contrast_math_node": 17,
+    "native_rails": "not_yet_run_for_this_delta",
+    "actual_chrome": "not_yet_run_for_this_delta"
+  },
+  "native_checks_prepared": {
+    "readiness_rails": 3,
+    "chrome_cases_unchanged": 256,
+    "additional_assertions": [
+      "actual module filter GET and authorized request identities",
+      "unit names after pending reload and readiness",
+      "four actual CSS contrast ratios per project >= 4.5"
+    ]
+  },
+  "verified_parent_ci": {
+    "sha": "8a3853cf38cd17ef999f48312f648e4951156c77",
+    "run": 45063751101,
+    "artifact": 14772399283,
+    "artifact_sha256": "bd07cc95c93387403ac65216a77083a6aff54be9f1cb3d6e40000184a3e4fca4",
+    "native_distinct_examples": 2767,
+    "reload_examples_separate": 187,
+    "vue_cases": 1760,
+    "chrome_cases": 256,
+    "png_hashes_verified": 568,
+    "product_includes_this_delta": false,
+    "actual_visual_findings_still_require_correction": true
+  },
+  "executor_business_rule": "Current permissions of the completing agent, revalidated per execution and retry; implementation still pending",
+  "no_grants_provider_commands_build_docker_publication_merge_deploy": true,
+  "whole_word_complete": false
+}

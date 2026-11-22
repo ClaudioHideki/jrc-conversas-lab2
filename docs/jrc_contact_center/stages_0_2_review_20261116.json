@@ -7287,5 +7287,14 @@
     "all_affected_units_approved_by_user": true,
     "real_account_activation": false,
     "whole_word_complete": false
+  },
+  "pause_approval_visual_qa_20261122": {
+    "report": "docs/jrc_contact_center/pause_approval_visual_qa_pending_20261122.json",
+    "status": "implemented_locally_pending_exact_sha_native_and_actual_chrome",
+    "native_scope_and_permissions_preserved": true,
+    "desktop_prior_images_reviewed": 16,
+    "local_vue_cases_passed": 26,
+    "actual_mobile_and_contrast_proof": "pending corrected candidate CI",
+    "whole_word_complete": false
   }
 }
