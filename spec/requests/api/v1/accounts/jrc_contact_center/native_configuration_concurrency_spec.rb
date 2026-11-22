@@ -790,7 +790,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
     expect(JrcContactCenter::Command.where(account: account)).to be_empty
   end
 
-  %w[profile coverage calendar_revision].each do |source|
+  { 'profile' => 401, 'coverage' => 404, 'calendar_revision' => 409 }.each do |source, expected_status|
     it "does not bind a queue calendar after #{source} changes during the actual account mutex wait" do
       member = account.account_users.find_by!(user: actor)
       context = { account: account, account_user: member, user: actor }
@@ -812,7 +812,7 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
         end
       end
       status = race_with_account_change(change, endpoint: endpoint, payload: payload, defer_change: true)
-      expect(status).to eq({ 'profile' => 401, 'coverage' => 404, 'calendar_revision' => 409 }.fetch(source))
+      expect(status).to eq(expected_status)
       expect(queue.reload.settings).not_to have_key(JrcContactCenter::QueueCalendarState::KEY)
       expect(JrcContactCenter::Command.where(account: account)).to be_empty
     end

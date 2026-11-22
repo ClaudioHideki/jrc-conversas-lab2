@@ -1,0 +1,50 @@
+{
+  "producer": "341120a2293b5eaee42888fc2ac68d50fc41bd2b",
+  "run": 44970957120,
+  "job": 137050409222,
+  "artifact": 14734194201,
+  "artifact_sha256": "4a543b698a3600f1655caaccea324dcc368a9b3e202a481999137e988efc92b8",
+  "status": "native_backend_and_vue_verified_three_test_lint_findings_block_assets_chrome",
+  "native_distinct": 2573,
+  "separate_reload": 175,
+  "vue": 1403,
+  "failed_pending_outside": 0,
+  "prior_cases": {
+    "call-center-rspec.json": {
+      "previous_preserved": 2340,
+      "new": 23
+    },
+    "call-center-pabx-rspec.json": {
+      "previous_preserved": 122,
+      "new": 3
+    },
+    "call-center-corporate-rspec.json": {
+      "previous_preserved": 85,
+      "new": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "previous_preserved": 175,
+      "new": 0
+    },
+    "vue": {
+      "previous_preserved": 1374,
+      "new": 29
+    }
+  },
+  "new_ruby_offenses": 3,
+  "offenses": {
+    "native_configuration_concurrency_spec.rb": [
+      "Performance/CollectionLiteralInLoop"
+    ],
+    "queue_calendars_spec.rb": [
+      "Layout/ArgumentAlignment",
+      "Layout/HashAlignment"
+    ]
+  },
+  "correction": "Move the three expected HTTP statuses to the existing case enumeration; align the exact unchanged response expectations. No runtime change or assertion removal.",
+  "new_regressions_prepared": 2,
+  "new_regressions": "Rebinding preserves previous native audit; old idempotent request cannot revert a newer association",
+  "assets_chrome_executed": false,
+  "full_word_complete": false,
+  "remaining": "Complete link/unlink lifecycle, number/IVR typed bindings and provider impacts remain open."
+}

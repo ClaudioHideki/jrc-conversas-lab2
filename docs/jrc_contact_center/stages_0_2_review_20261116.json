@@ -180,7 +180,8 @@
         "Elegibilidade e cobertura corporativa atuais do destinatário revalidadas na API e após espera de lock; desativação segura preservada. Validado na CI 44194721033, SHA 7011dac7, incluindo recarga e negativas no Chrome."
       ],
       "remaining_or_external": [
-        "No native Team-to-Queue/primary-supervisor model; DAC/calendar/publication need stages 3/4/6 and provider contract"
+        "Advanced DAC and calendar/working-hours association completeness",
+        "Actual PABX publication/capabilities/ACK"
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -294,7 +295,23 @@
           "evidence": "docs/jrc_contact_center/team_source_activity_verified_20261120.json",
           "scope": "Estado da origem de equipe local, confirmação do gestor e preservação de vínculos; supervisor principal/hierarquia continuam pendentes."
         }
-      ]
+      ],
+      "historical_remaining_before_20261122": [
+        "No native Team-to-Queue/primary-supervisor model; DAC/calendar/publication need stages 3/4/6 and provider contract"
+      ],
+      "review_20261122": {
+        "kind": "Reconciliation of existing bounded native/Chrome evidence, not acceptance of the complete figure",
+        "correction": "The old note about absence of primary team supervision is superseded by the31582e3a verified increment. The queue/calendar candidate341120a2 is not accepted yet.",
+        "verified_reports": [
+          "docs/jrc_contact_center/team_supervision_native_verified_20261121.json",
+          "docs/jrc_contact_center/unit_calendars_native_verified_20261122.json"
+        ],
+        "report_hashes": {
+          "team_supervision_native_verified_20261121.json": "276961e942b538b1c2cefc641104bdb8d3821999f2e024445459d03d11a48a57",
+          "unit_calendars_native_verified_20261122.json": "5e09705dc2748bfc6b5127097081c0d49b5a4358d214915ecb70a590f54c5d5b"
+        },
+        "full_figure_complete": false
+      }
     },
     {
       "figure": 4,
@@ -417,9 +434,9 @@
         "Vínculo exato de versão/hash no menu da URA local, histórico imutável e isolamento de conta/unidade validados em86ed16c6, inclusive240Chrome."
       ],
       "remaining_or_external": [
-        "Ver vínculos locais em implementação no próximo checkpoint: somente revisões atuais de URA, sem afirmar estado no PABX.",
-        "Vínculos operacionais de filas/números/campanhas, duplicação/exclusão com impacto completo, forma de onda e TTS continuam pendentes.",
-        "Microfone real, scanner em ambiente operacional e capacidades/ACKsPABX não foram homologados externamente."
+        "Complete operational references for queues/numbers/campaigns and guarded deletion",
+        "Authorized TTS provider/voices, real microphone/scanner and provider codecs/publication/ACK",
+        "Full visual and functional figure conformity is not inferred from the increments"
       ],
       "code_references": [],
       "reference": {
@@ -522,6 +539,34 @@
           "Remaining figure6 bulk operations",
           "New metadata selection and inspection filter await fresh native/Chrome proof"
         ],
+        "full_figure_complete": false
+      },
+      "historical_remaining_before_20261122": [
+        "Ver vínculos locais em implementação no próximo checkpoint: somente revisões atuais de URA, sem afirmar estado no PABX.",
+        "Vínculos operacionais de filas/números/campanhas, duplicação/exclusão com impacto completo, forma de onda e TTS continuam pendentes.",
+        "Microfone real, scanner em ambiente operacional e capacidades/ACKsPABX não foram homologados externamente."
+      ],
+      "review_20261122": {
+        "kind": "Reconciliation of existing bounded native/Chrome evidence, not acceptance of the complete figure",
+        "correction": "Local current-version IVR references, real synthetic waveform, individual/selected copies, ZIP, selected moves and metadata organization have bounded native/Chrome evidence; the historical pending list is stale for those increments.",
+        "verified_reports": [
+          "docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json",
+          "docs/jrc_contact_center/private_audio_waveform_native_verified_20261121.json",
+          "docs/jrc_contact_center/audio_copy_native_verified_20261121.json",
+          "docs/jrc_contact_center/audio_archive_native_verified_20261121.json",
+          "docs/jrc_contact_center/audio_selected_moves_native_verified_20261121.json",
+          "docs/jrc_contact_center/audio_library_organization_native_verified_20261121.json",
+          "docs/jrc_contact_center/audio_selected_copies_native_verified_20261121.json"
+        ],
+        "report_hashes": {
+          "audio_usages_nico_values_native_verified_20261121.json": "39a174688e09d70f7bcf25fd4ad47ad4b1650028fa921b5d8ab0a8fd82260e6f",
+          "private_audio_waveform_native_verified_20261121.json": "a41aa18a615a15e25bd0361dac69ba7b2eb7e62bbc0ee2dbc9decdaf33c963fe",
+          "audio_copy_native_verified_20261121.json": "f41530ea72bd59f4bda292e6056cd7810f5c4cd2b9fcf70a01f97d9ebeae0152",
+          "audio_archive_native_verified_20261121.json": "70725cb7b73896aca1905797bb8679bfdd612057b19918c9d413fd94ea2312ea",
+          "audio_selected_moves_native_verified_20261121.json": "cb557f42652f97f710a45cf221209f5904c5fdda940fbaf861ba6cba41d1347b",
+          "audio_library_organization_native_verified_20261121.json": "38ebb1e338cc9ff9a388783ceeade969a16adb98d135e3ec403963b60ba5ac4f",
+          "audio_selected_copies_native_verified_20261121.json": "5e26534cf49ddc21f41841d4338decf58752843c5d6c082f5dd80c3bd9ad7617"
+        },
         "full_figure_complete": false
       }
     },
@@ -924,9 +969,8 @@
         "Remoção/edição de membros da equipe exige revisão explícita assinada do gestor e auditoria transacional quando retira o último agente configurado elegível; escopos atuais e IDs canônicos revalidados. CI44461118646/3b9aa6db,1270Rails+16schema,573Vue,152Chrome,232capturas. Não inclui excluir a entidade Team ou comandos PABX."
       ],
       "remaining_or_external": [
-        "Supervisor principal e hierarquia próprios da equipe permanecem pendentes; estado da origem no Call Center validado em e9e364ec.",
-        "Disponibilidade/capacidades/ACKsPABX aguardam contrato externo.",
-        "Retirada de membro e exclusão da entidadeTeam possuem revisão nativa de último agente,confirmação do gestor e auditoria;aceite preservado em7d55fe76 e reexecutado em2a0cde0c. Não altera vínculos independentes."
+        "Remaining advanced team/queue scheduling and distribution integrations",
+        "Provider capacity, applied state and ACK"
       ],
       "code_references": [
         "AdministrationSection.vue",
@@ -1047,7 +1091,23 @@
           "scope": "Estado da origem de equipe local, confirmação do gestor e preservação de vínculos; supervisor principal/hierarquia continuam pendentes."
         }
       ],
-      "word_hierarchy_clarification": "A referência escrita exige supervisor principal/adicionais, agentes, filas e políticas reutilizáveis. A árvore explícita dos Word corresponde a pastas; não foi encontrado campo parent_team. Esta leitura não conclui as funções de supervisão e filas ainda pendentes."
+      "word_hierarchy_clarification": "A referência escrita exige supervisor principal/adicionais, agentes, filas e políticas reutilizáveis. A árvore explícita dos Word corresponde a pastas; não foi encontrado campo parent_team. Esta leitura não conclui as funções de supervisão e filas ainda pendentes.",
+      "historical_remaining_before_20261122": [
+        "Supervisor principal e hierarquia próprios da equipe permanecem pendentes; estado da origem no Call Center validado em e9e364ec.",
+        "Disponibilidade/capacidades/ACKsPABX aguardam contrato externo.",
+        "Retirada de membro e exclusão da entidadeTeam possuem revisão nativa de último agente,confirmação do gestor e auditoria;aceite preservado em7d55fe76 e reexecutado em2a0cde0c. Não altera vínculos independentes."
+      ],
+      "review_20261122": {
+        "kind": "Reconciliation of existing bounded native/Chrome evidence, not acceptance of the complete figure",
+        "correction": "Principal/additional supervisor links exist and were natively verified without automatic queue participation. No new team hierarchy requirement is inferred.",
+        "verified_reports": [
+          "docs/jrc_contact_center/team_supervision_native_verified_20261121.json"
+        ],
+        "report_hashes": {
+          "team_supervision_native_verified_20261121.json": "276961e942b538b1c2cefc641104bdb8d3821999f2e024445459d03d11a48a57"
+        },
+        "full_figure_complete": false
+      }
     },
     {
       "figure": 13,
@@ -1242,9 +1302,8 @@
         "Vínculo exato de versão/hash no menu da URA local, histórico imutável e isolamento de conta/unidade validados em86ed16c6, inclusive240Chrome."
       ],
       "remaining_or_external": [
-        "Ver vínculos locais em implementação no próximo checkpoint: somente revisões atuais de URA, sem afirmar estado no PABX.",
-        "Vínculos operacionais de filas/números/campanhas, duplicação/exclusão com impacto completo, forma de onda e TTS continuam pendentes.",
-        "Microfone real, scanner em ambiente operacional e capacidades/ACKsPABX não foram homologados externamente."
+        "Full operational reference inventory and safe deletion",
+        "TTS/codec/provider operations and external acceptance"
       ],
       "code_references": [],
       "reference": {
@@ -1342,6 +1401,28 @@
           "Remaining figure6 bulk operations",
           "New metadata selection and inspection filter await fresh native/Chrome proof"
         ],
+        "full_figure_complete": false
+      },
+      "historical_remaining_before_20261122": [
+        "Ver vínculos locais em implementação no próximo checkpoint: somente revisões atuais de URA, sem afirmar estado no PABX.",
+        "Vínculos operacionais de filas/números/campanhas, duplicação/exclusão com impacto completo, forma de onda e TTS continuam pendentes.",
+        "Microfone real, scanner em ambiente operacional e capacidades/ACKsPABX não foram homologados externamente."
+      ],
+      "review_20261122": {
+        "kind": "Reconciliation of existing bounded native/Chrome evidence, not acceptance of the complete figure",
+        "correction": "Versioned private file details, current native IVR references and waveform/copy increments are implemented and boundedly verified.",
+        "verified_reports": [
+          "docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json",
+          "docs/jrc_contact_center/private_audio_waveform_native_verified_20261121.json",
+          "docs/jrc_contact_center/audio_copy_native_verified_20261121.json",
+          "docs/jrc_contact_center/audio_selected_copies_native_verified_20261121.json"
+        ],
+        "report_hashes": {
+          "audio_usages_nico_values_native_verified_20261121.json": "39a174688e09d70f7bcf25fd4ad47ad4b1650028fa921b5d8ab0a8fd82260e6f",
+          "private_audio_waveform_native_verified_20261121.json": "a41aa18a615a15e25bd0361dac69ba7b2eb7e62bbc0ee2dbc9decdaf33c963fe",
+          "audio_copy_native_verified_20261121.json": "f41530ea72bd59f4bda292e6056cd7810f5c4cd2b9fcf70a01f97d9ebeae0152",
+          "audio_selected_copies_native_verified_20261121.json": "5e26534cf49ddc21f41841d4338decf58752843c5d6c082f5dd80c3bd9ad7617"
+        },
         "full_figure_complete": false
       }
     },
@@ -1714,9 +1795,9 @@
         "Base de autoridade própria validada em3c7747d8: perfil/equipe explícitos, escuta autorizada, elegibilidade, negações e ausência de fallback administrativo; não equivale ao fluxo completo de revisão."
       ],
       "remaining_or_external": [
-        "Valores/snapshot privados em memória preparados; exigem validação nativa no próximo checkpoint.",
-        "Vínculo comprovado de chamada/gravação/unidade, ledger persistente imutável, conflitos/idempotência/auditoria, API e popup completos ainda pendentes.",
-        "Não inferir equivalência de origensHodu/pabx_v1/jrc_pabx ou unidade a partir do usuário; não executar recomendações automaticamente."
+        "Proven immutable provider analysis-to-call-to-native-unit mapping",
+        "Persisted immutable review ledger, complete APIs/UI and conflict/idempotency/audit flow",
+        "Real provider recording/segments and external acceptance"
       ],
       "code_references": [],
       "reference": {
@@ -1768,6 +1849,24 @@
         "report": "docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json",
         "full_figure_complete": false,
         "subset": "Own-authority foundation and private input/source values; no persistent review API"
+      },
+      "historical_remaining_before_20261122": [
+        "Valores/snapshot privados em memória preparados; exigem validação nativa no próximo checkpoint.",
+        "Vínculo comprovado de chamada/gravação/unidade, ledger persistente imutável, conflitos/idempotência/auditoria, API e popup completos ainda pendentes.",
+        "Não inferir equivalência de origensHodu/pabx_v1/jrc_pabx ou unidade a partir do usuário; não executar recomendações automaticamente."
+      ],
+      "review_20261122": {
+        "kind": "Reconciliation of existing bounded native/Chrome evidence, not acceptance of the complete figure",
+        "correction": "Explicit review capability and strict private review values/snapshot foundation are natively verified. This is not the full persistent review flow.",
+        "verified_reports": [
+          "docs/jrc_contact_center/quality_review_authority_verified_20261121.json",
+          "docs/jrc_contact_center/audio_usages_nico_values_native_verified_20261121.json"
+        ],
+        "report_hashes": {
+          "quality_review_authority_verified_20261121.json": "9cb6b1f8c05499a4a48948b225aa6e8bd468c305dade29504a4515a940399da8",
+          "audio_usages_nico_values_native_verified_20261121.json": "39a174688e09d70f7bcf25fd4ad47ad4b1650028fa921b5d8ab0a8fd82260e6f"
+        },
+        "full_figure_complete": false
       }
     }
   ],
@@ -6862,6 +6961,31 @@
     "mocked_units": 39,
     "new_units": 29,
     "native_chrome_accepted": false,
+    "full_word_complete": false
+  },
+  "queue_calendar_bindings_first_native_lint_20261122": {
+    "producer": "341120a2293b5eaee42888fc2ac68d50fc41bd2b",
+    "report": "docs/jrc_contact_center/queue_calendar_bindings_first_native_lint_20261122.json",
+    "native": 2573,
+    "reload": 175,
+    "vue": 1403,
+    "new_ruby_offenses": 3,
+    "assets_chrome": "not_run",
+    "new_two_regressions": "prepared_not_run",
+    "full_word_complete": false
+  },
+  "word_reconciliation_20261122": {
+    "figures": [
+      3,
+      6,
+      12,
+      16,
+      23
+    ],
+    "historical_notes_preserved": true,
+    "no_complete_figure_inferred": true,
+    "queue_calendar_candidate": "341120a2 native/Vue passed; three test lint findings blocked assets/Chrome",
+    "last_full_calendar_acceptance": "369e7351 / CI44964018731",
     "full_word_complete": false
   }
 }

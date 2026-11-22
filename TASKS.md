@@ -863,3 +863,6 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 
 - [ ] Vínculo interno fila/calendário: snapshot exato, escopo nativo, dupla revisão CAS, auditoria e recuperação idempotente implementados.39Vue leves aprovados (29novos/10anteriores), sem aceite nativo ou visual deste novo incremento. Exigir novoSHA, banco real sintético e mesmos244Chrome. Números/URA/impacto externo continuam pendentes; nenhum Command/PABX/migration. Ver docs/jrc_contact_center/queue_calendar_bindings_prepared_20261122.json.
+
+
+- [ ] Vínculo de calendário341120a2/CI44970957120:2573Rails,175reload e1403Vue aprovados; todos os casos anteriores preservados. Três achados Ruby em dois specs bloquearam assets/Chrome. Declaração dos três status e alinhamento corrigidos sem remover asserções; dois cenários adicionais de histórico e replay antigo preparados. Exigir novoSHA e prova Chrome. Ver docs/jrc_contact_center/queue_calendar_bindings_first_native_lint_20261122.json.

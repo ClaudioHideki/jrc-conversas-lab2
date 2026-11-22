@@ -212,9 +212,47 @@ RSpec.describe 'Call Center queue calendar drafts pin reviewed snapshots without
     get base, headers: headers, params: { unit_id: unit.id, calendar_id: entry.fetch('id'), page: 2, per_page: 20 }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('meta')).to include('total' => 21, 'page' => 2, 'pages' => 2)
-    expect(response.parsed_body.fetch('items').sole).to include('queue_name' => 'SYNTHETIC queue 20', 'binding' => nil,
-                                                                 'external_impact' => 'unknown', 'pabx_confirmed' => false)
+    expect(response.parsed_body.fetch('items').sole).to include(
+      'queue_name' => 'SYNTHETIC queue 20', 'binding' => nil, 'external_impact' => 'unknown', 'pabx_confirmed' => false
+    )
     get base, headers: headers, params: { unit_id: unit.id, calendar_id: entry.fetch('id'), q: 'queue 03', page: 1 }
     expect(response.parsed_body.fetch('meta')).to include('total' => 1, 'pages' => 1)
+  end
+
+  it 'records both reviewed association snapshots without changing the previous native audit' do
+    patch "#{base}/#{queue.id}", headers: headers, params: body, as: :json
+    expect(response).to have_http_status(:ok)
+    first = response.parsed_body.fetch('binding')
+    audit = Audited.audit_class.where(auditable: queue, action: 'update').last!
+    before = audit.attributes.deep_dup
+    catalog = JrcContactCenter::CalendarCatalog.new(context: { account: account, account_user: member, user: actor }, unit_id: unit.id)
+    other = entry.deep_merge('id' => SecureRandom.uuid, 'definition' => { 'name' => 'SYNTHETIC separately reviewed calendar' })
+    catalog.save!(other, expected_revision: catalog.call.fetch('revision'), create: true)
+    input = body.merge('calendar_id' => other.fetch('id'), 'calendar_revision' => catalog.call.fetch('revision'),
+                       'queue_revision' => JrcContactCenter::ConfigurationRevision.token(queue.reload), 'idempotency_key' => SecureRandom.uuid)
+    patch "#{base}/#{queue.id}", headers: headers, params: input, as: :json
+    expect(response).to have_http_status(:ok)
+    second = response.parsed_body.fetch('binding')
+    expect(second.fetch('calendar_snapshot')).to eq(other)
+    expect(second.fetch('id')).not_to eq(first.fetch('id'))
+    trail = Audited.audit_class.where(auditable: queue, action: 'update').order(:id).last!
+    expect(trail.audited_changes.dig('attributes', 0, 'settings', JrcContactCenter::QueueCalendarState::KEY)).to eq(first)
+    expect(audit.reload.attributes).to eq(before)
+  end
+
+  it 'does not let an old recovered request revert a newer explicitly reviewed association' do
+    initial = body
+    patch "#{base}/#{queue.id}", headers: headers, params: initial, as: :json
+    expect(response).to have_http_status(:ok)
+    newer = initial.merge('queue_revision' => JrcContactCenter::ConfigurationRevision.token(queue.reload), 'idempotency_key' => SecureRandom.uuid)
+    patch "#{base}/#{queue.id}", headers: headers, params: newer, as: :json
+    expect(response).to have_http_status(:ok)
+    stored = queue.reload.attributes
+    audits = Audited.audit_class.where(auditable: queue).count
+    patch "#{base}/#{queue.id}", headers: headers, params: initial, as: :json
+    expect(response).to have_http_status(:conflict)
+    expect(response.parsed_body.fetch('error')).to eq('stale_configuration_revision')
+    expect(queue.reload.attributes).to eq(stored)
+    expect(Audited.audit_class.where(auditable: queue).count).to eq(audits)
   end
 end
