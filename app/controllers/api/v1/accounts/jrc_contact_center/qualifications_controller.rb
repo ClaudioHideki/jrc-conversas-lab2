@@ -37,8 +37,7 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
     with_current_operating_authority do
       record = scope.where(account_user: Current.account_user).find(params[:id])
       authorize_qualification_origin!(record)
-      reason = qualification_form_reason
-      JrcContactCenter::EndingConfirmationState.validate_reason!(record, reason)
+      reason = qualification_form_reason(record)
       response.headers['Cache-Control'] = 'no-store'
       item = { id: record.id, account_id: record.account_id, account_user_id: record.account_user_id, reason_code: reason }
       item.merge!(JrcContactCenter::QualificationForms.new(record).private_payload(reason: reason))
@@ -83,11 +82,12 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
     { attributes: draft_attributes, expected_revision: params[:expected_draft_revision], request_key: params[:idempotency_key] }
   end
 
-  def qualification_form_reason
+  def qualification_form_reason(record)
     reason = params[:reason_code]
     valid = reason.is_a?(String) && reason.length <= 100 && reason.exclude?("\0")
     raise JrcContactCenter::OperationError, 'invalid_qualification_form_context' unless valid
 
+    JrcContactCenter::EndingConfirmationState.validate_reason!(record, reason)
     reason
   end
 

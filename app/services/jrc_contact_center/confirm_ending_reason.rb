@@ -7,8 +7,8 @@ class JrcContactCenter::ConfirmEndingReason
     @member = @account.account_users.find(member.id)
   end
 
-  def call(record, **options)
-    input = JrcContactCenter::EndingConfirmationInput.new(**options)
+  def call(record, **)
+    input = JrcContactCenter::EndingConfirmationInput.new(**)
     JrcContactCenter::AuthorityTransaction.call(account: @account, member: @member) do
       record = JrcContactCenter::Qualification.where(account: @account, account_user: @member).lock.find(record.id)
       authorize!(record)
@@ -54,12 +54,11 @@ class JrcContactCenter::ConfirmEndingReason
   end
 
   def confirm!(record, input)
-    unless @policy.registered?(input.attributes.fetch(:reason_code))
-      raise JrcContactCenter::OperationError, 'registered_ending_reason_required'
-    end
+    raise JrcContactCenter::OperationError, 'registered_ending_reason_required' unless @policy.registered?(input.attributes.fetch(:reason_code))
+
     digest = input.digest(record)
-    JrcContactCenter::QualificationDraft.new(account: @account, member: @member)
-                                      .save!(record, input.attributes, expected_revision: input.expected_revision)
+    draft = JrcContactCenter::QualificationDraft.new(account: @account, member: @member)
+    draft.save!(record, input.attributes, expected_revision: input.expected_revision)
     JrcContactCenter::EndingReasonConfirmation.create!(account: @account, qualification: record, request_key: input.key,
                                                        reason_code: record.reload.reason_code, input_digest: digest)
     record

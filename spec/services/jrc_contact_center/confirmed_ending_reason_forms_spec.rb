@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Confirmed ending classification with incomplete native ACW forms' do
+RSpec.describe JrcContactCenter::ConfirmEndingReason, 'with incomplete native ACW forms' do
   include_context 'with a frozen ending reason catalogue'
 
   let(:rule_id) { 'synthetic_confirmation_form' }
@@ -11,7 +11,7 @@ RSpec.describe 'Confirmed ending classification with incomplete native ACW forms
     JrcContactCenter::AcwFormVersion.create!(
       account: account, acw_form_template: form, revision: 1, name: 'SYNTHETIC ending confirmation form', description: '', status: 'active',
       definition: { 'fields' => [{ 'key' => 'verified', 'label' => 'SYNTHETIC verified', 'type' => 'boolean', 'required' => true },
-                                { 'key' => 'quantity', 'label' => 'SYNTHETIC quantity', 'type' => 'integer', 'required' => true }] },
+                                 { 'key' => 'quantity', 'label' => 'SYNTHETIC quantity', 'type' => 'integer', 'required' => true }] },
       actor_account_user_id: member.id, actor_user_id: actor.id, request_id: SecureRandom.uuid
     )
     rule = { id: rule_id, reason_code: entry.fetch('code'), scope: 'general', scope_id: nil, active: true, limit_seconds: 120 }

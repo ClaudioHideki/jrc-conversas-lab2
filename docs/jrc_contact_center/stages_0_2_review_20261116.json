@@ -7308,5 +7308,19 @@
     "additional_chrome_prepared_not_run": 4,
     "all_23_figures_complete": false,
     "historical_scope_rule": "Do not infer original issuer/company/business unit from current operational-unit links."
+  },
+  "ending_confirmation_first_native_findings_20261122": {
+    "sha": "ce5d06b69a9c1e451f12411752b3bac3a81fec34",
+    "run": 45082939258,
+    "status": "failed_not_homologated",
+    "schema_reload_passed": 199,
+    "schema_reload_failed": 1,
+    "old_187_cases_preserved": true,
+    "new_ruby_offenses": 13,
+    "fresh_reload_receipts_match": true,
+    "corrections_prepared": true,
+    "report": "docs/jrc_contact_center/ending_confirmation_first_native_failure_20261122.json",
+    "no_database_or_legacy_retention_change": true,
+    "all_23_figures_complete": false
   }
 }

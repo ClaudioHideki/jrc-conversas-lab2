@@ -76,10 +76,14 @@ RSpec.describe JrcContactCenter::EndingReasonConfirmation do
     expect(described_class.column_names).not_to include('updated_at')
   end
 
-  it 'permits only the native account cascade to remove the account-owned ledger' do
-    id = ledger.id
-    guarded_sql("DELETE FROM accounts WHERE id=#{account.id}")
-    expect(described_class.exists?(id)).to be(false)
-    expect(record.class.exists?(record.id)).to be(false)
+  it 'preserves the native account retirement block and the exact confirmation while attendance history still exists' do
+    original = ledger.attributes.deep_dup
+    expect do
+      Account.transaction(requires_new: true) { account.destroy! }
+    end.to raise_error(ActiveRecord::InvalidForeignKey, /jrc_contact_center_/)
+    expect(Account.exists?(account.id)).to be(true)
+    expect(ledger.reload.attributes).to eq(original)
+    expect(record.class.exists?(record.id)).to be(true)
+    expect(JrcContactCenter::AgentStateEvent.where(account: account)).to exist
   end
 end

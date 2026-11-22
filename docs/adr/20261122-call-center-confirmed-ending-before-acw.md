@@ -20,7 +20,7 @@ Salvar o rascunho completo e a confirmação na mesma transação e sob os bloqu
 
 Depois da confirmação, o motivo fica fixo também nas APIs e no banco. Notas, resultado e respostas continuam editáveis enquanto o ACW permanecer aberto, segundo as validações atuais. Uma futura correção do motivo exigirá fluxo explícito e auditado; não introduzir alteração silenciosa de uma classificação que possa ter originado outros registros.
 
-Registrar origem, motivo, versão do catálogo, ator e horário no servidor. Não armazenar notas ou respostas completas na confirmação ou em logs. Preservar a identidade histórica quando a qualificação for removida pelo ciclo de vida nativo: o vínculo vivo pode ser nulo, mas o ID e a evidência originais permanecem imutáveis. Exclusão da conta continua sendo a exceção de descarte nativa.
+Registrar origem, motivo, versão do catálogo, ator e horário no servidor. Não armazenar notas ou respostas completas na confirmação ou em logs. Preservar a identidade histórica quando a qualificação for removida pelo ciclo de vida nativo: o vínculo vivo pode ser nulo, mas o ID e a evidência originais permanecem imutáveis. A nova tabela não altera o ciclo de conta: as FKs históricas de atendimento continuam bloqueando a retirada da conta enquanto essas evidências existirem. A cascata declarada da nova tabela não autoriza remover os impedimentos nativos.
 
 ## Limites
 

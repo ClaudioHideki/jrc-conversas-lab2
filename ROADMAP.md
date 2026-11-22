@@ -55,3 +55,5 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 ## Confirmação do motivo antes do ACW — 22/11/2026 [WIP]
 
 - [ ] **CALL-CENTER-ENDING-CONFIRMATION-20261122:** Implementação isolada preparada, com 86 casos Vue leves e 142 verificações estáticas de migrations. Execução nativa, lint Ruby e quatro novos cenários Chrome permanecem pendentes; não conclui a figura 10 nem as 23 figuras. Confirmação salva o rascunho e fixa o motivo, mantendo o ACW aberto. Automações de destino continuam separadas. Critérios e limites: [relatório](docs/jrc_contact_center/ending_confirmation_preparation_20261122.json) e [ADR](docs/adr/20261122-call-center-confirmed-ending-before-acw.md).
+
+- [ ] Confirmação do motivo: CI45082939258/ce5d06b6 preservada,199/200 testes de recarga aprovados e13 apontamentos Ruby. Os187 casos anteriores continuam aprovados; recibos fresh/reload coincidem. Corrigidos o cenário que contrariava a retenção nativa da conta e os apontamentos, sem alterar migrations/SQLs/gates. Nova execução nativa,260Chrome e revisão real ainda obrigatórias. Relatório: docs/jrc_contact_center/ending_confirmation_first_native_failure_20261122.json.

@@ -51,7 +51,7 @@ RSpec.describe JrcContactCenter::ConfirmEndingReason do
 
   it 'rejects a second confirmation under a different request key' do
     confirmation.call(record, **options)
-    expect { confirmation.call(record, **options.merge(request_key: SecureRandom.uuid)) }
+    expect { confirmation.call(record, **options, request_key: SecureRandom.uuid) }
       .to raise_error(JrcContactCenter::OperationError, 'ending_reason_already_confirmed')
     expect(JrcContactCenter::EndingReasonConfirmation.where(account: account).count).to eq(1)
   end
@@ -81,7 +81,7 @@ RSpec.describe JrcContactCenter::ConfirmEndingReason do
   end
 
   it 'rejects a stale revision without saving the draft or recording a confirmation' do
-    expect { confirmation.call(record, **options.merge(expected_revision: 'stale')) }
+    expect { confirmation.call(record, **options, expected_revision: 'stale') }
       .to raise_error(JrcContactCenter::OperationError, 'stale_configuration_revision')
     expect(record.reload.reason_code).to be_nil
     expect(JrcContactCenter::EndingReasonConfirmation.where(account: account)).to be_empty

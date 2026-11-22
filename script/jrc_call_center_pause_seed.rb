@@ -64,6 +64,9 @@ class JrcContactCenter::SyntheticPauseSeed
   private
 
   def prepare_pause_sources(payload, queues, admin, operator)
+    if @project.end_with?('-ending_confirmation')
+      payload.merge!(JrcContactCenter::SyntheticEndingConfirmationSeed.call(account: @account, admin: admin, operator: operator, queue: queues.first))
+    end
     prepare_special_sources(payload, queues.first, admin, operator)
     if @project.end_with?('-approval')
       payload.merge!(JrcContactCenter::SyntheticPauseApprovalSeed.call(account: @account, admin: admin, operator: operator, queues: queues))
@@ -72,9 +75,6 @@ class JrcContactCenter::SyntheticPauseSeed
   end
 
   def prepare_special_sources(payload, queue, admin, operator)
-    if @project.end_with?('-ending_confirmation')
-      payload.merge!(JrcContactCenter::SyntheticEndingConfirmationSeed.call(account: @account, admin: admin, operator: operator, queue: queue))
-    end
     if @project.end_with?('-team_supervision')
       payload.merge!(JrcContactCenter::SyntheticTeamSupervisionSeed.call(account: @account, unit: queue.unit))
     end

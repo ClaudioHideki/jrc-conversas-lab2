@@ -1,0 +1,94 @@
+{
+  "status": "failed_native_execution_not_homologated",
+  "sha": "ce5d06b69a9c1e451f12411752b3bac3a81fec34",
+  "run": 45082939258,
+  "early_artifact": 14777483303,
+  "early_artifact_sha256": "a76627ff40ff8c4976d1573c7cdf78fd854f96c104a4ae6519ae85be85b8ee3c",
+  "schema_reload": {
+    "duration": 30.292098471,
+    "example_count": 200,
+    "failure_count": 1,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0,
+    "passed": 199,
+    "previous_187_cases_preserved_and_passed": true
+  },
+  "schema_receipts": "Absent from the early artifact; equality and integrity require the final artifact and remain unverified here.",
+  "failure": {
+    "file": "./spec/models/jrc_contact_center/ending_reason_confirmation_spec.rb",
+    "line": 79,
+    "description": "JrcContactCenter::EndingReasonConfirmation permits only the native account cascade to remove the account-owned ledger",
+    "class": "ActiveRecord::InvalidForeignKey",
+    "message": "PG::ForeignKeyViolation: ERROR:  update or delete on table \"accounts\" violates foreign key constraint \"fk_rails_0a2eb96766\" on table \"jrc_contact_center_agent_state_events\"\nDETAIL:  Key (id)=(189) is still referenced from table \"jrc_contact_center_agent_state_events\".\n"
+  },
+  "cause": "The new account-retirement spec attempted direct account SQL deletion despite the preexisting attendance-event FK retention block.",
+  "correction": "Use the native Account.destroy! transaction and require InvalidForeignKey, live account/qualification/events and byte-for-byte unchanged confirmation.",
+  "unchanged": [
+    "Production behavior",
+    "All 14 migrations and SQL sources",
+    "Native account/attendance retention rules",
+    "Original three pending files",
+    "All 187 prior schema-reload examples"
+  ],
+  "pending": [
+    "Corrected native spec and full final-SHA gates",
+    "Rails/concurrency/Vue/assets/260Chrome",
+    "Actual desktop/mobile light/dark review",
+    "Destination automation engine",
+    "External PABX contract"
+  ],
+  "final_artifact": {
+    "id": 14779110190,
+    "sha256": "def8f19e574092f23659c9e3bc9ea37caaa76213b3c207599dbf30970362e256",
+    "run_conclusion": "failure"
+  },
+  "final_schema_receipts_verified": [
+    {
+      "stage": "fresh",
+      "product_sha": "ce5d06b69a9c1e451f12411752b3bac3a81fec34",
+      "calculated": "jrc_cc_ending_confirmation_v1:2398533a12d5a9381fa9fa01bfc9c925e56c90dad273a477169e1e96706db9cc",
+      "stored": {
+        "jrc_contact_center_ending_reason_confirmations": "jrc_cc_ending_confirmation_v1:2398533a12d5a9381fa9fa01bfc9c925e56c90dad273a477169e1e96706db9cc"
+      },
+      "component_hashes": {
+        "structure": "29d61924c9bcf0b13bc4e4a58b926902e321ee31277d3010869cf263c2ab9987",
+        "constraints": "079b02e54d4e2878a77d8869e5aaf024da129f393bdcbb1c34920af98d4d6a4e",
+        "functions": "f96e4d467a678063ff4755c719bdeed696a789dde5a59258edc9ee1c5a9558a2",
+        "triggers": "57f361259cfda3aa1c792a06e7b46ca11cf6472e2b0e74d9bb2d280f2201f515"
+      },
+      "path": "tmp/call-center-ending-confirmation-schema-fresh.json",
+      "sha256": "7a75493b4ca7a792899c3c7868cacdf6c7d5e682d10a0d905cbeaab3831b3235"
+    },
+    {
+      "stage": "reload",
+      "product_sha": "ce5d06b69a9c1e451f12411752b3bac3a81fec34",
+      "calculated": "jrc_cc_ending_confirmation_v1:2398533a12d5a9381fa9fa01bfc9c925e56c90dad273a477169e1e96706db9cc",
+      "stored": {
+        "jrc_contact_center_ending_reason_confirmations": "jrc_cc_ending_confirmation_v1:2398533a12d5a9381fa9fa01bfc9c925e56c90dad273a477169e1e96706db9cc"
+      },
+      "component_hashes": {
+        "structure": "29d61924c9bcf0b13bc4e4a58b926902e321ee31277d3010869cf263c2ab9987",
+        "constraints": "079b02e54d4e2878a77d8869e5aaf024da129f393bdcbb1c34920af98d4d6a4e",
+        "functions": "f96e4d467a678063ff4755c719bdeed696a789dde5a59258edc9ee1c5a9558a2",
+        "triggers": "57f361259cfda3aa1c792a06e7b46ca11cf6472e2b0e74d9bb2d280f2201f515"
+      },
+      "path": "tmp/call-center-ending-confirmation-schema-reload.json",
+      "sha256": "0b21c8155916c0ef8b67d878162152920ddbc98d389be4e6bd8fa9e68d468d90"
+    }
+  ],
+  "ruby_lint": {
+    "new_offenses": 13,
+    "affected_paths": [
+      "app/controllers/api/v1/accounts/jrc_contact_center/qualifications_controller.rb",
+      "app/services/jrc_contact_center/confirm_ending_reason.rb",
+      "app/services/jrc_contact_center/qualification_draft.rb",
+      "script/jrc_call_center_pause_seed.rb",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_confirmation_spec.rb",
+      "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb",
+      "spec/services/jrc_contact_center/confirmed_ending_reason_forms_spec.rb"
+    ],
+    "corrections": "Anonymous keyword forwarding; guard/layout and keyword syntax; validate context reason in its existing parser; fetch draft reason once; distribute the synthetic-only seed preparation; describe the actual service class.",
+    "not_yet_reexecuted": true
+  },
+  "preserved_ci_gates": "Unchanged; no reductions, exclusions, renumbered migrations or accepted failures."
+}
