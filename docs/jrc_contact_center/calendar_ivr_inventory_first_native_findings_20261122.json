@@ -1,0 +1,47 @@
+{
+  "failed_sha": "9ab0811933835c38921375df3fa7fd2da8035676",
+  "run": 45025400231,
+  "job": 137217215787,
+  "artifact": 14756840087,
+  "artifact_sha256": "a4007d04e857af2eaef5a05a806ecb62847297264432d8bfa7e105bb1b321313",
+  "native_core": {
+    "total": 2465,
+    "passed": 2464,
+    "failed": 1,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "all2448previous_native_cases_passed": true,
+  "new_native_cases": {
+    "passed": 16,
+    "failed": 1
+  },
+  "schema_reload_separate_passed": 175,
+  "new_ruby_offenses": 13,
+  "vue_concurrency_corporate_assets_chrome": "not executed after the core failure; no approval claimed",
+  "cause": [
+    "The new-scope fixture reused an old Unit object and overwrote its settings without preserving or rebuilding the calendar; GET then correctly returned404",
+    "Simply relabeling a retained catalog would also violate its captured-scope guard; the valid current source must be separately initialized in the new synthetic scope",
+    "One q keyword violates native parameter naming;12spec formatting/keyword-merging/performance offenses remain native gate findings"
+  ],
+  "correction": [
+    "Only in synthetic fixture setup: reload the unit, deliberately start a new native catalog configuration in scopeB and create the calendar through CalendarCatalog.save!",
+    "Assert both the new current catalog scopeB and unchanged immutable draft scopeA; keep API200/empty inventory and every previous history/isolation assertion",
+    "Rename only the internal service keyword to query, preserving the public HTTPq filter",
+    "Use direct Ruby keyword overrides, Array.new(21) and native alignment; no exclusions or global lint changes"
+  ],
+  "ruby_runtime_revalidation": "pending next exact checkpoint; no local Ruby/Rails execution",
+  "all17case_identities_preserved": true,
+  "assertions_removed": false,
+  "native_access_policies_or_migrations_changed": false,
+  "native_accepted": false,
+  "visual_accepted": false,
+  "whole_word_complete": false,
+  "provider_commands": false,
+  "preserved_job_log": {
+    "sanitized_sha256": "f595e869d7f060d07590724220d1c22363953bc4174d9a8a512eeb5ef03e41db",
+    "sanitized_bytes": 1584870,
+    "raw_sha256_not_saved": "2e41336c3b70fcff4b28f36b76cf75eb87706dda9bfb81c05f447032b57c0228",
+    "credentials_or_signed_urls_printed": false
+  }
+}

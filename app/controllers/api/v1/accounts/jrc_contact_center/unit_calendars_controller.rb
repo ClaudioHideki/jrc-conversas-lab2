@@ -28,7 +28,7 @@ class Api::V1::Accounts::JrcContactCenter::UnitCalendarsController < Api::V1::Ac
   def ivr_usages
     reader = JrcContactCenter::CalendarIvrUsages.new(context: pundit_user, unit_id: params[:unit_id], calendar_id: params[:id])
     result = reader.call(page: params.fetch(:page, 1), per_page: params.fetch(:per_page, 10),
-                         q: params.fetch(:q, ''), status: params.fetch(:status, 'all'))
+                         query: params.fetch(:q, ''), status: params.fetch(:status, 'all'))
     render json: base_payload.merge(result)
   end
 

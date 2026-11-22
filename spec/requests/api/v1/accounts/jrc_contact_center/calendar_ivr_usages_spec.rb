@@ -51,8 +51,10 @@ RSpec.describe 'Calendar usage inventory preserves current native URA heads and 
     before = units.first.reload.settings.deep_dup
     get base, headers: headers, params: { unit_id: units.first.id }
     expect(response).to have_http_status(:ok)
-    expect(response.parsed_body).to include('coverage' => 'current_local_ivr_drafts_only', 'provider_configuration_verified' => false,
-                                          'local_only' => true, 'pabx_confirmed' => false, 'calendar_id' => entry.fetch('id'), 'items' => [])
+    expect(response.parsed_body).to include(
+      'coverage' => 'current_local_ivr_drafts_only', 'provider_configuration_verified' => false,
+      'local_only' => true, 'pabx_confirmed' => false, 'calendar_id' => entry.fetch('id'), 'items' => []
+    )
     expect(response.parsed_body.fetch('meta')).to eq('page' => 1, 'per_page' => 10, 'total' => 0, 'pages' => 0)
     expect(response.headers['Cache-Control']).to eq('no-store')
     expect(JrcContactCenter::IvrDraftVersion.where(account: account)).to be_empty
@@ -64,7 +66,7 @@ RSpec.describe 'Calendar usage inventory preserves current native URA heads and 
     current = draft
     original = current.latest_version.attributes.deep_dup
     unlinked = { 'schema_version' => 3, 'start' => 'done', 'nodes' => [{ 'id' => 'done', 'type' => 'end' }] }
-    writer.call(input: JrcContactCenter::IvrDraftInput.new(**values.merge(definition: unlinked, expected_revision: 1, request_id: SecureRandom.uuid)),
+    writer.call(input: JrcContactCenter::IvrDraftInput.new(**values, definition: unlinked, expected_revision: 1, request_id: SecureRandom.uuid),
                 id: current.id)
     get base, headers: headers, params: { unit_id: units.first.id }
     expect(response).to have_http_status(:ok)
@@ -79,7 +81,7 @@ RSpec.describe 'Calendar usage inventory preserves current native URA heads and 
     second = graph.fetch('nodes').first.deep_dup.merge('id' => 'second_hours')
     graph.fetch('nodes').first['on_open'] = 'second_hours'
     graph.fetch('nodes') << second
-    result = writer.call(input: JrcContactCenter::IvrDraftInput.new(**values.merge(definition: graph)), unit_id: units.first.id)
+    result = writer.call(input: JrcContactCenter::IvrDraftInput.new(**values, definition: graph), unit_id: units.first.id)
     get base, headers: headers, params: { unit_id: units.first.id }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig('meta', 'total')).to eq(1)
@@ -92,8 +94,8 @@ RSpec.describe 'Calendar usage inventory preserves current native URA heads and 
   end
 
   it 'applies native pagination after actual reference filtering across twenty-one persisted drafts' do
-    ids = 21.times.map do |index|
-      input = JrcContactCenter::IvrDraftInput.new(**values.merge(name: format('SYNTHETIC inventory %02d', index), request_id: SecureRandom.uuid))
+    ids = Array.new(21) do |index|
+      input = JrcContactCenter::IvrDraftInput.new(**values, name: format('SYNTHETIC inventory %02d', index), request_id: SecureRandom.uuid)
       writer.call(input: input, unit_id: units.first.id).fetch(:draft).id.to_s
     end
     seen = []
@@ -115,15 +117,16 @@ RSpec.describe 'Calendar usage inventory preserves current native URA heads and 
     get base, headers: headers, params: { unit_id: units.first.id }
     expect(response).to have_http_status(:ok)
     row = response.parsed_body.fetch('items').sole
-    expect(row.fetch('references').sole).to include('calendar_changed' => true,
-                                                  'sha256' => definition.fetch('nodes').first.dig('calendar_reference', 'sha256'))
+    expect(row.fetch('references').sole).to include(
+      'calendar_changed' => true, 'sha256' => definition.fetch('nodes').first.dig('calendar_reference', 'sha256')
+    )
     expect(current.latest_version.attributes).to eq(original)
     expect(response.parsed_body.fetch('provider_configuration_verified')).to be(false)
   end
 
   it 'marks an archived native head explicitly and filters it without making it appear operational' do
     current = draft
-    writer.call(input: JrcContactCenter::IvrDraftInput.new(**values.merge(status: 'archived', expected_revision: 1, request_id: SecureRandom.uuid)),
+    writer.call(input: JrcContactCenter::IvrDraftInput.new(**values, status: 'archived', expected_revision: 1, request_id: SecureRandom.uuid),
                 id: current.id)
     get base, headers: headers, params: { unit_id: units.first.id, status: 'archived' }
     expect(response).to have_http_status(:ok)
@@ -135,7 +138,7 @@ RSpec.describe 'Calendar usage inventory preserves current native URA heads and 
 
   it 'treats SQL wildcard characters as literal bounded search text' do
     current = draft
-    writer.call(input: JrcContactCenter::IvrDraftInput.new(**values.merge(name: 'SYNTHETIC literal %_ marker', request_id: SecureRandom.uuid)),
+    writer.call(input: JrcContactCenter::IvrDraftInput.new(**values, name: 'SYNTHETIC literal %_ marker', request_id: SecureRandom.uuid),
                 unit_id: units.first.id)
     get base, headers: headers, params: { unit_id: units.first.id, q: '%_' }
     expect(response).to have_http_status(:ok)
@@ -166,8 +169,9 @@ RSpec.describe 'Calendar usage inventory preserves current native URA heads and 
 
   it 'refreshes configure permission and corporate coverage on every call to a reused native reader' do
     draft
-    reader = JrcContactCenter::CalendarIvrUsages.new(context: { account: account, account_user: member, user: actor },
-                                                  unit_id: units.first.id, calendar_id: entry.fetch('id'))
+    reader = JrcContactCenter::CalendarIvrUsages.new(
+      context: { account: account, account_user: member, user: actor }, unit_id: units.first.id, calendar_id: entry.fetch('id')
+    )
     expect(reader.call.fetch(:items).length).to eq(1)
     account.jrc_crm_user_business_units.where(user: actor).find_each { |row| row.update!(active: false) }
     expect { reader.call }.to raise_error(ActiveRecord::RecordNotFound)
@@ -185,8 +189,13 @@ RSpec.describe 'Calendar usage inventory preserves current native URA heads and 
     account.jrc_crm_user_business_units.where(user: actor).find_each { |row| row.update!(active: false) }
     account.jrc_crm_user_business_units.create!(user: actor, scope: 'BUSINESS_UNIT', company: next_company,
                                                 business_unit: next_business, active: true, structure_managed: true)
-    unit = units.first
-    unit.update!(settings: unit.settings.merge('issuer_company_id' => next_company.id, 'business_unit_id' => next_business.id))
+    # New synthetic configuration in the new scope; never relabel the old catalog or the immutable draft snapshot.
+    unit = units.first.reload
+    settings = unit.settings.except(JrcContactCenter::CalendarCatalogState::KEY)
+    unit.update!(settings: settings.merge('issuer_company_id' => next_company.id, 'business_unit_id' => next_business.id))
+    catalog.save!(entry, expected_revision: catalog.call.fetch('revision'), create: true)
+    expect(JrcContactCenter::CalendarCatalogState.new(unit: unit.reload).scope.fetch('issuer_company_id')).to eq(next_company.id.to_s)
+    expect(current.scope_snapshot.fetch('issuer_company_id')).to eq(company.id.to_s)
     get base, headers: headers, params: { unit_id: unit.id }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('items')).to eq([])

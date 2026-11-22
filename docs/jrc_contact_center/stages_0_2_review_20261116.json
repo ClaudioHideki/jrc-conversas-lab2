@@ -7241,5 +7241,14 @@
     "chrome_required_next": 252,
     "status": "candidate only; native and visual acceptance pending",
     "observed_datetime_icon_followup": "Scoped native color-scheme;91Vue passed, actual compiled CSS/icon pending in the same252Chrome candidate"
+  },
+  "calendar_ivr_inventory_first_native_findings_20261122": {
+    "report": "docs/jrc_contact_center/calendar_ivr_inventory_first_native_findings_20261122.json",
+    "sha": "9ab0811933835c38921375df3fa7fd2da8035676",
+    "run": 45025400231,
+    "core_passed": 2464,
+    "failed": 1,
+    "ruby_new_offenses": 13,
+    "new_checkpoint_revalidation_pending": true
   }
 }

@@ -9,12 +9,12 @@ class JrcContactCenter::CalendarIvrUsages
     @calendar_id = calendar_id
   end
 
-  def call(page: 1, per_page: 10, q: '', status: 'all')
+  def call(page: 1, per_page: 10, query: '', status: 'all')
     refresh!
-    filters!(q, status)
+    filters!(query, status)
     page = page!(page, 1_000_000)
     limit = page!(per_page, 20)
-    rows = filtered(q, status)
+    rows = filtered(query, status)
     total = rows.count
     items = rows.order(created_at: :desc, id: :desc).offset((page - 1) * limit).limit(limit).map { |row| present(row) }
     { items: items, meta: { page: page, per_page: limit, total: total, pages: (total.to_f / limit).ceil },
