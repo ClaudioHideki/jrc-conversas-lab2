@@ -25,7 +25,7 @@ describe('safe local IVR editing, without a provider contract', () => {
     '[]',
     '{}',
     '{',
-    JSON.stringify({ ...valid(), schema_version: 3 }),
+    JSON.stringify({ ...valid(), schema_version: 4 }),
   ])('rejects malformed or unsupported import %s', value => {
     expect(() => parseIvrDraft(value)).toThrow();
   });

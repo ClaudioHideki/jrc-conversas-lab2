@@ -38,19 +38,26 @@ class JrcContactCenter::IvrDraftWrite
     actor = { actor_account_user_id: @context.fetch(:account_user).id, actor_user_id: @context.fetch(:user).id }
     attributes = input.attributes.merge(actor).merge(account: @context.fetch(:account), ivr_draft: draft, revision: input.expected_revision + 1)
     version = JrcContactCenter::IvrDraftVersion.create!(attributes).reload
-    options = @audio_proofs.present? ? { audio_proofs: @audio_proofs } : {}
+    options = validation_audit_options
     JrcContactCenter::IvrDraftAudit.write!(draft, version, @scope.context, **options)
     { draft: draft, version: version, latest_revision: version.revision, replayed: false }
   end
 
+  def validation_audit_options
+    { audio_proofs: @audio_proofs, calendar_proofs: @calendar_proofs }.select { |_key, values| values.present? }
+  end
+
   def validate_definition!(draft, unit, input, previous)
     @audio_proofs = []
+    @calendar_proofs = []
     if input.status == 'archived'
       valid = previous && previous.name == input.name && previous.definition == input.definition
       raise JrcContactCenter::OperationError, 'ivr_archive_requires_unchanged_definition' unless valid
     else
       @scope.authorize_unchanged_scope!(draft, unit) if draft
-      @audio_proofs = JrcContactCenter::IvrGraph.new(input.definition, access: @scope.access, unit_id: unit.id).audio_proofs
+      graph = JrcContactCenter::IvrGraph.new(input.definition, access: @scope.access, unit_id: unit.id, origin_draft_id: draft&.id)
+      @audio_proofs = graph.audio_proofs
+      @calendar_proofs = graph.calendar_proofs
     end
   end
 

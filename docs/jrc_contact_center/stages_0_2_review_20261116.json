@@ -7160,5 +7160,30 @@
     "chrome": "not run in this failed workflow",
     "acceptance_of_corrected_sha": "pending new CI",
     "whole_word_complete": false
+  },
+  "queue_calendar_link_inventory_native_verified_20261122": {
+    "report": "docs/jrc_contact_center/queue_calendar_link_inventory_native_verified_20261122.json",
+    "sha": "da6ee6e97cc09532bf782ea9736b25f0be86a5bf",
+    "run": 45000878232,
+    "native_distinct": 2621,
+    "schema_reload_separate": 175,
+    "vue": 1451,
+    "chrome": 244,
+    "actual_images_opened": 12,
+    "full_word_complete": false
+  },
+  "ivr_calendar_routing_prepared_20261122": {
+    "report": "docs/jrc_contact_center/ivr_calendar_routing_prepared_20261122.json",
+    "adr": "docs/adr/20261122-call-center-native-calendar-ivr-snapshots.md",
+    "local_contract_schema": 3,
+    "preserved_schemas": [
+      1,
+      2
+    ],
+    "vue_targeted_http_mocked": 91,
+    "native_scenarios_prepared_not_run": 41,
+    "chrome_required": 248,
+    "native_and_visual_acceptance": false,
+    "full_word_complete": false
   }
 }

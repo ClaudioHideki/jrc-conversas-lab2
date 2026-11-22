@@ -1,3 +1,4 @@
+import { clearIvrCalendarReferences } from '../helpers/ivrCalendar';
 import { computed, onBeforeUnmount, reactive, ref } from 'vue';
 import API from 'dashboard/api/jrcContactCenter';
 import { useConfigurationRevision } from './useConfigurationRevision';
@@ -109,6 +110,7 @@ export const useIvrDraftEditor = ({ accountId, initialId }) => {
     const graph = JSON.parse(JSON.stringify(draft.value.definition));
     clearIvrQueues(graph);
     clearIvrAudioReferences(graph);
+    clearIvrCalendarReferences(graph);
     setGraph(graph);
   };
   const applyJson = text => {
@@ -184,10 +186,14 @@ export const useIvrDraftEditor = ({ accountId, initialId }) => {
         state.error = 'DENIED';
       } else if (
         error?.response?.status === 409 &&
-        error.response.data?.error === 'ivr_audio_not_verified'
+        [
+          'ivr_audio_not_verified',
+          'ivr_calendar_changed',
+          'ivr_calendar_attestation_conflict',
+        ].includes(error.response.data?.error)
       ) {
         state.uncertain = false;
-        state.error = 'ivr_audio_not_verified';
+        state.error = error.response.data.error;
       } else if (error?.response?.status === 422)
         state.error = error.response.data.error || 'SAVE_FAILED';
       else {

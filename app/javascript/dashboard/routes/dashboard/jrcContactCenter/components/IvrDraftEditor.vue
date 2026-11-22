@@ -27,6 +27,33 @@ const archive = ref(false);
 const notice = ref('');
 const dtmf = ref('');
 const simulation = ref(null);
+const simulationLocal = ref('');
+const simulationZone = ref('');
+const calendarNodes = computed(() =>
+  draft.value.definition.nodes.filter(node => node.type === 'calendar')
+);
+const simulationZones = computed(() => [
+  ...new Set([
+    ...calendarNodes.value
+      .map(node => node.calendar_reference?.snapshot?.definition?.timezone)
+      .filter(Boolean),
+    'UTC',
+  ]),
+]);
+const effectiveZone = computed({
+  get: () =>
+    simulationZones.value.includes(simulationZone.value)
+      ? simulationZone.value
+      : simulationZones.value[0],
+  set: value => {
+    simulationZone.value = value;
+  },
+});
+const calendarInstant = () =>
+  calendarNodes.value.length
+    ? { local: simulationLocal.value, timezone: effectiveZone.value }
+    : null;
+
 const history = reactive({
   items: [],
   page: 1,
@@ -34,16 +61,40 @@ const history = reactive({
   loading: false,
   failed: false,
 });
+const deny = () => {
+  state.denied = true;
+  state.loaded = false;
+  state.error = 'DENIED';
+  simulation.value = null;
+  history.items = [];
+};
 const locked = computed(() => editor.locked.value || secondaryBusy.value);
 const canSave = computed(() => editor.canSave.value && !secondaryBusy.value);
 const simulationFingerprint = () =>
-  JSON.stringify([draft.value.unit_id, draft.value.definition, dtmf.value]);
+  JSON.stringify([
+    draft.value.unit_id,
+    draft.value.definition,
+    dtmf.value,
+    recordId.value,
+    calendarInstant(),
+  ]);
 const currentSimulation = computed(() =>
   !jsonPending.value &&
   simulation.value?.fingerprint === simulationFingerprint()
     ? simulation.value.data
     : null
 );
+const calText = key =>
+  ({
+    INSTANT: t('JRC_CONTACT_CENTER.IVR_CALENDAR.INSTANT'),
+    TIMEZONE: t('JRC_CONTACT_CENTER.IVR_CALENDAR.TIMEZONE'),
+  })[key];
+const precedenceLabel = value =>
+  ({
+    exception: t('JRC_CONTACT_CENTER.IVR_CALENDAR.PRECEDENCES.exception'),
+    holiday: t('JRC_CONTACT_CENTER.IVR_CALENDAR.PRECEDENCES.holiday'),
+    weekly: t('JRC_CONTACT_CENTER.IVR_CALENDAR.PRECEDENCES.weekly'),
+  })[value];
 const date = value =>
   state.timezone
     ? new Intl.DateTimeFormat('pt-BR', {
@@ -114,15 +165,22 @@ const preview = async () => {
   notice.value = '';
   simulation.value = null;
   try {
-    const response = await API.previewIvrDraft(props.accountId, {
+    const payload = {
       unit_id: draft.value.unit_id,
       definition: draft.value.definition,
       dtmf: dtmf.value,
-    });
+    };
+    if (calendarNodes.value.length) {
+      payload.at = calendarInstant();
+      if (recordId.value) payload.origin_draft_id = recordId.value;
+    }
+    const response = await API.previewIvrDraft(props.accountId, payload);
     if (alive && fingerprint === simulationFingerprint())
       simulation.value = { fingerprint, data: response.data.simulation };
   } catch (error) {
-    if (alive) notice.value = error?.response?.data?.error || 'SAVE_FAILED';
+    if (alive && [401, 403, 404].includes(error?.response?.status)) deny();
+    else if (alive)
+      notice.value = error?.response?.data?.error || 'SAVE_FAILED';
   } finally {
     if (alive) secondaryBusy.value = false;
   }
@@ -316,6 +374,7 @@ onBeforeUnmount(() => {
           :model-value="draft.definition"
           :disabled="locked || jsonPending"
           @update:model-value="editor.setGraph"
+          @denied="deny"
         />
         <section v-show="tab === 'JSON'" class="min-w-0 space-y-3">
           <label for="ivr-json" class="block text-sm text-n-slate-12">{{
@@ -368,23 +427,64 @@ onBeforeUnmount(() => {
         </section>
         <section v-show="tab === 'SIMULATION'" class="min-w-0 space-y-3">
           <p class="text-sm text-n-slate-11">{{ text('SIMULATION_HINT') }}</p>
+          <section
+            v-if="calendarNodes.length"
+            class="min-w-0 space-y-3 rounded-lg border border-n-blue-6 bg-n-blue-2 p-3"
+            data-ivr-calendar-instant
+          >
+            <p class="break-words text-sm text-n-slate-11">
+              {{ t('JRC_CONTACT_CENTER.IVR_CALENDAR.INSTANT_HINT') }}
+            </p>
+            <label
+              for="ivr-simulation-local"
+              class="block text-sm text-n-slate-12"
+            >
+              {{ calText('INSTANT') }}
+            </label>
+            <input
+              id="ivr-simulation-local"
+              v-model="simulationLocal"
+              type="datetime-local"
+              step="1"
+              :disabled="locked"
+              required
+              class="h-10 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 px-2 text-n-slate-12"
+            />
+            <label
+              for="ivr-simulation-zone"
+              class="block text-sm text-n-slate-12"
+            >
+              {{ calText('TIMEZONE') }}
+            </label>
+            <select
+              id="ivr-simulation-zone"
+              v-model="effectiveZone"
+              :disabled="locked"
+              class="h-10 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 px-2 text-n-slate-12"
+            >
+              <option v-for="zone in simulationZones" :key="zone" :value="zone">
+                {{ zone }}
+              </option>
+            </select>
+          </section>
           <label for="ivr-dtmf" class="block text-sm text-n-slate-12">{{
             text('DTMF')
           }}</label>
           <input
             id="ivr-dtmf"
             v-model="dtmf"
-            @input="simulation = null"
             type="text"
             maxlength="128"
             :disabled="locked"
             inputmode="tel"
             class="h-10 w-full rounded-lg border border-n-weak bg-n-solid-1 px-3 text-n-slate-12"
+            @input="simulation = null"
           />
           <button
             type="button"
             :disabled="locked || jsonPending"
             class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
+            data-ivr-simulate
             @click="preview"
           >
             {{ text('SIMULATE') }}
@@ -411,6 +511,22 @@ onBeforeUnmount(() => {
                 }}<span v-if="row.event">
                   · {{ text(`EVENTS.${row.event}`) }}</span
                 >
+                <p
+                  v-if="row.calendar"
+                  class="break-words text-xs"
+                  data-ivr-calendar-decision
+                >
+                  {{
+                    t('JRC_CONTACT_CENTER.IVR_CALENDAR.DECISION', {
+                      state: row.calendar.open
+                        ? t('JRC_CONTACT_CENTER.IVR_CALENDAR.OPEN')
+                        : t('JRC_CONTACT_CENTER.IVR_CALENDAR.CLOSED'),
+                      instant: row.calendar.instant,
+                      timezone: row.calendar.timezone,
+                      precedence: precedenceLabel(row.calendar.precedence),
+                    })
+                  }}
+                </p>
               </li>
             </ol>
             <p>{{ text('LOCAL_ONLY') }}</p>

@@ -48,3 +48,5 @@ Call Center 17/11: ampliar a proteção contra concessões implícitas na retira
 Call Center: proteção de retirada de perfis validada no SHA 30fbf0b1. Próximo incremento implementa elegibilidade/herança de forma explícita, com fixtures sintéticas identificadas, upgrade populado e nova execução nativa; interface e demais figuras permanecem abertas.
 
 Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os 68 cenários Chrome anteriores e ampliando para 80; revalidar backend e banco junto à interface real, antes de qualquer aceite de F11/F12.
+
+- 22/11/2026 — calendário nativo: inventário de filas aceito em da6ee6e9. Próximo incremento: desvio interno de URA pela versão exata do calendário, com simulação determinística e escopo nativo; candidato ainda sem aceite Rails/Chrome. Os23 referenciais e o contrato operacional PABX continuam abertos.

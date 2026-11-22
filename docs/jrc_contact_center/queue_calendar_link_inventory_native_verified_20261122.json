@@ -1,0 +1,84 @@
+{
+  "sha": "da6ee6e97cc09532bf782ea9736b25f0be86a5bf",
+  "run": 45000878232,
+  "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/45000878232",
+  "artifact": 14747059000,
+  "artifact_sha256": "8c0f82db1c6c87e93e6433cd2b22a79a1fb6ee948300a618e79f14fcbcbd8152",
+  "native_distinct_examples": 2621,
+  "schema_reload_examples_separate": 175,
+  "vue": 1451,
+  "chrome": 244,
+  "failed": 0,
+  "pending": 0,
+  "outside_errors": 0,
+  "chrome_skipped": 0,
+  "chrome_flaky": 0,
+  "screenshots_hashes_verified": 504,
+  "actual_images_opened": [
+    "desktop-light-queue-calendar-linked-inventory.png",
+    "desktop-light-queue-calendar-linked-after-removal.png",
+    "desktop-light-queue-calendar-confirmed.png",
+    "desktop-dark-queue-calendar-linked-inventory.png",
+    "desktop-dark-queue-calendar-linked-after-removal.png",
+    "desktop-dark-queue-calendar-confirmed.png",
+    "mobile-light-queue-calendar-linked-inventory.png",
+    "mobile-light-queue-calendar-linked-after-removal.png",
+    "mobile-light-queue-calendar-confirmed.png",
+    "mobile-dark-queue-calendar-linked-inventory.png",
+    "mobile-dark-queue-calendar-linked-after-removal.png",
+    "mobile-dark-queue-calendar-confirmed.png"
+  ],
+  "image_hashes": {
+    "desktop-light-queue-calendar-linked-inventory.png": "03c2455549e3cfd1802bd64967ea2a4b7512a2fc3cba76b534fdb497347a4a33",
+    "desktop-light-queue-calendar-linked-after-removal.png": "03abebd5114003cdc3be056b924395d50d6f429d06ba148d86056702114c7e2a",
+    "desktop-light-queue-calendar-confirmed.png": "1d39733e7fb10d7a171f53698f253bc0aee9a85c2f5686377a3d199519f7fd97",
+    "desktop-dark-queue-calendar-linked-inventory.png": "470ef14cb6b9d0c4487d351611f9b1a00b733c5a13cb78ab35c086fbea02d67f",
+    "desktop-dark-queue-calendar-linked-after-removal.png": "03c0e89d4d645729c49c82c99f64462394cd5685f097be4b6d1e43d4352e149e",
+    "desktop-dark-queue-calendar-confirmed.png": "2e1ee3dcc59e499932550b4bbf0c8ce6b787b808a35c4b6dc4afbb17abf86193",
+    "mobile-light-queue-calendar-linked-inventory.png": "23ae1e38fe8c52722474909ccb23d83d4c271db28e21607e3ad44a86e92a415a",
+    "mobile-light-queue-calendar-linked-after-removal.png": "a57990469aecc04e1cda70a2bc3fd2bddb1b736de377a69b92d6e03f86d0b1cb",
+    "mobile-light-queue-calendar-confirmed.png": "3e40cea56f70b09dee007af0a10cb7e91c64821352fd7d1d6cdeb1e5ecc080ba",
+    "mobile-dark-queue-calendar-linked-inventory.png": "ce8728ed7d2ba2da04c25c9b1c709beb782f6c83935efab92bc5e9c44e72a8cf",
+    "mobile-dark-queue-calendar-linked-after-removal.png": "92dd6f791c60be3922c461bfa8fc635642f9113c31188851b0a2db98d6c272e6",
+    "mobile-dark-queue-calendar-confirmed.png": "a80d1b7780a1e28d0384741009ed6d164bc890b8c72e97d9d48b909ae201c233"
+  },
+  "native_behavior_verified": [
+    "SQL-filtered actual linked queues are distinct from candidates, before count/search/pagination",
+    "Unbound and different-calendar queues do not enter the linked inventory",
+    "Search produces0/1/1 rows; existing native21-row candidate pagination remains available",
+    "Confirmed removal reloads native counts and empties linked mode while a later binding survives historical replay",
+    "Current account, native unit scope, configure permission and denial remain enforced"
+  ],
+  "prior_native_and_vue_cases": {
+    "call-center-rspec.json": {
+      "preserved": 2402,
+      "new": 6
+    },
+    "call-center-pabx-rspec.json": {
+      "preserved": 128,
+      "new": 0
+    },
+    "call-center-corporate-rspec.json": {
+      "preserved": 85,
+      "new": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "preserved": 175,
+      "new": 0
+    },
+    "vue": {
+      "preserved": 1442,
+      "new": 9
+    }
+  },
+  "all_previous_chrome_identities_preserved": 244,
+  "visual_increment_accepted": true,
+  "visual_limits": [
+    "The existing disabled Save button is ellipsized on mobile; enabled navigation, review and close labels remain legible",
+    "Some desktop confirmation content is outside the captured scroll position; screenshot review alone is not proof of that content",
+    "This subset and244 Chrome combinations do not complete every Word criterion or external provider homologation"
+  ],
+  "whole_word_complete": false,
+  "external_homologation": false,
+  "operational_pabx_application": false
+}

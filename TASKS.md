@@ -883,3 +883,6 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] Aba de vínculos internos, contagem/paginação no servidor e recarga após retirada: 87 testes leves aprovados; execução nativa e Chrome da nova candidata pendentes.
 
 - [ ] Vínculos de calendário: CI44997899087 preservada com2621Rails,175recargas e1451Vue aprovados; duas infrações na mesma linha de teste corrigidas apenas no alinhamento; Chrome e aceite do próximo SHA pendentes.
+
+- [x] Calendário/fila: inventário nativo confirmado em da6ee6e9/CI45000878232, com2621Rails distintos,175recargas,1451Vue,244Chrome e12imagens efetivamente revisadas nos4projetos. Sem publicação no PABX.
+- [ ] URA/calendário: versão3 preparada no editor existente,91Vue direcionados aprovados;41casos nativos e248Chrome aguardam a CI do novo checkpoint. Preservados contratos1/2, escopos, histórico e todas as12migrations. Inventário de URAs e homologação externa continuam pendentes.

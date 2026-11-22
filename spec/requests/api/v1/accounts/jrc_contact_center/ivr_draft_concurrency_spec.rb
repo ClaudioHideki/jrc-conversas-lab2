@@ -121,4 +121,54 @@ RSpec.describe 'Local IVR real HTTP concurrency', type: :request do
     expect(draft.latest_version.name).to eq('SYNTHETIC initial')
     expect(draft.versions.count).to eq(1)
   end
+
+  context 'when a new native calendar pin is reviewed for the existing legacy draft' do
+    before do
+      account.enable_features!('audit_logs')
+      catalog = JrcContactCenter::CalendarCatalog.new(context: { account: account, account_user: member, user: actor }, unit_id: unit.id)
+      entry = { 'id' => SecureRandom.uuid, 'active' => true, 'definition' => {
+        'name' => 'SYNTHETIC concurrent calendar', 'description' => '', 'timezone' => 'America/Sao_Paulo',
+        'weekly' => (1..7).to_h { |day| [day.to_s, day == 1 ? [['08:00', '17:00']] : []] }, 'holidays' => [], 'exceptions' => []
+      } }
+      catalog.save!(entry, expected_revision: catalog.call.fetch('revision'), create: true)
+      reference = JrcContactCenter::IvrCalendarReferences.reference(entry, revision: catalog.call.fetch('revision'))
+      state[:calendar_entry] = entry
+      state[:calendar_payload] = values.merge(expected_revision: 1, request_id: SecureRandom.uuid, definition: {
+        'schema_version' => 3, 'start' => 'hours', 'nodes' => [
+          { 'id' => 'hours', 'type' => 'calendar', 'calendar_reference' => reference, 'on_open' => 'end', 'on_closed' => 'end' },
+          { 'id' => 'end', 'type' => 'end' }
+        ]
+      })
+    end
+
+    it 'refuses an uncommitted new pin whose source changed before its real request acquired the account lock' do
+      account.with_lock do
+        catalog = JrcContactCenter::CalendarCatalog.new(context: { account: account, account_user: member, user: actor }, unit_id: unit.id)
+        catalog.save!(state.fetch(:calendar_entry).deep_merge('definition' => { 'name' => 'SYNTHETIC changed during lock wait' }),
+                      expected_revision: catalog.call.fetch('revision'))
+        dispatch_ivr(state.fetch(:calendar_payload))
+        wait_for_real_locks(1)
+      end
+      row = collected_results(1).sole
+      expect(row.fetch(:status)).to eq(409)
+      expect(row.dig(:body, 'error')).to eq('ivr_calendar_changed')
+      expect(draft.latest_version.definition).to eq(definition)
+      expect(draft.versions.count).to eq(1)
+      expect(JrcContactCenter::Command.where(account: account)).to be_empty
+    end
+
+    it 'persists one exact pin and one durable audit for simultaneous retries after real lock acquisition' do
+      account.with_lock do
+        2.times { dispatch_ivr(state.fetch(:calendar_payload)) }
+        wait_for_real_locks(2)
+      end
+      rows = collected_results(2)
+      expect(rows.pluck(:status)).to eq([200, 200])
+      expect(rows.map { |row| row.fetch(:body).fetch('replayed') }).to contain_exactly(false, true)
+      expect(draft.latest_version.definition).to eq(state.fetch(:calendar_payload).fetch(:definition))
+      expect(draft.versions.count).to eq(2)
+      expect(Audited.audit_class.where(auditable: draft.latest_version, action: 'create').count).to eq(1)
+      expect(JrcContactCenter::Command.where(account: account)).to be_empty
+    end
+  end
 end

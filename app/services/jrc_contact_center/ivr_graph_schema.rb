@@ -51,9 +51,28 @@ class JrcContactCenter::IvrGraphSchema
     schema.dig('properties', 'nodes', 'items')['oneOf'] = [TERMINAL, QUEUE, MENU_V2]
   end.freeze
 
+  CALENDAR_REFERENCE = {
+    'type' => 'object', 'required' => %w[calendar_id unit_revision sha256 snapshot], 'additionalProperties' => false,
+    'properties' => {
+      'calendar_id' => { 'type' => 'string', 'minLength' => 36, 'maxLength' => 36 },
+      'unit_revision' => { 'type' => 'string', 'pattern' => '^[0-9a-f]{64}$', 'minLength' => 64, 'maxLength' => 64 },
+      'sha256' => { 'type' => 'string', 'pattern' => '^[0-9a-f]{64}$', 'minLength' => 64, 'maxLength' => 64 },
+      'snapshot' => { 'type' => 'object' }
+    }
+  }.freeze
+  CALENDAR = {
+    'type' => 'object', 'required' => %w[id type calendar_reference on_open on_closed], 'additionalProperties' => false,
+    'properties' => { 'id' => NODE_ID, 'type' => { 'const' => 'calendar' }, 'calendar_reference' => CALENDAR_REFERENCE,
+                      'on_open' => NODE_ID, 'on_closed' => NODE_ID }
+  }.freeze
+  SCHEMA_V3 = SCHEMA.deep_dup.tap do |schema|
+    schema.fetch('properties')['schema_version'] = { 'const' => 3 }
+    schema.dig('properties', 'nodes', 'items')['oneOf'] = [TERMINAL, QUEUE, MENU_V2, CALENDAR]
+  end.freeze
+
   def self.validate!(graph)
     versioned = graph.is_a?(Hash) && graph['schema_version'].is_a?(Integer)
-    schema = versioned && { 1 => SCHEMA, 2 => SCHEMA_V2 }[graph['schema_version']]
+    schema = versioned && { 1 => SCHEMA, 2 => SCHEMA_V2, 3 => SCHEMA_V3 }[graph['schema_version']]
     return if schema && JSONSchemer.schema(schema).valid?(graph) && JSON.generate(graph).bytesize <= 1.megabyte
 
     raise JrcContactCenter::OperationError, 'invalid_ivr_graph'

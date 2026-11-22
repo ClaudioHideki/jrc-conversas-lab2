@@ -1,3 +1,4 @@
+import { validIvrCalendarNode } from './ivrCalendar';
 export const IVR_BYTES_LIMIT = 1048576;
 export const IVR_NODES_LIMIT = 128;
 export const emptyIvr = () => ({ schema_version: 1, start: '', nodes: [] });
@@ -30,7 +31,7 @@ export const setIvrAudioReference = (graph, index, value) => {
     throw new Error('invalid_ivr_graph');
   if (value === null) delete node.audio_reference;
   else {
-    graph.schema_version = 2;
+    graph.schema_version = Math.max(graph.schema_version, 2);
     node.audio_reference = { ...value };
   }
 };
@@ -48,9 +49,13 @@ export const parseIvrDraft = text => {
     typeof node.id === 'string' &&
     /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(node.id) &&
     !/[^A-Za-z0-9_-]/.test(node.id) &&
-    ['menu', 'queue', 'end'].includes(node.type) &&
+    (node.type === 'calendar'
+      ? graph.schema_version === 3 && validIvrCalendarNode(node)
+      : ['menu', 'queue', 'end'].includes(node.type)) &&
+    (!Object.hasOwn(node, 'calendar_reference') ||
+      (graph.schema_version === 3 && node.type === 'calendar')) &&
     (!Object.hasOwn(node, 'audio_reference') ||
-      (graph.schema_version === 2 &&
+      ([2, 3].includes(graph.schema_version) &&
         node.type === 'menu' &&
         validIvrAudioReference(node.audio_reference))) &&
     (node.type !== 'menu' ||
@@ -64,7 +69,7 @@ export const parseIvrDraft = text => {
         )));
   if (
     !plainRecord(graph) ||
-    ![1, 2].includes(graph.schema_version) ||
+    ![1, 2, 3].includes(graph.schema_version) ||
     typeof graph.start !== 'string' ||
     !Array.isArray(graph.nodes) ||
     graph.nodes.length > IVR_NODES_LIMIT ||
@@ -77,7 +82,7 @@ export const parseIvrDraft = text => {
 
 export const addIvrNode = (graph, type) => {
   if (
-    !['menu', 'queue', 'end'].includes(type) ||
+    !['menu', 'queue', 'end', 'calendar'].includes(type) ||
     graph.nodes.length >= IVR_NODES_LIMIT
   )
     throw new Error('invalid_ivr_graph');
@@ -86,6 +91,14 @@ export const addIvrNode = (graph, type) => {
   while (identifiers.has(`node_${number}`)) number += 1;
   const node = { id: `node_${number}`, type };
   if (type === 'queue') node.queue_id = '';
+  if (type === 'calendar') {
+    graph.schema_version = 3;
+    Object.assign(node, {
+      calendar_reference: null,
+      on_open: '',
+      on_closed: '',
+    });
+  }
   if (type === 'menu')
     Object.assign(node, {
       timeout_seconds: '',
@@ -100,6 +113,12 @@ export const addIvrNode = (graph, type) => {
 export const removeIvrNode = (graph, id) => {
   graph.nodes = graph.nodes.filter(node => node.id !== id);
   if (graph.start === id) graph.start = '';
+  graph.nodes
+    .filter(node => node.type === 'calendar')
+    .forEach(node => {
+      if (node.on_open === id) node.on_open = '';
+      if (node.on_closed === id) node.on_closed = '';
+    });
   graph.nodes
     .filter(node => node.type === 'menu')
     .forEach(node => {

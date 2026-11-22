@@ -20,7 +20,8 @@ class Api::V1::Accounts::JrcContactCenter::UnitCalendarsController < Api::V1::Ac
     data = catalog.call
     item = data.fetch('entries').find { |row| row.fetch('id') == params[:id] } || raise(ActiveRecord::RecordNotFound)
     render json: base_payload.merge(
-      item: item, unit_id: data.fetch('unit_id'), revision: data.fetch('revision'), local_only: true, pabx_confirmed: false
+      item: item, unit_id: data.fetch('unit_id'), revision: data.fetch('revision'), local_only: true, pabx_confirmed: false,
+      ivr_reference: JrcContactCenter::IvrCalendarReferences.reference(item, revision: data.fetch('revision'))
     )
   end
 

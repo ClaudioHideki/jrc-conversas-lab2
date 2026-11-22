@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { verifyNativeCalendars } from './call-center-calendar-native.mjs';
+import { verifyNativeIvrCalendar } from './call-center-ivr-calendar-native.mjs';
 import type { Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10292,5 +10293,16 @@ test('local IVR audio reference pins native verified history and never crosses u
       provider_applied: false,
       provider_writes: unexpected,
     })
+  );
+});
+
+test('native URA calendar branches preserve the exact attested version across source edits, use explicit time and deny foreign scopes', async ({
+  page,
+}, info) => {
+  await verifyNativeIvrCalendar(
+    page,
+    info,
+    session.calendar_targets[info.project.name],
+    session.unit_id
   );
 });

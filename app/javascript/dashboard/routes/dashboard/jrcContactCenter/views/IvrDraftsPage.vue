@@ -16,6 +16,7 @@ const contextKey = computed(() => {
     user.value?.type,
     account?.role,
     account?.custom_role_id,
+    account?.contact_center_eligible,
     account?.permissions?.slice().sort(),
   ]);
 });

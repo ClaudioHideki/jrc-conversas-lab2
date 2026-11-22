@@ -8,6 +8,17 @@ const { t } = useI18n();
 const text = key => t(`JRC_CONTACT_CENTER.LOCAL_IVR.${key}`);
 const nodes = computed(() => props.modelValue.nodes);
 const edges = node => {
+  if (node.type === 'calendar')
+    return [
+      {
+        label: t('JRC_CONTACT_CENTER.IVR_CALENDAR.ON_OPEN'),
+        target: node.on_open,
+      },
+      {
+        label: t('JRC_CONTACT_CENTER.IVR_CALENDAR.ON_CLOSED'),
+        target: node.on_closed,
+      },
+    ];
   if (node.type !== 'menu') return [];
   return [
     ...node.options.map(choice => ({
@@ -49,7 +60,7 @@ const exists = id => nodes.value.some(node => node.id === id);
         >
           {{ text('START') }}
         </p>
-        <ul v-if="node.type === 'menu'" class="space-y-2">
+        <ul v-if="['menu', 'calendar'].includes(node.type)" class="space-y-2">
           <li
             v-for="(edge, index) in edges(node)"
             :key="index"

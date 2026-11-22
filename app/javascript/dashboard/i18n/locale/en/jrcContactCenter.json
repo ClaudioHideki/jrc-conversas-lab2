@@ -2004,7 +2004,8 @@
       "TYPES": {
         "menu": "Menu DTMF",
         "queue": "Destino de fila de voz",
-        "end": "Término local"
+        "end": "Término local",
+        "calendar": "Calendário interno"
       },
       "BUILDER": "Fluxo",
       "JSON": "JSON",
@@ -2067,7 +2068,9 @@
         "timeout": "Sem resposta",
         "matched_option": "Opção correspondente",
         "retry_invalid": "Nova tentativa de dígito inválido",
-        "invalid_limit": "Limite de tentativas inválidas"
+        "invalid_limit": "Limite de tentativas inválidas",
+        "calendar_open": "Expediente aberto",
+        "calendar_closed": "Expediente fechado"
       },
       "EXPORT": "Exportar revisão salva",
       "LOAD_VERSION": "Usar definição no editor",
@@ -2085,7 +2088,13 @@
         "invalid_ivr_revision": "Revise nome, estado e identidade da operação local.",
         "ivr_archive_requires_unchanged_definition": "Salve ou descarte as alterações antes de arquivar o conteúdo já registrado.",
         "ivr_unavailable_audio": "O áudio escolhido não está disponível na unidade e no seu acesso atual.",
-        "ivr_audio_not_verified": "A versão do áudio não possui verificação técnica atual. Revise o vínculo na biblioteca."
+        "ivr_audio_not_verified": "A versão do áudio não possui verificação técnica atual. Revise o vínculo na biblioteca.",
+        "invalid_ivr_calendar_reference": "O calendário referenciado não é válido. Selecione-o novamente na unidade autorizada.",
+        "invalid_ivr_calendar_origin": "A origem do calendário não é válida para este rascunho.",
+        "ivr_unavailable_calendar": "Calendário indisponível no seu escopo. Revise a seleção.",
+        "ivr_calendar_changed": "O catálogo mudou desde a seleção. Revise e selecione novamente o calendário antes de salvar.",
+        "ivr_calendar_instant_required": "Informe data, hora e fuso válidos. Horários inexistentes ou ambíguos na mudança do horário de verão são recusados.",
+        "ivr_calendar_attestation_conflict": "Há uma inconsistência na comprovação histórica do calendário. A alteração não foi salva; revise a origem antes de tentar novamente."
       },
       "AUDIT_REVISION": "Revisão de URA local",
       "REFERENCE_UNAVAILABLE": "Referência indisponível no escopo atual. Revise a seleção.",
@@ -2805,7 +2814,7 @@
       "TABS": "Vínculos internos e seleção de filas",
       "LINKED_TAB": "Vínculos internos",
       "CANDIDATES_TAB": "Selecionar filas",
-      "LINKED_RESOURCES": "Somente filas autorizadas vinculadas internamente a este calendário. Números e URAs ainda não possuem vínculo comprovado; o impacto no PABX permanece desconhecido.",
+      "LINKED_RESOURCES": "Este painel consulta somente vínculos internos de filas autorizadas. Números e URAs não são consultados aqui; o impacto no PABX permanece desconhecido.",
       "LINKED_EMPTY": "Nenhum vínculo interno de fila encontrado para este calendário nesta unidade.",
       "LOCAL_ONLY": "Somente configuração interna. O uso e o impacto no PABX são desconhecidos até a validação do fornecedor. Salvar não publica nem altera o roteamento.",
       "SEARCH": "Pesquisar fila da unidade",
@@ -2839,6 +2848,35 @@
       "CURRENT_UNKNOWN": "O recibo histórico foi confirmado, mas o estado atual não pôde ser verificado. Consulte novamente; a retirada não será reenviada.",
       "ABANDON_WARNING": "Entendo que sair não desfaz uma operação que possa ter sido gravada. O resultado permanece não confirmado nesta tela e deverá ser conferido na auditoria.",
       "ABANDON": "Sair sem declarar a retirada concluída"
+    },
+    "IVR_CALENDAR": {
+      "TITLE": "Calendário do desvio interno",
+      "LOCAL_ONLY": "Referência interna e simulação local. Não publica horários nem confirma aplicação no PABX.",
+      "DENIED": "Seu acesso à unidade ou à configuração mudou. Recarregue com um perfil autorizado.",
+      "CHANGE": "Trocar calendário",
+      "CHOOSE": "Selecionar calendário",
+      "REMOVE": "Retirar do desvio",
+      "PINNED": "Esta versão exata foi fixada no rascunho. Alterar o catálogo não atualiza automaticamente esta referência.",
+      "DETAILS": "Conferir versão fixada",
+      "SEARCH": "Buscar calendário da unidade",
+      "SEARCH_BUTTON": "Buscar",
+      "REVIEW": "Revisar calendário",
+      "CONFIRM": "Conferi horários, exceções, fuso e estado interno desta versão. Entendo que não há publicação no PABX.",
+      "USE": "Usar esta versão no rascunho",
+      "CANCEL": "Cancelar seleção",
+      "ON_OPEN": "Destino no expediente aberto",
+      "ON_CLOSED": "Destino no expediente fechado",
+      "INSTANT": "Data e hora da simulação",
+      "TIMEZONE": "Fuso da data e hora informadas",
+      "INSTANT_HINT": "Escolha uma data e hora explícitas. Exceção da data tem precedência sobre feriado, seguido do expediente semanal. Nenhuma chamada real será feita.",
+      "OPEN": "Aberto nesta simulação",
+      "CLOSED": "Fechado nesta simulação",
+      "PRECEDENCES": {
+        "exception": "Exceção explícita da data",
+        "holiday": "Feriado",
+        "weekly": "Expediente semanal"
+      },
+      "DECISION": "{state} · {instant} · {timezone} · {precedence}"
     }
   }
 }

@@ -2,9 +2,10 @@
 
 # Authorizes local draft references using the native module and organizational scopes.
 class JrcContactCenter::IvrGraph
-  attr_reader :data, :nodes, :unit_id, :audio_proofs
+  attr_reader :data, :nodes, :unit_id, :audio_proofs, :calendar_proofs
 
-  def initialize(graph, access:, unit_id:)
+  def initialize(graph, access:, unit_id:, origin_draft_id: nil)
+    @origin_draft_id = origin_draft_id
     @identity = access.policy.user_context.slice(:account, :account_user, :user)
     @access = fresh_access
     raise Pundit::NotAuthorizedError unless @access.policy.configure?
@@ -20,7 +21,7 @@ class JrcContactCenter::IvrGraph
   end
 
   def authorized_copy
-    self.class.new(data, access: @access, unit_id: unit_id)
+    self.class.new(data, access: @access, unit_id: unit_id, origin_draft_id: @origin_draft_id)
   end
 
   private
@@ -49,12 +50,23 @@ class JrcContactCenter::IvrGraph
   def validate_references!(access)
     validate_unit!(access.units)
     validate_queues!(access.queues)
+    validate_calendars!
     references = nodes.values.pluck('audio_reference').compact
     @audio_proofs = if references.empty?
                       []
                     else
                       JrcContactCenter::IvrAudioReferences.new(context: @identity, unit_id: unit_id).call(references)
                     end
+  end
+
+  def validate_calendars!
+    references = nodes.values.pluck('calendar_reference').compact
+    @calendar_proofs = if references.empty?
+                         []
+                       else
+                         JrcContactCenter::IvrCalendarReferences.new(context: @identity, unit_id: unit_id,
+                                                                     origin_draft_id: @origin_draft_id).call(references)
+                       end
   end
 
   def validate_unit!(units)

@@ -48,21 +48,33 @@ class Api::V1::Accounts::JrcContactCenter::IvrDraftsController < Api::V1::Accoun
   end
 
   def preview
-    request = params.require(:ivr_preview).permit(:unit_id, :dtmf, definition: {})
-    graph = JrcContactCenter::IvrGraph.new(request[:definition].to_h, access: draft_scope.access, unit_id: request[:unit_id])
-    result = JrcContactCenter::IvrSimulator.new(graph: graph).call(input: request[:dtmf])
+    source = params.require(:ivr_preview)
+    request = source.permit(:unit_id, :dtmf, definition: {})
+    graph = JrcContactCenter::IvrGraph.new(request[:definition].to_h, access: draft_scope.access, unit_id: request[:unit_id],
+                                         origin_draft_id: source[:origin_draft_id])
+    result = JrcContactCenter::IvrSimulator.new(graph: graph).call(input: request[:dtmf], at: simulation_instant(source))
     render json: base_payload.merge(simulation: result)
   end
 
   def simulate
     draft = draft_scope.find!(params[:id])
-    request = params.require(:ivr_simulation).permit(:revision, :dtmf)
+    source = params.require(:ivr_simulation)
+    request = source.permit(:revision, :dtmf)
     row = selected_version(draft, request[:revision])
-    result = simulate_version(draft, row, request[:dtmf])
+    result = simulate_version(draft, row, request[:dtmf], simulation_instant(source))
     render json: base_payload.merge(simulation: result, revision: row.revision)
   end
 
   private
+
+  def simulation_instant(request)
+    value = request[:at]
+    return value unless value.is_a?(ActionController::Parameters)
+
+    raise JrcContactCenter::OperationError, 'ivr_calendar_instant_required' unless value.keys.sort == %w[local timezone]
+
+    value.permit(:local, :timezone).to_h
+  end
 
   def history_page
     page = params.fetch(:page, '1')
@@ -71,10 +83,10 @@ class Api::V1::Accounts::JrcContactCenter::IvrDraftsController < Api::V1::Accoun
     page.to_i.clamp(1, 1_000_000)
   end
 
-  def simulate_version(draft, row, input)
-    graph = JrcContactCenter::IvrGraph.new(row.definition, access: draft_scope.access, unit_id: draft.unit_id)
+  def simulate_version(draft, row, input, at = nil)
+    graph = JrcContactCenter::IvrGraph.new(row.definition, access: draft_scope.access, unit_id: draft.unit_id, origin_draft_id: draft.id)
     draft_scope.authorize_unchanged_scope!(draft, draft_scope.access.units.find(draft.unit_id))
-    JrcContactCenter::IvrSimulator.new(graph: graph).call(input: input)
+    JrcContactCenter::IvrSimulator.new(graph: graph).call(input: input, at: at)
   end
 
   def base_payload

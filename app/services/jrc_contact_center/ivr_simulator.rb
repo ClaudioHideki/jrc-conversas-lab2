@@ -8,10 +8,11 @@ class JrcContactCenter::IvrSimulator
     @graph = graph
   end
 
-  def call(input: '')
+  def call(input: '', at: nil)
     @graph = @graph.authorized_copy
     raise JrcContactCenter::OperationError, 'ivr_invalid_simulation_input' unless input.is_a?(String) && input.match?(/\A[0-9*#]{0,128}\z/)
 
+    @instant = at
     @digits = input.chars
     @attempts = Hash.new(0)
     @trace = []
@@ -25,11 +26,17 @@ class JrcContactCenter::IvrSimulator
     MAX_STEPS.times do
       node = @graph.nodes.fetch(current)
       @trace << { node_id: current, type: node.fetch('type') }
-      return result(node.fetch('type') == 'end' ? 'ended' : 'queue_destination', node['queue_id']) unless node.fetch('type') == 'menu'
+      return result(node.fetch('type') == 'end' ? 'ended' : 'queue_destination', node['queue_id']) if %w[end queue].include?(node.fetch('type'))
 
-      current = next_target(node)
+      current = node.fetch('type') == 'calendar' ? calendar_target(node) : next_target(node)
     end
     result('step_limit')
+  end
+
+  def calendar_target(node)
+    decision = JrcContactCenter::IvrCalendarDecision.new(node.fetch('calendar_reference')).call(instant: @instant)
+    @trace.last[:calendar] = decision
+    transition(decision.fetch('open') ? 'calendar_open' : 'calendar_closed', node.fetch(decision.fetch('open') ? 'on_open' : 'on_closed'))
   end
 
   def next_target(node)

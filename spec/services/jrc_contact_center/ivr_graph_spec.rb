@@ -18,6 +18,13 @@ RSpec.describe JrcContactCenter::IvrGraph do
 
   before { account.enable_features!('jrc_contact_center') }
 
+  it 'accepts additive local schema3 without interpreting it as a provider contract or requiring a calendar node' do
+    data = { 'schema_version' => 3, 'start' => 'done', 'nodes' => [{ 'id' => 'done', 'type' => 'end' }] }
+    graph = described_class.new(data, access: access, unit_id: unit.id)
+    expect(graph.data).to eq(data)
+    expect(JrcContactCenter::IvrSimulator.new(graph: graph).call).to include(local_only: true, provider_applied: false, outcome: 'ended')
+  end
+
   it 'accepts an explicit local schema and resolves only active references in the same authorized unit' do
     graph = described_class.new(definition, access: access, unit_id: unit.id)
     expect(graph.data).to eq(definition)
@@ -25,7 +32,7 @@ RSpec.describe JrcContactCenter::IvrGraph do
     expect(graph.nodes.keys).to contain_exactly('entry', 'route', 'end')
   end
 
-  [nil, false, [], {}, { 'schema_version' => 3, 'start' => 'end', 'nodes' => [{ 'id' => 'end', 'type' => 'end' }] }].each do |invalid|
+  [nil, false, [], {}, { 'schema_version' => 4, 'start' => 'end', 'nodes' => [{ 'id' => 'end', 'type' => 'end' }] }].each do |invalid|
     it "rejects malformed or unsupported JSON #{invalid.inspect} without accepting a provider contract" do
       expect { described_class.new(invalid, access: access, unit_id: unit.id) }.to raise_error(JrcContactCenter::OperationError, 'invalid_ivr_graph')
     end

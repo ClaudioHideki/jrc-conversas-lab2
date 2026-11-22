@@ -241,7 +241,7 @@ export async function verifyNativeQueueCalendarBindings(
     dialog.locator(`[data-calendar-queue="${target.queue_id}"]`)
   ).toContainText('O calendário do catálogo mudou');
   await expect(dialog).toContainText(
-    'Números e URAs ainda não possuem vínculo comprovado'
+    'Este painel consulta somente vínculos internos de filas autorizadas'
   );
   const afterLinks = await page.request.get(
     `${base}/queue_calendars?unit_id=${unit}&calendar_id=${identity}&binding_filter=linked`,

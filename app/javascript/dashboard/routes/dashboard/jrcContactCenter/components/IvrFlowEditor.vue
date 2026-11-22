@@ -4,6 +4,8 @@ import Icon from 'dashboard/components-next/icon/Icon.vue';
 import IvrReferencePicker from './IvrReferencePicker.vue';
 import IvrFlowOverview from './IvrFlowOverview.vue';
 import IvrAudioReferencePicker from './IvrAudioReferencePicker.vue';
+import IvrCalendarReferencePicker from './IvrCalendarReferencePicker.vue';
+import { setIvrCalendarReference } from '../helpers/ivrCalendar';
 import {
   addIvrNode,
   removeIvrNode,
@@ -17,7 +19,7 @@ const props = defineProps({
   modelValue: { type: Object, required: true },
   disabled: { type: Boolean, default: false },
 });
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'denied']);
 const { t } = useI18n();
 const change = operation => {
   const graph = JSON.parse(JSON.stringify(props.modelValue));
@@ -36,7 +38,12 @@ const nodeIcons = {
   menu: 'i-lucide-network',
   queue: 'i-lucide-layers',
   end: 'i-lucide-flag',
+  calendar: 'i-lucide-calendar-clock',
 };
+const branchLabel = field =>
+  field === 'on_open'
+    ? t('JRC_CONTACT_CENTER.IVR_CALENDAR.ON_OPEN')
+    : t('JRC_CONTACT_CENTER.IVR_CALENDAR.ON_CLOSED');
 const typeLabel = type => t(`JRC_CONTACT_CENTER.LOCAL_IVR.TYPES.${type}`);
 </script>
 
@@ -65,7 +72,7 @@ const typeLabel = type => t(`JRC_CONTACT_CENTER.LOCAL_IVR.TYPES.${type}`);
     </select>
     <div class="flex flex-wrap gap-2">
       <button
-        v-for="type in ['menu', 'queue', 'end']"
+        v-for="type in ['menu', 'queue', 'end', 'calendar']"
         :key="type"
         type="button"
         :disabled="modelValue.nodes.length >= IVR_NODES_LIMIT"
@@ -264,6 +271,49 @@ const typeLabel = type => t(`JRC_CONTACT_CENTER.LOCAL_IVR.TYPES.${type}`);
               :value="target.id"
             >
               {{ target.id }}
+            </option>
+          </select>
+        </div>
+      </template>
+      <template v-else-if="node.type === 'calendar'">
+        <IvrCalendarReferencePicker
+          :account-id="accountId"
+          :unit-id="unitId"
+          :model-value="node.calendar_reference"
+          :disabled="disabled"
+          @update:model-value="
+            value =>
+              change(graph => setIvrCalendarReference(graph, index, value))
+          "
+          @denied="emit('denied')"
+        />
+        <div
+          v-for="field in ['on_open', 'on_closed']"
+          :key="field"
+          class="min-w-0"
+        >
+          <label
+            :for="`ivr-${field}-${index}`"
+            class="mb-1 block text-sm text-n-slate-12"
+          >
+            {{ branchLabel(field) }}
+          </label>
+          <select
+            :id="`ivr-${field}-${index}`"
+            :value="node[field]"
+            :data-ivr-calendar-branch="field"
+            class="h-10 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 px-2 text-n-slate-12"
+            @change="set(index, field, $event.target.value)"
+          >
+            <option value="" disabled>
+              {{ t('JRC_CONTACT_CENTER.LOCAL_IVR.CHOOSE_NODE') }}
+            </option>
+            <option
+              v-for="destination in modelValue.nodes"
+              :key="destination.id"
+              :value="destination.id"
+            >
+              {{ destination.id }}
             </option>
           </select>
         </div>
