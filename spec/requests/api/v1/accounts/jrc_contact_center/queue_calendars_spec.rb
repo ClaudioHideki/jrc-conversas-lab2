@@ -255,4 +255,55 @@ RSpec.describe 'Call Center queue calendar drafts pin reviewed snapshots without
     expect(queue.reload.attributes).to eq(stored)
     expect(Audited.audit_class.where(auditable: queue).count).to eq(audits)
   end
+
+  it 'separates linked inventory from unbound candidates and counts matching rows before pagination' do
+    21.times do |index|
+      item = JrcContactCenter::Queue.create!(account: account, unit: unit, code: "SYNTHETIC-LINK-#{index}",
+                                            name: format('SYNTHETIC linked queue %02d', index))
+      input = body.merge('queue_id' => item.id.to_s, 'queue_revision' => JrcContactCenter::ConfigurationRevision.token(item))
+      patch "#{base}/#{item.id}", headers: headers, params: input, as: :json
+      expect(response).to have_http_status(:ok)
+    end
+    get base, headers: headers, params: { unit_id: unit.id, calendar_id: entry.fetch('id'), binding_filter: 'linked', page: 2 }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('meta')).to include('total' => 21, 'pages' => 2, 'page' => 2)
+    expect(response.parsed_body.fetch('items').sole.fetch('queue_name')).to eq('SYNTHETIC linked queue 20')
+    get base, headers: headers, params: { unit_id: unit.id, calendar_id: entry.fetch('id'), binding_filter: 'linked', q: 'queue 03' }
+    expect(response.parsed_body.fetch('meta')).to include('total' => 1, 'pages' => 1)
+    expect(response.parsed_body.fetch('items').sole.dig('binding', 'calendar_snapshot', 'id')).to eq(entry.fetch('id'))
+  end
+
+  it 'does not treat an authorized queue candidate or a different calendar pin as use of this calendar' do
+    queue
+    get base, headers: headers, params: { unit_id: unit.id, calendar_id: entry.fetch('id'), binding_filter: 'linked' }
+    expect(response.parsed_body.fetch('items')).to eq([])
+    catalog = JrcContactCenter::CalendarCatalog.new(context: { account: account, account_user: member, user: actor }, unit_id: unit.id)
+    other = entry.deep_merge('id' => SecureRandom.uuid, 'definition' => { 'name' => 'SYNTHETIC other inventory calendar' })
+    catalog.save!(other, expected_revision: catalog.call.fetch('revision'), create: true)
+    patch "#{base}/#{queue.id}", headers: headers, params: body.merge('calendar_id' => other.fetch('id')), as: :json
+    expect(response).to have_http_status(:ok)
+    get base, headers: headers, params: { unit_id: unit.id, calendar_id: entry.fetch('id'), binding_filter: 'linked' }
+    expect(response.parsed_body.fetch('meta')).to include('total' => 0, 'pages' => 0)
+    get base, headers: headers, params: { unit_id: unit.id, calendar_id: other.fetch('id'), binding_filter: 'linked' }
+    expect(response.parsed_body.fetch('meta')).to include('total' => 1, 'pages' => 1)
+    expect(response.parsed_body.fetch('items').sole.fetch('queue_id')).to eq(queue.id.to_s)
+    expect(JrcContactCenter::Command.where(account: account)).to be_empty
+  end
+
+  ['applied', ['linked'], { value: 'linked' }].each do |invalid|
+    it "rejects unsupported or non-scalar inventory filter #{invalid.inspect}" do
+      get base, headers: headers, params: { unit_id: unit.id, calendar_id: entry.fetch('id'), binding_filter: invalid }
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(queue.reload.settings).not_to have_key(JrcContactCenter::QueueCalendarState::KEY)
+    end
+  end
+
+  it 'does not let linked filtering bypass current unit coverage or configuration authority' do
+    get base, headers: headers, params: { unit_id: units.last.id, calendar_id: entry.fetch('id'), binding_filter: 'linked' }
+    expect(response).to have_http_status(:not_found)
+    member.custom_role.update!(permissions: %w[jrc_contact_center_view])
+    get base, headers: headers, params: { unit_id: unit.id, calendar_id: entry.fetch('id'), binding_filter: 'linked' }
+    expect(response).to have_http_status(:unauthorized)
+    expect(JrcContactCenter::Command.where(account: account)).to be_empty
+  end
 end

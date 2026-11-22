@@ -33,6 +33,7 @@ export const useQueueCalendarBindings = ({
   const rows = ref([]);
   const page = ref(1);
   const query = ref('');
+  const bindingFilter = ref('all');
   const meta = ref({ total: 0, pages: 0 });
   const loading = ref(false);
   const saving = ref(false);
@@ -124,6 +125,7 @@ export const useQueueCalendarBindings = ({
     const current = generation;
     loading.value = true;
     rows.value = [];
+    meta.value = { total: 0, pages: 0 };
     resetSelection();
     error.value = '';
     try {
@@ -131,7 +133,12 @@ export const useQueueCalendarBindings = ({
         accountId.value,
         unitId.value,
         calendarId.value,
-        { page: nextPage, per_page: 20, q: query.value }
+        {
+          page: nextPage,
+          per_page: 20,
+          q: query.value,
+          binding_filter: bindingFilter.value,
+        }
       );
       if (current !== generation) return;
       if (
@@ -140,6 +147,10 @@ export const useQueueCalendarBindings = ({
         !Array.isArray(data.items) ||
         data.items.length > 20 ||
         !data.items.every(validRow) ||
+        (bindingFilter.value === 'linked' &&
+          !data.items.every(
+            row => row.binding?.calendar_snapshot.id === calendarId.value
+          )) ||
         new Set(data.items.map(row => row.queue_id)).size !==
           data.items.length ||
         data.meta?.page !== nextPage ||
@@ -150,6 +161,11 @@ export const useQueueCalendarBindings = ({
         data.meta.pages < 0
       )
         throw new Error('Invalid native queue calendar list');
+      if (nextPage > 1 && nextPage > data.meta.pages) {
+        loading.value = false;
+        await load(1);
+        return;
+      }
       rows.value = data.items;
       meta.value = data.meta;
       page.value = nextPage;
@@ -159,11 +175,26 @@ export const useQueueCalendarBindings = ({
       if (current === generation) loading.value = false;
     }
   };
+  const switchFilter = async value => {
+    if (
+      !['all', 'linked'].includes(value) ||
+      value === bindingFilter.value ||
+      !active.value ||
+      !canManage.value ||
+      busy.value ||
+      payload.value ||
+      selectionLocked.value
+    )
+      return;
+    bindingFilter.value = value;
+    await load(1);
+  };
   const open = async () => {
     if (!canManage.value || active.value) return;
     clear();
     active.value = true;
     query.value = '';
+    bindingFilter.value = 'all';
     page.value = 1;
     dialog.value?.open();
     await load();
@@ -223,6 +254,10 @@ export const useQueueCalendarBindings = ({
     ) {
       forget();
       onDenied();
+      return;
+    }
+    if (bindingFilter.value === 'linked') {
+      load(page.value);
       return;
     }
     selected.value = row;
@@ -292,6 +327,8 @@ export const useQueueCalendarBindings = ({
     dialog,
     active,
     rows,
+    bindingFilter,
+    switchFilter,
     page,
     query,
     meta,

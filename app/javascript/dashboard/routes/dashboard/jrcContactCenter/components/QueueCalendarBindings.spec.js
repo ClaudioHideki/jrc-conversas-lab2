@@ -126,6 +126,40 @@ beforeEach(() => {
   }));
 });
 describe('actual queue calendar component with native fields and mocked transport, not CSS or persistence proof', () => {
+  it('separates actual internal links from candidate selection and preserves an explicit external-impact warning', async () => {
+    const wrapper = fixture();
+    await wrapper
+      .get(`[data-queue-calendar-bindings="${id}"]`)
+      .trigger('click');
+    await flushPromises();
+    expect(
+      wrapper
+        .get('[data-calendar-link-filter="all"]')
+        .attributes('aria-pressed')
+    ).toBe('true');
+    API.queueCalendars.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        unit_id: '10',
+        items: [],
+        meta: { page: 1, per_page: 20, total: 0, pages: 0 },
+      },
+    });
+    await wrapper.get('[data-calendar-link-filter="linked"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.text()).toContain('Nenhum vínculo interno de fila');
+    expect(wrapper.text()).toContain(
+      'Números e URAs ainda não possuem vínculo comprovado'
+    );
+    expect(
+      wrapper
+        .get('[data-calendar-link-filter="linked"]')
+        .attributes('aria-pressed')
+    ).toBe('true');
+    expect(wrapper.findAll('[data-calendar-queue]')).toHaveLength(0);
+    expect(API.saveQueueCalendar).not.toHaveBeenCalled();
+  });
+
   it('opens a scoped candidate inventory with a truthful provider-impact warning and no automatic association', async () => {
     const wrapper = fixture();
     await wrapper

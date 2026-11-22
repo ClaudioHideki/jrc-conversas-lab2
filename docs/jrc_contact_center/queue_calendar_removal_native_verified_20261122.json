@@ -1,0 +1,41 @@
+{
+  "producer": "7abf7b0c5e78457455e0c6d93e769ebb15ebe8dc",
+  "run": 44993287826,
+  "artifact": 14743889539,
+  "artifact_sha256": "5a08014fd6d1fdbc46fb72ce4f7cb312fb76a10be6ae7f14036eb599c7447f2a",
+  "verified_at": "2026-11-22T07:19:49.422761+00:00",
+  "native_examples": 2615,
+  "same_chrome_cases_preserved": 244,
+  "opened_screenshots": 16,
+  "prior_cases": {
+    "call-center-rspec.json": {
+      "preserved": 2365,
+      "new": 37
+    },
+    "call-center-pabx-rspec.json": {
+      "preserved": 125,
+      "new": 3
+    },
+    "call-center-corporate-rspec.json": {
+      "preserved": 85,
+      "new": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "preserved": 175,
+      "new": 0
+    },
+    "vue": {
+      "preserved": 1403,
+      "new": 39
+    }
+  },
+  "behavior": [
+    "Typed reviewed removal preserves unrelated queue settings and catalog",
+    "Rollback and durable historical receipt; old replay cannot remove a newer binding",
+    "Native scope and actor revalidation, actual lock-wait negatives",
+    "Desktop/mobile and light/dark removal flows with real synthetic PostgreSQL",
+    "Post-save selected binding caption now reflects the verified native receipt"
+  ],
+  "pabx_applied": false,
+  "whole_word_complete": false
+}

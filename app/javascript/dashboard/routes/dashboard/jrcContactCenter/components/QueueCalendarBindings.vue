@@ -64,6 +64,31 @@ const errors = computed(() => ({
       <p v-if="state.busy.value" role="status">
         {{ t('JRC_CONTACT_CENTER.CALENDAR.LOADING') }}
       </p>
+      <nav
+        class="flex flex-wrap gap-2"
+        :aria-label="t('JRC_CONTACT_CENTER.CALENDAR_BINDING.TABS')"
+        data-calendar-link-tabs
+      >
+        <Button
+          v-for="filter in ['linked', 'all']"
+          :key="filter"
+          type="button"
+          :variant="state.bindingFilter.value === filter ? 'solid' : 'faded'"
+          :aria-pressed="state.bindingFilter.value === filter"
+          :data-calendar-link-filter="filter"
+          :label="
+            filter === 'linked'
+              ? t('JRC_CONTACT_CENTER.CALENDAR_BINDING.LINKED_TAB')
+              : t('JRC_CONTACT_CENTER.CALENDAR_BINDING.CANDIDATES_TAB')
+          "
+          :disabled="
+            state.busy.value ||
+            state.selectionLocked.value ||
+            Boolean(state.payload.value)
+          "
+          @click="state.switchFilter(filter)"
+        />
+      </nav>
       <form class="grid min-w-0 gap-2" @submit.prevent="state.load(1)">
         <label class="grid gap-1">
           <span>{{ t('JRC_CONTACT_CENTER.CALENDAR_BINDING.SEARCH') }}</span>
@@ -91,7 +116,11 @@ const errors = computed(() => ({
         />
       </form>
       <p class="break-words">
-        {{ t('JRC_CONTACT_CENTER.CALENDAR_BINDING.RESOURCES') }}
+        {{
+          state.bindingFilter.value === 'linked'
+            ? t('JRC_CONTACT_CENTER.CALENDAR_BINDING.LINKED_RESOURCES')
+            : t('JRC_CONTACT_CENTER.CALENDAR_BINDING.RESOURCES')
+        }}
       </p>
       <p
         v-if="
@@ -99,7 +128,11 @@ const errors = computed(() => ({
         "
         role="status"
       >
-        {{ t('JRC_CONTACT_CENTER.CALENDAR_BINDING.EMPTY') }}
+        {{
+          state.bindingFilter.value === 'linked'
+            ? t('JRC_CONTACT_CENTER.CALENDAR_BINDING.LINKED_EMPTY')
+            : t('JRC_CONTACT_CENTER.CALENDAR_BINDING.EMPTY')
+        }}
       </p>
       <article
         v-for="row in state.rows.value"

@@ -112,6 +112,208 @@ beforeEach(() => {
 });
 
 describe('queue calendar reviewed lifecycle with mocked transport; not native or PABX proof', () => {
+  it('refreshes linked inventory from the server after reviewed removal instead of displaying an unbound row as usage', async () => {
+    const { state } = fixture();
+    const bound = accepted({ idempotency_key: calendarId });
+    await state.open();
+    API.queueCalendars.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        unit_id: '10',
+        items: [bound],
+        meta: { page: 1, per_page: 20, total: 1, pages: 1 },
+      },
+    });
+    await state.switchFilter('linked');
+    API.queueCalendar.mockResolvedValueOnce({ data: bound });
+    await state.choose('20');
+    API.queueCalendars.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        unit_id: '10',
+        items: [],
+        meta: { page: 1, per_page: 20, total: 0, pages: 0 },
+      },
+    });
+    state.acceptCurrent(queue());
+    await flushPromises();
+    expect(state.rows.value).toEqual([]);
+    expect(state.meta.value.total).toBe(0);
+    expect(API.queueCalendars).toHaveBeenCalledTimes(3);
+    expect(API.saveQueueCalendar).not.toHaveBeenCalled();
+  });
+
+  it('recovers server pagination at page one when removing the last linked row on the final page', async () => {
+    const { state } = fixture();
+    const bound = accepted({ idempotency_key: calendarId });
+    await state.open();
+    API.queueCalendars.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        unit_id: '10',
+        items: [bound],
+        meta: { page: 1, per_page: 20, total: 21, pages: 2 },
+      },
+    });
+    await state.switchFilter('linked');
+    API.queueCalendars.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        unit_id: '10',
+        items: [bound],
+        meta: { page: 2, per_page: 20, total: 21, pages: 2 },
+      },
+    });
+    await state.load(2);
+    API.queueCalendar.mockResolvedValueOnce({ data: bound });
+    await state.choose('20');
+    const remaining = Array.from({ length: 20 }, (_unused, index) => {
+      const item = accepted({ idempotency_key: calendarId });
+      item.queue_id = String(index + 21);
+      item.binding.scope_snapshot.queue_id = item.queue_id;
+      return item;
+    });
+    API.queueCalendars
+      .mockResolvedValueOnce({
+        data: {
+          account_id: '1',
+          unit_id: '10',
+          items: [],
+          meta: { page: 2, per_page: 20, total: 20, pages: 1 },
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          account_id: '1',
+          unit_id: '10',
+          items: remaining,
+          meta: { page: 1, per_page: 20, total: 20, pages: 1 },
+        },
+      });
+    state.acceptCurrent(queue());
+    await flushPromises();
+    expect(state.rows.value).toEqual(remaining);
+    expect(state.page.value).toBe(1);
+    expect(state.meta.value.total).toBe(20);
+    expect(
+      API.queueCalendars.mock.calls.slice(-2).map(call => call[3].page)
+    ).toEqual([2, 1]);
+    expect(API.saveQueueCalendar).not.toHaveBeenCalled();
+  });
+
+  it('switches to linked inventory at page one using server filters and preserves search without a write', async () => {
+    const { state } = fixture();
+    await state.open();
+    state.query.value = 'SYNTHETIC existing';
+    await state.load(2);
+    API.queueCalendars.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        unit_id: '10',
+        items: [],
+        meta: { page: 1, per_page: 20, total: 0, pages: 0 },
+      },
+    });
+    await state.switchFilter('linked');
+    expect(API.queueCalendars).toHaveBeenLastCalledWith('1', '10', calendarId, {
+      page: 1,
+      per_page: 20,
+      q: 'SYNTHETIC existing',
+      binding_filter: 'linked',
+    });
+    expect(state.page.value).toBe(1);
+    expect(state.rows.value).toEqual([]);
+    expect(state.meta.value.total).toBe(0);
+    expect(API.saveQueueCalendar).not.toHaveBeenCalled();
+  });
+
+  it.each(['unbound', 'other-calendar'])(
+    'rejects a %s candidate in linked-only results without hiding it client-side',
+    async kind => {
+      const item =
+        kind === 'unbound'
+          ? queue()
+          : accepted({ idempotency_key: calendarId });
+      if (item.binding)
+        item.binding.calendar_snapshot.id =
+          '22222222-2222-4222-8222-222222222222';
+      const { state } = fixture();
+      await state.open();
+      API.queueCalendars.mockResolvedValueOnce({
+        data: {
+          account_id: '1',
+          unit_id: '10',
+          items: [item],
+          meta: { page: 1, per_page: 20, total: 1, pages: 1 },
+        },
+      });
+      await state.switchFilter('linked');
+      expect(state.error.value).toBe('LOAD_ERROR');
+      expect(state.rows.value).toEqual([]);
+      expect(state.meta.value.total).not.toBe(1);
+    }
+  );
+
+  it('preserves a matching linked snapshot even when the source calendar has changed', async () => {
+    const { state } = fixture();
+    await state.open();
+    const item = {
+      ...accepted({ idempotency_key: calendarId }),
+      calendar_changed: true,
+    };
+    API.queueCalendars.mockResolvedValueOnce({
+      data: {
+        account_id: '1',
+        unit_id: '10',
+        items: [item],
+        meta: { page: 1, per_page: 20, total: 1, pages: 1 },
+      },
+    });
+    await state.switchFilter('linked');
+    expect(state.error.value).toBe('');
+    expect(state.rows.value).toEqual([item]);
+    expect(state.meta.value.total).toBe(1);
+  });
+
+  it('does not switch inventory during removal review or an uncertain binding write', async () => {
+    const { state } = fixture();
+    await state.open();
+    state.lockSelection(true);
+    await state.switchFilter('linked');
+    expect(state.bindingFilter.value).toBe('all');
+    state.lockSelection(false);
+    await state.choose('20');
+    state.reviewed.value = true;
+    API.saveQueueCalendar.mockRejectedValueOnce(
+      new Error('SYNTHETIC unknown delivery')
+    );
+    await state.save();
+    await state.switchFilter('linked');
+    expect(state.bindingFilter.value).toBe('all');
+    expect(API.queueCalendars).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears private linked data on profile switch and ignores the pending list response', async () => {
+    const { state, contextKey } = fixture();
+    await state.open();
+    const gate = deferred();
+    API.queueCalendars.mockImplementationOnce(() => gate.promise);
+    const loading = state.switchFilter('linked');
+    contextKey.value = 'SYNTHETIC revoked profile';
+    gate.resolve({
+      data: {
+        account_id: '1',
+        unit_id: '10',
+        items: [accepted({ idempotency_key: calendarId })],
+        meta: { page: 1, per_page: 20, total: 1, pages: 1 },
+      },
+    });
+    await loading;
+    expect(state.active.value).toBe(false);
+    expect(state.rows.value).toEqual([]);
+    expect(state.selected.value).toBeNull();
+  });
+
   it('replaces the pre-save selected binding with the verified native receipt for immediate review', async () => {
     const { state } = fixture();
     await state.open();
@@ -312,6 +514,7 @@ describe('queue calendar reviewed lifecycle with mocked transport; not native or
       page: 2,
       per_page: 20,
       q: 'SYNTHETIC filter',
+      binding_filter: 'all',
     });
     expect(state.page.value).toBe(2);
     expect(API.saveQueueCalendar).not.toHaveBeenCalled();

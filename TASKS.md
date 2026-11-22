@@ -878,3 +878,6 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 - [ ] Retirada e correção da revisão imediata:21fontes aplicadas no overlay,78Vue leves aprovados (39anteriores/39novos), regressão real de legenda reproduzida com2falhas e corrigida com28casos aprovados. Serviços/API/UI/auditoria e corridas nativas preparados, mas novoSHA exige Rails,lint,assets e244Chrome. Sem migrations, grants ou PABX; conjunto23não concluído. Ver docs/jrc_contact_center/queue_calendar_removal_prepared_20261122.json.
 
 - [ ] Retirada de calendário/fila: CI44991077806 preservada com 2401/2402 exemplos Rails; um erro de preparação Current.set e13 infrações Ruby corrigidos sem reduzir regras; nova execução nativa e Chrome pendentes.
+
+- [x] Retirada auditada do calendário/fila e legenda após salvar: prova nativa e16 imagens revisadas em7abf7b0c; sem aplicação no PABX nem aceite integral do Word.
+- [ ] Aba de vínculos internos, contagem/paginação no servidor e recarga após retirada: 87 testes leves aprovados; execução nativa e Chrome da nova candidata pendentes.

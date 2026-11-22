@@ -7069,5 +7069,75 @@
     "security_rules_removed": false,
     "migrations_changed": false,
     "whole_word_complete": false
+  },
+  "queue_calendar_removal_native_verified_20261122": {
+    "producer": "7abf7b0c5e78457455e0c6d93e769ebb15ebe8dc",
+    "run": 44993287826,
+    "artifact": 14743889539,
+    "artifact_sha256": "5a08014fd6d1fdbc46fb72ce4f7cb312fb76a10be6ae7f14036eb599c7447f2a",
+    "verified_at": "2026-11-22T07:19:49.422761+00:00",
+    "native_examples": 2615,
+    "same_chrome_cases_preserved": 244,
+    "opened_screenshots": 16,
+    "prior_cases": {
+      "call-center-rspec.json": {
+        "preserved": 2365,
+        "new": 37
+      },
+      "call-center-pabx-rspec.json": {
+        "preserved": 125,
+        "new": 3
+      },
+      "call-center-corporate-rspec.json": {
+        "preserved": 85,
+        "new": 0
+      },
+      "call-center-ivr-schema-reload-rspec.json": {
+        "preserved": 175,
+        "new": 0
+      },
+      "vue": {
+        "preserved": 1403,
+        "new": 39
+      }
+    },
+    "behavior": [
+      "Typed reviewed removal preserves unrelated queue settings and catalog",
+      "Rollback and durable historical receipt; old replay cannot remove a newer binding",
+      "Native scope and actor revalidation, actual lock-wait negatives",
+      "Desktop/mobile and light/dark removal flows with real synthetic PostgreSQL",
+      "Post-save selected binding caption now reflects the verified native receipt"
+    ],
+    "pabx_applied": false,
+    "whole_word_complete": false
+  },
+  "queue_calendar_link_inventory_prepared_20261122": {
+    "base": "7abf7b0c5e78457455e0c6d93e769ebb15ebe8dc",
+    "status": "implemented_not_natively_validated",
+    "word_section": 6,
+    "runtime_paths": [
+      "app/services/jrc_contact_center/queue_calendars.rb",
+      "app/controllers/api/v1/accounts/jrc_contact_center/queue_calendars_controller.rb",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useQueueCalendarBindings.js",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarBindings.vue",
+      "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useQueueCalendarBindings.spec.js",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarBindings.spec.js",
+      "spec/requests/api/v1/accounts/jrc_contact_center/queue_calendars_spec.rb",
+      "tests/playwright/tests/e2e/ui/call-center-queue-calendar-native.mjs",
+      "tests/playwright/tests/e2e/ui/call-center-queue-calendar-removal-native.mjs"
+    ],
+    "mocked_passed": 87,
+    "native_or_browser_substitution": false,
+    "native_examples_prepared": 6,
+    "chrome_titles": "same244; two existing helpers extended",
+    "behavior": [
+      "Native linked-only SQL predicate before count, search and pagination",
+      "Keep existing candidate selection and explicit local-only/PABX-unknown warnings",
+      "Fresh native list after reviewed removal, no invented client totals; bounded page1 recovery",
+      "No number or IVR usage inferred from a queue candidate"
+    ],
+    "native_and_chrome": "pending next CI",
+    "whole_word_complete": false
   }
 }

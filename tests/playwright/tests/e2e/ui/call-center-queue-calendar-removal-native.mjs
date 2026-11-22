@@ -58,6 +58,13 @@ export async function verifyNativeQueueCalendarRemoval(
   await screenshot('removal-conflict');
   await dialog.locator('[data-reload-calendar-removal]').click();
   await expect(dialog.locator('[data-review-calendar-removal]')).toBeVisible();
+  await dialog.locator('[data-calendar-queue-search]').fill('');
+  await dialog
+    .getByRole('button', { name: 'Aplicar pesquisa', exact: true })
+    .click();
+  await dialog.locator('[data-calendar-link-filter="linked"]').click();
+  await expect(dialog.locator('[data-calendar-queue]')).toHaveCount(1);
+  await dialog.locator(`[data-review-queue-calendar="${queueId}"]`).click();
   await dialog.locator('[data-review-calendar-removal]').click();
   await expect(
     dialog.locator('[data-confirm-calendar-removal]')
@@ -93,6 +100,10 @@ export async function verifyNativeQueueCalendarRemoval(
   await screenshot('removal-confirmed');
   await dialog.locator('[data-finish-calendar-removal]').click();
   await expect(dialog.locator('[data-review-calendar-removal]')).toHaveCount(0);
+  await expect(dialog.locator('[data-calendar-queue]')).toHaveCount(0);
+  await expect(dialog).toContainText('Nenhum vínculo interno de fila');
+  await dialog.locator('[data-calendar-link-tabs]').scrollIntoViewIfNeeded();
+  await screenshot('linked-after-removal');
   await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
   const replay = await page.request.delete(bindingUrl, {
     headers,
@@ -177,6 +188,7 @@ export async function verifyNativeQueueCalendarRemoval(
         calendar_id: calendarId,
         stale_status: 409,
         removal_status: 200,
+        linked_inventory_ui_empty_after_confirmed_removal: true,
         replay_status: 200,
         rebind_status: 200,
         late_replay_status: 200,

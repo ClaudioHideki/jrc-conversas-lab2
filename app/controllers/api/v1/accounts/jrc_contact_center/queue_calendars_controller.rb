@@ -5,7 +5,7 @@ class Api::V1::Accounts::JrcContactCenter::QueueCalendarsController < Api::V1::A
 
   def index
     validate_filters!
-    relation = search_records(service.targets(params[:calendar_id])).order(:name, :id)
+    relation = search_records(service.targets(params[:calendar_id], binding_filter: params.fetch(:binding_filter, 'all'))).order(:name, :id)
     data = list_payload(relation) { |queue| service.show(queue.id) }
     render json: data.merge(unit_id: params[:unit_id].to_s, local_only: true, pabx_confirmed: false, external_impact: 'unknown')
   end

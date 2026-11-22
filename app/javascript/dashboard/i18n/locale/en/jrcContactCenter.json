@@ -2802,6 +2802,11 @@
     "CALENDAR_BINDING": {
       "OPEN": "Vínculos locais de filas",
       "TITLE": "Vínculos e impactos do calendário",
+      "TABS": "Vínculos internos e seleção de filas",
+      "LINKED_TAB": "Vínculos internos",
+      "CANDIDATES_TAB": "Selecionar filas",
+      "LINKED_RESOURCES": "Somente filas autorizadas vinculadas internamente a este calendário. Números e URAs ainda não possuem vínculo comprovado; o impacto no PABX permanece desconhecido.",
+      "LINKED_EMPTY": "Nenhum vínculo interno de fila encontrado para este calendário nesta unidade.",
       "LOCAL_ONLY": "Somente configuração interna. O uso e o impacto no PABX são desconhecidos até a validação do fornecedor. Salvar não publica nem altera o roteamento.",
       "SEARCH": "Pesquisar fila da unidade",
       "RESOURCES": "Filas autorizadas da unidade. A presença nesta lista não significa que o PABX utiliza este calendário.",

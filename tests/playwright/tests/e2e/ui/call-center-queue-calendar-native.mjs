@@ -63,6 +63,18 @@ export async function verifyNativeQueueCalendarBindings(
   ).toBeVisible();
   await page.locator(`[data-queue-calendar-bindings="${identity}"]`).click();
   const dialog = page.getByRole('dialog');
+  await dialog.locator('[data-calendar-link-filter="linked"]').click();
+  await expect(dialog.locator('[data-calendar-queue]')).toHaveCount(0);
+  await expect(dialog).toContainText('Nenhum vínculo interno de fila');
+  const beforeLinks = await page.request.get(
+    `${base}/queue_calendars?unit_id=${unit}&calendar_id=${identity}&binding_filter=linked`,
+    { headers }
+  );
+  expect(beforeLinks.status()).toBe(200);
+  const linkedBefore = await beforeLinks.json();
+  expect(linkedBefore.meta.total).toBe(0);
+  expect(linkedBefore.items).toEqual([]);
+  await dialog.locator('[data-calendar-link-filter="all"]').click();
   await expect(dialog.locator('[data-calendar-queue]')).toHaveCount(20);
   await dialog.getByRole('button', { name: 'Próxima', exact: true }).click();
   await expect(dialog.locator('[data-calendar-queue]')).toHaveCount(1);
@@ -223,6 +235,47 @@ export async function verifyNativeQueueCalendarBindings(
     dialog.locator(`[data-calendar-queue="${target.queue_id}"]`)
   ).toContainText('O calendário do catálogo mudou');
   await screenshot('pinned-after-source-edit');
+  await dialog.locator('[data-calendar-link-filter="linked"]').click();
+  await expect(dialog.locator('[data-calendar-queue]')).toHaveCount(1);
+  await expect(
+    dialog.locator(`[data-calendar-queue="${target.queue_id}"]`)
+  ).toContainText('O calendário do catálogo mudou');
+  await expect(dialog).toContainText(
+    'Números e URAs ainda não possuem vínculo comprovado'
+  );
+  const afterLinks = await page.request.get(
+    `${base}/queue_calendars?unit_id=${unit}&calendar_id=${identity}&binding_filter=linked`,
+    { headers }
+  );
+  expect(afterLinks.status()).toBe(200);
+  const linkedAfter = await afterLinks.json();
+  expect(linkedAfter.meta).toMatchObject({ total: 1, pages: 1, page: 1 });
+  expect(linkedAfter.items.map(row => row.queue_id)).toEqual([
+    String(target.queue_id),
+  ]);
+  expect(linkedAfter.items[0].binding).toEqual(receipt.binding);
+  await dialog.locator('[data-calendar-link-tabs]').scrollIntoViewIfNeeded();
+  await screenshot('linked-inventory');
+  await dialog
+    .locator('[data-calendar-queue-search]')
+    .fill('SYNTHETIC no matching linked queue');
+  await dialog
+    .getByRole('button', { name: 'Aplicar pesquisa', exact: true })
+    .click();
+  await expect(dialog.locator('[data-calendar-queue]')).toHaveCount(0);
+  await expect(dialog).toContainText('Nenhum vínculo interno de fila');
+  await dialog
+    .locator('[data-calendar-queue-search]')
+    .fill('concurrently reviewed');
+  await dialog
+    .getByRole('button', { name: 'Aplicar pesquisa', exact: true })
+    .click();
+  await expect(dialog.locator('[data-calendar-queue]')).toHaveCount(1);
+  await dialog.locator('[data-calendar-queue-search]').fill('');
+  await dialog
+    .getByRole('button', { name: 'Aplicar pesquisa', exact: true })
+    .click();
+  await expect(dialog.locator('[data-calendar-queue]')).toHaveCount(1);
   await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
   const denials = [];
   for (const value of [target.denied_unit_id, foreignUnit]) {
@@ -253,6 +306,11 @@ export async function verifyNativeQueueCalendarBindings(
         replay_status: 200,
         source_edit_status: 200,
         initial_queue_total: 21,
+        linked_inventory: {
+          before: linkedBefore,
+          after: linkedAfter,
+          ui_search_counts: [0, 1, 1],
+        },
         ui_pages: [1, 2, 1],
         receipt,
         final,

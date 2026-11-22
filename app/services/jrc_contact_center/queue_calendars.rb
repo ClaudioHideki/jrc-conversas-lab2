@@ -12,10 +12,16 @@ class JrcContactCenter::QueueCalendars
     raise JrcContactCenter::OperationError, 'invalid_queue_calendar_binding'
   end
 
-  def targets(calendar_id)
+  def targets(calendar_id, binding_filter: 'all')
+    raise JrcContactCenter::OperationError, 'invalid_queue_calendar_binding' unless %w[all linked].include?(binding_filter)
+
     refresh!
     catalog.find!(calendar_id)
-    @access.queues.where(unit_id: @unit.id)
+    relation = @access.queues.where(unit_id: @unit.id)
+    return relation if binding_filter == 'all'
+
+    relation.where("jrc_contact_center_queues.settings -> ? -> 'calendar_snapshot' ->> 'id' = ?",
+                   JrcContactCenter::QueueCalendarState::KEY, calendar_id)
   end
 
   def show(queue_id)
