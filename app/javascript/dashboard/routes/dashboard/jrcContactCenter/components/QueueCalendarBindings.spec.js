@@ -12,6 +12,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
     queueCalendar: vi.fn(),
     unitCalendar: vi.fn(),
     saveQueueCalendar: vi.fn(),
+    removeQueueCalendar: vi.fn(),
   },
 }));
 const Button = {
@@ -155,6 +156,9 @@ describe('actual queue calendar component with native fields and mocked transpor
     await wrapper.get('[data-save-queue-calendar]').trigger('click');
     await flushPromises();
     expect(API.saveQueueCalendar).toHaveBeenCalledOnce();
+    expect(wrapper.get('[data-calendar-queue-review]').text()).not.toContain(
+      'Sem vínculo interno de calendário.'
+    );
     expect(wrapper.get('[data-queue-calendar-confirmed]').text()).toContain(
       'Aplicação no PABX não confirmada'
     );
@@ -207,5 +211,78 @@ describe('actual queue calendar component with native fields and mocked transpor
     });
     expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
     expect(API.saveQueueCalendar).not.toHaveBeenCalled();
+  });
+  it('locks the parent dialog and binding submit until separately reviewed removal and fresh current state are finished', async () => {
+    const bound = {
+      ...row(),
+      binding: {
+        format: 'jrc-cc-queue-calendar-v1',
+        id,
+        calendar_snapshot: current().item,
+        calendar_digest: 'd'.repeat(64),
+        request_digest: 'e'.repeat(64),
+        scope_snapshot: { account_id: '1', unit_id: '10', queue_id: '20' },
+      },
+    };
+    API.queueCalendar
+      .mockResolvedValueOnce({ data: bound })
+      .mockResolvedValue({ data: row() });
+    API.removeQueueCalendar.mockImplementation(
+      async (_account, _queue, body) => ({
+        data: {
+          contract_version: 1,
+          format: 'jrc-cc-queue-calendar-removal-v1',
+          account_id: '1',
+          unit_id: '10',
+          queue_id: '20',
+          idempotency_key: body.idempotency_key,
+          removed_binding_id: id,
+          removed_calendar_digest: 'd'.repeat(64),
+          queue_revision_after: 'c'.repeat(64),
+          audit_id: '30',
+          historical_receipt: true,
+          local_only: true,
+          pabx_confirmed: false,
+          external_impact: 'unknown',
+        },
+      })
+    );
+    const wrapper = fixture();
+    await wrapper
+      .get(`[data-queue-calendar-bindings="${id}"]`)
+      .trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-review-queue-calendar="20"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-confirm-queue-calendar]').setValue(true);
+    await wrapper.get('[data-review-calendar-removal]').trigger('click');
+    expect(wrapper.get('[data-confirm-queue-calendar]').element.checked).toBe(
+      false
+    );
+    expect(wrapper.get('[data-save-queue-calendar]').element.disabled).toBe(
+      true
+    );
+    expect(
+      wrapper
+        .get('[role="dialog"]')
+        .findAll('button')
+        .slice(-2)
+        .every(button => button.element.disabled)
+    ).toBe(true);
+    await wrapper.get('[data-confirm-calendar-removal]').setValue(true);
+    await wrapper.get('[data-submit-calendar-removal]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-calendar-removal-receipt]').text()).toContain(
+      'auditoria 30'
+    );
+    expect(API.saveQueueCalendar).not.toHaveBeenCalled();
+    await wrapper.get('[data-finish-calendar-removal]').trigger('click');
+    expect(wrapper.find('[data-review-calendar-removal]').exists()).toBe(false);
+    expect(wrapper.get('[data-save-queue-calendar]').element.disabled).toBe(
+      true
+    );
+    expect(wrapper.get('[data-confirm-queue-calendar]').element.checked).toBe(
+      false
+    );
   });
 });

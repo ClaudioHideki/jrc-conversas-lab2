@@ -817,4 +817,33 @@ RSpec.describe 'Call Center concurrent configuration boundaries', type: :request
       expect(JrcContactCenter::Command.where(account: account)).to be_empty
     end
   end
+
+  { 'profile' => 401, 'coverage' => 404, 'queue_revision' => 409 }.each do |source, expected_status|
+    it "does not remove a calendar binding after #{source} changes during the actual account mutex wait" do
+      member = account.account_users.find_by!(user: actor)
+      context = { account: account, account_user: member, user: actor }
+      catalog = JrcContactCenter::CalendarCatalog.new(context: context, unit_id: units.first.id)
+      entry = synthetic_calendar_entry
+      created = catalog.save!(entry, expected_revision: catalog.call.fetch('revision'), create: true)
+      association = { 'unit_id' => units.first.id.to_s, 'queue_id' => queue.id.to_s, 'calendar_id' => entry.fetch('id'),
+                      'calendar_revision' => created.fetch('revision'), 'queue_revision' => JrcContactCenter::ConfigurationRevision.token(queue),
+                      'reviewed' => true, 'idempotency_key' => SecureRandom.uuid }
+      bound = JrcContactCenter::QueueCalendars.new(context: context, unit_id: units.first.id).save!(association)
+      payload = { 'unit_id' => units.first.id.to_s, 'queue_id' => queue.id.to_s, 'binding_id' => bound.fetch('binding').fetch('id'),
+                  'expected_revision' => bound.fetch('queue_revision'), 'reviewed' => true, 'idempotency_key' => SecureRandom.uuid }
+      stored = queue.reload.settings.deep_dup
+      endpoint = "/api/v1/accounts/#{account.id}/jrc_contact_center/queue_calendars/#{queue.id}"
+      change = lambda do
+        case source
+        when 'profile' then member.custom_role.update!(permissions: ['jrc_contact_center_view'])
+        when 'coverage' then JrcCrm::UserBusinessUnit.where(account: account, user: actor).find_each { |row| row.update!(active: false) }
+        else queue.update!(name: 'SYNTHETIC concurrent reviewed queue change')
+        end
+      end
+      status = race_with_account_change(change, endpoint: endpoint, payload: payload, verb: :delete, defer_change: true)
+      expect(status).to eq(expected_status)
+      expect(queue.reload.settings).to eq(stored)
+      expect(JrcContactCenter::Command.where(account: account)).to be_empty
+    end
+  end
 end

@@ -1,0 +1,66 @@
+{
+  "base": "3856523748ad9de81cf22dab39648b09f0918a91",
+  "scope": "Explicit reviewed removal of only the native Queue.settings calendar association, preserved before/after native audit evidence, strict actor/scope receipt recovery, safe current-state read and correction of the immediate post-save review caption.",
+  "paths": {
+    "app/models/jrc_contact_center/queue.rb": "909a2447fc3e8b4e90f6203a5d7df270ee929f3eaafabd870cf7cfea74708c25",
+    "app/services/jrc_contact_center/configuration_audit.rb": "715659427ce52ddfbf706092492446f49373c6f0f84d2de482fc9577776536e5",
+    "app/services/jrc_contact_center/queue_calendar_removals.rb": "10964376beab58f2ee611d0012d61ce879e1b15e5e6b10e9aa2c27b55bc70f14",
+    "app/services/jrc_contact_center/queue_calendar_removal_audit.rb": "0d6be7bdd1d0f2df7c62f3f866525206ab701ff16402e4b849647cf3ab84cdf8",
+    "app/controllers/api/v1/accounts/jrc_contact_center/queue_calendars_controller.rb": "cf5bdff82f9794b560f3951fb082c06629c663665d1cb89f5fdd1dc4185a9659",
+    "config/routes/jrc_contact_center.rb": "8bdf34ca51bf94be1768b90618538fb714b34926697be972b03b6de9cb66bfba",
+    "spec/requests/api/v1/accounts/jrc_contact_center/queue_calendar_removals_spec.rb": "006516bdc25c260d792dbc5c4f720c5037c289ab1068e88edf39eda88daa4aed",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useQueueCalendarRemoval.js": "7d72325bf56404d25c56027c0cef4153619e3ad92f35f5cf6639850d3381e646",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useQueueCalendarRemoval.spec.js": "a09ffc1cf61d728a25c8f6e2ffc2097b63f66067a3cdb5935453660ed063e083",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarRemoval.vue": "eee88c308b3e58bfd23db2a7e25f01f9c4962a98c5dcc358e7a0dce0cb07fb5b",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarRemoval.spec.js": "fbb84936225cd15b42803fc71e436b0319a4e7347fe04cd822e6a296e662aeff",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useQueueCalendarBindings.js": "4b4be022723b5f00704fa0b3361369a187da748a356f2f3efacf577ef795a750",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarBindings.vue": "ff637c9074fe4b009d86bbe30570b4aa58cb03652f647c55d75bacdf31ce6cb7",
+    "app/javascript/dashboard/api/jrcContactCenter.js": "4a40b64a2a0e4f93c1b4b300240a7173fec74e5840089d758deda7995fb2cfae",
+    "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "0e98cbfcb2bd1476b4b0f888b885534c9b5654d6f999e53fa0259a4377687456",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/calendarApi.spec.js": "9ed72d57b378f5948e763d632a74ff747b8b47e466073011a1d2e7ed4ad56255",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarBindings.spec.js": "604b557a6aa905ea6d43e55181679e28d44017f66d61bfb27c96513a5c8745ba",
+    "spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb": "118af96e5124cf9aa5640fb4662f378b252a2456b6b0daa9b40daa2d1d67a94c",
+    "tests/playwright/tests/e2e/ui/call-center-queue-calendar-native.mjs": "8975e5d8e43e8ca33b5b433c469ca2b728568473bad5bdc0fc221b38bc4ad5ed",
+    "tests/playwright/tests/e2e/ui/call-center-queue-calendar-removal-native.mjs": "8345c2606de75ecb28585fb224b6d7c8ab49107990f46d169fd51dd82353fe6b",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useQueueCalendarBindings.spec.js": "34f16b1d4a79ba53215a80bbe81f7d024fbd59d9810f2a39c1309d877ebff1e4"
+  },
+  "changes": [
+    "Reuse configure capability, Account mutex and native account/company/unit/queue scopes; reload authority after waiting.",
+    "Require exact reviewed body, queue revision, binding identity and immutable request UUID; preserve unrelated queue settings.",
+    "Removal audit stores reviewed=true, exact request digest, current actor, original scope, removed pin and durable historical result in the same transaction.",
+    "Missing or failed mandatory audit/receipt rolls back the actual mutation; ambiguous or another actor receipts conflict.",
+    "Recover only the same request; replay after a new binding returns the historical receipt without removing or claiming the current association.",
+    "Generic model/API paths cannot silently clear the reserved key or inject the transient reviewed intent.",
+    "UI separates operation receipt from freshly read current state, blocks sibling writes, clears old binding consent, preserves unknown requests for manual replay and allows acknowledged abandonment.",
+    "After verified binding save, selected now uses that receipt so the review no longer shows the old unbound label."
+  ],
+  "local_mocked_tests": {
+    "passed": 78,
+    "prior_preserved": 39,
+    "new": 39,
+    "report_sha256": "2595ff73fd9aefd122b3d2eed1fbe3b96171d4bf8bc5c2af60870ae5d198a0ef",
+    "not_native_or_browser_acceptance": true
+  },
+  "actual_caption_regression": {
+    "before": "2failed/26passed in28 targeted cases",
+    "after": "28passed/0failed",
+    "reports": [
+      "queue-calendar-receipt-state-before-light-vitest-result.json",
+      "queue-calendar-receipt-state-after-light-vitest-result.json"
+    ]
+  },
+  "static_checks": "Twelve JS/Vue/MJS files formatted; changed application JS/Vue lint0messages, Node syntax checks passed. Ruby LF/150columns checked only; actual Ruby lint/parsing must run in CI.",
+  "native_and_new_chrome": "Prepared, not executed on this new candidate",
+  "native_test_areas": [
+    "Strict malformed/missing body types, stale revisions/IDs, no implicit removal",
+    "Preserve unrelated queue settings and original native audit snapshots",
+    "Exact replay, actor/coverage withdrawal and protection of a later binding",
+    "Forced audit failure, missing receipt and duplicate ambiguity",
+    "Real HTTP/PG waits after profile, coverage and queue revision change"
+  ],
+  "chrome_prepared": "Extend the same244cases: manual conflict/reload/removal, actual receipt/current-state UI, replay, rebind and old replay preservation, current-scope denials, twelve new viewport/theme captures. No external PABX writes.",
+  "migrations_sql_dependencies_grants_changed": false,
+  "provider_applied": false,
+  "external_impact": "unknown",
+  "full_word_complete": false
+}

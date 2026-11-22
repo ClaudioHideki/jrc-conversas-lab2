@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import CalendarDetailsFields from './CalendarDetailsFields.vue';
+import QueueCalendarRemoval from './QueueCalendarRemoval.vue';
 import { useQueueCalendarBindings } from '../composables/useQueueCalendarBindings';
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -43,7 +44,7 @@ const errors = computed(() => ({
     ref="popup"
     contained
     :title="t('JRC_CONTACT_CENTER.CALENDAR_BINDING.TITLE')"
-    :dismissible="!state.busy.value"
+    :dismissible="!state.busy.value && !state.selectionLocked.value"
     @close="state.clear"
   >
     <div
@@ -69,7 +70,11 @@ const errors = computed(() => ({
           <input
             v-model="state.query.value"
             maxlength="100"
-            :disabled="state.busy.value || Boolean(state.payload.value)"
+            :disabled="
+              state.busy.value ||
+              state.selectionLocked.value ||
+              Boolean(state.payload.value)
+            "
             data-calendar-queue-search
             class="w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
           />
@@ -78,7 +83,11 @@ const errors = computed(() => ({
           type="submit"
           variant="faded"
           :label="t('JRC_CONTACT_CENTER.CALENDAR_BINDING.APPLY')"
-          :disabled="state.busy.value || Boolean(state.payload.value)"
+          :disabled="
+            state.busy.value ||
+            state.selectionLocked.value ||
+            Boolean(state.payload.value)
+          "
         />
       </form>
       <p class="break-words">
@@ -114,7 +123,11 @@ const errors = computed(() => ({
           variant="faded"
           :label="t('JRC_CONTACT_CENTER.CALENDAR_BINDING.REVIEW')"
           :data-review-queue-calendar="row.queue_id"
-          :disabled="state.busy.value || Boolean(state.payload.value)"
+          :disabled="
+            state.busy.value ||
+            state.selectionLocked.value ||
+            Boolean(state.payload.value)
+          "
           @click="state.choose(row.queue_id)"
         />
       </article>
@@ -129,6 +142,7 @@ const errors = computed(() => ({
           :label="t('JRC_CONTACT_CENTER.CALENDAR.PREVIOUS')"
           :disabled="
             state.busy.value ||
+            state.selectionLocked.value ||
             Boolean(state.payload.value) ||
             state.page.value <= 1
           "
@@ -146,6 +160,7 @@ const errors = computed(() => ({
           :label="t('JRC_CONTACT_CENTER.CALENDAR.NEXT')"
           :disabled="
             state.busy.value ||
+            state.selectionLocked.value ||
             Boolean(state.payload.value) ||
             state.page.value >= state.meta.value.pages
           "
@@ -160,6 +175,18 @@ const errors = computed(() => ({
         <h4 class="break-words font-semibold">
           {{ state.selected.value.queue_name }}
         </h4>
+        <QueueCalendarRemoval
+          v-if="state.selected.value.binding || state.selectionLocked.value"
+          :account-id="accountId"
+          :unit-id="unitId"
+          :row="state.selected.value"
+          :context-key="contextKey"
+          :can-manage="canManage && !state.busy.value && !state.payload.value"
+          :validate-current="state.validRow"
+          @lock="state.lockSelection"
+          @current="state.acceptCurrent"
+          @denied="emit('denied')"
+        />
         <p>{{ t('JRC_CONTACT_CENTER.CALENDAR_BINDING.PROPOSED') }}</p>
         <CalendarDetailsFields
           :model-value="state.proposed.value.item.definition"
@@ -193,7 +220,7 @@ const errors = computed(() => ({
             }}
           </p>
         </details>
-        <p class="break-words">
+        <p class="break-words" data-current-queue-calendar>
           {{
             state.selected.value.binding
               ? state.selected.value.binding.calendar_snapshot.definition.name
@@ -209,7 +236,7 @@ const errors = computed(() => ({
           variant="faded"
           data-reload-queue-calendar
           :label="t('JRC_CONTACT_CENTER.CALENDAR.RELOAD')"
-          :disabled="state.busy.value"
+          :disabled="state.busy.value || state.selectionLocked.value"
           @click="state.choose(state.selected.value.queue_id)"
         />
         <label
@@ -220,7 +247,11 @@ const errors = computed(() => ({
             v-model="state.reviewed.value"
             type="checkbox"
             data-confirm-queue-calendar
-            :disabled="state.busy.value || state.error.value === 'CONFLICT'"
+            :disabled="
+              state.busy.value ||
+              state.selectionLocked.value ||
+              state.error.value === 'CONFLICT'
+            "
             class="mt-1 shrink-0"
           />
           <span>{{ t('JRC_CONTACT_CENTER.CALENDAR_BINDING.CONFIRM') }}</span>
@@ -243,7 +274,7 @@ const errors = computed(() => ({
           color="slate"
           class="w-full"
           :label="t('JRC_CONTACT_CENTER.CALENDAR.CLOSE')"
-          :disabled="state.busy.value"
+          :disabled="state.busy.value || state.selectionLocked.value"
           @click="popup.close()"
         />
         <Button

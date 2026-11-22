@@ -1,0 +1,158 @@
+{
+  "producer_sha": "3856523748ad9de81cf22dab39648b09f0918a91",
+  "run": 44986114275,
+  "job": 137096928509,
+  "artifact": 14741625938,
+  "artifact_sha256": "6630a02ad6a40f44e2af8342301567c8a009014ba53ef9507c5978ec856f6c30",
+  "native_distinct_examples": 2575,
+  "separate_schema_reload": 175,
+  "vue": 1403,
+  "chrome": 244,
+  "failures": 0,
+  "pending": 0,
+  "outside_errors": 0,
+  "flaky": 0,
+  "skipped": 0,
+  "new_ruby_offenses": 0,
+  "fresh_assets_and_bootstrap": true,
+  "screenshot_hashes_verified": 484,
+  "actually_opened_pngs": 12,
+  "prior_cases_preserved": {
+    "call-center-rspec.json": {
+      "preserved": 2340,
+      "new": 25
+    },
+    "call-center-pabx-rspec.json": {
+      "preserved": 122,
+      "new": 3
+    },
+    "call-center-corporate-rspec.json": {
+      "preserved": 85,
+      "new": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "preserved": 175,
+      "new": 0
+    },
+    "vue": {
+      "preserved": 1374,
+      "new": 29
+    }
+  },
+  "same_chrome_identities_preserved": 244,
+  "native_receipt_hashes": {
+    "desktop-dark-queue-calendar-native.json": "8c590e02856b047d5566040dcf78ca2f6bbb8ae9955c8a9af069b3403d252b76",
+    "desktop-light-queue-calendar-native.json": "374c304bb5a3e9cc5f8d2801d957e78812b48f5d5f08e1c859bded8fac97bd5f",
+    "mobile-dark-queue-calendar-native.json": "6a275320e3d200b61d1c37140ec6ce59e724aac8789fb3770982eb935a676f97",
+    "mobile-light-queue-calendar-native.json": "c8b76714c94c157ebb2f338b700df9de25a1cd39a7ba4d86b44f688f8efb01a0"
+  },
+  "browser_response_observations": {
+    "desktop-light-queue-calendar-observed.json": {
+      "sha256": "04c62ff15f24e390f3f35b193a0b641dcfc39983ceb1e021c40070ecafe517e5",
+      "record": {
+        "sha": "3856523748ad9de81cf22dab39648b09f0918a91",
+        "browser_origin": "http://127.0.0.1:5386",
+        "observed": [
+          {
+            "origin": "http://127.0.0.1:5386",
+            "path": "/api/v1/accounts/2073/jrc_contact_center/queue_calendars/562",
+            "method": "PATCH",
+            "status": 409
+          },
+          {
+            "origin": "http://127.0.0.1:5386",
+            "path": "/api/v1/accounts/2073/jrc_contact_center/queue_calendars/562",
+            "method": "PATCH",
+            "status": 200
+          }
+        ]
+      }
+    },
+    "desktop-dark-queue-calendar-observed.json": {
+      "sha256": "4b323cd46155003b287d7fd032df34334869cc20cf6f42891ee8ffa2df83e291",
+      "record": {
+        "sha": "3856523748ad9de81cf22dab39648b09f0918a91",
+        "browser_origin": "http://127.0.0.1:5386",
+        "observed": [
+          {
+            "origin": "http://127.0.0.1:5386",
+            "path": "/api/v1/accounts/2074/jrc_contact_center/queue_calendars/563",
+            "method": "PATCH",
+            "status": 409
+          },
+          {
+            "origin": "http://127.0.0.1:5386",
+            "path": "/api/v1/accounts/2074/jrc_contact_center/queue_calendars/563",
+            "method": "PATCH",
+            "status": 200
+          }
+        ]
+      }
+    },
+    "mobile-light-queue-calendar-observed.json": {
+      "sha256": "7c229bfd39643de885ad8ec8512d4a7c194a847ab8a21246fa16eab489291e82",
+      "record": {
+        "sha": "3856523748ad9de81cf22dab39648b09f0918a91",
+        "browser_origin": "http://127.0.0.1:5386",
+        "observed": [
+          {
+            "origin": "http://127.0.0.1:5386",
+            "path": "/api/v1/accounts/2075/jrc_contact_center/queue_calendars/564",
+            "method": "PATCH",
+            "status": 409
+          },
+          {
+            "origin": "http://127.0.0.1:5386",
+            "path": "/api/v1/accounts/2075/jrc_contact_center/queue_calendars/564",
+            "method": "PATCH",
+            "status": 200
+          }
+        ]
+      }
+    },
+    "mobile-dark-queue-calendar-observed.json": {
+      "sha256": "2dbac02eff20d886c31700d0f2bfad776f04889b527e4e849a4f1c98ce529c85",
+      "record": {
+        "sha": "3856523748ad9de81cf22dab39648b09f0918a91",
+        "browser_origin": "http://127.0.0.1:5386",
+        "observed": [
+          {
+            "origin": "http://127.0.0.1:5386",
+            "path": "/api/v1/accounts/2076/jrc_contact_center/queue_calendars/565",
+            "method": "PATCH",
+            "status": 409
+          },
+          {
+            "origin": "http://127.0.0.1:5386",
+            "path": "/api/v1/accounts/2076/jrc_contact_center/queue_calendars/565",
+            "method": "PATCH",
+            "status": 200
+          }
+        ]
+      }
+    }
+  },
+  "manual_review_findings": [
+    "All12exactPNG opened: conflict review, confirmed save and pinned snapshot after source edit, across1440/390light/dark.",
+    "Body scroll and fixed own footer fit both viewports. Mobile save caption is ellipsized and upper fields are outside some captured scroll positions.",
+    "Local-only and unknown-provider-impact warnings are visible; no PABX application is claimed.",
+    "The candidate row and confirmed native receipt reflect the saved association. The review section still uses its pre-save selected.binding and therefore shows Sem vínculo after success; this is a real presentation-state defect requiring correction.",
+    "Subsequent reopening accurately shows the preserved pin and source-change warning, so the stale immediate review does not indicate lost persistence.",
+    "Exact native observations capture PATCH409and200 from preview5386; same244titles and all previous native/Vue identities preserved.",
+    "No full Word acceptance; explicit retirement and number/IVR/complete external impact remain open."
+  ],
+  "blocking_presentation_finding": [
+    "queue_review_retains_pre_save_binding_after_verified_save"
+  ],
+  "native_scope": "Internal version-pinned Queue/calendar association, exact request replay, audit, source-edit preservation,20/1paging, current-scope denials and real lock-wait authority changes.",
+  "word_reference": "Section6 Horários, feriados e exceções. Figure6 itself is the audio library, not the calendar image.",
+  "status": "Native/list/ownership proof verified; immediate review still showed pre-save selected.binding after success in this producer. The next candidate corrects it and must be revalidated.",
+  "full_word_or_full_figure_complete": false,
+  "external_homologation": false,
+  "remaining": [
+    "Native proof of explicit removal and current-review correction in the next SHA",
+    "Typed number/IVR calendar relations and complete operational impact inventory",
+    "Full Word layout conformity; mobile save caption is ellipsized",
+    "Provider contract, publication, capabilities and ACK"
+  ]
+}

@@ -2818,6 +2818,22 @@
       "UNCERTAIN": "O resultado não pôde ser confirmado. Nenhuma próxima operação será iniciada. Revise e tente recuperar somente esta mesma solicitação, sem alterar seu conteúdo.",
       "APPLY": "Aplicar pesquisa",
       "CURRENT": "Comparar com o snapshot do vínculo interno atual"
+    },
+    "CALENDAR_REMOVAL": {
+      "OPEN": "Revisar retirada do vínculo",
+      "TITLE": "Retirar somente o vínculo interno desta fila",
+      "LOCAL_ONLY": "Esta ação preserva o calendário e o histórico. Ela não confirma nem desfaz configurações do PABX; o impacto externo permanece desconhecido.",
+      "REVIEW": "Revisei a fila, o snapshot e a unidade. Autorizo retirar somente este vínculo interno, preservando o calendário e a auditoria.",
+      "SUBMIT": "Retirar vínculo interno",
+      "CONFIRMED": "Retirada histórica confirmada pela auditoria {audit}. O estado atual é consultado separadamente e pode conter um vínculo mais recente.",
+      "CURRENT": "Estado interno consultado após a operação:",
+      "REFRESH": "Consultar estado atual novamente",
+      "RETURN": "Voltar à revisão de vínculos",
+      "CONFLICT": "A fila ou o vínculo mudou. Carregue o estado atual e faça uma nova revisão; esta solicitação não será repetida.",
+      "UNCERTAIN": "Não foi possível confirmar a retirada. Revise antes de recuperar somente esta mesma solicitação. Nenhum outro vínculo será retirado automaticamente.",
+      "CURRENT_UNKNOWN": "O recibo histórico foi confirmado, mas o estado atual não pôde ser verificado. Consulte novamente; a retirada não será reenviada.",
+      "ABANDON_WARNING": "Entendo que sair não desfaz uma operação que possa ter sido gravada. O resultado permanece não confirmado nesta tela e deverá ser conferido na auditoria.",
+      "ABANDON": "Sair sem declarar a retirada concluída"
     }
   }
 }

@@ -112,6 +112,20 @@ beforeEach(() => {
 });
 
 describe('queue calendar reviewed lifecycle with mocked transport; not native or PABX proof', () => {
+  it('replaces the pre-save selected binding with the verified native receipt for immediate review', async () => {
+    const { state } = fixture();
+    await state.open();
+    await state.choose('20');
+    expect(state.selected.value.binding).toBeNull();
+    state.reviewed.value = true;
+    await state.save();
+    expect(state.confirmed.value.binding).not.toBeNull();
+    expect(state.selected.value.binding).toEqual(state.confirmed.value.binding);
+    expect(state.selected.value.queue_revision).toBe(
+      state.confirmed.value.queue_revision
+    );
+  });
+
   it('does not load data before explicit opening or without current configuration permission', async () => {
     const { state, canManage } = fixture();
     expect(API.queueCalendars).not.toHaveBeenCalled();

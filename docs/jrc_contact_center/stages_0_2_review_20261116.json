@@ -7013,5 +7013,26 @@
     "chrome_timed_out": 4,
     "whole_word_complete": false,
     "status": "Exact browser response identity correction prepared; new SHA and actual244Chrome proof required; no application change."
+  },
+  "queue_calendar_bindings_native_proof_20261122": {
+    "report": "docs/jrc_contact_center/queue_calendar_bindings_native_proof_20261122.json",
+    "sha": "3856523748ad9de81cf22dab39648b09f0918a91",
+    "run": 44986114275,
+    "native": 2575,
+    "reload": 175,
+    "vue": 1403,
+    "chrome": 244,
+    "png_hashes_verified": 484,
+    "png_actually_opened": 12,
+    "visual_status": "with immediate review-caption finding; next candidate corrects it",
+    "full_word_complete": false
+  },
+  "queue_calendar_removal_prepared_20261122": {
+    "report": "docs/jrc_contact_center/queue_calendar_removal_prepared_20261122.json",
+    "base": "3856523748ad9de81cf22dab39648b09f0918a91",
+    "local_mocked": 78,
+    "prior_mocked_preserved": 39,
+    "native_new_candidate": "not_run",
+    "whole_word_complete": false
   }
 }

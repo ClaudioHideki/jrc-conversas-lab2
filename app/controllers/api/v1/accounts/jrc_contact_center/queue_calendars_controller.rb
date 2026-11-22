@@ -21,6 +21,13 @@ class Api::V1::Accounts::JrcContactCenter::QueueCalendarsController < Api::V1::A
     render json: base_payload.merge(result)
   end
 
+  def destroy
+    raise JrcContactCenter::OperationError, 'invalid_queue_calendar_removal' unless document['queue_id'] == params[:id]
+
+    result = JrcContactCenter::QueueCalendarRemovals.new(context: pundit_user, unit_id: document['unit_id']).call(document)
+    render json: base_payload.merge(result)
+  end
+
   private
 
   def validate_filters!

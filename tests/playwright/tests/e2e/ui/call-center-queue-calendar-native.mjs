@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
+import { verifyNativeQueueCalendarRemoval } from './call-center-queue-calendar-removal-native.mjs';
 import { isBrowserApiResponse } from './call-center-browser-api.mjs';
 
 // The caller owns this tab and its independent synthetic account. No intercepted or simulated API.
@@ -173,6 +174,9 @@ export async function verifyNativeQueueCalendarBindings(
   await expect(dialog.locator('[data-queue-calendar-confirmed]')).toContainText(
     'Aplicação no PABX não confirmada'
   );
+  await expect(dialog.locator('[data-current-queue-calendar]')).toHaveText(
+    entry.definition.name
+  );
   await screenshot('confirmed');
   await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
   const replay = await page.request.patch(bindingUrl, {
@@ -258,6 +262,13 @@ export async function verifyNativeQueueCalendarBindings(
       null,
       2
     )
+  );
+  await verifyNativeQueueCalendarRemoval(
+    page,
+    info,
+    target,
+    identity,
+    screenshot
   );
   await page.goto(originalUrl);
   await expect(

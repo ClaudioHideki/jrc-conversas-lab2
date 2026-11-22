@@ -21,7 +21,7 @@ class JrcContactCenter::ConfigurationAudit
         'attributes' => [before&.fetch('attributes'), after&.fetch('attributes')],
         'cc_scope' => { 'before' => before&.fetch('scope'), 'after' => after&.fetch('scope') },
         'omitted_fields' => omitted, 'schema_version' => 1
-      }.merge(manager_review(record))
+      }.merge(manager_review(record)).merge(JrcContactCenter::QueueCalendarRemovalAudit.fields(record, before: before))
     )
   end
 

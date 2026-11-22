@@ -4,6 +4,8 @@ class JrcContactCenter::Queue < JrcContactCenter::ApplicationRecord
   include JrcContactCenter::AdministrativeAuditable
   STATUSES = %w[active inactive].freeze
 
+  attr_accessor :cc_calendar_removal_review
+
   belongs_to :unit, class_name: 'JrcContactCenter::Unit'
   has_many :memberships, class_name: 'JrcContactCenter::QueueMembership', dependent: :restrict_with_error
 
@@ -22,12 +24,21 @@ class JrcContactCenter::Queue < JrcContactCenter::ApplicationRecord
     previous = new_record? ? {} : settings_in_database
     return unless settings.key?(key) || previous.key?(key)
 
+    if previous.key?(key) && !settings.key?(key)
+      JrcContactCenter::QueueCalendarRemovalAudit.validate_model_intent!(self, previous.fetch(key))
+      return
+    end
+
+    validate_persisted_calendar!(key)
+  rescue JrcContactCenter::OperationError, ActiveRecord::RecordNotFound
+    errors.add(:settings, 'invalid_queue_calendar_binding')
+  end
+
+  def validate_persisted_calendar!(key)
     valid = !new_record? && settings.key?(key)
     raise JrcContactCenter::OperationError, 'invalid_queue_calendar_binding' unless valid
 
     JrcContactCenter::QueueCalendarState.new(queue: self).call
-  rescue JrcContactCenter::OperationError, ActiveRecord::RecordNotFound
-    errors.add(:settings, 'invalid_queue_calendar_binding')
   end
 
   def active_window_order

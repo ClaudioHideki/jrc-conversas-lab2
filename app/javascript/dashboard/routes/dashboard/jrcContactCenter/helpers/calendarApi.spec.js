@@ -3,7 +3,7 @@ import API from 'dashboard/api/jrcContactCenter';
 
 const calendar = '11111111-1111-4111-8111-111111111111';
 const revision = 'a'.repeat(64);
-const axios = { get: vi.fn(), post: vi.fn(), patch: vi.fn() };
+const axios = { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() };
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubGlobal('axios', axios);
@@ -143,4 +143,33 @@ describe('calendar API wire identity, not server authorization or persistence pr
     );
     expect(axios.get).not.toHaveBeenCalled();
   });
+});
+
+describe('reviewed internal removal API wire, not server authority proof', () => {
+  it('sends the exact reviewed body through the typed DELETE contract without URL payload or generic queue writes', () => {
+    const body = Object.freeze({
+      unit_id: '10',
+      queue_id: '20',
+      binding_id: calendar,
+      expected_revision: revision,
+      idempotency_key: '22222222-2222-4222-8222-222222222222',
+      reviewed: true,
+    });
+    API.removeQueueCalendar('1', '20', body);
+    expect(axios.delete).toHaveBeenCalledWith(
+      '/api/v1/accounts/1/jrc_contact_center/queue_calendars/20',
+      { data: body }
+    );
+    expect(axios.delete.mock.calls[0][1].data).toBe(body);
+    expect(axios.patch).not.toHaveBeenCalled();
+  });
+  it.each(['0', '../other', '9223372036854775808'])(
+    'rejects malformed queue identity %s before requesting removal',
+    queueId => {
+      expect(() => API.removeQueueCalendar('1', queueId, {})).toThrow(
+        'Invalid local record identity'
+      );
+      expect(axios.delete).not.toHaveBeenCalled();
+    }
+  );
 });

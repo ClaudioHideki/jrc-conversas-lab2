@@ -63,6 +63,11 @@ export default {
       `${base(accountId)}/queue_calendars/${recordIdentity(queueId)}`,
       body
     ),
+  removeQueueCalendar: (accountId, queueId, body) =>
+    axios.delete(
+      `${base(accountId)}/queue_calendars/${recordIdentity(queueId)}`,
+      { data: body }
+    ),
   unitCalendars: (accountId, unitId, params = {}) =>
     axios.get(`${base(accountId)}/unit_calendars`, {
       params: { ...params, unit_id: recordIdentity(unitId) },

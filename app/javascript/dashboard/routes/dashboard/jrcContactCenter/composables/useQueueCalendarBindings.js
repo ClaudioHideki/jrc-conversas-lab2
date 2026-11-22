@@ -42,6 +42,7 @@ export const useQueueCalendarBindings = ({
   const reviewed = ref(false);
   const payload = ref(null);
   const confirmed = ref(null);
+  const selectionLocked = ref(false);
   let generation = 0;
   const busy = computed(() => loading.value || saving.value);
   const canSave = computed(
@@ -49,6 +50,7 @@ export const useQueueCalendarBindings = ({
       active.value &&
       canManage.value &&
       !busy.value &&
+      !selectionLocked.value &&
       selected.value &&
       proposed.value &&
       reviewed.value &&
@@ -56,6 +58,7 @@ export const useQueueCalendarBindings = ({
       error.value !== 'CONFLICT'
   );
   const resetSelection = () => {
+    selectionLocked.value = false;
     selected.value = null;
     proposed.value = null;
     reviewed.value = false;
@@ -109,7 +112,13 @@ export const useQueueCalendarBindings = ({
     );
   };
   const load = async (nextPage = 1) => {
-    if (!active.value || !canManage.value || busy.value || payload.value)
+    if (
+      !active.value ||
+      !canManage.value ||
+      busy.value ||
+      payload.value ||
+      selectionLocked.value
+    )
       return;
     generation += 1;
     const current = generation;
@@ -164,6 +173,7 @@ export const useQueueCalendarBindings = ({
       !active.value ||
       !canManage.value ||
       busy.value ||
+      selectionLocked.value ||
       (payload.value && error.value !== 'CONFLICT')
     )
       return;
@@ -200,6 +210,27 @@ export const useQueueCalendarBindings = ({
       if (current === generation) loading.value = false;
     }
   };
+  const lockSelection = value => {
+    selectionLocked.value = value === true;
+    reviewed.value = false;
+  };
+  const acceptCurrent = row => {
+    if (
+      !active.value ||
+      !canManage.value ||
+      row.queue_id !== selected.value?.queue_id ||
+      !validRow(row)
+    ) {
+      forget();
+      onDenied();
+      return;
+    }
+    selected.value = row;
+    rows.value = rows.value.map(item =>
+      item.queue_id === row.queue_id ? row : item
+    );
+    reviewed.value = false;
+  };
   const save = async () => {
     if (!canSave.value) return;
     const current = generation;
@@ -235,6 +266,7 @@ export const useQueueCalendarBindings = ({
       )
         throw new Error('Unverified queue calendar receipt');
       confirmed.value = data;
+      selected.value = data;
       rows.value = rows.value.map(row =>
         row.queue_id === data.queue_id ? data : row
       );
@@ -270,6 +302,10 @@ export const useQueueCalendarBindings = ({
     reviewed,
     payload,
     confirmed,
+    selectionLocked,
+    lockSelection,
+    validRow,
+    acceptCurrent,
     canSave,
     clear,
     open,

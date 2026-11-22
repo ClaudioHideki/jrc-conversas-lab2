@@ -872,3 +872,7 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 
 - [ ] Vínculo fila/calendário6fcaa384/CI44981141842:2575Rails,175reload,1403Vue,lint,assets e bootstrap aprovados;240/244Chrome, quatro timeouts no observador PATCH. UI real alcançou o estado exclusivo de conflito; a espera comparava Axios5386 com Rails5387. Corrigidos os dois observadores com identidade exata e diagnóstico limitado sem payloads;9testes portáteis passaram. Preservados244casos,90s/75min e todos os gates. Exigir novoSHA e provas completas; retirada permanece privada e separada. Ver docs/jrc_contact_center/queue_calendar_browser_response_observer_diagnosis_20261122.json.
+
+
+- [x] Vínculo interno produtor38565237/CI44986114275:2575Rails distintos,175reload,1403Vue,244Chrome,484hashesPNG;12imagens efetivamente vistas.409/200reais do navegador e todos os casos anteriores preservados. Revisão manual encontrou rótulo pré-gravação na seleção imediata, apesar da persistência/lista corretas; aceite visual integral retido. Ver docs/jrc_contact_center/queue_calendar_bindings_native_proof_20261122.json.
+- [ ] Retirada e correção da revisão imediata:21fontes aplicadas no overlay,78Vue leves aprovados (39anteriores/39novos), regressão real de legenda reproduzida com2falhas e corrigida com28casos aprovados. Serviços/API/UI/auditoria e corridas nativas preparados, mas novoSHA exige Rails,lint,assets e244Chrome. Sem migrations, grants ou PABX; conjunto23não concluído. Ver docs/jrc_contact_center/queue_calendar_removal_prepared_20261122.json.
