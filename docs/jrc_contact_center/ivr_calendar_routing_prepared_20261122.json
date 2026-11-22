@@ -30,7 +30,7 @@
   "chrome_new_case": 1,
   "chrome_projects": 4,
   "chrome_required_total": 248,
-  "native_parser_rspec_lint_and_chrome_status": "pending new immutable checkpoint CI",
+  "native_parser_rspec_lint_and_chrome_status": "first native run failed in two test preparations and22Ruby findings; next SHA revalidation required",
   "ruby_sql_migrations_changed": false,
   "new_dependencies": [],
   "real_grants_added": false,
@@ -50,6 +50,14 @@
       "reason": "Version3 is the explicitly implemented local calendar extension; version4 stays unsupported",
       "assertions_removed": false,
       "blanket_comparison_exemption": false
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ivr_graph_schema_validate_spec.rb",
+      "from": "[3, '2', 2.0, true]",
+      "to": "[4, '2', 2.0, true]",
+      "reason": "Version3 is the explicit implemented contract; unknown4 and all malformed identity checks remain",
+      "assertions_removed": false,
+      "positive_schema3_added": true
     }
   ],
   "pending": [
@@ -60,5 +68,12 @@
   ],
   "whole_word_complete": false,
   "external_homologation": false,
-  "publish_or_provider_commands": false
+  "publish_or_provider_commands": false,
+  "native_first_gate": {
+    "sha": "6dcfa8251216fc5c331f2a1c159fa8e26fb75d5b",
+    "run": 45005873585,
+    "report": "docs/jrc_contact_center/ivr_calendar_first_native_findings_20261122.json",
+    "accepted": false
+  },
+  "next_gate_new_native_scenarios": 42
 }

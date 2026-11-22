@@ -2,6 +2,8 @@
 
 # A model row alone does not attest a catalog reference: require its native creation audit as well.
 class JrcContactCenter::IvrCalendarHistory
+  ATTESTED_SOURCES = %w[native_unit_catalog native_ivr_version].freeze
+
   def initialize(draft:, account:, unit_id:)
     @draft = draft
     @account = account
@@ -49,7 +51,7 @@ class JrcContactCenter::IvrCalendarHistory
 
     expected = reference.slice('calendar_id', 'sha256', 'unit_revision').merge('unit_id' => @unit_id)
     proofs.any? do |proof|
-      proof.slice(*expected.keys) == expected && %w[native_unit_catalog native_ivr_version].include?(proof['source'])
+      proof.slice(*expected.keys) == expected && ATTESTED_SOURCES.include?(proof['source'])
     end
   end
 end

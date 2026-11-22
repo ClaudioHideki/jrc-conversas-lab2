@@ -64,11 +64,18 @@ RSpec.describe JrcContactCenter::IvrGraphSchema, '.validate!' do
     end
   end
 
-  [3, '2', 2.0, true].each do |invalid|
+  [4, '2', 2.0, true].each do |invalid|
     it "does not reinterpret unsupported or untyped schema identity #{invalid.inspect}" do
       definition['schema_version'] = invalid
       expect { described_class.validate!(definition) }.to raise_error(JrcContactCenter::OperationError, 'invalid_ivr_graph')
     end
+  end
+
+  it 'accepts the explicitly implemented schema3 while keeping the menu snapshot unchanged' do
+    upgraded = definition.merge('schema_version' => 3)
+    original = upgraded.deep_dup
+    expect { described_class.validate!(upgraded) }.not_to raise_error
+    expect(upgraded).to eq(original)
   end
 
   it 'does not accept a menu audio property on a terminal node' do

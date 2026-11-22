@@ -886,3 +886,5 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 - [x] Calendário/fila: inventário nativo confirmado em da6ee6e9/CI45000878232, com2621Rails distintos,175recargas,1451Vue,244Chrome e12imagens efetivamente revisadas nos4projetos. Sem publicação no PABX.
 - [ ] URA/calendário: versão3 preparada no editor existente,91Vue direcionados aprovados;41casos nativos e248Chrome aguardam a CI do novo checkpoint. Preservados contratos1/2, escopos, histórico e todas as12migrations. Inventário de URAs e homologação externa continuam pendentes.
+
+- [ ] URA/calendário: falha nativa6dcfa825 preservada (2445/2447Rails e175recargas); corrigidas as duas preparações de teste e22apontamentos Ruby sem remover asserções. O teste do trigger passa a exigir SQL real e a mensagem de imutabilidade; versão4 continua recusada, com positivo explícito da3. Concorrência/Vue/assets/248Chrome aguardam o novo SHA.

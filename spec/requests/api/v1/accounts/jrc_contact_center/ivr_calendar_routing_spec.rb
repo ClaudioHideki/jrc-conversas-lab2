@@ -54,7 +54,7 @@ RSpec.describe 'Internal URA calendar branches use native scopes and exact attes
 
   it 'offers the exact authorized catalog reference without changing configuration or claiming provider use' do
     get "/api/v1/accounts/#{account.id}/jrc_contact_center/unit_calendars/#{entry.fetch('id')}", headers: headers,
-                                                                                                            params: { unit_id: unit.id }
+                                                                                                 params: { unit_id: unit.id }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('ivr_reference')).to eq(reference)
     expect(response.parsed_body).to include('local_only' => true, 'pabx_confirmed' => false)
@@ -62,10 +62,10 @@ RSpec.describe 'Internal URA calendar branches use native scopes and exact attes
     expect(JrcContactCenter::Command.where(account: account)).to be_empty
   end
 
-  { '2026-11-23T12:59:59Z' => ['closed', 'exception'], '2026-11-23T13:00:00Z' => ['open', 'exception'],
-    '2026-11-23T13:59:59Z' => ['open', 'exception'], '2026-11-23T14:00:00Z' => ['closed', 'exception'],
-    '2026-11-23T10:00:00-03:00' => ['open', 'exception'], '2026-11-24T16:00:00Z' => ['closed', 'exception'],
-    '2026-11-25T12:00:00Z' => ['open', 'weekly'], '2026-11-26T12:00:00Z' => ['closed', 'holiday'] }.each do |instant, expected|
+  { '2026-11-23T12:59:59Z' => %w[closed exception], '2026-11-23T13:00:00Z' => %w[open exception],
+    '2026-11-23T13:59:59Z' => %w[open exception], '2026-11-23T14:00:00Z' => %w[closed exception],
+    '2026-11-23T10:00:00-03:00' => %w[open exception], '2026-11-24T16:00:00Z' => %w[closed exception],
+    '2026-11-25T12:00:00Z' => %w[open weekly], '2026-11-26T12:00:00Z' => %w[closed holiday] }.each do |instant, expected|
     it "uses native date precedence and half-open boundaries at #{instant}" do
       post "#{base}/preview", headers: headers, params: { ivr_preview: {
         unit_id: unit.id.to_s, definition: definition, dtmf: '', at: instant
@@ -274,11 +274,11 @@ RSpec.describe 'Internal URA calendar branches use native scopes and exact attes
     other_member.update!(custom_role: create(:custom_role, account: other, permissions: %w[jrc_contact_center_view jrc_contact_center_configure]))
     other_unit = JrcContactCenter::Unit.create!(account: other, code: 'SYNTHETIC', name: 'SYNTHETIC foreign unit', kind: 'sac')
     input = JrcContactCenter::IvrDraftInput.new(name: 'SYNTHETIC foreign draft', status: 'draft', expected_revision: 0,
-                                              request_id: SecureRandom.uuid, definition: {
+                                                request_id: SecureRandom.uuid, definition: {
                                                 'schema_version' => 1, 'start' => 'done', 'nodes' => [{ 'id' => 'done', 'type' => 'end' }]
                                               })
     foreign = JrcContactCenter::IvrDraftWrite.new(context: { account: other, account_user: other_member, user: other_actor })
-                                           .call(input: input, unit_id: other_unit.id).fetch(:draft)
+                                             .call(input: input, unit_id: other_unit.id).fetch(:draft)
     post "#{base}/preview", headers: headers, params: { ivr_preview: {
       unit_id: unit.id.to_s, definition: definition, dtmf: '', at: '2026-11-23T13:00:00Z', origin_draft_id: foreign.id.to_s
     } }, as: :json
@@ -308,9 +308,11 @@ RSpec.describe 'Internal URA calendar branches use native scopes and exact attes
     expect(response).to have_http_status(:created)
     version = JrcContactCenter::IvrDraft.find_by!(account: account, id: response.parsed_body.dig('item', 'id')).latest_version
     original = version.attributes.deep_dup
+    connection = ActiveRecord::Base.connection
+    sql = "UPDATE jrc_contact_center_ivr_draft_versions SET name = 'SYNTHETIC denied rewrite' WHERE id = #{connection.quote(version.id)}"
     expect do
-      JrcContactCenter::IvrDraftVersion.transaction(requires_new: true) { version.update_columns(definition: { 'schema_version' => 1 }) }
-    end.to raise_error(ActiveRecord::StatementInvalid)
+      JrcContactCenter::IvrDraftVersion.transaction(requires_new: true) { connection.execute(sql) }
+    end.to raise_error(ActiveRecord::StatementInvalid, /IVR revisions are immutable/)
     expect(version.reload.attributes).to eq(original)
     expect(JrcContactCenter::Command.where(account: account)).to be_empty
   end
@@ -322,7 +324,7 @@ RSpec.describe 'Internal URA calendar branches use native scopes and exact attes
     version = draft.latest_version
     audit = Audited.audit_class.where(auditable: version, action: 'create').sole
     Audited.audit_class.create!(auditable: version, associated: account, user: actor, action: 'create',
-                               comment: JrcContactCenter::ConfigurationAudit::COMMENT, audited_changes: audit.audited_changes.deep_dup)
+                                comment: JrcContactCenter::ConfigurationAudit::COMMENT, audited_changes: audit.audited_changes.deep_dup)
     post "#{base}/#{draft.id}/simulate", headers: headers, params: { ivr_simulation: {
       revision: 1, dtmf: '', at: '2026-11-23T13:00:00Z'
     } }, as: :json

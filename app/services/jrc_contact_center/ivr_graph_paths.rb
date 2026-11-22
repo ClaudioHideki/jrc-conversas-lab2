@@ -2,6 +2,8 @@
 
 # Proves that every configured node has a path to a logical terminal.
 class JrcContactCenter::IvrGraphPaths
+  TERMINAL_TYPES = %w[end queue].freeze
+
   def self.targets(node)
     return node.values_at('on_open', 'on_closed') if node.fetch('type') == 'calendar'
     return [] unless node.fetch('type') == 'menu'
@@ -11,7 +13,7 @@ class JrcContactCenter::IvrGraphPaths
 
   def self.validate!(nodes)
     reverse = reverse_edges(nodes)
-    terminal = nodes.values.select { |node| %w[end queue].include?(node.fetch('type')) }.pluck('id')
+    terminal = nodes.values.select { |node| TERMINAL_TYPES.include?(node.fetch('type')) }.pluck('id')
     reached = terminal.to_set
     terminal.each { |id| reverse[id].each { |parent| terminal << parent if reached.add?(parent) } }
     raise JrcContactCenter::OperationError, 'ivr_closed_loop' unless reached.length == nodes.length

@@ -133,12 +133,11 @@ RSpec.describe 'Local IVR real HTTP concurrency', type: :request do
       catalog.save!(entry, expected_revision: catalog.call.fetch('revision'), create: true)
       reference = JrcContactCenter::IvrCalendarReferences.reference(entry, revision: catalog.call.fetch('revision'))
       state[:calendar_entry] = entry
-      state[:calendar_payload] = values.merge(expected_revision: 1, request_id: SecureRandom.uuid, definition: {
-        'schema_version' => 3, 'start' => 'hours', 'nodes' => [
-          { 'id' => 'hours', 'type' => 'calendar', 'calendar_reference' => reference, 'on_open' => 'end', 'on_closed' => 'end' },
-          { 'id' => 'end', 'type' => 'end' }
-        ]
-      })
+      graph = { 'schema_version' => 3, 'start' => 'hours', 'nodes' => [
+        { 'id' => 'hours', 'type' => 'calendar', 'calendar_reference' => reference, 'on_open' => 'end', 'on_closed' => 'end' },
+        { 'id' => 'end', 'type' => 'end' }
+      ] }
+      state[:calendar_payload] = values.merge(expected_revision: 1, request_id: SecureRandom.uuid, definition: graph)
     end
 
     it 'refuses an uncommitted new pin whose source changed before its real request acquired the account lock' do

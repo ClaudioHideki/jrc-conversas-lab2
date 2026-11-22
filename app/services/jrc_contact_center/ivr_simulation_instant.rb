@@ -20,7 +20,7 @@ class JrcContactCenter::IvrSimulationInstant
     raise ArgumentError unless value.fetch('local').is_a?(String) && LOCAL.match?(value.fetch('local'))
     raise ArgumentError unless value.fetch('timezone').is_a?(String) && value.fetch('timezone').length.between?(1, 100)
 
-    date = DateTime.iso8601(value.fetch('local') + 'Z')
+    date = DateTime.iso8601("#{value.fetch('local')}Z")
     clock = Time.utc(date.year, date.month, date.day, date.hour, date.minute, date.second)
     TZInfo::Timezone.get(value.fetch('timezone')).local_to_utc(clock, nil)
   end

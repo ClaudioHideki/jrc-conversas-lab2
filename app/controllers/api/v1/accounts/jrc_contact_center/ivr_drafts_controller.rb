@@ -51,7 +51,7 @@ class Api::V1::Accounts::JrcContactCenter::IvrDraftsController < Api::V1::Accoun
     source = params.require(:ivr_preview)
     request = source.permit(:unit_id, :dtmf, definition: {})
     graph = JrcContactCenter::IvrGraph.new(request[:definition].to_h, access: draft_scope.access, unit_id: request[:unit_id],
-                                         origin_draft_id: source[:origin_draft_id])
+                                                                      origin_draft_id: source[:origin_draft_id])
     result = JrcContactCenter::IvrSimulator.new(graph: graph).call(input: request[:dtmf], at: simulation_instant(source))
     render json: base_payload.merge(simulation: result)
   end

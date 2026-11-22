@@ -7185,5 +7185,16 @@
     "chrome_required": 248,
     "native_and_visual_acceptance": false,
     "full_word_complete": false
+  },
+  "ivr_calendar_first_native_findings_20261122": {
+    "sha": "6dcfa8251216fc5c331f2a1c159fa8e26fb75d5b",
+    "run": 45005873585,
+    "report": "docs/jrc_contact_center/ivr_calendar_first_native_findings_20261122.json",
+    "core_passed": 2445,
+    "core_failed": 2,
+    "schema_reload_passed_separate": 175,
+    "ruby_findings": 22,
+    "next_gate_pending": true,
+    "whole_word_complete": false
   }
 }

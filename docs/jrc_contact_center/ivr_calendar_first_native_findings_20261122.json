@@ -1,0 +1,64 @@
+{
+  "sha": "6dcfa8251216fc5c331f2a1c159fa8e26fb75d5b",
+  "run": 45005873585,
+  "artifact": 14748631917,
+  "artifact_sha256": "7ab5d4a0a75751b61426b467db81d59f1b1928820ed15ca6955a51f6b9ef8413",
+  "verification_status": "failed_workflow_partial_evidence",
+  "core_examples_executed": 2447,
+  "core_passed": 2445,
+  "core_failed": 2,
+  "core_pending": 0,
+  "outside_errors": 0,
+  "schema_reload_passed_separate": 175,
+  "not_run_on_this_sha": [
+    "Concurrency",
+    "Affected Approvals/Backoffice",
+    "Vue",
+    "Frontend lint",
+    "Assets",
+    "Chrome"
+  ],
+  "confirmed_causes": [
+    "An additional native schema-validator spec still used supported version3 as its unknown-version sentinel",
+    "The immutable-model guard stopped update_columns before the test could reach the PostgreSQL trigger"
+  ],
+  "correction": {
+    "parent": "6dcfa8251216fc5c331f2a1c159fa8e26fb75d5b",
+    "run": 45005873585,
+    "artifact_sha256": "7ab5d4a0a75751b61426b467db81d59f1b1928820ed15ca6955a51f6b9ef8413",
+    "paths": [
+      "app/controllers/api/v1/accounts/jrc_contact_center/ivr_drafts_controller.rb",
+      "app/services/jrc_contact_center/ivr_calendar_history.rb",
+      "app/services/jrc_contact_center/ivr_graph_paths.rb",
+      "app/services/jrc_contact_center/ivr_simulation_instant.rb",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ivr_calendar_routing_spec.rb",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb",
+      "spec/services/jrc_contact_center/ivr_graph_schema_validate_spec.rb"
+    ],
+    "native_failures_addressed": 2,
+    "ruby_findings_addressed": 22,
+    "native_revalidation": "pending new checkpoint CI",
+    "scope_and_permissions_changed": false,
+    "migrations_changed": false,
+    "assertions_removed": false,
+    "provider_calls": false,
+    "schema_unknown_sentinel": {
+      "path": "spec/services/jrc_contact_center/ivr_graph_schema_validate_spec.rb",
+      "from": 3,
+      "to": 4,
+      "positive_schema3_added": true
+    },
+    "database_trigger_test": "Real SQL with quoted native id inside a rollback savepoint; require exact immutable-trigger message",
+    "temporal_refactor": "Equivalent string interpolation removes one unnecessary method call; strict conversion and all guards retained"
+  },
+  "additional_positive_native_case": "Validate supported schema3 without mutating the original menu snapshot",
+  "unknown_version4_rejection_retained": true,
+  "same_database_trigger_assertion_strengthened": true,
+  "new_ruby_findings": 22,
+  "ruby_revalidation": "pending next immutable checkpoint",
+  "gates_disabled": false,
+  "assertions_removed": false,
+  "migrations_changed": false,
+  "whole_word_complete": false,
+  "external_homologation": false
+}
