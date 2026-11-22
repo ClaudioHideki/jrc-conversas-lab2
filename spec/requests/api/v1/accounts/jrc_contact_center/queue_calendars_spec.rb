@@ -259,7 +259,7 @@ RSpec.describe 'Call Center queue calendar drafts pin reviewed snapshots without
   it 'separates linked inventory from unbound candidates and counts matching rows before pagination' do
     21.times do |index|
       item = JrcContactCenter::Queue.create!(account: account, unit: unit, code: "SYNTHETIC-LINK-#{index}",
-                                            name: format('SYNTHETIC linked queue %02d', index))
+                                             name: format('SYNTHETIC linked queue %02d', index))
       input = body.merge('queue_id' => item.id.to_s, 'queue_revision' => JrcContactCenter::ConfigurationRevision.token(item))
       patch "#{base}/#{item.id}", headers: headers, params: input, as: :json
       expect(response).to have_http_status(:ok)

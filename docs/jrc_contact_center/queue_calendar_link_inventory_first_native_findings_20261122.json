@@ -1,0 +1,21 @@
+{
+  "producer": "ff2fc6cb80ed43c5bfe0a19e46d5581cd971af4f",
+  "run": 44997899087,
+  "artifact": 14744644787,
+  "artifact_sha256": "337ebb046ce3df9ba27f85bee1bead088bf121be1ab2f6c98e9cbdefd9bb1b92",
+  "native_distinct_passed": 2621,
+  "schema_reload_passed": 175,
+  "vue_passed": 1451,
+  "new_ruby_findings": 2,
+  "root_cause": "One continuation argument starts one column before the first argument in a new native inventory test",
+  "correction": {
+    "path": "spec/requests/api/v1/accounts/jrc_contact_center/queue_calendars_spec.rb",
+    "old_line": 262,
+    "only_leading_whitespace": true
+  },
+  "runtime_changed": false,
+  "migrations_changed": false,
+  "chrome": "not run in this failed workflow",
+  "acceptance_of_corrected_sha": "pending new CI",
+  "whole_word_complete": false
+}
