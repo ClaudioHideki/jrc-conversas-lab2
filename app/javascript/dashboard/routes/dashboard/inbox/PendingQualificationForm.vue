@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AcwFormFields from '../jrcContactCenter/components/AcwFormFields.vue';
+import EndingReasonConfirmation from './EndingReasonConfirmation.vue';
 
 const props = defineProps({
   disabled: { type: Boolean, default: false },
@@ -11,6 +12,11 @@ const props = defineProps({
   reasonOptions: { type: Array, default: () => [] },
   reasonRequired: { type: Boolean, default: false },
   reasonRevision: { type: Number, default: null },
+  reasonConfirmation: { type: Object, default: null },
+  confirmationScope: { type: String, default: '' },
+  canConfirmReason: { type: Boolean, default: false },
+  confirmationBusy: { type: Boolean, default: false },
+  confirmationError: { type: Boolean, default: false },
   formsPresent: { type: Boolean, default: false },
   formReasonCodes: { type: Array, default: () => [] },
   selectedForm: { type: Object, default: null },
@@ -24,6 +30,7 @@ const emit = defineEmits([
   'complete',
   'updateFormValues',
   'reloadForm',
+  'confirmReason',
 ]);
 const reason = defineModel('reason', { type: String, default: '' });
 const result = defineModel('result', { type: String, default: '' });
@@ -98,7 +105,7 @@ const reasons = computed(() => {
         <select
           v-model="reason"
           data-qualification-field="reason"
-          :disabled="disabled"
+          :disabled="disabled || reasonConfirmation?.state === 'confirmed'"
           class="mt-1 h-9 w-full rounded-md border border-n-weak bg-n-solid-1 px-2 text-xs"
         >
           <option value="">
@@ -146,6 +153,20 @@ const reasons = computed(() => {
         </select>
       </label>
     </div>
+    <EndingReasonConfirmation
+      v-if="reasonRevision || reasonConfirmation"
+      :scope="confirmationScope"
+      :reason="reason"
+      :label="
+        reasonOptions.find(option => option.code === reason)?.name || reason
+      "
+      :confirmation="reasonConfirmation"
+      :can-confirm="canConfirmReason"
+      :disabled="disabled || conflict || formLoading || formError"
+      :busy="confirmationBusy"
+      :error="confirmationError"
+      @confirm="emit('confirmReason')"
+    />
     <section
       v-if="formsPresent"
       class="mt-4 min-w-0 space-y-3 rounded-xl border border-n-weak bg-n-solid-1 p-3"

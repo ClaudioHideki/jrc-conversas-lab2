@@ -38,10 +38,12 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
       record = scope.where(account_user: Current.account_user).find(params[:id])
       authorize_qualification_origin!(record)
       reason = qualification_form_reason
+      JrcContactCenter::EndingConfirmationState.validate_reason!(record, reason)
       response.headers['Cache-Control'] = 'no-store'
       item = { id: record.id, account_id: record.account_id, account_user_id: record.account_user_id, reason_code: reason }
       item.merge!(JrcContactCenter::QualificationForms.new(record).private_payload(reason: reason))
       item.merge!(JrcContactCenter::EndingReasonPolicy.new(record).private_payload)
+      item.merge!(JrcContactCenter::EndingConfirmationState.private_payload(record))
       render json: base_payload.merge(item: item)
     end
   end
@@ -55,7 +57,31 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
     end
   end
 
+  def confirm_reason
+    with_current_operating_authority do
+      record = scope.where(account_user: Current.account_user).find(JrcServiceDesk::Input.id(params[:id]))
+      authorize_qualification_origin!(record)
+      service = JrcContactCenter::ConfirmEndingReason.new(account: Current.account, member: Current.account_user)
+      record = service.call(record, **confirmation_options)
+      render json: base_payload.merge(item: qualification_payload(record), agent: operator_snapshot)
+    end
+  end
+
   private
+
+  def confirmation_options
+    allowed = %w[qualification expected_draft_revision idempotency_key]
+    input = request.request_parameters
+    valid = request.media_type == 'application/json' && input.is_a?(Hash) && (input.keys - allowed).empty?
+    raise JrcContactCenter::OperationError, 'invalid_ending_confirmation' unless valid
+
+    document = params.require(:qualification)
+    fields = (JrcContactCenter::QualificationDraft::FIELDS + [JrcContactCenter::QualificationForms::KEY]).map(&:to_s)
+    valid = document.is_a?(ActionController::Parameters) && (document.keys - fields).empty?
+    raise JrcContactCenter::OperationError, 'invalid_ending_confirmation' unless valid
+
+    { attributes: draft_attributes, expected_revision: params[:expected_draft_revision], request_key: params[:idempotency_key] }
+  end
 
   def qualification_form_reason
     reason = params[:reason_code]

@@ -1,0 +1,71 @@
+{
+  "status": "implemented_in_isolated_overlay_native_and_visual_validation_pending",
+  "parent": "5ecee98a6984b4c788780ed21902d73a2ce0509d",
+  "approved_decision": "Confirmar motivo antes; manter ACW aberto até concluir o formulário.",
+  "scope": "Figura 10 e fluxo nativo de tabulação: confirmação explícita, não o motor de automações completo.",
+  "implemented": [
+    "Confirmação explícita no formulário existente; grava rascunho completo e recibo imutável na mesma transação.",
+    "Revalidação do agente original, conta, elegibilidade e escopos nativos; confirmação não concede acesso a outro módulo.",
+    "Idempotência, revisão esperada, motivo congelado por catálogo e bloqueio da troca do motivo nas APIs e SQL.",
+    "Notas, resultado e respostas continuam editáveis; confirmação não conclui ACW nem executa integrações.",
+    "Histórico sem respostas/notas no recibo; uma migration aditiva vazia, sem reescrever as 13 anteriores."
+  ],
+  "approved_local_only": {
+    "vue": {
+      "examples": 86,
+      "failures": 0,
+      "pending": 0
+    },
+    "frontend_lint": "zero errors or new warnings",
+    "migration_guard_tests": {
+      "examples": 142,
+      "failures": 0
+    },
+    "evidence_parser_synthetic_tests": 9,
+    "resource_receipt": {
+      "kind": "Windows bounded mocked unit check; not native Rails/Chrome or codec proof",
+      "target": "ending-confirmation",
+      "exit_code": 0,
+      "stop": null,
+      "seconds": 9.531999999999243,
+      "initial": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 3615100928,
+        "c_free_bytes": 50692022272,
+        "read_only": true
+      },
+      "minimum": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 3330752512,
+        "c_free_bytes": 50692022272,
+        "read_only": true
+      },
+      "final": {
+        "physical_total_bytes": 12711890944,
+        "physical_available_bytes": 3592298496,
+        "c_free_bytes": 50692022272,
+        "read_only": true
+      },
+      "log_bytes": 973
+    },
+    "vue_sfc_and_yaml_structural_checks": "passed; not actionlint, assets, native Ruby or browser proof"
+  },
+  "prepared_not_executed": [
+    "Native service, authenticated API, immutable SQL/FK/account lifecycle and populated upgrade/reexecution specs.",
+    "Native incomplete-form false/zero preservation and three real HTTP concurrency scenarios.",
+    "Fresh/reloaded schema receipts and four additional Chrome scenarios, 1440/390 px, light/dark."
+  ],
+  "native_and_chrome_status": "not_executed_for_this_increment; existing CI45075105183 belongs only to the parent QA repair",
+  "still_missing": [
+    "Native tests, lint and actual Chrome acceptance of this new increment.",
+    "Destination automations, their per-target idempotency receipts and attested corporate historical context.",
+    "Audited correction flow for a classification that has already been confirmed.",
+    "External PABX operations/ACKs, provider and physical-channel homologation remain blocked by missing contracts/authorization."
+  ],
+  "preserved": [
+    "No production, Compose, GHCR or Docker publication.",
+    "No grant or real account configuration.",
+    "Original b77ffe55 checkout, three pending hashes and all remote checkpoints.",
+    "Existing native gates, 256 Chrome scenarios, protected runner services, resource guards and HTTPS APT."
+  ]
+}

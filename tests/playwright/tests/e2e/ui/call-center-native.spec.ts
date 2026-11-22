@@ -1,4 +1,5 @@
 import { verifyAllScopePauseApproval } from './call-center-pause-approval-native.mjs';
+import { verifyEndingConfirmation } from './call-center-ending-confirmation-native.mjs';
 import { test, expect } from '@playwright/test';
 import { verifyNativeCalendars } from './call-center-calendar-native.mjs';
 import { verifyNativeIvrCalendar } from './call-center-ivr-calendar-native.mjs';
@@ -10327,5 +10328,16 @@ test('all-scope pause approval native requires both managers, preserves ACW and 
     page,
     info,
     session.pause_targets[info.project.name].approval
+  );
+});
+
+test('confirmed ending classification native keeps incomplete ACW open, survives reload and rejects changed reasons and foreign actors', async ({
+  page,
+}, info) => {
+  await verifyEndingConfirmation(
+    page,
+    info,
+    session.pause_targets[info.project.name].ending_confirmation,
+    session.administrator
   );
 });

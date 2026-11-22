@@ -53,6 +53,7 @@ class JrcContactCenter::QualificationManager
       end
 
       now = Time.current
+      JrcContactCenter::EndingConfirmationState.validate_reason!(record, attributes.fetch(:reason_code, record.reason_code))
       JrcContactCenter::EndingReasonPolicy.new(record).validate!(attributes.fetch(:reason_code, record.reason_code), complete: true)
       JrcContactCenter::QualificationForms.new(record).save!(attributes, complete: true)
       record.update!(completion_values(record, attributes, now))

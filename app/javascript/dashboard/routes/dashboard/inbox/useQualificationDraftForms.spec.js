@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { describe, expect, it } from 'vitest';
 import { useQualificationDraft } from './useQualificationDraft';
 
 const fixture = () => {
@@ -27,6 +28,36 @@ const record = (
 });
 
 describe('Private native ACW answers in the existing manual revision', () => {
+  it('preserves local answers but refuses to reapply a reason fixed by another confirmed revision', () => {
+    const f = fixture();
+    f.draft.observe(record());
+    f.reason.value = 'local-provisional';
+    f.formAnswers.value.rule.quantity = 2;
+    f.draft.observe({
+      ...record('confirmed'),
+      ending_reason_confirmation: { state: 'confirmed', reason_code: 'order' },
+    });
+    expect(f.draft.conflict.value).toBe(true);
+    expect(f.draft.canReapply.value).toBe(false);
+    expect(f.draft.reapply()).toBe(false);
+    expect(f.reason.value).toBe('local-provisional');
+    expect(f.formAnswers.value.rule.quantity).toBe(2);
+  });
+
+  it('permits an explicit reviewed reapplication of answers when the confirmed reason itself is unchanged', () => {
+    const f = fixture();
+    f.draft.observe(record());
+    f.formAnswers.value.rule.quantity = 2;
+    f.draft.observe({
+      ...record('confirmed'),
+      ending_reason_confirmation: { state: 'confirmed', reason_code: 'order' },
+    });
+    expect(f.draft.canReapply.value).toBe(true);
+    expect(f.draft.reapply()).toBe(true);
+    expect(f.reason.value).toBe('order');
+    expect(f.formAnswers.value.rule.quantity).toBe(2);
+  });
+
   it('hydrates typed values and ignores JSON key order when computing dirty state', () => {
     const f = fixture();
     f.draft.observe(record());

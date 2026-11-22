@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { migrationPath, ivrMigrationPath, endingReasonSqlPath, endingReasonCatalogSqlPath, reviewedMigrations, audioFileSqlSources, audioInspectionSqlSources, verifyAccessMigration, verifyReviewedMigrations,
-  pauseApprovalMigrationPath, pauseApprovalSqlSources, verifyPauseApprovalMigrations } from './validate_cc_access_migration.mjs';
+  pauseApprovalMigrationPath, pauseApprovalSqlSources, verifyPauseApprovalMigrations,
+  endingConfirmationMigrationPath, endingConfirmationSources, verifyEndingConfirmationMigrations } from './validate_cc_access_migration.mjs';
 
 const content = readFileSync(new URL('../db/migrate/20261117190000_add_contact_center_access_grants.rb', import.meta.url));
 const schema = 'ActiveRecord::Schema[7.1].define(version: 2026_11_16_190000) do\nend';
@@ -159,4 +160,32 @@ for (const path of Object.keys(reviewedMigrations)) {
 test('new admission preserves forward-only timestamp checks against a newer schema base', () => {
   assert.throws(() => verifyPauseApprovalMigrations(pauseChanges, readReviewed,
     schema.replace('2026_11_16_190000', '2026_11_23_120000')));
+});
+
+const endingPaths = [...currentPaths, endingConfirmationMigrationPath, ...Object.keys(endingConfirmationSources).filter(path => path.startsWith('db/'))];
+const endingChanges = endingPaths.map(path => `A\t${path}`).join('\n');
+test('confirmation admission preserves all prior13migrations and accepts only the exact14forward additions and SQL', () => {
+  assert.equal(verifyEndingConfirmationMigrations(endingChanges, readReviewed, schema).migrationCount, 14);
+  assert.equal(verifyPauseApprovalMigrations(pauseChanges, readReviewed, schema).migrationCount, 13);
+});
+for (const omitted of endingPaths) {
+  test(`confirmation admission rejects omission of ${omitted}`, () => {
+    assert.throws(() => verifyEndingConfirmationMigrations(endingPaths.filter(path => path !== omitted).map(path => `A\t${path}`).join('\n'), readReviewed, schema));
+  });
+}
+for (const path of [endingConfirmationMigrationPath, ...Object.keys(endingConfirmationSources), ...Object.keys(reviewedMigrations),
+  pauseApprovalMigrationPath, ...Object.keys(pauseApprovalSqlSources)]) {
+  test(`confirmation admission rejects mutation of exact source ${path}`, () => {
+    const altered = key => key === path ? Buffer.concat([readReviewed(key), Buffer.from('\n')]) : readReviewed(key);
+    assert.throws(() => verifyEndingConfirmationMigrations(endingChanges, altered, schema));
+  });
+}
+for (const extra of [`A\t${endingConfirmationMigrationPath}`, 'M\tdb/schema.rb', 'M\tdb/functions/historical.sql',
+  'D\tdb/migrate/20260101000000_original.rb', 'A\tdb/migrate/20261122213000_unknown.rb', 'A\tdb/functions/unknown.sql']) {
+  test(`confirmation admission rejects duplicate, destructive or unknown change ${extra}`, () => {
+    assert.throws(() => verifyEndingConfirmationMigrations(endingChanges + '\n' + extra, readReviewed, schema));
+  });
+}
+test('confirmation admission still blocks retroactivity against a newer schema', () => {
+  assert.throws(() => verifyEndingConfirmationMigrations(endingChanges, readReviewed, schema.replace('2026_11_16_190000', '2026_11_23_120000')));
 });

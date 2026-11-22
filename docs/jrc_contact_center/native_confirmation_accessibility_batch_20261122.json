@@ -1,0 +1,56 @@
+{
+  "status": "prepared_for_one_new_exact_sha_native_validation_not_homologated",
+  "parent_sha": "5ecee98a6984b4c788780ed21902d73a2ce0509d",
+  "parent_run": 45075105183,
+  "parent_artifact_sha256": "2f590c9a8ddbed0832d08e3547841c2f8d296dd917bc9d6a0dc8802c61e31c97",
+  "parent_actual": {
+    "rails_distinct": 2770,
+    "schema_reload_separate": 187,
+    "vue": 1768,
+    "new_ruby_lint_offenses": 0,
+    "chrome_passed": 252,
+    "chrome_failed": 4,
+    "assets_and_bootstrap": "passed",
+    "whole_workflow": "failed"
+  },
+  "accessibility_repair": {
+    "cause": "The enclosing label contains select option text; exact visible-label lookup did not locate the control.",
+    "change": "Associate only the visible module caption through an instance-unique aria-labelledby reference.",
+    "before_local_regressions": {
+      "examples": 3,
+      "failed": 3
+    },
+    "after_local_regressions": {
+      "examples": 3,
+      "failed": 0
+    },
+    "locale_cases": [
+      "pt_BR",
+      "en"
+    ],
+    "multiple_instances": true,
+    "lint": "zero errors and zero new warnings",
+    "chrome_assertions": "unchanged; no selector fallback, skipped check or removed decision/permission assertion"
+  },
+  "compatible_confirmation_increment": "docs/jrc_contact_center/ending_confirmation_preparation_20261122.json",
+  "validation_batch_decision": "One new complete native CI validates both compatible increments at the final SHA; no parent result is reused as final-SHA acceptance.",
+  "required": [
+    "Fresh/reloaded schema; populated update and idempotent migration specs, old13sources plus exact new14th.",
+    "All existing native regressions plus new API, classification, form, immutable-ledger and concurrency cases.",
+    "All existing frontend specs plus the three accessibility regressions and new confirmation cases.",
+    "Exactly260Chrome scenarios: preserve the256previous scenarios and add4confirmation flows; all four projects, no skips/flakes.",
+    "Verify metadata, JSON reports, screenshot hashes and actual desktop/mobile light/dark images before any acceptance."
+  ],
+  "not_complete": [
+    "All23Wordfigures",
+    "Destination automation engine",
+    "Provider/PABX/external homologation",
+    "Native execution of the new confirmation increment"
+  ],
+  "preservation": {
+    "main": "e6bd4cc9418b3522378a460bb97814b700f39123",
+    "original_checkout": "b77ffe55c9d7bc93a904f9cabb88453b6eb1eb5f",
+    "original_three_pending_files": "same SHA256 values",
+    "no_production_or_compose_or_image_changes": true
+  }
+}

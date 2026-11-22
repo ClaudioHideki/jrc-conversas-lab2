@@ -138,6 +138,14 @@ onMounted(async () => {
       :saved="saved"
       :forms-present="closing.forms.present.value"
       :form-reason-codes="closing.forms.reasonCodes.value"
+      :reason-options="closing.forms.reasonOptions.value"
+      :reason-required="closing.forms.reasonRequired.value"
+      :reason-revision="closing.forms.reasonRevision.value"
+      :reason-confirmation="closing.confirmation.value"
+      :confirmation-scope="closing.confirmationScope.value"
+      :can-confirm-reason="closing.canConfirmReason.value"
+      :confirmation-busy="saving"
+      :confirmation-error="error"
       :selected-form="closing.forms.selected.value"
       :form-values="closing.forms.values.value"
       :form-loading="closing.forms.loading.value"
@@ -146,6 +154,7 @@ onMounted(async () => {
       @update-form-values="closing.forms.update"
       @reload-form="closing.forms.load"
       @save="saveDraft"
+      @confirm-reason="closing.confirmReason"
       @complete="complete"
     />
     <p

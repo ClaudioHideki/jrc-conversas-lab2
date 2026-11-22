@@ -120,10 +120,35 @@ export function verifyPauseApprovalMigrations(changes, readCurrent, schema) {
   return validateNewMigrationTimestamps(schema, migrations);
 }
 
+export const endingConfirmationMigrationPath = 'db/migrate/20261122212900_create_contact_center_ending_reason_confirmations.rb';
+export const endingConfirmationMigrationHash = '37c558d6e6ab87733b4e934325f88640ba043b7fc242f39940501f6e71d17725';
+export const endingConfirmationSources = Object.freeze({
+  'db/functions/20261122212900_contact_center_ending_confirmations.sql': '544a195a90dea477d747c9cd08cf749bebc5d33bc0283c3bc1c11661406be681',
+  'lib/jrc_contact_center/ending_confirmation_schema_receipt.rb': 'cb6c9d0365680e9a64ca88c96240ea0dbe20072f11281f17d2ac7e529cc8438f',
+});
+
+// Preserve the published1/12/13verifiers; this explicit addition admits no unknown migration or SQL.
+export function verifyEndingConfirmationMigrations(changes, readCurrent, schema) {
+  const newPaths = [endingConfirmationMigrationPath, ...Object.keys(endingConfirmationSources).filter(path => path.startsWith('db/'))];
+  const priorPaths = [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath,
+    ...Object.keys(pauseApprovalSqlSources).filter(path => path.startsWith('db/'))];
+  const rows = changes.trim().split('\n').filter(Boolean).sort();
+  const expected = [...priorPaths, ...newPaths].map(path => `A\t${path}`).sort();
+  if (JSON.stringify(rows) !== JSON.stringify(expected))
+    throw new Error('Only14exact reviewed forward migrations and their exact SQL are admitted; unknown database changes remain blocked.');
+  for (const [path, digest] of Object.entries({ [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, ...endingConfirmationSources })) {
+    if (createHash('sha256').update(readCurrent(path)).digest('hex') !== digest)
+      throw new Error(`Reviewed ending confirmation source changed: ${path}`);
+  }
+  verifyPauseApprovalMigrations(priorPaths.map(path => `A\t${path}`).join('\n'), readCurrent, schema);
+  return validateNewMigrationTimestamps(schema, [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath, endingConfirmationMigrationPath]);
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyPauseApprovalMigrations(changes, readFileSync, schema);
+  const result = verifyEndingConfirmationMigrations(changes, readFileSync, schema);
   console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
-    [pauseApprovalMigrationPath]: pauseApprovalMigrationHash }, pauseApprovalSqlSources, ...result }));
+    [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash },
+    pauseApprovalSqlSources, endingConfirmationSources, ...result }));
 }

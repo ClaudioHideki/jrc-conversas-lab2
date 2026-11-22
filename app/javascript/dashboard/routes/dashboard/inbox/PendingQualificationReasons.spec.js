@@ -1,9 +1,38 @@
 import { mount } from '@vue/test-utils';
+import { describe, expect, it, vi } from 'vitest';
 import PendingQualificationForm from './PendingQualificationForm.vue';
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 
 describe('native pending qualification registered reason options', () => {
+  it('locks only confirmed classification and keeps remaining draft fields and context retry available', async () => {
+    const wrapper = mount(PendingQualificationForm, {
+      props: {
+        reason: 'order',
+        reasonRevision: 2,
+        formError: true,
+        reasonConfirmation: {
+          state: 'confirmed',
+          reason_code: 'order',
+          reason_label: 'SYNTHETIC confirmed',
+        },
+      },
+      global: { stubs: { EndingReasonConfirmation: true } },
+    });
+    expect(
+      wrapper.get('[data-qualification-field="reason"]').element.disabled
+    ).toBe(true);
+    expect(
+      wrapper.get('[data-qualification-field="result"]').element.disabled
+    ).toBe(false);
+    expect(
+      wrapper.get('[data-qualification-field="note"]').element.disabled
+    ).toBe(false);
+    await wrapper.get('[data-reload-ending-context]').trigger('click');
+    expect(wrapper.emitted('reloadForm')).toHaveLength(1);
+    wrapper.unmount();
+  });
+
   it('offers exactly the frozen registered choices for a required queue and preserves their order', () => {
     const wrapper = mount(PendingQualificationForm, {
       props: {

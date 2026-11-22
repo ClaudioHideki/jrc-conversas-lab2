@@ -1,9 +1,11 @@
 # Only used by the guarded exclusive Call Center synthetic runner, never by a product route.
 class JrcContactCenter::SyntheticOperationalFormSeed
-  def initialize(account:, admin:, queue:)
+  def initialize(account:, admin:, queue:, reason_code: 'order', rule_id: 'synthetic-order')
     @account = account
     @admin = admin
     @queue = queue
+    @reason_code = reason_code
+    @rule_id = rule_id
   end
 
   def call
@@ -13,7 +15,7 @@ class JrcContactCenter::SyntheticOperationalFormSeed
     form = original.fetch(:form)
     writer.call(input: input(2), id: form.id)
     policy = JrcContactCenter::AcwPolicy.new(account: @account)
-    rule = { id: 'synthetic-order', reason_code: 'order', scope: 'queue', scope_id: @queue.id, active: true, limit_seconds: 60 }
+    rule = { id: @rule_id, reason_code: @reason_code, scope: 'queue', scope_id: @queue.id, active: true, limit_seconds: 60 }
     binding = { rule_id: rule[:id], form_id: form.id.to_s, revision: 1, required_fields: ['feedback'] }
     policy.update!({ voice: 180, whatsapp: 180 }, voice_rules: [rule], voice_form_bindings: [binding], expected_revision: policy.revision)
     { form_id: form.id.to_s, original_form_revision: 1, latest_form_revision: 2, form_rule_id: rule[:id] }

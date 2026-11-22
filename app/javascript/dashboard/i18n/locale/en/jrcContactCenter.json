@@ -2936,6 +2936,17 @@
       "ORIGIN_PRIVATE": "A justificativa pessoal permanece privada. Nenhum comando ao PABX será executado por esta decisão.",
       "ORIGIN_UNVERIFIED": "Não foi possível conferir o contexto registrado desta pausa. A decisão está bloqueada até recuperar os dados corretos.",
       "SOURCE_HELP": "Consulte o contexto da pausa nas unidades autorizadas. A justificativa pessoal permanece privada."
+    },
+    "ENDING_CONFIRMATION": {
+      "OPEN": "Confirmar motivo",
+      "TITLE": "Confirmar motivo de encerramento",
+      "CONFIRM": "Confirmar motivo",
+      "CANCEL": "Voltar",
+      "HELP": "Confirme o motivo quando a classificação estiver definida. O formulário de pós-atendimento continuará aberto.",
+      "NOTICE": "Esta ação salva o rascunho e confirma a classificação. O ACW continua aberto até você concluir o formulário.",
+      "FIXED_REASON": "Após confirmar, o motivo não poderá ser alterado neste atendimento. Confira a classificação antes de continuar.",
+      "CONFIRMED": "Motivo confirmado: {reason}. Conclua o formulário para encerrar o ACW.",
+      "ERROR": "Não foi possível confirmar o motivo. Suas respostas foram preservadas; confira o estado antes de tentar novamente."
     }
   }
 }

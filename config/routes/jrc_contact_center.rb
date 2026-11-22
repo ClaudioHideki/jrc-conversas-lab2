@@ -39,6 +39,7 @@ namespace :api, defaults: { format: 'json' } do
         resource :pause_catalog, only: %i[show update], controller: 'pause_catalogs'
         resources :qualifications, only: [] do
           patch :draft, on: :member
+          post :confirm_reason, on: :member
           get :form_context, on: :member
         end
         resources :access_authorizations, path: 'access_authorizations/:subject_type', only: %i[index show update]

@@ -7296,5 +7296,17 @@
     "local_vue_cases_passed": 26,
     "actual_mobile_and_contrast_proof": "pending corrected candidate CI",
     "whole_word_complete": false
+  },
+  "ending_confirmation_20261122": {
+    "status": "partial_implemented_native_and_chrome_pending",
+    "figure": 10,
+    "report": "docs/jrc_contact_center/ending_confirmation_preparation_20261122.json",
+    "decision": "Confirmar motivo antes; manter ACW aberto até concluir o formulário.",
+    "automations_engine_complete": false,
+    "local_mocked_vue_examples": 86,
+    "native_examples_for_this_increment": null,
+    "additional_chrome_prepared_not_run": 4,
+    "all_23_figures_complete": false,
+    "historical_scope_rule": "Do not infer original issuer/company/business unit from current operational-unit links."
   }
 }

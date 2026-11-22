@@ -22,7 +22,8 @@ class JrcContactCenter::QualificationDraftRevision
   def self.private_components(record)
     forms = JrcContactCenter::QualificationForms.new(record).revision_component
     ending = JrcContactCenter::EndingReasonPolicy.new(record).private_payload
-    [forms, (ending if ending.any?)].compact
+    confirmation = JrcContactCenter::EndingConfirmationState.revision_component(record)
+    [forms, (ending if ending.any?), confirmation].compact
   end
   private_class_method :private_components
 end

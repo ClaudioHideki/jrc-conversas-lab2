@@ -2,6 +2,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import { useQualificationDraft } from './useQualificationDraft';
 import { useQualificationForms } from './useQualificationForms';
+import { intent } from '../approvals/model';
 
 export const useAttendanceClosing = ({
   props,
@@ -27,6 +28,7 @@ export const useAttendanceClosing = ({
   const note = ref('');
   const formAnswers = ref({});
   const draft = useQualificationDraft({ reason, result, note, formAnswers });
+  let confirmationIntent = intent();
   let generation = 0;
   let request = 0;
   let disposed = false;
@@ -51,6 +53,9 @@ export const useAttendanceClosing = ({
         !record.completed_at &&
         String(record.account_user_id) === String(agent.value?.account_user_id)
     )
+  );
+  const confirmation = computed(
+    () => pending.value?.ending_reason_confirmation || null
   );
   const unverified = computed(
     () => enabled.value && !agent.value && (loading.value || error.value)
@@ -89,6 +94,7 @@ export const useAttendanceClosing = ({
     result.value = '';
     note.value = '';
     draft.reset();
+    confirmationIntent = intent();
     writeFailure.value = '';
   };
   const rejectUnauthorized = failure => {
@@ -111,6 +117,17 @@ export const useAttendanceClosing = ({
     authorityKey: computed(identity),
     onDenied: failure => rejectUnauthorized(failure),
   });
+  const canConfirmReason = computed(
+    () =>
+      isVoice.value &&
+      Boolean(pending.value) &&
+      !confirmation.value &&
+      Boolean(draft.revision.value) &&
+      !draft.conflict.value &&
+      !forms.loading.value &&
+      !forms.error.value &&
+      forms.reasonOptions.value.some(option => option.code === reason.value)
+  );
 
   const load = async () => {
     if (!enabled.value) return;
@@ -204,6 +221,8 @@ export const useAttendanceClosing = ({
       [
         'stale_configuration_revision',
         'qualification_already_completed',
+        'ending_reason_already_confirmed',
+        'ending_confirmation_content_conflict',
       ].includes(code)
     ) {
       draft.markConflict();
@@ -211,7 +230,7 @@ export const useAttendanceClosing = ({
     }
   };
 
-  const saveDraft = async () => {
+  const writeDraft = async (confirming = false) => {
     if (
       saving.value ||
       !enabled.value ||
@@ -220,7 +239,7 @@ export const useAttendanceClosing = ({
       !pending.value ||
       forms.loading.value ||
       forms.error.value ||
-      !draft.canSave.value
+      !(confirming ? canConfirmReason.value : draft.canSave.value)
     )
       return false;
     const version = generation;
@@ -233,24 +252,48 @@ export const useAttendanceClosing = ({
     error.value = false;
     writeFailure.value = '';
     try {
-      const response = await ContactCenterAPI.saveQualificationDraft(
-        props.accountId,
-        record.id,
-        {
-          reason_code: submitted[0],
-          outcome_code: submitted[1],
-          notes: submitted[2],
-          ...(submitted.length === 4 ? { acw_form_answers: submitted[3] } : {}),
-        },
-        draft.revision.value
-      );
+      const qualification = {
+        reason_code: submitted[0],
+        outcome_code: submitted[1],
+        notes: submitted[2],
+        ...(submitted.length === 4 ? { acw_form_answers: submitted[3] } : {}),
+      };
+      const response = confirming
+        ? await ContactCenterAPI.confirmQualificationReason(
+            props.accountId,
+            record.id,
+            confirmationIntent(
+              { qualification, expected_draft_revision: draft.revision.value },
+              `${key}:ending-reason:${record.id}`
+            )
+          )
+        : await ContactCenterAPI.saveQualificationDraft(
+            props.accountId,
+            record.id,
+            qualification,
+            draft.revision.value
+          );
       if (!current(version, key)) return false;
       const updated = response.data.item;
       if (
+        String(updated?.id) !== String(record.id) ||
         String(updated?.account_id) !== String(props.accountId) ||
         String(updated?.account_user_id) !== String(record.account_user_id)
       )
         throw new Error('Invalid native qualification context');
+      if (confirming && updated?.completed_at) {
+        draft.markConflict();
+        await load();
+        return false;
+      }
+      if (
+        confirming &&
+        (updated?.ending_reason_confirmation?.state !== 'confirmed' ||
+          updated.ending_reason_confirmation.reason_code !== submitted[0] ||
+          updated.ending_reason_confirmation.completes_acw !== false ||
+          updated.ending_reason_confirmation.executes_integrations !== false)
+      )
+        throw new Error('Invalid native classification confirmation');
       draft.accept(updated, submitted);
       records.value = [
         updated,
@@ -267,6 +310,9 @@ export const useAttendanceClosing = ({
       if (current(version, key)) saving.value = false;
     }
   };
+
+  const saveDraft = () => writeDraft(false);
+  const confirmReason = () => writeDraft(true);
 
   const complete = async () => {
     if (
@@ -370,6 +416,11 @@ export const useAttendanceClosing = ({
     attendance,
     agent,
     policy,
+    confirmation,
+    canConfirmReason,
+    confirmationScope: computed(
+      () => `${identity()}:${pending.value?.id || ''}`
+    ),
     pending,
     pendingAttendance,
     unverified,
@@ -389,6 +440,7 @@ export const useAttendanceClosing = ({
     load,
     start,
     saveDraft,
+    confirmReason,
     complete,
     allowSelection,
   };

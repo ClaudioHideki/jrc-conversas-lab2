@@ -104,6 +104,7 @@ jobs:
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_acw_form_schema_probe"); JrcContactCenter::SyntheticAcwFormSchemaProbe.record("fresh")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_audio_schema_probe"); JrcContactCenter::SyntheticAudioSchemaProbe.record("fresh")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_pause_approval_schema_probe"); JrcContactCenter::SyntheticPauseApprovalSchemaProbe.record("fresh")'
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_confirmation_schema_probe"); JrcContactCenter::SyntheticEndingConfirmationSchemaProbe.record("fresh")'
       - name: Reload migrated schema in a separate disposable database
         id: native_reload
         env:
@@ -118,7 +119,8 @@ jobs:
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_acw_form_schema_probe"); JrcContactCenter::SyntheticAcwFormSchemaProbe.record("reload")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_audio_schema_probe"); JrcContactCenter::SyntheticAudioSchemaProbe.record("reload")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_pause_approval_schema_probe"); JrcContactCenter::SyntheticPauseApprovalSchemaProbe.record("reload")'
-          bundle exec rspec spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb spec/models/jrc_contact_center/acw_form_template_ledger_spec.rb spec/models/jrc_contact_center/deferred_pause_request_spec.rb spec/models/jrc_contact_center/qualification_form_spec.rb spec/services/jrc_contact_center/create_contact_center_qualification_forms_spec.rb spec/models/jrc_contact_center/ending_reason_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_reason_versions_spec.rb spec/models/jrc_contact_center/team_state_spec.rb spec/services/jrc_contact_center/create_contact_center_team_states_spec.rb spec/models/jrc_contact_center/audio_folder_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_folders_spec.rb spec/models/jrc_contact_center/audio_version_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_files_spec.rb spec/models/jrc_contact_center/audio_inspection_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_inspections_spec.rb spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb spec/services/jrc_contact_center/module_policy_quality_review_spec.rb spec/services/jrc_contact_center/create_contact_center_team_supervisions_spec.rb spec/models/jrc_contact_center/team_supervision_constraints_spec.rb spec/models/jrc_contact_center/pause_approval_review_evidence_spec.rb spec/services/jrc_contact_center/create_contact_center_pause_approval_evidence_spec.rb --format progress --format json --out /tmp/call-center-ivr-schema-reload-rspec.json
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_confirmation_schema_probe"); JrcContactCenter::SyntheticEndingConfirmationSchemaProbe.record("reload")'
+          bundle exec rspec spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb spec/models/jrc_contact_center/acw_form_template_ledger_spec.rb spec/models/jrc_contact_center/deferred_pause_request_spec.rb spec/models/jrc_contact_center/qualification_form_spec.rb spec/services/jrc_contact_center/create_contact_center_qualification_forms_spec.rb spec/models/jrc_contact_center/ending_reason_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_reason_versions_spec.rb spec/models/jrc_contact_center/team_state_spec.rb spec/services/jrc_contact_center/create_contact_center_team_states_spec.rb spec/models/jrc_contact_center/audio_folder_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_folders_spec.rb spec/models/jrc_contact_center/audio_version_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_files_spec.rb spec/models/jrc_contact_center/audio_inspection_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_inspections_spec.rb spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb spec/services/jrc_contact_center/module_policy_quality_review_spec.rb spec/services/jrc_contact_center/create_contact_center_team_supervisions_spec.rb spec/models/jrc_contact_center/team_supervision_constraints_spec.rb spec/models/jrc_contact_center/pause_approval_review_evidence_spec.rb spec/services/jrc_contact_center/create_contact_center_pause_approval_evidence_spec.rb spec/models/jrc_contact_center/ending_reason_confirmation_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_reason_confirmations_spec.rb --format progress --format json --out /tmp/call-center-ivr-schema-reload-rspec.json
       - name: Rails authorization, persistence and affected regressions
         id: native_core
         run: |
@@ -137,7 +139,7 @@ jobs:
             spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
             spec/services/jrc_operator/commands_spec.rb \
             spec/serializers/jrc_approvals/request_serializer_pause_spec.rb \
-            --exclude-pattern '**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
+            --exclude-pattern '**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
         if: failure() && (steps.native_reload.outcome == 'failure' || steps.native_core.outcome == 'failure')
@@ -158,7 +160,7 @@ jobs:
         run: |
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
-          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
+          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_confirmation_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
       - name: Affected Approvals and Backoffice in their guarded disposable candidate database
         env:
           POSTGRES_DATABASE: jrc_rel_v2_candidate_test
@@ -191,7 +193,7 @@ jobs:
             app/javascript/dashboard/routes/dashboard/webphone app/javascript/dashboard/routes/dashboard/settings/customRoles \
             app/javascript/dashboard/components/widgets/BackButton.spec.js \
             app/javascript/dashboard/api/specs/teams.spec.js app/javascript/dashboard/store/modules/specs/teamMembers app/javascript/dashboard/store/modules/specs/teams \
-            app/javascript/dashboard/routes/dashboard/inbox/useAttendanceClosing.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationDraftForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.spec.js app/javascript/dashboard/routes/dashboard/inbox/InboxVoicePanel.spec.js \
+            app/javascript/dashboard/routes/dashboard/inbox/useEndingReasonConfirmation.spec.js app/javascript/dashboard/routes/dashboard/inbox/EndingReasonConfirmation.spec.js app/javascript/dashboard/routes/dashboard/inbox/PendingQualificationReasons.spec.js app/javascript/dashboard/routes/dashboard/inbox/useAttendanceClosing.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/useQualificationDraftForms.spec.js app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.spec.js app/javascript/dashboard/routes/dashboard/inbox/InboxVoicePanel.spec.js \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/call-center-vitest.json
       - name: Frontend lint of changed sources
@@ -271,6 +273,23 @@ jobs:
           pause_schema = [json.loads(Path('/tmp', f'call-center-pause-approval-schema-{stage}.json').read_text()) for stage in ['fresh', 'reload']]
           assert pause_schema[0]['components'] == pause_schema[1]['components']
           assert all(item['product_sha'] == os.environ['GITHUB_SHA'] and set(item['stored'].values()) == {item['calculated']} for item in pause_schema)
+          ending_schema = [json.loads(Path('/tmp', f'call-center-ending-confirmation-schema-{stage}.json').read_text()) for stage in ['fresh', 'reload']]
+          assert ending_schema[0]['components'] == ending_schema[1]['components']
+          assert all(item['product_sha'] == os.environ['GITHUB_SHA'] and set(item['stored'].values()) == {item['calculated']} for item in ending_schema)
+          ending_flows = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-ending-confirmation-native.json')]
+          expected_projects = {'desktop-light', 'desktop-dark', 'mobile-light', 'mobile-dark'}
+          assert len(ending_flows) == 4 and {flow['project'] for flow in ending_flows} == expected_projects
+          assert len({str(flow['account_id']) for flow in ending_flows}) == 4
+          for flow in ending_flows:
+              assert flow['sha'] == os.environ['GITHUB_SHA'] and flow['synthetic'] is True
+              assert flow['explicit_confirmation_requests'] == 1 and flow['reason_change_status'] == 409
+              assert flow['other_actor_status'] == 404 and flow['foreign_status'] in [401, 403, 404]
+              assert flow['idempotent_replay_status'] == flow['final_completion_status'] == 200
+              assert all(flow[key] is True for key in ['confirmed_with_incomplete_form', 'acw_remained_open', 'pending_reload_preserved', 'false_and_zero_preserved'])
+              assert flow['errors'] == flow['provider_writes'] == []
+              assert len(flow['administrative_statuses']) == 2 and all(status in [401, 403, 404] for status in flow['administrative_statuses'])
+              assert len(flow['contrast']) == 2 and all(row['ratio'] >= 4.5 for row in flow['contrast'])
+              assert len(flow['screenshots']) == 4 and all(Path(path).is_file() for path in flow['screenshots'])
           pause_flows = list(Path('.codex/call-center-native-e2e').glob('*-pause-approval-native.json'))
           assert len(pause_flows) == 4
           for proof_path in pause_flows:

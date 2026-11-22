@@ -906,3 +906,8 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 ## Call Center 2026-11-22: all-affected-scope pause approval
 
 Implemented in the existing Central and deferred-pause flow; native CI, migrations, concurrency and actual Chrome remain pending. See docs/jrc_contact_center/pause_all_scope_approval_candidate_20261122.json. No real grants, policies, activation or provider commands.
+
+
+## Confirmação do motivo antes do ACW — 22/11/2026 [WIP]
+
+- [ ] **CALL-CENTER-ENDING-CONFIRMATION-20261122:** Implementação isolada preparada, com 86 casos Vue leves e 142 verificações estáticas de migrations. Execução nativa, lint Ruby e quatro novos cenários Chrome permanecem pendentes; não conclui a figura 10 nem as 23 figuras. Confirmação salva o rascunho e fixa o motivo, mantendo o ACW aberto. Automações de destino continuam separadas. Critérios e limites: [relatório](docs/jrc_contact_center/ending_confirmation_preparation_20261122.json) e [ADR](docs/adr/20261122-call-center-confirmed-ending-before-acw.md).

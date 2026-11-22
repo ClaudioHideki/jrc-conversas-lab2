@@ -336,6 +336,11 @@ export default {
     ),
   startQualification: (accountId, params) =>
     axios.post(`${base(accountId)}/qualifications`, params),
+  confirmQualificationReason: (accountId, id, body) =>
+    axios.post(
+      `${base(accountId)}/qualifications/${recordIdentity(id)}/confirm_reason`,
+      body
+    ),
   saveQualificationDraft: (accountId, id, qualification, expectedRevision) =>
     axios.patch(
       `${base(accountId)}/qualifications/${recordIdentity(id)}/draft`,

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { useStore } from 'vuex';
 import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useRoute, useRouter } from 'vue-router';
@@ -32,6 +32,7 @@ const route = useRoute();
 const router = useRouter();
 const { t, te, tm, rt } = useI18n();
 const moduleLabel = key => approvalModuleLabel(key, { t, te, tm, rt });
+const moduleFilterLabelId = useId();
 const store = useStore();
 const accessIdentity = computed(() =>
   JSON.stringify([route.params.accountId, authorityScope(store.getters)])
@@ -891,10 +892,13 @@ const errorText = computed(() => {
                 :placeholder="t('JRC_APPROVALS.workspace.searchPlaceholder')"
                 class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-background px-3 py-2.5 text-sm text-n-slate-12"
             /></label>
-            <label class="min-w-0 text-xs font-medium text-n-slate-11"
-              >{{ t('JRC_APPROVALS.workspace.module')
-              }}<select
+            <label class="min-w-0 text-xs font-medium text-n-slate-11">
+              <span :id="moduleFilterLabelId">
+                {{ t('JRC_APPROVALS.workspace.module') }}
+              </span>
+              <select
                 v-model="filters.module_key"
+                :aria-labelledby="moduleFilterLabelId"
                 class="mt-1 w-full min-w-0 rounded-lg border border-n-weak bg-n-background px-3 py-2.5 text-sm text-n-slate-12"
               >
                 <option value="">
@@ -907,8 +911,8 @@ const errorText = computed(() => {
                 >
                   {{ moduleLabel(key) }}
                 </option>
-              </select></label
-            >
+              </select>
+            </label>
             <label class="min-w-0 text-xs font-medium text-n-slate-11"
               >{{ t('JRC_APPROVALS.scope')
               }}<select

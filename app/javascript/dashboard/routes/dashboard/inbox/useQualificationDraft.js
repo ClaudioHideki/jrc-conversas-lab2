@@ -56,6 +56,8 @@ export const useQualificationDraft = ({
       reviewLoaded.value &&
       Boolean(remote.value?.draft_revision) &&
       !remote.value?.completed_at &&
+      (!remote.value?.ending_reason_confirmation ||
+        remote.value.ending_reason_confirmation.reason_code === reason.value) &&
       String(remote.value?.id) === String(baseline.value?.id)
   );
   const setBaseline = record => {
