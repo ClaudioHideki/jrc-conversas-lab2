@@ -7208,5 +7208,19 @@
     "ruby_indentation_findings": 2,
     "native_revalidation_pending": true,
     "whole_word_complete": false
+  },
+  "ivr_calendar_chrome_first_findings_20261122": {
+    "sha": "54aec107b4f89131f19de26b5b2b43d25e54bbbb",
+    "run": 45012783199,
+    "report": "docs/jrc_contact_center/ivr_calendar_chrome_first_findings_20261122.json",
+    "native_distinct_passed": 2663,
+    "schema_reload_separate_passed": 175,
+    "vue_passed": 1495,
+    "chrome_preserved_passed": 244,
+    "chrome_failed": 4,
+    "actual_partial_images_opened": 8,
+    "dark_theme_defect_corrected_in_source_not_yet_revalidated": true,
+    "next_native_gate_pending": true,
+    "whole_word_complete": false
   }
 }

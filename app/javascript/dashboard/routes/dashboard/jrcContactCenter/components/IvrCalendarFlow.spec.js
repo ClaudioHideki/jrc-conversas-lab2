@@ -203,6 +203,9 @@ describe('existing URA editor calendar controls with native components; not brow
   it('uses an explicit local date/time, the chosen timezone and the saved origin, then invalidates an obsolete result', async () => {
     const wrapper = mountEditor();
     await flushPromises();
+    expect(wrapper.get('[data-ivr-editor]').classes()).toContain(
+      'text-n-slate-12'
+    );
     expect(wrapper.get('#ivr-simulation-local').element.value).toBe('');
     expect(API.previewIvrDraft).not.toHaveBeenCalled();
     await wrapper.get('#ivr-simulation-local').setValue('2026-11-23T10:00');

@@ -1,0 +1,185 @@
+{
+  "sha": "54aec107b4f89131f19de26b5b2b43d25e54bbbb",
+  "run": 45012783199,
+  "job": 137178551400,
+  "artifact": 14753041438,
+  "artifact_sha256": "f5d6e3203daae4737f17485cf540b4bf8fdb0f7a0e981015ebc48e9446747100",
+  "sanitized_log_integrity": {
+    "job": 137178551400,
+    "run": 45012783199,
+    "sha": "54aec107b4f89131f19de26b5b2b43d25e54bbbb",
+    "raw_bytes": 2332523,
+    "raw_sha256_not_saved": "fef96b065d01ef65a8201ede1c5185174fbbdf9eace19e37353d5683bf5d609c",
+    "sanitized_bytes": 2283843,
+    "sanitized_sha256": "3ce350a513cbf953839aff41402ef3197f7fa1666f1621b6c0b703aa1b4c11e5",
+    "credentials_or_signed_urls_printed": false
+  },
+  "native_distinct_passed": 2663,
+  "native_counts": {
+    "core": 2448,
+    "concurrency": 130,
+    "approvals_backoffice": 85,
+    "schema_reload_separate": 175
+  },
+  "native_failures_pending_and_outside_errors": 0,
+  "vue": {
+    "passed": 1495,
+    "failed": 0,
+    "pending": 0
+  },
+  "frontend_lint": "passed",
+  "ruby_new_findings": 0,
+  "assets_build": "passed",
+  "chrome_bootstrap": "passed15cards0errors",
+  "chrome": {
+    "passed": 244,
+    "failed": 4,
+    "skipped": 0,
+    "flaky": 0,
+    "outside_errors": 0,
+    "all244prior_exact_identities_preserved_and_passed": true,
+    "prior_verified_run": 45000878232
+  },
+  "failed_identities": [
+    [
+      "call-center-native.spec.ts",
+      "native URA calendar branches preserve the exact attested version across source edits, use explicit time and deny foreign scopes",
+      "desktop-light"
+    ],
+    [
+      "call-center-native.spec.ts",
+      "native URA calendar branches preserve the exact attested version across source edits, use explicit time and deny foreign scopes",
+      "desktop-dark"
+    ],
+    [
+      "call-center-native.spec.ts",
+      "native URA calendar branches preserve the exact attested version across source edits, use explicit time and deny foreign scopes",
+      "mobile-light"
+    ],
+    [
+      "call-center-native.spec.ts",
+      "native URA calendar branches preserve the exact attested version across source edits, use explicit time and deny foreign scopes",
+      "mobile-dark"
+    ]
+  ],
+  "confirmed_test_cause": "The new helper requested exact tab Simulação, while the unchanged actual product and244approved cases use Simulação local",
+  "selector_correction": {
+    "parent": "54aec107b4f89131f19de26b5b2b43d25e54bbbb",
+    "run": 45012783199,
+    "artifact": 14753041438,
+    "artifact_sha256": "f5d6e3203daae4737f17485cf540b4bf8fdb0f7a0e981015ebc48e9446747100",
+    "path": "tests/playwright/tests/e2e/ui/call-center-ivr-calendar-native.mjs",
+    "before_sha256": "562bab40149c4a8c2c3484432cdc10d15df2bf6e9cbc56ac4e49a8e50069bd71",
+    "after_sha256": "139a71c1a88ed2e1206a1b2ea9514b663364a31cdef352c76e7ee0cb71ba62dd",
+    "native_label": "Simulação local",
+    "old_selector": "getByRole('tab', { name: 'Simulação', exact: true })",
+    "new_selector": "getByRole('tab', { name: 'Simulação local', exact: true })",
+    "product_ui_changed": false,
+    "backend_or_permissions_changed": false,
+    "workflow_changed": false,
+    "timeouts_or_retries_changed": false,
+    "tests_or_assertions_removed": false,
+    "expected_chrome_count_retained": 248,
+    "native_revalidation_pending": true,
+    "whole_word_complete": false
+  },
+  "actual_partial_screenshots_opened": {
+    "sha": "54aec107b4f89131f19de26b5b2b43d25e54bbbb",
+    "run": 45012783199,
+    "artifact": 14753041438,
+    "artifact_sha256": "f5d6e3203daae4737f17485cf540b4bf8fdb0f7a0e981015ebc48e9446747100",
+    "integrity_basis": "Complete archive SHA256; full acceptance screenshot manifest absent because the job failed",
+    "selected_images": {
+      "desktop-light-ivr-calendar-reviewed.png": "8df0bf8a2d8d73db5449bc9865d66cfb8507502b63976219436f5a40bb111bc4",
+      "desktop-light-ivr-calendar-historical-pin.png": "b43b7ada9eb1a585e22e7c7e733f15548a83bf559268196f8c937754c295fa77",
+      "desktop-dark-ivr-calendar-reviewed.png": "e558a5cef15bf1400569b2ae1d4a2f14fe694431c5e693df4e48212b55ddd3c3",
+      "desktop-dark-ivr-calendar-historical-pin.png": "cc64513cb954744ebfbdd57cc8c1ee294e1c7ae33a00d853b797132ffd744245",
+      "mobile-light-ivr-calendar-reviewed.png": "e0918deff8abe226492c1f3734656253a7d05dd2d52fa0983ea01aa6c04143b8",
+      "mobile-light-ivr-calendar-historical-pin.png": "786693ba458866a464d1834c3a8757760e0452c750994d59a869bd8372daba43",
+      "mobile-dark-ivr-calendar-reviewed.png": "747790254cdef31491b41c76e9c3927dff127af60cd9338848eb898c26c2a685",
+      "mobile-dark-ivr-calendar-historical-pin.png": "0debd13887965d8deecaa6149c21a6a6e1271d5c6526427cce718f6ba9efe0fd"
+    },
+    "actually_opened": [
+      "desktop-light-ivr-calendar-reviewed.png",
+      "desktop-light-ivr-calendar-historical-pin.png",
+      "desktop-dark-ivr-calendar-reviewed.png",
+      "desktop-dark-ivr-calendar-historical-pin.png",
+      "mobile-light-ivr-calendar-reviewed.png",
+      "mobile-light-ivr-calendar-historical-pin.png",
+      "mobile-dark-ivr-calendar-reviewed.png",
+      "mobile-dark-ivr-calendar-historical-pin.png"
+    ],
+    "visual_review_completed": false,
+    "visual_increment_accepted": false,
+    "whole_word_complete": false,
+    "not_reached": [
+      "Open and closed calendar simulation",
+      "Post-simulation historical replay and access denials"
+    ],
+    "blocking_findings": [
+      {
+        "issue": "Pinned calendar text is black against a dark blue background in desktop-dark and mobile-dark",
+        "scope": "name,timezone,state,snapshot explanation and details summary",
+        "source": "Actual screenshots, not mocked CSS tests",
+        "next_correction": "Scoped native text-n-slate-12 on the existing editor body; actual native contrast and16image revalidation required"
+      }
+    ],
+    "partial_observations": [
+      "Light theme text readable; both branch selectors visible and footer actions reachable at1440and390px",
+      "Calendar icon appears; mobile content wraps and scrolls within the dialog",
+      "Dark theme requires an explicit native foreground color on the editor body",
+      "Historical snapshots keep the original source name after catalog editing in all four projects; the dark-text defect is also visible after reload"
+    ],
+    "partial_visual_review_completed": true
+  },
+  "confirmed_product_visual_defect": "Black inherited pinned-calendar text against the dark-blue panel, visible in desktop-dark andmobile-dark before andafter reload",
+  "scoped_product_correction": "One text-n-slate-12 utility on the existing IvrDraftEditor body; no API, permissions, persistence, layout structure or global CSS changes",
+  "impact_review": "IvrCalendarReferencePicker is used only by IvrFlowEditor, which is used by the existing IvrDraftEditor; semantic child colors remain explicit; legacy1/2preview contracts still pass targeted tests",
+  "targeted_mocked_vue_after_correction": {
+    "passed": 91,
+    "failed": 0,
+    "pending": 0,
+    "not_native_css_proof": true
+  },
+  "targeted_static_checks": {
+    "checks": [
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrDraftEditor.vue",
+        "errors": 0,
+        "new_warnings": 0,
+        "inherited_warnings": 11,
+        "sha256": "e3044d4e5370aa383cf872e03c7ed396ec05bad11a8d4a7dd4bdfacbc84b4f59"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrCalendarFlow.spec.js",
+        "errors": 0,
+        "new_warnings": 0,
+        "inherited_warnings": 0,
+        "sha256": "a1c8295922c8acba0d539583e2f63aa3e18d7575af16bf11e2e353eeca4ebb61"
+      }
+    ],
+    "browser_helper": {
+      "path": "tests/playwright/tests/e2e/ui/call-center-ivr-calendar-native.mjs",
+      "sha256": "e9bda674fbf5b2b63674163a822835ad465ca5ff2219159ec68780ae92987b17",
+      "grammar_passed": true,
+      "exact_native_simulation_label": "Simulação local",
+      "real_css_contrast_minimum": 4.5
+    },
+    "workflow_unchanged": true,
+    "expected_chrome_count": 248,
+    "native_chrome_executed": false
+  },
+  "next_native_requirements": [
+    "All248Chrome, including actual open/closed simulations and post-simulation denial/replay assertions",
+    "Real CSS contrast>=4.5 for all five pinned-calendar text fields in both initial/reloaded screenshots",
+    "Actual16image review, native reports and source identity checks"
+  ],
+  "gates_assertions_or_timeouts_weakened": false,
+  "workflow_changed": false,
+  "migrations_changed": false,
+  "native_increment_accepted": false,
+  "visual_increment_accepted": false,
+  "whole_word_complete": false,
+  "external_homologation": false,
+  "separate_usage_inventory": "16privatepaths;54mockedVuepassed;17newnativeand4Chromecasesprepared; not applied before parent acceptance"
+}

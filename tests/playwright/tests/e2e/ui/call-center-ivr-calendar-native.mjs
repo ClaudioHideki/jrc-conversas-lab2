@@ -13,6 +13,7 @@ export async function verifyNativeIvrCalendar(
   const page = await parent.context().newPage();
   const errors = [];
   const forbidden = [];
+  const contrast = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => {
     if (
@@ -75,7 +76,81 @@ export async function verifyNativeIvrCalendar(
     expect(response.status()).toBe(200);
     return response.json();
   };
+  const verifyPinnedContrast = async phase => {
+    const rows = await page
+      .locator('[data-ivr-calendar-reference]')
+      .evaluate(root => {
+        const context = document.createElement('canvas').getContext('2d');
+        const pixel = color => {
+          context.clearRect(0, 0, 1, 1);
+          context.fillStyle = color;
+          context.fillRect(0, 0, 1, 1);
+          return [...context.getImageData(0, 0, 1, 1).data];
+        };
+        const luminance = channels =>
+          channels
+            .slice(0, 3)
+            .map(value => {
+              const channel = value / 255;
+              return channel <= 0.04045
+                ? channel / 12.92
+                : ((channel + 0.055) / 1.055) ** 2.4;
+            })
+            .reduce(
+              (sum, value, index) =>
+                sum + value * [0.2126, 0.7152, 0.0722][index],
+              0
+            );
+        const over = (front, back) => {
+          const alpha = front[3] / 255;
+          return front
+            .slice(0, 3)
+            .map((value, index) =>
+              Math.round(value * alpha + back[index] * (1 - alpha))
+            )
+            .concat(255);
+        };
+        const surfaces = [];
+        for (let node = root; node; node = node.parentElement)
+          surfaces.unshift(node);
+        const background = surfaces.reduce(
+          (color, node) =>
+            over(pixel(getComputedStyle(node).backgroundColor), color),
+          [255, 255, 255, 255]
+        );
+        const nodes = [
+          ...root.querySelectorAll('[data-ivr-calendar-pinned] > p'),
+          root.querySelector('[data-ivr-calendar-pinned] summary'),
+        ];
+        return nodes.map(node => {
+          const sourceForeground = pixel(getComputedStyle(node).color);
+          const foreground = over(sourceForeground, background);
+          const first = luminance(foreground);
+          const second = luminance(background);
+          return {
+            foreground,
+            background,
+            sourceForeground,
+            ratio:
+              (Math.max(first, second) + 0.05) /
+              (Math.min(first, second) + 0.05),
+          };
+        });
+      });
+    expect(rows).toHaveLength(5);
+    for (const row of rows) {
+      expect(row.foreground[3]).toBe(255);
+      expect(row.background[3]).toBe(255);
+      expect(
+        row.ratio,
+        JSON.stringify({ phase, ...row })
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+    contrast.push({ phase, rows });
+  };
   const screenshot = async suffix => {
+    if (await page.locator('[data-ivr-calendar-pinned]').isVisible())
+      await verifyPinnedContrast(suffix);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth
@@ -192,7 +267,9 @@ export async function verifyNativeIvrCalendar(
     ).not.toContainText('SOURCE EDIT');
     await dialog.locator('[data-ivr-calendar-pinned]').scrollIntoViewIfNeeded();
     await screenshot('historical-pin');
-    await dialog.getByRole('tab', { name: 'Simulação', exact: true }).click();
+    await dialog
+      .getByRole('tab', { name: 'Simulação local', exact: true })
+      .click();
     await expect(dialog.locator('#ivr-simulation-local')).toHaveValue('');
     await dialog.locator('#ivr-simulation-local').fill('2026-11-23T10:30');
     await dialog
@@ -298,6 +375,7 @@ export async function verifyNativeIvrCalendar(
           draft_id: id,
           calendar_id: identity,
           exact_pin: pin,
+          calendar_text_contrast: contrast,
           definition: originalGraph,
           create_status: saved.status(),
           source_edit_status: edited.status(),

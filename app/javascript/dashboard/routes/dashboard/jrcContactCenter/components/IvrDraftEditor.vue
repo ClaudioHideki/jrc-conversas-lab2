@@ -282,7 +282,7 @@ onBeforeUnmount(() => {
     :close-on-click-outside="false"
     @close="emit('close')"
   >
-    <div class="min-w-0 space-y-4" data-ivr-editor>
+    <div class="min-w-0 space-y-4 text-n-slate-12" data-ivr-editor>
       <p
         v-if="errorText"
         role="alert"
