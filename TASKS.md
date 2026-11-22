@@ -876,3 +876,5 @@ Rails: 1.847 exemplos distintos aprovados e90 reexecuções após recarga. Incre
 
 - [x] Vínculo interno produtor38565237/CI44986114275:2575Rails distintos,175reload,1403Vue,244Chrome,484hashesPNG;12imagens efetivamente vistas.409/200reais do navegador e todos os casos anteriores preservados. Revisão manual encontrou rótulo pré-gravação na seleção imediata, apesar da persistência/lista corretas; aceite visual integral retido. Ver docs/jrc_contact_center/queue_calendar_bindings_native_proof_20261122.json.
 - [ ] Retirada e correção da revisão imediata:21fontes aplicadas no overlay,78Vue leves aprovados (39anteriores/39novos), regressão real de legenda reproduzida com2falhas e corrigida com28casos aprovados. Serviços/API/UI/auditoria e corridas nativas preparados, mas novoSHA exige Rails,lint,assets e244Chrome. Sem migrations, grants ou PABX; conjunto23não concluído. Ver docs/jrc_contact_center/queue_calendar_removal_prepared_20261122.json.
+
+- [ ] Retirada de calendário/fila: CI44991077806 preservada com 2401/2402 exemplos Rails; um erro de preparação Current.set e13 infrações Ruby corrigidos sem reduzir regras; nova execução nativa e Chrome pendentes.

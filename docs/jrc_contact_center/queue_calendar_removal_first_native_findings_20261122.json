@@ -1,0 +1,35 @@
+{
+  "producer": "3f226323ec83e46a7c1cbe21586ed05818968dd9",
+  "run": 44991077806,
+  "artifact": 14742069722,
+  "artifact_sha256": "19b83352e27b3958ef6016b4399dec7759f5f70b4e8a032cfa44fb0f980d6dc3",
+  "status": "failed_not_accepted",
+  "core": {
+    "duration": 454.547645877,
+    "example_count": 2402,
+    "failure_count": 1,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "reload": {
+    "passed": 175,
+    "failures": 0
+  },
+  "new_ruby_offenses": 13,
+  "vue_assets_chrome_concurrency": "not executed by this failed run",
+  "root_cause": "The rollback spec used Current.set, but native lib/current.rb is a thread_mattr_accessor module with setters and reset only",
+  "correction": [
+    "Use native Current.user setter and ensure restoration in that exact rollback case",
+    "Keep raising RecordInvalid and assert actual queue and audit rollback",
+    "Group setup/lets; require actual returned binding identity during setup",
+    "Extract reviewed scope, digest and receipt shape predicates with unchanged checks; align actual reported arguments"
+  ],
+  "source_paths": [
+    "app/services/jrc_contact_center/queue_calendar_removals.rb",
+    "spec/requests/api/v1/accounts/jrc_contact_center/queue_calendar_removals_spec.rb"
+  ],
+  "validation_of_correction": "native execution pending",
+  "security_rules_removed": false,
+  "migrations_changed": false,
+  "whole_word_complete": false
+}

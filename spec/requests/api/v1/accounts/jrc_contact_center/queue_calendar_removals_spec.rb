@@ -31,6 +31,12 @@ RSpec.describe 'Explicit reviewed internal queue calendar removal and durable hi
       'queue_revision' => JrcContactCenter::ConfigurationRevision.token(queue.reload), 'idempotency_key' => SecureRandom.uuid, 'reviewed' => true }
   end
 
+  let(:removal) do
+    { 'unit_id' => unit.id.to_s, 'queue_id' => queue.id.to_s,
+      'binding_id' => queue.reload.settings.fetch(JrcContactCenter::QueueCalendarState::KEY).fetch('id'),
+      'expected_revision' => JrcContactCenter::ConfigurationRevision.token(queue), 'idempotency_key' => SecureRandom.uuid, 'reviewed' => true }
+  end
+
   before do
     account.enable_features!('jrc_contact_center', 'audit_logs', 'custom_roles')
     member.update!(custom_role: create(:custom_role, account: account,
@@ -39,17 +45,8 @@ RSpec.describe 'Explicit reviewed internal queue calendar removal and durable hi
                                                 business_unit: business.first, active: true, structure_managed: true)
     catalog = JrcContactCenter::CalendarCatalog.new(context: { account: account, account_user: member, user: actor }, unit_id: unit.id)
     catalog.save!(entry, expected_revision: catalog.call.fetch('revision'), create: true)
-  end
-
-  let(:removal) do
-    { 'unit_id' => unit.id.to_s, 'queue_id' => queue.id.to_s,
-      'binding_id' => queue.reload.settings.fetch(JrcContactCenter::QueueCalendarState::KEY).fetch('id'),
-      'expected_revision' => JrcContactCenter::ConfigurationRevision.token(queue), 'idempotency_key' => SecureRandom.uuid, 'reviewed' => true }
-  end
-
-  before do
     patch "#{base}/#{queue.id}", headers: headers, params: body, as: :json
-    expect(response).to have_http_status(:ok)
+    response.parsed_body.fetch('binding').fetch('id')
   end
 
   it 'removes only the reviewed internal association and preserves the pinned snapshot in native history' do
@@ -88,7 +85,7 @@ RSpec.describe 'Explicit reviewed internal queue calendar removal and durable hi
     expect(response).to have_http_status(:ok)
     first = response.parsed_body
     binding = body.merge('queue_revision' => JrcContactCenter::ConfigurationRevision.token(queue.reload),
-                          'idempotency_key' => SecureRandom.uuid)
+                         'idempotency_key' => SecureRandom.uuid)
     patch "#{base}/#{queue.id}", headers: headers, params: binding, as: :json
     expect(response).to have_http_status(:ok)
     newer = response.parsed_body.fetch('binding')
@@ -210,11 +207,13 @@ RSpec.describe 'Explicit reviewed internal queue calendar removal and durable hi
     audits = Audited.audit_class.count
     allow(Audited.audit_class).to receive(:create!).and_raise(ActiveRecord::RecordInvalid.new(Audited.audit_class.new))
     service = JrcContactCenter::QueueCalendarRemovals.new(context: { account: account, account_user: member, user: actor }, unit_id: unit.id)
-    Current.set(user: actor) do
-      expect { service.call(input) }.to raise_error(ActiveRecord::RecordInvalid)
-    end
+    previous_user = Current.user
+    Current.user = actor
+    expect { service.call(input) }.to raise_error(ActiveRecord::RecordInvalid)
     expect(queue.reload.attributes).to eq(stored)
     expect(Audited.audit_class.count).to eq(audits)
+  ensure
+    Current.user = previous_user
   end
 
   it 'rolls back removal if the audit callback is silenced and no durable receipt can be recovered' do
@@ -258,7 +257,7 @@ RSpec.describe 'Explicit reviewed internal queue calendar removal and durable hi
     other = create(:user, :contact_center_eligible, account: account)
     account.account_users.find_by!(user: other).update!(custom_role: member.custom_role)
     account.jrc_crm_user_business_units.create!(user: other, scope: 'BUSINESS_UNIT', company: company,
-                                               business_unit: business.first, active: true, structure_managed: true)
+                                                business_unit: business.first, active: true, structure_managed: true)
     stored = queue.reload.attributes
     audits = Audited.audit_class.count
     delete "#{base}/#{queue.id}", headers: other.create_new_auth_token, params: input, as: :json

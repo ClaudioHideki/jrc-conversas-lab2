@@ -40,9 +40,17 @@ class JrcContactCenter::QueueCalendarRemovals
   def validate_input!(input)
     invalid! unless input_shape?(input)
     invalid! unless identifier?(input.fetch('queue_id'))
-    invalid! unless input.fetch('unit_id') == @unit_id.to_s && input.fetch('reviewed') == true
+    invalid! unless reviewed_scope?(input)
     invalid! unless %w[binding_id idempotency_key].all? { |key| uuid?(input.fetch(key)) }
-    invalid! unless input.fetch('expected_revision').is_a?(String) && input.fetch('expected_revision').match?(/\A[a-f0-9]{64}\z/)
+    invalid! unless digest?(input.fetch('expected_revision'))
+  end
+
+  def reviewed_scope?(input)
+    input.fetch('unit_id') == @unit_id.to_s && input.fetch('reviewed') == true
+  end
+
+  def digest?(value)
+    value.is_a?(String) && value.match?(/\A[a-f0-9]{64}\z/)
   end
 
   def input_shape?(input)
@@ -69,7 +77,7 @@ class JrcContactCenter::QueueCalendarRemovals
 
   def prior_receipt(queue, input)
     records = Audited.audit_class.where(auditable: queue, associated: @context.fetch(:account),
-                                       comment: JrcContactCenter::ConfigurationAudit::COMMENT, action: 'update')
+                                        comment: JrcContactCenter::ConfigurationAudit::COMMENT, action: 'update')
     records = records.where("audited_changes -> 'queue_calendar_removal' ->> 'idempotency_key' = ?", input.fetch('idempotency_key'))
     rows = records.limit(2).to_a
     conflict! if rows.length > 1
@@ -82,10 +90,14 @@ class JrcContactCenter::QueueCalendarRemovals
     receipt.fetch('result').merge('audit_id' => audit.id.to_s)
   end
 
+  def receipt_shape?(receipt)
+    receipt.is_a?(Hash) && receipt.keys.all?(String) &&
+      receipt.keys.sort == (JrcContactCenter::QueueCalendarRemovalAudit::FIELDS + ['result']).sort &&
+      receipt['format'] == JrcContactCenter::QueueCalendarRemovalAudit::FORMAT
+  end
+
   def verify_receipt!(queue, input, receipt)
-    shape = receipt.is_a?(Hash) && receipt.keys.all?(String) &&
-            receipt.keys.sort == (JrcContactCenter::QueueCalendarRemovalAudit::FIELDS + ['result']).sort
-    conflict! unless shape && receipt['format'] == JrcContactCenter::QueueCalendarRemovalAudit::FORMAT
+    conflict! unless receipt_shape?(receipt)
     scope = JrcContactCenter::ConfigurationAuditSnapshot.capture(queue).fetch('scope')
     valid = receipt.fetch('request_digest') == JrcContactCenter::ConfigurationRevision.content_token(input) &&
             receipt.fetch('actor_user_id') == @context.fetch(:user).id.to_s && receipt.fetch('scope_snapshot') == scope
@@ -101,8 +113,7 @@ class JrcContactCenter::QueueCalendarRemovals
                  'removed_binding_id' => input.fetch('binding_id'), 'removed_calendar_digest' => receipt.fetch('calendar_digest'),
                  'historical_receipt' => true, 'local_only' => true, 'pabx_confirmed' => false, 'external_impact' => 'unknown' }
     conflict! unless result.except('queue_revision_after') == expected
-    token = result.fetch('queue_revision_after')
-    conflict! unless token.is_a?(String) && token.match?(/\A[a-f0-9]{64}\z/)
+    conflict! unless digest?(result.fetch('queue_revision_after'))
   end
 
   def remove!(queue, input)
