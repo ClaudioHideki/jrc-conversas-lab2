@@ -74,7 +74,7 @@ class JrcContactCenter::EndingActions::Catalogue
 
   def synchronized_version!(metadata)
     row = JrcContactCenter::EndingActionVersion.find_by(account: @account, revision: metadata.fetch('version'),
-                                                     head_nonce: metadata.fetch('nonce'))
+                                                        head_nonce: metadata.fetch('nonce'))
     unavailable! unless row && row.definition['version'] == row.revision
     row
   end

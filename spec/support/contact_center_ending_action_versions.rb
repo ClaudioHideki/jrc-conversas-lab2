@@ -14,7 +14,7 @@ RSpec.shared_context 'with native private ending action definitions' do
       update_private_ending_head(document)
       Current.set(user: actor, account: account, account_user: member) do
         audit = JrcContactCenter::AcwPolicyAudit.write!(account: account, before: before,
-                                                    after: JrcContactCenter::AcwPolicyAudit.capture(account))
+                                                        after: JrcContactCenter::AcwPolicyAudit.capture(account))
         JrcContactCenter::EndingActionVersion.record_change!(account: account, definition: document, audit: audit)
       end
     end

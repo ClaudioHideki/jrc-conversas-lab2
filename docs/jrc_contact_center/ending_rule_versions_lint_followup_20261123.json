@@ -1,0 +1,48 @@
+{
+  "sha": "d026fe8a7fe61e81de4d7d6bba5fe6affc6bfb1e",
+  "run": 45169703343,
+  "job": 137675703784,
+  "conclusion": "failure",
+  "artifact": 14818620705,
+  "artifact_sha256": "cbf7cf907fca0b7c140e96ed30c618e83a1bed7e72773b495c4041c41a835efc",
+  "early_artifact": 14815738944,
+  "early_sha256": "a9b8d662d9ca99312887fff7ff77c4bbdad80b3820d3fcc1aafc304464be96ae",
+  "new_ruby_offenses": [
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/blocking_revision.rb",
+      "cop": "Style/SafeNavigation",
+      "line": 35
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/catalogue.rb",
+      "cop": "Layout/ArgumentAlignment",
+      "line": 77
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/catalogue.rb",
+      "cop": "Layout/HashAlignment",
+      "line": 77
+    },
+    {
+      "path": "spec/support/contact_center_ending_action_versions.rb",
+      "cop": "Layout/ArgumentAlignment",
+      "line": 17
+    },
+    {
+      "path": "spec/support/contact_center_ending_action_versions.rb",
+      "cop": "Layout/HashAlignment",
+      "line": 17
+    }
+  ],
+  "native_examples_executed": 0,
+  "incremental_audit_capture_no_new_offenses": true,
+  "corrections": {
+    "safe_navigation": "Same missing/inactive origin rejection with rule&.fetch(active)",
+    "alignment": "Continuation keys now match the exact first account keyword at zero-based column56",
+    "standalone_dependency": "Load the actual Catalogue in the existing non-Rails value harness; all five original assertions sets retained"
+  },
+  "same_102_focused_and_3_real_concurrency_cases_required": true,
+  "no_new_migration_sql_gate_permissions_or_provider_changes": true,
+  "whole_figure10_complete": false,
+  "native_acceptance": false
+}

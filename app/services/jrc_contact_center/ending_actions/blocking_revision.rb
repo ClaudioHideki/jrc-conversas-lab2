@@ -32,7 +32,7 @@ class JrcContactCenter::EndingActions::BlockingRevision
   def validate_origin!(version)
     definition = JrcContactCenter::EndingActions::RuleDefinition.new.call(version.definition)
     rule = definition.fetch('entries').find { |entry| entry.fetch('code') == @rule_code }
-    raise JrcContactCenter::OperationError, 'ending_action_origin_unavailable' unless rule && rule.fetch('active')
+    raise JrcContactCenter::OperationError, 'ending_action_origin_unavailable' unless rule&.fetch('active')
   end
 
   def binds(version)

@@ -53,3 +53,5 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 - [Rascunho privado do pós-atendimento](20261119-call-center-pending-acw-draft.md): gravação explícita sem conclusão, revisão de conflitos, snapshot original e controles reutilizados no Hoya; exige execução nativa e dos novos cenários Chrome.
 
 - [Formulários operacionais versionados do ACW](20261119-call-center-operational-form-bindings.md): vínculo atômico, respostas privadas, origem imutável e validação obrigatória; execução nativa pendente.
+
+- [Desativação das automações de encerramento](20261123-call-center-ending-deactivation.md): decisão de negócio aprovada; barreira histórica preparada, executor e validação nativa ainda pendentes.
