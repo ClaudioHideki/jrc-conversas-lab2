@@ -70,3 +70,9 @@ Uma tarefa deve registrar problema, escopo, critério de aceite, evidência/arqu
 
 - [x] Implementar candidata com controle pelo provedor e teto local opcional; preservar reservas incertas e isolamento. Ver ADR0007.
 - [ ] Concluir testes nativos/CI, publicação das imagens e implantação autorizada na Branef. Validação local não comprova ambiente atualizado.
+
+## Groq HTTP 429 — 23/11/2026
+
+- [x] Reproduzir ausência de espera após Retry-After e implementar recuperação limitada à inferência rejeitada, sem repetição de ferramentas.
+- [ ] Executar regressão completa, CI do SHA final e publicar runtime.
+- [ ] Implantar somente no ambiente autorizado e homologar conhecimento. Registro: docs/adr/20261123-groq-retry-after.md.

@@ -1,3 +1,4 @@
+import { setTimeout as delay } from 'node:timers/promises';
 import { NicoError, type ProviderObservation } from './errors.ts';
 
 const LIMIT_HEADERS = ['x-ratelimit-limit-requests', 'x-ratelimit-limit-tokens',
@@ -49,7 +50,11 @@ export async function structuredResponse<T>(options: {
   retryInvalid: boolean; signal?: AbortSignal; timeoutMs?: number;
 }) {
   // A single deadline includes both requests and response-body reads.
-  const deadline = AbortSignal.timeout(options.timeoutMs ?? 45000);
+  const timeoutMs = options.timeoutMs ?? 45000;
+  const deadlineAt = Date.now() + timeoutMs;
+  const deadline = AbortSignal.timeout(timeoutMs);
+  const groq = new URL(options.url).hostname === 'api.groq.com';
+  let retriedRateLimit = false;
   const signal = AbortSignal.any([deadline, ...(options.signal ? [options.signal] : [])]);
   const usage: Usage = { input_tokens: 0, output_tokens: 0, total_tokens: 0 };
   let usageEstimated = false;
@@ -58,14 +63,27 @@ export async function structuredResponse<T>(options: {
     let accounted = false;
     try {
       signal.throwIfAborted();
-      const response = await fetch(options.url, {
-        method: 'POST', signal, redirect: 'error',
-        headers: { Authorization: `Bearer ${options.apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...options.body, messages: [...options.body.messages,
-          ...(attempt ? [{ role: 'system', content: REPAIR_INSTRUCTION }] : [])] }),
-      });
-      providerObservation = observation(response);
-      const body = await readJson(response);
+      let body;
+      while (true) {
+        const response = await fetch(options.url, {
+          method: 'POST', signal, redirect: 'error',
+          headers: { Authorization: `Bearer ${options.apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...options.body, messages: [...options.body.messages,
+            ...(attempt ? [{ role: 'system', content: REPAIR_INSTRUCTION }] : [])] }),
+        });
+        providerObservation = observation(response);
+        try { body = await readJson(response); break; }
+        catch (error) {
+          const after = response.headers.get('retry-after') || '';
+          const waitMs = /^\d+(?:\.\d+)?$/.test(after) ? Number(after) * 1000 : NaN;
+          if (!groq || retriedRateLimit || !(error instanceof NicoError) || error.code !== 'provider_rate_limited'
+            || !Number.isFinite(waitMs) || waitMs >= deadlineAt - Date.now()) throw error;
+          // Only replay the inference explicitly rejected by Groq, within the original deadline.
+          // No caller/tool execution is repeated, and rejected requests supply no usage receipt.
+          retriedRateLimit = true;
+          await delay(waitMs, undefined, { signal });
+        }
+      }
       signal.throwIfAborted();
       const measured = body?.usage;
       if (!measured || ![measured.prompt_tokens, measured.completion_tokens, measured.total_tokens]
