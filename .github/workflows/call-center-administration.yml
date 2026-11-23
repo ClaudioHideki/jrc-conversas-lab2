@@ -98,7 +98,7 @@ jobs:
       - name: Focused lint of new private ending version sources
         id: ending_version_lint
         run: |
-          bundle exec rubocop app/services/jrc_contact_center/ending_actions/blocking_revision.rb spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb app/models/jrc_contact_center/ending_action_version.rb app/services/jrc_contact_center/ending_actions/task_definition.rb app/services/jrc_contact_center/ending_actions/rule_definition.rb app/services/jrc_contact_center/ending_actions/catalogue.rb app/services/jrc_contact_center/ending_actions/project_task_parameters.rb app/services/jrc_contact_center/ending_actions/rule_input.rb app/services/jrc_contact_center/ending_actions/configure_rule.rb db/migrate/20261123063000_create_contact_center_ending_action_versions.rb lib/jrc_contact_center/ending_action_version_schema_receipt.rb script/jrc_call_center_ending_version_schema_probe.rb spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb spec/models/jrc_contact_center/ending_action_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/support/contact_center_ending_action_versions.rb spec/support/contact_center_ending_rule_configuration.rb --format json --out /tmp/call-center-ending-version-lint.json
+          bundle exec rubocop app/services/jrc_contact_center/ending_actions/blocking_revision.rb spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb app/models/jrc_contact_center/ending_action_version.rb app/services/jrc_contact_center/ending_actions/task_definition.rb app/services/jrc_contact_center/ending_actions/rule_definition.rb app/services/jrc_contact_center/ending_actions/catalogue.rb app/services/jrc_contact_center/ending_actions/project_task_parameters.rb app/services/jrc_contact_center/ending_actions/rule_input.rb app/services/jrc_contact_center/ending_actions/configure_rule.rb db/migrate/20261123063000_create_contact_center_ending_action_versions.rb lib/jrc_contact_center/ending_action_version_schema_receipt.rb script/jrc_call_center_ending_version_schema_probe.rb spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb spec/models/jrc_contact_center/ending_action_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/support/contact_center_ending_action_versions.rb spec/support/contact_center_ending_rule_configuration.rb app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb app/services/jrc_contact_center/ending_actions/configuration_context.rb app/services/jrc_contact_center/ending_actions/visible_rules.rb app/services/jrc_contact_center/ending_actions/source_context.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb script/jrc_call_center_ending_automation_seed.rb script/jrc_call_center_pause_seed.rb config/initializers/jrc_contact_center_ending_privacy.rb config/routes/jrc_contact_center.rb config/routes/jrc_contact_center_acw.rb --format json --out /tmp/call-center-ending-version-lint.json
       - name: Disposable application schema and pending migrations
         id: native_schema
         run: |
@@ -163,9 +163,9 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-ending-editor-preflight.json').read_text())
           summary = report['summary']
-          assert summary['example_count'] == 19
+          assert summary['example_count'] == 20
           assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0
-          assert len(report['examples']) == 19 and all(row['status'] == 'passed' for row in report['examples'])
+          assert len(report['examples']) == 20 and all(row['status'] == 'passed' for row in report['examples'])
           PY
       - name: Rails authorization, persistence and affected regressions
         id: native_core
@@ -352,6 +352,21 @@ jobs:
               assert len(flow['administrative_statuses']) == 2 and all(status in [401, 403, 404] for status in flow['administrative_statuses'])
               assert len(flow['contrast']) == 2 and all(row['ratio'] >= 4.5 for row in flow['contrast'])
               assert len(flow['screenshots']) == 4 and all(Path(path).is_file() for path in flow['screenshots'])
+          ending_editor_flows = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-ending-editor-native.json')]
+          assert len(ending_editor_flows) == 4 and {flow['project'] for flow in ending_editor_flows} == expected_projects
+          assert len({flow['account_id'] for flow in ending_editor_flows}) == 4
+          editor_surfaces = {}
+          for flow in ending_editor_flows:
+              assert flow['sha'] == os.environ['GITHUB_SHA'] and flow['synthetic'] is True
+              assert flow['initial_save'] == flow['reviewed_save'] == 200 and flow['stale_status'] == 409
+              assert flow['persisted_mode'] == 'agent_confirmation' and flow['configuration_only'] is True and flow['effects_executed'] is False
+              assert flow['denied_status'] in [401, 403] and flow['scoped_status'] in [401, 403] and flow['foreign_status'] in [401, 403, 404]
+              assert flow['theme_asserted_in_browser'] and flow['actual_dark_theme'] == flow['project'].endswith('dark')
+              assert flow['contrast']['ratio'] >= 4.5 and len(flow['screenshots']) == 1 and Path(flow['screenshots'][0]).is_file()
+              assert not flow['errors'] and not flow['provider_or_destination_writes']
+              editor_surfaces[flow['project']] = flow['contrast']['background']
+          assert editor_surfaces['desktop-light'] != editor_surfaces['desktop-dark']
+          assert editor_surfaces['mobile-light'] != editor_surfaces['mobile-dark']
           pause_flows = list(Path('.codex/call-center-native-e2e').glob('*-pause-approval-native.json'))
           assert len(pause_flows) == 4
           for proof_path in pause_flows:

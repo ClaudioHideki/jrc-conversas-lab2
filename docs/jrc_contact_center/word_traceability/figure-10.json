@@ -44,7 +44,7 @@
       "path": "app/services/jrc_contact_center/ending_actions/visible_rules.rb",
       "git_blob_at_validated_base": null,
       "state": "em_trabalho_sem_CI",
-      "current_sha256": "458d0f44e47d984cdfc36cea8f973c76d23ad49eecc365f0c6c8ca9e1efca0a9"
+      "current_sha256": "af026638839698f38ee978d406ce7379ec80746d3ef8efab409ccf30933069c5"
     },
     {
       "path": "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
@@ -68,7 +68,7 @@
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js",
       "git_blob_at_validated_base": null,
       "state": "em_trabalho_sem_CI",
-      "current_sha256": "9a7d0119ea9522ce1820ab10ca88b7871f78b0e63319b14885f891993d610d86"
+      "current_sha256": "383ab5c43c50ad9c4d63f5082df8cafa04c401c1fb71cc9ad8a52817cad76d4e"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/source_context.rb",

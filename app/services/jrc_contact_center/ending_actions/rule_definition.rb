@@ -46,7 +46,7 @@ class JrcContactCenter::EndingActions::RuleDefinition
   def validate_entry_keys!(row)
     fields = row.is_a?(Hash) && row.key?('execution_mode') ? FIELDS + ['execution_mode'] : FIELDS
     validate_keys!(row, fields)
-    invalid! if row.key?('execution_mode') && !EXECUTION_MODES.include?(row['execution_mode'])
+    invalid! if row.key?('execution_mode') && EXECUTION_MODES.exclude?(row['execution_mode'])
   end
 
   def validate_scope!(scope, active:)

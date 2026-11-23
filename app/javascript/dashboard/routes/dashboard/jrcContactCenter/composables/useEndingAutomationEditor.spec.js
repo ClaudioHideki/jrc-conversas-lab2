@@ -120,6 +120,46 @@ beforeEach(() => {
 });
 
 describe('authorized operational ending-rule editor', () => {
+  it('permits a reviewed inactive draft without a destination while keeping an active empty rule blocked', async () => {
+    const { editor } = mountEditor();
+    await flushPromises();
+    await editor.edit(null);
+    Object.assign(editor.draft.value, {
+      code: 'SYNTHETIC_DRAFT',
+      name: 'SYNTHETIC draft',
+      reason_code: 'SYNTHETIC_REASON',
+      timing: 'call_end',
+      execution_mode: 'agent_confirmation',
+    });
+    await editor.selectQueue('8');
+    await flushPromises();
+    editor.reviewed.value = true;
+    expect(editor.canSave.value).toBe(true);
+    editor.draft.value.active = true;
+    await flushPromises();
+    editor.reviewed.value = true;
+    expect(editor.canSave.value).toBe(false);
+    expect(API.saveEndingRule).not.toHaveBeenCalled();
+  });
+  it('treats a real rule named __new__ as persisted during conflict review instead of substituting an empty new draft', async () => {
+    const row = { ...stored(), code: '__new__' };
+    API.endingRules.mockResolvedValue(listed([row]));
+    const { editor } = mountEditor();
+    await flushPromises();
+    await editor.edit(editor.items.value[0]);
+    editor.revision.handleError({
+      response: { data: { error: 'stale_configuration_revision' } },
+    });
+    await editor.revision.reload();
+    expect(API.endingRules).toHaveBeenLastCalledWith('1', {
+      rule_code: '__new__',
+      page: 1,
+      per_page: 1,
+    });
+    expect(editor.revision.state.latest.name).toBe('SYNTHETIC private rule');
+    expect(editor.revision.state.latest.code).toBe('__new__');
+    expect(editor.draft.value.name).toBe('SYNTHETIC private rule');
+  });
   it('loads the native private list with bounded pagination and does not execute its destination', async () => {
     const { editor } = mountEditor();
     await flushPromises();

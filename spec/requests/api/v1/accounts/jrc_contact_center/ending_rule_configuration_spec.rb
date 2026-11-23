@@ -37,6 +37,16 @@ RSpec.describe 'Ending automation configuration through the existing ACW policy'
     expect(JrcProjects::Task.where(account: account)).to be_empty
   end
 
+  it 'persists an explicitly inactive empty draft without executing or silently choosing a destination' do
+    create_ending_rule_document(rule_input.merge('active' => false, 'actions' => [], 'execution_mode' => 'agent_confirmation'))
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('item')).to include('active' => false, 'actions' => [], 'execution_mode' => 'agent_confirmation')
+    get ending_rules_path, headers: headers, params: { status: 'inactive' }
+    expect(response.parsed_body.fetch('items').sole.fetch('actions')).to be_empty
+    expect(JrcContactCenter::EndingActionVersion.where(account: account).count).to eq(1)
+    expect(JrcProjects::Task.where(account: account)).to be_empty
+  end
+
   it 'paginates and filters authorized rules without changing their private templates' do
     3.times { |index| configure_native_ending_rule(rule_input.merge('code' => "SYNTHETIC_#{index}", 'name' => "SYNTHETIC rule #{index}")) }
     get ending_rules_path, headers: headers, params: { page: 2, per_page: 1, status: 'active', reason_code: 'SYNTHETIC_REASON' }
@@ -84,7 +94,7 @@ RSpec.describe 'Ending automation configuration through the existing ACW policy'
     other = create(:account)
     foreign = JrcContactCenter::Unit.create!(account: other, code: 'SYNTHETIC_OTHER', name: 'SYNTHETIC other', kind: 'sac')
     foreign_queue = JrcContactCenter::Queue.create!(account: other, unit: foreign, code: 'SYNTHETIC_OTHER', name: 'SYNTHETIC other',
-                                                 service_kind: 'voice', strategy: 'ring_all')
+                                                    service_kind: 'voice', strategy: 'ring_all')
     get "#{ending_rules_path}/source_context", headers: headers, params: { queue_id: foreign_queue.id.to_s }
     expect(response).to have_http_status(:not_found)
     expect(JrcContactCenter::EndingActionVersion.where(account: account)).to be_empty
@@ -125,12 +135,12 @@ RSpec.describe 'Ending automation configuration through the existing ACW policy'
     configure_native_ending_rule
     other = create(:user, :contact_center_eligible, account: account, role: :administrator)
     JrcProjects::Projects::Update.call(account: account, actor: actor, project: project,
-                                      attributes: { owner_id: other.id, visibility: 'private', lock_version: project.reload.lock_version },
-                                      correlation_id: 'SYNTHETIC_PRIVATE_REVOKE')
+                                       attributes: { owner_id: other.id, visibility: 'private', lock_version: project.reload.lock_version },
+                                       correlation_id: 'SYNTHETIC_PRIVATE_REVOKE')
     project.project_members.find_by!(account: account, user: actor).destroy!
     account.enable_features!('custom_roles')
     role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_configure
-                                                               jrc_projects_project_view jrc_projects_task_create])
+                                                                  jrc_projects_project_view jrc_projects_task_create])
     member.update!(custom_role: role)
     expect(JrcOperations::Access.projects(member)).not_to include(project)
     get ending_rules_path, headers: headers
@@ -162,7 +172,7 @@ RSpec.describe 'Ending automation configuration through the existing ACW policy'
     configure_native_ending_rule
     JrcCrm::UserBusinessUnit.where(account: account, user: actor, scope: 'GROUP').find_each { |row| row.update!(active: false) }
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', company: issuer,
-                                   business_unit: business, active: true, structure_managed: true)
+                                     business_unit: business, active: true, structure_managed: true)
     get ending_rules_path, headers: headers
     expect(response).to have_http_status(:unauthorized)
     expect(response.body).not_to include('SYNTHETIC_PRIVATE_TEMPLATE_7f19')
@@ -175,8 +185,8 @@ RSpec.describe 'Ending automation configuration through the existing ACW policy'
     configure_native_ending_rule
     person = create(:user, :contact_center_eligible, account: account, role: :administrator)
     JrcProjects::Projects::Update.call(account: account, actor: actor, project: project,
-                                      attributes: { owner_id: person.id, visibility: 'private', lock_version: project.reload.lock_version },
-                                      correlation_id: 'SYNTHETIC_PRIVATE_REVOKE')
+                                       attributes: { owner_id: person.id, visibility: 'private', lock_version: project.reload.lock_version },
+                                       correlation_id: 'SYNTHETIC_PRIVATE_REVOKE')
     project.project_members.find_by!(account: account, user: actor).destroy!
     visible = JrcProjects::Projects::Create.call(account: account, actor: actor, attributes: { name: 'SYNTHETIC visible destination' },
                                                idempotency_key: SecureRandom.uuid)
@@ -186,7 +196,7 @@ RSpec.describe 'Ending automation configuration through the existing ACW policy'
     values['attributes']['board_column_id'] = visible.board_columns.find_by!(status_key: 'backlog').id.to_s
     account.enable_features!('custom_roles')
     role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view jrc_contact_center_configure
-                                                               jrc_projects_project_view jrc_projects_task_create])
+                                                                  jrc_projects_project_view jrc_projects_task_create])
     member.update!(custom_role: role)
     expect(JrcOperations::Access.projects(member)).to include(visible)
     expect(JrcOperations::Access.projects(member)).not_to include(project)

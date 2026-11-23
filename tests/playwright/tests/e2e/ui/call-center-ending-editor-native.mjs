@@ -48,6 +48,10 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
     { auth: target.administrator, isDark: dark }
   );
   await page.goto(location);
+  const actualDarkTheme = await page.evaluate(() =>
+    document.documentElement.classList.contains('dark')
+  );
+  expect(actualDarkTheme).toBe(dark);
   await page.locator('[data-manage-ending-reasons]').click();
   await page.locator('[data-ending-automations-open]').click();
   let editor = page.locator('[data-ending-automation-editor]');
@@ -242,6 +246,8 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
       foreign_status: foreign.status(),
       effects_executed: false,
       configuration_only: true,
+      actual_dark_theme: actualDarkTheme,
+      theme_asserted_in_browser: true,
       contrast,
       screenshots,
       errors,

@@ -96,3 +96,6 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 
 
 - [ ] **Rastreabilidade Word e editor de automações — 23/11/2026**: ambos os Word e suas23 figuras relidos; matriz por requisito em `docs/jrc_contact_center/word_traceability/index.json`. API/editor, modo explícito e correção mobile preparados sobre c5d69cee; aguardam CI própria,19 cenários Rails e264 Chrome. Não equivale ao executor ou ao aceite F10-A/B. Nenhuma migration/SQL alterada; main, checkout b77ffe55, três arquivos e ambientes preservados.
+
+
+- [ ] **Primeiro gate do editor — 9a13e917**: CI45222369556 bloqueada por24 infrações Ruby, com0 exemplos Rails/Vue/Chrome executados. Correções de estrutura/alinhamento, conflito de código `__new__`, rascunho inativo e QA de tema preparados; nova CI exigirá20 pedidos nativos e264 execuções Chrome, sem reduzir os260 cenários anteriores. Relatório e SHA-256 preservados. Executor e aceite integral da figura10 continuam pendentes.

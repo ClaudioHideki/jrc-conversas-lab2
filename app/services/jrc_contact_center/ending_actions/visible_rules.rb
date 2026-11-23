@@ -68,14 +68,21 @@ class JrcContactCenter::EndingActions::VisibleRules
 
     values = input.stringify_keys
     invalid! unless (values.keys - FILTERS).empty?
+    validate_text_filters!(values)
+    invalid! if values.key?('status') && %w[all active inactive].exclude?(values['status'])
+    values
+  end
+
+  def validate_text_filters!(values)
     %w[q reason_code rule_code].each do |key|
       next unless values.key?(key)
 
-      value = values[key]
-      invalid! unless value.is_a?(String) && value.valid_encoding? && value.exclude?("\u0000") && value.length <= 100
+      invalid! unless valid_filter_text?(values[key])
     end
-    invalid! if values.key?('status') && !%w[all active inactive].include?(values['status'])
-    values
+  end
+
+  def valid_filter_text?(value)
+    value.is_a?(String) && value.valid_encoding? && value.exclude?("\u0000") && value.length <= 100
   end
 
   def integer_filter(key, fallback, maximum)

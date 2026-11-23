@@ -15,7 +15,7 @@
     "Mobile authority filters use separate rows below sm; real geometry assertion prepared."
   ],
   "tests_prepared_not_results": {
-    "new_native_requests": 19,
+    "new_native_requests": 20,
     "new_browser_executions": 4,
     "chrome_total_expected": 264,
     "existing_260_cases_retained": true
@@ -30,7 +30,7 @@
     "browser_counter_regressions": 8
   },
   "not_completed": [
-    "Native CI and actual Chrome evidence on this new checkpoint.",
+    "Corrected checkpoint still requires its own complete native CI and actual Chrome evidence.",
     "Call-origin/completion attestation and forward-only arming; rules do not execute destinations yet.",
     "Per-destination independent effect/receipt transactions, current original-agent authorization and real retries.",
     "CRM, Service Desk, notification/Nico adapters and their operational configuration.",
@@ -46,5 +46,27 @@
     "physical_available_bytes": 3600470016,
     "c_free_bytes": 54130974720,
     "read_only": true
-  }
+  },
+  "native_attempts": [
+    {
+      "sha": "9a13e917b7fbc39b76c21bd88c59d577c5e22dfd",
+      "run": 45222369556,
+      "result": "failure",
+      "artifact": 14843806214,
+      "artifact_sha256": "48a6bcc6f65fc7719bc5280c50a9cf8a063773faac16317b812c3b23fdee94da",
+      "new_ruby_offenses": 24,
+      "native_rspec_examples": 0,
+      "vue_cases": 0,
+      "chrome_cases": 0,
+      "tests_blocked_not_approved": true
+    }
+  ],
+  "followup_prepared_not_validated": [
+    "Native Ruby conventions/complexity and alignment corrected without changing allowed filter values or routes.",
+    "Real __new__ rule code no longer collides with the editors internal new-record identity; regression added.",
+    "Inactive empty drafts follow the native supported shape; active empty definitions remain rejected.",
+    "Actual browser theme assertion, real computed CSS surface/contrast and four independent editor evidence reports required.",
+    "All new Ruby files linted before the disposable schema; all older gates retained unchanged.",
+    "General requirements/annex now have explicit code/test references; changed-but-committed code is not labeled natively validated."
+  ]
 }

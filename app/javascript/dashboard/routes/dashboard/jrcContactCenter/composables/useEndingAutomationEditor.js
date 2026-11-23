@@ -72,17 +72,18 @@ export const useEndingAutomationEditor = ({ accountId }) => {
     revision.capture(null);
     error.value = 'DENIED';
   };
-  const reloadRecord = async (account, code) => {
+  const reloadRecord = async (account, identity) => {
+    const isNew = identity === 'new';
+    const code = isNew ? '' : identity.slice('rule:'.length);
     const response = await API.endingRules(account, {
-      rule_code: code === '__new__' ? '' : code,
+      rule_code: code,
       page: 1,
       per_page: 1,
     });
     checkAccount(response, account);
-    const row =
-      code === '__new__'
-        ? blank()
-        : response.data.items.find(item => item.code === code);
+    const row = isNew
+      ? blank()
+      : response.data.items.find(item => item.code === code);
     if (!row)
       throw Object.assign(new Error('Rule unavailable'), {
         response: { status: 404 },
@@ -96,7 +97,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
       data: {
         item: {
           ...row,
-          id: code,
+          id: identity,
           revision: response.data.revision,
           source_queue_id: queue,
           source_scope_revision: context?.data.item.scope_revision || '',
@@ -194,7 +195,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
     error.value = '';
     reviewed.value = false;
     revision.capture({
-      id: row?.code || '__new__',
+      id: row ? `rule:${row.code}` : 'new',
       revision: policy.value.revision,
     });
     if (row) await selectQueue(row.queue_id, true);
@@ -218,7 +219,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
       ['call_end', 'acw_completed'].includes(row.timing) &&
       ['automatic', 'agent_confirmation'].includes(row.execution_mode) &&
       digest(row.scope_revision) &&
-      row.actions.length > 0 &&
+      (!row.active || row.actions.length > 0) &&
       row.actions.every(action => action.kind === 'project_task') &&
       (!row.active ||
         (source.value?.configuration_available &&
@@ -266,7 +267,7 @@ export const useEndingAutomationEditor = ({ accountId }) => {
       reviewed.value = false;
       saved.value = true;
       revision.capture({
-        id: submitted.code,
+        id: `rule:${submitted.code}`,
         revision: response.data.revision,
       });
     } catch (failure) {
