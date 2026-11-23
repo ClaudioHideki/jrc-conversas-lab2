@@ -11,7 +11,7 @@
     "lib/jrc_contact_center/ending_execution_origin_schema_receipt.rb": "4ce75de6aae5a1446ad30f52a7a7285286c8a636b76bee20a99e17006fac3587",
     "config/initializers/jrc_contact_center_ending_privacy.rb": "afba220e54e72f230c483a92006568774f6a3dad69b34226970c69eb48658714",
     "script/jrc_call_center_ending_origin_schema_probe.rb": "826223f8b29b7bc263a76a6d119449a81ac1fe1e556998a72be0317d7f6c07ec",
-    "script/jrc_call_center_ending_origin_upgrade.rb": "2ed699738792f64081abb4e771f990f27244480582496316b3b426ca69dc2b62",
+    "script/jrc_call_center_ending_origin_upgrade.rb": "7b7588637d3d0642aef8a1a5c145221e0c9da86b48dfff1e101aa4d95df780a6",
     "script/validate_cc_ending_origin_migration.mjs": "ea4ea3ad0f32273200e43761465a54e4fdda8414774d4238a7a3395687760c65",
     "script/validate_cc_ending_origin_migration.test.mjs": "7500d7df8f72651e5bbb2c242298c69a416362f56d560762506aaaa4526ec647",
     "script/validate_cc_ending_origin_admission.test.mjs": "ecbfbf3445a7a59cb99336a6505f5e14d9ab62c9198ce52e0090e9dd192a1f23",
@@ -26,12 +26,13 @@
     "spec/support/contact_center_ending_origin_schema_dependencies.rb": "252eb7ceaa0adb4a3bec6cabb05615cdd68069adf6dda348252baeb21d72b0b3",
     "tests/playwright/tests/e2e/ui/call-center-authority-filter-geometry.mjs": "5bcaa6aa9ea6e56ae8b34aa28c466bf9b5b97cb6de30b2bceba7bf358e7e8b88",
     "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "fa2cef6b0b128dec38548015a00ef509bd1ff6a71b36c03a1844a43a6039f61b",
-    ".github/workflows/call-center-administration.yml": "96b8391d1c56e2fbec4e5b6ae2154f1d1c80bbf7259ebb0bad7c38d2ed5d5503",
-    "spec/models/jrc_contact_center/ending_action_origin_privacy_spec.rb": "a2a9e60dfb74cda482ca19ae3dd112364e7969e37f28f8c23bdb51ef052cdcd5"
+    ".github/workflows/call-center-administration.yml": "976690bdadaf7384ba295f988e0083c3d66b4dc6859c051b9fbc1b52495cbea9",
+    "spec/models/jrc_contact_center/ending_action_origin_privacy_spec.rb": "a2a9e60dfb74cda482ca19ae3dd112364e7969e37f28f8c23bdb51ef052cdcd5",
+    "spec/services/jrc_contact_center/synthetic_ending_origin_upgrade_spec.rb": "0c7a5ff5812c04edec64066ddae1e75f703d3016029a8d83aebb650c73d70604"
   },
   "migration_timestamp_collision": false,
   "existing16_migrations_and_sql_unchanged": true,
-  "new_origin_native_examples_expected": 33,
+  "new_origin_native_examples_expected": 34,
   "new_real_concurrency_examples_expected": 4,
   "native_execution_proved": false,
   "schema_installation_upgrade_reload_proved": false,
@@ -88,5 +89,40 @@
     "all_migrations_SQL_and_receipt_unchanged": true,
     "correction_native_result": null,
     "whole_figure10_accepted": false
+  },
+  "upgrade_snapshot_failure": {
+    "sha": "151bf30d8063376b2b5f7dc05400161165f48f54",
+    "run": 45269263508,
+    "job": 138024388978,
+    "artifact": 14864652722,
+    "artifact_sha256": "b459bf407b68702174361f34c107f416e78b4f725f61d4ea1885925cfc601b03",
+    "raw_log_sha256": "34c9a4925a11160bb9caaf663c0c55cb6d1fbd7e9302ab325dabaaed8d0cf15c",
+    "sanitized_log_sha256": "561d37df13ce0abbe6df9107bd948972bad307b0ffaf41cb3108236c3620a183",
+    "lint_new_offenses": 0,
+    "old_reload": {
+      "examples": 252,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "new_origin_reload": {
+      "examples": 33,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "actual_schema_token": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+    "failure": "SyntheticEndingOriginUpgrade#verify_preserved!: Original source changed during upgrade",
+    "cause": "Preparation hashes stale ActiveRecord objects without rereading native trigger/callback values from PostgreSQL.",
+    "correction": "Reload each source before hashing the pre-migration baseline. Preserve exact original-column comparison after migration.",
+    "new_native_regression": "spec/services/jrc_contact_center/synthetic_ending_origin_upgrade_spec.rb",
+    "native_regression_required": "A real native call with database-generated capture fields and a stale in-memory object must hash its persisted attributes.",
+    "required_origin_examples_increased_from": 33,
+    "required_origin_examples": 34,
+    "correction_and_regression_not_yet_natively_executed": true,
+    "all_migrations_SQL_receipts_permissions_and_runtime_unchanged": true,
+    "concurrency_4_and_new_browser_frames_not_yet_executed": true,
+    "whole_figure10_accepted": false,
+    "executor_effects_accepted": false
   }
 }

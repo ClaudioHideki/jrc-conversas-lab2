@@ -1450,15 +1450,38 @@
     "not_F10_A_or_F10_B_acceptance": true
   },
   "origin_executor_current_native_checkpoint_unapproved": {
-    "sha": "e9c54ed8b73bf89d9c1f4a768753e8246625015a",
-    "run": 45264890513,
-    "lint_passed": true,
-    "structural_fresh_reload_receipts_verified": true,
-    "schema_reload_passed": 251,
-    "schema_reload_failed": 1,
-    "origin_33_and_concurrency_4_not_run": true,
-    "finding": "docs/jrc_contact_center/ending_origin_reload_fixture_findings_20261123.json",
-    "helper_fix_needs_own_native_run": true,
-    "no_F10_A_or_F10_B_acceptance": true
+    "sha": "151bf30d8063376b2b5f7dc05400161165f48f54",
+    "run": 45269263508,
+    "job": 138024388978,
+    "artifact": 14864652722,
+    "artifact_sha256": "b459bf407b68702174361f34c107f416e78b4f725f61d4ea1885925cfc601b03",
+    "raw_log_sha256": "34c9a4925a11160bb9caaf663c0c55cb6d1fbd7e9302ab325dabaaed8d0cf15c",
+    "sanitized_log_sha256": "561d37df13ce0abbe6df9107bd948972bad307b0ffaf41cb3108236c3620a183",
+    "lint_new_offenses": 0,
+    "old_reload": {
+      "examples": 252,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "new_origin_reload": {
+      "examples": 33,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "actual_schema_token": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+    "failure": "SyntheticEndingOriginUpgrade#verify_preserved!: Original source changed during upgrade",
+    "cause": "Preparation hashes stale ActiveRecord objects without rereading native trigger/callback values from PostgreSQL.",
+    "correction": "Reload each source before hashing the pre-migration baseline. Preserve exact original-column comparison after migration.",
+    "new_native_regression": "spec/services/jrc_contact_center/synthetic_ending_origin_upgrade_spec.rb",
+    "native_regression_required": "A real native call with database-generated capture fields and a stale in-memory object must hash its persisted attributes.",
+    "required_origin_examples_increased_from": 33,
+    "required_origin_examples": 34,
+    "correction_and_regression_not_yet_natively_executed": true,
+    "all_migrations_SQL_receipts_permissions_and_runtime_unchanged": true,
+    "concurrency_4_and_new_browser_frames_not_yet_executed": true,
+    "whole_figure10_accepted": false,
+    "executor_effects_accepted": false
   }
 }

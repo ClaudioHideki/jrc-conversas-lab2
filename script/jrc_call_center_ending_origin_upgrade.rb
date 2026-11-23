@@ -123,6 +123,7 @@ class JrcContactCenter::SyntheticEndingOriginUpgrade
   end
 
   def snapshot(record)
+    record.reload
     { type: record.class.name, id: record.id, columns: record.attributes.keys, digest: digest(record.attributes) }
   end
 
