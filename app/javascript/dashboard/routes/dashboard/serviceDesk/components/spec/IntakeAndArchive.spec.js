@@ -5,6 +5,11 @@ import { createI18n } from 'vue-i18n';
 import messages from 'dashboard/i18n/locale/pt_BR/jrcServiceDesk.json';
 import InternalTicketForm from '../InternalTicketForm.vue';
 import ArchivedTicketsDialog from '../ArchivedTicketsDialog.vue';
+import {
+  createOperationalSession,
+  createOperationalState,
+} from '../../helpers/operationalSession';
+import { createServiceDeskOperationsClient } from 'dashboard/api/serviceDeskOperationsClient';
 
 let session;
 let wrapper;
@@ -42,7 +47,6 @@ const render = component => {
       stubs: {
         ServiceDefinitionSelect: true,
         CatalogueAnswers: true,
-        WriteFeedback: true,
         TicketCreationReceipt: true,
         TicketTable: {
           props: ['items'],
@@ -91,6 +95,66 @@ beforeEach(() => {
 afterEach(() => wrapper?.unmount());
 
 describe('Employee recipient and closed-ticket journeys', () => {
+  it('preserves the mounted draft and refuses the operation locally on a real client POST 403', async () => {
+    session.state.context.available = true;
+    session.state.context.units = [unit('10', '3', '7')];
+    session.dispose = vi.fn(() => {
+      session.state.context = null;
+    });
+    const http = {
+      post: vi.fn().mockRejectedValue({
+        response: { status: 403, data: { code: 'forbidden' } },
+      }),
+    };
+    session.operations = createOperationalSession(
+      createServiceDeskOperationsClient(http),
+      session,
+      reactive(createOperationalState())
+    );
+    render(InternalTicketForm);
+    wrapper
+      .getComponent({ name: 'ServiceDefinitionSelect' })
+      .vm.$emit('update:modelValue', '35');
+    await flushPromises();
+    wrapper.getComponent({ name: 'CatalogueAnswers' }).vm.$emit('ready', true);
+    await wrapper.get('input[maxlength="255"]').setValue('Synthetic request');
+    await wrapper.get('textarea').setValue('Synthetic description');
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+
+    expect(http.post).toHaveBeenCalledOnce();
+    expect(http.post.mock.calls[0][1]).toEqual({
+      unit_id: '10',
+      internal_request: true,
+      service_id: '35',
+      ticket: {
+        title: 'Synthetic request',
+        description: 'Synthetic description',
+        service_fields: {},
+        assignee_account_user_id: '7',
+      },
+    });
+    expect(session.dispose).not.toHaveBeenCalled();
+    expect(session.state.status).toBe('ready');
+    expect(wrapper.get('input[maxlength="255"]').element.value).toBe(
+      'Synthetic request'
+    );
+    expect(wrapper.get('textarea').element.value).toBe('Synthetic description');
+    expect(
+      wrapper.getComponent({ name: 'WriteFeedback' }).props('status')
+    ).toBe('forbidden');
+    expect(wrapper.text()).toContain(
+      messages.JRC_SERVICE_DESK.LIFECYCLE.feedback.denied
+    );
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(http.post.mock.calls[1][1]).toEqual(http.post.mock.calls[0][1]);
+    expect(http.post.mock.calls[1][2].headers).toEqual(
+      http.post.mock.calls[0][2].headers
+    );
+    session.operations.clear();
+  });
+
   it('requires a chosen recipient when legacy triage has no default', async () => {
     const destination = unit('10', '3', '7');
     destination.internal_intake.primary = null;

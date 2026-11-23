@@ -25,7 +25,6 @@ class JrcServiceDesk::IntakeRuleApplication
   def record_sla!
     selection = selected('sla_selection')
     return unless selection
-    raise Pundit::NotAuthorizedError unless @context.capability?(:sla_snapshots_record)
 
     version, rule = selection
     attributes = rule.fetch('output').fetch('snapshot').merge('captured_at' => @ticket.opened_at.iso8601(6))
@@ -36,7 +35,11 @@ class JrcServiceDesk::IntakeRuleApplication
     end
 
     JrcServiceDesk::LifecycleClocks.verify_snapshot!(snapshot, clock_kinds: bound_policy.rules.clock_kinds)
-    created = JrcServiceDesk::RecordSlaSnapshotService.new(user_context: @context.to_h).call(ticket_id: @ticket.id, attributes: attributes)
+    # The ticket creation command has already authorized and locked this unit.
+    # Conditions come exclusively from the selected, digest-checked published rule,
+    # not from a caller-supplied snapshot requiring manual recording permission.
+    snapshot.assign_attributes(account: @ticket.account, unit: @ticket.unit, ticket: @ticket, applied_at: Time.current)
+    created = JrcServiceDesk::SlaSnapshotWriter.call(snapshot: snapshot, actor: @ticket.created_by_membership)
     JrcServiceDesk::LifecycleClocks.new(ticket: @ticket, version: bound_policy,
                                       actor: @ticket.created_by_membership, now: @ticket.opened_at).start!
     @ticket.ticket_events.create!(account: @ticket.account, unit: @ticket.unit,

@@ -61,6 +61,7 @@ const locked = computed(
     busy.value ||
     [
       'readback_pending',
+      'forbidden',
       'error',
       'invalid_contract',
       'interrupted',

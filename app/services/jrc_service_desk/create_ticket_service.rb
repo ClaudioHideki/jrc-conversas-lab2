@@ -142,7 +142,9 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
 
   def catalogue_references(service_id, normalized, unit, internal_request: false)
     service = reference(JrcServiceDesk::Service, service_id, unit)
-    queue = reference(JrcServiceDesk::Queue, normalized['queue_id'] || service&.default_queue_id, unit)
+    queue_id = normalized['queue_id']
+    queue_id ||= service&.default_queue_id unless internal_request
+    queue = reference(JrcServiceDesk::Queue, queue_id, unit)
     raise Pundit::NotAuthorizedError if queue && !internal_request && !context.capability?(:tickets_assign)
 
     normalized['priority_id'] ||= service&.default_priority_id

@@ -246,8 +246,11 @@ export function createOperationalSession(
         if (
           !intake ||
           confirmed.assignee?.id !==
-            (payload.ticket.assignee_account_user_id || intake.primary.id) ||
-          confirmed.queue?.id !== intake.queue.id
+            canonicalId(
+              payload.ticket.assignee_account_user_id || intake.primary?.id
+            ) ||
+          (!payload.ticket.assignee_account_user_id &&
+            confirmed.queue?.id !== intake.queue?.id)
         )
           throw new ContractError();
       }
@@ -332,12 +335,13 @@ export function createOperationalSession(
         // Only a non-sensitive outcome survives losing record visibility.
         // No record, unit or account data is restored by this notice.
         state.notice = 'readback_pending';
-      } else if ([401, 403].includes(status))
-        revoke(status === 401 ? 'unauthenticated' : 'denied');
+      } else if (status === 401) revoke('unauthenticated');
       else {
         state.writes[key] = {
           status:
-            { 409: 'conflict', 422: 'invalid_input' }[status] ||
+            { 403: 'forbidden', 409: 'conflict', 422: 'invalid_input' }[
+              status
+            ] ||
             (error instanceof ContractError ? 'invalid_contract' : 'error'),
           ticket: null,
           ...([

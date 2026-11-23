@@ -26,19 +26,7 @@ class JrcServiceDesk::RecordSlaSnapshotService < JrcServiceDesk::BaseService
       snapshot = JrcServiceDesk::SlaSnapshot.new(values.merge('account' => context.account, 'unit' => ticket.unit,
                                                                  'ticket' => ticket, 'applied_at' => Time.current))
       authorize!(snapshot, :create?)
-      snapshot.payload_digest = snapshot.expected_digest
-      existing = ticket.sla_snapshots.where(account_id: context.account.id, unit_id: ticket.unit_id,
-                                             payload_digest: snapshot.payload_digest).first
-      next existing if existing
-
-      snapshot.version = (ticket.sla_snapshots.maximum(:version) || 0) + 1
-      snapshot.save!
-      JrcServiceDesk::SlaMilestone::KINDS.each do |kind|
-        JrcServiceDesk::SlaMilestone.create!(account: context.account, unit: ticket.unit, ticket: ticket, sla_snapshot: snapshot, kind: kind)
-      end
-      append_event!(ticket, 'sla_snapshot_recorded', 'snapshot_id' => snapshot.id, 'version' => snapshot.version,
-                                                       'payload_digest' => snapshot.payload_digest)
-      snapshot
+      JrcServiceDesk::SlaSnapshotWriter.call(snapshot: snapshot, actor: actor_membership)
     end
   end
 

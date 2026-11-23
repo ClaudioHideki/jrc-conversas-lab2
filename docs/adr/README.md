@@ -7,6 +7,8 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 
 ## Decisões deste bootstrap
 
+- [0009-sla-publicado-na-criacao-autorizada](0009-sla-publicado-na-criacao-autorizada.md): aplicar SLA publicado na criação autorizada sem conceder gravação manual de condições; recusa de escrita preserva o formulário.
+
 - [0008-abertura-interna-por-destinatario](0008-abertura-interna-por-destinatario.md): destinatários de outros departamentos da unidade e recuperação da abertura com nova autorização.
 
 - [0007-visualizacao-responsiva-da-conversa](0007-visualizacao-responsiva-da-conversa.md): área de mensagens priorizada, editor adaptável e modo de ampliar conversa.

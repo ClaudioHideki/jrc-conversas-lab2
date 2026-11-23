@@ -43,7 +43,8 @@ class JrcServiceDesk::InternalIntake
   end
 
   def self.recipient_allowed?(member, ticket)
-    (!ticket.queue || ticket.queue.active?) && JrcServiceDesk::AssignmentEligibility.manual_domain?(member, ticket)
+    member.account_user.user.reload.active_for_authentication? &&
+      (!ticket.queue || ticket.queue.active?) && JrcServiceDesk::AssignmentEligibility.manual_domain?(member, ticket)
   end
 
   def self.destinations(unit)

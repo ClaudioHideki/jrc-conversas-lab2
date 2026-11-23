@@ -12,6 +12,10 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 
 ## Fase 2: Operação e desenvolvimento ativo
 
+- [x] Validar localmente a abertura interna com SLA publicado, autorização manual preservada e rascunho mantido após recusa de operação. 1.068 cenários Rails cobertos com revalidação direcionada, 22 concorrentes e 1.153 Vue aprovados. Publicação e homologação permanecem pendentes de autorização posterior; ver SD-SAVE-403-20261123 em TASKS.md.
+
+  Ajuste final validado com 176 Rails e 87 Vue: escolha de responsável de outras equipes/filas, independência de padrões inválidos, autenticação ativa do destinatário e nenhuma substituição silenciosa.
+
 - [x] Validar e publicar a abertura interna por destinatário de outros departamentos da unidade e recuperação da rota de criação (ADR0008), preservando a imagem responsiva f494fd38. Produto ab6bba04; [evidências](docs/jrc_consolidation/abertura-chamados-agentes-release-20261119.md). Implantação e aceite permanecem separados.
 
 - [x] Validar e publicar a visualização responsiva de mensagens, com editor adaptável e botão Ampliar conversa (ADR0007). Produto f494fd38; [evidências](docs/jrc_consolidation/inbox-responsive-release-20261118.md). Implantação permanece separada.
