@@ -208,7 +208,7 @@ jobs:
         id: ending_actor_preflight
         run: |
           bundle exec rspec spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb --format progress --format json --out /tmp/call-center-ending-origin-guards-preflight.json
-          python3 - <<'PY'
+          python3 -B - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('/tmp/call-center-ending-origin-guards-preflight.json').read_text())

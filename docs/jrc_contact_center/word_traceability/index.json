@@ -900,7 +900,7 @@
       "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb": "d3556646d6f5916e1b6c8a93b85a1ca53830085534300e0409d34fe1c9c55183",
       "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb": "5a1c174c18af1c4033381535a0d9532c7c7971b097ef4c31b9ab855b32570463",
       "spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb": "d66b87d331f939ecb54f332b74200ab13ab581c4b44cd3c7a172024972acf624",
-      ".github/workflows/call-center-administration.yml": "56bf92116a138b0dc52a76e8e488f9538f349433db1c48a62d66ee9728f7975b",
+      ".github/workflows/call-center-administration.yml": "5bbe80d657c1932dee14b5a1b31b5658d3d115110580d4048f0ffb2ca4f37d63",
       "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AuthorityAssignments.vue": "a465f17b7041c5a491ac9ffda4425403143c66c7fcd6946b171dd2af8bed1da1",
       "tests/playwright/tests/e2e/ui/call-center-authority-filter-geometry.mjs": "e265a132a1ded5ab594d28f50742209b5b7ee91d20ac42551b93abcb45547ec6"
     },
@@ -940,7 +940,7 @@
       "origin_fresh_and_reload": 34,
       "chrome": 264,
       "previous_workflow_restored_exactly": true,
-      "static_rejected_mutations": 5
+      "static_rejected_mutations": 6
     },
     "mobile_card_correction_pending_native": {
       "before_sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
@@ -949,6 +949,32 @@
       "native_browser_required": "Four SHA-bound card geometry receipts and four new original PNGs; 264existing scenarios retained.",
       "new_vue_unit_tests_not_needed_for_css_geometry": "Existing component behavior suite plus real native Chrome geometry regression is required.",
       "expected_total_screenshot_hashes": 608
+    },
+    "initial_gate_failure": {
+      "sha": "ff05d569686383e24ae404fdfd95a7ced2dbe10a",
+      "run": 45286393732,
+      "job": 138083719637,
+      "conclusion": "failure",
+      "failed_steps": [
+        "Confirm immutable identity and disposable resources",
+        "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"
+      ],
+      "raw_log_sha256": "51fd6281f58135590bb24f74e2762c022d78dc7dca4433515efaa665d2971d6d",
+      "sanitized_log_sha256": "650705b738789d6ad993bf6463a23d297f467a55e489296dea7c227283270279",
+      "sanitized_log": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\job-138083719637-ff05d569-sanitized.log",
+      "native_rails_vue_chrome_examples_executed": 0,
+      "cause": "New actor preflight used python3 - instead of the existing reviewed python3 -B - heredoc form.",
+      "correction": "Add only -B to the new preflight command; do not weaken or change the existing validator.",
+      "artifact_upload_secondary_failure": "No test artifacts existed because the initial gate stopped before runtime/test setup. Preserve if-no-files-found:error.",
+      "last_verified_readonly_foundation": "dc9944c54e299e56a23886541de96cfdd9fce060",
+      "validator_native_source_unchanged": true,
+      "static_rechecks": {
+        "existing_gate_unit_cases": 7,
+        "python_blocks": 5,
+        "restores_previous_workflow_exactly": true,
+        "rejected_workflow_mutations": 6
+      },
+      "correction_not_natively_reexecuted": true
     }
   },
   "origin_read_only_foundation_native_acceptance": {
@@ -1137,5 +1163,31 @@
       "whole_figure10_accepted": false,
       "executor_effects_accepted": false
     }
-  ]
+  ],
+  "executor_initial_gate_failure": {
+    "sha": "ff05d569686383e24ae404fdfd95a7ced2dbe10a",
+    "run": 45286393732,
+    "job": 138083719637,
+    "conclusion": "failure",
+    "failed_steps": [
+      "Confirm immutable identity and disposable resources",
+      "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"
+    ],
+    "raw_log_sha256": "51fd6281f58135590bb24f74e2762c022d78dc7dca4433515efaa665d2971d6d",
+    "sanitized_log_sha256": "650705b738789d6ad993bf6463a23d297f467a55e489296dea7c227283270279",
+    "sanitized_log": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\job-138083719637-ff05d569-sanitized.log",
+    "native_rails_vue_chrome_examples_executed": 0,
+    "cause": "New actor preflight used python3 - instead of the existing reviewed python3 -B - heredoc form.",
+    "correction": "Add only -B to the new preflight command; do not weaken or change the existing validator.",
+    "artifact_upload_secondary_failure": "No test artifacts existed because the initial gate stopped before runtime/test setup. Preserve if-no-files-found:error.",
+    "last_verified_readonly_foundation": "dc9944c54e299e56a23886541de96cfdd9fce060",
+    "validator_native_source_unchanged": true,
+    "static_rechecks": {
+      "existing_gate_unit_cases": 7,
+      "python_blocks": 5,
+      "restores_previous_workflow_exactly": true,
+      "rejected_workflow_mutations": 6
+    },
+    "correction_not_natively_reexecuted": true
+  }
 }

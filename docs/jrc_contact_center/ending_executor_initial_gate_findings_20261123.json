@@ -1,0 +1,26 @@
+{
+  "sha": "ff05d569686383e24ae404fdfd95a7ced2dbe10a",
+  "run": 45286393732,
+  "job": 138083719637,
+  "conclusion": "failure",
+  "failed_steps": [
+    "Confirm immutable identity and disposable resources",
+    "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"
+  ],
+  "raw_log_sha256": "51fd6281f58135590bb24f74e2762c022d78dc7dca4433515efaa665d2971d6d",
+  "sanitized_log_sha256": "650705b738789d6ad993bf6463a23d297f467a55e489296dea7c227283270279",
+  "sanitized_log": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\job-138083719637-ff05d569-sanitized.log",
+  "native_rails_vue_chrome_examples_executed": 0,
+  "cause": "New actor preflight used python3 - instead of the existing reviewed python3 -B - heredoc form.",
+  "correction": "Add only -B to the new preflight command; do not weaken or change the existing validator.",
+  "artifact_upload_secondary_failure": "No test artifacts existed because the initial gate stopped before runtime/test setup. Preserve if-no-files-found:error.",
+  "last_verified_readonly_foundation": "dc9944c54e299e56a23886541de96cfdd9fce060",
+  "validator_native_source_unchanged": true,
+  "static_rechecks": {
+    "existing_gate_unit_cases": 7,
+    "python_blocks": 5,
+    "restores_previous_workflow_exactly": true,
+    "rejected_workflow_mutations": 6
+  },
+  "correction_not_natively_reexecuted": true
+}
