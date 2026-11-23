@@ -104,6 +104,7 @@ export async function verifyEndingConfirmation(
     expect([401, 403, 404]).toContain(beforeAdmin.status());
     administrativeStatuses.push(beforeAdmin.status());
     const form = page.locator('[data-pending-qualification-form]');
+    await expect(form.locator('[data-ending-reason-required]')).toBeVisible();
     const reason = form.locator('[data-qualification-field="reason"]');
     await reason.selectOption(target.ending_reason_code);
     const feedback = form.locator('[data-acw-answer="feedback"]');
@@ -174,6 +175,7 @@ export async function verifyEndingConfirmation(
       verified: false,
     });
     await expect(form.locator('[data-ending-reason-confirmed]')).toBeVisible();
+    await expect(form.locator('[data-ending-reason-required]')).toHaveCount(0);
     await expect(reason).toBeDisabled();
     await expect(
       form.locator('[data-qualification-field="note"]')
@@ -242,6 +244,30 @@ export async function verifyEndingConfirmation(
       verified: false,
       quantity: 0,
     });
+    const finalStateResponse = await page.request.get(api + '/agent_state', {
+      headers: target.operator,
+    });
+    expect(finalStateResponse.status()).toBe(200);
+    const finalStatePayload = await finalStateResponse.json();
+    expect(String(finalStatePayload.account_id)).toBe(
+      String(target.account_id)
+    );
+    const finalState = finalStatePayload.item;
+    expect(finalState).toMatchObject({
+      account_user_id: String(target.operator_id),
+      state: 'available',
+      pending_qualifications: [],
+      eligible: false,
+      provider_confirmed: false,
+    });
+    // Observe the production component's read-only poll; never inject UI state.
+    await expect(page.locator('[data-native-deferred-pause]')).toHaveAttribute(
+      'data-agent-state',
+      finalState.state,
+      {
+        timeout: 15000,
+      }
+    );
     await capture('completed');
     const afterAdmin = await page.request.get(api + '/acw_forms', {
       headers: target.operator,
@@ -271,6 +297,9 @@ export async function verifyEndingConfirmation(
           idempotent_replay_status: replay.status(),
           pending_reload_preserved: true,
           final_completion_status: 200,
+          final_agent_state: finalState.state,
+          native_agent_poll_observed: true,
+          provider_confirmed: finalState.provider_confirmed,
           false_and_zero_preserved: true,
           administrative_statuses: administrativeStatuses,
           contrast,

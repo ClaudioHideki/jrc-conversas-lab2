@@ -73,7 +73,11 @@ const reasons = computed(() => {
         })
       }}
     </p>
-    <p v-if="reasonRequired" class="mt-2 text-xs text-n-amber-11">
+    <p
+      v-if="reasonRequired && reasonConfirmation?.state !== 'confirmed'"
+      class="mt-2 text-xs text-n-amber-11"
+      data-ending-reason-required
+    >
       {{ t('JRC_CONTACT_CENTER.ENDING_REASONS.OPERATIONAL_REQUIRED') }}
     </p>
     <div

@@ -1,0 +1,88 @@
+{
+  "kind": "reviewed_visual_correction_and_stronger_native_browser_assertions",
+  "parent": "1d0ef6dc4db41fe85a801149013a298b74003e74",
+  "branch": "codex/call-center-control-desk-20261116",
+  "references": {
+    "diagnostic_source": "2a0fc2dedaa95c8b582c2bce11ffd9be045f3636",
+    "run": 45087999785,
+    "artifact": 14782891497,
+    "artifact_sha256": "a7d236fe870969a44abd890230405ee3497d81cf11d86dd21a7cc6550f43b86b",
+    "original_images_actually_opened": 48,
+    "failed_workflow_not_accepted": true
+  },
+  "findings": [
+    {
+      "observation": "A completed-form capture still displayed the previously fetched ACW state.",
+      "cause": "The existing production AgentStatePanel performs an authorized read-only poll every five seconds while work is pending; the new scenario captured immediately after the completion response.",
+      "correction": "Require a real authenticated native state response, no remaining qualifications and the rendered state after the existing poll before the final screenshot. Do not inject state, alter polling or assert PABX availability."
+    },
+    {
+      "observation": "The filtered own-requests capture still showed the existing loading indicator.",
+      "correction": "Await completion of the existing rendering/loading state after the verified HTTP filter response and visible matching rows, before capture."
+    },
+    {
+      "observation": "The generic instruction to select a registered reason remained after that reason was explicitly confirmed and locked.",
+      "correction": "Hide only that obsolete instruction after confirmation. Keep the confirmed-reason instruction, remaining draft fields, context retry and manual ACW completion."
+    }
+  ],
+  "local_actual": {
+    "unit_regression_before": {
+      "passed": 85,
+      "failed": 1,
+      "total": 86
+    },
+    "unit_after": {
+      "passed": 86,
+      "failed": 0,
+      "total": 86
+    },
+    "frontend_lint": {
+      "files": 2,
+      "errors": 0,
+      "warnings": 0
+    },
+    "browser_helper_grammar": {
+      "files": 2,
+      "passed": true
+    },
+    "resource_guard": {
+      "worker_count": 1,
+      "timeout_seconds": 45,
+      "node_heap_mib": 384,
+      "stopped_for_resources": false
+    },
+    "minimum_ram_bytes": 3139706880,
+    "minimum_c_free_bytes": 50443177984,
+    "not_native_rails_or_chrome_acceptance": true
+  },
+  "preserved": [
+    "All existing native specs and 260 Chrome combinations; no skipped cases or retries.",
+    "All 14 migration and SQL identities, confirmation ledger and permissions.",
+    "Original checkout b77ffe55 and the three protected pending hashes.",
+    "Current isolated CI is not cancelled or duplicated; publish the next checkpoint only after it finishes."
+  ],
+  "native_validation_of_this_delta": "pending",
+  "whole_word_complete": false,
+  "next_internal_requirement": "Figure10 real versioned automations and per-destination execution/retry under the completing agent's revalidated native permissions. Classification confirmation alone does not execute destinations.",
+  "no_docker_publication_or_deploy": true,
+  "scope_proof": {
+    "reconstructed_prior_code_bytes_exactly": 4,
+    "source_delta_paths": 8,
+    "all_other_backend_database_permissions_and_locales_unchanged": true
+  },
+  "parent_native_verified": {
+    "sha": "1d0ef6dc4db41fe85a801149013a298b74003e74",
+    "run": 45095458033,
+    "artifact": 14784884045,
+    "sha256": "4c90e51333581483046ef2958c74e500f11bfb192b555b7726bf14b3f42646c7",
+    "native_distinct": 2809,
+    "schema_reload_separate": 200,
+    "preflight_repeated_not_additional": 23,
+    "vue": 1795,
+    "chrome": 260,
+    "screenshots_hash_verified": 584,
+    "all_mandatory_failures_pending_outside_errors": 0,
+    "ruby_new_offenses": 0,
+    "does_not_accept_followup_delta_or_entire_word": true
+  }
+}

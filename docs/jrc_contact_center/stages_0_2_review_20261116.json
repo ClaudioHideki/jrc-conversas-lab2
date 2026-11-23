@@ -688,7 +688,7 @@
       ],
       "remaining_or_external": [
         "Workspace Hoya inteiro ainda não homologado em Chrome;controles reais reutilizados tiveram homologação no harness nativo.",
-        "Catálogo completo de encerramentos e automações por destino continuam pendentes.",
+        "Automações por destino continuam pendentes; confirmação de classificação e catálogo já possuem evidência nativa, conforme os registros posteriores desta matriz.",
         "Nenhuma confirmação ou publicaçãoPABX homologada."
       ],
       "code_references": [
@@ -867,7 +867,8 @@
         "complete_reference": [
           "Per-reason CRM/SD/task orchestration, per-destination receipts and retries remain stage 6"
         ]
-      }
+      },
+      "current_internal_foundation": "Motivo explicitamente confirmado, imutável e independente da conclusão do ACW: prova nativa em 2a0fc2de; não executa destinos. Motor por destino ainda pendente."
     },
     {
       "figure": 11,
@@ -7346,5 +7347,10 @@
     "report": "docs/jrc_contact_center/ending_confirmation_counter_gate_findings_20261122.json",
     "workflow_count_correction": 260,
     "full_23_figures_complete": false
+  },
+  "ending_confirmation_visual_followup_20261122": {
+    "report": "docs/jrc_contact_center/ending_confirmation_visual_followup_20261122.json",
+    "native_status": "pending",
+    "whole_word_complete": false
   }
 }

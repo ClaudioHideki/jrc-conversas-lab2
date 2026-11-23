@@ -194,6 +194,7 @@ export async function verifyAllScopePauseApproval(parent, info, target) {
       await expect(
         ownPage.locator(`[data-approval-request="${requestId}"]`)
       ).toContainText('Call Center');
+    await expect(ownPage.getByRole('status')).toHaveCount(0);
     await capture(ownPage, 'own-request');
     await ownPage.close();
 

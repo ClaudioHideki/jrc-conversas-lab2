@@ -10,6 +10,8 @@ describe('native pending qualification registered reason options', () => {
       props: {
         reason: 'order',
         reasonRevision: 2,
+        reasonRequired: true,
+        reasonOptions: [{ code: 'order', name: 'SYNTHETIC registered' }],
         formError: true,
         reasonConfirmation: {
           state: 'confirmed',
@@ -28,8 +30,18 @@ describe('native pending qualification registered reason options', () => {
     expect(
       wrapper.get('[data-qualification-field="note"]').element.disabled
     ).toBe(false);
+    expect(wrapper.text()).not.toContain(
+      'JRC_CONTACT_CENTER.ENDING_REASONS.OPERATIONAL_REQUIRED'
+    );
     await wrapper.get('[data-reload-ending-context]').trigger('click');
     expect(wrapper.emitted('reloadForm')).toHaveLength(1);
+    await wrapper.setProps({ reasonConfirmation: null });
+    expect(wrapper.text()).toContain(
+      'JRC_CONTACT_CENTER.ENDING_REASONS.OPERATIONAL_REQUIRED'
+    );
+    expect(
+      wrapper.get('[data-qualification-field="reason"]').element.disabled
+    ).toBe(false);
     wrapper.unmount();
   });
 
