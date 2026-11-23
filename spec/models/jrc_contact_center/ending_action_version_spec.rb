@@ -5,6 +5,7 @@ RSpec.describe JrcContactCenter::EndingActionVersion do
   include_context 'with native private ending action definitions'
 
   it 'records exact native audit and actor provenance without creating a destination or granting a capability' do
+    member
     before = [JrcProjects::Task.count, JrcContactCenter::AccessGrant.count]
     version = record_private_ending_definition
     audit = Audited.audit_class.find(version.source_audit_id)

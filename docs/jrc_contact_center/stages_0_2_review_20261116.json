@@ -7466,6 +7466,7 @@
     "whole_figure10_complete": false,
     "lint_followup": "docs/jrc_contact_center/ending_rule_versions_lint_followup_20261123.json",
     "source_pin_findings": "docs/jrc_contact_center/ending_rule_versions_source_pin_findings_20261123.json",
-    "current_context_findings": "docs/jrc_contact_center/ending_rule_versions_current_context_findings_20261123.json"
+    "current_context_findings": "docs/jrc_contact_center/ending_rule_versions_current_context_findings_20261123.json",
+    "fixture_findings": "docs/jrc_contact_center/ending_rule_versions_fixture_findings_20261123.json"
   }
 }

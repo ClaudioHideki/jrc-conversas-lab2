@@ -46,6 +46,7 @@ RSpec.describe CreateContactCenterEndingActionVersions do
   end
 
   it 'rejects an unproven pre-existing head instead of inventing private definitions, actors or historical dates' do
+    original = account.reload.attributes.deep_dup
     expect do
       ApplicationRecord.transaction(requires_new: true) do
         remove_owned_ending_version_schema
@@ -53,7 +54,7 @@ RSpec.describe CreateContactCenterEndingActionVersions do
         described_class.new.up
       end
     end.to raise_error(ActiveRecord::MigrationError, /Unproven ending action configuration/)
-    account.reload
+    expect(account.reload.attributes).to eq(original)
     expect(catalogue.head).to be_nil
     expect(versions).to be_empty
   end

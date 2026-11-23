@@ -1,0 +1,56 @@
+{
+  "base": "a0c0dbc0ad5a623c178af83e58e6664a87e14d22",
+  "run": 45185620677,
+  "job": 137730328958,
+  "artifact": 14823692087,
+  "artifact_sha256": "0149aefe46407e47763c06e857054e5b2829c0944164944ea539de1cbc5f2d91",
+  "diagnostic_is_early_not_acceptance": true,
+  "actual_reload": {
+    "duration": 35.658971364,
+    "example_count": 252,
+    "failure_count": 2,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "actual_passed": 250,
+  "all238_prior_examples_passed": true,
+  "unchanged_example_count": 252,
+  "failures": [
+    {
+      "file": "./spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "line": 7,
+      "description": "JrcContactCenter::EndingActionVersion records exact native audit and actor provenance without creating a destination or granting a capability",
+      "message": "\nexpected: [0, 0]\n     got: [0, 1]\n\n(compared using ==)\n"
+    },
+    {
+      "file": "./spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb",
+      "line": 48,
+      "description": "CreateContactCenterEndingActionVersions rejects an unproven pre-existing head instead of inventing private definitions, actors or historical dates",
+      "message": "Couldn't find Account with [WHERE \"accounts\".\"id\" = $1]"
+    }
+  ],
+  "causes": {
+    "eligibility_baseline": "The explicit contact_center_eligible user factory creates one synthetic AccessGrant when the lazy member is materialized; initialize member before measuring the private writer side effects.",
+    "migration_rollback_account": "The lazy account was created inside the deliberately rolled-back savepoint and correctly disappeared. Persist it before entering the savepoint, then compare every persisted attribute after rollback."
+  },
+  "factory_unchanged": {
+    "path": "spec/factories/users.rb",
+    "sha256": "203d6b095a128642d6091463c010a74e4a360e2b3c656a70eed98268d41786c2"
+  },
+  "candidate_source_fixes": {
+    "spec/models/jrc_contact_center/ending_action_version_spec.rb": "c12691f4b165917e8c5b9971f0e4b49bc4b3698eefd84e3e7e20266c0eb502f6",
+    "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": "8c0125a914596b8ed7d84485b437eeb1e0c50c4308010ecf9112c84f57e99a8a"
+  },
+  "no_product_schema_sql_lock_permission_or_factory_change": true,
+  "all_existing_assertions_preserved": true,
+  "extra_full_persisted_account_equality_assertion": true,
+  "no_grant_added_by_tested_writer": true,
+  "same102_focused_and3_concurrency_examples_required": true,
+  "native_acceptance_of_fixes": false,
+  "whole_figure10_complete": false,
+  "former_runtime_context_error_no_longer_observed": true,
+  "final_artifact": 14823734333,
+  "final_artifact_sha256": "8ba2c3e1e9c6d61b73fbda2e5db50a893d0074a5d0dd7bade71f5bdf2bde4e0e",
+  "final_incremental_ruby_new_offenses": 0,
+  "final_workflow_status": "completed_failure"
+}

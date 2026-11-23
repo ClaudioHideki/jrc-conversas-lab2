@@ -37,8 +37,8 @@
     "db/migrate/20261123063000_create_contact_center_ending_action_versions.rb": "e22b6a5f6d6fd239e18a7d83862cee391159acea181c0338d72daf7c1da75dc0",
     "db/functions/20261123063000_contact_center_ending_action_versions.sql": "0d8c92f02f01f49f3a783bc468bfd20e1e37fc86bfca6b2409cea69bec12c253",
     "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "bae3d97965ae0a0e84917dab6709b7dc03561a46f5fe4db718e826b7796ee397",
-    "spec/models/jrc_contact_center/ending_action_version_spec.rb": "f0f269c22f3dc052dbf50da0d1a91ccf3ea7e4e93d1fb0926a83d1788470290c",
-    "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": "fa81807fa395690b2edb09b8b6749f85ee08557aa85171cb45a9573e0e566c32",
+    "spec/models/jrc_contact_center/ending_action_version_spec.rb": "c12691f4b165917e8c5b9971f0e4b49bc4b3698eefd84e3e7e20266c0eb502f6",
+    "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": "8c0125a914596b8ed7d84485b437eeb1e0c50c4308010ecf9112c84f57e99a8a",
     "spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb": "acdca21cf9604e80266a5cdf113ed71a409c21f94422b29fe0d35820bffbc548",
     "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb": "531d7abdd7aac08bff9593afb466fa0a1d5e6749b03f8b7295fa594cd1dc0366",
     "spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb": "101a15f94a9b17f449a70d02b9aa2f6bc9771413655a23644b709ae5fa8d4b4b",
@@ -83,7 +83,7 @@
     "embedded_python_blocks_compiled_only": 2,
     "independent_evidence_reader": 18
   },
-  "native_validation": "Fresh/reload receipts match and all238 earlier reload examples pass; current-context and persisted-snapshot fixes await actual native run",
+  "native_validation": "250/252 native reload examples pass, including all238 earlier ones; Current.set errors no longer occur, but two fixture initialization corrections still await native CI",
   "native_or_visual_acceptance_of_this_increment": false,
   "no_public_automation_api_editor_job_or_destination_effects": true,
   "customer_company_links_distinct_from_operating_issuer_and_business_unit_scope": true,
@@ -103,15 +103,15 @@
   },
   "approved_deactivation_decision_report": "docs/jrc_contact_center/ending_deactivation_decision_20261123.json",
   "latest_actual_failure": {
-    "sha": "50f50458d95639b4c7faf4f380fa04eab90aa2ed",
-    "run": 45177093066,
-    "job": 137701058456,
-    "artifact": 14822310521,
-    "artifact_sha256": "8c97415997bfd04f54ab8534697ed9864b6b9696c72a8d9e53ab07f01940ce22",
-    "schema_reload_passed": 240,
-    "schema_reload_failed": 12,
+    "sha": "a0c0dbc0ad5a623c178af83e58e6664a87e14d22",
+    "run": 45185620677,
+    "job": 137730328958,
+    "early_artifact": 14823692087,
+    "early_artifact_sha256": "0149aefe46407e47763c06e857054e5b2829c0944164944ea539de1cbc5f2d91",
+    "schema_reload_passed": 250,
+    "schema_reload_failed": 2,
     "pending_outside_errors": 0,
-    "core_configuration_privacy_and_concurrency_examples_executed": 0
+    "core_configuration_privacy_concurrency_executed": 0
   },
   "same_unreleased16_ddl_and_timestamp": true,
   "native_context_reuse": {
@@ -129,5 +129,6 @@
     ],
     "both_common_files_unchanged": true,
     "no_gem_or_global_context_change": true
-  }
+  },
+  "fixture_findings": "docs/jrc_contact_center/ending_rule_versions_fixture_findings_20261123.json"
 }
