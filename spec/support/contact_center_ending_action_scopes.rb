@@ -19,4 +19,11 @@ RSpec.shared_context 'with a native ending action queue scope' do
   def guarded_ending_scope_sql(statement)
     ApplicationRecord.transaction(requires_new: true) { ApplicationRecord.connection.execute(statement) }
   end
+
+  # Intentional direct SQL tests the database boundary rather than skipping a model validation in application code.
+  def write_ending_scope_settings(values)
+    encoded = ApplicationRecord.connection.quote(values.to_json)
+    guarded_ending_scope_sql("UPDATE jrc_contact_center_units SET settings=#{encoded}::jsonb WHERE id=#{unit.id}")
+    unit.reload
+  end
 end

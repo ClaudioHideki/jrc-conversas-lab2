@@ -12,7 +12,7 @@ RSpec.describe JrcContactCenter::EndingActionQueueScope do
     expect(scope.payload.slice('account_id', 'source_queue_id', 'unit_id')).to eq(
       'account_id' => account.id, 'source_queue_id' => queue.id, 'unit_id' => unit.id
     )
-    expect(account.reload.settings.fetch('jrc_contact_center_acw', {})).not_to have_key('ending_automations')
+    expect(account.reload.settings.fetch('jrc_contact_center_acw', {})).not_to have_key('voice_ending_automations')
   end
 
   it 'preserves an unmapped scope without substituting a Group or company grant' do
@@ -63,10 +63,11 @@ RSpec.describe JrcContactCenter::EndingActionQueueScope do
 
   it 'does not accept a client timestamp as provenance' do
     scope
-    expect do
-      guarded_ending_scope_sql("INSERT INTO #{described_class.table_name}(account_id,source_queue_id,created_at) " \
-                              "VALUES(#{account.id},#{queue.id},'2020-01-01')")
-    end.to raise_error(ActiveRecord::StatementInvalid, /provenance is server generated/)
+    sql = <<~SQL.squish
+      INSERT INTO #{described_class.table_name}(account_id,source_queue_id,created_at)
+      VALUES(#{account.id},#{queue.id},'2020-01-01')
+    SQL
+    expect { guarded_ending_scope_sql(sql) }.to raise_error(ActiveRecord::StatementInvalid, /provenance is server generated/)
     expect(scopes.count).to eq(1)
   end
 

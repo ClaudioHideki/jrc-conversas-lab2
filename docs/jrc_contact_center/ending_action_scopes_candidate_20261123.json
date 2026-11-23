@@ -46,11 +46,25 @@
     "disk_reserve_bytes": 750000000,
     "no_local_build_or_database_started": true
   },
-  "native_validation": "pending",
+  "native_validation": {
+    "first_sha": "2d2b8154c62c8feb402e39b070bb0a7e5ac866de",
+    "first_run": 45110347415,
+    "conclusion": "failure",
+    "native_examples_executed": 0,
+    "report": "docs/jrc_contact_center/ending_action_scopes_first_native_findings_20261123.json",
+    "followup": "diagnostic and lint correction; new validation pending"
+  },
   "original_checkout": "b77ffe55 and the3protected pending files remain preserved",
   "no_production_or_provider_or_grant_changes": true,
   "no_docker_publication_or_deploy": true,
   "whole_word_complete": false,
   "pending_business_decision": "Disabling a rule: pending-vs-new-call semantics was asked separately; this scope ledger does not choose a default.",
-  "next": "Verify this forward-only foundation natively, then integrate versioned rule configuration and independent receipts with the existing ACW policy/editor. Preserve other destinations as unavailable until their native authority adapters are implemented."
+  "next": "Verify this forward-only foundation natively, then integrate versioned rule configuration and independent receipts with the existing ACW policy/editor. Preserve other destinations as unavailable until their native authority adapters are implemented.",
+  "diagnostic_followup": {
+    "same_mandatory_receipt_gate": true,
+    "write_metadata_before_verification": true,
+    "runtime_and15database_sources_unchanged": true,
+    "independent_reader_tests": 11,
+    "diagnostics_are_not_acceptance": true
+  }
 }

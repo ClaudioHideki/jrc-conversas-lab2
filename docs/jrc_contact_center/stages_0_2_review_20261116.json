@@ -7370,5 +7370,12 @@
     "native_validation": "pending",
     "automation_execution_available": false,
     "all23figures_complete": false
+  },
+  "ending_action_scope_first_native_findings_20261123": {
+    "report": "docs/jrc_contact_center/ending_action_scopes_first_native_findings_20261123.json",
+    "run": 45110347415,
+    "conclusion": "failure",
+    "native_executed": 0,
+    "all23figures_complete": false
   }
 }

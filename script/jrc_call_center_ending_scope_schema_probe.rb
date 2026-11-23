@@ -10,12 +10,12 @@ module JrcContactCenter::SyntheticEndingScopeSchemaProbe
 
     require Rails.root.join('lib/jrc_contact_center/ending_action_scope_schema_receipt')
     File.write("/tmp/call-center-ending-scope-schema-#{stage}.json", JSON.pretty_generate(report(stage)))
+    JrcContactCenter::EndingActionScopeSchemaReceipt.new(ActiveRecord::Base.connection).verify!
   end
 
   def self.report(stage)
     connection = ActiveRecord::Base.connection
     receipt = JrcContactCenter::EndingActionScopeSchemaReceipt.new(connection)
-    receipt.verify!
     components = %i[structure constraints functions triggers].index_with { |name| receipt.send(name) }
     { stage: stage, product_sha: ENV.fetch('GITHUB_SHA'), stored: { receipt.class::TABLE => connection.table_comment(receipt.class::TABLE) },
       calculated: receipt.send(:token), components: components,

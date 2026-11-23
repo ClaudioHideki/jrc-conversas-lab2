@@ -26,7 +26,7 @@ RSpec.describe CreateContactCenterEndingActionScopes do
       expect(captured.created_at).to be > session.started_at
       expect(captured.revision).to eq(1)
       expect([record.reload.attributes, session.reload.attributes, queue.reload.attributes, unit.reload.attributes]).to eq(previous)
-      expect(account.reload.settings.fetch('jrc_contact_center_acw')).not_to have_key('ending_automations')
+      expect(account.reload.settings.fetch('jrc_contact_center_acw')).not_to have_key('voice_ending_automations')
     end
   end
 

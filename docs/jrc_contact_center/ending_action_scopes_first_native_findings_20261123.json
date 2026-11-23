@@ -1,0 +1,33 @@
+{
+  "sha": "2d2b8154c62c8feb402e39b070bb0a7e5ac866de",
+  "run": 45110347415,
+  "job": 137481034113,
+  "workflow_conclusion": "failure",
+  "artifact": 14789538105,
+  "artifact_sha256": "237b80712523b983710f686fce0ed253d22e638a5e841239e31febc620f205ec",
+  "sanitized_log_sha256": "a86156be3e999b23b7a71ff85760cb9449ceae9275568bace8a2be31cf4cdcec",
+  "confirmed_actual": [
+    "Exact15migration/source admission and initial schema migration passed.",
+    "All previous ACW, audio, pause-approval and ending-confirmation fresh/reload receipts still match.",
+    "The new scope receipt passed fresh creation, but its mandatory verifier rejected the reloaded schema before RSpec started.",
+    "The fresh scope metadata and generated schema preserve all8function definitions byte-for-byte; this does not identify the runtime reload difference.",
+    "The probe verified before saving its metadata, so the differing reload component was not preserved.",
+    "Early artifact preservation failed because no RSpec/preflight files existed yet. The final artifact was retrieved and hash-verified; no quota failure was reported.",
+    "Ruby lint reported6new offenses in2new specs. There are no native Rails, Vue or Chrome approvals for this SHA."
+  ],
+  "prepared_corrections": [
+    "Write actual scope metadata before invoking the same mandatory verifier. A mismatch still raises and fails the stage.",
+    "Include existing generated schema metadata in the diagnostic-only early artifact, preserving if-no-files-found:error.",
+    "Fix the concatenated SQL indentation and describe the actual model.",
+    "Use explicit guarded SQL for security tests that intentionally bypass native model validation; do not disable Rails/SkipsModelValidations.",
+    "Check the exact planned voice_ending_automations key in non-activation assertions.",
+    "Independently preserve failed-run mismatches as diagnostics while rejecting them from final acceptance."
+  ],
+  "schema_root_cause": "not confirmed; exact fresh-vs-reload runtime components required",
+  "native_tests_executed": 0,
+  "all15migration_sql_and_receipt_sources_unchanged_in_followup": true,
+  "no_rule_activation_or_destination_execution": true,
+  "new_native_validation_required": true,
+  "whole_word_complete": false,
+  "no_production_build_publication_or_deploy": true
+}

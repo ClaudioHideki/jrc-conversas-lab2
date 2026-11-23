@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Native ending action scope transitions' do
+RSpec.describe JrcContactCenter::EndingActionQueueScope, 'scope history' do
   include_context 'with a native ending action queue scope'
 
   it 'records a new identity on corporate A-to-B-to-A transitions instead of reviving an old authorization' do
@@ -44,8 +44,8 @@ RSpec.describe 'Native ending action scope transitions' do
   it 'records a business-unit issuer changed through SQL instead of treating bypassed model validation as an old valid binding' do
     scope
     other = JrcCustomers::Company.create!(account: account, name: 'SYNTHETIC other issuer', relationship_type: 'internal', active: true)
-    business.update_columns(company_id: other.id)
-    business.update_columns(company_id: issuer.id)
+    guarded_ending_scope_sql("UPDATE jrc_crm_business_units SET company_id=#{other.id} WHERE id=#{business.id}")
+    guarded_ending_scope_sql("UPDATE jrc_crm_business_units SET company_id=#{issuer.id} WHERE id=#{business.id}")
     expect(scopes.pluck(:scope_state)).to eq(%w[mapped invalid mapped])
     expect(scopes.pluck(:revision)).to eq([1, 2, 3])
   end
@@ -54,7 +54,7 @@ RSpec.describe 'Native ending action scope transitions' do
     other_account = create(:account)
     other = JrcCustomers::Company.create!(account: other_account, name: 'SYNTHETIC foreign issuer', relationship_type: 'internal', active: true)
     scope
-    unit.update_columns(settings: { 'issuer_company_id' => other.id })
+    write_ending_scope_settings('issuer_company_id' => other.id)
     current = scopes.last
     expect(current.scope_state).to eq('invalid')
     expect([current.issuer_company_id, current.business_unit_id]).to eq([nil, nil])
@@ -65,7 +65,7 @@ RSpec.describe 'Native ending action scope transitions' do
   [false, [], '', { 'issuer_company_id' => false, 'business_unit_id' => '1' }, { 'issuer_company_id' => 1.5 }].each do |malformed|
     it "records malformed legacy mapping #{malformed.inspect} as unavailable instead of coercing it into a grant" do
       scope
-      unit.update_columns(settings: malformed)
+      write_ending_scope_settings(malformed)
       expect(scopes.last.scope_state).to eq('invalid')
       expect([scopes.last.issuer_company_id, scopes.last.business_unit_id]).to eq([nil, nil])
       expect(queue.reload.unit_id).to eq(unit.id)

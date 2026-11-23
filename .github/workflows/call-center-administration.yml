@@ -168,6 +168,7 @@ jobs:
             /tmp/call-center-ending-confirmation-preflight.json
             /tmp/call-center-ending-scope-preflight.json
             /tmp/call-center-ending-scope-lint.json
+            /tmp/call-center-*-schema-*.json
           if-no-files-found: error
           retention-days: 7
       - name: Legacy isolated ACW value compatibility (not a persistence proof)
