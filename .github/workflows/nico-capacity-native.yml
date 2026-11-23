@@ -97,7 +97,8 @@ jobs:
           npm test
       - name: RSpec ciclo de reservas, concorrencia, Quick, HelpDesk e providers
         run: |
-          bundle exec rspec spec/services/jrc_ai/provider_observation_spec.rb \
+          bundle exec rspec spec/requests/jrc_ai_usage_accounting_spec.rb \
+            spec/services/jrc_ai/provider_observation_spec.rb \
             spec/services/jrc_nico/reservation_ledger_spec.rb \
             spec/services/jrc_nico/reservation_reconciler_spec.rb \
             spec/services/jrc_nico/run_capacity_spec.rb \

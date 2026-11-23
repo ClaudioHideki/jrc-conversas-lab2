@@ -25,12 +25,17 @@ module Api
           private
 
           def totals(scope)
+            usage_groups = scope.group(
+              Arel.sql("CASE metadata -> 'usage_estimated' WHEN 'false'::jsonb THEN 'confirmed' " \
+                       "WHEN 'true'::jsonb THEN 'estimated' ELSE 'unclassified' END")
+            ).sum(:total_tokens)
             {
               input_tokens: scope.sum(:input_tokens),
               output_tokens: scope.sum(:output_tokens),
-              total_tokens: scope.sum(:total_tokens),
-              confirmed_tokens: scope.where("COALESCE(metadata ->> 'usage_estimated', 'false') <> 'true'").sum(:total_tokens),
-              estimated_tokens: scope.where("metadata ->> 'usage_estimated' = 'true'").sum(:total_tokens),
+              total_tokens: usage_groups.values.sum,
+              confirmed_tokens: usage_groups.fetch('confirmed', 0),
+              estimated_tokens: usage_groups.fetch('estimated', 0),
+              unclassified_tokens: usage_groups.fetch('unclassified', 0),
               estimated_cost_cents: known_cost(scope),
               executions: scope.count
             }
@@ -62,6 +67,7 @@ module Api
               input_tokens: event.input_tokens,
               output_tokens: event.output_tokens,
               total_tokens: event.total_tokens,
+              usage_basis: { false => 'confirmed', true => 'estimated' }.fetch(event.metadata['usage_estimated'], 'unclassified'),
               estimated_cost_cents: event.metadata['cost_available'] == false ? nil : event.estimated_cost_cents,
               user_id: event.user_id,
               provider_id: event.provider_id,

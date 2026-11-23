@@ -10,7 +10,7 @@ Uma implantação recebeu resposta HTTP 200 do provedor, mas foi bloqueada antes
 
 Uma nova conexão usa os limites do provedor por padrão e requer tipo compatível, URL, credencial e modelo. Teto mensal local é opcional. Configurações existentes mantêm sua política até alteração explícita; a implantação solicitante optou por operar pelo provedor. Concorrência, isolamento por conta, permissões e limites de tamanho permanecem obrigatórios.
 
-Manter recibos confirmados, estimativas identificadas e tentativas incertas separados. Operar pelo provedor não zera reservas antigas nem transforma incerteza em consumo confirmado. O histórico mantém o estado desconhecido para auditoria.
+Manter recibos confirmados, estimativas identificadas e tentativas incertas separados. Registros históricos sem marcador de recibo permanecem sem classificação; não são promovidos a consumo confirmado. Os totais cobrem somente chamadas registradas pelo JRC, não o uso da organização em outros sistemas. Operar pelo provedor não zera reservas antigas nem transforma incerteza em consumo confirmado. O histórico mantém o estado desconhecido para auditoria.
 
 Capturar somente os cabeçalhos de limite permitidos e o status HTTP do provedor, com conta, request e data. Exibir como observação da última resposta, jamais como saldo global em tempo real. HTTP 429 preserva o Retry-After sem repetir a chamada automaticamente. Nenhuma credencial, prompt ou corpo de erro externo integra os metadados exibidos.
 

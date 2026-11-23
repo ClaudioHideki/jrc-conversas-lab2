@@ -589,6 +589,10 @@ onMounted(load);
                   value: formatNumber(usage.totals.estimated_tokens),
                 },
                 {
+                  label: 'Histórico sem classificação',
+                  value: formatNumber(usage.totals.unclassified_tokens),
+                },
+                {
                   label: 'Execucoes',
                   value: formatNumber(usage.totals.executions),
                 },
@@ -742,6 +746,7 @@ onMounted(load);
                   <th class="p-3">Entrada</th>
                   <th class="p-3">Saida</th>
                   <th class="p-3">Total</th>
+                  <th class="p-3">Base do registro</th>
                 </tr>
               </thead>
               <tbody>
@@ -765,6 +770,14 @@ onMounted(load);
                   </td>
                   <td class="p-3 font-semibold text-n-slate-12">
                     {{ formatNumber(event.total_tokens) }}
+                  </td>
+                  <td class="p-3 text-n-slate-11">
+                    {{
+                      {
+                        confirmed: 'Confirmado pela API',
+                        estimated: 'Estimado',
+                      }[event.usage_basis] || 'Sem classificação'
+                    }}
                   </td>
                 </tr>
               </tbody>
