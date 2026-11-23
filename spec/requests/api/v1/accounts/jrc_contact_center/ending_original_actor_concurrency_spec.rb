@@ -2,6 +2,8 @@ require 'rails_helper'
 require 'timeout'
 
 RSpec.describe 'Ending original actor identity and transaction context' do
+  subject(:execution) { JrcContactCenter::EndingActions::OriginalActorContext.new(account: account, origin_id: origin.id) }
+
   self.use_transactional_tests = false
 
   before do
@@ -12,8 +14,6 @@ RSpec.describe 'Ending original actor identity and transaction context' do
   end
 
   include_context 'with native ending execution original evidence'
-
-  subject(:execution) { JrcContactCenter::EndingActions::OriginalActorContext.new(account: account, origin_id: origin.id) }
 
   it 'installs the attested original actor and restores the previous native context after the attempt' do
     target = execution

@@ -1,9 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe JrcContactCenter::EndingActions::PinnedRule do
-  include_context 'with native ending execution original evidence'
-
   subject(:selection) { described_class.new(account: account, origin: origin) }
+
+  include_context 'with native ending execution original evidence'
 
   let(:code) { 'SYNTHETIC_ORIGIN_RULE' }
   let(:pinned) { origin.version.definition.fetch('entries').sole }

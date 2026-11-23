@@ -35,8 +35,9 @@ class JrcContactCenter::EndingActions::SourceAuthority
 
   def authorize_scope!(origin, queue)
     latest = JrcContactCenter::EndingActionQueueScope.where(account: @account, source_queue_id: queue.id).order(revision: :desc).first!
-    current = queue.status == 'active' && queue.unit.status == 'active' && latest.scope_state == 'mapped' &&
-              latest.id == origin.queue_scope_version_id && latest.unit_id == queue.unit_id && origin.unit_id == queue.unit_id
+    current_scope = [latest.id, latest.unit_id, latest.scope_state, queue.unit_id]
+    original_scope = [origin.queue_scope_version_id, origin.unit_id, 'mapped', origin.unit_id]
+    current = queue.status == 'active' && queue.unit.status == 'active' && current_scope == original_scope
     raise JrcContactCenter::OperationError, 'ending_action_source_scope_changed' unless current
 
     links = { 'issuer_company_id' => origin.issuer_company_id&.to_s, 'business_unit_id' => origin.business_unit_id&.to_s }

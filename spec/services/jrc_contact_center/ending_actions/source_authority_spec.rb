@@ -1,9 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe JrcContactCenter::EndingActions::SourceAuthority do
-  include_context 'with native ending execution original evidence'
-
   subject(:authorization) { described_class.new(account: account, member: member) }
+
+  include_context 'with native ending execution original evidence'
 
   it 'authorizes the original actor through current native module, queue, call and corporate scopes' do
     expect(authorization.call(origin).id).to eq(source_call.id)

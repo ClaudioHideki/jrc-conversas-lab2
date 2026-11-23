@@ -1,0 +1,82 @@
+{
+  "sha": "4f3a41c8f1af2bc7a3fc89eb3958ef77b3b7195f",
+  "run": 45287983933,
+  "artifact": 14873131983,
+  "artifact_sha256": "2930b4d3055050321e1137e6e7eec1b154a97fcf3eb2c4bfbe88415883a26d3d",
+  "new_offenses": [
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/source_authority.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "message": "Cyclomatic complexity for `authorize_scope!` is too high. [9/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/source_authority.rb",
+      "cop": "Metrics/PerceivedComplexity",
+      "message": "Perceived complexity for `authorize_scope!` is too high. [9/8]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/pinned_rule.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "message": "Cyclomatic complexity for `validate_rule!` is too high. [8/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/pinned_rule.rb",
+      "cop": "Style/SafeNavigation",
+      "message": "Use safe navigation (`&.`) instead of checking if an object exists before calling the method."
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb",
+      "cop": "RSpec/LeadingSubject",
+      "message": "Declare `subject` above any other `include_context` declarations."
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb",
+      "cop": "RSpec/LeadingSubject",
+      "message": "Declare `subject` above any other `include_context` declarations."
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb",
+      "cop": "Layout/HashAlignment",
+      "message": "Align the keys of a hash literal if they span more than one line."
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb",
+      "cop": "RSpec/LeadingSubject",
+      "message": "Declare `subject` above any other `include_context` declarations."
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb",
+      "cop": "RSpec/LeadingSubject",
+      "message": "Declare `subject` above any other `before` declarations."
+    }
+  ],
+  "native_rails_vue_chrome_examples_executed": 0,
+  "corrections": [
+    "Compare the complete typed current/original source-scope identity tuple; preserve both active-state checks and native link authorization.",
+    "Separate pinned rule header validation from exact immutable scope validation; preserve every check and message.",
+    "Use safe navigation only after validated rule lookup returns a Hash or nil.",
+    "Move lazy RSpec subjects above include_context/before, retaining setup hook order and all29cases.",
+    "Align keyword arguments to native ConfirmEndingReason; values and assertions unchanged."
+  ],
+  "static_predicate_equivalence": {
+    "rows": 864,
+    "all_equal": true,
+    "not_native_tests": true
+  },
+  "formatting_preflight": {
+    "native_prettier_config_blob_verified": true,
+    "prettier": "3.3.3",
+    "two_UI_files_already_formatted": true,
+    "no_source_or_original_config_written": true
+  },
+  "lint_rules_exclusions_and_thresholds_unchanged": true,
+  "all_29_cases_retained": true,
+  "correction_not_natively_passed": true,
+  "whole_figure10_accepted": false,
+  "final_artifact": {
+    "id": 14873831709,
+    "sha256": "de250c13cdb53d6f5955668774cf0ccfd73f51ba2c4e6255d08510184ed363be",
+    "conclusion": "failure",
+    "native_examples": 0
+  }
+}

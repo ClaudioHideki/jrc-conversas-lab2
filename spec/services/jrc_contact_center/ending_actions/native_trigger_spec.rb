@@ -1,9 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe JrcContactCenter::EndingActions::NativeTrigger do
-  include_context 'with native ending execution original evidence'
-
   subject(:readiness) { described_class.new(origin: origin) }
+
+  include_context 'with native ending execution original evidence'
 
   let(:rule) do
     { 'timing' => 'acw_completed', 'reason_code' => 'SYNTHETIC_ORIGIN_REASON', 'conditions' => { 'outcome_codes' => [] } }
@@ -23,7 +23,8 @@ RSpec.describe JrcContactCenter::EndingActions::NativeTrigger do
   it 'uses the immutable explicit classification timestamp and leaves ACW open' do
     original = origin
     JrcContactCenter::ConfirmEndingReason.new(account: account, member: member).call(
-      qualification, attributes: { reason_code: 'SYNTHETIC_ORIGIN_REASON' },
+      qualification,
+      attributes: { reason_code: 'SYNTHETIC_ORIGIN_REASON' },
       expected_revision: JrcContactCenter::QualificationDraftRevision.token(qualification), request_key: SecureRandom.uuid
     )
     confirmation = JrcContactCenter::EndingReasonConfirmation.find_by!(account: account, source_qualification_id: qualification.id)

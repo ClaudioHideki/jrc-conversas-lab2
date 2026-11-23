@@ -1477,14 +1477,14 @@
     "source_parent": "dc9944c54e299e56a23886541de96cfdd9fce060",
     "native_not_yet_executed": true,
     "source_sha256": {
-      "app/services/jrc_contact_center/ending_actions/source_authority.rb": "eb6b6f84821310697529bbba782c65b8d294ae917795492840c32b4484a26e2e",
+      "app/services/jrc_contact_center/ending_actions/source_authority.rb": "ccac40fee03a43fa5df8606d8998645acc89c66e7802958e16a5ad481b914ac4",
       "app/services/jrc_contact_center/ending_actions/original_actor_context.rb": "a64cbce89eb984073723de27e81bcd965e5a6f10310f39ac2eed9ddf1576ee7a",
       "app/services/jrc_contact_center/ending_actions/native_trigger.rb": "e31a17493fd09f8b6d31a391683a709fc63a69b83d5cdb619716c43584337ad4",
-      "app/services/jrc_contact_center/ending_actions/pinned_rule.rb": "d85170cc298cfc6fc048a0240a0686c88d3f77e76d264b1c8bc6f8ab8a19e7a8",
-      "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb": "fde0af5331d0dd8c39dd3c735fa75f0c603e587f6cb6bd2a37a0c2fdb066805d",
-      "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb": "d3556646d6f5916e1b6c8a93b85a1ca53830085534300e0409d34fe1c9c55183",
-      "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb": "5a1c174c18af1c4033381535a0d9532c7c7971b097ef4c31b9ab855b32570463",
-      "spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb": "d66b87d331f939ecb54f332b74200ab13ab581c4b44cd3c7a172024972acf624",
+      "app/services/jrc_contact_center/ending_actions/pinned_rule.rb": "3f34821c58d2743fec4907b7943641e60adca0836568d9bd18b5a9efec5158b2",
+      "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb": "97aa9c97903f9ee57edfe483ef0f796c4ac608bd664cd0c7d15d04feb2b8ad0b",
+      "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb": "797dca7fda18526b9108775793e25cd1e10ab1cd9f1542acd5b5216af6a639b3",
+      "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb": "c104b49736b4c66fcbe4bf4a0e0abbf2380b139a8d58ee7ab1fc3d2b4f47c502",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb": "4b73fa5abdd63872089f00a6bc8b1068dab2b7d7b89032c0be328d4c40d98b82",
       ".github/workflows/call-center-administration.yml": "5bbe80d657c1932dee14b5a1b31b5658d3d115110580d4048f0ffb2ca4f37d63",
       "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AuthorityAssignments.vue": "a465f17b7041c5a491ac9ffda4425403143c66c7fcd6946b171dd2af8bed1da1",
       "tests/playwright/tests/e2e/ui/call-center-authority-filter-geometry.mjs": "e265a132a1ded5ab594d28f50742209b5b7ee91d20ac42551b93abcb45547ec6"
@@ -1560,6 +1560,82 @@
         "rejected_workflow_mutations": 6
       },
       "correction_not_natively_reexecuted": true
+    },
+    "new_lint_failure": {
+      "sha": "4f3a41c8f1af2bc7a3fc89eb3958ef77b3b7195f",
+      "run": 45287983933,
+      "artifact": 14873131983,
+      "artifact_sha256": "2930b4d3055050321e1137e6e7eec1b154a97fcf3eb2c4bfbe88415883a26d3d",
+      "new_offenses": [
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/source_authority.rb",
+          "cop": "Metrics/CyclomaticComplexity",
+          "message": "Cyclomatic complexity for `authorize_scope!` is too high. [9/7]"
+        },
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/source_authority.rb",
+          "cop": "Metrics/PerceivedComplexity",
+          "message": "Perceived complexity for `authorize_scope!` is too high. [9/8]"
+        },
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/pinned_rule.rb",
+          "cop": "Metrics/CyclomaticComplexity",
+          "message": "Cyclomatic complexity for `validate_rule!` is too high. [8/7]"
+        },
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/pinned_rule.rb",
+          "cop": "Style/SafeNavigation",
+          "message": "Use safe navigation (`&.`) instead of checking if an object exists before calling the method."
+        },
+        {
+          "path": "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb",
+          "cop": "RSpec/LeadingSubject",
+          "message": "Declare `subject` above any other `include_context` declarations."
+        },
+        {
+          "path": "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb",
+          "cop": "RSpec/LeadingSubject",
+          "message": "Declare `subject` above any other `include_context` declarations."
+        },
+        {
+          "path": "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb",
+          "cop": "Layout/HashAlignment",
+          "message": "Align the keys of a hash literal if they span more than one line."
+        },
+        {
+          "path": "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb",
+          "cop": "RSpec/LeadingSubject",
+          "message": "Declare `subject` above any other `include_context` declarations."
+        },
+        {
+          "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb",
+          "cop": "RSpec/LeadingSubject",
+          "message": "Declare `subject` above any other `before` declarations."
+        }
+      ],
+      "native_rails_vue_chrome_examples_executed": 0,
+      "corrections": [
+        "Compare the complete typed current/original source-scope identity tuple; preserve both active-state checks and native link authorization.",
+        "Separate pinned rule header validation from exact immutable scope validation; preserve every check and message.",
+        "Use safe navigation only after validated rule lookup returns a Hash or nil.",
+        "Move lazy RSpec subjects above include_context/before, retaining setup hook order and all29cases.",
+        "Align keyword arguments to native ConfirmEndingReason; values and assertions unchanged."
+      ],
+      "static_predicate_equivalence": {
+        "rows": 864,
+        "all_equal": true,
+        "not_native_tests": true
+      },
+      "formatting_preflight": {
+        "native_prettier_config_blob_verified": true,
+        "prettier": "3.3.3",
+        "two_UI_files_already_formatted": true,
+        "no_source_or_original_config_written": true
+      },
+      "lint_rules_exclusions_and_thresholds_unchanged": true,
+      "all_29_cases_retained": true,
+      "correction_not_natively_passed": true,
+      "whole_figure10_accepted": false
     }
   },
   "origin_read_only_foundation_native_acceptance": {
@@ -1774,5 +1850,81 @@
       "rejected_workflow_mutations": 6
     },
     "correction_not_natively_reexecuted": true
+  },
+  "executor_guard_lint_failure_pending_native_correction": {
+    "sha": "4f3a41c8f1af2bc7a3fc89eb3958ef77b3b7195f",
+    "run": 45287983933,
+    "artifact": 14873131983,
+    "artifact_sha256": "2930b4d3055050321e1137e6e7eec1b154a97fcf3eb2c4bfbe88415883a26d3d",
+    "new_offenses": [
+      {
+        "path": "app/services/jrc_contact_center/ending_actions/source_authority.rb",
+        "cop": "Metrics/CyclomaticComplexity",
+        "message": "Cyclomatic complexity for `authorize_scope!` is too high. [9/7]"
+      },
+      {
+        "path": "app/services/jrc_contact_center/ending_actions/source_authority.rb",
+        "cop": "Metrics/PerceivedComplexity",
+        "message": "Perceived complexity for `authorize_scope!` is too high. [9/8]"
+      },
+      {
+        "path": "app/services/jrc_contact_center/ending_actions/pinned_rule.rb",
+        "cop": "Metrics/CyclomaticComplexity",
+        "message": "Cyclomatic complexity for `validate_rule!` is too high. [8/7]"
+      },
+      {
+        "path": "app/services/jrc_contact_center/ending_actions/pinned_rule.rb",
+        "cop": "Style/SafeNavigation",
+        "message": "Use safe navigation (`&.`) instead of checking if an object exists before calling the method."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb",
+        "cop": "RSpec/LeadingSubject",
+        "message": "Declare `subject` above any other `include_context` declarations."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb",
+        "cop": "RSpec/LeadingSubject",
+        "message": "Declare `subject` above any other `include_context` declarations."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb",
+        "cop": "RSpec/LeadingSubject",
+        "message": "Declare `subject` above any other `include_context` declarations."
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb",
+        "cop": "RSpec/LeadingSubject",
+        "message": "Declare `subject` above any other `before` declarations."
+      }
+    ],
+    "native_rails_vue_chrome_examples_executed": 0,
+    "corrections": [
+      "Compare the complete typed current/original source-scope identity tuple; preserve both active-state checks and native link authorization.",
+      "Separate pinned rule header validation from exact immutable scope validation; preserve every check and message.",
+      "Use safe navigation only after validated rule lookup returns a Hash or nil.",
+      "Move lazy RSpec subjects above include_context/before, retaining setup hook order and all29cases.",
+      "Align keyword arguments to native ConfirmEndingReason; values and assertions unchanged."
+    ],
+    "static_predicate_equivalence": {
+      "rows": 864,
+      "all_equal": true,
+      "not_native_tests": true
+    },
+    "formatting_preflight": {
+      "native_prettier_config_blob_verified": true,
+      "prettier": "3.3.3",
+      "two_UI_files_already_formatted": true,
+      "no_source_or_original_config_written": true
+    },
+    "lint_rules_exclusions_and_thresholds_unchanged": true,
+    "all_29_cases_retained": true,
+    "correction_not_natively_passed": true,
+    "whole_figure10_accepted": false
   }
 }
