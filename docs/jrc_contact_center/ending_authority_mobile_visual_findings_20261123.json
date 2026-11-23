@@ -1,0 +1,105 @@
+{
+  "sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+  "run": 45273757511,
+  "artifact": 14871192042,
+  "artifact_sha256": "4a0a33b4784c7522a04f0da75aad10972a6ecbe405dff590ec3743026f5bc460",
+  "actual_original_images_opened": [
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\desktop-dark-ending-automation-fields.png",
+      "sha256": "d9732b466420f175533876f3fe5cd2066eb2cfd8880729d765e2132cf9db104c",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\desktop-dark-ending-automation-project-actions.png",
+      "sha256": "678867218ca315fbbcc85158a6203b677e2ac602365305766b0c1620cc6c02c9",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\desktop-dark-ending-automation-project.png",
+      "sha256": "3cc50a4795c6ff5bc431b121394c9387e0522fce53fb4e315f1d075ac3af6d94",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\desktop-light-ending-automation-fields.png",
+      "sha256": "2d53232466e2016698d84c0d3f5a3a10bcb6c860ab150dc1d0fb27a565731c1e",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\desktop-light-ending-automation-project-actions.png",
+      "sha256": "f2901fc2e6f8e0c4499afeaff272c173431d94f3d48640e95bf8d488fdd55376",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\desktop-light-ending-automation-project.png",
+      "sha256": "f58d02f1b1a90af73f2b688507a1968cf1f0132d003cb440ecbc7c6bb1a4ed7f",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\mobile-dark-ending-automation-fields.png",
+      "sha256": "372d318cedf3345aa353be1a9588d644af58ced4938aa642e100115a0749b821",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\mobile-dark-ending-automation-project-actions.png",
+      "sha256": "645826ab01c261bd3e22037f08ccfc8abe1a5452598b5ca2ea7ca45211e5330e",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\mobile-dark-ending-automation-project.png",
+      "sha256": "b65aa6ad517b6d039c4d1c43b1e35bd10876b180159c048adece80ce7bd2ff49",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\mobile-light-ending-automation-fields.png",
+      "sha256": "955925ec13c83d4435fb4d0f2de3b409bb7c3414cbc479e2cad280d0c29831ef",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\mobile-light-ending-automation-project-actions.png",
+      "sha256": "b78976268049dea34f70399293d3852feb688d8eeac03e454092c6eb0eaaac5a",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\mobile-light-ending-automation-project.png",
+      "sha256": "1da22854586942b4f92f35334243a67ff2c0ec4cb7e5a4fe780be42a1bd4cac7",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\desktop-dark-authority-filters-closed.png",
+      "sha256": "cee10b861ea5089f732ed7d63796f6792cfd35d20dd9b6648a4426027ece37ae",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\desktop-light-authority-filters-closed.png",
+      "sha256": "03d7514cb8bb28ff3c2ce4bd82d04a41fded0fc4952492d5db89afbb1925bc4a",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\mobile-dark-authority-filters-closed.png",
+      "sha256": "52ef9732bde2d97a9442b488f3f6169241383804e224b7c398557466cc6d9a2c",
+      "actual_image_inspection_pending": false
+    },
+    {
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-origin-visual-review-dc9944c5\\mobile-light-authority-filters-closed.png",
+      "sha256": "f0f3d18c351b7218728a1512012f166d251d208db05013bc1f4be3d62a46627e",
+      "actual_image_inspection_pending": false
+    }
+  ],
+  "configuration_fields": "Reviewed all four desktop/mobile/theme screenshots; fields readable, themes actual, mobile column layout within viewport.",
+  "project_parameters": "Reviewed all four parameter and four action frames. Current supported fields and Apply/Back buttons readable in both themes.",
+  "mobile_framing_limit": "Internal scroll frames do not show the project heading and all controls simultaneously. These are partial viewport frames, not full-popup proof.",
+  "filters": "Reviewed all four filter screenshots; labels, controls and Apply/Clear actions stack without overlap on390px.",
+  "mobile_team_card_failure": "Both mobile screenshots reveal the long team name compressed to about four characters per line by adjacent action controls. Existing no-overflow assertions missed this.",
+  "minimal_fix_prepared_not_tested": "Stack the existing card text and action group on mobile; preserve desktop row, native buttons/handlers and permissions.",
+  "new_native_browser_criteria": [
+    "Text block width at least card width minus32px on390px.",
+    "Action group below all text by at least8px; no horizontal page overflow.",
+    "Four SHA-bound geometry JSON receipts plus original PNGs. Same264Chrome scenarios."
+  ],
+  "word_divergences_preserved": [
+    "Executor, independent destination receipts, CRM/ServiceDesk editors and per-rule action confirmation remain incomplete.",
+    "Project parameter UI does not yet expose the required responsible-person selection or every optional native task field."
+  ],
+  "whole_figure10_accepted": false,
+  "mobile_team_card_visual_accepted_at_this_sha": false
+}

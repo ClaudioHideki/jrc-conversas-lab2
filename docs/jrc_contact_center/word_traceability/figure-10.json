@@ -111,6 +111,30 @@
       "git_blob_at_validated_base": "efb235d14b9966f8ea69e936d933f84f6d217de2",
       "state": "presente_na_base_validada",
       "current_sha256": "7eb03635e03fe10fc01299323712fdd2231feac32182f6061c22157b9c3d5350"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/source_authority.rb",
+      "git_blob_at_validated_base": null,
+      "state": "implementado_pendente_CI_nativa",
+      "current_sha256": "eb6b6f84821310697529bbba782c65b8d294ae917795492840c32b4484a26e2e"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/original_actor_context.rb",
+      "git_blob_at_validated_base": null,
+      "state": "implementado_pendente_CI_nativa",
+      "current_sha256": "a64cbce89eb984073723de27e81bcd965e5a6f10310f39ac2eed9ddf1576ee7a"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/native_trigger.rb",
+      "git_blob_at_validated_base": null,
+      "state": "implementado_pendente_CI_nativa",
+      "current_sha256": "e31a17493fd09f8b6d31a391683a709fc63a69b83d5cdb619716c43584337ad4"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/pinned_rule.rb",
+      "git_blob_at_validated_base": null,
+      "state": "implementado_pendente_CI_nativa",
+      "current_sha256": "d85170cc298cfc6fc048a0240a0686c88d3f77e76d264b1c8bc6f8ab8a19e7a8"
     }
   ],
   "planned_not_present": [],
@@ -1449,39 +1473,254 @@
     "operational_effects_or_receipts_implemented": false,
     "not_F10_A_or_F10_B_acceptance": true
   },
-  "origin_executor_current_native_checkpoint_unapproved": {
-    "sha": "151bf30d8063376b2b5f7dc05400161165f48f54",
-    "run": 45269263508,
-    "job": 138024388978,
-    "artifact": 14864652722,
-    "artifact_sha256": "b459bf407b68702174361f34c107f416e78b4f725f61d4ea1885925cfc601b03",
-    "raw_log_sha256": "34c9a4925a11160bb9caaf663c0c55cb6d1fbd7e9302ab325dabaaed8d0cf15c",
-    "sanitized_log_sha256": "561d37df13ce0abbe6df9107bd948972bad307b0ffaf41cb3108236c3620a183",
-    "lint_new_offenses": 0,
-    "old_reload": {
-      "examples": 252,
-      "failures": 0,
-      "pending": 0,
-      "outside_errors": 0
+  "executor_guard_candidate_pending_native": {
+    "source_parent": "dc9944c54e299e56a23886541de96cfdd9fce060",
+    "native_not_yet_executed": true,
+    "source_sha256": {
+      "app/services/jrc_contact_center/ending_actions/source_authority.rb": "eb6b6f84821310697529bbba782c65b8d294ae917795492840c32b4484a26e2e",
+      "app/services/jrc_contact_center/ending_actions/original_actor_context.rb": "a64cbce89eb984073723de27e81bcd965e5a6f10310f39ac2eed9ddf1576ee7a",
+      "app/services/jrc_contact_center/ending_actions/native_trigger.rb": "e31a17493fd09f8b6d31a391683a709fc63a69b83d5cdb619716c43584337ad4",
+      "app/services/jrc_contact_center/ending_actions/pinned_rule.rb": "d85170cc298cfc6fc048a0240a0686c88d3f77e76d264b1c8bc6f8ab8a19e7a8",
+      "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb": "fde0af5331d0dd8c39dd3c735fa75f0c603e587f6cb6bd2a37a0c2fdb066805d",
+      "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb": "d3556646d6f5916e1b6c8a93b85a1ca53830085534300e0409d34fe1c9c55183",
+      "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb": "5a1c174c18af1c4033381535a0d9532c7c7971b097ef4c31b9ab855b32570463",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb": "d66b87d331f939ecb54f332b74200ab13ab581c4b44cd3c7a172024972acf624",
+      ".github/workflows/call-center-administration.yml": "56bf92116a138b0dc52a76e8e488f9538f349433db1c48a62d66ee9728f7975b",
+      "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AuthorityAssignments.vue": "a465f17b7041c5a491ac9ffda4425403143c66c7fcd6946b171dd2af8bed1da1",
+      "tests/playwright/tests/e2e/ui/call-center-authority-filter-geometry.mjs": "e265a132a1ded5ab594d28f50742209b5b7ee91d20ac42551b93abcb45547ec6"
     },
-    "new_origin_reload": {
-      "examples": 33,
-      "failures": 0,
-      "pending": 0,
-      "outside_errors": 0
+    "native_cases_required": {
+      "source_authority": 13,
+      "native_trigger": 7,
+      "pinned_rule": 6,
+      "original_actor_concurrency": 3
     },
-    "actual_schema_token": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
-    "failure": "SyntheticEndingOriginUpgrade#verify_preserved!: Original source changed during upgrade",
-    "cause": "Preparation hashes stale ActiveRecord objects without rereading native trigger/callback values from PostgreSQL.",
-    "correction": "Reload each source before hashing the pre-migration baseline. Preserve exact original-column comparison after migration.",
-    "new_native_regression": "spec/services/jrc_contact_center/synthetic_ending_origin_upgrade_spec.rb",
-    "native_regression_required": "A real native call with database-generated capture fields and a stale in-memory object must hash its persisted attributes.",
-    "required_origin_examples_increased_from": 33,
-    "required_origin_examples": 34,
-    "correction_and_regression_not_yet_natively_executed": true,
-    "all_migrations_SQL_receipts_permissions_and_runtime_unchanged": true,
-    "concurrency_4_and_new_browser_frames_not_yet_executed": true,
+    "scope": [
+      "Original actor is derived only from the database-attested account/member/user triple.",
+      "Current native CC operation, eligibility, queue, live leg/call and corporate coverage are rechecked under the account execution boundary.",
+      "Exact pinned immutable definition, mapping and permanent deactivation history are retained.",
+      "Draft reason is not call-end confirmation; early confirmation is not an ACW completion.",
+      "A real completed ACW and its current native form/classification must match the immutable completion evidence.",
+      "Previous Current fields are restored, including when a destination attempt raises."
+    ],
+    "does_not_implement_or_accept": [
+      "Destination side effects or their atomic receipts",
+      "Activation/readiness of old rules",
+      "Per-rule manual execution confirmation",
+      "CRM/SD destination editors",
+      "F10-A/F10-B or whole figure10"
+    ],
+    "native_services_reused": [
+      "JrcOperations::Access.refresh",
+      "JrcContactCenter::ModulePolicy",
+      "JrcContactCenter::AccessScope",
+      "JrcContactCenter::OrganizationalScope",
+      "JrcContactCenter::EndingActions::BlockingRevision",
+      "JrcServiceDesk::NativeExecutionContext"
+    ],
+    "additional_migration_or_SQL_changes": false,
+    "production_or_provider_operations": false,
+    "existing_gates_preserved": {
+      "old_reload": 252,
+      "origin_fresh_and_reload": 34,
+      "chrome": 264,
+      "previous_workflow_restored_exactly": true,
+      "static_rejected_mutations": 5
+    },
+    "mobile_card_correction_pending_native": {
+      "before_sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+      "visual_failure": "Long team name compressed by adjacent action buttons on390px despite no page overflow.",
+      "fix": "Full-width text above wrapped actions on mobile; preserve existing desktop layout and all handlers.",
+      "native_browser_required": "Four SHA-bound card geometry receipts and four new original PNGs; 264existing scenarios retained.",
+      "new_vue_unit_tests_not_needed_for_css_geometry": "Existing component behavior suite plus real native Chrome geometry regression is required.",
+      "expected_total_screenshot_hashes": 608
+    }
+  },
+  "origin_read_only_foundation_native_acceptance": {
+    "sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+    "run": 45273757511,
+    "artifact": 14871192042,
+    "artifact_sha256": "4a0a33b4784c7522a04f0da75aad10972a6ecbe405dff590ec3743026f5bc460",
+    "read_only_origin_foundation_accepted": true,
+    "native_distinct_examples": 3015,
+    "old_reload_examples_separate_not_added": 252,
+    "origin_preflight": {
+      "summary": {
+        "example_count": 34,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/models/jrc_contact_center/ending_action_origin_spec.rb": 14,
+        "spec/models/jrc_contact_center/ending_action_completion_spec.rb": 8,
+        "spec/models/jrc_contact_center/ending_action_origin_privacy_spec.rb": 3,
+        "spec/services/jrc_contact_center/create_contact_center_ending_execution_origins_spec.rb": 8,
+        "spec/services/jrc_contact_center/synthetic_ending_origin_upgrade_spec.rb": 1
+      },
+      "path": "tmp/call-center-ending-origin-preflight.json",
+      "sha256": "ae82762a4cb93daa80b589fbace24b6b5cbb0ff63da90999372c22ca6e0d9380"
+    },
+    "origin_reload_separate_not_added": {
+      "summary": {
+        "example_count": 34,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/models/jrc_contact_center/ending_action_origin_spec.rb": 14,
+        "spec/models/jrc_contact_center/ending_action_completion_spec.rb": 8,
+        "spec/models/jrc_contact_center/ending_action_origin_privacy_spec.rb": 3,
+        "spec/services/jrc_contact_center/create_contact_center_ending_execution_origins_spec.rb": 8,
+        "spec/services/jrc_contact_center/synthetic_ending_origin_upgrade_spec.rb": 1
+      },
+      "path": "tmp/call-center-ending-origin-reload.json",
+      "sha256": "12b86c71641b35f36d54e874a08d1481bb634f2ea3599d236c361ba8eaf1e088"
+    },
+    "real_independent_connection_cases": {
+      "summary": {
+        "example_count": 4,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb": 4
+      }
+    },
+    "schema_stages": [
+      {
+        "stage": "populated",
+        "product_sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+        "stored": {
+          "jrc_contact_center_ending_action_origins": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+          "jrc_contact_center_ending_action_completions": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40"
+        },
+        "calculated": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+        "component_hashes": {
+          "structure": "afc33f889888fe9bdf8208927f4ca6a005725948bd2106d8a803a5fc6e2055cf",
+          "constraints": "04a244031ff6a92fea714a6788df2219083892fefaac713a979ce3a76d8c04f0",
+          "functions": "0d6270e42bbd722055267634dfe38ff8d3edba94b3f3a349c33536674eb9d496",
+          "triggers": "839d277d947d87b56f7ca138224c90ef6ae8a8b46b63f8a542baf56e6d1d1d1c"
+        },
+        "path": "tmp/call-center-ending-origin-schema-populated.json",
+        "sha256": "2b411237fdf8682cc799b6baba565709ad8cca8ca793129ab3a4f290deb7cf26"
+      },
+      {
+        "stage": "reload",
+        "product_sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+        "stored": {
+          "jrc_contact_center_ending_action_origins": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+          "jrc_contact_center_ending_action_completions": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40"
+        },
+        "calculated": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+        "component_hashes": {
+          "structure": "afc33f889888fe9bdf8208927f4ca6a005725948bd2106d8a803a5fc6e2055cf",
+          "constraints": "04a244031ff6a92fea714a6788df2219083892fefaac713a979ce3a76d8c04f0",
+          "functions": "0d6270e42bbd722055267634dfe38ff8d3edba94b3f3a349c33536674eb9d496",
+          "triggers": "839d277d947d87b56f7ca138224c90ef6ae8a8b46b63f8a542baf56e6d1d1d1c"
+        },
+        "path": "tmp/call-center-ending-origin-schema-reload.json",
+        "sha256": "145be1ba2450bfd7ad40a850be6da7f53d58cd8d36c942b99cbae6064270e12b"
+      },
+      {
+        "stage": "fresh",
+        "product_sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+        "stored": {
+          "jrc_contact_center_ending_action_origins": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+          "jrc_contact_center_ending_action_completions": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40"
+        },
+        "calculated": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+        "component_hashes": {
+          "structure": "afc33f889888fe9bdf8208927f4ca6a005725948bd2106d8a803a5fc6e2055cf",
+          "constraints": "04a244031ff6a92fea714a6788df2219083892fefaac713a979ce3a76d8c04f0",
+          "functions": "0d6270e42bbd722055267634dfe38ff8d3edba94b3f3a349c33536674eb9d496",
+          "triggers": "839d277d947d87b56f7ca138224c90ef6ae8a8b46b63f8a542baf56e6d1d1d1c"
+        },
+        "path": "tmp/call-center-ending-origin-schema-fresh.json",
+        "sha256": "f8de1c2af36eaf27b04b5b3e2de1e78d489157b6b22a9f5124246986e0cd0772"
+      }
+    ],
+    "populated_upgrade": {
+      "sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+      "synthetic": true,
+      "preserved_before_replay": true,
+      "legacy_origin_backfilled": false,
+      "native_legacy_completion_preserved": true,
+      "operational_effects": 0,
+      "passed": true,
+      "path": "tmp/call-center-ending-origin-upgrade-after.json",
+      "sha256": "5bb31f38aa65c2331234d2e0a0bebf5689b549a2959bee4b31e0271767e43f5d"
+    },
+    "vue": {
+      "examples": 1812,
+      "failed": 0,
+      "pending": 0
+    },
+    "chrome": {
+      "examples": 264,
+      "projects": 4,
+      "failed": 0,
+      "pending": 0,
+      "flaky": 0
+    },
+    "screenshot_hashes_verified": 604,
+    "additional_original_frames_opened": 16,
+    "visual_findings_file": "docs/jrc_contact_center/ending_authority_mobile_visual_findings_20261123.json",
+    "migration_and_snapshot_regression_proved": true,
+    "original_editor_configuration_increment_preserved": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+    "legacy_rules_armed": false,
+    "destination_effects_implemented_or_accepted": false,
     "whole_figure10_accepted": false,
-    "executor_effects_accepted": false
-  }
+    "whole_part1_accepted": false
+  },
+  "mobile_team_card_failure_pending_validation": {
+    "sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+    "run": 45273757511,
+    "mobile_team_card_failure": "Both mobile screenshots reveal the long team name compressed to about four characters per line by adjacent action controls. Existing no-overflow assertions missed this.",
+    "minimal_fix_prepared_not_tested": "Stack the existing card text and action group on mobile; preserve desktop row, native buttons/handlers and permissions.",
+    "new_native_browser_criteria": [
+      "Text block width at least card width minus32px on390px.",
+      "Action group below all text by at least8px; no horizontal page overflow.",
+      "Four SHA-bound geometry JSON receipts plus original PNGs. Same264Chrome scenarios."
+    ]
+  },
+  "historical_unapproved_origin_checkpoints": [
+    {
+      "sha": "151bf30d8063376b2b5f7dc05400161165f48f54",
+      "run": 45269263508,
+      "job": 138024388978,
+      "artifact": 14864652722,
+      "artifact_sha256": "b459bf407b68702174361f34c107f416e78b4f725f61d4ea1885925cfc601b03",
+      "raw_log_sha256": "34c9a4925a11160bb9caaf663c0c55cb6d1fbd7e9302ab325dabaaed8d0cf15c",
+      "sanitized_log_sha256": "561d37df13ce0abbe6df9107bd948972bad307b0ffaf41cb3108236c3620a183",
+      "lint_new_offenses": 0,
+      "old_reload": {
+        "examples": 252,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "new_origin_reload": {
+        "examples": 33,
+        "failures": 0,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "actual_schema_token": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+      "failure": "SyntheticEndingOriginUpgrade#verify_preserved!: Original source changed during upgrade",
+      "cause": "Preparation hashes stale ActiveRecord objects without rereading native trigger/callback values from PostgreSQL.",
+      "correction": "Reload each source before hashing the pre-migration baseline. Preserve exact original-column comparison after migration.",
+      "new_native_regression": "spec/services/jrc_contact_center/synthetic_ending_origin_upgrade_spec.rb",
+      "native_regression_required": "A real native call with database-generated capture fields and a stale in-memory object must hash its persisted attributes.",
+      "required_origin_examples_increased_from": 33,
+      "required_origin_examples": 34,
+      "correction_and_regression_not_yet_natively_executed": true,
+      "all_migrations_SQL_receipts_permissions_and_runtime_unchanged": true,
+      "concurrency_4_and_new_browser_frames_not_yet_executed": true,
+      "whole_figure10_accepted": false,
+      "executor_effects_accepted": false
+    }
+  ]
 }

@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { writeFile } from 'node:fs/promises';
 
 export async function verifyAuthorityFilterGeometry(page, project) {
   const form = page.locator('[data-authority-filters]');
@@ -50,4 +51,41 @@ export async function verifyAuthorityFilterGeometry(page, project) {
   await page.screenshot({
     path: `.codex/call-center-native-e2e/${project}-authority-filters-closed.png`,
   });
+  const card = page.locator('[data-authority-row]').first();
+  await card.scrollIntoViewIfNeeded();
+  const cardBox = await card.boundingBox();
+  const textBox = await card.locator('[data-authority-row-text]').boundingBox();
+  const actionsBox = await card
+    .locator('[data-authority-row-actions]')
+    .boundingBox();
+  expect(cardBox).not.toBeNull();
+  expect(textBox).not.toBeNull();
+  expect(actionsBox).not.toBeNull();
+  if (geometry.width === 390) {
+    expect(textBox.width).toBeGreaterThanOrEqual(cardBox.width - 32);
+    expect(actionsBox.y).toBeGreaterThanOrEqual(textBox.y + textBox.height + 8);
+  }
+  expect(actionsBox.x).toBeGreaterThanOrEqual(cardBox.x);
+  expect(actionsBox.x + actionsBox.width).toBeLessThanOrEqual(
+    cardBox.x + cardBox.width
+  );
+  const noOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth <= window.innerWidth
+  );
+  expect(noOverflow).toBe(true);
+  const image = `.codex/call-center-native-e2e/${project}-authority-card.png`;
+  await page.screenshot({ path: image });
+  await writeFile(
+    `.codex/call-center-native-e2e/${project}-authority-card-geometry.json`,
+    JSON.stringify({
+      sha: process.env.GITHUB_SHA,
+      project,
+      viewport_width: geometry.width,
+      card: cardBox,
+      text: textBox,
+      actions: actionsBox,
+      no_horizontal_overflow: noOverflow,
+      image,
+    })
+  );
 }

@@ -35,7 +35,7 @@
   "new_origin_native_examples_expected": 34,
   "new_real_concurrency_examples_expected": 4,
   "native_execution_proved": false,
-  "schema_installation_upgrade_reload_proved": false,
+  "schema_installation_upgrade_reload_proved": true,
   "operational_effects_implemented": false,
   "legacy_rules_armed": false,
   "superseded_activation_files_actor_context_and_source_authority_not_transported": true,
@@ -54,7 +54,7 @@
     "offenses": 33,
     "native_examples": 0
   },
-  "corrections_not_yet_natively_passed": true,
+  "corrections_not_yet_natively_passed": false,
   "static_followup_checks": {
     "migration_source_identity": 6,
     "full_admission_mutation_cases": 57,
@@ -124,5 +124,8 @@
     "concurrency_4_and_new_browser_frames_not_yet_executed": true,
     "whole_figure10_accepted": false,
     "executor_effects_accepted": false
-  }
+  },
+  "native_read_only_foundation_verified": true,
+  "verified_source_sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+  "native_acceptance_file": "docs/jrc_contact_center/ending_origin_native_acceptance_20261123.json"
 }

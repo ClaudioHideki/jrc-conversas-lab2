@@ -1,0 +1,63 @@
+{
+  "source_parent": "dc9944c54e299e56a23886541de96cfdd9fce060",
+  "native_not_yet_executed": true,
+  "source_sha256": {
+    "app/services/jrc_contact_center/ending_actions/source_authority.rb": "eb6b6f84821310697529bbba782c65b8d294ae917795492840c32b4484a26e2e",
+    "app/services/jrc_contact_center/ending_actions/original_actor_context.rb": "a64cbce89eb984073723de27e81bcd965e5a6f10310f39ac2eed9ddf1576ee7a",
+    "app/services/jrc_contact_center/ending_actions/native_trigger.rb": "e31a17493fd09f8b6d31a391683a709fc63a69b83d5cdb619716c43584337ad4",
+    "app/services/jrc_contact_center/ending_actions/pinned_rule.rb": "d85170cc298cfc6fc048a0240a0686c88d3f77e76d264b1c8bc6f8ab8a19e7a8",
+    "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb": "fde0af5331d0dd8c39dd3c735fa75f0c603e587f6cb6bd2a37a0c2fdb066805d",
+    "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb": "d3556646d6f5916e1b6c8a93b85a1ca53830085534300e0409d34fe1c9c55183",
+    "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb": "5a1c174c18af1c4033381535a0d9532c7c7971b097ef4c31b9ab855b32570463",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb": "d66b87d331f939ecb54f332b74200ab13ab581c4b44cd3c7a172024972acf624",
+    ".github/workflows/call-center-administration.yml": "56bf92116a138b0dc52a76e8e488f9538f349433db1c48a62d66ee9728f7975b",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AuthorityAssignments.vue": "a465f17b7041c5a491ac9ffda4425403143c66c7fcd6946b171dd2af8bed1da1",
+    "tests/playwright/tests/e2e/ui/call-center-authority-filter-geometry.mjs": "e265a132a1ded5ab594d28f50742209b5b7ee91d20ac42551b93abcb45547ec6"
+  },
+  "native_cases_required": {
+    "source_authority": 13,
+    "native_trigger": 7,
+    "pinned_rule": 6,
+    "original_actor_concurrency": 3
+  },
+  "scope": [
+    "Original actor is derived only from the database-attested account/member/user triple.",
+    "Current native CC operation, eligibility, queue, live leg/call and corporate coverage are rechecked under the account execution boundary.",
+    "Exact pinned immutable definition, mapping and permanent deactivation history are retained.",
+    "Draft reason is not call-end confirmation; early confirmation is not an ACW completion.",
+    "A real completed ACW and its current native form/classification must match the immutable completion evidence.",
+    "Previous Current fields are restored, including when a destination attempt raises."
+  ],
+  "does_not_implement_or_accept": [
+    "Destination side effects or their atomic receipts",
+    "Activation/readiness of old rules",
+    "Per-rule manual execution confirmation",
+    "CRM/SD destination editors",
+    "F10-A/F10-B or whole figure10"
+  ],
+  "native_services_reused": [
+    "JrcOperations::Access.refresh",
+    "JrcContactCenter::ModulePolicy",
+    "JrcContactCenter::AccessScope",
+    "JrcContactCenter::OrganizationalScope",
+    "JrcContactCenter::EndingActions::BlockingRevision",
+    "JrcServiceDesk::NativeExecutionContext"
+  ],
+  "additional_migration_or_SQL_changes": false,
+  "production_or_provider_operations": false,
+  "existing_gates_preserved": {
+    "old_reload": 252,
+    "origin_fresh_and_reload": 34,
+    "chrome": 264,
+    "previous_workflow_restored_exactly": true,
+    "static_rejected_mutations": 5
+  },
+  "mobile_card_correction_pending_native": {
+    "before_sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+    "visual_failure": "Long team name compressed by adjacent action buttons on390px despite no page overflow.",
+    "fix": "Full-width text above wrapped actions on mobile; preserve existing desktop layout and all handlers.",
+    "native_browser_required": "Four SHA-bound card geometry receipts and four new original PNGs; 264existing scenarios retained.",
+    "new_vue_unit_tests_not_needed_for_css_geometry": "Existing component behavior suite plus real native Chrome geometry regression is required.",
+    "expected_total_screenshot_hashes": 608
+  }
+}

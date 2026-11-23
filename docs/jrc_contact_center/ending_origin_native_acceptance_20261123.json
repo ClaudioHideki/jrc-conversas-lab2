@@ -1,0 +1,139 @@
+{
+  "sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+  "run": 45273757511,
+  "artifact": 14871192042,
+  "artifact_sha256": "4a0a33b4784c7522a04f0da75aad10972a6ecbe405dff590ec3743026f5bc460",
+  "read_only_origin_foundation_accepted": true,
+  "native_distinct_examples": 3015,
+  "old_reload_examples_separate_not_added": 252,
+  "origin_preflight": {
+    "summary": {
+      "example_count": 34,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/models/jrc_contact_center/ending_action_origin_spec.rb": 14,
+      "spec/models/jrc_contact_center/ending_action_completion_spec.rb": 8,
+      "spec/models/jrc_contact_center/ending_action_origin_privacy_spec.rb": 3,
+      "spec/services/jrc_contact_center/create_contact_center_ending_execution_origins_spec.rb": 8,
+      "spec/services/jrc_contact_center/synthetic_ending_origin_upgrade_spec.rb": 1
+    },
+    "path": "tmp/call-center-ending-origin-preflight.json",
+    "sha256": "ae82762a4cb93daa80b589fbace24b6b5cbb0ff63da90999372c22ca6e0d9380"
+  },
+  "origin_reload_separate_not_added": {
+    "summary": {
+      "example_count": 34,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/models/jrc_contact_center/ending_action_origin_spec.rb": 14,
+      "spec/models/jrc_contact_center/ending_action_completion_spec.rb": 8,
+      "spec/models/jrc_contact_center/ending_action_origin_privacy_spec.rb": 3,
+      "spec/services/jrc_contact_center/create_contact_center_ending_execution_origins_spec.rb": 8,
+      "spec/services/jrc_contact_center/synthetic_ending_origin_upgrade_spec.rb": 1
+    },
+    "path": "tmp/call-center-ending-origin-reload.json",
+    "sha256": "12b86c71641b35f36d54e874a08d1481bb634f2ea3599d236c361ba8eaf1e088"
+  },
+  "real_independent_connection_cases": {
+    "summary": {
+      "example_count": 4,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb": 4
+    }
+  },
+  "schema_stages": [
+    {
+      "stage": "populated",
+      "product_sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+      "stored": {
+        "jrc_contact_center_ending_action_origins": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+        "jrc_contact_center_ending_action_completions": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40"
+      },
+      "calculated": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+      "component_hashes": {
+        "structure": "afc33f889888fe9bdf8208927f4ca6a005725948bd2106d8a803a5fc6e2055cf",
+        "constraints": "04a244031ff6a92fea714a6788df2219083892fefaac713a979ce3a76d8c04f0",
+        "functions": "0d6270e42bbd722055267634dfe38ff8d3edba94b3f3a349c33536674eb9d496",
+        "triggers": "839d277d947d87b56f7ca138224c90ef6ae8a8b46b63f8a542baf56e6d1d1d1c"
+      },
+      "path": "tmp/call-center-ending-origin-schema-populated.json",
+      "sha256": "2b411237fdf8682cc799b6baba565709ad8cca8ca793129ab3a4f290deb7cf26"
+    },
+    {
+      "stage": "reload",
+      "product_sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+      "stored": {
+        "jrc_contact_center_ending_action_origins": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+        "jrc_contact_center_ending_action_completions": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40"
+      },
+      "calculated": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+      "component_hashes": {
+        "structure": "afc33f889888fe9bdf8208927f4ca6a005725948bd2106d8a803a5fc6e2055cf",
+        "constraints": "04a244031ff6a92fea714a6788df2219083892fefaac713a979ce3a76d8c04f0",
+        "functions": "0d6270e42bbd722055267634dfe38ff8d3edba94b3f3a349c33536674eb9d496",
+        "triggers": "839d277d947d87b56f7ca138224c90ef6ae8a8b46b63f8a542baf56e6d1d1d1c"
+      },
+      "path": "tmp/call-center-ending-origin-schema-reload.json",
+      "sha256": "145be1ba2450bfd7ad40a850be6da7f53d58cd8d36c942b99cbae6064270e12b"
+    },
+    {
+      "stage": "fresh",
+      "product_sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+      "stored": {
+        "jrc_contact_center_ending_action_origins": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+        "jrc_contact_center_ending_action_completions": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40"
+      },
+      "calculated": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+      "component_hashes": {
+        "structure": "afc33f889888fe9bdf8208927f4ca6a005725948bd2106d8a803a5fc6e2055cf",
+        "constraints": "04a244031ff6a92fea714a6788df2219083892fefaac713a979ce3a76d8c04f0",
+        "functions": "0d6270e42bbd722055267634dfe38ff8d3edba94b3f3a349c33536674eb9d496",
+        "triggers": "839d277d947d87b56f7ca138224c90ef6ae8a8b46b63f8a542baf56e6d1d1d1c"
+      },
+      "path": "tmp/call-center-ending-origin-schema-fresh.json",
+      "sha256": "f8de1c2af36eaf27b04b5b3e2de1e78d489157b6b22a9f5124246986e0cd0772"
+    }
+  ],
+  "populated_upgrade": {
+    "sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+    "synthetic": true,
+    "preserved_before_replay": true,
+    "legacy_origin_backfilled": false,
+    "native_legacy_completion_preserved": true,
+    "operational_effects": 0,
+    "passed": true,
+    "path": "tmp/call-center-ending-origin-upgrade-after.json",
+    "sha256": "5bb31f38aa65c2331234d2e0a0bebf5689b549a2959bee4b31e0271767e43f5d"
+  },
+  "vue": {
+    "examples": 1812,
+    "failed": 0,
+    "pending": 0
+  },
+  "chrome": {
+    "examples": 264,
+    "projects": 4,
+    "failed": 0,
+    "pending": 0,
+    "flaky": 0
+  },
+  "screenshot_hashes_verified": 604,
+  "additional_original_frames_opened": 16,
+  "visual_findings_file": "docs/jrc_contact_center/ending_authority_mobile_visual_findings_20261123.json",
+  "migration_and_snapshot_regression_proved": true,
+  "original_editor_configuration_increment_preserved": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+  "legacy_rules_armed": false,
+  "destination_effects_implemented_or_accepted": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

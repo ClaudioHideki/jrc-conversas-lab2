@@ -282,9 +282,10 @@ onBeforeUnmount(() => {
       <li
         v-for="row in items"
         :key="!users && teamIdentity(row) ? teamIdentity(row) : row.id"
-        class="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-3"
+        class="flex min-w-0 flex-col gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+        :data-authority-row="row.id"
       >
-        <div class="min-w-0 flex-1">
+        <div class="min-w-0 w-full sm:w-auto sm:flex-1" data-authority-row-text>
           <p class="break-words font-medium text-n-slate-12">{{ row.name }}</p>
           <p class="text-sm text-n-slate-11">
             {{
@@ -301,23 +302,28 @@ onBeforeUnmount(() => {
             {{ teamSummary(row) }}
           </p>
         </div>
-        <TeamSupervisionEditor
-          v-if="!users && teamIdentity(row)"
-          :account-id="accountId"
-          :team-id="teamIdentity(row)"
-          :team-name="row.name"
-          @changed="load"
-          @denied="load"
-        />
-        <button
-          type="button"
-          :disabled="opening"
-          class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
-          :data-edit-authority="row.id"
-          @click="open(row)"
+        <div
+          class="flex min-w-0 flex-wrap items-center gap-2 sm:shrink-0"
+          data-authority-row-actions
         >
-          {{ label('EDIT') }}
-        </button>
+          <TeamSupervisionEditor
+            v-if="!users && teamIdentity(row)"
+            :account-id="accountId"
+            :team-id="teamIdentity(row)"
+            :team-name="row.name"
+            @changed="load"
+            @denied="load"
+          />
+          <button
+            type="button"
+            :disabled="opening"
+            class="rounded-lg border border-n-blue-6 px-3 py-2 text-sm text-n-blue-11"
+            :data-edit-authority="row.id"
+            @click="open(row)"
+          >
+            {{ label('EDIT') }}
+          </button>
+        </div>
       </li>
       <li v-if="!items.length" class="text-sm text-n-slate-11">
         {{ label('EMPTY') }}
