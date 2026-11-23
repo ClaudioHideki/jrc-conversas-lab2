@@ -12,6 +12,8 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 
 ## Fase 2: Operação e desenvolvimento ativo
 
+- Manual de Cultura JRC: candidata local com portal HTTPS próprio, ciência por versão, administração e arquivos privados. [Homologação](docs/jrc_consolidation/manual-de-cultura-homologacao-20261123.md).
+
 - [x] Validar localmente a abertura interna com SLA publicado, autorização manual preservada e rascunho mantido após recusa de operação. 1.068 cenários Rails cobertos com revalidação direcionada, 22 concorrentes e 1.153 Vue aprovados. Publicação e homologação permanecem pendentes de autorização posterior; ver SD-SAVE-403-20261123 em TASKS.md.
 
   Ajuste final validado com 176 Rails e 87 Vue: escolha de responsável de outras equipes/filas, independência de padrões inválidos, autenticação ativa do destinatário e nenhuma substituição silenciosa.

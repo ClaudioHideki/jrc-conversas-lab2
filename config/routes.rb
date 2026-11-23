@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   }, via: [:get, :post]
 
   draw :jrc_requester_portal
+  draw :jrc_culture
 
   post 'resend_confirmation', to: 'auth/resend_confirmations#create'
 

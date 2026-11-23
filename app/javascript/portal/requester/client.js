@@ -36,7 +36,7 @@ export async function request(
   return response.json();
 }
 
-export async function login(fields) {
+export async function login(fields, sessionPath = '/portal/session') {
   const response = await fetch('/auth/sign_in', {
     method: 'POST',
     credentials: 'same-origin',
@@ -54,7 +54,7 @@ export async function login(fields) {
   );
   // Native credentials live only in this request; the bridge sets an encrypted,
   // HttpOnly cookie. Portal code never writes auth to local/session storage.
-  return request('/portal/session', { method: 'POST', headers });
+  return request(sessionPath, { method: 'POST', headers });
 }
 
 export const errorKey = error => {

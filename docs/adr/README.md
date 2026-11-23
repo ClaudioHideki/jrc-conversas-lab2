@@ -7,6 +7,8 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 
 ## Decisões deste bootstrap
 
+- [0010-manual-de-cultura-ciencia](0010-manual-de-cultura-ciencia.md): ciência por vínculo e versão, portal separado e arquivos privados.
+
 - [0009-sla-publicado-na-criacao-autorizada](0009-sla-publicado-na-criacao-autorizada.md): aplicar SLA publicado na criação autorizada sem conceder gravação manual de condições; recusa de escrita preserva o formulário.
 
 - [0008-abertura-interna-por-destinatario](0008-abertura-interna-por-destinatario.md): destinatários de outros departamentos da unidade e recuperação da abertura com nova autorização.

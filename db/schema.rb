@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_16_190000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_23_160000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -3377,6 +3377,104 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_16_190000) do
     t.index ["business_unit_id"], name: "index_jrc_crm_user_business_units_on_business_unit_id"
     t.index ["user_id"], name: "index_jrc_crm_user_business_units_on_user_id"
     t.check_constraint "structure_managed = false OR scope::text = 'GROUP'::text AND company_id IS NULL AND business_unit_id IS NULL OR scope::text = 'COMPANY'::text AND company_id IS NOT NULL AND business_unit_id IS NULL OR scope::text = 'BUSINESS_UNIT'::text AND business_unit_id IS NOT NULL", name: "jrc_crm_user_scope_shape"
+  end
+
+  create_table "jrc_culture_assets", force: :cascade do |t|
+    t.bigint "version_id", null: false
+    t.bigint "blob_id", null: false
+    t.string "kind", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blob_id"], name: "index_jrc_culture_assets_on_blob_id", unique: true
+    t.index ["version_id", "kind"], name: "index_jrc_culture_assets_on_version_id_and_kind", unique: true
+    t.index ["version_id"], name: "index_jrc_culture_assets_on_version_id"
+    t.check_constraint "kind::text = ANY (ARRAY['pdf'::character varying, 'pptx'::character varying]::text[])", name: "culture_asset_kind"
+  end
+
+  create_table "jrc_culture_audiences", force: :cascade do |t|
+    t.bigint "version_id", null: false
+    t.bigint "unit_id", null: false
+    t.index ["unit_id"], name: "index_jrc_culture_audiences_on_unit_id"
+    t.index ["version_id", "unit_id"], name: "index_jrc_culture_audiences_on_version_id_and_unit_id", unique: true
+    t.index ["version_id"], name: "index_jrc_culture_audiences_on_version_id"
+  end
+
+  create_table "jrc_culture_events", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "actor_id", null: false
+    t.string "action", null: false
+    t.string "subject_type", null: false
+    t.bigint "subject_id", null: false
+    t.jsonb "data", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.index ["account_id"], name: "index_jrc_culture_events_on_account_id"
+  end
+
+  create_table "jrc_culture_grants", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "account_user_id"
+    t.bigint "unit_id", null: false
+    t.bigint "member_key", null: false
+    t.bigint "user_key", null: false
+    t.string "role", default: "employee", null: false
+    t.string "department", default: "", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "member_key", "unit_id", "role"], name: "idx_culture_grant_identity", unique: true
+    t.index ["account_id"], name: "index_jrc_culture_grants_on_account_id"
+    t.index ["account_user_id"], name: "index_jrc_culture_grants_on_account_user_id"
+    t.index ["unit_id"], name: "index_jrc_culture_grants_on_unit_id"
+    t.check_constraint "role::text = ANY (ARRAY['employee'::character varying, 'administrator'::character varying]::text[])", name: "culture_grant_role"
+  end
+
+  create_table "jrc_culture_imports", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "unit_id", null: false
+    t.bigint "blob_id", null: false
+    t.bigint "actor_id", null: false
+    t.datetime "applied_at"
+    t.jsonb "result"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_culture_imports_on_account_id"
+    t.index ["blob_id"], name: "index_jrc_culture_imports_on_blob_id", unique: true
+    t.index ["unit_id"], name: "index_jrc_culture_imports_on_unit_id"
+  end
+
+  create_table "jrc_culture_manuals", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_culture_manuals_on_account_id"
+  end
+
+  create_table "jrc_culture_participations", force: :cascade do |t|
+    t.bigint "version_id", null: false
+    t.bigint "grant_id", null: false
+    t.string "department", default: "", null: false
+    t.datetime "confirmed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grant_id"], name: "index_jrc_culture_participations_on_grant_id"
+    t.index ["version_id", "grant_id"], name: "idx_culture_participation_identity", unique: true
+    t.index ["version_id"], name: "index_jrc_culture_participations_on_version_id"
+  end
+
+  create_table "jrc_culture_versions", force: :cascade do |t|
+    t.bigint "manual_id", null: false
+    t.integer "number", null: false
+    t.string "title", null: false
+    t.text "description", default: "", null: false
+    t.string "state", default: "draft", null: false
+    t.datetime "published_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["manual_id", "number"], name: "index_jrc_culture_versions_on_manual_id_and_number", unique: true
+    t.index ["manual_id"], name: "idx_culture_current_version", unique: true, where: "((state)::text = 'published'::text)"
+    t.index ["manual_id"], name: "index_jrc_culture_versions_on_manual_id"
+    t.check_constraint "state::text = ANY (ARRAY['draft'::character varying, 'published'::character varying, 'inactive'::character varying, 'withdrawn'::character varying]::text[])", name: "culture_version_state"
   end
 
   create_table "jrc_customer_economic_groups", force: :cascade do |t|
@@ -7276,6 +7374,21 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_16_190000) do
   add_foreign_key "jrc_crm_user_business_units", "teams"
   add_foreign_key "jrc_crm_user_business_units", "teams", column: ["account_id", "team_id"], primary_key: ["account_id", "id"], name: "jrc_crm_user_scope_team_account_fk"
   add_foreign_key "jrc_crm_user_business_units", "users"
+  add_foreign_key "jrc_culture_assets", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "jrc_culture_assets", "jrc_culture_versions", column: "version_id"
+  add_foreign_key "jrc_culture_audiences", "jrc_crm_business_units", column: "unit_id"
+  add_foreign_key "jrc_culture_audiences", "jrc_culture_versions", column: "version_id"
+  add_foreign_key "jrc_culture_events", "accounts"
+  add_foreign_key "jrc_culture_grants", "account_users", on_delete: :nullify
+  add_foreign_key "jrc_culture_grants", "accounts"
+  add_foreign_key "jrc_culture_grants", "jrc_crm_business_units", column: "unit_id"
+  add_foreign_key "jrc_culture_imports", "accounts"
+  add_foreign_key "jrc_culture_imports", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "jrc_culture_imports", "jrc_crm_business_units", column: "unit_id"
+  add_foreign_key "jrc_culture_manuals", "accounts"
+  add_foreign_key "jrc_culture_participations", "jrc_culture_grants", column: "grant_id"
+  add_foreign_key "jrc_culture_participations", "jrc_culture_versions", column: "version_id"
+  add_foreign_key "jrc_culture_versions", "jrc_culture_manuals", column: "manual_id"
   add_foreign_key "jrc_customer_economic_groups", "accounts", on_delete: :cascade
   add_foreign_key "jrc_customer_economic_groups", "companies", column: ["account_id", "principal_company_id"], primary_key: ["account_id", "id"], name: "customer_economic_group_principal_account"
   add_foreign_key "jrc_customer_segment_overrides", "accounts", on_delete: :cascade

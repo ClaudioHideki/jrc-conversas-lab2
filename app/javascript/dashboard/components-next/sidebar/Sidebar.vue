@@ -4,6 +4,7 @@ import { h, ref, computed, onMounted, watch } from 'vue';
 import { provideSidebarContext, useSidebarResize } from './provider';
 import { visibleSidebarSections } from './temporaryVisibility';
 import { universityLink } from './university';
+import { cultureManualLink } from './cultureManual';
 import { withNewBadge } from './newModules';
 import SidebarUniversity from './SidebarUniversity.vue';
 import { useServiceDeskNavigation } from 'dashboard/composables/useServiceDeskNavigation';
@@ -1971,6 +1972,22 @@ const menuSections = computed(() => {
             />
             <SidebarGroup v-else v-bind="item" />
           </template>
+          <li v-if="section.name === 'learning'" class="list-none">
+            <a
+              :href="cultureManualLink.href"
+              :aria-label="t('JRC_HOME.CULTURE_MANUAL')"
+              :title="t('JRC_HOME.CULTURE_MANUAL')"
+              class="flex h-10 items-center gap-2 rounded-xl px-2.5 text-sm font-medium text-sidebar-foreground hover:bg-white/10"
+            >
+              <span
+                class="i-lucide-book-open size-[18px] shrink-0 text-sidebar-secondary"
+                aria-hidden="true"
+              />
+              <span v-if="!isEffectivelyCollapsed">
+                {{ t('JRC_HOME.CULTURE_MANUAL') }}
+              </span>
+            </a>
+          </li>
         </ul>
       </section>
     </nav>
