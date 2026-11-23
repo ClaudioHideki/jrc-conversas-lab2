@@ -1500,7 +1500,7 @@
   "tests_candidate_not_validated": [
     {
       "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
-      "sha256": "0840946b5b36021605bfd88f9881dedbde9edee6ad8503bacfccfd6b6239e7e3",
+      "sha256": "1b8574f800fe133411af4c557de2b99319c8c2056ea47738f3fb865d9eaccebf",
       "status": "preparado_bloqueado_pelo_gate_ate_CI_propria",
       "native_or_visual_result": null
     },

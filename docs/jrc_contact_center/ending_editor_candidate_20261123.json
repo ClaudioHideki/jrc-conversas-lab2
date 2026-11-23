@@ -71,6 +71,49 @@
       "vue_cases": 0,
       "chrome_cases": 0,
       "tests_blocked_not_approved": true
+    },
+    {
+      "sha": "f6119dc535343742e3a8e6e369704db24e65cc8a",
+      "run": 45233032094,
+      "observed_result": "failure; final CI artifact recovered and verified",
+      "artifact": 14850411963,
+      "artifact_sha256": "093be9c49f244d1947c5d2aac6595201ce018dd6195eea8466f7f54b1b9cdbe2",
+      "early_artifact": 14847539060,
+      "early_artifact_sha256": "def45ed2639dc25f87ffbe4e5dc448a56c566f4d91b3e0d9e9fff108db8bdea8",
+      "new_ruby_offenses": 0,
+      "new_native_request_examples": 20,
+      "new_native_request_passed": 19,
+      "new_native_request_failed": 1,
+      "schema_reload": {
+        "examples": 252,
+        "failed": 0,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "native_version_preflight": {
+        "examples": 102,
+        "failed": 0,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "native_confirmation_preflight": {
+        "examples": 23,
+        "failed": 0,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "native_scope_preflight": {
+        "examples": 38,
+        "failed": 0,
+        "pending": 0,
+        "outside_errors": 0
+      },
+      "vue_cases": 0,
+      "chrome_cases": 0,
+      "tests_blocked_not_approved": true,
+      "confirmed_failure": "Reactivation used fixture policy revision predating the successful deactivation; API correctly returned409.",
+      "minimal_prepared_correction": "Use the actual deactivation response revision; retain422 and add exact invalid_ending_task_parameters assertion.",
+      "no_runtime_or_permission_change": true
     }
   ],
   "followup_prepared_not_validated": [
@@ -83,8 +126,8 @@
   ],
   "last_prepared_fix": {
     "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
-    "leading_whitespace_only": true,
-    "assertions_inputs_and_test_coverage_unchanged": true,
+    "actual_response_revision_instead_of_stale_fixture": true,
+    "specific_error_assertion_added_not_weakened": true,
     "native_revalidation_pending": true
   },
   "independent_evidence_checker": {

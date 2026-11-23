@@ -102,3 +102,5 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 
 
 - [ ] **Alinhamento final do editor — 27d16e5b**: diagnóstico nativo reduziu24 infrações para2, ambas no mesmo argumento do teste. Somente espaços corrigidos nessa chamada; relatório final14845798014 e SHA-256 preservados. 0 cenários funcionais executados neste SHA. Verificador independente com13 casos leves de JSON aprovado, sem equivalência a Rails/Chrome. Aguardar CI própria com20 pedidos,260 cenários antigos e4 novos do editor.
+
+- [ ] **Revisão real da API — f6119dc5**: lint sem novas infrações;252 recargas,23 confirmações,38 escopos e102 versões aprovados.19/20 pedidos do editor passaram; a reativação usou a revisão anterior à desativação e recebeu corretamente409. Preparado o uso da revisão devolvida pela API, mantendo422 e exigindo o erro específico do destino encerrado. Nenhuma regra de produção ou permissão alterada. Vue/Chrome e aceite do editor permanecem pendentes; artefato inicial14847539060/SHA256def45ed2…b8bdea8 preservado.

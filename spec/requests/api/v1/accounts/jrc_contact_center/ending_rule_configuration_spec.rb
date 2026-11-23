@@ -235,9 +235,11 @@ RSpec.describe 'Ending automation configuration through the existing ACW policy'
     create_ending_rule_document(rule_input.merge('active' => false, 'execution_mode' => 'automatic'))
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch('item').fetch('active')).to be(false)
+    revision = response.parsed_body.fetch('revision')
     before = ending_rule_write_counts
-    create_ending_rule_document(rule_input.merge('execution_mode' => 'automatic'))
+    create_ending_rule_document(rule_input.merge('execution_mode' => 'automatic'), revision: revision)
     expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.fetch('error')).to eq('invalid_ending_task_parameters')
     expect(ending_rule_write_counts).to eq(before)
     expect(JrcProjects::Task.where(account: account)).to be_empty
   end

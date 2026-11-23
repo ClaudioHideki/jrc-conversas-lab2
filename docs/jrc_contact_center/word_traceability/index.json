@@ -1,9 +1,10 @@
 {
   "format_version": 1,
-  "review_at": "2026-11-23T17:54:50.190077+00:00",
+  "review_at": "2026-11-23T18:15:50.168668+00:00",
   "validated_base_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
-  "candidate_sha": "27d16e5bf2f85e716054db2a49811e37a250ed89",
+  "candidate_source_parent_sha": "f6119dc535343742e3a8e6e369704db24e65cc8a",
   "candidate_not_yet_validated": true,
+  "candidate_identity_note": "A matriz acompanha o próximo checkpoint; este é o SHA pai de sua preparação, não um SHA futuro presumido. A identidade da CI/evidência deve ser conferida separadamente.",
   "documents": [
     {
       "id": "doc1",
