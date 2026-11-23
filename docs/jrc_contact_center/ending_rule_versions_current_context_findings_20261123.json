@@ -1,0 +1,220 @@
+{
+  "sha": "50f50458d95639b4c7faf4f380fa04eab90aa2ed",
+  "run": 45177093066,
+  "job": 137701058456,
+  "early_artifact": 14820222708,
+  "early_artifact_sha256": "ea8930716322c9858767188e04deb8b799529b2917f089c9c060cce42c1e3382",
+  "actual_reload": {
+    "duration": 45.405618503,
+    "example_count": 252,
+    "failure_count": 12,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "actual_passed": 240,
+  "all238_prior_examples_passed": true,
+  "actual_failures": [
+    {
+      "file": "./spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "line": 7,
+      "description": "JrcContactCenter::EndingActionVersion records exact native audit and actor provenance without creating a destination or granting a capability",
+      "message": "undefined method 'set' for module Current",
+      "backtrace": [
+        "./spec/support/contact_center_ending_action_versions.rb:15:in 'block in RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/support/contact_center_ending_action_versions.rb:11:in 'RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/models/jrc_contact_center/ending_action_version_spec.rb:9:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "line": 20,
+      "description": "JrcContactCenter::EndingActionVersion preserves earlier immutable definitions and current head across actual version increments",
+      "message": "undefined method 'set' for module Current",
+      "backtrace": [
+        "./spec/support/contact_center_ending_action_versions.rb:15:in 'block in RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/support/contact_center_ending_action_versions.rb:11:in 'RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/models/jrc_contact_center/ending_action_version_spec.rb:21:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "line": 32,
+      "description": "JrcContactCenter::EndingActionVersion rejects direct SQL mutation and deletion without depending on an immutable model callback",
+      "message": "undefined method 'set' for module Current",
+      "backtrace": [
+        "./spec/support/contact_center_ending_action_versions.rb:15:in 'block in RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/support/contact_center_ending_action_versions.rb:11:in 'RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/models/jrc_contact_center/ending_action_version_spec.rb:33:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "line": 42,
+      "description": "JrcContactCenter::EndingActionVersion rejects the reuse of another accounts audit without creating a foreign version",
+      "message": "undefined method 'set' for module Current",
+      "backtrace": [
+        "./spec/support/contact_center_ending_action_versions.rb:15:in 'block in RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/support/contact_center_ending_action_versions.rb:11:in 'RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/models/jrc_contact_center/ending_action_version_spec.rb:43:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "line": 56,
+      "description": "JrcContactCenter::EndingActionVersion rejects an unaudited head change and restores the account settings atomically on failure",
+      "message": "undefined method 'set' for module Current",
+      "backtrace": [
+        "./spec/support/contact_center_ending_action_versions.rb:15:in 'block in RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/support/contact_center_ending_action_versions.rb:11:in 'RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/models/jrc_contact_center/ending_action_version_spec.rb:57:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "line": 72,
+      "description": "JrcContactCenter::EndingActionVersion fails closed when a public head is missing, malformed or does not identify the latest private history",
+      "message": "undefined method 'set' for module Current",
+      "backtrace": [
+        "./spec/support/contact_center_ending_action_versions.rb:15:in 'block in RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/support/contact_center_ending_action_versions.rb:11:in 'RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/models/jrc_contact_center/ending_action_version_spec.rb:73:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "line": 84,
+      "description": "JrcContactCenter::EndingActionVersion retains private history and primitive actor provenance after native audit retention removes the source row",
+      "message": "undefined method 'set' for module Current",
+      "backtrace": [
+        "./spec/support/contact_center_ending_action_versions.rb:15:in 'block in RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/support/contact_center_ending_action_versions.rb:11:in 'RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/models/jrc_contact_center/ending_action_version_spec.rb:85:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "line": 93,
+      "description": "JrcContactCenter::EndingActionVersion rejects a duplicate version instead of reusing its nonce or overwriting private history",
+      "message": "undefined method 'set' for module Current",
+      "backtrace": [
+        "./spec/support/contact_center_ending_action_versions.rb:15:in 'block in RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/support/contact_center_ending_action_versions.rb:11:in 'RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/models/jrc_contact_center/ending_action_version_spec.rb:94:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "line": 103,
+      "description": "JrcContactCenter::EndingActionVersion rejects an actual nonce collision with a static error before a uniqueness failure can include a private failed row",
+      "message": "undefined method 'set' for module Current",
+      "backtrace": [
+        "./spec/support/contact_center_ending_action_versions.rb:15:in 'block in RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/support/contact_center_ending_action_versions.rb:11:in 'RSpec::ExampleGroups::JrcContactCenterEndingActionVersion#record_private_ending_definition'",
+        "./spec/models/jrc_contact_center/ending_action_version_spec.rb:104:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb",
+      "line": 18,
+      "description": "CreateContactCenterEndingActionVersions installs only an empty forward history without creating a head, grant or operational record",
+      "message": "\nexpected: {\"auto_resolve_duration\" => nil, \"created_at\" => 2026-11-23 12:47:47.770140905 +0000, \"custom_attribu...active\", \"support_email\" => \"support@test.com\", \"updated_at\" => 2026-11-23 12:47:47.770140905 +0000}\n     got: {\"auto_resolve_duration\" => nil, \"created_at\" => 2026-11-23 12:47:47.770140000 +0000, \"custom_attribu...active\", \"support_email\" => \"support@test.com\", \"updated_at\" => 2026-11-23 12:47:47.770140000 +0000}\n\n(compared using ==)\n\nDiff:\n@@ -1,5 +1,5 @@\n \"auto_resolve_duration\" => nil,\n-\"created_at\" => 2026-11-23 12:47:47.770140905 +0000,\n+\"created_at\" => 2026-11-23 12:47:47.770140000 +0000,\n \"custom_attributes\" => {},\n \"domain\" => \"test.com\",\n \"feature_flags\" => 0,\n@@ -12,5 +12,5 @@\n \"settings\" => {},\n \"status\" => \"active\",\n \"support_email\" => \"support@test.com\",\n-\"updated_at\" => 2026-11-23 12:47:47.770140905 +0000,\n+\"updated_at\" => 2026-11-23 12:47:47.770140000 +0000,\n",
+      "backtrace": [
+        "./spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb:24:in 'block (3 levels) in <main>'",
+        "./spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb:20:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb",
+      "line": 31,
+      "description": "CreateContactCenterEndingActionVersions preserves populated definitions, native audit and account settings on exact reexecution",
+      "message": "undefined method 'set' for module Current",
+      "backtrace": [
+        "./spec/support/contact_center_ending_action_versions.rb:15:in 'block in RSpec::ExampleGroups::CreateContactCenterEndingActionVersions#record_private_ending_definition'",
+        "./spec/support/contact_center_ending_action_versions.rb:11:in 'RSpec::ExampleGroups::CreateContactCenterEndingActionVersions#record_private_ending_definition'",
+        "./spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb:32:in 'block (2 levels) in <main>'"
+      ]
+    },
+    {
+      "file": "./spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb",
+      "line": 48,
+      "description": "CreateContactCenterEndingActionVersions rejects an unproven pre-existing head instead of inventing private definitions, actors or historical dates",
+      "message": "ending_automation_ledger_unavailable",
+      "backtrace": [
+        "./app/services/jrc_contact_center/ending_actions/catalogue.rb:83:in 'JrcContactCenter::EndingActions::Catalogue#unavailable!'",
+        "./app/services/jrc_contact_center/ending_actions/catalogue.rb:28:in 'JrcContactCenter::EndingActions::Catalogue#head'",
+        "./spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb:56:in 'block (2 levels) in <main>'"
+      ]
+    }
+  ],
+  "structure_verified_independently": [
+    {
+      "stage": "fresh",
+      "product_sha": "50f50458d95639b4c7faf4f380fa04eab90aa2ed",
+      "stored": {
+        "jrc_contact_center_ending_action_versions": "jrc_cc_ending_action_versions_v1:dbb05fdddd28385b5edbae8804ce1bd7bd35bf8b9c625a80a2648879a198ae7b"
+      },
+      "calculated": "jrc_cc_ending_action_versions_v1:dbb05fdddd28385b5edbae8804ce1bd7bd35bf8b9c625a80a2648879a198ae7b",
+      "component_hashes": {
+        "structure": "4b1acd0d9fffbd9bf02287c2da2801e170955840b5c0a4f2423c8ee80eb09691",
+        "constraints": "c8a06d9b6a83e606770ba7cd271ff60d6bce81a5b5a877ae6e4501d4e27093ca",
+        "functions": "ddc36802c40744ebda35c74abc2c5b44ccd687666063ba2ada76c291c1d01618",
+        "triggers": "6face64607c1b6349c8125cf38901dd37ed41bb1fa005fff47aedda493569099"
+      },
+      "report_sha256": "2baa769c88ee8d18802432fc47948f8ac403128403949de1dffe7df49666c1ea"
+    },
+    {
+      "stage": "reload",
+      "product_sha": "50f50458d95639b4c7faf4f380fa04eab90aa2ed",
+      "stored": {
+        "jrc_contact_center_ending_action_versions": "jrc_cc_ending_action_versions_v1:dbb05fdddd28385b5edbae8804ce1bd7bd35bf8b9c625a80a2648879a198ae7b"
+      },
+      "calculated": "jrc_cc_ending_action_versions_v1:dbb05fdddd28385b5edbae8804ce1bd7bd35bf8b9c625a80a2648879a198ae7b",
+      "component_hashes": {
+        "structure": "4b1acd0d9fffbd9bf02287c2da2801e170955840b5c0a4f2423c8ee80eb09691",
+        "constraints": "c8a06d9b6a83e606770ba7cd271ff60d6bce81a5b5a877ae6e4501d4e27093ca",
+        "functions": "ddc36802c40744ebda35c74abc2c5b44ccd687666063ba2ada76c291c1d01618",
+        "triggers": "6face64607c1b6349c8125cf38901dd37ed41bb1fa005fff47aedda493569099"
+      },
+      "report_sha256": "f0d8821dbc45c65b6740211aad63aea6c2b723524eb721b0807750abac419468"
+    }
+  ],
+  "cause": {
+    "runtime_context": "Current is a native thread_mattr_accessor module, not ActiveSupport::CurrentAttributes; set does not exist",
+    "account_snapshot": "New factory timestamp retained nanoseconds until reload; compare actual persisted snapshots before and after",
+    "rollback_snapshot": "Database rollback restores stored settings, not the mutated in-memory account; reload before checking the restored catalogue"
+  },
+  "reused_native_context": {
+    "path": "app/services/jrc_service_desk/native_execution_context.rb",
+    "sha256": "acb8d504f0a6a600ee747e6adfb1d7545b3f731524bcd6f8be25153aa182bdfc",
+    "current_module_path": "lib/current.rb",
+    "current_module_sha256": "289a98ef76b5f7f2554629de65009d99507435c599922cff6a40238b5a4b07ef",
+    "fields": [
+      "user",
+      "account",
+      "account_user",
+      "executed_by",
+      "contact",
+      "inbox"
+    ],
+    "both_common_files_unchanged": true,
+    "no_gem_or_global_context_change": true
+  },
+  "candidate_source_fixes": {
+    "app/services/jrc_contact_center/ending_actions/configure_rule.rb": "1baf512a466fe1b48f25bf1da5c2d0ca8c44f247f04fc2791b35afacae39fe29",
+    "spec/support/contact_center_ending_action_versions.rb": "4854503f3ffad13643156113e5710983743478a7767b03c60e18f6494915fa58",
+    "spec/support/contact_center_ending_rule_configuration.rb": "a4872abf31d59b1640d7d39ebc2f1313e8c6b94a5972b9279772cc36b34b8e8c",
+    "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": "fa81807fa395690b2edb09b8b6749f85ee08557aa85171cb45a9573e0e566c32",
+    "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb": "0be711d7e9dd0e3abd86af5da6e65b3d253392c86e02afd340cc61575cfeea72"
+  },
+  "existing_success_and_failure_tests_now_check_all_current_fields_restored": true,
+  "same_102_focused_and_3_concurrency_examples_required": true,
+  "no_assertion_removed_no_current_mock_no_database_guard_or_lock_change": true,
+  "native_acceptance_of_fixes": false,
+  "whole_figure10_complete": false,
+  "final_artifact": 14822310521,
+  "final_artifact_sha256": "8c97415997bfd04f54ab8534697ed9864b6b9696c72a8d9e53ab07f01940ce22",
+  "final_incremental_new_ruby_offenses": 0,
+  "final_workflow_status": "completed_failure",
+  "corrections_native_accepted": false,
+  "original_102_and_3_examples_retained": true
+}

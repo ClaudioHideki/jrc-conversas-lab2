@@ -15,7 +15,7 @@ class JrcContactCenter::EndingActions::ConfigureRule
     JrcContactCenter::AuthorityTransaction.call(account: @account, member: nil) do
       member = @account.account_users.find_by!(id: @member_id, user_id: @user_id)
       authorize_configuration!(member)
-      Current.set(account: @account, account_user: member, user: member.user, executed_by: nil, contact: nil, inbox: nil) do
+      JrcServiceDesk::NativeExecutionContext.with(account: @account, account_user: member, user: member.user) do
         update_rule!(member)
       end
     end

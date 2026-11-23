@@ -5,13 +5,14 @@ RSpec.describe JrcContactCenter::EndingActions::ConfigureRule do
   include_context 'with native ending rule configuration'
 
   it 'persists an explicitly authorized private rule and native audit without exposing its template through account settings' do
+    context = JrcServiceDesk::NativeExecutionContext::FIELDS.index_with { |field| Current.public_send(field) }
     result = configure_native_ending_rule
     catalogue = JrcContactCenter::EndingActions::Catalogue.new(account: account)
     row = JrcContactCenter::EndingActionVersion.where(account: account).sole
     audit = Audited.audit_class.find(row.source_audit_id)
     expect(catalogue.call.fetch('entries')).to eq([result.fetch(:rule)])
     expect(result.fetch(:revision)).to eq(policy.revision)
-    expect(row.actor_user_id).to eq(actor.id)
+    expect([row.actor_user_id, context.keys.index_with { |field| Current.public_send(field) }]).to eq([actor.id, context])
     expect(account.reload.settings.to_json).not_to include('SYNTHETIC_PRIVATE_TEMPLATE_7f19', 'project_id', 'definition_sha256')
     expect(audit.audited_changes.to_json).not_to include('SYNTHETIC_PRIVATE_TEMPLATE_7f19', 'project_id', 'definition_sha256')
     expect(row.inspect).not_to include('SYNTHETIC_PRIVATE_TEMPLATE_7f19')
@@ -119,10 +120,12 @@ RSpec.describe JrcContactCenter::EndingActions::ConfigureRule do
     input = rule_input
     before = ending_rule_write_counts
     original = account.reload.settings.deep_dup
+    context = JrcServiceDesk::NativeExecutionContext::FIELDS.index_with { |field| Current.public_send(field) }
     allow(JrcContactCenter::EndingActionVersion).to receive(:record_change!).and_raise(ActiveRecord::RecordInvalid)
     expect { configure_native_ending_rule(input) }.to raise_error(ActiveRecord::RecordInvalid)
     expect(account.reload.settings).to eq(original)
     expect(ending_rule_write_counts).to eq(before)
+    expect(context.keys.index_with { |field| Current.public_send(field) }).to eq(context)
   end
 
   it 'lets the currently authorized owner replace an old closed destination without bypassing checks on the new one' do

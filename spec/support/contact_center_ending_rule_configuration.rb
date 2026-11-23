@@ -41,7 +41,7 @@ RSpec.shared_context 'with native ending rule configuration' do
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'GROUP', active: true, structure_managed: true)
     entry = { 'code' => 'SYNTHETIC_REASON', 'name' => 'SYNTHETIC reason', 'category' => 'SYNTHETIC',
               'description' => '', 'order' => 0, 'active' => true }
-    Current.set(user: actor, account: account, account_user: member) do
+    JrcServiceDesk::NativeExecutionContext.with(user: actor, account: account, account_user: member) do
       policy.update!({ voice: 180, whatsapp: 180 }, voice_reason_catalog: [entry], voice_reason_required_queue_ids: [queue.id.to_s],
                                                     voice_reason_confirmation: true, expected_revision: policy.revision)
     end

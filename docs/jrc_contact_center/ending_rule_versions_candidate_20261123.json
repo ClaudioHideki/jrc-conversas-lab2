@@ -33,20 +33,20 @@
     "app/services/jrc_contact_center/ending_actions/catalogue.rb": "595998dbc4ae90917b5f456641173af0d2f04100cb8e21708db4a1f1f17db11e",
     "app/services/jrc_contact_center/ending_actions/project_task_parameters.rb": "a181ec9c84e7e143dde36b01f3ecd77f577870799f22ac83e96df40829333e99",
     "app/services/jrc_contact_center/ending_actions/rule_input.rb": "14098b7e978b146d357e20c51db9af1e3ae4beec690a5a7f32cd1c4d13d37eba",
-    "app/services/jrc_contact_center/ending_actions/configure_rule.rb": "f98faca255665cd425ef0034cc893f0c2ba894c40e62b3baab41784992b7d813",
+    "app/services/jrc_contact_center/ending_actions/configure_rule.rb": "1baf512a466fe1b48f25bf1da5c2d0ca8c44f247f04fc2791b35afacae39fe29",
     "db/migrate/20261123063000_create_contact_center_ending_action_versions.rb": "e22b6a5f6d6fd239e18a7d83862cee391159acea181c0338d72daf7c1da75dc0",
     "db/functions/20261123063000_contact_center_ending_action_versions.sql": "0d8c92f02f01f49f3a783bc468bfd20e1e37fc86bfca6b2409cea69bec12c253",
     "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "bae3d97965ae0a0e84917dab6709b7dc03561a46f5fe4db718e826b7796ee397",
     "spec/models/jrc_contact_center/ending_action_version_spec.rb": "f0f269c22f3dc052dbf50da0d1a91ccf3ea7e4e93d1fb0926a83d1788470290c",
-    "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": "57a814d49942cc66b3d09b0af4f2f03a6758c4e5ed0b370789702e75b0ec6e5c",
+    "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": "fa81807fa395690b2edb09b8b6749f85ee08557aa85171cb45a9573e0e566c32",
     "spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb": "acdca21cf9604e80266a5cdf113ed71a409c21f94422b29fe0d35820bffbc548",
     "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb": "531d7abdd7aac08bff9593afb466fa0a1d5e6749b03f8b7295fa594cd1dc0366",
     "spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb": "101a15f94a9b17f449a70d02b9aa2f6bc9771413655a23644b709ae5fa8d4b4b",
-    "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb": "be33d66b5035665693a23b612f2754090c2b221f4c3cad40bc63047a7036812e",
+    "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb": "0be711d7e9dd0e3abd86af5da6e65b3d253392c86e02afd340cc61575cfeea72",
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb": "e020dc08332f87c65273550c2c70e6106f98212dae1b9f9e39fa45ec3ac04cb8",
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb": "041cdc8e4f3d55a8886ef8a5a14d9817d25c7cbb402462b19403dd4e58e930f6",
-    "spec/support/contact_center_ending_action_versions.rb": "29281ad756e8d61d3933ff69e150132ee349e25205be7672da59889f66efff31",
-    "spec/support/contact_center_ending_rule_configuration.rb": "b4497a6e4046c95978167e05c47867f6dc5fad0cbf55670cddab553c32a64a0a",
+    "spec/support/contact_center_ending_action_versions.rb": "4854503f3ffad13643156113e5710983743478a7767b03c60e18f6494915fa58",
+    "spec/support/contact_center_ending_rule_configuration.rb": "a4872abf31d59b1640d7d39ebc2f1313e8c6b94a5972b9279772cc36b34b8e8c",
     "script/validate_cc_access_migration.mjs": "047851655027f3eb5754b9c553d4055961b8083d24a1fa74a19b8348b7cc2d08",
     "script/validate_cc_ending_version_migration.test.mjs": "33405903b02f84137985e194bc1a1896072e69ea9e690d497fb58741ab85d9de",
     "script/validate_cc_ending_version_preflight.mjs": "5243cfea55cc6eced12f3e6a4b0238d495a86cab38364573e9499db2a5d9c403",
@@ -83,7 +83,7 @@
     "embedded_python_blocks_compiled_only": 2,
     "independent_evidence_reader": 18
   },
-  "native_validation": "initial migration source-pin failure preserved; minimal pin/diagnostic/standalone spacing corrections await native validation",
+  "native_validation": "Fresh/reload receipts match and all238 earlier reload examples pass; current-context and persisted-snapshot fixes await actual native run",
   "native_or_visual_acceptance_of_this_increment": false,
   "no_public_automation_api_editor_job_or_destination_effects": true,
   "customer_company_links_distinct_from_operating_issuer_and_business_unit_scope": true,
@@ -103,12 +103,31 @@
   },
   "approved_deactivation_decision_report": "docs/jrc_contact_center/ending_deactivation_decision_20261123.json",
   "latest_actual_failure": {
-    "sha": "c8f2a0c5b82e3fe0200f9e2e14e646bc805c0d37",
-    "run": 45174140144,
-    "job": 137690900923,
-    "artifact": 14819941128,
-    "artifact_sha256": "8daece02cfb8e94fbc7e40ac2313ee24e9d61a57d7b15f2f2122d7ca3be562ab",
-    "native_examples_executed": 0
+    "sha": "50f50458d95639b4c7faf4f380fa04eab90aa2ed",
+    "run": 45177093066,
+    "job": 137701058456,
+    "artifact": 14822310521,
+    "artifact_sha256": "8c97415997bfd04f54ab8534697ed9864b6b9696c72a8d9e53ab07f01940ce22",
+    "schema_reload_passed": 240,
+    "schema_reload_failed": 12,
+    "pending_outside_errors": 0,
+    "core_configuration_privacy_and_concurrency_examples_executed": 0
   },
-  "same_unreleased16_ddl_and_timestamp": true
+  "same_unreleased16_ddl_and_timestamp": true,
+  "native_context_reuse": {
+    "path": "app/services/jrc_service_desk/native_execution_context.rb",
+    "sha256": "acb8d504f0a6a600ee747e6adfb1d7545b3f731524bcd6f8be25153aa182bdfc",
+    "current_module_path": "lib/current.rb",
+    "current_module_sha256": "289a98ef76b5f7f2554629de65009d99507435c599922cff6a40238b5a4b07ef",
+    "fields": [
+      "user",
+      "account",
+      "account_user",
+      "executed_by",
+      "contact",
+      "inbox"
+    ],
+    "both_common_files_unchanged": true,
+    "no_gem_or_global_context_change": true
+  }
 }

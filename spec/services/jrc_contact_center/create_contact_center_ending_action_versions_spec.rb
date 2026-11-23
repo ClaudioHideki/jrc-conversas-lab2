@@ -16,7 +16,7 @@ RSpec.describe CreateContactCenterEndingActionVersions do
   end
 
   it 'installs only an empty forward history without creating a head, grant or operational record' do
-    previous = account.attributes.deep_dup
+    previous = account.reload.attributes.deep_dup
     ApplicationRecord.transaction(requires_new: true) do
       remove_owned_ending_version_schema
       described_class.new.up
@@ -53,6 +53,7 @@ RSpec.describe CreateContactCenterEndingActionVersions do
         described_class.new.up
       end
     end.to raise_error(ActiveRecord::MigrationError, /Unproven ending action configuration/)
+    account.reload
     expect(catalogue.head).to be_nil
     expect(versions).to be_empty
   end
