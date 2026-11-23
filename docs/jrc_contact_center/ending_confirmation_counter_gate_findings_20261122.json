@@ -1,0 +1,63 @@
+{
+  "source_sha": "2a0fc2dedaa95c8b582c2bce11ffd9be045f3636",
+  "run": 45087999785,
+  "artifact": 14782891497,
+  "artifact_sha256": "a7d236fe870969a44abd890230405ee3497d81cf11d86dd21a7cc6550f43b86b",
+  "original_workflow_sha256": "bc14f680674796f03af2d84629825234881ee66c4844c3addce3aab92c727ab4",
+  "draft_workflow_sha256": "feb10fd9f6c716f16a39053faf2843f4a3047c55da810d793093debf18afd08b",
+  "only_workflow_edits": [
+    "Approved exact count256->260",
+    "One early regression-test command"
+  ],
+  "regression_before": {
+    "examples": 8,
+    "failed": 2
+  },
+  "regression_after": {
+    "examples": 8,
+    "failed": 0
+  },
+  "actual_artifact_stats_guard_replay": "passed against verified260-case report; three actual assertions executed",
+  "actual_native_preflight_independently_verified": {
+    "summary": {
+      "example_count": 23,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb": 13,
+      "spec/services/jrc_contact_center/confirm_ending_reason_forms_spec.rb": 2,
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_confirmation_spec.rb": 8
+    }
+  },
+  "actual_four_ending_and_four_pause_receipts_independently_verified": true,
+  "native_distinct_passed": 2809,
+  "schema_reload_separate_passed": 200,
+  "vue_passed": 1795,
+  "chrome_passed": 260,
+  "test_and_lint_gates_weakened": false,
+  "original_workflow_conclusion": "failure",
+  "new_workflow_execution_still_required": true,
+  "functional_code_or_database_changed": false,
+  "status": "all_actual_test_suites_passed_original_workflow_failed_on_obsolete_256_counter_new_workflow_pending",
+  "cause": {
+    "file": ".github/workflows/call-center-administration.yml",
+    "line": 268,
+    "actual_expected": 260,
+    "obsolete_gate_expected": 256,
+    "exception": "AssertionError after260passed",
+    "product_failure": false
+  },
+  "log_integrity": {
+    "sha": "2a0fc2dedaa95c8b582c2bce11ffd9be045f3636",
+    "run": 45087999785,
+    "job": 137410880618,
+    "original_log_sha256": "c392b801c6422502f638beca40afbcc7687f5381f5d3e1b47981c788f8545c77",
+    "sanitized_log_sha256": "5f223391b03046c557961a404185efce8b26b7360ddeb022600258b7d626dfa0",
+    "original_bytes": 2711668,
+    "sanitized_bytes": 1931482
+  },
+  "visual_review_status": "Actual48screenshots and full Word conformance still require review; no final visual acceptance yet.",
+  "scope": "CI count contract and early regression only; no app, migration, SQL, permissions, provider or production changes."
+}

@@ -7338,5 +7338,13 @@
     "report": "docs/jrc_contact_center/ending_confirmation_stale_native_failure_20261122.json",
     "chrome_260_not_executed": true,
     "all_23_figures_complete": false
+  },
+  "ending_confirmation_counter_gate_findings_20261122": {
+    "status": "actual_suites_passed_workflow_counter_failed",
+    "sha": "2a0fc2dedaa95c8b582c2bce11ffd9be045f3636",
+    "run": 45087999785,
+    "report": "docs/jrc_contact_center/ending_confirmation_counter_gate_findings_20261122.json",
+    "workflow_count_correction": 260,
+    "full_23_figures_complete": false
   }
 }
