@@ -17,3 +17,7 @@ A rejeição 429 não gera recibo de tokens. Somente a usage efetivamente devolv
 Testes de espera, cancelamento, limite de tentativas, consumo confirmado e reparo JSON. CI no SHA final; publicar somente runtime e implantar apenas no ambiente autorizado. Validar consulta real de conhecimento e separar a prontidão de rotas GLPI de abertura real de chamado e SLA.
 
 Fonte: https://console.groq.com/docs/rate-limits
+
+## Histórico de recursos
+
+A análise de sentimento aceita também uma origem identificada e IDs qualificados reais, sem atribuir um ticket a uma conversa JRC fictícia. O contrato de conversas existente permanece compatível. O núcleo não lê GLPI: autorização, período e projeção pública pertencem ao adaptador exclusivo da Branef.

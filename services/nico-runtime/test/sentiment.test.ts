@@ -40,3 +40,36 @@ test('uses the selected tenant model and never includes its credential in the pr
   assert.deepEqual(result.report, report);
   assert.equal(result.usage.total_tokens, 30);
 });
+
+const resource = { request_id: input.request_id, account_id: 1,
+  source: { system: 'helpdesk', resource_type: 'Ticket', resource_id: '45' },
+  messages: [{ id: 'Ticket/45', role: 'customer', content: 'Obrigado' },
+    { id: 'ITILFollowup/45', role: 'operator', content: 'Resolvido' }] };
+test('resource history preserves qualified source identifiers and rejects mixed contracts', () => {
+  assert.deepEqual(validateSentimentInput(resource), resource);
+  for (const invalid of [
+    { ...resource, conversation_id: 45 },
+    { ...resource, source: { ...resource.source, account_id: 2 } },
+    { ...resource, source: { ...resource.source, resource_id: '0' } },
+    { ...resource, messages: [{ ...resource.messages[0], id: 45 }] },
+    { ...resource, messages: [resource.messages[0], resource.messages[0]] },
+  ]) assert.throws(() => validateSentimentInput(invalid));
+  const result = { ...report, agent_sentiment: 'positive', quality_score: 90,
+    evidence: [{ message_id: 'ITILFollowup/45', observation: 'Solução informada' }] };
+  assert.deepEqual(validateSentimentReport(result, resource), result);
+  assert.throws(() => validateSentimentReport({ ...result, evidence: [{ message_id: 'Ticket/99', observation: 'Inventado' }] }, resource));
+  assert.throws(() => validateSentimentReport({ ...result, evidence: [{ message_id: 45, observation: 'Ambíguo' }] }, resource));
+});
+test('resource inference uses string evidence schema and records actual provider usage', async t => {
+  const result = { ...report, evidence: [{ message_id: 'Ticket/45', observation: 'Agradecimento' }] };
+  t.mock.method(globalThis, 'fetch', async (_url, init: any) => {
+    const body = JSON.parse(init.body);
+    assert.equal(body.response_format.json_schema.schema.properties.evidence.items.properties.message_id.type, 'string');
+    assert.deepEqual(JSON.parse(body.messages[1].content).source, resource.source);
+    return Response.json({ choices: [{ message: { content: JSON.stringify(result) } }],
+      usage: { prompt_tokens: 12, completion_tokens: 9, total_tokens: 21 } });
+  });
+  const response = await analyzeSentiment(resource, { apiKey: 'test', model: 'test', baseUrl: 'https://api.openai.com/v1' });
+  assert.equal(response.usage.total_tokens, 21);
+  assert.deepEqual(response.report.evidence, result.evidence);
+});
