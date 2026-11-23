@@ -18,7 +18,6 @@
     "script/validate_cc_access_migration.mjs": "a667de1b2e65f1d7c477d8acbabc3fd55344f247e0fcd5a785bc6213729abb9b",
     "spec/models/jrc_contact_center/ending_action_origin_spec.rb": "5474c12b70639d5f1e660ef6b435e0bf545b6b3cc89e6c0426b8510af9470d60",
     "spec/models/jrc_contact_center/ending_action_completion_spec.rb": "5655502dff1425d15efb3081e488b02e6fd7abda75876a2196c7c1d81c081d28",
-    "spec/models/jrc_contact_center/ending_execution_privacy_spec.rb": "9d0c278eb215226db15e42316240b3072c8abf16e20847a7ddbcf42999f0c205",
     "spec/services/jrc_contact_center/create_contact_center_ending_execution_origins_spec.rb": "902e7dd33cbd6a1d4d2dad168f6232c3aa89387b022bfd6998f1e7f7d1685e1a",
     "spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_spec.rb": "f10bcf1315398f003252173e6223227e5a9f693e2d7e08bc247f7af012d437dd",
     "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": "f43c617320cea235bef650c5fe239f9a107a1d3dde7a3aa8443133cf49e0de86",
@@ -27,7 +26,8 @@
     "spec/support/contact_center_ending_origin_schema_dependencies.rb": "e2ec900ee6d24f7cf7b344a11c17e0c2639528b1fb4c002a3333d1b47833896d",
     "tests/playwright/tests/e2e/ui/call-center-authority-filter-geometry.mjs": "5bcaa6aa9ea6e56ae8b34aa28c466bf9b5b97cb6de30b2bceba7bf358e7e8b88",
     "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "fa2cef6b0b128dec38548015a00ef509bd1ff6a71b36c03a1844a43a6039f61b",
-    ".github/workflows/call-center-administration.yml": "cc40d006c64086429659eac80bea88b5f1909def3580d16bb1e0b703b6198dab"
+    ".github/workflows/call-center-administration.yml": "96b8391d1c56e2fbec4e5b6ae2154f1d1c80bbf7259ebb0bad7c38d2ed5d5503",
+    "spec/models/jrc_contact_center/ending_action_origin_privacy_spec.rb": "a2a9e60dfb74cda482ca19ae3dd112364e7969e37f28f8c23bdb51ef052cdcd5"
   },
   "migration_timestamp_collision": false,
   "existing16_migrations_and_sql_unchanged": true,
@@ -59,5 +59,12 @@
     "full_admission_mutation_cases": 57,
     "independent_evidence_checker_synthetic_cases": 12,
     "not_application_tests": true
+  },
+  "second_lint_diagnostic": {
+    "sha": "1a3bb2b3943f4db39655a6f7b5b9641d741dca88",
+    "run": 45261324311,
+    "new_offenses": 4,
+    "all_three_privacy_examples_preserved": true,
+    "correction_native_result": null
   }
 }

@@ -3,7 +3,7 @@ require 'stringio'
 
 # Prepared for native CI. Query a real PostgreSQL connection and its actual SQL
 # logger; checking filter arrays alone would not prove that binds are redacted.
-RSpec.describe JrcContactCenter::EndingActionOrigin, 'and native completion evidence privacy' do
+RSpec.describe JrcContactCenter::EndingActionOrigin do
   include_context 'with native ending execution original evidence'
 
   def capture_execution_evidence_sql
@@ -20,8 +20,8 @@ RSpec.describe JrcContactCenter::EndingActionOrigin, 'and native completion evid
     origin
     marker = 'SYNTHETIC_PRIVATE_ORIGIN_BIND_312b'
     log = capture_execution_evidence_sql do
-      JrcContactCenter::EndingActionOrigin.uncached do
-        JrcContactCenter::EndingActionOrigin.where(account_id: account.id, private_origin_evidence: { source: marker }).load
+      described_class.uncached do
+        described_class.where(account_id: account.id, private_origin_evidence: { source: marker }).load
       end
     end
     expect(log).to include('jrc_contact_center_ending_action_origins', '[FILTERED]', "[\"account_id\", #{account.id}]")

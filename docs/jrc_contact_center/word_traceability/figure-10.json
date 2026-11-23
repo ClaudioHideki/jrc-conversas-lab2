@@ -1450,12 +1450,13 @@
     "not_F10_A_or_F10_B_acceptance": true
   },
   "origin_executor_current_native_checkpoint_unapproved": {
-    "sha": "d72549b09f46cc3f984bd9ea87534fe7c9006edb",
-    "run": 45257934782,
-    "first_lint_offenses": 33,
-    "native_examples_executed": 0,
-    "corrections_prepared_need_new_native_run": true,
-    "finding": "docs/jrc_contact_center/ending_origin_lint_findings_20261123.json",
+    "sha": "1a3bb2b3943f4db39655a6f7b5b9641d741dca88",
+    "run": 45261324311,
+    "remaining_lint_offenses": 4,
+    "native_functional_examples_executed": 0,
+    "all_three_privacy_cases_preserved_by_reviewed_rename": true,
+    "finding": "docs/jrc_contact_center/ending_origin_remaining_lint_20261123.json",
+    "correction_awaiting_native_validation": true,
     "no_F10_A_or_F10_B_acceptance": true
   }
 }

@@ -1,0 +1,22 @@
+{
+  "sha": "1a3bb2b3943f4db39655a6f7b5b9641d741dca88",
+  "run": 45261324311,
+  "early_artifact": 14860287450,
+  "early_artifact_sha256": "ca47616d273719c24b13cb85d13d69390953cd5f9f662d704ffe3837636a581e",
+  "new_lint_offenses": 4,
+  "previous_new_lint_offenses": 33,
+  "native_functional_examples": 0,
+  "rename": {
+    "old": "spec/models/jrc_contact_center/ending_execution_privacy_spec.rb",
+    "new": "spec/models/jrc_contact_center/ending_action_origin_privacy_spec.rb",
+    "before_sha256": "9d0c278eb215226db15e42316240b3072c8abf16e20847a7ddbcf42999f0c205",
+    "after_sha256": "a2a9e60dfb74cda482ca19ae3dd112364e7969e37f28f8c23bdb51ef052cdcd5"
+  },
+  "three_privacy_examples_and_all_expectations_preserved": true,
+  "migrations_SQL_or_permissions_changed": false,
+  "native_or_visual_acceptance": false,
+  "wait_for_current_ci_before_next_checkpoint": false,
+  "final_artifact": 14860859411,
+  "final_artifact_sha256": "e74f3ac53c951a723add868c97ecafd34d95ff684c2000b56645b4b0aee1553b",
+  "final_diagnostics_preserved": true
+}
