@@ -173,8 +173,8 @@
     {
       "path": "app/javascript/dashboard/i18n/locale/en/jrcNico.json",
       "baseSha256": "66619881bc818ddf4e8c699821b6a1456098e1156c55936751a1d69cdc9280c8",
-      "sha256": "fc2f296ad1ad4dc08858fa0647c73485ca9d0eaf75d0c6b312a7c6f63fbe0d4b",
-      "bytes": 19275
+      "sha256": "b0e91ffc669a629d0fd43e946ad2c2de191bb6ef29d456bddbd6932c55f82020",
+      "bytes": 19510
     },
     {
       "path": "app/javascript/dashboard/i18n/locale/en/relationship.json",
