@@ -1,4 +1,5 @@
 <script setup>
+import { useEndingAutomationLabels } from '../composables/useEndingAutomationLabels';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { pauseCatalogSummary } from '../pauseCatalogPresentation';
@@ -16,6 +17,7 @@ const props = defineProps({
 });
 const emit = defineEmits(['reload', 'review']);
 const { t } = useI18n();
+const endingText = useEndingAutomationLabels();
 const text = {
   conflict: t('JRC_CONTACT_CENTER.CONFIGURATION_REVISION.CONFLICT'),
   reload: t('JRC_CONTACT_CENTER.CONFIGURATION_REVISION.RELOAD'),
@@ -57,6 +59,11 @@ const labels = {
   account_user_id: t('JRC_CONTACT_CENTER.ADMIN.AGENT'),
   priority: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.PRIORITY'),
   active: t('JRC_CONTACT_CENTER.ADMIN.ACTIVE'),
+  reason_code: t('JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.REASON'),
+  timing: t('JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.TIMING'),
+  execution_mode: t('JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.EXECUTION_MODE'),
+  actions: t('JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.PREVIEW'),
+  conditions: t('JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.CONDITIONS'),
   participates: t('JRC_CONTACT_CENTER.ADMIN.PARTICIPATES'),
   supervises: t('JRC_CONTACT_CENTER.ADMIN.SUPERVISES'),
   service_kind: t('JRC_CONTACT_CENTER.CONFIGURATION_AUDIT.CHANNEL'),
@@ -117,6 +124,17 @@ const fields = computed(
       ],
       access_users: ['eligible', 'allowed', 'denied'],
       access_teams: ['allowed', 'active'],
+      ending_rules: [
+        'code',
+        'name',
+        'reason_code',
+        'queue_id',
+        'timing',
+        'execution_mode',
+        'active',
+        'conditions',
+        'actions',
+      ],
       audio_folders: ['name', 'description', 'parent_id'],
       audio_assets: ['name', 'description', 'purpose', 'folder_id'],
       ivr_drafts: ['name', 'revision', 'definition'],
@@ -173,7 +191,10 @@ const format = (record, field) => {
   if (field === 'voice_rules') return acwRulesSummary(value, t);
   if (field === 'voice_form_bindings') return acwFormBindingsSummary(value, t);
   if (field === 'entries') return pauseCatalogSummary(value, t);
-  if (field === 'definition') return JSON.stringify(value, null, 2);
+  if (['definition', 'actions', 'conditions'].includes(field))
+    return JSON.stringify(value, null, 2);
+  if (field === 'timing') return endingText(`TIMINGS.${value}`);
+  if (field === 'execution_mode') return endingText(`MODES.${value}`);
   return String(value);
 };
 </script>

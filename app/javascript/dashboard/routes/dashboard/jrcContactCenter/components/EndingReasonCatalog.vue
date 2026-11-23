@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import AcwRuleTarget from './AcwRuleTarget.vue';
+import EndingAutomationEditor from './EndingAutomationEditor.vue';
 import ConfigurationRevisionConflict from './ConfigurationRevisionConflict.vue';
 import { useEndingReasonCatalog } from '../composables/useEndingReasonCatalog';
 const props = defineProps({
@@ -68,6 +69,11 @@ const {
   revision,
 } = catalog;
 const dialog = ref(null);
+const automation = ref(false);
+const closeAutomation = async () => {
+  automation.value = false;
+  await catalog.load();
+};
 const q = ref('');
 const queue = ref('');
 const locked = computed(() => loading.value || saving.value);
@@ -148,11 +154,21 @@ onMounted(() => dialog.value.open());
     :show-cancel-button="false"
     :use-form="false"
     contained
-    :dismissible="!locked && !dirty"
+    :dismissible="!locked && !dirty && !automation"
     :close-on-click-outside="false"
     @close="emit('close')"
   >
-    <div class="min-w-0 space-y-4 text-n-slate-12" data-ending-reason-catalog>
+    <EndingAutomationEditor
+      v-if="automation"
+      :key="String(accountId)"
+      :account-id="accountId"
+      @close="closeAutomation"
+    />
+    <div
+      v-else
+      class="min-w-0 space-y-4 text-n-slate-12"
+      data-ending-reason-catalog
+    >
       <p v-if="loading" role="status">
         <span>{{ text('LOADING') }}</span>
       </p>
@@ -177,6 +193,15 @@ onMounted(() => dialog.value.open());
         <p class="text-sm text-n-slate-11">
           {{ text('VERSION') }} {{ version }}
         </p>
+        <button
+          type="button"
+          :disabled="locked || dirty"
+          class="rounded-lg border border-n-blue-6 bg-n-blue-2 px-3 py-2 text-sm text-n-blue-11 disabled:opacity-40"
+          data-ending-automations-open
+          @click="automation = true"
+        >
+          {{ t('JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.TITLE') }}
+        </button>
         <ConfigurationRevisionConflict
           :state="revision.state"
           :draft="revisionDraft"

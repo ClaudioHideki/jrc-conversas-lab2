@@ -229,19 +229,23 @@ onBeforeUnmount(() => {
     <p class="rounded-lg bg-n-blue-2 p-3 text-sm text-n-blue-11">
       {{ label('SCOPE') }}
     </p>
-    <form class="flex flex-wrap items-end gap-3" @submit.prevent="search">
-      <label class="min-w-0 flex-1 text-sm text-n-slate-12">
+    <form
+      class="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-end"
+      data-authority-filters
+      @submit.prevent="search"
+    >
+      <label class="block min-w-0 text-sm text-n-slate-12 sm:flex-1">
         {{ t('JRC_CONTACT_CENTER.ADMIN.SEARCH') }}
         <input
           v-model="q"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+          class="mt-1 block w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
         />
       </label>
-      <label class="text-sm text-n-slate-12">
+      <label class="block min-w-0 text-sm text-n-slate-12">
         {{ label(users ? 'ELIGIBILITY' : 'TEAM_STATUS') }}
         <select
           v-model="status"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+          class="mt-1 block w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 p-2"
         >
           <option value="">{{ label('ALL') }}</option>
           <template v-if="users">

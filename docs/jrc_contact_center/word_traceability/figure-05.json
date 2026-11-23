@@ -1,0 +1,925 @@
+{
+  "figure": 5,
+  "title": "Gerar mensagem com Nico",
+  "status": "bloqueado",
+  "expected_functionality": "Popup Gerar Mensagem com Nico",
+  "image": {
+    "sha256": "9248fe942c7170023e642eb3c41be800e1e46343a8a3c92ca7cc3173ddbe80a3",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioAssetLibrary.vue",
+      "git_blob_at_validated_base": "2a23be9c75ea1293a9759477e48e4834971fea27",
+      "state": "presente_na_base_validada",
+      "current_sha256": "6460dd18a276f26f22321f3d56db5579536c6acffb0ca903eda375b0aa76264f"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioCaptureDraft.vue",
+      "git_blob_at_validated_base": "31b24fd11ecafa8a54f8d736cb04d333efd58ff9",
+      "state": "presente_na_base_validada",
+      "current_sha256": "338c463e4fcedbe9597492450887ddae1b9182b2ccc77249469296687e6819ad"
+    },
+    {
+      "path": "app/services/jrc_contact_center/audio_uploads.rb",
+      "git_blob_at_validated_base": "a424900f84415c467db9ccd8234d0ebb26397ab5",
+      "state": "presente_na_base_validada",
+      "current_sha256": "0471faaf402c6fa6d43dabe2362159fd1076e27eed94863a660abe5a471d3fee"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/audio_file_input_spec.rb",
+      "passed_examples": 12,
+      "sample_behaviours": [
+        "JrcContactCenter::AudioFileInput detects the actual bytes instead of trusting the declared client MIME",
+        "JrcContactCenter::AudioFileInput refuses a nonaudio file despite a .wav name and audio MIME claim",
+        "JrcContactCenter::AudioFileInput refuses an empty actual upload"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/audio_uploads_admission_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "JrcContactCenter::AudioUploads atomically persists an actual clean decoded observation with the exact immutable version",
+        "JrcContactCenter::AudioUploads rejects a clean but undecodable header before any final record or final audit is persisted",
+        "JrcContactCenter::AudioUploads rejects the harmless synthetic scanner marker and compensates only the newly staged bytes"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/audio_uploads_spec.rb",
+      "passed_examples": 11,
+      "sample_behaviours": [
+        "JrcContactCenter::AudioUploads receives exact private bytes with an immutable origin and no implicit ActiveStorage attachment or provider command",
+        "JrcContactCenter::AudioUploads replays the same uncertain submission without another asset, blob or version",
+        "JrcContactCenter::AudioUploads rejects changed content under an already accepted key rather than duplicating or replacing history"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/audio_capture_spec.rb",
+      "passed_examples": 12,
+      "sample_behaviours": [
+        "Institutional browser capture reuses private native admission accepts declared capture origin only through actual scanner and codec admission with immutable evidence",
+        "Institutional browser capture reuses private native admission rejects invalid capture origin nil before staging or final persistence",
+        "Institutional browser capture reuses private native admission rejects invalid capture origin false before staging or final persistence"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb",
+      "passed_examples": 7,
+      "sample_behaviours": [
+        "Institutional private audio serializes uncertain native receipts commits exactly one version and compensates the redundant owned staging blob for simultaneous identical request keys",
+        "Institutional private audio serializes uncertain native receipts allows only one actual replacement when two different uploads reviewed the same exact prior version",
+        "Institutional private audio serializes uncertain native receipts keeps the native orphan-purge path harmless for committed private history without weakening its foreign-key protection"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "institutional audio folders native browser capture uses only the synthetic device and preserves reviewed origin"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0095-C01",
+      "expected": "Centralizar áudios reutilizáveis de URAs, filas, campanhas e mensagens institucionais.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 95,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 129,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5,
+        6,
+        16
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D1-P0097-C01",
+      "expected": "Biblioteca com pastas, busca, filtro, duração, origem, status e vínculos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 97,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 131,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5,
+        6,
+        16
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D1-P0098-C01",
+      "expected": "Novo áudio por upload, gravação no navegador ou síntese de voz pelo Nico (caso serviço habilitado).",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 98,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 132,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5,
+        6,
+        16
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D1-P0099-C01",
+      "expected": "Editor de áudio: nome, descrição, finalidade, pasta, prévia, duplicação, mover, download e versões.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 99,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 133,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5,
+        6,
+        16
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D1-P0100-C01",
+      "expected": "Popup Ver Vínculos: identificar URAs, filas, números e campanhas que utilizam o arquivo.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 100,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 134,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5,
+        6,
+        16
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D1-P0102-C01",
+      "expected": "Aceitar formatos suportados e converter para codec exigido pelo PABX após validação.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 102,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 136,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5,
+        6,
+        16
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D1-P0103-C01",
+      "expected": "Arquivo em produção não pode ser excluído enquanto houver referência ativa.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 103,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 137,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5,
+        6,
+        16
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D1-P0104-C01",
+      "expected": "Troca de áudio na biblioteca não deve atualizar versão publicada sem novo processo de autorização.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 104,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 138,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5,
+        6,
+        16
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0142-C01",
+      "expected": "Assistente para produzir um audio institucional por texto, mantendo upload e gravacao manual como formas alternativas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 142,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0143-C01",
+      "expected": "Acoes e resultado do clique: Abas Importar Arquivo, Gravar Mensagem e Gerar com o Nico: trocar o metodo preservando campos comuns.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 143,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0143-C02",
+      "expected": "Nome, descricao e pasta: identificar e organizar o ativo.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 143,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0143-C03",
+      "expected": "Texto da mensagem: editar e mostrar contador/limite.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 143,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0143-C04",
+      "expected": "Voz, velocidade e entonacao: escolher parametros suportados.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 143,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0143-C05",
+      "expected": "Gerar Nova Versao: pedir nova sintese; player permite ouvir antes de Salvar Audio;",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 143,
+          "clause": 5
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0143-C06",
+      "expected": "Cancelar descarta rascunho nao salvo.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 143,
+          "clause": 6
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0144-C01",
+      "expected": "Campos e dados apresentados: Armazenar origem Nico, parametros de sintese, idioma se aplicavel, texto de origem, versao e duracao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 144,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0144-C02",
+      "expected": "Em Utilizacao, associar apenas a finalidade selecionada (URA, fila, numero ou campanha), sem publicar automaticamente o arquivo no PABX.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 144,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0145-C01",
+      "expected": "Regras e permissoes: A geracao por Nico depende de habilitacao do servico.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 145,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0145-C02",
+      "expected": "O audio deve ser validado/convertido ao codec aceito antes do uso na telefonia.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 145,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0145-C03",
+      "expected": "Uma versao ja publicada e utilizada permanece imutavel; a alteracao cria outra versao e exige nova autorizacao para a substituicao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 145,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0146-C01",
+      "expected": "Estados de erro e excecoes: Se a sintese falhar ou exceder limites, manter texto e configuracoes, exibir causa recuperavel e habilitar nova tentativa.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 146,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0146-C02",
+      "expected": "Bloquear Salvar Audio quando nao houver arquivo final valido ou permissao para a pasta.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 146,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0148-C01",
+      "expected": "• F05-A: gerar, ouvir e salvar registra uma nova versao nao publicada vinculada a pasta correta.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 148,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "id": "D2-P0149-C01",
+      "expected": "• F05-B: erro no Nico conserva o texto digitado e nao substitui um audio em producao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 149,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        5
+      ],
+      "status": "bloqueado",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    }
+  ],
+  "divergences": [
+    "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

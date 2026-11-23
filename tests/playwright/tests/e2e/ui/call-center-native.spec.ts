@@ -1,5 +1,7 @@
 import { verifyAllScopePauseApproval } from './call-center-pause-approval-native.mjs';
 import { verifyEndingConfirmation } from './call-center-ending-confirmation-native.mjs';
+import { verifyEndingEditor } from './call-center-ending-editor-native.mjs';
+import { verifyAuthorityFilterGeometry } from './call-center-authority-filter-geometry.mjs';
 import { test, expect } from '@playwright/test';
 import { verifyNativeCalendars } from './call-center-calendar-native.mjs';
 import { verifyNativeIvrCalendar } from './call-center-ivr-calendar-native.mjs';
@@ -61,6 +63,7 @@ test('team supervision native metadata persists reviewed roles, pages candidates
   const openButton = page.locator(
     `[data-team-supervision-open="${target.team_id}"]`
   );
+  await verifyAuthorityFilterGeometry(page, info.project.name);
   await openButton.click();
   await expectContainedDialog(page);
   const dialog = page.getByRole('dialog');
@@ -10338,6 +10341,17 @@ test('confirmed ending classification native keeps incomplete ACW open, survives
     page,
     info,
     session.pause_targets[info.project.name].ending_confirmation,
+    session.administrator
+  );
+});
+
+test('versioned ending automation native editor persists reviewed private rules and denies stale or unauthorized changes without executing destinations', async ({
+  page,
+}, info) => {
+  await verifyEndingEditor(
+    page,
+    info,
+    session.pause_targets[info.project.name].ending_automations,
     session.administrator
   );
 });

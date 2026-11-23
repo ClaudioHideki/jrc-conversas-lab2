@@ -1,0 +1,1156 @@
+{
+  "figure": 15,
+  "title": "Aprovações PABX",
+  "status": "parcial",
+  "expected_functionality": "Central de Aprovacoes - solicitacoes do PABX",
+  "image": {
+    "sha256": "9dffd8375ee6ec3cbbf28e741b2fed803ccf0068041bc73a50312f854e7a9272",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/services/jrc_contact_center/pause_approval_coordinator.rb",
+      "git_blob_at_validated_base": "c985586d915110071292edd00e8fba3621f51d66",
+      "state": "presente_na_base_validada",
+      "current_sha256": "fbdbaca46a463f08a02fe1217bbd85221b69c90d509ff4b8333d4df4061b5811"
+    },
+    {
+      "path": "app/services/jrc_contact_center/pause_approval_policy_check.rb",
+      "git_blob_at_validated_base": "edaf3892ec2e2e34b9881b80490bb9f6d98c8b4e",
+      "state": "presente_na_base_validada",
+      "current_sha256": "bff2ba6de3bc45f1879582bb1f8f16b317d6f9a3c52a0323daecf414b28c2b73"
+    },
+    {
+      "path": "app/services/jrc_approvals/authorization.rb",
+      "git_blob_at_validated_base": "8d111773ad952b87015a045d71dfb1defc155c32",
+      "state": "presente_na_base_validada",
+      "current_sha256": "75b9992e226b84a5bd7e0b2478647c57c3a687642f16ea5827cd6314ce46f00a"
+    },
+    {
+      "path": "app/policies/jrc_contact_center/module_policy.rb",
+      "git_blob_at_validated_base": "877203b7de8eb1e36a2e4895cb1eb6fbc0dc5ee0",
+      "state": "presente_na_base_validada",
+      "current_sha256": "7600c7111a23f02e6dda05a312b09d5661f3d0a285bf724dafaea99a27d0c965"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/create_contact_center_pause_approval_evidence_spec.rb",
+      "passed_examples": 4,
+      "sample_behaviours": [
+        "CreateContactCenterPauseApprovalEvidence rejects committing a source root with no corporate children rather than accepting a merely visual all-unit claim",
+        "CreateContactCenterPauseApprovalEvidence rejects a partially inserted corporate set at the database boundary and rolls its scope back with the root",
+        "CreateContactCenterPauseApprovalEvidence accepts a complete immutable source without mistaking source existence for any policy, decision or approval"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_approval_coverage_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalCoverage captures every affected unit and corporate scope rather than selecting just the operating queue",
+        "JrcContactCenter::PauseApprovalCoverage deduplicates units while preserving the actual memberships of multiple queues",
+        "JrcContactCenter::PauseApprovalCoverage keeps a stable read-only digest without creating state, requests, approvals, grants or audit events"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_approval_intent_spec.rb",
+      "passed_examples": 13,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalIntent captures an authenticated immutable-input intent covering every affected corporate scope",
+        "JrcContactCenter::PauseApprovalIntent never narrows global pause approval to the selected operating queue",
+        "JrcContactCenter::PauseApprovalIntent creates no operational state, pending intent, approval, policy, grant or audit during preview"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_approval_policy_check_spec.rb",
+      "passed_examples": 2,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalPolicyCheck rejects a real conflicting publication before it can replace a usable scoped policy or affect a pending pause",
+        "JrcContactCenter::PauseApprovalPolicyCheck propagates a simulated selector conflict rather than treating it as missing or ready"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_approval_readiness_spec.rb",
+      "passed_examples": 3,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalReadiness projects captured operational unit names for every coherent owned scope without applying a pending pause",
+        "JrcContactCenter::PauseApprovalReadiness keeps captured names immutable and withholds the projection after the native unit context changes",
+        "JrcContactCenter::PauseApprovalReadiness returns no captured names after the owner loses current operating eligibility"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_approval_source_access_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalSourceAccess exposes only the reviewers own scope and opaque complete-context digest rather than other units or private justification",
+        "JrcContactCenter::PauseApprovalSourceAccess rejects source access and a vote by a reviewer covering only the other native business unit",
+        "JrcContactCenter::PauseApprovalSourceAccess requires explicit Call Center approve independently of native Central decide and an ordinary administrator role"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/pause_approval_review_evidence_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalReview retains the complete native payload and scope set unchanged in PostgreSQL",
+        "JrcContactCenter::PauseApprovalReview rejects bulk edits to the immutable complete context without silently rewriting a historical approval",
+        "JrcContactCenter::PauseApprovalReview rejects scope movement between accounts using actual SQL rather than an ActiveRecord-only validation"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_api_spec.rb",
+      "passed_examples": 9,
+      "sample_behaviours": [
+        "Native mandatory pause approval API returns a no-store complete preview without creating an operational intent or a native approval",
+        "Native mandatory pause approval API requires the reviewed server digest and rejects supplied scope authority before creating anything",
+        "Native mandatory pause approval API persists and recovers the pending all-scope state through authenticated native APIs without applying it early"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "All-scope pause actual HTTP concurrency commits one canonical intent and a complete two-company request set for distinct concurrent UUIDs",
+        "All-scope pause actual HTTP concurrency recovers one exact durable intent and Central request set from duplicate concurrent confirmations",
+        "All-scope pause actual HTTP concurrency rechecks operating permissions after waiting rather than recording any partial approval request"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_approvals/core_spec.rb",
+      "passed_examples": 46,
+      "sample_behaviours": [
+        "Configurable approval core starts disabled for a new account and has no production catalog adapter",
+        "Configurable approval core requires native resource visibility before capturing any context, even with core management permission",
+        "Configurable approval core publishes immutable versions and pins existing requests to their original version"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "all-scope pause approval native requires both managers, preserves ACW and denies cross-unit decisions"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0174-C01",
+      "expected": "Encaminhar alterações sensíveis para o módulo de Aprovações já existente.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 174,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 298,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D1-P0176-C01",
+      "expected": "Solicitação: objeto, comparação antes/depois, justificativa, impacto e referências de auditoria.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 176,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 300,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D1-P0177-C01",
+      "expected": "Fluxo: solicitar → validar → aprovar/rejeitar → executar → sincronizar → confirmar.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 177,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 301,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D1-P0178-C01",
+      "expected": "Popup de reversão com justificativa obrigatória e análise do estado atual do PABX.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 178,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 302,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D1-P0179-C01",
+      "expected": "Tabela de aprovações com status pendente, aprovada, rejeitada, em execução, falha e executada.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 179,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 303,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D1-P0181-C01",
+      "expected": "O aprovador deve vir automaticamente da política de alçada, não de escolha livre fora de regra.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 181,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 305,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D1-P0182-C01",
+      "expected": "Aprovação não é confirmação de execução.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 182,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 306,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D1-P0183-C01",
+      "expected": "Reversão não apaga os registros originais; cria nova operação auditada.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 183,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 307,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D1-P0184-C01",
+      "expected": "Chamadas em andamento e dependências impactadas exigem verificação prévia.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 184,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 308,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0312-C01",
+      "expected": "Reutilizar o fluxo de alçadas ja existente para avaliar mudancas sensiveis da telefonia.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 312,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0313-C01",
+      "expected": "Acoes e resultado do clique: Filtros por periodo, tipo, status e empresa: listar solicitacoes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 313,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0313-C02",
+      "expected": "Abas Todos, Pendentes, Solicitacoes do PABX, Aprovadas, Rejeitadas e Historico: alterar contexto.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 313,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0313-C03",
+      "expected": "Selecao de item: exibir resumo, objeto, justificativa, impacto e comparacao antes/depois.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 313,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0313-C04",
+      "expected": "Ver Solicitacao Completa: abrir detalhes;",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 313,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0313-C05",
+      "expected": "Aprovar/Rejeitar: executar somente para aprovador definido pela politica, com justificativa quando exigida.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 313,
+          "clause": 5
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0314-C01",
+      "expected": "Campos e dados apresentados: Mostrar numero da solicitacao, solicitante, aprovador por alçada, empresa, objeto, data, status e referencia tecnica.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 314,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0314-C02",
+      "expected": "Estados: pendente, aprovada, rejeitada, em execucao, falha e executada; aprovada nao equivale a aplicada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 314,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0315-C01",
+      "expected": "Regras e permissoes: O aprovador e determinado pela politica, nao por livre escolha fora de regra.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 315,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0315-C02",
+      "expected": "A autorizacao e separada da execucao tecnica.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 315,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0315-C03",
+      "expected": "Publicacao somente apos validação, teste, aprovacao quando necessaria e confirmacao de estado no PABX.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 315,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0315-C04",
+      "expected": "Reversao cria outra operacao auditada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 315,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0316-C01",
+      "expected": "Estados de erro e excecoes: Se recurso, versao ou dependencias mudarem durante aprovacao, bloquear execucao e solicitar revalidacao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 316,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0316-C02",
+      "expected": "Antes de reverter, avaliar chamadas em andamento e outros recursos afetados; exibir orientacao para falhas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 316,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0318-C01",
+      "expected": "• F15-A: pedido aprovado, mas ainda sem ACK do PABX, nao aparece como Executado.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 318,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "id": "D2-P0319-C01",
+      "expected": "• F15-B: usuario fora da alçada nao aprova via interface nem API; o evento de tentativa e rastreavel.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 319,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        15
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    }
+  ],
+  "divergences": [
+    "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

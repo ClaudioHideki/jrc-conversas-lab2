@@ -1,0 +1,932 @@
+{
+  "figure": 21,
+  "title": "Contexto do cliente",
+  "status": "parcial",
+  "expected_functionality": "Detalhes - contexto de cliente e historico",
+  "image": {
+    "sha256": "a69bf30378d2183c5686b1855fe2c9d7ebec0cf7fdee18e613201d0633f19ffe",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/services/jrc_contact_center/customer_context.rb",
+      "git_blob_at_validated_base": "cd1b513f4b9115942decf800acddb165bdee9410",
+      "state": "presente_na_base_validada",
+      "current_sha256": "67e5acfcbf99df66bacbbae6717e37e9575213d5cf8f6f51566889be89b818e9"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/LinkedContactMaster.vue",
+      "git_blob_at_validated_base": "f95f3b6fa84091280db61cbcf6e4efdc5f743f32",
+      "state": "presente_na_base_validada",
+      "current_sha256": "4542433437e6628aead1c27909b63640fe26d25cc86a7850cf25311f6581564c"
+    },
+    {
+      "path": "app/services/jrc_contact_center/quality_analysis_snapshot.rb",
+      "git_blob_at_validated_base": "9e316ad13bf4e1516f70ebd5766d172caf49fbe3",
+      "state": "presente_na_base_validada",
+      "current_sha256": "03b41b93b6349f4162e8de1030d84819cd02a0a1c1baca67e53bb01e54d450cc"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/customer_context_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "JrcContactCenter::CustomerContext uses the linked contact inside the call account without guessing another customer by phone",
+        "JrcContactCenter::CustomerContext never treats a short internal extension or a SIP URI as a customer phone",
+        "JrcContactCenter::CustomerContext rejects a call from another account and never returns its linked customer"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb",
+      "passed_examples": 30,
+      "sample_behaviours": [
+        "JrcContactCenter::QualityAnalysisSnapshot keeps actual quality, sentiment, zero score, missing confidence and original transcript distinct",
+        "JrcContactCenter::QualityAnalysisSnapshot does not let mutation of the reader DTO change the captured original or fingerprint",
+        "JrcContactCenter::QualityAnalysisSnapshot fingerprints the same native JSON independently of top-level symbol or object-key order"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb",
+      "passed_examples": 17,
+      "sample_behaviours": [
+        "Call Center operating origin and native visibility persists the Case operational unit from the authorized call without a client-provided unit",
+        "Call Center operating origin and native visibility rejects an explicit forbidden operational unit instead of replacing it silently with the source unit",
+        "Call Center operating origin and native visibility rejects a callback linked to a hidden Case rather than relying only on its own visible queue"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "form bindings native persists exact latest version while existing attendance retains its original form and clock",
+    "institutional audio folders native browser capture uses only the synthetic device and preserves reviewed origin",
+    "linked Customer Master operating records remain visible in their native scope after real UI creation",
+    "linked Customer Master preserves native permissions, persisted values and attendance drafts"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0205-C01",
+      "expected": "Utilizar o layout da área existente de Gravações e Qualidade como referência, com linguagem roxa e azul e popup de detalhes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 205,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 356,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D1-P0207-C01",
+      "expected": "Visão principal: totais, percentuais positivo/neutro/negativo, filtros, interações, distribuição e insights.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 207,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 358,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D1-P0208-C01",
+      "expected": "Popup: abas Análise do Nico, Transcrição, Gravação, Contexto e Ações e Histórico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 208,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 359,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D1-P0209-C01",
+      "expected": "Análise por trecho ligada a timestamps, playback e transcrição; nota de qualidade separada do sentimento.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 209,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 360,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D1-P0210-C01",
+      "expected": "Contexto usa cadastro de cliente, contratos, Service Desk, CRM e Relacionamento, com acesso limitado por perfil.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 210,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 361,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D1-P0211-C01",
+      "expected": "Ações e Histórico utilizam tarefas existentes, responsáveis, prazos, vinculação de chamados e revisões auditadas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 211,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 362,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D1-P0213-C01",
+      "expected": "Sentimento é estimativa de IA; distinguir negativo de crítico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 213,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 364,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D1-P0214-C01",
+      "expected": "Classificação corrigida por humano convive com resultado original imutável e justificativa.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 214,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 365,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D1-P0215-C01",
+      "expected": "A seleção de fala ou ponto do gráfico move o player ao timestamp correspondente.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 215,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 366,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D1-P0216-C01",
+      "expected": "Salvar e Concluir encerra somente a revisão da análise, não as tarefas/chamados pendentes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 216,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 367,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0404-C01",
+      "expected": "Relacionar a chamada ao cliente, contratos, atendimentos anteriores, CRM, Service Desk e Relacionamento.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 404,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0405-C01",
+      "expected": "Acoes e resultado do clique: Aba Contexto: mostrar dados do cliente, linha do tempo, contratos/servicos, chamados vinculados e indicadores contextuais.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 405,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0405-C02",
+      "expected": "Ver Cadastro: abrir registro existente na origem.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 405,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0405-C03",
+      "expected": "Ver Historico Completo: navegar para timeline autorizada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 405,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0405-C04",
+      "expected": "Atalhos Criar Chamado e Registrar no Relacionamento: abrir formulários existentes com cliente e call_id previamente relacionados.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 405,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0406-C01",
+      "expected": "Campos e dados apresentados: Trazer cliente, empresa, contatos, unidade, contratos e protocolos apenas quando a identidade for validada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 406,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0406-C02",
+      "expected": "Exibir fonte de cada informacao, data de atualizacao e status.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 406,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0406-C03",
+      "expected": "Indicadores contextuais devem explicitar janela temporal e criterio de calculo.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 406,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0407-C01",
+      "expected": "Regras e permissoes: Cadastro Mestre, CRM, Service Desk e Relacionamento permanecem fontes de verdade, sem replicar cliente ou empresa.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 407,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0407-C02",
+      "expected": "A transcricao pode ajudar a sugerir contexto, mas nao prova automaticamente identidade.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 407,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0407-C03",
+      "expected": "Aplicar escopo de conta, unidade, carteira e perfil em cada consulta.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 407,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0408-C01",
+      "expected": "Estados de erro e excecoes: Sem cliente identificado, mostrar vinculacao pendente e permitir fluxo manual autorizado, sem atribuir automaticamente a pessoa errada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 408,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0408-C02",
+      "expected": "Falhas em CRM ou SD nao devem ocultar demais dados validos; indicar origem indisponivel.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 408,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0410-C01",
+      "expected": "• F21-A: chamada sem cliente identificado nao vincula contrato ou protocolo por coincidencia de telefone.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 410,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "id": "D2-P0411-C01",
+      "expected": "• F21-B: usuario sem permissao ao Service Desk nao ve chamados em popup nem por link direto.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 411,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        21
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    }
+  ],
+  "divergences": [
+    "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

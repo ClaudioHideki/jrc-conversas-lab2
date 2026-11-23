@@ -1,0 +1,2243 @@
+{
+  "figure": 4,
+  "title": "Painel técnico PABX e atalhos",
+  "status": "parcial",
+  "expected_functionality": "Painel tecnico do PABX e atalhos para URAs",
+  "image": {
+    "sha256": "47a437fa36d278c610529028a5015e879f17651f37a60ea30e30596c39833f08",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/webphone/PabxSettingsPanel.vue",
+      "git_blob_at_validated_base": "e8250388f96bb91941d6de96d417878dbcacc228",
+      "state": "presente_na_base_validada",
+      "current_sha256": "ae6dc2a3a7fbb872f1f8965aca6b0e8287311853e6a87d9624de856557cd800b"
+    },
+    {
+      "path": "app/services/jrc_contact_center/providers/jrc_pabx_adapter.rb",
+      "git_blob_at_validated_base": "215fb00a16853aa792770a741c8c57697bf05d18",
+      "state": "presente_na_base_validada",
+      "current_sha256": "73c7fe2c21fd5164107ac33cb66769b75cd01a14b8c7677e5b75496f5de470bd"
+    },
+    {
+      "path": "app/services/pabx/scope_mapping.rb",
+      "git_blob_at_validated_base": "8ab3ad08ed7078696e4e3863c9e5fa850dd77288",
+      "state": "presente_na_base_validada",
+      "current_sha256": null
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrDraftWorkspace.vue",
+      "git_blob_at_validated_base": "9a16af028e93e3b75db5eac82a54935716bbea0e",
+      "state": "presente_na_base_validada",
+      "current_sha256": "4c452c62fadbf280990ea4f46f0dee268f634c8976788de55e735ea54a2923b2"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/ivr_draft_access_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "JrcContactCenter::IvrDraftAccess lets an explicitly covered native administrator read a draft only in the current and historical authorized unit",
+        "JrcContactCenter::IvrDraftAccess does not transfer access to old artifacts when an operational unit is remapped into another issuer",
+        "JrcContactCenter::IvrDraftAccess does not retain access from a historical scope after current unit access is lost"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ivr_draft_input_spec.rb",
+      "passed_examples": 14,
+      "sample_behaviours": [
+        "JrcContactCenter::IvrDraftInput rejects invalid local revision metadata {name: nil}",
+        "JrcContactCenter::IvrDraftInput rejects invalid local revision metadata {name: false}",
+        "JrcContactCenter::IvrDraftInput rejects invalid local revision metadata {name: \" \"}"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ivr_draft_migration_spec.rb",
+      "passed_examples": 3,
+      "sample_behaviours": [
+        "Local IVR ledger populated upgrade adds only empty ledger tables without changing existing unit, member or eligibility data",
+        "Local IVR ledger populated upgrade reexecutes against populated history without inserting, mutating or reauthorizing anything",
+        "Local IVR ledger populated upgrade blocks reexecution if a required SQL guard is missing rather than silently repairing an unknown schema"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ivr_draft_write_audio_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "JrcContactCenter::IvrDraftWrite persists the exact version, current observation and authenticated audit atomically",
+        "JrcContactCenter::IvrDraftWrite does not create an identity, revision or audit when audio has not been observed",
+        "JrcContactCenter::IvrDraftWrite does not commit a partial revision when the audit fails"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ivr_draft_write_spec.rb",
+      "passed_examples": 17,
+      "sample_behaviours": [
+        "JrcContactCenter::IvrDraftWrite creates the local identity, immutable initial revision and redacted audit in the same transaction",
+        "JrcContactCenter::IvrDraftWrite records the authenticated actor and scope without private graph or name in the native audit",
+        "JrcContactCenter::IvrDraftWrite appends changes while preserving the earlier revision"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb",
+      "passed_examples": 16,
+      "sample_behaviours": [
+        "JrcContactCenter::IvrDraft preserves a native account/unit scope and computes a digest on the immutable revision",
+        "JrcContactCenter::IvrDraft captures corporate scope at creation rather than trusting a client-supplied snapshot",
+        "JrcContactCenter::IvrDraft supports a new revision without changing the original and rejects gaps"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ivr_drafts_spec.rb",
+      "passed_examples": 30,
+      "sample_behaviours": [
+        "Call Center local IVR draft API returns creation status for a new durable local identity",
+        "Call Center local IVR draft API persists a local revision and reloads it through authenticated real APIs",
+        "Call Center local IVR draft API requires a precondition and never assumes the currently stored revision"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/native_pabx_navigation_spec.rb",
+      "passed_examples": 2,
+      "sample_behaviours": [
+        "Call Center reuses protected native PABX settings does not offer infrastructure settings to an account administrator",
+        "Call Center reuses protected native PABX settings offers only the existing settings route to an eligible native administrative SuperAdmin"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/cdr_contract_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "CDR documented transport and explicit mapping parses the documented empty envelope without configuring a fabricated row schema",
+        "CDR documented transport and explicit mapping does not convert technical identifiers without an explicit CDR identity contract",
+        "CDR documented transport and explicit mapping applies only the explicitly configured CDR prefix rule and does not mutate input data"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/client_security_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "Pabx::Client reuses the encrypted Account cache across separate Client instances",
+        "Pabx::Client expires the shared cache after five minutes for subsequent Client instances",
+        "Pabx::Client uses freshly persisted credentials rather than the previous configuration token"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/client_spec.rb",
+      "passed_examples": 21,
+      "sample_behaviours": [
+        "Pabx::Client authenticates automatically, reuses an encrypted temporary token and sends Bearer only to the configured API",
+        "Pabx::Client renews once after a 401 and retries the original request once",
+        "Pabx::Client stops after the second 401 without leaking request or response secrets"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/contract_spec.rb",
+      "passed_examples": 19,
+      "sample_behaviours": [
+        "Pabx::Contract accepts the documented empty result without claiming a populated CDR mapping",
+        "Pabx::Contract keeps a populated unknown schema pending instead of inventing fields",
+        "Pabx::Contract maps documented type IN from the explicit synthetic field contract"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/provider_rails_spec.rb",
+      "passed_examples": 18,
+      "sample_behaviours": [
+        "PABX Provider native Rails scope blocks extensions on tenant mismatch before any dependent request",
+        "PABX Provider native Rails scope blocks search_extension on tenant mismatch before any dependent request",
+        "PABX Provider native Rails scope blocks web_extensions on tenant mismatch before any dependent request"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/provider_spec.rb",
+      "passed_examples": 6,
+      "sample_behaviours": [
+        "Pabx::Provider keeps the configured expected tenant when the returned accountcode differs",
+        "Pabx::Provider reports technical state and a missing registry without querying CDR or recordings",
+        "Pabx::Provider passes documented CDR filters with bounded page numbers and human extension"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/recordings_spec.rb",
+      "passed_examples": 24,
+      "sample_behaviours": [
+        "PABX documented recording transport uses only the documented link body from a persisted CDR without exposing it publicly",
+        "PABX documented recording transport blocks an unconfirmed recording lookup empty",
+        "PABX documented recording transport blocks an unconfirmed recording lookup uniqueId"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/scope_mapping_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "Pabx::ScopeMapping preserves the strict legacy identity contract without accepting another accountcode",
+        "Pabx::ScopeMapping accepts explicitly authorized different identifiers without changing the tenant or guessing the CDR identity",
+        "Pabx::ScopeMapping keeps a separately declared logical tenant in CDR rows"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/sync_jobs_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "PABX existing job controls does not schedule or connect when enabled and sync_enabled are false",
+        "PABX existing job controls cannot run a queued integration ID through another Account",
+        "PABX existing job controls bounds and delays a retry for TIMEOUT using the existing ActiveJob queue"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/sync_rails_spec.rb",
+      "passed_examples": 18,
+      "sample_behaviours": [
+        "PABX incremental sync with real PostgreSQL and mocked HTTP imports multiple pages idempotently and conserves the Account-local cursor on replay",
+        "PABX incremental sync with real PostgreSQL and mocked HTTP rolls back a partial import and resumes from the same successful checkpoint after a temporary HTTP failure",
+        "PABX incremental sync with real PostgreSQL and mocked HTTP rejects empty pages while records are still missing"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/sync_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "Pabx::Sync reprocesses a period idempotently and updates later status/recording availability",
+        "Pabx::Sync reads all pages then advances the incremental cursor",
+        "Pabx::Sync rolls back partial pages and does not advance cursor on repeated pages"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/pabx_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "Native PABX settings and history API does not create integration, company, unit or SIP credentials on a settings read",
+        "Native PABX settings and history API keeps administrative writes and diagnostics exclusive to the native Super Admin",
+        "Native PABX settings and history API stores credentials encrypted, preserves blank values and never returns them after storage"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/pabx_security_spec.rb",
+      "passed_examples": 19,
+      "sample_behaviours": [
+        "PABX persistence and HTTP isolation persistence encrypts both credential columns in PostgreSQL and decrypts through the backend",
+        "PABX persistence and HTTP isolation persistence rotates credentials through HTTP without exposing or activating them",
+        "PABX persistence and HTTP isolation authorizes a distinct accountcode server-side and ignores forged provenance fields"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/pabx_history_spec.rb",
+      "passed_examples": 7,
+      "sample_behaviours": [
+        "PABX stored CDR HTTP scope shows only the authorized personal extension and current Account and tenant",
+        "PABX stored CDR HTTP scope filters inbound missed calls without treating outbound unanswered calls as missed",
+        "PABX stored CDR HTTP scope uses requested display-zone calendar boundaries and stable pagination"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/pabx_recordings_spec.rb",
+      "passed_examples": 11,
+      "sample_behaviours": [
+        "PABX private recording requests proxies only the authorized stored recording and prevents public caching",
+        "PABX private recording requests denies recording bytes without explicit authority when Call Center is enabled",
+        "PABX private recording requests separates listening from direct download and retains own-extension authorization"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/pabx_diagnostics_spec.rb",
+      "passed_examples": 14,
+      "sample_behaviours": [
+        "PABX authorized diagnosis Rails does not report success for an incomplete dashboard 1",
+        "PABX authorized diagnosis Rails does not report success for an incomplete dashboard 2",
+        "PABX authorized diagnosis Rails does not report success for an incomplete dashboard 3"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/sync_concurrency_spec.rb",
+      "passed_examples": 2,
+      "sample_behaviours": [
+        "PABX PostgreSQL concurrent jobs serializes concurrent jobs of the same integration using a real PostgreSQL row lock",
+        "PABX PostgreSQL concurrent jobs allows another Account integration to progress while the first Account row is locked"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "Local IVR real HTTP concurrency accepts exactly one writer when two different operations expect the same prior revision",
+        "Local IVR real HTTP concurrency returns one durable operation receipt to simultaneous retries with the same UUID",
+        "Local IVR real HTTP concurrency rejects a write whose eligibility was revoked while its real request waited for the account lock"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [
+    "app/javascript/dashboard/routes/dashboard/webphone/PabxSettingsPanel.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/NativePabxNavigation.spec.js"
+  ],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "local IVR audio reference pins native verified history and never crosses unit or publishes",
+    "local IVR pagination, URL filters and stale editor preserve the reviewed draft",
+    "local IVR real editor persists, simulates, imports and exports immutable revisions",
+    "local IVR scoped records and forced URLs obey corporate coverage and fresh eligibility",
+    "local IVR supervisor polling clears real scoped units after native eligibility revocation",
+    "queue popup creates edits and reloads local data without claiming PABX application"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0070-C01",
+      "expected": "Permitir criar, editar, testar, versionar e publicar URAs com segurança.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 70,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 95,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0072-C01",
+      "expected": "Abas: fluxo/menu, mensagens, vínculos, avançado, teste e homologação, publicação e histórico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 72,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 97,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0073-C01",
+      "expected": "Criação do zero, por modelo ou importação de JSON; exportação JSON versionada para backup/migração.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 73,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 98,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0074-C01",
+      "expected": "Fluxos com teclas DTMF, tempos, tentativas, destinos, contingência, horários e mensagens.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 74,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 99,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0075-C01",
+      "expected": "Visualizar rascunho e diagrama; simular DTMF e destinos antes da homologação.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 75,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 100,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0077-C01",
+      "expected": "JSON: validar esquema, versão, referências existentes e escopo da empresa.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 77,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 102,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0078-C01",
+      "expected": "Importação apenas como rascunho; não executar comandos no PABX automaticamente.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 78,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 103,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0079-C01",
+      "expected": "Publicação sujeita a permissão específica e confirmação técnica; rollback cria nova versão sem apagar histórico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 79,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 104,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0080-C01",
+      "expected": "Proibir loops sem saída, destinos inexistentes e sobreposição de opções DTMF.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 80,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 105,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0158-C01",
+      "expected": "Administrar o PABX próprio com segurança, isolamento entre empresas e rastreabilidade.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 158,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 264,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0160-C01",
+      "expected": "Conexão: host, porta, protocolo, credenciais protegidas, empresa e status; testes de autenticação e serviço.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 160,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 266,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0161-C01",
+      "expected": "Validação de identificadores: tenant, accountcode, empresa e permissões; apresentar valores de ambos os sistemas e status de mapeamento.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 161,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 267,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0162-C01",
+      "expected": "Sincronizar ramais, filas, URAs, usuários e eventos por execução manual, agendada ou automática.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 162,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 268,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0163-C01",
+      "expected": "Logs: filtro por data, empresa, tenant/accountcode, módulo e severidade; popup com detalhes e correlação de eventos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 163,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 269,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0165-C01",
+      "expected": "Tenant 8 e accountcode 12 podem ser diferentes: verificar mapeamento autorizado, não igualdade numérica.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 165,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 271,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0166-C01",
+      "expected": "Somente Super Admin altera infraestrutura e credenciais.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 166,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 272,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0167-C01",
+      "expected": "Credenciais/tokens não são exibidos em logs ou exportações.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 167,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 273,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D1-P0168-C01",
+      "expected": "Sincronização por job e idempotente; falha parcial reprocessa somente o que for seguro.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 168,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 274,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0109-C01",
+      "expected": "A imagem mostra as configuracoes gerais de conexao, sincronizacao e diagnostico do PABX.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 109,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0109-C02",
+      "expected": "Nao mostra o editor de fluxo/DTMF de URA.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 109,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0110-C01",
+      "expected": "Acoes e resultado do clique: Abas Geral, Ramais, Filas, URAs, Gravações, Sincronização, Diagnóstico e Auditoria: abrir views correspondentes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 110,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0110-C02",
+      "expected": "Testar Conexão: validar autenticacao e comunicacao sem alterar recursos.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 110,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0110-C03",
+      "expected": "Sincronizar ou Executar Diagnóstico: iniciar job com rastreio.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 110,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0110-C04",
+      "expected": "Atalhos Gerenciar Ramais, Filas, URAs e Gravações: acessar listagens; a edicao da URA requer fluxo especifico de rascunho, simulacao, aprovacao e publicacao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 110,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0111-C01",
+      "expected": "Campos e dados apresentados: Exibir empresa, host/porta/protocolo sem revelar segredo, recursos consultados, ultima sincronizacao, funcoes habilitadas, eventos de diagnostico e estados de servico.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 111,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0111-C02",
+      "expected": "Validações de tenant/accountcode devem consultar o mapeamento autorizado, e nao exigir numeros iguais.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 111,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0112-C01",
+      "expected": "Regras e permissoes: Somente Super Admin altera parametros de infraestrutura/credenciais.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 112,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0112-C02",
+      "expected": "Teste de conexao nao configura a URA, nao publica e nao aprova alteracoes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 112,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0112-C03",
+      "expected": "O conector confirma o estado no PABX; um acionamento de botao apenas inicia verificacao ou execucao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 112,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0113-C01",
+      "expected": "Estados de erro e excecoes: Apresentar erro de autenticacao, timeout, mapeamento invalido e divergencia de versao com diagnostico seguro.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 113,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0113-C02",
+      "expected": "Permitir reprocessar somente itens seguros; jamais expor tokens, senhas ou respostas sensiveis em tela.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 113,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0115-C01",
+      "expected": "• F04-A: tenant 8 e accountcode 12 validos por vinculacao autorizada nao geram falso bloqueio.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 115,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "id": "D2-P0116-C01",
+      "expected": "• F04-B: clicar Testar Conexao em ambiente falho informa erro sem atualizar recursos nem marcar publicacao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 116,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    }
+  ],
+  "divergences": [
+    "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

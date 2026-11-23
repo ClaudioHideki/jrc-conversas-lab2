@@ -1,0 +1,759 @@
+{
+  "figure": 2,
+  "title": "Página principal do Control Desk",
+  "status": "parcial",
+  "expected_functionality": "Pagina principal do Control Desk",
+  "image": {
+    "sha256": "5a08f2b212179f10e95a538f5fb458a481ae1526f4acc2e45b3901f4aeb5cb18",
+    "duplicate_of": 1,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/ControlDeskPage.vue",
+      "git_blob_at_validated_base": "7527b726d42d48ffcaadb715ab3d8bcd9a5a3308",
+      "state": "presente_na_base_validada",
+      "current_sha256": "f0d3c6419445e03ff370ec18f95ae64671d206ff8440c0c575bef18eb2af9958"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.vue",
+      "git_blob_at_validated_base": "903a8deca04a9618de35f460170e60041299e7e6",
+      "state": "presente_na_base_validada",
+      "current_sha256": "39de65ca7587029945091df09c110dc465f0a281a1bb24be94b8f17143ab9ad3"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecentConfigurationActivity.vue",
+      "git_blob_at_validated_base": "fec875a1aeba10a11a2e123fc5a8f04c7338a845",
+      "state": "presente_na_base_validada",
+      "current_sha256": "06d477018368e62d0e18022ee1bec451a1e29ae4bc33d1d8fadccc4e49928eb4"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/models/jrc_contact_center/configuration_audit_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "Call Center configuration audit transactions captures only allowed fields and scope when the local record is created",
+        "Call Center configuration audit transactions records an omitted settings change without copying its previous or current content",
+        "Call Center configuration audit transactions does not create an artificial update event for an unchanged record"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/administration_security_spec.rb",
+      "passed_examples": 6,
+      "sample_behaviours": [
+        "Call Center administration isolation does not grant new recording/publication/approval/audit authorities to a native administrator",
+        "Call Center administration isolation preserves legacy agent access without granting new administrative authorities",
+        "Call Center administration isolation keeps publication blocked without permission or a provider contract"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/administration_workflows_spec.rb",
+      "passed_examples": 14,
+      "sample_behaviours": [
+        "Call Center administrative workflows reports saved configuration without claiming an online PABX or an applied operation",
+        "Call Center administrative workflows offers native team member options only to a native team administrator",
+        "Call Center administrative workflows does not turn Call Center configure into native team administration"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/configuration_audits_spec.rb",
+      "passed_examples": 21,
+      "sample_behaviours": [
+        "Call Center configuration audit API records the actual authenticated actor and request correlation without private settings",
+        "Call Center configuration audit API returns a scoped immutable detail without e-mail or raw configuration payloads",
+        "Call Center configuration audit API combines resource, action, actor and correlation filters on the authorized relation"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.spec.js"
+  ],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "configuration audit boundary respects unit account export rights and live revocation",
+    "configuration audit filters pagination details history and verified export use real records",
+    "fifteen permission-bound cards, actual CSS, honest pending states and no overflow",
+    "last eligible queue withdrawal requires actual manager review and preserves native audit and scope",
+    "team roster last eligible withdrawal uses real native review, persistence and scoped audit",
+    "whole native team deletion preserves generic confirmation requires scoped manager review and records real audit"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0045-C01",
+      "expected": "Página inicial simples, com acesso aos recursos de telefonia, operação e governança.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 45,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 52,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D1-P0047-C01",
+      "expected": "Cards: Números, Ramais, Filas, URA, Horários, Áudios, Pausas, Encerramentos, Distribuição, Permissões, Gravações, PABX, Aprovações, Parâmetros Gerais e Integrações.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 47,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 54,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D1-P0048-C01",
+      "expected": "Cabeçalho com estado real da integração, última sincronização e alertas relevantes; evitar excesso de indicadores.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 48,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 55,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D1-P0049-C01",
+      "expected": "Cada card abre a lista da área.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 49,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 56,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D1-P0049-C02",
+      "expected": "Engrenagens e ações de cadastro/edição abrem popups.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 49,
+          "clause": 2
+        },
+        {
+          "document": "doc2",
+          "paragraph": 56,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D1-P0051-C01",
+      "expected": "Card indisponível para perfil sem autorização; backend revalida permissões.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 51,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 58,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D1-P0052-C01",
+      "expected": "Não criar cadastros paralelos para módulos já existentes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 52,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 59,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0063-C01",
+      "expected": "Painel de entrada compacto: todos os recursos administrativos sao encontrados aqui; a alteracao acontece na tela setorial e em popup.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 63,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0064-C01",
+      "expected": "Acoes e resultado do clique: Cards Números, Ramais, Filas, URA, Horários, Áudios, Pausas, Encerramentos, Distribuição, Permissões, Gravações, PABX, Aprovações, Parâmetros Gerais e Integrações: navegar à listagem do assunto.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 64,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0064-C02",
+      "expected": "Atividade Recente: filtrar registro e abrir detalhe de auditoria.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 64,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0064-C03",
+      "expected": "Alertas e Pendências: abrir pendência em sua fonte; indicador de notificações: mostrar apenas as autorizadas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 64,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0065-C01",
+      "expected": "Campos e dados apresentados: Para cada card, manter nome claro, descricao curta, disponibilidade por permissao e identificacao da area.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 65,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0065-C02",
+      "expected": "No topo, exibir situacao do PABX, ultima sincronizacao e alertas relevantes; enquanto dados carregam, exibir carregamento, vazio ou erro, sem metricas inventadas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 65,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0066-C01",
+      "expected": "Regras e permissoes: Nao duplicar usuario, calendario, equipe, aprovacoes, tickets ou tarefas ja cadastrados no JRC Conversas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 66,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0066-C02",
+      "expected": "Entradas sem permissao devem permanecer indisponiveis.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 66,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0066-C03",
+      "expected": "Alteracoes estruturais so recebem sucesso apos confirmacao do sistema responsavel e, quando necessario, do PABX.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 66,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0067-C01",
+      "expected": "Estados de erro e excecoes: Falha em um card ou indicador nao deve derrubar o painel.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 67,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0067-C02",
+      "expected": "Mostrar ultima atualizacao e opcao de tentar novamente; nao usar contagens desatualizadas sem aviso.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 67,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0069-C01",
+      "expected": "• F02-A: cada card leva ao modulo correto e o retorno preserva empresa, filtros e contexto.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 69,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "id": "D2-P0070-C01",
+      "expected": "• F02-B: uma falha no PABX aparece como alerta com estado real, sem anunciar sincronizacao bem-sucedida.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 70,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    }
+  ],
+  "divergences": [
+    "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

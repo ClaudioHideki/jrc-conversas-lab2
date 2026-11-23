@@ -1,0 +1,1900 @@
+{
+  "figure": 7,
+  "title": "Pausas e disponibilidade",
+  "status": "parcial",
+  "expected_functionality": "Gestao de pausas e disponibilidade",
+  "image": {
+    "sha256": "120e8c408f9e50310440930c7fa0c46c7b9e9668e8a4c9429597550a1f45d487",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.vue",
+      "git_blob_at_validated_base": "57d65f0077ff287174b57cd5e0673a59d731974c",
+      "state": "presente_na_base_validada",
+      "current_sha256": "1758cac2c62729a1ad29c689472ad6a319f39b7d471ef4ac12ab7936ace35b76"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AgentStateHistory.vue",
+      "git_blob_at_validated_base": "2c0eb58c7ddb913e5b9c4634d42ee2cbe91a7d98",
+      "state": "presente_na_base_validada",
+      "current_sha256": "750b162612e79eec78c13ec7caaede2d3e3e1f5bdfee36f8ac5cabdb20cafa05"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseApprovalStatus.vue",
+      "git_blob_at_validated_base": "fb9db6b6c3bd001933e56098bcdccac7e90b2cbc",
+      "state": "presente_na_base_validada",
+      "current_sha256": "32b5ebe33cda717440e2f22a045d8ce126fee7045c3b78e8c2d528b0eb788d18"
+    },
+    {
+      "path": "app/services/jrc_contact_center/agent_state_manager.rb",
+      "git_blob_at_validated_base": "f5212c475b859c38d53631eb554b283350021230",
+      "state": "presente_na_base_validada",
+      "current_sha256": "cab12b4ec6906262f2735bb9d3f30784257c5ac96170a50ee1ee9fd44837b45b"
+    },
+    {
+      "path": "app/services/jrc_contact_center/pause_approval_coordinator.rb",
+      "git_blob_at_validated_base": "c985586d915110071292edd00e8fba3621f51d66",
+      "state": "presente_na_base_validada",
+      "current_sha256": "fbdbaca46a463f08a02fe1217bbd85221b69c90d509ff4b8333d4df4061b5811"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/agent_state_manager_pause_justification_spec.rb",
+      "passed_examples": 19,
+      "sample_behaviours": [
+        "JrcContactCenter::AgentStateManager keeps the persisted old shape and its exact original revision on a read or unchanged save",
+        "JrcContactCenter::AgentStateManager does not require the new option until account enforcement is explicitly activated",
+        "JrcContactCenter::AgentStateManager does not reinterpret an old receipt after enabling justification and preserves the old digest bytes"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/agent_state_manager_pending_acw_spec.rb",
+      "passed_examples": 4,
+      "sample_behaviours": [
+        "JrcContactCenter::AgentStateManager does not interrupt a real connected leg to start an operator pause",
+        "JrcContactCenter::AgentStateManager keeps a terminated call in ACW and preserves its draft and native availability instead of starting the pause",
+        "JrcContactCenter::AgentStateManager continues blocking a pause after the ACW clock expires without completing or deleting answers"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/agent_state_manager_spec.rb",
+      "passed_examples": 17,
+      "sample_behaviours": [
+        "JrcContactCenter::AgentStateManager rejects local availability after explicit eligibility revocation without changing native availability",
+        "JrcContactCenter::AgentStateManager rejects a cached member after its functional profile loses operate",
+        "JrcContactCenter::AgentStateManager rejects an operator transition after its feature is disabled"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/create_contact_center_pause_approval_evidence_spec.rb",
+      "passed_examples": 4,
+      "sample_behaviours": [
+        "CreateContactCenterPauseApprovalEvidence rejects committing a source root with no corporate children rather than accepting a merely visual all-unit claim",
+        "CreateContactCenterPauseApprovalEvidence rejects a partially inserted corporate set at the database boundary and rolls its scope back with the root",
+        "CreateContactCenterPauseApprovalEvidence accepts a complete immutable source without mistaking source existence for any policy, decision or approval"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/deferred_pause_input_spec.rb",
+      "passed_examples": 46,
+      "sample_behaviours": [
+        "JrcContactCenter::DeferredPauseInput accepts only bounded native values and keeps the explicit zero state version",
+        "JrcContactCenter::DeferredPauseInput rejects malformed envelope nil",
+        "JrcContactCenter::DeferredPauseInput rejects malformed envelope false"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/deferred_pause_manager_approval_acw_spec.rb",
+      "passed_examples": 2,
+      "sample_behaviours": [
+        "JrcContactCenter::DeferredPauseManager does not override the actual pending qualification merely because all companies approved",
+        "JrcContactCenter::DeferredPauseManager consumes the approved native pause once after actual ACW completion without a provider command"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/deferred_pause_manager_approval_spec.rb",
+      "passed_examples": 16,
+      "sample_behaviours": [
+        "JrcContactCenter::DeferredPauseManager creates every scope in the native Central atomically without applying a pause or pretending a provider ACK",
+        "JrcContactCenter::DeferredPauseManager rejects empty policy selection without leaving any canonical intent, scope or partial request behind",
+        "JrcContactCenter::DeferredPauseManager rolls back the complete creation when only the first affected company has a policy"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/deferred_pause_manager_spec.rb",
+      "passed_examples": 18,
+      "sample_behaviours": [
+        "JrcContactCenter::DeferredPauseManager persists the request without altering the live call, native availability or current state",
+        "JrcContactCenter::DeferredPauseManager keeps the request waiting through the real call closure and overdue ACW without discarding the draft",
+        "JrcContactCenter::DeferredPauseManager starts one native pause only after call end and ACW completion and preserves its local-only identity"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/deferred_pause_revision_spec.rb",
+      "passed_examples": 3,
+      "sample_behaviours": [
+        "JrcContactCenter::DeferredPauseRevision provides a stable bounded token before any own request exists",
+        "JrcContactCenter::DeferredPauseRevision does not reuse the empty-history revision between two members of the same account",
+        "JrcContactCenter::DeferredPauseRevision refuses a member from another account"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_approval_coverage_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalCoverage captures every affected unit and corporate scope rather than selecting just the operating queue",
+        "JrcContactCenter::PauseApprovalCoverage deduplicates units while preserving the actual memberships of multiple queues",
+        "JrcContactCenter::PauseApprovalCoverage keeps a stable read-only digest without creating state, requests, approvals, grants or audit events"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_approval_intent_spec.rb",
+      "passed_examples": 13,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalIntent captures an authenticated immutable-input intent covering every affected corporate scope",
+        "JrcContactCenter::PauseApprovalIntent never narrows global pause approval to the selected operating queue",
+        "JrcContactCenter::PauseApprovalIntent creates no operational state, pending intent, approval, policy, grant or audit during preview"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_approval_policy_check_spec.rb",
+      "passed_examples": 2,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalPolicyCheck rejects a real conflicting publication before it can replace a usable scoped policy or affect a pending pause",
+        "JrcContactCenter::PauseApprovalPolicyCheck propagates a simulated selector conflict rather than treating it as missing or ready"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_approval_readiness_spec.rb",
+      "passed_examples": 3,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalReadiness projects captured operational unit names for every coherent owned scope without applying a pending pause",
+        "JrcContactCenter::PauseApprovalReadiness keeps captured names immutable and withholds the projection after the native unit context changes",
+        "JrcContactCenter::PauseApprovalReadiness returns no captured names after the owner loses current operating eligibility"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_approval_source_access_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalSourceAccess exposes only the reviewers own scope and opaque complete-context digest rather than other units or private justification",
+        "JrcContactCenter::PauseApprovalSourceAccess rejects source access and a vote by a reviewer covering only the other native business unit",
+        "JrcContactCenter::PauseApprovalSourceAccess requires explicit Call Center approve independently of native Central decide and an ordinary administrator role"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_catalog_spec.rb",
+      "passed_examples": 24,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseCatalog keeps an absent catalog disabled and accepts a free legacy reason through the existing manager",
+        "JrcContactCenter::PauseCatalog persists real minutes and has the same revision after the JSONB round trip without changing unrelated settings",
+        "JrcContactCenter::PauseCatalog requires explicit activation and keeps configuration and audit unchanged when it is absent"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/pause_reason_definition_approval_compatibility_spec.rb",
+      "passed_examples": 11,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseReasonDefinition preserves an absent approval flag and the exact canonical legacy content without silently activating approval",
+        "JrcContactCenter::PauseReasonDefinition preserves an explicit approval boolean true without adding an approver or policy",
+        "JrcContactCenter::PauseReasonDefinition preserves an explicit approval boolean false without adding an approver or policy"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/synthetic_pause_seed_spec.rb",
+      "passed_examples": 2,
+      "sample_behaviours": [
+        "JrcContactCenter::SyntheticPauseSeed rejects provisioning outside the exclusive synthetic runner without writing an Account",
+        "JrcContactCenter::SyntheticPauseSeed does not expose a constructor that bypasses resource guards"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/deferred_pause_request_spec.rb",
+      "passed_examples": 9,
+      "sample_behaviours": [
+        "JrcContactCenter::DeferredPauseRequest preserves request identity and private body against direct updates",
+        "JrcContactCenter::DeferredPauseRequest retains individual request history rather than deleting it after withdrawal",
+        "JrcContactCenter::DeferredPauseRequest does not let terminal history become an active request again through raw SQL"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/pause_approval_review_evidence_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "JrcContactCenter::PauseApprovalReview retains the complete native payload and scope set unchanged in PostgreSQL",
+        "JrcContactCenter::PauseApprovalReview rejects bulk edits to the immutable complete context without silently rewriting a historical approval",
+        "JrcContactCenter::PauseApprovalReview rejects scope movement between accounts using actual SQL rather than an ActiveRecord-only validation"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/agent_pause_pending_acw_spec.rb",
+      "passed_examples": 1,
+      "sample_behaviours": [
+        "Native operator pause while ACW is pending rejects a direct authenticated pause request without altering the pending qualification or state"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/agent_state_history_spec.rb",
+      "passed_examples": 21,
+      "sample_behaviours": [
+        "Call Center scoped operational state history returns only the explicit operational projection without mutating events or availability",
+        "Call Center scoped operational state history requires current supervisory or configuration authority rather than view or operate alone",
+        "Call Center scoped operational state history rechecks eligibility and the feature on each request"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_requests_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "Deferred operator pause API persists and recovers one own pending request without fabricating a paused state or provider ACK",
+        "Deferred operator pause API does not accept account, member, actor or unit authority from the request body",
+        "Deferred operator pause API rejects explicit malformed private values rather than dropping them through strong parameters"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_scope_spec.rb",
+      "passed_examples": 12,
+      "sample_behaviours": [
+        "Deferred pause current unit and private projection uses current corporate scope even when a physical membership exists in another unit",
+        "Deferred pause current unit and private projection recovers private details only for the own request while the original selection is still applicable",
+        "Deferred pause current unit and private projection redacts private historical data after losing the original unit without rewriting the receipt"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_api_spec.rb",
+      "passed_examples": 9,
+      "sample_behaviours": [
+        "Native mandatory pause approval API returns a no-store complete preview without creating an operational intent or a native approval",
+        "Native mandatory pause approval API requires the reviewed server digest and rejects supplied scope authority before creating anything",
+        "Native mandatory pause approval API persists and recovers the pending all-scope state through authenticated native APIs without applying it early"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb",
+      "passed_examples": 13,
+      "sample_behaviours": [
+        "Call Center account-local pause catalog API reads a disabled empty configuration with an Account-bound revision and no-store",
+        "Call Center account-local pause catalog API persists a draft through the native authenticated endpoint without enabling the requirement",
+        "Call Center account-local pause catalog API requires a revision and rejects an old one without creating an audit for the denied write"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_visibility_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "Call Center private pause options and supervisor scope includes rich authorized pause data in the authenticated operator self response",
+        "Call Center private pause options and supervisor scope does not copy private operator options or the Unit B snapshot into a Unit A supervisor response",
+        "Call Center private pause options and supervisor scope does not use a caller-provided member id to return another operator private catalog"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/pause_justification_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "Call Center private pause justification API rejects a missing required justification and leaves the database and native availability unchanged",
+        "Call Center private pause justification API does not silently filter malformed or blank private input boolean",
+        "Call Center private pause justification API does not silently filter malformed or blank private input integer"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "Call Center authorized supervisor pause duration notice exposes only duration and an exceeded flag without resuming availability or exposing private definition/text",
+        "Call Center authorized supervisor pause duration notice keeps a real zero and the exact informational threshold distinct from an exceeded pause",
+        "Call Center authorized supervisor pause duration notice uses the immutable event limit rather than changing an existing pause when the catalog changes"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/serializers/jrc_approvals/request_serializer_pause_spec.rb",
+      "passed_examples": 1,
+      "sample_behaviours": [
+        "JrcApprovals::RequestSerializer serializes only scoped immutable names and digests without exposing another company or the personal justification"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "Deferred pause real HTTP concurrency persists one pending request when concurrent operations have different UUIDs",
+        "Deferred pause real HTTP concurrency recovers the same durable receipt for simultaneous copies of one exact request",
+        "Deferred pause real HTTP concurrency rechecks operating authority after waiting rather than committing a revoked request"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "All-scope pause actual HTTP concurrency commits one canonical intent and a complete two-company request set for distinct concurrent UUIDs",
+        "All-scope pause actual HTTP concurrency recovers one exact durable intent and Central request set from duplicate concurrent confirmations",
+        "All-scope pause actual HTTP concurrency rechecks operating permissions after waiting rather than recording any partial approval request"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/pauseOrigin.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/DeferredPauseApprovalDialog.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/DeferredPauseDialog.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseApprovalStatus.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/deferredPauseApi.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/helpers/pauseApprovalPreview.spec.js"
+  ],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "all-scope pause approval native requires both managers, preserves ACW and denies cross-unit decisions",
+    "deferred pause native uncertain response reuses one durable receipt and explicit cancellation preserves ACW",
+    "deferred pause native waits through ACW and starts only after explicit completion without administrative access",
+    "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts",
+    "local pause catalog operator preserves legacy history and enforces only authorized new reasons",
+    "local pause duration supervisor shows authorized real elapsed evidence without private text or automatic resumption",
+    "operational form native preserves typed private drafts and blocks pause until required explicit completion"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0110-C01",
+      "expected": "Cadastrar motivos e comportamento de distribuição dos agentes sem impor apenas durações fixas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 110,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 162,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7,
+        8
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D1-P0112-C01",
+      "expected": "Motivo, categoria, descrição, duração padrão, mínima e máxima (apenas horas e minutos), status e perfis autorizados.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 112,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 164,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7,
+        8
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D1-P0113-C01",
+      "expected": "Configuração granular: retira da distribuição, exige justificativa, exige aprovação, alerta de tempo excedido e política de remuneração conforme regras aplicáveis.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 113,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 165,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7,
+        8
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D1-P0114-C01",
+      "expected": "Abas de motivos, regras de distribuição, disponibilidade da equipe e histórico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 114,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 166,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7,
+        8
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D1-P0115-C01",
+      "expected": "Tela da equipe: estados disponível, em atendimento, pausa, offline e duração do estado.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 115,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 167,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7,
+        8
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D1-P0117-C01",
+      "expected": "Não interromper ligação já em andamento; efetivar pausa na transição operacional apropriada.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 117,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 169,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7,
+        8
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D1-P0118-C01",
+      "expected": "Retorno à distribuição depende de elegibilidade e regra de retorno automático expressamente autorizada.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 118,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 170,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7,
+        8
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D1-P0119-C01",
+      "expected": "Tempo excedido gera alerta, mas não termina automaticamente a pausa.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 119,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 171,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7,
+        8
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D1-P0120-C01",
+      "expected": "Pausas legais, convencionais ou de política corporativa devem respeitar a norma aplicável; cadastro flexível não as substitui.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 120,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 172,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7,
+        8
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0176-C01",
+      "expected": "Visao operacional de motivos de pausa e do comportamento da distribuicao de novas chamadas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 176,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0177-C01",
+      "expected": "Acoes e resultado do clique: Abas Motivos de Pausa, Regras de Distribuicao, Disponibilidade da Equipe e Historico: consultar configuracoes e estados.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 177,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0177-C02",
+      "expected": "Novo Motivo: abrir popup.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 177,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0177-C03",
+      "expected": "Busca e edicao de linha: localizar/alterar configuracao com auditoria.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 177,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0177-C04",
+      "expected": "A aba de equipe mostra agente, estado, tempo decorrido e eventual pausa excedida; selecao de agente abre detalhes quando permitido.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 177,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0178-C01",
+      "expected": "Campos e dados apresentados: Listar nome, categoria, se retira da distribuicao, tempo padrao e status.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 178,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0178-C02",
+      "expected": "Estados exibidos: disponivel, em atendimento, em pausa e offline; indicadores de disponibilidade devem vir de eventos reais, nao de contagem fixa do mockup.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 178,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0179-C01",
+      "expected": "Regras e permissoes: Pausa durante chamada ativa nao derruba a ligacao; aplica-se na transicao operacional prevista.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 179,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0179-C02",
+      "expected": "Tempo excedido dispara aviso, mas nao encerra pausa automaticamente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 179,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0179-C03",
+      "expected": "O retorno a fila depende de elegibilidade, jornada e de politica explicita de retorno automatico.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 179,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0180-C01",
+      "expected": "Estados de erro e excecoes: Se PABX e aplicacao divergirem, mostrar status pendente/nao sincronizado.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 180,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0180-C02",
+      "expected": "Agente sem fila elegivel nao pode aparecer como disponivel para distribuicao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 180,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0180-C03",
+      "expected": "Falha de registro de pausa deve ser visivel ao agente e supervisor.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 180,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0182-C01",
+      "expected": "• F07-A: solicitar pausa com chamada em andamento preserva a chamada e impede novas distribuicoes apos a transicao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 182,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "id": "D2-P0183-C01",
+      "expected": "• F07-B: ultrapassar duracao gera alerta, sem terminar a pausa nem redistribuir chamadas por conta propria.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 183,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        7
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    }
+  ],
+  "divergences": [
+    "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

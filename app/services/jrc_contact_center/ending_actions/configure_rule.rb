@@ -1,34 +1,20 @@
 # frozen_string_literal: true
 
-# Internal writer; no public automation controller exposes it yet.
+# Existing ACW version writer; current native authority is shared with its scoped editor.
 # Reuses native ACW revision/audit and stores only a safe head in Account settings.
 class JrcContactCenter::EndingActions::ConfigureRule
   def initialize(account:, member:, input:, expected_revision:)
     @account = account
-    @member_id = member.id
-    @user_id = member.user_id
+    @context = JrcContactCenter::EndingActions::ConfigurationContext.new(account: account, member: member)
     @input = input
     @expected_revision = expected_revision
   end
 
   def call
-    JrcContactCenter::AuthorityTransaction.call(account: @account, member: nil) do
-      member = @account.account_users.find_by!(id: @member_id, user_id: @user_id)
-      authorize_configuration!(member)
-      JrcServiceDesk::NativeExecutionContext.with(account: @account, account_user: member, user: member.user) do
-        update_rule!(member)
-      end
-    end
+    @context.call { |member| update_rule!(member) }
   end
 
   private
-
-  def authorize_configuration!(member)
-    context = { account: @account, account_user: member, user: member.user }
-    allowed = member.user.reload.active_for_authentication? && JrcContactCenter::ModulePolicy.new(context, :contact_center).configure?
-    coverage = JrcContactCenter::CorporateCoverage.new(account: @account, user: member.user)
-    raise Pundit::NotAuthorizedError unless allowed && (!coverage.configured? || coverage.group?)
-  end
 
   def update_rule!(member)
     policy = JrcContactCenter::AcwPolicy.new(account: @account)

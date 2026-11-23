@@ -1,0 +1,523 @@
+{
+  "figure": 1,
+  "title": "Central e navegação",
+  "status": "parcial",
+  "expected_functionality": "Central de configuracoes - identidade e navegacao",
+  "image": {
+    "sha256": "5a08f2b212179f10e95a538f5fb458a481ae1526f4acc2e45b3901f4aeb5cb18",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/ControlDeskPage.vue",
+      "git_blob_at_validated_base": "7527b726d42d48ffcaadb715ab3d8bcd9a5a3308",
+      "state": "presente_na_base_validada",
+      "current_sha256": "f0d3c6419445e03ff370ec18f95ae64671d206ff8440c0c575bef18eb2af9958"
+    },
+    {
+      "path": "app/services/jrc_contact_center/administration.rb",
+      "git_blob_at_validated_base": "3b30c75e098cbb11aa6caf466ede157a5fa95311",
+      "state": "presente_na_base_validada",
+      "current_sha256": "8e095b383817afc2322e167d59219e0e51213f1280f3173f025e367accadb54d"
+    },
+    {
+      "path": "app/services/jrc_contact_center/operational_health.rb",
+      "git_blob_at_validated_base": "e3940c56fb10dc6d1f79f38defd9faa04bbe92e8",
+      "state": "presente_na_base_validada",
+      "current_sha256": "a7e7f9059cfe3d13363d820bf136d13d8f116c4a4228ed006943d795fc3b3454"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/module_policy_quality_review_spec.rb",
+      "passed_examples": 16,
+      "sample_behaviours": [
+        "JrcContactCenter::ModulePolicy#quality_review? does not infer review from any of the thirteen existing rights or native administration",
+        "JrcContactCenter::ModulePolicy#quality_review? requires an explicit registered profile right in addition to native recording access",
+        "JrcContactCenter::ModulePolicy#quality_review? does not review when the profile lacks jrc_contact_center_recordings_view"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/administration_security_spec.rb",
+      "passed_examples": 6,
+      "sample_behaviours": [
+        "Call Center administration isolation does not grant new recording/publication/approval/audit authorities to a native administrator",
+        "Call Center administration isolation preserves legacy agent access without granting new administrative authorities",
+        "Call Center administration isolation keeps publication blocked without permission or a provider contract"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/administration_workflows_spec.rb",
+      "passed_examples": 14,
+      "sample_behaviours": [
+        "Call Center administrative workflows reports saved configuration without claiming an online PABX or an applied operation",
+        "Call Center administrative workflows offers native team member options only to a native team administrator",
+        "Call Center administrative workflows does not turn Call Center configure into native team administration"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.spec.js"
+  ],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "fifteen permission-bound cards, actual CSS, honest pending states and no overflow"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0008-C01",
+      "expected": "REGRA DE CONTROLE Este material é a PARTE 1 de um projeto dividido em duas entregas documentais.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 8,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 12,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D1-P0008-C02",
+      "expected": "Não representa autorização para recriar os módulos existentes, alterar o ambiente de produção ou considerar telas demonstrativas como testes homologados.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 8,
+          "clause": 2
+        },
+        {
+          "document": "doc2",
+          "paragraph": 12,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        1
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D1-P0045-C01",
+      "expected": "Página inicial simples, com acesso aos recursos de telefonia, operação e governança.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 45,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 52,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D1-P0047-C01",
+      "expected": "Cards: Números, Ramais, Filas, URA, Horários, Áudios, Pausas, Encerramentos, Distribuição, Permissões, Gravações, PABX, Aprovações, Parâmetros Gerais e Integrações.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 47,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 54,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D1-P0048-C01",
+      "expected": "Cabeçalho com estado real da integração, última sincronização e alertas relevantes; evitar excesso de indicadores.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 48,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 55,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D1-P0049-C01",
+      "expected": "Cada card abre a lista da área.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 49,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 56,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D1-P0049-C02",
+      "expected": "Engrenagens e ações de cadastro/edição abrem popups.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 49,
+          "clause": 2
+        },
+        {
+          "document": "doc2",
+          "paragraph": 56,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D1-P0051-C01",
+      "expected": "Card indisponível para perfil sem autorização; backend revalida permissões.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 51,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 58,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D1-P0052-C01",
+      "expected": "Não criar cadastros paralelos para módulos já existentes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 52,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 59,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1,
+        2
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D2-P0009-C01",
+      "expected": "Esta imagem da capa repete o painel da Figura 2: serve como visao de conjunto, e nao como uma segunda tela para desenvolver.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 9,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D2-P0010-C01",
+      "expected": "Referencia de comportamento: A tela da capa reaparece como Figura 2.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 10,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D2-P0010-C02",
+      "expected": "Todos os cards, estados, permissoes e alertas devem ser implementados uma unica vez, conforme a especificacao da Figura 2.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 10,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        1
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "id": "D2-P0011-C01",
+      "expected": "Aceite F01-A/B: Nao exibir recursos sem permissao; status de conexao e sincronizacao devem refletir retorno real do PABX, inclusive falhas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 11,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        1
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    }
+  ],
+  "divergences": [
+    "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

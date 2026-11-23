@@ -3,6 +3,7 @@
 # Validates stored structure, never current authorization or historical scope inference.
 class JrcContactCenter::EndingActions::RuleDefinition
   TIMINGS = %w[call_end acw_completed].freeze
+  EXECUTION_MODES = %w[automatic agent_confirmation].freeze
   FIELDS = %w[code name reason_code queue_id timing active actions conditions scope].freeze
   SCOPE_FIELDS = %w[queue_scope_version_id integrity_sha256 unit_id issuer_company_id business_unit_id].freeze
 
@@ -32,12 +33,20 @@ class JrcContactCenter::EndingActions::RuleDefinition
   end
 
   def validate_entry!(row)
-    validate_keys!(row, FIELDS)
+    validate_entry_keys!(row)
     invalid! unless text?(row['code'], 100) && text?(row['name'], 120) && text?(row['reason_code'], 100)
     invalid! unless identifier?(row['queue_id']) && [true, false].include?(row['active']) && TIMINGS.include?(row['timing'])
     validate_scope!(row.fetch('scope'), active: row.fetch('active'))
     validate_actions!(row.fetch('actions'), active: row.fetch('active'))
     validate_conditions!(row.fetch('conditions'), timing: row.fetch('timing'))
+  end
+
+  # Legacy immutable definitions remain readable byte for byte. Absence of this
+  # field never grants an executor permission to run a historical rule.
+  def validate_entry_keys!(row)
+    fields = row.is_a?(Hash) && row.key?('execution_mode') ? FIELDS + ['execution_mode'] : FIELDS
+    validate_keys!(row, fields)
+    invalid! if row.key?('execution_mode') && !EXECUTION_MODES.include?(row['execution_mode'])
   end
 
   def validate_scope!(scope, active:)

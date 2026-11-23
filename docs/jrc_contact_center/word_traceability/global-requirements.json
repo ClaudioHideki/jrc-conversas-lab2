@@ -1,0 +1,1948 @@
+{
+  "requirements": [
+    {
+      "id": "D1-P0011-C01",
+      "expected": "O Control Desk será a central de configuração do Call Center do JRC Conversas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 11,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 15,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0011-C02",
+      "expected": "A experiência deve priorizar uma página inicial objetiva, cards de navegação e edições via popup.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 11,
+          "clause": 2
+        },
+        {
+          "document": "doc2",
+          "paragraph": 15,
+          "clause": 2
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0011-C03",
+      "expected": "A implantação reutilizará cadastros, equipes, permissões, calendário, CRM, Relacionamento, Service Desk, Projetos/Tarefas, Central de Aprovações e Nico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 11,
+          "clause": 3
+        },
+        {
+          "document": "doc2",
+          "paragraph": 15,
+          "clause": 3
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0011-C04",
+      "expected": "O PABX é infraestrutura própria do Grupo JRC.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 11,
+          "clause": 4
+        },
+        {
+          "document": "doc2",
+          "paragraph": 15,
+          "clause": 4
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0013-C01",
+      "expected": "Números, ramais, filas, URA, horários, áudios, pausas e motivos de encerramento.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 13,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 17,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0014-C01",
+      "expected": "Distribuição, equipes, perfis, permissões, acesso dos usuários e regras de atendimento.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 14,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 18,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0015-C01",
+      "expected": "Integração PABX, validação tenant/accountcode, sincronização, logs, auditoria, aprovações e reversões.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 15,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 19,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0016-C01",
+      "expected": "Gestão de gravações, consultas e reprodução;",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 16,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 20,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0016-C02",
+      "expected": "Análise de Sentimentos com Nico, contexto e revisão humana.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 16,
+          "clause": 2
+        },
+        {
+          "document": "doc2",
+          "paragraph": 20,
+          "clause": 2
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0018-C01",
+      "expected": "Telas são mockups de referência visual; nomes, estatísticas, telefones, aprovações e indicadores exibidos são fictícios/ilustrativos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 18,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 22,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0019-C01",
+      "expected": "Tela principal é uma listagem/visão compacta; edições, cadastros, validações e detalhes devem abrir em popup sempre que adequado.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 19,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 23,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0020-C01",
+      "expected": "A aplicação efetiva no PABX deve ser confirmada tecnicamente, nunca inferida apenas de um clique no frontend.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 20,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 24,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0021-C01",
+      "expected": "Duração de pausas e de pós-atendimento: cadastro em horas e minutos; tempos técnicos de telefonia podem ser parametrizados em segundos quando a integração exigir.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 21,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 25,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0025-C01",
+      "expected": "JRC Conversas / UI",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 25,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 32,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0026-C01",
+      "expected": "Listagens, popups, validações de formulário, filtros e status de execução.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 26,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 33,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0027-C01",
+      "expected": "Backend / serviços",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 27,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 34,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0028-C01",
+      "expected": "Autorização por escopo, regras, auditoria, idempotência e orquestração.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 28,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 35,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0029-C01",
+      "expected": "Conector PABX JRC",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 29,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 36,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0030-C01",
+      "expected": "Consulta, comandos permitidos, confirmação do estado e recepção de eventos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 30,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 37,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0031-C01",
+      "expected": "Módulos existentes",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 31,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 38,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0032-C01",
+      "expected": "Cliente, CRM, SD, Relacionamento, Tarefas, Aprovações e Nico como fonte de verdade.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 32,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 39,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0033-C01",
+      "expected": "Jobs / filas",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 33,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 40,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0034-C01",
+      "expected": "Sincronização, publicação, reprocessamento e tarefas demoradas fora da requisição web.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 34,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 41,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0037-C01",
+      "expected": "Somente Super Admin pode adicionar novos números telefônicos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 37,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 44,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0038-C01",
+      "expected": "Admin pode cadastrar ramais se houver ramal disponível e autorização na configuração do PABX.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 38,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 45,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0039-C01",
+      "expected": "Permissões granulares: consultar, criar, editar, excluir, exportar, aprovar, publicar, monitorar, ouvir e baixar gravações.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 39,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 46,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0040-C01",
+      "expected": "Supervisão não implica participação na distribuição de chamadas; um agente pode participar de múltiplas filas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 40,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 47,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0041-C01",
+      "expected": "Restrições por empresa/tenant, equipe, fila, carteira e usuário devem ser verificadas no backend.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 41,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 48,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0043-C01",
+      "expected": "Rascunho → validação técnica → testes → solicitação de aprovação (quando exigida) → execução controlada → confirmação PABX → auditoria.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 43,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 50,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0043-C02",
+      "expected": "Falhas geram estado de erro e orientação de correção/reversão; jamais apresentar “publicado” sem confirmação.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 43,
+          "clause": 2
+        },
+        {
+          "document": "doc2",
+          "paragraph": 50,
+          "clause": 2
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0232-C01",
+      "expected": "Configuração de recurso",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 232,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 437,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0233-C01",
+      "expected": "id, tenant_id, empresa_id, tipo, versão, status, created_by, updated_at",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 233,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 438,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0234-C01",
+      "expected": "Fila/ramal/URA",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 234,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 439,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0235-C01",
+      "expected": "id interno, id PABX, versão aplicada, status de sync, vínculos permitidos",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 235,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 440,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0236-C01",
+      "expected": "Evento de chamada",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 236,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 441,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0237-C01",
+      "expected": "call_id, correlation_id, tenant/accountcode validados, timestamps, ramal/fila, outcome",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 237,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 442,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0238-C01",
+      "expected": "Gravação",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 238,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 443,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0239-C01",
+      "expected": "recording_id, call_id, local seguro, hash/integridade, política, estado, retenção",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 239,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 444,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0240-C01",
+      "expected": "Análise Nico",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 240,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 445,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0241-C01",
+      "expected": "analysis_id, call_id, versão modelo, score/confiança se disponível, timestamps, revisão humana",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 241,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 446,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0242-C01",
+      "expected": "Auditoria",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 242,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 447,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0243-C01",
+      "expected": "actor, ação, objeto, before/after sanitizado, data, escopo, correlação, resultado",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 243,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 448,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0244-C01",
+      "expected": "Aprovação",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 244,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 449,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0245-C01",
+      "expected": "request_id, regra, aprovador/decisão, estado de execução, confirmação técnica",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 245,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 450,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0247-C01",
+      "expected": "Todas as mutações exigem autenticação, autorização de backend, validação tenant/empresa e log correlacionável.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 247,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 452,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0248-C01",
+      "expected": "Publicações e sincronizações utilizam operações idempotentes e estados explícitos: solicitado, validando, aprovado, executando, aplicado, falhou.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 248,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 453,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0249-C01",
+      "expected": "Segredos em cofre/variáveis protegidas; logs e relatórios com mascaramento de dados sensíveis.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 249,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 454,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0250-C01",
+      "expected": "Contratos de API devem ser versionados e testados; importar JSON de URA não autoriza execução direta de comandos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 250,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 455,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0252-C01",
+      "expected": "AC-01 — Perfis e alçadas: Super Admin para novos números, Admin para ramais elegíveis, separação monitoria/gravações.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 252,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 457,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0253-C01",
+      "expected": "AC-02 — Popups responsivos preservam contexto da listagem e exibem validação de campos, inclusive mensagens de erro.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 253,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 458,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0254-C01",
+      "expected": "AC-03 — Cadastro de pausa permite exclusivamente horas/minutos (padrão, mínimo e máximo), sem segundos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 254,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 459,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0255-C01",
+      "expected": "AC-04 — URA JSON inválido não altera a versão publicada; teste de DTMF e destinos antes de publicar.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 255,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 460,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0256-C01",
+      "expected": "AC-05 — Publicação sem ACK/estado confirmado no PABX não pode marcar operação como sucesso.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 256,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 461,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0257-C01",
+      "expected": "AC-06 — Tenant 8/accountcode 12 validado por vínculo de empresa, não por equivalência de valor.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 257,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 462,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0258-C01",
+      "expected": "AC-07 — Sincronização executada por job, com reprocessamento controlado e histórico das falhas parciais.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 258,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 463,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0259-C01",
+      "expected": "AC-08 — Gravação respeita política/escopo, acesso auditado e bloqueio de descarte em retenção obrigatória.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 259,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 464,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0260-C01",
+      "expected": "AC-09 — Transcrição e gráfico do Nico sincronizados por timestamps da chamada.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 260,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 465,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0261-C01",
+      "expected": "AC-10 — Correção da IA preserva resultado original, razão e autor, sem editar a ligação original.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 261,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 466,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0262-C01",
+      "expected": "AC-11 — Integrações CRM/SD/Tarefas e Aprovações não criam cadastros paralelos nem duplicam ações.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 262,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 467,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0263-C01",
+      "expected": "AC-12 — Relatório final de homologação contém evidência técnica, usuário de teste, resultado e pendências.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 263,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 468,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0268-C01",
+      "expected": "1 — Base",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 268,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 473,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0269-C01",
+      "expected": "UI de Control Desk, identidade, roles/escopos, APIs e auditoria",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 269,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 474,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0270-C01",
+      "expected": "cadastros existentes",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 270,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 475,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0271-C01",
+      "expected": "2 — Telefonia",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 271,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 476,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0272-C01",
+      "expected": "números/ramais/filas, PABX, tenant/accountcode, sync",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 272,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 477,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0273-C01",
+      "expected": "validação técnica",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 273,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 478,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0274-C01",
+      "expected": "3 — Fluxos",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 274,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 479,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0275-C01",
+      "expected": "URA, horários, áudios, pausas, encerramentos, DAC",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 275,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 480,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0276-C01",
+      "expected": "recursos PABX",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 276,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 481,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0277-C01",
+      "expected": "4 — Governança",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 277,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 482,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0278-C01",
+      "expected": "aprovações, publicação, reversões, logs",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 278,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 483,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0279-C01",
+      "expected": "módulo Aprovações",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 279,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 484,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0280-C01",
+      "expected": "5 — Qualidade",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 280,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 485,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0281-C01",
+      "expected": "gravações, consulta, transcrição, Nico, revisão humana",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 281,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 486,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0282-C01",
+      "expected": "gravações e permissões",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 282,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 487,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0283-C01",
+      "expected": "6 — Homologação",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 283,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 488,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0284-C01",
+      "expected": "testes completos, migração/configuração e entrada controlada",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 284,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 489,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0285-C01",
+      "expected": "evidências de aceite",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 285,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 490,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0288-C01",
+      "expected": "Este documento é explicitamente a PARTE 1.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 288,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 493,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0288-C02",
+      "expected": "Haverá uma SEGUNDA PARTE do projeto, que deverá ser entregue em documento complementar, mantendo a mesma identidade visual, nomenclatura e integrações.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 288,
+          "clause": 2
+        },
+        {
+          "document": "doc2",
+          "paragraph": 493,
+          "clause": 2
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0289-C01",
+      "expected": "Detalhamento da tela de Alertas e Casos Críticos do Nico, incluindo regras de severidade, encaminhamento, escalonamento e revisão.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 289,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 494,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0290-C01",
+      "expected": "Aprofundamento dos popups restantes: detalhes de gravação, armazenamento/retensão, acesso, auditoria de gravações e relatórios de qualidade.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 290,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 495,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0291-C01",
+      "expected": "Telas e fluxos adicionais de supervisão, monitoria, experiências sensoriais de voz e exceções operacionais não esgotadas nesta Parte 1.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 291,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 496,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0292-C01",
+      "expected": "Homologação final end-to-end, plano de implantação/rollback e matriz de requisitos com referência ao código existente e às versões atualizadas do repositório.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 292,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 497,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0293-C01",
+      "expected": "Acompanhamento de requisitos em aberto e ajustes após revisão do DEV e observação da aplicação real.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 293,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 498,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0294-C01",
+      "expected": "REGRA DE CONTROLE A Parte 2 COMPLEMENTARÁ este material e não deverá revogar automaticamente as regras estabelecidas na Parte 1.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 294,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 499,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0294-C02",
+      "expected": "Divergências deverão ser registradas em controle de mudanças e aprovadas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 294,
+          "clause": 2
+        },
+        {
+          "document": "doc2",
+          "paragraph": 499,
+          "clause": 2
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0296-C01",
+      "expected": "O desenvolvedor deve analisar o código atual antes de alterar o sistema, mapear componentes reaproveitáveis, registrar lacunas por módulo, implementar por etapas e vincular evidências de teste a cada critério de aceite.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 296,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 501,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0296-C02",
+      "expected": "Telas deste documento são referências visuais de requisito, não capturas de funcionalidades efetivamente concluídas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 296,
+          "clause": 2
+        },
+        {
+          "document": "doc2",
+          "paragraph": 501,
+          "clause": 2
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D1-P0296-C03",
+      "expected": "Dados operacionais, aprovadores, identificadores e métricas precisam ser confirmados no ambiente autorizado.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 296,
+          "clause": 3
+        },
+        {
+          "document": "doc2",
+          "paragraph": 501,
+          "clause": 3
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D2-P0027-C01",
+      "expected": "Cada figura inclui objetivo, acoes por controle, dados, regras de autorizacao e integracao, tratamento de erros e dois cenarios verificaveis (Fxx-A/Fxx-B).",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 27,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D2-P0027-C02",
+      "expected": "A descricao complementa o documento original e nao comprova implementacao existente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 27,
+          "clause": 2
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D2-P0028-C01",
+      "expected": "As telas de referencia sao mockups.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 28,
+          "clause": 1
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D2-P0028-C02",
+      "expected": "Nomes, indicadores, valores, comandos externos e entidades precisam ser conferidos no sistema e no codigo.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 28,
+          "clause": 2
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    },
+    {
+      "id": "D2-P0028-C03",
+      "expected": "Propostas complementares e lacunas dependem de alinhamento com produto/DEV antes de homologacao ou deploy.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 28,
+          "clause": 3
+        }
+      ],
+      "figures": [],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral."
+    }
+  ],
+  "annex_gaps": [
+    {
+      "id": "D01",
+      "topic": "Editor completo de URAs",
+      "gap": "As Figuras 4/13 exibem painel PABX, mas nao a interface de diagrama, DTMF, testes, importacao JSON, versionamento e rollback.",
+      "required_validation": "Definir mockup/fluxo proprio e evidencias para o ciclo de URA.",
+      "source": {
+        "document": "doc2",
+        "paragraphs": [
+          606,
+          607,
+          608,
+          609
+        ]
+      },
+      "status": "parcial"
+    },
+    {
+      "id": "D02",
+      "topic": "Politica de gravacao",
+      "gap": "A Figura 16 mostra a biblioteca de audios, nao um cadastro de politica de gravação.",
+      "required_validation": "Desenhar e homologar tela para politica, aviso, tipos, filas, escopo, retencao e aplicacao PABX.",
+      "source": {
+        "document": "doc2",
+        "paragraphs": [
+          610,
+          611,
+          612,
+          613
+        ]
+      },
+      "status": "parcial"
+    },
+    {
+      "id": "D03",
+      "topic": "Parametros de retencao",
+      "gap": "O documento nao determina prazos legais, destino definitivo ou politicas de descarte.",
+      "required_validation": "Obter regra aplicavel e aprovacao de governanca antes de ativar exclusao automatica.",
+      "source": {
+        "document": "doc2",
+        "paragraphs": [
+          614,
+          615,
+          616,
+          617
+        ]
+      },
+      "status": "bloqueado"
+    },
+    {
+      "id": "D04",
+      "topic": "Contrato real com PABX",
+      "gap": "Identificadores/acoes sao requisitos minimos, nao nomes de endpoints confirmados.",
+      "required_validation": "Auditar API, callbacks, ACK, timeout, capacidade e rollback do conector instalado.",
+      "source": {
+        "document": "doc2",
+        "paragraphs": [
+          618,
+          619,
+          620,
+          621
+        ]
+      },
+      "status": "bloqueado"
+    },
+    {
+      "id": "D05",
+      "topic": "Elegibilidade e retorno de pausas",
+      "gap": "A regra de retorno automatico e os limites aplicaveis por perfil/fila carecem de decisao operacional.",
+      "required_validation": "Definir precedencias, autorizadores e alertas antes de automatizar.",
+      "source": {
+        "document": "doc2",
+        "paragraphs": [
+          622,
+          623,
+          624,
+          625
+        ]
+      },
+      "status": "parcial"
+    },
+    {
+      "id": "D06",
+      "topic": "Disponibilidade de Nico Voz",
+      "gap": "O popup de geracao por IA depende de integracao habilitada.",
+      "required_validation": "Confirmar fornecedor/servico, vozes, limites, custos, codec e tratamento de indisponibilidade.",
+      "source": {
+        "document": "doc2",
+        "paragraphs": [
+          626,
+          627,
+          628,
+          629
+        ]
+      },
+      "status": "bloqueado"
+    },
+    {
+      "id": "D07",
+      "topic": "Alcadas de aprovacao",
+      "gap": "O modulo de Aprovacoes e reutilizado, mas a matriz especifica por operacao nao esta detalhada.",
+      "required_validation": "Mapear quem solicita, aprova, executa e reverte cada tipo de alteracao.",
+      "source": {
+        "document": "doc2",
+        "paragraphs": [
+          630,
+          631,
+          632,
+          633
+        ]
+      },
+      "status": "bloqueado"
+    },
+    {
+      "id": "D08",
+      "topic": "Confianca e criticidade do Nico",
+      "gap": "Percentuais de sentimento e indicadores de qualidade nao estabelecem limiares de casos criticos.",
+      "required_validation": "Definir denominadores e politica de criticidade/alertas, detalhada formalmente na Parte 2.",
+      "source": {
+        "document": "doc2",
+        "paragraphs": [
+          634,
+          635,
+          636,
+          637
+        ]
+      },
+      "status": "bloqueado"
+    },
+    {
+      "id": "D09",
+      "topic": "Eventos de ACW",
+      "gap": "O momento de disparo de cada automacao e a precedencia de regras por fila/equipe requerem definicao.",
+      "required_validation": "Validar transicoes de chamada, formulario, bloqueio e evento de integracao.",
+      "source": {
+        "document": "doc2",
+        "paragraphs": [
+          638,
+          639,
+          640,
+          641
+        ]
+      },
+      "status": "parcial"
+    },
+    {
+      "id": "D10",
+      "topic": "Mapa de reutilizacao no codigo",
+      "gap": "O documento e visual/funcional e nao comprova endpoints, migrations ou componentes existentes.",
+      "required_validation": "DEV deve inventariar codigo e evidencias antes de implementar, substituir ou publicar.",
+      "source": {
+        "document": "doc2",
+        "paragraphs": [
+          642,
+          643,
+          644,
+          645
+        ]
+      },
+      "status": "parcial"
+    }
+  ],
+  "part2_is_not_silently_implemented": true,
+  "governance_and_cross_module_checks_are_not_replaced_by_test_counts": true
+}

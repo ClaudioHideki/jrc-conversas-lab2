@@ -1,0 +1,959 @@
+{
+  "figure": 14,
+  "title": "Auditoria técnica",
+  "status": "parcial",
+  "expected_functionality": "Auditoria tecnica do PABX",
+  "image": {
+    "sha256": "b5a0d87dcc7757227cac2cf2aa8a04241d3a6aa11784b96765018b947bcba6b6",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditPanel.vue",
+      "git_blob_at_validated_base": "88e3df87218689b84f257c7247a5bac6859b808c",
+      "state": "presente_na_base_validada",
+      "current_sha256": "fab417f98f3dee69c40a82e206c9af171bfb2374df26a747f7dbf7d2b114c439"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditDetails.vue",
+      "git_blob_at_validated_base": "aee517888753eb664972a858d6722e3793694c3d",
+      "state": "presente_na_base_validada",
+      "current_sha256": "3ffab8f1ab60fba54cd29917b492d6e97068ef025cd2bf43baff659fc2b69c0e"
+    },
+    {
+      "path": "app/services/jrc_contact_center/configuration_audit_scope.rb",
+      "git_blob_at_validated_base": "68066581c19160cbbf3a98f63c266b84aabba13c",
+      "state": "presente_na_base_validada",
+      "current_sha256": "0255b2d605c939bacceb49abaa8c9eb115cbb8bbe04230dbddabf1150af2f217"
+    },
+    {
+      "path": "app/services/jrc_contact_center/configuration_audit_query.rb",
+      "git_blob_at_validated_base": "f8c6e005ea8143b0a68ca4a57a65ce067e435b5f",
+      "state": "presente_na_base_validada",
+      "current_sha256": "cc4da4caf3041c4eea8ac99d1f2fcd506e401ae8684a569633c3200e1e1c4654"
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/jrc_contact_center/configuration_audits_controller.rb",
+      "git_blob_at_validated_base": "3f6d4b53123fe41bade8f11622a0d5260d5b455e",
+      "state": "presente_na_base_validada",
+      "current_sha256": "7628ac15d0db998608b7ee6fb78eafac510d94cee27c3a1ef2786cf9c16ccb35"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/models/jrc_contact_center/configuration_audit_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "Call Center configuration audit transactions captures only allowed fields and scope when the local record is created",
+        "Call Center configuration audit transactions records an omitted settings change without copying its previous or current content",
+        "Call Center configuration audit transactions does not create an artificial update event for an unchanged record"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/configuration_audits_spec.rb",
+      "passed_examples": 21,
+      "sample_behaviours": [
+        "Call Center configuration audit API records the actual authenticated actor and request correlation without private settings",
+        "Call Center configuration audit API returns a scoped immutable detail without e-mail or raw configuration payloads",
+        "Call Center configuration audit API combines resource, action, actor and correlation filters on the authorized relation"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "ACW form library persists native schema revisions and preserves immutable history without operational activation",
+    "configuration audit boundary respects unit account export rights and live revocation",
+    "configuration audit filters pagination details history and verified export use real records",
+    "institutional audio folders native exact-version scanner and decoder history",
+    "last eligible queue withdrawal requires actual manager review and preserves native audit and scope",
+    "local IVR audio reference pins native verified history and never crosses unit or publishes",
+    "local pause catalog operator preserves legacy history and enforces only authorized new reasons",
+    "native calendar usage inventory paginates actual current URAs, preserves history and denies foreign scopes",
+    "state history native preserves scope, filters, pagination and private event data without writes",
+    "team roster last eligible withdrawal uses real native review, persistence and scoped audit",
+    "whole native team deletion preserves generic confirmation requires scoped manager review and records real audit"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0158-C01",
+      "expected": "Administrar o PABX próprio com segurança, isolamento entre empresas e rastreabilidade.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 158,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 264,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D1-P0160-C01",
+      "expected": "Conexão: host, porta, protocolo, credenciais protegidas, empresa e status; testes de autenticação e serviço.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 160,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 266,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D1-P0161-C01",
+      "expected": "Validação de identificadores: tenant, accountcode, empresa e permissões; apresentar valores de ambos os sistemas e status de mapeamento.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 161,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 267,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D1-P0162-C01",
+      "expected": "Sincronizar ramais, filas, URAs, usuários e eventos por execução manual, agendada ou automática.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 162,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 268,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D1-P0163-C01",
+      "expected": "Logs: filtro por data, empresa, tenant/accountcode, módulo e severidade; popup com detalhes e correlação de eventos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 163,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 269,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D1-P0165-C01",
+      "expected": "Tenant 8 e accountcode 12 podem ser diferentes: verificar mapeamento autorizado, não igualdade numérica.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 165,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 271,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D1-P0166-C01",
+      "expected": "Somente Super Admin altera infraestrutura e credenciais.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 166,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 272,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D1-P0167-C01",
+      "expected": "Credenciais/tokens não são exibidos em logs ou exportações.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 167,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 273,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D1-P0168-C01",
+      "expected": "Sincronização por job e idempotente; falha parcial reprocessa somente o que for seguro.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 168,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 274,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        4,
+        13,
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0289-C01",
+      "expected": "Rastreabilidade de alteracoes, acessos, sincronizacoes, diagnosticos, publicacoes e reversoes com detalhamento do evento.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 289,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0290-C01",
+      "expected": "Acoes e resultado do clique: Filtros de data, tipo, unidade/empresa e origem: refinar registros;",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 290,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0290-C02",
+      "expected": "Consultar: aplicar filtros com paginacao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 290,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0290-C03",
+      "expected": "Selecao de uma linha: preencher Detalhes do Evento com data/hora, usuario, operacao, objeto, tenant/accountcode, resultado e descricao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 290,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0290-C04",
+      "expected": "Ver Detalhes: abrir popup do evento;",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 290,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0290-C05",
+      "expected": "Exportar Relatorio: gerar arquivo dentro do escopo;",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 290,
+          "clause": 5
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0290-C06",
+      "expected": "Ver Historico: listar eventos correlatos.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 290,
+          "clause": 6
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0291-C01",
+      "expected": "Campos e dados apresentados: Registrar id do evento, correlation_id/request_id, ator, acao, recurso, before/after sanitizados, horario, estado pretendido e estado confirmado.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 291,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0291-C02",
+      "expected": "Resultado deve distinguir concluido, pendente, divergente, falha e reversao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 291,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0292-C01",
+      "expected": "Regras e permissoes: Auditoria nao e editavel pela UI.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 292,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0292-C02",
+      "expected": "Um evento pode ter multiplas etapas e deve preservar a sequencia.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 292,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0292-C03",
+      "expected": "Acesso a registros e exportacao exige permissao propria e filtro por empresa/tenant.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 292,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0292-C04",
+      "expected": "Senhas, tokens, dados protegidos e payloads sensiveis nao podem aparecer.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 292,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0293-C01",
+      "expected": "Estados de erro e excecoes: Falha de consulta ou exportacao nao deve retornar lista vazia como se nao houvesse eventos.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 293,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0293-C02",
+      "expected": "Mostrar erro e identificador rastreavel; registrar tentativas de acesso negado de acordo com as politicas existentes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 293,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0295-C01",
+      "expected": "• F14-A: filtros por empresa e tenant impedem acesso a eventos fora do escopo, inclusive via API.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 295,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "id": "D2-P0296-C01",
+      "expected": "• F14-B: evento de publicacao mostra pedido, execucao, confirmacao e eventuais erros pelo mesmo identificador de correlacao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 296,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        14
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    }
+  ],
+  "divergences": [
+    "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

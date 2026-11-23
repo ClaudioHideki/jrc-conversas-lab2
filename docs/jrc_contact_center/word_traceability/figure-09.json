@@ -1,0 +1,2488 @@
+{
+  "figure": 9,
+  "title": "Regra de pós-atendimento",
+  "status": "parcial",
+  "expected_functionality": "Popup Configurar Regra de Pos-Atendimento",
+  "image": {
+    "sha256": "a62031ae783e6604671671e0d6342a0efba034b47bcd18447272fcddb0bec338",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRulesEditor.vue",
+      "git_blob_at_validated_base": "acb791803d9f75645563d8b46e5f3ac4d6d28173",
+      "state": "presente_na_base_validada",
+      "current_sha256": "21e6719d5031013d90d12b97cd22a318bf50e910d4ee6edee7c2bec0688e5826"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwFormLibrary.vue",
+      "git_blob_at_validated_base": "b70890595d76ec1e1b679f40cb1e68b3bbd6f444",
+      "state": "presente_na_base_validada",
+      "current_sha256": "ebef207fdfbf3c8ea8cdb06d6ee1a401265b645f14f5245326026041da02af9c"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleFormBinding.vue",
+      "git_blob_at_validated_base": "dd38e52f2d4b6cff1470a230f8d1f133c594c1aa",
+      "state": "presente_na_base_validada",
+      "current_sha256": "b25dc66f7a8bfe058d128cfa36b2fc42a1d29b222f5faf477f56f9fb53609101"
+    },
+    {
+      "path": "app/services/jrc_contact_center/qualification_manager.rb",
+      "git_blob_at_validated_base": "eba81fa306877aded3c4e32741f8e8df62904764",
+      "state": "presente_na_base_validada",
+      "current_sha256": "70aa11b140bc4e930b6fe1394675e5a27522e6da33ba87c54354afce34976acc"
+    },
+    {
+      "path": "app/services/jrc_contact_center/qualification_draft.rb",
+      "git_blob_at_validated_base": "6625ef9e8a7c6574e1907d59707710c8bfeb160e",
+      "state": "presente_na_base_validada",
+      "current_sha256": "2e46862db72f9d40a03c53dd699a6e9b69366944867959e358bc3e2e4e681510"
+    },
+    {
+      "path": "app/services/jrc_contact_center/acw_rule_precedence.rb",
+      "git_blob_at_validated_base": "c0deb4658dd650c7a7678622dd63ea7c8f9c5d61",
+      "state": "presente_na_base_validada",
+      "current_sha256": "43fd84bfb7ee6840ae7a5f665797f4c97aab6d3b0ef91c8545aeaccb1259c353"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/acw_ending_reasons_spec.rb",
+      "passed_examples": 11,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwEndingReasons preserves the exact legacy empty policy revision when no catalogue was configured",
+        "JrcContactCenter::AcwEndingReasons fails closed for malformed stored configuration nil",
+        "JrcContactCenter::AcwEndingReasons fails closed for malformed stored configuration false"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/acw_form_answers_spec.rb",
+      "passed_examples": 29,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwFormAnswers accepts explicit false and zero as required answers instead of treating them as missing",
+        "JrcContactCenter::AcwFormAnswers returns independent data without rewriting private text or selection values",
+        "JrcContactCenter::AcwFormAnswers allows an incomplete draft without changing required flags in the immutable definition"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/acw_form_binding_policy_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwFormBindingPolicy keeps the exact original policy hash when bindings are absent or explicitly empty",
+        "JrcContactCenter::AcwFormBindingPolicy keeps the original six-field scoped signature when only legacy rules exist",
+        "JrcContactCenter::AcwFormBindingPolicy signs exact form versions and requirements independently of JSON key order without mutating the legacy vector"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/acw_form_bindings_spec.rb",
+      "passed_examples": 29,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwFormBindings pins the actual immutable version and unions requirements without changing the native six-field rule or input",
+        "JrcContactCenter::AcwFormBindings resolves only the pinned schema and does not expose the catalogue actor or enable attendance access",
+        "JrcContactCenter::AcwFormBindings rejects malformed binding collection NilClass"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/acw_form_definition_spec.rb",
+      "passed_examples": 24,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwFormDefinition reuses the native four field types without retrieving any Service Desk records or context",
+        "JrcContactCenter::AcwFormDefinition returns an independent value so editing a new form version cannot mutate the original definition",
+        "JrcContactCenter::AcwFormDefinition rejects an incomplete or unknown definition envelope nil"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/acw_form_input_spec.rb",
+      "passed_examples": 27,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwFormInput rejects invalid form metadata 1:name:NilClass",
+        "JrcContactCenter::AcwFormInput rejects invalid form metadata 2:name:FalseClass",
+        "JrcContactCenter::AcwFormInput rejects invalid form metadata 3:name:String"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/acw_form_query_spec.rb",
+      "passed_examples": 13,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwFormQuery returns one latest summary per form with bounded pagination and no complete definitions",
+        "JrcContactCenter::AcwFormQuery does not match an obsolete historical name in the current form listing",
+        "JrcContactCenter::AcwFormQuery treats SQL search wildcards as literal characters rather than a request for every form"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/acw_form_write_spec.rb",
+      "passed_examples": 19,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwFormWrite creates the form identity, immutable initial form revision and redacted audit in the same transaction",
+        "JrcContactCenter::AcwFormWrite records the authenticated actor and scope without private form definition or name in the native audit",
+        "JrcContactCenter::AcwFormWrite appends changes while preserving the earlier revision"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/acw_qualification_policy_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwQualificationPolicy uses the answered leg origin and persists the queue rule in native completion",
+        "JrcContactCenter::AcwQualificationPolicy uses team precedence when the answered leg has no queue and does not infer a transferred current queue",
+        "JrcContactCenter::AcwQualificationPolicy uses the general reason rule when no queue or team rule matches the native snapshot"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/acw_rule_precedence_spec.rb",
+      "passed_examples": 15,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwRulePrecedence selects the queue rule above the team and general rules for the same reason",
+        "JrcContactCenter::AcwRulePrecedence selects a matching team above the general rule when no queue rule applies",
+        "JrcContactCenter::AcwRulePrecedence selects the general rule when neither native queue nor team matches"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/agent_state_manager_pending_acw_spec.rb",
+      "passed_examples": 4,
+      "sample_behaviours": [
+        "JrcContactCenter::AgentStateManager does not interrupt a real connected leg to start an operator pause",
+        "JrcContactCenter::AgentStateManager keeps a terminated call in ACW and preserves its draft and native availability instead of starting the pause",
+        "JrcContactCenter::AgentStateManager continues blocking a pause after the ACW clock expires without completing or deleting answers"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/confirm_ending_reason_forms_spec.rb",
+      "passed_examples": 2,
+      "sample_behaviours": [
+        "JrcContactCenter::ConfirmEndingReason with incomplete native ACW forms saves partial typed answers and confirms the reason while enforcing remaining required fields at actual ACW completion",
+        "JrcContactCenter::ConfirmEndingReason with incomplete native ACW forms does not partially save a reason or confirmation when submitted form answers are invalid"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb",
+      "passed_examples": 13,
+      "sample_behaviours": [
+        "JrcContactCenter::ConfirmEndingReason saves the complete explicit draft and an immutable classification without completing ACW or executing integrations",
+        "JrcContactCenter::ConfirmEndingReason retains the frozen reason label even after the account publishes a new catalogue version",
+        "JrcContactCenter::ConfirmEndingReason replays the same original input exactly once without demanding its now-stale preconfirmation revision"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/create_contact_center_ending_reason_confirmations_spec.rb",
+      "passed_examples": 4,
+      "sample_behaviours": [
+        "CreateContactCenterEndingReasonConfirmations creates an empty optional domain over populated native calls without rewriting qualification or catalogue history",
+        "CreateContactCenterEndingReasonConfirmations retains a populated confirmation unchanged on exact migration reexecution",
+        "CreateContactCenterEndingReasonConfirmations rejects an incomplete existing schema instead of stamping a missing reason-protection trigger as valid"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/create_contact_center_qualification_forms_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "CreateContactCenterQualificationForms reexecutes as a verified no-op with actual synthetic answers and native attendance preserved",
+        "CreateContactCenterQualificationForms does not accept a missing structural receipt as an already-upgraded schema",
+        "CreateContactCenterQualificationForms detects a missing child trigger instead of recreating it silently during reexecution"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/deferred_pause_manager_approval_acw_spec.rb",
+      "passed_examples": 2,
+      "sample_behaviours": [
+        "JrcContactCenter::DeferredPauseManager does not override the actual pending qualification merely because all companies approved",
+        "JrcContactCenter::DeferredPauseManager consumes the approved native pause once after actual ACW completion without a provider command"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/qualification_concurrency_spec.rb",
+      "passed_examples": 1,
+      "sample_behaviours": [
+        "Contact Center qualification concurrent retries serializes two real connections into one pending record and one immutable completion"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/qualification_draft_spec.rb",
+      "passed_examples": 17,
+      "sample_behaviours": [
+        "JrcContactCenter::QualificationDraft persists incomplete manual answers without completing attendance, resetting its clock or changing native state events",
+        "JrcContactCenter::QualificationDraft keeps the manual-state revision stable across an overdue clock observation",
+        "JrcContactCenter::QualificationDraft keeps manual answers out of shared agent and supervisor state while preserving the pending blocker"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/qualification_forms_legacy_spec.rb",
+      "passed_examples": 1,
+      "sample_behaviours": [
+        "JrcContactCenter::QualificationForms does not backfill a form or change a legacy manual token when policy bindings are introduced later"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/qualification_forms_spec.rb",
+      "passed_examples": 16,
+      "sample_behaviours": [
+        "JrcContactCenter::QualificationForms captures one owned immutable response identity on the native qualification without another attendance or library",
+        "JrcContactCenter::QualificationForms exposes only the selected exact definition to the authorized caller and keeps private answers out of shared payloads",
+        "JrcContactCenter::QualificationForms saves incomplete typed responses with the native draft revision and retains false and zero without completing ACW"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/qualification_manager_spec.rb",
+      "passed_examples": 22,
+      "sample_behaviours": [
+        "JrcContactCenter::QualificationManager does not enter ACW when hangup is requested without terminal confirmation",
+        "JrcContactCenter::QualificationManager persists one pending qualification on confirmed voice termination and restores it on replay",
+        "JrcContactCenter::QualificationManager does not create an automatic obligation for voice when that company makes tabulation optional"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/acw_form_template_ledger_spec.rb",
+      "passed_examples": 24,
+      "sample_behaviours": [
+        "JrcContactCenter::AcwFormTemplate computes the account scope and immutable definition digest without trusting a submitted scope",
+        "JrcContactCenter::AcwFormTemplate appends a contiguous new version without rewriting the original definition",
+        "JrcContactCenter::AcwFormTemplate persists a large valid compact schema even when PostgreSQL adds JSONB separator spaces"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/ending_reason_confirmation_spec.rb",
+      "passed_examples": 9,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingReasonConfirmation derives account, actor, catalogue and source evidence in PostgreSQL instead of accepting a client provenance",
+        "JrcContactCenter::EndingReasonConfirmation rejects direct SQL edits of confirmed evidence even when ActiveRecord callbacks are bypassed",
+        "JrcContactCenter::EndingReasonConfirmation rejects direct SQL deletion while the account is still live"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb",
+      "passed_examples": 7,
+      "sample_behaviours": [
+        "Native qualification clock refresh against a stale persisted row refreshes the derived clock on the current pending row without completing or restarting attendance",
+        "Native qualification clock refresh against a stale persisted row cannot overwrite a completed result through an AR copy read while it was still pending",
+        "Native qualification clock refresh against a stale persisted row cannot restore an obsolete exceeded duration after the current pending limit increases"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/qualification_form_spec.rb",
+      "passed_examples": 12,
+      "sample_behaviours": [
+        "JrcContactCenter::QualificationForm rejects malformed snapshot identity even before testing immutability of an otherwise valid snapshot",
+        "JrcContactCenter::QualificationForm rejects direct rewriting of the frozen definition references through PostgreSQL",
+        "JrcContactCenter::QualificationForm refuses direct cross-account reassignment even when the supplied account exists"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/acw_form_audits_spec.rb",
+      "passed_examples": 6,
+      "sample_behaviours": [
+        "Call Center form revisions in native configuration audit reuses the native audit detail with only immutable revision metadata and no private definition",
+        "Call Center form revisions in native configuration audit filters the exact native revision without mixing accounts or unrelated configuration types",
+        "Call Center form revisions in native configuration audit does not expose the new comment through the ordinary native audit relation after permission revocation"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/acw_form_binding_configuration_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "Native ACW immutable form binding configuration persists rules and owned exact form pins in one native revision and mandatory configuration audit",
+        "Native ACW immutable form binding configuration rejects stale settings and preserves both the previous rules and form pins without a second audit",
+        "Native ACW immutable form binding configuration does not orphan a form when deleting a rule and permits only an explicit atomic removal of both"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/acw_forms_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "Call Center immutable ACW form library creates and reloads an owned version with real persistence and noncacheable account identity",
+        "Call Center immutable ACW form library keeps append-only version history and detects stale updates instead of overwriting data",
+        "Call Center immutable ACW form library replays a completed create request without duplicating a form, version or native audit"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/acw_global_scope_spec.rb",
+      "passed_examples": 3,
+      "sample_behaviours": [
+        "Call Center global ACW configuration scope does not let unit coverage change the policy for the entire account",
+        "Call Center global ACW configuration scope lets explicit GROUP coverage change only its own account policy",
+        "Call Center global ACW configuration scope does not treat GROUP coverage as permission to configure the module"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/acw_policy_audit_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "Call Center local ACW configuration audit records effective values and the authenticated actor and request correlation atomically",
+        "Call Center local ACW configuration audit does not append misleading events for an unchanged effective default or a repeated save",
+        "Call Center local ACW configuration audit exposes the same native event in filtered history and detail without private account settings"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/acw_policy_revision_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "Call Center expected global ACW revision returns an account-bound revision without unrelated settings and disables caching",
+        "Call Center expected global ACW revision commits a current snapshot and returns a fresh revision with the audit intact",
+        "Call Center expected global ACW revision rejects an outdated edit without changing values or appending a second audit"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/acw_scoped_rules_spec.rb",
+      "passed_examples": 14,
+      "sample_behaviours": [
+        "Call Center scoped voice ACW rules saves native scoped rules with an account-bound revision and a mandatory audit",
+        "Call Center scoped voice ACW rules preserves existing rules on a legacy limits-only edit without materializing or changing historical events",
+        "Call Center scoped voice ACW rules requires a revision for scoped rule edits and rejects an outdated edit atomically"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/acw_spec.rb",
+      "passed_examples": 12,
+      "sample_behaviours": [
+        "Contact Center ACW persistent API lets agents read explicit backend defaults without changing administrative settings",
+        "Contact Center ACW persistent API lets only authorized administration save independent per-account channel limits",
+        "Contact Center ACW persistent API lets administration configure optional voice tabulation without affecting another account or erasing the choice on legacy limit updates"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/agent_pause_pending_acw_spec.rb",
+      "passed_examples": 1,
+      "sample_behaviours": [
+        "Native operator pause while ACW is pending rejects a direct authenticated pause request without altering the pending qualification or state"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_confirmation_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "Explicit own-attendance ending reason confirmation returns a private no-store confirmation while leaving the existing ACW pending",
+        "Explicit own-attendance ending reason confirmation refuses another account credential and does not reveal the private classification",
+        "Explicit own-attendance ending reason confirmation does not grant a second administrator authority over the original operator classification"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/qualification_authority_spec.rb",
+      "passed_examples": 22,
+      "sample_behaviours": [
+        "Call Center native qualification origin authority completes owned attendance through the API when a transfer remains inside its authorized unit",
+        "Call Center native qualification origin authority denies completion of a formerly visible call that is now outside the authorized business unit",
+        "Call Center native qualification origin authority does not use a caller supplied account or user ID to expand completion authority"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_context_spec.rb",
+      "passed_examples": 7,
+      "sample_behaviours": [
+        "Owned native qualification form context and original corporate source provides the owned exact runtime form while denying the manager catalogue to the same operator",
+        "Owned native qualification form context and original corporate source persists private typed responses through the authenticated native draft API and recovers them after reload",
+        "Owned native qualification form context and original corporate source blocks missing required answers through the actual completion API with no partial completion"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb",
+      "passed_examples": 3,
+      "sample_behaviours": [
+        "ACW form library real HTTP concurrency accepts exactly one writer when two different operations expect the same prior revision",
+        "ACW form library real HTTP concurrency returns one durable operation receipt to simultaneous retries with the same UUID",
+        "ACW form library real HTTP concurrency rejects a write whose eligibility was revoked while its real request waited for the account lock"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb",
+      "passed_examples": 2,
+      "sample_behaviours": [
+        "Private operational ACW responses with real HTTP contenders accepts exactly one private draft when different actual HTTP requests expect the same manual revision",
+        "Private operational ACW responses with real HTTP contenders rejects a queued private draft after eligibility is revoked while preserving all persisted answers"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [
+    "app/javascript/dashboard/routes/dashboard/inbox/PendingQualificationReasons.spec.js",
+    "app/javascript/dashboard/routes/dashboard/inbox/useQualificationDraftForms.spec.js",
+    "app/javascript/dashboard/routes/dashboard/inbox/useQualificationForms.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualificationDraftControls.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QualificationDraftNavigation.spec.js"
+  ],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "ACW form library native pagination filters clearing reload and account denials stay scoped",
+    "ACW form library persists native schema revisions and preserves immutable history without operational activation",
+    "Hoya workspace native restores and persists versioned ACW answers in the actual voice workspace",
+    "all-scope pause approval native requires both managers, preserves ACW and denies cross-unit decisions",
+    "confirmed ending classification native keeps incomplete ACW open, survives reload and rejects changed reasons and foreign actors",
+    "deferred pause native uncertain response reuses one durable receipt and explicit cancellation preserves ACW",
+    "deferred pause native waits through ACW and starts only after explicit completion without administrative access",
+    "global ACW revision preserves drafts across both native editors and requires reviewed retry",
+    "local ACW popup validates HH:MM preserves failed values and reloads the native policy",
+    "pending ACW native draft persists incomplete answers and completes only after explicit tabulation",
+    "pending ACW native navigation reviews unsaved edits preserves saved state and leaves other modules untouched",
+    "pending ACW native review preserves local answers blocks stale writes and requires explicit reconciliation",
+    "scoped ACW native popup persists queue rules blocks conflicts and keeps scoped viewers denied"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0126-C01",
+      "expected": "Classificar o resultado de uma ligação, parametrizar formulários e disparar ações entre módulos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 126,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 196,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D1-P0128-C01",
+      "expected": "Cadastro do motivo: nome, categoria, descrição, ordem, status e obrigatoriedade por fila.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 128,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 198,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D1-P0129-C01",
+      "expected": "Popup de pós-atendimento: formulário, campos obrigatórios, duração em horas/minutos, aviso de tempo e bloqueio de novas chamadas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 129,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 199,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D1-P0130-C01",
+      "expected": "Automação de CRM, Service Desk, Tarefas, notificações e Nico por motivo, com condições e momento de disparo.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 130,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 200,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D1-P0131-C01",
+      "expected": "Histórico e auditoria das execuções, status de falha, pendência e sucesso.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 131,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 201,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D1-P0133-C01",
+      "expected": "Encerramento telefônico e conclusão do pós-atendimento são eventos distintos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 133,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 203,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D1-P0134-C01",
+      "expected": "Tempo máximo de ACW alerta, não descarta dados nem conclui automaticamente o registro.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 134,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 204,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D1-P0135-C01",
+      "expected": "Reprocessamento idempotente; vínculo com chamado/tarefa existente evita duplicidades.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 135,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 205,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D1-P0136-C01",
+      "expected": "Nico propõe/classifica; execução de ações sensíveis segue autorização e regras de negócio.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 136,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 206,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0210-C01",
+      "expected": "Definir ACW por motivo de encerramento sem confundir termino da chamada com termino do formulario.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 210,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0211-C01",
+      "expected": "Acoes e resultado do clique: Motivo de Encerramento: escolher classificacao existente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 211,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0211-C02",
+      "expected": "Tempo de Pos-Atendimento: configurar horas/minutos.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 211,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0211-C03",
+      "expected": "Formulario: selecionar template reutilizavel e Gerenciar Formularios na fonte.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 211,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0211-C04",
+      "expected": "Campos Obrigatorios: marcar os dados exigidos.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 211,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0211-C05",
+      "expected": "Comportamento do Agente: bloquear chamadas, emitir alertas ou permitir excecao conforme politica.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 211,
+          "clause": 5
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0211-C06",
+      "expected": "Aplicar para: todas, filas especificas ou equipes especificas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 211,
+          "clause": 6
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0211-C07",
+      "expected": "Salvar Regra: validar impacto.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 211,
+          "clause": 7
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0212-C01",
+      "expected": "Campos e dados apresentados: Associar motivo, versao da regra, formularios, campos, publico aplicavel e eventos operacionais.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 212,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0212-C02",
+      "expected": "Registrar inicio/fim do ACW de modo independente do encerramento da chamada, por call_id e agente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 212,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0213-C01",
+      "expected": "Regras e permissoes: Se o tempo expirar, alertar sem descartar rascunho nem concluir automaticamente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 213,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0213-C02",
+      "expected": "Bloqueio de novas chamadas deve refletir elegibilidade real.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 213,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0213-C03",
+      "expected": "Formulario obrigatorio sem preenchimento nao pode ser considerado concluido.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 213,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0213-C04",
+      "expected": "A configuracao de fila prevalece conforme regra de precedencia explicitamente validada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 213,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0214-C01",
+      "expected": "Estados de erro e excecoes: A ausencia de motivo ou formulario exigido gera erro de validacao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 214,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0214-C02",
+      "expected": "Em falha de salvamento manter selecoes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 214,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0214-C03",
+      "expected": "Se o agente sair da pagina, rascunho e estado de ACW exigem recuperacao controlada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 214,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0216-C01",
+      "expected": "• F09-A: encerrada a ligacao, o ACW permanece ativo ate conclusao do formulario obrigatorio.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 216,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "id": "D2-P0217-C01",
+      "expected": "• F09-B: exceder o tempo configurado emite aviso e conserva respostas nao concluidas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 217,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    }
+  ],
+  "divergences": [
+    "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

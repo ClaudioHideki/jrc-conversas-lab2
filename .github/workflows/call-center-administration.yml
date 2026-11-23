@@ -153,6 +153,20 @@ jobs:
           node --test script/validate_cc_ending_version_preflight.test.mjs
           bundle exec rspec spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb spec/models/jrc_contact_center/ending_action_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb --format progress --format json --out /tmp/call-center-ending-version-preflight.json
           node script/validate_cc_ending_version_preflight.mjs /tmp/call-center-ending-version-preflight.json
+      - name: Focused native ending editor authorization and historical compatibility
+        id: ending_editor_preflight
+        run: |
+          bundle exec rubocop app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb app/services/jrc_contact_center/ending_actions/configuration_context.rb app/services/jrc_contact_center/ending_actions/visible_rules.rb app/services/jrc_contact_center/ending_actions/source_context.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb script/jrc_call_center_ending_automation_seed.rb --format json --out /tmp/call-center-ending-editor-lint.json
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb --format progress --format json --out /tmp/call-center-ending-editor-preflight.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/call-center-ending-editor-preflight.json').read_text())
+          summary = report['summary']
+          assert summary['example_count'] == 19
+          assert summary['failure_count'] == summary['pending_count'] == summary['errors_outside_of_examples_count'] == 0
+          assert len(report['examples']) == 19 and all(row['status'] == 'passed' for row in report['examples'])
+          PY
       - name: Rails authorization, persistence and affected regressions
         id: native_core
         run: |
@@ -174,7 +188,7 @@ jobs:
             --exclude-pattern '**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
-        if: failure() && (steps.native_schema.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure')
+        if: failure() && (steps.native_schema.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure' || steps.ending_editor_preflight.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-early-${{ github.sha }}
@@ -183,6 +197,8 @@ jobs:
             /tmp/call-center-rspec.json
             /tmp/call-center-ending-version-preflight.json
             /tmp/call-center-ending-version-lint.json
+            /tmp/call-center-ending-editor-lint.json
+            /tmp/call-center-ending-editor-preflight.json
             /tmp/call-center-ending-version-schema-*.json
             /tmp/call-center-ivr-schema-reload-rspec.json
             /tmp/call-center-ending-confirmation-preflight.json
@@ -298,7 +314,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path('.codex/call-center-native-e2e/results.json').read_text())
           stats = report['stats']
-          assert stats['expected'] == 260
+          assert stats['expected'] == 264
           assert stats['unexpected'] == stats['skipped'] == stats['flaky'] == 0
           assert not report.get('errors')
           source = Path('docs/jrc_contact_center/stages_0_2_review_20261116.json')

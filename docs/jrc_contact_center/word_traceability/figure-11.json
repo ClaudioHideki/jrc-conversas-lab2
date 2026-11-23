@@ -1,0 +1,1128 @@
+{
+  "figure": 11,
+  "title": "Perfil e permissões",
+  "status": "parcial",
+  "expected_functionality": "Popup Configurar Perfil e Permissoes",
+  "image": {
+    "sha256": "68e02dd6060d031429e546c7ea3a6d29a50f554302d526ea701a6bffc1a3d09d",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AuthorityAssignments.vue",
+      "git_blob_at_validated_base": "c75028f48a3c605f3273ae09af351750ab9f2b74",
+      "state": "em_trabalho_sem_CI",
+      "current_sha256": "7be71e6b64338a0b012318c2dbfc9be99dbb80bdae85747569e89a5e6286d79b"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/NativeRoleEditor.vue",
+      "git_blob_at_validated_base": "dcb15bf9bc1f147fb96785358f33ba0d388eecf9",
+      "state": "presente_na_base_validada",
+      "current_sha256": "09c9f4c397368957ed62a18579aa5532932a96daea661320f3952df51d8dc991"
+    },
+    {
+      "path": "app/services/jrc_contact_center/access_authorization.rb",
+      "git_blob_at_validated_base": "943fb8c96d5abfa9feb0ea074e7a5e5b5854647a",
+      "state": "presente_na_base_validada",
+      "current_sha256": "2a134d768661e2d8b45bfab0c82285ebdd5df815924d4f876f1f249c27cc89d3"
+    },
+    {
+      "path": "app/services/jrc_contact_center/permission_sources.rb",
+      "git_blob_at_validated_base": "819efab48ef1130f7f8cf93ede50d354435e899f",
+      "state": "presente_na_base_validada",
+      "current_sha256": "26db382f54f70c157a6e73884628f8117a78db0fa5b1a2dbc5d2f708c6af4da8"
+    },
+    {
+      "path": "app/services/jrc_contact_center/role_fallback_guard.rb",
+      "git_blob_at_validated_base": "a560dcea89afbae577a3c27d3b570e280109d5d3",
+      "state": "presente_na_base_validada",
+      "current_sha256": "5567a9018d86222b572ab42a903af5f97028cbc030106cab24e84bb712afe7f2"
+    },
+    {
+      "path": "app/policies/jrc_contact_center/module_policy.rb",
+      "git_blob_at_validated_base": "877203b7de8eb1e36a2e4895cb1eb6fbc0dc5ee0",
+      "state": "presente_na_base_validada",
+      "current_sha256": "7600c7111a23f02e6dda05a312b09d5661f3d0a285bf724dafaea99a27d0c965"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/permission_sources_spec.rb",
+      "passed_examples": 16,
+      "sample_behaviours": [
+        "JrcContactCenter::PermissionSources denies every capability to a newly created native administrator without explicit eligibility",
+        "JrcContactCenter::PermissionSources keeps an ineligible user denied even with an explicit full profile and team grants",
+        "JrcContactCenter::PermissionSources inherits only actual memberships in a native team of the same account"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb",
+      "passed_examples": 15,
+      "sample_behaviours": [
+        "Call Center explicit access authorizations lists native users with bounded pagination and explicit pending state",
+        "Call Center explicit access authorizations persists eligibility and individual rights, then denies access again after suspension",
+        "Call Center explicit access authorizations does not let an administrator grant a critical power above their own authority"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/native_role_fallback_spec.rb",
+      "passed_examples": 21,
+      "sample_behaviours": [
+        "Call Center authority on native role fallback denies removing a restrictive own profile using nil without partial name changes",
+        "Call Center authority on native role fallback denies removing a restrictive own profile using \"\" without partial name changes",
+        "Call Center authority on native role fallback denies clearing another agent profile when operate would be newly granted"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/native_role_revision_spec.rb",
+      "passed_examples": 7,
+      "sample_behaviours": [
+        "Call Center native role revisions returns an additive revision and accepts an update against that exact version",
+        "Call Center native role revisions rejects a stale form without changing newer data or recording a successful change",
+        "Call Center native role revisions requires a nonblank version when the caller explicitly opts into preconditions"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb",
+      "passed_examples": 8,
+      "sample_behaviours": [
+        "Call Center native role boundaries returns not found for a foreign role without changing either Account",
+        "Call Center native role boundaries preserves the role and audit history when an actor cannot grant a critical power",
+        "Call Center native role boundaries serializes the native update and permits removing an existing power without automatic grants"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/pabx/recordings_spec.rb",
+      "passed_examples": 24,
+      "sample_behaviours": [
+        "PABX documented recording transport uses only the documented link body from a persisted CDR without exposing it publicly",
+        "PABX documented recording transport blocks an unconfirmed recording lookup empty",
+        "PABX documented recording transport blocks an unconfirmed recording lookup uniqueId"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/pabx_recordings_spec.rb",
+      "passed_examples": 11,
+      "sample_behaviours": [
+        "PABX private recording requests proxies only the authorized stored recording and prevents public caching",
+        "PABX private recording requests denies recording bytes without explicit authority when Call Center is enabled",
+        "PABX private recording requests separates listening from direct download and retains own-extension authorization"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb",
+      "passed_examples": 1,
+      "sample_behaviours": [
+        "Call Center native role concurrent revocation does not restore a concurrently revoked power using a stale role read"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "deferred pause native waits through ACW and starts only after explicit completion without administrative access",
+    "fifteen permission-bound cards, actual CSS, honest pending states and no overflow",
+    "institutional audio folders native private receipt, revisions and permissions persist without publishing bytes",
+    "linked Customer Master preserves native permissions, persisted values and attendance drafts",
+    "native access conflict preserves draft and requires explicit comparison before overwrite",
+    "native access team grants remain separate from eligibility and queue participation",
+    "native access user eligibility, real pagination, denial and persistence",
+    "native permission popup reuses the role editor and persists only explicitly selected capabilities",
+    "native role creation validates the form and persists exactly the selected capabilities",
+    "native role denied creation keeps the draft and never persists an unauthorized power",
+    "native role stale form preserves the draft and requires a fresh explicit review",
+    "profile change revalidates native grants and denies writes after revocation",
+    "team supervision native metadata persists reviewed roles, pages candidates and rejects stale or denied writes"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0142-C01",
+      "expected": "Reutilizar os usuários, equipes e perfis da plataforma, com concessões por funcionalidade.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 142,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 230,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D1-P0144-C01",
+      "expected": "Matriz granular por módulo: visualizar, criar, editar, excluir, exportar, aprovar e publicar.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 144,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 232,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D1-P0145-C01",
+      "expected": "Usuário: perfil, empresa, equipes, participação e supervisão nas filas, ramal e permissões individuais.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 145,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 233,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D1-P0146-C01",
+      "expected": "Monitoria: escuta, sussurro, intervenção e acesso a gravações com permissões independentes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 146,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 234,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D1-P0147-C01",
+      "expected": "Regras operacionais: transferência entre filas/ramais, captura, espera, conferência, desvio, calendários e exceções.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 147,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 235,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D1-P0149-C01",
+      "expected": "Não aplicar “selecionar todos” a permissões críticas indiscriminadamente.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 149,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 237,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D1-P0150-C01",
+      "expected": "Um administrador nunca pode conceder privilégios acima da própria alçada.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 150,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 238,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D1-P0151-C01",
+      "expected": "Sem conceder automaticamente acesso ao Call Center ao apenas criar um usuário no sistema.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 151,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 239,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D1-P0152-C01",
+      "expected": "Alterações PABX devem respeitar disponibilidade de recursos e confirmação técnica.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 152,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 240,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11,
+        12
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0244-C01",
+      "expected": "Matriz granular para conceder operacoes por modulo, perfil, equipe e usuario, com alçadas separadas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 244,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0245-C01",
+      "expected": "Acoes e resultado do clique: Seletores Perfil, Equipe e Usuario: escolher o escopo alvo.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 245,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0245-C02",
+      "expected": "Abas Permissoes por Modulo, Acesso Especial, PABX JRC e Configuracoes Adicionais: trocar categoria sem perder alteracoes ainda nao salvas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 245,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0245-C03",
+      "expected": "Checkbox por acao: visualizar, criar, editar, excluir, exportar, aprovar e publicar, mais ouvir/baixar/monitorar onde aplicavel.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 245,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0245-C04",
+      "expected": "Salvar Permissoes: mostrar alteracoes antes de confirmar.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 245,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0246-C01",
+      "expected": "Campos e dados apresentados: Exibir permissao herdada, individual, concedida e efetiva de forma distinguivel quando houver hierarquia.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 246,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0246-C02",
+      "expected": "Informar escopo de empresa, equipe, fila e carteira; manter trilha de quem concedeu, quando e por qual origem.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 246,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0247-C01",
+      "expected": "Regras e permissoes: Nao conceder privilegio maior que a alçada do operador.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 247,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0247-C02",
+      "expected": "Evitar Selecionar Todos irrestrito para tarefas criticas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 247,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0247-C03",
+      "expected": "Monitoria (escuta, sussurro, intervencao) e acesso a gravacao sao permissoes distintas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 247,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0247-C04",
+      "expected": "Criar usuario na plataforma nao ativa automaticamente Call Center.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 247,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0248-C01",
+      "expected": "Estados de erro e excecoes: Se o perfil alvo mudou em outra sessao, exigir revisao antes de sobrescrever.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 248,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0248-C02",
+      "expected": "Uma acao negada pela API precisa ser negada mesmo quando checkbox ou rota estiver manipulada no navegador.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 248,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0250-C01",
+      "expected": "• F11-A: Admin sem permissao de publicacao nao consegue conceder Publicar para outro perfil.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 250,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "id": "D2-P0251-C01",
+      "expected": "• F11-B: usuario com Ouvir Gravacao e sem Baixar consegue reproduzir e recebe bloqueio de download na UI e API.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 251,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        11
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    }
+  ],
+  "divergences": [
+    "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

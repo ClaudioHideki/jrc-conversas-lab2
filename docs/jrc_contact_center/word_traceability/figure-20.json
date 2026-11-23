@@ -1,0 +1,920 @@
+{
+  "figure": 20,
+  "title": "Transcrição e áudio sincronizados",
+  "status": "pendente",
+  "expected_functionality": "Detalhes - transcricao, sentimentos e audio sincronizados",
+  "image": {
+    "sha256": "08e491b35f6f32eaebe0e22d4c5a60bb899e7e5cf18099f939d8c1e8fddeb63a",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/components-next/Calls/CallRecordingPlayer.vue",
+      "git_blob_at_validated_base": "6eaa81b7b12e9467873e513b84199a3b724e43dc",
+      "state": "presente_na_base_validada",
+      "current_sha256": null
+    },
+    {
+      "path": "app/services/jrc_contact_center/quality_analysis_snapshot.rb",
+      "git_blob_at_validated_base": "9e316ad13bf4e1516f70ebd5766d172caf49fbe3",
+      "state": "presente_na_base_validada",
+      "current_sha256": "03b41b93b6349f4162e8de1030d84819cd02a0a1c1baca67e53bb01e54d450cc"
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/call_quality_analyses_controller.rb",
+      "git_blob_at_validated_base": "b9c189e16b635244abf984b192dd6ee783d2c8d5",
+      "state": "presente_na_base_validada",
+      "current_sha256": null
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb",
+      "passed_examples": 30,
+      "sample_behaviours": [
+        "JrcContactCenter::QualityAnalysisSnapshot keeps actual quality, sentiment, zero score, missing confidence and original transcript distinct",
+        "JrcContactCenter::QualityAnalysisSnapshot does not let mutation of the reader DTO change the captured original or fingerprint",
+        "JrcContactCenter::QualityAnalysisSnapshot fingerprints the same native JSON independently of top-level symbol or object-key order"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_voice_quality/supabase_client_scope_spec.rb",
+      "passed_examples": 7,
+      "sample_behaviours": [
+        "JrcVoiceQuality::SupabaseClient queries the same external identifier independently in two Accounts",
+        "JrcVoiceQuality::SupabaseClient rejects a foreign or unscoped response even when the transport returns success",
+        "JrcVoiceQuality::SupabaseClient includes account scope in batch lookups and does not fall back to an unscoped query"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [],
+  "requirements": [
+    {
+      "id": "D1-P0205-C01",
+      "expected": "Utilizar o layout da área existente de Gravações e Qualidade como referência, com linguagem roxa e azul e popup de detalhes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 205,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 356,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D1-P0207-C01",
+      "expected": "Visão principal: totais, percentuais positivo/neutro/negativo, filtros, interações, distribuição e insights.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 207,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 358,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D1-P0208-C01",
+      "expected": "Popup: abas Análise do Nico, Transcrição, Gravação, Contexto e Ações e Histórico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 208,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 359,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D1-P0209-C01",
+      "expected": "Análise por trecho ligada a timestamps, playback e transcrição; nota de qualidade separada do sentimento.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 209,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 360,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D1-P0210-C01",
+      "expected": "Contexto usa cadastro de cliente, contratos, Service Desk, CRM e Relacionamento, com acesso limitado por perfil.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 210,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 361,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D1-P0211-C01",
+      "expected": "Ações e Histórico utilizam tarefas existentes, responsáveis, prazos, vinculação de chamados e revisões auditadas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 211,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 362,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D1-P0213-C01",
+      "expected": "Sentimento é estimativa de IA; distinguir negativo de crítico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 213,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 364,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D1-P0214-C01",
+      "expected": "Classificação corrigida por humano convive com resultado original imutável e justificativa.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 214,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 365,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D1-P0215-C01",
+      "expected": "A seleção de fala ou ponto do gráfico move o player ao timestamp correspondente.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 215,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 366,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D1-P0216-C01",
+      "expected": "Salvar e Concluir encerra somente a revisão da análise, não as tarefas/chamados pendentes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 216,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 367,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0393-C01",
+      "expected": "Popup com abas Analise do Nico, Transcricao, Gravacao, Contexto e Acoes e Historico, conectadas ao mesmo evento de chamada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 393,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0394-C01",
+      "expected": "Acoes e resultado do clique: Selecionar fala na Transcricao: mover player ao timestamp correspondente e destacar ponto no grafico.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 394,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0394-C02",
+      "expected": "Selecionar ponto do grafico: buscar trecho, tempo e emocao estimada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 394,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0394-C03",
+      "expected": "Controles de audio: reproduzir, pausar, buscar, controlar velocidade e volume.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 394,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0394-C04",
+      "expected": "Corrigir Analise: abrir revisao humana quando habilitada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 394,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0394-C05",
+      "expected": "Criar Chamado/Registrar no Relacionamento: abrir fluxo autorizado sem concluir automaticamente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 394,
+          "clause": 5
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0395-C01",
+      "expected": "Campos e dados apresentados: Cada segmento traz inicio/fim, locutor identificado quando possivel, texto, classe estimada e vinculo ao call_id/recording_id.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 395,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0395-C02",
+      "expected": "Separar indicador de qualidade do sentimento.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 395,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0395-C03",
+      "expected": "O popup informa chamada, data, fila, agente, duracao, estado e versao da analise.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 395,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0396-C01",
+      "expected": "Regras e permissoes: Posicao de playback, texto e grafico devem usar a mesma base temporal; clicar nao deve reprocessar nem editar o audio original.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 396,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0396-C02",
+      "expected": "Transcricao e metadados sensiveis seguem as permissoes de gravação.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 396,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0396-C03",
+      "expected": "Correcao humana conserva versao original e autor da revisao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 396,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0397-C01",
+      "expected": "Estados de erro e excecoes: Para trechos sem timestamp valido, mostrar limitacao sem saltar para posicao incorreta.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 397,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0397-C02",
+      "expected": "Se arquivo nao estiver disponivel, manter transcricao autorizada e informar indisponibilidade do player.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 397,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0399-C01",
+      "expected": "• F20-A: clicar no trecho de 01:25 desloca player e marcador ao mesmo instante, dentro da precisao definida tecnicamente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 399,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "id": "D2-P0400-C01",
+      "expected": "• F20-B: a aba Contexto nao revela contratos/chamados fora das permissoes do visualizador.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 400,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        20
+      ],
+      "status": "pendente",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    }
+  ],
+  "divergences": [
+    "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

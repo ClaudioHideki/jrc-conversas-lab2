@@ -325,6 +325,17 @@ export default {
       responseType: 'blob',
     }),
   acwPolicy: accountId => axios.get(`${base(accountId)}/acw_policy`),
+  endingRules: (accountId, params = {}) =>
+    axios.get(`${base(accountId)}/acw_policy/ending_rules`, { params }),
+  endingRuleSourceContext: (accountId, queueId) =>
+    axios.get(`${base(accountId)}/acw_policy/ending_rules/source_context`, {
+      params: { queue_id: recordIdentity(queueId) },
+    }),
+  saveEndingRule: (accountId, rule, expectedRevision) =>
+    axios.post(`${base(accountId)}/acw_policy/ending_rules`, {
+      private_rule: rule,
+      expected_revision: expectedRevision,
+    }),
   updateAcwPolicy: (accountId, limits, options = {}) =>
     axios.patch(`${base(accountId)}/acw_policy`, { ...options, limits }),
   qualifications: (accountId, params) =>

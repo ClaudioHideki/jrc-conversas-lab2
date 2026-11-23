@@ -11,6 +11,7 @@ const resources = [
   'ivr_drafts',
   'acw_forms',
   'acw_policy',
+  'ending_rules',
   'pause_catalog',
   'routing_rules',
   'audio_folders',

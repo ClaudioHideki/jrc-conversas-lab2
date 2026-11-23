@@ -1,0 +1,1079 @@
+{
+  "figure": 23,
+  "title": "Correção humana da análise",
+  "status": "parcial",
+  "expected_functionality": "Popup Corrigir Analise do Nico - revisao humana",
+  "image": {
+    "sha256": "1d2ce4542d2080a4dac03144e5965f576d45aea5a4d6fa993fd8af353e2d235f",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/services/jrc_contact_center/quality_review_input.rb",
+      "git_blob_at_validated_base": "ad959bbf5704ab44d7219158ef6e077b071c1479",
+      "state": "presente_na_base_validada",
+      "current_sha256": "db0dbf3bf5f595ead49022a519c3c48f4869b21f8891f552f63ae5c81b6366b0"
+    },
+    {
+      "path": "app/services/jrc_contact_center/quality_analysis_snapshot.rb",
+      "git_blob_at_validated_base": "9e316ad13bf4e1516f70ebd5766d172caf49fbe3",
+      "state": "presente_na_base_validada",
+      "current_sha256": "03b41b93b6349f4162e8de1030d84819cd02a0a1c1baca67e53bb01e54d450cc"
+    },
+    {
+      "path": "app/policies/jrc_contact_center/module_policy.rb",
+      "git_blob_at_validated_base": "877203b7de8eb1e36a2e4895cb1eb6fbc0dc5ee0",
+      "state": "presente_na_base_validada",
+      "current_sha256": "7600c7111a23f02e6dda05a312b09d5661f3d0a285bf724dafaea99a27d0c965"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb",
+      "passed_examples": 12,
+      "sample_behaviours": [
+        "AddContactCenterQualityReviewAuthority accepts an already upgraded installation without manufacturing grants",
+        "AddContactCenterQualityReviewAuthority upgrades populated legacy grants atomically without changing eligibility, denials, teams or audit",
+        "AddContactCenterQualityReviewAuthority admits explicit allowed review values only after the forward migration"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/module_policy_quality_review_spec.rb",
+      "passed_examples": 16,
+      "sample_behaviours": [
+        "JrcContactCenter::ModulePolicy#quality_review? does not infer review from any of the thirteen existing rights or native administration",
+        "JrcContactCenter::ModulePolicy#quality_review? requires an explicit registered profile right in addition to native recording access",
+        "JrcContactCenter::ModulePolicy#quality_review? does not review when the profile lacks jrc_contact_center_recordings_view"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb",
+      "passed_examples": 30,
+      "sample_behaviours": [
+        "JrcContactCenter::QualityAnalysisSnapshot keeps actual quality, sentiment, zero score, missing confidence and original transcript distinct",
+        "JrcContactCenter::QualityAnalysisSnapshot does not let mutation of the reader DTO change the captured original or fingerprint",
+        "JrcContactCenter::QualityAnalysisSnapshot fingerprints the same native JSON independently of top-level symbol or object-key order"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/quality_review_input_spec.rb",
+      "passed_examples": 61,
+      "sample_behaviours": [
+        "JrcContactCenter::QualityReviewInput keeps the explicit human classification separate from the immutable original analysis",
+        "JrcContactCenter::QualityReviewInput takes an immutable private copy without freezing or rewriting the caller values",
+        "JrcContactCenter::QualityReviewInput normalizes explicit input without assigning actor, permissions, origin or an operational action"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb",
+      "passed_examples": 9,
+      "sample_behaviours": [
+        "Call Center Nico review permissions in authenticated native APIs does not export a new review right merely because the authenticated user is an administrator",
+        "Call Center Nico review permissions in authenticated native APIs exports an explicit profile grant and removes it after a fresh recording-access denial",
+        "Call Center Nico review permissions in authenticated native APIs does not let a native administrator add the new authority through the existing profile API"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "global ACW revision preserves drafts across both native editors and requires reviewed retry",
+    "institutional audio folders native browser capture uses only the synthetic device and preserves reviewed origin",
+    "institutional audio folders native unit organization persists, paginates and rejects stale reviews",
+    "last eligible queue withdrawal requires actual manager review and preserves native audit and scope",
+    "local IVR pagination, URL filters and stale editor preserve the reviewed draft",
+    "local pause catalog editor persists HH:MM, pagination, explicit policy and reviewed conflicts",
+    "native local routing drafts persist paginate review conflicts and deny unauthorized targets",
+    "native queue eligibility is rechecked before saving and preserves the reviewed selection",
+    "native role stale form preserves the draft and requires a fresh explicit review",
+    "pending ACW native navigation reviews unsaved edits preserves saved state and leaves other modules untouched",
+    "pending ACW native review preserves local answers blocks stale writes and requires explicit reconciliation",
+    "team roster last eligible withdrawal uses real native review, persistence and scoped audit",
+    "team source last eligible inactivation preserves shared roster and requires manager review",
+    "team supervision native metadata persists reviewed roles, pages candidates and rejects stale or denied writes",
+    "whole native team deletion preserves generic confirmation requires scoped manager review and records real audit"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0205-C01",
+      "expected": "Utilizar o layout da área existente de Gravações e Qualidade como referência, com linguagem roxa e azul e popup de detalhes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 205,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 356,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D1-P0207-C01",
+      "expected": "Visão principal: totais, percentuais positivo/neutro/negativo, filtros, interações, distribuição e insights.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 207,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 358,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D1-P0208-C01",
+      "expected": "Popup: abas Análise do Nico, Transcrição, Gravação, Contexto e Ações e Histórico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 208,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 359,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D1-P0209-C01",
+      "expected": "Análise por trecho ligada a timestamps, playback e transcrição; nota de qualidade separada do sentimento.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 209,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 360,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D1-P0210-C01",
+      "expected": "Contexto usa cadastro de cliente, contratos, Service Desk, CRM e Relacionamento, com acesso limitado por perfil.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 210,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 361,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D1-P0211-C01",
+      "expected": "Ações e Histórico utilizam tarefas existentes, responsáveis, prazos, vinculação de chamados e revisões auditadas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 211,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 362,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D1-P0213-C01",
+      "expected": "Sentimento é estimativa de IA; distinguir negativo de crítico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 213,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 364,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D1-P0214-C01",
+      "expected": "Classificação corrigida por humano convive com resultado original imutável e justificativa.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 214,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 365,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D1-P0215-C01",
+      "expected": "A seleção de fala ou ponto do gráfico move o player ao timestamp correspondente.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 215,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 366,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D1-P0216-C01",
+      "expected": "Salvar e Concluir encerra somente a revisão da análise, não as tarefas/chamados pendentes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 216,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 367,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0426-C01",
+      "expected": "Permitir ajuste de classificacao e resumo sem apagar a inferencia original da IA.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 426,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0427-C01",
+      "expected": "Acoes e resultado do clique: Exibir classe original do Nico, score/confianca disponivel e resumo original em modo somente leitura.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 427,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0427-C02",
+      "expected": "Nova Classificacao: selecionar Positivo, Neutro ou Negativo segundo regra vigente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 427,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0427-C03",
+      "expected": "Resumo Ajustado e Temas Ajustados: revisar texto e rotulos.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 427,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0427-C04",
+      "expected": "Recomendacoes Sugeridas: selecionar quais propostas serao mantidas como sugestoes; nao disparar acoes sensiveis.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 427,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0427-C05",
+      "expected": "Justificativa da Correcao: preencher obrigatoriamente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 427,
+          "clause": 5
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0427-C06",
+      "expected": "Cancelar ou Salvar Correcao: descartar ou criar revisao auditada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 427,
+          "clause": 6
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0428-C01",
+      "expected": "Campos e dados apresentados: Persistir versao original da analise, modelo, classe/score, classificacao humana, texto revisado, temas, recomendacoes, usuario, horario e motivo.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 428,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0428-C02",
+      "expected": "Exibir origem humana na leitura posterior sem substituir de modo destrutivo a analise original.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 428,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0429-C01",
+      "expected": "Regras e permissoes: Somente perfis autorizados corrigem.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 429,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0429-C02",
+      "expected": "A classificacao da IA permanece imutavel e comparavel.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 429,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0429-C03",
+      "expected": "Correcao nao altera audio, transcricao de origem ou dados brutos da chamada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 429,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0429-C04",
+      "expected": "Recomendações sao sugestoes e precisam respeitar autorizacao, consentimento e politica dos modulos de destino.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 429,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0430-C01",
+      "expected": "Estados de erro e excecoes: Sem justificativa ou sem nova classificacao valida, impedir salvar com mensagem especifica.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 430,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0430-C02",
+      "expected": "Duas correcoes concorrentes exigem controle de versao para nao perder historico; erro de persistencia nao fecha popup.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 430,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0432-C01",
+      "expected": "• F23-A: alterar Positivo para Negativo preserva registro original, autor, horario e justificativa da revisao.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 432,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    },
+    {
+      "id": "D2-P0433-C01",
+      "expected": "• F23-B: enviar sem justificativa ou sem permissao nao modifica analise e retorna erro verificavel.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 433,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    }
+  ],
+  "divergences": [
+    "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

@@ -1,0 +1,50 @@
+{
+  "validated_parent": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+  "branch": "codex/call-center-control-desk-20261116",
+  "word_reference": "word_traceability/index.json",
+  "both_documents_fully_read": true,
+  "all_23_drawings_and_21_unique_images_read": true,
+  "changes_prepared": [
+    "Native existing ACW configuration authority reused by three authenticated endpoints; no parallel catalogue.",
+    "Current GROUP configuration coverage, native queue scope and destination project authority revalidated on read/write.",
+    "Private project templates and counts omitted before filtering/pagination when their native authority is absent.",
+    "Operational configuration dialog through the existing ending-reason catalogue: draft, native project picker, review, revisions, filters and paging.",
+    "Explicit execution mode, without rewriting old immutable definitions or silently arming legacy rules.",
+    "Private HTTP parameters filtered in native instrumentation; SQL privacy remains in force.",
+    "Disable remains possible for an authorized closed project; reactivation requires a valid current destination.",
+    "Mobile authority filters use separate rows below sm; real geometry assertion prepared."
+  ],
+  "tests_prepared_not_results": {
+    "new_native_requests": 19,
+    "new_browser_executions": 4,
+    "chrome_total_expected": 264,
+    "existing_260_cases_retained": true
+  },
+  "static_results": {
+    "client_files": 10,
+    "new_errors": 0,
+    "new_warnings": 0,
+    "workflow_yaml_and_identity_mutants": true,
+    "bash_syntax_scripts": 29,
+    "workflow_python_regressions": 7,
+    "browser_counter_regressions": 8
+  },
+  "not_completed": [
+    "Native CI and actual Chrome evidence on this new checkpoint.",
+    "Call-origin/completion attestation and forward-only arming; rules do not execute destinations yet.",
+    "Per-destination independent effect/receipt transactions, current original-agent authorization and real retries.",
+    "CRM, Service Desk, notification/Nico adapters and their operational configuration.",
+    "F10-A/F10-B real effects; the new editor is not full Figure10 acceptance.",
+    "Full remaining Part1 figures and external PABX contract/provider homologation."
+  ],
+  "runtime_provider_or_production_writes": false,
+  "main_original_checkout_and_three_dirty_files_preserved": true,
+  "new_migrations_or_sql_changes": false,
+  "heavy_windows_tests_or_builds": false,
+  "resources": {
+    "physical_total_bytes": 12711890944,
+    "physical_available_bytes": 3600470016,
+    "c_free_bytes": 54130974720,
+    "read_only": true
+  }
+}

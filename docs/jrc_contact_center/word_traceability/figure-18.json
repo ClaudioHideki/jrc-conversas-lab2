@@ -1,0 +1,865 @@
+{
+  "figure": 18,
+  "title": "Gravações e Qualidade existente",
+  "status": "parcial",
+  "expected_functionality": "Interface existente de Gravacoes e Qualidade",
+  "image": {
+    "sha256": "236f52caf0f9b64da8f01de0819f9d2861c4dcc2cc9c6e85c3db425e999a59dd",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue",
+      "git_blob_at_validated_base": "0700b1c75bbc7707ee9893d2bfc0a28915c44644",
+      "state": "presente_na_base_validada",
+      "current_sha256": "0ea995d1dc2e3c29fb08d01eb0cb796fd39a47bde86f85afb4008182eebae80c"
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/call_quality_analyses_controller.rb",
+      "git_blob_at_validated_base": "b9c189e16b635244abf984b192dd6ee783d2c8d5",
+      "state": "presente_na_base_validada",
+      "current_sha256": null
+    },
+    {
+      "path": "app/javascript/dashboard/api/callQualityAnalyses.js",
+      "git_blob_at_validated_base": "a438b20220802e55745e0bd36544ebc875cfc9ae",
+      "state": "presente_na_base_validada",
+      "current_sha256": null
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb",
+      "passed_examples": 30,
+      "sample_behaviours": [
+        "JrcContactCenter::QualityAnalysisSnapshot keeps actual quality, sentiment, zero score, missing confidence and original transcript distinct",
+        "JrcContactCenter::QualityAnalysisSnapshot does not let mutation of the reader DTO change the captured original or fingerprint",
+        "JrcContactCenter::QualityAnalysisSnapshot fingerprints the same native JSON independently of top-level symbol or object-key order"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_voice_quality/supabase_client_scope_spec.rb",
+      "passed_examples": 7,
+      "sample_behaviours": [
+        "JrcVoiceQuality::SupabaseClient queries the same external identifier independently in two Accounts",
+        "JrcVoiceQuality::SupabaseClient rejects a foreign or unscoped response even when the transport returns success",
+        "JrcVoiceQuality::SupabaseClient includes account scope in batch lookups and does not fall back to an unscoped query"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "Hoya workspace native restores and persists versioned ACW answers in the actual voice workspace",
+    "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0205-C01",
+      "expected": "Utilizar o layout da área existente de Gravações e Qualidade como referência, com linguagem roxa e azul e popup de detalhes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 205,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 356,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D1-P0207-C01",
+      "expected": "Visão principal: totais, percentuais positivo/neutro/negativo, filtros, interações, distribuição e insights.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 207,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 358,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D1-P0208-C01",
+      "expected": "Popup: abas Análise do Nico, Transcrição, Gravação, Contexto e Ações e Histórico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 208,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 359,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D1-P0209-C01",
+      "expected": "Análise por trecho ligada a timestamps, playback e transcrição; nota de qualidade separada do sentimento.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 209,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 360,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D1-P0210-C01",
+      "expected": "Contexto usa cadastro de cliente, contratos, Service Desk, CRM e Relacionamento, com acesso limitado por perfil.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 210,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 361,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D1-P0211-C01",
+      "expected": "Ações e Histórico utilizam tarefas existentes, responsáveis, prazos, vinculação de chamados e revisões auditadas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 211,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 362,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D1-P0213-C01",
+      "expected": "Sentimento é estimativa de IA; distinguir negativo de crítico.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 213,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 364,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D1-P0214-C01",
+      "expected": "Classificação corrigida por humano convive com resultado original imutável e justificativa.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 214,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 365,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D1-P0215-C01",
+      "expected": "A seleção de fala ou ponto do gráfico move o player ao timestamp correspondente.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 215,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 366,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D1-P0216-C01",
+      "expected": "Salvar e Concluir encerra somente a revisão da análise, não as tarefas/chamados pendentes.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 216,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 367,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0371-C01",
+      "expected": "Captura da area real de referencia visual: serve de ponto de integracao, nao de autorizacao para substituir as funcionalidades atuais.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 371,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0372-C01",
+      "expected": "Acoes e resultado do clique: Preservar navegacao, menu, listagem de gravacoes, indicadores e blocos de qualidade existentes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 372,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0372-C02",
+      "expected": "Adicionar entrada para Analise de Sentimentos no mesmo ecossistema visual, usando componente reutilizavel e fluxo de retorno consistente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 372,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0372-C03",
+      "expected": "Abrir analise a partir de uma gravacao ou interacao quando houver call_id elegivel.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 372,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0373-C01",
+      "expected": "Campos e dados apresentados: Reaproveitar identificadores, permissoes, filtros e origem de dados do modulo existente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 373,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0373-C02",
+      "expected": "Status e metricas da captura devem ser confirmados no codigo/ambiente autorizado; nao deduzir funcionalidades prontas apenas da aparencia.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 373,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0374-C01",
+      "expected": "Regras e permissoes: Evitar nova base de gravacoes, usuarios e clientes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 374,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0374-C02",
+      "expected": "A analise do Nico deve referenciar a chamada e o arquivo ja existentes.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 374,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0374-C03",
+      "expected": "Alteracoes de UI nao podem alterar direitos de acesso a gravação e qualidade.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 374,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0374-C04",
+      "expected": "O layout precisa funcionar em desktop e telas menores.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 374,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0375-C01",
+      "expected": "Estados de erro e excecoes: Se a funcao do Nico nao estiver habilitada, ocultar ou mostrar estado indisponivel explicito, sem criar analise ficticia.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 375,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0375-C02",
+      "expected": "Falha de consulta da area nova nao deve impedir o acesso ao modulo existente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 375,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0377-C01",
+      "expected": "• F18-A: usuario autorizado continua acessando fluxos de Gravacoes e Qualidade anteriores apos incluir entrada do Nico.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 377,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "id": "D2-P0378-C01",
+      "expected": "• F18-B: analise aberta a partir de gravacao referencia o mesmo call_id, sem duplicar registro de origem.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 378,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        18
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2
+      ],
+      "test_reference_ids": [
+        0,
+        1
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    }
+  ],
+  "divergences": [
+    "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}

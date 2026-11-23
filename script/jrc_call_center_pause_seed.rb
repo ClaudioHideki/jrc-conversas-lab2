@@ -2,6 +2,7 @@ require_relative 'jrc_call_center_operational_form_seed'
 require_relative 'jrc_call_center_state_history_seed'
 require_relative 'jrc_call_center_ending_reason_seed'
 require_relative 'jrc_call_center_ending_confirmation_seed'
+require_relative 'jrc_call_center_ending_automation_seed'
 require_relative 'jrc_call_center_audio_folder_seed'
 require_relative 'jrc_call_center_team_supervision_seed'
 require_relative 'jrc_call_center_pause_approval_seed'
@@ -26,6 +27,7 @@ class JrcContactCenter::SyntheticPauseSeed
         editor operations withdrawal duration acw routing state_history
         team_withdrawal team_activity acw_draft acw_review acw_navigation team_deletion deferred_pause deferred_pause_retry
         operational_forms form_bindings hoya_forms required_endings ending_confirmation membership_eligibility audio_folders team_supervision approval
+        ending_automations
       ].index_with do |kind|
         new("#{project}-#{kind}").call
       end
@@ -64,6 +66,9 @@ class JrcContactCenter::SyntheticPauseSeed
   private
 
   def prepare_pause_sources(payload, queues, admin, operator)
+    if @project.end_with?('-ending_automations')
+      payload.merge!(JrcContactCenter::SyntheticEndingAutomationSeed.call(account: @account, admin: admin, queue: queues.first))
+    end
     if @project.end_with?('-ending_confirmation')
       payload.merge!(JrcContactCenter::SyntheticEndingConfirmationSeed.call(account: @account, admin: admin, operator: operator, queue: queues.first))
     end

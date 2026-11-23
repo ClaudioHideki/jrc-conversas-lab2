@@ -7469,5 +7469,14 @@
     "current_context_findings": "docs/jrc_contact_center/ending_rule_versions_current_context_findings_20261123.json",
     "fixture_findings": "docs/jrc_contact_center/ending_rule_versions_fixture_findings_20261123.json",
     "sql_privacy_findings": "docs/jrc_contact_center/ending_rule_versions_sql_privacy_findings_20261123.json"
+  },
+  "current_requirement_traceability": {
+    "index": "docs/jrc_contact_center/word_traceability/index.json",
+    "figures": 23,
+    "requirements": 554,
+    "read_again_on": "2026-11-23",
+    "full_text_and_images_verified": true,
+    "historical_matrix_preserved": true,
+    "new_editor_native_and_visual_acceptance_pending": true
   }
 }

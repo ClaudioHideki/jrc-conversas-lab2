@@ -37,10 +37,21 @@ class JrcContactCenter::EndingActions::RuleInput
   end
 
   def validate_header!(row)
-    valid = row.keys.sort == FIELDS.sort && text?(row['code'], 100) && text?(row['name'], 120)
+    valid = row.keys.sort == input_fields(row).sort && text?(row['code'], 100) && text?(row['name'], 120)
     valid &&= text?(row['reason_code'], 100) && [true, false].include?(row['active'])
     valid &&= JrcContactCenter::EndingActions::RuleDefinition::TIMINGS.include?(row['timing'])
     invalid! unless valid
+    validate_execution_mode!(row)
+  end
+
+  def input_fields(row)
+    row.key?('execution_mode') ? FIELDS + ['execution_mode'] : FIELDS
+  end
+
+  def validate_execution_mode!(row)
+    return unless row.key?('execution_mode')
+
+    invalid! unless JrcContactCenter::EndingActions::RuleDefinition::EXECUTION_MODES.include?(row['execution_mode'])
   end
 
   def validate_activation!(row, queue, scope)
@@ -64,18 +75,19 @@ class JrcContactCenter::EndingActions::RuleInput
     entries = row.fetch('actions')
     invalid! unless entries.is_a?(Array) && entries.length <= 5
     invalid! if row.fetch('active') && entries.empty?
-    result = entries.map { |entry| action!(entry) }
+    result = entries.map { |entry| action!(entry, active: row.fetch('active')) }
     invalid! unless result.pluck('kind').uniq.length == result.length
     result
   end
 
-  def action!(input)
+  def action!(input, active:)
     invalid! unless input.is_a?(Hash)
     entry = input.deep_stringify_keys
     invalid! unless entry.keys.sort == %w[kind parameters]
     raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless entry['kind'] == 'project_task'
 
-    parameters = JrcContactCenter::EndingActions::ProjectTaskParameters.new(member: @member).call(entry.fetch('parameters'))
+    validator = JrcContactCenter::EndingActions::ProjectTaskParameters.new(member: @member)
+    parameters = active ? validator.call(entry.fetch('parameters')) : validator.authorize_reference!(entry.fetch('parameters'))
     { 'kind' => 'project_task', 'parameters' => parameters }
   end
 

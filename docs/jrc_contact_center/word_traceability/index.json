@@ -1,0 +1,877 @@
+{
+  "format_version": 1,
+  "review_at": "2026-11-23T16:55:45.911371+00:00",
+  "validated_base_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+  "candidate_sha": null,
+  "candidate_not_yet_validated": true,
+  "documents": [
+    {
+      "id": "doc1",
+      "name": "JRC_Conversas_Call_Center_Parte_1_Especificacao_DEV_Com_Imagens.docx",
+      "sha256": "5db370d9b7598a720d32f7f60eba4e22b4b61878327bd4459176ff729fe7a2c8",
+      "paragraphs_read": 298,
+      "drawings": 23,
+      "unique_images": 21
+    },
+    {
+      "id": "doc2",
+      "name": "JRC_Conversas_Call_Center_Parte_1_Detalhamento_Funcional_23_Imagens.docx",
+      "sha256": "8f9300cf1940012f71be1a97903a192f7b5a18667e6da6664b9f972866e7e88b",
+      "paragraphs_read": 647,
+      "drawings": 23,
+      "unique_images": 21
+    }
+  ],
+  "read_evidence": {
+    "body_text": {
+      "doc1": [
+        [
+          0,
+          297
+        ]
+      ],
+      "doc2": [
+        [
+          0,
+          219
+        ],
+        [
+          220,
+          439
+        ],
+        [
+          440,
+          646
+        ]
+      ]
+    },
+    "footer_read": true,
+    "all21_unique_images_actually_opened": true,
+    "figures_1_2_and_4_13_are_reused_not_missing": true
+  },
+  "method": "Texto integral e imagens lidos; fonte da base completa consultada. As ligações por família não são alegação de cobertura individual. Nenhuma figura é concluída pelo total de testes.",
+  "native_evidence": {
+    "sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+    "run": 45194343773,
+    "artifact": 14833234159,
+    "artifact_sha256": "cd68f31eafe693657320c3cb40bcc88e959eb59597469b2b447107fb57cddf98",
+    "native_distinct_examples": 2957,
+    "screenshot_hashes_verified": 584
+  },
+  "tests_are_overlapping_do_not_sum_by_figure": true,
+  "figures": [
+    {
+      "figure": 1,
+      "title": "Central e navegação",
+      "status": "parcial",
+      "requirements": 13,
+      "file": "figure-01.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/ControlDeskPage.vue",
+        "app/services/jrc_contact_center/administration.rb",
+        "app/services/jrc_contact_center/operational_health.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/module_policy_quality_review_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/administration_security_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/administration_workflows_spec.rb"
+      ],
+      "divergences": [
+        "Quinze cards e navegação existem. Conexão/sincronização operacional não equivalem a ACK homologado."
+      ]
+    },
+    {
+      "figure": 2,
+      "title": "Página principal do Control Desk",
+      "status": "parcial",
+      "requirements": 20,
+      "file": "figure-02.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/ControlDeskPage.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/RecentConfigurationActivity.vue"
+      ],
+      "native_spec_paths": [
+        "spec/models/jrc_contact_center/configuration_audit_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/administration_security_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/administration_workflows_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/configuration_audits_spec.rb"
+      ],
+      "divergences": [
+        "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
+      ]
+    },
+    {
+      "figure": 3,
+      "title": "Equipes, filas e distribuição",
+      "status": "parcial",
+      "requirements": 33,
+      "file": "figure-03.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/TeamSupervisionEditor.vue",
+        "app/controllers/api/v1/accounts/jrc_contact_center/queue_memberships_controller.rb",
+        "app/services/jrc_contact_center/configured_queue_eligibility.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/QueueCalendarBindings.vue"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/create_contact_center_team_supervisions_spec.rb",
+        "spec/services/jrc_contact_center/queue_membership_spec.rb",
+        "spec/services/jrc_contact_center/team_roster_preview_spec.rb",
+        "spec/services/jrc_contact_center/team_supervision_input_spec.rb",
+        "spec/services/jrc_contact_center/team_supervision_scope_spec.rb",
+        "spec/models/jrc_contact_center/team_supervision_constraints_spec.rb",
+        "spec/models/jrc_contact_center/team_supervision_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/membership_enrollment_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/membership_recipient_scope_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/membership_user_eligibility_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/queue_calendar_removals_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/queue_calendars_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/queue_withdrawal_review_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_roster_identity_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_roster_withdrawal_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_supervisions_spec.rb",
+        "spec/services/jrc_crm/team_membership_projection_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
+      ]
+    },
+    {
+      "figure": 4,
+      "title": "Painel técnico PABX e atalhos",
+      "status": "parcial",
+      "requirements": 33,
+      "file": "figure-04.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/webphone/PabxSettingsPanel.vue",
+        "app/services/jrc_contact_center/providers/jrc_pabx_adapter.rb",
+        "app/services/pabx/scope_mapping.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrDraftWorkspace.vue"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/ivr_draft_access_spec.rb",
+        "spec/services/jrc_contact_center/ivr_draft_input_spec.rb",
+        "spec/services/jrc_contact_center/ivr_draft_migration_spec.rb",
+        "spec/services/jrc_contact_center/ivr_draft_write_audio_spec.rb",
+        "spec/services/jrc_contact_center/ivr_draft_write_spec.rb",
+        "spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ivr_drafts_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_pabx_navigation_spec.rb",
+        "spec/services/pabx/cdr_contract_spec.rb",
+        "spec/services/pabx/client_security_spec.rb",
+        "spec/services/pabx/client_spec.rb",
+        "spec/services/pabx/contract_spec.rb",
+        "spec/services/pabx/provider_rails_spec.rb",
+        "spec/services/pabx/provider_spec.rb",
+        "spec/services/pabx/recordings_spec.rb",
+        "spec/services/pabx/scope_mapping_spec.rb",
+        "spec/services/pabx/sync_jobs_spec.rb",
+        "spec/services/pabx/sync_rails_spec.rb",
+        "spec/services/pabx/sync_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_security_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_history_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_recordings_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_diagnostics_spec.rb",
+        "spec/services/pabx/sync_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Figura é painel técnico, não editor de URA. O editor interno existe separadamente; publicação/ACK não homologados."
+      ]
+    },
+    {
+      "figure": 5,
+      "title": "Gerar mensagem com Nico",
+      "status": "bloqueado",
+      "requirements": 24,
+      "file": "figure-05.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioAssetLibrary.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioCaptureDraft.vue",
+        "app/services/jrc_contact_center/audio_uploads.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/audio_file_input_spec.rb",
+        "spec/services/jrc_contact_center/audio_uploads_admission_spec.rb",
+        "spec/services/jrc_contact_center/audio_uploads_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_capture_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
+      ]
+    },
+    {
+      "figure": 6,
+      "title": "Biblioteca de áudios e pastas",
+      "status": "parcial",
+      "requirements": 25,
+      "file": "figure-06.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioAssetLibrary.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioFolderLibrary.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioVersionPreview.vue",
+        "app/services/jrc_contact_center/audio_copies.rb",
+        "app/services/jrc_contact_center/audio_asset_moves.rb",
+        "app/services/jrc_contact_center/audio_archives.rb",
+        "app/services/jrc_contact_center/audio_ivr_usages.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/audio_archive_input_spec.rb",
+        "spec/services/jrc_contact_center/audio_archives_spec.rb",
+        "spec/services/jrc_contact_center/audio_asset_moves_spec.rb",
+        "spec/services/jrc_contact_center/audio_bytes_spec.rb",
+        "spec/services/jrc_contact_center/audio_copies_spec.rb",
+        "spec/services/jrc_contact_center/audio_file_input_spec.rb",
+        "spec/services/jrc_contact_center/audio_folder_path_spec.rb",
+        "spec/services/jrc_contact_center/audio_library_presenter_metadata_spec.rb",
+        "spec/services/jrc_contact_center/audio_media_decoder_spec.rb",
+        "spec/services/jrc_contact_center/audio_media_metadata_spec.rb",
+        "spec/services/jrc_contact_center/audio_media_probe_spec.rb",
+        "spec/services/jrc_contact_center/audio_move_input_spec.rb",
+        "spec/services/jrc_contact_center/audio_probe_process_spec.rb",
+        "spec/services/jrc_contact_center/audio_safety_observation_received_spec.rb",
+        "spec/services/jrc_contact_center/audio_safety_observation_spec.rb",
+        "spec/services/jrc_contact_center/audio_uploads_admission_spec.rb",
+        "spec/services/jrc_contact_center/audio_uploads_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_audio_files_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_audio_folders_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_audio_inspections_spec.rb",
+        "spec/services/jrc_contact_center/ivr_draft_write_audio_spec.rb",
+        "spec/services/jrc_contact_center/ivr_graph_audio_proofs_spec.rb",
+        "spec/services/jrc_contact_center/synthetic_audio_folder_seed_spec.rb",
+        "spec/services/jrc_contact_center/synthetic_audio_storage_guard_spec.rb",
+        "spec/services/jrc_contact_center/synthetic_ivr_audio_seed_spec.rb",
+        "spec/models/jrc_contact_center/audio_folder_spec.rb",
+        "spec/models/jrc_contact_center/audio_inspection_spec.rb",
+        "spec/models/jrc_contact_center/audio_version_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_admission_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_archives_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_filters_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_moves_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_assets_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_bytes_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_capture_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_filters_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_inspections_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_metadata_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_opus_capture_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_usages_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ivr_audio_references_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_audio_inspections_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
+      ]
+    },
+    {
+      "figure": 7,
+      "title": "Pausas e disponibilidade",
+      "status": "parcial",
+      "requirements": 24,
+      "file": "figure-07.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AgentStateHistory.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseApprovalStatus.vue",
+        "app/services/jrc_contact_center/agent_state_manager.rb",
+        "app/services/jrc_contact_center/pause_approval_coordinator.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/agent_state_manager_pause_justification_spec.rb",
+        "spec/services/jrc_contact_center/agent_state_manager_pending_acw_spec.rb",
+        "spec/services/jrc_contact_center/agent_state_manager_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_pause_approval_evidence_spec.rb",
+        "spec/services/jrc_contact_center/deferred_pause_input_spec.rb",
+        "spec/services/jrc_contact_center/deferred_pause_manager_approval_acw_spec.rb",
+        "spec/services/jrc_contact_center/deferred_pause_manager_approval_spec.rb",
+        "spec/services/jrc_contact_center/deferred_pause_manager_spec.rb",
+        "spec/services/jrc_contact_center/deferred_pause_revision_spec.rb",
+        "spec/services/jrc_contact_center/pause_approval_coverage_spec.rb",
+        "spec/services/jrc_contact_center/pause_approval_intent_spec.rb",
+        "spec/services/jrc_contact_center/pause_approval_policy_check_spec.rb",
+        "spec/services/jrc_contact_center/pause_approval_readiness_spec.rb",
+        "spec/services/jrc_contact_center/pause_approval_source_access_spec.rb",
+        "spec/services/jrc_contact_center/pause_catalog_spec.rb",
+        "spec/services/jrc_contact_center/pause_reason_definition_approval_compatibility_spec.rb",
+        "spec/services/jrc_contact_center/synthetic_pause_seed_spec.rb",
+        "spec/models/jrc_contact_center/deferred_pause_request_spec.rb",
+        "spec/models/jrc_contact_center/pause_approval_review_evidence_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/agent_pause_pending_acw_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/agent_state_history_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_requests_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_scope_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_api_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_visibility_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_justification_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/supervisor_pause_notice_spec.rb",
+        "spec/serializers/jrc_approvals/request_serializer_pause_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
+      ]
+    },
+    {
+      "figure": 8,
+      "title": "Cadastro de motivo de pausa",
+      "status": "parcial",
+      "requirements": 24,
+      "file": "figure-08.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/PauseCatalogEditor.vue",
+        "app/services/jrc_contact_center/pause_catalog.rb",
+        "app/services/jrc_contact_center/pause_reason_definition.rb",
+        "app/services/jrc_contact_center/pause_definition_snapshot.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/pause_catalog_spec.rb",
+        "spec/services/jrc_contact_center/pause_reason_definition_approval_compatibility_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_catalog_visibility_spec.rb"
+      ],
+      "divergences": [
+        "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
+      ]
+    },
+    {
+      "figure": 9,
+      "title": "Regra de pós-atendimento",
+      "status": "parcial",
+      "requirements": 28,
+      "file": "figure-09.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRulesEditor.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwFormLibrary.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwRuleFormBinding.vue",
+        "app/services/jrc_contact_center/qualification_manager.rb",
+        "app/services/jrc_contact_center/qualification_draft.rb",
+        "app/services/jrc_contact_center/acw_rule_precedence.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/acw_ending_reasons_spec.rb",
+        "spec/services/jrc_contact_center/acw_form_answers_spec.rb",
+        "spec/services/jrc_contact_center/acw_form_binding_policy_spec.rb",
+        "spec/services/jrc_contact_center/acw_form_bindings_spec.rb",
+        "spec/services/jrc_contact_center/acw_form_definition_spec.rb",
+        "spec/services/jrc_contact_center/acw_form_input_spec.rb",
+        "spec/services/jrc_contact_center/acw_form_query_spec.rb",
+        "spec/services/jrc_contact_center/acw_form_write_spec.rb",
+        "spec/services/jrc_contact_center/acw_qualification_policy_spec.rb",
+        "spec/services/jrc_contact_center/acw_rule_precedence_spec.rb",
+        "spec/services/jrc_contact_center/agent_state_manager_pending_acw_spec.rb",
+        "spec/services/jrc_contact_center/confirm_ending_reason_forms_spec.rb",
+        "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_ending_reason_confirmations_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_qualification_forms_spec.rb",
+        "spec/services/jrc_contact_center/deferred_pause_manager_approval_acw_spec.rb",
+        "spec/services/jrc_contact_center/qualification_concurrency_spec.rb",
+        "spec/services/jrc_contact_center/qualification_draft_spec.rb",
+        "spec/services/jrc_contact_center/qualification_forms_legacy_spec.rb",
+        "spec/services/jrc_contact_center/qualification_forms_spec.rb",
+        "spec/services/jrc_contact_center/qualification_manager_spec.rb",
+        "spec/models/jrc_contact_center/acw_form_template_ledger_spec.rb",
+        "spec/models/jrc_contact_center/ending_reason_confirmation_spec.rb",
+        "spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb",
+        "spec/models/jrc_contact_center/qualification_form_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/acw_form_audits_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/acw_form_binding_configuration_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/acw_forms_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/acw_global_scope_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/acw_policy_audit_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/acw_policy_revision_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/acw_scoped_rules_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/acw_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/agent_pause_pending_acw_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_confirmation_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/qualification_authority_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_context_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Formulários, rascunho e ACW independente têm provas; workspace completo e integrações por destino não estão integralmente homologados."
+      ]
+    },
+    {
+      "figure": 10,
+      "title": "Automações por encerramento",
+      "status": "parcial",
+      "requirements": 25,
+      "file": "figure-10.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue",
+        "app/services/jrc_contact_center/ending_actions/configure_rule.rb",
+        "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+        "app/services/jrc_contact_center/ending_actions/blocking_revision.rb",
+        "app/models/jrc_contact_center/ending_action_version.rb",
+        "app/services/jrc_contact_center/ending_actions/visible_rules.rb",
+        "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js",
+        "app/services/jrc_contact_center/ending_actions/source_context.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb",
+        "spec/models/jrc_contact_center/ending_action_version_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "figure": 11,
+      "title": "Perfil e permissões",
+      "status": "parcial",
+      "requirements": 24,
+      "file": "figure-11.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AuthorityAssignments.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/NativeRoleEditor.vue",
+        "app/services/jrc_contact_center/access_authorization.rb",
+        "app/services/jrc_contact_center/permission_sources.rb",
+        "app/services/jrc_contact_center/role_fallback_guard.rb",
+        "app/policies/jrc_contact_center/module_policy.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/permission_sources_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/access_authorizations_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_role_fallback_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_role_revision_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_roles_spec.rb",
+        "spec/services/pabx/recordings_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_recordings_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Direitos CC e suas origens existem; matriz visual completa multi-módulo do Word não equivale ao editor setorial."
+      ]
+    },
+    {
+      "figure": 12,
+      "title": "Equipe e filas em popup",
+      "status": "parcial",
+      "requirements": 33,
+      "file": "figure-12.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/TeamSupervisionEditor.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/TeamRosterWithdrawalDialog.vue",
+        "app/services/jrc_contact_center/team_roster_withdrawal_review.rb",
+        "app/services/jrc_contact_center/team_deletion_review.rb",
+        "app/services/jrc_contact_center/team_activity_change.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/create_contact_center_team_states_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_team_supervisions_spec.rb",
+        "spec/services/jrc_contact_center/team_roster_preview_spec.rb",
+        "spec/services/jrc_contact_center/team_supervision_input_spec.rb",
+        "spec/services/jrc_contact_center/team_supervision_scope_spec.rb",
+        "spec/models/jrc_contact_center/team_state_spec.rb",
+        "spec/models/jrc_contact_center/team_supervision_constraints_spec.rb",
+        "spec/models/jrc_contact_center/team_supervision_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/membership_enrollment_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/queue_withdrawal_review_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_authorizations_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_corporate_authority_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_deletion_review_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_roster_identity_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_roster_withdrawal_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_source_activity_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_source_coverage_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_source_withdrawal_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_supervisions_spec.rb",
+        "spec/controllers/api/v1/accounts/team_members_controller_spec.rb",
+        "spec/services/jrc_crm/team_membership_projection_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
+      ]
+    },
+    {
+      "figure": 13,
+      "title": "Conexão e sincronização PABX",
+      "status": "parcial",
+      "requirements": 33,
+      "file": "figure-13.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/webphone/PabxSettingsPanel.vue",
+        "app/services/jrc_contact_center/providers/jrc_pabx_adapter.rb",
+        "app/services/pabx/scope_mapping.rb",
+        "app/services/jrc_contact_center/event_ingestor.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/event_ingestor_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_pabx_navigation_spec.rb",
+        "spec/services/pabx/cdr_contract_spec.rb",
+        "spec/services/pabx/client_security_spec.rb",
+        "spec/services/pabx/client_spec.rb",
+        "spec/services/pabx/contract_spec.rb",
+        "spec/services/pabx/provider_rails_spec.rb",
+        "spec/services/pabx/provider_spec.rb",
+        "spec/services/pabx/recordings_spec.rb",
+        "spec/services/pabx/scope_mapping_spec.rb",
+        "spec/services/pabx/sync_jobs_spec.rb",
+        "spec/services/pabx/sync_rails_spec.rb",
+        "spec/services/pabx/sync_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_security_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_history_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_recordings_spec.rb",
+        "spec/requests/api/v1/accounts/pabx_diagnostics_spec.rb",
+        "spec/services/pabx/sync_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
+      ]
+    },
+    {
+      "figure": 14,
+      "title": "Auditoria técnica",
+      "status": "parcial",
+      "requirements": 26,
+      "file": "figure-14.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditPanel.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditDetails.vue",
+        "app/services/jrc_contact_center/configuration_audit_scope.rb",
+        "app/services/jrc_contact_center/configuration_audit_query.rb",
+        "app/controllers/api/v1/accounts/jrc_contact_center/configuration_audits_controller.rb"
+      ],
+      "native_spec_paths": [
+        "spec/models/jrc_contact_center/configuration_audit_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/configuration_audits_spec.rb"
+      ],
+      "divergences": [
+        "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
+      ]
+    },
+    {
+      "figure": 15,
+      "title": "Aprovações PABX",
+      "status": "parcial",
+      "requirements": 25,
+      "file": "figure-15.json",
+      "code_paths": [
+        "app/services/jrc_contact_center/pause_approval_coordinator.rb",
+        "app/services/jrc_contact_center/pause_approval_policy_check.rb",
+        "app/services/jrc_approvals/authorization.rb",
+        "app/policies/jrc_contact_center/module_policy.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/create_contact_center_pause_approval_evidence_spec.rb",
+        "spec/services/jrc_contact_center/pause_approval_coverage_spec.rb",
+        "spec/services/jrc_contact_center/pause_approval_intent_spec.rb",
+        "spec/services/jrc_contact_center/pause_approval_policy_check_spec.rb",
+        "spec/services/jrc_contact_center/pause_approval_readiness_spec.rb",
+        "spec/services/jrc_contact_center/pause_approval_source_access_spec.rb",
+        "spec/models/jrc_contact_center/pause_approval_review_evidence_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_api_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb",
+        "spec/services/jrc_approvals/core_spec.rb"
+      ],
+      "divergences": [
+        "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
+      ]
+    },
+    {
+      "figure": 16,
+      "title": "Detalhes do áudio institucional",
+      "status": "parcial",
+      "requirements": 23,
+      "file": "figure-16.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioAssetLibrary.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioVersionPreview.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AudioWaveform.vue",
+        "app/services/jrc_contact_center/audio_library_presenter.rb",
+        "app/services/jrc_contact_center/audio_ivr_usages.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/audio_archive_input_spec.rb",
+        "spec/services/jrc_contact_center/audio_archives_spec.rb",
+        "spec/services/jrc_contact_center/audio_asset_moves_spec.rb",
+        "spec/services/jrc_contact_center/audio_bytes_spec.rb",
+        "spec/services/jrc_contact_center/audio_copies_spec.rb",
+        "spec/services/jrc_contact_center/audio_file_input_spec.rb",
+        "spec/services/jrc_contact_center/audio_folder_path_spec.rb",
+        "spec/services/jrc_contact_center/audio_library_presenter_metadata_spec.rb",
+        "spec/services/jrc_contact_center/audio_media_decoder_spec.rb",
+        "spec/services/jrc_contact_center/audio_media_metadata_spec.rb",
+        "spec/services/jrc_contact_center/audio_media_probe_spec.rb",
+        "spec/services/jrc_contact_center/audio_move_input_spec.rb",
+        "spec/services/jrc_contact_center/audio_probe_process_spec.rb",
+        "spec/services/jrc_contact_center/audio_safety_observation_received_spec.rb",
+        "spec/services/jrc_contact_center/audio_safety_observation_spec.rb",
+        "spec/services/jrc_contact_center/audio_uploads_admission_spec.rb",
+        "spec/services/jrc_contact_center/audio_uploads_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_audio_files_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_audio_folders_spec.rb",
+        "spec/services/jrc_contact_center/create_contact_center_audio_inspections_spec.rb",
+        "spec/services/jrc_contact_center/ivr_draft_write_audio_spec.rb",
+        "spec/services/jrc_contact_center/ivr_graph_audio_proofs_spec.rb",
+        "spec/services/jrc_contact_center/synthetic_audio_folder_seed_spec.rb",
+        "spec/services/jrc_contact_center/synthetic_audio_storage_guard_spec.rb",
+        "spec/services/jrc_contact_center/synthetic_ivr_audio_seed_spec.rb",
+        "spec/models/jrc_contact_center/audio_folder_spec.rb",
+        "spec/models/jrc_contact_center/audio_inspection_spec.rb",
+        "spec/models/jrc_contact_center/audio_version_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_admission_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_archives_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_filters_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_asset_moves_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_assets_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_bytes_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_capture_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_copies_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_folders_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_filters_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_inspections_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_metadata_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_opus_capture_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_usages_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/ivr_audio_references_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_audio_inspections_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb"
+      ],
+      "divergences": [
+        "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
+      ]
+    },
+    {
+      "figure": 17,
+      "title": "Consulta de gravações e player",
+      "status": "parcial",
+      "requirements": 27,
+      "file": "figure-17.json",
+      "code_paths": [
+        "app/services/jrc_contact_center/recording_access.rb",
+        "app/javascript/dashboard/components-next/Calls/CallRecordingPlayer.vue",
+        "app/controllers/api/v1/accounts/call_quality_analyses_controller.rb"
+      ],
+      "native_spec_paths": [
+        "spec/requests/api/v1/accounts/pabx_recordings_spec.rb",
+        "spec/services/jrc_voice_quality/supabase_client_scope_spec.rb"
+      ],
+      "divergences": [
+        "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
+      ]
+    },
+    {
+      "figure": 18,
+      "title": "Gravações e Qualidade existente",
+      "status": "parcial",
+      "requirements": 24,
+      "file": "figure-18.json",
+      "code_paths": [
+        "app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue",
+        "app/controllers/api/v1/accounts/call_quality_analyses_controller.rb",
+        "app/javascript/dashboard/api/callQualityAnalyses.js"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb",
+        "spec/services/jrc_voice_quality/supabase_client_scope_spec.rb"
+      ],
+      "divergences": [
+        "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
+      ]
+    },
+    {
+      "figure": 19,
+      "title": "Painel de sentimentos",
+      "status": "parcial",
+      "requirements": 26,
+      "file": "figure-19.json",
+      "code_paths": [
+        "app/controllers/api/v1/accounts/call_quality_analyses_controller.rb",
+        "app/javascript/dashboard/api/callQualityAnalyses.js",
+        "app/services/jrc_contact_center/quality_analysis_snapshot.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb",
+        "spec/services/jrc_voice_quality/supabase_client_scope_spec.rb"
+      ],
+      "divergences": [
+        "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
+      ]
+    },
+    {
+      "figure": 20,
+      "title": "Transcrição e áudio sincronizados",
+      "status": "pendente",
+      "requirements": 26,
+      "file": "figure-20.json",
+      "code_paths": [
+        "app/javascript/dashboard/components-next/Calls/CallRecordingPlayer.vue",
+        "app/services/jrc_contact_center/quality_analysis_snapshot.rb",
+        "app/controllers/api/v1/accounts/call_quality_analyses_controller.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb",
+        "spec/services/jrc_voice_quality/supabase_client_scope_spec.rb"
+      ],
+      "divergences": [
+        "Popup de cinco abas, transcrição/gráfico/player sincronizados e segmentos reais ainda sem prova completa."
+      ]
+    },
+    {
+      "figure": 21,
+      "title": "Contexto do cliente",
+      "status": "parcial",
+      "requirements": 25,
+      "file": "figure-21.json",
+      "code_paths": [
+        "app/services/jrc_contact_center/customer_context.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/LinkedContactMaster.vue",
+        "app/services/jrc_contact_center/quality_analysis_snapshot.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/customer_context_spec.rb",
+        "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb"
+      ],
+      "divergences": [
+        "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
+      ]
+    },
+    {
+      "figure": 22,
+      "title": "Ações e histórico",
+      "status": "pendente",
+      "requirements": 26,
+      "file": "figure-22.json",
+      "code_paths": [
+        "app/services/jrc_contact_center/quality_analysis_snapshot.rb",
+        "app/services/jrc_projects/tasks/create.rb",
+        "app/services/jrc_crm/activity_dispatch_service.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb",
+        "spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb",
+        "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb"
+      ],
+      "divergences": [
+        "Serviços nativos são fontes, não prova da orquestração Nova Ação/Salvar e Concluir/recibos independentes."
+      ]
+    },
+    {
+      "figure": 23,
+      "title": "Correção humana da análise",
+      "status": "parcial",
+      "requirements": 27,
+      "file": "figure-23.json",
+      "code_paths": [
+        "app/services/jrc_contact_center/quality_review_input.rb",
+        "app/services/jrc_contact_center/quality_analysis_snapshot.rb",
+        "app/policies/jrc_contact_center/module_policy.rb"
+      ],
+      "native_spec_paths": [
+        "spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb",
+        "spec/services/jrc_contact_center/module_policy_quality_review_spec.rb",
+        "spec/services/jrc_contact_center/quality_analysis_snapshot_spec.rb",
+        "spec/services/jrc_contact_center/quality_review_input_spec.rb",
+        "spec/requests/api/v1/accounts/jrc_contact_center/quality_review_permissions_spec.rb"
+      ],
+      "divergences": [
+        "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
+      ]
+    }
+  ],
+  "requirements_unique_count": 554,
+  "global_requirements_file": "global-requirements.json",
+  "working_files_not_validated_by_prior_CI": [
+    "ROADMAP.md",
+    "TASKS.md",
+    "script/jrc_call_center_chrome_counter_test.py",
+    "script/jrc_call_center_ending_automation_seed.rb",
+    "script/jrc_call_center_pause_seed.rb",
+    ".github/workflows/call-center-administration.yml",
+    "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
+    "app/javascript/dashboard/api/jrcContactCenter.js",
+    "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AuthorityAssignments.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationRevisionConflict.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useConfigurationRevision.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationLabels.js",
+    "app/services/jrc_contact_center/ending_actions/configuration_context.rb",
+    "app/services/jrc_contact_center/ending_actions/configure_rule.rb",
+    "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+    "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+    "app/services/jrc_contact_center/ending_actions/source_context.rb",
+    "app/services/jrc_contact_center/ending_actions/visible_rules.rb",
+    "config/initializers/jrc_contact_center_ending_privacy.rb",
+    "config/routes/jrc_contact_center.rb",
+    "docs/jrc_contact_center/ending_editor_candidate_20261123.json",
+    "docs/jrc_contact_center/stages_0_2_review_20261116.json",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+    "tests/playwright/tests/e2e/ui/call-center-authority-filter-geometry.mjs",
+    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs",
+    "tests/playwright/tests/e2e/ui/call-center-native.spec.ts"
+  ],
+  "caption_differences": [
+    {
+      "figure": 16,
+      "doc1": "Figura16: Política de gravação",
+      "doc2": "Biblioteca de áudios; não é política de gravação",
+      "evidence": "Imagem lida e doc2P334–343/D02. Preservar requisito de política em seção13 e criar seu aceite próprio; não alterar comportamento por uma legenda."
+    },
+    {
+      "figure": 4,
+      "evidence": "Doc2P107–116/D01: painel PABX reutilizado em13 não comprova editor de URA."
+    }
+  ],
+  "approved_decisions_preserved": [
+    "Motivos legados de pausa preservados até ativação explícita por conta.",
+    "Último agente elegível: confirmação do gestor, revisão e auditoria.",
+    "ACW: fila → equipe → geral, bloqueando conflitos no mesmo nível.",
+    "Pausa pedida durante ligação só inicia após terminar chamada e concluir ACW.",
+    "Motivos cadastrados obrigatórios nas filas selecionadas; chamadas já iniciadas preservam snapshot.",
+    "Inativar equipe só suspende a origem dessa equipe no Call Center.",
+    "Áudios institucionais por unidade e cobertura.",
+    "Revisão Nico exige capacidade própria sem concessão automática.",
+    "Calendário: exceção de data → feriado → semana; bloquear sobreposição.",
+    "Pausa que exige aprovação usa Central e cobre todas as unidades afetadas.",
+    "Executor usa permissões atuais do agente original em cada tentativa.",
+    "Confirmar motivo antes de automação precoce, mantendo ACW/formulário independente.",
+    "Desativação bloqueia pendências anteriores; reativação não as revive; sucessos/histórico preservados."
+  ],
+  "known_functional_conflicts_requiring_new_business_decision": [],
+  "known_implementation_gaps_not_business_conflicts": [
+    "Modo de execução acrescentado como escolha explícita no editor em trabalho. Gatilhos/recibos ainda não executados; não confundir com confirmação do motivo.",
+    "Não inventar prazos de retenção, alçadas reais, endpoints/ACKs PABX ou limiares de criticidade Nico.",
+    "Rascunhos da API/editor ainda não são resultados nativos aprovados."
+  ],
+  "full_part1_complete": false,
+  "production_or_provider_operations_authorized_by_this_document": false
+}

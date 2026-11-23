@@ -1,0 +1,1375 @@
+{
+  "figure": 10,
+  "title": "Automações por encerramento",
+  "status": "parcial",
+  "expected_functionality": "Popup Configurar Automacoes e Integracoes",
+  "image": {
+    "sha256": "13d486d0762cdfc9b651c4c7a056e410187c58c453a5ac729ffd919666a2ec8a",
+    "duplicate_of": null,
+    "actually_visually_read": true,
+    "present_in_both_verified_documents": true
+  },
+  "code": [
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue",
+      "git_blob_at_validated_base": "2f397e47c3060c2971b98abeeb7ad00d50c4fb32",
+      "state": "em_trabalho_sem_CI",
+      "current_sha256": "c8e744daa49d34c0606fd3682bd46eaf76caa27ade0d648168ed97f50eeedd2e"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/configure_rule.rb",
+      "git_blob_at_validated_base": "d8287e5e1141a363a8a774a5584c365615e46f1f",
+      "state": "em_trabalho_sem_CI",
+      "current_sha256": "4ad8e4d6745bc1e5144228d774f00635b4dfb2d5f351006b40bae54ef790ae32"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "git_blob_at_validated_base": "43e053aec12f37e3f48281958e9081afb328dca3",
+      "state": "em_trabalho_sem_CI",
+      "current_sha256": "90b6a2607cbc9af3e7dd09cbbb5981d5e0dd2b41d774d425efb8d6ea99eea39e"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/blocking_revision.rb",
+      "git_blob_at_validated_base": "4db89aa8588fa426b1237f153c4f49124c377126",
+      "state": "presente_na_base_validada",
+      "current_sha256": "b1ccf985696d98449fe04d3e22b1d60dae579c8007b76cb1f5911ff5f300e955"
+    },
+    {
+      "path": "app/models/jrc_contact_center/ending_action_version.rb",
+      "git_blob_at_validated_base": "60a6fca172840338dbff01483b1421bf8cefceb7",
+      "state": "presente_na_base_validada",
+      "current_sha256": "3fbfc0a3a96820048756003868659ed54220e653dda267193a3d25726520e532"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/visible_rules.rb",
+      "git_blob_at_validated_base": null,
+      "state": "em_trabalho_sem_CI",
+      "current_sha256": "458d0f44e47d984cdfc36cea8f973c76d23ad49eecc365f0c6c8ca9e1efca0a9"
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
+      "git_blob_at_validated_base": null,
+      "state": "em_trabalho_sem_CI",
+      "current_sha256": "06a2e3e1d6f0b32c28bf95f20aab697215e2214a4474c9b8b4de2f280eeaac33"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
+      "git_blob_at_validated_base": null,
+      "state": "em_trabalho_sem_CI",
+      "current_sha256": "5b47ca46047961504b0fa102b26c5df043d9958976f3dcdc3ce2be7b97da7539"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
+      "git_blob_at_validated_base": null,
+      "state": "em_trabalho_sem_CI",
+      "current_sha256": "c5931e011d63a36ceed45f50e47d597cba1628f369552bd2eabf32e20cdd33e5"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js",
+      "git_blob_at_validated_base": null,
+      "state": "em_trabalho_sem_CI",
+      "current_sha256": "9a7d0119ea9522ce1820ab10ca88b7871f78b0e63319b14885f891993d610d86"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/source_context.rb",
+      "git_blob_at_validated_base": null,
+      "state": "em_trabalho_sem_CI",
+      "current_sha256": "2ee0d5a27ac4b3eb8084021fd69af22caa78944b1e927668098c28063f68c2d3"
+    }
+  ],
+  "planned_not_present": [],
+  "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb",
+      "passed_examples": 6,
+      "sample_behaviours": [
+        "CreateContactCenterEndingActionScopes uses only the real account identity without duplicating accounts, people or operational configuration",
+        "CreateContactCenterEndingActionScopes creates exactly one technical reference when a real new account is inserted",
+        "CreateContactCenterEndingActionScopes rejects a reference without a real account instead of admitting an orphaned history root"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "CreateContactCenterEndingActionScopes anchors existing queues at installation time without rewriting populated native calls or catalogues",
+        "CreateContactCenterEndingActionScopes preserves populated scope history on exact migration reexecution",
+        "CreateContactCenterEndingActionScopes rejects an incomplete existing schema instead of stamping missing guards as valid"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "CreateContactCenterEndingActionVersions installs only an empty forward history without creating a head, grant or operational record",
+        "CreateContactCenterEndingActionVersions preserves populated definitions, native audit and account settings on exact reexecution",
+        "CreateContactCenterEndingActionVersions rejects a partial schema instead of stamping a missing immutable trigger as valid"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb",
+      "passed_examples": 10,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActions::BlockingRevision leaves an enabled original rule eligible without changing its exact template or creating an effect",
+        "JrcContactCenter::EndingActions::BlockingRevision blocks old pending work at the first disabled revision while retaining the immutable original history",
+        "JrcContactCenter::EndingActions::BlockingRevision does not revive old blocked work after reactivation but permits origins pinned to the new active version"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb",
+      "passed_examples": 1,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActions::Catalogue puts only revision and a random nonce in the public head without a private template or dictionary-testable definition hash"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb",
+      "passed_examples": 13,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActions::ConfigureRule persists an explicitly authorized private rule and native audit without exposing its template through account settings",
+        "JrcContactCenter::EndingActions::ConfigureRule keeps the same exact rule retry as a no-op without a second version or audit",
+        "JrcContactCenter::EndingActions::ConfigureRule audits an authorized deactivation while keeping prior definitions and an identical inactive retry unchanged"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb",
+      "passed_examples": 34,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActions::RuleDefinition accepts an explicitly typed stored definition without creating native destination records",
+        "JrcContactCenter::EndingActions::RuleDefinition preserves an explicitly disabled rule instead of dropping false or activating it",
+        "JrcContactCenter::EndingActions::RuleDefinition accepts explicit outcome conditions only after actual ACW completion"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb",
+      "passed_examples": 25,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActions::TaskDefinition preserves explicit literal values without creating a task or copying attendance content",
+        "JrcContactCenter::EndingActions::TaskDefinition preserves an explicit zero-day offset and zero estimated minutes instead of treating them as absent",
+        "JrcContactCenter::EndingActions::TaskDefinition normalizes only canonical positive integer references, retaining an explicit unassigned native task"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "passed_examples": 9,
+      "sample_behaviours": [
+        "JrcContactCenter::EndingActionVersion records exact native audit and actor provenance without creating a destination or granting a capability",
+        "JrcContactCenter::EndingActionVersion preserves earlier immutable definitions and current head across actual version increments",
+        "JrcContactCenter::EndingActionVersion rejects direct SQL mutation and deletion without depending on an immutable model callback"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb",
+      "passed_examples": 5,
+      "sample_behaviours": [
+        "Ending rule private definitions at native serialization and logging boundaries exposes only the random revision head through an actual authenticated Account response",
+        "Ending rule private definitions at native serialization and logging boundaries keeps the actual native configuration audit readable under its dedicated permission without returning private content",
+        "Ending rule private definitions at native serialization and logging boundaries filters the private native INSERT bind while retaining actual SQL diagnostics and the persisted private template"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb",
+      "passed_examples": 3,
+      "sample_behaviours": [
+        "Ending rule versions with competing native PostgreSQL connections serializes actual overlapping stale writes into one immutable version and one conflict without a task",
+        "Ending rule versions with competing native PostgreSQL connections rechecks committed profile revocation after waiting instead of using the callers earlier configure authority",
+        "Ending rule versions with competing native PostgreSQL connections observes a committed deactivation after the original pending reader actually waits on the native account transaction"
+      ],
+      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    }
+  ],
+  "tests_vue_related_not_browser_proof": [],
+  "chrome_related_titles_not_complete_figure_acceptance": [
+    "confirmed ending classification native keeps incomplete ACW open, survives reload and rejects changed reasons and foreign actors",
+    "ending reason native catalogue persists revisions and deactivation with filtering paging and authorized rule selection",
+    "fifteen permission-bound cards, actual CSS, honest pending states and no overflow",
+    "pending ACW native draft persists incomplete answers and completes only after explicit tabulation",
+    "pending ACW native navigation reviews unsaved edits preserves saved state and leaves other modules untouched",
+    "pending ACW native review preserves local answers blocks stale writes and requires explicit reconciliation",
+    "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya"
+  ],
+  "requirements": [
+    {
+      "id": "D1-P0126-C01",
+      "expected": "Classificar o resultado de uma ligação, parametrizar formulários e disparar ações entre módulos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 126,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 196,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D1-P0128-C01",
+      "expected": "Cadastro do motivo: nome, categoria, descrição, ordem, status e obrigatoriedade por fila.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 128,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 198,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D1-P0129-C01",
+      "expected": "Popup de pós-atendimento: formulário, campos obrigatórios, duração em horas/minutos, aviso de tempo e bloqueio de novas chamadas.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 129,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 199,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D1-P0130-C01",
+      "expected": "Automação de CRM, Service Desk, Tarefas, notificações e Nico por motivo, com condições e momento de disparo.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 130,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 200,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D1-P0131-C01",
+      "expected": "Histórico e auditoria das execuções, status de falha, pendência e sucesso.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 131,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 201,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D1-P0133-C01",
+      "expected": "Encerramento telefônico e conclusão do pós-atendimento são eventos distintos.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 133,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 203,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D1-P0134-C01",
+      "expected": "Tempo máximo de ACW alerta, não descarta dados nem conclui automaticamente o registro.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 134,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 204,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D1-P0135-C01",
+      "expected": "Reprocessamento idempotente; vínculo com chamado/tarefa existente evita duplicidades.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 135,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 205,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D1-P0136-C01",
+      "expected": "Nico propõe/classifica; execução de ações sensíveis segue autorização e regras de negócio.",
+      "sources": [
+        {
+          "document": "doc1",
+          "paragraph": 136,
+          "clause": 1
+        },
+        {
+          "document": "doc2",
+          "paragraph": 206,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        9,
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0221-C01",
+      "expected": "Parametrizar providencias decorrentes de motivo de encerramento usando CRM, Service Desk, Tarefas, Notificacoes e Nico.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 221,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0222-C01",
+      "expected": "Acoes e resultado do clique: Motivo de Encerramento: definir gatilho.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 222,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0222-C02",
+      "expected": "Ativo: habilitar/desabilitar a regra.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 222,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0222-C03",
+      "expected": "Aplicar Automaticamente: escolher quais destinos participarão;",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 222,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0222-C04",
+      "expected": "Configurar por destino: abrir popup de parametros (tipo de acao, vinculo, condicoes, responsavel e momento de disparo).",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 222,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0222-C05",
+      "expected": "Regras de Execucao: definir automatizacao permitida ou confirmacao manual quando a acao exigir.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 222,
+          "clause": 5
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0223-C01",
+      "expected": "Campos e dados apresentados: Exibir quais automacoes estao ligadas ao motivo, destinos, prioridade, condicoes, falha, pendencia e sucesso.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 223,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0223-C02",
+      "expected": "Registrar call_id, regra/versao, request_id e vinculo do chamado/tarefa/cliente gerado ou reutilizado.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 223,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0224-C01",
+      "expected": "Regras e permissoes: Reutilizar as APIs e os modulos existentes; nao criar cadastros paralelos.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 224,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0224-C02",
+      "expected": "Acao automatica deve ser idempotente: o mesmo evento nao cria dois tickets nem duas tarefas.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 224,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "pendente",
+      "verification": "Não executados: a base não cria efeitos nem recibos operacionais. Testes de metadados não satisfazem F10-A/B.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0224-C03",
+      "expected": "A sugestao do Nico nao executa acao sensivel fora da alçada autorizada.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 224,
+          "clause": 3
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0224-C04",
+      "expected": "O momento de disparo (fim de chamada ou conclusao do ACW) precisa ser escolhido por regra.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 224,
+          "clause": 4
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0225-C01",
+      "expected": "Estados de erro e excecoes: Falha parcial de um destino nao desfaz automaticamente operacoes ja confirmadas em outro; registrar estado de cada integracao, disponibilizar reprocessamento seguro e evitar duplicidade.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 225,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "pendente",
+      "verification": "Não executados: a base não cria efeitos nem recibos operacionais. Testes de metadados não satisfazem F10-A/B.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0225-C02",
+      "expected": "Desabilitacao nao apaga historico.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 225,
+          "clause": 2
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "parcial",
+      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0227-C01",
+      "expected": "• F10-A: receber duas vezes o mesmo evento cria no maximo um chamado/tarefa para a mesma chave de idempotencia.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 227,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "pendente",
+      "verification": "Não executados: a base não cria efeitos nem recibos operacionais. Testes de metadados não satisfazem F10-A/B.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    },
+    {
+      "id": "D2-P0228-C01",
+      "expected": "• F10-B: quando CRM conclui e Service Desk falha, historico mostra resultados independentes e permite reprocessar apenas o pendente.",
+      "sources": [
+        {
+          "document": "doc2",
+          "paragraph": 228,
+          "clause": 1
+        }
+      ],
+      "figures": [
+        10
+      ],
+      "status": "pendente",
+      "verification": "Não executados: a base não cria efeitos nem recibos operacionais. Testes de metadados não satisfazem F10-A/B.",
+      "code_reference_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "test_reference_ids": [],
+      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "divergences": [
+        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ]
+    }
+  ],
+  "divergences": [
+    "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+  ],
+  "previous_matrix_is_historical_not_acceptance": true,
+  "complete_figure_accepted": false
+}
