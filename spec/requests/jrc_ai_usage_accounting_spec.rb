@@ -4,7 +4,7 @@ RSpec.describe 'AI usage accounting provenance', type: :request do
   let(:account) { create(:account) }
   let(:user) { create(:user, account: account, role: :administrator) }
 
-  it 'reconciles confirmed, estimated and unclassified records without borrowing another account usage' do
+  it 'shows only provider-confirmed tokens across totals, groups and records while preserving the audit' do
     JrcAi::UsageEvent.create!(account: account, agent_key: 'nico', feature: 'nico_operator', input_tokens: 7, output_tokens: 3,
                              total_tokens: 10, metadata: { usage_estimated: false, cost_available: false })
     JrcAi::UsageEvent.create!(account: account, agent_key: 'nico', feature: 'nico_operator', input_tokens: 3, output_tokens: 2,
@@ -17,10 +17,15 @@ RSpec.describe 'AI usage accounting provenance', type: :request do
     get "/api/v1/accounts/#{account.id}/jrc_ai/usage", headers: user.create_new_auth_token, as: :json
 
     expect(response).to have_http_status(:ok)
-    expect(response.parsed_body.fetch('totals')).to include('total_tokens' => 19, 'confirmed_tokens' => 10,
-                                                           'estimated_tokens' => 5, 'unclassified_tokens' => 4,
-                                                           'estimated_cost_cents' => nil)
-    expect(response.parsed_body.fetch('recent').map { |row| row['usage_basis'] }.sort)
-      .to eq(%w[confirmed estimated unclassified])
+    body = response.parsed_body
+    expect(body.fetch('totals')).to eq('total_tokens' => 10, 'input_tokens' => 7, 'output_tokens' => 3,
+                                     'tokens_today' => 10, 'executions' => 1)
+    expect(body.fetch('recent').map { |row| row.fetch('total_tokens') }).to eq([10])
+    %w[by_agent by_model by_user].each do |group|
+      expect(body.fetch(group).sum { |row| row.fetch('tokens') }).to eq(10)
+    end
+    expect(body).not_to have_key('nico_capacity')
+    expect(body.fetch('recent').first).not_to have_key('estimated_cost_cents')
+    expect(account.jrc_ai_usage_events.count).to eq(3)
   end
 end

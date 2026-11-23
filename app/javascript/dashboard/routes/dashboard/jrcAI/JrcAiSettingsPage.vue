@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n';
 import { useMapGetter } from 'dashboard/composables/store';
 import { useAlert } from 'dashboard/composables';
 import jrcAiAPI from 'dashboard/api/jrcAi';
-import NicoCapacitySummary from 'dashboard/components-next/jrcCopilot/NicoCapacitySummary.vue';
 
 const props = defineProps({
   initialTab: { type: String, default: 'providers' },
@@ -333,7 +332,6 @@ onMounted(load);
         </div>
 
         <section v-if="activeTab === 'providers'" class="space-y-4">
-          <NicoCapacitySummary :capacity="usage.nico_capacity" />
           <div
             class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
           >
@@ -568,7 +566,6 @@ onMounted(load);
         </section>
 
         <section v-else-if="activeTab === 'usage'" class="space-y-4">
-          <NicoCapacitySummary :capacity="usage.nico_capacity" />
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <article
               v-for="card in [
@@ -577,23 +574,11 @@ onMounted(load);
                   value: formatNumber(usage.totals.tokens_today),
                 },
                 {
-                  label: 'Tokens registrados no mês',
+                  label: 'Tokens confirmados no mês',
                   value: formatNumber(usage.totals.total_tokens),
                 },
                 {
-                  label: 'Tokens confirmados pela API',
-                  value: formatNumber(usage.totals.confirmed_tokens),
-                },
-                {
-                  label: 'Tokens estimados',
-                  value: formatNumber(usage.totals.estimated_tokens),
-                },
-                {
-                  label: 'Histórico sem classificação',
-                  value: formatNumber(usage.totals.unclassified_tokens),
-                },
-                {
-                  label: 'Execucoes',
+                  label: 'Execuções',
                   value: formatNumber(usage.totals.executions),
                 },
                 {
@@ -601,8 +586,8 @@ onMounted(load);
                   value: formatNumber(usage.totals.input_tokens),
                 },
                 {
-                  label: 'Custo estimado',
-                  value: formatMoney(usage.totals.estimated_cost_cents),
+                  label: 'Saída',
+                  value: formatNumber(usage.totals.output_tokens),
                 },
               ]"
               :key="card.label"
@@ -720,11 +705,11 @@ onMounted(load);
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-lg font-bold text-n-slate-12">
-                Logs de uso de IA
+                Consumo confirmado pela API
               </h2>
               <p class="text-sm text-n-slate-11">
-                Somente metadados de consumo; a chave da API nunca &eacute;
-                registrada.
+                Somente tokens retornados pela API do provedor nas chamadas
+                desta conta.
               </p>
             </div>
             <button
@@ -746,7 +731,6 @@ onMounted(load);
                   <th class="p-3">Entrada</th>
                   <th class="p-3">Saida</th>
                   <th class="p-3">Total</th>
-                  <th class="p-3">Base do registro</th>
                 </tr>
               </thead>
               <tbody>
@@ -771,14 +755,6 @@ onMounted(load);
                   <td class="p-3 font-semibold text-n-slate-12">
                     {{ formatNumber(event.total_tokens) }}
                   </td>
-                  <td class="p-3 text-n-slate-11">
-                    {{
-                      {
-                        confirmed: 'Confirmado pela API',
-                        estimated: 'Estimado',
-                      }[event.usage_basis] || 'Sem classificação'
-                    }}
-                  </td>
                 </tr>
               </tbody>
             </table>
@@ -786,7 +762,7 @@ onMounted(load);
               v-if="!usage.recent.length"
               class="p-6 text-center text-sm text-n-slate-11"
             >
-              Nenhuma execu&ccedil;&atilde;o registrada.
+              Nenhum consumo confirmado pela API neste mês.
             </p>
           </div>
         </section>

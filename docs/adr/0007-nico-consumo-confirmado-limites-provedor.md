@@ -21,3 +21,7 @@ Orçamento financeiro cadastrado é apenas referência interna. Sem API oficial 
 Cobrir admissão com reservas incertas preservadas, tetos locais explícitos, concorrência, isolamento entre contas, metadados reais e resposta 429. A implantação alvo deve receber a candidata somente após gates e imagem do SHA final. Não alterar outros ambientes por esta decisão. Sem migrations novas nesta correção.
 
 Referência de unidades e limites organizacionais: https://console.groq.com/docs/rate-limits .
+
+### Ajuste de apresentação aprovado em 23/11/2026
+
+A API e a tela de consumo passam a agregar e listar somente registros com uso confirmado pelo provedor (`usage_estimated: false`). Todos os agrupamentos e períodos usam o mesmo filtro. Estimativas, registros sem comprovação e reservas permanecem na auditoria interna, sem compor os números exibidos. A tela não apresenta custos ou saldos estimados.

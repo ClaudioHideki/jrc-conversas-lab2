@@ -167,32 +167,30 @@ describe('AI provider actions', () => {
     );
   });
 
-  it('shows provider-controlled capacity without presenting a fabricated monthly balance', async () => {
+  it('shows only confirmed token usage without estimates or uncertain capacity', async () => {
     api.usage.mockResolvedValueOnce({
       data: {
-        totals: {},
+        totals: {
+          tokens_today: 109,
+          total_tokens: 109,
+          input_tokens: 77,
+          output_tokens: 32,
+          executions: 1,
+        },
         by_agent: [],
         by_model: [],
         by_user: [],
         recent: [],
-        nico_capacity: {
-          limit_source: 'provider',
-          token_limit: null,
-          execution_limit: null,
-          remaining_tokens: null,
-          used_tokens: 109,
-          uncertain_tokens: 858240,
-          reserved_tokens: 858240,
-          executions: 30,
-          active_operations: 0,
-          concurrency_limit: 3,
-        },
       },
     });
-    wrapper = mount(JrcAiSettingsPage);
+    wrapper = mount(JrcAiSettingsPage, { props: { initialTab: 'usage' } });
     await flushPromises();
-    expect(wrapper.get('summary').text()).toMatch(/provider|provedor/i);
-    expect(wrapper.get('summary').text()).not.toMatch(/1[,.]000[,.]000|0 de 0/);
-    expect(wrapper.text()).toContain('não disponível');
+    expect(wrapper.text()).toContain('Tokens confirmados no mês');
+    expect(wrapper.text()).toContain('109');
+    expect(wrapper.text()).toContain('77');
+    expect(wrapper.text()).toContain('32');
+    expect(wrapper.text()).not.toMatch(
+      /Tokens estimados|Histórico sem classificação|Custo estimado|reservados|incerto/i
+    );
   });
 });
