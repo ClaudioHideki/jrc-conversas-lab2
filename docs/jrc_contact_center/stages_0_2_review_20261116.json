@@ -7464,6 +7464,7 @@
     "approved_business_decision": true,
     "native_accepted": false,
     "whole_figure10_complete": false,
-    "lint_followup": "docs/jrc_contact_center/ending_rule_versions_lint_followup_20261123.json"
+    "lint_followup": "docs/jrc_contact_center/ending_rule_versions_lint_followup_20261123.json",
+    "source_pin_findings": "docs/jrc_contact_center/ending_rule_versions_source_pin_findings_20261123.json"
   }
 }

@@ -1,0 +1,41 @@
+{
+  "sha": "c8f2a0c5b82e3fe0200f9e2e14e646bc805c0d37",
+  "run": 45174140144,
+  "job": 137690900923,
+  "conclusion": "failure",
+  "artifact": 14819941128,
+  "artifact_sha256": "8daece02cfb8e94fbc7e40ac2313ee24e9d61a57d7b15f2f2122d7ca3be562ab",
+  "sanitized_job_log_sha256": "fb57888502c418454beaceaef9bbc569c0b307e16fbaeac6beccfa303f58c5e5",
+  "failed_stage": "Disposable application schema and pending migrations",
+  "actual_error": "ActiveRecord::MigrationError at load_sources!: Ending action version source changed; preserve history",
+  "cause": "The unpublished16th migration still pinned the pre-lint receipt source; the external admission pin had already changed",
+  "focused_new_ruby_lint": "passed",
+  "incremental_new_ruby_offenses": 1,
+  "incremental_correction": "One missing blank line between standalone loader namespace declarations; no original assertion removed",
+  "native_examples_executed": 0,
+  "pin_fix": {
+    "base": "c8f2a0c5b82e3fe0200f9e2e14e646bc805c0d37",
+    "old_migration_sha256": "97d516c8876ddb4bf4e9346d1a6f880d05e1806b2006599099732f1fd88380b7",
+    "new_migration_sha256": "e22b6a5f6d6fd239e18a7d83862cee391159acea181c0338d72daf7c1da75dc0",
+    "old_receipt_pin": "1ba3e81f7d75c59c7ac8133b8dd119388e42129e77f9ef00ab1cf28df3d9b24c",
+    "correct_receipt_pin": "bae3d97965ae0a0e84917dab6709b7dc03561a46f5fe4db718e826b7796ee397",
+    "only_migration_content_change": "One receipt source digest in SOURCES; no DDL, SQL, timestamp, guard or schema change",
+    "new16_not_native_accepted_or_deployed": true,
+    "all15_historical_components_and_sql_preserved": true,
+    "static_regression_reproduced_before_fix": true,
+    "native_validation_pending": true
+  },
+  "regression": {
+    "before": "actual static failure reproduced",
+    "after": "same directed case passed",
+    "node_suite": 289,
+    "python_readers_and_admission": 25,
+    "native_equivalence": false
+  },
+  "guard_improvement": "Exact16th-migration transitive source pins are now checked before Rails; no historical gate weakened",
+  "observability": "Initial schema stdout/stderr preserved before unchanged long lint, same fail-fast commands and mandatory final evidence",
+  "same_102_focused_and_3_real_concurrency_cases_required": true,
+  "all15_historical_components_and_all_sql_unchanged": true,
+  "whole_figure10_complete": false,
+  "native_acceptance": false
+}

@@ -5,7 +5,7 @@ import {
   reviewedMigrations, endingReasonSqlPath, endingReasonCatalogSqlPath, audioFileSqlSources, audioInspectionSqlSources,
   pauseApprovalMigrationPath, pauseApprovalSqlSources, endingConfirmationMigrationPath, endingConfirmationSources,
   endingActionScopeMigrationPath, endingActionScopeSources, verifyEndingActionScopeMigrations,
-  endingActionVersionMigrationPath, endingActionVersionSources, verifyEndingActionVersionMigrations,
+  endingActionVersionMigrationPath, endingActionVersionSources, verifyEndingActionVersionMigrations, verifyEndingActionVersionSourcePins,
 } from './validate_cc_access_migration.mjs';
 
 const schema = 'ActiveRecord::Schema[7.1].define(version: 2026_11_16_190000) do\nend';
@@ -16,6 +16,18 @@ const priorPaths = [...Object.keys(reviewedMigrations), pauseApprovalMigrationPa
   ...Object.keys(endingActionScopeSources).filter(path => path.startsWith('db/'))];
 const paths = [...priorPaths, endingActionVersionMigrationPath, ...Object.keys(endingActionVersionSources).filter(path => path.startsWith('db/'))];
 const changes = paths.map(path => `A\t${path}`).join('\n');
+
+test('transitive private receipt pin matches the actual reviewed installation source', () => {
+  assert.doesNotThrow(() => verifyEndingActionVersionSourcePins(read));
+});
+
+test('rejects a stale transitive private receipt pin independently of an outer migration checksum', () => {
+  const receipt = 'lib/jrc_contact_center/ending_action_version_schema_receipt.rb';
+  const original = read(endingActionVersionMigrationPath).toString('utf8');
+  const changed = original.replace(endingActionVersionSources[receipt], '0'.repeat(64));
+  const mutated = key => key === endingActionVersionMigrationPath ? Buffer.from(changed) : read(key);
+  assert.throws(() => verifyEndingActionVersionSourcePins(mutated), /source pin mismatch/);
+});
 
 test('admits exactly16reviewed additions while preserving every previously reviewed verifier and hash', () => {
   assert.equal(verifyEndingActionVersionMigrations(changes, read, schema).migrationCount, 16);

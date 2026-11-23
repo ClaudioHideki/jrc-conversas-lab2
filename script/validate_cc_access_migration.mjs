@@ -173,11 +173,22 @@ export function verifyEndingActionScopeMigrations(changes, readCurrent, schema) 
 
 
 export const endingActionVersionMigrationPath = 'db/migrate/20261123063000_create_contact_center_ending_action_versions.rb';
-export const endingActionVersionMigrationHash = '97d516c8876ddb4bf4e9346d1a6f880d05e1806b2006599099732f1fd88380b7';
+export const endingActionVersionMigrationHash = 'e22b6a5f6d6fd239e18a7d83862cee391159acea181c0338d72daf7c1da75dc0';
 export const endingActionVersionSources = Object.freeze({
   "db/functions/20261123063000_contact_center_ending_action_versions.sql": "0d8c92f02f01f49f3a783bc468bfd20e1e37fc86bfca6b2409cea69bec12c253",
   "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "bae3d97965ae0a0e84917dab6709b7dc03561a46f5fe4db718e826b7796ee397"
 });
+
+// The installation checks these hashes again. A top-level source admission must
+// not accept a candidate whose own migration still pins an older receipt.
+export function verifyEndingActionVersionSourcePins(readCurrent) {
+  const migration = readCurrent(endingActionVersionMigrationPath).toString('utf8');
+  for (const [path, digest] of Object.entries(endingActionVersionSources)) {
+    const key = path.startsWith('db/') ? 'SQL' : `'${path}'`;
+    if (!migration.includes(`${key} => '${digest}'`))
+      throw new Error(`Private version migration source pin mismatch: ${path}`);
+  }
+}
 
 // Keep every earlier verifier and source hash. This addition admits only its3exact private-history sources.
 export function verifyEndingActionVersionMigrations(changes, readCurrent, schema) {
@@ -194,6 +205,7 @@ export function verifyEndingActionVersionMigrations(changes, readCurrent, schema
     if (createHash('sha256').update(readCurrent(path)).digest('hex') !== digest)
       throw new Error(`Reviewed ending action private version source changed: ${path}`);
   }
+  verifyEndingActionVersionSourcePins(readCurrent);
   verifyEndingActionScopeMigrations(priorPaths.map(path => `A\t${path}`).join('\n'), readCurrent, schema);
   return validateNewMigrationTimestamps(schema,
     [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath, endingConfirmationMigrationPath,

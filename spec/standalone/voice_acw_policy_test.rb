@@ -9,6 +9,7 @@ require 'active_support/all'
 module JrcContactCenter
   class OperationError < StandardError; end
 end
+
 module JrcContactCenter::EndingActions; end
 # Load the actual new policy dependencies, without stubbing their behavior.
 # This remains an isolated value test, never a substitute for PostgreSQL/Rails.

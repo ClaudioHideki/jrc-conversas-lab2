@@ -100,18 +100,22 @@ jobs:
         run: |
           bundle exec rubocop app/services/jrc_contact_center/ending_actions/blocking_revision.rb spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb app/models/jrc_contact_center/ending_action_version.rb app/services/jrc_contact_center/ending_actions/task_definition.rb app/services/jrc_contact_center/ending_actions/rule_definition.rb app/services/jrc_contact_center/ending_actions/catalogue.rb app/services/jrc_contact_center/ending_actions/project_task_parameters.rb app/services/jrc_contact_center/ending_actions/rule_input.rb app/services/jrc_contact_center/ending_actions/configure_rule.rb db/migrate/20261123063000_create_contact_center_ending_action_versions.rb lib/jrc_contact_center/ending_action_version_schema_receipt.rb script/jrc_call_center_ending_version_schema_probe.rb spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb spec/models/jrc_contact_center/ending_action_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/support/contact_center_ending_action_versions.rb spec/support/contact_center_ending_rule_configuration.rb --format json --out /tmp/call-center-ending-version-lint.json
       - name: Disposable application schema and pending migrations
+        id: native_schema
         run: |
-          test "$RAILS_ENV" = test
-          test "$POSTGRES_HOST" = 127.0.0.1
-          test "$POSTGRES_DATABASE" = jrc_sd_bc_portal_concurrency_20261025_test
-          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
-          bundle exec rails db:migrate
-          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_acw_form_schema_probe"); JrcContactCenter::SyntheticAcwFormSchemaProbe.record("fresh")'
-          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_audio_schema_probe"); JrcContactCenter::SyntheticAudioSchemaProbe.record("fresh")'
-          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_pause_approval_schema_probe"); JrcContactCenter::SyntheticPauseApprovalSchemaProbe.record("fresh")'
-          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_confirmation_schema_probe"); JrcContactCenter::SyntheticEndingConfirmationSchemaProbe.record("fresh")'
-          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_scope_schema_probe"); JrcContactCenter::SyntheticEndingScopeSchemaProbe.record("fresh")'
-          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_version_schema_probe"); JrcContactCenter::SyntheticEndingVersionSchemaProbe.record("fresh")'
+          {
+            test "$RAILS_ENV" = test
+            test "$POSTGRES_HOST" = 127.0.0.1
+            test "$POSTGRES_DATABASE" = jrc_sd_bc_portal_concurrency_20261025_test
+            SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+            bundle exec rails db:migrate
+            bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_acw_form_schema_probe"); JrcContactCenter::SyntheticAcwFormSchemaProbe.record("fresh")'
+            bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_audio_schema_probe"); JrcContactCenter::SyntheticAudioSchemaProbe.record("fresh")'
+            bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_pause_approval_schema_probe"); JrcContactCenter::SyntheticPauseApprovalSchemaProbe.record("fresh")'
+            bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_confirmation_schema_probe"); JrcContactCenter::SyntheticEndingConfirmationSchemaProbe.record("fresh")'
+            bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_scope_schema_probe"); JrcContactCenter::SyntheticEndingScopeSchemaProbe.record("fresh")'
+            bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_version_schema_probe"); JrcContactCenter::SyntheticEndingVersionSchemaProbe.record("fresh")'
+          } > /tmp/call-center-initial-schema.log 2>&1
+          cat /tmp/call-center-initial-schema.log
       - name: Reload migrated schema in a separate disposable database
         id: native_reload
         env:
@@ -170,11 +174,12 @@ jobs:
             --exclude-pattern '**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
-        if: failure() && (steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure')
+        if: failure() && (steps.native_schema.outcome == 'failure' || steps.ending_version_lint.outcome == 'failure' || steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-early-${{ github.sha }}
           path: |
+            /tmp/call-center-initial-schema.log
             /tmp/call-center-rspec.json
             /tmp/call-center-ending-version-preflight.json
             /tmp/call-center-ending-version-lint.json
@@ -372,6 +377,7 @@ jobs:
           path: |
             /tmp/call-center-*.json
             /tmp/call-center-*.txt
+            /tmp/call-center-*.log
             /tmp/call-center-schema.rb
             .codex/call-center-native-e2e
           if-no-files-found: error

@@ -34,7 +34,7 @@
     "app/services/jrc_contact_center/ending_actions/project_task_parameters.rb": "a181ec9c84e7e143dde36b01f3ecd77f577870799f22ac83e96df40829333e99",
     "app/services/jrc_contact_center/ending_actions/rule_input.rb": "14098b7e978b146d357e20c51db9af1e3ae4beec690a5a7f32cd1c4d13d37eba",
     "app/services/jrc_contact_center/ending_actions/configure_rule.rb": "f98faca255665cd425ef0034cc893f0c2ba894c40e62b3baab41784992b7d813",
-    "db/migrate/20261123063000_create_contact_center_ending_action_versions.rb": "97d516c8876ddb4bf4e9346d1a6f880d05e1806b2006599099732f1fd88380b7",
+    "db/migrate/20261123063000_create_contact_center_ending_action_versions.rb": "e22b6a5f6d6fd239e18a7d83862cee391159acea181c0338d72daf7c1da75dc0",
     "db/functions/20261123063000_contact_center_ending_action_versions.sql": "0d8c92f02f01f49f3a783bc468bfd20e1e37fc86bfca6b2409cea69bec12c253",
     "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "bae3d97965ae0a0e84917dab6709b7dc03561a46f5fe4db718e826b7796ee397",
     "spec/models/jrc_contact_center/ending_action_version_spec.rb": "f0f269c22f3dc052dbf50da0d1a91ccf3ea7e4e93d1fb0926a83d1788470290c",
@@ -47,18 +47,18 @@
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb": "041cdc8e4f3d55a8886ef8a5a14d9817d25c7cbb402462b19403dd4e58e930f6",
     "spec/support/contact_center_ending_action_versions.rb": "29281ad756e8d61d3933ff69e150132ee349e25205be7672da59889f66efff31",
     "spec/support/contact_center_ending_rule_configuration.rb": "b4497a6e4046c95978167e05c47867f6dc5fad0cbf55670cddab553c32a64a0a",
-    "script/validate_cc_access_migration.mjs": "bb1feb57a678cf993df92bff341db68aaf0a5a5df592893f9c0c7866d874b290",
-    "script/validate_cc_ending_version_migration.test.mjs": "6c15070b8c7c493562a0ec85e7418209ab905239234d3343728462dc20834ea7",
+    "script/validate_cc_access_migration.mjs": "047851655027f3eb5754b9c553d4055961b8083d24a1fa74a19b8348b7cc2d08",
+    "script/validate_cc_ending_version_migration.test.mjs": "33405903b02f84137985e194bc1a1896072e69ea9e690d497fb58741ab85d9de",
     "script/validate_cc_ending_version_preflight.mjs": "5243cfea55cc6eced12f3e6a4b0238d495a86cab38364573e9499db2a5d9c403",
     "script/validate_cc_ending_version_preflight.test.mjs": "ded8c9e93f4062f06fd3b12e348f32bb75e40d46e16cccc0fcfe788e5f548faa",
     "script/jrc_call_center_ending_version_schema_probe.rb": "6a9395f3de39fb45bf22c228ee516d7d771d64cf3977e258e76f146529b66f05",
-    ".github/workflows/call-center-administration.yml": "7676007057ca355738731dbff761c0cdd92a3401fe50758b5f8e1066bbc02d89",
+    ".github/workflows/call-center-administration.yml": "f94db1602a76b36d545032efefa55479642de9e91c6454ba58bfb5e5db144d18",
     "app/services/jrc_contact_center/ending_actions/blocking_revision.rb": "b1ccf985696d98449fe04d3e22b1d60dae579c8007b76cb1f5911ff5f300e955",
     "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb": "4aa661cd22bd7771ddea006d15f7d910012119b9ac2f2d1e41e597000553d8d1",
-    "spec/standalone/voice_acw_policy_test.rb": "b76fc3ad831e5aeae56fd5e7f051bf5a9112f03dc64c33b0724aa1b5c4adb30f"
+    "spec/standalone/voice_acw_policy_test.rb": "8af2a7914e6ef1eab001d04d91622e689e8853ffeee25f6e46933ecdf3ddec7f"
   },
   "database_sources": {
-    "db/migrate/20261123063000_create_contact_center_ending_action_versions.rb": "97d516c8876ddb4bf4e9346d1a6f880d05e1806b2006599099732f1fd88380b7",
+    "db/migrate/20261123063000_create_contact_center_ending_action_versions.rb": "e22b6a5f6d6fd239e18a7d83862cee391159acea181c0338d72daf7c1da75dc0",
     "db/functions/20261123063000_contact_center_ending_action_versions.sql": "0d8c92f02f01f49f3a783bc468bfd20e1e37fc86bfca6b2409cea69bec12c253",
     "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "bae3d97965ae0a0e84917dab6709b7dc03561a46f5fe4db718e826b7796ee397"
   },
@@ -76,14 +76,14 @@
     "blocking_history": 10
   },
   "light_checks_executed": {
-    "exact_migration_reader": 60,
+    "exact_migration_reader": 62,
     "rspec_report_reader": 17,
-    "checkpoint_admission": 6,
+    "checkpoint_admission": 7,
     "bash_blocks_syntax_only": 28,
     "embedded_python_blocks_compiled_only": 2,
     "independent_evidence_reader": 18
   },
-  "native_validation": "two failed lint runs preserved; final5 exact style corrections and real standalone dependency load await native validation",
+  "native_validation": "initial migration source-pin failure preserved; minimal pin/diagnostic/standalone spacing corrections await native validation",
   "native_or_visual_acceptance_of_this_increment": false,
   "no_public_automation_api_editor_job_or_destination_effects": true,
   "customer_company_links_distinct_from_operating_issuer_and_business_unit_scope": true,
@@ -103,11 +103,12 @@
   },
   "approved_deactivation_decision_report": "docs/jrc_contact_center/ending_deactivation_decision_20261123.json",
   "latest_actual_failure": {
-    "sha": "d026fe8a7fe61e81de4d7d6bba5fe6affc6bfb1e",
-    "run": 45169703343,
-    "job": 137675703784,
-    "artifact": 14818620705,
-    "artifact_sha256": "cbf7cf907fca0b7c140e96ed30c618e83a1bed7e72773b495c4041c41a835efc",
+    "sha": "c8f2a0c5b82e3fe0200f9e2e14e646bc805c0d37",
+    "run": 45174140144,
+    "job": 137690900923,
+    "artifact": 14819941128,
+    "artifact_sha256": "8daece02cfb8e94fbc7e40ac2313ee24e9d61a57d7b15f2f2122d7ca3be562ab",
     "native_examples_executed": 0
-  }
+  },
+  "same_unreleased16_ddl_and_timestamp": true
 }
