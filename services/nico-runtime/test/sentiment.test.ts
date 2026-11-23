@@ -73,3 +73,21 @@ test('resource inference uses string evidence schema and records actual provider
   assert.equal(response.usage.total_tokens, 21);
   assert.deepEqual(response.report.evidence, result.evidence);
 });
+
+test('generation cannot assign sentiment or quality to an unproven human author', async t => {
+  const unknown = { ...resource, messages: resource.messages.map(message => ({ ...message, role: 'unknown' })) };
+  const result = { ...report, customer_sentiment: 'insufficient_data', agent_sentiment: 'insufficient_data',
+    quality_score: null, evidence: [{ message_id: 'Ticket/45', observation: 'Autoria não comprovada' }] };
+  t.mock.method(globalThis, 'fetch', async (_url, init: any) => {
+    const properties = JSON.parse(init.body).response_format.json_schema.schema.properties;
+    assert.deepEqual(properties.customer_sentiment.enum, ['insufficient_data']);
+    assert.deepEqual(properties.agent_sentiment.enum, ['insufficient_data']);
+    assert.deepEqual(properties.quality_score, { type: 'null' });
+    assert.deepEqual(properties.evidence.items.properties.message_id.enum, ['Ticket/45', 'ITILFollowup/45']);
+    return Response.json({ choices: [{ message: { content: JSON.stringify(result) } }],
+      usage: { prompt_tokens: 23, completion_tokens: 11, total_tokens: 34 } });
+  });
+  const response = await analyzeSentiment(unknown, { apiKey: 'test', model: 'test', baseUrl: 'https://api.groq.com/openai/v1' });
+  assert.equal(response.usage.total_tokens, 34);
+  assert.equal(response.report.quality_score, null);
+});

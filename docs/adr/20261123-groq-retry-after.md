@@ -25,3 +25,7 @@ A análise de sentimento aceita também uma origem identificada e IDs qualificad
 ## Evidência posterior:413 após leitura do conhecimento
 
 Na Branef, a consulta search_knowledge foi executada, mas a síntese recebeu HTTP413 com limite observado de8000TPM. O retorno429 não era a única causa. Para esse provedor/modelo e cota observada, a projeção da inferência omite guias de módulos redundantes, mantém quatro mensagens recentes, limita corpos de conhecimento a1000caracteres preservando IDs/URLs e elimina apenas duplicatas exatas de resultados. Fontes, autorizações e ferramentas permanecem intactas. A cadência usa reset do provedor e último recibo confirmado, antes de criar reserva; nenhuma espera é contabilizada como consumo. Não alterar outros provedores/modelos nem liberar reservas incertas antigas.
+
+## Contrato de geração do sentimento
+
+Duas amostras reais de histórico foram rejeitadas por provider_schema_invalid, com recibos efetivos preservados. Um diagnóstico separado obteve resposta válida; ele não recupera o conteúdo das respostas anteriores nem comprova o campo exato que falhou. O schema de geração permitia autoria/sentimento e referências que o validador posterior proíbe. Ele agora restringe as referências aos IDs fornecidos e exige insufficient_data e nota nula quando não há autoria correspondente comprovada. O validador continua recusando respostas inválidas; não corrigir notas ou atribuir autores por inferência. Mudança genérica, sem leitura GLPI no núcleo e sem alterar o Voice Quality/PABX.

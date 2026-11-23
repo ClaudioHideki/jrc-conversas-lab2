@@ -61,9 +61,18 @@ export function validateSentimentReport(raw: any, input: SentimentInput) {
 }
 export async function analyzeSentiment(raw: unknown, provider: ProviderConfig, signal?: AbortSignal) {
   const input = validateSentimentInput(raw);
-  const schema = 'source' in input ? { ...sentimentSchema, properties: { ...sentimentSchema.properties,
+  // Constrain generation to the same authorship and reference rules enforced
+  // below. A role inferred by the model cannot establish a human author.
+  const hasCustomer = input.messages.some(message => message.role === 'customer');
+  const hasOperator = input.messages.some(message => message.role === 'operator');
+  const schema = { ...sentimentSchema, properties: { ...sentimentSchema.properties,
+    customer_sentiment: { type: 'string', enum: hasCustomer ? labels : ['insufficient_data'] },
+    agent_sentiment: { type: 'string', enum: hasOperator ? labels : ['insufficient_data'] },
+    quality_score: hasOperator ? sentimentSchema.properties.quality_score : { type: 'null' },
     evidence: { type: 'array', items: { type: 'object', additionalProperties: false,
-      required: ['message_id', 'observation'], properties: { message_id: string, observation: string } } } } } : sentimentSchema;
+      required: ['message_id', 'observation'], properties: {
+        message_id: { type: 'source' in input ? 'string' : 'integer', enum: input.messages.map(message => message.id) },
+        observation: string } } } } };
   const generated = await structuredResponse({ url: `${provider.baseUrl.replace(/\/$/, '')}/chat/completions`,
     apiKey: provider.apiKey, signal, retryInvalid: false,
     body: { model: provider.model, temperature: 0, max_completion_tokens: 2000,
