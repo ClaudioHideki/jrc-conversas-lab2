@@ -23,6 +23,7 @@ class JrcContactCenter::AcwPolicy
     scoped = JrcContactCenter::AcwScopedRules.new(account: @account).call
     signature << scoped.map { |row| JrcContactCenter::AcwRulePrecedence::FIELDS.map { |field| row.fetch(field) } } if scoped.any?
     signature = JrcContactCenter::AcwEndingReasons.new(account: @account).signature(signature)
+    signature = JrcContactCenter::EndingActions::Catalogue.new(account: @account).signature(signature)
     Digest::SHA256.hexdigest(JrcContactCenter::AcwFormBindingPolicy.new(account: @account).signature(signature).to_json)
   end
 

@@ -171,11 +171,40 @@ export function verifyEndingActionScopeMigrations(changes, readCurrent, schema) 
     [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath, endingConfirmationMigrationPath, endingActionScopeMigrationPath]);
 }
 
+
+export const endingActionVersionMigrationPath = 'db/migrate/20261123063000_create_contact_center_ending_action_versions.rb';
+export const endingActionVersionMigrationHash = '97d516c8876ddb4bf4e9346d1a6f880d05e1806b2006599099732f1fd88380b7';
+export const endingActionVersionSources = Object.freeze({
+  "db/functions/20261123063000_contact_center_ending_action_versions.sql": "0d8c92f02f01f49f3a783bc468bfd20e1e37fc86bfca6b2409cea69bec12c253",
+  "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "1ba3e81f7d75c59c7ac8133b8dd119388e42129e77f9ef00ab1cf28df3d9b24c"
+});
+
+// Keep every earlier verifier and source hash. This addition admits only its3exact private-history sources.
+export function verifyEndingActionVersionMigrations(changes, readCurrent, schema) {
+  const priorPaths = [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath, endingConfirmationMigrationPath, endingActionScopeMigrationPath,
+    ...Object.keys(pauseApprovalSqlSources).filter(path => path.startsWith('db/')),
+    ...Object.keys(endingConfirmationSources).filter(path => path.startsWith('db/')),
+    ...Object.keys(endingActionScopeSources).filter(path => path.startsWith('db/'))];
+  const newPaths = [endingActionVersionMigrationPath, ...Object.keys(endingActionVersionSources).filter(path => path.startsWith('db/'))];
+  const rows = changes.trim().split('\n').filter(Boolean).sort();
+  const expected = [...priorPaths, ...newPaths].map(path => `A\t${path}`).sort();
+  if (JSON.stringify(rows) !== JSON.stringify(expected))
+    throw new Error('Only16exact reviewed forward migrations and their exact SQL are admitted; unknown database changes remain blocked.');
+  for (const [path, digest] of Object.entries({ [endingActionVersionMigrationPath]: endingActionVersionMigrationHash, ...endingActionVersionSources })) {
+    if (createHash('sha256').update(readCurrent(path)).digest('hex') !== digest)
+      throw new Error(`Reviewed ending action private version source changed: ${path}`);
+  }
+  verifyEndingActionScopeMigrations(priorPaths.map(path => `A\t${path}`).join('\n'), readCurrent, schema);
+  return validateNewMigrationTimestamps(schema,
+    [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath, endingConfirmationMigrationPath,
+      endingActionScopeMigrationPath, endingActionVersionMigrationPath]);
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyEndingActionScopeMigrations(changes, readFileSync, schema);
+  const result = verifyEndingActionVersionMigrations(changes, readFileSync, schema);
   console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
-    [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, [endingActionScopeMigrationPath]: endingActionScopeMigrationHash },
-    pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, ...result }));
+    [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, [endingActionScopeMigrationPath]: endingActionScopeMigrationHash, [endingActionVersionMigrationPath]: endingActionVersionMigrationHash },
+    pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, endingActionVersionSources, ...result }));
 }

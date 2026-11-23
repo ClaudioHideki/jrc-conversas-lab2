@@ -7443,6 +7443,19 @@
       "actual_new_lint_offenses": 3,
       "lint_and_fixture_corrections_prepared": true,
       "final_artifact_sha256": "99440f9df0e0085585b2e3db7b49c2192873d9961f25a0868e13b6b0650628a3"
+    },
+    "validated_followup": {
+      "sha": "21990ca9bc2ee7c40a637afeca81c38d06848992",
+      "run": 45124532184,
+      "report": "docs/jrc_contact_center/ending_scope_account_lock_findings_20261123.json",
+      "scope_foundation_accepted": true,
+      "full_figure10_pending": true
     }
+  },
+  "ending_rule_private_versions_candidate_20261123": {
+    "base_scope_sha": "21990ca9bc2ee7c40a637afeca81c38d06848992",
+    "report": "docs/jrc_contact_center/ending_rule_versions_candidate_20261123.json",
+    "native_validation": "pending",
+    "whole_figure10_or23_complete": false
   }
 }

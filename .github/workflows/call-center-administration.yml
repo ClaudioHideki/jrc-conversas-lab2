@@ -92,9 +92,13 @@ jobs:
         run: |
           node --test script/validate_ag_migration_identity.test.mjs script/validate_migration_timestamps.test.mjs script/validate_ag_historical_migrations.test.mjs
           node script/validate_ag_migration_identity.mjs
-          node --test script/validate_cc_access_migration.test.mjs script/validate_cc_ending_scope_migration.test.mjs
+          node --test script/validate_cc_access_migration.test.mjs script/validate_cc_ending_scope_migration.test.mjs script/validate_cc_ending_version_migration.test.mjs
           node --test --test-concurrency=1 tests/playwright/tests/e2e/ui/call-center-browser-api.test.mjs tests/playwright/tests/e2e/ui/call-center-text-contrast.test.mjs
           node script/validate_cc_access_migration.mjs
+      - name: Focused lint of new private ending version sources
+        id: ending_version_lint
+        run: |
+          bundle exec rubocop app/models/jrc_contact_center/ending_action_version.rb app/services/jrc_contact_center/ending_actions/task_definition.rb app/services/jrc_contact_center/ending_actions/rule_definition.rb app/services/jrc_contact_center/ending_actions/catalogue.rb app/services/jrc_contact_center/ending_actions/project_task_parameters.rb app/services/jrc_contact_center/ending_actions/rule_input.rb app/services/jrc_contact_center/ending_actions/configure_rule.rb db/migrate/20261123063000_create_contact_center_ending_action_versions.rb lib/jrc_contact_center/ending_action_version_schema_receipt.rb script/jrc_call_center_ending_version_schema_probe.rb spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb spec/models/jrc_contact_center/ending_action_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/support/contact_center_ending_action_versions.rb spec/support/contact_center_ending_rule_configuration.rb --format json --out /tmp/call-center-ending-version-lint.json
       - name: Disposable application schema and pending migrations
         run: |
           test "$RAILS_ENV" = test
@@ -107,6 +111,7 @@ jobs:
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_pause_approval_schema_probe"); JrcContactCenter::SyntheticPauseApprovalSchemaProbe.record("fresh")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_confirmation_schema_probe"); JrcContactCenter::SyntheticEndingConfirmationSchemaProbe.record("fresh")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_scope_schema_probe"); JrcContactCenter::SyntheticEndingScopeSchemaProbe.record("fresh")'
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_version_schema_probe"); JrcContactCenter::SyntheticEndingVersionSchemaProbe.record("fresh")'
       - name: Reload migrated schema in a separate disposable database
         id: native_reload
         env:
@@ -123,7 +128,8 @@ jobs:
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_pause_approval_schema_probe"); JrcContactCenter::SyntheticPauseApprovalSchemaProbe.record("reload")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_confirmation_schema_probe"); JrcContactCenter::SyntheticEndingConfirmationSchemaProbe.record("reload")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_scope_schema_probe"); JrcContactCenter::SyntheticEndingScopeSchemaProbe.record("reload")'
-          bundle exec rspec spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb spec/models/jrc_contact_center/acw_form_template_ledger_spec.rb spec/models/jrc_contact_center/deferred_pause_request_spec.rb spec/models/jrc_contact_center/qualification_form_spec.rb spec/services/jrc_contact_center/create_contact_center_qualification_forms_spec.rb spec/models/jrc_contact_center/ending_reason_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_reason_versions_spec.rb spec/models/jrc_contact_center/team_state_spec.rb spec/services/jrc_contact_center/create_contact_center_team_states_spec.rb spec/models/jrc_contact_center/audio_folder_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_folders_spec.rb spec/models/jrc_contact_center/audio_version_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_files_spec.rb spec/models/jrc_contact_center/audio_inspection_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_inspections_spec.rb spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb spec/services/jrc_contact_center/module_policy_quality_review_spec.rb spec/services/jrc_contact_center/create_contact_center_team_supervisions_spec.rb spec/models/jrc_contact_center/team_supervision_constraints_spec.rb spec/models/jrc_contact_center/pause_approval_review_evidence_spec.rb spec/services/jrc_contact_center/create_contact_center_pause_approval_evidence_spec.rb spec/models/jrc_contact_center/ending_reason_confirmation_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_reason_confirmations_spec.rb spec/models/jrc_contact_center/ending_action_queue_scope_spec.rb spec/services/jrc_contact_center/ending_action_queue_scope_history_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb --format progress --format json --out /tmp/call-center-ivr-schema-reload-rspec.json
+          bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_version_schema_probe"); JrcContactCenter::SyntheticEndingVersionSchemaProbe.record("reload")'
+          bundle exec rspec spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb spec/models/jrc_contact_center/acw_form_template_ledger_spec.rb spec/models/jrc_contact_center/deferred_pause_request_spec.rb spec/models/jrc_contact_center/qualification_form_spec.rb spec/services/jrc_contact_center/create_contact_center_qualification_forms_spec.rb spec/models/jrc_contact_center/ending_reason_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_reason_versions_spec.rb spec/models/jrc_contact_center/team_state_spec.rb spec/services/jrc_contact_center/create_contact_center_team_states_spec.rb spec/models/jrc_contact_center/audio_folder_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_folders_spec.rb spec/models/jrc_contact_center/audio_version_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_files_spec.rb spec/models/jrc_contact_center/audio_inspection_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_inspections_spec.rb spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb spec/services/jrc_contact_center/module_policy_quality_review_spec.rb spec/services/jrc_contact_center/create_contact_center_team_supervisions_spec.rb spec/models/jrc_contact_center/team_supervision_constraints_spec.rb spec/models/jrc_contact_center/pause_approval_review_evidence_spec.rb spec/services/jrc_contact_center/create_contact_center_pause_approval_evidence_spec.rb spec/models/jrc_contact_center/ending_reason_confirmation_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_reason_confirmations_spec.rb spec/models/jrc_contact_center/ending_action_queue_scope_spec.rb spec/services/jrc_contact_center/ending_action_queue_scope_history_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb spec/models/jrc_contact_center/ending_action_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb --format progress --format json --out /tmp/call-center-ivr-schema-reload-rspec.json
       - name: Focused confirmed-ending native preflight before unchanged full regressions
         id: confirmed_ending_preflight
         run: |
@@ -137,6 +143,12 @@ jobs:
           bundle exec rubocop app/models/jrc_contact_center/ending_action_queue_scope.rb db/migrate/20261123034500_create_contact_center_ending_action_scopes.rb lib/jrc_contact_center/ending_action_scope_schema_receipt.rb script/jrc_call_center_ending_scope_schema_probe.rb spec/models/jrc_contact_center/ending_action_queue_scope_spec.rb spec/services/jrc_contact_center/ending_action_queue_scope_history_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scope_concurrency_spec.rb spec/support/contact_center_ending_action_scopes.rb --format json --out /tmp/call-center-ending-scope-lint.json
           bundle exec rspec spec/models/jrc_contact_center/ending_action_queue_scope_spec.rb spec/services/jrc_contact_center/ending_action_queue_scope_history_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb --format progress --format json --out /tmp/call-center-ending-scope-preflight.json
           node script/validate_cc_ending_scope_preflight.mjs /tmp/call-center-ending-scope-preflight.json
+      - name: Focused private ending rule native authorization and privacy preflight
+        id: ending_version_preflight
+        run: |
+          node --test script/validate_cc_ending_version_preflight.test.mjs
+          bundle exec rspec spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb spec/models/jrc_contact_center/ending_action_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb --format progress --format json --out /tmp/call-center-ending-version-preflight.json
+          node script/validate_cc_ending_version_preflight.mjs /tmp/call-center-ending-version-preflight.json
       - name: Rails authorization, persistence and affected regressions
         id: native_core
         run: |
@@ -155,15 +167,17 @@ jobs:
             spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb \
             spec/services/jrc_operator/commands_spec.rb \
             spec/serializers/jrc_approvals/request_serializer_pause_spec.rb \
-            --exclude-pattern '**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
+            --exclude-pattern '**/ending_action_version_concurrency_spec.rb,**/ending_scope_concurrency_spec.rb,**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
-        if: failure() && (steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure')
+        if: failure() && (steps.ending_version_preflight.outcome == 'failure' || steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.ending_scope_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-early-${{ github.sha }}
           path: |
             /tmp/call-center-rspec.json
+            /tmp/call-center-ending-version-preflight.json
+            /tmp/call-center-ending-version-schema-*.json
             /tmp/call-center-ivr-schema-reload-rspec.json
             /tmp/call-center-ending-confirmation-preflight.json
             /tmp/call-center-ending-scope-preflight.json
@@ -180,7 +194,7 @@ jobs:
         run: |
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
-          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_confirmation_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scope_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
+          bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_confirmation_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
       - name: Affected Approvals and Backoffice in their guarded disposable candidate database
         env:
           POSTGRES_DATABASE: jrc_rel_v2_candidate_test
@@ -299,6 +313,9 @@ jobs:
           scope_schema = [json.loads(Path('/tmp', f'call-center-ending-scope-schema-{stage}.json').read_text()) for stage in ['fresh', 'reload']]
           assert scope_schema[0]['components'] == scope_schema[1]['components']
           assert all(item['product_sha'] == os.environ['GITHUB_SHA'] and set(item['stored'].values()) == {item['calculated']} for item in scope_schema)
+          version_schema = [json.loads(Path('/tmp', f'call-center-ending-version-schema-{stage}.json').read_text()) for stage in ['fresh', 'reload']]
+          assert version_schema[0]['components'] == version_schema[1]['components']
+          assert all(item['product_sha'] == os.environ['GITHUB_SHA'] and set(item['stored'].values()) == {item['calculated']} for item in version_schema)
           ending_flows = [json.loads(path.read_text()) for path in Path('.codex/call-center-native-e2e').glob('*-ending-confirmation-native.json')]
           expected_projects = {'desktop-light', 'desktop-dark', 'mobile-light', 'mobile-dark'}
           assert len(ending_flows) == 4 and {flow['project'] for flow in ending_flows} == expected_projects
@@ -328,6 +345,7 @@ jobs:
           assert vue['numFailedTests'] == vue['numPendingTests'] == 0
           ending_preflight = json.loads(Path('/tmp/call-center-ending-confirmation-preflight.json').read_text())['summary']
           scope_preflight = json.loads(Path('/tmp/call-center-ending-scope-preflight.json').read_text())['summary']
+          version_preflight = json.loads(Path('/tmp/call-center-ending-version-preflight.json').read_text())['summary']
           evidence = {
               'sha': os.environ['GITHUB_SHA'], 'run_id': os.environ['GITHUB_RUN_ID'],
               'branch': os.environ['GITHUB_REF_NAME'],
@@ -336,6 +354,7 @@ jobs:
               'chrome': stats, 'matrix': matrix,
               'ending_confirmation_preflight': {key: ending_preflight[key] for key in ['example_count', 'failure_count', 'pending_count', 'errors_outside_of_examples_count']},
               'ending_scope_preflight': {key: scope_preflight[key] for key in ['example_count', 'failure_count', 'pending_count', 'errors_outside_of_examples_count']},
+              'ending_version_preflight': {key: version_preflight[key] for key in ['example_count', 'failure_count', 'pending_count', 'errors_outside_of_examples_count']},
               'stages_0_2_complete': False, 'external_homologation': False,
               'screenshots': {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
                               for path in sorted(Path('.codex/call-center-native-e2e').rglob('*.png'))},
