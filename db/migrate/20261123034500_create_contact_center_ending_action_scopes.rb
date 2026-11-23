@@ -58,7 +58,7 @@ class CreateContactCenterEndingActionScopes < ActiveRecord::Migration[7.1]
   # Appending evidence must not retain a late KEY SHARE lock on the native authority row.
   def create_account_references
     create_table ACCOUNT_TABLE, id: false do |table|
-      table.bigint :account_id, null: false, primary_key: true
+      table.bigint :account_id, null: false, primary_key: true, default: nil
     end
     add_foreign_key ACCOUNT_TABLE, :accounts, column: :account_id, on_delete: :cascade
   end

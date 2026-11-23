@@ -7431,6 +7431,18 @@
     "parent": "c0c47932eab471d25be8dadd860cc048f619387b",
     "native_status": "correction_prepared_not_accepted",
     "all14historical_sources_and_native_tests_preserved": true,
-    "all23figures_complete": false
+    "all23figures_complete": false,
+    "reference_lifecycle_followup": {
+      "sha": "fb90991fa484101ddede479f225fa486a5250296",
+      "run": 45122364380,
+      "reload_passed": 236,
+      "reload_failed": 2,
+      "fresh_reload_match": true,
+      "native_retirement_unchanged": true,
+      "native_revalidation": "pending",
+      "actual_new_lint_offenses": 3,
+      "lint_and_fixture_corrections_prepared": true,
+      "final_artifact_sha256": "99440f9df0e0085585b2e3db7b49c2192873d9961f25a0868e13b6b0650628a3"
+    }
   }
 }

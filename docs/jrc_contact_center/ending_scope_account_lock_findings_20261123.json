@@ -70,7 +70,7 @@
       "lib/jrc_contact_center/ending_action_scope_schema_receipt.rb": "a7b94b6aa584239cb4ec860b0d42b39a6b608f878a7984353ed716bca89798f6"
     },
     "new_sources": {
-      "db/migrate/20261123034500_create_contact_center_ending_action_scopes.rb": "10de41dd2a75d6c69aca0ec0000549ab8bded565b9ae692e443a175744d6ce7c",
+      "db/migrate/20261123034500_create_contact_center_ending_action_scopes.rb": "deaaea240d744f923541b97c404cd9c5502722f9169f971e3ffb16595fe3deac",
       "db/functions/20261123034500_contact_center_ending_action_scopes.sql": "3f1ecc42e7944d40ddd838eb066dc1610a95465f27f614b11f692f9d1ee7fdd5",
       "lib/jrc_contact_center/ending_action_scope_schema_receipt.rb": "d23faa6189bae4c4ca93084e8c085f7839caa5f8383a8b6deb8fa248fdb68bb1"
     }
@@ -89,5 +89,62 @@
   },
   "native_acceptance": false,
   "whole_figure10_or23_complete": false,
-  "no_rule_activation_destination_effects_build_docker_publication_merge_or_deploy": true
+  "no_rule_activation_destination_effects_build_docker_publication_merge_or_deploy": true,
+  "technical_reference_lifecycle_followup": {
+    "sha": "fb90991fa484101ddede479f225fa486a5250296",
+    "run": 45122364380,
+    "job": 137518818378,
+    "early_artifact": 14793759599,
+    "artifact_sha256": "69ccc9152e5ae528168430908b677cc665c78489e644ebb5922055c159801c43",
+    "fresh_reload_both_tables_all_components_and_comments_equal": true,
+    "receipt": "jrc_cc_ending_action_scopes_v1:5f2dcae620b573432f813a42dd891e06e170401a635830f0d19a5ed0f0915b55",
+    "reload_summary": {
+      "duration": 32.193552247,
+      "example_count": 238,
+      "failure_count": 2,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "actual_failures": [
+      {
+        "description": "CreateContactCenterEndingActionScopes uses only the real account identity without duplicating accounts, people or operational configuration",
+        "file": "./spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb",
+        "line": 11,
+        "error": "expected: nil\n     got: \"nextval('jrc_contact_center_ending_scope_accounts_account_id_seq'::regclass)\"",
+        "backtrace": [
+          "./spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb:16:in 'block (2 levels) in <main>'"
+        ]
+      },
+      {
+        "description": "CreateContactCenterEndingActionScopes cascades the new reference and history only after actual root deletion and leaves another account intact",
+        "file": "./spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb",
+        "line": 51,
+        "error": "PG::ForeignKeyViolation: ERROR:  update or delete on table \"accounts\" violates foreign key constraint \"fk_rails_d4cc1a7d80\" on table \"jrc_contact_center_queues\"\nDETAIL:  Key (id)=(235) is still referenced from table \"jrc_contact_center_queues\".\n",
+        "backtrace": [
+          "./spec/support/contact_center_ending_action_scopes.rb:20:in 'block in RSpec::ExampleGroups::CreateContactCenterEndingActionScopes_2#guarded_ending_scope_sql'",
+          "./spec/support/contact_center_ending_action_scopes.rb:20:in 'RSpec::ExampleGroups::CreateContactCenterEndingActionScopes_2#guarded_ending_scope_sql'",
+          "./spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb:58:in 'block (2 levels) in <main>'",
+          "------------------",
+          "--- Caused by: ---"
+        ]
+      }
+    ],
+    "correction": [
+      "Explicit default:nil prevents Rails7.1.5.2 from converting the technical bigint PK into bigserial; no sequence or data is deleted.",
+      "Preserve the native Account-to-Queue/Unit retirement block. Assert that the attempted root deletion rolls back the new reference/history too.",
+      "Then explicitly remove only the owned synthetic queue/unit through native destroy and prove cascade only after actual root deletion.",
+      "Keep the same6reference examples and38positive-case requirement; strengthen the lifecycle case instead of removing it."
+    ],
+    "primary_runtime_reference": "https://raw.githubusercontent.com/rails/rails/v7.1.5.2/activerecord/lib/active_record/connection_adapters/abstract/schema_definitions.rb",
+    "migration_change_is_exactly_one_default_option": true,
+    "all14historical_sources_sql_current_receipt_native_models_and_legacy_concurrency_test_unchanged": true,
+    "native_revalidation": "pending",
+    "not_native_acceptance": true,
+    "final_artifact": 14794932522,
+    "final_artifact_sha256": "99440f9df0e0085585b2e3db7b49c2192873d9961f25a0868e13b6b0650628a3",
+    "final_workflow_conclusion": "failure",
+    "actual_new_lint_offenses": 3,
+    "lint_correction": "Extract the unchanged contender synchronization body; align synthetic fixture attributes. No assertion removed.",
+    "all5concurrency_cases_and_every_existing_assertion_preserved": true
+  }
 }

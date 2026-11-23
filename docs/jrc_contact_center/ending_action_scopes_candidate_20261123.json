@@ -73,6 +73,18 @@
       "concurrency_passed": 139,
       "concurrency_failed": 2,
       "whole_component_accepted": false
+    },
+    "reference_lifecycle_followup": {
+      "sha": "fb90991fa484101ddede479f225fa486a5250296",
+      "run": 45122364380,
+      "reload_passed": 236,
+      "reload_failed": 2,
+      "same_fresh_reload_receipt_for_both_tables": true,
+      "preserve_native_retirement_and_remove_implicit_pk_default": true,
+      "complete_acceptance": false,
+      "actual_new_lint_offenses": 3,
+      "lint_and_fixture_corrections_prepared": true,
+      "final_artifact_sha256": "99440f9df0e0085585b2e3db7b49c2192873d9961f25a0868e13b6b0650628a3"
     }
   },
   "original_checkout": "b77ffe55 and the3protected pending files remain preserved",

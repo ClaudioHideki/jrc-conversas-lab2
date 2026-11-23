@@ -79,18 +79,23 @@ RSpec.describe 'Ending action scope capture with competing native PostgreSQL con
     state = { ready: Queue.new, gate: Queue.new, results: Queue.new, workers: [] }
     account.with_lock do
       state[:workers] << scope_change_contender(state, model, key, attributes)
-      pid = Timeout.timeout(8) { state[:ready].pop }
-      raise 'Independent PostgreSQL connection required' if pid == ActiveRecord::Base.connection.raw_connection.backend_pid
-
-      state[:gate] << true
-      result = Timeout.timeout(8) { state[:results].pop }
-      raise result if result.is_a?(Exception)
-
+      result = committed_native_scope_change(state)
       JrcContactCenter::Queue.transaction(requires_new: true) { JrcContactCenter::Queue.find(queue_id).lock!('FOR UPDATE NOWAIT') }
       result
     end
   ensure
     join_scope_contenders(state) if state
+  end
+
+  def committed_native_scope_change(state)
+    pid = Timeout.timeout(8) { state[:ready].pop }
+    raise 'Independent PostgreSQL connection required' if pid == ActiveRecord::Base.connection.raw_connection.backend_pid
+
+    state[:gate] << true
+    result = Timeout.timeout(8) { state[:results].pop }
+    raise result if result.is_a?(Exception)
+
+    result
   end
 
   it 'serializes duplicate captures without creating a second scope revision' do

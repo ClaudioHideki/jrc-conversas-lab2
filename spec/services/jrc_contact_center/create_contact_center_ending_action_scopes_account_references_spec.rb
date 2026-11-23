@@ -52,9 +52,16 @@ RSpec.describe CreateContactCenterEndingActionScopes do
     original = scope.attributes.deep_dup
     other = create(:account)
     other_unit = JrcContactCenter::Unit.create!(account: other, code: 'SYNTHETIC', name: 'SYNTHETIC empty retirement', kind: 'sac')
-    other_queue = JrcContactCenter::Queue.create!(account: other, unit: other_unit, code: 'SYNTHETIC', name: 'SYNTHETIC empty retirement',
-                                                service_kind: 'voice', strategy: 'ring_all')
+    other_queue = JrcContactCenter::Queue.create!(
+      account: other, unit: other_unit, code: 'SYNTHETIC', name: 'SYNTHETIC empty retirement', service_kind: 'voice', strategy: 'ring_all'
+    )
     expect(JrcContactCenter::EndingActionQueueScope.where(account: other, source_queue_id: other_queue.id)).to exist
+    expect { guarded_ending_scope_sql("DELETE FROM accounts WHERE id=#{other.id}") }
+      .to raise_error(ActiveRecord::InvalidForeignKey, /jrc_contact_center_(queues|units)/)
+    remaining = connection.select_value("SELECT count(*) FROM #{reference_table} WHERE account_id=#{other.id}")
+    expect([remaining, JrcContactCenter::EndingActionQueueScope.where(account_id: other.id).count]).to eq([1, 1])
+    other_queue.destroy!
+    other_unit.destroy!
     guarded_ending_scope_sql("DELETE FROM accounts WHERE id=#{other.id}")
     expect(Account.exists?(other.id)).to be(false)
     expect(connection.select_value("SELECT count(*) FROM #{reference_table} WHERE account_id=#{other.id}")).to eq(0)

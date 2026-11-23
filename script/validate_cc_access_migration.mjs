@@ -146,7 +146,7 @@ export function verifyEndingConfirmationMigrations(changes, readCurrent, schema)
 
 
 export const endingActionScopeMigrationPath = 'db/migrate/20261123034500_create_contact_center_ending_action_scopes.rb';
-export const endingActionScopeMigrationHash = '10de41dd2a75d6c69aca0ec0000549ab8bded565b9ae692e443a175744d6ce7c';
+export const endingActionScopeMigrationHash = 'deaaea240d744f923541b97c404cd9c5502722f9169f971e3ffb16595fe3deac';
 export const endingActionScopeSources = Object.freeze({
   "db/functions/20261123034500_contact_center_ending_action_scopes.sql": "3f1ecc42e7944d40ddd838eb066dc1610a95465f27f614b11f692f9d1ee7fdd5",
   "lib/jrc_contact_center/ending_action_scope_schema_receipt.rb": "d23faa6189bae4c4ca93084e8c085f7839caa5f8383a8b6deb8fa248fdb68bb1"
