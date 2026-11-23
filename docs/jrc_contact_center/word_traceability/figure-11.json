@@ -12,8 +12,8 @@
   "code": [
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AuthorityAssignments.vue",
-      "git_blob_at_validated_base": "c75028f48a3c605f3273ae09af351750ab9f2b74",
-      "state": "em_trabalho_sem_CI",
+      "git_blob_at_validated_base": "0277111aec1dab2ec0d0b5b15d19ac4050adeda7",
+      "state": "presente_na_base_validada",
       "current_sha256": "7be71e6b64338a0b012318c2dbfc9be99dbb80bdae85747569e89a5e6286d79b"
     },
     {
@@ -57,7 +57,7 @@
         "JrcContactCenter::PermissionSources keeps an ineligible user denied even with an explicit full profile and team grants",
         "JrcContactCenter::PermissionSources inherits only actual memberships in a native team of the same account"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -68,7 +68,7 @@
         "Call Center explicit access authorizations persists eligibility and individual rights, then denies access again after suspension",
         "Call Center explicit access authorizations does not let an administrator grant a critical power above their own authority"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -79,7 +79,7 @@
         "Call Center authority on native role fallback denies removing a restrictive own profile using \"\" without partial name changes",
         "Call Center authority on native role fallback denies clearing another agent profile when operate would be newly granted"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -90,7 +90,7 @@
         "Call Center native role revisions rejects a stale form without changing newer data or recording a successful change",
         "Call Center native role revisions requires a nonblank version when the caller explicitly opts into preconditions"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -101,7 +101,7 @@
         "Call Center native role boundaries preserves the role and audit history when an actor cannot grant a critical power",
         "Call Center native role boundaries serializes the native update and permits removing an existing power without automatic grants"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -112,7 +112,7 @@
         "PABX documented recording transport blocks an unconfirmed recording lookup empty",
         "PABX documented recording transport blocks an unconfirmed recording lookup uniqueId"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -123,7 +123,7 @@
         "PABX private recording requests denies recording bytes without explicit authority when Call Center is enabled",
         "PABX private recording requests separates listening from direct download and retains own-extension authorization"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -132,7 +132,7 @@
       "sample_behaviours": [
         "Call Center native role concurrent revocation does not restore a concurrently revoked power using a stale role read"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],
@@ -1200,9 +1200,19 @@
   "tests_candidate_not_validated": [
     {
       "path": "tests/playwright/tests/e2e/ui/call-center-authority-filter-geometry.mjs",
-      "sha256": "495a163619569df8b2a9da4a1119fdcf8ce25f8439b90efaf63fd1bfd3fead07",
+      "sha256": "5bcaa6aa9ea6e56ae8b34aa28c466bf9b5b97cb6de30b2bceba7bf358e7e8b88",
       "status": "preparado_bloqueado_pelo_gate_ate_CI_propria",
       "native_or_visual_result": null
     }
-  ]
+  ],
+  "accepted_configuration_increment": {
+    "sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+    "run": 45237591913,
+    "whole_figure_accepted": false,
+    "acceptance_file": "docs/jrc_contact_center/ending_editor_acceptance_20261123.json",
+    "visual_evidence_limits": [
+      "Enquadrar filtros mobile de verdade; a captura atual não contém os controles.",
+      "Adicionar capturas do topo do editor e dos parâmetros do destino antes de salvar."
+    ]
+  }
 }

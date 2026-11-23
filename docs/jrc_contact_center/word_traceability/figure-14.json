@@ -51,7 +51,7 @@
         "Call Center configuration audit transactions records an omitted settings change without copying its previous or current content",
         "Call Center configuration audit transactions does not create an artificial update event for an unchanged record"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -62,7 +62,7 @@
         "Call Center configuration audit API returns a scoped immutable detail without e-mail or raw configuration payloads",
         "Call Center configuration audit API combines resource, action, actor and correlation filters on the authorized relation"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],

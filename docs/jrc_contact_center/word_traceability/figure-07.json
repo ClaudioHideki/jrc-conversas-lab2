@@ -51,7 +51,7 @@
         "JrcContactCenter::AgentStateManager does not require the new option until account enforcement is explicitly activated",
         "JrcContactCenter::AgentStateManager does not reinterpret an old receipt after enabling justification and preserves the old digest bytes"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -62,7 +62,7 @@
         "JrcContactCenter::AgentStateManager keeps a terminated call in ACW and preserves its draft and native availability instead of starting the pause",
         "JrcContactCenter::AgentStateManager continues blocking a pause after the ACW clock expires without completing or deleting answers"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -73,7 +73,7 @@
         "JrcContactCenter::AgentStateManager rejects a cached member after its functional profile loses operate",
         "JrcContactCenter::AgentStateManager rejects an operator transition after its feature is disabled"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -84,7 +84,7 @@
         "CreateContactCenterPauseApprovalEvidence rejects a partially inserted corporate set at the database boundary and rolls its scope back with the root",
         "CreateContactCenterPauseApprovalEvidence accepts a complete immutable source without mistaking source existence for any policy, decision or approval"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -95,7 +95,7 @@
         "JrcContactCenter::DeferredPauseInput rejects malformed envelope nil",
         "JrcContactCenter::DeferredPauseInput rejects malformed envelope false"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -105,7 +105,7 @@
         "JrcContactCenter::DeferredPauseManager does not override the actual pending qualification merely because all companies approved",
         "JrcContactCenter::DeferredPauseManager consumes the approved native pause once after actual ACW completion without a provider command"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -116,7 +116,7 @@
         "JrcContactCenter::DeferredPauseManager rejects empty policy selection without leaving any canonical intent, scope or partial request behind",
         "JrcContactCenter::DeferredPauseManager rolls back the complete creation when only the first affected company has a policy"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -127,7 +127,7 @@
         "JrcContactCenter::DeferredPauseManager keeps the request waiting through the real call closure and overdue ACW without discarding the draft",
         "JrcContactCenter::DeferredPauseManager starts one native pause only after call end and ACW completion and preserves its local-only identity"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -138,7 +138,7 @@
         "JrcContactCenter::DeferredPauseRevision does not reuse the empty-history revision between two members of the same account",
         "JrcContactCenter::DeferredPauseRevision refuses a member from another account"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -149,7 +149,7 @@
         "JrcContactCenter::PauseApprovalCoverage deduplicates units while preserving the actual memberships of multiple queues",
         "JrcContactCenter::PauseApprovalCoverage keeps a stable read-only digest without creating state, requests, approvals, grants or audit events"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -160,7 +160,7 @@
         "JrcContactCenter::PauseApprovalIntent never narrows global pause approval to the selected operating queue",
         "JrcContactCenter::PauseApprovalIntent creates no operational state, pending intent, approval, policy, grant or audit during preview"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -170,7 +170,7 @@
         "JrcContactCenter::PauseApprovalPolicyCheck rejects a real conflicting publication before it can replace a usable scoped policy or affect a pending pause",
         "JrcContactCenter::PauseApprovalPolicyCheck propagates a simulated selector conflict rather than treating it as missing or ready"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -181,7 +181,7 @@
         "JrcContactCenter::PauseApprovalReadiness keeps captured names immutable and withholds the projection after the native unit context changes",
         "JrcContactCenter::PauseApprovalReadiness returns no captured names after the owner loses current operating eligibility"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -192,7 +192,7 @@
         "JrcContactCenter::PauseApprovalSourceAccess rejects source access and a vote by a reviewer covering only the other native business unit",
         "JrcContactCenter::PauseApprovalSourceAccess requires explicit Call Center approve independently of native Central decide and an ordinary administrator role"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -203,7 +203,7 @@
         "JrcContactCenter::PauseCatalog persists real minutes and has the same revision after the JSONB round trip without changing unrelated settings",
         "JrcContactCenter::PauseCatalog requires explicit activation and keeps configuration and audit unchanged when it is absent"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -214,7 +214,7 @@
         "JrcContactCenter::PauseReasonDefinition preserves an explicit approval boolean true without adding an approver or policy",
         "JrcContactCenter::PauseReasonDefinition preserves an explicit approval boolean false without adding an approver or policy"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -224,7 +224,7 @@
         "JrcContactCenter::SyntheticPauseSeed rejects provisioning outside the exclusive synthetic runner without writing an Account",
         "JrcContactCenter::SyntheticPauseSeed does not expose a constructor that bypasses resource guards"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -235,7 +235,7 @@
         "JrcContactCenter::DeferredPauseRequest retains individual request history rather than deleting it after withdrawal",
         "JrcContactCenter::DeferredPauseRequest does not let terminal history become an active request again through raw SQL"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -246,7 +246,7 @@
         "JrcContactCenter::PauseApprovalReview rejects bulk edits to the immutable complete context without silently rewriting a historical approval",
         "JrcContactCenter::PauseApprovalReview rejects scope movement between accounts using actual SQL rather than an ActiveRecord-only validation"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -255,7 +255,7 @@
       "sample_behaviours": [
         "Native operator pause while ACW is pending rejects a direct authenticated pause request without altering the pending qualification or state"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -266,7 +266,7 @@
         "Call Center scoped operational state history requires current supervisory or configuration authority rather than view or operate alone",
         "Call Center scoped operational state history rechecks eligibility and the feature on each request"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -277,7 +277,7 @@
         "Deferred operator pause API does not accept account, member, actor or unit authority from the request body",
         "Deferred operator pause API rejects explicit malformed private values rather than dropping them through strong parameters"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -288,7 +288,7 @@
         "Deferred pause current unit and private projection recovers private details only for the own request while the original selection is still applicable",
         "Deferred pause current unit and private projection redacts private historical data after losing the original unit without rewriting the receipt"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -299,7 +299,7 @@
         "Native mandatory pause approval API requires the reviewed server digest and rejects supplied scope authority before creating anything",
         "Native mandatory pause approval API persists and recovers the pending all-scope state through authenticated native APIs without applying it early"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -310,7 +310,7 @@
         "Call Center account-local pause catalog API persists a draft through the native authenticated endpoint without enabling the requirement",
         "Call Center account-local pause catalog API requires a revision and rejects an old one without creating an audit for the denied write"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -321,7 +321,7 @@
         "Call Center private pause options and supervisor scope does not copy private operator options or the Unit B snapshot into a Unit A supervisor response",
         "Call Center private pause options and supervisor scope does not use a caller-provided member id to return another operator private catalog"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -332,7 +332,7 @@
         "Call Center private pause justification API does not silently filter malformed or blank private input boolean",
         "Call Center private pause justification API does not silently filter malformed or blank private input integer"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -343,7 +343,7 @@
         "Call Center authorized supervisor pause duration notice keeps a real zero and the exact informational threshold distinct from an exceeded pause",
         "Call Center authorized supervisor pause duration notice uses the immutable event limit rather than changing an existing pause when the catalog changes"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -352,7 +352,7 @@
       "sample_behaviours": [
         "JrcApprovals::RequestSerializer serializes only scoped immutable names and digests without exposing another company or the personal justification"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -363,7 +363,7 @@
         "Deferred pause real HTTP concurrency recovers the same durable receipt for simultaneous copies of one exact request",
         "Deferred pause real HTTP concurrency rechecks operating authority after waiting rather than committing a revoked request"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -374,7 +374,7 @@
         "All-scope pause actual HTTP concurrency recovers one exact durable intent and Central request set from duplicate concurrent confirmations",
         "All-scope pause actual HTTP concurrency rechecks operating permissions after waiting rather than recording any partial approval request"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],

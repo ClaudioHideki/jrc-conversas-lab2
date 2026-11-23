@@ -4,8 +4,10 @@ require Rails.root.join('db/migrate/20261123063000_create_contact_center_ending_
 # Prepared, not executed. Every destructive schema statement below is limited to a rolled-back synthetic test transaction.
 RSpec.describe CreateContactCenterEndingActionVersions do
   include_context 'with native private ending action definitions'
+  include ContactCenterEndingOriginSchemaDependencies
 
   def remove_owned_ending_version_schema
+    detach_ending_origin_version_reference
     receipt = JrcContactCenter::EndingActionVersionSchemaReceipt
     ApplicationRecord.connection.execute("DROP TABLE #{receipt::TABLE}")
     receipt::FUNCTIONS.each do |name|

@@ -44,7 +44,7 @@
         "JrcContactCenter::EventIngestor stores one canonical event and deduplicates an identical retry",
         "JrcContactCenter::EventIngestor rejects a replay that reuses the event id with a different payload"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -54,7 +54,7 @@
         "Call Center reuses protected native PABX settings does not offer infrastructure settings to an account administrator",
         "Call Center reuses protected native PABX settings offers only the existing settings route to an eligible native administrative SuperAdmin"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -65,7 +65,7 @@
         "CDR documented transport and explicit mapping does not convert technical identifiers without an explicit CDR identity contract",
         "CDR documented transport and explicit mapping applies only the explicitly configured CDR prefix rule and does not mutate input data"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -76,7 +76,7 @@
         "Pabx::Client expires the shared cache after five minutes for subsequent Client instances",
         "Pabx::Client uses freshly persisted credentials rather than the previous configuration token"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -87,7 +87,7 @@
         "Pabx::Client renews once after a 401 and retries the original request once",
         "Pabx::Client stops after the second 401 without leaking request or response secrets"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -98,7 +98,7 @@
         "Pabx::Contract keeps a populated unknown schema pending instead of inventing fields",
         "Pabx::Contract maps documented type IN from the explicit synthetic field contract"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -109,7 +109,7 @@
         "PABX Provider native Rails scope blocks search_extension on tenant mismatch before any dependent request",
         "PABX Provider native Rails scope blocks web_extensions on tenant mismatch before any dependent request"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -120,7 +120,7 @@
         "Pabx::Provider reports technical state and a missing registry without querying CDR or recordings",
         "Pabx::Provider passes documented CDR filters with bounded page numbers and human extension"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -131,7 +131,7 @@
         "PABX documented recording transport blocks an unconfirmed recording lookup empty",
         "PABX documented recording transport blocks an unconfirmed recording lookup uniqueId"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -142,7 +142,7 @@
         "Pabx::ScopeMapping accepts explicitly authorized different identifiers without changing the tenant or guessing the CDR identity",
         "Pabx::ScopeMapping keeps a separately declared logical tenant in CDR rows"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -153,7 +153,7 @@
         "PABX existing job controls cannot run a queued integration ID through another Account",
         "PABX existing job controls bounds and delays a retry for TIMEOUT using the existing ActiveJob queue"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -164,7 +164,7 @@
         "PABX incremental sync with real PostgreSQL and mocked HTTP rolls back a partial import and resumes from the same successful checkpoint after a temporary HTTP failure",
         "PABX incremental sync with real PostgreSQL and mocked HTTP rejects empty pages while records are still missing"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -175,7 +175,7 @@
         "Pabx::Sync reads all pages then advances the incremental cursor",
         "Pabx::Sync rolls back partial pages and does not advance cursor on repeated pages"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -186,7 +186,7 @@
         "Native PABX settings and history API keeps administrative writes and diagnostics exclusive to the native Super Admin",
         "Native PABX settings and history API stores credentials encrypted, preserves blank values and never returns them after storage"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -197,7 +197,7 @@
         "PABX persistence and HTTP isolation persistence rotates credentials through HTTP without exposing or activating them",
         "PABX persistence and HTTP isolation authorizes a distinct accountcode server-side and ignores forged provenance fields"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -208,7 +208,7 @@
         "PABX stored CDR HTTP scope filters inbound missed calls without treating outbound unanswered calls as missed",
         "PABX stored CDR HTTP scope uses requested display-zone calendar boundaries and stable pagination"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -219,7 +219,7 @@
         "PABX private recording requests denies recording bytes without explicit authority when Call Center is enabled",
         "PABX private recording requests separates listening from direct download and retains own-extension authorization"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -230,7 +230,7 @@
         "PABX authorized diagnosis Rails does not report success for an incomplete dashboard 2",
         "PABX authorized diagnosis Rails does not report success for an incomplete dashboard 3"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -240,7 +240,7 @@
         "PABX PostgreSQL concurrent jobs serializes concurrent jobs of the same integration using a real PostgreSQL row lock",
         "PABX PostgreSQL concurrent jobs allows another Account integration to progress while the first Account row is locked"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],

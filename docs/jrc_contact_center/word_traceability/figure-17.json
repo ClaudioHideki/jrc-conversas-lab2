@@ -39,7 +39,7 @@
         "PABX private recording requests denies recording bytes without explicit authority when Call Center is enabled",
         "PABX private recording requests separates listening from direct download and retains own-extension authorization"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -50,7 +50,7 @@
         "JrcVoiceQuality::SupabaseClient rejects a foreign or unscoped response even when the transport returns success",
         "JrcVoiceQuality::SupabaseClient includes account scope in batch lookups and does not fall back to an unscoped query"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],

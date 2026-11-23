@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { validateNewMigrationTimestamps } from './validate_migration_timestamps.mjs';
+import { sourcePins as endingOriginPins, validateEndingOriginSources } from './validate_cc_ending_origin_migration.mjs';
 
 export const migrationPath = 'db/migrate/20261117190000_add_contact_center_access_grants.rb';
 export const migrationHash = '85fa579036a807b2d50ae3c30af64b061ba9ea6c6ffe173b4e0f33d4ad922dbe';
@@ -212,11 +213,27 @@ export function verifyEndingActionVersionMigrations(changes, readCurrent, schema
       endingActionScopeMigrationPath, endingActionVersionMigrationPath]);
 }
 
+// Preserve all sixteen previous verifiers and source identities. Only the exact
+// new origin migration and its SQL may be removed before the prior strict gate.
+export function verifyEndingOriginMigrations(changes, readCurrent, schema) {
+  const additions = [endingOriginPins.migration.path, endingOriginPins.sql.path];
+  const rows = changes.trim().split('\n').filter(Boolean);
+  for (const path of additions) {
+    if (rows.filter(row => row === `A\t${path}`).length !== 1)
+      throw new Error(`Missing or duplicate reviewed ending origin source: ${path}`);
+  }
+  const prior = rows.filter(row => !additions.some(path => row === `A\t${path}`));
+  verifyEndingActionVersionMigrations(prior.join('\n'), readCurrent, schema);
+  validateEndingOriginSources(Object.fromEntries(Object.entries(endingOriginPins).map(([key, pin]) => [key, readCurrent(pin.path)])));
+  const migrations = rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2));
+  return validateNewMigrationTimestamps(schema, migrations);
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyEndingActionVersionMigrations(changes, readFileSync, schema);
+  const result = verifyEndingOriginMigrations(changes, readFileSync, schema);
   console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
     [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, [endingActionScopeMigrationPath]: endingActionScopeMigrationHash, [endingActionVersionMigrationPath]: endingActionVersionMigrationHash },
-    pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, endingActionVersionSources, ...result }));
+    pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, endingActionVersionSources, endingOriginPins, ...result }));
 }

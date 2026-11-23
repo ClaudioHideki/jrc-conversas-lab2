@@ -45,7 +45,7 @@
         "JrcContactCenter::PauseCatalog persists real minutes and has the same revision after the JSONB round trip without changing unrelated settings",
         "JrcContactCenter::PauseCatalog requires explicit activation and keeps configuration and audit unchanged when it is absent"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -56,7 +56,7 @@
         "JrcContactCenter::PauseReasonDefinition preserves an explicit approval boolean true without adding an approver or policy",
         "JrcContactCenter::PauseReasonDefinition preserves an explicit approval boolean false without adding an approver or policy"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -67,7 +67,7 @@
         "Call Center account-local pause catalog API persists a draft through the native authenticated endpoint without enabling the requirement",
         "Call Center account-local pause catalog API requires a revision and rejects an old one without creating an audit for the denied write"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -78,7 +78,7 @@
         "Call Center private pause options and supervisor scope does not copy private operator options or the Unit B snapshot into a Unit A supervisor response",
         "Call Center private pause options and supervisor scope does not use a caller-provided member id to return another operator private catalog"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],

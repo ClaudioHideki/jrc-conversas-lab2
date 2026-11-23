@@ -45,7 +45,7 @@
         "CreateContactCenterPauseApprovalEvidence rejects a partially inserted corporate set at the database boundary and rolls its scope back with the root",
         "CreateContactCenterPauseApprovalEvidence accepts a complete immutable source without mistaking source existence for any policy, decision or approval"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -56,7 +56,7 @@
         "JrcContactCenter::PauseApprovalCoverage deduplicates units while preserving the actual memberships of multiple queues",
         "JrcContactCenter::PauseApprovalCoverage keeps a stable read-only digest without creating state, requests, approvals, grants or audit events"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -67,7 +67,7 @@
         "JrcContactCenter::PauseApprovalIntent never narrows global pause approval to the selected operating queue",
         "JrcContactCenter::PauseApprovalIntent creates no operational state, pending intent, approval, policy, grant or audit during preview"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -77,7 +77,7 @@
         "JrcContactCenter::PauseApprovalPolicyCheck rejects a real conflicting publication before it can replace a usable scoped policy or affect a pending pause",
         "JrcContactCenter::PauseApprovalPolicyCheck propagates a simulated selector conflict rather than treating it as missing or ready"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -88,7 +88,7 @@
         "JrcContactCenter::PauseApprovalReadiness keeps captured names immutable and withholds the projection after the native unit context changes",
         "JrcContactCenter::PauseApprovalReadiness returns no captured names after the owner loses current operating eligibility"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -99,7 +99,7 @@
         "JrcContactCenter::PauseApprovalSourceAccess rejects source access and a vote by a reviewer covering only the other native business unit",
         "JrcContactCenter::PauseApprovalSourceAccess requires explicit Call Center approve independently of native Central decide and an ordinary administrator role"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -110,7 +110,7 @@
         "JrcContactCenter::PauseApprovalReview rejects bulk edits to the immutable complete context without silently rewriting a historical approval",
         "JrcContactCenter::PauseApprovalReview rejects scope movement between accounts using actual SQL rather than an ActiveRecord-only validation"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -121,7 +121,7 @@
         "Native mandatory pause approval API requires the reviewed server digest and rejects supplied scope authority before creating anything",
         "Native mandatory pause approval API persists and recovers the pending all-scope state through authenticated native APIs without applying it early"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -132,7 +132,7 @@
         "All-scope pause actual HTTP concurrency recovers one exact durable intent and Central request set from duplicate concurrent confirmations",
         "All-scope pause actual HTTP concurrency rechecks operating permissions after waiting rather than recording any partial approval request"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -143,7 +143,7 @@
         "Configurable approval core requires native resource visibility before capturing any context, even with core management permission",
         "Configurable approval core publishes immutable versions and pins existing requests to their original version"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],

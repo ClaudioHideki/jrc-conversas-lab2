@@ -39,7 +39,7 @@
         "JrcContactCenter::EndingActions::BlockingRevision blocks old pending work at the first disabled revision while retaining the immutable original history",
         "JrcContactCenter::EndingActions::BlockingRevision does not revive old blocked work after reactivation but permits origins pinned to the new active version"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -48,7 +48,7 @@
       "sample_behaviours": [
         "JrcContactCenter::EndingActions::Catalogue puts only revision and a random nonce in the public head without a private template or dictionary-testable definition hash"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -59,7 +59,7 @@
         "JrcContactCenter::EndingActions::ConfigureRule keeps the same exact rule retry as a no-op without a second version or audit",
         "JrcContactCenter::EndingActions::ConfigureRule audits an authorized deactivation while keeping prior definitions and an identical inactive retry unchanged"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -70,7 +70,7 @@
         "JrcContactCenter::EndingActions::RuleDefinition preserves an explicitly disabled rule instead of dropping false or activating it",
         "JrcContactCenter::EndingActions::RuleDefinition accepts explicit outcome conditions only after actual ACW completion"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -81,7 +81,7 @@
         "JrcContactCenter::EndingActions::TaskDefinition preserves an explicit zero-day offset and zero estimated minutes instead of treating them as absent",
         "JrcContactCenter::EndingActions::TaskDefinition normalizes only canonical positive integer references, retaining an explicit unassigned native task"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -92,7 +92,7 @@
         "JrcContactCenter::QualityAnalysisSnapshot does not let mutation of the reader DTO change the captured original or fingerprint",
         "JrcContactCenter::QualityAnalysisSnapshot fingerprints the same native JSON independently of top-level symbol or object-key order"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],
@@ -104,7 +104,8 @@
     "pending ACW native draft persists incomplete answers and completes only after explicit tabulation",
     "pending ACW native navigation reviews unsaved edits preserves saved state and leaves other modules untouched",
     "pending ACW native review preserves local answers blocks stale writes and requires explicit reconciliation",
-    "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya"
+    "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya",
+    "versioned ending automation native editor persists reviewed private rules and denies stale or unauthorized changes without executing destinations"
   ],
   "requirements": [
     {

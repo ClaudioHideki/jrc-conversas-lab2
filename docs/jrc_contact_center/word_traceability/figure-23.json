@@ -39,7 +39,7 @@
         "AddContactCenterQualityReviewAuthority upgrades populated legacy grants atomically without changing eligibility, denials, teams or audit",
         "AddContactCenterQualityReviewAuthority admits explicit allowed review values only after the forward migration"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -50,7 +50,7 @@
         "JrcContactCenter::ModulePolicy#quality_review? requires an explicit registered profile right in addition to native recording access",
         "JrcContactCenter::ModulePolicy#quality_review? does not review when the profile lacks jrc_contact_center_recordings_view"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -61,7 +61,7 @@
         "JrcContactCenter::QualityAnalysisSnapshot does not let mutation of the reader DTO change the captured original or fingerprint",
         "JrcContactCenter::QualityAnalysisSnapshot fingerprints the same native JSON independently of top-level symbol or object-key order"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -72,7 +72,7 @@
         "JrcContactCenter::QualityReviewInput takes an immutable private copy without freezing or rewriting the caller values",
         "JrcContactCenter::QualityReviewInput normalizes explicit input without assigning actor, permissions, origin or an operational action"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -83,7 +83,7 @@
         "Call Center Nico review permissions in authenticated native APIs exports an explicit profile grant and removes it after a fresh recording-access denial",
         "Call Center Nico review permissions in authenticated native APIs does not let a native administrator add the new authority through the existing profile API"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],
@@ -103,6 +103,7 @@
     "team roster last eligible withdrawal uses real native review, persistence and scoped audit",
     "team source last eligible inactivation preserves shared roster and requires manager review",
     "team supervision native metadata persists reviewed roles, pages candidates and rejects stale or denied writes",
+    "versioned ending automation native editor persists reviewed private rules and denies stale or unauthorized changes without executing destinations",
     "whole native team deletion preserves generic confirmation requires scoped manager review and records real audit"
   ],
   "requirements": [

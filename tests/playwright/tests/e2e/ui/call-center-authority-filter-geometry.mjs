@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 export async function verifyAuthorityFilterGeometry(page, project) {
   const form = page.locator('[data-authority-filters]');
   await expect(form).toBeVisible();
+  await form.scrollIntoViewIfNeeded();
   const geometry = await form.evaluate(node => {
     const labels = [...node.querySelectorAll('label')].map(label => {
       const box = label.getBoundingClientRect();
@@ -27,6 +28,12 @@ export async function verifyAuthorityFilterGeometry(page, project) {
       noOverflow: document.documentElement.scrollWidth <= window.innerWidth,
     };
   });
+  const visible = await form.boundingBox();
+  expect(visible).not.toBeNull();
+  expect(visible.y).toBeGreaterThanOrEqual(-1);
+  expect(visible.y + visible.height).toBeLessThanOrEqual(
+    page.viewportSize().height + 1
+  );
   expect(geometry.labels).toHaveLength(2);
   expect(geometry.noOverflow).toBe(true);
   for (const label of geometry.labels) {

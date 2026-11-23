@@ -57,7 +57,7 @@
         "JrcContactCenter::AcwEndingReasons fails closed for malformed stored configuration nil",
         "JrcContactCenter::AcwEndingReasons fails closed for malformed stored configuration false"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -68,7 +68,7 @@
         "JrcContactCenter::AcwFormAnswers returns independent data without rewriting private text or selection values",
         "JrcContactCenter::AcwFormAnswers allows an incomplete draft without changing required flags in the immutable definition"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -79,7 +79,7 @@
         "JrcContactCenter::AcwFormBindingPolicy keeps the original six-field scoped signature when only legacy rules exist",
         "JrcContactCenter::AcwFormBindingPolicy signs exact form versions and requirements independently of JSON key order without mutating the legacy vector"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -90,7 +90,7 @@
         "JrcContactCenter::AcwFormBindings resolves only the pinned schema and does not expose the catalogue actor or enable attendance access",
         "JrcContactCenter::AcwFormBindings rejects malformed binding collection NilClass"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -101,7 +101,7 @@
         "JrcContactCenter::AcwFormDefinition returns an independent value so editing a new form version cannot mutate the original definition",
         "JrcContactCenter::AcwFormDefinition rejects an incomplete or unknown definition envelope nil"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -112,7 +112,7 @@
         "JrcContactCenter::AcwFormInput rejects invalid form metadata 2:name:FalseClass",
         "JrcContactCenter::AcwFormInput rejects invalid form metadata 3:name:String"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -123,7 +123,7 @@
         "JrcContactCenter::AcwFormQuery does not match an obsolete historical name in the current form listing",
         "JrcContactCenter::AcwFormQuery treats SQL search wildcards as literal characters rather than a request for every form"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -134,7 +134,7 @@
         "JrcContactCenter::AcwFormWrite records the authenticated actor and scope without private form definition or name in the native audit",
         "JrcContactCenter::AcwFormWrite appends changes while preserving the earlier revision"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -145,7 +145,7 @@
         "JrcContactCenter::AcwQualificationPolicy uses team precedence when the answered leg has no queue and does not infer a transferred current queue",
         "JrcContactCenter::AcwQualificationPolicy uses the general reason rule when no queue or team rule matches the native snapshot"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -156,7 +156,7 @@
         "JrcContactCenter::AcwRulePrecedence selects a matching team above the general rule when no queue rule applies",
         "JrcContactCenter::AcwRulePrecedence selects the general rule when neither native queue nor team matches"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -167,7 +167,7 @@
         "JrcContactCenter::AgentStateManager keeps a terminated call in ACW and preserves its draft and native availability instead of starting the pause",
         "JrcContactCenter::AgentStateManager continues blocking a pause after the ACW clock expires without completing or deleting answers"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -177,7 +177,7 @@
         "JrcContactCenter::ConfirmEndingReason with incomplete native ACW forms saves partial typed answers and confirms the reason while enforcing remaining required fields at actual ACW completion",
         "JrcContactCenter::ConfirmEndingReason with incomplete native ACW forms does not partially save a reason or confirmation when submitted form answers are invalid"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -188,7 +188,7 @@
         "JrcContactCenter::ConfirmEndingReason retains the frozen reason label even after the account publishes a new catalogue version",
         "JrcContactCenter::ConfirmEndingReason replays the same original input exactly once without demanding its now-stale preconfirmation revision"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -199,7 +199,7 @@
         "CreateContactCenterEndingReasonConfirmations retains a populated confirmation unchanged on exact migration reexecution",
         "CreateContactCenterEndingReasonConfirmations rejects an incomplete existing schema instead of stamping a missing reason-protection trigger as valid"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -210,7 +210,7 @@
         "CreateContactCenterQualificationForms does not accept a missing structural receipt as an already-upgraded schema",
         "CreateContactCenterQualificationForms detects a missing child trigger instead of recreating it silently during reexecution"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -220,7 +220,7 @@
         "JrcContactCenter::DeferredPauseManager does not override the actual pending qualification merely because all companies approved",
         "JrcContactCenter::DeferredPauseManager consumes the approved native pause once after actual ACW completion without a provider command"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -229,7 +229,7 @@
       "sample_behaviours": [
         "Contact Center qualification concurrent retries serializes two real connections into one pending record and one immutable completion"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -240,7 +240,7 @@
         "JrcContactCenter::QualificationDraft keeps the manual-state revision stable across an overdue clock observation",
         "JrcContactCenter::QualificationDraft keeps manual answers out of shared agent and supervisor state while preserving the pending blocker"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -249,7 +249,7 @@
       "sample_behaviours": [
         "JrcContactCenter::QualificationForms does not backfill a form or change a legacy manual token when policy bindings are introduced later"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -260,7 +260,7 @@
         "JrcContactCenter::QualificationForms exposes only the selected exact definition to the authorized caller and keeps private answers out of shared payloads",
         "JrcContactCenter::QualificationForms saves incomplete typed responses with the native draft revision and retains false and zero without completing ACW"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -271,7 +271,7 @@
         "JrcContactCenter::QualificationManager persists one pending qualification on confirmed voice termination and restores it on replay",
         "JrcContactCenter::QualificationManager does not create an automatic obligation for voice when that company makes tabulation optional"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -282,7 +282,7 @@
         "JrcContactCenter::AcwFormTemplate appends a contiguous new version without rewriting the original definition",
         "JrcContactCenter::AcwFormTemplate persists a large valid compact schema even when PostgreSQL adds JSONB separator spaces"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -293,7 +293,7 @@
         "JrcContactCenter::EndingReasonConfirmation rejects direct SQL edits of confirmed evidence even when ActiveRecord callbacks are bypassed",
         "JrcContactCenter::EndingReasonConfirmation rejects direct SQL deletion while the account is still live"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -304,7 +304,7 @@
         "Native qualification clock refresh against a stale persisted row cannot overwrite a completed result through an AR copy read while it was still pending",
         "Native qualification clock refresh against a stale persisted row cannot restore an obsolete exceeded duration after the current pending limit increases"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -315,7 +315,7 @@
         "JrcContactCenter::QualificationForm rejects direct rewriting of the frozen definition references through PostgreSQL",
         "JrcContactCenter::QualificationForm refuses direct cross-account reassignment even when the supplied account exists"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -326,7 +326,7 @@
         "Call Center form revisions in native configuration audit filters the exact native revision without mixing accounts or unrelated configuration types",
         "Call Center form revisions in native configuration audit does not expose the new comment through the ordinary native audit relation after permission revocation"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -337,7 +337,7 @@
         "Native ACW immutable form binding configuration rejects stale settings and preserves both the previous rules and form pins without a second audit",
         "Native ACW immutable form binding configuration does not orphan a form when deleting a rule and permits only an explicit atomic removal of both"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -348,7 +348,7 @@
         "Call Center immutable ACW form library keeps append-only version history and detects stale updates instead of overwriting data",
         "Call Center immutable ACW form library replays a completed create request without duplicating a form, version or native audit"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -359,7 +359,7 @@
         "Call Center global ACW configuration scope lets explicit GROUP coverage change only its own account policy",
         "Call Center global ACW configuration scope does not treat GROUP coverage as permission to configure the module"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -370,7 +370,7 @@
         "Call Center local ACW configuration audit does not append misleading events for an unchanged effective default or a repeated save",
         "Call Center local ACW configuration audit exposes the same native event in filtered history and detail without private account settings"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -381,7 +381,7 @@
         "Call Center expected global ACW revision commits a current snapshot and returns a fresh revision with the audit intact",
         "Call Center expected global ACW revision rejects an outdated edit without changing values or appending a second audit"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -392,7 +392,7 @@
         "Call Center scoped voice ACW rules preserves existing rules on a legacy limits-only edit without materializing or changing historical events",
         "Call Center scoped voice ACW rules requires a revision for scoped rule edits and rejects an outdated edit atomically"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -403,7 +403,7 @@
         "Contact Center ACW persistent API lets only authorized administration save independent per-account channel limits",
         "Contact Center ACW persistent API lets administration configure optional voice tabulation without affecting another account or erasing the choice on legacy limit updates"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -412,7 +412,7 @@
       "sample_behaviours": [
         "Native operator pause while ACW is pending rejects a direct authenticated pause request without altering the pending qualification or state"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -423,7 +423,7 @@
         "Explicit own-attendance ending reason confirmation refuses another account credential and does not reveal the private classification",
         "Explicit own-attendance ending reason confirmation does not grant a second administrator authority over the original operator classification"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -434,7 +434,7 @@
         "Call Center native qualification origin authority denies completion of a formerly visible call that is now outside the authorized business unit",
         "Call Center native qualification origin authority does not use a caller supplied account or user ID to expand completion authority"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -445,7 +445,7 @@
         "Owned native qualification form context and original corporate source persists private typed responses through the authenticated native draft API and recovers them after reload",
         "Owned native qualification form context and original corporate source blocks missing required answers through the actual completion API with no partial completion"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -456,7 +456,7 @@
         "ACW form library real HTTP concurrency returns one durable operation receipt to simultaneous retries with the same UUID",
         "ACW form library real HTTP concurrency rejects a write whose eligibility was revoked while its real request waited for the account lock"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -466,7 +466,7 @@
         "Private operational ACW responses with real HTTP contenders accepts exactly one private draft when different actual HTTP requests expect the same manual revision",
         "Private operational ACW responses with real HTTP contenders rejects a queued private draft after eligibility is revoked while preserving all persisted answers"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],

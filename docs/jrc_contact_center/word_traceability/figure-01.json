@@ -39,7 +39,7 @@
         "JrcContactCenter::ModulePolicy#quality_review? requires an explicit registered profile right in addition to native recording access",
         "JrcContactCenter::ModulePolicy#quality_review? does not review when the profile lacks jrc_contact_center_recordings_view"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -50,7 +50,7 @@
         "Call Center administration isolation preserves legacy agent access without granting new administrative authorities",
         "Call Center administration isolation keeps publication blocked without permission or a provider contract"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -61,7 +61,7 @@
         "Call Center administrative workflows offers native team member options only to a native team administrator",
         "Call Center administrative workflows does not turn Call Center configure into native team administration"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],

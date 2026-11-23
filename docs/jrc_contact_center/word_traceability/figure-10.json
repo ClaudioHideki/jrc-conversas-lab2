@@ -12,20 +12,20 @@
   "code": [
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue",
-      "git_blob_at_validated_base": "2f397e47c3060c2971b98abeeb7ad00d50c4fb32",
-      "state": "em_trabalho_sem_CI",
+      "git_blob_at_validated_base": "14b20edf713f80c5a3772c6092987d1eebbd1032",
+      "state": "presente_na_base_validada",
       "current_sha256": "c8e744daa49d34c0606fd3682bd46eaf76caa27ade0d648168ed97f50eeedd2e"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/configure_rule.rb",
-      "git_blob_at_validated_base": "d8287e5e1141a363a8a774a5584c365615e46f1f",
-      "state": "em_trabalho_sem_CI",
+      "git_blob_at_validated_base": "10d0718f7cbe28f470f993fff2c8413a27132324",
+      "state": "presente_na_base_validada",
       "current_sha256": "4ad8e4d6745bc1e5144228d774f00635b4dfb2d5f351006b40bae54ef790ae32"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
-      "git_blob_at_validated_base": "43e053aec12f37e3f48281958e9081afb328dca3",
-      "state": "em_trabalho_sem_CI",
+      "git_blob_at_validated_base": "ab229f7317373a5dcd2e69df7939311f6975224b",
+      "state": "presente_na_base_validada",
       "current_sha256": "90b6a2607cbc9af3e7dd09cbbb5981d5e0dd2b41d774d425efb8d6ea99eea39e"
     },
     {
@@ -42,43 +42,90 @@
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/visible_rules.rb",
-      "git_blob_at_validated_base": null,
-      "state": "em_trabalho_sem_CI",
+      "git_blob_at_validated_base": "78f1e7ff1876f6e4ee758b8eabf790770ca4bd61",
+      "state": "presente_na_base_validada",
       "current_sha256": "af026638839698f38ee978d406ce7379ec80746d3ef8efab409ccf30933069c5"
     },
     {
       "path": "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
-      "git_blob_at_validated_base": null,
-      "state": "em_trabalho_sem_CI",
+      "git_blob_at_validated_base": "c60a1f991e2aab8f0a1ad1ed5bdb4d7e6cb2cde8",
+      "state": "presente_na_base_validada",
       "current_sha256": "06a2e3e1d6f0b32c28bf95f20aab697215e2214a4474c9b8b4de2f280eeaac33"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
-      "git_blob_at_validated_base": null,
-      "state": "em_trabalho_sem_CI",
+      "git_blob_at_validated_base": "d8323a2b1276ec658b609e62c9ab5f48de64a5b6",
+      "state": "presente_na_base_validada",
       "current_sha256": "5b47ca46047961504b0fa102b26c5df043d9958976f3dcdc3ce2be7b97da7539"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
-      "git_blob_at_validated_base": null,
-      "state": "em_trabalho_sem_CI",
+      "git_blob_at_validated_base": "1a38f32e660784c8b68978fd464f3e1bb0551082",
+      "state": "presente_na_base_validada",
       "current_sha256": "c5931e011d63a36ceed45f50e47d597cba1628f369552bd2eabf32e20cdd33e5"
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.js",
-      "git_blob_at_validated_base": null,
-      "state": "em_trabalho_sem_CI",
+      "git_blob_at_validated_base": "fc5f647dcb1a83f0d0fdefcb5a6d2bd2869966d6",
+      "state": "presente_na_base_validada",
       "current_sha256": "383ab5c43c50ad9c4d63f5082df8cafa04c401c1fb71cc9ad8a52817cad76d4e"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/source_context.rb",
-      "git_blob_at_validated_base": null,
-      "state": "em_trabalho_sem_CI",
+      "git_blob_at_validated_base": "be26d2f26b50d4955a1af2d50f18a8e0d757edec",
+      "state": "presente_na_base_validada",
       "current_sha256": "2ee0d5a27ac4b3eb8084021fd69af22caa78944b1e927668098c28063f68c2d3"
+    },
+    {
+      "path": "app/services/jrc_contact_center/acw_ending_reasons.rb",
+      "git_blob_at_validated_base": "97839871fde2ab428edede96ab1658e5a51ac7cb",
+      "state": "presente_na_base_validada",
+      "current_sha256": "2797c3427cff7ad542cce1b1ea6235067edf02bbd040e59416b06ad1d7df6320"
+    },
+    {
+      "path": "app/services/jrc_contact_center/qualification_manager.rb",
+      "git_blob_at_validated_base": "eba81fa306877aded3c4e32741f8e8df62904764",
+      "state": "presente_na_base_validada",
+      "current_sha256": "70aa11b140bc4e930b6fe1394675e5a27522e6da33ba87c54354afce34976acc"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/project_task_parameters.rb",
+      "git_blob_at_validated_base": "b7a2f3cbc3bd3a40f5b28511cd2aca5c47ba8bb2",
+      "state": "presente_na_base_validada",
+      "current_sha256": "a181ec9c84e7e143dde36b01f3ecd77f577870799f22ac83e96df40829333e99"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "git_blob_at_validated_base": "2a23c9347268a35231bc96bc07e31e749bef2c66",
+      "state": "presente_na_base_validada",
+      "current_sha256": "0923fb023ecf13d53e799791ce9701334bc25c904465a7a52ae8df943242ec45"
+    },
+    {
+      "path": "app/services/jrc_contact_center/confirm_ending_reason.rb",
+      "git_blob_at_validated_base": "7f7343e96ccfdacfbdc4bc9d75a0d6ad7a0cb6f4",
+      "state": "presente_na_base_validada",
+      "current_sha256": "6ab9de4ac92e5bdec19c7f010027d63c7304b07fa79bb171ca9b9ef57143845d"
+    },
+    {
+      "path": "app/models/jrc_contact_center/qualification.rb",
+      "git_blob_at_validated_base": "efb235d14b9966f8ea69e936d933f84f6d217de2",
+      "state": "presente_na_base_validada",
+      "current_sha256": "7eb03635e03fe10fc01299323712fdd2231feac32182f6061c22157b9c3d5350"
     }
   ],
   "planned_not_present": [],
   "tests_native_related": [
+    {
+      "path": "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb",
+      "passed_examples": 13,
+      "sample_behaviours": [
+        "JrcContactCenter::ConfirmEndingReason saves the complete explicit draft and an immutable classification without completing ACW or executing integrations",
+        "JrcContactCenter::ConfirmEndingReason retains the frozen reason label even after the account publishes a new catalogue version",
+        "JrcContactCenter::ConfirmEndingReason replays the same original input exactly once without demanding its now-stale preconfirmation revision"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
     {
       "path": "spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_account_references_spec.rb",
       "passed_examples": 6,
@@ -87,7 +134,7 @@
         "CreateContactCenterEndingActionScopes creates exactly one technical reference when a real new account is inserted",
         "CreateContactCenterEndingActionScopes rejects a reference without a real account instead of admitting an orphaned history root"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -98,7 +145,7 @@
         "CreateContactCenterEndingActionScopes preserves populated scope history on exact migration reexecution",
         "CreateContactCenterEndingActionScopes rejects an incomplete existing schema instead of stamping missing guards as valid"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -109,7 +156,7 @@
         "CreateContactCenterEndingActionVersions preserves populated definitions, native audit and account settings on exact reexecution",
         "CreateContactCenterEndingActionVersions rejects a partial schema instead of stamping a missing immutable trigger as valid"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -120,7 +167,7 @@
         "JrcContactCenter::EndingActions::BlockingRevision blocks old pending work at the first disabled revision while retaining the immutable original history",
         "JrcContactCenter::EndingActions::BlockingRevision does not revive old blocked work after reactivation but permits origins pinned to the new active version"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -129,7 +176,7 @@
       "sample_behaviours": [
         "JrcContactCenter::EndingActions::Catalogue puts only revision and a random nonce in the public head without a private template or dictionary-testable definition hash"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -140,7 +187,7 @@
         "JrcContactCenter::EndingActions::ConfigureRule keeps the same exact rule retry as a no-op without a second version or audit",
         "JrcContactCenter::EndingActions::ConfigureRule audits an authorized deactivation while keeping prior definitions and an identical inactive retry unchanged"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -151,7 +198,7 @@
         "JrcContactCenter::EndingActions::RuleDefinition preserves an explicitly disabled rule instead of dropping false or activating it",
         "JrcContactCenter::EndingActions::RuleDefinition accepts explicit outcome conditions only after actual ACW completion"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -162,7 +209,18 @@
         "JrcContactCenter::EndingActions::TaskDefinition preserves an explicit zero-day offset and zero estimated minutes instead of treating them as absent",
         "JrcContactCenter::EndingActions::TaskDefinition normalizes only canonical positive integer references, retaining an explicit unassigned native task"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/services/jrc_contact_center/qualification_manager_spec.rb",
+      "passed_examples": 22,
+      "sample_behaviours": [
+        "JrcContactCenter::QualificationManager does not enter ACW when hangup is requested without terminal confirmation",
+        "JrcContactCenter::QualificationManager persists one pending qualification on confirmed voice termination and restores it on replay",
+        "JrcContactCenter::QualificationManager does not create an automatic obligation for voice when that company makes tabulation optional"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -173,7 +231,18 @@
         "JrcContactCenter::EndingActionVersion preserves earlier immutable definitions and current head across actual version increments",
         "JrcContactCenter::EndingActionVersion rejects direct SQL mutation and deletion without depending on an immutable model callback"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb",
+      "passed_examples": 7,
+      "sample_behaviours": [
+        "Native qualification clock refresh against a stale persisted row refreshes the derived clock on the current pending row without completing or restarting attendance",
+        "Native qualification clock refresh against a stale persisted row cannot overwrite a completed result through an AR copy read while it was still pending",
+        "Native qualification clock refresh against a stale persisted row cannot restore an obsolete exceeded duration after the current pending limit increases"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -184,7 +253,40 @@
         "Ending rule private definitions at native serialization and logging boundaries keeps the actual native configuration audit readable under its dedicated permission without returning private content",
         "Ending rule private definitions at native serialization and logging boundaries filters the private native INSERT bind while retaining actual SQL diagnostics and the persisted private template"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb",
+      "passed_examples": 28,
+      "sample_behaviours": [
+        "Native ACW ending reason catalogue configuration returns an empty account-global catalogue only to an authorized configurator and disables caching",
+        "Native ACW ending reason catalogue configuration persists through the existing policy API and records the exact version, actor and before/after in its native audit",
+        "Native ACW ending reason catalogue configuration preserves old versions in the audit and deactivates without deleting codes or qualifications"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb",
+      "passed_examples": 18,
+      "sample_behaviours": [
+        "Explicit required ending reason queues rejects malformed queue selection nil without broadening to an account-wide requirement",
+        "Explicit required ending reason queues rejects malformed queue selection false without broadening to an account-wide requirement",
+        "Explicit required ending reason queues rejects malformed queue selection {} without broadening to an account-wide requirement"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+      "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+      "passed_examples": 20,
+      "sample_behaviours": [
+        "Ending automation configuration through the existing ACW policy persists one explicit authorized rule through the actual API and returns the same private rule on reload",
+        "Ending automation configuration through the existing ACW policy keeps absent rule configuration empty without enabling a catalogue or destination",
+        "Ending automation configuration through the existing ACW policy persists an explicitly inactive empty draft without executing or silently choosing a destination"
+      ],
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -195,7 +297,7 @@
         "Ending rule versions with competing native PostgreSQL connections rechecks committed profile revocation after waiting instead of using the callers earlier configure authority",
         "Ending rule versions with competing native PostgreSQL connections observes a committed deactivation after the original pending reader actually waits on the native account transaction"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],
@@ -207,7 +309,8 @@
     "pending ACW native draft persists incomplete answers and completes only after explicit tabulation",
     "pending ACW native navigation reviews unsaved edits preserves saved state and leaves other modules untouched",
     "pending ACW native review preserves local answers blocks stale writes and requires explicit reconciliation",
-    "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya"
+    "registered ending native preserves the call catalogue while managers revise required queues and operators complete in Hoya",
+    "versioned ending automation native editor persists reviewed private rules and denies stale or unauthorized changes without executing destinations"
   ],
   "requirements": [
     {
@@ -230,42 +333,37 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Cadastro, obrigatoriedade por fila, formulário nativo e ACW persistido existem. Disparo operacional entre módulos e workspace completo ainda não estão concluídos.",
       "code_reference_ids": [
         0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        11,
+        12
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
         9,
-        10
+        13,
+        14
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "A navegação completa em quatro abas, indicadores reais e workspace de automações da imagem precisam de aceite próprio; não substituir por números ilustrativos."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Cadastro, obrigatoriedade por fila, formulário nativo e ACW persistido existem. Disparo operacional entre módulos e workspace completo ainda não estão concluídos.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue",
+          "app/services/jrc_contact_center/acw_ending_reasons.rb",
+          "app/services/jrc_contact_center/qualification_manager.rb"
+        ],
+        "tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb",
+          "spec/services/jrc_contact_center/qualification_manager_spec.rb"
+        ],
+        "visual_gap": "A navegação completa em quatro abas, indicadores reais e workspace de automações da imagem precisam de aceite próprio; não substituir por números ilustrativos."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0128-C01",
@@ -287,42 +385,37 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Cadastro, obrigatoriedade por fila, formulário nativo e ACW persistido existem. Disparo operacional entre módulos e workspace completo ainda não estão concluídos.",
       "code_reference_ids": [
         0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        11,
+        12
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
         9,
-        10
+        13,
+        14
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "A navegação completa em quatro abas, indicadores reais e workspace de automações da imagem precisam de aceite próprio; não substituir por números ilustrativos."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Cadastro, obrigatoriedade por fila, formulário nativo e ACW persistido existem. Disparo operacional entre módulos e workspace completo ainda não estão concluídos.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue",
+          "app/services/jrc_contact_center/acw_ending_reasons.rb",
+          "app/services/jrc_contact_center/qualification_manager.rb"
+        ],
+        "tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb",
+          "spec/services/jrc_contact_center/qualification_manager_spec.rb"
+        ],
+        "visual_gap": "A navegação completa em quatro abas, indicadores reais e workspace de automações da imagem precisam de aceite próprio; não substituir por números ilustrativos."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0129-C01",
@@ -344,42 +437,37 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Cadastro, obrigatoriedade por fila, formulário nativo e ACW persistido existem. Disparo operacional entre módulos e workspace completo ainda não estão concluídos.",
       "code_reference_ids": [
         0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        11,
+        12
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
         9,
-        10
+        13,
+        14
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "A navegação completa em quatro abas, indicadores reais e workspace de automações da imagem precisam de aceite próprio; não substituir por números ilustrativos."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Cadastro, obrigatoriedade por fila, formulário nativo e ACW persistido existem. Disparo operacional entre módulos e workspace completo ainda não estão concluídos.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue",
+          "app/services/jrc_contact_center/acw_ending_reasons.rb",
+          "app/services/jrc_contact_center/qualification_manager.rb"
+        ],
+        "tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_catalog_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_queue_configuration_spec.rb",
+          "spec/services/jrc_contact_center/qualification_manager_spec.rb"
+        ],
+        "visual_gap": "A navegação completa em quatro abas, indicadores reais e workspace de automações da imagem precisam de aceite próprio; não substituir por números ilustrativos."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0130-C01",
@@ -401,41 +489,40 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
       "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
         6,
         7,
         8,
-        9,
-        10
+        13
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        15
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
       ],
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
+          "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
+          "app/services/jrc_contact_center/ending_actions/project_task_parameters.rb"
+        ],
+        "tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
+          "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
+        ],
+        "visual_gap": "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "authorization_gap": "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
+      },
       "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
+        0
       ]
     },
     {
@@ -457,43 +544,23 @@
         9,
         10
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
-      "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "status": "pendente",
+      "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+      "code_reference_ids": [],
+      "test_reference_ids": [],
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "pendente",
+        "behavior": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+        "code": [],
+        "tests": [],
+        "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
+        "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0133-C01",
@@ -515,42 +582,38 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Ciclo interno separa encerramento, confirmação do motivo e conclusão real do ACW. Confirmação mantém formulário e pausa pendentes; o relógio não conclui nem apaga rascunhos. A evidência anterior é do ciclo nativo, não do novo executor.",
       "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        12,
+        15,
+        16
       ],
       "test_reference_ids": [
         0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
         9,
-        10
+        11
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Conferir o comportamento desse ciclo com o editor e o executor integrados; não concluir a figura10 por testes isolados do ciclo."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Ciclo interno separa encerramento, confirmação do motivo e conclusão real do ACW. Confirmação mantém formulário e pausa pendentes; o relógio não conclui nem apaga rascunhos. A evidência anterior é do ciclo nativo, não do novo executor.",
+        "code": [
+          "app/services/jrc_contact_center/qualification_manager.rb",
+          "app/services/jrc_contact_center/confirm_ending_reason.rb",
+          "app/models/jrc_contact_center/qualification.rb"
+        ],
+        "tests": [
+          "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb",
+          "spec/services/jrc_contact_center/qualification_manager_spec.rb",
+          "spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-ending-confirmation-native.mjs"
+        ],
+        "visual_gap": "Conferir o comportamento desse ciclo com o editor e o executor integrados; não concluir a figura10 por testes isolados do ciclo."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0134-C01",
@@ -572,42 +635,38 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Ciclo interno separa encerramento, confirmação do motivo e conclusão real do ACW. Confirmação mantém formulário e pausa pendentes; o relógio não conclui nem apaga rascunhos. A evidência anterior é do ciclo nativo, não do novo executor.",
       "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        12,
+        15,
+        16
       ],
       "test_reference_ids": [
         0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
         9,
-        10
+        11
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Conferir o comportamento desse ciclo com o editor e o executor integrados; não concluir a figura10 por testes isolados do ciclo."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Ciclo interno separa encerramento, confirmação do motivo e conclusão real do ACW. Confirmação mantém formulário e pausa pendentes; o relógio não conclui nem apaga rascunhos. A evidência anterior é do ciclo nativo, não do novo executor.",
+        "code": [
+          "app/services/jrc_contact_center/qualification_manager.rb",
+          "app/services/jrc_contact_center/confirm_ending_reason.rb",
+          "app/models/jrc_contact_center/qualification.rb"
+        ],
+        "tests": [
+          "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb",
+          "spec/services/jrc_contact_center/qualification_manager_spec.rb",
+          "spec/models/jrc_contact_center/qualification_clock_refresh_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-ending-confirmation-native.mjs"
+        ],
+        "visual_gap": "Conferir o comportamento desse ciclo com o editor e o executor integrados; não concluir a figura10 por testes isolados do ciclo."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0135-C01",
@@ -628,43 +687,23 @@
         9,
         10
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
-      "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "status": "pendente",
+      "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+      "code_reference_ids": [],
+      "test_reference_ids": [],
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "pendente",
+        "behavior": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+        "code": [],
+        "tests": [],
+        "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
+        "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0136-C01",
@@ -685,43 +724,26 @@
         9,
         10
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "status": "pendente",
+      "verification": "Nico não está habilitado para executar ações neste editor. É necessário reutilizar sugestões/processamento existentes e reautorizar o agente original por destino; ausência de executor não equivale à homologação da integração.",
       "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        7
       ],
-      "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "test_reference_ids": [],
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Configuração e sugestão Nico operacionais ainda faltam; fornecedor/canal real permanece fora da homologação interna."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "pendente",
+        "behavior": "Nico não está habilitado para executar ações neste editor. É necessário reutilizar sugestões/processamento existentes e reautorizar o agente original por destino; ausência de executor não equivale à homologação da integração.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue"
+        ],
+        "tests": [],
+        "visual_gap": "Configuração e sugestão Nico operacionais ainda faltam; fornecedor/canal real permanece fora da homologação interna."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0221-C01",
@@ -737,41 +759,40 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
       "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
         6,
         7,
         8,
-        9,
-        10
+        13
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        15
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
       ],
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
+          "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
+          "app/services/jrc_contact_center/ending_actions/project_task_parameters.rb"
+        ],
+        "tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
+          "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
+        ],
+        "visual_gap": "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "authorization_gap": "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
+      },
       "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
+        0
       ]
     },
     {
@@ -788,41 +809,37 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Motivo, momento e modo explícitos são persistidos e validados. call_end e acw_completed são enums distintos; automatic e agent_confirmation não são inferidos para definições legadas. Despacho e confirmação operacional por regra ainda não existem.",
       "code_reference_ids": [
-        0,
-        1,
         2,
-        3,
-        4,
-        5,
-        6,
         7,
-        8,
-        9,
-        10
+        14
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
         7,
-        8,
-        9,
-        10
+        15
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Seleção preparada; falta demonstrar o modo escolhido durante uma execução real e sua revisão pelo agente."
       ],
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Motivo, momento e modo explícitos são persistidos e validados. call_end e acw_completed são enums distintos; automatic e agent_confirmation não são inferidos para definições legadas. Despacho e confirmação operacional por regra ainda não existem.",
+        "code": [
+          "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+          "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue"
+        ],
+        "tests": [
+          "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
+        ],
+        "visual_gap": "Seleção preparada; falta demonstrar o modo escolhido durante uma execução real e sua revisão pelo agente."
+      },
       "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
+        0
       ]
     },
     {
@@ -839,42 +856,35 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Configuração imutável preserva histórico e detecta a primeira desativação, inclusive após reativação. O executor ainda precisa aplicar esse bloqueio a recibos reais de pendências, sem desfazer sucessos.",
       "code_reference_ids": [
-        0,
         1,
-        2,
         3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        4
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
         4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        16
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Histórico de configuração não é histórico de execução; falta exibir recibos por destino."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Configuração imutável preserva histórico e detecta a primeira desativação, inclusive após reativação. O executor ainda precisa aplicar esse bloqueio a recibos reais de pendências, sem desfazer sucessos.",
+        "code": [
+          "app/models/jrc_contact_center/ending_action_version.rb",
+          "app/services/jrc_contact_center/ending_actions/blocking_revision.rb",
+          "app/services/jrc_contact_center/ending_actions/configure_rule.rb"
+        ],
+        "tests": [
+          "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb"
+        ],
+        "visual_gap": "Histórico de configuração não é histórico de execução; falta exibir recibos por destino."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0222-C03",
@@ -890,41 +900,40 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
       "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
         6,
         7,
         8,
-        9,
-        10
+        13
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        15
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
       ],
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
+          "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
+          "app/services/jrc_contact_center/ending_actions/project_task_parameters.rb"
+        ],
+        "tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
+          "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
+        ],
+        "visual_gap": "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "authorization_gap": "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
+      },
       "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
+        0
       ]
     },
     {
@@ -941,41 +950,40 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
       "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
         6,
         7,
         8,
-        9,
-        10
+        13
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        15
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
       ],
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
+          "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
+          "app/services/jrc_contact_center/ending_actions/project_task_parameters.rb"
+        ],
+        "tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
+          "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
+        ],
+        "visual_gap": "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "authorization_gap": "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
+      },
       "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
+        0
       ]
     },
     {
@@ -992,41 +1000,37 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Motivo, momento e modo explícitos são persistidos e validados. call_end e acw_completed são enums distintos; automatic e agent_confirmation não são inferidos para definições legadas. Despacho e confirmação operacional por regra ainda não existem.",
       "code_reference_ids": [
-        0,
-        1,
         2,
-        3,
-        4,
-        5,
-        6,
         7,
-        8,
-        9,
-        10
+        14
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
         7,
-        8,
-        9,
-        10
+        15
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Seleção preparada; falta demonstrar o modo escolhido durante uma execução real e sua revisão pelo agente."
       ],
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Motivo, momento e modo explícitos são persistidos e validados. call_end e acw_completed são enums distintos; automatic e agent_confirmation não são inferidos para definições legadas. Despacho e confirmação operacional por regra ainda não existem.",
+        "code": [
+          "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+          "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue"
+        ],
+        "tests": [
+          "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
+        ],
+        "visual_gap": "Seleção preparada; falta demonstrar o modo escolhido durante uma execução real e sua revisão pelo agente."
+      },
       "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
+        0
       ]
     },
     {
@@ -1043,41 +1047,40 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
       "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
         6,
         7,
         8,
-        9,
-        10
+        13
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        15
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
       ],
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
+          "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
+          "app/services/jrc_contact_center/ending_actions/project_task_parameters.rb"
+        ],
+        "tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
+          "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
+        ],
+        "visual_gap": "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "authorization_gap": "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
+      },
       "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
+        0
       ]
     },
     {
@@ -1093,43 +1096,23 @@
       "figures": [
         10
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
-      "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "status": "pendente",
+      "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+      "code_reference_ids": [],
+      "test_reference_ids": [],
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "pendente",
+        "behavior": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+        "code": [],
+        "tests": [],
+        "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
+        "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0224-C01",
@@ -1145,41 +1128,40 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
       "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
         6,
         7,
         8,
-        9,
-        10
+        13
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        15
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
       ],
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Novo editor e API autenticada configuram parâmetros de tarefa no catálogo ACW versionado existente. CRM, Service Desk, notificações e Nico aparecem como pendentes, não executam efeitos. O seletor usa Projetos nativo, sem catálogo paralelo.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingProjectTaskConfiguration.vue",
+          "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb",
+          "app/services/jrc_contact_center/ending_actions/project_task_parameters.rb"
+        ],
+        "tests": [
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
+          "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
+        ],
+        "visual_gap": "Popup por destino e editor preparados; configurações dos demais destinos e estados de execução reais ainda faltam.",
+        "authorization_gap": "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
+      },
       "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
+        0
       ]
     },
     {
@@ -1196,30 +1178,22 @@
         10
       ],
       "status": "pendente",
-      "verification": "Não executados: a base não cria efeitos nem recibos operacionais. Testes de metadados não satisfazem F10-A/B.",
-      "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
+      "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+      "code_reference_ids": [],
       "test_reference_ids": [],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "pendente",
+        "behavior": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+        "code": [],
+        "tests": [],
+        "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
+        "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0224-C03",
@@ -1234,43 +1208,26 @@
       "figures": [
         10
       ],
-      "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "status": "pendente",
+      "verification": "Nico não está habilitado para executar ações neste editor. É necessário reutilizar sugestões/processamento existentes e reautorizar o agente original por destino; ausência de executor não equivale à homologação da integração.",
       "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        7
       ],
-      "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "test_reference_ids": [],
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Configuração e sugestão Nico operacionais ainda faltam; fornecedor/canal real permanece fora da homologação interna."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "pendente",
+        "behavior": "Nico não está habilitado para executar ações neste editor. É necessário reutilizar sugestões/processamento existentes e reautorizar o agente original por destino; ausência de executor não equivale à homologação da integração.",
+        "code": [
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue"
+        ],
+        "tests": [],
+        "visual_gap": "Configuração e sugestão Nico operacionais ainda faltam; fornecedor/canal real permanece fora da homologação interna."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0224-C04",
@@ -1286,41 +1243,37 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Motivo, momento e modo explícitos são persistidos e validados. call_end e acw_completed são enums distintos; automatic e agent_confirmation não são inferidos para definições legadas. Despacho e confirmação operacional por regra ainda não existem.",
       "code_reference_ids": [
-        0,
-        1,
         2,
-        3,
-        4,
-        5,
-        6,
         7,
-        8,
-        9,
-        10
+        14
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
         7,
-        8,
-        9,
-        10
+        15
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Seleção preparada; falta demonstrar o modo escolhido durante uma execução real e sua revisão pelo agente."
       ],
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Motivo, momento e modo explícitos são persistidos e validados. call_end e acw_completed são enums distintos; automatic e agent_confirmation não são inferidos para definições legadas. Despacho e confirmação operacional por regra ainda não existem.",
+        "code": [
+          "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+          "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingAutomationEditor.vue"
+        ],
+        "tests": [
+          "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+          "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
+        ],
+        "visual_gap": "Seleção preparada; falta demonstrar o modo escolhido durante uma execução real e sua revisão pelo agente."
+      },
       "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
+        0
       ]
     },
     {
@@ -1337,30 +1290,22 @@
         10
       ],
       "status": "pendente",
-      "verification": "Não executados: a base não cria efeitos nem recibos operacionais. Testes de metadados não satisfazem F10-A/B.",
-      "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
+      "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+      "code_reference_ids": [],
       "test_reference_ids": [],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "pendente",
+        "behavior": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+        "code": [],
+        "tests": [],
+        "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
+        "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0225-C02",
@@ -1376,42 +1321,35 @@
         10
       ],
       "status": "parcial",
-      "verification": "Exige confronto observável; referências e testes relacionados não equivalem a aceite integral.",
+      "verification": "Configuração imutável preserva histórico e detecta a primeira desativação, inclusive após reativação. O executor ainda precisa aplicar esse bloqueio a recibos reais de pendências, sem desfazer sucessos.",
       "code_reference_ids": [
-        0,
         1,
-        2,
         3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        4
       ],
       "test_reference_ids": [
-        0,
-        1,
-        2,
-        3,
         4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+        16
       ],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Histórico de configuração não é histórico de execução; falta exibir recibos por destino."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "parcial",
+        "behavior": "Configuração imutável preserva histórico e detecta a primeira desativação, inclusive após reativação. O executor ainda precisa aplicar esse bloqueio a recibos reais de pendências, sem desfazer sucessos.",
+        "code": [
+          "app/models/jrc_contact_center/ending_action_version.rb",
+          "app/services/jrc_contact_center/ending_actions/blocking_revision.rb",
+          "app/services/jrc_contact_center/ending_actions/configure_rule.rb"
+        ],
+        "tests": [
+          "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb",
+          "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb"
+        ],
+        "visual_gap": "Histórico de configuração não é histórico de execução; falta exibir recibos por destino."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0227-C01",
@@ -1427,30 +1365,22 @@
         10
       ],
       "status": "pendente",
-      "verification": "Não executados: a base não cria efeitos nem recibos operacionais. Testes de metadados não satisfazem F10-A/B.",
-      "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
+      "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+      "code_reference_ids": [],
       "test_reference_ids": [],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "pendente",
+        "behavior": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+        "code": [],
+        "tests": [],
+        "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
+        "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+      },
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0228-C01",
@@ -1466,30 +1396,22 @@
         10
       ],
       "status": "pendente",
-      "verification": "Não executados: a base não cria efeitos nem recibos operacionais. Testes de metadados não satisfazem F10-A/B.",
-      "code_reference_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
+      "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+      "code_reference_ids": [],
       "test_reference_ids": [],
-      "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
+      "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
-        "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+        "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente."
       ],
-      "candidate_test_reference_ids_not_approval": [
-        0,
-        1,
-        2
-      ]
+      "direct_functional_review": {
+        "status": "pendente",
+        "behavior": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
+        "code": [],
+        "tests": [],
+        "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
+        "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
+      },
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
@@ -1499,22 +1421,32 @@
   "complete_figure_accepted": false,
   "tests_candidate_not_validated": [
     {
-      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
-      "sha256": "1b8574f800fe133411af4c557de2b99319c8c2056ea47738f3fb865d9eaccebf",
-      "status": "preparado_bloqueado_pelo_gate_ate_CI_propria",
-      "native_or_visual_result": null
-    },
-    {
-      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
-      "sha256": "172fcb97ed004d956ce703a07e97173365f9eaf3d94e9aa4e875faa4345cc2d5",
-      "status": "preparado_bloqueado_pelo_gate_ate_CI_propria",
-      "native_or_visual_result": null
-    },
-    {
       "path": "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs",
-      "sha256": "fd6b65e5944429b716d80bd85624788e686a9bd70d60676e4815d97180d3a484",
+      "sha256": "fa2cef6b0b128dec38548015a00ef509bd1ff6a71b36c03a1844a43a6039f61b",
       "status": "preparado_bloqueado_pelo_gate_ate_CI_propria",
       "native_or_visual_result": null
     }
-  ]
+  ],
+  "accepted_configuration_increment": {
+    "sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+    "run": 45237591913,
+    "whole_figure_accepted": false,
+    "acceptance_file": "docs/jrc_contact_center/ending_editor_acceptance_20261123.json",
+    "visual_evidence_limits": [
+      "Enquadrar filtros mobile de verdade; a captura atual não contém os controles.",
+      "Adicionar capturas do topo do editor e dos parâmetros do destino antes de salvar."
+    ]
+  },
+  "executor_origin_increment_pending_native_validation": {
+    "candidate_file": "docs/jrc_contact_center/ending_origin_candidate_20261123.json",
+    "code": [
+      "app/services/jrc_contact_center/ending_actions/execution_transaction.rb",
+      "app/models/jrc_contact_center/ending_action_origin.rb",
+      "app/models/jrc_contact_center/ending_action_completion.rb"
+    ],
+    "native_examples_prepared_not_passed": 33,
+    "real_concurrency_examples_prepared_not_passed": 4,
+    "operational_effects_or_receipts_implemented": false,
+    "not_F10_A_or_F10_B_acceptance": true
+  }
 }

@@ -51,7 +51,7 @@
         "JrcContactCenter::AudioArchiveInput rejects coerced, overflowed and malformed native identifiers without truncation",
         "JrcContactCenter::AudioArchiveInput requires exact item keys and a lowercase hexadecimal source digest"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -62,7 +62,7 @@
         "JrcContactCenter::AudioArchives rejects duplicate source/version selections rather than relying on archive overwrite behavior",
         "JrcContactCenter::AudioArchives rejects empty, scalar and oversized selections before reading any source bytes"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -73,7 +73,7 @@
         "JrcContactCenter::AudioAssetMoves requires review again after any source revision changes and never partially moves earlier selections",
         "JrcContactCenter::AudioAssetMoves requires the existing revision precondition even when the target is the current root"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -84,7 +84,7 @@
         "JrcContactCenter::AudioBytes returns only the exact bytes proven by the real native observation and rehashed in the returned buffer",
         "JrcContactCenter::AudioBytes does not reuse an older clean observation when the current attempt is unavailable"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -95,7 +95,7 @@
         "JrcContactCenter::AudioCopies replays the exact same reviewed operation without creating blobs or releasing source bytes again",
         "JrcContactCenter::AudioCopies rejects a reused key with different destination attributes instead of creating a second copy"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -106,7 +106,7 @@
         "JrcContactCenter::AudioFileInput refuses a nonaudio file despite a .wav name and audio MIME claim",
         "JrcContactCenter::AudioFileInput refuses an empty actual upload"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -117,7 +117,7 @@
         "JrcContactCenter::AudioFolderPath queries a deep authorized hierarchy once rather than loading an ancestor per request",
         "JrcContactCenter::AudioFolderPath fails closed if the caller relation cannot see an ancestor instead of exposing its name"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -126,7 +126,7 @@
       "sample_behaviours": [
         "JrcContactCenter::AudioLibraryPresenter loads the latest observation in one native batch instead of querying the inspection history separately for each file"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -137,7 +137,7 @@
         "JrcContactCenter::AudioMediaDecoder with synthetic parser results, not native decoding evidence requires one complete SHA-256 record, never a partial, wrong-algorithm or extra-output result",
         "JrcContactCenter::AudioMediaDecoder with the owned real native decoder and synthetic PCM bytes proves actual decoded PCM independently of progress timestamps and preserves the previous diagnostic"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -148,7 +148,7 @@
         "JrcContactCenter::AudioMediaMetadata does not replace missing duration with a guessed zero or default",
         "JrcContactCenter::AudioMediaMetadata can use the real container duration when the stream has no duration"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -159,7 +159,7 @@
         "JrcContactCenter::AudioMediaProbe rejects an empty WAV header instead of mistaking its declared data length for actual playable media",
         "JrcContactCenter::AudioMediaProbe does not follow a playlist, external media URL or arbitrary protocol as institutional audio"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -170,7 +170,7 @@
         "JrcContactCenter::AudioMoveInput rejects malformed or unbounded selections before a write can begin",
         "JrcContactCenter::AudioMoveInput rejects duplicate integer and string representations of the same asset"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -181,7 +181,7 @@
         "JrcContactCenter::AudioProbeProcess does not inherit application credentials or arbitrary environment into the child",
         "JrcContactCenter::AudioProbeProcess marks a missing executable unavailable without exposing arguments or system paths in output"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -192,7 +192,7 @@
         "JrcContactCenter::AudioSafetyObservation rejects a genuinely clean header without decodable samples before any final record can be created",
         "JrcContactCenter::AudioSafetyObservation rejects the harmless synthetic marker with the real scanner without persisting a final version"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -203,7 +203,7 @@
         "JrcContactCenter::AudioSafetyObservation uses the native disabled-scanner result as unavailable and never runs the decoder or fabricates clean",
         "JrcContactCenter::AudioSafetyObservation rejects a clean dependency response for different bytes before calling the media parser"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -214,7 +214,7 @@
         "JrcContactCenter::AudioUploads rejects a clean but undecodable header before any final record or final audit is persisted",
         "JrcContactCenter::AudioUploads rejects the harmless synthetic scanner marker and compensates only the newly staged bytes"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -225,7 +225,7 @@
         "JrcContactCenter::AudioUploads replays the same uncertain submission without another asset, blob or version",
         "JrcContactCenter::AudioUploads rejects changed content under an already accepted key rather than duplicating or replacing history"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -236,7 +236,7 @@
         "CreateContactCenterAudioFiles verifies actual fresh or reloaded function/trigger definitions and both tables without duplicating their schema",
         "CreateContactCenterAudioFiles refuses a partial table instead of silently stamping or repairing unknown data"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -247,7 +247,7 @@
         "CreateContactCenterAudioFolders verifies both fresh and reloaded real schemas idempotently",
         "CreateContactCenterAudioFolders blocks reexecution when the origin foreign key has been removed rather than accepting a divergent table"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -258,7 +258,7 @@
         "CreateContactCenterAudioInspections verifies actual installed or reloaded metadata and retains the preceding exact file-domain receipt",
         "CreateContactCenterAudioInspections refuses partial tables instead of accepting unknown rows or silently restamping them"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -269,7 +269,7 @@
         "JrcContactCenter::IvrDraftWrite does not create an identity, revision or audit when audio has not been observed",
         "JrcContactCenter::IvrDraftWrite does not commit a partial revision when the audit fails"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -280,7 +280,7 @@
         "JrcContactCenter::IvrGraph#audio_proofs does not make an unverified private receipt usable as a menu announcement",
         "JrcContactCenter::IvrGraph#audio_proofs rejects a supplied hash that does not match the immutable selected version"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -289,7 +289,7 @@
       "sample_behaviours": [
         "JrcContactCenter::SyntheticAudioFolderSeed keeps metadata-only organization in its own native folder without changing existing destination or root pagination fixtures"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -300,7 +300,7 @@
         "JrcContactCenter::SyntheticAudioStorageGuard rejects an unowned runner environment before reaching its storage service",
         "JrcContactCenter::SyntheticAudioStorageGuard does not connect to or accept an external Redis locator"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -311,7 +311,7 @@
         "JrcContactCenter::SyntheticIvrAudioSeed refuses a non-owned environment before looking up any account or touching storage",
         "JrcContactCenter::SyntheticIvrAudioSeed refuses a non-synthetic account even in the disposable database"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -322,7 +322,7 @@
         "JrcContactCenter::AudioFolder rejects cross-unit parentage at the composite foreign key even when model validations are bypassed",
         "JrcContactCenter::AudioFolder protects case-insensitive sibling uniqueness while permitting the same name under another parent"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -333,7 +333,7 @@
         "JrcContactCenter::AudioInspection keeps accepted observations immutable at the model and database levels",
         "JrcContactCenter::AudioInspection rejects missing or mismatched observed hashes instead of accepting a null-valued clean CHECK predicate"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -344,7 +344,7 @@
         "JrcContactCenter::AudioVersion protects accepted version history from SQL bulk update and delete",
         "JrcContactCenter::AudioVersion checks immutable history before dependent-inspection callbacks or destruction audit can run"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -355,7 +355,7 @@
         "Institutional audio admission authenticates and validates before final persistence rejects a scanner-clean empty WAV rather than presenting a persisted unusable row",
         "Institutional audio admission authenticates and validates before final persistence rejects the harmless native scanner marker without a final receipt or a private storage locator"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -366,7 +366,7 @@
         "Private selected institutional audio downloads retain native authority rejects root grants, storage locators and missing items without releasing private bytes",
         "Private selected institutional audio downloads retain native authority refuses missing authentication and foreign-account credentials on a genuine selection"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -377,7 +377,7 @@
         "Native scoped institutional audio filters use only the latest version combines current origin, real format and name before native totals and bounded pagination",
         "Native scoped institutional audio filters use only the latest version uses actual canonical MIME and preserves an unfiltered list instead of duplicating version rows"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -388,7 +388,7 @@
         "Selected institutional audio moves retain native account/unit authority and CAS does not silently replay a stale response as a new metadata write",
         "Selected institutional audio moves retain native account/unit authority and CAS requires the explicit destination key and rejects extra actor/account authority fields"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -399,7 +399,7 @@
         "Private institutional audio receipts reuse native account and unit authority accepts actual multipart bytes and presents metadata without a signed locator, storage key or readiness claim",
         "Private institutional audio receipts reuse native account and unit authority bounds native pagination and persists reviewed rename and reorganization within the exact same unit"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -410,7 +410,7 @@
         "Institutional audio byte access uses current native authority and exact integrity returns exact rehashed bytes with the immutable observation identity and no shared cache or storage redirect",
         "Institutional audio byte access uses current native authority and exact integrity does not fallback to a previous clean receipt after an unavailable inspection"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -421,7 +421,7 @@
         "Institutional browser capture reuses private native admission rejects invalid capture origin nil before staging or final persistence",
         "Institutional browser capture reuses private native admission rejects invalid capture origin false before staging or final persistence"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -432,7 +432,7 @@
         "Institutional audio duplication uses the native receipt and account/unit authority recovers both independently confirmed copy receipts with their original keys without new blobs, versions or audits",
         "Institutional audio duplication uses the native receipt and account/unit authority persists an independent identity, version one and private bytes through the real native inspection"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -443,7 +443,7 @@
         "Institutional audio folders stay within the current native operational unit does not expose another operational unit or foreign account through list, details, parent or create",
         "Institutional audio folders stay within the current native operational unit paginates the selected native unit and keeps search and hierarchy explicit"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -454,7 +454,7 @@
         "Native institutional audio inspection filters preserve source version and unit authority filters an actual unavailable native scanner observation without treating it as clearance",
         "Native institutional audio inspection filters preserve source version and unit authority uses the latest attempt rather than a historical clean scanner observation"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -465,7 +465,7 @@
         "Institutional audio inspection authority and native persistence replays an accepted uncertain request without adding a second observation or audit event",
         "Institutional audio inspection authority and native persistence bounds exact-version history while keeping a deliberately requested fresh attempt distinct"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -476,7 +476,7 @@
         "Institutional audio list metadata remains current and scoped does not invent zero duration or a clean status for historical quarantine without any observation",
         "Institutional audio list metadata remains current and scoped hides earlier clean metadata when the latest actual inspection is unavailable"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -486,7 +486,7 @@
         "Institutional Opus capture passes the real private admission boundary recognizes byte-detected audio/opus and stores canonical OGG only after actual scanning and decoding",
         "Institutional Opus capture passes the real private admission boundary when recognizable Opus headers have no decodable audio frames still rejects the file and leaves no asset, version, observation or owned staging blob"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -497,7 +497,7 @@
         "Authorized institutional audio local IVR usages returns no current usage after unlinking while retaining the original immutable version",
         "Authorized institutional audio local IVR usages distinguishes an archived local head without claiming the provider has removed the reference"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -508,7 +508,7 @@
         "Authenticated exact institutional audio and local IVR references persists, reloads and exports the authorized local graph through native APIs",
         "Authenticated exact institutional audio and local IVR references rejects unverified audio through the write API with no partial draft"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -519,7 +519,7 @@
         "Institutional audio native scanner and decoder receipts detects the harmless byte marker with the actual engine and does not decode or clear that version",
         "Institutional audio native scanner and decoder receipts keeps a genuinely scanner-clean but undecodable empty WAV header blocked without invented duration"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -530,7 +530,7 @@
         "Institutional private audio serializes uncertain native receipts allows only one actual replacement when two different uploads reviewed the same exact prior version",
         "Institutional private audio serializes uncertain native receipts keeps the native orphan-purge path harmless for committed private history without weakening its foreign-key protection"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -541,7 +541,7 @@
         "Institutional audio committed inspection concurrency serializes deliberately distinct attempts without overwriting history or duplicating a version sequence",
         "Institutional audio committed inspection concurrency does not persist an earlier authorized observation after the profile is withdrawn before final commit"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],

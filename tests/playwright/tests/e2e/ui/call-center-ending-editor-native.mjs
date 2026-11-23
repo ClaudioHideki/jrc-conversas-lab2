@@ -13,6 +13,7 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   const forbidden = [];
   const writes = [];
   const screenshots = [];
+  const configurationScreenshots = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => {
     if (
@@ -80,6 +81,10 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
     'SYNTHETIC pause unit'
   );
   await editor.locator('[data-ending-rule-active]').check();
+  await editor.locator('[data-ending-rule-code]').scrollIntoViewIfNeeded();
+  const fieldsImage = `.codex/call-center-native-e2e/${info.project.name}-ending-automation-fields.png`;
+  await page.screenshot({ path: fieldsImage });
+  configurationScreenshots.push(fieldsImage);
   for (const kind of ['crm', 'service_desk', 'notifications', 'nico'])
     await expect(
       editor.locator(`[data-ending-configure-destination="${kind}"]`)
@@ -99,6 +104,14 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
     .selectOption(target.automation_column_id);
   await task.locator('[data-ending-task-priority]').selectOption('medium');
   await task.locator('[data-ending-task-due]').fill('0');
+  await task.locator('[data-ending-project]').scrollIntoViewIfNeeded();
+  const parametersImage = `.codex/call-center-native-e2e/${info.project.name}-ending-automation-project.png`;
+  await page.screenshot({ path: parametersImage });
+  configurationScreenshots.push(parametersImage);
+  await task.locator('[data-ending-task-apply]').scrollIntoViewIfNeeded();
+  const actionsImage = `.codex/call-center-native-e2e/${info.project.name}-ending-automation-project-actions.png`;
+  await page.screenshot({ path: actionsImage });
+  configurationScreenshots.push(actionsImage);
   await task.locator('[data-ending-task-apply]').click();
   await expect(editor.locator('[data-ending-rule-save]')).toBeDisabled();
   await editor.locator('[data-ending-rule-reviewed]').check();
@@ -250,6 +263,7 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
       theme_asserted_in_browser: true,
       contrast,
       screenshots,
+      configuration_screenshots: configurationScreenshots,
       errors,
       provider_or_destination_writes: forbidden,
     })

@@ -1,0 +1,101 @@
+{
+  "at": "2026-11-23T20:04:25.243276+00:00",
+  "product_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+  "run": 45237591913,
+  "artifact": 14856080579,
+  "artifact_sha256": "adec5481331a7c630f72d318b1f4bd7073376384047da31c60063a8dcbb66445",
+  "evidence_status": "complete_verified_evidence",
+  "native_distinct_examples": 2977,
+  "schema_reload_examples_separate_do_not_sum": 252,
+  "vue_examples": 1812,
+  "chrome_examples": 264,
+  "failures": 0,
+  "pending": 0,
+  "outside_errors": 0,
+  "screenshot_hashes_verified": 592,
+  "actual_images_reviewed": [
+    {
+      "file": "desktop-dark-authority-filters-closed.png",
+      "source": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-authority-filters-closed.png",
+      "sha256": "cee10b861ea5089f732ed7d63796f6792cfd35d20dd9b6648a4426027ece37ae",
+      "actually_viewed": true,
+      "review": "Filtros e ações visíveis sem sobreposição, nos temas claro e escuro."
+    },
+    {
+      "file": "desktop-dark-ending-automation-editor.png",
+      "source": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-ending-automation-editor.png",
+      "sha256": "9b36b2f28f1446eaf9673e8e2824ca46c85bfbefa99d2313be64793d57890f46",
+      "actually_viewed": true,
+      "review": "Estado salvo, destinos e revisão legíveis; sem transbordamento horizontal na captura. Cabeçalho/formulário superior exigem enquadramento adicional."
+    },
+    {
+      "file": "desktop-light-authority-filters-closed.png",
+      "source": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-authority-filters-closed.png",
+      "sha256": "56d35f9e809b2a816c57fcd702dfc4689fa168998b9c212d2acff6a32990f02e",
+      "actually_viewed": true,
+      "review": "Filtros e ações visíveis sem sobreposição, nos temas claro e escuro."
+    },
+    {
+      "file": "desktop-light-ending-automation-editor.png",
+      "source": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-ending-automation-editor.png",
+      "sha256": "a13fc9e9936218a89a3c5fcedc1d100adf7c8dc45e87c0635273fa7849fc437e",
+      "actually_viewed": true,
+      "review": "Estado salvo, destinos e revisão legíveis; sem transbordamento horizontal na captura. Cabeçalho/formulário superior exigem enquadramento adicional."
+    },
+    {
+      "file": "mobile-dark-authority-filters-closed.png",
+      "source": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-authority-filters-closed.png",
+      "sha256": "daf8cbef9a142eb36bb22f77158af632bae00771eb9e759a0b938780fd3e2d7e",
+      "actually_viewed": true,
+      "review": "Cabeçalho mobile legível; os filtros ficam fora do enquadramento. Medições DOM passaram, mas falta captura dos controles."
+    },
+    {
+      "file": "mobile-dark-ending-automation-editor.png",
+      "source": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-ending-automation-editor.png",
+      "sha256": "8f9977b57fbc5146417f57ece116a0516713f1bc9160d4ba5902ff3decbfc4d4",
+      "actually_viewed": true,
+      "review": "Estado salvo, destinos e revisão legíveis; sem transbordamento horizontal na captura. Cabeçalho/formulário superior exigem enquadramento adicional."
+    },
+    {
+      "file": "mobile-light-authority-filters-closed.png",
+      "source": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-authority-filters-closed.png",
+      "sha256": "89099041e0d144d696bf1e1416b65df8b2d312a00d013f446d1ed2f3c21b7eb8",
+      "actually_viewed": true,
+      "review": "Cabeçalho mobile legível; os filtros ficam fora do enquadramento. Medições DOM passaram, mas falta captura dos controles."
+    },
+    {
+      "file": "mobile-light-ending-automation-editor.png",
+      "source": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-ending-automation-editor.png",
+      "sha256": "ebdcb5121f34b438fc5cdd5287503cc09af4ba6fc715d0dab68c35b47f1e032e",
+      "actually_viewed": true,
+      "review": "Estado salvo, destinos e revisão legíveis; sem transbordamento horizontal na captura. Cabeçalho/formulário superior exigem enquadramento adicional."
+    }
+  ],
+  "configuration_editor_increment_accepted": true,
+  "acceptance_scope": [
+    "Configuração versionada pela API e interface nativas; seleção nativa de projeto sem catálogo paralelo.",
+    "Persistência e recarga, revisão409 e negação por perfil/conta/cobertura nos quatro cenários de tela/tema.",
+    "Estado salvo e mensagens de configuração sem efeitos reais revisados visualmente nos quatro cenários."
+  ],
+  "remaining_visual_evidence": [
+    "Enquadrar filtros mobile de verdade; a captura atual não contém os controles.",
+    "Adicionar capturas do topo do editor e dos parâmetros do destino antes de salvar."
+  ],
+  "remaining_functional": [
+    "Execução CRM/Service Desk/Projetos, recibos por destino, idempotência e concorrência de efeitos.",
+    "Administração específica por empresa/unidade; preservar bloqueio da política global.",
+    "Workspace, histórico de execuções, indicadores reais, demais destinos e aceite integral do Word."
+  ],
+  "configuration_only": true,
+  "effects_executed": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_complete": false,
+  "original_checkout_changed": false,
+  "production_or_provider_operations": false,
+  "resources": {
+    "physical_total_bytes": 12711890944,
+    "physical_available_bytes": 4237725696,
+    "c_free_bytes": 53359804416,
+    "read_only": true
+  }
+}

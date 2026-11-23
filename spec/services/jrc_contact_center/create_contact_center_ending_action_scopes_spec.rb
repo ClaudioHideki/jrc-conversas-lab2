@@ -3,8 +3,10 @@ require Rails.root.join('db/migrate/20261123034500_create_contact_center_ending_
 
 RSpec.describe CreateContactCenterEndingActionScopes do
   include_context 'with a frozen ending reason catalogue'
+  include ContactCenterEndingOriginSchemaDependencies
 
   def remove_ending_action_scope_schema
+    detach_ending_origin_scope_references
     receipt = JrcContactCenter::EndingActionScopeSchemaReceipt
     receipt::RELATIONS.each do |table|
       receipt::TRIGGERS.each { |name| ApplicationRecord.connection.execute("DROP TRIGGER IF EXISTS #{name} ON #{table}") }

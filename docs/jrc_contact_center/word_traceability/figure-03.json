@@ -51,7 +51,7 @@
         "CreateContactCenterTeamSupervisions verifies the native fresh or reloaded schema idempotently without changing stored assignments",
         "CreateContactCenterTeamSupervisions rejects an existing schema missing the composite teams account boundary"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -60,7 +60,7 @@
       "sample_behaviours": [
         "JrcContactCenter::QueueMembership rejects a membership linking a queue to a user from another account at the database boundary"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -71,7 +71,7 @@
         "JrcContactCenter::TeamRosterPreview detects lost functional permission even if independent corporate coverage remains",
         "JrcContactCenter::TeamRosterPreview detects lost corporate coverage even if the native profile still permits operation"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -82,7 +82,7 @@
         "JrcContactCenter::TeamSupervisionInput does not invent a required primary or convert a missing selection into the first additional supervisor",
         "JrcContactCenter::TeamSupervisionInput accepts an empty explicit selection and exact native bigint IDs without Float conversion"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -93,7 +93,7 @@
         "JrcContactCenter::TeamSupervisionScope accepts an existing company grant for its unit but does not widen a unit grant to the whole company",
         "JrcContactCenter::TeamSupervisionScope requires explicit group coverage for a group team, without assuming an administrator grant"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -104,7 +104,7 @@
         "JrcContactCenter::TeamSupervision rejects a foreign native member through its composite account FK even when model validation is bypassed",
         "JrcContactCenter::TeamSupervision enforces one principal per team in PostgreSQL rather than relying only on a validation race"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -115,7 +115,7 @@
         "JrcContactCenter::TeamSupervision keeps administrator metadata separate from native memberships, queue participation and all existing permissions",
         "JrcContactCenter::TeamSupervision does not invent a primary when only an additional supervisor has been explicitly saved"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -126,7 +126,7 @@
         "Call Center queue enrollment eligibility rejects reactivation on an inactive queue and preserves the existing inactive link",
         "Call Center queue enrollment eligibility permits deactivation of an existing link after the queue was inactivated"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -137,7 +137,7 @@
         "Call Center queue enrollment preserves recipient corporate coverage denies an eligible recipient covered only by another business unit",
         "Call Center queue enrollment preserves recipient corporate coverage permits compatible explicit BUSINESS_UNIT coverage without changing that coverage"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -148,7 +148,7 @@
         "Call Center enrollment requires explicit user eligibility rejects a new participation assignment to a pending user",
         "Call Center enrollment requires explicit user eligibility rejects supervision without implicitly activating a pending user"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -159,7 +159,7 @@
         "Explicit reviewed internal queue calendar removal and durable historical receipts recovers exactly the same committed removal receipt without a second audit or another write",
         "Explicit reviewed internal queue calendar removal and durable historical receipts never removes a newer association when the old removal request is replayed"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -170,7 +170,7 @@
         "Call Center queue calendar drafts pin reviewed snapshots without provider application pins the exact authorized snapshot and native scope and audits its real persisted association",
         "Call Center queue calendar drafts pin reviewed snapshots without provider application recovers the same reviewed request without another mutation or audit despite the old revision tokens"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -181,7 +181,7 @@
         "Call Center last configured eligible agent withdrawal accepts an explicitly confirmed signed review and records it in the same native audit",
         "Call Center last configured eligible agent withdrawal does not mistake false for explicit manager confirmation"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -192,7 +192,7 @@
         "Native team roster identity and inherited authority keeps selected members while adding and removing different members in the same string-ID request",
         "Native team roster identity and inherited authority keeps native additive string-ID requests idempotent without replacing corporate or eligibility records"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -203,7 +203,7 @@
         "Native team removal and last configured eligible queue agent does not remove an existing agent when the proposed roster mixes string and numeric IDs for the same user",
         "Native team removal and last configured eligible queue agent blocks unreviewed patch without changing membership, stored grants, queue, audit or cache"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -214,7 +214,7 @@
         "Call Center native team supervision metadata saves and reloads primary/additional native members without adding distribution, recording or Nico rights",
         "Call Center native team supervision metadata changes the principal atomically while preserving the old person as an explicit additional supervisor"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -225,7 +225,7 @@
         "JrcCrm::TeamMembershipProjection preserves an independent direct grant during a prospective withdrawal",
         "JrcCrm::TeamMembershipProjection preserves a valid independent team source"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     },
     {
@@ -236,7 +236,7 @@
         "Native team supervision competing reviewed writes reauthorizes recipient after a real Account lock wait and rejects a previously reviewed selection after revocation",
         "Native team supervision competing reviewed writes reauthorizes actor after a real Account lock wait and rejects a previously reviewed selection after revocation"
       ],
-      "evidence_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
+      "evidence_sha": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
       "level": "Rails em PostgreSQL sintético; fornecedores podem ser substituídos nos testes"
     }
   ],
