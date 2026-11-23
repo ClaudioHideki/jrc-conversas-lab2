@@ -5,13 +5,14 @@ RSpec.describe 'Account-owned NICO capacity diagnostics', type: :request do
   let(:user) { create(:user, account: account, role: :administrator) }
   let(:headers) { user.create_new_auth_token }
 
-  it 'reports the effective NICO limit consistently in Quick and AI usage without exposing keys' do
+  it 'keeps operational capacity in Quick and exposes only confirmed consumption in AI usage' do
     get "/api/v1/accounts/#{account.id}/jrc_nico/operations", headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body['capacity']).to include('token_limit' => 2_000_000, 'remaining_tokens' => 2_000_000)
     get "/api/v1/accounts/#{account.id}/jrc_ai/usage", headers: headers
     expect(response).to have_http_status(:ok)
-    expect(response.parsed_body['nico_capacity']).to include('token_limit' => 2_000_000)
+    expect(response.parsed_body).not_to have_key('nico_capacity')
+    expect(response.parsed_body.fetch('totals')).to include('total_tokens' => 0, 'executions' => 0)
     expect(response.body).not_to include('api_key', 'service_token')
   end
 
