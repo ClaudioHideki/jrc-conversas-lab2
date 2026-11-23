@@ -47,8 +47,8 @@ RSpec.describe 'Explicit own-attendance ending reason confirmation', type: :requ
     post endpoint, headers: headers, params: input, as: :json
     expect(response).to have_http_status(:ok)
     revision = response.parsed_body.dig('item', 'draft_revision')
-    patch endpoint.sub('/confirm_reason', '/draft'), headers: headers,
-                                                   params: { qualification: { reason_code: 'other' }, expected_draft_revision: revision }, as: :json
+    body = { qualification: { reason_code: 'other' }, expected_draft_revision: revision }
+    patch endpoint.sub('/confirm_reason', '/draft'), headers: headers, params: body, as: :json
     expect(response).to have_http_status(:conflict)
     expect(response.parsed_body.fetch('error')).to eq('ending_reason_already_confirmed')
     expect(record.reload.completed_at).to be_nil

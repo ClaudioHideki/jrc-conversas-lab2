@@ -97,7 +97,8 @@ RSpec.describe JrcContactCenter::ConfirmEndingReason do
   it 'freezes classification while permitting later notes and explicit native ACW completion' do
     confirmation.call(record, **options)
     before = ledger.attributes.deep_dup
-    manager.save_draft!(record, { notes: 'SYNTHETIC reviewed notes' }, expected_revision: JrcContactCenter::QualificationDraftRevision.token(record))
+    revision = JrcContactCenter::QualificationDraftRevision.token(record.reload)
+    manager.save_draft!(record, { notes: 'SYNTHETIC reviewed notes' }, expected_revision: revision)
     expect(record.reload.notes).to eq('SYNTHETIC reviewed notes')
     expect(record.completed_at).to be_nil
     manager.complete!(record, reason_code: entry.fetch('code'), outcome_code: 'completed', notes: record.notes)
@@ -107,12 +108,25 @@ RSpec.describe JrcContactCenter::ConfirmEndingReason do
 
   it 'rejects reason replacement through either ordinary draft or native completion' do
     confirmation.call(record, **options)
+    revision = JrcContactCenter::QualificationDraftRevision.token(record.reload)
     expect do
-      manager.save_draft!(record, { reason_code: 'other' }, expected_revision: JrcContactCenter::QualificationDraftRevision.token(record))
+      manager.save_draft!(record, { reason_code: 'other' }, expected_revision: revision)
     end.to raise_error(JrcContactCenter::OperationError, 'ending_reason_already_confirmed')
     expect { manager.complete!(record, reason_code: 'other', outcome_code: 'completed') }
       .to raise_error(JrcContactCenter::OperationError, 'ending_reason_already_confirmed')
     expect(record.reload.reason_code).to eq(entry.fetch('code'))
+    expect(record.completed_at).to be_nil
+  end
+
+  it 'rejects the previously valid preconfirmation revision without changing notes or the confirmed evidence' do
+    input = options
+    confirmation.call(record, **input)
+    original = ledger.attributes.deep_dup
+    expect do
+      manager.save_draft!(record, { notes: 'SYNTHETIC stale replacement' }, expected_revision: input.fetch(:expected_revision))
+    end.to raise_error(JrcContactCenter::OperationError, 'stale_configuration_revision')
+    expect(record.reload.notes).to eq(attributes.fetch(:notes))
+    expect(ledger.reload.attributes).to eq(original)
     expect(record.completed_at).to be_nil
   end
 end

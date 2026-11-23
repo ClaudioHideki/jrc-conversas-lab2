@@ -1,0 +1,134 @@
+{
+  "status": "failed_native_core_not_homologated",
+  "sha": "adc43bababa759fce7ff71a4619cce3b9d4f9741",
+  "run": 45084892809,
+  "early_artifact": 14778624723,
+  "early_artifact_sha256": "776778115e26da4310bcf3b0fb6bb9f5b531f186d8424cc5b5e9df2e077ec502",
+  "rails": {
+    "duration": 574.991821635,
+    "example_count": 2585,
+    "failure_count": 2,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0,
+    "passed": 2583,
+    "all_previous_2550_preserved_and_passed": true
+  },
+  "schema_reload": {
+    "duration": 32.45172641,
+    "example_count": 200,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "failures": [
+    {
+      "file": "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb",
+      "line": 97,
+      "description": "JrcContactCenter::ConfirmEndingReason freezes classification while permitting later notes and explicit native ACW completion",
+      "class": "JrcContactCenter::OperationError",
+      "message": "stale_configuration_revision"
+    },
+    {
+      "file": "./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb",
+      "line": 108,
+      "description": "JrcContactCenter::ConfirmEndingReason rejects reason replacement through either ordinary draft or native completion",
+      "class": "RSpec::Expectations::ExpectationNotMetError",
+      "message": "expected JrcContactCenter::OperationError with \"ending_reason_already_confirmed\", got #<JrcContactCenter::OperationError: stale_configuration_revision> with backtrace:\n  # ./app/services/jrc_contact_center/configuration_revision.rb:24:in 'JrcContactCenter::ConfigurationRevision.check_token!'\n  # ./app/services/jrc_contact_center/qualification_draft_revision.rb:19:in 'JrcContactCenter::QualificationDraftRevision.check!'\n  # ./app/services/jrc_contact_center/qualification_draft.rb:20:in 'block in JrcContactCenter::QualificationDraft#save!'\n  # ./app/services/jrc_contact_center/qualification_draft.rb:14:in 'JrcContactCenter::QualificationDraft#save!'\n  # ./app/services/jrc_contact_center/qualification_manager.rb:40:in 'JrcContactCenter::QualificationManager#save_draft!'\n  # ./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb:111:in 'block (3 levels) in <main>'\n  # ./spec/services/jrc_contact_center/confirm_ending_reason_spec.rb:112:in 'block (2 levels) in <main>'"
+    }
+  ],
+  "cause": "The two new service callers computed the next draft token from the original preconfirmation ActiveRecord instance. The service returns the freshly locked record; its expected revision must reflect the persisted confirmed state.",
+  "correction_prepared": "Reload before computing the next revision; retain all notes, completion, fixed-reason and immutable-ledger expectations. Add a case requiring the previously valid revision to remain rejected, without rewriting notes or confirmation.",
+  "functional_code_changed": "Only extract the existing authorized form-context payload composition; no response, authorization or persistence semantics changed.",
+  "guards_or_assertions_disabled": false,
+  "next_native_core_expected": 2586,
+  "ruby_lint_status": {
+    "new_offenses": [
+      {
+        "file": "app/controllers/api/v1/accounts/jrc_contact_center/qualifications_controller.rb",
+        "line": 36,
+        "cop": "Metrics/AbcSize",
+        "message": "Assignment Branch Condition size for form_context is too high. [<4, 26, 0> 26.31/26]"
+      },
+      {
+        "file": "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_confirmation_spec.rb",
+        "line": 51,
+        "cop": "Layout/HashAlignment",
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "file": "spec/services/jrc_contact_center/confirmed_ending_reason_forms_spec.rb",
+        "line": 3,
+        "cop": "RSpec/SpecFilePathFormat",
+        "message": "Spec path should end with `jrc_contact_center/confirm_ending_reason*with_incomplete_native_ACW_forms*_spec.rb`."
+      },
+      {
+        "file": "spec/services/jrc_contact_center/confirmed_ending_reason_forms_spec.rb",
+        "line": 3,
+        "cop": "RSpec/DescribeMethod",
+        "message": "The second argument to describe should be the method being tested. '#instance' or '.class'."
+      },
+      {
+        "file": "spec/services/jrc_contact_center/confirmed_ending_reason_forms_spec.rb",
+        "line": 24,
+        "cop": "RSpec/DescribedClass",
+        "message": "Use `described_class` instead of `JrcContactCenter::ConfirmEndingReason`."
+      },
+      {
+        "file": "spec/services/jrc_contact_center/confirmed_ending_reason_forms_spec.rb",
+        "line": 41,
+        "cop": "RSpec/DescribedClass",
+        "message": "Use `described_class` instead of `JrcContactCenter::ConfirmEndingReason`."
+      }
+    ],
+    "corrections_prepared_not_native_approved": [
+      "Extract the existing authorized form payload composition; same validations, no-store header and response fields.",
+      "Use a short explicit request body to remove ambiguous keyword alignment.",
+      "Reviewed form-spec rename with class, context and described_class; all two native expectations preserved."
+    ]
+  },
+  "chrome_260_status": "Not executed because native gate failed.",
+  "full_23_figures_complete": false,
+  "final_artifact": {
+    "id": 14779613496,
+    "sha256": "5472958cc6c73b98e82c1f90b98f6c92936339ee95a161eb8418c9b09183ae90",
+    "conclusion": "failure"
+  },
+  "reviewed_test_rename": {
+    "old": "spec/services/jrc_contact_center/confirmed_ending_reason_forms_spec.rb",
+    "new": "spec/services/jrc_contact_center/confirm_ending_reason_forms_spec.rb",
+    "parent_sha256": "2d0d394bf634fec40d370eee1a87d8eb169079f7bc358c94ce81f87d5cbd3abf",
+    "new_sha256": "4943ff20f07aea3609b33c84d6bde427121d3f81a66d8eb31154862894a8e76a",
+    "exact_allowed_changes_only": [
+      "File name matches described native class",
+      "Native context wrapper preserves both full descriptions",
+      "Use described_class in the same two calls"
+    ],
+    "all_test_bodies_and_expectations_preserved": true,
+    "examples": 2
+  },
+  "new_mandatory_early_preflight": {
+    "native_examples_required": 23,
+    "files": {
+      "spec/services/jrc_contact_center/confirm_ending_reason_spec.rb": 13,
+      "spec/services/jrc_contact_center/confirm_ending_reason_forms_spec.rb": 2,
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_confirmation_spec.rb": 8
+    },
+    "no_replacement_of_full_gates": true,
+    "independently_required_in_final_artifact": true,
+    "duplicate_native_examples_not_added_to_distinct_full_suite_counts": true,
+    "native_execution_pending": true,
+    "node_validator_synthetic_tests_passed": 12,
+    "independent_evidence_and_preservation_synthetic_tests_passed": 44,
+    "workflow_proof": {
+      "parsed_yaml": true,
+      "full_parent_workflow_restored_exactly": true,
+      "added_gate_only": "Focused confirmed-ending native preflight before unchanged full regressions",
+      "unchanged_full_rails_vue_chrome_migrations_services_permissions_resources": true,
+      "rejected_synthetic_mutations": 3,
+      "native_execution_or_chrome_acceptance": false
+    },
+    "bash_syntax": "passed; commands not executed",
+    "embedded_python": "2 blocks compiled; not executed",
+    "actionlint": "not executed locally"
+  }
+}

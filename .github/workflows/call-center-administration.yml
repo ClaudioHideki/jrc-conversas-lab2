@@ -121,6 +121,12 @@ jobs:
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_pause_approval_schema_probe"); JrcContactCenter::SyntheticPauseApprovalSchemaProbe.record("reload")'
           bundle exec rails runner 'require Rails.root.join("script/jrc_call_center_ending_confirmation_schema_probe"); JrcContactCenter::SyntheticEndingConfirmationSchemaProbe.record("reload")'
           bundle exec rspec spec/models/jrc_contact_center/ivr_draft_ledger_spec.rb spec/models/jrc_contact_center/acw_form_template_ledger_spec.rb spec/models/jrc_contact_center/deferred_pause_request_spec.rb spec/models/jrc_contact_center/qualification_form_spec.rb spec/services/jrc_contact_center/create_contact_center_qualification_forms_spec.rb spec/models/jrc_contact_center/ending_reason_version_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_reason_versions_spec.rb spec/models/jrc_contact_center/team_state_spec.rb spec/services/jrc_contact_center/create_contact_center_team_states_spec.rb spec/models/jrc_contact_center/audio_folder_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_folders_spec.rb spec/models/jrc_contact_center/audio_version_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_files_spec.rb spec/models/jrc_contact_center/audio_inspection_spec.rb spec/services/jrc_contact_center/create_contact_center_audio_inspections_spec.rb spec/services/jrc_contact_center/add_contact_center_quality_review_authority_spec.rb spec/services/jrc_contact_center/module_policy_quality_review_spec.rb spec/services/jrc_contact_center/create_contact_center_team_supervisions_spec.rb spec/models/jrc_contact_center/team_supervision_constraints_spec.rb spec/models/jrc_contact_center/pause_approval_review_evidence_spec.rb spec/services/jrc_contact_center/create_contact_center_pause_approval_evidence_spec.rb spec/models/jrc_contact_center/ending_reason_confirmation_spec.rb spec/services/jrc_contact_center/create_contact_center_ending_reason_confirmations_spec.rb --format progress --format json --out /tmp/call-center-ivr-schema-reload-rspec.json
+      - name: Focused confirmed-ending native preflight before unchanged full regressions
+        id: confirmed_ending_preflight
+        run: |
+          node --test script/validate_cc_ending_confirmation_preflight.test.mjs
+          bundle exec rspec spec/services/jrc_contact_center/confirm_ending_reason_spec.rb spec/services/jrc_contact_center/confirm_ending_reason_forms_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_reason_confirmation_spec.rb --format progress --format json --out /tmp/call-center-ending-confirmation-preflight.json
+          node script/validate_cc_ending_confirmation_preflight.mjs /tmp/call-center-ending-confirmation-preflight.json
       - name: Rails authorization, persistence and affected regressions
         id: native_core
         run: |
@@ -142,13 +148,14 @@ jobs:
             --exclude-pattern '**/ending_confirmation_concurrency_spec.rb,**/sync_concurrency_spec.rb,**/native_role_concurrency_spec.rb,**/native_configuration_concurrency_spec.rb,**/ivr_draft_concurrency_spec.rb,**/acw_form_concurrency_spec.rb,**/qualification_form_concurrency_spec.rb,**/deferred_pause_concurrency_spec.rb,**/pause_approval_concurrency_spec.rb,**/native_team_scope_concurrency_spec.rb,**/native_operating_origins_spec.rb,**/audio_upload_concurrency_spec.rb,**/audio_inspection_concurrency_spec.rb,**/team_supervision_concurrency_spec.rb' \
             --format progress --format json --out /tmp/call-center-rspec.json
       - name: Preserve early native failure diagnostics without granting acceptance
-        if: failure() && (steps.native_reload.outcome == 'failure' || steps.native_core.outcome == 'failure')
+        if: failure() && (steps.native_reload.outcome == 'failure' || steps.confirmed_ending_preflight.outcome == 'failure' || steps.native_core.outcome == 'failure')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: call-center-native-early-${{ github.sha }}
           path: |
             /tmp/call-center-rspec.json
             /tmp/call-center-ivr-schema-reload-rspec.json
+            /tmp/call-center-ending-confirmation-preflight.json
           if-no-files-found: error
           retention-days: 7
       - name: Legacy isolated ACW value compatibility (not a persistence proof)
@@ -303,12 +310,14 @@ jobs:
           vue = json.loads(Path('/tmp/call-center-vitest.json').read_text())
           assert vue['numPassedTests'] == vue['numTotalTests'] > 0
           assert vue['numFailedTests'] == vue['numPendingTests'] == 0
+          ending_preflight = json.loads(Path('/tmp/call-center-ending-confirmation-preflight.json').read_text())['summary']
           evidence = {
               'sha': os.environ['GITHUB_SHA'], 'run_id': os.environ['GITHUB_RUN_ID'],
               'branch': os.environ['GITHUB_REF_NAME'],
               'source_matrix_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
               'rails': summaries, 'vue': {key: vue[key] for key in ['numTotalTests', 'numPassedTests', 'numFailedTests', 'numPendingTests']},
               'chrome': stats, 'matrix': matrix,
+              'ending_confirmation_preflight': {key: ending_preflight[key] for key in ['example_count', 'failure_count', 'pending_count', 'errors_outside_of_examples_count']},
               'stages_0_2_complete': False, 'external_homologation': False,
               'screenshots': {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
                               for path in sorted(Path('.codex/call-center-native-e2e').rglob('*.png'))},

@@ -39,11 +39,7 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
       authorize_qualification_origin!(record)
       reason = qualification_form_reason(record)
       response.headers['Cache-Control'] = 'no-store'
-      item = { id: record.id, account_id: record.account_id, account_user_id: record.account_user_id, reason_code: reason }
-      item.merge!(JrcContactCenter::QualificationForms.new(record).private_payload(reason: reason))
-      item.merge!(JrcContactCenter::EndingReasonPolicy.new(record).private_payload)
-      item.merge!(JrcContactCenter::EndingConfirmationState.private_payload(record))
-      render json: base_payload.merge(item: item)
+      render json: base_payload.merge(item: qualification_form_payload(record, reason))
     end
   end
 
@@ -67,6 +63,13 @@ class Api::V1::Accounts::JrcContactCenter::QualificationsController < Api::V1::A
   end
 
   private
+
+  def qualification_form_payload(record, reason)
+    item = { id: record.id, account_id: record.account_id, account_user_id: record.account_user_id, reason_code: reason }
+    item.merge!(JrcContactCenter::QualificationForms.new(record).private_payload(reason: reason))
+    item.merge!(JrcContactCenter::EndingReasonPolicy.new(record).private_payload)
+    item.merge!(JrcContactCenter::EndingConfirmationState.private_payload(record))
+  end
 
   def confirmation_options
     allowed = %w[qualification expected_draft_revision idempotency_key]

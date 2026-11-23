@@ -7322,5 +7322,21 @@
     "report": "docs/jrc_contact_center/ending_confirmation_first_native_failure_20261122.json",
     "no_database_or_legacy_retention_change": true,
     "all_23_figures_complete": false
+  },
+  "ending_confirmation_second_native_findings_20261122": {
+    "sha": "adc43bababa759fce7ff71a4619cce3b9d4f9741",
+    "run": 45084892809,
+    "status": "failed_not_homologated",
+    "core_passed": 2583,
+    "core_failed": 2,
+    "previous_2550_preserved_and_passed": true,
+    "schema_reload_passed": 200,
+    "new_ruby_offenses": 6,
+    "correction_and_actual_stale_revision_regression_prepared": true,
+    "reviewed_two_case_spec_rename": true,
+    "new_short_native_preflight_keeps_all_full_gates": true,
+    "report": "docs/jrc_contact_center/ending_confirmation_stale_native_failure_20261122.json",
+    "chrome_260_not_executed": true,
+    "all_23_figures_complete": false
   }
 }
