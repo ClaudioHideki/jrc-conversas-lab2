@@ -23,7 +23,7 @@
     "scope_model": 15,
     "scope_history": 12,
     "scope_migration": 5,
-    "scope_concurrency": 2,
+    "scope_concurrency": 3,
     "scope_schema_reload_repeated": 32,
     "unchanged_browser_examples": 260
   },
@@ -66,5 +66,13 @@
     "runtime_and15database_sources_unchanged": true,
     "independent_reader_tests": 11,
     "diagnostics_are_not_acceptance": true
+  },
+  "explicit_text_check_followup": {
+    "report": "docs/jrc_contact_center/ending_action_scope_reload_cast_findings_20261123.json",
+    "new15th_unreleased_migration_only": true,
+    "all14historical_migrations_all_sql_and_receipts_unchanged": true,
+    "native_revalidation": "pending",
+    "history_spec_rename_preserves_all12cases": true,
+    "additional_unexecuted_concurrency_case": "Upstream issuer update must not hold queue while waiting for native account authority lock."
   }
 }

@@ -7377,5 +7377,12 @@
     "conclusion": "failure",
     "native_executed": 0,
     "all23figures_complete": false
+  },
+  "ending_action_scope_reload_cast_findings_20261123": {
+    "report": "docs/jrc_contact_center/ending_action_scope_reload_cast_findings_20261123.json",
+    "diagnostic_sha": "f8cf0902ce9c97f8076784072c08fc827fc03509",
+    "cause_confirmed": "CHECK array cast representation changes during reload",
+    "native_revalidation": "pending",
+    "all23figures_complete": false
   }
 }

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 export const REQUIRED = new Map([
   ['spec/models/jrc_contact_center/ending_action_queue_scope_spec.rb', 15],
-  ['spec/services/jrc_contact_center/ending_action_scope_history_spec.rb', 12],
+  ['spec/services/jrc_contact_center/ending_action_queue_scope_history_spec.rb', 12],
   ['spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_spec.rb', 5],
 ]);
 

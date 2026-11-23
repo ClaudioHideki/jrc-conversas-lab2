@@ -64,8 +64,9 @@ class CreateContactCenterEndingActionScopes < ActiveRecord::Migration[7.1]
     add_check_constraint TABLE, identity, name: 'cc_ending_action_scope_identity'
     digests = "scope_digest ~ '^[0-9a-f]{64}$' AND integrity_sha256 ~ '^[0-9a-f]{64}$'"
     add_check_constraint TABLE, digests, name: 'cc_ending_action_scope_digests'
-    state = "scope_state IN ('mapped', 'unmapped', 'invalid') AND (issuer_company_id IS NULL OR issuer_company_id > 0) " \
-            "AND (business_unit_id IS NULL OR business_unit_id > 0) AND (scope_state <> 'mapped' OR issuer_company_id IS NOT NULL)"
+    state = "scope_state::text = ANY (ARRAY['mapped'::text, 'unmapped'::text, 'invalid'::text]) " \
+            'AND (issuer_company_id IS NULL OR issuer_company_id > 0) AND (business_unit_id IS NULL OR business_unit_id > 0) ' \
+            "AND (scope_state <> 'mapped' OR issuer_company_id IS NOT NULL)"
     add_check_constraint TABLE, state, name: 'cc_ending_action_scope_state'
     add_check_constraint TABLE, "jsonb_typeof(payload) = 'object' AND octet_length(payload::text) <= 8192", name: 'cc_ending_action_scope_payload'
   end

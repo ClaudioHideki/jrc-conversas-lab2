@@ -1,0 +1,58 @@
+{
+  "diagnostic_sha": "f8cf0902ce9c97f8076784072c08fc827fc03509",
+  "run": 45113230705,
+  "job": 137490093137,
+  "early_artifact": 14791050013,
+  "early_artifact_sha256": "41523ad3c878801664067bf2119083f4b9f644c0c31ed944305ac74bd29d6c21",
+  "diagnostic_is_not_native_acceptance": true,
+  "confirmed_difference": {
+    "component": "cc_ending_action_scope_state CHECK",
+    "fresh": "ARRAY['mapped'::character varying, 'unmapped'::character varying, 'invalid'::character varying]::text[]",
+    "reload": "ARRAY['mapped'::character varying::text, 'unmapped'::character varying::text, 'invalid'::character varying::text]",
+    "all_columns_indexes_functions_and_triggers_identical": true,
+    "other_constraints_identical": true,
+    "fresh_token": "jrc_cc_ending_action_scopes_v1:464d81ddd175444767809d7e70cf4ebd2b76b5ca6a23a4bccd8624d8b1b026bf",
+    "reload_calculated_token": "jrc_cc_ending_action_scopes_v1:0577a53ef3ce059c78e69fee7623ef2d2e69d513e8081e1b5b65f44308f5f800"
+  },
+  "correction": {
+    "unreleased_migration": "20261123034500_create_contact_center_ending_action_scopes.rb",
+    "explicit_array": "ARRAY['mapped'::text, 'unmapped'::text, 'invalid'::text]",
+    "allowed_states_unchanged": true,
+    "before_migration_sha256": "5fc7767b640f6bb0c1a1067dc6677570f0382df7aa6bb9925227a07cfda79b0d",
+    "after_migration_sha256": "b0145006657dad66ee74797bbc7eaf58b750a2a4265ce144995ae8c31a4010b8",
+    "original14migrations_all_sql_and_receipt_files_unchanged": true,
+    "no_timestamp_renumbering": true,
+    "not_deployed_or_published_in_an_image": true,
+    "no_mismatched_token_whitelist": true,
+    "same_positive_rspec_and_exact_schema_requirements": true
+  },
+  "actual_light_guard_tests": {
+    "node_exact_migration_and_reader_cases": 210,
+    "failures_pending_skipped_cancelled": 0,
+    "not_native_postgresql_acceptance": true
+  },
+  "native_revalidation": "pending",
+  "no_rule_activation_or_destination_effects": true,
+  "whole_word_complete": false,
+  "no_build_docker_ghcr_merge_or_deploy": true,
+  "final_ci_evidence": {
+    "conclusion": "failure",
+    "artifact": 14791545897,
+    "sha256": "69dab3aa0a29697224d087dc11a0002258d91d64a4dc33a22687a7f01db0c464",
+    "native_examples_executed": 0,
+    "new_ruby_lint_offenses": 4
+  },
+  "history_spec_lint_correction": {
+    "old_path": "spec/services/jrc_contact_center/ending_action_scope_history_spec.rb",
+    "new_path": "spec/services/jrc_contact_center/ending_action_queue_scope_history_spec.rb",
+    "all12examples_preserved": true,
+    "remove_non_method_second_describe_argument": true,
+    "use_described_class_in2existing_queries": true,
+    "no_rules_suppressed": true
+  },
+  "additional_native_concurrency_test": {
+    "expected_count": 3,
+    "executed": false,
+    "purpose": "Check real issuer/account/queue lock ordering with NOWAIT and separate PostgreSQL connection; no speculative SQL fix."
+  }
+}

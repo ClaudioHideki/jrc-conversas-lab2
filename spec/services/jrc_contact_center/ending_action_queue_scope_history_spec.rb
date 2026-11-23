@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe JrcContactCenter::EndingActionQueueScope, 'scope history' do
+RSpec.describe JrcContactCenter::EndingActionQueueScope do
   include_context 'with a native ending action queue scope'
 
   it 'records a new identity on corporate A-to-B-to-A transitions instead of reviving an old authorization' do
@@ -78,9 +78,9 @@ RSpec.describe JrcContactCenter::EndingActionQueueScope, 'scope history' do
     other_unit = JrcContactCenter::Unit.create!(account: other_account, code: 'SYNTHETIC', name: 'SYNTHETIC foreign', kind: 'sac')
     other_queue = JrcContactCenter::Queue.create!(account: other_account, unit: other_unit, code: 'SYNTHETIC', name: 'SYNTHETIC foreign',
                                                   service_kind: 'voice', strategy: 'ring_all')
-    other_scope = JrcContactCenter::EndingActionQueueScope.find_by!(account: other_account, source_queue_id: other_queue.id)
+    other_scope = described_class.find_by!(account: other_account, source_queue_id: other_queue.id)
     expect(other_scope.scope_state).to eq('unmapped')
     expect(scopes.where(id: other_scope.id)).to be_empty
-    expect(JrcContactCenter::EndingActionQueueScope.where(account: other_account, source_queue_id: queue.id)).to be_empty
+    expect(described_class.where(account: other_account, source_queue_id: queue.id)).to be_empty
   end
 end

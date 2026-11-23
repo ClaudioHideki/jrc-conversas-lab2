@@ -79,4 +79,37 @@ RSpec.describe 'Ending action scope capture with competing native PostgreSQL con
     expect(scopes.pluck(:revision)).to eq([1, 2])
     expect(scope.reload.attributes).to eq(original)
   end
+
+  it 'does not hold a native queue while an upstream issuer update waits for the existing account authority lock' do
+    scope
+    issuer_id = issuer.id
+    state = { ready: Queue.new, gate: Queue.new, results: Queue.new, workers: [] }
+    account.with_lock do
+      state[:workers] << Thread.new do
+        ActiveRecord::Base.connection_pool.with_connection do |connection|
+          state[:ready] << connection.raw_connection.backend_pid
+          Timeout.timeout(15) { state[:gate].pop }
+          JrcCustomers::Company.find(issuer_id).update!(active: false)
+          state[:results] << :updated
+        end
+      rescue StandardError => e
+        state[:results] << e
+      end
+      pid = Timeout.timeout(8) { state[:ready].pop }
+      state[:gate] << true
+      sql = "SELECT count(*) FROM pg_stat_activity WHERE pid=#{Integer(pid)} AND wait_event_type='Lock'"
+      Timeout.timeout(8) do
+        ActiveRecord::Base.connection.uncached { sleep 0.02 until ActiveRecord::Base.connection.select_value(sql).to_i == 1 }
+      end
+      JrcContactCenter::Queue.transaction(requires_new: true) { queue.lock!('FOR UPDATE NOWAIT') }
+    end
+    result = Timeout.timeout(20) { state[:results].pop }
+    raise result if result.is_a?(Exception)
+
+    expect(result).to eq(:updated)
+    expect(scopes.last.scope_state).to eq('invalid')
+    expect(scopes.pluck(:revision)).to eq([1, 2])
+  ensure
+    join_scope_contenders(state) if state
+  end
 end
