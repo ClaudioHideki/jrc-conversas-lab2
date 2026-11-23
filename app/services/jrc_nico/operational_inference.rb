@@ -1,5 +1,8 @@
 class JrcNico::OperationalInference
   def self.call(account:, user:, kind:, message:, context:, history: [])
+    if ENV['NICO_MODE'] == 'provider' && kind == 'operator'
+      context, history = JrcNico::GroqContext.project(account: account, message: message, context: context, history: history)
+    end
     payload = { request_id: SecureRandom.uuid, account_id: account.id, kind: kind, message: message, context: context, history: history }
     # Reserve both provider attempts, including prompts, framing and up to 2,000 output tokens each.
     reservation = 2 * (payload.to_json.bytesize + 16_000)

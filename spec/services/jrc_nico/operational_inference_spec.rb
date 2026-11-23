@@ -175,3 +175,76 @@ RSpec.describe JrcNico::OperationalInference do
     expect(WebMock).not_to have_requested(:post, 'http://runtime:3108/v1/operate')
   end
 end
+
+RSpec.describe JrcNico::GroqContext do
+  let(:account) { create(:account) }
+  let(:observation) do
+    { 'source' => 'provider_response', 'model' => 'groq-test', 'observed_at' => Time.current.iso8601,
+      'headers' => { 'x-ratelimit-limit-tokens' => '8000', 'x-ratelimit-remaining-tokens' => '1000',
+                     'x-ratelimit-reset-tokens' => '53.295s' } }
+  end
+  let!(:provider) do
+    JrcAi::Provider.create!(account: account, name: 'Groq fixture', provider_type: 'custom', default_model: 'groq-test',
+                           base_url: 'https://api.groq.com/openai/v1', api_key: 'synthetic-key', default_provider: true,
+                           settings: { provider_observation: observation })
+  end
+  let(:article) do
+    { 'id' => 12, 'resource_type' => 'JrcNico::KnowledgeDocument', 'body' => ('A' * 1500) + ' https://example.test/manual' }
+  end
+  let(:context) { { tools: [{ name: 'search_knowledge' }], module_guides: { crm: 'Guide' }, tool_results: [{ tool: 'search_knowledge', result: [article] }] } }
+  let(:history) { 10.times.map { |id| { 'role' => 'user', 'content' => "Past #{id}" } } }
+  around do |example|
+    with_modified_env NICO_PROVIDER_ALLOWED_HOSTS: 'api.groq.com,api.openai.com' do
+      example.run
+    end
+  end
+  before { allow(Kernel).to receive(:sleep) }
+
+  it 'bounds only the model projection while preserving source IDs, links, tools and original records' do
+    before = Marshal.dump([context, history])
+    projected, recent = described_class.project(account: account, message: 'Now', context: context, history: history)
+    row = projected.fetch('tool_results').first.fetch('result').first
+    expect(row).to include('id' => 12, 'resource_type' => 'JrcNico::KnowledgeDocument', 'body_truncated' => true,
+                           'source_links' => ['https://example.test/manual'])
+    expect(row.fetch('body').length).to eq(1000)
+    expect(projected.fetch('tools')).to eq([{ 'name' => 'search_knowledge' }])
+    expect(projected).not_to have_key('module_guides')
+    expect(recent).to eq(history.last(4))
+    expect(projected.dig('context_window', 'history_omitted')).to eq(6)
+    expect(Marshal.dump([context, history])).to eq(before)
+    expect(Kernel).not_to have_received(:sleep)
+  end
+
+  it 'leaves other providers and unverified or changed models untouched' do
+    [observation.merge('model' => 'old-model'), observation.merge('source' => 'manual'),
+     observation.merge('headers' => observation['headers'].merge('x-ratelimit-limit-tokens' => '100000'))].each do |value|
+      provider.update!(settings: { provider_observation: value })
+      expect(described_class.project(account: account, message: 'Now', context: context, history: history)).to eq([context, history])
+    end
+    provider.update!(base_url: 'https://api.openai.com/v1', settings: { provider_observation: observation })
+    expect(described_class.project(account: account, message: 'Now', context: context, history: history)).to eq([context, history])
+    expect(Kernel).not_to have_received(:sleep)
+  end
+
+  it 'uses the observed token reset and a confirmed receipt before the next inference, without inventing usage' do
+    JrcAi::UsageEvent.create!(account: account, provider: provider, agent_key: 'nico', feature: 'nico_operator',
+                             model: 'groq-test', input_tokens: 2000, output_tokens: 100, total_tokens: 2100,
+                             metadata: { usage_estimated: false })
+    events = account.jrc_ai_usage_events.count
+    described_class.project(account: account, message: 'Now', context: context, history: history)
+    expect(Kernel).to have_received(:sleep).with(a_value_between(40, 54))
+    expect(account.jrc_ai_usage_events.count).to eq(events)
+  end
+
+  it 'does not wait on expired observations or estimated usage and removes duplicated knowledge only' do
+    provider.update!(settings: { provider_observation: observation.merge('observed_at' => 2.minutes.ago.iso8601) })
+    JrcAi::UsageEvent.create!(account: account, provider: provider, agent_key: 'nico', feature: 'nico_operator',
+                             model: 'groq-test', input_tokens: 2000, output_tokens: 100, total_tokens: 2100,
+                             metadata: { usage_estimated: true })
+    value = context.merge(last_result: { tool: 'search_knowledge', result: [article] })
+    projected, = described_class.project(account: account, message: 'Now', context: value, history: history)
+    expect(projected).not_to have_key('last_result')
+    expect(projected.fetch('tool_results').first.fetch('result').first.fetch('id')).to eq(12)
+    expect(Kernel).not_to have_received(:sleep)
+  end
+end

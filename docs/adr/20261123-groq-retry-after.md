@@ -21,3 +21,7 @@ Fonte: https://console.groq.com/docs/rate-limits
 ## Histórico de recursos
 
 A análise de sentimento aceita também uma origem identificada e IDs qualificados reais, sem atribuir um ticket a uma conversa JRC fictícia. O contrato de conversas existente permanece compatível. O núcleo não lê GLPI: autorização, período e projeção pública pertencem ao adaptador exclusivo da Branef.
+
+## Evidência posterior:413 após leitura do conhecimento
+
+Na Branef, a consulta search_knowledge foi executada, mas a síntese recebeu HTTP413 com limite observado de8000TPM. O retorno429 não era a única causa. Para esse provedor/modelo e cota observada, a projeção da inferência omite guias de módulos redundantes, mantém quatro mensagens recentes, limita corpos de conhecimento a1000caracteres preservando IDs/URLs e elimina apenas duplicatas exatas de resultados. Fontes, autorizações e ferramentas permanecem intactas. A cadência usa reset do provedor e último recibo confirmado, antes de criar reserva; nenhuma espera é contabilizada como consumo. Não alterar outros provedores/modelos nem liberar reservas incertas antigas.
