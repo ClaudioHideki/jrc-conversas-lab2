@@ -137,6 +137,17 @@ jobs:
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
           bundle exec rspec spec/requests/api/v1/accounts/jrc_operations/rich_comments_concurrency_spec.rb --format progress --format json --out /tmp/projects-portal-comments-concurrency.json
+      - name: Manual de Cultura em PostgreSQL, incluindo concorrencia
+        if: hashFiles('spec/requests/jrc_culture/concurrency_spec.rb') != ''
+        env:
+          POSTGRES_DATABASE: jrc_culture_test
+        run: |
+          test "$RAILS_ENV:$POSTGRES_HOST:$POSTGRES_DATABASE" = test:127.0.0.1:jrc_culture_test
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate:down VERSION=20261123160000
+          bundle exec rails db:migrate:up VERSION=20261123160000
+          bundle exec rspec spec/requests/jrc_culture --format progress --format json --out /tmp/jrc-culture-rspec.json
+          ruby -rjson -e 's=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Manual de Cultura gate failed" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero?' /tmp/jrc-culture-rspec.json
       - name: Exigir exemplos executados e nenhuma falha ou pendencia nos quatro bancos
         run: |
           ruby -rjson -e 'ARGV.each { |path| s=JSON.parse(File.read(path)).fetch("summary"); abort "Empty, failed or pending native gate: #{path}" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero? && s.fetch("errors_outside_of_examples_count").zero? }' /tmp/projects-portal-rspec.json /tmp/projects-portal-concurrency.json /tmp/projects-portal-sd-concurrency.json /tmp/projects-portal-comments-concurrency.json
@@ -165,6 +176,8 @@ jobs:
           app/javascript/dashboard/routes/dashboard/jrcOperations
           app/javascript/dashboard/routes/dashboard/serviceDesk
           app/javascript/portal/requester
+          app/javascript/portal/culture
+          app/javascript/dashboard/components-next/sidebar/specs
           app/javascript/widget/components/spec/ServiceDeskPortal.spec.js
           app/javascript/dashboard/routes/dashboard/webphone
           app/javascript/dashboard/routes/dashboard/inbox
@@ -198,6 +211,7 @@ jobs:
             /tmp/projects-portal-concurrency.json
             /tmp/projects-portal-sd-concurrency.json
             /tmp/projects-portal-comments-concurrency.json
+            /tmp/jrc-culture-rspec.json
             /tmp/projects-portal-vitest.json
             /tmp/projects-portal-schema.rb
             /tmp/projects-portal-schema-regression.json
