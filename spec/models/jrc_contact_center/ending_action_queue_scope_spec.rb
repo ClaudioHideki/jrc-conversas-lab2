@@ -105,7 +105,7 @@ RSpec.describe JrcContactCenter::EndingActionQueueScope do
   it 'leaves pre-anchor events unattested instead of inferring a historical mapping' do
     original = scope
     connection = ApplicationRecord.connection
-    timestamp = connection.quote(original.created_at - 1.microsecond)
+    timestamp = connection.quote(original.created_at - Rational(1, 1_000_000))
     actual = connection.select_value("SELECT cc_ending_action_queue_scope_at(#{account.id},#{queue.id},#{timestamp}::timestamp)")
     expect(actual).to be_nil
     expect(scopes.count).to eq(1)

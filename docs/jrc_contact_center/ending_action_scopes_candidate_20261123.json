@@ -52,7 +52,16 @@
     "conclusion": "failure",
     "native_examples_executed": 0,
     "report": "docs/jrc_contact_center/ending_action_scopes_first_native_findings_20261123.json",
-    "followup": "diagnostic and lint correction; new validation pending"
+    "followup": "diagnostic and lint correction; new validation pending",
+    "check_followup": {
+      "sha": "447ad396efc4a040db886b0ea844b8ca2f7ee3f3",
+      "run": 45115534273,
+      "fresh_reload_match": true,
+      "reload_passed": 231,
+      "reload_failed": 1,
+      "fixture_only_fix_prepared": true,
+      "all_native_acceptance": false
+    }
   },
   "original_checkout": "b77ffe55 and the3protected pending files remain preserved",
   "no_production_or_provider_or_grant_changes": true,

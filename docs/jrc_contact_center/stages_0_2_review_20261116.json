@@ -583,8 +583,8 @@
         "Pausa adiada persistente:aplica somente após chamada encerrada e conclusão explícita de todos osACW. Tempo/rascunho não concluem;conflitos,autoria,escopo e compatibilidadelegada revalidados em0ddd5a4b e2a0cde0c."
       ],
       "remaining_or_external": [
-        "Aprovação de pausa e variabilidade avançada continuam pendentes.",
-        "Nenhum retorno automático à distribuição ou ACKPABX homologado. Catálogo ativado somente por decisão explícita por conta."
+        "Variações avançadas ainda exigem critérios próprios; não equivalem ao fluxo de aprovação já validado.",
+        "Retorno à distribuição e ACKPABX dependem de homologação externa; catálogo somente após ativação explícita por conta."
       ],
       "code_references": [],
       "reference": {
@@ -619,6 +619,16 @@
         "complete_reference": [
           "Aprovação,variabilidade e publicação/ACKs externos permanecem abertos. Histórico operacional de eventos em validação separada."
         ]
+      },
+      "current_pause_approval_evidence_20261123": {
+        "sha": "68d5011bfddafb936306f5015423994035ba15dd",
+        "run": 45102299490,
+        "all_affected_units": true,
+        "does_not_apply_before_actual_acw_completion": true,
+        "real_native_api_db_and4chrome_projects": true,
+        "bounded_visual_review_images": 32,
+        "whole_figure_or_provider_acceptance": false,
+        "report": "docs/jrc_contact_center/ending_confirmation_visual_followup_20261122.json"
       }
     },
     {
@@ -633,8 +643,8 @@
         "Pausa adiada persistente:aplica somente após chamada encerrada e conclusão explícita de todos osACW. Tempo/rascunho não concluem;conflitos,autoria,escopo e compatibilidadelegada revalidados em0ddd5a4b e2a0cde0c."
       ],
       "remaining_or_external": [
-        "Aprovação de pausa e variabilidade avançada continuam pendentes.",
-        "Nenhum retorno automático à distribuição ou ACKPABX homologado. Catálogo ativado somente por decisão explícita por conta."
+        "Variações avançadas ainda exigem critérios próprios; não equivalem ao fluxo de aprovação já validado.",
+        "Retorno à distribuição e ACKPABX dependem de homologação externa; catálogo somente após ativação explícita por conta."
       ],
       "code_references": [],
       "reference": {
@@ -669,6 +679,16 @@
         "complete_reference": [
           "Aprovação,variabilidade e publicação/ACKs externos permanecem abertos. Histórico operacional de eventos em validação separada."
         ]
+      },
+      "current_pause_approval_evidence_20261123": {
+        "sha": "68d5011bfddafb936306f5015423994035ba15dd",
+        "run": 45102299490,
+        "all_affected_units": true,
+        "does_not_apply_before_actual_acw_completion": true,
+        "real_native_api_db_and4chrome_projects": true,
+        "bounded_visual_review_images": 32,
+        "whole_figure_or_provider_acceptance": false,
+        "report": "docs/jrc_contact_center/ending_confirmation_visual_followup_20261122.json"
       }
     },
     {
@@ -826,13 +846,18 @@
     {
       "figure": 10,
       "title": "Automações por encerramento",
-      "status": "Reservado às etapas 3–8",
+      "status": "Implementado parcialmente",
       "stages": [
         6
       ],
-      "implemented_in_0_2": [],
+      "implemented_in_0_2": [
+        "Pré-condição de confirmação explícita do motivo validada em68d5011b; conserva ACW/formulário aberto e não executa destinos.",
+        "Registro prospectivo imutável de escopo implementado em branch exclusiva, ainda aguardando aceite nativo completo."
+      ],
       "remaining_or_external": [
-        "Per-reason CRM/SD/task orchestration, per-destination receipts and retries remain stage 6"
+        "Configuração versionada das automações, origens fixadas, recibos por destino, execução e reprocessamento seguro ainda incompletos.",
+        "Adaptadores CRM, Service Desk, Tarefas, notificações e Nico precisam preservar suas autoridades nativas; nenhum destino é ativado por esta fundação.",
+        "Decisão de desativação versus ações já pendentes continua separada, sem regra de negócio presumida."
       ],
       "code_references": [],
       "reference": {
@@ -868,7 +893,15 @@
           "Per-reason CRM/SD/task orchestration, per-destination receipts and retries remain stage 6"
         ]
       },
-      "current_internal_foundation": "Motivo explicitamente confirmado, imutável e independente da conclusão do ACW: prova nativa em 2a0fc2de; não executa destinos. Motor por destino ainda pendente."
+      "current_internal_foundation": "Motivo explicitamente confirmado, imutável e independente da conclusão do ACW: prova nativa em 2a0fc2de; não executa destinos. Motor por destino ainda pendente.",
+      "current_implementation_boundary_20261123": {
+        "confirmation_accepted_sha": "68d5011bfddafb936306f5015423994035ba15dd",
+        "scope_candidate_sha": "447ad396efc4a040db886b0ea844b8ca2f7ee3f3",
+        "actual_scope_schema_fresh_reload_equal": true,
+        "scope_native_acceptance": false,
+        "F10_A_and_B_accepted": false,
+        "report": "docs/jrc_contact_center/ending_action_scope_reload_cast_findings_20261123.json"
+      }
     },
     {
       "figure": 11,
@@ -7383,6 +7416,14 @@
     "diagnostic_sha": "f8cf0902ce9c97f8076784072c08fc827fc03509",
     "cause_confirmed": "CHECK array cast representation changes during reload",
     "native_revalidation": "pending",
-    "all23figures_complete": false
+    "all23figures_complete": false,
+    "check_followup": {
+      "sha": "447ad396efc4a040db886b0ea844b8ca2f7ee3f3",
+      "run": 45115534273,
+      "fresh_reload_match": true,
+      "reload_passed": 231,
+      "fixture_failed": 1,
+      "whole_component_accepted": false
+    }
   }
 }

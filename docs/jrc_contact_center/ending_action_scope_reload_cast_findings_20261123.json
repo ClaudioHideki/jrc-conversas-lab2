@@ -54,5 +54,47 @@
     "expected_count": 3,
     "executed": false,
     "purpose": "Check real issuer/account/queue lock ordering with NOWAIT and separate PostgreSQL connection; no speculative SQL fix."
+  },
+  "exact_check_native_followup": {
+    "sha": "447ad396efc4a040db886b0ea844b8ca2f7ee3f3",
+    "run": 45115534273,
+    "job": 137497401126,
+    "early_artifact": 14791826266,
+    "artifact_sha256": "723edfa10f24b2e9ca166a5de99c0b7daee671a4e1291063c1db647c8fcc2198",
+    "fresh_and_reload_receipts_and_all_components_equal": true,
+    "receipt": "jrc_cc_ending_action_scopes_v1:be499f2e925377851559d43035efb063784b28fce1618c3d28fcf090a0b8af43",
+    "reload_summary": {
+      "duration": 31.589650099,
+      "example_count": 232,
+      "failure_count": 1,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "old200reload_examples_still_pass": true,
+    "new_scope_examples_passed": 31,
+    "only_failure": {
+      "description": "JrcContactCenter::EndingActionQueueScope leaves pre-anchor events unattested instead of inferring a historical mapping",
+      "file": "./spec/models/jrc_contact_center/ending_action_queue_scope_spec.rb",
+      "line": 105,
+      "error": "undefined method 'microsecond' for an instance of Integer",
+      "backtrace": [
+        "./spec/models/jrc_contact_center/ending_action_queue_scope_spec.rb:108:in 'block (2 levels) in <main>'"
+      ]
+    },
+    "fixture_only_correction": "Subtract Rational(1, 1_000_000), preserving the exact one-microsecond pre-anchor assertion.",
+    "no_product_migration_sql_receipt_or_gate_change": true,
+    "native_revalidation": "pending",
+    "no_whole_component_acceptance": true,
+    "final_artifact": 14792012468,
+    "final_artifact_sha256": "f1d66f8a0da27d9a09a6018683111833c9aaab735322f1e21779fdb2c8c189d0",
+    "final_new_ruby_offenses": 0,
+    "final_workflow_conclusion": "failure"
+  },
+  "independent_evidence_reader": {
+    "synthetic_tests_passed": 12,
+    "current_reviewed_history_path_required": true,
+    "stale_history_path_rejected": true,
+    "same32positive_cases_and_all_schema_requirements": true,
+    "not_native_tests": true
   }
 }
