@@ -17,7 +17,7 @@ module JrcContactCenter::SyntheticEndingScopeSchemaProbe
     connection = ActiveRecord::Base.connection
     receipt = JrcContactCenter::EndingActionScopeSchemaReceipt.new(connection)
     components = %i[structure constraints functions triggers].index_with { |name| receipt.send(name) }
-    { stage: stage, product_sha: ENV.fetch('GITHUB_SHA'), stored: { receipt.class::TABLE => connection.table_comment(receipt.class::TABLE) },
+    { stage: stage, product_sha: ENV.fetch('GITHUB_SHA'), stored: receipt.class::TABLES.index_with { |table| connection.table_comment(table) },
       calculated: receipt.send(:token), components: components,
       component_hashes: components.transform_values { |value| Digest::SHA256.hexdigest(JSON.generate(value)) } }
   end

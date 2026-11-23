@@ -10,6 +10,7 @@ RSpec.describe CreateContactCenterEndingActionScopes do
       receipt::TRIGGERS.each { |name| ApplicationRecord.connection.execute("DROP TRIGGER IF EXISTS #{name} ON #{table}") }
     end
     ApplicationRecord.connection.execute("DROP TABLE #{receipt::TABLE}")
+    ApplicationRecord.connection.execute("DROP TABLE #{receipt::ACCOUNT_TABLE}")
     receipt::FUNCTIONS.each do |name|
       rows = ApplicationRecord.connection.select_values("SELECT oid::regprocedure::text FROM pg_proc WHERE proname='#{name}' " \
                                                         "AND pronamespace='public'::regnamespace")

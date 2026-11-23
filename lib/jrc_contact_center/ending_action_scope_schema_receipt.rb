@@ -6,42 +6,56 @@ require 'digest'
 # Fingerprints only the new scope ledger and its own triggers/functions. No earlier receipt is restamped.
 class JrcContactCenter::EndingActionScopeSchemaReceipt
   TABLE = 'jrc_contact_center_ending_action_queue_scopes'
+  ACCOUNT_TABLE = 'jrc_contact_center_ending_scope_accounts'
+  TABLES = [ACCOUNT_TABLE, TABLE].freeze
   COLUMNS = %w[id account_id queue_id source_queue_id unit_id revision issuer_company_id business_unit_id scope_state
                scope_digest payload integrity_sha256 created_at].freeze
-  RELATIONS = [TABLE, 'jrc_contact_center_queues', 'jrc_contact_center_units', 'companies', 'jrc_crm_business_units'].freeze
+  RELATIONS = [*TABLES, 'accounts', 'jrc_contact_center_queues', 'jrc_contact_center_units', 'companies', 'jrc_crm_business_units'].freeze
   FUNCTIONS = %w[cc_ending_action_scope_id cc_ending_action_queue_scope_document cc_ending_action_queue_scope_guard
                  cc_ending_action_capture_queue_scope cc_ending_action_queue_scope_at cc_ending_action_queue_changed
-                 cc_ending_action_unit_scope_changed cc_ending_action_corporate_scope_changed].freeze
+                 cc_ending_action_unit_scope_changed cc_ending_action_corporate_scope_changed
+                 cc_ending_action_scope_account_guard cc_ending_action_scope_account_created].freeze
   TRIGGERS = %w[cc_ending_action_queue_scope_immutable cc_ending_action_queue_scope_created cc_ending_action_queue_scope_changed
                 cc_ending_action_unit_scope_changed cc_ending_action_unit_scope_deleted cc_ending_action_issuer_scope_changed
-                cc_ending_action_issuer_scope_deleted cc_ending_action_business_scope_changed cc_ending_action_business_scope_deleted].freeze
+                cc_ending_action_issuer_scope_deleted cc_ending_action_business_scope_changed cc_ending_action_business_scope_deleted
+                cc_ending_action_scope_account_immutable cc_ending_action_scope_account_created].freeze
 
   def initialize(connection)
     @connection = connection
   end
 
   def stamp!
-    @connection.change_table_comment(TABLE, token)
+    value = token
+    TABLES.each { |table| @connection.change_table_comment(table, value) }
   end
 
   def verify!
-    valid = complete_structure? && @connection.table_comment(TABLE) == token
+    valid = complete_structure? && TABLES.all? { |table| @connection.table_comment(table) == token }
     raise ActiveRecord::MigrationError, 'Unexpected ending action scope schema; preserve history and investigate' unless valid
   end
 
   private
 
   def complete_structure?
-    return false unless @connection.table_exists?(TABLE)
+    return false unless TABLES.all? { |table| @connection.table_exists?(table) }
     return false unless @connection.columns(TABLE).map(&:name).sort == COLUMNS.sort
+    return false unless account_reference_structure?
 
     functions.length == FUNCTIONS.length && triggers.length == TRIGGERS.length
   end
 
+  def account_reference_structure?
+    @connection.columns(ACCOUNT_TABLE).map(&:name) == ['account_id'] &&
+      @connection.foreign_keys(ACCOUNT_TABLE).map(&:to_table) == ['accounts'] &&
+      @connection.foreign_keys(TABLE).map(&:to_table).sort == [ACCOUNT_TABLE, 'jrc_contact_center_queues'].sort
+  end
+
   def structure
-    columns = @connection.columns(TABLE).map { |row| [row.name, row.sql_type, row.null, row.default, row.default_function, row.collation] }
-    indexes = @connection.indexes(TABLE).map { |row| [row.name, row.columns, row.unique, row.where] }.sort
-    [TABLE, columns, indexes]
+    TABLES.map do |table|
+      columns = @connection.columns(table).map { |row| [row.name, row.sql_type, row.null, row.default, row.default_function, row.collation] }
+      indexes = @connection.indexes(table).map { |row| [row.name, row.columns, row.unique, row.where] }.sort
+      [table, columns, indexes]
+    end
   end
 
   def token
@@ -50,8 +64,9 @@ class JrcContactCenter::EndingActionScopeSchemaReceipt
 
   def constraints
     @connection.select_rows(<<~SQL.squish)
-      SELECT conname, pg_get_constraintdef(oid, true)
-      FROM pg_constraint WHERE conrelid = '#{TABLE}'::regclass ORDER BY conname
+      SELECT conrelid::regclass::text, conname, pg_get_constraintdef(oid, true)
+      FROM pg_constraint WHERE conrelid IN ('#{TABLE}'::regclass, '#{ACCOUNT_TABLE}'::regclass)
+      ORDER BY conrelid::regclass::text, conname
     SQL
   end
 

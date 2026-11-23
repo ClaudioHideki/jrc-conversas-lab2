@@ -4,7 +4,7 @@ import { REQUIRED, validateScopePreflight } from './validate_cc_ending_scope_pre
 
 function fixture() {
   return {
-    summary: { example_count: 32, failure_count: 0, pending_count: 0, errors_outside_of_examples_count: 0 },
+    summary: { example_count: 38, failure_count: 0, pending_count: 0, errors_outside_of_examples_count: 0 },
     examples: [...REQUIRED].flatMap(([path, count]) => Array.from({ length: count }, (_, index) => ({
       file_path: `./${path}`, line_number: index + 1, full_description: `synthetic reader case ${index}`, status: 'passed',
     }))),
@@ -12,13 +12,13 @@ function fixture() {
 }
 
 test('accepts complete reader input; this is not a Rails or PostgreSQL test', () => {
-  assert.equal(validateScopePreflight(fixture()).example_count, 32);
+  assert.equal(validateScopePreflight(fixture()).example_count, 38);
 });
 
 test('accepts out-of-order native results without discarding or deduplicating them', () => {
   const data = fixture();
   data.examples.reverse();
-  assert.equal(validateScopePreflight(data).example_count, 32);
+  assert.equal(validateScopePreflight(data).example_count, 38);
 });
 
 for (const [name, mutate] of [

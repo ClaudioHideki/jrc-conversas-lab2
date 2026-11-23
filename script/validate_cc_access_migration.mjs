@@ -146,10 +146,10 @@ export function verifyEndingConfirmationMigrations(changes, readCurrent, schema)
 
 
 export const endingActionScopeMigrationPath = 'db/migrate/20261123034500_create_contact_center_ending_action_scopes.rb';
-export const endingActionScopeMigrationHash = 'b0145006657dad66ee74797bbc7eaf58b750a2a4265ce144995ae8c31a4010b8';
+export const endingActionScopeMigrationHash = '10de41dd2a75d6c69aca0ec0000549ab8bded565b9ae692e443a175744d6ce7c';
 export const endingActionScopeSources = Object.freeze({
-  "db/functions/20261123034500_contact_center_ending_action_scopes.sql": "d7088773cb24eb47b626924a8c5d117705a95a2ecca5ac0ba9caaab3d9533447",
-  "lib/jrc_contact_center/ending_action_scope_schema_receipt.rb": "a7b94b6aa584239cb4ec860b0d42b39a6b608f878a7984353ed716bca89798f6"
+  "db/functions/20261123034500_contact_center_ending_action_scopes.sql": "3f1ecc42e7944d40ddd838eb066dc1610a95465f27f614b11f692f9d1ee7fdd5",
+  "lib/jrc_contact_center/ending_action_scope_schema_receipt.rb": "d23faa6189bae4c4ca93084e8c085f7839caa5f8383a8b6deb8fa248fdb68bb1"
 });
 
 // The original1/12/13/14verifiers and their exact historical hashes remain unchanged.

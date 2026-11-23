@@ -1,4 +1,5 @@
 require 'rails_helper'
+require Rails.root.join('lib/jrc_contact_center/ending_action_scope_schema_receipt')
 
 RSpec.describe JrcContactCenter::EndingActionQueueScope do
   include_context 'with a native ending action queue scope'
@@ -88,8 +89,12 @@ RSpec.describe JrcContactCenter::EndingActionQueueScope do
 
   it 'adds no live corporate or user foreign key that could erase old scope identities' do
     keys = described_class.connection.foreign_keys(described_class.table_name)
-    expect(keys.map(&:to_table).sort).to eq(%w[accounts jrc_contact_center_queues])
+    reference = JrcContactCenter::EndingActionScopeSchemaReceipt::ACCOUNT_TABLE
+    expect(keys.map(&:to_table).sort).to eq([reference, 'jrc_contact_center_queues'].sort)
     expect(keys.find { |key| key.to_table == 'jrc_contact_center_queues' }.on_delete).to eq(:nullify)
+    parent = described_class.connection.foreign_keys(reference).sole
+    expect([parent.to_table, parent.column, parent.on_delete]).to eq(['accounts', 'account_id', :cascade])
+    expect(keys.find { |key| key.to_table == reference }.on_delete).to eq(:cascade)
     expect(described_class.column_names).not_to include('updated_at', 'actor_user_id')
   end
 

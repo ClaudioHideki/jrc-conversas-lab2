@@ -1,6 +1,28 @@
 -- Forward-only native queue/corporate scope evidence. This does not activate an automation.
 -- No existing cc_ending_reason_* function/receipt is replaced.
 
+-- Preserve a declarative Account -> technical reference -> immutable history FK chain,
+-- without taking a new native Account KEY SHARE lock for every scope revision.
+CREATE FUNCTION cc_ending_action_scope_account_guard() RETURNS trigger
+LANGUAGE plpgsql AS $guard$
+BEGIN
+  IF TG_OP = 'DELETE' AND NOT EXISTS (SELECT 1 FROM accounts WHERE id = OLD.account_id) THEN RETURN OLD; END IF;
+  RAISE EXCEPTION 'Ending scope account reference is immutable';
+END $guard$;
+
+CREATE TRIGGER cc_ending_action_scope_account_immutable BEFORE UPDATE OR DELETE
+  ON jrc_contact_center_ending_scope_accounts FOR EACH ROW EXECUTE FUNCTION cc_ending_action_scope_account_guard();
+
+CREATE FUNCTION cc_ending_action_scope_account_created() RETURNS trigger
+LANGUAGE plpgsql AS $guard$
+BEGIN
+  INSERT INTO jrc_contact_center_ending_scope_accounts(account_id) VALUES(NEW.id);
+  RETURN NEW;
+END $guard$;
+
+CREATE TRIGGER cc_ending_action_scope_account_created AFTER INSERT ON accounts
+  FOR EACH ROW EXECUTE FUNCTION cc_ending_action_scope_account_created();
+
 CREATE FUNCTION cc_ending_action_scope_id(value jsonb) RETURNS bigint
 LANGUAGE plpgsql IMMUTABLE AS $guard$
 DECLARE identifier text;

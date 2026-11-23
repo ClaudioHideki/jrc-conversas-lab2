@@ -3,21 +3,24 @@
 # Forward-only evidence, not rule activation. Existing calls, catalogues and authority are untouched.
 class CreateContactCenterEndingActionScopes < ActiveRecord::Migration[7.1]
   TABLE = :jrc_contact_center_ending_action_queue_scopes
+  ACCOUNT_TABLE = :jrc_contact_center_ending_scope_accounts
   SQL = 'db/functions/20261123034500_contact_center_ending_action_scopes.sql'
   SOURCES = {
-    SQL => 'd7088773cb24eb47b626924a8c5d117705a95a2ecca5ac0ba9caaab3d9533447',
-    'lib/jrc_contact_center/ending_action_scope_schema_receipt.rb' => 'a7b94b6aa584239cb4ec860b0d42b39a6b608f878a7984353ed716bca89798f6'
+    SQL => '3f1ecc42e7944d40ddd838eb066dc1610a95465f27f614b11f692f9d1ee7fdd5',
+    'lib/jrc_contact_center/ending_action_scope_schema_receipt.rb' => 'd23faa6189bae4c4ca93084e8c085f7839caa5f8383a8b6deb8fa248fdb68bb1'
   }.freeze
 
   def up
     load_sources!
     receipt = JrcContactCenter::EndingActionScopeSchemaReceipt.new(connection)
-    return receipt.verify! if table_exists?(TABLE)
+    return receipt.verify! if table_exists?(TABLE) || table_exists?(ACCOUNT_TABLE)
 
+    create_account_references
     create_records
     indexes
     constraints
     execute File.read(Rails.root.join(SQL))
+    execute "INSERT INTO #{ACCOUNT_TABLE}(account_id) SELECT id FROM accounts ORDER BY id"
     execute 'SELECT cc_ending_action_capture_queue_scope(id) FROM jrc_contact_center_queues ORDER BY account_id, id'
     receipt.stamp!
     receipt.verify!
@@ -39,7 +42,7 @@ class CreateContactCenterEndingActionScopes < ActiveRecord::Migration[7.1]
 
   def create_records
     create_table TABLE do |table|
-      table.references :account, null: false, index: false, foreign_key: { on_delete: :cascade }
+      table.references :account, null: false, index: false
       table.bigint :queue_id
       table.bigint :source_queue_id, :unit_id, null: false
       table.integer :revision, null: false
@@ -51,12 +54,22 @@ class CreateContactCenterEndingActionScopes < ActiveRecord::Migration[7.1]
     end
   end
 
+  # One immutable technical FK target per real Account, never a customer/provider registry.
+  # Appending evidence must not retain a late KEY SHARE lock on the native authority row.
+  def create_account_references
+    create_table ACCOUNT_TABLE, id: false do |table|
+      table.bigint :account_id, null: false, primary_key: true
+    end
+    add_foreign_key ACCOUNT_TABLE, :accounts, column: :account_id, on_delete: :cascade
+  end
+
   def indexes
     add_index TABLE, [:account_id, :source_queue_id, :revision], unique: true, name: 'cc_ending_action_scope_revision'
     add_index TABLE, [:account_id, :source_queue_id, :created_at], name: 'cc_ending_action_scope_effective'
     add_index TABLE, [:id, :account_id], unique: true, name: 'cc_ending_action_scope_account'
     add_index TABLE, :queue_id, name: 'cc_ending_action_scope_live_queue'
     add_foreign_key TABLE, :jrc_contact_center_queues, column: :queue_id, on_delete: :nullify
+    add_foreign_key TABLE, ACCOUNT_TABLE, column: :account_id, primary_key: :account_id, on_delete: :cascade
   end
 
   def constraints

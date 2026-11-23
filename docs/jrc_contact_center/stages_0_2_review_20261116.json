@@ -7425,5 +7425,12 @@
       "fixture_failed": 1,
       "whole_component_accepted": false
     }
+  },
+  "ending_scope_account_lock_followup_20261123": {
+    "report": "docs/jrc_contact_center/ending_scope_account_lock_findings_20261123.json",
+    "parent": "c0c47932eab471d25be8dadd860cc048f619387b",
+    "native_status": "correction_prepared_not_accepted",
+    "all14historical_sources_and_native_tests_preserved": true,
+    "all23figures_complete": false
   }
 }

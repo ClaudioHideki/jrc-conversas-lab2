@@ -1,0 +1,93 @@
+{
+  "parent": "c0c47932eab471d25be8dadd860cc048f619387b",
+  "run": 45117406905,
+  "job": 137503284325,
+  "conclusion": "failure",
+  "artifact": 14792534119,
+  "artifact_sha256": "68081e7a09b98d13ea51c4f8131b40fec9c944a5ef5d63b1c12fa9d2796cb98a",
+  "actual_native": {
+    "call-center-rspec.json": {
+      "duration": 564.601069155,
+      "example_count": 2618,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-pabx-rspec.json": {
+      "duration": 81.126012044,
+      "example_count": 141,
+      "failure_count": 2,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "call-center-ivr-schema-reload-rspec.json": {
+      "duration": 32.523014912,
+      "example_count": 232,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    }
+  },
+  "actual_preflight_repeated_not_added_to_distinct": {
+    "confirmation": 23,
+    "scope": 32
+  },
+  "new_ruby_offenses": 0,
+  "vue_build_chrome_and_corporate_not_executed": true,
+  "confirmed_failure_mechanism": [
+    "The new history INSERT checks its direct Account FK with PostgreSQL KEY SHARE.",
+    "A queue-remapping transaction retains that new parent-row lock and prevents the unchanged native request from reaching its original queue-read barrier.",
+    "An issuer update already holds a native queue while its new history FK check waits behind Account FOR UPDATE; the real NOWAIT queue probe failed.",
+    "Both existing native authorization and the new independently connected scope test exposed the added coupling."
+  ],
+  "postgres_primary_sources": [
+    "https://www.postgresql.org/docs/16/explicit-locking.html",
+    "https://raw.githubusercontent.com/postgres/postgres/REL_16_STABLE/src/backend/utils/adt/ri_triggers.c"
+  ],
+  "correction_not_yet_native_accepted": {
+    "fk_chain": [
+      "history.account_id -> ending_scope_accounts.account_id",
+      "ending_scope_accounts.account_id -> accounts.id"
+    ],
+    "technical_reference_columns": [
+      "account_id"
+    ],
+    "one_reference_per_real_account": true,
+    "no_implicit_generated_account_id": true,
+    "real_fk_constraints_and_root_cascade_preserved": true,
+    "manual_reference_delete_or_reparent_while_account_live_rejected": true,
+    "queue_fk_nullification_and_old_scope_rows_preserved": true,
+    "no_customer_provider_user_or_permission_registry": true,
+    "native_account_authority_lock_and_all_legacy_models_unchanged": true,
+    "old_native_concurrency_test_byte_identical": "118af96e5124cf9aa5640fb4662f378b252a2456b6b0daa9b40daa2d1d67a94c",
+    "own_schema_receipt_covers_both_tables_10functions_11triggers": true,
+    "all14historical_migrations_sql_and_receipts_unchanged": true,
+    "only_unreleased_never_deployed15th_migration_revised": true,
+    "existing_incompatible_prototype_schema_still_rejected_not_rewritten": true,
+    "old_sources": {
+      "db/migrate/20261123034500_create_contact_center_ending_action_scopes.rb": "b0145006657dad66ee74797bbc7eaf58b750a2a4265ce144995ae8c31a4010b8",
+      "db/functions/20261123034500_contact_center_ending_action_scopes.sql": "d7088773cb24eb47b626924a8c5d117705a95a2ecca5ac0ba9caaab3d9533447",
+      "lib/jrc_contact_center/ending_action_scope_schema_receipt.rb": "a7b94b6aa584239cb4ec860b0d42b39a6b608f878a7984353ed716bca89798f6"
+    },
+    "new_sources": {
+      "db/migrate/20261123034500_create_contact_center_ending_action_scopes.rb": "10de41dd2a75d6c69aca0ec0000549ab8bded565b9ae692e443a175744d6ce7c",
+      "db/functions/20261123034500_contact_center_ending_action_scopes.sql": "3f1ecc42e7944d40ddd838eb066dc1610a95465f27f614b11f692f9d1ee7fdd5",
+      "lib/jrc_contact_center/ending_action_scope_schema_receipt.rb": "d23faa6189bae4c4ca93084e8c085f7839caa5f8383a8b6deb8fa248fdb68bb1"
+    }
+  },
+  "planned_native_checks_not_results": {
+    "scope_preflight": 38,
+    "account_reference_cases": 6,
+    "scope_concurrency": 5,
+    "core": 2624,
+    "pabx_concurrency_total": 143,
+    "corporate": 85,
+    "distinct_total_if_passed": 2852,
+    "schema_reload_separate_if_passed": 238,
+    "vue": 1795,
+    "chrome": 260
+  },
+  "native_acceptance": false,
+  "whole_figure10_or23_complete": false,
+  "no_rule_activation_destination_effects_build_docker_publication_merge_or_deploy": true
+}

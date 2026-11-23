@@ -9,7 +9,8 @@
     "Version changes for relevant native remapping and corporate lifecycle transitions, including A-to-B-to-A.",
     "No copying of full settings, secrets, call notes or customer content; malformed/foreign identities remain unavailable.",
     "Separate exact-source migration admission and schema receipt without altering any of the14published migrations/SQLs.",
-    "Native upgrade, immutable-history, cross-account, malformed-input, schema-reload and real-connection concurrency specs prepared."
+    "Native upgrade, immutable-history, cross-account, malformed-input, schema-reload and real-connection concurrency specs prepared.",
+    "Technical immutable Account FK reference avoids late native authority locks while preserving declarative referential integrity and root cleanup; new native validation required."
   ],
   "not_implemented_by_this_increment": [
     "Activation or configuration of automation rules",
@@ -19,13 +20,14 @@
     "Automation user interface or complete figure10 acceptance"
   ],
   "expected_native_checks_not_results": {
-    "scope_preflight_repeated": 32,
+    "scope_preflight_repeated": 38,
     "scope_model": 15,
     "scope_history": 12,
     "scope_migration": 5,
-    "scope_concurrency": 3,
-    "scope_schema_reload_repeated": 32,
-    "unchanged_browser_examples": 260
+    "scope_concurrency": 5,
+    "scope_schema_reload_repeated": 38,
+    "unchanged_browser_examples": 260,
+    "scope_account_references": 6
   },
   "actual_light_checks": {
     "node_reader_and_exact_migration_checks": 210,
@@ -61,6 +63,16 @@
       "reload_failed": 1,
       "fixture_only_fix_prepared": true,
       "all_native_acceptance": false
+    },
+    "account_lock_followup": {
+      "sha": "c0c47932eab471d25be8dadd860cc048f619387b",
+      "run": 45117406905,
+      "report": "docs/jrc_contact_center/ending_scope_account_lock_findings_20261123.json",
+      "core_passed": 2618,
+      "reload_passed_separate": 232,
+      "concurrency_passed": 139,
+      "concurrency_failed": 2,
+      "whole_component_accepted": false
     }
   },
   "original_checkout": "b77ffe55 and the3protected pending files remain preserved",

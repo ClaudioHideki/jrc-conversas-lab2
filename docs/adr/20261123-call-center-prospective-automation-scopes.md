@@ -13,3 +13,11 @@ O registro é uma evidência, nunca uma concessão. A configuração e cada exec
 Neste incremento não existe ativação, endpoint de automação, job de destino, credencial de serviço ou chamada externa. A decisão sobre desativação de ações pendentes permanece separada. Os adaptadores de CRM, Service Desk e notificações ainda precisam reutilizar suas autoridades nativas; não serão habilitados por suposição.
 
 Validação exigida: instalação sobre filas/chamadas preenchidas, reexecução, recarga do schema, alterações A → B → A, mapeamentos malformados/entre contas, remoção nativa da fila, imutabilidade, preservação dos recibos anteriores e concorrência PostgreSQL real. Os testes locais de leitores e hashes não equivalem a essa execução.
+
+## Correção de concorrência antes da primeira homologação
+
+O histórico não pode acrescentar um bloqueio `KEY SHARE` tardio à linha nativa de Account em cada revisão. A CI c0c47932 reproduziu interferência no teste legado de mudança de unidade e no novo cenário de emissora/fila.
+
+A referência técnica contém somente o identificador da conta real, com PK/FK, sem gerar contas, pessoas, conexões ou permissões. O caminho declarativo passa a ser histórico → referência imutável → Account. A FK da fila e sua nulificação histórica permanecem. A referência só pode ser apagada pela remoção real da conta; reparenting é rejeitado. O recibo estrito inclui ambas as tabelas e os gatilhos próprios da conta, sem alterar as 14 migrations anteriores ou o lock nativo de autorização.
+
+Trata-se de correção da 15ª migration candidata, nunca implantada, ainda sem aceite. Um schema de protótipo divergente continua bloqueado, sem conversão automática de dados. São obrigatórios instalação, atualização preenchida, recarga, reexecução, isolamento, imutabilidade, cascata real e concorrência nativa, mantendo o teste legado intacto.
