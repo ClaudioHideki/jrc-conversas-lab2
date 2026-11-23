@@ -921,3 +921,5 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 - WIP: confirmar motivo mantém ACW aberto; revisão de 48 PNGs encontrou instrução obsoleta e capturas antes do polling/render. Correção mínima passou 86 testes Vue; nova validação Chrome ainda pendente. Ver docs/jrc_contact_center/ending_confirmation_visual_followup_20261122.json.
 
 - Base 1d0ef6dc / CI45095458033: evidência íntegra, 2809 Rails distintos, 200 exemplos separados de recarga, 1795 Vue e 260 Chrome, sem falhas/pendências/erros externos. Os oito arquivos do ajuste visual posterior continuam aguardando sua própria validação nativa.
+
+- 23/11/2026: confirmação e pausa aceitas no incremento68d5011b/CI45102299490:2809Rails distintos,200recargas,1795Vue,260Chrome e48capturas revisadas; sem falhas/pendências. Não conclui as23figuras. Próximo incremento: registro imutável e prospectivo do escopo das filas para automações, ainda sem aceite nativo ou execução de destinos. Ver docs/jrc_contact_center/ending_action_scopes_candidate_20261123.json.

@@ -144,11 +144,38 @@ export function verifyEndingConfirmationMigrations(changes, readCurrent, schema)
   return validateNewMigrationTimestamps(schema, [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath, endingConfirmationMigrationPath]);
 }
 
+
+export const endingActionScopeMigrationPath = 'db/migrate/20261123034500_create_contact_center_ending_action_scopes.rb';
+export const endingActionScopeMigrationHash = '5fc7767b640f6bb0c1a1067dc6677570f0382df7aa6bb9925227a07cfda79b0d';
+export const endingActionScopeSources = Object.freeze({
+  "db/functions/20261123034500_contact_center_ending_action_scopes.sql": "d7088773cb24eb47b626924a8c5d117705a95a2ecca5ac0ba9caaab3d9533447",
+  "lib/jrc_contact_center/ending_action_scope_schema_receipt.rb": "a7b94b6aa584239cb4ec860b0d42b39a6b608f878a7984353ed716bca89798f6"
+});
+
+// The original1/12/13/14verifiers and their exact historical hashes remain unchanged.
+export function verifyEndingActionScopeMigrations(changes, readCurrent, schema) {
+  const priorPaths = [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath, endingConfirmationMigrationPath,
+    ...Object.keys(pauseApprovalSqlSources).filter(path => path.startsWith('db/')),
+    ...Object.keys(endingConfirmationSources).filter(path => path.startsWith('db/'))];
+  const newPaths = [endingActionScopeMigrationPath, ...Object.keys(endingActionScopeSources).filter(path => path.startsWith('db/'))];
+  const rows = changes.trim().split('\n').filter(Boolean).sort();
+  const expected = [...priorPaths, ...newPaths].map(path => `A\t${path}`).sort();
+  if (JSON.stringify(rows) !== JSON.stringify(expected))
+    throw new Error('Only15exact reviewed forward migrations and their exact SQL are admitted; unknown database changes remain blocked.');
+  for (const [path, digest] of Object.entries({ [endingActionScopeMigrationPath]: endingActionScopeMigrationHash, ...endingActionScopeSources })) {
+    if (createHash('sha256').update(readCurrent(path)).digest('hex') !== digest)
+      throw new Error(`Reviewed ending action scope source changed: ${path}`);
+  }
+  verifyEndingConfirmationMigrations(priorPaths.map(path => `A\t${path}`).join('\n'), readCurrent, schema);
+  return validateNewMigrationTimestamps(schema,
+    [...Object.keys(reviewedMigrations), pauseApprovalMigrationPath, endingConfirmationMigrationPath, endingActionScopeMigrationPath]);
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyEndingConfirmationMigrations(changes, readFileSync, schema);
+  const result = verifyEndingActionScopeMigrations(changes, readFileSync, schema);
   console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
-    [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash },
-    pauseApprovalSqlSources, endingConfirmationSources, ...result }));
+    [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, [endingActionScopeMigrationPath]: endingActionScopeMigrationHash },
+    pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, ...result }));
 }

@@ -1,0 +1,56 @@
+{
+  "kind": "prospective_native_queue_scope_foundation_not_automation_completion",
+  "parent": "68d5011bfddafb936306f5015423994035ba15dd",
+  "branch": "codex/call-center-control-desk-20261116",
+  "word_reference": "Figure10 — versioned ending automations with native source authority and independent destination receipts",
+  "implemented_this_increment": [
+    "Additive immutable queue/corporate scope ledger, derived from native queues, units, companies and business units by PostgreSQL guards.",
+    "Forward-only installation anchors and typed account/queue/time lookup; old events remain unattested.",
+    "Version changes for relevant native remapping and corporate lifecycle transitions, including A-to-B-to-A.",
+    "No copying of full settings, secrets, call notes or customer content; malformed/foreign identities remain unavailable.",
+    "Separate exact-source migration admission and schema receipt without altering any of the14published migrations/SQLs.",
+    "Native upgrade, immutable-history, cross-account, malformed-input, schema-reload and real-connection concurrency specs prepared."
+  ],
+  "not_implemented_by_this_increment": [
+    "Activation or configuration of automation rules",
+    "Pinned rule/action origins and immutable completion attestation",
+    "Atomic per-destination execution receipts and pending-only retry",
+    "Task, CRM, Service Desk, notification or Nico effects",
+    "Automation user interface or complete figure10 acceptance"
+  ],
+  "expected_native_checks_not_results": {
+    "scope_preflight_repeated": 32,
+    "scope_model": 15,
+    "scope_history": 12,
+    "scope_migration": 5,
+    "scope_concurrency": 2,
+    "scope_schema_reload_repeated": 32,
+    "unchanged_browser_examples": 260
+  },
+  "actual_light_checks": {
+    "node_reader_and_exact_migration_checks": 210,
+    "node_failures_pending_cancelled": 0,
+    "new_independent_python_reader_tests": 8,
+    "existing_workflow_chrome_counter_regressions": 8,
+    "yaml_parsed": true,
+    "bash_blocks_parsed_without_execution": 26,
+    "embedded_python_blocks_compiled_without_execution": 2,
+    "parent_workflow_and_migration_verifier_reconstructed_exactly": true,
+    "native_rails_or_postgresql_acceptance": false
+  },
+  "resource_guard": {
+    "local_node_heap_mib": 128,
+    "local_timeout_seconds": 45,
+    "local_minimum_start_ram_and_disk_mib": 1536,
+    "ram_reserve_mib": 750,
+    "disk_reserve_bytes": 750000000,
+    "no_local_build_or_database_started": true
+  },
+  "native_validation": "pending",
+  "original_checkout": "b77ffe55 and the3protected pending files remain preserved",
+  "no_production_or_provider_or_grant_changes": true,
+  "no_docker_publication_or_deploy": true,
+  "whole_word_complete": false,
+  "pending_business_decision": "Disabling a rule: pending-vs-new-call semantics was asked separately; this scope ledger does not choose a default.",
+  "next": "Verify this forward-only foundation natively, then integrate versioned rule configuration and independent receipts with the existing ACW policy/editor. Preserve other destinations as unavailable until their native authority adapters are implemented."
+}

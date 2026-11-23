@@ -7352,5 +7352,23 @@
     "report": "docs/jrc_contact_center/ending_confirmation_visual_followup_20261122.json",
     "native_status": "pending",
     "whole_word_complete": false
+  },
+  "ending_confirmation_visual_verified_20261123": {
+    "report": "docs/jrc_contact_center/ending_confirmation_visual_followup_20261122.json",
+    "sha": "68d5011bfddafb936306f5015423994035ba15dd",
+    "native_distinct": 2809,
+    "reload_separate": 200,
+    "vue": 1795,
+    "chrome": 260,
+    "actual_images_opened": 48,
+    "bounded_increment_accepted": true,
+    "all23figures_complete": false
+  },
+  "ending_action_scope_foundation_20261123": {
+    "report": "docs/jrc_contact_center/ending_action_scopes_candidate_20261123.json",
+    "parent": "68d5011bfddafb936306f5015423994035ba15dd",
+    "native_validation": "pending",
+    "automation_execution_available": false,
+    "all23figures_complete": false
   }
 }
