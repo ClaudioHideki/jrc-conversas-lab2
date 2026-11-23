@@ -25,7 +25,7 @@
   },
   "increment": "Private immutable rule versions in the existing ACW policy, not another catalogue",
   "paths": {
-    "app/models/jrc_contact_center/ending_action_version.rb": "a46d77c747af6dd9725a43416990020274add9cbfa23bfe18fa45553b47be3c7",
+    "app/models/jrc_contact_center/ending_action_version.rb": "3fbfc0a3a96820048756003868659ed54220e653dda267193a3d25726520e532",
     "app/services/jrc_contact_center/acw_policy.rb": "a4c6ae2c06e02a863181eccc52373fc087debe697a29b519ecddee751af101fd",
     "app/services/jrc_contact_center/acw_policy_audit.rb": "45bfb28220f6f82eeb68e154de46ac60d1922d853ed99c32833c45418fd33dc3",
     "app/services/jrc_contact_center/ending_actions/task_definition.rb": "3c61ff6911314a4e25d6263991dfea7e715ec25363e1e1294d846fb95c28a5f0",
@@ -44,7 +44,7 @@
     "spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb": "101a15f94a9b17f449a70d02b9aa2f6bc9771413655a23644b709ae5fa8d4b4b",
     "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb": "0be711d7e9dd0e3abd86af5da6e65b3d253392c86e02afd340cc61575cfeea72",
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb": "e020dc08332f87c65273550c2c70e6106f98212dae1b9f9e39fa45ec3ac04cb8",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb": "041cdc8e4f3d55a8886ef8a5a14d9817d25c7cbb402462b19403dd4e58e930f6",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb": "4b488f2c478a1b5009145a1fd2cf4fe1c894d544a3a7d43944c2100d6e8529bb",
     "spec/support/contact_center_ending_action_versions.rb": "4854503f3ffad13643156113e5710983743478a7767b03c60e18f6494915fa58",
     "spec/support/contact_center_ending_rule_configuration.rb": "a4872abf31d59b1640d7d39ebc2f1313e8c6b94a5972b9279772cc36b34b8e8c",
     "script/validate_cc_access_migration.mjs": "047851655027f3eb5754b9c553d4055961b8083d24a1fa74a19b8348b7cc2d08",
@@ -55,7 +55,8 @@
     ".github/workflows/call-center-administration.yml": "f94db1602a76b36d545032efefa55479642de9e91c6454ba58bfb5e5db144d18",
     "app/services/jrc_contact_center/ending_actions/blocking_revision.rb": "b1ccf985696d98449fe04d3e22b1d60dae579c8007b76cb1f5911ff5f300e955",
     "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb": "4aa661cd22bd7771ddea006d15f7d910012119b9ac2f2d1e41e597000553d8d1",
-    "spec/standalone/voice_acw_policy_test.rb": "8af2a7914e6ef1eab001d04d91622e689e8853ffeee25f6e46933ecdf3ddec7f"
+    "spec/standalone/voice_acw_policy_test.rb": "8af2a7914e6ef1eab001d04d91622e689e8853ffeee25f6e46933ecdf3ddec7f",
+    "config/initializers/jrc_contact_center_ending_privacy.rb": "1293341766e6bda0b894b722aef499d5fcb0b380a43472837f0fcf4364198d54"
   },
   "database_sources": {
     "db/migrate/20261123063000_create_contact_center_ending_action_versions.rb": "e22b6a5f6d6fd239e18a7d83862cee391159acea181c0338d72daf7c1da75dc0",
@@ -83,7 +84,7 @@
     "embedded_python_blocks_compiled_only": 2,
     "independent_evidence_reader": 18
   },
-  "native_validation": "250/252 native reload examples pass, including all238 earlier ones; Current.set errors no longer occur, but two fixture initialization corrections still await native CI",
+  "native_validation": "252/252reload,23confirmation,38scope and100/102focused pass. Two actual SQL filtering failures now have a dedicated native Base initializer and unchanged red regression cases; fix awaits native CI",
   "native_or_visual_acceptance_of_this_increment": false,
   "no_public_automation_api_editor_job_or_destination_effects": true,
   "customer_company_links_distinct_from_operating_issuer_and_business_unit_scope": true,
@@ -103,15 +104,16 @@
   },
   "approved_deactivation_decision_report": "docs/jrc_contact_center/ending_deactivation_decision_20261123.json",
   "latest_actual_failure": {
-    "sha": "a0c0dbc0ad5a623c178af83e58e6664a87e14d22",
-    "run": 45185620677,
-    "job": 137730328958,
-    "early_artifact": 14823692087,
-    "early_artifact_sha256": "0149aefe46407e47763c06e857054e5b2829c0944164944ea539de1cbc5f2d91",
-    "schema_reload_passed": 250,
-    "schema_reload_failed": 2,
+    "sha": "39be8717e122237b57108bf9c35eb436238cad05",
+    "run": 45188994956,
+    "early_artifact": 14824782174,
+    "early_artifact_sha256": "d29dd394704f51196a7b5223e997a7fa1722af61205c1b80f4d0a91c7ce5bb43",
+    "schema_reload_passed": 252,
+    "schema_reload_failed": 0,
+    "focused_passed": 100,
+    "focused_failed": 2,
     "pending_outside_errors": 0,
-    "core_configuration_privacy_concurrency_executed": 0
+    "concurrency_not_yet_executed": true
   },
   "same_unreleased16_ddl_and_timestamp": true,
   "native_context_reuse": {
@@ -130,5 +132,6 @@
     "both_common_files_unchanged": true,
     "no_gem_or_global_context_change": true
   },
-  "fixture_findings": "docs/jrc_contact_center/ending_rule_versions_fixture_findings_20261123.json"
+  "fixture_findings": "docs/jrc_contact_center/ending_rule_versions_fixture_findings_20261123.json",
+  "sql_privacy_findings": "docs/jrc_contact_center/ending_rule_versions_sql_privacy_findings_20261123.json"
 }

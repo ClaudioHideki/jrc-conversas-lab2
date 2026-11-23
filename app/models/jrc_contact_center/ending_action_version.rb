@@ -4,7 +4,7 @@
 class JrcContactCenter::EndingActionVersion < JrcContactCenter::ApplicationRecord
   include JrcApprovals::Immutable
 
-  # Native :private parameter filtering also protects SQL binds for this column.
+  # These filters protect inspect; SQL binds use the dedicated native Base initializer.
   alias_attribute :definition, :private_definition
   self.filter_attributes += %i[definition private_definition definition_sha256]
 

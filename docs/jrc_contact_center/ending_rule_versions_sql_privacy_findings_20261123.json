@@ -1,0 +1,88 @@
+{
+  "base": "39be8717e122237b57108bf9c35eb436238cad05",
+  "run": 45188994956,
+  "job": 137742011279,
+  "early_artifact": 14824782174,
+  "early_artifact_sha256": "d29dd394704f51196a7b5223e997a7fa1722af61205c1b80f4d0a91c7ce5bb43",
+  "diagnostic_only_not_full_acceptance": true,
+  "actual_reload": {
+    "duration": 54.711909812,
+    "example_count": 252,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "actual_focused": {
+    "duration": 9.722747422,
+    "example_count": 102,
+    "failure_count": 2,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "focused_by_file": {
+    "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb": {
+      "passed": 10
+    },
+    "spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb": {
+      "passed": 25
+    },
+    "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb": {
+      "passed": 34
+    },
+    "spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb": {
+      "passed": 1
+    },
+    "spec/models/jrc_contact_center/ending_action_version_spec.rb": {
+      "passed": 9
+    },
+    "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": {
+      "passed": 5
+    },
+    "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb": {
+      "passed": 13
+    },
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb": {
+      "passed": 3,
+      "failed": 2
+    }
+  },
+  "actual_failures": [
+    {
+      "file": "./spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb",
+      "line": 51,
+      "description": "Ending rule private definitions at native serialization and logging boundaries filters the private native INSERT bind while retaining actual SQL diagnostics and the persisted private template",
+      "message": "expected \"  \\e[1m\\e[36mTRANSACTION (0.2ms)\\e[0m  \\e[1m\\e[35mSAVEPOINT active_record_1\\e[0m\\n  \\e[1m\\e[36mAccou...\\\", 1]]\\n  \\e[1m\\e[36mTRANSACTION (0.2ms)\\e[0m  \\e[1m\\e[35mRELEASE SAVEPOINT active_record_1\\e[0m\\n\" to include \"[FILTERED]\""
+    },
+    {
+      "file": "./spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb",
+      "line": 75,
+      "description": "Ending rule private definitions at native serialization and logging boundaries uses a filtered prepared bind for the private rule identity when looking for a deactivation barrier",
+      "message": "expected \"  \\e[1m\\e[36mJrcContactCenter::EndingActionVersion Load (0.2ms)\\e[0m  \\e[1m\\e[34mSELECT \\\"jrc_contac...unt_id\\\", 110], [\\\"revision\\\", 1], [\\\"private_rule_code\\\", \\\"SYNTHETIC_PRIVATE_RULE_CODE_7f19\\\"]]\\n\" to include \"[FILTERED]\""
+    }
+  ],
+  "runtime_activerecord": "7.1.5.2",
+  "confirmed_framework_sql_log_filter": "ActiveRecord::LogSubscriber#filter uses ActiveRecord::Base.inspection_filter, not the model-specific filter_attributes",
+  "confirmed_native_observation": "Neither INSERT nor prepared private_rule_code SELECT received a filtered marker; the latter visibly contained the synthetic private rule code.",
+  "boot_timing_of_existing_request_filters": "Not asserted as proven; direct Base registration with the native on_load hook avoids relying on request-only or model-only configuration.",
+  "official_sources": [
+    "https://github.com/rails/rails/blob/v7.1.5.2/activerecord/lib/active_record/log_subscriber.rb#L152-L154",
+    "https://github.com/rails/rails/blob/v7.1.5.2/activerecord/lib/active_record/core.rb#L292-L313"
+  ],
+  "minimal_fix": "Dedicated initializer adds only private_definition, definition_sha256 and private_rule_code to request filters and native Base SQL filters; existing filters and useful SQL diagnostics remain.",
+  "candidate_source_fixes": {
+    "config/initializers/jrc_contact_center_ending_privacy.rb": "1293341766e6bda0b894b722aef499d5fcb0b380a43472837f0fcf4364198d54",
+    "app/models/jrc_contact_center/ending_action_version.rb": "3fbfc0a3a96820048756003868659ed54220e653dda267193a3d25726520e532",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb": "4b488f2c478a1b5009145a1fd2cf4fe1c894d544a3a7d43944c2100d6e8529bb"
+  },
+  "sql_logging_not_disabled_or_mocked": true,
+  "two_existing_red_native_log_examples_retained": true,
+  "extra_positive_control_preserves_non_sensitive_account_bind": true,
+  "same102_focused_3_concurrency_252_reload_cases": true,
+  "no_schema_factory_permission_scope_authority_lock_or_workflow_change": true,
+  "native_acceptance_of_fix": false,
+  "whole_figure10_complete": false,
+  "final_artifact": 14826019121,
+  "final_artifact_sha256": "042ac7ca3d72239552e17d892b17bca1713efd996d3e23a714ffbd6f97c56a23",
+  "final_incremental_ruby_new_offenses": 0,
+  "previous_workflow_completed_failure": true
+}

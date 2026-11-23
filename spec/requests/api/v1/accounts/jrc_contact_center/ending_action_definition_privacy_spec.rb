@@ -53,6 +53,7 @@ RSpec.describe 'Ending rule private definitions at native serialization and logg
     log = capture_ending_version_sql { configure_native_ending_rule(input) }
     version = JrcContactCenter::EndingActionVersion.where(account: account).sole
     expect(log).to include('INSERT INTO', 'jrc_contact_center_ending_action_versions', '[FILTERED]')
+    expect(log).to include("[\"account_id\", #{account.id}]")
     expect(log).not_to include(secret_marker, version.definition_sha256)
     expect(version.definition.fetch('entries').first.fetch('actions').first.fetch('parameters').fetch('attributes').fetch('title'))
       .to eq(secret_marker)
@@ -83,6 +84,7 @@ RSpec.describe 'Ending rule private definitions at native serialization and logg
     end
     expect(result).to eq(2)
     expect(log).to include('EndingActionPendingHistory', '[FILTERED]')
+    expect(log).to include("[\"account_id\", #{account.id}]")
     expect(log).not_to include(input.fetch('code'), secret_marker, version.definition_sha256)
     expect(version.reload.definition.fetch('entries').first.fetch('active')).to be(true)
   end
