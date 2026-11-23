@@ -889,13 +889,15 @@
   "full_part1_complete": false,
   "production_or_provider_operations_authorized_by_this_document": false,
   "origin_executor_current_native_checkpoint_unapproved": {
-    "sha": "1a3bb2b3943f4db39655a6f7b5b9641d741dca88",
-    "run": 45261324311,
-    "remaining_lint_offenses": 4,
-    "native_functional_examples_executed": 0,
-    "all_three_privacy_cases_preserved_by_reviewed_rename": true,
-    "finding": "docs/jrc_contact_center/ending_origin_remaining_lint_20261123.json",
-    "correction_awaiting_native_validation": true,
+    "sha": "e9c54ed8b73bf89d9c1f4a768753e8246625015a",
+    "run": 45264890513,
+    "lint_passed": true,
+    "structural_fresh_reload_receipts_verified": true,
+    "schema_reload_passed": 251,
+    "schema_reload_failed": 1,
+    "origin_33_and_concurrency_4_not_run": true,
+    "finding": "docs/jrc_contact_center/ending_origin_reload_fixture_findings_20261123.json",
+    "helper_fix_needs_own_native_run": true,
     "no_F10_A_or_F10_B_acceptance": true
   }
 }

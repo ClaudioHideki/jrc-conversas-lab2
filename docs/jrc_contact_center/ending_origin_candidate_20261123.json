@@ -23,7 +23,7 @@
     "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": "f43c617320cea235bef650c5fe239f9a107a1d3dde7a3aa8443133cf49e0de86",
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb": "2ef49c046a65ba66da3ffcfa90a794fc2773c5d04513be414725842dd13ca805",
     "spec/support/contact_center_ending_execution_origins.rb": "8f38782f91fba65f6db22de92d3459d64997ca01ae25c7d4bbd375636ec119f0",
-    "spec/support/contact_center_ending_origin_schema_dependencies.rb": "e2ec900ee6d24f7cf7b344a11c17e0c2639528b1fb4c002a3333d1b47833896d",
+    "spec/support/contact_center_ending_origin_schema_dependencies.rb": "252eb7ceaa0adb4a3bec6cabb05615cdd68069adf6dda348252baeb21d72b0b3",
     "tests/playwright/tests/e2e/ui/call-center-authority-filter-geometry.mjs": "5bcaa6aa9ea6e56ae8b34aa28c466bf9b5b97cb6de30b2bceba7bf358e7e8b88",
     "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "fa2cef6b0b128dec38548015a00ef509bd1ff6a71b36c03a1844a43a6039f61b",
     ".github/workflows/call-center-administration.yml": "96b8391d1c56e2fbec4e5b6ae2154f1d1c80bbf7259ebb0bad7c38d2ed5d5503",
@@ -66,5 +66,27 @@
     "new_offenses": 4,
     "all_three_privacy_examples_preserved": true,
     "correction_native_result": null
+  },
+  "reload_fixture_failure": {
+    "sha": "e9c54ed8b73bf89d9c1f4a768753e8246625015a",
+    "run": 45264890513,
+    "artifact": 14860939028,
+    "artifact_sha256": "b3ee939adb74a8da20d3f58846df98007d2fc399b049540d867b76daa1339d85",
+    "lint_new_offenses": 0,
+    "actual_fresh_reload_receipts_equal": true,
+    "origin_schema_token": "jrc_cc_ending_execution_origins_v1:152935bbaa1524cdaf7f6b35ace4a21245ab596f049c071dfcc601b054a72f40",
+    "schema_reload": {
+      "examples": 252,
+      "passed": 251,
+      "failed": 1,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "failure": "PG::ObjectInUse in rolled-back migration fixture DDL: deferred leg-scope FK checks pending.",
+    "fix": "Validate the one owned deferred FK with SET CONSTRAINTS named IMMEDIATE before fixture-only ALTER TABLE. Do not disable checks or change runtime deferrability.",
+    "native_origin_33_or_concurrency_4_executed": false,
+    "all_migrations_SQL_and_receipt_unchanged": true,
+    "correction_native_result": null,
+    "whole_figure10_accepted": false
   }
 }

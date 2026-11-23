@@ -8,6 +8,9 @@ module ContactCenterEndingOriginSchemaDependencies
 
   def detach_ending_origin_scope_references
     connection = ApplicationRecord.connection
+    # Validate this owned deferred FK before fixture-only DDL. Never disable it
+    # or alter the runtime deferrability; the enclosing test rolls back the DDL.
+    connection.execute('SET CONSTRAINTS cc_ending_execution_leg_scope_fk IMMEDIATE')
     connection.remove_foreign_key(:jrc_contact_center_call_legs, name: 'cc_ending_execution_leg_scope_fk')
     connection.remove_foreign_key(:jrc_contact_center_ending_action_origins, name: 'cc_ending_execution_origin_scope_fk')
     %i[jrc_contact_center_ending_action_origins jrc_contact_center_ending_action_completions].each do |table|
