@@ -40,12 +40,19 @@ class JrcContactCenter::EndingExecutionOriginSchemaReceipt
   def verify!
     valid = COLUMNS.keys.all? { |table| @connection.table_exists?(table) }
     valid &&= valid_columns? && valid_references?
-    valid &&= functions.length == FUNCTIONS.length && triggers.map { |row| row.first(2) }.sort == TRIGGERS.to_a.sort
-    valid &&= [ORIGINS, COMPLETIONS].all? { |table| @connection.table_comment(table) == token }
+    valid &&= valid_guards? && valid_stamps?
     raise ActiveRecord::MigrationError, 'Unexpected ending execution origin schema; preserve evidence and investigate' unless valid
   end
 
   private
+
+  def valid_guards?
+    functions.length == FUNCTIONS.length && triggers.map { |row| row.first(2) }.sort == TRIGGERS.to_a.sort
+  end
+
+  def valid_stamps?
+    [ORIGINS, COMPLETIONS].all? { |table| @connection.table_comment(table) == token }
+  end
 
   def valid_columns?
     [ORIGINS, COMPLETIONS].all? { |table| @connection.columns(table).map(&:name).sort == COLUMNS.fetch(table).sort } &&

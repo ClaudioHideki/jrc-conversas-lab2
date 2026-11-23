@@ -9,7 +9,7 @@ class CreateContactCenterEndingExecutionOrigins < ActiveRecord::Migration[7.1]
   SQL = 'db/functions/20261123180000_contact_center_ending_execution_origins.sql'
   SOURCES = {
     SQL => 'e9e97c3db666a8b5a59ae4852786a342b1df8101105b8b9ce1415d71e5cf1ed6',
-    'lib/jrc_contact_center/ending_execution_origin_schema_receipt.rb' => '6271242e0b66d5e36e39ac1d65e618650da977f60648d4a0db0f93ff37be3988'
+    'lib/jrc_contact_center/ending_execution_origin_schema_receipt.rb' => '4ce75de6aae5a1446ad30f52a7a7285286c8a636b76bee20a99e17006fac3587'
   }.freeze
 
   def up
@@ -75,7 +75,8 @@ class CreateContactCenterEndingExecutionOrigins < ActiveRecord::Migration[7.1]
       table.string :reason_code, :outcome_code, null: false, limit: 100
       table.string :integrity_sha256, null: false, limit: 64
       table.jsonb :private_completion_evidence, null: false, default: {}
-      table.datetime :completed_at, :created_at, null: false
+      table.datetime :completed_at, null: false
+      table.datetime :created_at, null: false
     end
   end
 
@@ -92,11 +93,14 @@ class CreateContactCenterEndingExecutionOrigins < ActiveRecord::Migration[7.1]
       add_foreign_key table, :jrc_contact_center_ending_scope_accounts, column: :account_id, primary_key: :account_id, on_delete: :cascade
     end
     add_foreign_key ORIGINS, :jrc_contact_center_qualifications, column: :qualification_id, on_delete: :nullify
-    add_foreign_key ORIGINS, :jrc_contact_center_ending_action_versions, column: [:version_id, :account_id],
+    add_foreign_key ORIGINS, :jrc_contact_center_ending_action_versions,
+                    column: [:version_id, :account_id],
                     primary_key: [:id, :account_id], deferrable: :deferred, name: 'cc_ending_execution_origin_version_fk'
-    add_foreign_key ORIGINS, :jrc_contact_center_ending_action_queue_scopes, column: [:queue_scope_version_id, :account_id],
+    add_foreign_key ORIGINS, :jrc_contact_center_ending_action_queue_scopes,
+                    column: [:queue_scope_version_id, :account_id],
                     primary_key: [:id, :account_id], deferrable: :deferred, name: 'cc_ending_execution_origin_scope_fk'
-    add_foreign_key COMPLETIONS, ORIGINS, column: [:origin_id, :account_id], primary_key: [:id, :account_id],
+    add_foreign_key COMPLETIONS, ORIGINS,
+                    column: [:origin_id, :account_id], primary_key: [:id, :account_id],
                     deferrable: :deferred, on_delete: :cascade, name: 'cc_ending_execution_completion_origin_fk'
   end
 

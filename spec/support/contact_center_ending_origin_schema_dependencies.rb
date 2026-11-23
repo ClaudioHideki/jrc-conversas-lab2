@@ -3,7 +3,7 @@
 module ContactCenterEndingOriginSchemaDependencies
   def detach_ending_origin_version_reference
     ApplicationRecord.connection.remove_foreign_key(:jrc_contact_center_ending_action_origins,
-                                                      name: 'cc_ending_execution_origin_version_fk')
+                                                    name: 'cc_ending_execution_origin_version_fk')
   end
 
   def detach_ending_origin_scope_references

@@ -5,26 +5,26 @@
   "source_paths": {
     "app/models/jrc_contact_center/ending_action_origin.rb": "17b87e9115d4957fe7d871940023f12126dd7ae07f2144298b152e58b22c5233",
     "app/models/jrc_contact_center/ending_action_completion.rb": "655ba3651638c7c836231c53f1f3f8e5de51d90535c129771e6909d859d5dc6f",
-    "app/services/jrc_contact_center/ending_actions/execution_transaction.rb": "e9ae43b42d960bd109ff0fdfcee3b2eb601674b6d9e7214da2b4650e18d91f8d",
-    "db/migrate/20261123180000_create_contact_center_ending_execution_origins.rb": "dad97d51ad06ececfa7d0180c383cd88dacd5b86a826ba2c6a76e7bef9f16419",
+    "app/services/jrc_contact_center/ending_actions/execution_transaction.rb": "7fd83bf3680e73e9d1104e0717a603b980edd28d879ee1390ecbc6afa5fc4920",
+    "db/migrate/20261123180000_create_contact_center_ending_execution_origins.rb": "38ef3d266c3f25a7ff53a8dc3e4259f93f1af9b51bb538cac90cfcc25227428c",
     "db/functions/20261123180000_contact_center_ending_execution_origins.sql": "e9e97c3db666a8b5a59ae4852786a342b1df8101105b8b9ce1415d71e5cf1ed6",
-    "lib/jrc_contact_center/ending_execution_origin_schema_receipt.rb": "6271242e0b66d5e36e39ac1d65e618650da977f60648d4a0db0f93ff37be3988",
+    "lib/jrc_contact_center/ending_execution_origin_schema_receipt.rb": "4ce75de6aae5a1446ad30f52a7a7285286c8a636b76bee20a99e17006fac3587",
     "config/initializers/jrc_contact_center_ending_privacy.rb": "afba220e54e72f230c483a92006568774f6a3dad69b34226970c69eb48658714",
-    "script/jrc_call_center_ending_origin_schema_probe.rb": "02b117e4bc8a2acc6a91a48ecaef9fb7113716fb9fd5bab16d17d7295c9a3087",
-    "script/jrc_call_center_ending_origin_upgrade.rb": "ed483fb1306d6e8afff7121e8e3c7a8627b36b99ad27e29f40b99fecc73ebcad",
-    "script/validate_cc_ending_origin_migration.mjs": "35a998dec862b57aac834455e20b1eef888dbd850241ebd6b67764075496c35b",
+    "script/jrc_call_center_ending_origin_schema_probe.rb": "826223f8b29b7bc263a76a6d119449a81ac1fe1e556998a72be0317d7f6c07ec",
+    "script/jrc_call_center_ending_origin_upgrade.rb": "2ed699738792f64081abb4e771f990f27244480582496316b3b426ca69dc2b62",
+    "script/validate_cc_ending_origin_migration.mjs": "ea4ea3ad0f32273200e43761465a54e4fdda8414774d4238a7a3395687760c65",
     "script/validate_cc_ending_origin_migration.test.mjs": "7500d7df8f72651e5bbb2c242298c69a416362f56d560762506aaaa4526ec647",
     "script/validate_cc_ending_origin_admission.test.mjs": "ecbfbf3445a7a59cb99336a6505f5e14d9ab62c9198ce52e0090e9dd192a1f23",
     "script/validate_cc_access_migration.mjs": "a667de1b2e65f1d7c477d8acbabc3fd55344f247e0fcd5a785bc6213729abb9b",
-    "spec/models/jrc_contact_center/ending_action_origin_spec.rb": "675d26d3e9416c9f3a8f0aa1459ca86d7b05032cf6c7fe9a9ab5809135a3139b",
+    "spec/models/jrc_contact_center/ending_action_origin_spec.rb": "5474c12b70639d5f1e660ef6b435e0bf545b6b3cc89e6c0426b8510af9470d60",
     "spec/models/jrc_contact_center/ending_action_completion_spec.rb": "5655502dff1425d15efb3081e488b02e6fd7abda75876a2196c7c1d81c081d28",
-    "spec/models/jrc_contact_center/ending_execution_privacy_spec.rb": "ffdbd9b02967aa2e368b63e24a100ca87e5d6e4a3dda64cd84b7b323f3a52c24",
-    "spec/services/jrc_contact_center/create_contact_center_ending_execution_origins_spec.rb": "c7563496061d7add4dab173bbed1b6ce4bacd19b43721190fd3703265b92d395",
+    "spec/models/jrc_contact_center/ending_execution_privacy_spec.rb": "9d0c278eb215226db15e42316240b3072c8abf16e20847a7ddbcf42999f0c205",
+    "spec/services/jrc_contact_center/create_contact_center_ending_execution_origins_spec.rb": "902e7dd33cbd6a1d4d2dad168f6232c3aa89387b022bfd6998f1e7f7d1685e1a",
     "spec/services/jrc_contact_center/create_contact_center_ending_action_scopes_spec.rb": "f10bcf1315398f003252173e6223227e5a9f693e2d7e08bc247f7af012d437dd",
     "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": "f43c617320cea235bef650c5fe239f9a107a1d3dde7a3aa8443133cf49e0de86",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb": "45e47b8f58958fcbe07a26eace92b69431e763c75ac2fc3fa81e80efdcc2616b",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb": "2ef49c046a65ba66da3ffcfa90a794fc2773c5d04513be414725842dd13ca805",
     "spec/support/contact_center_ending_execution_origins.rb": "8f38782f91fba65f6db22de92d3459d64997ca01ae25c7d4bbd375636ec119f0",
-    "spec/support/contact_center_ending_origin_schema_dependencies.rb": "8b19c855ffcfd24262f89e4b9b9fb7fa4f9dcb4d5d8e396fcba60d7c0de587f8",
+    "spec/support/contact_center_ending_origin_schema_dependencies.rb": "e2ec900ee6d24f7cf7b344a11c17e0c2639528b1fb4c002a3333d1b47833896d",
     "tests/playwright/tests/e2e/ui/call-center-authority-filter-geometry.mjs": "5bcaa6aa9ea6e56ae8b34aa28c466bf9b5b97cb6de30b2bceba7bf358e7e8b88",
     "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "fa2cef6b0b128dec38548015a00ef509bd1ff6a71b36c03a1844a43a6039f61b",
     ".github/workflows/call-center-administration.yml": "cc40d006c64086429659eac80bea88b5f1909def3580d16bb1e0b703b6198dab"
@@ -46,5 +46,18 @@
     "old_workflow_restored_exactly": true,
     "workflow_mutants_rejected": 4,
     "new_source_admission_is_not_native_validation": true
+  },
+  "current_lint_failure": {
+    "sha": "d72549b09f46cc3f984bd9ea87534fe7c9006edb",
+    "run": 45257934782,
+    "offenses": 33,
+    "native_examples": 0
+  },
+  "corrections_not_yet_natively_passed": true,
+  "static_followup_checks": {
+    "migration_source_identity": 6,
+    "full_admission_mutation_cases": 57,
+    "independent_evidence_checker_synthetic_cases": 12,
+    "not_application_tests": true
   }
 }

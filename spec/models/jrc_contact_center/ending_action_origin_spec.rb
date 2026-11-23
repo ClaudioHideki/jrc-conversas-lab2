@@ -32,7 +32,8 @@ RSpec.describe JrcContactCenter::EndingActionOrigin do
   it 'keeps early reason confirmation distinct from a real ACW completion and any execution' do
     origin
     JrcContactCenter::ConfirmEndingReason.new(account: account, member: member).call(
-      qualification, attributes: { reason_code: 'SYNTHETIC_ORIGIN_REASON' },
+      qualification,
+      attributes: { reason_code: 'SYNTHETIC_ORIGIN_REASON' },
       expected_revision: JrcContactCenter::QualificationDraftRevision.token(qualification), request_key: SecureRandom.uuid
     )
     expect(qualification.reload.completed_at).to be_nil

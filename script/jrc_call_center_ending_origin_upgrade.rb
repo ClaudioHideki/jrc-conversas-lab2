@@ -34,7 +34,7 @@ class JrcContactCenter::SyntheticEndingOriginUpgrade
                records: [@call, @leg, @qualification].map { |row| snapshot(row) },
                settings_digest: digest(@account.reload.settings),
                version_ids: JrcContactCenter::EndingActionVersion.where(account: @account).pluck(:id) }
-    File.write(BEFORE, JSON.pretty_generate(record) + "\n")
+    File.write(BEFORE, "#{JSON.pretty_generate(record)}\n")
   end
 
   def verify
@@ -50,20 +50,23 @@ class JrcContactCenter::SyntheticEndingOriginUpgrade
     replay_native_attendance!(previous)
     report = { sha: previous.fetch('sha'), synthetic: true, preserved_before_replay: true, legacy_origin_backfilled: false,
                native_legacy_completion_preserved: true, operational_effects: 0, passed: true }
-    File.write(AFTER, JSON.pretty_generate(report) + "\n")
+    File.write(AFTER, "#{JSON.pretty_generate(report)}\n")
   end
 
   private
 
   def guard!(installed:)
     config = ApplicationRecord.connection_db_config
-    owned = ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' && Rails.env.test? &&
-            config.database == DATABASE && config.configuration_hash[:host] == '127.0.0.1' &&
-            ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15' && ENV.fetch('GITHUB_SHA', '').match?(/\A[0-9a-f]{40}\z/)
+    owned = runner_owned? && config.database == DATABASE && config.configuration_hash[:host] == '127.0.0.1'
     raise 'Exclusive disposable origin upgrade runner required' unless owned
     raise 'Unexpected origin installation stage' unless ApplicationRecord.connection.table_exists?(TABLE) == installed
 
     ActiveJob::Base.queue_adapter = :test
+  end
+
+  def runner_owned?
+    ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' && Rails.env.test? &&
+      ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15' && ENV.fetch('GITHUB_SHA', '').match?(/\A[0-9a-f]{40}\z/)
   end
 
   def create_identity
@@ -111,10 +114,10 @@ class JrcContactCenter::SyntheticEndingOriginUpgrade
 
   def create_attendance
     @call = JrcContactCenter::CallSession.create!(account: @account, provider: 'synthetic', correlation_id: SecureRandom.uuid,
-                                                 direction: 'inbound', status: 'connected', started_at: Time.current,
-                                                 current_unit: @queue.unit, current_queue: @queue)
+                                                  direction: 'inbound', status: 'connected', started_at: Time.current,
+                                                  current_unit: @queue.unit, current_queue: @queue)
     @leg = JrcContactCenter::CallLeg.create!(account: @account, call_session: @call, account_user: @member, queue: @queue,
-                                            direction: 'inbound', status: 'connected', started_at: @call.started_at, answered_at: Time.current)
+                                             direction: 'inbound', status: 'connected', started_at: @call.started_at, answered_at: Time.current)
     @call.update!(status: 'ended', ended_at: Time.current)
     @qualification = JrcContactCenter::Qualification.find_by!(account: @account, account_user: @member, call_session: @call)
   end
@@ -133,10 +136,15 @@ class JrcContactCenter::SyntheticEndingOriginUpgrade
       record = classes.fetch(saved.fetch('type')).where(account: @account).find(saved.fetch('id'))
       raise 'Original source changed during upgrade' unless digest(record.attributes.slice(*saved.fetch('columns'))) == saved.fetch('digest')
     end
+    verify_saved_configuration!(previous)
+    raise 'Legacy source unexpectedly backfilled' if JrcContactCenter::EndingActionOrigin.exists?(account: @account)
+  end
+
+  def verify_saved_configuration!(previous)
     raise 'Original configuration changed' unless digest(@account.settings) == previous.fetch('settings_digest')
+
     versions = JrcContactCenter::EndingActionVersion.where(account: @account).pluck(:id)
     raise 'Original versions changed' unless versions == previous.fetch('version_ids')
-    raise 'Legacy source unexpectedly backfilled' if JrcContactCenter::EndingActionOrigin.where(account: @account).exists?
   end
 
   def replay_native_attendance!(previous)
@@ -150,8 +158,13 @@ class JrcContactCenter::SyntheticEndingOriginUpgrade
       qualification, { reason_code: 'SYNTHETIC_UPGRADE_REASON', outcome_code: 'completed' }
     )
     raise 'Native legacy completion failed' unless qualification.reload.completed_at
-    raise 'Legacy replay created an origin' if JrcContactCenter::EndingActionOrigin.where(account: @account).exists?
-    raise 'Legacy replay created a completion' if JrcContactCenter::EndingActionCompletion.where(account: @account).exists?
-    raise 'Upgrade caused an operational effect' if JrcProjects::Task.where(account: @account).exists?
+
+    verify_no_upgrade_effects!
+  end
+
+  def verify_no_upgrade_effects!
+    raise 'Legacy replay created an origin' if JrcContactCenter::EndingActionOrigin.exists?(account: @account)
+    raise 'Legacy replay created a completion' if JrcContactCenter::EndingActionCompletion.exists?(account: @account)
+    raise 'Upgrade caused an operational effect' if JrcProjects::Task.exists?(account: @account)
   end
 end

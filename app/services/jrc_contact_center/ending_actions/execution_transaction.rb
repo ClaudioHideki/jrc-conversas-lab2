@@ -6,9 +6,7 @@
 # while permitting native destination inserts' Account foreign-key KEY SHARE.
 class JrcContactCenter::EndingActions::ExecutionTransaction
   def self.call(account:)
-    if Account.connection.transaction_open?
-      raise JrcContactCenter::OperationError, 'ending_execution_requires_independent_transaction'
-    end
+    raise JrcContactCenter::OperationError, 'ending_execution_requires_independent_transaction' if Account.connection.transaction_open?
 
     AccountUser.uncached do
       account.with_lock('FOR NO KEY UPDATE') do

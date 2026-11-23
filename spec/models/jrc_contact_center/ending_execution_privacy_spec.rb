@@ -3,7 +3,7 @@ require 'stringio'
 
 # Prepared for native CI. Query a real PostgreSQL connection and its actual SQL
 # logger; checking filter arrays alone would not prove that binds are redacted.
-RSpec.describe 'Native ending execution evidence privacy' do
+RSpec.describe JrcContactCenter::EndingActionOrigin, 'and native completion evidence privacy' do
   include_context 'with native ending execution original evidence'
 
   def capture_execution_evidence_sql

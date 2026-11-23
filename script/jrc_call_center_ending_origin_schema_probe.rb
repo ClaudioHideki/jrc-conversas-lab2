@@ -11,14 +11,21 @@ module JrcContactCenter::SyntheticEndingOriginSchemaProbe
 
   def self.record(stage)
     config = ApplicationRecord.connection_db_config
-    owned = ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' && Rails.env.test? &&
-            config.configuration_hash[:host] == '127.0.0.1' && config.database == DATABASES.fetch(stage) &&
-            ApplicationRecord.connection.current_database == config.database && ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15'
-    raise 'Exclusive ending origin schema diagnostics runner required' unless owned
+    raise 'Exclusive ending origin schema diagnostics runner required' unless runner_owned? && connection_owned?(config, stage)
 
     require Rails.root.join('lib/jrc_contact_center/ending_execution_origin_schema_receipt')
     File.write("/tmp/call-center-ending-origin-schema-#{stage}.json", JSON.pretty_generate(report(stage)))
     JrcContactCenter::EndingExecutionOriginSchemaReceipt.new(ApplicationRecord.connection).verify!
+  end
+
+  def self.runner_owned?
+    ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' && Rails.env.test? &&
+      ENV['REDIS_URL'] == 'redis://127.0.0.1:6379/15'
+  end
+
+  def self.connection_owned?(config, stage)
+    config.configuration_hash[:host] == '127.0.0.1' && config.database == DATABASES.fetch(stage) &&
+      ApplicationRecord.connection.current_database == config.database
   end
 
   def self.report(stage)

@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 export const sourcePins = Object.freeze({
   migration: Object.freeze({
     path: 'db/migrate/20261123180000_create_contact_center_ending_execution_origins.rb',
-    sha256: 'dad97d51ad06ececfa7d0180c383cd88dacd5b86a826ba2c6a76e7bef9f16419',
+    sha256: '38ef3d266c3f25a7ff53a8dc3e4259f93f1af9b51bb538cac90cfcc25227428c',
   }),
   sql: Object.freeze({
     path: 'db/functions/20261123180000_contact_center_ending_execution_origins.sql',
@@ -16,7 +16,7 @@ export const sourcePins = Object.freeze({
   }),
   receipt: Object.freeze({
     path: 'lib/jrc_contact_center/ending_execution_origin_schema_receipt.rb',
-    sha256: '6271242e0b66d5e36e39ac1d65e618650da977f60648d4a0db0f93ff37be3988',
+    sha256: '4ce75de6aae5a1446ad30f52a7a7285286c8a636b76bee20a99e17006fac3587',
   }),
 });
 

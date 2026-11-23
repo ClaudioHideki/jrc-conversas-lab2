@@ -1,0 +1,18 @@
+{
+  "rejected_sha": "d72549b09f46cc3f984bd9ea87534fe7c9006edb",
+  "run": 45257934782,
+  "early_artifact": 14858319882,
+  "early_artifact_sha256": "f1a21da1459b2062a374d77c59705ec50bdc1cff06a0069deb44404b73ffb9b5",
+  "new_ruby_offenses": 33,
+  "native_functional_examples_executed": 0,
+  "fixes_prepared_not_natively_passed": true,
+  "same_first_candidate_ddl_and_column_order": true,
+  "all_SQL_and_old16_migrations_unchanged": true,
+  "unreleased_migration_sha256": "38ef3d266c3f25a7ff53a8dc3e4259f93f1af9b51bb538cac90cfcc25227428c",
+  "receipt_sha256": "4ce75de6aae5a1446ad30f52a7a7285286c8a636b76bee20a99e17006fac3587",
+  "rules_or_tests_disabled": false,
+  "current_ci_must_finish_before_next_push": false,
+  "final_artifact": 14861080459,
+  "final_artifact_sha256": "8240c0ec082ed154407fb8ae0e5ddae4cf8c3194afb991aad21e762f22f5ac07",
+  "final_diagnostics_preserved": true
+}

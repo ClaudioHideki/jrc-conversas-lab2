@@ -15,11 +15,11 @@ RSpec.describe 'Ending execution lock compatibility with native destinations' do
 
   include_context 'with native ending rule configuration'
 
-  def execution_worker(state, &operation)
+  def execution_worker(state)
     Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do |connection|
         state[:ready] << connection.raw_connection.backend_pid
-        state[:result] << operation.call
+        state[:result] << yield
       end
     rescue StandardError => e
       state[:result] << e
@@ -118,7 +118,7 @@ RSpec.describe 'Ending execution lock compatibility with native destinations' do
       end
       wait_for_execution_lock(state)
       first = JrcProjects::Tasks::Create.call(account_user: person, project: destination,
-                                             attributes: { title: 'SYNTHETIC earlier native writer', board_column_id: column_id })
+                                              attributes: { title: 'SYNTHETIC earlier native writer', board_column_id: column_id })
       expect(first).to be_persisted
     end
     expect(Timeout.timeout(20) { state[:result].pop }).to be_a(JrcProjects::Task)

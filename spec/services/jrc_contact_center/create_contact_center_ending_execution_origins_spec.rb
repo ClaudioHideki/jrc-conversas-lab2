@@ -79,7 +79,7 @@ RSpec.describe CreateContactCenterEndingExecutionOrigins do
   it 'uses the existing immutable technical account reference and adds no live actor foreign key' do
     keys = ApplicationRecord.connection.foreign_keys(:jrc_contact_center_ending_action_origins)
     expect(keys.map(&:to_table).sort).to eq(%w[jrc_contact_center_ending_action_queue_scopes jrc_contact_center_ending_action_versions
-                                             jrc_contact_center_ending_scope_accounts jrc_contact_center_qualifications])
+                                               jrc_contact_center_ending_scope_accounts jrc_contact_center_qualifications])
     expect(keys.find { |key| key.to_table == 'jrc_contact_center_qualifications' }.on_delete).to eq(:nullify)
     expect(JrcContactCenter::EndingActionOrigin.column_names).not_to include('updated_at')
     expect(JrcContactCenter::EndingActionCompletion.column_names).not_to include('updated_at')

@@ -1448,5 +1448,14 @@
     "real_concurrency_examples_prepared_not_passed": 4,
     "operational_effects_or_receipts_implemented": false,
     "not_F10_A_or_F10_B_acceptance": true
+  },
+  "origin_executor_current_native_checkpoint_unapproved": {
+    "sha": "d72549b09f46cc3f984bd9ea87534fe7c9006edb",
+    "run": 45257934782,
+    "first_lint_offenses": 33,
+    "native_examples_executed": 0,
+    "corrections_prepared_need_new_native_run": true,
+    "finding": "docs/jrc_contact_center/ending_origin_lint_findings_20261123.json",
+    "no_F10_A_or_F10_B_acceptance": true
   }
 }
