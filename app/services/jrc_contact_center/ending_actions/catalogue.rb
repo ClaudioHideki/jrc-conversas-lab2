@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Unapplied WIP. The native account API serializes settings, so it may contain
+# The native account API serializes settings, so it may contain
 # only a revision/nonce head. Private definitions and their hashes remain in the ledger.
 class JrcContactCenter::EndingActions::Catalogue
   KEY = 'voice_ending_automations'
@@ -24,7 +24,7 @@ class JrcContactCenter::EndingActions::Catalogue
     metadata = settings.fetch(KEY)
     valid = metadata.is_a?(Hash) && metadata.keys.sort == %w[nonce version]
     valid &&= metadata['version'].is_a?(Integer) && metadata['version'].between?(1, 2_147_483_647)
-    valid &&= metadata['nonce'].is_a?(String) && metadata['nonce'].match?(/\A[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/)
+    valid &&= valid_nonce?(metadata['nonce'])
     unavailable! unless valid
     metadata.deep_dup
   end
@@ -54,9 +54,6 @@ class JrcContactCenter::EndingActions::Catalogue
     verify_synchronized!
     current = call
     previous = current.fetch('entries').find { |entry| entry.fetch('code') == rule.fetch('code') }
-    if previous&.fetch('active') && rule.fetch('active') == false
-      raise JrcContactCenter::OperationError, 'ending_action_deactivation_decision_pending'
-    end
     return current if previous == rule
 
     proposed = { 'version' => current.fetch('version') + 1, 'entries' => updated_entries(current, rule, previous) }
@@ -64,6 +61,10 @@ class JrcContactCenter::EndingActions::Catalogue
   end
 
   private
+
+  def valid_nonce?(value)
+    value.is_a?(String) && value.match?(/\A[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/)
+  end
 
   def updated_entries(current, rule, previous)
     entries = current.fetch('entries').map { |entry| entry.fetch('code') == rule.fetch('code') ? rule : entry }
@@ -73,7 +74,7 @@ class JrcContactCenter::EndingActions::Catalogue
 
   def synchronized_version!(metadata)
     row = JrcContactCenter::EndingActionVersion.find_by(account: @account, revision: metadata.fetch('version'),
-                                                      head_nonce: metadata.fetch('nonce'))
+                                                     head_nonce: metadata.fetch('nonce'))
     unavailable! unless row && row.definition['version'] == row.revision
     row
   end

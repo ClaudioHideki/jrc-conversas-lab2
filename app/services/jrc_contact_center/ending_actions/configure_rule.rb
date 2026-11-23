@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Unapplied WIP. No controller or migration exposes this writer yet.
+# Internal writer; no public automation controller exposes it yet.
 # Reuses native ACW revision/audit and stores only a safe head in Account settings.
 class JrcContactCenter::EndingActions::ConfigureRule
   def initialize(account:, member:, input:, expected_revision:)
@@ -53,9 +53,7 @@ class JrcContactCenter::EndingActions::ConfigureRule
   # accessible project. Unseen unrelated rules remain unchanged server-side.
   def authorize_previous!(member, rule)
     rule.fetch('actions').each do |action|
-      unless action.fetch('kind') == 'project_task'
-        raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable'
-      end
+      raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action.fetch('kind') == 'project_task'
 
       JrcContactCenter::EndingActions::ProjectTaskParameters.new(member: member).authorize_reference!(action.fetch('parameters'))
     end

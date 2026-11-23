@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Unapplied WIP: shape validation only. Neither this schema nor a stored project ID grants access.
+# Shape validation only. Neither this schema nor a stored project ID grants access.
 class JrcContactCenter::EndingActions::TaskDefinition
   REQUIRED = %w[title priority estimated_minutes board_column_id].freeze
   IDS = %w[assignee_id parent_id board_column_id].freeze
@@ -12,11 +12,18 @@ class JrcContactCenter::EndingActions::TaskDefinition
     invalid! unless row.keys.sort == %w[attributes due_after_days project_id] && row['attributes'].is_a?(Hash)
     attributes = task_attributes!(row.fetch('attributes'))
     offset = row.fetch('due_after_days')
-    invalid! unless offset.nil? || (offset.is_a?(Integer) && offset.between?(0, 3650) && !attributes.key?('due_on'))
+    validate_offset!(offset, attributes)
     { 'project_id' => identifier!(row.fetch('project_id')), 'attributes' => attributes, 'due_after_days' => offset }
   end
 
   private
+
+  def validate_offset!(offset, attributes)
+    return if offset.nil?
+
+    invalid! unless offset.is_a?(Integer) && offset.between?(0, 3650)
+    invalid! if attributes.key?('due_on')
+  end
 
   def task_attributes!(values)
     validate_attribute_header!(values)
@@ -40,6 +47,10 @@ class JrcContactCenter::EndingActions::TaskDefinition
     invalid! if values.key?('description') && !string?(values['description'], 6000)
     validate_labels!(values['labels']) if values.key?('labels')
     %w[starts_on due_on].each { |key| validate_date!(values[key]) if values.key?(key) }
+    validate_date_order!(values)
+  end
+
+  def validate_date_order!(values)
     return unless values['starts_on'] && values['due_on']
 
     invalid! if Date.iso8601(values['due_on']) < Date.iso8601(values['starts_on'])
@@ -52,6 +63,7 @@ class JrcContactCenter::EndingActions::TaskDefinition
 
   def validate_date!(value)
     return if value.nil?
+
     invalid! unless string?(value, 10) && value.match?(/\A[0-9]{4}-[0-9]{2}-[0-9]{2}\z/)
 
     invalid! unless Date.iso8601(value).year.between?(1, 9999)
@@ -71,7 +83,7 @@ class JrcContactCenter::EndingActions::TaskDefinition
   end
 
   def string?(value, maximum)
-    value.is_a?(String) && value.valid_encoding? && !value.include?("\u0000") && value.length <= maximum
+    value.is_a?(String) && value.valid_encoding? && value.exclude?("\u0000") && value.length <= maximum
   end
 
   def invalid!

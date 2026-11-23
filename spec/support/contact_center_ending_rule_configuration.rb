@@ -1,4 +1,4 @@
-# Prepared, unapplied and unexecuted. Every grant below belongs only to its explicitly synthetic native test account.
+# Every grant below belongs only to its explicitly synthetic native test account.
 RSpec.shared_context 'with native ending rule configuration' do
   include_context 'with a native ending action queue scope'
 
@@ -43,7 +43,7 @@ RSpec.shared_context 'with native ending rule configuration' do
               'description' => '', 'order' => 0, 'active' => true }
     Current.set(user: actor, account: account, account_user: member) do
       policy.update!({ voice: 180, whatsapp: 180 }, voice_reason_catalog: [entry], voice_reason_required_queue_ids: [queue.id.to_s],
-                     voice_reason_confirmation: true, expected_revision: policy.revision)
+                                                    voice_reason_confirmation: true, expected_revision: policy.revision)
     end
   end
 end

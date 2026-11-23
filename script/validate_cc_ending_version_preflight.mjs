@@ -9,8 +9,9 @@ export const REQUIRED = new Map([
   ['spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb', 1],
   ['spec/models/jrc_contact_center/ending_action_version_spec.rb', 9],
   ['spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb', 5],
-  ['spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb', 11],
-  ['spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb', 4],
+  ['spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb', 13],
+  ['spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb', 5],
+  ['spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb', 10],
 ]);
 
 // Reader fixtures do not confer native acceptance: this command consumes the real RSpec formatter output.

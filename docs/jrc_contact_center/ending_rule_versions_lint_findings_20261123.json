@@ -1,0 +1,299 @@
+{
+  "sha": "763ac60a1aacc2f9f1dcd15d861e7dc2567c67b3",
+  "run": 45133930374,
+  "artifact": 14799223455,
+  "artifact_sha256": "7a0aad316ea0cbdfc0d6847b095860d28160c7f54cd0d0cee89a36242e6d4659",
+  "native_examples_executed": 0,
+  "new_ruby_offenses": [
+    {
+      "path": "app/services/jrc_contact_center/acw_policy_audit.rb",
+      "cop": "Metrics/AbcSize",
+      "line": 3,
+      "message": "Assignment Branch Condition size for capture is too high. [<14, 24, 6> 28.43/26]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/catalogue.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 20,
+      "message": "Cyclomatic complexity for `head` is too high. [8/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/catalogue.rb",
+      "cop": "Layout/ArgumentAlignment",
+      "line": 76,
+      "message": "Align the arguments of a method call if they span more than one line."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/catalogue.rb",
+      "cop": "Layout/HashAlignment",
+      "line": 76,
+      "message": "Align the keys of a hash literal if they span more than one line."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/configure_rule.rb",
+      "cop": "Style/IfUnlessModifier",
+      "line": 56,
+      "message": "Favor modifier `unless` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/AbcSize",
+      "line": 9,
+      "message": "Assignment Branch Condition size for call is too high. [<3, 24, 15> 28.46/26]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 9,
+      "message": "Cyclomatic complexity for `call` is too high. [12/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/PerceivedComplexity",
+      "line": 9,
+      "message": "Perceived complexity for `call` is too high. [12/8]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/AbcSize",
+      "line": 23,
+      "message": "Assignment Branch Condition size for validate_entry! is too high. [<1, 29, 10> 30.69/26]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 23,
+      "message": "Cyclomatic complexity for `validate_entry!` is too high. [10/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/PerceivedComplexity",
+      "line": 23,
+      "message": "Perceived complexity for `validate_entry!` is too high. [10/8]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/AbcSize",
+      "line": 32,
+      "message": "Assignment Branch Condition size for validate_scope! is too high. [<2, 28, 14> 31.37/26]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 32,
+      "message": "Cyclomatic complexity for `validate_scope!` is too high. [14/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/PerceivedComplexity",
+      "line": 32,
+      "message": "Perceived complexity for `validate_scope!` is too high. [14/8]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/AbcSize",
+      "line": 43,
+      "message": "Assignment Branch Condition size for validate_actions! is too high. [<2, 24, 16> 28.91/26]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 43,
+      "message": "Cyclomatic complexity for `validate_actions!` is too high. [12/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/PerceivedComplexity",
+      "line": 43,
+      "message": "Perceived complexity for `validate_actions!` is too high. [12/8]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 55,
+      "message": "Cyclomatic complexity for `validate_conditions!` is too high. [10/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Metrics/PerceivedComplexity",
+      "line": 55,
+      "message": "Perceived complexity for `validate_conditions!` is too high. [10/8]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_definition.rb",
+      "cop": "Rails/NegateInclude",
+      "line": 68,
+      "message": "Use `.exclude?` and remove the negation part."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Metrics/AbcSize",
+      "line": 13,
+      "message": "Assignment Branch Condition size for call is too high. [<3, 30, 3> 30.3/26]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Style/IfUnlessModifier",
+      "line": 20,
+      "message": "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Layout/EmptyLineAfterGuardClause",
+      "line": 22,
+      "message": "Add empty line after guard clause."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 42,
+      "message": "Cyclomatic complexity for `validate_activation!` is too high. [9/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Metrics/PerceivedComplexity",
+      "line": 42,
+      "message": "Perceived complexity for `validate_activation!` is too high. [9/8]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Style/IfUnlessModifier",
+      "line": 67,
+      "message": "Favor modifier `unless` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 77,
+      "message": "Cyclomatic complexity for `conditions!` is too high. [10/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Metrics/PerceivedComplexity",
+      "line": 77,
+      "message": "Perceived complexity for `conditions!` is too high. [10/8]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Style/IfUnlessModifier",
+      "line": 83,
+      "message": "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Layout/EmptyLineAfterGuardClause",
+      "line": 85,
+      "message": "Add empty line after guard clause."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/rule_input.rb",
+      "cop": "Rails/NegateInclude",
+      "line": 102,
+      "message": "Use `.exclude?` and remove the negation part."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/task_definition.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 8,
+      "message": "Cyclomatic complexity for `call` is too high. [8/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/task_definition.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 39,
+      "message": "Cyclomatic complexity for `validate_optional!` is too high. [9/7]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/task_definition.rb",
+      "cop": "Metrics/PerceivedComplexity",
+      "line": 39,
+      "message": "Perceived complexity for `validate_optional!` is too high. [9/8]"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/task_definition.rb",
+      "cop": "Layout/EmptyLineAfterGuardClause",
+      "line": 54,
+      "message": "Add empty line after guard clause."
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/task_definition.rb",
+      "cop": "Rails/NegateInclude",
+      "line": 74,
+      "message": "Use `.exclude?` and remove the negation part."
+    },
+    {
+      "path": "lib/jrc_contact_center/ending_action_version_schema_receipt.rb",
+      "cop": "Metrics/CyclomaticComplexity",
+      "line": 22,
+      "message": "Cyclomatic complexity for `verify!` is too high. [9/7]"
+    },
+    {
+      "path": "lib/jrc_contact_center/ending_action_version_schema_receipt.rb",
+      "cop": "Metrics/PerceivedComplexity",
+      "line": 22,
+      "message": "Perceived complexity for `verify!` is too high. [9/8]"
+    },
+    {
+      "path": "spec/models/jrc_contact_center/ending_action_version_spec.rb",
+      "cop": "Layout/LineEndStringConcatenationIndentation",
+      "line": 47,
+      "message": "Align parts of a string concatenated with backslash."
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb",
+      "cop": "Layout/HashAlignment",
+      "line": 67,
+      "message": "Align the keys of a hash literal if they span more than one line."
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb",
+      "cop": "Metrics/AbcSize",
+      "line": 42,
+      "message": "Assignment Branch Condition size for competing_ending_rules is too high. [<4, 27, 6> 27.95/26]"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb",
+      "cop": "Performance/RedundantEqualityComparisonBlock",
+      "line": 75,
+      "message": "Use `all?(Pundit::NotAuthorizedError)` instead of block."
+    },
+    {
+      "path": "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb",
+      "cop": "Rails/SkipsModelValidations",
+      "line": 60,
+      "message": "Avoid using `update_all` because it skips validations."
+    },
+    {
+      "path": "spec/support/contact_center_ending_action_versions.rb",
+      "cop": "Metrics/AbcSize",
+      "line": 10,
+      "message": "Assignment Branch Condition size for record_private_ending_definition is too high. [<4, 28, 0> 28.28/26]"
+    },
+    {
+      "path": "spec/support/contact_center_ending_action_versions.rb",
+      "cop": "Layout/ArgumentAlignment",
+      "line": 19,
+      "message": "Align the arguments of a method call if they span more than one line."
+    },
+    {
+      "path": "spec/support/contact_center_ending_action_versions.rb",
+      "cop": "Layout/HashAlignment",
+      "line": 19,
+      "message": "Align the keys of a hash literal if they span more than one line."
+    },
+    {
+      "path": "spec/support/contact_center_ending_rule_configuration.rb",
+      "cop": "Layout/HashAlignment",
+      "line": 46,
+      "message": "Align the keys of a hash literal if they span more than one line."
+    }
+  ],
+  "minimal_source_changes": [
+    "Split existing validators/audit capture into bounded methods with the same validation rules",
+    "Fix argument/string alignment and native test updates without suppressing a cop",
+    "Reuse committed PostgreSQL workers and prove pending-history reader waits for deactivation"
+  ],
+  "scope_addition": "Explicitly approved deactivation blocks old pending work; no old history mutation or implicit reactivation",
+  "remaining_native_validation": true,
+  "no_gate_reduction_or_configuration_suppression": true
+}

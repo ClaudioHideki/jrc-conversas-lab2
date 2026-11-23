@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Unapplied WIP for the existing AcwPolicy writer. Its caller retains current
+# Input for the existing AcwPolicy writer. Its caller retains current
 # native configure/global-coverage authority and the account transaction/revision.
 class JrcContactCenter::EndingActions::RuleInput
   FIELDS = %w[code name reason_code queue_id scope_revision timing active actions conditions].freeze
@@ -15,18 +15,22 @@ class JrcContactCenter::EndingActions::RuleInput
 
     row = input.deep_stringify_keys
     validate_header!(row)
-    queue = access.queues.lock('FOR SHARE').includes(:unit).find(identifier!(row.fetch('queue_id')))
-    scope = JrcContactCenter::EndingActionQueueScope.where(account: @account, source_queue_id: queue.id).order(revision: :desc).first!
-    if scope.unit_id != queue.unit_id
-      raise JrcContactCenter::OperationError.new('ending_action_source_scope_changed', status: :conflict)
-    end
-    JrcContactCenter::ConfigurationRevision.check_token!(scope.integrity_sha256, row.fetch('scope_revision'))
+    queue, scope = source_for!(row)
     validate_activation!(row, queue, scope)
     row.except('scope_revision').merge('queue_id' => queue.id.to_s, 'actions' => actions!(row), 'conditions' => conditions!(row),
                                        'scope' => scope_payload(scope, queue))
   end
 
   private
+
+  def source_for!(row)
+    queue = access.queues.lock('FOR SHARE').includes(:unit).find(identifier!(row.fetch('queue_id')))
+    scope = JrcContactCenter::EndingActionQueueScope.where(account: @account, source_queue_id: queue.id).order(revision: :desc).first!
+    raise JrcContactCenter::OperationError.new('ending_action_source_scope_changed', status: :conflict) if scope.unit_id != queue.unit_id
+
+    JrcContactCenter::ConfigurationRevision.check_token!(scope.integrity_sha256, row.fetch('scope_revision'))
+    [queue, scope]
+  end
 
   def access
     JrcContactCenter::AccessScope.new(user_context: { account: @account, account_user: @member, user: @member.user })
@@ -45,10 +49,15 @@ class JrcContactCenter::EndingActions::RuleInput
     invalid! unless reason
     return unless row.fetch('active')
 
-    valid = reason.fetch('active') && queue.status == 'active' && queue.unit.status == 'active' && scope.scope_state == 'mapped'
-    valid &&= catalogue.fetch('required_queue_ids', []).include?(queue.id.to_s)
-    invalid! unless valid
+    invalid! unless reason.fetch('active')
+
+    validate_active_source!(queue, scope, catalogue)
     JrcApprovals::Authorization.scope!(@account, scope.issuer_company_id, scope.business_unit_id)
+  end
+
+  def validate_active_source!(queue, scope, catalogue)
+    valid = queue.status == 'active' && queue.unit.status == 'active' && scope.scope_state == 'mapped'
+    invalid! unless valid && catalogue.fetch('required_queue_ids', []).include?(queue.id.to_s)
   end
 
   def actions!(row)
@@ -64,9 +73,7 @@ class JrcContactCenter::EndingActions::RuleInput
     invalid! unless input.is_a?(Hash)
     entry = input.deep_stringify_keys
     invalid! unless entry.keys.sort == %w[kind parameters]
-    unless entry['kind'] == 'project_task'
-      raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable'
-    end
+    raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless entry['kind'] == 'project_task'
 
     parameters = JrcContactCenter::EndingActions::ProjectTaskParameters.new(member: @member).call(entry.fetch('parameters'))
     { 'kind' => 'project_task', 'parameters' => parameters }
@@ -78,12 +85,15 @@ class JrcContactCenter::EndingActions::RuleInput
     input = row.fetch('conditions')
     invalid! unless input.is_a?(Hash) && input.keys == ['outcome_codes']
     codes = input.fetch('outcome_codes')
-    valid = codes.is_a?(Array) && codes.length <= 10 && codes.all? { |code| text?(code, 100) }
-    invalid! unless valid && codes.uniq.length == codes.length
-    if codes.any? && row.fetch('timing') != 'acw_completed'
-      raise JrcContactCenter::OperationError, 'ending_action_conditions_require_completed_acw'
-    end
+    validate_condition_codes!(codes)
+    raise JrcContactCenter::OperationError, 'ending_action_conditions_require_completed_acw' if codes.any? && row.fetch('timing') != 'acw_completed'
+
     { 'outcome_codes' => codes.sort }
+  end
+
+  def validate_condition_codes!(codes)
+    invalid! unless codes.is_a?(Array) && codes.length <= 10 && codes.all? { |code| text?(code, 100) }
+    invalid! unless codes.uniq.length == codes.length
   end
 
   def scope_payload(scope, queue)
@@ -99,7 +109,7 @@ class JrcContactCenter::EndingActions::RuleInput
   end
 
   def text?(value, maximum)
-    value.is_a?(String) && value.valid_encoding? && !value.include?("\u0000") &&
+    value.is_a?(String) && value.valid_encoding? && value.exclude?("\u0000") &&
       value.strip.present? && value == value.strip && value.length <= maximum
   end
 

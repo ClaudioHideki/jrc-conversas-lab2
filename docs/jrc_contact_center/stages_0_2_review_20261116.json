@@ -7457,5 +7457,12 @@
     "report": "docs/jrc_contact_center/ending_rule_versions_candidate_20261123.json",
     "native_validation": "pending",
     "whole_figure10_or23_complete": false
+  },
+  "ending_deactivation_20261123": {
+    "report": "docs/jrc_contact_center/ending_deactivation_decision_20261123.json",
+    "lint_failure": "docs/jrc_contact_center/ending_rule_versions_lint_findings_20261123.json",
+    "approved_business_decision": true,
+    "native_accepted": false,
+    "whole_figure10_complete": false
   }
 }

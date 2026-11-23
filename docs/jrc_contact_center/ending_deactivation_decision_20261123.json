@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-23",
+  "source": "Explicit user answer: Bloquear tambem acoes pendentes",
+  "approved": true,
+  "pending_business_question": false,
+  "semantics": {
+    "deactivation_blocks_pending_and_retries_from_earlier_origins": true,
+    "completed_effects_receipts_and_immutable_definitions_preserved": true,
+    "reactivation_does_not_revive_old_blocked_origins": true,
+    "new_origins_may_pin_a_later_active_version": true,
+    "unrelated_rules_and_accounts_unchanged": true,
+    "other_enabled_edits_do_not_redirect_original_pinned_parameters": true
+  },
+  "implementation": {
+    "configuration_transition": "Existing Catalogue/ConfigureRule, same native authority, revision, audit and private ledger",
+    "barrier": "Earliest later immutable version missing the rule or not explicitly active true",
+    "prepared_filtered_bind": "private_rule_code",
+    "database_migrations_or_sql_changed": false,
+    "caller_contract": "Evidence only: revalidate original actor, source and destination under native account authority transaction immediately before pending effect/retry",
+    "completed_receipt_read_path": "Never apply the pending-work barrier to already completed history",
+    "no_dispatcher_or_receipt_cancellation_claim": true
+  },
+  "prepared_native_cases_not_results": {
+    "blocking_history": 10,
+    "configuration_total": 13,
+    "privacy_total": 5,
+    "private_version_preflight_total": 102,
+    "real_concurrency_total": 3
+  },
+  "native_acceptance": false,
+  "previous_actual_failure": {
+    "sha": "763ac60a1aacc2f9f1dcd15d861e7dc2567c67b3",
+    "run": 45133930374,
+    "artifact": 14799223455,
+    "artifact_sha256": "7a0aad316ea0cbdfc0d6847b095860d28160c7f54cd0d0cee89a36242e6d4659",
+    "early_ruby_offenses": 46,
+    "additional_incremental_audit_offense": 1,
+    "native_examples_executed": 0
+  },
+  "remaining": [
+    "Actual native execution of private ledger/configuration/privacy and blocking history",
+    "Operational editor/API and pinned call origins/completion",
+    "Independent per-destination receipts, pending-only retry and actual F10-A/F10-B",
+    "PABX provider contracts/homologation remain separate and no real commands are authorized"
+  ],
+  "whole_figure10_or23_complete": false,
+  "main_original_checkout3files_5379_production_and_other_environments_unchanged": true
+}

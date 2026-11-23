@@ -3,7 +3,7 @@
 require 'json'
 require 'digest'
 
-# Unapplied WIP. This receipt covers only the owned private definition history.
+# This receipt covers only the owned private definition history.
 class JrcContactCenter::EndingActionVersionSchemaReceipt
   TABLE = 'jrc_contact_center_ending_action_versions'
   COLUMNS = %w[id account_id revision source_audit_id actor_user_id actor_user_type head_nonce private_definition
@@ -20,14 +20,22 @@ class JrcContactCenter::EndingActionVersionSchemaReceipt
   end
 
   def verify!
-    valid = @connection.table_exists?(TABLE) && @connection.columns(TABLE).map(&:name).sort == COLUMNS.sort
+    valid = valid_columns?
     valid &&= @connection.foreign_keys(TABLE).map(&:to_table) == ['accounts']
-    valid &&= functions.length == FUNCTIONS.length && triggers.length == TRIGGERS.length
+    valid &&= complete_functions_and_triggers?
     valid &&= @connection.table_comment(TABLE) == token
     raise ActiveRecord::MigrationError, 'Unexpected ending action version schema; preserve history and investigate' unless valid
   end
 
   private
+
+  def valid_columns?
+    @connection.table_exists?(TABLE) && @connection.columns(TABLE).map(&:name).sort == COLUMNS.sort
+  end
+
+  def complete_functions_and_triggers?
+    functions.length == FUNCTIONS.length && triggers.length == TRIGGERS.length
+  end
 
   def structure
     columns = @connection.columns(TABLE).map { |row| [row.name, row.sql_type, row.null, row.default, row.default_function, row.collation] }

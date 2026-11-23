@@ -42,12 +42,13 @@ RSpec.describe JrcContactCenter::EndingActionVersion do
   it 'rejects the reuse of another accounts audit without creating a foreign version' do
     original = record_private_ending_definition
     other = create(:account)
-    expect do
-      guarded_ending_version_sql("INSERT INTO #{described_class.table_name} " \
-                                '(account_id, revision, source_audit_id, head_nonce, private_definition) ' \
-                                "SELECT #{other.id},revision,source_audit_id,head_nonce,private_definition " \
-                                "FROM #{described_class.table_name} WHERE id=#{original.id}")
-    end.to raise_error(ActiveRecord::StatementInvalid, /Ending action private definition head mismatch/)
+    statement = <<~SQL.squish
+      INSERT INTO #{described_class.table_name} (account_id, revision, source_audit_id, head_nonce, private_definition)
+      SELECT #{other.id},revision,source_audit_id,head_nonce,private_definition
+      FROM #{described_class.table_name} WHERE id=#{original.id}
+    SQL
+    expect { guarded_ending_version_sql(statement) }
+      .to raise_error(ActiveRecord::StatementInvalid, /Ending action private definition head mismatch/)
     expect(described_class.where(account: other)).to be_empty
     expect(versions.count).to eq(1)
   end

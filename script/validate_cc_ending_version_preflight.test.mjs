@@ -11,9 +11,9 @@ function nativeReportFixture() {
   return { summary: { example_count: examples.length, failure_count: 0, pending_count: 0, errors_outside_of_examples_count: 0 }, examples };
 }
 
-test('accepts exactly89unique positive fixtures; this does not represent an executed native suite', () => {
+test('accepts exactly102unique positive fixtures; this does not represent an executed native suite', () => {
   const data = nativeReportFixture();
-  assert.equal(validateVersionPreflight(data).example_count, 89);
+  assert.equal(validateVersionPreflight(data).example_count, 102);
 });
 
 for (const key of ['failure_count', 'pending_count', 'errors_outside_of_examples_count']) {
@@ -24,7 +24,7 @@ for (const key of ['failure_count', 'pending_count', 'errors_outside_of_examples
   });
 }
 
-for (const count of [0, 88, 90]) {
+for (const count of [0, 101, 103]) {
   test(`rejects summary example count ${count}`, () => {
     const data = nativeReportFixture();
     data.summary.example_count = count;

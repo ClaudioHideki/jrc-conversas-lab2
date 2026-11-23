@@ -29,13 +29,13 @@ RSpec.describe 'Ending rule versions with competing native PostgreSQL connection
     end
   end
 
-  def wait_for_ending_rule_contenders(state)
-    ids = Timeout.timeout(8) { Array.new(2) { state[:ready].pop } }
-    raise 'Independent PostgreSQL connections required' unless ids.uniq.length == 2
+  def wait_for_ending_rule_contenders(state, count: 2)
+    ids = Timeout.timeout(8) { Array.new(count) { state[:ready].pop } }
+    raise 'Independent PostgreSQL connections required' unless ids.uniq.length == count
 
     sql = "SELECT count(*) FROM pg_stat_activity WHERE pid IN (#{ids.map { |id| Integer(id) }.join(',')}) AND wait_event_type='Lock'"
     Timeout.timeout(8) do
-      ApplicationRecord.connection.uncached { sleep 0.02 until ApplicationRecord.connection.select_value(sql).to_i == 2 }
+      ApplicationRecord.connection.uncached { sleep 0.02 until ApplicationRecord.connection.select_value(sql).to_i == count }
     end
   end
 
@@ -53,9 +53,27 @@ RSpec.describe 'Ending rule versions with competing native PostgreSQL connection
       Array.new(2) { state[:results].pop }
     end
   ensure
-    if state
-      state[:workers].each { |worker| worker.join(20) }
-      raise 'Synthetic ending rule writer still active' if state[:workers].any?(&:alive?)
+    verify_ending_rule_workers_finished(state) if state
+  end
+
+  def verify_ending_rule_workers_finished(state)
+    state[:workers].each { |worker| worker.join(20) }
+    raise 'Synthetic ending rule writer still active' if state[:workers].any?(&:alive?)
+  end
+
+  def pending_ending_history_reader(state, version)
+    Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do |connection|
+        target = Account.find(account.id)
+        state[:ready] << connection.raw_connection.backend_pid
+        JrcContactCenter::AuthorityTransaction.call(account: target, member: nil) do
+          state[:results] << JrcContactCenter::EndingActions::BlockingRevision.new(
+            account: target, version_id: version.id, rule_code: 'SYNTHETIC_RULE'
+          ).call
+        end
+      end
+    rescue StandardError => e
+      state[:results] << e
     end
   end
 
@@ -72,9 +90,25 @@ RSpec.describe 'Ending rule versions with competing native PostgreSQL connection
   it 'rechecks committed profile revocation after waiting instead of using the callers earlier configure authority' do
     role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view])
     results = competing_ending_rules { member.update!(custom_role: role) }
-    expect(results.all? { |result| result.is_a?(Pundit::NotAuthorizedError) }).to be(true)
+    expect(results.all?(Pundit::NotAuthorizedError)).to be(true)
     expect(JrcContactCenter::EndingActionVersion.where(account: account)).to be_empty
     expect(JrcProjects::Task.where(account: account)).to be_empty
     expect(account.reload.settings.fetch(JrcContactCenter::AcwPolicy::KEY)).not_to have_key('voice_ending_automations')
+  end
+
+  it 'observes a committed deactivation after the original pending reader actually waits on the native account transaction' do
+    configure_native_ending_rule
+    version = JrcContactCenter::EndingActionVersion.where(account: account).sole
+    state = { ready: Queue.new, results: Queue.new, workers: [] }
+    account.with_lock do
+      state[:workers] << pending_ending_history_reader(state, version)
+      wait_for_ending_rule_contenders(state, count: 1)
+      configure_native_ending_rule(rule_input.merge('active' => false))
+    end
+    expect(Timeout.timeout(20) { state[:results].pop }).to eq(2)
+    expect(version.reload.definition.fetch('entries').first.fetch('active')).to be(true)
+    expect(JrcProjects::Task.where(account: account)).to be_empty
+  ensure
+    verify_ending_rule_workers_finished(state) if state
   end
 end

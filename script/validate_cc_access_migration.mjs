@@ -176,7 +176,7 @@ export const endingActionVersionMigrationPath = 'db/migrate/20261123063000_creat
 export const endingActionVersionMigrationHash = '97d516c8876ddb4bf4e9346d1a6f880d05e1806b2006599099732f1fd88380b7';
 export const endingActionVersionSources = Object.freeze({
   "db/functions/20261123063000_contact_center_ending_action_versions.sql": "0d8c92f02f01f49f3a783bc468bfd20e1e37fc86bfca6b2409cea69bec12c253",
-  "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "1ba3e81f7d75c59c7ac8133b8dd119388e42129e77f9ef00ab1cf28df3d9b24c"
+  "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "bae3d97965ae0a0e84917dab6709b7dc03561a46f5fe4db718e826b7796ee397"
 });
 
 // Keep every earlier verifier and source hash. This addition admits only its3exact private-history sources.

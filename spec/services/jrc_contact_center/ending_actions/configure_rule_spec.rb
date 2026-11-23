@@ -26,6 +26,28 @@ RSpec.describe JrcContactCenter::EndingActions::ConfigureRule do
     expect(ending_rule_write_counts).to eq(previous)
   end
 
+  it 'audits an authorized deactivation while keeping prior definitions and an identical inactive retry unchanged' do
+    configure_native_ending_rule
+    first = JrcContactCenter::EndingActionVersion.where(account: account).sole.attributes.deep_dup
+    result = configure_native_ending_rule(rule_input.merge('active' => false))
+    before = ending_rule_write_counts
+    expect(result.fetch(:rule).fetch('active')).to be(false)
+    expect(JrcContactCenter::EndingActionVersion.where(account: account).order(:revision).first.attributes).to eq(first)
+    expect(JrcContactCenter::EndingActionVersion.where(account: account).order(:revision).pluck(:revision)).to eq([1, 2])
+    expect(configure_native_ending_rule(rule_input.merge('active' => false))).to eq(result)
+    expect(ending_rule_write_counts).to eq(before)
+  end
+
+  it 'rejects deactivation after a native permission revocation without changing the active rule or its history' do
+    configure_native_ending_rule
+    role = create(:custom_role, account: account, permissions: %w[jrc_contact_center_view])
+    member.update!(custom_role: role)
+    before = ending_rule_write_counts
+    expect { configure_native_ending_rule(rule_input.merge('active' => false)) }.to raise_error(Pundit::NotAuthorizedError)
+    expect(ending_rule_write_counts).to eq(before)
+    expect(JrcContactCenter::EndingActionVersion.where(account: account).sole.definition.fetch('entries').first.fetch('active')).to be(true)
+  end
+
   it 'rejects a stale native revision instead of losing another clients changes' do
     revision = policy.revision
     configure_native_ending_rule
@@ -57,7 +79,7 @@ RSpec.describe JrcContactCenter::EndingActions::ConfigureRule do
 
   it 'rejects a corporate coverage revocation without changing the saved history or granting global scope' do
     input = rule_input
-    JrcCrm::UserBusinessUnit.where(account: account, user: actor, scope: 'GROUP').update_all(active: false)
+    JrcCrm::UserBusinessUnit.where(account: account, user: actor, scope: 'GROUP').find_each { |coverage| coverage.update!(active: false) }
     before = ending_rule_write_counts
     expect { configure_native_ending_rule(input) }.to raise_error(Pundit::NotAuthorizedError)
     expect(ending_rule_write_counts).to eq(before)

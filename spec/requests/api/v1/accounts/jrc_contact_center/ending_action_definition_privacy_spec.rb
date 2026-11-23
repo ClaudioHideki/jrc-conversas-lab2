@@ -63,12 +63,27 @@ RSpec.describe 'Ending rule private definitions at native serialization and logg
     configure_native_ending_rule
     version = JrcContactCenter::EndingActionVersion.where(account: account).sole
     original = account.reload.settings.deep_dup
-    patch "/api/v1/accounts/#{account.id}", headers: headers, as: :json,
-                                          params: { jrc_contact_center_acw: { voice_ending_automations: { version: 2, nonce: SecureRandom.uuid } } }
+    parameters = { jrc_contact_center_acw: { voice_ending_automations: { version: 2, nonce: SecureRandom.uuid } } }
+    patch "/api/v1/accounts/#{account.id}", headers: headers, as: :json, params: parameters
     expect(response).to have_http_status(:ok)
     expect(account.reload.settings).to eq(original)
     expect(JrcContactCenter::EndingActions::Catalogue.new(account: account).call).to eq(version.definition)
     expect(JrcContactCenter::EndingActionVersion.where(account: account).pluck(:id)).to eq([version.id])
     expect(response.body).not_to include(secret_marker, 'private_definition', version.definition_sha256)
+  end
+
+  it 'uses a filtered prepared bind for the private rule identity when looking for a deactivation barrier' do
+    input = rule_input.merge('code' => 'SYNTHETIC_PRIVATE_RULE_CODE_7f19')
+    configure_native_ending_rule(input)
+    version = JrcContactCenter::EndingActionVersion.where(account: account).sole
+    configure_native_ending_rule(input.merge('active' => false))
+    result = nil
+    log = capture_ending_version_sql do
+      result = JrcContactCenter::EndingActions::BlockingRevision.new(account: account, version_id: version.id, rule_code: input.fetch('code')).call
+    end
+    expect(result).to eq(2)
+    expect(log).to include('EndingActionPendingHistory', '[FILTERED]')
+    expect(log).not_to include(input.fetch('code'), secret_marker, version.definition_sha256)
+    expect(version.reload.definition.fetch('entries').first.fetch('active')).to be(true)
   end
 end

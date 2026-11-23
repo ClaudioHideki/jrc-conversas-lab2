@@ -11,12 +11,19 @@ class JrcContactCenter::AcwPolicyAudit
     attributes['voice_rules'] = rules if rules.any?
     bindings = JrcContactCenter::AcwFormBindingPolicy.new(account: account).call
     attributes['voice_form_bindings'] = bindings if bindings.any?
-    reasons = JrcContactCenter::AcwEndingReasons.new(account: account).call
-    attributes['voice_reason_catalog'] = reasons if reasons.fetch('version').positive?
-    automation = JrcContactCenter::EndingActions::Catalogue.new(account: account).head
-    attributes[JrcContactCenter::EndingActions::Catalogue::KEY] = automation if automation
+    attributes.merge!(catalogue_attributes(account))
     { 'attributes' => attributes, 'omitted_fields' => omitted }
   end
+
+  def self.catalogue_attributes(account)
+    reasons = JrcContactCenter::AcwEndingReasons.new(account: account).call
+    head = JrcContactCenter::EndingActions::Catalogue.new(account: account).head
+    attributes = {}
+    attributes['voice_reason_catalog'] = reasons if reasons.fetch('version').positive?
+    attributes[JrcContactCenter::EndingActions::Catalogue::KEY] = head if head
+    attributes
+  end
+  private_class_method :catalogue_attributes
 
   def self.write!(account:, before:, after:)
     return if before == after

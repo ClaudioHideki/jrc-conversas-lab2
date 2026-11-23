@@ -27,37 +27,39 @@
   "paths": {
     "app/models/jrc_contact_center/ending_action_version.rb": "a46d77c747af6dd9725a43416990020274add9cbfa23bfe18fa45553b47be3c7",
     "app/services/jrc_contact_center/acw_policy.rb": "a4c6ae2c06e02a863181eccc52373fc087debe697a29b519ecddee751af101fd",
-    "app/services/jrc_contact_center/acw_policy_audit.rb": "fb1796d1971fc4bb091bb993c648ea2461f32f44e134086c31b5833f1c72e4e3",
-    "app/services/jrc_contact_center/ending_actions/task_definition.rb": "905201058faf797b95a57944ed74e5f8455a5687bb99248284b84efa09d8f9d2",
-    "app/services/jrc_contact_center/ending_actions/rule_definition.rb": "f7bb6c55c2e879516dc40c11bf930d5d95885f1daa2c41ebb7d9d92c843eb4b8",
-    "app/services/jrc_contact_center/ending_actions/catalogue.rb": "5bf07f722baa6436965dda97da82cba5aa8cebce2b363f1c291102fe1c745795",
+    "app/services/jrc_contact_center/acw_policy_audit.rb": "45bfb28220f6f82eeb68e154de46ac60d1922d853ed99c32833c45418fd33dc3",
+    "app/services/jrc_contact_center/ending_actions/task_definition.rb": "3c61ff6911314a4e25d6263991dfea7e715ec25363e1e1294d846fb95c28a5f0",
+    "app/services/jrc_contact_center/ending_actions/rule_definition.rb": "0c3c903c9e4e25e9568a2937ce2a09a1bafbbc3d69efbb0d81d0defca49c15ac",
+    "app/services/jrc_contact_center/ending_actions/catalogue.rb": "5e04e9476206141f0c38107ec09228778a9da4a24f36ba084bf3cd46d4713145",
     "app/services/jrc_contact_center/ending_actions/project_task_parameters.rb": "a181ec9c84e7e143dde36b01f3ecd77f577870799f22ac83e96df40829333e99",
-    "app/services/jrc_contact_center/ending_actions/rule_input.rb": "cecc8ec2fe3ed1ba109e678e58fababee8e0259cac019252f40faa0e06707134",
-    "app/services/jrc_contact_center/ending_actions/configure_rule.rb": "7b84fc61afd6c9ade4aa8f7078d502e4a4182dd90d2c589f9b7d58da8d2e450b",
+    "app/services/jrc_contact_center/ending_actions/rule_input.rb": "14098b7e978b146d357e20c51db9af1e3ae4beec690a5a7f32cd1c4d13d37eba",
+    "app/services/jrc_contact_center/ending_actions/configure_rule.rb": "f98faca255665cd425ef0034cc893f0c2ba894c40e62b3baab41784992b7d813",
     "db/migrate/20261123063000_create_contact_center_ending_action_versions.rb": "97d516c8876ddb4bf4e9346d1a6f880d05e1806b2006599099732f1fd88380b7",
     "db/functions/20261123063000_contact_center_ending_action_versions.sql": "0d8c92f02f01f49f3a783bc468bfd20e1e37fc86bfca6b2409cea69bec12c253",
-    "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "1ba3e81f7d75c59c7ac8133b8dd119388e42129e77f9ef00ab1cf28df3d9b24c",
-    "spec/models/jrc_contact_center/ending_action_version_spec.rb": "d8840bfc873f35642b0db2244546ce00ea1b8cf5f3b2ccb3f7c0d31fb0b95053",
+    "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "bae3d97965ae0a0e84917dab6709b7dc03561a46f5fe4db718e826b7796ee397",
+    "spec/models/jrc_contact_center/ending_action_version_spec.rb": "f0f269c22f3dc052dbf50da0d1a91ccf3ea7e4e93d1fb0926a83d1788470290c",
     "spec/services/jrc_contact_center/create_contact_center_ending_action_versions_spec.rb": "57a814d49942cc66b3d09b0af4f2f03a6758c4e5ed0b370789702e75b0ec6e5c",
     "spec/services/jrc_contact_center/ending_actions/task_definition_spec.rb": "acdca21cf9604e80266a5cdf113ed71a409c21f94422b29fe0d35820bffbc548",
     "spec/services/jrc_contact_center/ending_actions/rule_definition_spec.rb": "531d7abdd7aac08bff9593afb466fa0a1d5e6749b03f8b7295fa594cd1dc0366",
     "spec/services/jrc_contact_center/ending_actions/catalogue_spec.rb": "101a15f94a9b17f449a70d02b9aa2f6bc9771413655a23644b709ae5fa8d4b4b",
-    "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb": "aae78c38213caaed62681d964de9549012befe9902498db72c93d890de21b084",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb": "586a8c2bd8bac972c16171cdcaf6e22f7d1004d76ce63878404d3d0dfbba752d",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb": "0eb9e664bbeebf48d532fcf51912d2f2d9bcad2097f36bec169fb6d908c1f77b",
-    "spec/support/contact_center_ending_action_versions.rb": "f9cdd8a224bf11b544a976d8b7a2ccef7ae62983588373b59772203af61816fe",
-    "spec/support/contact_center_ending_rule_configuration.rb": "a3e1f3baabc8564a7ffd14e8a2513e1b8a1e88cbd5f0f28886b702fc2c5fecdf",
-    "script/validate_cc_access_migration.mjs": "7aee8e084520a0e6f91b795dee045e8b190cd76df4608776545eec393d2c1b11",
+    "spec/services/jrc_contact_center/ending_actions/configure_rule_spec.rb": "be33d66b5035665693a23b612f2754090c2b221f4c3cad40bc63047a7036812e",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb": "e020dc08332f87c65273550c2c70e6106f98212dae1b9f9e39fa45ec3ac04cb8",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_action_definition_privacy_spec.rb": "041cdc8e4f3d55a8886ef8a5a14d9817d25c7cbb402462b19403dd4e58e930f6",
+    "spec/support/contact_center_ending_action_versions.rb": "73c5e8b1005d320bcabb7bcbaac1309c98e5ea5316a6b0a8bc4229b0290e2ccb",
+    "spec/support/contact_center_ending_rule_configuration.rb": "b4497a6e4046c95978167e05c47867f6dc5fad0cbf55670cddab553c32a64a0a",
+    "script/validate_cc_access_migration.mjs": "bb1feb57a678cf993df92bff341db68aaf0a5a5df592893f9c0c7866d874b290",
     "script/validate_cc_ending_version_migration.test.mjs": "6c15070b8c7c493562a0ec85e7418209ab905239234d3343728462dc20834ea7",
-    "script/validate_cc_ending_version_preflight.mjs": "ff2d588c088992c5d9e56110cb8477923c39aed30bf48013b04540c3c581d6f9",
-    "script/validate_cc_ending_version_preflight.test.mjs": "7e7f1b012a24cfefa09135ca1c2996a85354d9a586186bcb01a4a40e79e11cce",
+    "script/validate_cc_ending_version_preflight.mjs": "5243cfea55cc6eced12f3e6a4b0238d495a86cab38364573e9499db2a5d9c403",
+    "script/validate_cc_ending_version_preflight.test.mjs": "ded8c9e93f4062f06fd3b12e348f32bb75e40d46e16cccc0fcfe788e5f548faa",
     "script/jrc_call_center_ending_version_schema_probe.rb": "6a9395f3de39fb45bf22c228ee516d7d771d64cf3977e258e76f146529b66f05",
-    ".github/workflows/call-center-administration.yml": "419df51c28e460dd15d25df119fecd25741021a6c412971da9c85215a6a00c8f"
+    ".github/workflows/call-center-administration.yml": "7676007057ca355738731dbff761c0cdd92a3401fe50758b5f8e1066bbc02d89",
+    "app/services/jrc_contact_center/ending_actions/blocking_revision.rb": "2b5306e81de43660e792b4d68ee31f1de9113f5284cbe3e4bf0f43711e2ce989",
+    "spec/services/jrc_contact_center/ending_actions/blocking_revision_spec.rb": "4aa661cd22bd7771ddea006d15f7d910012119b9ac2f2d1e41e597000553d8d1"
   },
   "database_sources": {
     "db/migrate/20261123063000_create_contact_center_ending_action_versions.rb": "97d516c8876ddb4bf4e9346d1a6f880d05e1806b2006599099732f1fd88380b7",
     "db/functions/20261123063000_contact_center_ending_action_versions.sql": "0d8c92f02f01f49f3a783bc468bfd20e1e37fc86bfca6b2409cea69bec12c253",
-    "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "1ba3e81f7d75c59c7ac8133b8dd119388e42129e77f9ef00ab1cf28df3d9b24c"
+    "lib/jrc_contact_center/ending_action_version_schema_receipt.rb": "bae3d97965ae0a0e84917dab6709b7dc03561a46f5fe4db718e826b7796ee397"
   },
   "old15sources_unchanged": true,
   "native_permissions_and_account_authority_lock_unchanged": true,
@@ -67,9 +69,10 @@
     "public_head": 1,
     "native_versions": 9,
     "native_migration": 5,
-    "native_configuration": 11,
-    "real_concurrency": 2,
-    "native_api_and_log_privacy": 4
+    "native_configuration": 13,
+    "real_concurrency": 3,
+    "native_api_and_log_privacy": 5,
+    "blocking_history": 10
   },
   "light_checks_executed": {
     "exact_migration_reader": 60,
@@ -79,16 +82,23 @@
     "embedded_python_blocks_compiled_only": 2,
     "independent_evidence_reader": 18
   },
-  "native_validation": "pending_first_isolated_run",
+  "native_validation": "first_run_failed_lint_before_native_tests; corrected_candidate_requires_actual_retry",
   "native_or_visual_acceptance_of_this_increment": false,
   "no_public_automation_api_editor_job_or_destination_effects": true,
   "customer_company_links_distinct_from_operating_issuer_and_business_unit_scope": true,
   "remaining": [
     "Native schema, lint, configuration, API/log privacy and real concurrency verification.",
     "Operational editor/API, immutable call origin/completion, independent receipts and fresh original-actor execution.",
-    "Other destination adapters, actual F10-A/F10-B and full Word layout acceptance.",
-    "Deactivation semantics remains the separate unanswered business question; no default chosen."
+    "Other destination adapters, actual F10-A/F10-B and full Word layout acceptance."
   ],
   "whole_figure10_or23_complete": false,
-  "no_production_external_build_docker_publication_merge_or_deploy": true
+  "no_production_external_build_docker_publication_merge_or_deploy": true,
+  "previous_failure": {
+    "sha": "763ac60a1aacc2f9f1dcd15d861e7dc2567c67b3",
+    "run": 45133930374,
+    "artifact": 14799223455,
+    "artifact_sha256": "7a0aad316ea0cbdfc0d6847b095860d28160c7f54cd0d0cee89a36242e6d4659",
+    "native_examples_executed": 0
+  },
+  "approved_deactivation_decision_report": "docs/jrc_contact_center/ending_deactivation_decision_20261123.json"
 }
