@@ -36,5 +36,5 @@ export function errorResponse(error: unknown, route: string, scope?: { account_i
   // Never serialize exception messages, stack traces, request headers or provider bodies.
   return { status, body: { error: code, ...(accounting ? { accounting } : {}),
     ...(error instanceof NicoError && error.providerObservation && scope
-      ? { provider_observation: { ...error.providerObservation, ...scope } } : {}) }, log: { event: 'nico_request_failed', route: safeRoute, code } };
+      ? { provider_observation: { ...error.providerObservation, account_id: scope.account_id, request_id: scope.request_id } } : {}) }, log: { event: 'nico_request_failed', route: safeRoute, code } };
 }

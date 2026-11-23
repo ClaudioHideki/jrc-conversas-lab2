@@ -60,7 +60,14 @@ jobs:
         with:
           node-version-file: .nvmrc
       - name: Dependencias nativas de teste
-        run: sudo apt-get update && sudo apt-get install -y libpq-dev libvips libvips-dev redis-server
+        run: |
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources /etc/apt/apt-mirrors*.txt; do
+            if [ -f "$source" ]; then
+              sudo sed -i -E -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' "$source"
+            fi
+          done
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::https::Timeout=20 update
+          sudo apt-get -o Acquire::Retries=2 install -y libpq-dev libvips libvips-dev redis-server
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.12'
@@ -87,7 +94,7 @@ jobs:
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npm run typecheck
-          node --test --test-concurrency=1 test/provider.test.ts test/provider-reliability.test.ts test/provider-config.test.ts
+          npm test
       - name: RSpec ciclo de reservas, concorrencia, Quick, HelpDesk e providers
         run: |
           bundle exec rspec spec/services/jrc_ai/provider_observation_spec.rb \

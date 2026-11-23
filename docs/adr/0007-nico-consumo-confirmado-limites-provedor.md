@@ -4,11 +4,11 @@ Estado: Aceita pelo responsável em 23/11/2026. Implementação candidata; impla
 
 ## Contexto
 
-Na Branef, o provedor Groq respondeu HTTP 200 e informou 8.000 tokens/minuto. O JRC impediu o NICO antes da API por 858.240 tokens reservados como incertos, somados a 110.388 registrados, contra um teto local padrão de 1.000.000. Esses valores locais não comprovam saldo financeiro nem cota restante do provedor.
+Uma implantação recebeu resposta HTTP 200 do provedor, mas foi bloqueada antes de novas chamadas por reservas incertas e um teto mensal local. Valores locais e estimativas sem recibo não comprovam saldo financeiro nem cota restante do provedor. Evidências operacionais específicas permanecem na coordenação da implantação.
 
 ## Decisão
 
-Uma nova conexão usa os limites do provedor por padrão e requer tipo compatível, URL, credencial e modelo. Teto mensal local é opcional. Configurações existentes mantêm sua política até alteração explícita; a Branef solicitou operar pelo provedor. Concorrência, isolamento por conta, permissões e limites de tamanho permanecem obrigatórios.
+Uma nova conexão usa os limites do provedor por padrão e requer tipo compatível, URL, credencial e modelo. Teto mensal local é opcional. Configurações existentes mantêm sua política até alteração explícita; a implantação solicitante optou por operar pelo provedor. Concorrência, isolamento por conta, permissões e limites de tamanho permanecem obrigatórios.
 
 Manter recibos confirmados, estimativas identificadas e tentativas incertas separados. Operar pelo provedor não zera reservas antigas nem transforma incerteza em consumo confirmado. O histórico mantém o estado desconhecido para auditoria.
 
@@ -18,6 +18,6 @@ Orçamento financeiro cadastrado é apenas referência interna. Sem API oficial 
 
 ## Validação e limites
 
-Cobrir admissão com reservas incertas preservadas, tetos locais explícitos, concorrência, isolamento entre contas, metadados reais e resposta 429. A Branef deve receber a candidata somente após gates e imagem do SHA final. Não alterar outros ambientes por esta decisão. Sem migrations novas nesta correção.
+Cobrir admissão com reservas incertas preservadas, tetos locais explícitos, concorrência, isolamento entre contas, metadados reais e resposta 429. A implantação alvo deve receber a candidata somente após gates e imagem do SHA final. Não alterar outros ambientes por esta decisão. Sem migrations novas nesta correção.
 
 Referência de unidades e limites organizacionais: https://console.groq.com/docs/rate-limits .
