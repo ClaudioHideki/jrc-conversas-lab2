@@ -189,7 +189,7 @@ RSpec.describe 'Ending automation configuration through the existing ACW policy'
                                        correlation_id: 'SYNTHETIC_PRIVATE_REVOKE')
     project.project_members.find_by!(account: account, user: actor).destroy!
     visible = JrcProjects::Projects::Create.call(account: account, actor: actor, attributes: { name: 'SYNTHETIC visible destination' },
-                                               idempotency_key: SecureRandom.uuid)
+                                                 idempotency_key: SecureRandom.uuid)
     input = rule_input.deep_dup
     values = input.fetch('actions').first.fetch('parameters')
     values['project_id'] = visible.id.to_s

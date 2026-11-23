@@ -125,7 +125,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0112-C01",
@@ -163,7 +164,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0113-C01",
@@ -201,7 +203,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0114-C01",
@@ -239,7 +242,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0115-C01",
@@ -277,7 +281,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0117-C01",
@@ -315,7 +320,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0118-C01",
@@ -353,7 +359,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0119-C01",
@@ -391,7 +398,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0120-C01",
@@ -429,7 +437,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0187-C01",
@@ -461,7 +470,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0188-C01",
@@ -493,7 +503,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0188-C02",
@@ -525,7 +536,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0188-C03",
@@ -557,7 +569,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0188-C04",
@@ -589,7 +602,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0188-C05",
@@ -621,7 +635,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0189-C01",
@@ -653,7 +668,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0189-C02",
@@ -685,7 +701,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0190-C01",
@@ -717,7 +734,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0190-C02",
@@ -749,7 +767,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0190-C03",
@@ -781,7 +800,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0191-C01",
@@ -813,7 +833,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0191-C02",
@@ -845,7 +866,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0193-C01",
@@ -877,7 +899,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0194-C01",
@@ -909,12 +932,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "HH:MM, limites e formulário existem; conformidade completa de todos os controles exige aceite observável, além da CI."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

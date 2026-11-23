@@ -117,7 +117,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0160-C01",
@@ -155,7 +156,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0161-C01",
@@ -193,7 +195,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0162-C01",
@@ -231,7 +234,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0163-C01",
@@ -269,7 +273,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0165-C01",
@@ -307,7 +312,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0166-C01",
@@ -345,7 +351,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0167-C01",
@@ -383,7 +390,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0168-C01",
@@ -421,7 +429,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0289-C01",
@@ -452,7 +461,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0290-C01",
@@ -483,7 +493,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0290-C02",
@@ -514,7 +525,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0290-C03",
@@ -545,7 +557,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0290-C04",
@@ -576,7 +589,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0290-C05",
@@ -607,7 +621,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0290-C06",
@@ -638,7 +653,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0291-C01",
@@ -669,7 +685,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0291-C02",
@@ -700,7 +717,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0292-C01",
@@ -731,7 +749,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0292-C02",
@@ -762,7 +781,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0292-C03",
@@ -793,7 +813,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0292-C04",
@@ -824,7 +845,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0293-C01",
@@ -855,7 +877,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0293-C02",
@@ -886,7 +909,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0295-C01",
@@ -917,7 +941,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0296-C01",
@@ -948,12 +973,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Auditoria administrativa interna, filtros e exportação; sequência externa pedido/execução/ACK/reversão ainda depende do contrato."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

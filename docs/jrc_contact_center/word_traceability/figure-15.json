@@ -193,7 +193,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0176-C01",
@@ -236,7 +237,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0177-C01",
@@ -279,7 +281,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0178-C01",
@@ -322,7 +325,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0179-C01",
@@ -365,7 +369,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0181-C01",
@@ -408,7 +413,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0182-C01",
@@ -451,7 +457,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0183-C01",
@@ -494,7 +501,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0184-C01",
@@ -537,7 +545,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0312-C01",
@@ -575,7 +584,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0313-C01",
@@ -613,7 +623,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0313-C02",
@@ -651,7 +662,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0313-C03",
@@ -689,7 +701,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0313-C04",
@@ -727,7 +740,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0313-C05",
@@ -765,7 +779,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0314-C01",
@@ -803,7 +818,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0314-C02",
@@ -841,7 +857,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0315-C01",
@@ -879,7 +896,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0315-C02",
@@ -917,7 +935,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0315-C03",
@@ -955,7 +974,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0315-C04",
@@ -993,7 +1013,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0316-C01",
@@ -1031,7 +1052,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0316-C02",
@@ -1069,7 +1091,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0318-C01",
@@ -1107,7 +1130,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0319-C01",
@@ -1145,12 +1169,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Central existente e aprovação de pausa integradas; não equivalem ao adaptador completo de alterações/publicação/reversão PABX."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

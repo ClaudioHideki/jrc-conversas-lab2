@@ -461,7 +461,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0112-C01",
@@ -527,7 +528,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0113-C01",
@@ -593,7 +595,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0114-C01",
@@ -659,7 +662,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0115-C01",
@@ -725,7 +729,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0117-C01",
@@ -791,7 +796,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0118-C01",
@@ -857,7 +863,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0119-C01",
@@ -923,7 +930,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0120-C01",
@@ -989,7 +997,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0176-C01",
@@ -1049,7 +1058,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0177-C01",
@@ -1109,7 +1119,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0177-C02",
@@ -1169,7 +1180,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0177-C03",
@@ -1229,7 +1241,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0177-C04",
@@ -1289,7 +1302,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0178-C01",
@@ -1349,7 +1363,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0178-C02",
@@ -1409,7 +1424,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0179-C01",
@@ -1469,7 +1485,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0179-C02",
@@ -1529,7 +1546,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0179-C03",
@@ -1589,7 +1607,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0180-C01",
@@ -1649,7 +1668,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0180-C02",
@@ -1709,7 +1729,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0180-C03",
@@ -1769,7 +1790,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0182-C01",
@@ -1829,7 +1851,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0183-C01",
@@ -1889,12 +1912,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Catálogo, pausa diferida e aprovação internos; estados/distribuição real e retorno no PABX exigem homologação."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

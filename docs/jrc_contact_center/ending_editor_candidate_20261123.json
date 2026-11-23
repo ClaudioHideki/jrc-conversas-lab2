@@ -59,6 +59,18 @@
       "vue_cases": 0,
       "chrome_cases": 0,
       "tests_blocked_not_approved": true
+    },
+    {
+      "sha": "27d16e5bf2f85e716054db2a49811e37a250ed89",
+      "run": 45228396428,
+      "result": "failure",
+      "artifact": 14845798014,
+      "artifact_sha256": "9e6bcc98e12aacc649d812de296baf64e206b7ae7b533580015c930491976f0a",
+      "new_ruby_offenses": 2,
+      "native_rspec_examples": 0,
+      "vue_cases": 0,
+      "chrome_cases": 0,
+      "tests_blocked_not_approved": true
     }
   ],
   "followup_prepared_not_validated": [
@@ -68,5 +80,23 @@
     "Actual browser theme assertion, real computed CSS surface/contrast and four independent editor evidence reports required.",
     "All new Ruby files linted before the disposable schema; all older gates retained unchanged.",
     "General requirements/annex now have explicit code/test references; changed-but-committed code is not labeled natively validated."
-  ]
+  ],
+  "last_prepared_fix": {
+    "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+    "leading_whitespace_only": true,
+    "assertions_inputs_and_test_coverage_unchanged": true,
+    "native_revalidation_pending": true
+  },
+  "independent_evidence_checker": {
+    "regressions_passed": 13,
+    "kind": "pure JSON validation only",
+    "native_rspec_or_browser_proof": false,
+    "requirements": [
+      "20 exact API examples",
+      "4 distinct native browser/project/account receipts",
+      "Actual theme and independently recomputed contrast",
+      "Screenshot hashes verified in artifact",
+      "No executor or full Figure10 acceptance inferred"
+    ]
+  }
 }

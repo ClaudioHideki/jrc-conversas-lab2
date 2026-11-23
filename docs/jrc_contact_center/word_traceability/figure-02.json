@@ -123,7 +123,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0047-C01",
@@ -160,7 +161,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0048-C01",
@@ -197,7 +199,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0049-C01",
@@ -234,7 +237,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0049-C02",
@@ -271,7 +275,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0051-C01",
@@ -308,7 +313,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0052-C01",
@@ -345,7 +351,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0063-C01",
@@ -376,7 +383,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0064-C01",
@@ -407,7 +415,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0064-C02",
@@ -438,7 +447,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0064-C03",
@@ -469,7 +479,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0065-C01",
@@ -500,7 +511,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0065-C02",
@@ -531,7 +543,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0066-C01",
@@ -562,7 +575,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0066-C02",
@@ -593,7 +607,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0066-C03",
@@ -624,7 +639,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0067-C01",
@@ -655,7 +671,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0067-C02",
@@ -686,7 +703,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0069-C01",
@@ -717,7 +735,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0070-C01",
@@ -748,12 +767,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Navegação e atividade administrativa interna têm evidência; alertas externos e fidelidade integral ainda não."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

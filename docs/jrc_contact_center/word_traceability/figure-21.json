@@ -111,7 +111,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0207-C01",
@@ -151,7 +152,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0208-C01",
@@ -191,7 +193,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0209-C01",
@@ -231,7 +234,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0210-C01",
@@ -271,7 +275,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0211-C01",
@@ -311,7 +316,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0213-C01",
@@ -351,7 +357,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0214-C01",
@@ -391,7 +398,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0215-C01",
@@ -431,7 +439,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0216-C01",
@@ -471,7 +480,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0404-C01",
@@ -501,7 +511,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0405-C01",
@@ -531,7 +542,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0405-C02",
@@ -561,7 +573,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0405-C03",
@@ -591,7 +604,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0405-C04",
@@ -621,7 +635,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0406-C01",
@@ -651,7 +666,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0406-C02",
@@ -681,7 +697,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0406-C03",
@@ -711,7 +728,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0407-C01",
@@ -741,7 +759,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0407-C02",
@@ -771,7 +790,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0407-C03",
@@ -801,7 +821,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0408-C01",
@@ -831,7 +852,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0408-C02",
@@ -861,7 +883,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0410-C01",
@@ -891,7 +914,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0411-C01",
@@ -921,12 +945,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Contexto autorizado reutilizável; popup completo da análise com todas as fontes e falhas independentes ainda incompleto."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

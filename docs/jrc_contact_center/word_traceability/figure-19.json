@@ -94,7 +94,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0207-C01",
@@ -133,7 +134,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0208-C01",
@@ -172,7 +174,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0209-C01",
@@ -211,7 +214,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0210-C01",
@@ -250,7 +254,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0211-C01",
@@ -289,7 +294,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0213-C01",
@@ -328,7 +334,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0214-C01",
@@ -367,7 +374,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0215-C01",
@@ -406,7 +414,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0216-C01",
@@ -445,7 +454,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0382-C01",
@@ -474,7 +484,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0383-C01",
@@ -503,7 +514,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0383-C02",
@@ -532,7 +544,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0383-C03",
@@ -561,7 +574,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0383-C04",
@@ -590,7 +604,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0383-C05",
@@ -619,7 +634,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0384-C01",
@@ -648,7 +664,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0384-C02",
@@ -677,7 +694,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0385-C01",
@@ -706,7 +724,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0385-C02",
@@ -735,7 +754,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0385-C03",
@@ -764,7 +784,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0385-C04",
@@ -793,7 +814,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0386-C01",
@@ -822,7 +844,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0386-C02",
@@ -851,7 +874,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0388-C01",
@@ -880,7 +904,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0389-C01",
@@ -909,12 +934,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Consulta/processamento existentes não equivalem ao painel agregado real, denominadores, filtros e insights do Word."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

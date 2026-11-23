@@ -97,7 +97,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0207-C01",
@@ -136,7 +137,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0208-C01",
@@ -175,7 +177,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0209-C01",
@@ -214,7 +217,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0210-C01",
@@ -253,7 +257,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0211-C01",
@@ -292,7 +297,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0213-C01",
@@ -331,7 +337,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0214-C01",
@@ -370,7 +377,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0215-C01",
@@ -409,7 +417,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0216-C01",
@@ -448,7 +457,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0371-C01",
@@ -477,7 +487,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0372-C01",
@@ -506,7 +517,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0372-C02",
@@ -535,7 +547,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0372-C03",
@@ -564,7 +577,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0373-C01",
@@ -593,7 +607,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0373-C02",
@@ -622,7 +637,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0374-C01",
@@ -651,7 +667,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0374-C02",
@@ -680,7 +697,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0374-C03",
@@ -709,7 +727,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0374-C04",
@@ -738,7 +757,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0375-C01",
@@ -767,7 +787,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0375-C02",
@@ -796,7 +817,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0377-C01",
@@ -825,7 +847,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0378-C01",
@@ -854,12 +877,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Área existente preservada. Demonstração e consultas de análise por chamada não comprovam o novo painel operacional completo."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

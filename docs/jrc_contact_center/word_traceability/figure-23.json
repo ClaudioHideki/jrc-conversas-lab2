@@ -146,7 +146,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0207-C01",
@@ -188,7 +189,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0208-C01",
@@ -230,7 +232,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0209-C01",
@@ -272,7 +275,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0210-C01",
@@ -314,7 +318,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0211-C01",
@@ -356,7 +361,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0213-C01",
@@ -398,7 +404,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0214-C01",
@@ -440,7 +447,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0215-C01",
@@ -482,7 +490,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0216-C01",
@@ -524,7 +533,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0426-C01",
@@ -556,7 +566,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0427-C01",
@@ -588,7 +599,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0427-C02",
@@ -620,7 +632,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0427-C03",
@@ -652,7 +665,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0427-C04",
@@ -684,7 +698,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0427-C05",
@@ -716,7 +731,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0427-C06",
@@ -748,7 +764,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0428-C01",
@@ -780,7 +797,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0428-C02",
@@ -812,7 +830,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0429-C01",
@@ -844,7 +863,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0429-C02",
@@ -876,7 +896,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0429-C03",
@@ -908,7 +929,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0429-C04",
@@ -940,7 +962,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0430-C01",
@@ -972,7 +995,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0430-C02",
@@ -1004,7 +1028,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0432-C01",
@@ -1036,7 +1061,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0433-C01",
@@ -1068,12 +1094,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Permissão própria e validação de entrada/snapshot; ledger persistido de revisão, API/UI e concorrência completos ainda faltam."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

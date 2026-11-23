@@ -303,7 +303,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0072-C01",
@@ -356,7 +357,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0073-C01",
@@ -409,7 +411,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0074-C01",
@@ -462,7 +465,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0075-C01",
@@ -515,7 +519,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0077-C01",
@@ -568,7 +573,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0078-C01",
@@ -621,7 +627,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0079-C01",
@@ -674,7 +681,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0080-C01",
@@ -727,7 +735,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0158-C01",
@@ -781,7 +790,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0160-C01",
@@ -835,7 +845,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0161-C01",
@@ -889,7 +900,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0162-C01",
@@ -943,7 +955,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0163-C01",
@@ -997,7 +1010,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0165-C01",
@@ -1051,7 +1065,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0166-C01",
@@ -1105,7 +1120,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0167-C01",
@@ -1159,7 +1175,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0168-C01",
@@ -1213,7 +1230,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0278-C01",
@@ -1260,7 +1278,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0279-C01",
@@ -1307,7 +1326,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0279-C02",
@@ -1354,7 +1374,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0279-C03",
@@ -1401,7 +1422,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0279-C04",
@@ -1448,7 +1470,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0279-C05",
@@ -1495,7 +1518,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0280-C01",
@@ -1542,7 +1566,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0280-C02",
@@ -1589,7 +1614,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0281-C01",
@@ -1636,7 +1662,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0281-C02",
@@ -1683,7 +1710,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0281-C03",
@@ -1730,7 +1758,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0282-C01",
@@ -1777,7 +1806,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0282-C02",
@@ -1824,7 +1854,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0284-C01",
@@ -1871,7 +1902,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0285-C01",
@@ -1918,12 +1950,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Reutiliza figura4; consultas/contratos de leitura não comprovam inventário, comandos, sincronização ou ACK de publicação."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

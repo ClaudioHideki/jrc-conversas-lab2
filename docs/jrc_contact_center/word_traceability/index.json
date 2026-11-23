@@ -1,8 +1,8 @@
 {
   "format_version": 1,
-  "review_at": "2026-11-23T17:28:11.020953+00:00",
+  "review_at": "2026-11-23T17:54:50.190077+00:00",
   "validated_base_sha": "c5d69ceec5a923cddd270d1155605ca7613ec0d8",
-  "candidate_sha": "9a13e917b7fbc39b76c21bd88c59d577c5e22dfd",
+  "candidate_sha": "27d16e5bf2f85e716054db2a49811e37a250ed89",
   "candidate_not_yet_validated": true,
   "documents": [
     {

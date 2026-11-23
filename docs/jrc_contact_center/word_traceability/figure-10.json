@@ -260,6 +260,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -312,6 +317,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -364,6 +374,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -416,6 +431,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -468,6 +488,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -520,6 +545,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -572,6 +602,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -624,6 +659,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -676,6 +716,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -722,6 +767,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -768,6 +818,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -814,6 +869,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -860,6 +920,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -906,6 +971,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -952,6 +1022,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -998,6 +1073,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -1044,6 +1124,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -1090,6 +1175,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -1124,6 +1214,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -1170,6 +1265,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -1216,6 +1316,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -1250,6 +1355,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -1296,6 +1406,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -1330,6 +1445,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -1364,6 +1484,11 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
+      ],
+      "candidate_test_reference_ids_not_approval": [
+        0,
+        1,
+        2
       ]
     }
   ],
@@ -1371,5 +1496,25 @@
     "Base versionada/privacidade/bloqueio histórico validada. Editor, API e escolha explícita de confirmação estão em trabalho sem CI. Origens, recibos e executor multi-destino pendentes; F10-A/B não aprovados."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": [
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_configuration_spec.rb",
+      "sha256": "0840946b5b36021605bfd88f9881dedbde9edee6ad8503bacfccfd6b6239e7e3",
+      "status": "preparado_bloqueado_pelo_gate_ate_CI_propria",
+      "native_or_visual_result": null
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js",
+      "sha256": "172fcb97ed004d956ce703a07e97173365f9eaf3d94e9aa4e875faa4345cc2d5",
+      "status": "preparado_bloqueado_pelo_gate_ate_CI_propria",
+      "native_or_visual_result": null
+    },
+    {
+      "path": "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs",
+      "sha256": "fd6b65e5944429b716d80bd85624788e686a9bd70d60676e4815d97180d3a484",
+      "status": "preparado_bloqueado_pelo_gate_ate_CI_propria",
+      "native_or_visual_result": null
+    }
+  ]
 }

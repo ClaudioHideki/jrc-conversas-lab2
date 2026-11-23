@@ -129,7 +129,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0097-C01",
@@ -168,7 +169,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0098-C01",
@@ -207,7 +209,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0099-C01",
@@ -246,7 +249,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0100-C01",
@@ -285,7 +289,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0102-C01",
@@ -324,7 +329,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0103-C01",
@@ -363,7 +369,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0104-C01",
@@ -402,7 +409,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0142-C01",
@@ -434,7 +442,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0143-C01",
@@ -466,7 +475,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0143-C02",
@@ -498,7 +508,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0143-C03",
@@ -530,7 +541,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0143-C04",
@@ -562,7 +574,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0143-C05",
@@ -594,7 +607,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0143-C06",
@@ -626,7 +640,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0144-C01",
@@ -658,7 +673,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0144-C02",
@@ -690,7 +706,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0145-C01",
@@ -722,7 +739,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0145-C02",
@@ -754,7 +772,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0145-C03",
@@ -786,7 +805,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0146-C01",
@@ -818,7 +838,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0146-C02",
@@ -850,7 +871,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0148-C01",
@@ -882,7 +904,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0149-C01",
@@ -914,12 +937,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Upload/gravação são reutilizáveis; síntese Nico, vozes, limites e operação externa não comprovados."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

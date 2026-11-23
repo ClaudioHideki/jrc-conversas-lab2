@@ -635,7 +635,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0097-C01",
@@ -717,7 +718,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0098-C01",
@@ -799,7 +801,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0099-C01",
@@ -881,7 +884,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0100-C01",
@@ -963,7 +967,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0102-C01",
@@ -1045,7 +1050,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0103-C01",
@@ -1127,7 +1133,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0104-C01",
@@ -1209,7 +1216,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0336-C01",
@@ -1284,7 +1292,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0337-C01",
@@ -1359,7 +1368,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0337-C02",
@@ -1434,7 +1444,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0337-C03",
@@ -1509,7 +1520,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0337-C04",
@@ -1584,7 +1596,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0337-C05",
@@ -1659,7 +1672,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0337-C06",
@@ -1734,7 +1748,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0338-C01",
@@ -1809,7 +1824,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0338-C02",
@@ -1884,7 +1900,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0339-C01",
@@ -1959,7 +1976,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0339-C02",
@@ -2034,7 +2052,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0340-C01",
@@ -2109,7 +2128,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0340-C02",
@@ -2184,7 +2204,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0342-C01",
@@ -2259,7 +2280,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0343-C01",
@@ -2334,12 +2356,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Imagem inspecionada mostra áudio institucional. Não usar como prova de política de gravações; referências publicadas completas ainda faltam."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

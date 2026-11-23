@@ -312,7 +312,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0058-C01",
@@ -364,7 +365,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0059-C01",
@@ -416,7 +418,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0060-C01",
@@ -468,7 +471,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0061-C01",
@@ -520,7 +524,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0063-C01",
@@ -572,7 +577,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0064-C01",
@@ -624,7 +630,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0065-C01",
@@ -676,7 +683,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0066-C01",
@@ -728,7 +736,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0084-C01",
@@ -781,7 +790,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0086-C01",
@@ -834,7 +844,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0087-C01",
@@ -887,7 +898,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0088-C01",
@@ -940,7 +952,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0089-C01",
@@ -993,7 +1006,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0091-C01",
@@ -1046,7 +1060,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0092-C01",
@@ -1099,7 +1114,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0093-C01",
@@ -1152,7 +1168,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0086-C01",
@@ -1199,7 +1216,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0087-C01",
@@ -1246,7 +1264,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0087-C02",
@@ -1293,7 +1312,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0087-C03",
@@ -1340,7 +1360,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0087-C04",
@@ -1387,7 +1408,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0088-C01",
@@ -1434,7 +1456,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0088-C02",
@@ -1481,7 +1504,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0088-C03",
@@ -1528,7 +1552,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0089-C01",
@@ -1575,7 +1600,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0089-C02",
@@ -1622,7 +1648,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0089-C03",
@@ -1669,7 +1696,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0089-C04",
@@ -1716,7 +1744,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0090-C01",
@@ -1763,7 +1792,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0090-C02",
@@ -1810,7 +1840,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0092-C01",
@@ -1857,7 +1888,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0093-C01",
@@ -1904,12 +1936,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Equipe/fila, elegibilidade, supervisão e calendário internos; aplicar DAC/voz no PABX depende de contrato e ACK."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

@@ -957,3 +957,6 @@ Implemented in the existing Central and deferred-pause flow; native CI, migratio
 
 
 - [ ] **Primeiro gate do editor — 9a13e917**: CI45222369556 bloqueada por24 infrações Ruby, com0 exemplos Rails/Vue/Chrome executados. Correções de estrutura/alinhamento, conflito de código `__new__`, rascunho inativo e QA de tema preparados; nova CI exigirá20 pedidos nativos e264 execuções Chrome, sem reduzir os260 cenários anteriores. Relatório e SHA-256 preservados. Executor e aceite integral da figura10 continuam pendentes.
+
+
+- [ ] **Alinhamento final do editor — 27d16e5b**: diagnóstico nativo reduziu24 infrações para2, ambas no mesmo argumento do teste. Somente espaços corrigidos nessa chamada; relatório final14845798014 e SHA-256 preservados. 0 cenários funcionais executados neste SHA. Verificador independente com13 casos leves de JSON aprovado, sem equivalência a Rails/Chrome. Aguardar CI própria com20 pedidos,260 cenários antigos e4 novos do editor.

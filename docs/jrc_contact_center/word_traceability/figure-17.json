@@ -89,7 +89,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0190-C01",
@@ -123,7 +124,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0191-C01",
@@ -157,7 +159,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0192-C01",
@@ -191,7 +194,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0193-C01",
@@ -225,7 +229,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0194-C01",
@@ -259,7 +264,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0196-C01",
@@ -293,7 +299,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0197-C01",
@@ -327,7 +334,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0198-C01",
@@ -361,7 +369,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0199-C01",
@@ -395,7 +404,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0347-C01",
@@ -424,7 +434,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0348-C01",
@@ -453,7 +464,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0348-C02",
@@ -482,7 +494,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0348-C03",
@@ -511,7 +524,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0348-C04",
@@ -540,7 +554,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0348-C05",
@@ -569,7 +584,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0348-C06",
@@ -598,7 +614,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0349-C01",
@@ -627,7 +644,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0349-C02",
@@ -656,7 +674,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0350-C01",
@@ -685,7 +704,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0350-C02",
@@ -714,7 +734,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0350-C03",
@@ -743,7 +764,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0350-C04",
@@ -772,7 +794,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0351-C01",
@@ -801,7 +824,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0351-C02",
@@ -830,7 +854,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0353-C01",
@@ -859,7 +884,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0354-C01",
@@ -888,12 +914,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Autoridade e player existentes; retenção/hold, política e console completo não estão comprovados nesta entrega."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

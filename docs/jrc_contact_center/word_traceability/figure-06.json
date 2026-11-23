@@ -649,7 +649,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0097-C01",
@@ -733,7 +734,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0098-C01",
@@ -817,7 +819,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0099-C01",
@@ -901,7 +904,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0100-C01",
@@ -985,7 +989,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0102-C01",
@@ -1069,7 +1074,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0103-C01",
@@ -1153,7 +1159,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0104-C01",
@@ -1237,7 +1244,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0153-C01",
@@ -1314,7 +1322,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0154-C01",
@@ -1391,7 +1400,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0154-C02",
@@ -1468,7 +1478,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0154-C03",
@@ -1545,7 +1556,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0154-C04",
@@ -1622,7 +1634,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0154-C05",
@@ -1699,7 +1712,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0154-C06",
@@ -1776,7 +1790,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0155-C01",
@@ -1853,7 +1868,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0155-C02",
@@ -1930,7 +1946,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0156-C01",
@@ -2007,7 +2024,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0156-C02",
@@ -2084,7 +2102,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0156-C03",
@@ -2161,7 +2180,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0156-C04",
@@ -2238,7 +2258,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0157-C01",
@@ -2315,7 +2336,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0157-C02",
@@ -2392,7 +2414,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0159-C01",
@@ -2469,7 +2492,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0160-C01",
@@ -2546,12 +2570,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Biblioteca, arquivos, pastas e versões internos validados; vínculos completos com números/filas/campanhas e uso publicado ainda faltam."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }

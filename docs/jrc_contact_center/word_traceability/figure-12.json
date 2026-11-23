@@ -386,7 +386,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0086-C01",
@@ -446,7 +447,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0087-C01",
@@ -506,7 +508,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0088-C01",
@@ -566,7 +569,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0089-C01",
@@ -626,7 +630,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0091-C01",
@@ -686,7 +691,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0092-C01",
@@ -746,7 +752,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0093-C01",
@@ -806,7 +813,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0142-C01",
@@ -866,7 +874,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0144-C01",
@@ -926,7 +935,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0145-C01",
@@ -986,7 +996,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0146-C01",
@@ -1046,7 +1057,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0147-C01",
@@ -1106,7 +1118,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0149-C01",
@@ -1166,7 +1179,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0150-C01",
@@ -1226,7 +1240,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0151-C01",
@@ -1286,7 +1301,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D1-P0152-C01",
@@ -1346,7 +1362,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0255-C01",
@@ -1400,7 +1417,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0256-C01",
@@ -1454,7 +1472,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0256-C02",
@@ -1508,7 +1527,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0256-C03",
@@ -1562,7 +1582,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0256-C04",
@@ -1616,7 +1637,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0256-C05",
@@ -1670,7 +1692,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0256-C06",
@@ -1724,7 +1747,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0257-C01",
@@ -1778,7 +1802,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0257-C02",
@@ -1832,7 +1857,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0258-C01",
@@ -1886,7 +1912,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0258-C02",
@@ -1940,7 +1967,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0258-C03",
@@ -1994,7 +2022,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0259-C01",
@@ -2048,7 +2077,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0259-C02",
@@ -2102,7 +2132,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0261-C01",
@@ -2156,7 +2187,8 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     },
     {
       "id": "D2-P0262-C01",
@@ -2210,12 +2242,14 @@
       "reference_granularity": "Família funcional revisada; não afirmar cobertura exata de cada controle sem cenário observável.",
       "divergences": [
         "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
-      ]
+      ],
+      "candidate_test_reference_ids_not_approval": []
     }
   ],
   "divergences": [
     "Papéis, retirada revisada e vínculos internos; horários/distribuição completos e capacidade aplicada no PABX permanecem parciais."
   ],
   "previous_matrix_is_historical_not_acceptance": true,
-  "complete_figure_accepted": false
+  "complete_figure_accepted": false,
+  "tests_candidate_not_validated": []
 }
