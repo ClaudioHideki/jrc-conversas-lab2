@@ -29,6 +29,8 @@ module Api
               input_tokens: scope.sum(:input_tokens),
               output_tokens: scope.sum(:output_tokens),
               total_tokens: scope.sum(:total_tokens),
+              confirmed_tokens: scope.where("COALESCE(metadata ->> 'usage_estimated', 'false') <> 'true'").sum(:total_tokens),
+              estimated_tokens: scope.where("metadata ->> 'usage_estimated' = 'true'").sum(:total_tokens),
               estimated_cost_cents: known_cost(scope),
               executions: scope.count
             }

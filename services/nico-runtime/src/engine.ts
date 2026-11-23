@@ -8,11 +8,11 @@ import { transcribeAudio } from './transcription.ts';
 import { validateOperation, validateOperationResult, operationPrompt, operationSchema, customerSchema, type OperationInput } from './operations.ts';
 
 import { structuredResponse, type Usage } from './provider.ts';
-import { NicoError } from './errors.ts';
+import { NicoError, type ProviderObservation } from './errors.ts';
 import type { ProviderConfig } from './provider-config.ts';
 import { analyzeSentiment, type SentimentInput } from './sentiment.ts';
 
-export type Result = Analysis & { usage: Usage | null; model: string; mode: string };
+export type Result = Analysis & { usage: Usage | null; model: string; mode: string; provider_observation?: ProviderObservation };
 type Config = { mode: 'fixture' | 'provider'; dataDir?: string; postgresUrl?: string; model?: string; apiKey?: string; baseUrl?: string };
 
 export async function createEngine(config: Config) {
@@ -74,7 +74,7 @@ export async function createEngine(config: Config) {
           },
           validate: value => operational ? validateOperationResult(value, raw.kind) : validateAnalysis(value, (input as Input).context),
         });
-        return { ...generated.result, usage: generated.usage,
+        return { ...generated.result, usage: generated.usage, provider_observation: generated.providerObservation,
           ...(generated.usageEstimated ? { usage_estimated: true } : {}), model: selected.model, mode: 'provider' };
       },
     },
@@ -97,9 +97,9 @@ export async function createEngine(config: Config) {
     async analyze(input: Input, signal?: AbortSignal, provider?: ProviderConfig): Promise<Result> {
       validateInput(input);
         const result = await providers.run(provider, () => invoke(input, signal)) as Result;
-        const { usage, model: modelName, mode, ...analysis } = result;
+        const { usage, model: modelName, mode, provider_observation, ...analysis } = result;
         validateAnalysis(analysis, input.context);
-        return { ...analysis, usage, model: modelName, mode };
+        return { ...analysis, usage, model: modelName, mode, provider_observation };
     },
     async operate(input: OperationInput, signal?: AbortSignal, provider?: ProviderConfig) {
       validateOperation(input);

@@ -15,6 +15,8 @@ vi.mock('dashboard/api/jrcAi', () => ({
     usage: vi.fn(),
     makeDefault: vi.fn(),
     deleteProvider: vi.fn(),
+    createProvider: vi.fn(),
+    updateProvider: vi.fn(),
   },
 }));
 
@@ -134,5 +136,63 @@ describe('AI provider actions', () => {
     );
     await form.get('button[aria-label="Close"]').trigger('click');
     expect(wrapper.find('form').exists()).toBe(false);
+  });
+
+  it('configures a new connection with provider-managed usage without monthly values', async () => {
+    api.createProvider.mockResolvedValueOnce({ data: {} });
+    wrapper = mount(JrcAiSettingsPage);
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Novo provedor')
+      .trigger('click');
+    const form = wrapper.get('form');
+    expect(form.findAll('select').at(-1).element.value).toBe('provider');
+    expect(form.findAll('input[type="number"]')).toHaveLength(0);
+    await form.get('input[type="password"]').setValue('test-only-key');
+    await form
+      .findAll('label')
+      .find(label => label.text().includes('Modelo padrão'))
+      .get('input')
+      .setValue('test-model');
+    await form.trigger('submit');
+    await flushPromises();
+    expect(api.createProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        default_model: 'test-model',
+        monthly_token_limit: null,
+        monthly_budget_cents: null,
+        settings: { usage_policy: 'provider' },
+      })
+    );
+  });
+
+  it('shows provider-controlled capacity without presenting a fabricated monthly balance', async () => {
+    api.usage.mockResolvedValueOnce({
+      data: {
+        totals: {},
+        by_agent: [],
+        by_model: [],
+        by_user: [],
+        recent: [],
+        nico_capacity: {
+          limit_source: 'provider',
+          token_limit: null,
+          execution_limit: null,
+          remaining_tokens: null,
+          used_tokens: 109,
+          uncertain_tokens: 858240,
+          reserved_tokens: 858240,
+          executions: 30,
+          active_operations: 0,
+          concurrency_limit: 3,
+        },
+      },
+    });
+    wrapper = mount(JrcAiSettingsPage);
+    await flushPromises();
+    expect(wrapper.get('summary').text()).toMatch(/provider|provedor/i);
+    expect(wrapper.get('summary').text()).not.toMatch(/1[,.]000[,.]000|0 de 0/);
+    expect(wrapper.text()).toContain('não disponível');
   });
 });

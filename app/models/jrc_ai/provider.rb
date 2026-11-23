@@ -56,6 +56,8 @@ module JrcAi
     validates :monthly_token_limit, :monthly_budget_cents,
               numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
+    validate :valid_usage_policy
+
     scope :enabled, -> { where(active: true) }
     scope :preferred_first, -> { order(default_provider: :desc, active: :desc, name: :asc) }
 
@@ -87,6 +89,11 @@ module JrcAi
     end
 
     private
+
+    def valid_usage_policy
+      policy = settings['usage_policy']
+      errors.add(:settings, 'invalid usage policy') unless policy.nil? || %w[provider local].include?(policy)
+    end
 
     def normalize_fields
       self.name = name.to_s.strip

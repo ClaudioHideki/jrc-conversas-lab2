@@ -338,11 +338,13 @@
       "SUMMARY": "NICO da conta: {remaining} de {limit} tokens disponíveis no mês",
       "USED": "Consumo registrado",
       "RESERVED": "Reservas pendentes",
-      "UNCERTAIN": "Consumo incerto",
+      "UNCERTAIN": "Consumo sem recibo (estimativa máxima)",
       "EXECUTIONS": "Execuções no mês",
       "CONCURRENCY": "Em andamento",
-      "PROVIDER_LIMIT": "Limite mensal do provedor",
-      "RATIO": "{value} / {limit}"
+      "PROVIDER_LIMIT": "Limite mensal local opcional de tokens",
+      "RATIO": "{value} / {limit}",
+      "PROVIDER_MANAGED": "NICO: limites controlados pelo provedor; sem teto mensal local",
+      "ACCOUNTING_NOTE": "Consumo incerto é uma estimativa para auditoria; não representa crédito do provedor nem tokens confirmados."
     },
     "CHAT": {
       "TITLE": "NICO",

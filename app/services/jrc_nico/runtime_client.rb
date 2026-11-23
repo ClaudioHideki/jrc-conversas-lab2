@@ -171,8 +171,10 @@ class JrcNico::RuntimeClient
     end
     parsed = JSON.parse(body)
     input = JSON.parse(payload)
+    observation = parsed.delete('provider_observation') if parsed.is_a?(Hash)
     unless status == '200'
       terminal_receipt!(parsed, input)
+      record_provider_observation(observation, input)
       code = parsed.is_a?(Hash) && parsed['error']
       code = 'runtime_transport_error' unless code.is_a?(String) && Error::CODES.include?(code)
       # Provider errors can follow a billed repair attempt. Only pre-engine rejections prove zero consumption.
@@ -185,6 +187,7 @@ class JrcNico::RuntimeClient
        text?(parsed['model'], 150, required: true) && valid_usage?(parsed)
       @ledger&.receipt!(parsed)
     end
+    record_provider_observation(observation, input)
     parsed
   rescue KeyError, URI::InvalidURIError
     raise Error, 'invalid_configuration'
@@ -194,6 +197,13 @@ class JrcNico::RuntimeClient
     raise Error, 'runtime_timeout'
   rescue IOError, SystemCallError, SocketError, OpenSSL::SSL::SSLError, Net::HTTPBadResponse, Net::ProtocolError
     raise Error, 'runtime_transport_error'
+  end
+
+  def record_provider_observation(value, input)
+    ::JrcAi::ProviderObservation.record!(value, input: input, provider: @provider)
+  rescue Error, ActiveRecord::RecordInvalid
+    # Optional rate metadata must not discard a provider result or its usage receipt.
+    Rails.logger.warn('NICO provider limit metadata rejected')
   end
 
   def terminal_receipt!(body, input)

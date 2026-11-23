@@ -46,4 +46,41 @@ RSpec.describe JrcNico::RunCapacity do
     expect { account.with_lock { described_class.reservation_for!(account) } }
       .to raise_error(described_class::Exceeded) { |error| expect(error.code).to eq('concurrency_limit') }
   end
+
+  context 'provider-managed consumption' do
+    let!(:provider) do
+      JrcAi::Provider.create!(account: account, name: 'Provider account', provider_type: 'custom',
+                              api_key: 'test-key-only', base_url: 'https://api.groq.com/openai', default_model: 'test-model',
+                              settings: { usage_policy: 'provider' }, monthly_token_limit: 1)
+    end
+
+    it 'admits work using provider limits while retaining unknown usage as audit evidence' do
+      record = JrcNico::Inference.create!(account: account, user: user, status: 'unknown', reserved_tokens: 950)
+      JrcAi::UsageEvent.create!(account: account, agent_key: 'nico', feature: 'nico_operator', total_tokens: 950)
+      expect(account.with_lock { described_class.reservation_for!(account, reservation_tokens: 100) }).to eq(100)
+      expect(described_class.snapshot(account)).to include(limit_source: 'provider', token_limit: nil, execution_limit: nil,
+                                                         remaining_tokens: nil, used_tokens: 950, uncertain_tokens: 950)
+      expect(record.reload.reserved_tokens).to eq(950)
+      expect(account.reload.custom_attributes['nico_monthly_token_limit']).to eq(1000)
+    end
+
+    it 'still enforces live concurrency and conversation isolation' do
+      2.times { JrcNico::Inference.create!(account: account, user: user) }
+      expect { account.with_lock { described_class.reservation_for!(account) } }
+        .to raise_error(described_class::Exceeded) { |error| expect(error.code).to eq('concurrency_limit') }
+    end
+
+    it 'retains local policy and bounds in a different account' do
+      other = create(:account, custom_attributes: { nico_monthly_token_limit: 0 })
+      expect { other.with_lock { described_class.reservation_for!(other, reservation_tokens: 1) } }
+        .to raise_error(described_class::Exceeded) { |error| expect(error.code).to eq('monthly_token_limit') }
+    end
+
+    it 'applies an explicitly selected local provider ceiling' do
+      provider.update!(settings: { usage_policy: 'local' }, monthly_token_limit: 0)
+      expect { account.with_lock { described_class.reservation_for!(account, reservation_tokens: 1) } }
+        .to raise_error(described_class::Exceeded) { |error| expect(error.code).to eq('monthly_token_limit') }
+    end
+  end
+
 end

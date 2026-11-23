@@ -16,6 +16,7 @@ module Api
 
           def create
             provider = Current.account.jrc_ai_providers.new(provider_params)
+            provider.settings = { 'usage_policy' => 'provider' }.merge(provider.settings)
             provider.created_by = Current.user
 
             if provider.save
@@ -71,11 +72,16 @@ module Api
           end
 
           def provider_params
-            params.require(:provider).permit(
+            attributes = params.require(:provider).permit(
               :provider_type, :name, :api_key, :base_url, :default_model,
               :fast_model, :advanced_model, :monthly_token_limit,
               :monthly_budget_cents, :active, :default_provider, settings: {}
             )
+            if attributes.key?(:settings)
+              settings = attributes[:settings].to_h.except('provider_observation')
+              attributes[:settings] = (@provider&.settings || {}).merge(settings)
+            end
+            attributes
           end
 
           def validation_error(provider)
@@ -105,7 +111,8 @@ module Api
               openai_compatible: provider.openai_compatible?,
               last_validated_at: provider.last_validated_at,
               last_error: provider.last_error,
-              settings: provider.settings,
+              settings: provider.settings.except('provider_observation'),
+              provider_observation: provider.settings['provider_observation'],
               created_at: provider.created_at,
               updated_at: provider.updated_at
             }

@@ -1,4 +1,16 @@
-import { NicoError } from './errors.ts';
+import { NicoError, type ProviderObservation } from './errors.ts';
+
+const LIMIT_HEADERS = ['x-ratelimit-limit-requests', 'x-ratelimit-limit-tokens',
+  'x-ratelimit-remaining-requests', 'x-ratelimit-remaining-tokens',
+  'x-ratelimit-reset-requests', 'x-ratelimit-reset-tokens', 'retry-after'];
+
+function observation(response: Response): ProviderObservation {
+  const headers = Object.fromEntries(LIMIT_HEADERS.flatMap(key => {
+    const value = response.headers.get(key);
+    return value && /^[a-z0-9 .-]{1,80}$/i.test(value) ? [[key, value]] : [];
+  }));
+  return { http_status: response.status, headers };
+}
 
 export type Usage = { input_tokens: number; output_tokens: number; total_tokens: number };
 const INVALID_OUTPUT = new Set(['provider_outer_json_invalid', 'tool_arguments_invalid', 'provider_schema_invalid']);
@@ -25,8 +37,8 @@ async function readJson(response: Response): Promise<any> {
     try { payload = JSON.parse(Buffer.concat(parts).toString('utf8')); }
     catch { throw new NicoError(response.ok ? 'provider_outer_json_invalid' : failure); }
     if (!response.ok) {
-      const quota = ['insufficient_quota', 'billing_hard_limit_reached'].includes(payload?.error?.code);
-      throw new NicoError(response.status === 429 && quota ? 'provider_quota_exceeded' : failure);
+      const quota = ['insufficient_quota', 'billing_hard_limit_reached', 'blocked_api_access'].includes(payload?.error?.code);
+      throw new NicoError([400, 402, 429].includes(response.status) && quota ? 'provider_quota_exceeded' : failure);
     }
     return payload;
   } finally { await reader.cancel().catch(() => {}); }
@@ -41,6 +53,7 @@ export async function structuredResponse<T>(options: {
   const signal = AbortSignal.any([deadline, ...(options.signal ? [options.signal] : [])]);
   const usage: Usage = { input_tokens: 0, output_tokens: 0, total_tokens: 0 };
   let usageEstimated = false;
+  let providerObservation: ProviderObservation | undefined;
   for (let attempt = 0; attempt < (options.retryInvalid ? 2 : 1); attempt++) {
     let accounted = false;
     try {
@@ -51,6 +64,7 @@ export async function structuredResponse<T>(options: {
         body: JSON.stringify({ ...options.body, messages: [...options.body.messages,
           ...(attempt ? [{ role: 'system', content: REPAIR_INSTRUCTION }] : [])] }),
       });
+      providerObservation = observation(response);
       const body = await readJson(response);
       signal.throwIfAborted();
       const measured = body?.usage;
@@ -71,16 +85,19 @@ export async function structuredResponse<T>(options: {
       try { result = options.validate(parsed); }
       catch (error) { throw error instanceof NicoError ? error : new NicoError('provider_schema_invalid'); }
       signal.throwIfAborted();
-      return { result, usage, usageEstimated };
+      return { result, usage, usageEstimated, providerObservation };
     } catch (error) {
       if (options.signal?.aborted) throw new NicoError('request_cancelled');
       if (deadline.aborted) throw new NicoError('provider_timeout');
       if (!(error instanceof NicoError)) throw new NicoError('provider_transport_error');
+      error.providerObservation = providerObservation;
       if (!options.retryInvalid || attempt !== 0 || !INVALID_OUTPUT.has(error.code)) {
         // A later timeout/unmetered response must never turn an earlier partial receipt into complete accounting.
         if (accounted && INVALID_OUTPUT.has(error.code)) {
-          throw new NicoError(error.code, { version: 1, complete: true, attempts: attempt + 1, model: options.body.model,
+          const terminal = new NicoError(error.code, { version: 1, complete: true, attempts: attempt + 1, model: options.body.model,
             usage: { ...usage }, ...(usageEstimated ? { usage_estimated: true } : {}) });
+          terminal.providerObservation = providerObservation;
+          throw terminal;
         }
         throw error;
       }

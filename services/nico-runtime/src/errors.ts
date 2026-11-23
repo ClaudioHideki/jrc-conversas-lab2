@@ -9,7 +9,10 @@ export type TerminalAccounting = {
   usage: { input_tokens: number; output_tokens: number; total_tokens: number }; usage_estimated?: true;
 };
 
+export type ProviderObservation = { http_status: number; headers: Record<string, string> };
+
 export class NicoError extends Error {
+  providerObservation?: ProviderObservation;
   readonly code: ErrorCode;
   readonly accounting?: TerminalAccounting;
   constructor(code: ErrorCode, accounting?: TerminalAccounting) {
@@ -31,5 +34,7 @@ export function errorResponse(error: unknown, route: string, scope?: { account_i
     usage: { input_tokens: receipt.usage.input_tokens, output_tokens: receipt.usage.output_tokens, total_tokens: receipt.usage.total_tokens },
     ...(receipt.usage_estimated ? { usage_estimated: true } : {}) } : undefined;
   // Never serialize exception messages, stack traces, request headers or provider bodies.
-  return { status, body: { error: code, ...(accounting ? { accounting } : {}) }, log: { event: 'nico_request_failed', route: safeRoute, code } };
+  return { status, body: { error: code, ...(accounting ? { accounting } : {}),
+    ...(error instanceof NicoError && error.providerObservation && scope
+      ? { provider_observation: { ...error.providerObservation, ...scope } } : {}) }, log: { event: 'nico_request_failed', route: safeRoute, code } };
 }

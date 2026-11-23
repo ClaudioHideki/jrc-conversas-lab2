@@ -2,7 +2,7 @@ name: NICO - reservas, consumo e concorrencia por Account
 
 on:
   push:
-    branches: [codex/quick-nico-capacidade-20261011]
+    branches: [codex/quick-nico-capacidade-20261011, codex/nico-provider-usage-20261123]
   workflow_dispatch:
 
 permissions:
@@ -38,6 +38,7 @@ jobs:
       JRC_SD_CONCURRENCY: '1'
       DB_POOL_SIZE: '8'
       SCHEMA: /tmp/nico-capacity-native-schema.rb
+      NICO_CAPACITY_BASE: ${{ github.ref == 'refs/heads/codex/nico-provider-usage-20261123' && 'e6bd4cc9418b3522378a460bb97814b700f39123' || 'f7cfe4638e7aeb5414685583bd99d4b4e6602480' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,10 +46,13 @@ jobs:
           persist-credentials: false
       - name: Confirmar branch, commit e recursos
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/quick-nico-capacidade-20261011
+          case "$GITHUB_REF" in
+            refs/heads/codex/quick-nico-capacidade-20261011|refs/heads/codex/nico-provider-usage-20261123) ;;
+            *) exit 1 ;;
+          esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git merge-base --is-ancestor f7cfe4638e7aeb5414685583bd99d4b4e6602480 HEAD
-          git diff --check f7cfe4638e7aeb5414685583bd99d4b4e6602480 HEAD
+          git merge-base --is-ancestor "$NICO_CAPACITY_BASE" HEAD
+          git diff --check "$NICO_CAPACITY_BASE" HEAD
           free -h
           df -h /
       - uses: actions/setup-node@v4
@@ -77,9 +81,16 @@ jobs:
           pnpm exec vitest run app/javascript/dashboard/components-next/jrcCopilot/specs app/javascript/dashboard/routes/dashboard/jrcAI/specs --maxWorkers=2 --no-file-parallelism --reporter=json --outputFile=/tmp/nico-capacity-native-vitest.json
           pnpm exec eslint app/javascript/dashboard/components-next/jrcCopilot/NicoCapacitySummary.vue app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotQuickPanel.vue app/javascript/dashboard/components-next/jrcCopilot/specs/nicoQuickUI.spec.js app/javascript/dashboard/routes/dashboard/jrcAI/JrcAiSettingsPage.vue
           node --test --test-concurrency=1 services/nico-runtime/test/provider-reliability.test.ts services/nico-runtime/test/provider-config.test.ts services/nico-runtime/test/sentiment.test.ts services/nico-runtime/test/contract.test.ts services/nico-runtime/test/erp-contract.test.ts
+      - name: Runtime NICO com dependências congeladas
+        working-directory: services/nico-runtime
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run typecheck
+          node --test --test-concurrency=1 test/provider.test.ts test/provider-reliability.test.ts test/provider-config.test.ts
       - name: RSpec ciclo de reservas, concorrencia, Quick, HelpDesk e providers
         run: |
-          bundle exec rspec spec/services/jrc_nico/reservation_ledger_spec.rb \
+          bundle exec rspec spec/services/jrc_ai/provider_observation_spec.rb \
+            spec/services/jrc_nico/reservation_ledger_spec.rb \
             spec/services/jrc_nico/reservation_reconciler_spec.rb \
             spec/services/jrc_nico/run_capacity_spec.rb \
             spec/services/jrc_nico/operational_inference_spec.rb \
@@ -140,8 +151,8 @@ jobs:
         if: always()
         run: |
           python3 - <<'PY'
-          import collections, json, pathlib, subprocess
-          base = 'f7cfe4638e7aeb5414685583bd99d4b4e6602480'
+          import collections, json, os, pathlib, subprocess
+          base = os.environ['NICO_CAPACITY_BASE']
           files = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', base, 'HEAD', '--', '*.rb'], text=True).splitlines()
           rows, blockers = [], []
           for path in files:

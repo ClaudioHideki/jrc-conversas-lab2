@@ -56,7 +56,9 @@ const server = createServer(async (req, res) => {
       : req.url === '/v1/operate' ? await engine.operate(input as any, cancellation.signal, provider)
       : req.url === '/v1/sentiment' ? await engine.sentiment(input as any, cancellation.signal, provider)
       : await engine.analyze(input as any, cancellation.signal, provider);
-    send(200, { ...result, request_id: input.request_id, account_id: input.account_id });
+    const observation = 'provider_observation' in result ? result.provider_observation : undefined;
+    send(200, { ...result, request_id: input.request_id, account_id: input.account_id,
+      ...(observation ? { provider_observation: { ...observation, account_id: input.account_id, request_id: input.request_id } } : {}) });
   } catch (error) {
     const failure = errorResponse(error, req.url || '', input);
     console.error(JSON.stringify(failure.log));
