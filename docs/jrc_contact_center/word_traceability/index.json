@@ -2570,5 +2570,11 @@
     "document": "docs/jrc_contact_center/ending_assignee_alias_lint_followup_20261124.json",
     "native_cases_executed": 0,
     "full_acceptance": false
+  },
+  "browser_response_envelope_QA": {
+    "document": "docs/jrc_contact_center/ending_projects_response_envelope_qa_20261124.json",
+    "parent": "5dfb4829094ff5efa4efa23e7283e7e8eba0b6b8",
+    "implementation_or_gates_weakened": false,
+    "native_UI_accepted": false
   }
 }

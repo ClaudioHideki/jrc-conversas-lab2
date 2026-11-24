@@ -1,0 +1,28 @@
+{
+  "parent": "5dfb4829094ff5efa4efa23e7283e7e8eba0b6b8",
+  "failed_run": 45347833396,
+  "failed_job": 138286606158,
+  "artifact": 14902917657,
+  "artifact_sha256": "2033ddb1833599e277990e8901fba47ec78006ee003ff8967eeabd4db433c4b9",
+  "sanitized_log_sha256": "ded9a9304eadf98cf7c894603007adccb249c69d36c25ddeecf51be3c9c41e42",
+  "confirmed_failure": "All four editor scenarios failed at the additional assertion reading capabilities at the HTTP JSON root. The native controller and production editor use the data envelope.",
+  "immutable_native_controller": {
+    "path": "app/controllers/jrc_projects/api/v1/projects_controller.rb",
+    "sha": "5dfb4829094ff5efa4efa23e7283e7e8eba0b6b8",
+    "sha256": "b012068465506becdf3e71fc01e4965375338f46bdf0382928c693184ad07141"
+  },
+  "changed_path": "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs",
+  "before_sha256": "f2ac0670d3cd8678def86965cd696a2c64b2891eb04abfc00cba9d3527fbadd0",
+  "after_sha256": "97434a65de8278a35c8f57cbf88a45b7b929a75c1a8813103045dcc62f5595e9",
+  "correction": "Read the native data envelope explicitly and verify the selected project identity; retain assignment capability, authorized member, visible field, persistence and reopen assertions.",
+  "prior_chrome_report_from_log": {
+    "passed": 260,
+    "failed": 4,
+    "failure_line": 105
+  },
+  "node_syntax_check_passed": true,
+  "product_API_model_permission_SQL_or_real_grants_changed": false,
+  "assertions_removed_or_gate_exclusions_added": false,
+  "requires_full_native_and_chrome_revalidation": true,
+  "whole_figure10_or_Part1_accepted": false
+}

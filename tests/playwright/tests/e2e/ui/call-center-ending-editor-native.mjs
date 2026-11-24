@@ -101,7 +101,8 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
     { headers: target.administrator }
   );
   expect(projectResponse.status()).toBe(200);
-  const reviewedProject = await projectResponse.json();
+  const { data: reviewedProject } = await projectResponse.json();
+  expect(String(reviewedProject.id)).toBe(target.automation_project_id);
   expect(reviewedProject.capabilities).toContain('projects.task.assign');
   expect(
     reviewedProject.members.some(

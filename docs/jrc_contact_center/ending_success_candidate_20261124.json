@@ -19,7 +19,7 @@
     ".github/workflows/call-center-administration.yml": "5cc9e1e622cf28a32b1ee3c1f691554842d0fddfb9d6fe4e39cdd42533ff81a3",
     "spec/support/contact_center_ending_origin_schema_dependencies.rb": "7e3502b546af98b2c00f7056fc80215bce0af81e1789ff17ae7f8d698c688781",
     "script/jrc_call_center_ending_automation_seed.rb": "37ae32235238752784c45b5744361dff3385a03dc2537ebba01206d7b696f2a2",
-    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "f2ac0670d3cd8678def86965cd696a2c64b2891eb04abfc00cba9d3527fbadd0",
+    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "97434a65de8278a35c8f57cbf88a45b7b929a75c1a8813103045dcc62f5595e9",
     "spec/services/jrc_contact_center/ending_actions/project_task_parameters_assignee_spec.rb": "db9d183a3529da0788afdd396014dc74076830e491b800d7ad39e6c832d527f8"
   },
   "native_cases_prepared": {
@@ -264,5 +264,6 @@
     "collector_static_cases_rechecked": 9
   },
   "native_assignee_alias_correction": "docs/jrc_contact_center/ending_assignee_alias_correction_20261124.json",
-  "native_alias_lint_followup": "docs/jrc_contact_center/ending_assignee_alias_lint_followup_20261124.json"
+  "native_alias_lint_followup": "docs/jrc_contact_center/ending_assignee_alias_lint_followup_20261124.json",
+  "browser_response_envelope_QA": "docs/jrc_contact_center/ending_projects_response_envelope_qa_20261124.json"
 }
