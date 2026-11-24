@@ -22,7 +22,8 @@
     "tests/playwright/call-center-native.config.ts": "ada02e4713601ead6f582926b1c2ffb0d4ce31c83000e8263ded8e9abe928518",
     "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.mjs": "a16ef13827912a9a2162c8c9ad53a6a6c5e005b7e35b0642e5c60e93aba00d88",
     "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts": "807f6dc21573164011c3c46fc139af6a944779ff422b10231afcb80641a3f61c",
-    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "3e4b28b021cb0fa80598979d82f659506f70dc3f0cd9575f401901caae5abf51"
+    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "3e4b28b021cb0fa80598979d82f659506f70dc3f0cd9575f401901caae5abf51",
+    "script/jrc_call_center_chrome_counter_test.py": "00d3485f258e8cf7f21697e652c42a9b2b493ab7733581dc62a33c3195d055ab"
   },
   "parent_sources": {
     "app/controllers/api/v1/accounts/jrc_contact_center/ending_rules_controller.rb": "06a2e3e1d6f0b32c28bf95f20aab697215e2214a4474c9b8b4de2f280eeaac33",
@@ -36,7 +37,8 @@
     "tests/playwright/call-center-native.config.ts": "b3155f12640ac7e21316e25ca9ac8d5c8947a80b17cfbfc1b04ef4fc41b49018",
     "app/javascript/dashboard/routes/dashboard/jrcContactCenter/composables/useEndingAutomationEditor.spec.js": "172fcb97ed004d956ce703a07e97173365f9eaf3d94e9aa4e875faa4345cc2d5",
     "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "ae250a62250824d5425e3ddc73a91cffd01d7f5c9daa1726bab18649588cc61f",
-    ".github/workflows/call-center-administration.yml": "0743ec33f6b6c5fede4f8073733a8adadbac44c0edc803ad40f932e04b874c42"
+    ".github/workflows/call-center-administration.yml": "0743ec33f6b6c5fede4f8073733a8adadbac44c0edc803ad40f932e04b874c42",
+    "script/jrc_call_center_chrome_counter_test.py": "975e85524d59bfeeac8021ae174263b47a2f0031fd1f73cb270e3f8019bd98cc"
   },
   "new_native_cases_prepared": 24,
   "new_vue_cases_prepared": 18,
@@ -95,5 +97,19 @@
       "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs"
     ],
     "native_or_browser_acceptance": false
+  },
+  "preflight_counter_correction_pending_revalidation": {
+    "parent": "a2b5ffc44c2af4b46a64a89b62ab29740b1484ab",
+    "failed_run": 45422461452,
+    "failed_job": 138545374914,
+    "sanitized_log_sha256": "cc8de6c23ab1083283bbb098d4c402cb7a62790d586ca19c06b91b805f89c51d",
+    "cause": "The workflow correctly requires268Chrome examples; the counter regression fixture still supplied264. No native Rails/Vue/Chrome suite or build started.",
+    "path": "script/jrc_call_center_chrome_counter_test.py",
+    "before": "975e85524d59bfeeac8021ae174263b47a2f0031fd1f73cb270e3f8019bd98cc",
+    "after": "00d3485f258e8cf7f21697e652c42a9b2b493ab7733581dc62a33c3195d055ab",
+    "light_verifier_cases_passed": 9,
+    "old264_report_explicitly_rejected": true,
+    "no_product_permission_migration_or_workflow_change": true,
+    "new_SHA_native_and_Chrome_revalidation_required": true
   }
 }

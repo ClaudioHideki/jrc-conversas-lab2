@@ -4458,5 +4458,19 @@
     "new_vue_cases_prepared_not_executed": 18,
     "total_chrome_required": 268,
     "whole_figure_accepted": false
+  },
+  "explicit_activation_counter_correction_pending_revalidation": {
+    "parent": "a2b5ffc44c2af4b46a64a89b62ab29740b1484ab",
+    "failed_run": 45422461452,
+    "failed_job": 138545374914,
+    "sanitized_log_sha256": "cc8de6c23ab1083283bbb098d4c402cb7a62790d586ca19c06b91b805f89c51d",
+    "cause": "The workflow correctly requires268Chrome examples; the counter regression fixture still supplied264. No native Rails/Vue/Chrome suite or build started.",
+    "path": "script/jrc_call_center_chrome_counter_test.py",
+    "before": "975e85524d59bfeeac8021ae174263b47a2f0031fd1f73cb270e3f8019bd98cc",
+    "after": "00d3485f258e8cf7f21697e652c42a9b2b493ab7733581dc62a33c3195d055ab",
+    "light_verifier_cases_passed": 9,
+    "old264_report_explicitly_rejected": true,
+    "no_product_permission_migration_or_workflow_change": true,
+    "new_SHA_native_and_Chrome_revalidation_required": true
   }
 }
