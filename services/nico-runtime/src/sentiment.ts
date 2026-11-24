@@ -26,7 +26,8 @@ export function validateSentimentInput(raw: any): SentimentInput {
     || raw.messages.some((m: any) => !m || Object.keys(m).sort().join(',') !== 'content,id,role'
       || (external ? typeof m.id !== 'string' || !reference.test(m.id) : !Number.isSafeInteger(m.id) || m.id < 1)
       || !['customer', 'operator', 'bot', 'unknown'].includes(m.role)
-      || typeof m.content !== 'string' || m.content.length < 1 || m.content.length > 1000)
+      // Rails truncates public text by Unicode code point, not UTF-16 unit.
+      || typeof m.content !== 'string' || m.content.length < 1 || Array.from(m.content).length > 1000)
     || new Set(raw.messages.map((m: any) => m.id)).size !== raw.messages.length) throw new NicoError('invalid_configuration');
   return raw;
 }

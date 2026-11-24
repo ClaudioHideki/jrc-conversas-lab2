@@ -14,6 +14,13 @@ test('requires bounded public message projection with an exact account and conve
   assert.throws(() => validateSentimentInput({ ...input, messages: [input.messages[0], input.messages[0]] }));
 });
 
+test('counts Unicode characters consistently with the Rails public text projection', () => {
+  const message = { ...input.messages[0], content: 'a'.repeat(999) + '😀' };
+  const projected = { ...input, messages: [message] };
+  assert.deepEqual(validateSentimentInput(projected), projected);
+  assert.throws(() => validateSentimentInput({ ...input, messages: [{ ...message, content: message.content + 'a' }] }));
+});
+
 test('rejects evidence from messages outside the supplied conversation', () => {
   assert.deepEqual(validateSentimentReport(report, input), report);
   assert.throws(() => validateSentimentReport({ ...report, evidence: [{ message_id: 999, observation: 'invented' }] }, input));

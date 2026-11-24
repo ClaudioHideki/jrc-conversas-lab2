@@ -9,3 +9,6 @@ Consumo usa os recibos nativos, incluindo cache Anthropic e pensamento Gemini se
 Testes locais de protocolos, uso, escopo e interface; CI e implantação são evidências separadas.
 
 Fontes: https://platform.claude.com/docs/en/api/messages/create ; https://platform.claude.com/docs/en/api/models/list ; https://platform.claude.com/docs/en/api/migration-2026-10-21 ; https://ai.google.dev/api/generate-content .
+
+## Correcao Unicode em registros de chamados
+Na validacao produtiva do chamado 4152, ITILSolution/1998 tinha 1000 caracteres Unicode e 1001 unidades UTF-16. O runtime recusava a projecao Rails antes da inferencia. O limite permanece 1000 caracteres, contado por ponto de codigo Unicode, com o limite HTTP de bytes preservado. Regressao reproduz o emoji no limite e rejeita 1001 caracteres. CI/imagem/deploy e nova analise devem ser registrados separadamente nas evidencias da Branef.
