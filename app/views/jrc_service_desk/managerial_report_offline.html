@@ -16,15 +16,26 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,sans-serif}
-main{max-width:1500px;margin:auto;padding:clamp(.75rem,3vw,2rem)}
-header,.toolbar{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between;align-items:center}
-header{
-  margin-bottom:1rem;padding:clamp(1rem,3vw,1.75rem);border-radius:1rem;
-  background:linear-gradient(110deg,#09264c,#164b9e 75%,#155e97);color:#fff;
-}
-header h1{margin:0;font-size:clamp(1.4rem,3vw,1.9rem)}
-header button{border-color:#a6c0e0;background:#183d70;color:inherit}
-header button:focus-visible{outline-color:#fff}
+.page-width{max-width:1424px;margin-inline:auto;padding-inline:clamp(.75rem,3vw,2rem)}
+main{padding-block:clamp(1rem,2vw,1.65rem)}
+.toolbar,.cover-top,.cover-bottom{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between;align-items:center}
+.cover{background:#102c46;border-bottom:.3rem solid #25c4cc;color:#fff}
+.cover .page-width{padding-block:clamp(1.25rem,3vw,2.25rem)}
+.cover-top{align-items:start}
+.cover-brand{display:flex;flex-wrap:wrap;gap:.25rem .65rem;align-items:baseline}
+.cover-brand strong{font-size:1.6rem;font-weight:850;letter-spacing:.08em}
+.cover-brand span,.cover-meta{font-size:.8rem}
+.cover-brand span,.cover-meta strong{text-transform:uppercase;letter-spacing:.045em}
+.cover-meta{text-align:end;color:#dceafa}
+.cover-meta strong,.cover-meta p{display:block;margin:0}
+.cover .cover-context{margin:1.45rem 0 .75rem;color:#81e7ef;font-size:.8rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+.cover h1{margin:0;font-size:clamp(1.55rem,3.4vw,2.15rem);line-height:1.12}
+.cover h1 span{display:block}
+.cover-bottom{align-items:end;margin-top:.65rem}
+.cover-bottom p{max-width:47rem;margin:0;color:#e0efff}
+.cover button{border-color:#9bb6cf;background:#173c5f;color:inherit}
+.cover button:focus-visible{outline-color:#fff}
+@media(max-width:36rem){.cover-meta{text-align:start}}
 h2,h3{margin:0 0 .75rem}h2{font-size:1.25rem}h3{font-size:1rem}
 section,details{margin:0 0 1rem;padding:clamp(.85rem,2vw,1.25rem);border:1px solid var(--line);border-radius:1rem;background:var(--panel)}
 summary{cursor:pointer;font-weight:650;color:var(--accent)}
@@ -68,8 +79,21 @@ dl{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:.35rem 1r
 </style>
 </head>
 <body>
-<main>
-  <header><h1 id="title"></h1><button id="theme" type="button" aria-pressed="false"></button></header>
+<header class="cover">
+  <div class="page-width">
+    <div class="cover-top">
+      <div class="cover-brand"><strong>JRC</strong><span id="report-brand"></span></div>
+      <div class="cover-meta"><strong id="report-type"></strong><p id="report-extraction"></p></div>
+    </div>
+    <p id="report-context" class="cover-context"></p>
+    <h1 id="title"></h1>
+    <div class="cover-bottom">
+      <p id="report-intro"></p>
+      <button id="theme" type="button" aria-pressed="false"></button>
+    </div>
+  </div>
+</header>
+<main class="page-width">
   <details><summary id="criteria-title"></summary><dl id="criteria"></dl></details>
   <section>
     <h2 id="filters-title"></h2>
@@ -113,8 +137,14 @@ const node = (tag, value) => {
 };
 document.documentElement.lang = locale;
 document.title = l.title;
+const observed = Date.parse(observed_day + 'T00:00:00Z');
+const extraction = new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(observed);
+const sourceScope = criteria.find(([label]) => label === columns.origin)?.[1] || l.origins.all;
+byId('title').append(...l.report_headline.map(line => node('span', line)));
 const captions = {
-  title: l.title, theme: l.theme, 'criteria-title': l.criteria, 'filters-title': l.interactive_filters, 'summary-title': l.summary,
+  'report-brand': l.report_brand, 'report-type': l.report_type, 'report-intro': l.report_intro,
+  'report-extraction': l.report_extraction + ' · ' + extraction, 'report-context': 'Service Desk / ' + sourceScope,
+  theme: l.theme, 'criteria-title': l.criteria, 'filters-title': l.interactive_filters, 'summary-title': l.summary,
   definition: l.close_policy, 'volume-title': l.volume, 'tickets-title': l.tickets, csv: l.export_csv, previous: l.previous, next: l.next,
   'backlog-title': l.backlog, 'backlog-order': l.backlog_order, 'backlog-empty': l.empty,
   'backlog-previous': l.previous, 'backlog-next': l.next,
@@ -123,7 +153,6 @@ Object.entries(captions).forEach(([id, title]) => { byId(id).textContent = title
 criteria.forEach(([name, value]) => byId('criteria').append(node('dt', name), node('dd', value)));
 const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
 const days = new Intl.NumberFormat(locale, { style: 'unit', unit: 'day', unitDisplay: 'long' });
-const observed = Date.parse(observed_day + 'T00:00:00Z');
 const age = stamp => stamp ? Math.max(0, (observed - Date.parse(stamp.slice(0, 10) + 'T00:00:00Z')) / 86400000) : null;
 const dims = ['status','phase','priority','assignee','team','queue','company','establishment','unit','service','category','origin'];
 const headings = Object.entries(columns);

@@ -52,7 +52,7 @@ Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em a
 
 ## Concluído (Done)
 
-- O HTML do relatório gerencial usa cartões coloridos e grades responsivas. O cálculo da média de SLA aceita os segundos decimais serializados como texto e considera apenas relógios concluídos. Validação offline em Chrome e Edge entre 320 e 1.440 px, com filtros, CSV, temas e cálculo da média de resolução.
+- O HTML do relatório gerencial usa a capa JRC de Operações & Relacionamento, com a origem da exportação e a data da extração, cartões coloridos e grades responsivas. A média de SLA aceita segundos decimais serializados como texto e considera relógios concluídos. Validação offline em Chrome e Edge entre 320 e 1.907 px, com filtros, CSV, temas e média de resolução.
 
 - Relatório gerencial do Service Desk inicia com os chamados nativos do JRC e abertura original a partir de 2026. O HTML exportado mostra a média com eventos reais de fechamento e ordena os chamados pendentes pela idade crescente na data da extração.
 

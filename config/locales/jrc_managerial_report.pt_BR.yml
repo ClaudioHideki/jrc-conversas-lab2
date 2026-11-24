@@ -1,6 +1,11 @@
 pt_BR:
   jrc_managerial_report:
     title: "Service Desk — Relatório gerencial"
+    report_brand: "Operações & Relacionamento"
+    report_type: "Relatório gerencial"
+    report_extraction: "Extração"
+    report_headline: ["Visibilidade para decidir.", "Prioridades para agir."]
+    report_intro: "Resumo da carteira, pendências por responsável e desempenho de SLA."
     account: "Conta"
     summary: "Resumo"
     interactive_filters: "Filtros do relatório"

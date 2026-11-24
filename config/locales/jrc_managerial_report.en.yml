@@ -1,6 +1,11 @@
 en:
   jrc_managerial_report:
     title: "Service Desk — Management report"
+    report_brand: "Operations & Customer Relations"
+    report_type: "Management report"
+    report_extraction: "Extracted on"
+    report_headline: ["Visibility to make decisions.", "Priorities to act on."]
+    report_intro: "See the ticket portfolio, pending work by assignee, and SLA performance."
     account: "Account"
     summary: "Summary"
     interactive_filters: "Report filters"
