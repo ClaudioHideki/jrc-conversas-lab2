@@ -1,3 +1,4 @@
+import { sourcePins as endingReadinessPins, validateEndingReadinessSources } from './validate_cc_ending_readiness_migration.mjs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -229,10 +230,25 @@ export function verifyEndingOriginMigrations(changes, readCurrent, schema) {
   return validateNewMigrationTimestamps(schema, migrations);
 }
 
+// Admit only the exact eighteenth migration/SQL before the unchanged
+// seventeen-migration gate; unknown, modified or duplicate sources still fail.
+export function verifyEndingReadinessMigrations(changes, readCurrent, schema) {
+  const additions = [endingReadinessPins.migration.path, endingReadinessPins.sql.path];
+  const rows = changes.trim().split('\n').filter(Boolean);
+  for (const path of additions) {
+    if (rows.filter(row => row === `A\t${path}`).length !== 1)
+      throw new Error(`Missing or duplicate reviewed ending readiness source: ${path}`);
+  }
+  const prior = rows.filter(row => !additions.some(path => row === `A\t${path}`));
+  verifyEndingOriginMigrations(prior.join('\n'), readCurrent, schema);
+  validateEndingReadinessSources(Object.fromEntries(Object.entries(endingReadinessPins).map(([key, pin]) => [key, readCurrent(pin.path)])));
+  return validateNewMigrationTimestamps(schema, rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyEndingOriginMigrations(changes, readFileSync, schema);
+  const result = verifyEndingReadinessMigrations(changes, readFileSync, schema);
   console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
     [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, [endingActionScopeMigrationPath]: endingActionScopeMigrationHash, [endingActionVersionMigrationPath]: endingActionVersionMigrationHash },
     pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, endingActionVersionSources, endingOriginPins, ...result }));

@@ -2,7 +2,8 @@
 
 # Rails SQL logging reads Base filters, independently of a model's inspect filters.
 private_ending_attributes = %i[private_definition definition_sha256 private_rule_code private_rule rule_code
-                               private_origin_evidence private_completion_evidence]
+                               private_origin_evidence private_completion_evidence
+                               title description custom_fields before_data after_data]
 Rails.application.config.filter_parameters += private_ending_attributes
 
 ActiveSupport.on_load(:active_record) do

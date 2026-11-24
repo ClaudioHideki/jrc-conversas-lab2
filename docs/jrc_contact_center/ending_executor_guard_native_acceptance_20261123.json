@@ -1,0 +1,205 @@
+{
+  "sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+  "run": 45290790691,
+  "artifact": 14879673821,
+  "artifact_sha256": "9d83099b676f0017863fd7f36097642c7b4b34f42f773d5981aabefc5bb1203f",
+  "accepted_scope": "Current original-actor/source authority, immutable triggers/pinned rules and mobile team-card layout only.",
+  "native_distinct_examples": 3044,
+  "old_reload_examples_separate_not_added": 252,
+  "guard_preflight_separate_not_added": {
+    "summary": {
+      "example_count": 26,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb": 13,
+      "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb": 7,
+      "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb": 6
+    },
+    "path": "tmp/call-center-ending-origin-guards-preflight.json",
+    "sha256": "d67f383bd876a12d7e306e3234e6a654c4b4f9aad34139033d4617276d35d57a"
+  },
+  "guard_core_coverage": {
+    "summary": {
+      "example_count": 26,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb": 7,
+      "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb": 6,
+      "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb": 13
+    }
+  },
+  "real_actor_concurrency": {
+    "summary": {
+      "example_count": 3,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb": 3
+    }
+  },
+  "authority_card_geometry": [
+    {
+      "sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+      "project": "desktop-dark",
+      "viewport_width": 1440,
+      "card": {
+        "x": 45,
+        "y": 698,
+        "width": 1350,
+        "height": 113.09375
+      },
+      "text": {
+        "x": 58,
+        "y": 711,
+        "width": 1059.734375,
+        "height": 87.09375
+      },
+      "actions": {
+        "x": 1129.734375,
+        "y": 736.546875,
+        "width": 252.265625,
+        "height": 36
+      },
+      "no_horizontal_overflow": true,
+      "image": ".codex/call-center-native-e2e/desktop-dark-authority-card.png",
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-authority-card-geometry.json",
+      "sha256": "9865a39b1af6ba0da8118f77b82eda791217892e208dc366042649bd857acfcb"
+    },
+    {
+      "sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+      "project": "desktop-light",
+      "viewport_width": 1440,
+      "card": {
+        "x": 45,
+        "y": 698,
+        "width": 1350,
+        "height": 113.09375
+      },
+      "text": {
+        "x": 58,
+        "y": 711,
+        "width": 1059.734375,
+        "height": 87.09375
+      },
+      "actions": {
+        "x": 1129.734375,
+        "y": 736.546875,
+        "width": 252.265625,
+        "height": 36
+      },
+      "no_horizontal_overflow": true,
+      "image": ".codex/call-center-native-e2e/desktop-light-authority-card.png",
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-authority-card-geometry.json",
+      "sha256": "20632e5246cb6a9a5625c32b6339eedb225c5b3d667b59416b0cb48e308d9ade"
+    },
+    {
+      "sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+      "project": "mobile-dark",
+      "viewport_width": 390,
+      "card": {
+        "x": 33,
+        "y": 563,
+        "width": 324,
+        "height": 227.28125
+      },
+      "text": {
+        "x": 46,
+        "y": 576,
+        "width": 298,
+        "height": 153.28125
+      },
+      "actions": {
+        "x": 46,
+        "y": 741.28125,
+        "width": 298,
+        "height": 36
+      },
+      "no_horizontal_overflow": true,
+      "image": ".codex/call-center-native-e2e/mobile-dark-authority-card.png",
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-authority-card-geometry.json",
+      "sha256": "d08699bd4238fb7406c688a199deaa9466a0a8f89e2e94bb59de99a588fa81be"
+    },
+    {
+      "sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+      "project": "mobile-light",
+      "viewport_width": 390,
+      "card": {
+        "x": 33,
+        "y": 563,
+        "width": 324,
+        "height": 227.28125
+      },
+      "text": {
+        "x": 46,
+        "y": 576,
+        "width": 298,
+        "height": 153.28125
+      },
+      "actions": {
+        "x": 46,
+        "y": 741.28125,
+        "width": 298,
+        "height": 36
+      },
+      "no_horizontal_overflow": true,
+      "image": ".codex/call-center-native-e2e/mobile-light-authority-card.png",
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-authority-card-geometry.json",
+      "sha256": "b050b1db687e380423780b7bd1cb86ca5165468b034ad614b1d0e4695a354ee3"
+    }
+  ],
+  "authority_card_browser_geometry_verified": true,
+  "actual_visual_review": {
+    "source_sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+    "actual_original_images_opened": 6,
+    "distinct_original_image_contents": 4,
+    "image_sha256": [
+      "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075",
+      "7bbf773af41584d6b477125947754d67b29c37756cbd22f2b9777bde84e679b5",
+      "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9",
+      "f04239a3bcd407efac5c123f7eae13cba3fd7e85e02628ab3bc612d21f8c8974"
+    ],
+    "desktop": "1440px light/dark: team text readable beside existing actions; filters and pagination visible without overlap.",
+    "mobile": "390px light/dark: long team name occupies three readable lines, active/supervisor details wrap above the separate action row, filters and Apply/Clear controls stack without overlap.",
+    "framing_limit": "Mobile images are scrolled viewport captures of the team card and closed filters, not full-page or popup proofs.",
+    "duplicate_frames": "The two mobile filter frames are byte-identical to the corresponding mobile card frames; six files opened, four unique image contents.",
+    "input_clipping": "Long search value clips within its native single-line input; the card displays its full name and the page stays within the viewport.",
+    "accepted_scope": "Team-card mobile fix and closed authority filters in four viewport/theme projects only.",
+    "whole_figure10_accepted": false
+  },
+  "vue": {
+    "examples": 1812,
+    "failures": 0,
+    "pending": 0
+  },
+  "chrome": {
+    "examples": 264,
+    "projects": 4,
+    "failures": 0,
+    "pending": 0,
+    "flaky": 0
+  },
+  "screenshot_hashes_verified": 608,
+  "native_lint_passed_without_rule_or_threshold_changes": true,
+  "prior_mobile_team_card_failure_corrected": true,
+  "editor_configuration_original_acceptance": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+  "read_only_origin_foundation_preserved": "dc9944c54e299e56a23886541de96cfdd9fce060",
+  "not_accepted": [
+    "Destination execution and atomic receipts",
+    "Prospective readiness and native Projects adapter pending the next CI",
+    "CRM/Service Desk automation adapters",
+    "Operational activation/manual confirmation/history/retry UI",
+    "Whole figure 10 or Part 1",
+    "External PABX/provider operations"
+  ],
+  "responsible_field_correction": "Native project member/assignment selector already exists; do not duplicate it. Its operational selection still needs dedicated Chrome proof.",
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

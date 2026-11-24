@@ -1192,17 +1192,6 @@
     "whole_figure10_accepted": false,
     "whole_part1_accepted": false
   },
-  "mobile_team_card_failure_pending_validation": {
-    "sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
-    "run": 45273757511,
-    "mobile_team_card_failure": "Both mobile screenshots reveal the long team name compressed to about four characters per line by adjacent action controls. Existing no-overflow assertions missed this.",
-    "minimal_fix_prepared_not_tested": "Stack the existing card text and action group on mobile; preserve desktop row, native buttons/handlers and permissions.",
-    "new_native_browser_criteria": [
-      "Text block width at least card width minus32px on390px.",
-      "Action group below all text by at least8px; no horizontal page overflow.",
-      "Four SHA-bound geometry JSON receipts plus original PNGs. Same264Chrome scenarios."
-    ]
-  },
   "historical_unapproved_origin_checkpoints": [
     {
       "sha": "151bf30d8063376b2b5f7dc05400161165f48f54",
@@ -1341,5 +1330,343 @@
     "all_29_cases_retained": true,
     "correction_not_natively_passed": true,
     "whole_figure10_accepted": false
+  },
+  "project_destination_candidate_pending_native": {
+    "source_parent": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+    "classification": "implemented_adapter_awaiting_native_tests_not_operational_executor",
+    "source_sha256": {
+      "app/services/jrc_contact_center/ending_actions/project_task_destination.rb": "ce1b7e15338ec0c9a6d460ab985d5905e9cf885ffef29f6e7e23953354148a0b",
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": "87926d475a31d1484e35b0eb5c58f1923fc8e41dd41aa64b6303de6a73bbc04d",
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": "ba46825bfffb6519e315af8909e01af2dbc48ea66cebf0371714818ebd52c475",
+      "config/initializers/jrc_contact_center_ending_privacy.rb": "790b0005a669e5ed6a850308030cccc7f6ff5a21a27a31e2f25e3b0423d804e0",
+      ".github/workflows/call-center-administration.yml": "9fa892bec4b7f91c1ee98abf2fe72055e22e7c39537155b43ac6ece128e82f96"
+    },
+    "native_cases_required": {
+      "project_task_destination": 14,
+      "project_task_destination_privacy": 3
+    },
+    "native_services_preserved": [
+      "JrcOperations::Access.refresh",
+      "JrcOperations::Access.projects",
+      "JrcContactCenter::EndingActions::ProjectTaskParameters",
+      "JrcProjects::Tasks::Create",
+      "JrcProjects::AuditEvent.record!"
+    ],
+    "implemented": [
+      "Native task creation with current destination permissions, private project membership, assignment, WIP and state checks.",
+      "Stable relative deadlines from an immutable trigger and explicitly supplied reviewed timezone, including offset zero.",
+      "No fallback timezone and no silent correction of an invalid derived calendar deadline.",
+      "No mutation of stored task parameters; explicit absolute dates and optional native fields retained.",
+      "SQL/request/inspect redaction for native task text and native audit payload; stored content retained."
+    ],
+    "logging_scope": "Extend the existing Base SQL filters because native task/audit columns use ordinary names. This changes logging only; account diagnostics remain visible.",
+    "not_yet_implemented_or_accepted": [
+      "Automatic dispatcher or native call hook",
+      "Explicit server-issued readiness and audited activation UI",
+      "Atomic append-only per-destination receipts and attempts",
+      "Idempotence and destination-effect concurrency",
+      "Manual per-rule action confirmation",
+      "CRM and Service Desk adapters",
+      "Whole figure10 or Part1"
+    ],
+    "migrations_or_historical_SQL_changed": false,
+    "operational_effects_enabled_by_installation": false,
+    "existing_gates_restored_exactly": true,
+    "new_static_rejected_workflow_mutations": 10,
+    "external_collector_unit_cases": 35,
+    "static_tests_are_not_native": true,
+    "native_Rails_Vue_Chrome_passed_for_this_adapter": false
+  },
+  "readiness_and_native_destination_candidate": {
+    "source_parent": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+    "status": "implemented_internal_commands_and_adapter_awaiting_native_validation",
+    "native_cases_required": {
+      "spec/services/jrc_contact_center/ending_actions/activate_rule_spec.rb": 10,
+      "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb": 9,
+      "spec/models/jrc_contact_center/ending_action_readiness_spec.rb": 4,
+      "spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb": 5,
+      "spec/services/jrc_contact_center/ending_readiness_populated_upgrade_spec.rb": 1,
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb": 3,
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": 14,
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": 3
+    },
+    "source_sha256": {
+      "app/models/jrc_contact_center/ending_action_readiness.rb": "0490aaa2a3a647cbb8f1924cbe88367d5b8c5bf40b1ccc625c8dd98c7f8bccd4",
+      "app/services/jrc_contact_center/ending_actions/activate_rule.rb": "23bdd01b77fff72ce916bbcdc44daccb0545415afcc83096aae01e18a09e2e44",
+      "app/services/jrc_contact_center/ending_actions/execution_readiness.rb": "0db216644fd6ac81672488baba018f23ff34b3d221eff55d869a64a82281a813",
+      "app/services/jrc_contact_center/ending_actions/project_task_destination.rb": "ce1b7e15338ec0c9a6d460ab985d5905e9cf885ffef29f6e7e23953354148a0b",
+      "db/migrate/20261123235000_create_contact_center_ending_action_readinesses.rb": "7980d4b64320f602b9edfee3083c14134c86f2784e0275611556bb26e17fd59f",
+      "db/functions/20261123235000_contact_center_ending_action_readiness.sql": "13a6da4ca25eb6dd7f826a39070ebabb381fc776934f098504e1020c8d24d4e7",
+      "lib/jrc_contact_center/ending_action_readiness_schema_receipt.rb": "7dd62dafddbab0a574c9e89337df6629b2bafcd6700d6e0a56bdb28adfd7bce2",
+      "spec/services/jrc_contact_center/ending_actions/activate_rule_spec.rb": "9ae16f1fee59f5538308744477d14441840922bc49dc6d8acb9ce23e984ba377",
+      "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb": "d588013c20ec1c899a918283dfd7c9c1795075167cd462f96d6a602ddeeab637",
+      "spec/models/jrc_contact_center/ending_action_readiness_spec.rb": "4d8eb1ba963cf16df49e6e5e88dd27298b30347d3c932142375e2730e23a0524",
+      "spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb": "d06421b1a436485f01ec1431c03b533c18327d4784d49f0c2674f51cea44febd",
+      "spec/services/jrc_contact_center/ending_readiness_populated_upgrade_spec.rb": "8a6bdad9b395c36b0903662b2fb3d5c332c050cf3f3748d02b94a29fb4501348",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb": "137712902e0b58345ae07046b0921958234b2c4ce4e86aef6ac229e3dc0d2118",
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": "87926d475a31d1484e35b0eb5c58f1923fc8e41dd41aa64b6303de6a73bbc04d",
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": "ba46825bfffb6519e315af8909e01af2dbc48ea66cebf0371714818ebd52c475",
+      ".github/workflows/call-center-administration.yml": "3940bd06c11e5e236cb3a0ca440220b0ada5b58cf1d25bb773c15e6ef3faade3",
+      "script/jrc_call_center_ending_readiness_schema_probe.rb": "007c6dd5462662a402e641087045baa2cc2a2521dd9c544bb4550b1a0d80b8ff",
+      "script/jrc_call_center_ending_readiness_upgrade.rb": "0a66a2adf9fbbd05b07906b53dcc0b9564e687c30a84d6859054dd2e3bba4071",
+      "script/validate_cc_ending_readiness_migration.mjs": "6fa410595b44d0d503854c451731e59de18edefc20e797dc5389a6311325c06d",
+      "script/validate_cc_access_migration.mjs": "e7f08aa027b9caf9486c9d78d0a54a7cb1f4102df90be36d1579ff40f23930ce",
+      "spec/support/contact_center_ending_origin_schema_dependencies.rb": "46226a23a18cb11246e3a53c76f66e9c366a1250cf192633c69f99d520ea1e00"
+    },
+    "prospective_admission": [
+      "Configuration saves and installation create no readiness.",
+      "Explicit native configuration authority, current immutable revision and current source/destination permissions are mandatory.",
+      "DB-generated timestamp, actor, source timezone and global sequence/MAX call/leg cutoffs exclude old/in-flight IDs.",
+      "A late imported start timestamp cannot arm old calls; both observed IDs and immutable original start must be prospective.",
+      "Exactly unchanged rules can retain preceding readiness across unrelated catalogue saves; changed/unarmed rules cannot.",
+      "Permanent disable history is applied before readiness selection; reactivation does not release pending originals."
+    ],
+    "native_installation_upgrade_reload_required": true,
+    "finite_ci_timeout": {
+      "previous_minutes": 105,
+      "candidate_minutes": 135,
+      "measured_complete_run": 45290790691,
+      "measured_seconds": 6161,
+      "reason": "Preserve every existing gate while adding populated M17 upgrade and 49 native cases.",
+      "resource_reserves_and_test_assertions_unchanged": true
+    },
+    "upgrade_proof_scope": "Actual M17 native origin/completion, actor, version and configuration records; compare all their original fields and columns, no raw snapshots exported.",
+    "upgrade_harness": "Prepare committed M17 data in a guarded Rails runner, migrate normally, then boot the real application in one dedicated RSpec example with native check_all_pending! and exact schema receipt checks. Standard Rails suites keep rails_helper and schema maintenance unchanged. Existing .rspec keeps WebMock protections.",
+    "confirmed_native_rails_version": "7.1.5.2",
+    "schema_maintenance_primary_references": [
+      "https://github.com/rails/rails/blob/v7.1.5.2/activerecord/lib/active_record/migration.rb",
+      "https://github.com/rails/rails/blob/v7.1.5.2/activerecord/lib/active_record/tasks/database_tasks.rb"
+    ],
+    "fixture_only_dependency_change": "Detach only the new incoming FK within the already rollbackable older migration specs; validate deferred events first. Runtime FK remains enabled.",
+    "remaining": [
+      "Atomic per-destination success receipts and attempts",
+      "Idempotent dispatcher and effect concurrency",
+      "Explicit activation UI/API and manual per-rule confirmation",
+      "CRM/Service Desk adapters and independent partial failures",
+      "Configuration by limited company/unit coverage; current global ACW writer stays protected",
+      "Representative scale and full account retirement with readiness history before production acceptance"
+    ],
+    "sequence_compatibility_not_homologated": "Prospective cutoffs are conservative for customized cached ID allocation. Validate native production sequence settings before any live executor activation; no sequence or database setting is changed here.",
+    "assignee_ui_code_audit": "The existing select already uses projects.task.assign and authorized native project members. Do not duplicate it. Authorized selection still needs its own Chrome proof.",
+    "native_execution_or_browser_accepted_for_this_increment": false,
+    "whole_figure10_accepted": false,
+    "whole_part1_complete": false,
+    "external_provider_commands_enabled": false
+  },
+  "original_actor_guards_and_mobile_native_acceptance": {
+    "sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+    "run": 45290790691,
+    "artifact": 14879673821,
+    "artifact_sha256": "9d83099b676f0017863fd7f36097642c7b4b34f42f773d5981aabefc5bb1203f",
+    "accepted_scope": "Current original-actor/source authority, immutable triggers/pinned rules and mobile team-card layout only.",
+    "native_distinct_examples": 3044,
+    "old_reload_examples_separate_not_added": 252,
+    "guard_preflight_separate_not_added": {
+      "summary": {
+        "example_count": 26,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb": 13,
+        "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb": 7,
+        "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb": 6
+      },
+      "path": "tmp/call-center-ending-origin-guards-preflight.json",
+      "sha256": "d67f383bd876a12d7e306e3234e6a654c4b4f9aad34139033d4617276d35d57a"
+    },
+    "guard_core_coverage": {
+      "summary": {
+        "example_count": 26,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb": 7,
+        "spec/services/jrc_contact_center/ending_actions/pinned_rule_spec.rb": 6,
+        "spec/services/jrc_contact_center/ending_actions/source_authority_spec.rb": 13
+      }
+    },
+    "real_actor_concurrency": {
+      "summary": {
+        "example_count": 3,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb": 3
+      }
+    },
+    "authority_card_geometry": [
+      {
+        "sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+        "project": "desktop-dark",
+        "viewport_width": 1440,
+        "card": {
+          "x": 45,
+          "y": 698,
+          "width": 1350,
+          "height": 113.09375
+        },
+        "text": {
+          "x": 58,
+          "y": 711,
+          "width": 1059.734375,
+          "height": 87.09375
+        },
+        "actions": {
+          "x": 1129.734375,
+          "y": 736.546875,
+          "width": 252.265625,
+          "height": 36
+        },
+        "no_horizontal_overflow": true,
+        "image": ".codex/call-center-native-e2e/desktop-dark-authority-card.png",
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-authority-card-geometry.json",
+        "sha256": "9865a39b1af6ba0da8118f77b82eda791217892e208dc366042649bd857acfcb"
+      },
+      {
+        "sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+        "project": "desktop-light",
+        "viewport_width": 1440,
+        "card": {
+          "x": 45,
+          "y": 698,
+          "width": 1350,
+          "height": 113.09375
+        },
+        "text": {
+          "x": 58,
+          "y": 711,
+          "width": 1059.734375,
+          "height": 87.09375
+        },
+        "actions": {
+          "x": 1129.734375,
+          "y": 736.546875,
+          "width": 252.265625,
+          "height": 36
+        },
+        "no_horizontal_overflow": true,
+        "image": ".codex/call-center-native-e2e/desktop-light-authority-card.png",
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-authority-card-geometry.json",
+        "sha256": "20632e5246cb6a9a5625c32b6339eedb225c5b3d667b59416b0cb48e308d9ade"
+      },
+      {
+        "sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+        "project": "mobile-dark",
+        "viewport_width": 390,
+        "card": {
+          "x": 33,
+          "y": 563,
+          "width": 324,
+          "height": 227.28125
+        },
+        "text": {
+          "x": 46,
+          "y": 576,
+          "width": 298,
+          "height": 153.28125
+        },
+        "actions": {
+          "x": 46,
+          "y": 741.28125,
+          "width": 298,
+          "height": 36
+        },
+        "no_horizontal_overflow": true,
+        "image": ".codex/call-center-native-e2e/mobile-dark-authority-card.png",
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-authority-card-geometry.json",
+        "sha256": "d08699bd4238fb7406c688a199deaa9466a0a8f89e2e94bb59de99a588fa81be"
+      },
+      {
+        "sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+        "project": "mobile-light",
+        "viewport_width": 390,
+        "card": {
+          "x": 33,
+          "y": 563,
+          "width": 324,
+          "height": 227.28125
+        },
+        "text": {
+          "x": 46,
+          "y": 576,
+          "width": 298,
+          "height": 153.28125
+        },
+        "actions": {
+          "x": 46,
+          "y": 741.28125,
+          "width": 298,
+          "height": 36
+        },
+        "no_horizontal_overflow": true,
+        "image": ".codex/call-center-native-e2e/mobile-light-authority-card.png",
+        "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-authority-card-geometry.json",
+        "sha256": "b050b1db687e380423780b7bd1cb86ca5165468b034ad614b1d0e4695a354ee3"
+      }
+    ],
+    "authority_card_browser_geometry_verified": true,
+    "actual_visual_review": {
+      "source_sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+      "actual_original_images_opened": 6,
+      "distinct_original_image_contents": 4,
+      "image_sha256": [
+        "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075",
+        "7bbf773af41584d6b477125947754d67b29c37756cbd22f2b9777bde84e679b5",
+        "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9",
+        "f04239a3bcd407efac5c123f7eae13cba3fd7e85e02628ab3bc612d21f8c8974"
+      ],
+      "desktop": "1440px light/dark: team text readable beside existing actions; filters and pagination visible without overlap.",
+      "mobile": "390px light/dark: long team name occupies three readable lines, active/supervisor details wrap above the separate action row, filters and Apply/Clear controls stack without overlap.",
+      "framing_limit": "Mobile images are scrolled viewport captures of the team card and closed filters, not full-page or popup proofs.",
+      "duplicate_frames": "The two mobile filter frames are byte-identical to the corresponding mobile card frames; six files opened, four unique image contents.",
+      "input_clipping": "Long search value clips within its native single-line input; the card displays its full name and the page stays within the viewport.",
+      "accepted_scope": "Team-card mobile fix and closed authority filters in four viewport/theme projects only.",
+      "whole_figure10_accepted": false
+    },
+    "vue": {
+      "examples": 1812,
+      "failures": 0,
+      "pending": 0
+    },
+    "chrome": {
+      "examples": 264,
+      "projects": 4,
+      "failures": 0,
+      "pending": 0,
+      "flaky": 0
+    },
+    "screenshot_hashes_verified": 608,
+    "native_lint_passed_without_rule_or_threshold_changes": true,
+    "prior_mobile_team_card_failure_corrected": true,
+    "editor_configuration_original_acceptance": "8f362263c9b6c337c0bb2052b3c7fe75b9f4012a",
+    "read_only_origin_foundation_preserved": "dc9944c54e299e56a23886541de96cfdd9fce060",
+    "not_accepted": [
+      "Destination execution and atomic receipts",
+      "Prospective readiness and native Projects adapter pending the next CI",
+      "CRM/Service Desk automation adapters",
+      "Operational activation/manual confirmation/history/retry UI",
+      "Whole figure 10 or Part 1",
+      "External PABX/provider operations"
+    ],
+    "responsible_field_correction": "Native project member/assignment selector already exists; do not duplicate it. Its operational selection still needs dedicated Chrome proof.",
+    "whole_figure10_accepted": false,
+    "whole_part1_accepted": false
+  },
+  "historical_mobile_team_card_failure": {
+    "sha": "dc9944c54e299e56a23886541de96cfdd9fce060",
+    "run": 45273757511,
+    "mobile_team_card_failure": "Both mobile screenshots reveal the long team name compressed to about four characters per line by adjacent action controls. Existing no-overflow assertions missed this.",
+    "minimal_fix_prepared_not_tested": "Stack the existing card text and action group on mobile; preserve desktop row, native buttons/handlers and permissions.",
+    "new_native_browser_criteria": [
+      "Text block width at least card width minus32px on390px.",
+      "Action group below all text by at least8px; no horizontal page overflow.",
+      "Four SHA-bound geometry JSON receipts plus original PNGs. Same264Chrome scenarios."
+    ]
   }
 }

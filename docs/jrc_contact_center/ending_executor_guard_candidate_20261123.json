@@ -1,6 +1,6 @@
 {
   "source_parent": "dc9944c54e299e56a23886541de96cfdd9fce060",
-  "native_not_yet_executed": true,
+  "native_not_yet_executed": false,
   "source_sha256": {
     "app/services/jrc_contact_center/ending_actions/source_authority.rb": "ccac40fee03a43fa5df8606d8998645acc89c66e7802958e16a5ad481b914ac4",
     "app/services/jrc_contact_center/ending_actions/original_actor_context.rb": "a64cbce89eb984073723de27e81bcd965e5a6f10310f39ac2eed9ddf1576ee7a",
@@ -58,7 +58,8 @@
     "fix": "Full-width text above wrapped actions on mobile; preserve existing desktop layout and all handlers.",
     "native_browser_required": "Four SHA-bound card geometry receipts and four new original PNGs; 264existing scenarios retained.",
     "new_vue_unit_tests_not_needed_for_css_geometry": "Existing component behavior suite plus real native Chrome geometry regression is required.",
-    "expected_total_screenshot_hashes": 608
+    "expected_total_screenshot_hashes": 608,
+    "accepted_at_sha": "4be947544b361e64777f23fad6444aeb7a90c0f9"
   },
   "initial_gate_failure": {
     "sha": "ff05d569686383e24ae404fdfd95a7ced2dbe10a",
@@ -161,5 +162,7 @@
     "all_29_cases_retained": true,
     "correction_not_natively_passed": true,
     "whole_figure10_accepted": false
-  }
+  },
+  "verified_source_sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
+  "native_acceptance_file": "docs/jrc_contact_center/ending_executor_guard_native_acceptance_20261123.json"
 }

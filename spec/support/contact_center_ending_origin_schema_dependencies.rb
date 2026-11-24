@@ -2,6 +2,9 @@
 # rollbackable migration examples; production foreign keys are never removed.
 module ContactCenterEndingOriginSchemaDependencies
   def detach_ending_origin_version_reference
+    connection = ApplicationRecord.connection
+    connection.execute('SET CONSTRAINTS cc_ending_readiness_version_fk IMMEDIATE')
+    connection.remove_foreign_key(:jrc_contact_center_ending_action_readinesses, name: 'cc_ending_readiness_version_fk')
     ApplicationRecord.connection.remove_foreign_key(:jrc_contact_center_ending_action_origins,
                                                     name: 'cc_ending_execution_origin_version_fk')
   end
@@ -16,5 +19,6 @@ module ContactCenterEndingOriginSchemaDependencies
     %i[jrc_contact_center_ending_action_origins jrc_contact_center_ending_action_completions].each do |table|
       connection.remove_foreign_key(table, :jrc_contact_center_ending_scope_accounts)
     end
+    connection.remove_foreign_key(:jrc_contact_center_ending_action_readinesses, :jrc_contact_center_ending_scope_accounts)
   end
 end
