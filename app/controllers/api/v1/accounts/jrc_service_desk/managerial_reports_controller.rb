@@ -4,8 +4,15 @@ class Api::V1::Accounts::JrcServiceDesk::ManagerialReportsController < Api::V1::
   before_action :require_managerial_reports!
 
   def show
-    query = ::JrcServiceDesk::ManagerialReportQuery.new(report_context, query_values.fetch('unit_id'))
-    render json: base_payload.merge(unit_id: query.unit.id.to_s, timezone: query.timezone.tzinfo.name, **query.collection(query_values))
+    query = ::JrcServiceDesk::ManagerialReportQuery.new(report_context, query_values.fetch('unit_id'), parameters: query_values)
+    data = query.collection
+    data[:indicators] = ::JrcServiceDesk::ManagerialReportMetrics.new(query).call(data.dig(:meta, :total)) if report_context.managerial_reporting_allowed?(:indicators, unit: query.unit)
+    if report_context.managerial_reporting_allowed?(:export, unit: query.unit)
+      data[:export_limits] = ::JrcServiceDesk::ReportExport::MANAGERIAL_FORMATS.index_with do |format|
+        ::JrcServiceDesk::ReportExport.limit_for(format, kind: 'managerial')
+      end
+    end
+    render json: base_payload.merge(unit_id: query.unit.id.to_s, timezone: query.timezone.tzinfo.name, **data)
   end
 
   def options

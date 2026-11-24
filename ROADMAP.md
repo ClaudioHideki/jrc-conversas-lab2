@@ -12,7 +12,7 @@ Referência inicial: INIT solicitado pelo usuário em 2026-11-13. É uma trilha 
 
 ## Fase 2: Operação e desenvolvimento ativo
 
-- Relatórios gerenciais do Service Desk. A primeira etapa cobre permissões, filtros e consulta paginada a partir de 2026. Indicadores, gráficos e arquivos gerenciais seguem nas etapas seguintes. [Decisão](docs/adr/0012-relatorios-gerenciais-service-desk.md).
+- Relatórios gerenciais do Service Desk a partir de 2026 com filtros, gráficos, indicadores de SLA e exportações HTML, XLSX, PDF e CSV. [Escopo](docs/adr/0012-relatorios-gerenciais-service-desk.md) · [Indicadores e exportações](docs/adr/0013-indicadores-e-exportacoes-gerenciais-service-desk.md).
 
 - Manual de Cultura JRC: candidata local com portal HTTPS próprio, ciência por versão, administração e arquivos privados. [Homologação](docs/jrc_consolidation/manual-de-cultura-homologacao-20261123.md).
 

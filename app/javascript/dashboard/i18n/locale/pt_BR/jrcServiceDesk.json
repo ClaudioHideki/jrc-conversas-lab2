@@ -3058,6 +3058,8 @@
       "title": "Exportar relatório",
       "help": "O arquivo usará os mesmos filtros aplicados e o conjunto completo de {count} chamados autorizados. O processamento é realizado no servidor.",
       "formats": {
+        "html": "HTML interativo",
+        "csv": "CSV",
         "csv_summary": "CSV resumido",
         "csv_detailed": "CSV detalhado",
         "xlsx": "Excel completo (.xlsx)",

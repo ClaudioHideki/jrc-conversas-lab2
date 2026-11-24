@@ -26,12 +26,17 @@ class JrcServiceDesk::ReportExportJob < ApplicationJob
               'Report changed; refresh before exporting'
       end
 
-      dataset = JrcServiceDesk::ReportExportData.new(access.query)
-      artifact = JrcServiceDesk::ReportExportFile.new(dataset, export.format).call
-      export.file.attach(io: StringIO.new(artifact.fetch(:data)), filename: artifact.fetch(:filename), content_type: artifact.fetch(:content_type))
+      report = export.managerial? ? JrcServiceDesk::ManagerialReportFile : JrcServiceDesk::ReportExportFile
+      dataset = export.managerial? ? JrcServiceDesk::ManagerialReportDataset.new(access.query) : JrcServiceDesk::ReportExportData.new(access.query)
+      artifact = report.new(dataset, export.format).call
+      raise ArgumentError, 'Private storage required' if export.managerial? && ActiveStorage::Blob.service.public?
+
+      attachment = { io: StringIO.new(artifact.fetch(:data)), filename: artifact.fetch(:filename), content_type: artifact.fetch(:content_type) }
+      attachment.merge!(identify: false, metadata: { JrcServiceDesk::ReportExport::MANAGERIAL_BLOB_MARKER => true }) if export.managerial?
+      export.file.attach(attachment)
       export.update!(state: 'ready', record_count: dataset.count, authorization_signature: access.signature,
-                     observed_at: dataset.observed_at, metadata: { 'report_version' => 2, 'timezone' => dataset.timezone,
-                                                                   'sha256' => Digest::SHA256.hexdigest(artifact.fetch(:data)) })
+                     observed_at: dataset.observed_at, metadata: export.metadata.merge('report_version' => 2, 'timezone' => dataset.timezone,
+                                                                                     'sha256' => Digest::SHA256.hexdigest(artifact.fetch(:data))))
       JrcServiceDesk::ReportExportAudit.call(export, 'completed', context[:user])
     end
     JrcServiceDesk::ReportExportCleanupJob.set(wait_until: export.expires_at).perform_later(export.id)
@@ -44,6 +49,7 @@ class JrcServiceDesk::ReportExportJob < ApplicationJob
              else 'generation_failed'
              end
       export.update!(state: 'failed', error_code: code)
+      export.file.purge_later if export.managerial? && export.file.attached?
       JrcServiceDesk::ReportExportAudit.call(export, 'failed', export.account_user.user)
       Rails.logger.error("service_desk_export_failed export=#{export.id} class=#{e.class.name}")
     end

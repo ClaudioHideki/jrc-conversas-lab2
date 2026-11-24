@@ -7,7 +7,12 @@ class JrcServiceDesk::ReportExportAccess
 
   def initialize(export, user_context)
     @export = export
-    @query = JrcServiceDesk::OperationalReportQuery.new(user_context: user_context, parameters: export.filters, permission: 'reports_export')
+    @query = if export.managerial?
+               context = JrcServiceDesk::OperationalContext.new(user_context)
+               JrcServiceDesk::ManagerialReportQuery.new(context, export.unit_id, parameters: export.filters, action: :export)
+             else
+               JrcServiceDesk::OperationalReportQuery.new(user_context: user_context, parameters: export.filters, permission: 'reports_export')
+             end
     unless query.context.account.id == export.account_id && query.context.account_user.id == export.account_user_id && query.unit.id == export.unit_id
       raise Pundit::NotAuthorizedError
     end
@@ -15,7 +20,8 @@ class JrcServiceDesk::ReportExportAccess
 
   def signature
     context = query.context
-    permissions = %w[reports_export customers_view history_view sla_view conversations_view]
+    permissions = %w[reports_export customers_view history_view sla_view]
+    permissions << 'conversations_view' unless @export.managerial?
     identities = permissions.to_h do |permission|
       rows = query.relation_for(permission).reorder(:id).pluck(:id)
       [permission, Digest::SHA256.hexdigest(rows.join(','))]
@@ -23,8 +29,12 @@ class JrcServiceDesk::ReportExportAccess
     member = context.account_user
     role = member.respond_to?(:custom_role) ? member.custom_role : nil
     value = { capabilities: context.effective_capabilities.sort, role: member.role, permissions: member.permissions.sort,
-              custom_role: role&.attributes, teams: context.native_team_ids.reorder(:id).pluck(:id), rows: identities,
-              survey_ids: JrcServiceDesk::ReportSurveyScope.for(query).order(:id).pluck(:id) }
+              custom_role: role&.attributes, teams: context.native_team_ids.reorder(:id).pluck(:id), rows: identities }
+    if @export.managerial?
+      value[:customers] = query.customer_signature
+    else
+      value[:survey_ids] = JrcServiceDesk::ReportSurveyScope.for(query).order(:id).pluck(:id)
+    end
     Digest::SHA256.hexdigest(JrcServiceDesk::CanonicalJson.dump(value))
   end
 

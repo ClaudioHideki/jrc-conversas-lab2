@@ -3058,6 +3058,8 @@
       "title": "Export report",
       "help": "The file uses the applied filters and the complete set of {count} authorized tickets. Processing runs on the server.",
       "formats": {
+        "html": "Interactive HTML",
+        "csv": "CSV",
         "csv_summary": "Summary CSV",
         "csv_detailed": "Detailed CSV",
         "xlsx": "Complete Excel (.xlsx)",

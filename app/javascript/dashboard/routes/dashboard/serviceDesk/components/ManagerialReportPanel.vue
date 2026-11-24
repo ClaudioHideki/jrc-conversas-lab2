@@ -2,6 +2,8 @@
 import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/serviceDeskOperationalRules';
+import ReportExportMenu from './ReportExportMenu.vue';
+import ManagerialReportIndicators from './ManagerialReportIndicators.vue';
 import { useOperationalScope } from '../composables/useOperationalScope';
 import { assertEnvelope } from '../helpers/operationalRules.mjs';
 import messages from '../helpers/managerialReportMessages';
@@ -19,6 +21,7 @@ const defaults = () => ({
   from: firstDate,
   to: '',
   date_field: 'opened_at',
+  group_by: 'month',
   origin: 'all',
   phase: '',
 });
@@ -47,6 +50,7 @@ const origins = [
 ];
 const phases = ['open', 'waiting', 'resolved', 'closed', 'cancelled'];
 const dates = ['opened_at', 'created_at', 'updated_at'];
+const groups = ['day', 'week', 'month', 'year'];
 const columns = [
   'id',
   'title',
@@ -79,6 +83,12 @@ const report = ref(null);
 const busy = ref(false);
 const error = ref('');
 const lookupError = ref('');
+const applied = computed(() => ({
+  ...Object.fromEntries(Object.entries(filters).filter(([, value]) => value)),
+  ...Object.fromEntries(
+    Object.entries(selected.value).map(([key, value]) => [key, value.id])
+  ),
+}));
 const dateFormat = computed(
   () =>
     new Intl.DateTimeFormat(locale.value.replace('_', '-'), {
@@ -220,15 +230,7 @@ async function load(page = 1) {
   busy.value = true;
   error.value = '';
   try {
-    const params = {
-      ...Object.fromEntries(
-        Object.entries(filters).filter(([, value]) => value)
-      ),
-      ...Object.fromEntries(
-        Object.entries(selected.value).map(([key, value]) => [key, value.id])
-      ),
-      page,
-    };
+    const params = { ...applied.value, page };
     const payload = assertEnvelope(
       await API.managerialReport(
         lease.context.account_id,
@@ -291,6 +293,14 @@ const inputClass =
           <select v-model="filters.date_field" :class="inputClass">
             <option v-for="value in dates" :key="value" :value="value">
               {{ t(`labels.${value}`) }}
+            </option>
+          </select>
+        </label>
+        <label class="grid gap-1 text-sm">
+          {{ t('group') }}
+          <select v-model="filters.group_by" :class="inputClass">
+            <option v-for="value in groups" :key="value" :value="value">
+              {{ t(`groups.${value}`) }}
             </option>
           </select>
         </label>
@@ -420,6 +430,18 @@ const inputClass =
     <p v-if="error" class="text-sm text-n-ruby-11" role="alert">
       {{ t(error) }}
     </p>
+    <ManagerialReportIndicators
+      v-if="report?.indicators"
+      :data="report.indicators"
+    />
+    <ReportExportMenu
+      v-if="report?.export_limits"
+      managerial
+      :unit-id="unitId"
+      :filters="applied"
+      :total="report.meta.total"
+      :limits="report.export_limits"
+    />
     <p v-if="report?.meta.total === 0" class="text-sm" role="status">
       {{ t('empty') }}
     </p>

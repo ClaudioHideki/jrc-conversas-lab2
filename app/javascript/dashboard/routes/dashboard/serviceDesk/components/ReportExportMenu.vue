@@ -1,7 +1,9 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import API from 'dashboard/api/serviceDeskReportExports';
+import API, {
+  managerialReportExports,
+} from 'dashboard/api/serviceDeskReportExports';
 import { useOperationalScope } from '../composables/useOperationalScope';
 import { assertEnvelope, reportFilters } from '../helpers/operationalRules.mjs';
 import { canonicalId } from '../helpers/access';
@@ -10,13 +12,22 @@ const props = defineProps({
   filters: { type: Object, required: true },
   total: { type: Number, required: true },
   limits: { type: Object, default: () => ({}) },
+  managerial: { type: Boolean, default: false },
 });
 const { t, locale } = useI18n();
 const scope = useOperationalScope(
   toRef(props, 'unitId'),
-  context => context?.capabilities?.operational_reports?.export === true
+  context =>
+    context?.capabilities?.[
+      props.managerial ? 'managerial_reports' : 'operational_reports'
+    ]?.export === true
 );
-const formats = ['csv_summary', 'csv_detailed', 'xlsx', 'pdf'];
+const formats = computed(() =>
+  props.managerial
+    ? ['html', 'xlsx', 'pdf', 'csv']
+    : ['csv_summary', 'csv_detailed', 'xlsx', 'pdf']
+);
+const api = computed(() => (props.managerial ? managerialReportExports : API));
 const formatLimit = value =>
   new Intl.NumberFormat(locale.value.replace('_', '-')).format(value);
 const expanded = ref(false);
@@ -29,7 +40,7 @@ const validate = (row, lease) => {
   assertEnvelope(row, lease.context, lease.unit);
   if (
     !canonicalId(row.id) ||
-    !formats.includes(row.format) ||
+    !formats.value.includes(row.format) ||
     !['queued', 'processing', 'ready', 'failed', 'expired'].includes(row.state)
   )
     throw new TypeError('Invalid export result');
@@ -42,7 +53,7 @@ const refresh = async () => {
   busy.value = true;
   try {
     const payload = assertEnvelope(
-      await API.list(lease.context.account_id, lease.unit, lease.signal),
+      await api.value.list(lease.context.account_id, lease.unit, lease.signal),
       lease.context,
       lease.unit
     );
@@ -65,9 +76,12 @@ const create = async format => {
   error.value = '';
   window.clearTimeout(timer);
   try {
-    const filters = { ...reportFilters(props.filters), unit_id: lease.unit };
+    const applied = props.managerial
+      ? props.filters
+      : reportFilters(props.filters);
+    const filters = { ...applied, unit_id: lease.unit };
     const row = validate(
-      await API.create(
+      await api.value.create(
         lease.context.account_id,
         { format, filters, expected_count: props.total },
         lease.signal
@@ -95,7 +109,7 @@ const download = async row => {
   busy.value = true;
   error.value = '';
   try {
-    const blob = await API.download(
+    const blob = await api.value.download(
       lease.context.account_id,
       row.id,
       lease.signal
@@ -188,7 +202,10 @@ defineExpose({ openMenu });
       <p class="m-0 text-xs text-n-slate-11">
         {{ t('JRC_SERVICE_DESK.EXPORT_FILES.narrow') }}
       </p>
-      <p class="m-0 rounded-lg border border-blue-200 bg-n-solid-1 p-3 text-sm">
+      <p
+        v-if="!managerial"
+        class="m-0 rounded-lg border border-blue-200 bg-n-solid-1 p-3 text-sm"
+      >
         {{ t('JRC_SERVICE_DESK.EXPORT_FILES.schedule_later') }}
       </p>
       <p v-if="error" role="alert" class="m-0 text-sm text-n-ruby-11">

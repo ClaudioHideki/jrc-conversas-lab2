@@ -183,6 +183,9 @@ Rails.application.routes.draw do
             get 'operational_reports/export', to: 'operational_reports#export'
             get 'managerial_reports', to: 'managerial_reports#show'
             get 'managerial_reports/options', to: 'managerial_reports#options'
+            resources :managerial_report_exports, only: [:index, :create] do
+              get :download, on: :member
+            end
             resources :report_exports, only: [:index, :create] do
               get :download, on: :member
             end

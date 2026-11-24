@@ -52,6 +52,8 @@ Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em a
 
 ## Concluído (Done)
 
+- Indicadores, gráficos e exportações gerenciais do Service Desk, com recorte pela abertura original a partir de 2026. Passaram 55 exemplos Rails e 25 testes Vue. O Chrome validou o fluxo autenticado, os quatro downloads e o painel móvel em tema escuro. Chrome e Edge abriram o HTML offline com filtros. [Decisão](docs/adr/0013-indicadores-e-exportacoes-gerenciais-service-desk.md).
+
 - Relatório gerencial do Service Desk com permissões, filtros combináveis e separação de chamados nativos, importados e de origem não classificada. Escopo inicial pela abertura original a partir de 2026. Validação local com 34 exemplos Rails e 13 testes Vue, incluindo regressões dos relatórios existentes. [Decisão](docs/adr/0012-relatorios-gerenciais-service-desk.md).
 
 - Manual de Cultura JRC: versões e público, ciência e histórico, gestão e importação protegida implementados em branch isolada. Homologação externa e publicação permanecem como etapas separadas. [Roteiro](docs/jrc_consolidation/manual-de-cultura-homologacao-20261123.md).

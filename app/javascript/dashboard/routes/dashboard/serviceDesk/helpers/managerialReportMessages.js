@@ -14,6 +14,63 @@ const dimensions = {
 };
 
 const ptBR = {
+  group: 'Agrupar por',
+  groups: {
+    day: 'Dia',
+    week: 'Semana',
+    month: 'Mês',
+    year: 'Ano',
+  },
+  indicators: {
+    total: 'Total de chamados',
+    rate: 'Taxa de encerramento',
+    new: 'Novos',
+    inService: 'Em atendimento',
+    openWaiting: 'Abertos ou aguardando',
+    definition:
+      'Taxa de encerramento: chamados atualmente encerrados ÷ total filtrado. Resolvidos e cancelados aparecem separadamente.',
+    volume: 'Volume por período',
+    distribution: 'Distribuição por',
+    limitedPeriods:
+      'Exibindo até 366 períodos recentes. O total inclui todo o resultado filtrado.',
+    limitedGroups:
+      'Exibindo as 20 maiores categorias e registros sem classificação, quando houver.',
+    values: 'Consultar valores do gráfico',
+    value: '{label} · {count}',
+    missing: 'Sem classificação',
+    unavailable: 'Indisponível',
+    sla: 'SLA e tempo de encerramento',
+    clock: 'Relógio',
+    closure:
+      'Tempo médio de encerramento (s): {seconds} · Chamados com encerramento registrado: {count}',
+    coverage:
+      'Só relógios concluídos entram nas médias. Sem medição não conta como cumprimento nem violação.',
+    clocks: {
+      first_response: 'Primeira resposta',
+      resolution: 'Resolução',
+    },
+    slaFields: {
+      measured: 'Com medição',
+      unmeasured: 'Sem medição',
+      within: 'Concluídos no prazo',
+      late: 'Concluídos fora do prazo',
+      in_progress: 'Em andamento',
+      overdue: 'Vencidos em andamento',
+      mean_seconds: 'Tempo médio (s)',
+    },
+    dimensions: {
+      status_id: 'Status',
+      priority_id: 'Prioridade',
+      assignee_membership_id: 'Responsável',
+      team_id: 'Equipe',
+      queue_id: 'Fila',
+      company_id: 'Empresa',
+      service_id: 'Serviço',
+      category_id: 'Categoria',
+      origin: 'Origem',
+      unit: 'Unidade',
+    },
+  },
   period: 'Chamados abertos a partir de 1º de janeiro de 2026.',
   reference: 'Data de referência',
   from: 'Data inicial',
@@ -78,6 +135,63 @@ const ptBR = {
   },
 };
 const en = {
+  group: 'Group by',
+  groups: {
+    day: 'Day',
+    week: 'Week',
+    month: 'Month',
+    year: 'Year',
+  },
+  indicators: {
+    total: 'Total tickets',
+    rate: 'Closure rate',
+    new: 'New',
+    inService: 'In service',
+    openWaiting: 'Open or waiting',
+    definition:
+      'Closure rate: currently closed tickets ÷ all filtered tickets. Resolved and cancelled tickets are counted separately.',
+    volume: 'Volume by period',
+    distribution: 'Distribution by',
+    limitedPeriods:
+      'Showing up to 366 recent periods. The total still covers the entire filtered set.',
+    limitedGroups:
+      'Showing the 20 largest groups and unclassified tickets, if any.',
+    values: 'View chart values',
+    value: '{label} · {count}',
+    missing: 'Unclassified',
+    unavailable: 'Unavailable',
+    sla: 'SLA and closing time',
+    clock: 'Clock',
+    closure:
+      'Average closing time (s): {seconds} · Tickets with a recorded closure: {count}',
+    coverage:
+      'Only completed clocks contribute to averages. Missing measurements do not count as SLA compliance or breaches.',
+    clocks: {
+      first_response: 'First response',
+      resolution: 'Resolution',
+    },
+    slaFields: {
+      measured: 'Measured',
+      unmeasured: 'Unmeasured',
+      within: 'Completed on time',
+      late: 'Completed late',
+      in_progress: 'In progress',
+      overdue: 'Overdue in progress',
+      mean_seconds: 'Average time (s)',
+    },
+    dimensions: {
+      status_id: 'Status',
+      priority_id: 'Priority',
+      assignee_membership_id: 'Assignee',
+      team_id: 'Team',
+      queue_id: 'Queue',
+      company_id: 'Company',
+      service_id: 'Service',
+      category_id: 'Category',
+      origin: 'Source',
+      unit: 'Unit',
+    },
+  },
   period: 'Tickets originally opened on or after January 1, 2026.',
   reference: 'Reference date',
   from: 'Start date',

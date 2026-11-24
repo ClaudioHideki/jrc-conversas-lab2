@@ -14,6 +14,10 @@ module RequesterPortal::ProtectedBlob
   def authorize_service_desk_blob
     blob = @blob || service_desk_disk_blob
     return unless blob
+    if blob.metadata[JrcServiceDesk::ReportExport::MANAGERIAL_BLOB_MARKER]
+      response.headers['Cache-Control'] = 'no-store'
+      return head :not_found
+    end
 
     accesses = protected_blob_accesses(blob)
     return if accesses.empty?

@@ -88,6 +88,7 @@ describe('managerial report filters', () => {
       {
         from: '2026-01-01',
         date_field: 'opened_at',
+        group_by: 'month',
         origin: 'native',
         page: 1,
       },

@@ -7,8 +7,13 @@ class JrcServiceDesk::ReportExportPolicy < JrcServiceDesk::OperationalPolicy
 
   def create?
     context = operational_context
-    record.account_id == context.account.id && record.account_user_id == context.account_user.id &&
+    return false unless record.account_id == context.account.id && record.account_user_id == context.account_user.id
+
+    if record.managerial?
+      context.managerial_reporting_allowed?(:export, unit: record.unit)
+    else
       context.reporting_allowed?(permission: 'reports_export', unit: record.unit)
+    end
   end
 
   def show?

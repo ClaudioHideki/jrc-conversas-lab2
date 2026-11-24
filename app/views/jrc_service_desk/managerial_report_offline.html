@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+<title>Service Desk</title>
+<style>
+:root{color-scheme:light dark;--bg:#f3f6fb;--panel:#fff;--text:#17283d;--line:#c7d4e2;--accent:#1268c3}
+:root.dark{color-scheme:dark;--bg:#111924;--panel:#1b2838;--text:#e8eff8;--line:#45576c;--accent:#6ab0ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,sans-serif}
+main{max-width:1500px;margin:auto;padding:clamp(.75rem,3vw,2rem)}header,.toolbar,.filters,.tiles,.charts{display:flex;flex-wrap:wrap;gap:.75rem;align-items:start}
+header,.toolbar{justify-content:space-between;align-items:center}h1,h2,h3{margin:.25rem 0 .75rem}h1{font-size:1.55rem}h2{font-size:1.25rem}h3{font-size:1rem}
+section,details{margin:0 0 1rem;padding:1rem;border:1px solid var(--line);border-radius:.8rem;background:var(--panel)}
+label{display:grid;gap:.35rem;min-width:10rem;flex:1}input,select,button{border:1px solid var(--line);border-radius:.4rem;padding:.45rem .6rem;font:inherit;max-width:100%;background:var(--panel);color:var(--text)}
+button{cursor:pointer}button:disabled{opacity:.45;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tiles>div{border:1px solid var(--line);border-radius:.55rem;padding:.6rem;min-width:8rem;flex:1}.tiles strong{display:block;font-size:1.4rem}
+.charts>div{flex:1 1 22rem;min-width:0}.bars>div{display:grid;grid-template-columns:minmax(6rem,1fr) minmax(3rem,1fr) 3rem;gap:.45rem;align-items:center;margin-block:.35rem}
+.bars span{overflow-wrap:anywhere}progress{width:100%;accent-color:var(--accent)}.tablebox{overflow:auto;margin:.75rem 0}
+table{border-collapse:collapse;width:100%}td,th{text-align:start;padding:.55rem;border-bottom:1px solid var(--line);vertical-align:top;min-width:8rem}
+td:nth-child(2){min-width:14rem;max-width:24rem;overflow-wrap:anywhere}p{margin:.5rem 0}dl{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1rem}dt{font-weight:600}dd{margin:0;overflow-wrap:anywhere}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <header><h1 id="title"></h1><button id="theme" type="button" aria-pressed="false"></button></header>
+  <details><summary id="criteria-title"></summary><dl id="criteria"></dl></details>
+  <section>
+    <h2 id="filters-title"></h2>
+    <div id="filters" class="filters"></div>
+  </section>
+  <section id="indicators" hidden>
+    <h2 id="summary-title"></h2>
+    <div id="kpis" class="tiles"></div>
+    <p id="definition"></p>
+    <div class="charts">
+      <div><h3 id="volume-title"></h3><div id="volume" class="bars"></div></div>
+      <div><div id="dimension-control"></div><div id="distribution" class="bars"></div></div>
+    </div>
+    <div id="sla" class="tablebox"></div>
+  </section>
+  <section>
+    <div class="toolbar"><h2 id="tickets-title"></h2><button id="csv" type="button"></button></div>
+    <p id="count" aria-live="polite"></p>
+    <div class="tablebox"><table><thead id="table-head"></thead><tbody id="table-body"></tbody></table></div>
+    <div class="toolbar"><button id="previous" type="button"></button><span id="page"></span><button id="next" type="button"></button></div>
+  </section>
+</main>
+<script id="report-data" type="application/json">__MANAGERIAL_REPORT_DATA__</script>
+<script>
+'use strict';
+const byId = id => document.getElementById(id);
+const { labels: l, rows, columns, locale, criteria, indicators, date_field, group_by } = JSON.parse(byId('report-data').textContent);
+const node = (tag, value) => {
+  const item = document.createElement(tag);
+  if (value !== undefined && value !== null) item.textContent = value;
+  return item;
+};
+document.documentElement.lang = locale;
+document.title = l.title;
+const captions = {
+  title: l.title, theme: l.theme, 'criteria-title': l.criteria, 'filters-title': l.criteria, 'summary-title': l.summary,
+  definition: l.close_policy, 'volume-title': l.volume, 'tickets-title': l.tickets, csv: l.export_csv, previous: l.previous, next: l.next,
+};
+Object.entries(captions).forEach(([id, title]) => { byId(id).textContent = title; });
+criteria.forEach(([name, value]) => byId('criteria').append(node('dt', name), node('dd', value)));
+const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+const dims = ['status','phase','priority','assignee','team','queue','company','establishment','unit','service','category','origin'];
+const headings = Object.entries(columns);
+const dates = ['opened_at', 'created_at', 'updated_at'];
+const fieldViews = {};
+const size = 50;
+let page = 0;
+let filtered = [];
+function labelOf(row, key) {
+  if (key === 'origin') return l.origins[row.origin];
+  if (key === 'phase') return l.phases[row.phase];
+  if (key === 'assignee' && !row.assignee) return l.unassigned;
+  if (key === 'first_response_result' || key === 'resolution_result') {
+    const kind = key.replace('_result', '');
+    return l.results[row.sla[kind]?.result || 'unmeasured'];
+  }
+  if (key === 'first_response_seconds' || key === 'resolution_seconds') {
+    return row.sla[key.replace('_seconds', '')]?.seconds;
+  }
+  return row[key];
+}
+function select(label, id, entries, selected, mount) {
+  const wrapper = node('label', label);
+  const control = node('select');
+  control.id = id;
+  entries.forEach(([key, name]) => {
+    const option = node('option', name);
+    option.value = key;
+    control.append(option);
+  });
+  control.value = selected;
+  wrapper.append(control);
+  mount.append(wrapper);
+  return control;
+}
+function inputDate(label, id) {
+  const wrapper = node('label', label);
+  const input = node('input');
+  input.type = 'date';
+  input.id = id;
+  input.min = '2026-01-01';
+  wrapper.append(input);
+  byId('filters').append(wrapper);
+  return input;
+}
+const reference = select(l.date_reference, 'date-reference', dates.map(k => [k, columns[k]]), date_field, byId('filters'));
+const from = inputDate(l.from, 'from');
+const to = inputDate(l.to, 'to');
+const grouping = select(l.group, 'grouping', Object.entries(l.groups), group_by, byId('filters'));
+const distribution = select(l.choose_dimension, 'dimension', dims.map(k => [k, columns[k]]), 'origin', byId('dimension-control'));
+for (const key of dims) {
+  const names = [...new Set(rows.map(row => labelOf(row, key) || l.missing))].sort((a, b) => a.localeCompare(b, locale));
+  const entries = [['', l.all], ...names.map(name => [name, name])];
+  if (key === 'origin') entries.splice(1, 0, ['@native', l.origins.native]);
+  fieldViews[key] = select(columns[key], 'filter-' + key, entries, '', byId('filters'));
+}
+function matches(row) {
+  const day = row[reference.value].slice(0, 10);
+  if ((from.value && day < from.value) || (to.value && day > to.value)) return false;
+  return dims.every(key => {
+    const value = fieldViews[key].value;
+    if (key === 'origin' && value === '@native') return ['manual', 'portal'].includes(row.origin);
+    return !value || (labelOf(row, key) || l.missing) === value;
+  });
+}
+function average(values) {
+  return values.length ? number.format(values.reduce((sum, current) => sum + current, 0) / values.length) : l.missing;
+}
+function countsBy(key) {
+  const groups = new Map();
+  filtered.forEach(row => { const keyValue = key(row); groups.set(keyValue, (groups.get(keyValue) || 0) + 1); });
+  return [...groups];
+}
+function bucket(row) {
+  const day = row[reference.value].slice(0, 10);
+  if (grouping.value === 'month') return day.slice(0, 7);
+  if (grouping.value === 'year') return day.slice(0, 4);
+  if (grouping.value !== 'week') return day;
+  const date = new Date(day + 'T00:00:00Z');
+  date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 6) % 7);
+  return date.toISOString().slice(0, 10);
+}
+function tiles(values) {
+  const items = values.map(([label, value]) => {
+    const tile = node('div');
+    tile.append(node('span', label), node('strong', value));
+    return tile;
+  });
+  byId('kpis').replaceChildren(...items);
+}
+function bars(id, values) {
+  const max = Math.max(1, ...values.map(([, count]) => count));
+  const lines = values.map(([name, value]) => {
+    const row = node('div');
+    const progress = node('progress');
+    progress.max = max;
+    progress.value = value;
+    progress.setAttribute('aria-label', name);
+    row.append(node('span', name), progress, node('span', number.format(value)));
+    return row;
+  });
+  byId(id).replaceChildren(...lines);
+}
+function drawIndicators() {
+  if (!indicators) return;
+  const counts = Object.fromEntries(countsBy(row => row.phase));
+  const newCount = filtered.filter(row => row.phase === 'open' && row.initial).length;
+  const closed = filtered.filter(row => Number.isFinite(row.closure_seconds));
+  tiles([
+    [l.total, number.format(filtered.length)],
+    ...Object.entries(l.phases).map(([phase, name]) => [name, number.format(counts[phase] || 0)]),
+    [l.new_count, number.format(newCount)],
+    [l.in_service, number.format((counts.open || 0) - newCount)],
+    [l.open_or_waiting, number.format((counts.open || 0) + (counts.waiting || 0))],
+    [l.closure_rate, filtered.length ? number.format((counts.closed || 0) * 100 / filtered.length) : l.missing],
+    [l.closure_measured, number.format(closed.length)],
+    [l.closure_mean, average(closed.map(row => row.closure_seconds))],
+  ]);
+  bars('volume', countsBy(bucket).sort(([a], [b]) => a.localeCompare(b)).slice(-24));
+  const selected = distribution.value;
+  const missing = selected === 'assignee' ? l.unassigned : l.missing;
+  const ranked = countsBy(row => labelOf(row, selected) || missing).sort((a, b) => b[1] - a[1]);
+  const top = ranked.slice(0, 20);
+  const missingRow = ranked.find(([label]) => label === missing);
+  if (missingRow && !top.includes(missingRow)) top.push(missingRow);
+  bars('distribution', top);
+  const table = node('table');
+  const tableHead = node('tr');
+  tableHead.append(node('th', 'SLA'));
+  Object.values(l.sla).forEach(label => tableHead.append(node('th', label)));
+  table.append(tableHead);
+  Object.entries(l.clocks).forEach(([kind, name]) => {
+    const facts = filtered.map(row => row.sla[kind]).filter(Boolean);
+    const result = value => facts.filter(fact => fact.result === value).length;
+    const values = [facts.length, filtered.length - facts.length, result('within'), result('late'),
+      result('in_progress') + result('overdue'), result('overdue'), average(facts.map(fact => fact.seconds).filter(Number.isFinite))];
+    const row = node('tr');
+    row.append(node('th', name), ...values.map(value => node('td', typeof value === 'number' ? number.format(value) : value)));
+    table.append(row);
+  });
+  byId('sla').replaceChildren(table);
+}
+function drawTable() {
+  const body = document.createDocumentFragment();
+  filtered.slice(page * size, page * size + size).forEach(row => {
+    const line = node('tr');
+    headings.forEach(([key]) => line.append(node('td', labelOf(row, key) ?? '—')));
+    body.append(line);
+  });
+  byId('table-body').replaceChildren(body);
+  byId('count').textContent = filtered.length ? l.total + ' · ' + number.format(filtered.length) : l.empty;
+  byId('page').textContent = (page + 1) + ' / ' + Math.max(1, Math.ceil(filtered.length / size));
+  byId('previous').disabled = page <= 0;
+  byId('next').disabled = (page + 1) * size >= filtered.length;
+}
+function refresh() {
+  filtered = rows.filter(matches);
+  page = 0;
+  drawIndicators();
+  drawTable();
+}
+function csvCell(value) {
+  let text = String(value ?? '').replace(/\0/g, '');
+  if (/^[\s]*[=+@-]|^[\t\r\n]/u.test(text)) text = "'" + text;
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+byId('csv').addEventListener('click', () => {
+  const lines = [headings.map(([, label]) => csvCell(label)).join(',')];
+  filtered.forEach(row => lines.push(headings.map(([key]) => csvCell(labelOf(row, key))).join(',')));
+  const url = URL.createObjectURL(new Blob(['\uFEFF', lines.join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' }));
+  const link = node('a');
+  link.href = url;
+  link.download = 'ServiceDesk.csv';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+function dark(value) {
+  document.documentElement.classList.toggle('dark', value);
+  byId('theme').setAttribute('aria-pressed', String(value));
+}
+dark(matchMedia('(prefers-color-scheme: dark)').matches);
+byId('theme').addEventListener('click', () => dark(!document.documentElement.classList.contains('dark')));
+byId('previous').addEventListener('click', () => { page -= 1; drawTable(); });
+byId('next').addEventListener('click', () => { page += 1; drawTable(); });
+byId('filters').addEventListener('change', refresh);
+distribution.addEventListener('change', drawIndicators);
+const headingsRow = node('tr');
+headings.forEach(([, heading]) => headingsRow.append(node('th', heading)));
+byId('table-head').append(headingsRow);
+byId('indicators').hidden = !indicators;
+refresh();
+</script>
+</body>
+</html>
