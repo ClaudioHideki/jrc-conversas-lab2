@@ -74,7 +74,7 @@ export async function analyzeSentiment(raw: unknown, provider: ProviderConfig, s
         message_id: { type: 'source' in input ? 'string' : 'integer', enum: input.messages.map(message => message.id) },
         observation: string } } } } };
   const generated = await structuredResponse({ url: `${provider.baseUrl.replace(/\/$/, '')}/chat/completions`,
-    apiKey: provider.apiKey, signal, retryInvalid: false,
+    apiKey: provider.apiKey, providerType: provider.providerType, workspaceId: provider.workspaceId, signal, retryInvalid: false,
     body: { model: provider.model, temperature: 0, max_completion_tokens: 2000,
       response_format: { type: 'json_schema', json_schema: { name: 'jrc_sentiment_report', strict: true, schema } },
       messages: [

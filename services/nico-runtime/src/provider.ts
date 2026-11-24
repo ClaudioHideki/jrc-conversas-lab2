@@ -1,4 +1,5 @@
 import { setTimeout as delay } from 'node:timers/promises';
+import { providerRequest, providerReceipt, type ProviderType } from './provider-wire.ts';
 import { NicoError, type ProviderObservation } from './errors.ts';
 
 const LIMIT_HEADERS = ['x-ratelimit-limit-requests', 'x-ratelimit-limit-tokens',
@@ -46,7 +47,7 @@ async function readJson(response: Response): Promise<any> {
 }
 
 export async function structuredResponse<T>(options: {
-  url: string; apiKey: string; body: Record<string, any>; validate: (value: unknown) => T;
+  url: string; apiKey: string; providerType?: ProviderType; workspaceId?: string; body: Record<string, any>; validate: (value: unknown) => T;
   retryInvalid: boolean; signal?: AbortSignal; timeoutMs?: number;
 }) {
   // A single deadline includes both requests and response-body reads.
@@ -65,11 +66,12 @@ export async function structuredResponse<T>(options: {
       signal.throwIfAborted();
       let body;
       while (true) {
-        const response = await fetch(options.url, {
+        const wire = providerRequest(options.url, options.apiKey, { ...options.body, messages: [...options.body.messages,
+            ...(attempt ? [{ role: 'system', content: REPAIR_INSTRUCTION }] : [])] }, options.providerType, options.workspaceId);
+        const response = await fetch(wire.url, {
           method: 'POST', signal, redirect: 'error',
-          headers: { Authorization: `Bearer ${options.apiKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...options.body, messages: [...options.body.messages,
-            ...(attempt ? [{ role: 'system', content: REPAIR_INSTRUCTION }] : [])] }),
+          headers: { ...wire.headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify(wire.body),
         });
         providerObservation = observation(response);
         try { body = await readJson(response); break; }
@@ -85,16 +87,13 @@ export async function structuredResponse<T>(options: {
         }
       }
       signal.throwIfAborted();
-      const measured = body?.usage;
-      if (!measured || ![measured.prompt_tokens, measured.completion_tokens, measured.total_tokens]
-        .every(n => Number.isSafeInteger(n) && n >= 0 && n <= 270000)
-        || measured.prompt_tokens + measured.completion_tokens !== measured.total_tokens) throw new NicoError('provider_usage_invalid');
-      usage.input_tokens += measured.prompt_tokens;
-      usage.output_tokens += measured.completion_tokens;
-      usage.total_tokens += measured.total_tokens;
+      const measured = providerReceipt(body, options.providerType);
+      usage.input_tokens += measured.input;
+      usage.output_tokens += measured.output;
+      usage.total_tokens += measured.total;
       accounted = true;
       if (usage.total_tokens > 270000) throw new NicoError('provider_usage_invalid');
-      const content = body.choices?.[0]?.message?.content;
+      const content = measured.content;
       if (typeof content !== 'string') throw new NicoError('provider_schema_invalid');
       let parsed: unknown;
       try { parsed = JSON.parse(content); }

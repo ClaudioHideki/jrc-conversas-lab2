@@ -30,6 +30,13 @@ class JrcAiAPI extends ApiClient {
     return axios.delete(`${this.url}/providers/${id}`);
   }
 
+  providerModels(payload, id) {
+    return axios.post(`${this.url}/providers/model_catalogue`, {
+      provider: payload,
+      ...(id ? { id } : {}),
+    });
+  }
+
   validateProvider(id) {
     return axios.post(`${this.url}/providers/${id}/validate_configuration`);
   }

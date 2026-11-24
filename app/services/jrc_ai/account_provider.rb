@@ -18,7 +18,7 @@ class JrcAi::AccountProvider
   end
 
   def self.compatible?(provider)
-    provider.openai_compatible? && provider.provider_type != 'azure_openai'
+    provider.runtime_supported?
   end
   private_class_method :compatible?
 
@@ -34,7 +34,9 @@ class JrcAi::AccountProvider
     provider ||= resolve(account)
     raise JrcNico::RuntimeClient::Error, 'invalid_scope' unless provider.account_id == account.id
 
-    { api_key: provider.api_key, model: provider.default_model, base_url: provider.request_base_url,
+    configuration = { provider_type: provider.provider_type, api_key: provider.api_key, model: provider.default_model, base_url: provider.request_base_url,
       transcription_model: provider.settings['transcription_model'].presence || 'gpt-4o-mini-transcribe' }
+    configuration[:workspace_id] = provider.settings['workspace_id'] if provider.provider_type == 'anthropic' && provider.settings['workspace_id'].present?
+    configuration
   end
 end

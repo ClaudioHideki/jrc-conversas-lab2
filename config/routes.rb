@@ -998,6 +998,7 @@ Rails.application.routes.draw do
             resource :cockpit, only: :show, controller: :cockpit
             resources :agents, only: :index
             resources :providers do
+              post :model_catalogue, on: :collection
               post :validate_configuration, on: :member
               post :make_default, on: :member
             end

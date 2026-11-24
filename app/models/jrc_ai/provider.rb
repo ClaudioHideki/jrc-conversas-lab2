@@ -75,13 +75,18 @@ module JrcAi
       "#{'*' * 12}#{suffix}"
     end
 
+    def runtime_supported?
+      %w[openai custom anthropic google_gemini].include?(provider_type)
+    end
+
     def openai_compatible?
       OPENAI_COMPATIBLE_TYPES.include?(provider_type)
     end
 
     def request_base_url
       value = base_url.to_s.strip
-      value = 'https://api.openai.com' if value.blank? && provider_type == 'openai'
+      value = JrcAi::ModelCatalogue::BASES[provider_type].to_s if value.blank?
+      return value.chomp('/') if provider_type == 'google_gemini'
       value = value.chomp('/')
       return value if value.end_with?('/v1')
 

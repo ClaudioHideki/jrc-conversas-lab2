@@ -13,7 +13,7 @@ import type { ProviderConfig } from './provider-config.ts';
 import { analyzeSentiment, type SentimentInput } from './sentiment.ts';
 
 export type Result = Analysis & { usage: Usage | null; model: string; mode: string; provider_observation?: ProviderObservation };
-type Config = { mode: 'fixture' | 'provider'; dataDir?: string; postgresUrl?: string; model?: string; apiKey?: string; baseUrl?: string };
+type Config = { providerType?: ProviderConfig['providerType']; workspaceId?: string; mode: 'fixture' | 'provider'; dataDir?: string; postgresUrl?: string; model?: string; apiKey?: string; baseUrl?: string };
 
 export async function createEngine(config: Config) {
   // core useModel traces whole prompts. This dedicated service never emits SDK logs,
@@ -59,7 +59,7 @@ export async function createEngine(config: Config) {
         if (!selected.apiKey || !selected.model) throw new NicoError('account_ai_not_configured');
         const generated = await structuredResponse({
           url: `${(selected.baseUrl || baseUrl.href).replace(/\/$/, '')}/chat/completions`, apiKey: selected.apiKey,
-          signal: signals.getStore(), retryInvalid: operational,
+          providerType: selected.providerType, workspaceId: selected.workspaceId, signal: signals.getStore(), retryInvalid: operational,
           body: { model: selected.model, temperature: 0, max_completion_tokens: 2000,
             response_format: { type: 'json_schema', json_schema: {
               name: 'nico_assisted_analysis', strict: true,

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useMapGetter } from 'dashboard/composables/store';
 import { useAlert } from 'dashboard/composables';
 import jrcAiAPI from 'dashboard/api/jrcAi';
+import { providerBases, recommendedModels } from './providerCatalogue';
 
 const props = defineProps({
   initialTab: { type: String, default: 'providers' },
@@ -26,12 +27,17 @@ const usage = ref({
 const showForm = ref(false);
 const editingId = ref(null);
 const error = ref('');
+const modelOptions = ref([]);
+const modelsLoading = ref(false);
+const modelError = ref('');
+let catalogueEpoch = 0;
+const savedProviderType = ref('');
 
 const emptyForm = () => ({
   provider_type: 'openai',
   name: 'JRC OpenAI Producao',
   api_key: '',
-  base_url: 'https://api.openai.com',
+  base_url: providerBases.openai,
   default_model: '',
   fast_model: '',
   advanced_model: '',
@@ -46,8 +52,8 @@ const form = ref(emptyForm());
 const providerOptions = [
   { value: 'openai', label: 'OpenAI', compatible: true },
   { value: 'azure_openai', label: 'Azure OpenAI', compatible: true },
-  { value: 'google_gemini', label: 'Google Gemini', compatible: false },
-  { value: 'anthropic', label: 'Anthropic', compatible: false },
+  { value: 'google_gemini', label: 'Google Gemini', compatible: true },
+  { value: 'anthropic', label: 'Anthropic', compatible: true },
   { value: 'custom', label: 'API compativel com OpenAI', compatible: true },
 ];
 const tabs = [
@@ -97,13 +103,6 @@ const statusClass = status =>
   })[status] || 'bg-n-slate-3 text-n-slate-11';
 const formatNumber = value =>
   new Intl.NumberFormat('pt-BR').format(Number(value || 0));
-const formatMoney = cents =>
-  cents == null
-    ? 'Indisponível'
-    : new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      }).format(Number(cents) / 100);
 const formatDate = value =>
   value
     ? new Intl.DateTimeFormat('pt-BR', {
@@ -111,9 +110,6 @@ const formatDate = value =>
         timeStyle: 'short',
       }).format(new Date(value))
     : '--';
-const currentProviderType = computed(() =>
-  providerOptions.find(item => item.value === form.value.provider_type)
-);
 
 const load = async () => {
   if (!isAdministrator.value) return;
@@ -135,13 +131,59 @@ const load = async () => {
   }
 };
 
+const loadModels = async () => {
+  catalogueEpoch += 1;
+  const epoch = catalogueEpoch;
+  modelError.value = '';
+  if (
+    !form.value.api_key &&
+    (!editingId.value || savedProviderType.value !== form.value.provider_type)
+  )
+    return;
+  modelsLoading.value = true;
+  try {
+    const response = await jrcAiAPI.providerModels(
+      {
+        provider_type: form.value.provider_type,
+        base_url: form.value.base_url,
+        api_key: form.value.api_key,
+        settings: {
+          workspace_id: form.value.provider_settings.workspace_id || null,
+        },
+      },
+      editingId.value
+    );
+    if (epoch !== catalogueEpoch || !showForm.value) return;
+    modelOptions.value = response.data.models;
+    const defaults = recommendedModels(
+      form.value.provider_type,
+      modelOptions.value
+    );
+    Object.entries(defaults).forEach(([key, value]) => {
+      if (!form.value[key]) form.value[key] = value;
+    });
+  } catch (requestError) {
+    if (epoch === catalogueEpoch)
+      modelError.value =
+        requestError?.response?.data?.message ||
+        'Não foi possível consultar os modelos.';
+  } finally {
+    if (epoch === catalogueEpoch) modelsLoading.value = false;
+  }
+};
 const startCreate = () => {
   editingId.value = null;
+  savedProviderType.value = '';
+  modelOptions.value = [];
+  modelError.value = '';
   form.value = emptyForm();
   showForm.value = true;
 };
 const startEdit = provider => {
   editingId.value = provider.id;
+  savedProviderType.value = provider.provider_type;
+  modelOptions.value = [];
+  modelError.value = '';
   form.value = {
     provider_type: provider.provider_type,
     name: provider.name,
@@ -160,11 +202,20 @@ const startEdit = provider => {
     default_provider: provider.default_provider,
   };
   showForm.value = true;
+  loadModels();
 };
 const providerChanged = () => {
-  if (form.value.provider_type === 'openai' && !form.value.base_url) {
-    form.value.base_url = 'https://api.openai.com';
-  }
+  catalogueEpoch += 1;
+  modelsLoading.value = false;
+  modelOptions.value = [];
+  modelError.value = '';
+  form.value.base_url = providerBases[form.value.provider_type] || '';
+  form.value.fast_model = '';
+  form.value.default_model = '';
+  form.value.advanced_model = '';
+  form.value.api_key = '';
+  form.value.provider_settings = {};
+  form.value.name = providerLabel(form.value.provider_type);
 };
 const buildPayload = () => ({
   provider_type: form.value.provider_type,
@@ -259,6 +310,13 @@ const removeProvider = async provider => {
   }
 };
 
+watch(showForm, value => {
+  if (!value) {
+    catalogueEpoch += 1;
+    modelsLoading.value = false;
+    form.value.api_key = '';
+  }
+});
 watch(
   () => props.initialTab,
   value => {
@@ -282,9 +340,7 @@ onMounted(load);
           Intelig&ecirc;ncia Artificial
         </h1>
         <p class="mt-2 max-w-3xl text-sm text-blue-50/90">
-          Cadastre provedores, modelos e limites de consumo. A chave nunca
-          &eacute; devolvida ao navegador depois de salva e as chamadas do
-          Copiloto passam pelo backend.
+          Escolha o provedor e os modelos usados pelo NICO.
         </p>
       </header>
 
@@ -350,7 +406,7 @@ onMounted(load);
               <i class="i-lucide-plus size-4" /> Novo provedor
             </button>
           </div>
-          <div class="grid gap-4 lg:grid-cols-2">
+          <div class="grid gap-3">
             <article
               v-for="provider in providers"
               :key="provider.id"
@@ -385,84 +441,36 @@ onMounted(load);
                   >{{ statusLabel(provider.status) }}</span
                 >
               </div>
-              <dl
-                class="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-n-surface-1 p-4 text-xs"
-              >
-                <div>
-                  <dt class="text-n-slate-11">
-                    {{ t('JRC_NICO.PROVIDER.API_KEY') }}
-                  </dt>
-                  <dd class="mt-1 font-semibold text-n-slate-12">
-                    {{ provider.masked_api_key || 'Nao cadastrada' }}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-n-slate-11">Compatibilidade</dt>
-                  <dd
-                    class="mt-1 font-semibold"
-                    :class="
-                      provider.openai_compatible
-                        ? 'text-emerald-700'
-                        : 'text-amber-700'
-                    "
-                  >
-                    {{
-                      provider.openai_compatible
-                        ? 'Copiloto habilitado'
-                        : 'Adaptador pendente'
-                    }}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-n-slate-11">
-                    {{ t('JRC_NICO.CAPACITY.PROVIDER_LIMIT') }}
-                  </dt>
-                  <dd class="mt-1 font-semibold text-n-slate-12">
-                    {{
-                      provider.monthly_token_limit != null &&
-                      provider.settings?.usage_policy !== 'provider'
-                        ? formatNumber(provider.monthly_token_limit) + ' tokens'
-                        : provider.settings?.usage_policy === 'provider'
-                          ? 'Sem teto local'
-                          : 'Usa o teto local da conta'
-                    }}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-n-slate-11">
-                    Referência interna de orçamento
-                  </dt>
-                  <dd class="mt-1 font-semibold text-n-slate-12">
-                    {{
-                      provider.monthly_budget_cents
-                        ? formatMoney(provider.monthly_budget_cents)
-                        : 'Não informada'
-                    }}
-                  </dd>
-                </div>
-              </dl>
               <p class="mt-3 text-xs text-n-slate-11">
-                Saldo/crédito no provedor: não disponível nesta integração. O
-                orçamento informado é uma referência interna e não consulta a
-                cobrança do provedor.
+                {{
+                  provider.api_key_configured
+                    ? 'Chave cadastrada'
+                    : 'Chave pendente'
+                }}
+                · {{ provider.active ? 'Ativo' : 'Desativado' }}
               </p>
-              <dl
+              <details
                 v-if="provider.provider_observation"
-                class="mt-3 space-y-1 text-xs text-n-slate-11"
+                class="mt-2 text-xs text-n-slate-11"
               >
-                <dt>Última resposta da API do provedor</dt>
-                <dd>
+                <summary class="cursor-pointer">
+                  Detalhes da última resposta
+                </summary>
+                <p class="mt-2">
                   HTTP {{ provider.provider_observation.http_status }} ·
                   {{ formatDate(provider.provider_observation.observed_at) }}
-                </dd>
-                <template
-                  v-for="(value, key) in provider.provider_observation.headers"
-                  :key="key"
-                >
-                  <dt>{{ rateHeaderLabel(key, provider) }}</dt>
-                  <dd>{{ value }}</dd>
-                </template>
-              </dl>
+                </p>
+                <dl class="mt-2 grid gap-1">
+                  <template
+                    v-for="(value, key) in provider.provider_observation
+                      .headers"
+                    :key="key"
+                  >
+                    <dt>{{ rateHeaderLabel(key, provider) }}</dt>
+                    <dd>{{ value }}</dd>
+                  </template>
+                </dl>
+              </details>
               <p
                 v-if="provider.last_error"
                 class="mt-3 rounded-xl bg-rose-50 p-3 text-xs text-rose-700"
@@ -827,29 +835,74 @@ onMounted(load);
                   editingId
                     ? 'Deixe vazio para manter a chave atual'
                     : 'Cole a chave do provedor'
-                " /></label
-            ><label class="md:col-span-2 text-sm font-medium text-n-slate-12"
-              >URL base<input
-                v-model="form.base_url"
-                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 font-mono text-xs outline-none focus:border-blue-500"
-                placeholder="https://api.exemplo.com" /></label
-            ><label class="text-sm font-medium text-n-slate-12"
-              >Modelo r&aacute;pido<input
-                v-model="form.fast_model"
-                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
-                placeholder="Nome do modelo" /></label
-            ><label class="text-sm font-medium text-n-slate-12"
-              >Modelo padr&atilde;o *<input
-                v-model="form.default_model"
-                required
-                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
-                placeholder="Nome do modelo" /></label
-            ><label class="text-sm font-medium text-n-slate-12"
-              >Modelo avan&ccedil;ado<input
-                v-model="form.advanced_model"
-                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
-                placeholder="Nome do modelo" /></label
+                "
+                @change="loadModels" /></label
             ><label class="md:col-span-2 text-sm font-medium text-n-slate-12">
+              URL base<input
+                v-model="form.base_url"
+                :readonly="!!providerBases[form.provider_type]"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 px-3 text-xs text-n-slate-12"
+                @change="loadModels"
+              />
+            </label>
+            <label
+              v-if="form.provider_type === 'anthropic'"
+              class="md:col-span-2 text-sm font-medium text-n-slate-12"
+              >Workspace Anthropic (quando exigido pela chave)<input
+                v-model="form.provider_settings.workspace_id"
+                placeholder="wrkspc_…"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 px-3 text-xs"
+                @change="loadModels"
+            /></label>
+            <div class="md:col-span-2 flex items-center gap-3 text-xs">
+              <button
+                type="button"
+                :disabled="modelsLoading"
+                class="font-semibold text-n-brand"
+                @click="loadModels"
+              >
+                {{
+                  modelsLoading ? 'Consultando modelos…' : 'Atualizar modelos'
+                }}</button
+              ><span v-if="modelError" role="alert" class="text-n-ruby-11">{{
+                modelError
+              }}</span>
+            </div>
+            <label
+              v-for="field in [
+                { key: 'fast_model', label: 'Modelo rápido' },
+                { key: 'default_model', label: 'Modelo padrão *' },
+                { key: 'advanced_model', label: 'Modelo avançado' },
+              ]"
+              :key="field.key"
+              class="text-sm font-medium text-n-slate-12"
+            >
+              {{ field.label
+              }}<select
+                v-model="form[field.key]"
+                :required="field.key === 'default_model'"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 px-3 text-n-slate-12"
+              >
+                <option value="">Selecionar modelo</option>
+                <option
+                  v-if="
+                    form[field.key] &&
+                    !modelOptions.some(model => model.id === form[field.key])
+                  "
+                  :value="form[field.key]"
+                >
+                  {{ form[field.key] }} — salvo, ainda não verificado
+                </option>
+                <option
+                  v-for="model in modelOptions"
+                  :key="model.id"
+                  :value="model.id"
+                >
+                  {{ model.name }}
+                </option>
+              </select>
+            </label>
+            <label class="md:col-span-2 text-sm font-medium text-n-slate-12">
               Controle de consumo
               <select
                 v-model="form.usage_policy"
@@ -874,17 +927,7 @@ onMounted(load);
                 type="number"
                 min="0"
                 class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
-                placeholder="Ex.: 1000000" /></label
-            ><label
-              v-if="form.usage_policy === 'local'"
-              class="text-sm font-medium text-n-slate-12"
-              >Referência interna de orçamento (R$)<input
-                v-model="form.monthly_budget_brl"
-                type="number"
-                min="0"
-                step="0.01"
-                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
-                placeholder="Ex.: 500,00"
+                placeholder="Ex.: 1000000"
             /></label>
             <div class="flex flex-wrap items-center gap-5 md:col-span-2">
               <label class="flex items-center gap-2 text-sm text-n-slate-12"
@@ -904,14 +947,7 @@ onMounted(load);
               >
             </div>
           </div>
-          <div
-            v-if="!currentProviderType?.compatible"
-            class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800"
-          >
-            O token ser&aacute; armazenado, mas esta vers&atilde;o ainda precisa
-            de um adaptador espec&iacute;fico para usar este provedor no
-            Copiloto.
-          </div>
+
           <div class="mt-6 flex justify-end gap-2">
             <button
               type="button"

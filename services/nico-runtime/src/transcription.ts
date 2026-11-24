@@ -1,3 +1,5 @@
+import { NicoError } from './errors.ts';
+
 export const audioTypes: Record<string, string> = {
   'audio/webm': 'webm', 'audio/mp4': 'mp4', 'audio/ogg': 'ogg', 'audio/wav': 'wav', 'audio/mpeg': 'mp3',
 };
@@ -12,8 +14,9 @@ export function validateAudio(raw: any) {
   return { ...raw, bytes };
 }
 
-export async function transcribeAudio(raw: any, config: { mode: string; apiKey?: string; baseUrl?: string; transcriptionModel?: string }, signal?: AbortSignal) {
+export async function transcribeAudio(raw: any, config: { mode: string; providerType?: string; apiKey?: string; baseUrl?: string; transcriptionModel?: string }, signal?: AbortSignal) {
   const input = validateAudio(raw);
+  if (['anthropic', 'google_gemini'].includes(config.providerType || '')) throw new NicoError('invalid_configuration');
   if (config.mode !== 'provider' || !config.apiKey) throw new Error('Transcription requires provider');
   const base = new URL(config.baseUrl || 'https://api.openai.com/v1/');
   if (base.protocol !== 'https:') throw new Error('Provider requires HTTPS');

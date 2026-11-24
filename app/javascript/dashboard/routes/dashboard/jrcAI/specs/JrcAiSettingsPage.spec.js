@@ -12,6 +12,7 @@ vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
 vi.mock('dashboard/api/jrcAi', () => ({
   default: {
     providers: vi.fn(),
+    providerModels: vi.fn(),
     usage: vi.fn(),
     makeDefault: vi.fn(),
     deleteProvider: vi.fn(),
@@ -25,6 +26,9 @@ describe('AI provider actions', () => {
   const originalPlugins = config.global.plugins;
   beforeEach(() => {
     role = ref('administrator');
+    api.providerModels.mockResolvedValue({
+      data: { models: [{ id: 'test-model', name: 'Test model' }] },
+    });
     api.providers.mockResolvedValue({
       data: [{ id: 7, name: 'Local test', status: 'configured' }],
     });
@@ -57,7 +61,7 @@ describe('AI provider actions', () => {
             id: 7,
             name: 'Teste',
             status: 'configured',
-            masked_api_key: '••••1234',
+            api_key_configured: true,
           },
         ],
       });
@@ -66,8 +70,8 @@ describe('AI provider actions', () => {
       expect(wrapper.get('header').classes()).toContain('text-white');
       expect(wrapper.get('header h1').classes()).toContain('text-inherit');
       expect(wrapper.get('header p').classes()).toContain('text-blue-50/90');
-      expect(wrapper.text()).toContain('Chave da API');
-      expect(wrapper.text()).toContain('••••1234');
+      expect(wrapper.text()).toContain('Chave cadastrada');
+      expect(wrapper.text()).toContain('Chave cadastrada');
       expect(wrapper.text()).not.toContain('API Key');
       await wrapper
         .findAll('button')
@@ -150,10 +154,11 @@ describe('AI provider actions', () => {
     expect(form.findAll('select').at(-1).element.value).toBe('provider');
     expect(form.findAll('input[type="number"]')).toHaveLength(0);
     await form.get('input[type="password"]').setValue('test-only-key');
+    await flushPromises();
     await form
       .findAll('label')
       .find(label => label.text().includes('Modelo padrão'))
-      .get('input')
+      .get('select')
       .setValue('test-model');
     await form.trigger('submit');
     await flushPromises();
