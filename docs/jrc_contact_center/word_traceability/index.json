@@ -2557,5 +2557,12 @@
     "all_new_lint_offenses_on_diagnostic_sha": 0,
     "source_gate_static_cases_rechecked": 73,
     "collector_static_cases_rechecked": 9
+  },
+  "native_assignee_validation_pending": {
+    "failed_sha": "5bc6959a72c3187dc666e32a51d1921cc8aee3e0",
+    "passed_Chrome": 260,
+    "failed_Chrome": 4,
+    "cause_document": "docs/jrc_contact_center/ending_assignee_alias_correction_20261124.json",
+    "full_acceptance": false
   }
 }

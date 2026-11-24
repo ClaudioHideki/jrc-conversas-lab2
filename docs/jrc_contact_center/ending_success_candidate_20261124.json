@@ -16,15 +16,17 @@
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": "93a0ec38a5123a7a52e8a63a0ac7318abaa07c56850895d9e31dca2e78128d6d",
     "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb": "e90a2dc15604eed2952eb7163ec7acf80ca931c2e635aa1bfacc6b3bb28c768e",
     "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": "40ba73172522654661f2e8da5e8a5a153b6572f61d10c037b194387fc37cbba9",
-    ".github/workflows/call-center-administration.yml": "1c39af78f13f152af092bd85b38f6ae32c4a24a04c4e4ed67e8b13893c97112d",
+    ".github/workflows/call-center-administration.yml": "f0a0887af41c00a43972435480cbfd3cfaaf7138731c5ce6fac569638456c560",
     "spec/support/contact_center_ending_origin_schema_dependencies.rb": "7e3502b546af98b2c00f7056fc80215bce0af81e1789ff17ae7f8d698c688781",
-    "script/jrc_call_center_ending_automation_seed.rb": "301ed75008fb7465fc8c56b0b98a7d61a1fd5f8653d4cb83b8eb2bfab8853c85",
-    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "3600a5fefb5058d814bc28b3167f378b8807a30c285685a2a0a30eb4b2729a39"
+    "script/jrc_call_center_ending_automation_seed.rb": "37ae32235238752784c45b5744361dff3385a03dc2537ebba01206d7b696f2a2",
+    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "f2ac0670d3cd8678def86965cd696a2c64b2891eb04abfc00cba9d3527fbadd0",
+    "spec/services/jrc_contact_center/ending_actions/project_assignee_native_permissions_spec.rb": "0fee0df45142130e9f6de084819e87554a41a9a2dc393d8636298d3609ff9012"
   },
   "native_cases_prepared": {
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": 17,
     "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb": 7,
-    "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": 1
+    "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": 1,
+    "spec/services/jrc_contact_center/ending_actions/project_assignee_native_permissions_spec.rb": 2
   },
   "native_cases_executed": 0,
   "implemented": [
@@ -260,5 +262,6 @@
     "all_new_lint_offenses_on_diagnostic_sha": 0,
     "source_gate_static_cases_rechecked": 73,
     "collector_static_cases_rechecked": 9
-  }
+  },
+  "native_assignee_alias_correction": "docs/jrc_contact_center/ending_assignee_alias_correction_20261124.json"
 }

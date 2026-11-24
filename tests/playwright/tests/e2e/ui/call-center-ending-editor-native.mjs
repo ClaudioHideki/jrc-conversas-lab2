@@ -96,6 +96,19 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   await task
     .locator('[data-ending-project]')
     .selectOption(target.automation_project_id);
+  const projectResponse = await page.request.get(
+    `http://127.0.0.1:5387/api/v1/accounts/${target.account_id}/projects/projects/${target.automation_project_id}`,
+    { headers: target.administrator }
+  );
+  expect(projectResponse.status()).toBe(200);
+  const reviewedProject = await projectResponse.json();
+  expect(reviewedProject.capabilities).toContain('projects.task.assign');
+  expect(
+    reviewedProject.members.some(
+      member => String(member.user_id) === target.automation_assignee_id
+    )
+  ).toBe(true);
+  await expect(task.locator('[data-ending-task-assignee]')).toBeVisible();
   await task
     .locator('[data-ending-task-title]')
     .fill('SYNTHETIC private persisted title');

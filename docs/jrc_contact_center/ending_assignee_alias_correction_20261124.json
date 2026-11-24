@@ -1,0 +1,151 @@
+{
+  "failed_sha": "5bc6959a72c3187dc666e32a51d1921cc8aee3e0",
+  "failed_run": 45330295404,
+  "artifact": 14897207308,
+  "artifact_sha256": "0b0772802cd4d3c2b9eacba80d3d5716d7b394c7cd4d11f43fc70fdf67f8fdf4",
+  "backend_independently_verified_subset_not_whole_acceptance": {
+    "preflight": {
+      "summary": {
+        "example_count": 7,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb": 7
+      }
+    },
+    "reload": {
+      "summary": {
+        "example_count": 7,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb": 7
+      }
+    },
+    "upgrade-preflight": {
+      "summary": {
+        "example_count": 1,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": 1
+      }
+    },
+    "actual_native_executor": {
+      "summary": {
+        "example_count": 17,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": 17
+      }
+    },
+    "rails": {
+      "rspec": {
+        "duration": 866.701358869,
+        "example_count": 2858,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "pabx-rspec": {
+        "duration": 114.492742072,
+        "example_count": 173,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "corporate-rspec": {
+        "duration": 530.592441002,
+        "example_count": 85,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      }
+    }
+  },
+  "exact_schema_metadata": [
+    {
+      "stage": "fresh",
+      "product_sha": "5bc6959a72c3187dc666e32a51d1921cc8aee3e0",
+      "stored": "jrc_cc_ending_destination_success_v1:11ba52530da3d1024635f07599be4b0212479b3a880830d7c295d6cc6ecd22df",
+      "calculated": "jrc_cc_ending_destination_success_v1:11ba52530da3d1024635f07599be4b0212479b3a880830d7c295d6cc6ecd22df",
+      "component_hashes": {
+        "structure": "d71a2557ff812d7ec0bb6a098bfcf1d417b1625ab69e2ef24fcd7249ff4ddc16",
+        "constraints": "2a19c169cb5dbd351d7aea9ee5fe0c9d4b10558ca428248fadfcb0c7ea5a6aa8",
+        "functions": "581e49bc2eca2fa7c70a021dd8f8f5a5a9e1a2aba5553f9d4ceb8dda71ba3e97",
+        "triggers": "adc17274ba047b6e811fa7d4c9fccfaf237d5617fa68d2e739cfc7930938ba35"
+      },
+      "success_count": 0
+    },
+    {
+      "stage": "reload",
+      "product_sha": "5bc6959a72c3187dc666e32a51d1921cc8aee3e0",
+      "stored": "jrc_cc_ending_destination_success_v1:11ba52530da3d1024635f07599be4b0212479b3a880830d7c295d6cc6ecd22df",
+      "calculated": "jrc_cc_ending_destination_success_v1:11ba52530da3d1024635f07599be4b0212479b3a880830d7c295d6cc6ecd22df",
+      "component_hashes": {
+        "structure": "d71a2557ff812d7ec0bb6a098bfcf1d417b1625ab69e2ef24fcd7249ff4ddc16",
+        "constraints": "2a19c169cb5dbd351d7aea9ee5fe0c9d4b10558ca428248fadfcb0c7ea5a6aa8",
+        "functions": "581e49bc2eca2fa7c70a021dd8f8f5a5a9e1a2aba5553f9d4ceb8dda71ba3e97",
+        "triggers": "adc17274ba047b6e811fa7d4c9fccfaf237d5617fa68d2e739cfc7930938ba35"
+      },
+      "success_count": 0
+    },
+    {
+      "stage": "populated",
+      "product_sha": "5bc6959a72c3187dc666e32a51d1921cc8aee3e0",
+      "stored": "jrc_cc_ending_destination_success_v1:11ba52530da3d1024635f07599be4b0212479b3a880830d7c295d6cc6ecd22df",
+      "calculated": "jrc_cc_ending_destination_success_v1:11ba52530da3d1024635f07599be4b0212479b3a880830d7c295d6cc6ecd22df",
+      "component_hashes": {
+        "structure": "d71a2557ff812d7ec0bb6a098bfcf1d417b1625ab69e2ef24fcd7249ff4ddc16",
+        "constraints": "2a19c169cb5dbd351d7aea9ee5fe0c9d4b10558ca428248fadfcb0c7ea5a6aa8",
+        "functions": "581e49bc2eca2fa7c70a021dd8f8f5a5a9e1a2aba5553f9d4ceb8dda71ba3e97",
+        "triggers": "adc17274ba047b6e811fa7d4c9fccfaf237d5617fa68d2e739cfc7930938ba35"
+      },
+      "success_count": 0
+    }
+  ],
+  "populated_upgrade": {
+    "sha": "5bc6959a72c3187dc666e32a51d1921cc8aee3e0",
+    "synthetic": true,
+    "exact_old_columns_and_values_preserved": true,
+    "rerun_idempotent": true,
+    "existing_tasks_preserved": 1,
+    "readiness_records_preserved": 1,
+    "successful_receipts": 0,
+    "operational_effects_delta": 0
+  },
+  "chrome": {
+    "passed": 260,
+    "failed": 4,
+    "skipped": 0,
+    "flaky": 0
+  },
+  "confirmed_cause": "The synthetic restricted CustomRole included task.assign but not task.update, required by native IndividualPermissions::READ_ALIASES. UI correctly omitted its select.",
+  "native_paths_read_at_sha": [
+    "app/services/jrc_projects/authorization.rb",
+    "app/services/jrc_projects/individual_permissions.rb",
+    "app/services/jrc_projects/projects/create.rb"
+  ],
+  "correction": "Add only the existing native task.update capability to the explicitly synthetic fixture profile; verify effective assign capability and actual project membership before selecting.",
+  "new_native_regressions_prepared": 2,
+  "new_native_regressions_executed": 0,
+  "real_user_grants_or_product_authorization_changed": false,
+  "all_four_native_assignee_UI_flows_and_264_scenarios_retained": true,
+  "new_candidate_full_native_or_Chrome_accepted": false,
+  "M20_private_draft_stays_untransported": true,
+  "candidate_source_sha256": {
+    "script/jrc_call_center_ending_automation_seed.rb": "37ae32235238752784c45b5744361dff3385a03dc2537ebba01206d7b696f2a2",
+    "spec/services/jrc_contact_center/ending_actions/project_assignee_native_permissions_spec.rb": "0fee0df45142130e9f6de084819e87554a41a9a2dc393d8636298d3609ff9012",
+    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "f2ac0670d3cd8678def86965cd696a2c64b2891eb04abfc00cba9d3527fbadd0",
+    ".github/workflows/call-center-administration.yml": "f0a0887af41c00a43972435480cbfd3cfaaf7138731c5ce6fac569638456c560"
+  }
+}
