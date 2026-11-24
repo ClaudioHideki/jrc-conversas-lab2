@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 export const sourcePins = Object.freeze({
   "migration": {
     "path": "db/migrate/20261123235000_create_contact_center_ending_action_readinesses.rb",
-    "sha256": "7980d4b64320f602b9edfee3083c14134c86f2784e0275611556bb26e17fd59f"
+    "sha256": "dd57e137760d1933faf0351ecffda41307da095d050a62f059f3ff6164252c53"
   },
   "sql": {
     "path": "db/functions/20261123235000_contact_center_ending_action_readiness.sql",
@@ -16,7 +16,7 @@ export const sourcePins = Object.freeze({
   },
   "receipt": {
     "path": "lib/jrc_contact_center/ending_action_readiness_schema_receipt.rb",
-    "sha256": "7dd62dafddbab0a574c9e89337df6629b2bafcd6700d6e0a56bdb28adfd7bce2"
+    "sha256": "e117d71bad5e02f22ffc9739bc5bf10c8d1b17ba87fc5a64710a3a25640905de"
   }
 });
 Object.values(sourcePins).forEach(pin => Object.freeze(pin));

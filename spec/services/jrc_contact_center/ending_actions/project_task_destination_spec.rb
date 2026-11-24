@@ -40,10 +40,10 @@ RSpec.describe JrcContactCenter::EndingActions::ProjectTaskDestination do
 
   it 'preserves explicit absolute dates and optional native labels and description without copying call content' do
     parameters.fetch('attributes').merge!('starts_on' => '2026-11-22', 'due_on' => '2026-11-24',
-                                        'description' => 'SYNTHETIC configured description', 'labels' => ['SYNTHETIC'])
+                                          'description' => 'SYNTHETIC configured description', 'labels' => ['SYNTHETIC'])
     task = create_destination_task
     expect(task).to have_attributes(starts_on: Date.iso8601('2026-11-22'), due_on: Date.iso8601('2026-11-24'),
-                                   description: 'SYNTHETIC configured description', labels: ['SYNTHETIC'])
+                                    description: 'SYNTHETIC configured description', labels: ['SYNTHETIC'])
   end
 
   it 'does not invent a timezone when a relative deadline lacks its reviewed source timezone' do

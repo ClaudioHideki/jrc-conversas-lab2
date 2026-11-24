@@ -12,7 +12,7 @@ require Rails.root.join('db/migrate/20261123235000_create_contact_center_ending_
 require Rails.root.join('script/jrc_call_center_ending_readiness_schema_probe')
 require Rails.root.join('script/jrc_call_center_ending_readiness_upgrade')
 
-RSpec.describe 'Prospective readiness installation on populated native M17' do
+RSpec.describe JrcContactCenter::SyntheticEndingReadinessUpgrade do
   before do
     config = ApplicationRecord.connection_db_config
     owned = Rails.env.test? && ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&

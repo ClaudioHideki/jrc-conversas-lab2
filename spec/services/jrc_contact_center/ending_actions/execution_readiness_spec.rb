@@ -5,8 +5,8 @@ RSpec.describe JrcContactCenter::EndingActions::ExecutionReadiness do
 
   def activate_readiness
     JrcContactCenter::EndingActions::ActivateRule.new(account: account, member: member, rule_code: 'SYNTHETIC_ORIGIN_RULE',
-                                                       request_key: SecureRandom.uuid,
-                                                       expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
+                                                      request_key: SecureRandom.uuid,
+                                                      expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
   end
 
   def readiness_for(original = origin, code = 'SYNTHETIC_ORIGIN_RULE')

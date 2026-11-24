@@ -136,10 +136,10 @@ class JrcContactCenter::SyntheticEndingReadinessUpgrade
 
   def create_attendance
     @call = JrcContactCenter::CallSession.create!(account: @account, provider: 'synthetic', correlation_id: SecureRandom.uuid,
-                                                 direction: 'inbound', status: 'connected', started_at: Time.current, answered_at: Time.current,
-                                                 current_unit: @queue.unit, current_queue: @queue)
+                                                  direction: 'inbound', status: 'connected', started_at: Time.current, answered_at: Time.current,
+                                                  current_unit: @queue.unit, current_queue: @queue)
     @leg = JrcContactCenter::CallLeg.create!(account: @account, call_session: @call, account_user: @member, queue: @queue,
-                                            direction: 'inbound', status: 'connected', started_at: @call.started_at, answered_at: @call.answered_at)
+                                             direction: 'inbound', status: 'connected', started_at: @call.started_at, answered_at: @call.answered_at)
     @call.update!(status: 'ended', ended_at: Time.current)
     @qualification = JrcContactCenter::Qualification.find_by!(account: @account, account_user: @member, call_session: @call)
     @origin = JrcContactCenter::EndingActionOrigin.find_by!(account: @account, source_qualification_id: @qualification.id)

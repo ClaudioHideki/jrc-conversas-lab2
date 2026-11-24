@@ -39,7 +39,7 @@ RSpec.describe CreateContactCenterEndingActionReadinesses do
   it 'rejects an unknown extra trigger instead of ignoring unreviewed behavior on its owned ledger' do
     expect do
       ApplicationRecord.transaction(requires_new: true) do
-        ApplicationRecord.connection.execute(<<~SQL)
+        ApplicationRecord.connection.execute(<<~SQL.squish)
           CREATE FUNCTION cc_synthetic_unreviewed_readiness() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$;
           CREATE TRIGGER cc_synthetic_unreviewed_readiness BEFORE INSERT ON jrc_contact_center_ending_action_readinesses
             FOR EACH ROW EXECUTE FUNCTION cc_synthetic_unreviewed_readiness();

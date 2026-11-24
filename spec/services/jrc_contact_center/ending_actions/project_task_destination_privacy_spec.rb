@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'stringio'
 
-RSpec.describe JrcContactCenter::EndingActions::ProjectTaskDestination, 'private native destination binds' do
+RSpec.describe JrcContactCenter::EndingActions::ProjectTaskDestination do
   include_context 'with native ending execution original evidence'
 
   let(:marker) { 'SYNTHETIC_PRIVATE_NATIVE_TASK_23b8' }

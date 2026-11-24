@@ -5,8 +5,8 @@ RSpec.describe JrcContactCenter::EndingActionReadiness do
 
   let(:readiness) do
     JrcContactCenter::EndingActions::ActivateRule.new(account: account, member: member, rule_code: 'SYNTHETIC_ORIGIN_RULE',
-                                                       request_key: SecureRandom.uuid,
-                                                       expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
+                                                      request_key: SecureRandom.uuid,
+                                                      expected_revision: JrcContactCenter::AcwPolicy.new(account: account).revision).call
   end
 
   it 'rejects direct SQL retargeting and preserves the complete original activation' do

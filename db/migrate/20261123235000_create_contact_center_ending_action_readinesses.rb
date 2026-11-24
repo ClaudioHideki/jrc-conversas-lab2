@@ -6,7 +6,7 @@ class CreateContactCenterEndingActionReadinesses < ActiveRecord::Migration[7.1]
   SQL = 'db/functions/20261123235000_contact_center_ending_action_readiness.sql'
   SOURCES = {
     'db/functions/20261123235000_contact_center_ending_action_readiness.sql' => '13a6da4ca25eb6dd7f826a39070ebabb381fc776934f098504e1020c8d24d4e7',
-    'lib/jrc_contact_center/ending_action_readiness_schema_receipt.rb' => '7dd62dafddbab0a574c9e89337df6629b2bafcd6700d6e0a56bdb28adfd7bce2'
+    'lib/jrc_contact_center/ending_action_readiness_schema_receipt.rb' => 'e117d71bad5e02f22ffc9739bc5bf10c8d1b17ba87fc5a64710a3a25640905de'
   }.freeze
 
   def up
@@ -54,8 +54,8 @@ class CreateContactCenterEndingActionReadinesses < ActiveRecord::Migration[7.1]
 
   def create_references
     add_foreign_key TABLE, :jrc_contact_center_ending_scope_accounts, column: :account_id, primary_key: :account_id, on_delete: :cascade
-    add_foreign_key TABLE, :jrc_contact_center_ending_action_versions, column: [:version_id, :account_id],
-                    primary_key: [:id, :account_id], deferrable: :deferred, name: 'cc_ending_readiness_version_fk'
+    add_foreign_key TABLE, :jrc_contact_center_ending_action_versions,
+                    column: [:version_id, :account_id], primary_key: [:id, :account_id], deferrable: :deferred, name: 'cc_ending_readiness_version_fk'
   end
 
   def create_constraints

@@ -19,14 +19,17 @@ class JrcContactCenter::EndingActionReadinessSchemaReceipt
   end
 
   def verify!
-    valid = @connection.table_exists?(TABLE) && @connection.columns(TABLE).map(&:name).sort == COLUMNS.sort
-    valid &&= functions.length == FUNCTIONS.length && triggers.map { |row| row.first(2) } == [['cc_ending_action_readiness_immutable', TABLE]]
-    valid &&= valid_references?
-    valid &&= @connection.table_comment(TABLE) == token
+    valid = valid_structure? && valid_references? && @connection.table_comment(TABLE) == token
     raise ActiveRecord::MigrationError, 'Unexpected ending readiness schema; preserve history and investigate' unless valid
   end
 
   private
+
+  def valid_structure?
+    columns_valid = @connection.table_exists?(TABLE) && @connection.columns(TABLE).map(&:name).sort == COLUMNS.sort
+    columns_valid && functions.length == FUNCTIONS.length &&
+      triggers.map { |row| row.first(2) } == [['cc_ending_action_readiness_immutable', TABLE]]
+  end
 
   def valid_references?
     keys = @connection.foreign_keys(TABLE)

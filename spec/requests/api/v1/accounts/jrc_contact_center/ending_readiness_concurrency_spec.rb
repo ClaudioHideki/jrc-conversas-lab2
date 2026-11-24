@@ -17,7 +17,7 @@ RSpec.describe 'Ending prospective activation under native account authority' do
     target = Account.find(account_id)
     person = target.account_users.find(member_id)
     JrcContactCenter::EndingActions::ActivateRule.new(account: target, member: person, rule_code: 'SYNTHETIC_ORIGIN_RULE',
-                                                       request_key: key, expected_revision: revision).call
+                                                      request_key: key, expected_revision: revision).call
   end
 
   def waiting_activation(state, key, revision)

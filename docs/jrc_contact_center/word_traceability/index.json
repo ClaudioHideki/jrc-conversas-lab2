@@ -1336,10 +1336,10 @@
     "classification": "implemented_adapter_awaiting_native_tests_not_operational_executor",
     "source_sha256": {
       "app/services/jrc_contact_center/ending_actions/project_task_destination.rb": "ce1b7e15338ec0c9a6d460ab985d5905e9cf885ffef29f6e7e23953354148a0b",
-      "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": "87926d475a31d1484e35b0eb5c58f1923fc8e41dd41aa64b6303de6a73bbc04d",
-      "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": "ba46825bfffb6519e315af8909e01af2dbc48ea66cebf0371714818ebd52c475",
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": "fad3d3075341f8ce82363c7858826f56e2e14706d6913820e205711c6f8fe14c",
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": "233b42399836c06752e69f9f1ef7d2903162dfc09907a6d6acbb8bccc34838d8",
       "config/initializers/jrc_contact_center_ending_privacy.rb": "790b0005a669e5ed6a850308030cccc7f6ff5a21a27a31e2f25e3b0423d804e0",
-      ".github/workflows/call-center-administration.yml": "9fa892bec4b7f91c1ee98abf2fe72055e22e7c39537155b43ac6ece128e82f96"
+      ".github/workflows/call-center-administration.yml": "f950f4bbf35a9a3696640ae5e7e1b6a31d92d36e85a089f9f750264ffa8936ae"
     },
     "native_cases_required": {
       "project_task_destination": 14,
@@ -1371,8 +1371,8 @@
     ],
     "migrations_or_historical_SQL_changed": false,
     "operational_effects_enabled_by_installation": false,
-    "existing_gates_restored_exactly": true,
-    "new_static_rejected_workflow_mutations": 10,
+    "existing_gates_restored_except_reviewed_finite_timeout": true,
+    "new_static_rejected_workflow_mutations": 11,
     "external_collector_unit_cases": 35,
     "static_tests_are_not_native": true,
     "native_Rails_Vue_Chrome_passed_for_this_adapter": false
@@ -1385,7 +1385,7 @@
       "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb": 9,
       "spec/models/jrc_contact_center/ending_action_readiness_spec.rb": 4,
       "spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb": 5,
-      "spec/services/jrc_contact_center/ending_readiness_populated_upgrade_spec.rb": 1,
+      "spec/services/jrc_contact_center/synthetic_ending_readiness_upgrade_spec.rb": 1,
       "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb": 3,
       "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": 14,
       "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": 3
@@ -1395,21 +1395,21 @@
       "app/services/jrc_contact_center/ending_actions/activate_rule.rb": "23bdd01b77fff72ce916bbcdc44daccb0545415afcc83096aae01e18a09e2e44",
       "app/services/jrc_contact_center/ending_actions/execution_readiness.rb": "0db216644fd6ac81672488baba018f23ff34b3d221eff55d869a64a82281a813",
       "app/services/jrc_contact_center/ending_actions/project_task_destination.rb": "ce1b7e15338ec0c9a6d460ab985d5905e9cf885ffef29f6e7e23953354148a0b",
-      "db/migrate/20261123235000_create_contact_center_ending_action_readinesses.rb": "7980d4b64320f602b9edfee3083c14134c86f2784e0275611556bb26e17fd59f",
+      "db/migrate/20261123235000_create_contact_center_ending_action_readinesses.rb": "dd57e137760d1933faf0351ecffda41307da095d050a62f059f3ff6164252c53",
       "db/functions/20261123235000_contact_center_ending_action_readiness.sql": "13a6da4ca25eb6dd7f826a39070ebabb381fc776934f098504e1020c8d24d4e7",
-      "lib/jrc_contact_center/ending_action_readiness_schema_receipt.rb": "7dd62dafddbab0a574c9e89337df6629b2bafcd6700d6e0a56bdb28adfd7bce2",
+      "lib/jrc_contact_center/ending_action_readiness_schema_receipt.rb": "e117d71bad5e02f22ffc9739bc5bf10c8d1b17ba87fc5a64710a3a25640905de",
       "spec/services/jrc_contact_center/ending_actions/activate_rule_spec.rb": "9ae16f1fee59f5538308744477d14441840922bc49dc6d8acb9ce23e984ba377",
-      "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb": "d588013c20ec1c899a918283dfd7c9c1795075167cd462f96d6a602ddeeab637",
-      "spec/models/jrc_contact_center/ending_action_readiness_spec.rb": "4d8eb1ba963cf16df49e6e5e88dd27298b30347d3c932142375e2730e23a0524",
-      "spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb": "d06421b1a436485f01ec1431c03b533c18327d4784d49f0c2674f51cea44febd",
-      "spec/services/jrc_contact_center/ending_readiness_populated_upgrade_spec.rb": "8a6bdad9b395c36b0903662b2fb3d5c332c050cf3f3748d02b94a29fb4501348",
-      "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb": "137712902e0b58345ae07046b0921958234b2c4ce4e86aef6ac229e3dc0d2118",
-      "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": "87926d475a31d1484e35b0eb5c58f1923fc8e41dd41aa64b6303de6a73bbc04d",
-      "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": "ba46825bfffb6519e315af8909e01af2dbc48ea66cebf0371714818ebd52c475",
-      ".github/workflows/call-center-administration.yml": "3940bd06c11e5e236cb3a0ca440220b0ada5b58cf1d25bb773c15e6ef3faade3",
+      "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb": "dafbffa0b88d6fddfbe9e5da2c3ae05920819fb42f28286888e569ed3ecdb2af",
+      "spec/models/jrc_contact_center/ending_action_readiness_spec.rb": "456631b3184253cec33ad3fe2ae6eaf820ad08762c6a7164817b7e2ab64dd093",
+      "spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb": "201bf2d26cb99a5645c747705792a50c077a991fc6220e68b10910d85fa37275",
+      "spec/services/jrc_contact_center/synthetic_ending_readiness_upgrade_spec.rb": "0af1bc91d9c8bc4562884a47576a6330e8d1b3b4189f79f41387fe5e011a7233",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb": "edcc9cae5d8f9a187435896e4f060af5305b91140954d97371d9c493895b0fae",
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": "fad3d3075341f8ce82363c7858826f56e2e14706d6913820e205711c6f8fe14c",
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": "233b42399836c06752e69f9f1ef7d2903162dfc09907a6d6acbb8bccc34838d8",
+      ".github/workflows/call-center-administration.yml": "f950f4bbf35a9a3696640ae5e7e1b6a31d92d36e85a089f9f750264ffa8936ae",
       "script/jrc_call_center_ending_readiness_schema_probe.rb": "007c6dd5462662a402e641087045baa2cc2a2521dd9c544bb4550b1a0d80b8ff",
-      "script/jrc_call_center_ending_readiness_upgrade.rb": "0a66a2adf9fbbd05b07906b53dcc0b9564e687c30a84d6859054dd2e3bba4071",
-      "script/validate_cc_ending_readiness_migration.mjs": "6fa410595b44d0d503854c451731e59de18edefc20e797dc5389a6311325c06d",
+      "script/jrc_call_center_ending_readiness_upgrade.rb": "50a2adfa6682ac8973a4e1f96335fa9bc0dd3e42ca80e6fe5077c6e426409d6f",
+      "script/validate_cc_ending_readiness_migration.mjs": "42e9bd5a86e9e8644e1e7843e9140d1d3c04bd700ad99d7764664e33dcbcdde3",
       "script/validate_cc_access_migration.mjs": "e7f08aa027b9caf9486c9d78d0a54a7cb1f4102df90be36d1579ff40f23930ce",
       "spec/support/contact_center_ending_origin_schema_dependencies.rb": "46226a23a18cb11246e3a53c76f66e9c366a1250cf192633c69f99d520ea1e00"
     },
@@ -1668,5 +1668,218 @@
       "Action group below all text by at least8px; no horizontal page overflow.",
       "Four SHA-bound geometry JSON receipts plus original PNGs. Same264Chrome scenarios."
     ]
+  },
+  "readiness_native_lint_failure_and_correction": {
+    "failed_sha": "852d876045461e88e5941903f3f3ac06cf6a1fd0",
+    "failed_run": 45307382415,
+    "artifact": 14882068237,
+    "artifact_sha256": "fa3187f84ce7bfbb3792ede1b6dd622a0ec855dcba0f6ebfc0851a21aed77d3b",
+    "new_lint_offenses": [
+      {
+        "path": "db/migrate/20261123235000_create_contact_center_ending_action_readinesses.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 58,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "lib/jrc_contact_center/ending_action_readiness_schema_receipt.rb",
+        "cop": "Metrics/CyclomaticComplexity",
+        "line": 21,
+        "message": "Cyclomatic complexity for `verify!` is too high. [9/7]"
+      },
+      {
+        "path": "lib/jrc_contact_center/ending_action_readiness_schema_receipt.rb",
+        "cop": "Metrics/PerceivedComplexity",
+        "line": 21,
+        "message": "Perceived complexity for `verify!` is too high. [9/8]"
+      },
+      {
+        "path": "script/jrc_call_center_ending_readiness_upgrade.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 139,
+        "message": "Align the arguments of a method call if they span more than one line."
+      },
+      {
+        "path": "script/jrc_call_center_ending_readiness_upgrade.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 139,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "script/jrc_call_center_ending_readiness_upgrade.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 140,
+        "message": "Align the arguments of a method call if they span more than one line."
+      },
+      {
+        "path": "script/jrc_call_center_ending_readiness_upgrade.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 140,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "script/jrc_call_center_ending_readiness_upgrade.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 142,
+        "message": "Align the arguments of a method call if they span more than one line."
+      },
+      {
+        "path": "script/jrc_call_center_ending_readiness_upgrade.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 142,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "spec/models/jrc_contact_center/ending_action_readiness_spec.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 8,
+        "message": "Align the arguments of a method call if they span more than one line."
+      },
+      {
+        "path": "spec/models/jrc_contact_center/ending_action_readiness_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 8,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "spec/models/jrc_contact_center/ending_action_readiness_spec.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 9,
+        "message": "Align the arguments of a method call if they span more than one line."
+      },
+      {
+        "path": "spec/models/jrc_contact_center/ending_action_readiness_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 9,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 20,
+        "message": "Align the arguments of a method call if they span more than one line."
+      },
+      {
+        "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 20,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb",
+        "cop": "Rails/SquishedSQLHeredocs",
+        "line": 42,
+        "message": "Use `<<~SQL.squish` instead of `<<~SQL`."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 8,
+        "message": "Align the arguments of a method call if they span more than one line."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 8,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 9,
+        "message": "Align the arguments of a method call if they span more than one line."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 9,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb",
+        "cop": "RSpec/SpecFilePathFormat",
+        "line": 4,
+        "message": "Spec path should end with `jrc_contact_center/ending_actions/project_task_destination*private_native_destination_binds*_spec.rb`."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb",
+        "cop": "RSpec/DescribeMethod",
+        "line": 4,
+        "message": "The second argument to describe should be the method being tested. '#instance' or '.class'."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 43,
+        "message": "Align the arguments of a method call if they span more than one line."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 43,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb",
+        "cop": "Layout/ArgumentAlignment",
+        "line": 46,
+        "message": "Align the arguments of a method call if they span more than one line."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb",
+        "cop": "Layout/HashAlignment",
+        "line": 46,
+        "message": "Align the keys of a hash literal if they span more than one line."
+      },
+      {
+        "path": "spec/services/jrc_contact_center/ending_readiness_populated_upgrade_spec.rb",
+        "cop": "RSpec/DescribeClass",
+        "line": 15,
+        "message": "The first argument to describe should be the class or module being tested."
+      }
+    ],
+    "native_rails_examples_executed": 0,
+    "corrections": [
+      "Align native keyword/hash continuations without changing values.",
+      "Describe the actual native upgrade class and preserve its complete single example under the matching spec path.",
+      "Use the native squished SQL-heredoc style; retain the unknown-trigger rejection scenario.",
+      "Separate the schema-shape predicate while retaining column/function/trigger/reference/token checks in their original order.",
+      "Update only the uninstalled M18 candidate source pins and exact spec references; old17 migration/SQL source admission remains unchanged."
+    ],
+    "candidate_identity_changes": {
+      "candidate_parent": "852d876045461e88e5941903f3f3ac06cf6a1fd0",
+      "old_new_readiness_migration_sha256": [
+        "7980d4b64320f602b9edfee3083c14134c86f2784e0275611556bb26e17fd59f",
+        "dd57e137760d1933faf0351ecffda41307da095d050a62f059f3ff6164252c53"
+      ],
+      "old_new_schema_receipt_source_sha256": [
+        "7dd62dafddbab0a574c9e89337df6629b2bafcd6700d6e0a56bdb28adfd7bce2",
+        "e117d71bad5e02f22ffc9739bc5bf10c8d1b17ba87fc5a64710a3a25640905de"
+      ],
+      "readiness_sql_unchanged": true,
+      "reviewed_spec_rename": [
+        "spec/services/jrc_contact_center/ending_readiness_populated_upgrade_spec.rb",
+        "spec/services/jrc_contact_center/synthetic_ending_readiness_upgrade_spec.rb"
+      ],
+      "old_upgrade_spec_sha256": "8a6bdad9b395c36b0903662b2fb3d5c332c050cf3f3748d02b94a29fb4501348",
+      "no_native_migration_or_examples_ran_before_the_lint_failure": true,
+      "previous_17_migrations_and_SQL_must_be_verified_unchanged": true,
+      "no_rules_or_assertions_removed": true
+    },
+    "schema_predicate_static_equivalence": {
+      "boolean_combinations": 64,
+      "all_equal": true,
+      "native_acceptance": false
+    },
+    "static_source_admission": {
+      "cases": 68,
+      "passed": 68,
+      "native_schema_or_runtime_proof": false
+    },
+    "external_evidence_collector_unit_cases": 35,
+    "native_cases_retained_for_next_CI": 49,
+    "lint_rules_thresholds_exclusions_and_assertions_unchanged": true,
+    "native_revalidation_required": true,
+    "whole_figure10_accepted": false
   }
 }

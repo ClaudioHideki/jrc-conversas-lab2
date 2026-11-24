@@ -3,10 +3,10 @@
   "classification": "implemented_adapter_awaiting_native_tests_not_operational_executor",
   "source_sha256": {
     "app/services/jrc_contact_center/ending_actions/project_task_destination.rb": "ce1b7e15338ec0c9a6d460ab985d5905e9cf885ffef29f6e7e23953354148a0b",
-    "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": "87926d475a31d1484e35b0eb5c58f1923fc8e41dd41aa64b6303de6a73bbc04d",
-    "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": "ba46825bfffb6519e315af8909e01af2dbc48ea66cebf0371714818ebd52c475",
+    "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": "fad3d3075341f8ce82363c7858826f56e2e14706d6913820e205711c6f8fe14c",
+    "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": "233b42399836c06752e69f9f1ef7d2903162dfc09907a6d6acbb8bccc34838d8",
     "config/initializers/jrc_contact_center_ending_privacy.rb": "790b0005a669e5ed6a850308030cccc7f6ff5a21a27a31e2f25e3b0423d804e0",
-    ".github/workflows/call-center-administration.yml": "9fa892bec4b7f91c1ee98abf2fe72055e22e7c39537155b43ac6ece128e82f96"
+    ".github/workflows/call-center-administration.yml": "f950f4bbf35a9a3696640ae5e7e1b6a31d92d36e85a089f9f750264ffa8936ae"
   },
   "native_cases_required": {
     "project_task_destination": 14,
@@ -38,8 +38,8 @@
   ],
   "migrations_or_historical_SQL_changed": false,
   "operational_effects_enabled_by_installation": false,
-  "existing_gates_restored_exactly": true,
-  "new_static_rejected_workflow_mutations": 10,
+  "existing_gates_restored_except_reviewed_finite_timeout": true,
+  "new_static_rejected_workflow_mutations": 11,
   "external_collector_unit_cases": 35,
   "static_tests_are_not_native": true,
   "native_Rails_Vue_Chrome_passed_for_this_adapter": false
