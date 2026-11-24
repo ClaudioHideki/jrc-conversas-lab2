@@ -1,0 +1,25 @@
+{
+  "failed_sha": "1a4c6a9187d6b70dcf7652913b25610f56b3262d",
+  "run": 45325333111,
+  "job": 138213437696,
+  "artifact": 14889704066,
+  "artifact_sha256": "cc58d3d56845b1d0f10223a550d9e49c27e5b9e75211200aae1b25d427b2bae5",
+  "sanitized_job_log_sha256": "518e6239c232121881cc90a96c918ee91f6cc4839887f4e2ec8a09dcdfdd9683",
+  "confirmed": [
+    "Focused and incremental Ruby lint have zero new offenses.",
+    "Fresh migration19 and all fresh schema receipts passed.",
+    "Reloaded M1-M18 receipts passed; exact M19 verification raised ActiveRecord::MigrationError.",
+    "The M19 function text in the generated Ruby schema matches its fresh pg_get_functiondef byte for byte."
+  ],
+  "unresolved": "Exact post-reload structural/reference/fingerprint difference; old probe raised before writing these components.",
+  "diagnostic_change": [
+    "Write unverified owned schema metadata before verify!, then mark verified only after the original exact guard and zero-success assertion pass.",
+    "Preserve the same synthetic schema in early artifacts, already retained by the existing final artifact.",
+    "Require verified=true and all three native checks in workflow and independent collector; an unverified diagnostic never grants acceptance."
+  ],
+  "migration_SQL_receipt_or_native_authorization_changed": false,
+  "gates_weakened": false,
+  "root_cause_claimed_fixed": false,
+  "native_RSpec_cases_run": 0,
+  "whole_figure10_accepted": false
+}

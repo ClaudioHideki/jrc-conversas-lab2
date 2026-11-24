@@ -340,6 +340,7 @@ jobs:
           name: call-center-native-early-${{ github.sha }}
           path: |
             /tmp/call-center-initial-schema.log
+            /tmp/call-center-schema.rb
             /tmp/call-center-rspec.json
             /tmp/call-center-ending-version-preflight.json
             /tmp/call-center-ending-version-lint.json
@@ -563,6 +564,8 @@ jobs:
           assert len({item['stored'] for item in success_receipts}) == 1
           for receipt in success_receipts:
               assert receipt['product_sha'] == os.environ['GITHUB_SHA'] and receipt['success_count'] == 0
+              assert receipt['verified'] is True
+              assert receipt['verification_checks'] == {'structure': True, 'references': True, 'fingerprint': True}
               assert receipt['stored'] == receipt['calculated']
               for component, values in receipt['components'].items():
                   encoded = json.dumps(values, ensure_ascii=False, separators=(',', ':')).encode('utf-8')

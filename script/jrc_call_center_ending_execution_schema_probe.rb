@@ -15,10 +15,15 @@ module JrcContactCenter::SyntheticEndingExecutionSchemaProbe
 
     require Rails.root.join('lib/jrc_contact_center/ending_action_execution_schema_receipt')
     receipt = JrcContactCenter::EndingActionExecutionSchemaReceipt.new(ApplicationRecord.connection)
-    receipt.verify!
     proof = report(stage, receipt)
+    write_report(stage, proof.merge(verified: false))
+    receipt.verify!
     raise 'Installation cannot execute an existing attendance' unless proof[:success_count].zero?
 
+    write_report(stage, proof.merge(verified: true))
+  end
+
+  def self.write_report(stage, proof)
     File.write("/tmp/call-center-ending-success-schema-#{stage}.json", JSON.pretty_generate(proof))
   end
 
@@ -32,6 +37,8 @@ module JrcContactCenter::SyntheticEndingExecutionSchemaProbe
     { stage: stage, product_sha: ENV.fetch('GITHUB_SHA'), stored: ApplicationRecord.connection.table_comment(receipt.class::TABLE),
       calculated: receipt.send(:token), components: components,
       component_hashes: components.transform_values { |value| Digest::SHA256.hexdigest(JSON.generate(value)) },
-      success_count: JrcContactCenter::EndingActionExecution.count }
+      success_count: JrcContactCenter::EndingActionExecution.count,
+      verification_checks: { structure: receipt.send(:valid_structure?), references: receipt.send(:valid_references?),
+                             fingerprint: ApplicationRecord.connection.table_comment(receipt.class::TABLE) == receipt.send(:token) } }
   end
 end

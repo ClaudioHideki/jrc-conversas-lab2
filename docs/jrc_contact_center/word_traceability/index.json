@@ -2107,7 +2107,7 @@
     "parent": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
     "status": "implemented_internal_projects_executor_awaiting_native_validation",
     "source_sha256": {
-      "script/jrc_call_center_ending_execution_schema_probe.rb": "ead30e7314384240aa84870d17e6b04eac49eca0ba976ff4920d7128b4c7c458",
+      "script/jrc_call_center_ending_execution_schema_probe.rb": "4da60d73726d665bcfff2031d64f90a7515d07f3c2d136488122ff09597c83db",
       "script/jrc_call_center_ending_success_upgrade.rb": "c64a0702bd74aa0d0089032dc2667b24f4ab3353c096b187cd4107ae892e5911",
       "script/validate_cc_access_migration.mjs": "0d46b0c1e0ad1640296300b07f470a134118cb7e7fa087ef019291bdb8d4fcd3",
       "script/validate_cc_ending_execution_admission.test.mjs": "335736f3f72bd10218545f68556c941357fbb4e9212ec0ee00b3fc7941706b86",
@@ -2121,7 +2121,7 @@
       "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": "93a0ec38a5123a7a52e8a63a0ac7318abaa07c56850895d9e31dca2e78128d6d",
       "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb": "a11681713da8ecd04300b458fc765693fee52eff47489a269fb98cb0c90168af",
       "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": "40ba73172522654661f2e8da5e8a5a153b6572f61d10c037b194387fc37cbba9",
-      ".github/workflows/call-center-administration.yml": "b6c5fbdde64707321e2d37d7d56dc48b01c5ea86d537b386513aa2a5c3171047",
+      ".github/workflows/call-center-administration.yml": "e94be6605cf848b73242cc1ff20118c0bf05c24128c3a01f7330f3323916d3e0",
       "spec/support/contact_center_ending_origin_schema_dependencies.rb": "7e3502b546af98b2c00f7056fc80215bce0af81e1789ff17ae7f8d698c688781",
       "script/jrc_call_center_ending_automation_seed.rb": "301ed75008fb7465fc8c56b0b98a7d61a1fd5f8653d4cb83b8eb2bfab8853c85",
       "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "3600a5fefb5058d814bc28b3167f378b8807a30c285685a2a0a30eb4b2729a39"
@@ -2152,12 +2152,13 @@
       "classification": "private_static_ci_draft_not_published_or_executed",
       "parent_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
       "parent_workflow_sha256": "f950f4bbf35a9a3696640ae5e7e1b6a31d92d36e85a089f9f750264ffa8936ae",
-      "candidate_workflow_sha256": "b6c5fbdde64707321e2d37d7d56dc48b01c5ea86d537b386513aa2a5c3171047",
+      "candidate_workflow_sha256": "e94be6605cf848b73242cc1ff20118c0bf05c24128c3a01f7330f3323916d3e0",
       "additive_patches": 12,
       "every_old_gate_restored_exactly": true,
       "native_cases_prepared": 23,
       "native_cases_executed": 0,
-      "additional_assertions": "Two strict native assignee assertions in the same four real editor flows; no old assertions removed."
+      "additional_assertions": "Two strict native assignee assertions in the same four real editor flows; no old assertions removed.",
+      "additional_schema_diagnostic_assertions": "Unverified early diagnostic is not native acceptance; original exact verify! remains mandatory."
     },
     "remaining": [
       "Native execution and concurrency acceptance of this candidate",
@@ -2173,7 +2174,7 @@
     "automatic_dispatch_enabled": false,
     "whole_figure10_accepted": false,
     "whole_part1_complete": false,
-    "last_failed_checkpoint": "e3ef9512342ca87a55e1784e531e6bf65391b9ef",
+    "last_failed_checkpoint": "1a4c6a9187d6b70dcf7652913b25610f56b3262d",
     "lint_correction": {
       "failed_sha": "e3ef9512342ca87a55e1784e531e6bf65391b9ef",
       "failed_run": 45323043739,
@@ -2303,6 +2304,31 @@
       "no_new_grants_or_production_data": true,
       "existing_editor_flow_count_unchanged": 4,
       "native_execution_not_claimed": true
+    },
+    "reload_diagnostic": {
+      "failed_sha": "1a4c6a9187d6b70dcf7652913b25610f56b3262d",
+      "run": 45325333111,
+      "job": 138213437696,
+      "artifact": 14889704066,
+      "artifact_sha256": "cc58d3d56845b1d0f10223a550d9e49c27e5b9e75211200aae1b25d427b2bae5",
+      "sanitized_job_log_sha256": "518e6239c232121881cc90a96c918ee91f6cc4839887f4e2ec8a09dcdfdd9683",
+      "confirmed": [
+        "Focused and incremental Ruby lint have zero new offenses.",
+        "Fresh migration19 and all fresh schema receipts passed.",
+        "Reloaded M1-M18 receipts passed; exact M19 verification raised ActiveRecord::MigrationError.",
+        "The M19 function text in the generated Ruby schema matches its fresh pg_get_functiondef byte for byte."
+      ],
+      "unresolved": "Exact post-reload structural/reference/fingerprint difference; old probe raised before writing these components.",
+      "diagnostic_change": [
+        "Write unverified owned schema metadata before verify!, then mark verified only after the original exact guard and zero-success assertion pass.",
+        "Preserve the same synthetic schema in early artifacts, already retained by the existing final artifact.",
+        "Require verified=true and all three native checks in workflow and independent collector; an unverified diagnostic never grants acceptance."
+      ],
+      "migration_SQL_receipt_or_native_authorization_changed": false,
+      "gates_weakened": false,
+      "root_cause_claimed_fixed": false,
+      "native_RSpec_cases_run": 0,
+      "whole_figure10_accepted": false
     }
   },
   "native_projects_success_lint_followup": {
@@ -2434,5 +2460,30 @@
     "no_new_grants_or_production_data": true,
     "existing_editor_flow_count_unchanged": 4,
     "native_execution_not_claimed": true
+  },
+  "native_projects_success_schema_reload_pending_diagnostic": {
+    "failed_sha": "1a4c6a9187d6b70dcf7652913b25610f56b3262d",
+    "run": 45325333111,
+    "job": 138213437696,
+    "artifact": 14889704066,
+    "artifact_sha256": "cc58d3d56845b1d0f10223a550d9e49c27e5b9e75211200aae1b25d427b2bae5",
+    "sanitized_job_log_sha256": "518e6239c232121881cc90a96c918ee91f6cc4839887f4e2ec8a09dcdfdd9683",
+    "confirmed": [
+      "Focused and incremental Ruby lint have zero new offenses.",
+      "Fresh migration19 and all fresh schema receipts passed.",
+      "Reloaded M1-M18 receipts passed; exact M19 verification raised ActiveRecord::MigrationError.",
+      "The M19 function text in the generated Ruby schema matches its fresh pg_get_functiondef byte for byte."
+    ],
+    "unresolved": "Exact post-reload structural/reference/fingerprint difference; old probe raised before writing these components.",
+    "diagnostic_change": [
+      "Write unverified owned schema metadata before verify!, then mark verified only after the original exact guard and zero-success assertion pass.",
+      "Preserve the same synthetic schema in early artifacts, already retained by the existing final artifact.",
+      "Require verified=true and all three native checks in workflow and independent collector; an unverified diagnostic never grants acceptance."
+    ],
+    "migration_SQL_receipt_or_native_authorization_changed": false,
+    "gates_weakened": false,
+    "root_cause_claimed_fixed": false,
+    "native_RSpec_cases_run": 0,
+    "whole_figure10_accepted": false
   }
 }
