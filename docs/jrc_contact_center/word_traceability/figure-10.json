@@ -13,8 +13,8 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue",
       "git_blob_at_validated_base": "14b20edf713f80c5a3772c6092987d1eebbd1032",
-      "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "8badb823d33ee7ca4c273cb1db90ba88779ea01f6b3dec5027b6c7d9d763b8ca"
+      "state": "implementado_pendente_revalidacao_Chrome_novo_SHA",
+      "current_sha256": "87abf3a68dece4066afc36702973e938dbd95d6f2060ad09e66ababd7cb39216"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/configure_rule.rb",
@@ -4054,5 +4054,122 @@
     "workflow_embedded_Python_blocks_compiled": 13,
     "migrations_SQL_receipts_product_services_permissions_and_lint_rules_unchanged": true,
     "native_revalidation_or_visual_acceptance": false
+  },
+  "M20_native_frontend_formatter_revalidation": {
+    "parent": "d80faea56326d10c89638249f68d1aa5f43f78c0",
+    "run": 45399079243,
+    "artifact": 14926136636,
+    "artifact_sha256": "a9a861da58cadf5689a2036800e1f5be478e475d2e897dad43fa7fcc15ee61b5",
+    "confirmed_failure": "One Prettier ternary line-wrap in EndingReasonCatalog.vue; no functional token change.",
+    "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue",
+    "before_sha256": "8badb823d33ee7ca4c273cb1db90ba88779ea01f6b3dec5027b6c7d9d763b8ca",
+    "after_sha256": "87abf3a68dece4066afc36702973e938dbd95d6f2060ad09e66ababd7cb39216",
+    "runner_formatter_output_matches_independent_bounded_probe": true,
+    "confirmed_frontend_errors": 1,
+    "frontend_warnings_retained_for_separate_review": 275,
+    "other_formatter_suggestions_not_applied": [
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/ApprovalInbox.vue",
+        "before": "06a1de9d58cca512b62e1449264d91b515c547bbb8731fd4e95eaf769869c28e",
+        "after": "06a1de9d58cca512b62e1449264d91b515c547bbb8731fd4e95eaf769869c28e"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/ApprovalsPage.vue",
+        "before": "2d35fe9920ba52544bc5e04b5b5835d150cad4aaa5404751f0814ee07997419d",
+        "after": "2d35fe9920ba52544bc5e04b5b5835d150cad4aaa5404751f0814ee07997419d"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+        "before": "54b7b92c9b368f3b3e3a013b8ea4f4db004f7be9de9f28a4977fc9be362c4696",
+        "after": "54b7b92c9b368f3b3e3a013b8ea4f4db004f7be9de9f28a4977fc9be362c4696"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/crm/views/settings/OrganizationalStructureSettings.vue",
+        "before": "85918d16c3b7abfc3e333ee4f527c18f253ea12c250b3edd46ba625d89592ace",
+        "after": "85918d16c3b7abfc3e333ee4f527c18f253ea12c250b3edd46ba625d89592ace"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/inbox/InboxVoicePanel.vue",
+        "before": "1ae7fb67a4fdbbe6cb75b01fac41a18937e2dabb00373e40adbf11dc31ac563e",
+        "after": "1ae7fb67a4fdbbe6cb75b01fac41a18937e2dabb00373e40adbf11dc31ac563e"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwFormLibrary.vue",
+        "before": "ebef207fdfbf3c8ea8cdb06d6ee1a401265b645f14f5245326026041da02af9c",
+        "after": "ebef207fdfbf3c8ea8cdb06d6ee1a401265b645f14f5245326026041da02af9c"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AcwPolicyEditor.vue",
+        "before": "56e5b460424e46b90f8870b1c85d0e2b0a3df180cf15d71302db811f073a1800",
+        "after": "56e5b460424e46b90f8870b1c85d0e2b0a3df180cf15d71302db811f073a1800"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AdministrationSection.vue",
+        "before": "39de65ca7587029945091df09c110dc465f0a281a1bb24be94b8f17143ab9ad3",
+        "after": "39de65ca7587029945091df09c110dc465f0a281a1bb24be94b8f17143ab9ad3"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/AuthorityAssignments.vue",
+        "before": "a465f17b7041c5a491ac9ffda4425403143c66c7fcd6946b171dd2af8bed1da1",
+        "after": "a465f17b7041c5a491ac9ffda4425403143c66c7fcd6946b171dd2af8bed1da1"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/ConfigurationAuditPanel.vue",
+        "before": "fab417f98f3dee69c40a82e206c9af171bfb2374df26a747f7dbf7d2b114c439",
+        "after": "fab417f98f3dee69c40a82e206c9af171bfb2374df26a747f7dbf7d2b114c439"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrDraftEditor.vue",
+        "before": "d16856db78d3e41b4490682ff61c25ff6be04b2be0ce186ce86261045ce56142",
+        "after": "d16856db78d3e41b4490682ff61c25ff6be04b2be0ce186ce86261045ce56142"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrDraftWorkspace.vue",
+        "before": "4c452c62fadbf280990ea4f46f0dee268f634c8976788de55e735ea54a2923b2",
+        "after": "4c452c62fadbf280990ea4f46f0dee268f634c8976788de55e735ea54a2923b2"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrFlowEditor.vue",
+        "before": "f86b396d4814cc6ec99e72137c68848b6c32aa47a1f38d7196488e80a0374361",
+        "after": "f86b396d4814cc6ec99e72137c68848b6c32aa47a1f38d7196488e80a0374361"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/IvrFlowOverview.vue",
+        "before": "39cd08e3a1ed56fb9c598b78f68f146e8b0884575ef9e7a307f013ba841697fb",
+        "after": "39cd08e3a1ed56fb9c598b78f68f146e8b0884575ef9e7a307f013ba841697fb"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcContactCenter/views/ControlDeskPage.vue",
+        "before": "f0d3c6419445e03ff370ec18f95ae64671d206ff8440c0c575bef18eb2af9958",
+        "after": "f0d3c6419445e03ff370ec18f95ae64671d206ff8440c0c575bef18eb2af9958"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue",
+        "before": "6d2d166939fd402903572ab4bc0dd18722bbe61cae9e8be7b5da40566ce859d5",
+        "after": "6d2d166939fd402903572ab4bc0dd18722bbe61cae9e8be7b5da40566ce859d5"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/MasterContactDetails.vue",
+        "before": "b1a864830e4be49b5dcad25146b815ecdbab88d58beb28e357ecbf5b27b8269f",
+        "after": "b1a864830e4be49b5dcad25146b815ecdbab88d58beb28e357ecbf5b27b8269f"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/webphone/PabxSettingsPanel.vue",
+        "before": "ae6dc2a3a7fbb872f1f8965aca6b0e8287311853e6a87d9624de856557cd800b",
+        "after": "c53bd406a0bddac82b125712ef10cdf747286792427c157ac7123e0c1e698535"
+      }
+    ],
+    "sanitized_native_log_sha256": "ed0dacf9e02d04ccd95d4a5ccf2aafe505b3e3621fd7c36a46b43afa4ec4fbea",
+    "all_current_native_Rails_passed": {
+      "call-center-rspec.json": 2873,
+      "call-center-pabx-rspec.json": 216,
+      "call-center-corporate-rspec.json": 85
+    },
+    "native_distinct_Rails": 3174,
+    "Vue_passed": 1813,
+    "new_Ruby_lint_offenses": 0,
+    "native_services_migrations_SQL_receipts_permissions_and_every_test_unchanged": true,
+    "new_SHA_full_native_and_Chrome_revalidation_required": true,
+    "whole_figure10_or_Part1_accepted": false
   }
 }
