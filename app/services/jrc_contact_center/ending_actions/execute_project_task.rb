@@ -30,7 +30,7 @@ class JrcContactCenter::EndingActions::ExecuteProjectTask
   # A durable attempt writer can wrap the real effect inside the same original
   # actor transaction; the default call remains unchanged and independent.
   def observe_execution!(wrapper, origin, readiness, &effect)
-    return effect.call unless wrapper
+    return yield unless wrapper
 
     metadata = { account_id: origin.account_id, origin_id: origin.id, version_id: origin.version_id,
                  actor_account_user_id: origin.actor_account_user_id, actor_user_id: origin.actor_user_id,

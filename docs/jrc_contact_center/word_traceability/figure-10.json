@@ -191,7 +191,7 @@
     {
       "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
       "state": "implementado_pendente_validacao_nativa_incremento_tentativas_dispatch",
-      "current_sha256": "73c1b206980ea0641c4217d4d9787d4a5f15bec43ba8615854cb1dd9189d8359",
+      "current_sha256": "c7ac08d66957919ca5e848bfd4ba2d7e57f16e8dbbba0968f35afb516ca6dd30",
       "evidence_sha": "2c3525735edf4ce6a798c3a5e24a1b414d5fafed"
     },
     {
@@ -3957,6 +3957,42 @@
       "dc093e96609603537ad648c1d16c0773860f511f2ea9b2990b2e313ea3e3b787"
     ],
     "native_lint_or_application_revalidation": false,
-    "whole_figure10_accepted": false
+    "whole_figure10_accepted": false,
+    "block_cop_followup": {
+      "candidate": "102e368b6ad8f15c2ba6ec8574cf3f8d7a31b3db",
+      "run": 45379976587,
+      "early_artifact": 14911924066,
+      "early_artifact_sha256": "c50a6443f260cab2f049c4bfe698e90ed1184f1b37cf3f81608dc3444e917d91",
+      "focused_offenses": [
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+          "cop": "Performance/RedundantBlockCall",
+          "message": "Use `yield` instead of `effect.call`."
+        }
+      ],
+      "correction": "Use direct yield on the default branch and explicit &effect forwarding on the wrapper branch, satisfying both block cops without removing either.",
+      "source": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+      "before_sha256": "73c1b206980ea0641c4217d4d9787d4a5f15bec43ba8615854cb1dd9189d8359",
+      "after_sha256": "c7ac08d66957919ca5e848bfd4ba2d7e57f16e8dbbba0968f35afb516ca6dd30",
+      "existing_wrapper_default_metadata_atomicity_and_authority_tests_unchanged": true,
+      "await_complete_lint_diagnostics_before_checkpoint": false,
+      "native_or_browser_acceptance": false,
+      "complete_diagnostic_artifact": 14915585825,
+      "complete_diagnostic_artifact_sha256": "987588502a5197e3849551c3da67fb270a43445c4c2c59f2d7fd7100edeb525e",
+      "complete_native_new_offense_count": 1,
+      "prior_reported_count": 48,
+      "all_prior_offense_categories_resolved": true,
+      "raw_log_sha256": "3482a57451efa5698a3391b23fee2f05d6150ab1a0e025d2de20c9e5229c75e4",
+      "sanitized_log_sha256": "1b2f506d196102d8fc16f78cb17559dde0dffd840460d062becea67de2653548",
+      "pinned_tool_versions": {
+        "rubocop": "1.75.6",
+        "rubocop-performance": "1.25.0"
+      },
+      "primary_references": [
+        "https://docs.rubocop.org/rubocop/1.75/cops_style.html#styleexplicitblockargument",
+        "https://docs.rubocop.org/rubocop/1.75/cops_style.html#styleargumentsforwarding",
+        "https://raw.githubusercontent.com/rubocop/rubocop-performance/v1.25.0/lib/rubocop/cop/performance/redundant_block_call.rb"
+      ]
+    }
   }
 }
