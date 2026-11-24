@@ -3,7 +3,7 @@
   "status": "implemented_read_only_history_awaiting_native_validation",
   "accepted_activation_acceptance_sha256": "feec99f684cb2925122824095530ad95c9a0cd35572468f61fdb47fd92a78d66",
   "source_sha256": {
-    ".github/workflows/call-center-administration.yml": "b8ae959cd443691408e8de38eba6b91da7e2fbf9597b6c19c1ccac347561eec0",
+    ".github/workflows/call-center-administration.yml": "a179a6223911a30dd0654cddb1493ca17c56215253e3131276cee54f4ddd009c",
     "app/controllers/api/v1/accounts/jrc_contact_center/ending_attempts_controller.rb": "505cca727e3aeb5f31922a11897230592a3852223090048b2e6a3987355108bd",
     "app/javascript/dashboard/api/jrcContactCenter.js": "946b4e40644e1d8a3ca20590b9ebde0eabe9434dfcbca1cef323381db9e5e6df",
     "app/javascript/dashboard/i18n/locale/en/jrcContactCenter.json": "a9b20f1eaf8e887890918eb63c49a6535ea49a894248b00b9c64701428847466",
@@ -19,7 +19,7 @@
     "script/jrc_call_center_ending_attempt_history_seed.rb": "8f3026943f78f9da103bd14e136cdb0c6269e686b8331a736a7113952d106f36",
     "script/jrc_call_center_pause_seed.rb": "005f668fa909c8b6bc5f5a5293f2b6a66079255e4355000cc9a8f538d6c44335",
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb": "9a922c66311ee94e111b5ec55796a8f2153afda29b9f4138792a65bbde232df8",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb": "f2ed33c936210bc2e69de6a8689bab2dae18c2e79a51102c7a14aaf9c2ec5a92",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb": "5d18f43f6a2625d64d9060c5a5638f30aad6806366797194bfe6630f17284a76",
     "tests/playwright/call-center-native.config.ts": "c5922f3ce27fab6f2fa6c42d16ae05b7b7dc047c5f43d19148f374648c27ee97",
     "tests/playwright/fixtures/call-center-native/main.js": "9404629cf4ff878c35fffad97b1bee97d6f0bd70aa53a4a2952a648336962a3b",
     "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.mjs": "826ea4b67dfbd2458eb4edd0e87bd90ecd20d5d355ede7936a00ea3aa2813ffb",
@@ -89,5 +89,26 @@
       "tests/playwright/tests/e2e/ui/call-center-ending-attempt-history-native.spec.ts"
     ],
     "native_or_browser_acceptance": false
+  },
+  "native_lint_indentation_correction_awaiting_revalidation": {
+    "failed_sha": "95e10e8df623c7c7d4c4188c7d7e178a6f777230",
+    "failed_run": 45461099942,
+    "artifact": 14955188169,
+    "artifact_sha256": "729efc399fd05eba4c1626d8636d221b8e3b9ff626269c6c7eb83b424cc79f5c",
+    "native_lint_report_sha256": "fdad9ff84808a7e6504b0ab6965543e41c4d4b8c626ba361e3fb146a4f826f04",
+    "native_incremental_files_classified": 618,
+    "new_offenses": 4,
+    "RSpec_path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
+    "lines": [
+      62,
+      121,
+      185
+    ],
+    "before_sha256": "f2ed33c936210bc2e69de6a8689bab2dae18c2e79a51102c7a14aaf9c2ec5a92",
+    "after_sha256": "5d18f43f6a2625d64d9060c5a5638f30aad6806366797194bfe6630f17284a76",
+    "non_indentation_content_and_all17_examples_assertions_preserved": true,
+    "diagnostic_change": "Additionally preserve /tmp/call-center-ending-history-*.json in the early artifact, retaining all old paths.",
+    "product_function_permissions_migrations_SQL_or_test_criteria_changed": false,
+    "native_or_Chrome_acceptance": false
   }
 }

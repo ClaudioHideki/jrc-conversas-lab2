@@ -159,3 +159,5 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 - M21/b3117ee4/CI45446266789: ativação e consulta prospectiva explícitas validadas; 3198Rails distintos,1831Vue,268Chrome e620PNG verificados. Histórico operacional, execução manual, CRM/ServiceDesk, broker e Parte1 continuam abertos.
 
 - ApósM21/b3117ee4 aceito: preparadoM22 com histórico operacional somente leitura,19novosRails/23novosVue/4novosChrome; sem aceite nativo ainda. Preservados os268Chrome anteriores e todos os recibos imutáveis. Execução manual,retry,CRM/ServiceDesk,broker real eParte1 continuam abertos.
+
+- M22/95e10e8d:4infrações nativas de alinhamento corrigidas em3linhas de um spec; tokens/asserções/17cenários preservados. Acrescentado diagnóstico inicial de histórico; 19Rails/23Vue/272Chrome continuam exigidos. Sem aceite nativo ou visual deste incremento.

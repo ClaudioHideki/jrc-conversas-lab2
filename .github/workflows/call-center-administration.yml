@@ -432,6 +432,7 @@ jobs:
             /tmp/call-center-ending-success-*.json
             /tmp/call-center-ending-attempt-*.json
             /tmp/call-center-ending-activation-*.json
+            /tmp/call-center-ending-history-*.json
             /tmp/call-center-ending-assignee-*.json
             /tmp/call-center-ending-version-schema-*.json
             /tmp/call-center-ivr-schema-reload-rspec.json

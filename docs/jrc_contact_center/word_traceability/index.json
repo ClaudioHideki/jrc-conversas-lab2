@@ -3570,5 +3570,12 @@
     "Chrome_total_required": 272,
     "native_or_visual_acceptance": false,
     "whole_figure_accepted": false
+  },
+  "history_native_lint_correction_awaiting_revalidation": {
+    "failed_sha": "95e10e8df623c7c7d4c4188c7d7e178a6f777230",
+    "new_offenses": 4,
+    "reference": "docs/jrc_contact_center/ending_history_lint_correction_20261124.json",
+    "code_permissions_or_test_criteria_changed": false,
+    "native_or_Chrome_acceptance": false
   }
 }

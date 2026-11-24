@@ -1,0 +1,21 @@
+{
+  "failed_sha": "95e10e8df623c7c7d4c4188c7d7e178a6f777230",
+  "failed_run": 45461099942,
+  "artifact": 14955188169,
+  "artifact_sha256": "729efc399fd05eba4c1626d8636d221b8e3b9ff626269c6c7eb83b424cc79f5c",
+  "native_lint_report_sha256": "fdad9ff84808a7e6504b0ab6965543e41c4d4b8c626ba361e3fb146a4f826f04",
+  "native_incremental_files_classified": 618,
+  "new_offenses": 4,
+  "RSpec_path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb",
+  "lines": [
+    62,
+    121,
+    185
+  ],
+  "before_sha256": "f2ed33c936210bc2e69de6a8689bab2dae18c2e79a51102c7a14aaf9c2ec5a92",
+  "after_sha256": "5d18f43f6a2625d64d9060c5a5638f30aad6806366797194bfe6630f17284a76",
+  "non_indentation_content_and_all17_examples_assertions_preserved": true,
+  "diagnostic_change": "Additionally preserve /tmp/call-center-ending-history-*.json in the early artifact, retaining all old paths.",
+  "product_function_permissions_migrations_SQL_or_test_criteria_changed": false,
+  "native_or_Chrome_acceptance": false
+}

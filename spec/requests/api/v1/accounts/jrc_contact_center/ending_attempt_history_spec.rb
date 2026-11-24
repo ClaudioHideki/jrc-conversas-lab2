@@ -59,7 +59,7 @@ RSpec.describe 'Authorized native ending attempt history', type: :request do
     item = response.parsed_body.fetch('items').sole
     expect(item).to include('id' => row.id.to_s, 'outcome' => 'pending', 'target' => nil, 'result_code' => nil)
     expect(item.keys).to match_array(%w[id origin_id rule_code version_id destination_kind request_id queued_at
-                                       outcome result_code finished_at execution_id target])
+                                        outcome result_code finished_at execution_id target])
     expect(response.body).not_to include('private_definition', 'SYNTHETIC unarmed original evidence', 'integrity_sha256', 'notes')
     expect(history_effects).to eq([0, 0, 1, 0])
   end
@@ -118,7 +118,7 @@ RSpec.describe 'Authorized native ending attempt history', type: :request do
     own_qualification = qualification
     account.enable_features!('custom_roles')
     role = create(:custom_role, account: account,
-                  permissions: %w[jrc_contact_center_view jrc_contact_center_supervise jrc_contact_center_audit])
+                                permissions: %w[jrc_contact_center_view jrc_contact_center_supervise jrc_contact_center_audit])
     member.update!(custom_role: role)
     request_history(original.source_qualification_id)
     expect(response).to have_http_status(:ok)
@@ -182,7 +182,7 @@ RSpec.describe 'Authorized native ending attempt history', type: :request do
     JrcCrm::UserBusinessUnit.where(account: account, user: actor).find_each { |row| row.update!(active: false) }
     other_company = JrcCustomers::Company.create!(account: account, name: 'SYNTHETIC other issuer', relationship_type: 'internal', active: true)
     other_unit = JrcCrm::BusinessUnit.create!(account: account, operating_company: other_company,
-                                             name: 'SYNTHETIC other business', code: 'SYNTHETIC_OTHER', active: true)
+                                              name: 'SYNTHETIC other business', code: 'SYNTHETIC_OTHER', active: true)
     JrcCrm::UserBusinessUnit.create!(account: account, user: actor, scope: 'BUSINESS_UNIT', company: other_company,
                                      business_unit: other_unit, active: true, structure_managed: true)
     request_history
