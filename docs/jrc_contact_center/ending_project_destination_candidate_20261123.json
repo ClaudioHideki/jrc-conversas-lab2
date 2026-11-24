@@ -1,6 +1,6 @@
 {
   "source_parent": "4be947544b361e64777f23fad6444aeb7a90c0f9",
-  "classification": "implemented_adapter_awaiting_native_tests_not_operational_executor",
+  "classification": "native_adapter_validated_not_operational_executor",
   "source_sha256": {
     "app/services/jrc_contact_center/ending_actions/project_task_destination.rb": "ce1b7e15338ec0c9a6d460ab985d5905e9cf885ffef29f6e7e23953354148a0b",
     "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": "fad3d3075341f8ce82363c7858826f56e2e14706d6913820e205711c6f8fe14c",
@@ -42,5 +42,8 @@
   "new_static_rejected_workflow_mutations": 11,
   "external_collector_unit_cases": 35,
   "static_tests_are_not_native": true,
-  "native_Rails_Vue_Chrome_passed_for_this_adapter": false
+  "native_Rails_Vue_Chrome_passed_for_this_adapter": true,
+  "status": "native_adapter_validated_not_operational_executor",
+  "native_verified_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+  "native_acceptance": "docs/jrc_contact_center/ending_readiness_native_acceptance_20261124.json"
 }

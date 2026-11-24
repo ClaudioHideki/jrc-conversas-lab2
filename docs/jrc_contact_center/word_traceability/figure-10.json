@@ -142,38 +142,55 @@
     },
     {
       "path": "app/models/jrc_contact_center/ending_action_readiness.rb",
-      "state": "candidata_sem_aceite_nativo",
-      "current_sha256": "0490aaa2a3a647cbb8f1924cbe88367d5b8c5bf40b1ccc625c8dd98c7f8bccd4"
+      "state": "implementado_validado_componente_interno_sem_dispatcher",
+      "current_sha256": "0490aaa2a3a647cbb8f1924cbe88367d5b8c5bf40b1ccc625c8dd98c7f8bccd4",
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/activate_rule.rb",
-      "state": "candidata_sem_aceite_nativo",
-      "current_sha256": "23bdd01b77fff72ce916bbcdc44daccb0545415afcc83096aae01e18a09e2e44"
+      "state": "implementado_validado_componente_interno_sem_dispatcher",
+      "current_sha256": "23bdd01b77fff72ce916bbcdc44daccb0545415afcc83096aae01e18a09e2e44",
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/execution_readiness.rb",
-      "state": "candidata_sem_aceite_nativo",
-      "current_sha256": "0db216644fd6ac81672488baba018f23ff34b3d221eff55d869a64a82281a813"
+      "state": "implementado_validado_componente_interno_sem_dispatcher",
+      "current_sha256": "0db216644fd6ac81672488baba018f23ff34b3d221eff55d869a64a82281a813",
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551"
     },
     {
       "path": "app/services/jrc_contact_center/ending_actions/project_task_destination.rb",
-      "state": "candidata_sem_aceite_nativo",
-      "current_sha256": "ce1b7e15338ec0c9a6d460ab985d5905e9cf885ffef29f6e7e23953354148a0b"
+      "state": "implementado_validado_componente_interno_sem_dispatcher",
+      "current_sha256": "ce1b7e15338ec0c9a6d460ab985d5905e9cf885ffef29f6e7e23953354148a0b",
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551"
     },
     {
       "path": "db/migrate/20261123235000_create_contact_center_ending_action_readinesses.rb",
-      "state": "candidata_sem_aceite_nativo",
-      "current_sha256": "dd57e137760d1933faf0351ecffda41307da095d050a62f059f3ff6164252c53"
+      "state": "implementado_validado_componente_interno_sem_dispatcher",
+      "current_sha256": "dd57e137760d1933faf0351ecffda41307da095d050a62f059f3ff6164252c53",
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551"
     },
     {
       "path": "db/functions/20261123235000_contact_center_ending_action_readiness.sql",
-      "state": "candidata_sem_aceite_nativo",
-      "current_sha256": "13a6da4ca25eb6dd7f826a39070ebabb381fc776934f098504e1020c8d24d4e7"
+      "state": "implementado_validado_componente_interno_sem_dispatcher",
+      "current_sha256": "13a6da4ca25eb6dd7f826a39070ebabb381fc776934f098504e1020c8d24d4e7",
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551"
     },
     {
       "path": "lib/jrc_contact_center/ending_action_readiness_schema_receipt.rb",
-      "state": "candidata_sem_aceite_nativo",
-      "current_sha256": "e117d71bad5e02f22ffc9739bc5bf10c8d1b17ba87fc5a64710a3a25640905de"
+      "state": "implementado_validado_componente_interno_sem_dispatcher",
+      "current_sha256": "e117d71bad5e02f22ffc9739bc5bf10c8d1b17ba87fc5a64710a3a25640905de",
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551"
+    },
+    {
+      "path": "app/models/jrc_contact_center/ending_action_execution.rb",
+      "state": "implementado_na_candidata_sem_validacao_nativa",
+      "current_sha256": "01fa3de550844bca8675eefb406b66db9b771f62b7abaa2e7ce9a404fe5791a4"
+    },
+    {
+      "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+      "state": "implementado_na_candidata_sem_validacao_nativa",
+      "current_sha256": "0e17c411a9dce7b9d6b98c33e661d8c834b625e98dd296d4c941d34944c9210c"
     }
   ],
   "planned_not_present": [],
@@ -365,59 +382,59 @@
     },
     {
       "path": "spec/services/jrc_contact_center/ending_actions/activate_rule_spec.rb",
-      "passed_examples": 0,
+      "passed_examples": 10,
       "prepared_examples": 10,
-      "evidence_sha": null,
-      "level": "Preparado para Rails/PostgreSQL isolado; não executado."
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "level": "Rails/PostgreSQL nativo; contexto descartável e casos de concorrência real separados."
     },
     {
       "path": "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb",
-      "passed_examples": 0,
+      "passed_examples": 9,
       "prepared_examples": 9,
-      "evidence_sha": null,
-      "level": "Preparado para Rails/PostgreSQL isolado; não executado."
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "level": "Rails/PostgreSQL nativo; contexto descartável e casos de concorrência real separados."
     },
     {
       "path": "spec/models/jrc_contact_center/ending_action_readiness_spec.rb",
-      "passed_examples": 0,
+      "passed_examples": 4,
       "prepared_examples": 4,
-      "evidence_sha": null,
-      "level": "Preparado para Rails/PostgreSQL isolado; não executado."
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "level": "Rails/PostgreSQL nativo; contexto descartável e casos de concorrência real separados."
     },
     {
       "path": "spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb",
-      "passed_examples": 0,
+      "passed_examples": 5,
       "prepared_examples": 5,
-      "evidence_sha": null,
-      "level": "Preparado para Rails/PostgreSQL isolado; não executado."
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "level": "Rails/PostgreSQL nativo; contexto descartável e casos de concorrência real separados."
     },
     {
       "path": "spec/services/jrc_contact_center/synthetic_ending_readiness_upgrade_spec.rb",
-      "passed_examples": 0,
+      "passed_examples": 1,
       "prepared_examples": 1,
-      "evidence_sha": null,
-      "level": "Preparado para Rails/PostgreSQL isolado; não executado."
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "level": "Rails/PostgreSQL nativo; contexto descartável e casos de concorrência real separados."
     },
     {
       "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb",
-      "passed_examples": 0,
+      "passed_examples": 3,
       "prepared_examples": 3,
-      "evidence_sha": null,
-      "level": "Preparado para Rails/PostgreSQL isolado; não executado."
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "level": "Rails/PostgreSQL nativo; contexto descartável e casos de concorrência real separados."
     },
     {
       "path": "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb",
-      "passed_examples": 0,
+      "passed_examples": 14,
       "prepared_examples": 14,
-      "evidence_sha": null,
-      "level": "Preparado para Rails/PostgreSQL isolado; não executado."
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "level": "Rails/PostgreSQL nativo; contexto descartável e casos de concorrência real separados."
     },
     {
       "path": "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb",
-      "passed_examples": 0,
+      "passed_examples": 3,
       "prepared_examples": 3,
-      "evidence_sha": null,
-      "level": "Preparado para Rails/PostgreSQL isolado; não executado."
+      "evidence_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "level": "Rails/PostgreSQL nativo; contexto descartável e casos de concorrência real separados."
     },
     {
       "path": "spec/services/jrc_contact_center/ending_actions/native_trigger_spec.rb",
@@ -442,6 +459,24 @@
       "passed_examples": 3,
       "evidence_sha": "4be947544b361e64777f23fad6444aeb7a90c0f9",
       "level": "Rails/PostgreSQL nativo; concorrência com conexões independentes quando aplicável."
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb",
+      "prepared_examples": 17,
+      "passed_examples": 0,
+      "level": "Preparado; não executado nativamente nesta candidata."
+    },
+    {
+      "path": "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb",
+      "prepared_examples": 5,
+      "passed_examples": 0,
+      "level": "Preparado; não executado nativamente nesta candidata."
+    },
+    {
+      "path": "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb",
+      "prepared_examples": 1,
+      "passed_examples": 0,
+      "level": "Preparado; não executado nativamente nesta candidata."
     }
   ],
   "tests_vue_related_not_browser_proof": [],
@@ -637,7 +672,9 @@
         6,
         7,
         8,
-        13
+        13,
+        28,
+        29
       ],
       "test_reference_ids": [
         15
@@ -665,8 +702,12 @@
         "authorization_gap": "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
       },
       "candidate_test_reference_ids_not_approval": [
-        0
-      ]
+        0,
+        29,
+        30,
+        31
+      ],
+      "projects_executor_candidate_note": "Executor interno Projetos e recibo atômico preparados; aguarda CI nativa. Dispatcher,interface operacional,CRM/ServiceDesk eF10-B não estão aceitos."
     },
     {
       "id": "D1-P0131-C01",
@@ -689,7 +730,10 @@
       ],
       "status": "pendente",
       "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
-      "code_reference_ids": [],
+      "code_reference_ids": [
+        28,
+        29
+      ],
       "test_reference_ids": [],
       "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
@@ -703,7 +747,12 @@
         "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
         "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
       },
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [
+        29,
+        30,
+        31
+      ],
+      "projects_executor_candidate_note": "Executor interno Projetos e recibo atômico preparados; aguarda CI nativa. Dispatcher,interface operacional,CRM/ServiceDesk eF10-B não estão aceitos."
     },
     {
       "id": "D1-P0133-C01",
@@ -733,7 +782,9 @@
         17,
         18,
         19,
-        20
+        20,
+        28,
+        29
       ],
       "test_reference_ids": [
         0,
@@ -764,8 +815,13 @@
         ],
         "visual_gap": "Conferir o comportamento desse ciclo com o editor e o executor integrados; não concluir a figura10 por testes isolados do ciclo."
       },
-      "candidate_test_reference_ids_not_approval": [],
-      "guard_acceptance_note": "Guardas nativas validadas em4be94754; isto não aceita efeitos, recibos nem o executor completo."
+      "candidate_test_reference_ids_not_approval": [
+        29,
+        30,
+        31
+      ],
+      "guard_acceptance_note": "Guardas nativas validadas em4be94754; isto não aceita efeitos, recibos nem o executor completo.",
+      "projects_executor_candidate_note": "Executor interno Projetos e recibo atômico preparados; aguarda CI nativa. Dispatcher,interface operacional,CRM/ServiceDesk eF10-B não estão aceitos."
     },
     {
       "id": "D1-P0134-C01",
@@ -841,7 +897,10 @@
       ],
       "status": "pendente",
       "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
-      "code_reference_ids": [],
+      "code_reference_ids": [
+        28,
+        29
+      ],
       "test_reference_ids": [],
       "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
@@ -855,7 +914,12 @@
         "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
         "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
       },
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [
+        29,
+        30,
+        31
+      ],
+      "projects_executor_candidate_note": "Executor interno Projetos e recibo atômico preparados; aguarda CI nativa. Dispatcher,interface operacional,CRM/ServiceDesk eF10-B não estão aceitos."
     },
     {
       "id": "D1-P0136-C01",
@@ -1294,7 +1358,10 @@
       ],
       "status": "pendente",
       "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
-      "code_reference_ids": [],
+      "code_reference_ids": [
+        28,
+        29
+      ],
       "test_reference_ids": [],
       "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
@@ -1308,7 +1375,12 @@
         "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
         "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
       },
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [
+        29,
+        30,
+        31
+      ],
+      "projects_executor_candidate_note": "Executor interno Projetos e recibo atômico preparados; aguarda CI nativa. Dispatcher,interface operacional,CRM/ServiceDesk eF10-B não estão aceitos."
     },
     {
       "id": "D2-P0224-C01",
@@ -1340,7 +1412,9 @@
         24,
         25,
         26,
-        27
+        27,
+        28,
+        29
       ],
       "test_reference_ids": [
         15,
@@ -1380,10 +1454,14 @@
         "authorization_gap": "A configuração usa atualmente a cobertura global nativa do ACW. Administração específica por empresa/unidade requer escrita por regra e testes próprios, preservando o bloqueio da política global."
       },
       "candidate_test_reference_ids_not_approval": [
-        0
+        0,
+        29,
+        30,
+        31
       ],
       "readiness_candidate_note": "Comandos internos e adaptador preparados; 49cenários nativos previstos, ainda sem aceite. F10-A/F10-B e interface operacional continuam pendentes.",
-      "guard_acceptance_note": "Guardas nativas validadas em4be94754; isto não aceita efeitos, recibos nem o executor completo."
+      "guard_acceptance_note": "Guardas nativas validadas em4be94754; isto não aceita efeitos, recibos nem o executor completo.",
+      "projects_executor_candidate_note": "Executor interno Projetos e recibo atômico preparados; aguarda CI nativa. Dispatcher,interface operacional,CRM/ServiceDesk eF10-B não estão aceitos."
     },
     {
       "id": "D2-P0224-C02",
@@ -1400,7 +1478,10 @@
       ],
       "status": "pendente",
       "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
-      "code_reference_ids": [],
+      "code_reference_ids": [
+        28,
+        29
+      ],
       "test_reference_ids": [],
       "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
@@ -1414,7 +1495,12 @@
         "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
         "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
       },
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [
+        29,
+        30,
+        31
+      ],
+      "projects_executor_candidate_note": "Executor interno Projetos e recibo atômico preparados; aguarda CI nativa. Dispatcher,interface operacional,CRM/ServiceDesk eF10-B não estão aceitos."
     },
     {
       "id": "D2-P0224-C03",
@@ -1489,7 +1575,9 @@
         24,
         25,
         26,
-        27
+        27,
+        28,
+        29
       ],
       "test_reference_ids": [
         7,
@@ -1527,10 +1615,14 @@
         "visual_gap": "Seleção preparada; falta demonstrar o modo escolhido durante uma execução real e sua revisão pelo agente."
       },
       "candidate_test_reference_ids_not_approval": [
-        0
+        0,
+        29,
+        30,
+        31
       ],
       "readiness_candidate_note": "Comandos internos e adaptador preparados; 49cenários nativos previstos, ainda sem aceite. F10-A/F10-B e interface operacional continuam pendentes.",
-      "guard_acceptance_note": "Guardas nativas validadas em4be94754; isto não aceita efeitos, recibos nem o executor completo."
+      "guard_acceptance_note": "Guardas nativas validadas em4be94754; isto não aceita efeitos, recibos nem o executor completo.",
+      "projects_executor_candidate_note": "Executor interno Projetos e recibo atômico preparados; aguarda CI nativa. Dispatcher,interface operacional,CRM/ServiceDesk eF10-B não estão aceitos."
     },
     {
       "id": "D2-P0225-C01",
@@ -1581,7 +1673,9 @@
       "code_reference_ids": [
         1,
         3,
-        4
+        4,
+        28,
+        29
       ],
       "test_reference_ids": [
         4,
@@ -1605,7 +1699,12 @@
         ],
         "visual_gap": "Histórico de configuração não é histórico de execução; falta exibir recibos por destino."
       },
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [
+        29,
+        30,
+        31
+      ],
+      "projects_executor_candidate_note": "Executor interno Projetos e recibo atômico preparados; aguarda CI nativa. Dispatcher,interface operacional,CRM/ServiceDesk eF10-B não estão aceitos."
     },
     {
       "id": "D2-P0227-C01",
@@ -1622,7 +1721,10 @@
       ],
       "status": "pendente",
       "verification": "Não há ainda execução por destino, recibo atômico, chave operacional de efeito, reprocessamento real ou resultado parcial. Versões de configuração não provam esses requisitos.",
-      "code_reference_ids": [],
+      "code_reference_ids": [
+        28,
+        29
+      ],
       "test_reference_ids": [],
       "reference_granularity": "Cláusula revisada diretamente; código, cenário nativo e interface continuam separados.",
       "divergences": [
@@ -1636,7 +1738,12 @@
         "visual_gap": "Faltam recibos e estados reais de cada destino, falha parcial e reprocessamento somente do pendente.",
         "must_not_count_as_proof": "Configuração, BlockingRevision e testes de JSON não demonstram F10-A/F10-B."
       },
-      "candidate_test_reference_ids_not_approval": []
+      "candidate_test_reference_ids_not_approval": [
+        29,
+        30,
+        31
+      ],
+      "projects_executor_candidate_note": "Executor interno Projetos e recibo atômico preparados; aguarda CI nativa. Dispatcher,interface operacional,CRM/ServiceDesk eF10-B não estão aceitos."
     },
     {
       "id": "D2-P0228-C01",
@@ -2725,5 +2832,267 @@
       "final_artifact": 14884571107,
       "final_artifact_sha256": "b334642bfe521ff64e72775ec8f90caa2a97391c1886a4acfa8237172ce0e0b2"
     }
+  },
+  "prospective_readiness_and_project_adapter_native_acceptance": {
+    "sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+    "run": 45313705722,
+    "artifact": 14887453199,
+    "artifact_sha256": "2f70fbc139f2ac7e087262e974652e37d2012df68ba5d27f101c4c194d29d05f",
+    "accepted_scope": "Internal explicit prospective readiness and native Projects task adapter only; no automatic dispatcher or operational UI.",
+    "native_distinct_examples": 3092,
+    "old_reload_examples_separate_not_added": 252,
+    "readiness_core": {
+      "summary": {
+        "example_count": 28,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb": 5,
+        "spec/services/jrc_contact_center/ending_actions/activate_rule_spec.rb": 10,
+        "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb": 9,
+        "spec/models/jrc_contact_center/ending_action_readiness_spec.rb": 4
+      }
+    },
+    "real_readiness_concurrency": {
+      "summary": {
+        "example_count": 3,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb": 3
+      }
+    },
+    "populated_m17_upgrade_separate_not_added": {
+      "summary": {
+        "example_count": 1,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/synthetic_ending_readiness_upgrade_spec.rb": 1
+      },
+      "path": "tmp/call-center-ending-readiness-upgrade-preflight.json",
+      "sha256": "f2648aabc999e0b1bfd1090deda549e09fc451d13a0e32bc42d883ec2e844533"
+    },
+    "populated_m17_upgrade": {
+      "sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "synthetic": true,
+      "exact_old_columns_and_values_preserved": true,
+      "historical_rules_armed": 0,
+      "operational_effects": 0,
+      "rerun_idempotent": true,
+      "path": "tmp/call-center-ending-readiness-upgrade.json",
+      "sha256": "63927e0297854709e9dd926a3e06db4fd41a06a25688c3aeb4e6d1889c53b136"
+    },
+    "schema_metadata": [
+      {
+        "stage": "fresh",
+        "product_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+        "stored": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+        "calculated": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+        "component_hashes": {
+          "structure": "a6617aa84fc7c96ca66690eec01869a68ad5e778380636b93b9f62f5882a4dad",
+          "constraints": "bc895df4ba4b72c6c4dec133dc4f5aedec96f2ee05dbf8d1024a9280365ad69c",
+          "functions": "b7dcb0e1b4c0803cec6de752faaebca34be3bab07bbc7fdad69efbd13727197e",
+          "triggers": "8cb8dfbf07ce169ab5dde26bdac79a38f7bc793a6611bf95f2f8fb05842d670d"
+        },
+        "readiness_count": 0,
+        "path": "tmp/call-center-ending-readiness-schema-fresh.json",
+        "sha256": "4e03578455f52917ca7d474d7ea68c8d8d683e7992f2d01e62637dcb5dfdb3da"
+      },
+      {
+        "stage": "populated",
+        "product_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+        "stored": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+        "calculated": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+        "component_hashes": {
+          "structure": "a6617aa84fc7c96ca66690eec01869a68ad5e778380636b93b9f62f5882a4dad",
+          "constraints": "bc895df4ba4b72c6c4dec133dc4f5aedec96f2ee05dbf8d1024a9280365ad69c",
+          "functions": "b7dcb0e1b4c0803cec6de752faaebca34be3bab07bbc7fdad69efbd13727197e",
+          "triggers": "8cb8dfbf07ce169ab5dde26bdac79a38f7bc793a6611bf95f2f8fb05842d670d"
+        },
+        "readiness_count": 0,
+        "path": "tmp/call-center-ending-readiness-schema-populated.json",
+        "sha256": "c029f1e026d8f767763e0aad5f97159d459fdf83a02c55594d7f78b86674b2de"
+      },
+      {
+        "stage": "reload",
+        "product_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+        "stored": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+        "calculated": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+        "component_hashes": {
+          "structure": "a6617aa84fc7c96ca66690eec01869a68ad5e778380636b93b9f62f5882a4dad",
+          "constraints": "bc895df4ba4b72c6c4dec133dc4f5aedec96f2ee05dbf8d1024a9280365ad69c",
+          "functions": "b7dcb0e1b4c0803cec6de752faaebca34be3bab07bbc7fdad69efbd13727197e",
+          "triggers": "8cb8dfbf07ce169ab5dde26bdac79a38f7bc793a6611bf95f2f8fb05842d670d"
+        },
+        "readiness_count": 0,
+        "path": "tmp/call-center-ending-readiness-schema-reload.json",
+        "sha256": "4bd49a2a6ea123ca8be1218030b15f75aa48a76686a0eac8c146f717b990200e"
+      }
+    ],
+    "native_project_adapter": {
+      "summary": {
+        "example_count": 17,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": {
+        "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": 3,
+        "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": 14
+      }
+    },
+    "vue": {
+      "examples": 1812,
+      "failures": 0,
+      "pending": 0
+    },
+    "chrome": {
+      "examples": 264,
+      "projects": 4,
+      "failures": 0,
+      "pending": 0,
+      "flaky": 0
+    },
+    "screenshot_hashes_verified": 608,
+    "actual_visual_review": {
+      "source_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "original_files_actually_opened": 10,
+      "files": [
+        {
+          "file": "desktop-dark-authority-card.png",
+          "sha256": "7bbf773af41584d6b477125947754d67b29c37756cbd22f2b9777bde84e679b5"
+        },
+        {
+          "file": "desktop-light-authority-card.png",
+          "sha256": "f04239a3bcd407efac5c123f7eae13cba3fd7e85e02628ab3bc612d21f8c8974"
+        },
+        {
+          "file": "mobile-dark-authority-card.png",
+          "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+        },
+        {
+          "file": "mobile-light-authority-card.png",
+          "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+        },
+        {
+          "file": "mobile-dark-authority-filters-closed.png",
+          "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+        },
+        {
+          "file": "mobile-light-authority-filters-closed.png",
+          "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+        },
+        {
+          "file": "desktop-dark-ending-automation-editor.png",
+          "sha256": "ba06f9d5e2e321442c9f57a9a4f00d28fb65f0dc1739e845a31257d6e28cc609"
+        },
+        {
+          "file": "desktop-light-ending-automation-editor.png",
+          "sha256": "a13fc9e9936218a89a3c5fcedc1d100adf7c8dc45e87c0635273fa7849fc437e"
+        },
+        {
+          "file": "mobile-dark-ending-automation-editor.png",
+          "sha256": "7ff16877081d577b31aad50dccdcf5b733a03e6cf75d0acc52cbd657130ab6f2"
+        },
+        {
+          "file": "mobile-light-ending-automation-editor.png",
+          "sha256": "84a24acc9112d09c0897ae1a9dbfce2b4decdc49fbd8ed66ad28578547291463"
+        }
+      ],
+      "desktop": "1440px: team text/actions remain readable; actual light/dark editor panels and pending destinations visible.",
+      "mobile": "390px: team name wraps above actions; filters stack; editor review/confirmation/save/back visible without horizontal overflow.",
+      "limits": "Mobile frames are scroll positions, not proof of every modal field. No new operational activation or execution UI is accepted.",
+      "word_divergences": [
+        "The figure10 workspace is partial: CRM/Service Desk/notifications/NICO execution and per-destination results/retry remain pending.",
+        "The shared modal heading remains Motivos de encerramento; the dedicated automation workspace still needs its own completion."
+      ]
+    },
+    "native_lint_passed_without_exclusions_or_threshold_changes": true,
+    "installation_created_no_readiness_or_effect": true,
+    "not_accepted": [
+      "Automatic execution/outbox/dispatcher and native hooks",
+      "Atomic per-destination success and failed-attempt receipts",
+      "Activation API/UI and manual per-rule confirmation",
+      "CRM/Service Desk automation adapters and partial retries",
+      "Representative scale, customized sequence allocation and full account retirement with readiness history",
+      "Whole figure10, Part1 and external PABX/provider operations"
+    ],
+    "whole_figure10_accepted": false,
+    "whole_part1_accepted": false
+  },
+  "native_projects_success_candidate_pending_validation": {
+    "parent": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+    "status": "implemented_internal_projects_executor_awaiting_native_validation",
+    "source_sha256": {
+      "script/jrc_call_center_ending_execution_schema_probe.rb": "ead30e7314384240aa84870d17e6b04eac49eca0ba976ff4920d7128b4c7c458",
+      "script/jrc_call_center_ending_success_upgrade.rb": "b981304d74c281f850593ba63d052f061a1698324ea8f16323b821c28bbdbbfc",
+      "script/validate_cc_access_migration.mjs": "0d46b0c1e0ad1640296300b07f470a134118cb7e7fa087ef019291bdb8d4fcd3",
+      "script/validate_cc_ending_execution_admission.test.mjs": "335736f3f72bd10218545f68556c941357fbb4e9212ec0ee00b3fc7941706b86",
+      "script/validate_cc_ending_execution_migration.mjs": "ee930638b2085b50961e88bc26b22dff99cdf739de22ec3471c3628b7d9f4b43",
+      "script/validate_cc_ending_execution_migration.test.mjs": "897904cd3a6a96c8a568cd73d2149cd56362ee9969621ff87185d71894c44bb3",
+      "app/models/jrc_contact_center/ending_action_execution.rb": "01fa3de550844bca8675eefb406b66db9b771f62b7abaa2e7ce9a404fe5791a4",
+      "app/services/jrc_contact_center/ending_actions/execute_project_task.rb": "0e17c411a9dce7b9d6b98c33e661d8c834b625e98dd296d4c941d34944c9210c",
+      "db/functions/20261124000000_contact_center_ending_executions.sql": "18f93d4daf3cd6210ca57a914787baf164867edb41f186c35169f167981bf675",
+      "db/migrate/20261124000000_create_contact_center_ending_action_executions.rb": "9caa7bfad60f9da1afee9a57c32a8d0f0c84f644c051401772d986d083499585",
+      "lib/jrc_contact_center/ending_action_execution_schema_receipt.rb": "28ffc5a421d7060f0aa0c1d916e97f4e4f0d7f09eed000ddbd2142727d4d8e16",
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": "258fa4c2c8954bab9ba786f0a0268a85a876bcfb1f03d6a706061a6cef422065",
+      "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb": "a11681713da8ecd04300b458fc765693fee52eff47489a269fb98cb0c90168af",
+      "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": "40ba73172522654661f2e8da5e8a5a153b6572f61d10c037b194387fc37cbba9",
+      ".github/workflows/call-center-administration.yml": "706f0c6d93e0fb623cfdc2d77be66495bce09953f92e848d6f3659e86f04ed09",
+      "spec/support/contact_center_ending_origin_schema_dependencies.rb": "7e3502b546af98b2c00f7056fc80215bce0af81e1789ff17ae7f8d698c688781"
+    },
+    "native_cases_prepared": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": 17,
+      "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb": 5,
+      "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": 1
+    },
+    "native_cases_executed": 0,
+    "implemented": [
+      "Original actor resolved from immutable evidence; current source and native destination authority rechecked for every invocation and replay.",
+      "Native Projects Task/Audit and database-attested success receipt in the same savepoint.",
+      "Unique success per account/origin/rule/destination, stable immutable rule/trigger/deadline, no duplicate after target deletion.",
+      "Confirmed call-end classification remains distinct from actual ACW completion; unconfirmed/manual effects refused.",
+      "Deactivation permanently blocks old pending originals even after reactivation; no install-time hooks or effects.",
+      "Fresh/reload exact schema proofs plus populated M18 baseline with fourteen real records, including existing manual Task/Audit."
+    ],
+    "source_admission": {
+      "exact_owned_migrations": 19,
+      "leaf_static_tests_passed": 8,
+      "reader_static_tests_passed": 65,
+      "previous_eighteen_migration_gate_preserved": true,
+      "static_is_not_native": true
+    },
+    "fixture_only_change": "Within old rollbackable migration specs only, detach the new success-ledger incoming technical account FK before deliberate root DDL. Production constraints stay intact.",
+    "ci_draft": {
+      "classification": "private_static_ci_draft_not_published_or_executed",
+      "parent_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "parent_workflow_sha256": "f950f4bbf35a9a3696640ae5e7e1b6a31d92d36e85a089f9f750264ffa8936ae",
+      "candidate_workflow_sha256": "706f0c6d93e0fb623cfdc2d77be66495bce09953f92e848d6f3659e86f04ed09",
+      "additive_patches": 12,
+      "every_old_gate_restored_exactly": true,
+      "native_cases_prepared": 23,
+      "native_cases_executed": 0
+    },
+    "remaining": [
+      "Native execution and concurrency acceptance of this candidate",
+      "Full account retirement and representative scale",
+      "Durable failed/blocked attempt history, automatic outbox/dispatcher and native hooks",
+      "Explicit activation API/UI and manual per-rule confirmation",
+      "Authorized explicit CRM/Service Desk destination/context adapters and independent partial retries",
+      "Operational destination states/history/retry navigation and dedicated assignee Chrome evidence",
+      "External PABX contract/homologation"
+    ],
+    "no_business_parameters_invented": true,
+    "no_automatic_grants": true,
+    "automatic_dispatch_enabled": false,
+    "whole_figure10_accepted": false,
+    "whole_part1_complete": false
   }
 }

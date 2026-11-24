@@ -1,0 +1,194 @@
+{
+  "sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+  "run": 45313705722,
+  "artifact": 14887453199,
+  "artifact_sha256": "2f70fbc139f2ac7e087262e974652e37d2012df68ba5d27f101c4c194d29d05f",
+  "accepted_scope": "Internal explicit prospective readiness and native Projects task adapter only; no automatic dispatcher or operational UI.",
+  "native_distinct_examples": 3092,
+  "old_reload_examples_separate_not_added": 252,
+  "readiness_core": {
+    "summary": {
+      "example_count": 28,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb": 5,
+      "spec/services/jrc_contact_center/ending_actions/activate_rule_spec.rb": 10,
+      "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb": 9,
+      "spec/models/jrc_contact_center/ending_action_readiness_spec.rb": 4
+    }
+  },
+  "real_readiness_concurrency": {
+    "summary": {
+      "example_count": 3,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb": 3
+    }
+  },
+  "populated_m17_upgrade_separate_not_added": {
+    "summary": {
+      "example_count": 1,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/services/jrc_contact_center/synthetic_ending_readiness_upgrade_spec.rb": 1
+    },
+    "path": "tmp/call-center-ending-readiness-upgrade-preflight.json",
+    "sha256": "f2648aabc999e0b1bfd1090deda549e09fc451d13a0e32bc42d883ec2e844533"
+  },
+  "populated_m17_upgrade": {
+    "sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+    "synthetic": true,
+    "exact_old_columns_and_values_preserved": true,
+    "historical_rules_armed": 0,
+    "operational_effects": 0,
+    "rerun_idempotent": true,
+    "path": "tmp/call-center-ending-readiness-upgrade.json",
+    "sha256": "63927e0297854709e9dd926a3e06db4fd41a06a25688c3aeb4e6d1889c53b136"
+  },
+  "schema_metadata": [
+    {
+      "stage": "fresh",
+      "product_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "stored": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+      "calculated": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+      "component_hashes": {
+        "structure": "a6617aa84fc7c96ca66690eec01869a68ad5e778380636b93b9f62f5882a4dad",
+        "constraints": "bc895df4ba4b72c6c4dec133dc4f5aedec96f2ee05dbf8d1024a9280365ad69c",
+        "functions": "b7dcb0e1b4c0803cec6de752faaebca34be3bab07bbc7fdad69efbd13727197e",
+        "triggers": "8cb8dfbf07ce169ab5dde26bdac79a38f7bc793a6611bf95f2f8fb05842d670d"
+      },
+      "readiness_count": 0,
+      "path": "tmp/call-center-ending-readiness-schema-fresh.json",
+      "sha256": "4e03578455f52917ca7d474d7ea68c8d8d683e7992f2d01e62637dcb5dfdb3da"
+    },
+    {
+      "stage": "populated",
+      "product_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "stored": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+      "calculated": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+      "component_hashes": {
+        "structure": "a6617aa84fc7c96ca66690eec01869a68ad5e778380636b93b9f62f5882a4dad",
+        "constraints": "bc895df4ba4b72c6c4dec133dc4f5aedec96f2ee05dbf8d1024a9280365ad69c",
+        "functions": "b7dcb0e1b4c0803cec6de752faaebca34be3bab07bbc7fdad69efbd13727197e",
+        "triggers": "8cb8dfbf07ce169ab5dde26bdac79a38f7bc793a6611bf95f2f8fb05842d670d"
+      },
+      "readiness_count": 0,
+      "path": "tmp/call-center-ending-readiness-schema-populated.json",
+      "sha256": "c029f1e026d8f767763e0aad5f97159d459fdf83a02c55594d7f78b86674b2de"
+    },
+    {
+      "stage": "reload",
+      "product_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+      "stored": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+      "calculated": "jrc_cc_ending_action_readiness_v1:408efe74b249317c8e6594a72afb8b892776d49a24d232da26368e3d567a7d16",
+      "component_hashes": {
+        "structure": "a6617aa84fc7c96ca66690eec01869a68ad5e778380636b93b9f62f5882a4dad",
+        "constraints": "bc895df4ba4b72c6c4dec133dc4f5aedec96f2ee05dbf8d1024a9280365ad69c",
+        "functions": "b7dcb0e1b4c0803cec6de752faaebca34be3bab07bbc7fdad69efbd13727197e",
+        "triggers": "8cb8dfbf07ce169ab5dde26bdac79a38f7bc793a6611bf95f2f8fb05842d670d"
+      },
+      "readiness_count": 0,
+      "path": "tmp/call-center-ending-readiness-schema-reload.json",
+      "sha256": "4bd49a2a6ea123ca8be1218030b15f75aa48a76686a0eac8c146f717b990200e"
+    }
+  ],
+  "native_project_adapter": {
+    "summary": {
+      "example_count": 17,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": 3,
+      "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": 14
+    }
+  },
+  "vue": {
+    "examples": 1812,
+    "failures": 0,
+    "pending": 0
+  },
+  "chrome": {
+    "examples": 264,
+    "projects": 4,
+    "failures": 0,
+    "pending": 0,
+    "flaky": 0
+  },
+  "screenshot_hashes_verified": 608,
+  "actual_visual_review": {
+    "source_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+    "original_files_actually_opened": 10,
+    "files": [
+      {
+        "file": "desktop-dark-authority-card.png",
+        "sha256": "7bbf773af41584d6b477125947754d67b29c37756cbd22f2b9777bde84e679b5"
+      },
+      {
+        "file": "desktop-light-authority-card.png",
+        "sha256": "f04239a3bcd407efac5c123f7eae13cba3fd7e85e02628ab3bc612d21f8c8974"
+      },
+      {
+        "file": "mobile-dark-authority-card.png",
+        "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+      },
+      {
+        "file": "mobile-light-authority-card.png",
+        "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+      },
+      {
+        "file": "mobile-dark-authority-filters-closed.png",
+        "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+      },
+      {
+        "file": "mobile-light-authority-filters-closed.png",
+        "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+      },
+      {
+        "file": "desktop-dark-ending-automation-editor.png",
+        "sha256": "ba06f9d5e2e321442c9f57a9a4f00d28fb65f0dc1739e845a31257d6e28cc609"
+      },
+      {
+        "file": "desktop-light-ending-automation-editor.png",
+        "sha256": "a13fc9e9936218a89a3c5fcedc1d100adf7c8dc45e87c0635273fa7849fc437e"
+      },
+      {
+        "file": "mobile-dark-ending-automation-editor.png",
+        "sha256": "7ff16877081d577b31aad50dccdcf5b733a03e6cf75d0acc52cbd657130ab6f2"
+      },
+      {
+        "file": "mobile-light-ending-automation-editor.png",
+        "sha256": "84a24acc9112d09c0897ae1a9dbfce2b4decdc49fbd8ed66ad28578547291463"
+      }
+    ],
+    "desktop": "1440px: team text/actions remain readable; actual light/dark editor panels and pending destinations visible.",
+    "mobile": "390px: team name wraps above actions; filters stack; editor review/confirmation/save/back visible without horizontal overflow.",
+    "limits": "Mobile frames are scroll positions, not proof of every modal field. No new operational activation or execution UI is accepted.",
+    "word_divergences": [
+      "The figure10 workspace is partial: CRM/Service Desk/notifications/NICO execution and per-destination results/retry remain pending.",
+      "The shared modal heading remains Motivos de encerramento; the dedicated automation workspace still needs its own completion."
+    ]
+  },
+  "native_lint_passed_without_exclusions_or_threshold_changes": true,
+  "installation_created_no_readiness_or_effect": true,
+  "not_accepted": [
+    "Automatic execution/outbox/dispatcher and native hooks",
+    "Atomic per-destination success and failed-attempt receipts",
+    "Activation API/UI and manual per-rule confirmation",
+    "CRM/Service Desk automation adapters and partial retries",
+    "Representative scale, customized sequence allocation and full account retirement with readiness history",
+    "Whole figure10, Part1 and external PABX/provider operations"
+  ],
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

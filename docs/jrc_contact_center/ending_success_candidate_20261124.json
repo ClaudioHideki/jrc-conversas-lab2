@@ -1,0 +1,68 @@
+{
+  "parent": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+  "status": "implemented_internal_projects_executor_awaiting_native_validation",
+  "source_sha256": {
+    "script/jrc_call_center_ending_execution_schema_probe.rb": "ead30e7314384240aa84870d17e6b04eac49eca0ba976ff4920d7128b4c7c458",
+    "script/jrc_call_center_ending_success_upgrade.rb": "b981304d74c281f850593ba63d052f061a1698324ea8f16323b821c28bbdbbfc",
+    "script/validate_cc_access_migration.mjs": "0d46b0c1e0ad1640296300b07f470a134118cb7e7fa087ef019291bdb8d4fcd3",
+    "script/validate_cc_ending_execution_admission.test.mjs": "335736f3f72bd10218545f68556c941357fbb4e9212ec0ee00b3fc7941706b86",
+    "script/validate_cc_ending_execution_migration.mjs": "ee930638b2085b50961e88bc26b22dff99cdf739de22ec3471c3628b7d9f4b43",
+    "script/validate_cc_ending_execution_migration.test.mjs": "897904cd3a6a96c8a568cd73d2149cd56362ee9969621ff87185d71894c44bb3",
+    "app/models/jrc_contact_center/ending_action_execution.rb": "01fa3de550844bca8675eefb406b66db9b771f62b7abaa2e7ce9a404fe5791a4",
+    "app/services/jrc_contact_center/ending_actions/execute_project_task.rb": "0e17c411a9dce7b9d6b98c33e661d8c834b625e98dd296d4c941d34944c9210c",
+    "db/functions/20261124000000_contact_center_ending_executions.sql": "18f93d4daf3cd6210ca57a914787baf164867edb41f186c35169f167981bf675",
+    "db/migrate/20261124000000_create_contact_center_ending_action_executions.rb": "9caa7bfad60f9da1afee9a57c32a8d0f0c84f644c051401772d986d083499585",
+    "lib/jrc_contact_center/ending_action_execution_schema_receipt.rb": "28ffc5a421d7060f0aa0c1d916e97f4e4f0d7f09eed000ddbd2142727d4d8e16",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": "258fa4c2c8954bab9ba786f0a0268a85a876bcfb1f03d6a706061a6cef422065",
+    "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb": "a11681713da8ecd04300b458fc765693fee52eff47489a269fb98cb0c90168af",
+    "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": "40ba73172522654661f2e8da5e8a5a153b6572f61d10c037b194387fc37cbba9",
+    ".github/workflows/call-center-administration.yml": "706f0c6d93e0fb623cfdc2d77be66495bce09953f92e848d6f3659e86f04ed09",
+    "spec/support/contact_center_ending_origin_schema_dependencies.rb": "7e3502b546af98b2c00f7056fc80215bce0af81e1789ff17ae7f8d698c688781"
+  },
+  "native_cases_prepared": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": 17,
+    "spec/services/jrc_contact_center/create_contact_center_ending_action_executions_spec.rb": 5,
+    "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": 1
+  },
+  "native_cases_executed": 0,
+  "implemented": [
+    "Original actor resolved from immutable evidence; current source and native destination authority rechecked for every invocation and replay.",
+    "Native Projects Task/Audit and database-attested success receipt in the same savepoint.",
+    "Unique success per account/origin/rule/destination, stable immutable rule/trigger/deadline, no duplicate after target deletion.",
+    "Confirmed call-end classification remains distinct from actual ACW completion; unconfirmed/manual effects refused.",
+    "Deactivation permanently blocks old pending originals even after reactivation; no install-time hooks or effects.",
+    "Fresh/reload exact schema proofs plus populated M18 baseline with fourteen real records, including existing manual Task/Audit."
+  ],
+  "source_admission": {
+    "exact_owned_migrations": 19,
+    "leaf_static_tests_passed": 8,
+    "reader_static_tests_passed": 65,
+    "previous_eighteen_migration_gate_preserved": true,
+    "static_is_not_native": true
+  },
+  "fixture_only_change": "Within old rollbackable migration specs only, detach the new success-ledger incoming technical account FK before deliberate root DDL. Production constraints stay intact.",
+  "ci_draft": {
+    "classification": "private_static_ci_draft_not_published_or_executed",
+    "parent_sha": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
+    "parent_workflow_sha256": "f950f4bbf35a9a3696640ae5e7e1b6a31d92d36e85a089f9f750264ffa8936ae",
+    "candidate_workflow_sha256": "706f0c6d93e0fb623cfdc2d77be66495bce09953f92e848d6f3659e86f04ed09",
+    "additive_patches": 12,
+    "every_old_gate_restored_exactly": true,
+    "native_cases_prepared": 23,
+    "native_cases_executed": 0
+  },
+  "remaining": [
+    "Native execution and concurrency acceptance of this candidate",
+    "Full account retirement and representative scale",
+    "Durable failed/blocked attempt history, automatic outbox/dispatcher and native hooks",
+    "Explicit activation API/UI and manual per-rule confirmation",
+    "Authorized explicit CRM/Service Desk destination/context adapters and independent partial retries",
+    "Operational destination states/history/retry navigation and dedicated assignee Chrome evidence",
+    "External PABX contract/homologation"
+  ],
+  "no_business_parameters_invented": true,
+  "no_automatic_grants": true,
+  "automatic_dispatch_enabled": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_complete": false
+}

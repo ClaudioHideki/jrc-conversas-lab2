@@ -20,5 +20,6 @@ module ContactCenterEndingOriginSchemaDependencies
       connection.remove_foreign_key(table, :jrc_contact_center_ending_scope_accounts)
     end
     connection.remove_foreign_key(:jrc_contact_center_ending_action_readinesses, :jrc_contact_center_ending_scope_accounts)
+    connection.remove_foreign_key(:jrc_contact_center_ending_action_executions, :jrc_contact_center_ending_scope_accounts)
   end
 end
