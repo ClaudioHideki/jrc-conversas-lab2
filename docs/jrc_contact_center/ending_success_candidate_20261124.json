@@ -1,6 +1,6 @@
 {
   "parent": "38b0b2db044ebe02485ce7a954ea7be5fc532551",
-  "status": "implemented_internal_projects_executor_awaiting_native_validation",
+  "status": "native_atomic_projects_executor_validated_no_dispatcher",
   "source_sha256": {
     "script/jrc_call_center_ending_execution_schema_probe.rb": "4da60d73726d665bcfff2031d64f90a7515d07f3c2d136488122ff09597c83db",
     "script/jrc_call_center_ending_success_upgrade.rb": "c64a0702bd74aa0d0089032dc2667b24f4ab3353c096b187cd4107ae892e5911",
@@ -28,7 +28,7 @@
     "spec/services/jrc_contact_center/synthetic_ending_execution_upgrade_spec.rb": 1,
     "spec/services/jrc_contact_center/ending_actions/project_task_parameters_assignee_spec.rb": 2
   },
-  "native_cases_executed": 0,
+  "native_cases_executed": 27,
   "implemented": [
     "Original actor resolved from immutable evidence; current source and native destination authority rechecked for every invocation and replay.",
     "Native Projects Task/Audit and database-attested success receipt in the same savepoint.",
@@ -58,13 +58,11 @@
     "additional_schema_diagnostic_assertions": "Unverified early diagnostic is not native acceptance; original exact verify! remains mandatory."
   },
   "remaining": [
-    "Native execution and concurrency acceptance of this candidate",
-    "Full account retirement and representative scale",
-    "Durable failed/blocked attempt history, automatic outbox/dispatcher and native hooks",
-    "Explicit activation API/UI and manual per-rule confirmation",
-    "Authorized explicit CRM/Service Desk destination/context adapters and independent partial retries",
-    "Operational destination states/history/retry navigation and dedicated assignee Chrome evidence",
-    "External PABX contract/homologation"
+    "Durable failed/blocked attempts, automatic dispatcher and native event hooks",
+    "Explicit operational activation and per-rule manual confirmation",
+    "CRM/Service Desk automation adapters and independent partial retries",
+    "Representative scale and full account retirement with native success history",
+    "Whole figure10, Part1 and external PABX/provider operations"
   ],
   "no_business_parameters_invented": true,
   "no_automatic_grants": true,
@@ -265,5 +263,8 @@
   },
   "native_assignee_alias_correction": "docs/jrc_contact_center/ending_assignee_alias_correction_20261124.json",
   "native_alias_lint_followup": "docs/jrc_contact_center/ending_assignee_alias_lint_followup_20261124.json",
-  "browser_response_envelope_QA": "docs/jrc_contact_center/ending_projects_response_envelope_qa_20261124.json"
+  "browser_response_envelope_QA": "docs/jrc_contact_center/ending_projects_response_envelope_qa_20261124.json",
+  "native_verified_sha": "2c3525735edf4ce6a798c3a5e24a1b414d5fafed",
+  "native_acceptance": "docs/jrc_contact_center/ending_success_native_acceptance_20261124.json",
+  "native_internal_executor_accepted": true
 }

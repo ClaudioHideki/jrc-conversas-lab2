@@ -10,7 +10,7 @@ class JrcContactCenter::EndingActions::ExecuteProjectTask
     @rule_code = rule_code
   end
 
-  def call
+  def call(&attempt_wrapper)
     context = JrcContactCenter::EndingActions::OriginalActorContext.new(account: @account, origin_id: @origin_id)
     context.call do |member, origin|
       rule = JrcContactCenter::EndingActions::PinnedRule.new(account: @account, origin: origin).call(@rule_code)
@@ -18,11 +18,25 @@ class JrcContactCenter::EndingActions::ExecuteProjectTask
       action = rule.fetch('actions').find { |entry| entry.fetch('kind') == 'project_task' }
       raise JrcContactCenter::OperationError, 'ending_action_destination_unavailable' unless action
 
-      execute_or_replay!(member, origin, rule, readiness, action.fetch('parameters'))
+      observe_execution!(attempt_wrapper, origin, readiness) do
+        execute_or_replay!(member, origin, rule, readiness, action.fetch('parameters'))
+      end
     end
   end
 
   private
+
+  # Internal Ruby callback only. No endpoint/job passes user-supplied code.
+  # A durable attempt writer can wrap the real effect inside the same original
+  # actor transaction; the default call remains unchanged and independent.
+  def observe_execution!(wrapper, origin, readiness)
+    return yield unless wrapper
+
+    metadata = { account_id: origin.account_id, origin_id: origin.id, version_id: origin.version_id,
+                 actor_account_user_id: origin.actor_account_user_id, actor_user_id: origin.actor_user_id,
+                 readiness_id: readiness.id, rule_code: @rule_code.dup.freeze, destination_kind: 'project_task' }.freeze
+    wrapper.call(metadata) { yield }
+  end
 
   def execute_or_replay!(member, origin, rule, readiness, parameters)
     # An earlier receipt never becomes a substitute for current destination

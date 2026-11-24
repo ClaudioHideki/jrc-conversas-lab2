@@ -1,0 +1,161 @@
+{
+  "parent": "2c3525735edf4ce6a798c3a5e24a1b414d5fafed",
+  "status": "implemented_native_attempts_and_dispatch_awaiting_native_validation",
+  "source_sha256": {
+    ".github/workflows/call-center-administration.yml": "69a4e2750abbba1cb6aeead78e1af306c70b362e2e2fda8319794ada90e5df05",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.spec.js": "2fd4722175623b48a1335baf1fb1e2087cd6b370a78bf6621aae6b6735db41b9",
+    "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue": "8badb823d33ee7ca4c273cb1db90ba88779ea01f6b3dec5027b6c7d9d763b8ca",
+    "app/jobs/jrc_contact_center/ending_actions_job.rb": "7d53a7d946c0d463b0fb15fad45825e9b4be08eb807c07feb67b42c3527b44a1",
+    "app/jobs/jrc_contact_center/ending_attempt_reconcile_job.rb": "695f5fe43c5e9fff5148407494f045ada998f2ad3f3e73cbaebc46fe7cd960ee",
+    "app/models/jrc_contact_center/ending_action_attempt.rb": "985c86649b0918132d9d21661aa848debb80498c088ebb062e3dc011634a5f5f",
+    "app/models/jrc_contact_center/ending_action_attempt_outcome.rb": "e898a92f6b0185bb860f6c740962ad7c2d40ed9ac2ccf6f659c1ecb6f3fb986e",
+    "app/models/jrc_contact_center/ending_reason_confirmation.rb": "dcc7cedb56077d8908c0eb1c73038b192dc464363d1f54a6e4755bfe391db288",
+    "app/models/jrc_contact_center/qualification.rb": "2dc94a11ed306c733105ab7818c57caeb564e7e7d08fdbc143d10a61f150dd66",
+    "app/services/jrc_contact_center/ending_actions/attempt_failure.rb": "74f1ec0b44978dc31e31365fc6aa4205c4c5c7427030d86c43718043d17155c3",
+    "app/services/jrc_contact_center/ending_actions/enqueue_qualification.rb": "6e0148d28d098680ce9f350142cfab0f5660e02e9f81db4f8045722001d5f0c7",
+    "app/services/jrc_contact_center/ending_actions/execute_attempt.rb": "3dfd7315a684294e6987c21c8402eb0a8508cf0276095f4eb20ca40375767b19",
+    "app/services/jrc_contact_center/ending_actions/execute_project_task.rb": "036039257804b7d11446c61ae8a9fb3cc73b6da8e2946058def63cc89e310343",
+    "app/services/jrc_contact_center/ending_actions/initial_project_attempts.rb": "fcfba4f25d48a616ee747f446a063fb4b8486ba4f7cd8738848c765042964d2b",
+    "app/services/jrc_contact_center/ending_actions/queue_project_attempt.rb": "686a06724b30d151cb289e5f611894f831371ac5c35fcc59d6f96e52bafd09be",
+    "app/services/jrc_contact_center/ending_actions/record_attempt.rb": "7f58fb74057f090d9f53e37352f81910c67f416446891a465e9f929552b46449",
+    "db/functions/20261124001000_contact_center_ending_attempts.sql": "7c317f8dde21ef093a5c6ebe12b09f5b84fc65d253f61d5a01256e3e88e1f29f",
+    "db/migrate/20261124001000_create_contact_center_ending_action_attempts.rb": "a4e1893ac89f24823fa7779dc4bc7d625134677bcfddfd0f8eb1ca8a15aa0dc8",
+    "lib/jrc_contact_center/ending_action_attempt_schema_receipt.rb": "d143e6d8b95c4af20047af63fb68fb8694492d6063f0a3ff2c14eb53ed0fdb6f",
+    "script/jrc_call_center_ending_attempt_schema_probe.rb": "3dd144bad1cf18add663ef8153746ff000b0f85d4477540b960ed6721b2bd098",
+    "script/jrc_call_center_ending_attempt_upgrade.rb": "a676bb430ff4824a1dbe03c74fd6981dc90dc21768f067615dec9f8f9f4f1a0b",
+    "script/validate_cc_access_migration.mjs": "18618ffba6ad6f1edd6821f57db3ee40149469c3a86490e9e6a80433e34f4614",
+    "script/validate_cc_ending_attempt_admission.test.mjs": "305bd7b14d82b9a62409cac5439abfaf0f1bde136b3c67a0b8ea2e0308cbe080",
+    "script/validate_cc_ending_attempt_migration.mjs": "11872371ac1528a81357f5fbab3d96135987c7816bdbc0c768ffbadb4df02c2d",
+    "script/validate_cc_ending_attempt_migration.test.mjs": "b2326cd8d3ee564f4d7054feca0599a0489a8b71740598613bbd65d2e15dc6f3",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": "d88b3da9e5b31555ddb455ad2a20960f5c8ddb630945255f53a9ed83d408dcd3",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": "acdf3581c1cf9ad2b24882523022c20cb7d38590e433bf8eeba0b87c7b3575f9",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": "27d947041911d5bc5c25e65e697ab61dd61b596406e1c934cd19370fee4673f0",
+    "spec/services/jrc_contact_center/create_contact_center_ending_action_attempts_spec.rb": "08d8455db03388ba9907037085fb4c87a23b3805cfa429a76b3c6ae95aaef3f5",
+    "spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb": "e9e4def3ac0e449a5dd95837578512628319a29b7d192924a05e33f78e869351",
+    "spec/services/jrc_contact_center/synthetic_ending_attempt_upgrade_spec.rb": "04f91e836e901166b14e6b2d14300f524e476e1d8ef7ccb0bc16c57bc75d09d7",
+    "spec/support/contact_center_ending_attempt_operators.rb": "2441c8cbaf4a030f4ed5155ae8a87761281a9b2a3a7190fac5a53e4a35497945",
+    "spec/support/contact_center_ending_origin_schema_dependencies.rb": "cf424b0eb09113d7109945ff5f2d4735ab683f4e8ab2e23433ccd538dbb34057",
+    "tests/playwright/tests/e2e/ui/call-center-ending-editor-native.mjs": "ae250a62250824d5425e3ddc73a91cffd01d7f5c9daa1726bab18649588cc61f",
+    "tests/playwright/tests/e2e/ui/call-center-native.spec.ts": "704ada447c9a9338c662b0fad3670d83f7219e03e9923d07455ba14c5ced99f4",
+    "tests/playwright/tests/e2e/ui/cc-native-test.mjs": "1b9e8d67d9b5a73ddb53b9a402ad44ff7b43849957d0494d4e226384747ddb59"
+  },
+  "native_cases_prepared": {
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": 22,
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": 14,
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": 23,
+    "spec/services/jrc_contact_center/create_contact_center_ending_action_attempts_spec.rb": 6,
+    "spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb": 7,
+    "spec/services/jrc_contact_center/synthetic_ending_attempt_upgrade_spec.rb": 1
+  },
+  "new_native_cases_prepared": 56,
+  "native_cases_executed": 0,
+  "visual_correction_prepared": {
+    "observed_gap": "The automation editor kept the outer reason-catalogue heading and description.",
+    "existing_translation_reused": true,
+    "vue_navigation_regression_prepared": 1,
+    "native_chrome_checks": "Assert the actual accessible dialog name on entry and reload in all four viewport/theme projects.",
+    "native_or_visual_acceptance": false
+  },
+  "additional_vue_cases_prepared_not_executed": 1,
+  "prior_seventeen_executor_cases_preserved": true,
+  "implemented": [
+    "Owned empty technical attempt/outcome tables with account-scoped composite FKs, server-derived actor/version/time/digest and immutable terminal history.",
+    "Native scheduling/worker commands and real after-commit confirmation/ACW event hooks; no configuration save or install-time activation.",
+    "Original current source/destination authority for every unfinished attempt, atomic Task/audit/success/outcome and bounded failure history after rollback.",
+    "No automatic retry of terminal failed/blocked attempts; permanent rule deactivation still prevents old pending work after reactivation.",
+    "After-commit enqueue failure preserves pending metadata without finishing or undoing ACW; bounded reconciliation of already persisted unfinished work.",
+    "Real native commit/rollback, distinct original non-admin actor, duplicate event concurrency and populated M19 upgrade prepared for owned runners."
+  ],
+  "ci_draft": {
+    "classification": "private_static_ci_draft_not_applied_or_executed",
+    "parent_sha": "2c3525735edf4ce6a798c3a5e24a1b414d5fafed",
+    "parent_workflow_sha256": "5cc9e1e622cf28a32b1ee3c1f691554842d0fddfb9d6fe4e39cdd42533ff81a3",
+    "candidate_workflow_sha256": "69a4e2750abbba1cb6aeead78e1af306c70b362e2e2fda8319794ada90e5df05",
+    "additive_patches": 13,
+    "every_old_gate_restored_exactly": true,
+    "new_native_cases_prepared": 56,
+    "native_cases_executed": 0,
+    "private_draft_revisions": [
+      {
+        "previous_sha256": "642eb6acc4f759ed281726c5fdecc07a83c7e299ffeb30571d48c5c07b571b5b",
+        "new_sha256": "adb12dc9c2d54d45371a967ca6621afdc0cd7c5ebd6e22827c29b78e39fc4e68",
+        "reason": "Three additional native PostgreSQL actor/source/receipt forgery cases, raising the new runtime requirement from19to22."
+      },
+      {
+        "previous_sha256": "adb12dc9c2d54d45371a967ca6621afdc0cd7c5ebd6e22827c29b78e39fc4e68",
+        "new_sha256": "dd6c25f4ab7b3a5adf977514621fa657d38a98feb6b62918115afa3f2c9b1f81",
+        "reason": "Actual native committed-event dispatch, enqueue failure/recovery and original-agent tests; no old check removed.",
+        "additive_changes": 4,
+        "previous_draft_exactly_recoverable": true
+      },
+      {
+        "previous_sha256": "dd6c25f4ab7b3a5adf977514621fa657d38a98feb6b62918115afa3f2c9b1f81",
+        "new_sha256": "8ef6e94973170392f5b396c2a99ebb062531e8c3bd9fb2f4080a59020aa757b5",
+        "reason": "Focused lint covers new sources; two pre-existing native models retain mandatory full incremental lint and their unchanged baseline. No lint configuration or exclusions changed.",
+        "previous_draft_exactly_recoverable": true
+      },
+      {
+        "previous_sha256": "8ef6e94973170392f5b396c2a99ebb062531e8c3bd9fb2f4080a59020aa757b5",
+        "new_sha256": "69a4e2750abbba1cb6aeead78e1af306c70b362e2e2fda8319794ada90e5df05",
+        "reason": "Carry the exact native alias fixture regression and canonical lint fix forward; no parent gate removed.",
+        "exact_parent_changes_carried": 5,
+        "previous_draft_exactly_recoverable": true
+      }
+    ],
+    "actual_event_dispatch_native_cases_prepared": 14,
+    "existing_models_require_full_incremental_lint": [
+      "app/models/jrc_contact_center/ending_reason_confirmation.rb",
+      "app/models/jrc_contact_center/qualification.rb"
+    ],
+    "private_parent_rebases": [
+      {
+        "from": "5dfb4829094ff5efa4efa23e7283e7e8eba0b6b8",
+        "to": "2c3525735edf4ce6a798c3a5e24a1b414d5fafed",
+        "workflow_bytes_unchanged": true,
+        "exact_browser_envelope_correction_carried": true
+      }
+    ]
+  },
+  "source_admission_draft": {
+    "classification": "private_static_source_draft_not_applied",
+    "parent_sha": "5bc6959a72c3187dc666e32a51d1921cc8aee3e0",
+    "old_nineteen_migration_verifiers_recoverable_byte_for_byte": true,
+    "parent_sha256": "0d46b0c1e0ad1640296300b07f470a134118cb7e7fa087ef019291bdb8d4fcd3",
+    "candidate_sha256": "18618ffba6ad6f1edd6821f57db3ee40149469c3a86490e9e6a80433e34f4614",
+    "new_admission_tests_prepared_not_executed": true,
+    "native_acceptance": false
+  },
+  "previous_native_acceptance": "docs/jrc_contact_center/ending_success_native_acceptance_20261124.json",
+  "old_model_baseline": "Qualification/confirmation retain all pre-existing code; mandatory full incremental Ruby lint covers both. No rule or global exclusion changed.",
+  "fixture_only_change": "Within old rollbackable migration specs only, account for the two new technical incoming FKs. Runtime FKs remain installed.",
+  "remaining": [
+    "Native installation/reload/populated M19 upgrade, failure, concurrency, full regressions and browser acceptance of this candidate",
+    "Operational activation UI/API, manual per-rule confirmation, authorized result/history/retry interface",
+    "Native CRM/Service Desk destination context and independent partial retries",
+    "A periodic or operator-facing recovery path for original events whose history database was itself unavailable",
+    "Representative scale, full account retirement and external PABX/provider homologation"
+  ],
+  "new_capabilities_granted_or_business_parameters_invented": false,
+  "external_provider_operations_or_periodic_schedule_added": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false,
+  "source_admission": {
+    "exact_owned_migrations": 20,
+    "old_nineteen_migration_gate_preserved": true,
+    "static_checks": [
+      {
+        "file": "script/validate_cc_ending_attempt_migration.test.mjs",
+        "passed_cases": 8,
+        "stdout_sha256": "fe1270852eed83a9f3e94dda0b6ebde99ac0b22dc42498863edf63204224232f",
+        "native_execution": false
+      },
+      {
+        "file": "script/validate_cc_ending_attempt_admission.test.mjs",
+        "passed_cases": 70,
+        "stdout_sha256": "b22c6dd62ec69c31d4594ea14b524462a4bc9c058a338f19e1900c676d23a7c6",
+        "native_execution": false
+      }
+    ],
+    "native_execution_accepted": false
+  }
+}

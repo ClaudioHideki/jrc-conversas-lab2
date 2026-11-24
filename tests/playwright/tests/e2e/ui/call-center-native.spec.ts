@@ -2,7 +2,7 @@ import { verifyAllScopePauseApproval } from './call-center-pause-approval-native
 import { verifyEndingConfirmation } from './call-center-ending-confirmation-native.mjs';
 import { verifyEndingEditor } from './call-center-ending-editor-native.mjs';
 import { verifyAuthorityFilterGeometry } from './call-center-authority-filter-geometry.mjs';
-import { test, expect } from '@playwright/test';
+import { test, expect } from './cc-native-test.mjs';
 import { verifyNativeCalendars } from './call-center-calendar-native.mjs';
 import { verifyNativeIvrCalendar } from './call-center-ivr-calendar-native.mjs';
 import { verifyCalendarIvrInventory } from './call-center-calendar-ivr-inventory-native.mjs';

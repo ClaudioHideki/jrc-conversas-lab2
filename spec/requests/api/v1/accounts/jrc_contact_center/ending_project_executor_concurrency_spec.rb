@@ -304,4 +304,76 @@ RSpec.describe 'Native ending Projects destination effects and immutable receipt
   ensure
     join_executors(workers || [])
   end
+
+  it 'wraps the real effect with bounded immutable original-actor metadata and preserves the native result' do
+    complete_origin_qualification
+    observed = nil
+    result = JrcContactCenter::EndingActions::ExecuteProjectTask.new(
+      account: account, origin_id: origin.id, rule_code: 'SYNTHETIC_ORIGIN_RULE'
+    ).call do |metadata, &effect|
+      observed = metadata
+      effect.call
+    end
+    expect(result).to be_a(JrcContactCenter::EndingActionExecution)
+    expect(observed).to eq(account_id: account.id, origin_id: origin.id, version_id: origin.version_id,
+                           actor_account_user_id: member.id, actor_user_id: actor.id, readiness_id: result.readiness_id,
+                           rule_code: 'SYNTHETIC_ORIGIN_RULE', destination_kind: 'project_task')
+    expect(observed).to be_frozen
+    expect(observed.fetch(:rule_code)).to be_frozen
+    expect(observed.to_json).not_to include('SYNTHETIC unarmed original evidence', 'private_origin_evidence', 'private_definition')
+    expect(destination_effects).to eq([1, 1, 1])
+  end
+
+  it 'leaves no native task or success when a trusted attempt writer fails before invoking the effect' do
+    complete_origin_qualification
+    command = JrcContactCenter::EndingActions::ExecuteProjectTask.new(account: account, origin_id: origin.id,
+                                                                      rule_code: 'SYNTHETIC_ORIGIN_RULE')
+    expect { command.call { raise 'SYNTHETIC attempt-start failure' } }.to raise_error(RuntimeError, 'SYNTHETIC attempt-start failure')
+    expect(destination_effects).to eq([0, 0, 0])
+  end
+
+  it 'rolls back the real native task and success if recording its attempt result fails' do
+    complete_origin_qualification
+    command = JrcContactCenter::EndingActions::ExecuteProjectTask.new(account: account, origin_id: origin.id,
+                                                                      rule_code: 'SYNTHETIC_ORIGIN_RULE')
+    expect do
+      command.call do |_metadata, &effect|
+        effect.call
+        raise 'SYNTHETIC attempt-result failure'
+      end
+    end.to raise_error(RuntimeError, 'SYNTHETIC attempt-result failure')
+    expect(destination_effects).to eq([0, 0, 0])
+  end
+
+  it 'does not retain an earlier attempt callback when the same command is called normally again' do
+    complete_origin_qualification
+    command = JrcContactCenter::EndingActions::ExecuteProjectTask.new(account: account, origin_id: origin.id,
+                                                                      rule_code: 'SYNTHETIC_ORIGIN_RULE')
+    expect { command.call { raise 'SYNTHETIC one callback only' } }.to raise_error(RuntimeError, 'SYNTHETIC one callback only')
+    expect(command.call).to be_persisted
+    expect(destination_effects).to eq([1, 1, 1])
+  end
+
+  it 'does not let attempt metadata mutation redirect the actual source or rule' do
+    complete_origin_qualification
+    command = JrcContactCenter::EndingActions::ExecuteProjectTask.new(account: account, origin_id: origin.id,
+                                                                      rule_code: 'SYNTHETIC_ORIGIN_RULE')
+    expect { command.call { |metadata| metadata[:origin_id] = 0 } }.to raise_error(FrozenError)
+    expect(destination_effects).to eq([0, 0, 0])
+  end
+
+  it 'still creates only one real native effect when the trusted wrapper accidentally invokes it twice' do
+    complete_origin_qualification
+    command = JrcContactCenter::EndingActions::ExecuteProjectTask.new(account: account, origin_id: origin.id,
+                                                                      rule_code: 'SYNTHETIC_ORIGIN_RULE')
+    ids = []
+    result = command.call do |_metadata, &effect|
+      first = effect.call
+      second = effect.call
+      ids = [first.id, second.id]
+      second
+    end
+    expect(ids).to eq([result.id, result.id])
+    expect(destination_effects).to eq([1, 1, 1])
+  end
 end

@@ -1,3 +1,4 @@
+import { sourcePins as endingAttemptPins, validateEndingAttemptSources } from './validate_cc_ending_attempt_migration.mjs';
 import { sourcePins as endingExecutionPins, validateEndingExecutionSources } from './validate_cc_ending_execution_migration.mjs';
 import { sourcePins as endingReadinessPins, validateEndingReadinessSources } from './validate_cc_ending_readiness_migration.mjs';
 import { execFileSync } from 'node:child_process';
@@ -259,10 +260,25 @@ export function verifyEndingExecutionMigrations(changes, readCurrent, schema) {
   return validateNewMigrationTimestamps(schema, rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
 }
 
+// Admit only the exact twentieth migration and SQL before the unchanged
+// M1-M19 verifier; unknown, omitted, changed or duplicate identities still fail.
+export function verifyEndingAttemptMigrations(changes, readCurrent, schema) {
+  const additions = [endingAttemptPins.migration.path, endingAttemptPins.sql.path];
+  const rows = changes.trim().split('\n').filter(Boolean);
+  for (const path of additions) {
+    if (rows.filter(row => row === `A\t${path}`).length !== 1)
+      throw new Error(`Missing or duplicate reviewed ending attempt source: ${path}`);
+  }
+  const prior = rows.filter(row => !additions.some(path => row === `A\t${path}`));
+  verifyEndingExecutionMigrations(prior.join('\n'), readCurrent, schema);
+  validateEndingAttemptSources(Object.fromEntries(Object.entries(endingAttemptPins).map(([key, pin]) => [key, readCurrent(pin.path)])));
+  return validateNewMigrationTimestamps(schema, rows.filter(row => row.startsWith('A\tdb/migrate/')).map(row => row.slice(2)));
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const changes = execFileSync('git', ['diff', '--name-status', base, 'HEAD', '--', 'db/migrate', 'db/schema.rb', 'db/sql', 'db/functions'], { encoding: 'utf8' });
   const schema = execFileSync('git', ['show', `${base}:db/schema.rb`], { encoding: 'utf8' });
-  const result = verifyEndingExecutionMigrations(changes, readFileSync, schema);
+  const result = verifyEndingAttemptMigrations(changes, readFileSync, schema);
   console.log(JSON.stringify({ protectedBase: base, reviewedMigrations: { ...reviewedMigrations,
     [pauseApprovalMigrationPath]: pauseApprovalMigrationHash, [endingConfirmationMigrationPath]: endingConfirmationMigrationHash, [endingActionScopeMigrationPath]: endingActionScopeMigrationHash, [endingActionVersionMigrationPath]: endingActionVersionMigrationHash },
     pauseApprovalSqlSources, endingConfirmationSources, endingActionScopeSources, endingActionVersionSources, endingOriginPins, ...result }));

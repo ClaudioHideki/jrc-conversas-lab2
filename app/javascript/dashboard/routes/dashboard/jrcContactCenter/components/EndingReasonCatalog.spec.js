@@ -10,6 +10,7 @@ vi.mock('dashboard/api/jrcContactCenter', () => ({
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 enableAutoUnmount(afterEach);
 const Dialog = {
+  props: ['title', 'description'],
   emits: ['close'],
   setup(_props, { expose }) {
     const visible = ref(false);
@@ -20,7 +21,8 @@ const Dialog = {
     });
     return { visible };
   },
-  template: '<section v-if="visible" role="dialog"><slot /></section>',
+  template:
+    '<section v-if="visible" role="dialog"><h2>{{ title }}</h2><p>{{ description }}</p><slot /></section>',
 };
 const entry = i => ({
   code: `synthetic_${i}`,
@@ -52,6 +54,39 @@ beforeEach(() => {
 });
 
 describe('native ending reason catalogue dialog', () => {
+  it('uses the automation title without the reason-catalogue description and restores both when returning', async () => {
+    const wrapper = mount(EndingReasonCatalog, {
+      props: { accountId: '1' },
+      global: {
+        stubs: {
+          Dialog,
+          EndingAutomationEditor: {
+            emits: ['close'],
+            template:
+              '<button data-return-from-automations @click="$emit(\'close\')">Return</button>',
+          },
+        },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.get('h2').text()).toBe(
+      'JRC_CONTACT_CENTER.ENDING_REASONS.TITLE'
+    );
+    await wrapper.get('[data-ending-automations-open]').trigger('click');
+    expect(wrapper.get('h2').text()).toBe(
+      'JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.TITLE'
+    );
+    expect(wrapper.findComponent(Dialog).props('description')).toBeUndefined();
+    await wrapper.get('[data-return-from-automations]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('h2').text()).toBe(
+      'JRC_CONTACT_CENTER.ENDING_REASONS.TITLE'
+    );
+    expect(wrapper.findComponent(Dialog).props('description')).toBe(
+      'JRC_CONTACT_CENTER.ENDING_REASONS.HINT'
+    );
+  });
+
   it('shows an authorized selected queue outside the current picker page and preserves unknown references without inventing names', async () => {
     const configured = response([entry(0)]);
     configured.data.item.voice_reason_catalog.required_queue_ids = [

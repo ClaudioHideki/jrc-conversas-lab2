@@ -147,8 +147,10 @@ onMounted(() => dialog.value.open());
 <template>
   <Dialog
     ref="dialog"
-    :title="text('TITLE')"
-    :description="text('HINT')"
+    :title="
+      automation ? t('JRC_CONTACT_CENTER.ENDING_AUTOMATIONS.TITLE') : text('TITLE')
+    "
+    :description="automation ? undefined : text('HINT')"
     width="5xl"
     :show-confirm-button="false"
     :show-cancel-button="false"

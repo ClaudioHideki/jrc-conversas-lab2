@@ -55,6 +55,12 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   expect(actualDarkTheme).toBe(dark);
   await page.locator('[data-manage-ending-reasons]').click();
   await page.locator('[data-ending-automations-open]').click();
+  await expect(
+    page.getByRole('dialog', {
+      name: 'Configurar automações e integrações',
+      exact: true,
+    })
+  ).toBeVisible();
   let editor = page.locator('[data-ending-automation-editor]');
   await expect(
     editor.locator('[data-ending-configuration-only]')
@@ -165,6 +171,12 @@ export async function verifyEndingEditor(parent, info, target, foreignHeaders) {
   await page.reload();
   await page.locator('[data-manage-ending-reasons]').click();
   await page.locator('[data-ending-automations-open]').click();
+  await expect(
+    page.getByRole('dialog', {
+      name: 'Configurar automações e integrações',
+      exact: true,
+    })
+  ).toBeVisible();
   editor = page.locator('[data-ending-automation-editor]');
   await expect(editor.locator('[data-ending-rule-entry]')).toContainText(
     'SYNTHETIC reviewed browser automation'

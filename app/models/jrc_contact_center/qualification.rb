@@ -15,6 +15,8 @@ class JrcContactCenter::Qualification < JrcContactCenter::ApplicationRecord
   validate :account_and_target_match
   validate :required_form_answers, if: -> { completed_at.present? && will_save_change_to_completed_at? }
 
+  after_update_commit :dispatch_ending_automations, if: -> { saved_change_to_completed_at? && completed_at? }
+
   def elapsed_seconds
     duration_seconds || [(Time.current - started_at).to_i, 0].max
   end
@@ -43,6 +45,10 @@ class JrcContactCenter::Qualification < JrcContactCenter::ApplicationRecord
   end
 
   private
+
+  def dispatch_ending_automations
+    JrcContactCenter::EndingActions::EnqueueQualification.call(account_id: account_id, qualification_id: id)
+  end
 
   def required_form_answers
     JrcContactCenter::QualificationForms.new(self).validate_completion!
