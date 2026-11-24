@@ -23,6 +23,7 @@ const { t } = useI18n({
       modelHelp:
         'Escolha uma visão e consulte os dados no seu escopo autorizado.',
       overview: 'Dashboard executivo',
+      managerial: 'Relatório gerencial',
       report: 'Relatório operacional detalhado',
       supervision: 'Supervisão da equipe',
       sla: 'Prazos e cumprimento de SLA',
@@ -62,6 +63,7 @@ const { t } = useI18n({
       models: 'Ready-made views',
       modelHelp: 'Choose a view to query data within your authorized scope.',
       overview: 'Executive dashboard',
+      managerial: 'Management report',
       report: 'Detailed operational report',
       supervision: 'Team supervision',
       sla: 'SLA deadlines and compliance',
@@ -95,6 +97,7 @@ const groups = [
     icon: 'i-lucide-chart-no-axes-combined',
     links: [
       ['overview', 'overview'],
+      ['managerial', 'managerial_reports'],
       ['clients', 'operational'],
       ['services', 'operational'],
       ['supervision', 'supervision'],

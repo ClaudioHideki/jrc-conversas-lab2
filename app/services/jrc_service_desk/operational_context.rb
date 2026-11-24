@@ -130,6 +130,11 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
     JrcServiceDesk::SupervisionAccess.new(self)
   end
 
+  def managerial_reporting_allowed?(action = :view, unit: nil)
+    administrator? && !employee_portal? && capability?("managerial_reports_#{action}") &&
+      reporting_allowed?(permission: action == :export ? 'reports_export' : 'reports_view', unit: unit)
+  end
+
   private
 
   def capability_set

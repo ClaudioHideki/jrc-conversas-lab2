@@ -32,7 +32,9 @@ class JrcServiceDesk::UiCapabilityProjection
       'lifecycle_policies' => { index: policy, publish: policy }, 'configuration' => configuration,
       'operational_rules' => JrcServiceDesk::OperationalRuleContract::KINDS
         .index_with { |kind| JrcServiceDesk::OperationalRuleAccess.allowed?(@context, kind) },
-      'operational_reports' => { index: @context.reporting_allowed?, export: @context.reporting_allowed?(permission: 'reports_export') } }
+      'operational_reports' => { index: @context.reporting_allowed?, export: @context.reporting_allowed?(permission: 'reports_export') },
+      'managerial_reports' => { index: @context.managerial_reporting_allowed?, indicators: @context.managerial_reporting_allowed?(:indicators),
+                               export: @context.managerial_reporting_allowed?(:export) } }
   end
 
   def configuration

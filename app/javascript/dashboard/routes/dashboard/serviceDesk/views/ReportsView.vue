@@ -13,6 +13,7 @@ import TicketTable from '../components/TicketTable.vue';
 import SupervisorPanel from '../components/SupervisorPanel.vue';
 import ReportCenter from '../components/ReportCenter.vue';
 import OperationalReportPanel from '../components/OperationalReportPanel.vue';
+import ManagerialReportPanel from '../components/ManagerialReportPanel.vue';
 import ReportDialog from '../components/ReportDialog.vue';
 import { downloadCsv, metricRows } from '../helpers/csvExport';
 import LiveKpis from '../components/LiveKpis.vue';
@@ -134,6 +135,10 @@ const open = ticketId =>
         v-if="mode === 'operational'"
         ref="reportView"
         :initial-dimension="selection.dimension"
+        @open="open"
+      />
+      <ManagerialReportPanel
+        v-else-if="mode === 'managerial_reports'"
         @open="open"
       />
       <component

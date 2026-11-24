@@ -88,6 +88,19 @@ const click = async label => {
   await flushPromises();
 };
 describe('Report windows and exports preserve the current workspace', () => {
+  it('shows the managerial report only with its own viewing capability', async () => {
+    await render();
+    expect(wrapper.text()).not.toContain('Relatório gerencial');
+    mocks.session.state.context.capabilities.managerial_reports = {
+      index: true,
+    };
+    await flushPromises();
+    await click('Relatório gerencial');
+    expect(wrapper.emitted('select').at(-1)[0]).toMatchObject({
+      target: 'managerial_reports',
+      title: 'Relatório gerencial',
+    });
+  });
   it('keeps every report category in the same card layout and emits a query instead of navigating away', async () => {
     const router = await render();
     await click('Executivo');

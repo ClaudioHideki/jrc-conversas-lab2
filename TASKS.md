@@ -52,6 +52,8 @@ Nenhuma execução funcional é iniciada por este bootstrap. As frentes já em a
 
 ## Concluído (Done)
 
+- Relatório gerencial do Service Desk com permissões, filtros combináveis e separação de chamados nativos, importados e de origem não classificada. Escopo inicial pela abertura original a partir de 2026. Validação local com 34 exemplos Rails e 13 testes Vue, incluindo regressões dos relatórios existentes. [Decisão](docs/adr/0012-relatorios-gerenciais-service-desk.md).
+
 - Manual de Cultura JRC: versões e público, ciência e histórico, gestão e importação protegida implementados em branch isolada. Homologação externa e publicação permanecem como etapas separadas. [Roteiro](docs/jrc_consolidation/manual-de-cultura-homologacao-20261123.md).
 - Manual de Cultura JRC em contas sem unidades vinculadas: habilitação por conta, sessão compartilhada e planilha protegida, validadas em ambiente local. [Decisão](docs/adr/0011-manual-de-cultura-escopo-da-conta.md).
 

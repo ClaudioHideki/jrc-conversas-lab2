@@ -50,6 +50,20 @@ export default {
         params: { ...reportFilters(query), unit_id: id(unit) },
       })
       .then(result),
+  managerialReport: (account, unit, query, signal) =>
+    axios
+      .get(`${base(account)}/managerial_reports`, {
+        ...options(signal),
+        params: { ...query, unit_id: id(unit) },
+      })
+      .then(result),
+  managerialReportOptions: (account, params, signal) =>
+    axios
+      .get(`${base(account)}/managerial_reports/options`, {
+        ...options(signal),
+        params,
+      })
+      .then(result),
   export: (account, unit, query, signal) =>
     axios
       .get(`${base(account)}/operational_reports/export`, {

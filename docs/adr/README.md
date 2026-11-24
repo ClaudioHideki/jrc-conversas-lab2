@@ -7,6 +7,8 @@ Não marcar uma proposta como aceita sem a decisão correspondente. Preserve os 
 
 ## Decisões deste bootstrap
 
+- [0012-relatorios-gerenciais-service-desk](0012-relatorios-gerenciais-service-desk.md): autorização, período e classificação de origem do relatório gerencial do Service Desk.
+
 - [0011-manual-de-cultura-escopo-da-conta](0011-manual-de-cultura-escopo-da-conta.md): acesso explícito do Manual em contas sem estrutura de unidades vinculadas no CRM.
 
 - [0010-manual-de-cultura-ciencia](0010-manual-de-cultura-ciencia.md): ciência por vínculo e versão, portal separado e arquivos privados.

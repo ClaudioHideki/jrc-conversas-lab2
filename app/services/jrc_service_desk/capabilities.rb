@@ -9,7 +9,8 @@ class JrcServiceDesk::Capabilities
             priority_change work_status_change pause resume resolve close cancel reopen notes_view notes_add history_view conversations_view
             conversations_link sla_view contract_conditions_view sla_snapshots_record lookups_view customers_view queues_manage categories_manage
             priorities_manage statuses_manage services_manage lifecycle_policies_manage settings_view dashboard_view structure_view
-            operator_companies_manage units_manage unit_memberships_manage].freeze
+            operator_companies_manage units_manage unit_memberships_manage managerial_reports_view managerial_reports_indicators
+            managerial_reports_export].freeze
   PERMISSIONS = KEYS.map { |key| "#{PREFIX}#{key}" }.freeze
   DEFAULTS = {
     'agent' => %w[technical_notes tasks_view tasks_manage approvals_view approvals_request approvals_decide
@@ -24,7 +25,7 @@ class JrcServiceDesk::Capabilities
                           work_status_change pause resume resolve close cancel reopen notes_view notes_add history_view conversations_view
                           conversations_link sla_view contract_conditions_view sla_snapshots_record lookups_view customers_view queues_manage
                           categories_manage priorities_manage statuses_manage services_manage lifecycle_policies_manage settings_view
-                          dashboard_view].freeze
+                          dashboard_view managerial_reports_view managerial_reports_indicators managerial_reports_export].freeze
   }.freeze
   DEPENDENCIES = {
     'notifications_manage' => %w[settings_view customer_publish].freeze,
@@ -72,6 +73,9 @@ class JrcServiceDesk::Capabilities
     'lifecycle_policies_manage' => %w[settings_view lookups_view].freeze,
     'settings_view' => %w[module_view].freeze,
     'dashboard_view' => %w[tickets_view].freeze,
+    'managerial_reports_view' => %w[dashboard_view].freeze,
+    'managerial_reports_indicators' => %w[managerial_reports_view].freeze,
+    'managerial_reports_export' => %w[managerial_reports_view].freeze,
   }.freeze
   LIFECYCLE_ACTIONS = {
     'work_status' => 'work_status_change', 'pause' => 'pause', 'resume' => 'resume',
