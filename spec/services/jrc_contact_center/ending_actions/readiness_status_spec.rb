@@ -11,7 +11,7 @@ RSpec.describe JrcContactCenter::EndingActions::ReadinessStatus do
 
   def explicitly_activate_current_rule
     JrcContactCenter::EndingActions::ActivateRule.new(account: account, member: member, rule_code: 'SYNTHETIC_RULE',
-                                                    request_key: SecureRandom.uuid, expected_revision: policy.revision).call
+                                                      request_key: SecureRandom.uuid, expected_revision: policy.revision).call
   end
 
   it 'keeps an unreviewed rule empty without implicitly creating readiness or tasks on read' do

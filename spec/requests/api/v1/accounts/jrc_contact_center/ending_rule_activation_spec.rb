@@ -132,7 +132,7 @@ RSpec.describe 'Explicit prospective ending automation activation through the na
 
   it 'reads an empty persisted state through the authenticated route without implicitly activating it' do
     get "#{activation_path.delete_suffix('/activate')}/readiness", headers: headers,
-                                                                 params: { rule_code: 'SYNTHETIC_RULE', expected_revision: policy.revision }
+                                                                   params: { rule_code: 'SYNTHETIC_RULE', expected_revision: policy.revision }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.values_at('last_review', 'applicable_review')).to eq([nil, nil])
     expect(JrcContactCenter::EndingActionReadiness.where(account: account)).to be_empty
@@ -143,7 +143,7 @@ RSpec.describe 'Explicit prospective ending automation activation through the na
     request_activation
     saved = response.parsed_body.fetch('item')
     get "#{activation_path.delete_suffix('/activate')}/readiness", headers: headers,
-                                                                 params: { rule_code: 'SYNTHETIC_RULE', expected_revision: policy.revision }
+                                                                   params: { rule_code: 'SYNTHETIC_RULE', expected_revision: policy.revision }
     expect(response).to have_http_status(:ok)
     expect(response.headers['Cache-Control']).to eq('no-store')
     expect(response.parsed_body.fetch('applicable_review')).to eq(saved)

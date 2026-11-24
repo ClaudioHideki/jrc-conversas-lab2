@@ -17,8 +17,8 @@
     "config/routes/jrc_contact_center_acw.rb": "331577f7d6540ceeb2dfe5339a0fa9182e3fb8b41e19fc61c2285a38d0b8b2f5",
     "script/jrc_call_center_ending_automation_seed.rb": "6f7918ef04ae38d2fd7b631d637e970fc8ae53c0acef83ceb0db8fa0c01ce666",
     "script/jrc_call_center_pause_seed.rb": "310298d2c62f5da6e718449fdafd727c9a0be13635d747c6f6a22ecfd1cdf4bb",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb": "e927656f66a982e9838efecb83c773cc432fef44a4fd318fba94d3ee39a8326d",
-    "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb": "51b8a3d1bb756aa37ec7faeb139afd364e907e143155ecab7c8b5f2971864f5e",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb": "f9dc6b3da99a737d381a7a0885fe299d9d3e3a756034d74983fcebfc8942eddf",
+    "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb": "ab43b800a5d79f8ad730294cccb5b7fa251a9dc6515f68e562d75e2c36d28170",
     "tests/playwright/call-center-native.config.ts": "ada02e4713601ead6f582926b1c2ffb0d4ce31c83000e8263ded8e9abe928518",
     "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.mjs": "a16ef13827912a9a2162c8c9ad53a6a6c5e005b7e35b0642e5c60e93aba00d88",
     "tests/playwright/tests/e2e/ui/call-center-ending-activation-native.spec.ts": "807f6dc21573164011c3c46fc139af6a944779ff422b10231afcb80641a3f61c",
@@ -111,5 +111,31 @@
     "old264_report_explicitly_rejected": true,
     "no_product_permission_migration_or_workflow_change": true,
     "new_SHA_native_and_Chrome_revalidation_required": true
+  },
+  "native_layout_correction_pending_revalidation": {
+    "parent": "09174065479977398352ab2e9e574fab89b34062",
+    "early_artifact": 14935218859,
+    "early_artifact_sha256": "59c23c22b4decf16d9aab73592c954572a3fa817e4b0910183156075693e9d87",
+    "offenses": 4,
+    "corrected_lines": 3,
+    "paths": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_rule_activation_spec.rb": {
+        "before": "e927656f66a982e9838efecb83c773cc432fef44a4fd318fba94d3ee39a8326d",
+        "after": "f9dc6b3da99a737d381a7a0885fe299d9d3e3a756034d74983fcebfc8942eddf"
+      },
+      "spec/services/jrc_contact_center/ending_actions/readiness_status_spec.rb": {
+        "before": "51b8a3d1bb756aa37ec7faeb139afd364e907e143155ecab7c8b5f2971864f5e",
+        "after": "ab43b800a5d79f8ad730294cccb5b7fa251a9dc6515f68e562d75e2c36d28170"
+      }
+    },
+    "only_leading_whitespace_changed": true,
+    "applied_to_product_overlay": true,
+    "native_lint_or_examples_executed": false,
+    "final_artifact": 14938195362,
+    "final_artifact_sha256": "8f6dce5b6ac9fd85cbdf2ff2790021b3c268e642620d8ce0dfa21ff9f4d2c2cd",
+    "full_incremental_Ruby_offenses_exactly_match_early_four": true,
+    "sanitized_log_sha256": "c5bdfea31795ea8caead764e637e45ae7b6b2e039df52ecc3862226adf851a77",
+    "new_M21_Rails_Vue_Chrome_executed_in_this_attempt": false,
+    "legacy_native_preflights_preserved_not_counted_as_new_acceptance": true
   }
 }
