@@ -25,10 +25,10 @@ RSpec.describe JrcContactCenter::SyntheticEndingReadinessUpgrade do
   end
 
   it 'preserves real native origin, completion, actor and configuration history while installing empty prospective metadata idempotently' do
-    before = JrcContactCenter::SyntheticEndingReadinessUpgrade.verify!
+    before = described_class.verify!
     migration = CreateContactCenterEndingActionReadinesses.new
     migration.up
-    expect(JrcContactCenter::SyntheticEndingReadinessUpgrade.verify!).to eq(before)
+    expect(described_class.verify!).to eq(before)
     expect(before.fetch(:preserved_records).length).to eq(10)
     expect(before.values_at(:historical_rules_armed, :operational_effects)).to eq([0, 0])
     JrcContactCenter::SyntheticEndingReadinessSchemaProbe.record('populated')

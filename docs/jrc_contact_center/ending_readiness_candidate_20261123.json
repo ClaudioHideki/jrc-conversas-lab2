@@ -23,7 +23,7 @@
     "spec/services/jrc_contact_center/ending_actions/execution_readiness_spec.rb": "dafbffa0b88d6fddfbe9e5da2c3ae05920819fb42f28286888e569ed3ecdb2af",
     "spec/models/jrc_contact_center/ending_action_readiness_spec.rb": "456631b3184253cec33ad3fe2ae6eaf820ad08762c6a7164817b7e2ab64dd093",
     "spec/services/jrc_contact_center/create_contact_center_ending_action_readinesses_spec.rb": "201bf2d26cb99a5645c747705792a50c077a991fc6220e68b10910d85fa37275",
-    "spec/services/jrc_contact_center/synthetic_ending_readiness_upgrade_spec.rb": "0af1bc91d9c8bc4562884a47576a6330e8d1b3b4189f79f41387fe5e011a7233",
+    "spec/services/jrc_contact_center/synthetic_ending_readiness_upgrade_spec.rb": "52604aa00fc4a1d4a3b1115b9bcbaaede51879c5ba17020e5dab94ac6cc47f52",
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb": "edcc9cae5d8f9a187435896e4f060af5305b91140954d97371d9c493895b0fae",
     "spec/services/jrc_contact_center/ending_actions/project_task_destination_spec.rb": "fad3d3075341f8ce82363c7858826f56e2e14706d6913820e205711c6f8fe14c",
     "spec/services/jrc_contact_center/ending_actions/project_task_destination_privacy_spec.rb": "233b42399836c06752e69f9f1ef7d2903162dfc09907a6d6acbb8bccc34838d8",
