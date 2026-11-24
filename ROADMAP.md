@@ -149,3 +149,5 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 - CI45374803728/3a05945a: preservado diagnóstico de48infrações Ruby em13arquivos doM20; corrigidos alinhamento,arrays,blocos e complexidade sem alterar gates,SQL ou permissões. Mantidos todos os cenários e asserções; imutabilidade continua testada por SQL real. Revalidação nativa pendente; nenhum teste ignorado foi considerado aprovado. Ver ending_attempt_block_style_qa_20261124.json.
 
 - CI45379976587/102e368b: diagnóstico Ruby completo confirma48→1infração; preparada correção final deuma linha para manteryield direto eencaminhamento explícito dobloco. Regras,esquemas,permissões e testes preservados; revalidação nativa permanece pendente.
+
+- CI45384095210/b2b568e6: relatório final confirma somente duas ocorrências de Naming/BlockForwarding; corrigidos os dois pontos com encaminhamento anônimo, preservando o caminho padrão, a autorização original, todas as asserções e os vinte esquemas históricos. Revalidação nativa do M20 continua obrigatória; os testes ignorados nesta execução não foram aprovados.

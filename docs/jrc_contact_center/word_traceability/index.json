@@ -2956,6 +2956,34 @@
         "https://docs.rubocop.org/rubocop/1.75/cops_style.html#styleargumentsforwarding",
         "https://raw.githubusercontent.com/rubocop/rubocop-performance/v1.25.0/lib/rubocop/cop/performance/redundant_block_call.rb"
       ]
+    },
+    "anonymous_forwarding_followup": {
+      "candidate": "b2b568e67a12e459130cbe67359e5c09d17c401d",
+      "run": 45384095210,
+      "early_artifact": 14915249303,
+      "early_artifact_sha256": "14d34d1000572d5dd188728c576be66a2f2abaa2f32e1b50290cfec2d6f6e90a",
+      "focused_offenses": [
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+          "cop": "Naming/BlockForwarding",
+          "message": "Use anonymous block forwarding."
+        },
+        {
+          "path": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+          "cop": "Naming/BlockForwarding",
+          "message": "Use anonymous block forwarding."
+        }
+      ],
+      "source": "app/services/jrc_contact_center/ending_actions/execute_project_task.rb",
+      "before_sha256": "c7ac08d66957919ca5e848bfd4ba2d7e57f16e8dbbba0968f35afb516ca6dd30",
+      "after_sha256": "5efd6a5c65c8fb2a9f73972aa0332ed68f2d5a494cc65d5bc3404d1cc39e1d3f",
+      "correction": "Use anonymous & forwarding at the two exact native-cop locations; keep direct yield and the public named attempt-wrapper parameter.",
+      "default_behavior_current_authority_and_all_wrapper_tests_preserved": true,
+      "native_or_browser_acceptance": false,
+      "await_complete_diagnostics": false,
+      "complete_diagnostic_artifact": 14916238743,
+      "complete_diagnostic_artifact_sha256": "a21ea62148fa0d9fadcdac0b09f19e4ede1a95b11c52c8d7d9d878e73c50e155",
+      "complete_new_offense_count": 2
     }
   }
 }
