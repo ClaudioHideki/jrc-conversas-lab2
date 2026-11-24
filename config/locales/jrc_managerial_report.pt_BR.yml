@@ -3,6 +3,7 @@ pt_BR:
     title: "Service Desk — Relatório gerencial"
     account: "Conta"
     summary: "Resumo"
+    interactive_filters: "Filtros do relatório"
     criteria: "Filtros aplicados"
     tickets: "Chamados"
     backlog: "Pendências que exigem revisão"

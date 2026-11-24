@@ -3,6 +3,7 @@ en:
     title: "Service Desk — Management report"
     account: "Account"
     summary: "Summary"
+    interactive_filters: "Report filters"
     criteria: "Applied filters"
     tickets: "Tickets"
     backlog: "Open tickets for review"

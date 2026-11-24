@@ -6,19 +6,64 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
 <title>Service Desk</title>
 <style>
-:root{color-scheme:light dark;--bg:#f3f6fb;--panel:#fff;--text:#17283d;--line:#c7d4e2;--accent:#1268c3}
-:root.dark{color-scheme:dark;--bg:#111924;--panel:#1b2838;--text:#e8eff8;--line:#45576c;--accent:#6ab0ff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,sans-serif}
-main{max-width:1500px;margin:auto;padding:clamp(.75rem,3vw,2rem)}header,.toolbar,.filters,.tiles,.charts{display:flex;flex-wrap:wrap;gap:.75rem;align-items:start}
-header,.toolbar{justify-content:space-between;align-items:center}h1,h2,h3{margin:.25rem 0 .75rem}h1{font-size:1.55rem}h2{font-size:1.25rem}h3{font-size:1rem}
-section,details{margin:0 0 1rem;padding:1rem;border:1px solid var(--line);border-radius:.8rem;background:var(--panel)}
-label{display:grid;gap:.35rem;min-width:10rem;flex:1}input,select,button{border:1px solid var(--line);border-radius:.4rem;padding:.45rem .6rem;font:inherit;max-width:100%;background:var(--panel);color:var(--text)}
-button{cursor:pointer}button:disabled{opacity:.45;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.tiles>div{border:1px solid var(--line);border-radius:.55rem;padding:.6rem;min-width:8rem;flex:1}.tiles strong{display:block;font-size:1.4rem}
-.charts>div{flex:1 1 22rem;min-width:0}.bars>div{display:grid;grid-template-columns:minmax(6rem,1fr) minmax(3rem,1fr) 3rem;gap:.45rem;align-items:center;margin-block:.35rem}
-.bars span{overflow-wrap:anywhere}progress{width:100%;accent-color:var(--accent)}.tablebox{overflow:auto;margin:.75rem 0}
-table{border-collapse:collapse;width:100%}td,th{text-align:start;padding:.55rem;border-bottom:1px solid var(--line);vertical-align:top;min-width:8rem}
-td:nth-child(2){min-width:14rem;max-width:24rem;overflow-wrap:anywhere}p{margin:.5rem 0}dl{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1rem}dt{font-weight:600}dd{margin:0;overflow-wrap:anywhere}
+:root{
+  color-scheme:light;--bg:#edf4ff;--panel:#fff;--subtle:#f2f7fe;--text:#17283d;--muted:#465c76;
+  --line:#cbd9ec;--accent:#1259b0;--teal:#08776a;--violet:#5f43a2;--amber:#925105;--red:#ab2851;
+}
+:root.dark{
+  color-scheme:dark;--bg:#101927;--panel:#18263a;--subtle:#1f3049;--text:#e8eff8;--muted:#b6c7dc;
+  --line:#3e536d;--accent:#90c4ff;--teal:#76dfc3;--violet:#cfbaff;--amber:#ffd087;--red:#ffa8bd;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,sans-serif}
+main{max-width:1500px;margin:auto;padding:clamp(.75rem,3vw,2rem)}
+header,.toolbar{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between;align-items:center}
+header{
+  margin-bottom:1rem;padding:clamp(1rem,3vw,1.75rem);border-radius:1rem;
+  background:linear-gradient(110deg,#09264c,#164b9e 75%,#155e97);color:#fff;
+}
+header h1{margin:0;font-size:clamp(1.4rem,3vw,1.9rem)}
+header button{border-color:#a6c0e0;background:#183d70;color:inherit}
+header button:focus-visible{outline-color:#fff}
+h2,h3{margin:0 0 .75rem}h2{font-size:1.25rem}h3{font-size:1rem}
+section,details{margin:0 0 1rem;padding:clamp(.85rem,2vw,1.25rem);border:1px solid var(--line);border-radius:1rem;background:var(--panel)}
+summary{cursor:pointer;font-weight:650;color:var(--accent)}
+.filters,.tiles,.charts{display:grid;gap:.75rem}
+.filters{grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr))}
+label{display:grid;gap:.35rem;min-width:0;overflow-wrap:anywhere}
+input,select,button{border:1px solid var(--line);border-radius:.45rem;padding:.5rem .65rem;font:inherit;background:var(--panel);color:var(--text)}
+input,select{width:100%;min-width:0;max-width:100%}
+button{cursor:pointer}button:disabled{opacity:.45;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tiles{grid-template-columns:minmax(0,1fr)}
+@media(min-width:28rem){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:42rem){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:56rem){.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:84rem){.tiles{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.tile{
+  --tone:var(--accent);
+  display:flex;flex-direction:column;justify-content:space-between;gap:.35rem;min-height:5.65rem;
+  padding:.8rem;border:1px solid var(--line);border-inline-start:.28rem solid var(--tone);border-radius:.65rem;
+  background:var(--subtle);background:color-mix(in srgb,var(--tone) 9%,var(--panel));
+  overflow-wrap:anywhere;
+}
+.tile strong{font-size:clamp(1.25rem,2vw,1.55rem);line-height:1.18;color:var(--tone);font-variant-numeric:tabular-nums}
+.tile-violet{--tone:var(--violet)}.tile-amber{--tone:var(--amber)}
+.tile-teal{--tone:var(--teal)}.tile-red{--tone:var(--red)}
+#definition,#backlog-order{color:var(--muted)}
+.charts{grid-template-columns:repeat(auto-fit,minmax(min(100%,25rem),1fr));margin-block:1rem}
+.charts>div{min-width:0;padding:.85rem;border:1px solid var(--line);border-radius:.65rem;background:var(--subtle)}
+.bars>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(2.25rem,1fr) minmax(2ch,auto);gap:.45rem;align-items:center;margin-block:.35rem}
+.bars span{overflow-wrap:anywhere}progress{width:100%;accent-color:var(--accent)}#distribution progress{accent-color:var(--teal)}
+.tablebox{max-width:100%;overflow:auto;margin:.75rem 0}
+table{border-collapse:collapse;width:100%}
+td,th{text-align:start;padding:.65rem;border-bottom:1px solid var(--line);vertical-align:top;min-width:6.5rem}
+thead th{background:var(--subtle)}
+#backlog-body td:nth-child(2),#table-body td:nth-child(2){min-width:14rem;max-width:24rem;overflow-wrap:anywhere}
+#sla td{font-variant-numeric:tabular-nums}
+#sla td:last-child{font-weight:650}
+p{margin:.625rem 0}
+dl{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:.35rem 1rem}dt{font-weight:600}dd{margin:0}dt,dd{overflow-wrap:anywhere}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -69,7 +114,7 @@ const node = (tag, value) => {
 document.documentElement.lang = locale;
 document.title = l.title;
 const captions = {
-  title: l.title, theme: l.theme, 'criteria-title': l.criteria, 'filters-title': l.criteria, 'summary-title': l.summary,
+  title: l.title, theme: l.theme, 'criteria-title': l.criteria, 'filters-title': l.interactive_filters, 'summary-title': l.summary,
   definition: l.close_policy, 'volume-title': l.volume, 'tickets-title': l.tickets, csv: l.export_csv, previous: l.previous, next: l.next,
   'backlog-title': l.backlog, 'backlog-order': l.backlog_order, 'backlog-empty': l.empty,
   'backlog-previous': l.previous, 'backlog-next': l.next,
@@ -146,8 +191,13 @@ function matches(row) {
     return !value || (labelOf(row, key) || l.missing) === value;
   });
 }
-function average(values) {
-  return values.length ? number.format(values.reduce((sum, current) => sum + current, 0) / values.length) : l.missing;
+function meanClockSeconds(facts) {
+  // Rails serializes the decimal elapsed_seconds field as a JSON string.
+  const seconds = facts.filter(fact => ['within', 'late'].includes(fact.result) &&
+    (typeof fact.seconds === 'number' || (typeof fact.seconds === 'string' && fact.seconds.trim() !== '')))
+    .map(fact => Number(fact.seconds))
+    .filter(value => Number.isFinite(value) && value >= 0);
+  return seconds.length ? number.format(seconds.reduce((sum, value) => sum + value, 0) / seconds.length) : l.missing;
 }
 function closingTime(rowsWithClosure) {
   if (!rowsWithClosure.length) return l.missing;
@@ -172,8 +222,9 @@ function bucket(row) {
   return date.toISOString().slice(0, 10);
 }
 function tiles(values) {
-  const items = values.map(([label, value]) => {
+  const items = values.map(([label, value, tone]) => {
     const tile = node('div');
+    tile.className = 'tile tile-' + tone;
     tile.append(node('span', label), node('strong', value));
     return tile;
   });
@@ -197,15 +248,16 @@ function drawIndicators() {
   const counts = Object.fromEntries(countsBy(row => row.phase));
   const newCount = filtered.filter(row => row.phase === 'open' && row.initial).length;
   const closed = filtered.filter(row => row.phase === 'closed' && Number.isFinite(row.closure_seconds) && row.closure_seconds >= 0);
+  const phaseTones = { open: 'blue', waiting: 'amber', resolved: 'teal', closed: 'teal', cancelled: 'red' };
   tiles([
-    [l.total, number.format(filtered.length)],
-    ...Object.entries(l.phases).map(([phase, name]) => [name, number.format(counts[phase] || 0)]),
-    [l.new_count, number.format(newCount)],
-    [l.in_service, number.format((counts.open || 0) - newCount)],
-    [l.open_or_waiting, number.format((counts.open || 0) + (counts.waiting || 0))],
-    [l.closure_rate, filtered.length ? number.format((counts.closed || 0) * 100 / filtered.length) : l.missing],
-    [l.closure_measured, number.format(closed.length)],
-    [l.closing_time, closingTime(closed)],
+    [l.total, number.format(filtered.length), 'blue'],
+    ...Object.entries(l.phases).map(([phase, name]) => [name, number.format(counts[phase] || 0), phaseTones[phase]]),
+    [l.new_count, number.format(newCount), 'blue'],
+    [l.in_service, number.format((counts.open || 0) - newCount), 'violet'],
+    [l.open_or_waiting, number.format((counts.open || 0) + (counts.waiting || 0)), 'amber'],
+    [l.closure_rate, filtered.length ? number.format((counts.closed || 0) * 100 / filtered.length) : l.missing, 'teal'],
+    [l.closure_measured, number.format(closed.length), 'teal'],
+    [l.closing_time, closingTime(closed), 'violet'],
   ]);
   bars('volume', countsBy(bucket).sort(([a], [b]) => a.localeCompare(b)).slice(-24));
   const selected = distribution.value;
@@ -216,18 +268,21 @@ function drawIndicators() {
   if (missingRow && !top.includes(missingRow)) top.push(missingRow);
   bars('distribution', top);
   const table = node('table');
-  const tableHead = node('tr');
-  tableHead.append(node('th', 'SLA'));
-  Object.values(l.sla).forEach(label => tableHead.append(node('th', label)));
-  table.append(tableHead);
+  const tableHead = table.createTHead().insertRow();
+  ['SLA', ...Object.values(l.sla)].forEach(label => {
+    const heading = node('th', label);
+    heading.scope = 'col';
+    tableHead.append(heading);
+  });
+  const tableBody = table.createTBody();
   Object.entries(l.clocks).forEach(([kind, name]) => {
     const facts = filtered.map(row => row.sla[kind]).filter(Boolean);
     const result = value => facts.filter(fact => fact.result === value).length;
     const values = [facts.length, filtered.length - facts.length, result('within'), result('late'),
-      result('in_progress') + result('overdue'), result('overdue'), average(facts.map(fact => fact.seconds).filter(Number.isFinite))];
-    const row = node('tr');
-    row.append(node('th', name), ...values.map(value => node('td', typeof value === 'number' ? number.format(value) : value)));
-    table.append(row);
+      result('in_progress') + result('overdue'), result('overdue'), meanClockSeconds(facts)];
+    const heading = node('th', name);
+    heading.scope = 'row';
+    tableBody.insertRow().append(heading, ...values.map(value => node('td', typeof value === 'number' ? number.format(value) : value)));
   });
   byId('sla').replaceChildren(table);
 }
