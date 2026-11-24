@@ -1,6 +1,6 @@
 {
   "parent": "b3117ee4f3caca8b80421d04bf5c27345b7ad9ae",
-  "status": "implemented_read_only_history_awaiting_native_validation",
+  "status": "authorized_read_only_native_history_validated",
   "accepted_activation_acceptance_sha256": "feec99f684cb2925122824095530ad95c9a0cd35572468f61fdb47fd92a78d66",
   "source_sha256": {
     ".github/workflows/call-center-administration.yml": "a179a6223911a30dd0654cddb1493ca17c56215253e3131276cee54f4ddd009c",
@@ -47,7 +47,7 @@
   "Vue_cases_prepared": {
     "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js": 23
   },
-  "native_cases_executed": 0,
+  "native_cases_executed": 19,
   "Chrome_total_required": 272,
   "new_Chrome_cases": 4,
   "Word_traceability": {
@@ -112,5 +112,7 @@
     "native_or_Chrome_acceptance": false
   },
   "frontend_lint_correction": "docs/jrc_contact_center/ending_history_frontend_lint_correction_20261124.json",
-  "light_contrast_correction": "docs/jrc_contact_center/ending_history_light_contrast_correction_20261124.json"
+  "light_contrast_correction": "docs/jrc_contact_center/ending_history_light_contrast_correction_20261124.json",
+  "native_verified_sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
+  "native_acceptance": "docs/jrc_contact_center/ending_history_native_acceptance_20261124.json"
 }

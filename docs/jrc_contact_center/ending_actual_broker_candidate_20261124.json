@@ -1,0 +1,32 @@
+{
+  "parent": "5040861ff6f1523d52ad617145d4eb923e73ce85",
+  "status": "actual_broker_verification_prepared_not_executed",
+  "accepted_history_acceptance_sha256": "b3d3db4244f0f0141eb2bddf377f9a4fad4222a24199b7dfa8b47a218edc5586",
+  "source_sha256": {
+    "spec/integration/jrc_contact_center/owned_ending_worker_boot.rb": "52fba99436d72e2ee90da231503faf7af01912932a836dba9cb65a15dee970a8",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_actual_broker_concurrency_spec.rb": "14814d27118b68ef0dace664b9c0b5fe5e551c4c6efc64f77d32cccbd9dfca2f",
+    ".github/workflows/call-center-administration.yml": "3de3cda6067f077b8078e53fef0113ba3e32337141a8a4560e6f98e0533edca8",
+    "script/jrc_call_center_ending_broker_check.py": "9873de41183339136bd75a1bed5ded32d08a804ff60dab20f6c35b358ed94f53"
+  },
+  "parent_sources": {
+    ".github/workflows/call-center-administration.yml": "a179a6223911a30dd0654cddb1493ca17c56215253e3131276cee54f4ddd009c"
+  },
+  "new_native_cases_prepared": 3,
+  "native_cases_executed": 0,
+  "no_product_function_migration_or_permission_change": true,
+  "private_CI_draft": {
+    "additive_patches": 8,
+    "every_prior_command_and_gate_exactly_recoverable": true,
+    "dedicated_real_broker_examples": 3,
+    "only_owned_runner_worker_is_stopped": true,
+    "Python_blocks_syntax": 14,
+    "total_distinct_Rails_required_after_acceptance": 3220,
+    "no_product_function_migration_or_permission_change": true,
+    "native_or_real_broker_execution": false,
+    "runner_probe_simulated_cases_passed": 12,
+    "missing_constants_regression_reproduced_and_fixed_before_transport": true
+  },
+  "no_Windows_process_or_protected_environment_operation": true,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}

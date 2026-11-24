@@ -165,3 +165,7 @@ Call Center: evoluir a área Permissões com Perfil/Equipe/Usuário, mantendo os
 - M22/de57c426: Rails3217distintos,Vue1854 e recarga252 passaram; lintRuby618arquivos semnovasinfrações. Únicoerrofrontend no-plusplus corrigido por +=1 seguido dacaptura. O novoSHA exigiráCI e272cenáriosChrome completos; histórico ainda semaceite.
 
 - M22/a90ab9d4:3217Rails e1854Vue passaram;270Chrome passaram e2falharam no contraste claro do estado bloqueado. Correção limitada ao texto amber12 no claro, preservando amber11 noescuro e4,5:1 nos testes. Captura de falha passa a ocorrer antes de fechar a página; todos os gates permanecem obrigatórios.
+
+- M22/5040861f/CI45493347951: histórico operacional somente leitura validado; 3217Rails distintos,1854Vue,272Chrome e632PNG verificados. Manual/retry,CRM/ServiceDesk,broker real eParte1 permanecem abertos.
+
+- ApósM22/5040861f aceito: preparadoM23 com3cenários reais deRedis/Sidekiq/PostgreSQL emrecursos próprios do runner; ainda não executados. Sem mudança funcional,grants oumigrations. Broker,PABX,CRM/ServiceDesk eParte1 ainda sem aceite integral.

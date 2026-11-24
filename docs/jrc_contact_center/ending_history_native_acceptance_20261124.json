@@ -1,0 +1,353 @@
+{
+  "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
+  "run": 45493347951,
+  "artifact": 14972198426,
+  "artifact_sha256": "dd1aa21a229ca113270f79d4bba47c49095b4a38910a2fd58f791ce2b8202e66",
+  "accepted_scope": "Bounded native read-only per-attendance history with independent immutable outcomes, current source/audit authority, private-target suppression and native authorized Task navigation.",
+  "previous_native_acceptance": "b3117ee4f3caca8b80421d04bf5c27345b7ad9ae",
+  "native_distinct_examples": 3217,
+  "new_native_cases": 19,
+  "new_Vue_cases": 23,
+  "native_history": {
+    "summary": {
+      "example_count": 19,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "files": {
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_spec.rb": 17,
+      "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_history_concurrency_spec.rb": 2
+    }
+  },
+  "Vue_history": {
+    "path": "app/javascript/dashboard/routes/dashboard/inbox/useEndingAttemptHistory.spec.js",
+    "examples": 23
+  },
+  "Chrome_history": [
+    {
+      "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
+      "synthetic": true,
+      "project": "desktop-dark",
+      "account_id": "2920",
+      "qualification_id": "394",
+      "native_immutable_attempts": 23,
+      "pending": 20,
+      "succeeded": 1,
+      "blocked": 1,
+      "failed": 1,
+      "synthetic_persistence_fault_injection": true,
+      "native_task_total_before": 1,
+      "native_task_total_after": 1,
+      "persisted_after_reload": true,
+      "ordinary_other_agent_status": 401,
+      "native_task_route_opened": true,
+      "prohibited_mutations_or_external_calls": [],
+      "page_errors": [],
+      "actual_dark": true,
+      "contrast_ratio": 15.409212620661986,
+      "state_contrast_ratios": [
+        8.501018061613784,
+        8.49035261645098,
+        11.524517254606616,
+        9.547535455781105
+      ],
+      "screenshots": [
+        ".codex/call-center-native-e2e/desktop-dark-ending-history-pending-page.png",
+        ".codex/call-center-native-e2e/desktop-dark-ending-history-independent-outcomes.png",
+        ".codex/call-center-native-e2e/desktop-dark-ending-history-native-task.png"
+      ],
+      "whole_figure10_or_Part1_accepted": false,
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-dark-ending-history-native.json",
+      "sha256": "8b264d469f0a879324b7c85d745b0c67889c56c32d335bb416e9e8adb84c04f6"
+    },
+    {
+      "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
+      "synthetic": true,
+      "project": "desktop-light",
+      "account_id": "2893",
+      "qualification_id": "382",
+      "native_immutable_attempts": 23,
+      "pending": 20,
+      "succeeded": 1,
+      "blocked": 1,
+      "failed": 1,
+      "synthetic_persistence_fault_injection": true,
+      "native_task_total_before": 1,
+      "native_task_total_after": 1,
+      "persisted_after_reload": true,
+      "ordinary_other_agent_status": 401,
+      "native_task_route_opened": true,
+      "prohibited_mutations_or_external_calls": [],
+      "page_errors": [],
+      "actual_dark": false,
+      "contrast_ratio": 16.387622041717133,
+      "state_contrast_ratios": [
+        6.221041725218425,
+        6.350574507416432,
+        10.932555437451596,
+        6.1326133243008805
+      ],
+      "screenshots": [
+        ".codex/call-center-native-e2e/desktop-light-ending-history-pending-page.png",
+        ".codex/call-center-native-e2e/desktop-light-ending-history-independent-outcomes.png",
+        ".codex/call-center-native-e2e/desktop-light-ending-history-native-task.png"
+      ],
+      "whole_figure10_or_Part1_accepted": false,
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/desktop-light-ending-history-native.json",
+      "sha256": "05a26a022e78bf584de094d2a8816c99731a6951f3cbcb288fbc73254c9f6c97"
+    },
+    {
+      "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
+      "synthetic": true,
+      "project": "mobile-dark",
+      "account_id": "2974",
+      "qualification_id": "418",
+      "native_immutable_attempts": 23,
+      "pending": 20,
+      "succeeded": 1,
+      "blocked": 1,
+      "failed": 1,
+      "synthetic_persistence_fault_injection": true,
+      "native_task_total_before": 1,
+      "native_task_total_after": 1,
+      "persisted_after_reload": true,
+      "ordinary_other_agent_status": 401,
+      "native_task_route_opened": true,
+      "prohibited_mutations_or_external_calls": [],
+      "page_errors": [],
+      "actual_dark": true,
+      "contrast_ratio": 15.409212620661986,
+      "state_contrast_ratios": [
+        8.501018061613784,
+        8.49035261645098,
+        11.524517254606616,
+        9.547535455781105
+      ],
+      "screenshots": [
+        ".codex/call-center-native-e2e/mobile-dark-ending-history-pending-page.png",
+        ".codex/call-center-native-e2e/mobile-dark-ending-history-independent-outcomes.png",
+        ".codex/call-center-native-e2e/mobile-dark-ending-history-native-task.png"
+      ],
+      "whole_figure10_or_Part1_accepted": false,
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-dark-ending-history-native.json",
+      "sha256": "0cd56c84d2ee2c01a7462354fc8a61207710faa35e08b7beacd14b88380be691"
+    },
+    {
+      "sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
+      "synthetic": true,
+      "project": "mobile-light",
+      "account_id": "2947",
+      "qualification_id": "406",
+      "native_immutable_attempts": 23,
+      "pending": 20,
+      "succeeded": 1,
+      "blocked": 1,
+      "failed": 1,
+      "synthetic_persistence_fault_injection": true,
+      "native_task_total_before": 1,
+      "native_task_total_after": 1,
+      "persisted_after_reload": true,
+      "ordinary_other_agent_status": 401,
+      "native_task_route_opened": true,
+      "prohibited_mutations_or_external_calls": [],
+      "page_errors": [],
+      "actual_dark": false,
+      "contrast_ratio": 16.387622041717133,
+      "state_contrast_ratios": [
+        6.221041725218425,
+        6.350574507416432,
+        10.932555437451596,
+        6.1326133243008805
+      ],
+      "screenshots": [
+        ".codex/call-center-native-e2e/mobile-light-ending-history-pending-page.png",
+        ".codex/call-center-native-e2e/mobile-light-ending-history-independent-outcomes.png",
+        ".codex/call-center-native-e2e/mobile-light-ending-history-native-task.png"
+      ],
+      "whole_figure10_or_Part1_accepted": false,
+      "path": "home/runner/work/jrc-conversas-lab2/jrc-conversas-lab2/.codex/call-center-native-e2e/mobile-light-ending-history-native.json",
+      "sha256": "58a4211fbbcd72022b77e22987bf4659339c254fd7bbbc103baf4e4bef10215d"
+    }
+  ],
+  "Vue": {
+    "examples": 1854,
+    "failures": 0,
+    "pending": 0
+  },
+  "Chrome": {
+    "examples": 272,
+    "failures": 0,
+    "pending": 0,
+    "flaky": 0
+  },
+  "screenshot_hashes_verified": 632,
+  "actual_visual_review": {
+    "source_sha": "5040861ff6f1523d52ad617145d4eb923e73ce85",
+    "run": 45493347951,
+    "artifact_sha256": "dd1aa21a229ca113270f79d4bba47c49095b4a38910a2fd58f791ce2b8202e66",
+    "original_files_actually_opened": 34,
+    "files": [
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-5040861f\\desktop-dark-authority-card.png",
+        "sha256": "7bbf773af41584d6b477125947754d67b29c37756cbd22f2b9777bde84e679b5"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-5040861f\\desktop-light-authority-card.png",
+        "sha256": "f04239a3bcd407efac5c123f7eae13cba3fd7e85e02628ab3bc612d21f8c8974"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-5040861f\\mobile-dark-authority-card.png",
+        "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-5040861f\\mobile-light-authority-card.png",
+        "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-5040861f\\mobile-dark-authority-filters-closed.png",
+        "sha256": "a82f506a1595478cba548229b21d57913e37f166afd1eb526287653302e958a9"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\authority-card-visual-review-5040861f\\mobile-light-authority-filters-closed.png",
+        "sha256": "0972d73ce2f1c07171330acfefc47082cd48400adbf11eb60987457728805075"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-5040861f\\desktop-dark-ending-automation-editor.png",
+        "sha256": "ff201bfedd03e7bb12bc47be38b258fe688b10abb6ecfdec5da6a644898d465b"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-5040861f\\desktop-light-ending-automation-editor.png",
+        "sha256": "053be4c945ece4b0d881d4b2eae9e141e5b31c3601cf0fd6a2a4a8f7a96b6521"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-5040861f\\mobile-dark-ending-automation-editor.png",
+        "sha256": "2b5bcc72cff50c7213f97616aa7176abfdda7e8999d96da96d7635e1f023f932"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-editor-current-review-5040861f\\mobile-light-ending-automation-editor.png",
+        "sha256": "273fc2d4484947e5599d2319d12d2bc7eed1205039e1b8c17295edfbb6105c6d"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\desktop-dark-ending-activation-recorded.png",
+        "sha256": "3909eb1db9f039b91034d4d556a85f6d5fda5bc3cfa9d0fa3d86b84aacb72381"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\desktop-dark-ending-activation-review.png",
+        "sha256": "c8147c0c2cad74faccf662ae7b602c443e9bfd35abb6d689d44835bfd066d6bb"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\desktop-dark-ending-activation-stale.png",
+        "sha256": "4559f5795b2c2b2ceb25f9dbbffcbedb4cf095e9de0affa6c2438e15bf6bc6c8"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\desktop-light-ending-activation-recorded.png",
+        "sha256": "7bae10173e65eeb7a93891783d3332cf634b9227ea8092e312149c1d0bd88a4d"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\desktop-light-ending-activation-review.png",
+        "sha256": "c00c00017a60ca472910e4f3c8d0feb4a37b30cb7337f61e93680ad2083406d7"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\desktop-light-ending-activation-stale.png",
+        "sha256": "ed94e06a7fbb831dcd6d62d373bb982cb3d86d8f7da39edec8fc87e7e5aedde7"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\mobile-dark-ending-activation-recorded.png",
+        "sha256": "26f4b884414ecfe017f0ba17daaf898774633401127f9a27e9e1f32668c30e5e"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\mobile-dark-ending-activation-review.png",
+        "sha256": "d00346fe74f591d31410080f163fa0e226447ba26714afdd12fdaa54fe46590a"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\mobile-dark-ending-activation-stale.png",
+        "sha256": "317128d04fa3fc94f5ad89a7b800743eec6d1d66d65538247a00983ea091317b"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\mobile-light-ending-activation-recorded.png",
+        "sha256": "ebbcfde68728b2f3e04cc096f4e8aa6c8b03eb543fe7591a3ebd1498edd031c1"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\mobile-light-ending-activation-review.png",
+        "sha256": "c6a3cc5e695009a59ab4f1d03d9bf0bfa7cdb71eee913c9234af6b7cf2beee81"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-activation-visual-review-5040861f\\mobile-light-ending-activation-stale.png",
+        "sha256": "fc68fd498f19eec430cb3838a0598ac82b26dd6500d16220ae7fd2aab18a133b"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\desktop-dark-ending-history-independent-outcomes.png",
+        "sha256": "60acbf484c761d590291f2350407d42d8eccc05dbed311b34cb79b9682b6315f"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\desktop-dark-ending-history-native-task.png",
+        "sha256": "03071a6995dcc7838c63bdaa41de3716965bf6905862c0731c7ab7508e09b659"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\desktop-dark-ending-history-pending-page.png",
+        "sha256": "1313edb2b27d3cf386c838c21e2b58a22eaa01d3468e0b12e36608b588488090"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\desktop-light-ending-history-independent-outcomes.png",
+        "sha256": "19848b3657e86da0e8b829a706abfd6402946c0cefbb405a6f86857bb5acf1e4"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\desktop-light-ending-history-native-task.png",
+        "sha256": "37ba78950b829fb1a35d54da358d55229e22b3c8b86c16d27f6f29fe897bf7bd"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\desktop-light-ending-history-pending-page.png",
+        "sha256": "2caaa081cd89943ec837722602b00b92eca1784c9ac2adcd59e46c11687e0ba0"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\mobile-dark-ending-history-independent-outcomes.png",
+        "sha256": "c37b246a6986132a56fb59808fb21ecb358fe65a5da7b04f59ac374c41a4fed9"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\mobile-dark-ending-history-native-task.png",
+        "sha256": "91275d61aebf55a27b23c6b57535811b5a0169d71a7740969f79c879f2f89fe1"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\mobile-dark-ending-history-pending-page.png",
+        "sha256": "5f5f0dd852f3713ee8fce444788a4508ceb595ea6a453b6b5d43c6be779aa62b"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\mobile-light-ending-history-independent-outcomes.png",
+        "sha256": "c822362daa51e3a674614780a9a0d3b15f125df5b48ae1996a02e4c0e5c2947f"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\mobile-light-ending-history-native-task.png",
+        "sha256": "c661e9e4d884d970d69d874da3e3cffe2909ff4fe26a976bbde0707dbc9b1320"
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\call-center-control-desk-20261116-CONTROLE\\native-permissions\\ending-history-visual-review-5040861f\\mobile-light-ending-history-pending-page.png",
+        "sha256": "1a585231f352482de05622f7e125928d71dd4d5ab5b40da6b2fc89d8ef489c1a"
+      }
+    ],
+    "observations": [
+      "All34original current PNGs were opened:6authority/card filters,4saved-editor,12prospective activation and12operational history/native Task.",
+      "Desktop1440px and mobile390px, light and dark: long team titles wrap and mobile filter controls are vertically separated without horizontal overlap.",
+      "Two mobile authority/card-filter pairs have identical pixels; each original was opened, not counted as an independent new state.",
+      "The saved editor now uses neutral Project-parameter wording; CRM, SD, notifications and NICO remain explicitly pending instead of simulated execution.",
+      "Activation review/recorded/stale states are shown in all4projects; stale configuration blocks authorization and offers return/reload.",
+      "Read-only history shows pending/failed outcomes and authorized native Task navigation; the mobile outcome view also shows blocked and succeeded rows without overlapping their controls.",
+      "The four actual DOM state contrasts passed unchanged4.5threshold; blocked light is10.932555 and blocked dark11.524517.",
+      "The native TaskEditor opened in all4projects;3originals show the loaded native editor. Desktop-light caught its transient loading label while the actual Task title was already present; this is not proof of editing/saving that Task.",
+      "Several images intentionally capture a scrolled panel; items beyond the viewport and the partially cropped mobile blocked badge are not claimed as fully visible in those frames.",
+      "Native timestamps remain ISO UTC in activation/history and native Project date inputs follow the browser locale; localization remains a visual difference, not silently declared identical to the Word."
+    ],
+    "native_task_edit_or_save_tested_by_this_history_review": false,
+    "whole_figure10_or_Part1_accepted": false
+  },
+  "no_implicit_execution_retry_or_new_grants": true,
+  "remaining": [
+    "Actual Sidekiq dequeue and worker/Redis/PostgreSQL ownership evidence.",
+    "Explicit manual execution and safely selected retries without reviving deactivated work.",
+    "Native CRM and ServiceDesk adapters with immutable legitimate customer context and independent receipts.",
+    "Representative scale, complete account lifecycle and external PABX/provider homologation."
+  ],
+  "real_call_broker_or_provider_homologated": false,
+  "whole_figure10_accepted": false,
+  "whole_part1_accepted": false
+}
