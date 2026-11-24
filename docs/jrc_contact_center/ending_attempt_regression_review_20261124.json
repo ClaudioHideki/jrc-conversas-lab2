@@ -1,0 +1,32 @@
+{
+  "parent": "1741f97da9f386cc06cccbb6b8aa9e2069ab4eff",
+  "run": 45389432113,
+  "artifact": 14921951772,
+  "artifact_sha256": "187caca3fa8ee7e81b4294b3208fe239a26928209736cdc979fccd846dfff983",
+  "native_core": {
+    "examples": 2873,
+    "failures": 0,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "native_concurrency": {
+    "examples": 215,
+    "passed": 211,
+    "failures": 4,
+    "pending": 0,
+    "outside_errors": 0
+  },
+  "native_lint": "Focused and full incremental Ruby lint passed on the parent; new test edits require revalidation.",
+  "corrections": [
+    "Limit injected CHECK failure to the exact synthetic account/attempt and prove an earlier legitimate success in that same account remains unchanged.",
+    "Check both existing model ReadOnlyRecord protection and real parameterized PostgreSQL DELETE rejection; retain SQL UPDATE immutability assertions.",
+    "Use updated_at for an unrelated metadata update; completed notes remain immutable with a new explicit native regression.",
+    "Preserve failed concurrency JSON immediately before subsequent lint diagnostics without skipping commands or changing exit status."
+  ],
+  "new_dispatch_examples_required": 15,
+  "new_native_cases_prepared_including_upgrade": 57,
+  "expected_distinct_Rails_only_after_full_acceptance": 3174,
+  "workflow_embedded_Python_blocks_compiled": 13,
+  "migrations_SQL_receipts_product_services_permissions_and_lint_rules_unchanged": true,
+  "native_revalidation_or_visual_acceptance": false
+}

@@ -2,7 +2,7 @@
   "parent": "2c3525735edf4ce6a798c3a5e24a1b414d5fafed",
   "status": "implemented_native_attempts_and_dispatch_awaiting_native_validation",
   "source_sha256": {
-    ".github/workflows/call-center-administration.yml": "69a4e2750abbba1cb6aeead78e1af306c70b362e2e2fda8319794ada90e5df05",
+    ".github/workflows/call-center-administration.yml": "0743ec33f6b6c5fede4f8073733a8adadbac44c0edc803ad40f932e04b874c42",
     "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.spec.js": "2fd4722175623b48a1335baf1fb1e2087cd6b370a78bf6621aae6b6735db41b9",
     "app/javascript/dashboard/routes/dashboard/jrcContactCenter/components/EndingReasonCatalog.vue": "8badb823d33ee7ca4c273cb1db90ba88779ea01f6b3dec5027b6c7d9d763b8ca",
     "app/jobs/jrc_contact_center/ending_actions_job.rb": "7d53a7d946c0d463b0fb15fad45825e9b4be08eb807c07feb67b42c3527b44a1",
@@ -27,8 +27,8 @@
     "script/validate_cc_ending_attempt_admission.test.mjs": "305bd7b14d82b9a62409cac5439abfaf0f1bde136b3c67a0b8ea2e0308cbe080",
     "script/validate_cc_ending_attempt_migration.mjs": "11872371ac1528a81357f5fbab3d96135987c7816bdbc0c768ffbadb4df02c2d",
     "script/validate_cc_ending_attempt_migration.test.mjs": "b2326cd8d3ee564f4d7054feca0599a0489a8b71740598613bbd65d2e15dc6f3",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": "54a4a4381441b8f972dd9ddbe38ee60506b49b711f34874af04df34edb98c67c",
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": "f6b43efea4ce311ac9e21c97bd79cb8aa6412015b5ad1922321dbcf54790c5db",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": "03684ab8dcc9cfafd9f86567211fbfec587b2d9a211fe9451d388ca1bad0adbc",
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": "1d9a5432835a78cb21323934cd1e46ff95fa6db8305078e5c4438c5732ea74c9",
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": "27d947041911d5bc5c25e65e697ab61dd61b596406e1c934cd19370fee4673f0",
     "spec/services/jrc_contact_center/create_contact_center_ending_action_attempts_spec.rb": "08d8455db03388ba9907037085fb4c87a23b3805cfa429a76b3c6ae95aaef3f5",
     "spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb": "8efb68cf3a3110e10bb2dd97c3cf7ad786839085f7ba4a88c43ba0913e246378",
@@ -41,13 +41,13 @@
   },
   "native_cases_prepared": {
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb": 22,
-    "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": 14,
+    "spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb": 15,
     "spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb": 23,
     "spec/services/jrc_contact_center/create_contact_center_ending_action_attempts_spec.rb": 6,
     "spec/services/jrc_contact_center/ending_actions/attempt_failure_spec.rb": 7,
     "spec/services/jrc_contact_center/synthetic_ending_attempt_upgrade_spec.rb": 1
   },
-  "new_native_cases_prepared": 56,
+  "new_native_cases_prepared": 57,
   "native_cases_executed": 0,
   "visual_correction_prepared": {
     "observed_gap": "The automation editor kept the outer reason-catalogue heading and description.",
@@ -73,7 +73,7 @@
     "candidate_workflow_sha256": "69a4e2750abbba1cb6aeead78e1af306c70b362e2e2fda8319794ada90e5df05",
     "additive_patches": 13,
     "every_old_gate_restored_exactly": true,
-    "new_native_cases_prepared": 56,
+    "new_native_cases_prepared": 57,
     "native_cases_executed": 0,
     "private_draft_revisions": [
       {
@@ -363,5 +363,51 @@
       "complete_diagnostic_artifact_sha256": "a21ea62148fa0d9fadcdac0b09f19e4ede1a95b11c52c8d7d9d878e73c50e155",
       "complete_new_offense_count": 2
     }
+  },
+  "concurrency_failure_observability_prepared": {
+    "parent": "1741f97da9f386cc06cccbb6b8aa9e2069ab4eff",
+    "run": 45389432113,
+    "file": ".github/workflows/call-center-administration.yml",
+    "before_sha256": "69a4e2750abbba1cb6aeead78e1af306c70b362e2e2fda8319794ada90e5df05",
+    "after_sha256": "a7eef8b74c30365713a79d26f6bd762c709fb122a167d68272cfd873a60686b5",
+    "cause": "Native concurrency failure had no early report while the independent full Ruby lint was still running.",
+    "change": "Name the existing concurrency step and upload its existing JSON reports only on failure.",
+    "every_old_test_command_environment_gate_and_exit_status_exactly_recoverable": true,
+    "python_blocks_compiled": 13,
+    "tests_or_failures_skipped_or_retried": false,
+    "product_behavior_changed": false,
+    "native_validation": false
+  },
+  "native_regression_correction_pending_revalidation": {
+    "parent": "1741f97da9f386cc06cccbb6b8aa9e2069ab4eff",
+    "run": 45389432113,
+    "artifact": 14921951772,
+    "artifact_sha256": "187caca3fa8ee7e81b4294b3208fe239a26928209736cdc979fccd846dfff983",
+    "native_core": {
+      "examples": 2873,
+      "failures": 0,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "native_concurrency": {
+      "examples": 215,
+      "passed": 211,
+      "failures": 4,
+      "pending": 0,
+      "outside_errors": 0
+    },
+    "native_lint": "Focused and full incremental Ruby lint passed on the parent; new test edits require revalidation.",
+    "corrections": [
+      "Limit injected CHECK failure to the exact synthetic account/attempt and prove an earlier legitimate success in that same account remains unchanged.",
+      "Check both existing model ReadOnlyRecord protection and real parameterized PostgreSQL DELETE rejection; retain SQL UPDATE immutability assertions.",
+      "Use updated_at for an unrelated metadata update; completed notes remain immutable with a new explicit native regression.",
+      "Preserve failed concurrency JSON immediately before subsequent lint diagnostics without skipping commands or changing exit status."
+    ],
+    "new_dispatch_examples_required": 15,
+    "new_native_cases_prepared_including_upgrade": 57,
+    "expected_distinct_Rails_only_after_full_acceptance": 3174,
+    "workflow_embedded_Python_blocks_compiled": 13,
+    "migrations_SQL_receipts_product_services_permissions_and_lint_rules_unchanged": true,
+    "native_revalidation_or_visual_acceptance": false
   }
 }

@@ -207,7 +207,19 @@ RSpec.describe 'Native committed ending events and operational Projects dispatch
   it 'does not enqueue another automation when an unrelated field of an already completed qualification changes' do
     complete_origin_qualification
     clear_enqueued_jobs
-    qualification.reload.update!(notes: 'SYNTHETIC later note')
+    qualification.reload.update!(updated_at: 1.minute.from_now)
+    expect(enqueued_jobs.count { |job| job[:job] == JrcContactCenter::EndingActionsJob }).to eq(0)
+    expect(dispatch_effects).to eq([0, 0, 0, 0, 0])
+  end
+
+  it 'rejects edits to completed classification notes without enqueuing another automation' do
+    complete_origin_qualification
+    clear_enqueued_jobs
+    original_notes = qualification.reload.notes
+    expect do
+      qualification.update!(notes: 'SYNTHETIC forbidden later note')
+    end.to raise_error(ActiveRecord::StatementInvalid, /Completed ending reason classification is immutable/)
+    expect(qualification.reload.notes).to eq(original_notes)
     expect(enqueued_jobs.count { |job| job[:job] == JrcContactCenter::EndingActionsJob }).to eq(0)
     expect(dispatch_effects).to eq([0, 0, 0, 0, 0])
   end

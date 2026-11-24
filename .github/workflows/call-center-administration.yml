@@ -415,6 +415,7 @@ jobs:
       - name: Legacy isolated ACW value compatibility (not a persistence proof)
         run: bundle exec ruby spec/standalone/voice_acw_policy_test.rb
       - name: PABX concurrency in its explicitly guarded disposable database
+        id: native_concurrency
         env:
           POSTGRES_DATABASE: corporate_gratuity_disposable
           SCHEMA: /tmp/call-center-pabx-schema.rb
@@ -422,6 +423,17 @@ jobs:
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
           bundle exec rspec spec/services/pabx/sync_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_role_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_configuration_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ivr_draft_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/acw_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/qualification_form_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/deferred_pause_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_team_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/native_operating_origins_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_upload_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/audio_inspection_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/team_supervision_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/pause_approval_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_confirmation_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_scope_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_action_version_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_execution_transaction_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_original_actor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_readiness_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_project_executor_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb --format progress --format json --out /tmp/call-center-pabx-rspec.json
+      - name: Preserve failed native concurrency reports before later lint diagnostics
+        if: failure() && steps.native_concurrency.outcome == 'failure'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: call-center-native-early-${{ github.sha }}
+          path: |
+            /tmp/call-center-pabx-rspec.json
+            /tmp/call-center-rspec.json
+            /tmp/call-center-ending-*.json
+          if-no-files-found: error
+          retention-days: 7
       - name: Affected Approvals and Backoffice in their guarded disposable candidate database
         env:
           POSTGRES_DATABASE: jrc_rel_v2_candidate_test
@@ -663,7 +675,7 @@ jobs:
           attempt_executions = [row for row in concurrency['examples'] if row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/ending_attempt_execution_concurrency_spec.rb']
           assert len(attempt_executions) == 22 and all(row['status'] == 'passed' for row in attempt_executions)
           native_dispatch = [row for row in concurrency['examples'] if row['file_path'].removeprefix('./') == 'spec/requests/api/v1/accounts/jrc_contact_center/ending_dispatch_native_spec.rb']
-          assert len(native_dispatch) == 14 and all(row['status'] == 'passed' for row in native_dispatch)
+          assert len(native_dispatch) == 15 and all(row['status'] == 'passed' for row in native_dispatch)
           assert editor_surfaces['desktop-light'] != editor_surfaces['desktop-dark']
           assert editor_surfaces['mobile-light'] != editor_surfaces['mobile-dark']
           pause_flows = list(Path('.codex/call-center-native-e2e').glob('*-pause-approval-native.json'))

@@ -208,21 +208,26 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
 
   it 'rolls the actual Task and success back if terminal success persistence fails, retaining a bounded failure' do
     complete_origin_qualification
+    other_origin = completed_attempt_source(member)
+    legitimate = queue_native_attempt(SecureRandom.uuid, other_origin.id)
+    saved = execute_queued_attempt(legitimate).attributes
     row = queue_native_attempt
     connection = ApplicationRecord.connection
+    predicate = "account_id <> #{Integer(account.id)} OR attempt_id <> #{Integer(row.id)} OR outcome::text <> 'succeeded'::text"
     connection.add_check_constraint(:jrc_contact_center_ending_action_attempt_outcomes,
-                                    "outcome::text <> 'succeeded'::text", name: 'cc_synthetic_attempt_success_failure')
+                                    predicate, name: 'cc_synthetic_attempt_success_failure')
     begin
       result = execute_queued_attempt(row)
       expect(result).to have_attributes(outcome: 'failed', result_code: 'destination_failure', execution_id: nil)
-      expect(native_attempt_effects).to eq([0, 0, 0, 1])
+      expect(native_attempt_effects).to eq([1, 1, 1, 2])
     ensure
       connection.remove_check_constraint(:jrc_contact_center_ending_action_attempt_outcomes, name: 'cc_synthetic_attempt_success_failure')
     end
     retry_row = queue_native_attempt(SecureRandom.uuid)
     expect(execute_queued_attempt(retry_row).outcome).to eq('succeeded')
-    expect(native_attempt_effects).to eq([1, 1, 1, 2])
+    expect(native_attempt_effects).to eq([2, 2, 2, 3])
     expect(row.reload.outcome.outcome).to eq('failed')
+    expect(legitimate.reload.outcome.attributes).to eq(saved)
   end
 
   it 'does not accept a known attempt ID from another account' do
@@ -284,7 +289,11 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
              'destination_failure', account.id, result.id]
       ApplicationRecord.connection.execute(ApplicationRecord.sanitize_sql_array(sql))
     end.to raise_error(ActiveRecord::StatementInvalid)
-    expect { result.delete }.to raise_error(ActiveRecord::StatementInvalid)
+    expect { result.delete }.to raise_error(ActiveRecord::ReadOnlyRecord)
+    expect do
+      sql = ['DELETE FROM jrc_contact_center_ending_action_attempt_outcomes WHERE account_id=? AND id=?', account.id, result.id]
+      ApplicationRecord.connection.execute(ApplicationRecord.sanitize_sql_array(sql))
+    end.to raise_error(ActiveRecord::StatementInvalid)
     expect(result.reload.outcome).to eq('succeeded')
     expect(native_attempt_effects).to eq([1, 1, 1, 1])
   end
@@ -297,7 +306,11 @@ RSpec.describe 'Durable ending attempts and independent native Projects outcomes
              'SYNTHETIC altered rule', account.id, row.id]
       ApplicationRecord.connection.execute(ApplicationRecord.sanitize_sql_array(sql))
     end.to raise_error(ActiveRecord::StatementInvalid)
-    expect { row.delete }.to raise_error(ActiveRecord::StatementInvalid)
+    expect { row.delete }.to raise_error(ActiveRecord::ReadOnlyRecord)
+    expect do
+      sql = ['DELETE FROM jrc_contact_center_ending_action_attempts WHERE account_id=? AND id=?', account.id, row.id]
+      ApplicationRecord.connection.execute(ApplicationRecord.sanitize_sql_array(sql))
+    end.to raise_error(ActiveRecord::StatementInvalid)
     expect(row.reload.rule_code).to eq('SYNTHETIC_ORIGIN_RULE')
     expect(native_attempt_effects).to eq([0, 0, 0, 0])
   end
